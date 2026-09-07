@@ -147,7 +147,7 @@ def test_runtime_detect_row_stays_below_first_window_tables() -> None:
     )
     assert detect_row is not None
     assert detect_row.get("collapsed") is True
-    assert int((detect_row.get("gridPos") or {}).get("y", -1)) >= 16
+    assert int((detect_row.get("gridPos") or {}).get("y", -1)) >= 12
     blockers = next(
         (panel for panel in dashboard.get("panels", []) if panel.get("id") == 9101),
         None,
@@ -199,7 +199,7 @@ def test_runtime_first_screen_grid_uses_shared_panel_reference_sizes() -> None:
         [panel for panel in dashboard.get("panels", []) if isinstance(panel, dict)]
     )
 
-    first_action_grid = root_panels["Start Pipeline Triage"]["gridPos"]
+    first_action_grid = root_panels["Understand Pipeline Scope"]["gridPos"]
     assert first_action_grid["y"] <= 8
     assert first_action_grid["w"] >= 8
     context_row = next(
@@ -419,8 +419,8 @@ def test_control_plane_trust_panels_follow_reference_widths() -> None:
     processed = panels["Review Processed Records"]["gridPos"]
     telemetry = panels["Monitor Telemetry"]["gridPos"]
 
-    assert scope == {"x": 0, "y": 4, "w": 16, "h": 3}
-    assert readiness == {"x": 16, "y": 4, "w": 8, "h": 3}
+    assert scope == {"x": 0, "y": 3, "w": 16, "h": 4}
+    assert readiness == {"x": 16, "y": 3, "w": 8, "h": 3}
     assert readiness["w"] * readiness["h"] == 24
     assert run_summary["w"] == 18
     assert processed["w"] == telemetry["w"] == 6

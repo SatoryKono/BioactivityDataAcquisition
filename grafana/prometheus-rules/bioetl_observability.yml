@@ -1122,6 +1122,8 @@ groups:
 
 
       - record: bioetl_incident_ranked_runtime
+        labels:
+          confidence: UNVERIFIED
         expr: |-
           (
             topk(5,
@@ -1130,11 +1132,11 @@ groups:
                   label_replace(
                     (
                       max by (pipeline, run_type, reason, severity, action_target) (
-                        bioetl_runtime_current_blocker_reason{severity="failing"}
+                        bioetl_runtime_current_blocker_reason{severity="failing"} > 0
                       ) * 2
                       or
                       max by (pipeline, run_type, reason, severity, action_target) (
-                        bioetl_runtime_current_blocker_reason{severity="degraded"}
+                        bioetl_runtime_current_blocker_reason{severity="degraded"} > 0
                       )
                     ),
                     "domain", "runtime", "", ""
@@ -1157,6 +1159,8 @@ groups:
             "action", "UNKNOWN", "", ""
           )
       - record: bioetl_incident_ranked_provider
+        labels:
+          confidence: UNVERIFIED
         expr: |-
           (
             topk(5,
@@ -1165,11 +1169,11 @@ groups:
                   label_replace(
                     (
                       max by (provider, cause, severity) (
-                        bioetl_provider_current_cause{severity="failing"}
+                        bioetl_provider_current_cause{severity="failing"} > 0
                       ) * 2
                       or
                       max by (provider, cause, severity) (
-                        bioetl_provider_current_cause{severity="degraded"}
+                        bioetl_provider_current_cause{severity="degraded"} > 0
                       )
                     ),
                     "domain", "provider", "", ""
@@ -1192,6 +1196,8 @@ groups:
             "action", "UNKNOWN", "", ""
           )
       - record: bioetl_incident_ranked_dq
+        labels:
+          confidence: UNVERIFIED
         expr: |-
           (
             topk(5,
@@ -1200,11 +1206,11 @@ groups:
                   label_replace(
                     (
                       max by (pipeline, reason, severity, action_target) (
-                        bioetl_dq_current_reason{severity="crit"}
+                        bioetl_dq_current_reason{severity="crit"} > 0
                       ) * 2
                       or
                       max by (pipeline, reason, severity, action_target) (
-                        bioetl_dq_current_reason{severity="warn"}
+                        bioetl_dq_current_reason{severity="warn"} > 0
                       )
                     ),
                     "domain", "dq", "", ""

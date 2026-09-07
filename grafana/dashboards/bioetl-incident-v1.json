@@ -10,7 +10,7 @@
   "panels": [
     {
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 24,
         "x": 0,
         "y": 0
@@ -19,7 +19,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1;margin:0 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:2px;flex-wrap:nowrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/bioetl-runtime?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-stage=$__all&amp;${__url_time_range}\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health). Preserves selected scope and time range.\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-provider=$provider&amp;var-pipeline_context=$pipeline&amp;${__url_time_range}\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-stage=$__all&amp;${__url_time_range}\">4. Data Quality</a><a class=\"bioetl-nav-current\" href=\"#bioetl-incident-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"5. Incident Workspace (Incident Workspace)\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">5. Incident Workspace (current)</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">6. Run Explorer</a></div>"
+        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1;margin:0 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:2px;flex-wrap:nowrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/bioetl-runtime?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-stage=$__all&amp;${__url_time_range}\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health). Preserves selected scope and time range.\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-provider=$provider&amp;var-pipeline_context=$pipeline&amp;${__url_time_range}\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-stage=$__all&amp;${__url_time_range}\">4. Data Quality</a><a class=\"bioetl-nav-current\" href=\"#bioetl-incident-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"5. Incident Workspace (Incident Workspace)\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">6. Run Explorer</a></div>"
       },
       "title": "",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
@@ -103,17 +103,17 @@
       "id": 9400,
       "type": "text",
       "title": "",
-      "description": "Explains the incident-triage question and the evidence scopes used on this read-only dashboard. CURRENT ranks suspects from current fleet telemetry using the active filters. SELECTED RUN uses HTTP-backed evidence for one exact run; run_id never filters Prometheus. No suspects means none were found in the current scope and does not prove the fleet is healthy Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: provider=${provider}.",
+      "description": "Explains the incident-triage question and the evidence scopes used on this read-only dashboard. CURRENT ranks suspects from current fleet telemetry in GLOBAL scope; Pipeline and Run ID do not filter suspects. SELECTED RUN uses HTTP-backed evidence for one exact run; run_id never filters Prometheus. No suspects means none were found in the current scope and does not prove the fleet is healthy Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: provider=${provider}.",
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 16,
         "x": 0,
-        "y": 4
+        "y": 3
       },
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Incident Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">What is the highest-confidence active suspect? CURRENT = suspects. SELECTED RUN = proof. EMPTY DOMAIN is not a healthy-fleet verdict.</div></div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">GLOBAL fleet triage: Pipeline / Run ID do not filter suspects. Open the row’s domain and object; selected-run evidence is separate.</div></div>"
       },
       "links": []
     },
@@ -123,10 +123,10 @@
       "title": "Monitor Incident Status",
       "description": "CURRENT · TIME RANGE · Pair with Provenance reason + action; never read as OK. Not a healthy OK. Ranked suspects may be WORKFLOW/GLOBAL blast radius — check scope labels on tables. Incident header status (labelled only). Map 0=OK,1=WARN,2=CRIT,3/null=UNKNOWN. Never bare numbers. Confidence from missing telemetry / VALID_EMPTY suspects. Read-only workspace",
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 8,
         "x": 16,
-        "y": 4
+        "y": 3
       },
       "datasource": {
         "type": "prometheus",
@@ -224,15 +224,15 @@
       "title": "",
       "description": "DSA-07 decision rail. Read-only",
       "gridPos": {
-        "h": 3,
+        "h": 2,
         "w": 24,
         "x": 0,
-        "y": 8
+        "y": 6
       },
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Start Incident Triage",
-        "content": "<div style=\"font-size:16px;line-height:1;padding:0;margin:0;white-space:normal;overflow-wrap:anywhere\">First action: open the top Ranked Suspect.</div>"
+        "content": "<div style=\"font-size:16px;line-height:1.25;padding:0;white-space:normal;overflow-wrap:anywhere\">GLOBAL · CURRENT · Rank: CRIT before WARN; ties have equal urgency. Confidence: signal only, unverified cause. Impact / event age: UNKNOWN until verified.</div>"
       },
       "links": [
         {
@@ -247,12 +247,12 @@
       "id": 2010,
       "type": "table",
       "title": "Inspect Ranked Suspects",
-      "description": "TIME RANGE · Selected pipeline may differ from row pipeline (blast radius). Cross-domain first-screen ranking uses shipped severity labels (failing/crit=2, degraded/warn=1), not boolean activation. Priority 0 is telemetry_gap/UNKNOWN for a domain with no recording-rule or universe series. Global sort by Priority then cap five rows. Domain, signal, priority, and action identify source and next handoff; row links preserve scope. VALID_EMPTY when no active suspects — empty domains are not a healthy-fleet verdict. Complete per-domain evidence stays in Domain Suspect Details. TELEMETRY MISSING is not a zero and not VALID EMPTY. One Prometheus union preserves a single Value column before descending priority sort and the five-row limit; domain labels keep sources distinct.",
+      "description": "GLOBAL · CURRENT at query evaluation time (range end), not SELECTED RUN. Rank is severity order: CRIT=2, WARN=1, UNKNOWN=0; ties have equal urgency, not higher confidence. Confidence is UNVERIFIED: a rule signal alone does not establish cause or impact. Pipeline/provider identifies potential impact scope; confirm with domain evidence. Only active (>0) signals are ranked; telemetry_gap stays UNKNOWN. VALID EMPTY means no active suspects with available evidence; TELEMETRY MISSING is not a zero and not VALID EMPTY. Domain details use the same GLOBAL scope and evaluation time. Rule sample time is not the underlying event time. Inspect retains source labels; Action preserves row scope. TIME RANGE selects evaluation time, not an event-history rank.",
       "gridPos": {
-        "h": 7,
+        "h": 10,
         "w": 24,
         "x": 0,
-        "y": 11
+        "y": 8
       },
       "datasource": {
         "type": "prometheus",
@@ -264,10 +264,37 @@
           "instant": true,
           "range": false,
           "format": "table",
-          "expr": "bioetl_incident_ranked_runtime or bioetl_incident_ranked_provider or bioetl_incident_ranked_dq"
+          "expr": "label_join(label_replace((bioetl_incident_ranked_runtime or bioetl_incident_ranked_provider or bioetl_incident_ranked_dq),\"confidence\",\"UNVERIFIED\",\"\",\"\"),\"object\",\"\",\"pipeline\",\"provider\")"
         }
       ],
       "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "filters": [
+              {
+                "fieldName": "Value",
+                "config": {
+                  "id": "greater",
+                  "options": {
+                    "value": 0
+                  }
+                }
+              },
+              {
+                "fieldName": "signal",
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": "telemetry_gap"
+                  }
+                }
+              }
+            ],
+            "type": "include",
+            "match": "any"
+          }
+        },
         {
           "id": "sortBy",
           "options": {
@@ -287,6 +314,25 @@
           }
         },
         {
+          "id": "calculateField",
+          "options": {
+            "mode": "index",
+            "alias": "row_index"
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "mode": "binary",
+            "binary": {
+              "left": "row_index",
+              "operator": "+",
+              "right": "1"
+            },
+            "alias": "Rank"
+          }
+        },
+        {
           "id": "organize",
           "options": {
             "excludeByName": {
@@ -298,30 +344,36 @@
               "run_type": true,
               "severity": true,
               "action_target": true,
-              "__name__": true
+              "__name__": true,
+              "row_index": true,
+              "confidence": false,
+              "object": false
             },
             "indexByName": {
-              "domain": 0,
-              "signal": 1,
-              "Value": 2,
-              "action": 3,
-              "pipeline": 4,
-              "provider": 5
+              "Rank": 0,
+              "Value": 1,
+              "confidence": 2,
+              "pipeline": 3,
+              "provider": 4,
+              "signal": 5,
+              "action": 6,
+              "domain": 7,
+              "object": 3
             },
             "renameByName": {
               "domain": "Domain",
               "signal": "Signal",
-              "Value": "Priority",
+              "Value": "Severity",
               "action": "Action",
-              "pipeline": "Pipeline",
-              "provider": "Provider"
+              "confidence": "Confidence",
+              "object": "Object"
             }
           }
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
+          "noValue": "UNKNOWN",
           "custom": {
             "align": "left",
             "cellOptions": {
@@ -380,110 +432,65 @@
               "includeVars": false
             }
           ],
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null+nan",
-                "result": {
-                  "text": "—",
-                  "color": "transparent",
-                  "index": 0
-                }
-              }
-            },
-            {
-              "type": "value",
-              "options": {
-                "2": {
-                  "text": "CRIT",
-                  "color": "red",
-                  "index": 1
-                },
-                "1": {
-                  "text": "WARN",
-                  "color": "orange",
-                  "index": 2
-                },
-                "0": {
-                  "text": "UNKNOWN",
-                  "color": "gray",
-                  "index": 3
-                }
-              }
-            }
-          ]
+          "mappings": []
         },
         "overrides": [
           {
             "matcher": {
               "id": "byName",
-              "options": "Value"
+              "options": "Rank"
             },
             "properties": [
               {
-                "id": "displayName",
-                "value": "Priority"
+                "id": "custom.width",
+                "value": 52
               },
               {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background",
-                  "mode": "basic",
-                  "wrapText": false
-                }
+                "id": "mappings",
+                "value": []
               },
               {
-                "id": "color",
-                "value": {
-                  "mode": "thresholds"
-                }
+                "id": "unit",
+                "value": "none"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 86
               },
               {
-                "id": "thresholds",
-                "value": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "gray",
-                      "value": null
-                    },
-                    {
-                      "color": "gray",
-                      "value": 0
-                    },
-                    {
-                      "color": "orange",
-                      "value": 1
-                    },
-                    {
-                      "color": "red",
-                      "value": 2
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "0": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      },
+                      "1": {
+                        "text": "WARN",
+                        "color": "orange"
+                      },
+                      "2": {
+                        "text": "CRIT",
+                        "color": "red"
+                      }
                     }
-                  ]
-                }
-              },
-              {
-                "id": "custom.width",
-                "value": 100
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "domain"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 90
+                  }
+                ]
               },
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto",
-                  "wrapText": false
+                  "type": "color-text"
                 }
               }
             ]
@@ -491,38 +498,16 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "signal"
+              "options": "Confidence"
             },
             "properties": [
               {
                 "id": "custom.width",
-                "value": 210
+                "value": 110
               },
               {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "action"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 120
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
+                "id": "noValue",
+                "value": "UNVERIFIED"
               }
             ]
           },
@@ -533,6 +518,30 @@
             },
             "properties": [
               {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "provider"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Signal"
+            },
+            "properties": [
+              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
@@ -544,12 +553,47 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "provider"
+              "options": "Action"
             },
             "properties": [
               {
                 "id": "custom.width",
-                "value": 110
+                "value": 100
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Domain"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 80
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Object"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 145
+              },
+              {
+                "id": "noValue",
+                "value": "GLOBAL"
               },
               {
                 "id": "custom.cellOptions",
@@ -575,8 +619,8 @@
         },
         "sortBy": [
           {
-            "displayName": "Priority",
-            "desc": true
+            "displayName": "Rank",
+            "desc": false
           }
         ]
       }
@@ -714,7 +758,7 @@
           "id": 2006,
           "type": "state-timeline",
           "title": "Track Alert State History",
-          "description": "TIME RANGE · Range ALERTS history, not a persistent incident log. State is written in every band and row label; color is redundant. Use Current Alerts for the current verdict. VALID EMPTY (no events) is not TELEMETRY MISSING.",
+          "description": "GLOBAL · TIME RANGE · ALERTS history, not a persistent incident log. FIRING/PENDING legend names the states; adjacent equal samples merge. Auto labels avoid clipped fragments. Hover a band for full alert name and interval start/end; gaps remain gaps. VALID EMPTY (no events) is not TELEMETRY MISSING. Outlined intervals use semantic state colors; hover for exact interval boundaries. Gaps mean no observed samples, not OK. State is explicit in the full row label and legend; narrow intervals carry no clipped in-band text.",
           "gridPos": {
             "h": 8,
             "w": 24,
@@ -727,8 +771,8 @@
           },
           "targets": [
             {
-              "expr": "ALERTS{alertstate=~\"firing|pending\"}",
-              "legendFormat": "{{alertstate}} · {{alertname}}",
+              "expr": "ALERTS{alertstate=\"firing\"} or (ALERTS{alertstate=\"pending\"} * 2)",
+              "legendFormat": "{{alertname}} · {{alertstate}}",
               "refId": "A",
               "instant": false,
               "range": true
@@ -736,13 +780,15 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
+              "noValue": "GAP",
               "custom": {
                 "fillOpacity": 0,
-                "lineWidth": 0
+                "lineWidth": 2,
+                "axisWidth": 360
               },
               "color": {
-                "mode": "thresholds"
+                "mode": "fixed",
+                "fixedColor": "gray"
               },
               "thresholds": {
                 "mode": "absolute",
@@ -761,84 +807,29 @@
                 {
                   "type": "value",
                   "options": {
-                    "0": {
-                      "text": "inactive"
-                    },
                     "1": {
-                      "text": "active"
+                      "text": "FIRING",
+                      "color": "red"
+                    },
+                    "2": {
+                      "text": "PENDING",
+                      "color": "orange"
                     }
                   }
                 }
               ]
             },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": ".*firing.*"
-                },
-                "properties": [
-                  {
-                    "id": "color",
-                    "value": {
-                      "mode": "fixed",
-                      "fixedColor": "red"
-                    }
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "1": {
-                            "text": "FIRING"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": ".*pending.*"
-                },
-                "properties": [
-                  {
-                    "id": "color",
-                    "value": {
-                      "mode": "fixed",
-                      "fixedColor": "orange"
-                    }
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "1": {
-                            "text": "PENDING"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
+            "overrides": []
           },
           "options": {
             "mergeValues": true,
-            "showValue": "always",
+            "showValue": "never",
             "alignValue": "left",
             "rowHeight": 1.0,
             "legend": {
               "displayMode": "list",
               "placement": "bottom",
-              "showLegend": false
+              "showLegend": true
             },
             "tooltip": {
               "mode": "single",
@@ -860,7 +851,7 @@
           },
           "options": {
             "mode": "html",
-            "content": "<div style=\"display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:4px 8px;line-height:1.3;font-size:16px;white-space:normal\"><div><strong>Impact</strong><br>Affected pipeline/provider scope from suspects and current alerts.</div><div><strong>Confidence</strong><br>High with mapped Status + suspects; low with UNKNOWN or missing telemetry.</div><div><strong>Basis</strong><br>Domain label + alertname; read-only evidence, not AI diagnosis.</div></div>"
+            "content": "<div style=\"font-size:16px;line-height:1.25;padding:0;white-space:normal;overflow-wrap:anywhere\">Impact: confirm the row’s pipeline/provider. Confidence: UNVERIFIED until domain status and independent evidence agree. UNKNOWN means missing telemetry; it does not identify a cause.</div>"
           }
         }
       ]
@@ -868,7 +859,7 @@
     {
       "id": 2099,
       "type": "row",
-      "title": "Domain Suspect Details",
+      "title": "Domain Suspect Details · GLOBAL / CURRENT",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -881,7 +872,7 @@
           "id": 2002,
           "type": "table",
           "title": "Inspect Runtime Suspects",
-          "description": "TIME RANGE · SELECTED RUN · Selected pipeline may differ from row pipeline (blast radius). Runtime blockers (current topk by domain). VALID EMPTY when none. Handoff: Pipeline Diagnostics. Not cross-domain ranking TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "GLOBAL · CURRENT at query evaluation time (range end). Same fleet scope as Ranked Suspects; pipeline and run selectors do not filter this table. Active signals only. VALID EMPTY is not TELEMETRY MISSING or a healthy-fleet verdict. TIME RANGE · SELECTED RUN · Selected pipeline may differ from row pipeline (blast radius). Runtime blockers (current topk by domain). VALID EMPTY when none. Handoff: Pipeline Diagnostics. Not cross-domain ranking ",
           "gridPos": {
             "h": 7,
             "w": 8,
@@ -1070,7 +1061,7 @@
           "id": 2003,
           "type": "table",
           "title": "Inspect Provider Suspects",
-          "description": "TIME RANGE · Do not put full UUIDs into Prometheus labels. Selected pipeline may differ from row pipeline (blast radius). Provider causes (current fleet topk). Empty + non-OK Status is an explainability gap. Handoff: Provider Health TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "GLOBAL · CURRENT at query evaluation time (range end). Same fleet scope as Ranked Suspects; pipeline and run selectors do not filter this table. Active signals only. VALID EMPTY is not TELEMETRY MISSING or a healthy-fleet verdict. TIME RANGE · Do not put full UUIDs into Prometheus labels. Selected pipeline may differ from row pipeline (blast radius). Provider causes (current fleet topk). Empty + non-OK Status is an explainability gap. Handoff: Provider Health ",
           "gridPos": {
             "h": 7,
             "w": 8,
@@ -1259,7 +1250,7 @@
           "id": 2004,
           "type": "table",
           "title": "Inspect DQ Suspects",
-          "description": "TIME RANGE · Selected pipeline may differ from row pipeline (blast radius). DQ current reasons (NOW topk). VALID EMPTY when none. Handoff: Data Quality. Not a persistent incident record TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "GLOBAL · CURRENT at query evaluation time (range end). Same fleet scope as Ranked Suspects; pipeline and run selectors do not filter this table. Active signals only. VALID EMPTY is not TELEMETRY MISSING or a healthy-fleet verdict. TIME RANGE · Selected pipeline may differ from row pipeline (blast radius). DQ current reasons (NOW topk). VALID EMPTY when none. Handoff: Data Quality. Not a persistent incident record ",
           "gridPos": {
             "h": 7,
             "w": 8,

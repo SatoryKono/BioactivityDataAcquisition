@@ -21,7 +21,7 @@
   "panels": [
     {
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 24,
         "x": 0,
         "y": 0
@@ -30,7 +30,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1;margin:0 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:2px;flex-wrap:nowrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">0. Trust</a><a class=\"bioetl-nav-current\" href=\"#bioetl-overview-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"1. Overview (Overview)\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">1. Overview (current)</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/bioetl-runtime?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-stage=$__all&amp;${__url_time_range}\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health). Scope reset: provider=unknown; preserves time range, pipeline context.\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;${__url_time_range}\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-stage=$__all&amp;${__url_time_range}\">4. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">6. Run Explorer</a></div>"
+        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1;margin:0 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:2px;flex-wrap:nowrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">0. Trust</a><a class=\"bioetl-nav-current\" href=\"#bioetl-overview-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"1. Overview (Overview)\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/bioetl-runtime?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-stage=$__all&amp;${__url_time_range}\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health). Scope reset: provider=unknown; preserves time range, pipeline context.\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;${__url_time_range}\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-stage=$__all&amp;${__url_time_range}\">4. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">6. Run Explorer</a></div>"
       },
       "title": "",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
@@ -115,7 +115,7 @@
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 4
+        "y": 3
       },
       "id": 99,
       "options": {
@@ -134,9 +134,9 @@
       "title": "Review Selected Run Summary",
       "gridPos": {
         "h": 5,
-        "w": 24,
+        "w": 16,
         "x": 0,
-        "y": 7
+        "y": 6
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Compact pipeline_run_report_v1 identity, status, and coverage. Gold out and contract exclusions stay in Run Explorer. This strip is the selected UUID, not CURRENT fleet. Missing run is VALID EMPTY / SELECT RUN, not OK. Do not treat Monitor Fleet Health or Review First Action as this run. Backend unavailable means the query could not be evaluated. Verify /health/live. Coverage chip is IN RANGE / OUT OF RANGE / UNKNOWN from covers_selected_run. Set range to run opens Run Explorer 3022 at from_ms..to_ms. A covered run does not show an outside-range warning.",
@@ -428,10 +428,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 8,
-        "x": 0,
-        "y": 12
+        "x": 16,
+        "y": 6
       },
       "id": 214,
       "options": {
@@ -490,10 +490,10 @@
       "type": "table",
       "title": "Review First Action",
       "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 8,
-        "y": 12
+        "h": 7,
+        "w": 16,
+        "x": 0,
+        "y": 11
       },
       "datasource": {
         "type": "prometheus",
@@ -517,35 +517,35 @@
               "type": "value",
               "options": {
                 "0": {
-                  "text": "NR",
+                  "text": "UNKNOWN",
                   "color": "gray"
                 },
                 "5": {
-                  "text": "MON",
+                  "text": "WATCH",
                   "color": "gray"
                 },
                 "10": {
-                  "text": "WF",
+                  "text": "REVIEW",
                   "color": "green"
                 },
                 "20": {
-                  "text": "PROV",
+                  "text": "HIGH",
                   "color": "orange"
                 },
                 "30": {
-                  "text": "DQ",
+                  "text": "HIGH",
                   "color": "orange"
                 },
                 "35": {
-                  "text": "GOLD",
+                  "text": "URGENT",
                   "color": "orange"
                 },
                 "40": {
-                  "text": "CP",
+                  "text": "URGENT",
                   "color": "red"
                 },
                 "50": {
-                  "text": "RUNTIME",
+                  "text": "URGENT",
                   "color": "red"
                 }
               }
@@ -702,38 +702,10 @@
                 "value": {
                   "mode": "thresholds"
                 }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Value"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Priority"
-              },
-              {
-                "id": "custom.align",
-                "value": "center"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background"
-                }
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "thresholds"
-                }
               },
               {
                 "id": "custom.width",
-                "value": 48
+                "value": 90
               }
             ]
           },
@@ -754,19 +726,19 @@
                     "type": "value",
                     "options": {
                       "control_plane_guardrail_active": {
-                        "text": "Control-plane issue"
+                        "text": "Replay guardrail active"
                       },
                       "dq_threshold_or_validation_signal": {
-                        "text": "DQ issue"
+                        "text": "DQ threshold / validation"
                       },
                       "no_recent_activity_or_unknown_state": {
                         "text": "No recent activity"
                       },
                       "selected_scope_not_present": {
-                        "text": "Scope not in universe"
+                        "text": "No active route; verify telemetry"
                       },
                       "provider_global_degradation": {
-                        "text": "Provider issue"
+                        "text": "GLOBAL provider degraded"
                       },
                       "gold_lifecycle_blocking": {
                         "text": "Gold lifecycle blocked"
@@ -785,32 +757,8 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Pipeline"
-            },
-            "properties": [
-              {
-                "id": "custom.hidden",
-                "value": true
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "pipeline"
-            },
-            "properties": [
-              {
-                "id": "custom.hidden",
-                "value": true
               }
             ]
           },
@@ -837,12 +785,31 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pipeline"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 150
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
           }
         ]
       },
       "targets": [
         {
-          "expr": "topk(2, bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or (absent(bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})*bioetl_l0_next_action_no_route))",
+          "expr": "topk(2,max without(run_type)(bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}>0)) or on() bioetl_l0_next_action_no_route",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -897,18 +864,21 @@
               "bioetl_l0_next_action_route": true,
               "input": true,
               "run_type": true,
-              "pipeline": true,
-              "Pipeline": true
+              "pipeline": false,
+              "Pipeline": false
             },
             "indexByName": {
-              "action_target": 0,
-              "Value": 1,
-              "action_reason": 2,
-              "action_dashboard_uid": 4
+              "Value": 0,
+              "pipeline": 1,
+              "action_reason": 3,
+              "action_target": 4,
+              "action_dashboard_uid": 5,
+              "run_type": 2
             },
             "renameByName": {
               "Value": "Priority",
-              "pipeline": "Pipeline"
+              "pipeline": "Pipeline",
+              "run_type": "Run type"
             }
           }
         },
@@ -919,7 +889,7 @@
           }
         }
       ],
-      "description": "TIME RANGE · CURRENT · Open Action on the top row first — routes are ranked by urgency (RUNTIME > CP > GOLD > DQ > PROV > WF > MON). MON/NR means keep watching when Fleet Health is OK.  Scope: current fleet/status verdict for selected pipeline, workflow, and time range; not a per-run_id metric. NO_ROUTE/no_route appears only when the selected scope has no route series (absent(route)*no_route); it is not a healthy empty and does not mean the dashboard selector widget is blank. Gold lifecycle blocked / DQ issue here is CURRENT fleet routing, not a verdict for the selected run_id. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+      "description": "CURRENT selected-pipeline routes across selected run types; not a SELECTED RUN verdict. One row per pipeline and action/reason, taking the highest urgency across run types before the two-row limit. Open Action on the top row first. Priority is routing urgency: URGENT > HIGH > REVIEW > WATCH, not inferred alert severity. Provider degradation is GLOBAL; confirm the provider in Provider Health. Only positive routes participate. NO_ROUTE is an absence-only fallback when no positive route survives (or on()); it is not a healthy zero or VALID EMPTY. Verify telemetry and selection before a health conclusion. TELEMETRY MISSING is not zero. TIME RANGE sets current evaluation time.",
       "links": [
         {
           "title": "Open Runtime",
@@ -952,10 +922,10 @@
       "type": "table",
       "title": "Review Domain Status",
       "gridPos": {
-        "h": 6,
+        "h": 7,
         "w": 8,
         "x": 16,
-        "y": 12
+        "y": 11
       },
       "datasource": {
         "type": "prometheus",
@@ -1717,7 +1687,7 @@
           "title": "Track Runtime Blockers",
           "gridPos": {
             "h": 6,
-            "w": 8,
+            "w": 24,
             "x": 0,
             "y": 26
           },
@@ -1728,7 +1698,8 @@
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "thresholds"
+                "mode": "fixed",
+                "fixedColor": "gray"
               },
               "custom": {
                 "fillOpacity": 0,
@@ -1737,7 +1708,8 @@
                   "tooltip": false,
                   "viz": false
                 },
-                "lineWidth": 0
+                "lineWidth": 2,
+                "axisWidth": 240
               },
               "mappings": [
                 {
@@ -1780,7 +1752,7 @@
                 ]
               },
               "unit": "none",
-              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -1792,16 +1764,29 @@
                 "targetBlank": false,
                 "includeVars": false
               }
-            ]
+            ],
+            "mergeValues": true,
+            "showValue": "auto",
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
           },
           "targets": [
             {
-              "expr": "max by (pipeline, run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\"), \"run_type\", \"$run_type\", \"\", \"\")",
+              "expr": "max by (pipeline,run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"$pipeline\",\"\",\"\"),\"run_type\",\"$run_type\",\"\",\"\")",
               "refId": "A",
-              "legendFormat": "{{pipeline}}/{{run_type}}"
+              "legendFormat": "{{pipeline}} / {{run_type}}",
+              "instant": false,
+              "range": true
             }
           ],
-          "description": "TIME RANGE · SELECTED RUN · Shows Runtime status over the selected range for Pipeline and Run Type. Values are OK, WARN, CRIT, or UNKNOWN; missing samples remain UNKNOWN. This trend does not determine current Fleet Health; open Pipeline Diagnostics for current blockers. TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: history (state-timeline) of L1 runtime over the range; the snapshot table is Review Runtime Status (9003).",
+          "description": "TIME RANGE · SELECTED RUN · Shows Runtime status over the selected range for Pipeline and Run Type. Values are OK, WARN, CRIT, or UNKNOWN; missing samples remain UNKNOWN. This trend does not determine current Fleet Health; open Pipeline Diagnostics for current blockers. TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: history (state-timeline) of L1 runtime over the range; the snapshot table is Review Runtime Status (9003). Outlined intervals use semantic state colors; hover for exact interval boundaries. Gaps mean no observed samples, not OK.",
           "maxDataPoints": 400
         },
         {
@@ -1810,9 +1795,9 @@
           "title": "Track Data Quality Status",
           "gridPos": {
             "h": 6,
-            "w": 8,
-            "x": 8,
-            "y": 26
+            "w": 24,
+            "x": 0,
+            "y": 32
           },
           "datasource": {
             "type": "prometheus",
@@ -1821,7 +1806,8 @@
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "thresholds"
+                "mode": "fixed",
+                "fixedColor": "gray"
               },
               "custom": {
                 "fillOpacity": 0,
@@ -1830,7 +1816,8 @@
                   "tooltip": false,
                   "viz": false
                 },
-                "lineWidth": 0
+                "lineWidth": 2,
+                "axisWidth": 240
               },
               "mappings": [
                 {
@@ -1873,7 +1860,7 @@
                 ]
               },
               "unit": "none",
-              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -1885,16 +1872,29 @@
                 "targetBlank": false,
                 "includeVars": false
               }
-            ]
+            ],
+            "mergeValues": true,
+            "showValue": "auto",
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
           },
           "targets": [
             {
-              "expr": "max by (pipeline, run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\"), \"run_type\", \"$run_type\", \"\", \"\")",
+              "expr": "max by (pipeline,run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"$pipeline\",\"\",\"\"),\"run_type\",\"$run_type\",\"\",\"\")",
               "refId": "A",
-              "legendFormat": "{{pipeline}}/{{run_type}}"
+              "legendFormat": "{{pipeline}} / {{run_type}}",
+              "instant": false,
+              "range": true
             }
           ],
-          "description": "CURRENT · TIME RANGE · Shows Data Quality status over the selected range for Pipeline and Run Type. Values are OK, WARN, CRIT, or UNKNOWN; missing samples remain UNKNOWN. This trend does not determine current Fleet Health; open Data Quality for current conditions. TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: history (state-timeline) of L1 data-quality over the range; the snapshot table is Review Data Quality Status (9004).",
+          "description": "CURRENT · TIME RANGE · Shows Data Quality status over the selected range for Pipeline and Run Type. Values are OK, WARN, CRIT, or UNKNOWN; missing samples remain UNKNOWN. This trend does not determine current Fleet Health; open Data Quality for current conditions. TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: history (state-timeline) of L1 data-quality over the range; the snapshot table is Review Data Quality Status (9004). Outlined intervals use semantic state colors; hover for exact interval boundaries. Gaps mean no observed samples, not OK.",
           "maxDataPoints": 400
         },
         {
@@ -1903,9 +1903,9 @@
           "title": "Track Gold Lifecycle",
           "gridPos": {
             "h": 6,
-            "w": 8,
-            "x": 16,
-            "y": 26
+            "w": 24,
+            "x": 0,
+            "y": 38
           },
           "datasource": {
             "type": "prometheus",
@@ -1914,7 +1914,8 @@
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "thresholds"
+                "mode": "fixed",
+                "fixedColor": "gray"
               },
               "custom": {
                 "fillOpacity": 0,
@@ -1923,7 +1924,8 @@
                   "tooltip": false,
                   "viz": false
                 },
-                "lineWidth": 0
+                "lineWidth": 2,
+                "axisWidth": 240
               },
               "mappings": [
                 {
@@ -1966,7 +1968,7 @@
                 ]
               },
               "unit": "none",
-              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -1984,16 +1986,29 @@
                 "targetBlank": false,
                 "includeVars": false
               }
-            ]
+            ],
+            "mergeValues": true,
+            "showValue": "auto",
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
           },
           "targets": [
             {
-              "expr": "max by (pipeline, run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\"), \"run_type\", \"$run_type\", \"\", \"\")",
+              "expr": "max by (pipeline,run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"$pipeline\",\"\",\"\"),\"run_type\",\"$run_type\",\"\",\"\")",
               "refId": "A",
-              "legendFormat": "{{pipeline}}/{{run_type}}/{{lifecycle_state}}"
+              "legendFormat": "{{pipeline}} / {{run_type}}",
+              "instant": false,
+              "range": true
             }
           ],
-          "description": "TIME RANGE · Shows Gold lifecycle state over the selected range for Pipeline and Run Type. A disabled Gold stage is a valid non-error state, while gaps or missing series remain UNKNOWN. This trend does not determine current Fleet Health; continue in Pipeline Diagnostics or Trust. TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: history (state-timeline) of L1 gold lifecycle over the range; the snapshot table is Review Data Validation Status (9005).",
+          "description": "TIME RANGE · Shows Gold lifecycle state over the selected range for Pipeline and Run Type. A disabled Gold stage is a valid non-error state, while gaps or missing series remain UNKNOWN. This trend does not determine current Fleet Health; continue in Pipeline Diagnostics or Trust. TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: history (state-timeline) of L1 gold lifecycle over the range; the snapshot table is Review Data Validation Status (9005). Outlined intervals use semantic state colors; hover for exact interval boundaries. Gaps mean no observed samples, not OK.",
           "maxDataPoints": 400
         }
       ]
@@ -2415,9 +2430,9 @@
           "title": "Review Control Plane Status",
           "gridPos": {
             "h": 5,
-            "w": 5,
+            "w": 24,
             "x": 0,
-            "y": 32
+            "y": 44
           },
           "datasource": {
             "type": "prometheus",
@@ -2519,7 +2534,7 @@
                   },
                   {
                     "id": "custom.width",
-                    "value": 40
+                    "value": 100
                   }
                 ]
               },
@@ -2538,18 +2553,6 @@
                     "value": {
                       "type": "color-text"
                     }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Count"
                   }
                 ]
               }
@@ -2610,9 +2613,9 @@
           "title": "Review Runtime Status",
           "gridPos": {
             "h": 5,
-            "w": 4,
-            "x": 5,
-            "y": 32
+            "w": 24,
+            "x": 0,
+            "y": 49
           },
           "datasource": {
             "type": "prometheus",
@@ -2714,7 +2717,7 @@
                   },
                   {
                     "id": "custom.width",
-                    "value": 40
+                    "value": 100
                   }
                 ]
               },
@@ -2733,18 +2736,6 @@
                     "value": {
                       "type": "color-text"
                     }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Count"
                   }
                 ]
               }
@@ -2805,9 +2796,9 @@
           "title": "Review Data Quality Status",
           "gridPos": {
             "h": 5,
-            "w": 5,
-            "x": 9,
-            "y": 32
+            "w": 24,
+            "x": 0,
+            "y": 54
           },
           "datasource": {
             "type": "prometheus",
@@ -2909,7 +2900,7 @@
                   },
                   {
                     "id": "custom.width",
-                    "value": 40
+                    "value": 100
                   }
                 ]
               },
@@ -2928,18 +2919,6 @@
                     "value": {
                       "type": "color-text"
                     }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Count"
                   }
                 ]
               }
@@ -3000,9 +2979,9 @@
           "title": "Review Global Provider Status",
           "gridPos": {
             "h": 5,
-            "w": 4,
-            "x": 14,
-            "y": 32
+            "w": 24,
+            "x": 0,
+            "y": 59
           },
           "datasource": {
             "type": "prometheus",
@@ -3104,7 +3083,7 @@
                   },
                   {
                     "id": "custom.width",
-                    "value": 40
+                    "value": 100
                   }
                 ]
               },
@@ -3123,18 +3102,6 @@
                     "value": {
                       "type": "color-text"
                     }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Count"
                   }
                 ]
               }
@@ -3195,9 +3162,9 @@
           "title": "Review Data Validation Status",
           "gridPos": {
             "h": 5,
-            "w": 6,
-            "x": 18,
-            "y": 32
+            "w": 24,
+            "x": 0,
+            "y": 64
           },
           "datasource": {
             "type": "prometheus",
@@ -3299,7 +3266,7 @@
                   },
                   {
                     "id": "custom.width",
-                    "value": 40
+                    "value": 100
                   }
                 ]
               },
@@ -3318,18 +3285,6 @@
                     "value": {
                       "type": "color-text"
                     }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Count"
                   }
                 ]
               }
@@ -3389,10 +3344,10 @@
           "type": "table",
           "title": "Review Workflow Status",
           "gridPos": {
-            "h": 8,
+            "h": 5,
             "w": 24,
             "x": 0,
-            "y": 37
+            "y": 69
           },
           "datasource": {
             "type": "prometheus",
@@ -3592,7 +3547,7 @@
             "h": 3,
             "w": 24,
             "x": 0,
-            "y": 45
+            "y": 74
           },
           "options": {
             "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:16px;white-space:normal\"><strong>Next dashboard:</strong> Trust for evidence confidence · Pipeline Diagnostics for runtime blockers · Data Quality for DQ reasons · Provider Health for provider causes. Scope and time range are preserved.</div>",

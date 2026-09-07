@@ -33,6 +33,30 @@ or query semantics. See [Optional Scenes dual path](scenes-dual-path.md).
 > `bioetl quarantine inspect`. Details:
 > [monitoring-surface-reduction](../../05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md).
 
+Operator triage updates (2026-09-07):
+
+- Overview priorities express routing urgency (URGENT / HIGH / REVIEW / WATCH),
+  with pipeline visible and identical actions merged across selected run types.
+  They are not alert severity. Provider
+  degradation is GLOBAL context. Domain comparisons use full-width tables;
+  timelines show named states and preserve gaps.
+- Pipeline Diagnostics places current blockers immediately below the scope and
+  health verdict. Endpoint SCRAPING, baseline rule/series presence, and rule
+  evaluation age are separate neutral evidence indicators. Baseline PRESENT
+  does not prove complete telemetry for the selected pipeline. Empty blockers
+  means none observed; confirm telemetry before a health conclusion.
+- Incident Workspace ranks GLOBAL, CURRENT signals at query evaluation time
+  (the selected range end). Pipeline and Run ID do not filter the ranking or
+  domain suspect details. Only positive signals are active suspects; a missing
+  domain universe retains telemetry_gap / UNKNOWN. Rank reflects severity,
+  with equal urgency for ties. Confidence remains UNVERIFIED until independent
+  domain evidence corroborates the cause; sample time is not event freshness.
+- Alert history merges adjacent equal samples. FIRING / PENDING appear in the
+  semantic legend; hover an interval for the full alert identity and bounds.
+- The shared navigation occupies three grid rows with the same 19px heading
+  and 16px links. The current destination retains its underline and accessible
+  current-page state. Detailed instructions remain available below the fold.
+
 Shipped inventory (**7 dashboards**): Control Plane, Overview, Runtime, Provider
 Provider Health, Data Quality, Incident Workspace, Run Explorer. Primary `0..6` refresh is `60s`.
 Generic primary handoffs preserve HTTP `$run_id` for identity panels only
@@ -804,4 +828,4 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - **Localize**: локализация culprit stage/phase и проверка latency/backlog breakdown.
 - **Escalate**: shutdown/terminal-state диагностика и handoff в tracing/log drilldown для подтверждения причины.
 
-На first screen оставлена ровно одна рекомендация drilldown — panel `id=9991` (`First Action`). Оператор сначала читает current status, top blockers и telemetry gap; `Inspect Active Runtime Blocker Detail` открывается из CTA только когда нужен полный rule-level breakdown внутри `Detect`.
+На first screen рекомендация первого действия включена в scope panel `id=9400`; подробный rail `id=9991` доступен в Localize Runtime Cause. Оператор сначала читает current status, top blockers и telemetry gap; `Inspect Active Runtime Blocker Detail` открывается из CTA только когда нужен полный rule-level breakdown внутри `Detect`.

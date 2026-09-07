@@ -154,11 +154,11 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
     assert panels["Monitor Fleet Health"].get("id") == 214
     assert panels["Review First Action"].get("id") == 215
     assert panels["Review Domain Status"].get("id") == 9002
-    assert panels["Inspect Scope & Evidence"].get("gridPos", {}).get("y") == 4
+    assert panels["Inspect Scope & Evidence"].get("gridPos", {}).get("y") == 3
     assert panels["Review Selected Run Summary"].get("id") == 9603
-    assert panels["Review Selected Run Summary"].get("gridPos", {}).get("y") == 7
-    assert panels["Monitor Fleet Health"].get("gridPos", {}).get("y") == 12
-    assert panels["Review First Action"].get("gridPos", {}).get("y") == 12
+    assert panels["Review Selected Run Summary"].get("gridPos", {}).get("y") == 6
+    assert panels["Monitor Fleet Health"].get("gridPos", {}).get("y") == 6
+    assert panels["Review First Action"].get("gridPos", {}).get("y") == 11
     assert panels["Review Domain Status"].get("gridPos", {}).get("y") == panels[
         "Review First Action"
     ].get("gridPos", {}).get("y")
@@ -207,7 +207,8 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
         or "selected_scope_not_present" in next_action_expr
     )
     # #8748: no_route only when the selected scope has no route series.
-    assert "absent(" in next_action_expr
+    assert "or on() bioetl_l0_next_action_no_route" in next_action_expr
+    assert "max without(run_type)" in next_action_expr
     assert "or bioetl_l0_next_action_no_route)" not in next_action_expr
     assert len(next_action_expr) <= 200
 
@@ -266,14 +267,14 @@ def test_review_domain_status_is_deviation_first_and_capped() -> None:
         if mapping.get("type") == "value":
             priority_maps.update(mapping.get("options") or {})
     for score, badge in {
-        "0": "NR",
-        "5": "MON",
-        "10": "WF",
-        "20": "PROV",
-        "30": "DQ",
-        "35": "GOLD",
-        "40": "CP",
-        "50": "RUNTIME",
+        "0": "UNKNOWN",
+        "5": "WATCH",
+        "10": "REVIEW",
+        "20": "HIGH",
+        "30": "HIGH",
+        "35": "URGENT",
+        "40": "URGENT",
+        "50": "URGENT",
     }.items():
         assert score in priority_maps, f"missing Priority map for score {score}"
         assert priority_maps[score].get("text") == badge
@@ -352,13 +353,13 @@ def test_review_domain_status_is_deviation_first_and_capped() -> None:
     }
     assert hidden_route_properties.get("custom.hidden") is True
     assert exclude.get("Value") is not True
-    assert exclude.get("pipeline") is True
-    # Action-first hierarchy: Action → Priority → Why. Pipeline is $pipeline scope.
+    assert exclude.get("pipeline") is False
+    # Urgency and explicit row object precede the reason and action.
     index_by_name = organize.get("options", {}).get("indexByName", {})
-    assert index_by_name.get("action_target") == 0
-    assert index_by_name.get("Value") == 1
-    assert index_by_name.get("action_reason") == 2
-    assert "pipeline" not in index_by_name
+    assert index_by_name.get("action_target") == 4
+    assert index_by_name.get("Value") == 0
+    assert index_by_name.get("action_reason") == 3
+    assert index_by_name["pipeline"] == 1
 
 
 def test_identity_panel_uses_run_id_without_leaking_to_prometheus_queries() -> None:

@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "7d9fdc21041537245ac0e7a85726e5a17566080773ce3242d3fe53d90f304647",
-    "bioetl-dq-v2": "68d0ed592b4f8371f2549ca2296960b3e8a5c81d95c4bf9379df13a7493b2603",
-    "bioetl-incident-v1": "fff21c49c2d62c74fe91440e1d4d863dd3bde07cf9ca8fff9106f68b99c71fbe",
-    "bioetl-overview-v2": "af2acc517d435ebe7409d5590da5b828ae3c90cbf30a3d1f5c96d2b2c33a29e1",
-    "bioetl-provider-health-v2": "6e87880c616bf3b083b04676239fb8e1f58daba1bd16f9525972936976cd3058",
-    "bioetl-run-explorer-v1": "f2e7f6286d9c7a8d1ac6d5a62fd8432e73123b5c3b33124b95b7d3e914409657",
-    "bioetl-runtime": "726a7a2cec6896b61ffa77ffcb8a5e40952a2b2e28e82038ad3608715b13dbbc"
+    "bioetl-control-plane-v1": "528d901461c8dcd9cbeed3406e1f716698f5c3c85956a82d0687fb6f61b3d489",
+    "bioetl-dq-v2": "9a8695552a395f230c042091d2855826feaec920c49464c57ba616774b6554b9",
+    "bioetl-incident-v1": "4ad7fccd23c0fcb29f4a53162115030d75dacef5a47cd80409ed24850d1d67b5",
+    "bioetl-overview-v2": "ef00bb82642747c6d2579c9a291b642e39ee3bf0e8ffd95ff398d595b4dd41fd",
+    "bioetl-provider-health-v2": "8bdc21bf5230912c6102ec42119af7e36f0a1184b2067cba8feec6001154c002",
+    "bioetl-run-explorer-v1": "440efa37f96625d1b4d492ff14edd8feacdc8210c9b60b4666a418e07d9d5f47",
+    "bioetl-runtime": "c4522465fb2daeedcf3b0349411c5ed15c8ed575dc257d73ecd2457a06977329"
   },
   "panels": [
     {
@@ -1830,7 +1830,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "bioetl_incident_ranked_runtime or bioetl_incident_ranked_provider or bioetl_incident_ranked_dq"
+          "label_join(label_replace((bioetl_incident_ranked_runtime or bioetl_incident_ranked_provider or bioetl_incident_ranked_dq),\"confidence\",\"UNVERIFIED\",\"\",\"\"),\"object\",\"\",\"pipeline\",\"provider\")"
         ],
         "target_count": 1
       }
@@ -1868,7 +1868,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "ALERTS{alertstate=~\"firing|pending\"}"
+          "ALERTS{alertstate=\"firing\"} or (ALERTS{alertstate=\"pending\"} * 2)"
         ],
         "target_count": 1
       }
@@ -2052,7 +2052,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "topk(2, bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or (absent(bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})*bioetl_l0_next_action_no_route))"
+          "topk(2,max without(run_type)(bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}>0)) or on() bioetl_l0_next_action_no_route"
         ],
         "target_count": 1
       }
@@ -2128,7 +2128,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (pipeline, run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\"), \"run_type\", \"$run_type\", \"\", \"\")"
+          "max by (pipeline,run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"$pipeline\",\"\",\"\"),\"run_type\",\"$run_type\",\"\",\"\")"
         ],
         "target_count": 1
       }
@@ -2147,7 +2147,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (pipeline, run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\"), \"run_type\", \"$run_type\", \"\", \"\")"
+          "max by (pipeline,run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"$pipeline\",\"\",\"\"),\"run_type\",\"$run_type\",\"\",\"\")"
         ],
         "target_count": 1
       }
@@ -2166,7 +2166,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (pipeline, run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\"), \"run_type\", \"$run_type\", \"\", \"\")"
+          "max by (pipeline,run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"$pipeline\",\"\",\"\"),\"run_type\",\"$run_type\",\"\",\"\")"
         ],
         "target_count": 1
       }
@@ -3248,23 +3248,6 @@
       "disposition": "route-primary",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-runtime",
-      "panel_id": 9991,
-      "panel_title": "Start Pipeline Triage",
-      "route": "pipeline-flow",
-      "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
-        "expressions": [],
-        "target_count": 0
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "Context Bar",
-      "dashboard_uid": "bioetl-runtime",
-      "disposition": "route-primary",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-runtime",
       "panel_id": 9101,
       "panel_title": "Review Runtime Blockers",
       "route": "pipeline-flow",
@@ -3291,9 +3274,11 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max(bioetl_runtime_trust_gap_status_10m)"
+          "max(up{job=\"bioetl\"})",
+          "max(bioetl_runtime_trust_gap_status_10m)",
+          "time()-max(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~\".*bioetl.*\"})"
         ],
-        "target_count": 1
+        "target_count": 3
       }
     },
     {
@@ -3498,6 +3483,23 @@
           "sum by(stage, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\",stage!~\"none.*\"}[$__range])) or label_replace(label_replace(vector(0), \"stage\", \"none\", \"\", \"\"), \"run_type\", \"none\", \"\", \"\")"
         ],
         "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "Context Bar",
+      "dashboard_uid": "bioetl-runtime",
+      "disposition": "route-primary",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-runtime",
+      "panel_id": 9991,
+      "panel_title": "Start Pipeline Triage",
+      "route": "pipeline-flow",
+      "source": {
+        "datasource_type": null,
+        "datasource_uid": null,
+        "expressions": [],
+        "target_count": 0
       }
     },
     {

@@ -37,8 +37,8 @@ _SPECS = {
         9400,
         "Understand Pipeline Scope",
         (
-            "Is the pipeline progressing, and what is blocking delivery?",
-            "health/phase/blockers",
+            "CURRENT",
+            "highest-severity blocker",
             "SCRAPING",
         ),
     ),
@@ -64,9 +64,9 @@ _SPECS = {
         9400,
         "Understand Incident Scope",
         (
-            "What is the highest-confidence active suspect?",
-            "EMPTY DOMAIN",
-            "not a healthy-fleet verdict",
+            "GLOBAL fleet triage",
+            "do not filter suspects",
+            "selected-run evidence is separate",
         ),
     ),
     "bioetl-run-explorer-v1.json": (
@@ -148,6 +148,15 @@ def test_provenance_panel_readability_contract(
         if item.get("gridPos", {}).get("y") == panel["gridPos"]["y"]
         and item.get("id") != panel_id
     ]
-    companion_min_h = 3 if filename == "bioetl-control-plane-v1.json" else 4
+    companion_min_h = (
+        3
+        if filename
+        in {
+            "bioetl-control-plane-v1.json",
+            "bioetl-runtime.json",
+            "bioetl-incident-v1.json",
+        }
+        else 4
+    )
     for companion in companions:
         assert companion["gridPos"]["h"] >= companion_min_h

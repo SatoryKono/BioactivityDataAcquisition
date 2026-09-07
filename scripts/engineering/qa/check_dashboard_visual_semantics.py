@@ -69,7 +69,6 @@ STANDARD_SEVERITY_TITLE_TOKENS = (
 BACKGROUND_SEVERITY_STAT_PANELS = {
     (DASHBOARD_OVERVIEW_V2, "Status"),
     (DASHBOARD_RUNTIME, PANEL_RUNTIME_STATUS),
-    (DASHBOARD_RUNTIME, PANEL_METRICS_EVIDENCE),
     (DASHBOARD_RUNTIME, "Failed Runs"),
     (DASHBOARD_RUNTIME, PANEL_RUNTIME_ERROR_RATE),
     (DASHBOARD_RUNTIME, PANEL_WORST_STAGE_LAG),
@@ -99,11 +98,6 @@ EXPLICIT_VALUE_MAPPING_STAT_PANELS: dict[tuple[str, str], JsonObject] = {
         "1": {"text": "WARN", "color": "orange"},
         "2": {"text": "CRIT", "color": "red"},
         "3": {"text": "INCOMPLETE", "color": "gray"},
-    },
-    (DASHBOARD_RUNTIME, PANEL_METRICS_EVIDENCE): {
-        "0": {"text": "SCRAPING", "color": "green"},
-        "1": {"text": "RULE/SERIES GAP", "color": "orange"},
-        "2": {"text": "RULE+SERIES GAP", "color": "red"},
     },
     (DASHBOARD_DQ_V2, PANEL_MONITOR_DQ_CURRENT_STATUS): {
         "0": {"text": "OK", "color": "green"},
@@ -458,12 +452,52 @@ def _fail_closed_panel_errors(
     return errors
 
 
+def _telemetry_evidence_errors(panel: JsonObject) -> list[str]:
+    """Endpoint/baseline evidence is neutral and cannot masquerade as health."""
+    errors: list[str] = []
+    if panel.get("options", {}).get("colorMode") != "value":
+        errors.append("Metrics Coverage must use neutral value-only evidence")
+    fields = {
+        item.get("matcher", {}).get("options"): {
+            prop.get("id"): prop.get("value") for prop in item.get("properties", [])
+        }
+        for item in panel.get("fieldConfig", {}).get("overrides", [])
+    }
+    expected = {
+        "Endpoint": {
+            "1": {"text": "SCRAPING", "color": "gray"},
+            "0": {"text": "UNAVAILABLE", "color": "orange"},
+        },
+        "Baseline": {
+            "0": {"text": "PRESENT", "color": "gray"},
+            "1": {"text": "RULE/SERIES GAP", "color": "orange"},
+            "2": {"text": "RULE+SERIES GAP", "color": "red"},
+        },
+    }
+    for name, values in expected.items():
+        if fields.get(name, {}).get("mappings") != [
+            {"type": "value", "options": values}
+        ]:
+            errors.append(
+                f"Metrics Coverage {name} must use explicit evidence mappings"
+            )
+    if fields.get("Rule age", {}).get("unit") != "s":
+        errors.append("Metrics Coverage must show rule evaluation age in seconds")
+    return errors
+
+
 def _panel_errors(dashboard_path: Path, panel: JsonObject) -> list[str]:
     title = str(panel.get("title", ""))
     panel_key = (dashboard_path.name, title)
     expected_no_value = FAIL_CLOSED_NO_ZERO_FALLBACK_PANELS.get(panel_key)
+    evidence_errors = (
+        _telemetry_evidence_errors(panel)
+        if panel_key == (DASHBOARD_RUNTIME, PANEL_METRICS_EVIDENCE)
+        else []
+    )
     return (
-        _stat_threshold_color_errors(dashboard_path, panel)
+        evidence_errors
+        + _stat_threshold_color_errors(dashboard_path, panel)
         + _status_panel_errors(dashboard_path, panel)
         + _panel_type_errors(dashboard_path, panel)
         + _fail_closed_panel_errors(dashboard_path, panel, expected_no_value)

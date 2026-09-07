@@ -89,12 +89,12 @@ def _validate_action_route_uids() -> None:
 
 
 NAV_DISPLAY_TITLE = "Navigate Dashboards"
-NAV_HEIGHT = 4
+NAV_HEIGHT = 3
 # layout-budgets.yaml first_window_y / viewport_rows. Expanding nav must not
 # push always-visible first-window panels past this fold.
 VIEWPORT_ROWS = 18
 # First-window copy that was explicitly designed and tested at h=3 must not be
-# sacrificed when the shared navigation grows to its canonical h=4.
+# sacrificed when the shared navigation grows to its canonical h=3.
 _MINIMUM_FIRST_WINDOW_HEIGHTS: dict[str, dict[int, int]] = {
     "bioetl-run-explorer-v1": {1: 3},
 }
@@ -105,8 +105,8 @@ _FALLBACK_COMPACTION_HEIGHTS: dict[str, dict[int, int]] = {
     "bioetl-run-explorer-v1": {3010: 11},
 }
 _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    9400: (0, 4, 16, 3),
-    9401: (16, 4, 8, 3),
+    9400: (0, 3, 16, 4),
+    9401: (16, 3, 8, 3),
     9418: (0, 7, 12, 5),
     9416: (12, 7, 12, 5),
     906: (0, 12, 24, 3),
@@ -202,7 +202,7 @@ def _chip_html(item: dict[str, str], *, current_uid: str, source_uid: str) -> st
             f'<a class="bioetl-nav-current" href="#{item["uid"]}" '
             f'aria-disabled="true" aria-current="page" data-current="page" '
             f'tabindex="-1" title="{title_attr}" style="{CURRENT_STYLE}">'
-            f"{item['title']} (current)</a>"
+            f"{item['title']}</a>"
         )
     tooltip = nav_link_tooltip(source_uid=source_uid, target=item)
     title_attr = html.escape(tooltip, quote=True)
@@ -528,7 +528,7 @@ def _shift_panel_tree(panel: dict[str, object], *, delta: int) -> None:
 
 
 def _layout_control_plane_first_window(panels: list[object]) -> None:
-    """Keep Trust density/readability while fitting the canonical h=4 nav."""
+    """Keep Trust density/readability while fitting the canonical h=3 nav."""
     root = _root_panels(panels)
     by_id = {panel.get("id"): panel for panel in root}
     missing = set(_CONTROL_PLANE_FIRST_WINDOW_GEOMETRY) - set(by_id)
@@ -565,7 +565,7 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
     cta = by_id[906]
     cta["description"] = (
         "Next-step rail kept at readable h=3 on the first screen under the "
-        "canonical h=4 navigation. Do not replay this run if its Trust status is "
+        "canonical h=3 navigation. Do not replay this run if its Trust status is "
         "INCOMPLETE or UNKNOWN. First-screen tables: Review Selected-Run Trust "
         "(9418) and Review Retention Compliance (9416). Review Lineage Validation "
         "is the first collapsed row (9419) and contains table 9415. Monitor Replay "
@@ -576,7 +576,7 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
 def _reclaim_first_window_overflow(
     nav: dict[str, object], panels: list[object], *, current_uid: str | None = None
 ) -> None:
-    """Compact a safe first-window band so nav h=4 still fits the fold."""
+    """Compact a safe first-window band so nav h=3 still fits the fold."""
     overflow = _first_window_overflow(panels)
     if overflow <= 0:
         return
@@ -606,7 +606,7 @@ def _expand_nav_height(
     if not isinstance(grid_pos, dict):
         raise SystemExit("navigation panel gridPos must be an object")
     old_height = grid_pos.get("h")
-    if not isinstance(old_height, int) or old_height >= new_height:
+    if not isinstance(old_height, int) or old_height == new_height:
         return
     delta = new_height - old_height
     old_bottom = int(grid_pos.get("y", 0)) + old_height
@@ -615,7 +615,9 @@ def _expand_nav_height(
             continue
         grid = panel.get("gridPos")
         if isinstance(grid, dict) and isinstance(grid.get("y"), int):
-            if grid["y"] >= old_bottom:
+            if grid["y"] >= old_bottom and not (
+                delta < 0 and panel.get("type") == "row"
+            ):
                 grid["y"] += delta
 
 
@@ -644,7 +646,7 @@ def apply_to_dashboard(path: Path, *, current_uid: str, check: bool = False) -> 
     nav["description"] = NAV_DESCRIPTION
     _expand_nav_height(nav, panels, new_height=NAV_HEIGHT)
     # The inline 19px title plus the single-row, internally reflowing 16px chips
-    # require four grid units at the normative 1366px viewport. Live geometry
+    # require three grid units at the normative 1366px viewport. Live geometry
     # validation guards clipping at 100% and 200% browser zoom.
     # Normalize all dashboards so content containment is an executable contract.
     grid_pos = nav["gridPos"]
