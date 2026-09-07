@@ -118,12 +118,14 @@ def test_loaded_report_display_preserves_reason_and_artifact_fields(
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("report_run_id", ["selected", "another-run"])
+@pytest.mark.parametrize("report_pipeline", ["chembl_assay", "chembl_activity"])
 @pytest.mark.parametrize(
     "identity_coverage,expected_coverage", [(None, "full"), (0, 0)]
 )
 async def test_identity_summary_uses_only_the_selected_report(
     monkeypatch: pytest.MonkeyPatch,
     report_run_id: str,
+    report_pipeline: str,
     identity_coverage: int | None,
     expected_coverage: str | int,
 ) -> None:
@@ -138,6 +140,7 @@ async def test_identity_summary_uses_only_the_selected_report(
         lambda **kwargs: {
             "identity": {
                 "run_id": report_run_id,
+                "pipeline_name": report_pipeline,
                 "status": "success",
                 "started_at": "2026-09-06T12:20:49+00:00",
                 "completed_at": "2026-09-06T12:21:15+00:00",
@@ -160,7 +163,7 @@ async def test_identity_summary_uses_only_the_selected_report(
     summary = await routing._build_identity_evidence_summary(
         SimpleNamespace(_run_ledger_port=None), scope=scope, checkpoint_metadata=None
     )
-    if report_run_id == "selected":
+    if report_run_id == "selected" and report_pipeline == "chembl_assay":
         assert summary["run_status"] == "success"
         assert summary["started_at"] == "2026-09-06T12:20:49+00:00"
         assert summary["completed_at"] == "2026-09-06T12:21:15+00:00"
@@ -181,3 +184,35 @@ async def test_identity_summary_uses_only_the_selected_report(
         assert values["Workflow Step ID"] == "run_chembl_assay"
     else:
         assert summary == {}
+
+
+@pytest.mark.asyncio
+async def test_slow_report_enrichment_preserves_completed_identity_evidence(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    async def source_read(build):
+        if build.__name__ == "<lambda>":
+            await routing.asyncio.Event().wait()
+        return build()
+
+    monkeypatch.setattr(routing.asyncio, "to_thread", source_read)
+    monkeypatch.setattr(routing, "_IDENTITY_EVIDENCE_BUILD_TIMEOUT_SECONDS", 0.01)
+    monkeypatch.setattr(
+        routing,
+        "build_control_plane_identity_evidence_payload",
+        lambda **kwargs: {"summary": {"identity_graph_complete": True, "gap_count": 0}},
+    )
+    scope = _IdentityScope(
+        requested_pipeline="chembl_assay",
+        selected_pipelines=("chembl_assay",),
+        selected_run_types=(),
+        selected_run_id="selected",
+        resolved_manifest=None,
+        resolved_via="selected_run_id_not_found",
+    )
+    summary = await routing._build_identity_evidence_summary(
+        SimpleNamespace(_run_ledger_port=None),
+        scope=scope,
+        checkpoint_metadata=None,
+    )
+    assert summary == {"identity_graph_complete": True, "gap_count": 0}

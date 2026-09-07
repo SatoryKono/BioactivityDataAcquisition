@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from bioetl.interfaces.http._health_server_checkpoint_lookup import (
@@ -236,12 +237,24 @@ async def _build_identity_evidence_summary(
         ).get("summary")
         if not isinstance(identity_evidence_summary, dict):
             return None
-        identity_evidence_summary.update(_selected_report_summary(scope))
         return identity_evidence_summary
 
+    summary, report_summary = await asyncio.gather(
+        _bounded_identity_summary(_build),
+        _bounded_identity_summary(lambda: _selected_report_summary(scope)),
+    )
+    if report_summary:
+        return {**(summary or {}), **report_summary}
+    return summary
+
+
+async def _bounded_identity_summary(
+    build: Callable[[], dict[str, object] | None],
+) -> dict[str, object] | None:
+    """Bound each source independently so report I/O cannot erase evidence."""
     try:
         return await asyncio.wait_for(
-            asyncio.to_thread(_build),
+            asyncio.to_thread(build),
             timeout=_IDENTITY_EVIDENCE_BUILD_TIMEOUT_SECONDS,
         )
     except TimeoutError:
@@ -266,6 +279,7 @@ def _selected_report_summary(scope: _IdentityScope) -> dict[str, object]:
     if (
         not isinstance(identity, dict)
         or str(identity.get("run_id")) != scope.selected_run_id
+        or identity.get("pipeline_name") != pipeline
     ):
         return {}
     keys = (
