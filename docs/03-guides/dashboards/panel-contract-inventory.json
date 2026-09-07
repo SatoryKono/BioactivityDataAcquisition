@@ -14,7 +14,7 @@
   "schema_version": 1,
   "source": "grafana/dashboards/*.json",
   "target_counts": {
-    "http": 35,
+    "http": 34,
     "loki": 0,
     "promql": 173,
     "tempo": 0,
@@ -838,11 +838,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.50, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
+      "formula": "histogram_quantile(0.50, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
       "kind": "promql",
       "panel_id": 111,
       "panel_title": "Track Global Read Latency",
-      "query": "histogram_quantile(0.50, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
+      "query": "histogram_quantile(0.50, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
       "query_tokens": [
         "bioetl_control_plane_read_duration_seconds_bucket"
       ],
@@ -873,11 +873,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.95, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
+      "formula": "histogram_quantile(0.95, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
       "kind": "promql",
       "panel_id": 111,
       "panel_title": "Track Global Read Latency",
-      "query": "histogram_quantile(0.95, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
+      "query": "histogram_quantile(0.95, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
       "query_tokens": [
         "bioetl_control_plane_read_duration_seconds_bucket"
       ],
@@ -908,11 +908,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.99, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
+      "formula": "histogram_quantile(0.99, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
       "kind": "promql",
       "panel_id": 111,
       "panel_title": "Track Global Read Latency",
-      "query": "histogram_quantile(0.99, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
+      "query": "histogram_quantile(0.99, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
       "query_tokens": [
         "bioetl_control_plane_read_duration_seconds_bucket"
       ],
@@ -4798,28 +4798,6 @@
         "run_id"
       ],
       "ref_id": "A",
-      "runbook_urls": [],
-      "thresholds": [],
-      "unit": ""
-    },
-    {
-      "coverage_class": null,
-      "dashboard_uid": "bioetl-run-explorer-v1",
-      "datasource_type": "yesoreyeram-infinity-datasource",
-      "documents_backend_down": true,
-      "documents_valid_empty": true,
-      "empty_state": "valid_empty",
-      "formula": "",
-      "kind": "http",
-      "panel_id": 3022,
-      "panel_title": "Inspect Run Identity",
-      "query": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
-      "query_tokens": [
-        "/ops/observability/pipeline-run-report",
-        "pipeline",
-        "run_id"
-      ],
-      "ref_id": "B",
       "runbook_urls": [],
       "thresholds": [],
       "unit": ""

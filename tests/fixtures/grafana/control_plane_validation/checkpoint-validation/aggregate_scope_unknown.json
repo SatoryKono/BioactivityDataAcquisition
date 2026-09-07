@@ -33,6 +33,7 @@
     "reasons": [
       "aggregate_scope_requires_exact_pipeline"
     ],
+    "reasons_count": 1,
     "reasons_text": "aggregate_scope_requires_exact_pipeline",
     "reasons_truncated": false,
     "scope_kind": "exact_run",

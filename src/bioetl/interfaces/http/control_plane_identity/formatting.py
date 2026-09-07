@@ -143,3 +143,32 @@ def validate_manifest_id_format(value: str) -> bool:
 def validate_provider_entity_format(value: str) -> bool:
     """Return whether a value follows ``provider.entity`` naming."""
     return bool(_PROVIDER_ENTITY_RE.fullmatch(str(value).strip()))
+
+
+def display_capability(value: object | None) -> str:
+    normalized = _normalized_token(value)
+    return {
+        "exact_replay_supported": "Supported",
+        "resume_only": "Resume only",
+        "rebuild_only": "Rebuild only",
+    }.get(normalized, _title_token(normalized))
+
+
+def display_replay_mode(value: object | None) -> str:
+    normalized = _normalized_token(value)
+    return {
+        "exact_replay": "Exact Replay",
+        "replay": "Replay",
+        "backfill": "Backfill",
+        "rebuild": "Rebuild",
+        "incremental": "Incremental",
+    }.get(normalized, _title_token(normalized))
+
+
+def _normalized_token(value: object | None) -> str:
+    raw_value = getattr(value, "value", value)
+    return str(raw_value or "unknown").strip().lower().replace("-", "_")
+
+
+def _title_token(value: str) -> str:
+    return value.replace("_", " ").title() if value else "Unknown"

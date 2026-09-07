@@ -24,6 +24,7 @@
     "evidence_observed_at": "2026-08-10T00:00:00+00:00",
     "processing_status": "unknown",
     "reasons": [],
+    "reasons_count": 0,
     "reasons_text": "",
     "reasons_truncated": false,
     "scope_kind": "exact_run",
