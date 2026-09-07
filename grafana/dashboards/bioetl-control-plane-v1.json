@@ -5753,7 +5753,7 @@
             "h": 6
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · CURRENT · Shows Bronze, Silver, and Gold record counts and outcomes for the selected scope. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Use Run Explorer for full run details.",
+          "description": "SELECTED RUN · CURRENT · Shows Bronze, Silver, and Gold record counts and outcomes for the selected scope. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Use Run Explorer for full run details. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -5789,7 +5789,11 @@
                     }
                   }
                 }
-              ]
+              ],
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "text"
+              }
             },
             "overrides": [
               {
@@ -5884,6 +5888,13 @@
                     "value": {
                       "type": "color-text"
                     }
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "text"
+                    }
                   }
                 ]
               },
@@ -5905,6 +5916,13 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text"
+                    }
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "text"
                     }
                   }
                 ]
@@ -6017,6 +6035,13 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "text"
+                    }
                   }
                 ]
               }
