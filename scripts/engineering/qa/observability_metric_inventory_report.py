@@ -38,7 +38,9 @@ from scripts.engineering.qa.observability_metric_inventory_shared import (
 
 
 _COVERAGE_CLASSES_PATH = Path("configs/quality/observability_coverage_classes.yaml")
-_PROMETHEUS_BUILTIN_METRIC_RE = re.compile(r"\b(?:ALERTS|ALERTS_FOR_STATE)\b")
+_PROMETHEUS_BUILTIN_METRIC_RE = re.compile(
+    r"\b(?:ALERTS|ALERTS_FOR_STATE|up|prometheus_rule_group_last_evaluation_timestamp_seconds)\b"
+)
 _coverage_class_map: dict[str, str] = {}
 _empty_state_map: dict[str, str] = {}
 

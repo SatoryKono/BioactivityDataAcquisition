@@ -10,8 +10,12 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `e2f6f63dc4feea69fa8686c0728ac0c15a0e12c82d548a9f7d3679bc80dfc83e`
+Evidence surface SHA-256: `ba1de60a804e0a7ffd97e1f91c5c859912df4ee5dd63e126022eb83c8f435347`
 
+Evidence metadata refresh (2026-09-07): the canonical registry digest was
+recomputed after synchronizing the remote-main baseline in the debt gate report.
+The historical audited commit above is retained; this metadata refresh does not
+constitute a new repository-wide architecture audit.
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -19,7 +23,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "e2f6f63dc4feea69fa8686c0728ac0c15a0e12c82d548a9f7d3679bc80dfc83e",
+  "evidence_surface_sha256": "ba1de60a804e0a7ffd97e1f91c5c859912df4ee5dd63e126022eb83c8f435347",
   "metrics": {
     "architecture_integral_score": 9.14,
     "architecture_interpretation": "good_targeted_improvements",

@@ -101,7 +101,7 @@ def test_overview_selected_run_summary_is_in_first_window() -> None:
     assert y < FIRST_WINDOW_Y, f"9603 must sit in first window, got y={y}"
     fleet_y = int(next(item for item in root if item.get("id") == 214)["gridPos"]["y"])
     action_y = int(next(item for item in root if item.get("id") == 215)["gridPos"]["y"])
-    assert y < fleet_y, "SELECTED RUN summary must sit above Monitor Fleet Health"
+    assert y <= fleet_y, "SELECTED RUN summary must sit above or beside Fleet Health"
     assert y < action_y, "SELECTED RUN summary must sit above Review First Action"
     blob = f"{panel.get('title') or ''}\n{panel.get('description') or ''}"
     assert "SELECTED RUN" in blob

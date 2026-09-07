@@ -125,7 +125,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-incident-v1.json | 2005 | Monitor Current Alerts |
 | bioetl-incident-v1.json | 2006 | Track Alert State History |
 | bioetl-incident-v1.json | 2007 | Assess Impact & Confidence |
-| bioetl-incident-v1.json | 2099 | Domain Suspect Details |
+| bioetl-incident-v1.json | 2099 | Domain Suspect Details · GLOBAL / CURRENT |
 | bioetl-incident-v1.json | 2002 | Inspect Runtime Suspects |
 | bioetl-incident-v1.json | 2003 | Inspect Provider Suspects |
 | bioetl-incident-v1.json | 2004 | Inspect DQ Suspects |
@@ -211,7 +211,6 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-runtime.json | 1000 | Navigate Dashboards |
 | bioetl-runtime.json | 9400 | Understand Pipeline Scope |
 | bioetl-runtime.json | 9401 | Monitor Pipeline Status |
-| bioetl-runtime.json | 9991 | Start Pipeline Triage |
 | bioetl-runtime.json | 9101 | Review Runtime Blockers |
 | bioetl-runtime.json | 9102 | Monitor Metrics Coverage |
 | bioetl-runtime.json | 252 | Inspect Detection Signals |
@@ -226,6 +225,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-runtime.json | 239 | Track Pipeline Duration |
 | bioetl-runtime.json | 256 | Review Errors by Stage & Code |
 | bioetl-runtime.json | 241 | Compare Records by Stage & Run Type |
+| bioetl-runtime.json | 9991 | Start Pipeline Triage |
 | bioetl-runtime.json | 254 | Review Escalation Paths |
 | bioetl-runtime.json | 2541 | Review Runtime Escalation |
 | bioetl-runtime.json | 230 | Monitor Pipeline Alert Conditions |
