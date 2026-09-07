@@ -1495,3 +1495,25 @@ def test_runtime_evidence_validator_rejects_scraping_as_health() -> None:
     assert not _telemetry_evidence_errors(coverage)
     coverage["options"]["colorMode"] = "background"
     assert _telemetry_evidence_errors(coverage)
+
+
+def test_incident_main_columns_hide_future_service_labels_but_keep_inspect() -> None:
+    """Evolving recording-rule metadata cannot leak into the operator table."""
+    panel = _panel(_load("bioetl-incident-v1.json"), 2010)
+    defaults = panel["fieldConfig"]["defaults"]["custom"]
+    assert defaults["hidden"] is True
+    assert defaults["inspect"] is True
+    visible = {
+        override["matcher"]["options"]
+        for override in panel["fieldConfig"]["overrides"]
+        if {"id": "custom.hidden", "value": False} in override["properties"]
+    }
+    assert visible == {
+        "Rank",
+        "Severity",
+        "Confidence",
+        "Object",
+        "Signal",
+        "Action",
+        "Domain",
+    }

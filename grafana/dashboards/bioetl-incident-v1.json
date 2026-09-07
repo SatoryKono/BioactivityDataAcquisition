@@ -380,7 +380,8 @@
               "type": "auto",
               "wrapText": false
             },
-            "inspect": true
+            "inspect": true,
+            "hidden": true
           },
           "color": {
             "mode": "thresholds"
@@ -443,7 +444,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 52
+                "value": 48
               },
               {
                 "id": "mappings",
@@ -452,6 +453,10 @@
               {
                 "id": "unit",
                 "value": "none"
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
               }
             ]
           },
@@ -492,6 +497,10 @@
                 "value": {
                   "type": "color-text"
                 }
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
               }
             ]
           },
@@ -503,11 +512,15 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 110
+                "value": 112
               },
               {
                 "id": "noValue",
                 "value": "UNVERIFIED"
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
               }
             ]
           },
@@ -566,6 +579,10 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
               }
             ]
           },
@@ -577,7 +594,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 100
+                "value": 105
               },
               {
                 "id": "custom.cellOptions",
@@ -604,10 +621,20 @@
                       },
                       "dq": {
                         "text": "DQ"
+                      },
+                      "UNKNOWN": {
+                        "text": "Inspect"
+                      },
+                      "unknown": {
+                        "text": "Inspect"
                       }
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
               }
             ]
           },
@@ -619,7 +646,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 80
+                "value": 100
               },
               {
                 "id": "mappings",
@@ -646,6 +673,10 @@
                   "type": "auto",
                   "wrapText": true
                 }
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
               }
             ]
           },
@@ -657,7 +688,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 145
+                "value": 130
               },
               {
                 "id": "noValue",
@@ -682,6 +713,10 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
               }
             ]
           },
