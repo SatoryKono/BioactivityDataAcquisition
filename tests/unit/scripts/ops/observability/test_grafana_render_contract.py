@@ -77,11 +77,7 @@ def _manifest(*, classification: str = "incomplete") -> dict[str, object]:
 
 
 def _bind_provenance(tmp_path: Path, manifest: dict[str, object]) -> None:
-    source = {
-        "path": "grafana/dashboards/bioetl-runtime.json",
-        "sha256": "b" * 64,
-        "version": 1,
-    }
+    source = rerender._dashboard_source_by_uid()["bioetl-runtime"]
     dashboards = manifest["dashboards"]
     assert isinstance(dashboards, list)
     dashboard = dashboards[0]

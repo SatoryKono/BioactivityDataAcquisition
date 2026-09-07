@@ -10,6 +10,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -260,7 +261,11 @@ def _terminal_render_manifest(
     file_name = f"{uid}.png"
     dashboard_source = {
         "path": f"grafana/dashboards/{uid}.json",
-        "sha256": "b" * 64,
+        "sha256": hashlib.sha256(
+            (
+                preflight_subject._REPO_ROOT / f"grafana/dashboards/{uid}.json"
+            ).read_bytes()
+        ).hexdigest(),
         "version": 1,
     }
     return {
