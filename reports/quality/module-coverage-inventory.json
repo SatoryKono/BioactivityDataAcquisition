@@ -1,7 +1,7 @@
 {
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
-  "coverage_xml_sha256": "370695021612ec91767611ef261a2dfc7c4b258fd66b23f2a4a0708c231816db",
+  "coverage_xml_sha256": "6d81bb374e5c78ee38cc33d6cd149424456baf2f8ff41aab0538cd5162b9317d",
   "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
   "measurement_mode": "coverage_xml",
   "modules": [
@@ -24296,14 +24296,14 @@
       "source_lines": 13
     },
     {
-      "coverage_percent": 69.44,
+      "coverage_percent": 73.39,
       "coverage_status": "partially_covered",
-      "covered_lines": 75,
-      "executable_lines": 108,
+      "covered_lines": 91,
+      "executable_lines": 124,
       "missing_lines": 33,
       "module": "bioetl.interfaces.http._health_server_identity_routing_support",
       "path": "src/bioetl/interfaces/http/_health_server_identity_routing_support.py",
-      "source_lines": 355
+      "source_lines": 378
     },
     {
       "coverage_percent": 100.0,
@@ -48988,14 +48988,14 @@
       "source_lines": 13
     },
     {
-      "coverage_percent": 69.44,
+      "coverage_percent": 73.39,
       "coverage_status": "partially_covered",
-      "covered_lines": 75,
-      "executable_lines": 108,
+      "covered_lines": 91,
+      "executable_lines": 124,
       "missing_lines": 33,
       "module": "bioetl.interfaces.http._health_server_identity_routing_support",
       "path": "src/bioetl/interfaces/http/_health_server_identity_routing_support.py",
-      "source_lines": 355
+      "source_lines": 378
     },
     {
       "coverage_percent": 100.0,

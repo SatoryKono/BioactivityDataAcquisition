@@ -1,11 +1,11 @@
 {
   "source_branch": "fix/run-explorer-trust-10174-10191",
-  "source_commit": "c18f737c3edc439e21ef8eaf2ebb6cd79060d01f",
-  "source_run_id": "34148282491",
+  "source_commit": "93cf65f495a987575343f0e17128354bb9185903",
+  "source_run_id": "34151672662",
   "source_event": "pull_request",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34148282491",
-  "source_tree_sha256": "f3856a7ab557152d17c1f8b05a69e796533b952f439948467030a06616199ea0",
-  "refreshed_at_utc": "2026-09-07T17:48:00.241959+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34151672662",
+  "source_tree_sha256": "29042f8f473507ce4620bceee41383c9ca44bb6bbd37e67a443b7b5afd194ea7",
+  "refreshed_at_utc": "2026-09-07T18:35:49.875429+00:00",
   "refresh_status": "captured",
   "coverage_percent": 96.71,
   "coverage": {

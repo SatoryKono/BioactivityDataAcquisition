@@ -1,6 +1,6 @@
 # Сводка evidence: project-package-topology
 
-Refresh note (2026-09-07): Run Explorer adds the report-section ordering module and isolates summary I/O from the health server executor. Counts and the source fingerprint below come from the canonical source inventory. Coverage measurements will be refreshed from CI for the executor change before closeout. Historical notes remain historical.
+Refresh note (2026-09-07): Run Explorer adds the report-section ordering module and isolates summary I/O from the health server executor. Counts and the source fingerprint below come from the canonical source inventory. Coverage measurements come from successful coverage-verify for 93cf65f495 (CI run 34151672662). Historical notes remain historical.
 
 `source_tree_sha256=3bd6e0b20e190e5be94697e7432cfa83865f053700b5c121f0a084730be1af4c`
 
