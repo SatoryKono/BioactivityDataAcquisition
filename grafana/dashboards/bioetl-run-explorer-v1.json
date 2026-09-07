@@ -993,8 +993,7 @@
                 "align": "left",
                 "inspect": true,
                 "cellOptions": {
-                  "type": "auto",
-                  "wrapText": true
+                  "type": "auto"
                 }
               },
               "noValue": "UNKNOWN — inspect the state row. SELECT RUN before choosing an exact run; VALID EMPTY only for a loaded report. Backend failure renders as QUERY ERROR."
@@ -1146,8 +1145,7 @@
                 "align": "left",
                 "inspect": true,
                 "cellOptions": {
-                  "type": "auto",
-                  "wrapText": true
+                  "type": "auto"
                 }
               },
               "noValue": "UNKNOWN — inspect the state row. SELECT RUN before choosing an exact run; VALID EMPTY only for a loaded report. Backend failure renders as QUERY ERROR."
