@@ -1958,7 +1958,10 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     }
     assert parameter_properties["custom.align"] == "left"
     assert parameter_properties["custom.cellOptions"]["type"] == "color-text"
-    assert parameter_properties["custom.cellOptions"].get("wrapText") is True
+    # Run Explorer aligns accounting with the adjacent 36px identity rows.
+    # Its bounded labels fit without wrapping at the audited 900px viewport.
+    expected_wrap = dashboard_name != "bioetl-run-explorer-v1.json"
+    assert parameter_properties["custom.cellOptions"].get("wrapText") is expected_wrap
 
     assert_processed_records_field_overrides(
         processed,

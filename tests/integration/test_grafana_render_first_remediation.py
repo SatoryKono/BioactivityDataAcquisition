@@ -765,7 +765,6 @@ def test_cycle4_named_text_columns_wrap_below_fold() -> None:
         ("bioetl-provider-health-v2.json", 9403, "parameter"),
         ("bioetl-runtime.json", 9403, "parameter"),
         ("bioetl-control-plane-v1.json", 9403, "parameter"),
-        ("bioetl-run-explorer-v1.json", 3023, "parameter"),
         ("bioetl-control-plane-v1.json", 9417, "reason"),
         ("bioetl-run-explorer-v1.json", 3014, "value"),
         ("bioetl-dq-v2.json", 118, "Pipeline"),

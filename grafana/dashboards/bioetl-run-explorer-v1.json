@@ -170,7 +170,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 100
+                "value": 160
               }
             ]
           },
@@ -186,7 +186,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 100
+                "value": 160
               }
             ]
           },
@@ -204,7 +204,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 64
+                "value": 88
               },
               {
                 "id": "mappings",
@@ -266,10 +266,6 @@
                     "includeVars": false
                   }
                 ]
-              },
-              {
-                "id": "custom.width",
-                "value": 340
               },
               {
                 "id": "custom.inspect",
@@ -652,7 +648,8 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50
               },
               "decimals": 0,
               "unit": "none",
@@ -731,7 +728,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -785,6 +782,14 @@
                     "value": {
                       "type": "color-text"
                     }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 80
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "percent"
                   }
                 ]
               },
