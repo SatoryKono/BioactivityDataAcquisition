@@ -1478,29 +1478,32 @@ def _playwright_manifest_screenshot_problem(
     return None
 
 
+def _read_failed_playwright_manifest(config: RenderConfig) -> dict[str, Any] | None:
+    """Preserve only the failed attempt, never a preceding dashboard's evidence."""
+    try:
+        failed = _read_playwright_manifest(config.output_dir / _RENDER_MANIFEST_JSON)
+    except RuntimeError:
+        return None
+    actual_uids = {
+        item.get("uid")
+        for item in failed.get("dashboards", [])
+        if isinstance(item, dict)
+    }
+    if actual_uids != set(config.selected_uids):
+        return None
+    failed["terminal_state_validation"] = {"status": "error"}
+    for item in failed["dashboards"]:
+        item["renderStatus"] = "error"
+    return failed
+
+
 def _run_playwright_with_retry(
     config: RenderConfig,
 ) -> tuple[int, dict[str, Any] | None]:
     for attempt in range(2):
         result = _run_playwright_process(config)
         if result != 0:
-            try:
-                failed = _read_playwright_manifest(
-                    config.output_dir / _RENDER_MANIFEST_JSON
-                )
-            except RuntimeError:
-                return result, None
-            actual_uids = {
-                item.get("uid")
-                for item in failed.get("dashboards", [])
-                if isinstance(item, dict)
-            }
-            if actual_uids != set(config.selected_uids):
-                return result, None
-            failed["terminal_state_validation"] = {"status": "error"}
-            for item in failed["dashboards"]:
-                item["renderStatus"] = "error"
-            return result, failed
+            return result, _read_failed_playwright_manifest(config)
         try:
             manifest = _read_playwright_manifest(
                 config.output_dir / _RENDER_MANIFEST_JSON
@@ -1523,12 +1526,9 @@ def _run_playwright_fallback(config: RenderConfig) -> int:
     dashboards = _load_dashboards(config)
     if len(dashboards) <= 1:
         result, manifest = _run_playwright_with_retry(config)
-        if result != 0 or manifest is None:
-            if manifest is not None:
-                _write_merged_playwright_manifest(config, [manifest])
-            return result or 1
-        _write_merged_playwright_manifest(config, [manifest])
-        return 0
+        if manifest is not None:
+            _write_merged_playwright_manifest(config, [manifest])
+        return result or int(manifest is None)
 
     manifests: list[dict[str, Any]] = []
     failed = False

@@ -1999,8 +1999,7 @@ async function verifyRenderedPanelCount(page, dashboard, index, total) {
   );
 }
 
-async function collectVerifiedRenderContext(page, dashboard) {
-  dashboard.accessibilityMeasurements = await page.evaluate(() => {
+function accessibilityMeasurementsFromDom() {
     const rgba = (value) => {
       const parts = value.match(/[\d.]+/g)?.map(Number);
       return parts && parts.length >= 3 ? [...parts.slice(0, 3), parts[3] ?? 1] : null;
@@ -2010,52 +2009,73 @@ async function collectVerifiedRenderContext(page, dashboard) {
       const c = v / 255;
       return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
     }).reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0);
-    const pairs = [];
-    for (const panel of document.querySelectorAll('[data-viz-panel-key]')) {
-      for (const element of panel.querySelectorAll('*')) {
-        const directText = [...element.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').trim();
-        const rect = element.getBoundingClientRect();
-        const style = getComputedStyle(element);
-        if (!directText || !rect.width || !rect.height || style.visibility !== 'visible' || style.display === 'none') continue;
+    function backgroundInfo(element) {
         const layers = [];
         let reason = null;
         let opaque = false;
         for (let node = element; node; node = node.parentElement) {
           const s = getComputedStyle(node);
-          if (Number(s.opacity) !== 1 || s.filter !== 'none' || s.mixBlendMode !== 'normal') reason = 'unsupported opacity/filter/blend';
+          if (unsupportedCompositing(s)) reason = 'unsupported opacity/filter/blend';
           if (!opaque) {
             if (s.backgroundImage !== 'none') reason = 'background image or gradient requires pixel measurement';
             const color = rgba(s.backgroundColor);
-            if (color) { layers.push(color); if (color[3] === 1) opaque = true; }
+            if (color) layers.push(color);
+            opaque = color?.[3] === 1;
           }
         }
         if (!opaque) reason = reason || 'opaque background unavailable';
         let background = [0, 0, 0];
-        for (const layer of layers.reverse()) background = over(layer, background);
-        const foreground = rgba(style.color);
-        if (!foreground) reason = reason || 'unsupported foreground';
-        const effective = foreground ? over(foreground, background) : null;
-        const values = effective ? [luminance(effective), luminance(background)] : null;
-        const ratio = values && !reason ? (Math.max(...values) + 0.05) / (Math.min(...values) + 0.05) : null;
-        const size = parseFloat(style.fontSize);
-        const weight = parseFloat(style.fontWeight);
+        for (const layer of layers.toReversed()) background = over(layer, background);
+        return {background, reason};
+    }
+    function unsupportedCompositing(style) {
+      return Number(style.opacity) !== 1 || style.filter !== 'none' || style.mixBlendMode !== 'normal';
+    }
+    function contrastValues(style, element) {
+      let {background, reason} = backgroundInfo(element);
+      const foreground = rgba(style.color);
+      if (!foreground) reason = reason || 'unsupported foreground';
+      const effective = foreground ? over(foreground, background) : null;
+      const values = effective ? [luminance(effective), luminance(background)] : null;
+      const ratio = values && !reason ? (Math.max(...values) + 0.05) / (Math.min(...values) + 0.05) : null;
+      return {background, reason, effective, ratio};
+    }
+    function measureElement(element, panel) {
+        const directText = [...element.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').trim();
+        const rect = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        if (!directText || !rect.width || !rect.height || style.visibility !== 'visible' || style.display === 'none') return null;
+        const {background, reason, effective, ratio} = contrastValues(style, element);
+        const size = Number.parseFloat(style.fontSize);
+        const weight = Number.parseFloat(style.fontWeight);
         const large = size >= 24 || (size >= 18.6666666667 && weight >= 700);
         const threshold = large ? 3 : 4.5;
-        pairs.push({panel: panel.getAttribute('data-viz-panel-key'), text: directText.slice(0, 240),
+        let status = 'NOT_VERIFIABLE';
+        if (!reason) status = ratio >= threshold ? 'PASS' : 'FAIL';
+        return {panel: panel.dataset.vizPanelKey, text: directText.slice(0, 240),
           tag: element.tagName, foreground: style.color, background, effectiveForeground: effective,
           fontSize: size, fontWeight: weight, large, ratio, threshold,
-          status: reason ? 'NOT_VERIFIABLE' : ratio >= threshold ? 'PASS' : 'FAIL', reason,
+          status, reason,
           bbox: {x: rect.x, y: rect.y, width: rect.width, height: rect.height},
           clientWidth: element.clientWidth, scrollWidth: element.scrollWidth,
           clientHeight: element.clientHeight, scrollHeight: element.scrollHeight,
-          textOverflow: style.textOverflow, overflowX: style.overflowX, overflowY: style.overflowY});
+          textOverflow: style.textOverflow, overflowX: style.overflowX, overflowY: style.overflowY};
+    }
+    const pairs = [];
+    for (const panel of document.querySelectorAll('[data-viz-panel-key]')) {
+      for (const element of panel.querySelectorAll('*')) {
+        const measurement = measureElement(element, panel);
+        if (measurement) pairs.push(measurement);
       }
     }
     return {method: 'computed sRGB colors; alpha backgrounds composited to opaque ancestor',
       scope: 'rendered DOM text only; graphics/canvas, gradients, hidden/virtualized content and state matrix require separate evidence',
       devicePixelRatio: window.devicePixelRatio, cssViewport: {width: innerWidth, height: innerHeight},
       url: location.href, pairs};
-  });
+}
+
+async function collectVerifiedRenderContext(page, dashboard) {
+  dashboard.accessibilityMeasurements = await page.evaluate(accessibilityMeasurementsFromDom);
   dashboard.requestedViewport = { ...CONFIG.viewport };
   dashboard.layoutViewport =
     page.viewportSize() || layoutViewportForZoom(CONFIG.viewport, CONFIG.browserZoom);
@@ -2364,6 +2384,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  accessibilityMeasurementsFromDom,
   classifyPanelTerminalEvidence,
   evaluateContainmentResults,
   evaluatePanelContainment,

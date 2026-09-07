@@ -48,6 +48,37 @@ def _node_eval(program: str) -> str:
     return result.stdout.strip()
 
 
+def test_text_contrast_composites_alpha_and_preserves_unmeasured_gradients() -> None:
+    output = _node_eval(
+        """
+const {accessibilityMeasurementsFromDom} = require(process.argv[1]);
+const base = {opacity:'1',filter:'none',mixBlendMode:'normal',backgroundImage:'none',
+  backgroundColor:'rgb(255, 255, 255)',color:'rgb(0, 0, 0)',fontSize:'16px',fontWeight:'400',
+  visibility:'visible',display:'block',textOverflow:'clip',overflowX:'visible',overflowY:'visible'};
+const make = (style) => ({childNodes:[{nodeType:3,textContent:'Example'}],
+  getBoundingClientRect:()=>({x:0,y:0,width:100,height:24}),style:{...base,...style},parentElement:null});
+const black=make({});
+const same=make({color:'rgb(255, 255, 255)'});
+const alpha=make({color:'rgba(0, 0, 0, 0.5)'});
+const gradient=make({backgroundImage:'linear-gradient(white, black)'});
+global.document={querySelectorAll:()=>[{dataset:{vizPanelKey:'panel-1'},querySelectorAll:()=>[black,same,alpha,gradient]}]};
+global.getComputedStyle=(el)=>el.style;
+global.window={devicePixelRatio:1}; global.innerWidth=1366; global.innerHeight=768;
+global.location={href:'http://localhost/test'};
+console.log(JSON.stringify(accessibilityMeasurementsFromDom().pairs));
+"""
+    )
+    pairs = json.loads(output)
+    assert pairs[0]["ratio"] == pytest.approx(21)
+    assert pairs[0]["status"] == "PASS"
+    assert pairs[1]["ratio"] == pytest.approx(1)
+    assert pairs[1]["status"] == "FAIL"
+    assert pairs[2]["ratio"] == pytest.approx(3.976653024912438)
+    assert pairs[2]["status"] == "FAIL"
+    assert pairs[3]["ratio"] is None
+    assert pairs[3]["status"] == "NOT_VERIFIABLE"
+
+
 def test_select_first_window_panels_skips_rows_and_below_fold() -> None:
     output = _node_eval(
         """
