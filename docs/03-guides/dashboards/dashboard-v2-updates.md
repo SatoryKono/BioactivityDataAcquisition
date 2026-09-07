@@ -2,6 +2,17 @@ ______________________________________________________________________
 
 ## UX report artifact requirement
 
+Tables and accounting presentation (#10178, #10179, #10180, #10192, #10183):
+selected-run summaries put status, coverage and local timestamps before the
+UUID. Recent-run timestamps use reserved widths; workflow runs have direct
+report links and a compact selection marker. Provider severity codes use the
+same named states in summary and fleet detail. Optional latency uses a stat.
+DQ range cards share a two-column grid, height and value font size. Current DQ
+reasons distinguish explicit OK from unavailable evidence. Processed-record
+counts and percentages are neutral quantities; layer label colors identify
+Bronze/Silver/Gold, not quality. Percentages use one to three decimal places
+consistently, preserving small exclusions and UNKNOWN denominators.
+
 Для любого PR с изменениями `grafana/dashboards/*.json` change notes MUST
 содержать ссылку на UX artifact:
 `docs/reports/dashboard-ux-checks/YYYY-MM-DD.md`.
