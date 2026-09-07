@@ -2015,7 +2015,7 @@ function accessibilityMeasurementsFromDom() {
         let opaque = false;
         for (let node = element; node; node = node.parentElement) {
           const s = getComputedStyle(node);
-          if (unsupportedCompositing(s)) reason = 'unsupported opacity/filter/blend';
+          if (Number(s.opacity) !== 1 || s.filter !== 'none' || s.mixBlendMode !== 'normal') reason = 'unsupported opacity/filter/blend';
           if (!opaque) {
             if (s.backgroundImage !== 'none') reason = 'background image or gradient requires pixel measurement';
             const color = rgba(s.backgroundColor);
@@ -2027,9 +2027,6 @@ function accessibilityMeasurementsFromDom() {
         let background = [0, 0, 0];
         for (const layer of layers.toReversed()) background = over(layer, background);
         return {background, reason};
-    }
-    function unsupportedCompositing(style) {
-      return Number(style.opacity) !== 1 || style.filter !== 'none' || style.mixBlendMode !== 'normal';
     }
     function contrastValues(style, element) {
       let {background, reason} = backgroundInfo(element);
