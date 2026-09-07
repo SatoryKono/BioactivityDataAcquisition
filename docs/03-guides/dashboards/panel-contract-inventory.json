@@ -16,7 +16,7 @@
   "target_counts": {
     "http": 35,
     "loki": 0,
-    "promql": 171,
+    "promql": 169,
     "tempo": 0,
     "unknown": 0
   },
@@ -2904,89 +2904,17 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
-      "formula": "bioetl_incident_ranked_runtime",
+      "formula": "bioetl_incident_ranked_runtime or bioetl_incident_ranked_provider or bioetl_incident_ranked_dq",
       "kind": "promql",
       "panel_id": 2010,
       "panel_title": "Inspect Ranked Suspects",
-      "query": "bioetl_incident_ranked_runtime",
+      "query": "bioetl_incident_ranked_runtime or bioetl_incident_ranked_provider or bioetl_incident_ranked_dq",
       "query_tokens": [
+        "bioetl_incident_ranked_dq",
+        "bioetl_incident_ranked_provider",
         "bioetl_incident_ranked_runtime"
       ],
       "ref_id": "A",
-      "runbook_urls": [],
-      "thresholds": [
-        {
-          "color": "gray",
-          "value": null
-        },
-        {
-          "color": "green",
-          "value": 0
-        },
-        {
-          "color": "orange",
-          "value": 1
-        },
-        {
-          "color": "red",
-          "value": 2
-        }
-      ],
-      "unit": ""
-    },
-    {
-      "coverage_class": "required_current",
-      "dashboard_uid": "bioetl-incident-v1",
-      "datasource_type": "prometheus",
-      "documents_backend_down": false,
-      "documents_valid_empty": true,
-      "empty_state": "coverage_gap",
-      "formula": "bioetl_incident_ranked_provider",
-      "kind": "promql",
-      "panel_id": 2010,
-      "panel_title": "Inspect Ranked Suspects",
-      "query": "bioetl_incident_ranked_provider",
-      "query_tokens": [
-        "bioetl_incident_ranked_provider"
-      ],
-      "ref_id": "B",
-      "runbook_urls": [],
-      "thresholds": [
-        {
-          "color": "gray",
-          "value": null
-        },
-        {
-          "color": "green",
-          "value": 0
-        },
-        {
-          "color": "orange",
-          "value": 1
-        },
-        {
-          "color": "red",
-          "value": 2
-        }
-      ],
-      "unit": ""
-    },
-    {
-      "coverage_class": "required_current",
-      "dashboard_uid": "bioetl-incident-v1",
-      "datasource_type": "prometheus",
-      "documents_backend_down": false,
-      "documents_valid_empty": true,
-      "empty_state": "coverage_gap",
-      "formula": "bioetl_incident_ranked_dq",
-      "kind": "promql",
-      "panel_id": 2010,
-      "panel_title": "Inspect Ranked Suspects",
-      "query": "bioetl_incident_ranked_dq",
-      "query_tokens": [
-        "bioetl_incident_ranked_dq"
-      ],
-      "ref_id": "C",
       "runbook_urls": [],
       "thresholds": [
         {
@@ -5068,13 +4996,13 @@
       "dashboard_uid": "bioetl-runtime",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
-      "documents_valid_empty": true,
-      "empty_state": "valid_empty",
-      "formula": "sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[15m])) or ((count(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0) * 0)",
+      "documents_valid_empty": false,
+      "empty_state": "coverage_gap",
+      "formula": "(sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[$__range])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range])) > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range]) unless on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[$__range]) >= 2))",
       "kind": "promql",
       "panel_id": 205,
       "panel_title": "Monitor Failed Runs",
-      "query": "sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[15m])) or ((count(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0) * 0)",
+      "query": "(sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[$__range])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range])) > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range]) unless on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[$__range]) >= 2))",
       "query_tokens": [
         "bioetl_pipeline_runs_total",
         "bioetl_runtime_pipeline_run_type_universe_scoped"

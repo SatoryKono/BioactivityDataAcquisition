@@ -12,6 +12,9 @@ from bioetl.interfaces.http.control_plane_identity.extractors import (
     build_anchor_values,
     is_composite,
 )
+from bioetl.interfaces.http.control_plane_identity.manifest_extractors import (
+    execution_flag,
+)
 
 # Shared operator-facing unavailability markers for identity table rows.
 IDENTITY_UNAVAILABLE_CURRENT_SCOPE = "not available for current scope"
@@ -229,11 +232,8 @@ def _execution_flags(manifest: RunManifest | None) -> str | None:
     if manifest is None:
         return None
     return " | ".join(
-        (
-            _yes_no(_payload_value(manifest, "resume")),
-            _yes_no(_payload_value(manifest, "dry_run")),
-            _yes_no(_payload_value(manifest, "use_cached_bronze")),
-        )
+        _yes_no(execution_flag(manifest, key))
+        for key in ("resume", "dry_run", "use_cached_bronze")
     )
 
 

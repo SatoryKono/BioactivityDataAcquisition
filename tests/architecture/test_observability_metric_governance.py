@@ -224,7 +224,7 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
         str(target["url"]).startswith(("/ops/", "/health/")) for target in http_targets
     )
     assert report["typed_target_counts"] == {
-        "promql": 171,
+        "promql": 169,  # Incident/2010 combines three targets into one union.
         "http": 35,
         "loki": 0,
         "tempo": 0,
