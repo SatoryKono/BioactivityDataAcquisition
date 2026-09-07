@@ -614,11 +614,13 @@ def _expand_nav_height(
         if panel is nav:
             continue
         grid = panel.get("gridPos")
-        if isinstance(grid, dict) and isinstance(grid.get("y"), int):
-            if grid["y"] >= old_bottom and not (
-                delta < 0 and panel.get("type") == "row"
-            ):
-                grid["y"] += delta
+        if (
+            isinstance(grid, dict)
+            and isinstance(grid.get("y"), int)
+            and grid["y"] >= old_bottom
+            and not (delta < 0 and panel.get("type") == "row")
+        ):
+            grid["y"] += delta
 
 
 def apply_to_dashboard(path: Path, *, current_uid: str, check: bool = False) -> bool:

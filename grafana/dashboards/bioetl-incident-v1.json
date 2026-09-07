@@ -264,7 +264,7 @@
           "instant": true,
           "range": false,
           "format": "table",
-          "expr": "label_join(label_replace((bioetl_incident_ranked_runtime or bioetl_incident_ranked_provider or bioetl_incident_ranked_dq),\"confidence\",\"UNVERIFIED\",\"\",\"\"),\"object\",\"\",\"pipeline\",\"provider\")"
+          "expr": "label_join(label_replace((bioetl_incident_ranked_runtime or bioetl_incident_ranked_provider or bioetl_incident_ranked_dq),\"confidence\",\"UNVERIFIED\",\"\",\"\"),\"object\",\" / \",\"pipeline\",\"provider\")"
         }
       ],
       "transformations": [
@@ -463,7 +463,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 86
+                "value": 100
               },
               {
                 "id": "mappings",
@@ -547,6 +547,25 @@
                   "type": "auto",
                   "wrapText": true
                 }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "telemetry_gap": {
+                        "text": "Telemetry missing"
+                      },
+                      "runtime_failed": {
+                        "text": "Run failed"
+                      },
+                      "dq_failure": {
+                        "text": "DQ failure"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -566,6 +585,29 @@
                   "type": "auto",
                   "wrapText": true
                 }
+              },
+              {
+                "id": "noValue",
+                "value": "Inspect"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "provider": {
+                        "text": "Provider"
+                      },
+                      "runtime": {
+                        "text": "Runtime"
+                      },
+                      "dq": {
+                        "text": "DQ"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -578,6 +620,32 @@
               {
                 "id": "custom.width",
                 "value": 80
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "provider": {
+                        "text": "Provider"
+                      },
+                      "runtime": {
+                        "text": "Runtime"
+                      },
+                      "dq": {
+                        "text": "DQ"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
               }
             ]
           },
@@ -601,6 +669,31 @@
                   "type": "auto",
                   "wrapText": true
                 }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "unknown / unknown": {
+                        "text": "UNKNOWN"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "action_dashboard_uid"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
               }
             ]
           }

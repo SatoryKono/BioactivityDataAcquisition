@@ -224,7 +224,7 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
         str(target["url"]).startswith(("/ops/", "/health/")) for target in http_targets
     )
     assert report["typed_target_counts"] == {
-        "promql": 169,  # Incident/2010 combines three targets into one union.
+        "promql": 171,  # Runtime/9102 separates endpoint, baseline, and rule age.
         "http": 35,
         "loki": 0,
         "tempo": 0,
@@ -640,3 +640,21 @@ def test_runtime_cardinality_live_review_artifact_is_release_grade() -> None:
     assert payload["query_errors"] == {}
     assert payload["live_threshold_violations"] == []
     assert payload["static_threshold_violations"] == []
+
+
+@pytest.mark.architecture
+def test_prometheus_endpoint_and_rule_age_have_required_coverage() -> None:
+    """Prometheus-owned health evidence must retain source and missing semantics."""
+    report = inventory.collect_typed_observability_inventory(ROOT)
+    targets = {
+        target["ref_id"]: target
+        for target in report["typed_targets"]
+        if target["dashboard_uid"] == "bioetl-runtime" and target["panel_id"] == 9102
+    }
+    for ref_id, metric in (
+        ("A", "up"),
+        ("C", "prometheus_rule_group_last_evaluation_timestamp_seconds"),
+    ):
+        assert targets[ref_id]["query_tokens"] == [metric]
+        assert targets[ref_id]["coverage_class"] == "required_current"
+        assert targets[ref_id]["empty_state"] == "coverage_gap"
