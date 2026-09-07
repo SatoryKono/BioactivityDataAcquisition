@@ -23,7 +23,10 @@ from bioetl.composition.bootstrap.runtime_public_exports import (
     ObservabilityWorkflowServiceProtocol,
     RunManifestInspectionServiceProtocol,
 )
-from bioetl.composition import _service_registry, _services
+from bioetl.composition import _services
+from bioetl.infrastructure.storage.run_report_store_adapter import (
+    FileRunReportStoreAdapter,
+)
 from bioetl.composition.runtime_builders import config_access as _config_access
 from bioetl.domain.exceptions import MetricsServerError
 from bioetl.domain.ports import LoggerPort, RunReportStorePort
@@ -341,6 +344,4 @@ def get_observability_diagnostics_bundle() -> ObservabilityDiagnosticsBundle:
 
 def create_run_report_store() -> RunReportStorePort:
     """Resolve a fresh report store for one explicit caller lifetime."""
-    return _service_registry.resolve(
-        _service_registry.typed_port[RunReportStorePort](RunReportStorePort)
-    )
+    return FileRunReportStoreAdapter()

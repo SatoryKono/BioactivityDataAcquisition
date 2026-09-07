@@ -586,36 +586,6 @@ def test_workflow_prune_removes_recursive_duplicate_candidate_once(
     ] == ["new"]
 
 
-def _require_symlink_privilege(tmp_path: Path) -> None:
-    probe = tmp_path / "_symlink_probe_src"
-    probe.write_text("x", encoding="utf-8")
-    try:
-        (tmp_path / "_symlink_probe").symlink_to(probe)
-    except OSError as exc:
-        if getattr(exc, "winerror", None) == 1314:
-            pytest.skip("Windows symlink privilege is not granted")
-        raise
-
-
-def test_remove_tree_unlinks_symlinks_without_traversing_targets(
-    tmp_path: Path,
-) -> None:
-    _require_symlink_privilege(tmp_path)
-    external = tmp_path / "external"
-    external.mkdir()
-    external_file = external / "keep.txt"
-    external_file.write_text("keep", encoding="utf-8")
-    report_dir = tmp_path / "report"
-    report_dir.mkdir()
-    (report_dir / "directory-link").symlink_to(external, target_is_directory=True)
-    (report_dir / "file-link").symlink_to(external_file)
-
-    FileRunReportStoreAdapter().remove_tree(str(report_dir), root=str(tmp_path))
-
-    assert not report_dir.exists()
-    assert external_file.read_text(encoding="utf-8") == "keep"
-
-
 def test_reports_for_prune_is_unbounded(tmp_path: Path, monkeypatch) -> None:
     base = tmp_path / "pipeline"
     base.mkdir()

@@ -493,3 +493,13 @@ def test_get_observability_diagnostics_bundle_builds_bundle() -> None:
     mock_manifest.assert_called_once_with()
     mock_lineage.assert_called_once_with()
     mock_workflow.assert_called_once_with()
+
+
+def test_run_report_store_factory_returns_independent_port_instances() -> None:
+    from bioetl.domain.ports import RunReportStorePort
+
+    first = observability_api.create_run_report_store()
+    second = observability_api.create_run_report_store()
+    assert isinstance(first, RunReportStorePort)
+    assert isinstance(second, RunReportStorePort)
+    assert first is not second
