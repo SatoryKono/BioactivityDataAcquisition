@@ -535,7 +535,7 @@ def test_control_plane_identity_evidence_uses_http_not_prometheus_labels() -> No
 
 
 def test_control_plane_identity_evidence_documents_short_full_split() -> None:
-    """The dashboard must keep short overview values and full detail values distinct."""
+    """Full identity values stay readable and source metadata remains inspectable."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     panel = next(
         panel
@@ -543,13 +543,19 @@ def test_control_plane_identity_evidence_documents_short_full_split() -> None:
         if panel.get("title") == "Review Identity Anchors"
     )
     description = str(panel.get("description", "")).lower()
-    assert "short values are shown" in description
-    assert "full values remain available" in description
+    assert "full values are shown" in description
+    assert "inspect value" in description
     transformation_payload = json.dumps(panel.get("transformations", []))
-    assert "value_short" in transformation_payload
     assert "value_full" in transformation_payload
-    assert "source_type" in transformation_payload
-    assert "drilldown_target" in transformation_payload
+    overrides = {
+        item["matcher"]["options"]: {
+            prop["id"]: prop["value"] for prop in item["properties"]
+        }
+        for item in panel["fieldConfig"]["overrides"]
+    }
+    for field in ("value_short", "source_type", "drilldown_target"):
+        assert overrides[field]["custom.hidden"] is True
+    assert panel["fieldConfig"]["defaults"]["custom"]["inspect"] is True
 
 
 def test_runtime_selected_count_zeroes_are_scope_anchored() -> None:
@@ -1828,10 +1834,13 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     identity = panels[identity_id]
     processed = panels[processed_id]
     if dashboard_name == "bioetl-run-explorer-v1.json":
-        assert identity.get("gridPos", {}).get("h") == 14
+        assert identity.get("gridPos", {}).get("h") == 20
         assert processed.get("gridPos", {}).get("h") == 14
-        assert identity.get("gridPos", {}).get("w") == 14
-        assert processed.get("gridPos", {}).get("w") == 10
+        assert identity.get("gridPos", {}).get("w") == 24
+        assert processed.get("gridPos", {}).get("w") == 24
+        assert processed["gridPos"]["y"] >= (
+            identity["gridPos"]["y"] + identity["gridPos"]["h"]
+        )
     else:
         expected_height = 6
         assert (
@@ -1863,16 +1872,15 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         .get("cellOptions", {})
     )
     assert default_identity_cell_options.get("wrapText") is not True
-    identity_cell_options = [
-        property_.get("value", {})
+    wrapped_identity_fields = {
+        override["matcher"]["options"]
         for override in identity.get("fieldConfig", {}).get("overrides", [])
         for property_ in override.get("properties", [])
         if property_.get("id") == "custom.cellOptions"
-    ]
-    assert all(
-        cell_options.get("wrapText") is not True
-        for cell_options in identity_cell_options
-        if isinstance(cell_options, dict)
+        and property_.get("value", {}).get("wrapText") is True
+    }
+    assert wrapped_identity_fields == (
+        {"value"} if dashboard_name == "bioetl-run-explorer-v1.json" else set()
     )
 
     assert processed.get("datasource") == "BioETL Ops HTTP"

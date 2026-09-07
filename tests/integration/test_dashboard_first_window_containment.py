@@ -113,80 +113,32 @@ def test_every_first_window_table_owns_a_row_cap() -> None:
     assert not extra, f"row-cap contract refers to missing dashboards: {extra}"
 
 
-def test_trust_9418_wraps_only_bounded_reasons_without_moving_fold() -> None:
-    """#8975: one Trust row exposes top-3 reasons on the shipped first-screen grid."""
-    dashboard_path = next(
-        path
-        for path in get_dashboard_files()
-        if path.name == "bioetl-control-plane-v1.json"
+def test_trust_9418_keeps_verdict_and_reason_count_visible() -> None:
+    """#10174: long reasons cannot increase the compact verdict row height."""
+    path = next(
+        p for p in get_dashboard_files() if p.name == "bioetl-control-plane-v1.json"
     )
-    dashboard = load_dashboard(dashboard_path)
-    panel = next(item for item in _root_panels(dashboard) if item.get("id") == 9418)
-
-    assert panel.get("gridPos") == {"h": 5, "w": 12, "x": 0, "y": 7}
-    assert panel.get("options", {}).get("cellHeight") == "sm"
-    defaults = panel.get("fieldConfig", {}).get("defaults", {}).get("custom", {})
-    assert defaults.get("inspect") is True
-    assert defaults.get("cellOptions", {}).get("wrapText") is not True
-
-    limit = next(
-        transform
-        for transform in panel.get("transformations", [])
-        if transform.get("id") == "limit"
-    )
-    assert limit.get("options", {}).get("limitField") == 1
-    organize = next(
-        transform
-        for transform in panel.get("transformations", [])
-        if transform.get("id") == "organize"
-    ).get("options", {})
-    assert organize.get("excludeByName") == {
-        "Time": True,
-        "reasons": True,
-        "reasons_truncated": True,
-        "scope_kind": True,
-        "evidence_freshness": True,
+    panel = next(p for p in _root_panels(load_dashboard(path)) if p.get("id") == 9418)
+    assert panel["gridPos"] == {"h": 5, "w": 12, "x": 0, "y": 7}
+    props = {
+        o["matcher"]["options"]: {p["id"]: p["value"] for p in o["properties"]}
+        for o in panel["fieldConfig"]["overrides"]
     }
-    assert organize.get("indexByName") == {
-        "processing_status": 0,
-        "trust_status": 1,
-        "reasons_text": 2,
-        "evidence_observed_at": 3,
-    }
-
-    override_properties = {
-        override.get("matcher", {}).get("options"): {
-            prop.get("id"): prop.get("value") for prop in override.get("properties", [])
-        }
-        for override in panel.get("fieldConfig", {}).get("overrides", [])
-    }
-    assert override_properties["reasons_text"]["custom.cellOptions"] == {
-        "type": "auto",
-        "wrapText": True,
-    }
-    assert override_properties["reasons_text"]["custom.inspect"] is True
-    assert override_properties["reasons_text"]["custom.width"] == 150
-    assert "custom.width" not in override_properties["trust_status"]
-    assert override_properties["processing_status"]["custom.width"] == 72
-    assert override_properties["evidence_observed_at"]["custom.hidden"] is True
-    assert override_properties["evidence_observed_at"]["unit"] == (
-        "time:YYYY-MM-DD HH:mm"
-    )
-    assert {
-        field
-        for field, properties in override_properties.items()
-        if properties.get("custom.cellOptions", {}).get("wrapText") is True
-    } == {"reasons_text"}
-    enum_fields = (
-        "processing_status",
-        "trust_status",
-    )
+    assert props["reasons_text"]["custom.hidden"] is True
+    assert props["reasons_text"]["custom.inspect"] is True
+    assert props["processing_status"]["displayName"] == "Processing"
+    assert props["trust_status"]["displayName"] == "Trust"
+    assert props["reasons_count"]["displayName"] == "Reasons"
+    assert "viewPanel=9414" in props["reasons_count"]["links"][0]["url"]
     assert all(
-        override_properties[field]["custom.cellOptions"].get("wrapText") is False
-        for field in enum_fields
+        not p.get("custom.cellOptions", {}).get("wrapText") for p in props.values()
     )
-    assert override_properties["scope_kind"]["custom.hidden"] is True
-    assert override_properties["evidence_freshness"]["custom.hidden"] is True
+    assert (
+        next(t for t in panel["transformations"] if t["id"] == "limit")["options"][
+            "limitField"
+        ]
+        == 1
+    )
 
 
 def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:

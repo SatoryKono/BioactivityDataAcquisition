@@ -12,6 +12,12 @@ from bioetl.interfaces.http.control_plane_identity.extractors import (
     build_anchor_values,
     is_composite,
 )
+from bioetl.interfaces.http.control_plane_identity.formatting import (
+    display_capability as _display_capability,
+)
+from bioetl.interfaces.http.control_plane_identity.formatting import (
+    display_replay_mode as _display_replay_mode,
+)
 from bioetl.interfaces.http.control_plane_identity.manifest_extractors import (
     execution_flag,
 )
@@ -278,6 +284,15 @@ def _report_identity_rows(
         _identity_row("Completed at", completed_at, unavailable=unavailable),
         _identity_row("Duration seconds", duration, unavailable=unavailable),
         _identity_row("Tracking coverage", coverage, unavailable=unavailable),
+        *[
+            _identity_row(label, summary[key], unavailable=unavailable)
+            for key, label in (
+                ("workflow_id", "Workflow ID"),
+                ("workflow_run_id", "Workflow Run ID"),
+                ("workflow_step_id", "Workflow Step ID"),
+            )
+            if summary.get(key) not in (None, "")
+        ],
     ]
 
 
@@ -352,35 +367,6 @@ def _display_eligible(value: object | None) -> str:
     if value is False or value is not None:
         return "No"
     return "Unknown"
-
-
-def _display_capability(value: object | None) -> str:
-    normalized = _normalized_token(value)
-    return {
-        "exact_replay_supported": "Supported",
-        "resume_only": "Resume only",
-        "rebuild_only": "Rebuild only",
-    }.get(normalized, _title_token(normalized))
-
-
-def _display_replay_mode(value: object | None) -> str:
-    normalized = _normalized_token(value)
-    return {
-        "exact_replay": "Exact Replay",
-        "replay": "Replay",
-        "backfill": "Backfill",
-        "rebuild": "Rebuild",
-        "incremental": "Incremental",
-    }.get(normalized, _title_token(normalized))
-
-
-def _normalized_token(value: object | None) -> str:
-    raw_value = getattr(value, "value", value)
-    return str(raw_value or "unknown").strip().lower().replace("-", "_")
-
-
-def _title_token(value: str) -> str:
-    return value.replace("_", " ").title() if value else "Unknown"
 
 
 def _gap_count(value: object | None) -> int:

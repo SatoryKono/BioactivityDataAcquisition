@@ -131,6 +131,7 @@ def test_manifest_validation_incomplete_reasons_is_three_line_text() -> None:
         trust["reasons"][:FIRST_SCREEN_TRUST_REASONS_CAP]
     )
     assert trust["reasons_truncated"] is True
+    assert trust["reasons_count"] == len(trust["reasons"]) == 4
 
 
 def test_empty_rows_fixture_is_empty_list() -> None:
