@@ -7,8 +7,7 @@ ______________________________________________________________________
 `docs/reports/dashboard-ux-checks/YYYY-MM-DD.md`.
 
 Latest dashboard UX artifact for current shipped JSON changes:
-[2026-09-07 data integrity verification](../../reports/dashboard-ux-checks/2026-09-07.md)
-(`docs/reports/dashboard-ux-checks/2026-09-07.md`). Panel 205 now evaluates the
+`docs/reports/dashboard-ux-checks/2026-09-07.md`. Panel 205 now evaluates the
 selected window once and preserves absent counters. Incident 2010 combines the
 three recorded ranking metrics in one short union so Priority has one numeric
 field before sorting. The earlier long raw-query union limitation no longer

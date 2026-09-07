@@ -108,7 +108,7 @@
 | `docs/reports/dashboard-ux-checks/2026-08-11.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-16.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-17.md` | Working | 0 | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/2026-09-07.md` | Working | 1 | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-09-07.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
 | `reports/ai/agent-tools/RF005-CLOSEOUT-2026-08-09.md` | Working | 0 | archive-after-migration |
 | `reports/ai/agent-tools/compatibility/rf005-platform-matrix-2026-08-09.json` | Working | 0 | archive-after-migration |
