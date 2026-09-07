@@ -1,5 +1,7 @@
 """Stable field ordering for Run Explorer report sections."""
 
+from __future__ import annotations
+
 # Canonical reconciliation key order for Run Explorer panel 3015 (REC-04).
 _RECONCILIATION_ROW_ORDER: tuple[str, ...] = (
     "silver_accounted",

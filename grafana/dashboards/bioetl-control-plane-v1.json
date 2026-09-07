@@ -3345,7 +3345,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows p50, p95, and p99 read latency for each control-plane store and operation during the selected range. Filters do not apply. No data means no latency samples were recorded in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Shows p50, p95, and p99 read latency for each control-plane store and operation during the selected range, excluding failed reads (status!=\"failed\"). Filters do not apply. No data means no latency samples were recorded in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "fieldConfig": {
             "defaults": {
               "color": {

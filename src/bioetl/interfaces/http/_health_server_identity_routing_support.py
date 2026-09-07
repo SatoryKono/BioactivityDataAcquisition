@@ -279,9 +279,8 @@ def _selected_report_summary(scope: _IdentityScope) -> dict[str, object]:
         "workflow_step_id",
     )
     values = dict(identity)
-    values["tracking_coverage"] = identity.get("tracking_coverage") or report.get(
-        "tracking_coverage"
-    )
+    if values.get("tracking_coverage") in (None, ""):
+        values["tracking_coverage"] = report.get("tracking_coverage")
     return {
         "run_status" if key == "status" else key: values[key]
         for key in keys

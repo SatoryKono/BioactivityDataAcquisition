@@ -9,6 +9,7 @@ from __future__ import annotations
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.interfaces.http.control_plane_identity.checkpoint import (
     build_checkpoint_compare,
+    checkpoint_row,
 )
 from bioetl.interfaces.http.control_plane_identity.extractors import (
     build_anchor_values,
@@ -98,6 +99,10 @@ def build_control_plane_identity_evidence_payload(
         summary["overall_status"] = state
         if not rows:
             rows = [{"label": "Run identity", "value_full": state, "ui_status": state}]
+            if view.strip().lower() == "checkpoint_compare":
+                row = checkpoint_row("Run identity", None, None, state)
+                row.update(ui_status=state, source_quality="unavailable")
+                rows = [row]
     return {
         "contract": IDENTITY_EVIDENCE_CONTRACT,
         "pipeline": requested_pipeline,

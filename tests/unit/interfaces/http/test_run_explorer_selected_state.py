@@ -6,6 +6,7 @@ import pytest
 from types import SimpleNamespace
 
 from bioetl.interfaces.http import _health_server_identity_routing_support as routing
+from bioetl.interfaces.http import _health_server_identity_support as identity_support
 from bioetl.interfaces.http._health_server_control_plane_scope import _IdentityScope
 
 from bioetl.interfaces.http._pipeline_run_report_table import (
@@ -18,6 +19,16 @@ from bioetl.interfaces.http.control_plane_identity.payload import (
 )
 
 pytestmark = pytest.mark.unit
+
+
+def test_partial_identity_keeps_contract_reference_and_unknown_gap_count() -> None:
+    assert (
+        identity_support._contract_schema({"contract_ref": "gold.assay"})
+        == "gold.assay"
+    )
+    assert identity_support._identity_health(
+        {}, {"identity_graph_complete": False}
+    ) == ("Incomplete [0 gaps]")
 
 
 @pytest.mark.parametrize("key", ["funnel", "reasons_top_n", "artifacts"])
@@ -35,7 +46,9 @@ def test_report_selection_missing_and_loaded_empty_are_distinct(key: str) -> Non
     assert unselected[key] == missing[key] == empty[key] == []
 
 
-@pytest.mark.parametrize("view", ["overview", "copy_values", "gaps", "anchors"])
+@pytest.mark.parametrize(
+    "view", ["overview", "copy_values", "gaps", "anchors", "checkpoint_compare"]
+)
 @pytest.mark.parametrize(
     "run_id,state", [(None, "SELECT RUN"), ("absent", "TELEMETRY MISSING")]
 )
@@ -58,6 +71,13 @@ def test_unresolved_identity_never_claims_verified_anchors(
     assert result["rows"]
     assert all(row["ui_status"] == state for row in result["rows"])
     assert all(row["source_quality"] == "unavailable" for row in result["anchors"])
+    if view == "checkpoint_compare":
+        row = result["rows"][0]
+        assert row["anchor"] == "Run identity"
+        assert row["status"] == state
+        assert row["source_type"] == "checkpoint_metadata_compare"
+        assert row["source_quality"] == "unavailable"
+        assert row["drilldown_target"] == "checkpoint.compare:Run identity"
 
 
 def test_funnel_display_keeps_gold_and_full_exclusion_reason() -> None:
@@ -82,10 +102,30 @@ def test_funnel_display_keeps_gold_and_full_exclusion_reason() -> None:
     assert rows[-1]["removals_summary"] == "17 gold_contract_schema_failure"
 
 
+@pytest.mark.parametrize(
+    "key,row",
+    [
+        ("reasons_top_n", {"reason_code": "gold_contract_schema_failure", "count": 17}),
+        ("artifacts", {"kind": "gold", "path": "data/output/gold/chembl/assay"}),
+    ],
+)
+def test_loaded_report_display_preserves_reason_and_artifact_fields(
+    key: str, row: dict[str, str | int]
+) -> None:
+    result = _table_shape_pipeline_run_report({key: [row]})
+    assert result[f"{key}_display"] == [row]
+
+
 @pytest.mark.asyncio
 @pytest.mark.parametrize("report_run_id", ["selected", "another-run"])
+@pytest.mark.parametrize(
+    "identity_coverage,expected_coverage", [(None, "full"), (0, 0)]
+)
 async def test_identity_summary_uses_only_the_selected_report(
-    monkeypatch: pytest.MonkeyPatch, report_run_id: str
+    monkeypatch: pytest.MonkeyPatch,
+    report_run_id: str,
+    identity_coverage: int | None,
+    expected_coverage: str | int,
 ) -> None:
     monkeypatch.setattr(
         routing,
@@ -104,6 +144,7 @@ async def test_identity_summary_uses_only_the_selected_report(
                 "workflow_id": "chembl_baseline",
                 "workflow_run_id": "workflow-run",
                 "workflow_step_id": "run_chembl_assay",
+                "tracking_coverage": identity_coverage,
             },
             "tracking_coverage": "full",
         },
@@ -123,7 +164,7 @@ async def test_identity_summary_uses_only_the_selected_report(
         assert summary["run_status"] == "success"
         assert summary["started_at"] == "2026-09-06T12:20:49+00:00"
         assert summary["completed_at"] == "2026-09-06T12:21:15+00:00"
-        assert summary["tracking_coverage"] == "full"
+        assert summary["tracking_coverage"] == expected_coverage
         rows = routing.build_control_plane_identity_payload(
             requested_pipeline="chembl_assay",
             resolved_manifest=None,
@@ -134,7 +175,7 @@ async def test_identity_summary_uses_only_the_selected_report(
             identity_evidence_summary=summary,
         )["rows"]
         values = {row["parameter"]: row["value"] for row in rows}
-        assert values["Tracking coverage"] == "full"
+        assert values["Tracking coverage"] == str(expected_coverage)
         assert values["Workflow ID"] == "chembl_baseline"
         assert values["Workflow Run ID"] == "workflow-run"
         assert values["Workflow Step ID"] == "run_chembl_assay"
