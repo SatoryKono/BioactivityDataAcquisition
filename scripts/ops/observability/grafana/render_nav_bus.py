@@ -614,11 +614,13 @@ def _expand_nav_height(
         if panel is nav:
             continue
         grid = panel.get("gridPos")
-        if isinstance(grid, dict) and isinstance(grid.get("y"), int):
-            if grid["y"] >= old_bottom and not (
-                delta < 0 and panel.get("type") == "row"
-            ):
-                grid["y"] += delta
+        if (
+            isinstance(grid, dict)
+            and isinstance(grid.get("y"), int)
+            and grid["y"] >= old_bottom
+            and not (delta < 0 and panel.get("type") == "row")
+        ):
+            grid["y"] += delta
 
 
 def apply_to_dashboard(path: Path, *, current_uid: str, check: bool = False) -> bool:
@@ -628,6 +630,11 @@ def apply_to_dashboard(path: Path, *, current_uid: str, check: bool = False) -> 
     payload = json.loads(
         safe_path.read_text(encoding="utf-8")  # NOSONAR - confined under DASH_DIR
     )
+    from scripts.ops.observability.grafana.dashboard_context_links import (
+        normalize_dashboard_actions,
+    )
+
+    normalize_dashboard_actions(payload)
     _remove_obsolete_provider_handoff_variable(payload)
     _fail_closed_provider_handoffs(
         payload, provider_declared=current_uid in _PROVIDER_VARIABLE_UIDS

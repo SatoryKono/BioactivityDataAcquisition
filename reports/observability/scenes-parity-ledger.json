@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "528d901461c8dcd9cbeed3406e1f716698f5c3c85956a82d0687fb6f61b3d489",
-    "bioetl-dq-v2": "9a8695552a395f230c042091d2855826feaec920c49464c57ba616774b6554b9",
-    "bioetl-incident-v1": "4ad7fccd23c0fcb29f4a53162115030d75dacef5a47cd80409ed24850d1d67b5",
-    "bioetl-overview-v2": "133a2c367cc8a4dfbb00dd06b6cff6169e5e0b8dbd867f4728c614cccbe4f2d2",
-    "bioetl-provider-health-v2": "8bdc21bf5230912c6102ec42119af7e36f0a1184b2067cba8feec6001154c002",
-    "bioetl-run-explorer-v1": "440efa37f96625d1b4d492ff14edd8feacdc8210c9b60b4666a418e07d9d5f47",
-    "bioetl-runtime": "c4522465fb2daeedcf3b0349411c5ed15c8ed575dc257d73ecd2457a06977329"
+    "bioetl-control-plane-v1": "0bacc70615d88003f5c118a9598bf4a3674f8e01f8eb2dae3c27db79521cfa45",
+    "bioetl-dq-v2": "91316bc49d46e45ea0bbab6107492ab6aadc9a0451881737ad00e4ed21ef6288",
+    "bioetl-incident-v1": "6b7494711ad550147bcc3e9b9ea7dbebc3952b9c9919fd087a8613cb9952b66c",
+    "bioetl-overview-v2": "b9b8219561eefc254d3cec0a4ccadeb8332b35103c65bd4eeb2d2dc5a5077b35",
+    "bioetl-provider-health-v2": "0c62a72cd4c4345f54e9a6dd0198efbf28a14eaa2befd658264f42bb5fa4f2b7",
+    "bioetl-run-explorer-v1": "373ea0f209343634a88401a6df4e383bcca6d311796c7e26ce085956da66df6b",
+    "bioetl-runtime": "3069483ddb5441045649a77fa2810142ab56ee4798eaf027374dbe003a4865d8"
   },
   "panels": [
     {
@@ -1230,9 +1230,11 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "topk(5, bioetl_dq_first_window_reason{pipeline=~\"$pipeline\"} > 0)"
+          "topk(5, bioetl_dq_first_window_reason{pipeline=~\"$pipeline\"} > 0) and on(pipeline) (bioetl_dq_current_status{pipeline=~\"$pipeline\"} < 3)",
+          "label_replace((bioetl_dq_current_status{pipeline=~\"$pipeline\"} == 0), \"reason\", \"No active reasons (OK)\", \"\", \"\")",
+          "label_replace((bioetl_dq_current_status{pipeline=~\"$pipeline\"} == 3) or absent(bioetl_dq_current_status{pipeline=~\"$pipeline\"}), \"reason\", \"Evidence unavailable (UNKNOWN)\", \"\", \"\")"
         ],
-        "target_count": 1
+        "target_count": 3
       }
     },
     {
@@ -1830,7 +1832,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "label_join(label_replace((bioetl_incident_ranked_runtime or bioetl_incident_ranked_provider or bioetl_incident_ranked_dq),\"confidence\",\"UNVERIFIED\",\"\",\"\"),\"object\",\"\",\"pipeline\",\"provider\")"
+          "label_join(label_replace((bioetl_incident_ranked_runtime or bioetl_incident_ranked_provider or bioetl_incident_ranked_dq),\"confidence\",\"UNVERIFIED\",\"\",\"\"),\"object\",\" / \",\"pipeline\",\"provider\")"
         ],
         "target_count": 1
       }

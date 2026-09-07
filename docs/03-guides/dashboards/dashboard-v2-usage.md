@@ -222,10 +222,10 @@ exact-run RunLedger evidence when `$run_id` is selected, otherwise over
 status, accounted subtotal, and delta rows; missing aggregate accounting series
 are diagnostic no-data/instrumentation gaps, not green zero. Every panel titled
 `Inspect Processed Records` or `Review Processed Records` displays `parameter`,
-`value`, and canonical formatted `percentage`: Bronze is always `100%`;
-`silver [valid]` and `gold [valid]`
-render one decimal (`91.0%`, `90.1%`); secondary Silver and Gold outcomes render
-up to three decimals with trailing zeroes trimmed (`8.51%`, `0.47%`).
+`value`, and canonical formatted `percentage`: all rows use one to three
+decimal places, trimming trailing zeroes while retaining at least one decimal
+(`100.0%`, `91.02%`, `90.09%`, `8.51%`, `0.0%`, `0.001%`).
+Bronze is `100.0%` when its total is known; unavailable evidence is `UNKNOWN`.
 Zero-valued outcome rows remain visible in the compact table. Silver and Gold
 outcome percentages use Bronze total as denominator. The table formats `value`
 with a space as the thousands separator, left-pads shorter values to the
@@ -690,26 +690,17 @@ Variable handoff policy for dashboard links remains strict and bounded:
 ## Важные пороги (из JSON)
 
 - `overview.id=214 (Status)`: `CRIT` при runtime blocker `>0`, DQ hard fail `>0`, blocking data-validation lifecycle или control-plane blocker `>0`; `WARN` при non-fatal warning-only сигналах; `UNKNOWN` при no recent samples. Panel links route directly to Runtime / Control Plane / Data Quality / Provider Health / Workflow with the current time range.
-- `overview.id=215 (Review First Action)`: table shows up to **four** routes via
-  `topk(4, bioetl_l0_next_action_route{…} or NO_ROUTE fallback)`. Column order is
-  **Action → Priority → Why → Pipeline** (Action-first hierarchy). Short Action
-  labels (`Runtime`, `Control Plane`, `DQ`, …) reduce truncation; panel
-  `dataLinks` keep full `Open *` titles as secondary domain shortcuts. Priority
-  order `Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow >
-  Monitor`. Priority uses **short badges** (`RUNTIME`/`CP`/`GOLD`/`DQ`/`PROV`/
-  `WF`/`MON`/`NR`) with **color-background** (column-only, never row-wide paint).
-  Action is the sole **color-text** CTA emphasis. Primary CTA is the Action cell
-  link using `action_dashboard_uid` + row `pipeline`. Missing/empty scope falls
-  back to `NO_ROUTE` / `selected_scope_not_present` instead of a blank panel.
-  Runtime / Control Plane / DQ handoffs preserve
-  `workflow/pipeline/run_type/run_id`; Provider Health fail-closes to
-  `provider=unknown` while preserving `pipeline_context`. When Priority is
-  `MON`/`NR` and Fleet Health is OK, continue monitoring rather than escalating.
-  First-screen layout pairs RFA with Domain Status at `w=12` each; `cellHeight`
-  is `sm`. The shipped dashboard JSON and its contracts are the durable record
-  for the RFA-00 migration; the retired one-off mutator was historical only and
-  should not be reintroduced under `scripts/ops/observability/grafana/` — edit
-  shipped `grafana/dashboards/*.json` through reviewable PR changes.
+- `overview.id=215 (Review First Action)`: shows at most **two** positive
+  routes after `max without(run_type)` merges identical action/object/reason
+  rows. Column order is **Priority → Pipeline → Why → Action**. Priority is
+  routing urgency, not alert severity: `0=UNKNOWN`, `5=WATCH`, `10=REVIEW`,
+  `20/30=HIGH`, `35/40/50=URGENT`. Different pipelines remain distinct.
+  An absence-only `bioetl_l0_next_action_no_route` fallback preserves UNKNOWN.
+  Action links use the row's `action_dashboard_uid` and pipeline, preserving
+  workflow, run type, run ID and time range. Provider Health clears an unknown
+  provider to `provider=unknown` while retaining `pipeline_context`.
+  First Action occupies `w=16`, paired with Domain Status at `w=8`.
+  Inspect retains routing metadata; no healthy zero is manufactured.
 - `overview` first-screen selected-scope cards normalize a manually selected `workflow_<pipeline>` value back to the entity pipeline before reading `bioetl_l0_*` / `bioetl_l1_*` summary recording rules. For example, `workflow_chembl_assay` resolves to the same current-state summary rows as `chembl_assay`.
 - `dq.id=2 (DQ Score Snapshot)`: no-data остается `UNKNOWN`, не `0`; hard-fail signals блокируют promotion, warning-only означает drift. Next action: hard-fail -> reject/quarantine diagnostics; warning-only -> trend + top reasons.
 - `overview.id=9002 (Review Domain Status)`: использует `topk(4, max by (input) (bioetl_l0_input_status_selected{pipeline=~"$pipeline",run_type=~"$run_type"}))`. First-screen таблица показывает четыре worst/UNKNOWN domain status; полный six-domain matrix остаётся в `overview.id=9031` под `Domain Status Tracks`.
@@ -718,7 +709,13 @@ Variable handoff policy for dashboard links remains strict and bounded:
   quarantine pressure, spike = incident. Next action: `Top Silver Reject
   Reasons` + `bioetl quarantine inspect` (CLI).
 - `runtime.id=16 (Monitor Active Blocker Count)`: CURRENT 15m count chip supporting `9101`; non-zero = active blocker count; `UNKNOWN` means missing current runtime status/blocker telemetry and must not be treated as OK. Next action: runtime blockers table + culprit stage panels, затем file logs under `reports/logs/` при необходимости (no Grafana Loki/Tempo UI).
-- `runtime.id=9102 (Metrics Evidence)`: `0=SCRAPING/RULES OK`, `1=RULE/SERIES GAP`, `>=2=RULE+SERIES GAP`, `null=UNKNOWN`; checks scrape health plus runtime dashboard recording-rule evaluation failures, rule-group presence, and rule-group freshness. Any non-zero value forces headline `Status` and `Runtime Status` to `INCOMPLETE` (`3`).
+- `runtime.id=9102 (Monitor Metrics Coverage)`: three neutral evidence fields
+  separate Endpoint (`SCRAPING` / `UNAVAILABLE`), Baseline (`PRESENT` /
+  `RULE/SERIES GAP` / `RULE+SERIES GAP`) and Rule age in seconds. Missing
+  evidence is UNKNOWN. Baseline PRESENT checks only the existing ten-minute
+  rule/series guard, not all required telemetry; the first-screen scope text
+  therefore keeps full telemetry UNVERIFIED. The existing non-zero trust-gap
+  rule still makes Pipeline Status INCOMPLETE, independently of presentation.
 - `runtime.id=205/id=236 (Failed Runs / Monitor No-Records Runs)`: `0` is valid only when `bioetl_runtime_pipeline_run_type_universe` confirms the selected scope; missing selected scope remains `UNKNOWN`.
 - `runtime.id=220 (Runtime Error Rate)`: elevated ratio with meaningful 30m Bronze denominator (`>=20`) = degradation risk; WARN starts at 5%, dashboard CRIT escalation at 20%, and lower/missing denominator stays `UNKNOWN`. Next action: `Inspect Errors by Stage / Error Code / Range` + failed runs/backlog/lag panels.
 - `runtime` current-triage panels normalize a manually selected `workflow_<pipeline>` value back to the entity pipeline before reading current runtime recording rules and error-rate/lag evidence. For example, `workflow_chembl_assay` resolves to the same current status and blocker scope as `chembl_assay`; `UNKNOWN` on error-rate still remains valid when the 30m Bronze denominator is absent or `<20`.

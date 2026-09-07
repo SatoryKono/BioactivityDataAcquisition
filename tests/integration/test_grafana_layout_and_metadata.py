@@ -364,7 +364,7 @@ def test_retention_panel_9416_retry_preserves_selected_run_and_time() -> None:
         if isinstance(link, dict) and "Retry" in str(link.get("title", ""))
     )
     retry_url = str(retry.get("url", ""))
-    assert "var-run_id=$run_id" in retry_url
+    assert "${run_id:queryparam}" in retry_url
     assert "${__url_time_range}" in retry_url
     assert "viewPanel=9416" in retry_url
 

@@ -2,12 +2,30 @@ ______________________________________________________________________
 
 ## UX report artifact requirement
 
+Tables and accounting presentation (#10178, #10179, #10180, #10192, #10183):
+selected-run summaries put status, coverage and local timestamps before the
+UUID. Recent-run timestamps use reserved widths; workflow runs have direct
+report links and a compact selection marker. Provider severity codes use the
+same named states in summary and fleet detail. Optional latency uses a stat.
+DQ range cards share a two-column grid, height and value font size. Current DQ
+reasons distinguish explicit OK from unavailable evidence. Processed-record
+counts and percentages are neutral quantities; layer label colors identify
+Bronze/Silver/Gold, not quality. Percentages use one to three decimal places
+consistently, preserving small exclusions and UNKNOWN denominators.
+
 Для любого PR с изменениями `grafana/dashboards/*.json` change notes MUST
 содержать ссылку на UX artifact:
 `docs/reports/dashboard-ux-checks/YYYY-MM-DD.md`.
 
 Latest dashboard UX artifact for current shipped JSON changes:
-`docs/reports/dashboard-ux-checks/2026-09-07.md`. Panel 205 now evaluates the
+`docs/reports/dashboard-ux-checks/2026-09-07.md`. The Overview, Runtime and
+Incident follow-up (#10176, #10177, #10181, #10193, #10194) adds readable
+routing priorities, a first-screen blocker action, explicit global incident
+scope and unverified confidence, complete alert names and neutral telemetry
+evidence. Common navigation uses three grid rows on all seven dashboards;
+the existing text sizes and query budgets remain unchanged.
+
+Panel 205 now evaluates the
 selected window once and preserves absent counters. Incident 2010 combines the
 three recorded ranking metrics in one short union so Priority has one numeric
 field before sorting. The earlier long raw-query union limitation no longer
