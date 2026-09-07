@@ -468,7 +468,7 @@ def test_control_plane_provider_health_handoff_omits_adapter_fallback() -> None:
     assert link is not None, "Overview First Action must hand off to Provider Health"
     url = str(link.get("url", ""))
     assert "var-provider=unknown" in url
-    assert "var-pipeline_context=$pipeline" in url
+    assert "var-pipeline_context=${pipeline:percentencode}" in url
     assert "var-adapter=" not in url
 
 
@@ -501,28 +501,28 @@ def test_runtime_first_action_cta_links_preserve_scoped_vars_and_time() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expected = {
         "Review current status": (
-            "var-workflow=$workflow",
-            "var-pipeline=$pipeline",
-            "var-run_type=$run_type",
-            "var-stage=$stage",
+            "${workflow:queryparam}",
+            "${pipeline:queryparam}",
+            "${run_type:queryparam}",
+            "${stage:queryparam}",
         ),
         "Review range evidence": (
-            "var-workflow=$workflow",
-            "var-pipeline=$pipeline",
-            "var-run_type=$run_type",
-            "var-stage=$stage",
+            "${workflow:queryparam}",
+            "${pipeline:queryparam}",
+            "${run_type:queryparam}",
+            "${stage:queryparam}",
         ),
         "Inspect top blockers": (
-            "var-workflow=$workflow",
-            "var-pipeline=$pipeline",
-            "var-run_type=$run_type",
-            "var-stage=$stage",
+            "${workflow:queryparam}",
+            "${pipeline:queryparam}",
+            "${run_type:queryparam}",
+            "${stage:queryparam}",
         ),
         "Inspect active blocker": (
-            "var-workflow=$workflow",
-            "var-pipeline=$pipeline",
-            "var-run_type=$run_type",
-            "var-stage=$stage",
+            "${workflow:queryparam}",
+            "${pipeline:queryparam}",
+            "${run_type:queryparam}",
+            "${stage:queryparam}",
         ),
     }
     forbidden = (
@@ -937,7 +937,7 @@ def test_provider_health_handoff_fail_closes_and_remembers_return_context() -> N
     url = str(link.get("url", ""))
     tooltip = str(link.get("tooltip", ""))
     assert "var-provider=unknown" in url
-    assert "var-pipeline_context=$pipeline" in url
+    assert "var-pipeline_context=${pipeline:percentencode}" in url
     assert "var-provider=All" not in url
     # Tooltip is optional on dataLinks; URL fail-closed vars are mandatory.
     if tooltip:
@@ -967,7 +967,7 @@ def test_provider_health_handoff_fail_closes_and_remembers_return_context() -> N
             if _extract_dashboard_uid(str(item.get("url", ""))) == target_uid
         )
         url = str(link.get("url", ""))
-        assert "var-pipeline=$pipeline_context" in url
+        assert "var-pipeline=${pipeline_context:percentencode}" in url
         assert "var-pipeline=All" not in url
 
 

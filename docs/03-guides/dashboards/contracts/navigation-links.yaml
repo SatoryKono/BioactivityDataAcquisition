@@ -22,6 +22,30 @@ normative_source:
 
     '
 version: 1
+selection_serialization:
+  formatter: queryparam
+  mapped_scalar_parameter_formatter: percentencode
+  all_value: '$__all'
+  multiple_values: repeated_var_parameters
+  row_fields: concrete_row_values
+  selected_run_range: retained_hidden_from_ms_to_ms
+  unavailable_run_range: no_active_action
+  ranked_suspect_action:
+  action_target_override:
+    data_quality: bioetl-dq-v2
+    source_uid: bioetl-incident-v1
+    panel_id: 2010
+    pipeline: row
+    run_id: '-'
+    reason: Current metric rows do not identify an exact run; do not carry a foreign UUID.
+    target_uid_by_domain:
+      runtime: bioetl-runtime
+      provider: bioetl-provider-health-v2
+      dq: bioetl-dq-v2
+    extra_vars_by_domain:
+      runtime: [stage]
+      provider: [provider, pipeline_context]
+      dq: [stage]
 required_top_level_links_by_uid:
   bioetl-control-plane-v1:
   - 1. Overview

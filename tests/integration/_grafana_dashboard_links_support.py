@@ -220,13 +220,18 @@ def _extract_dashboard_uid(url: str) -> str | None:
 
 def _extract_link_vars(url: str) -> set[str]:
     vars = set(_LINK_VAR_RE.findall(url))
+    vars.update(re.findall(r"\$\{(\w+):queryparam\}", url))
     if "bioetl-provider-health-v2" in url:
         vars.discard("stage")
     return vars
 
 
 def _extract_link_var_values(url: str) -> dict[str, str]:
-    return dict(_LINK_VAR_VALUE_RE.findall(url))
+    values = dict(_LINK_VAR_VALUE_RE.findall(url))
+    values.update(
+        {name: "$" + name for name in re.findall(r"\$\{(\w+):queryparam\}", url)}
+    )
+    return values
 
 
 def _is_logs_drilldown_url(url: str) -> bool:
@@ -704,12 +709,32 @@ def _assert_cross_dashboard_link_policy(
     current_uid: str,
     link: dict[str, object],
     dashboard_links: object,
+    row_action: bool = False,
 ) -> None:
     url = link.get("url", "")
     if not isinstance(url, str) or not url.startswith("/d/"):
         return
     target_uid = _extract_dashboard_uid(url)
     assert target_uid is not None, f"Could not parse dashboard UID from {url}"
+    if target_uid == "${__data.fields.action_dashboard_uid}":
+        assert current_uid == "bioetl-incident-v1"
+        assert link.get("title") == "Open domain diagnostics"
+        for resolved_uid, scope in {
+            "bioetl-runtime": "var-stage=%24__all",
+            "bioetl-dq-v2": "var-stage=%24__all",
+            "bioetl-provider-health-v2": "var-provider=chembl&var-pipeline_context=unknown",
+        }.items():
+            resolved_url = url.replace(
+                "${__data.fields.action_dashboard_uid}", resolved_uid
+            ).replace("${__data.fields.action_scope}", scope)
+            _assert_cross_dashboard_link_policy(
+                dashboard_name=dashboard_name,
+                current_uid=current_uid,
+                link={**link, "url": resolved_url},
+                dashboard_links=dashboard_links,
+                row_action=True,
+            )
+        return
     passed_vars = _assert_dashboard_link_vars_allowed(
         dashboard_name=dashboard_name,
         target_uid=target_uid,
@@ -728,13 +753,19 @@ def _assert_cross_dashboard_link_policy(
             url=url,
             passed_vars=passed_vars,
         )
-        _assert_preserved_identity_handoff(
-            dashboard_name=dashboard_name,
-            current_uid=current_uid,
-            target_uid=target_uid,
-            url=url,
-            passed_vars=passed_vars,
-        )
+        if row_action:
+            assert _extract_link_var_values(url)["run_id"] == "-"
+            assert (
+                _extract_link_var_values(url)["pipeline"] == "${__data.fields.Pipeline}"
+            )
+        else:
+            _assert_preserved_identity_handoff(
+                dashboard_name=dashboard_name,
+                current_uid=current_uid,
+                target_uid=target_uid,
+                url=url,
+                passed_vars=passed_vars,
+            )
     required_top_level_titles = _REQUIRED_TOP_LEVEL_LINKS_BY_UID.get(
         current_uid, frozenset()
     )
@@ -1240,6 +1271,7 @@ def _html_hrefs_from_panel_content(
 
 
 def _query_var_values(url: str) -> dict[str, str]:
+    url = re.sub(r"\$\{(\w+):queryparam\}", lambda m: "var-" + m[1] + "=$" + m[1], url)
     return {
         key[4:]: value
         for key, value in parse_qsl(urlsplit(url).query, keep_blank_values=True)
@@ -1670,9 +1702,13 @@ def _assert_named_dashboard_handoff(
     matching_urls = [url for url in urls if url.startswith(url_prefix)]
     assert matching_urls, f"{dashboard_name} handoff must target {url_prefix}"
     token_a, token_b = scope_tokens
-    assert any(token_a in url and token_b in url for url in matching_urls), (
-        f"{dashboard_name} handoff must preserve pipeline/run_type scope"
-    )
+    assert any(
+        all(
+            _extract_link_var_values(url).get(name) == value
+            for name, value in (token[4:].split("=", 1) for token in (token_a, token_b))
+        )
+        for url in matching_urls
+    ), f"{dashboard_name} handoff must preserve pipeline/run_type scope"
 
 
 _SILVER_EXPLORER_EXPLICIT_EXPECTATIONS: dict[str, dict[str, object]] = {
