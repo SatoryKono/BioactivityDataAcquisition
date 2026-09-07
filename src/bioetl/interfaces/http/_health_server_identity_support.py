@@ -12,6 +12,9 @@ from bioetl.interfaces.http.control_plane_identity.extractors import (
     build_anchor_values,
     is_composite,
 )
+from bioetl.interfaces.http.control_plane_identity.manifest_extractors import (
+    execution_flag,
+)
 
 # Shared operator-facing unavailability markers for identity table rows.
 IDENTITY_UNAVAILABLE_CURRENT_SCOPE = "not available for current scope"
@@ -229,31 +232,9 @@ def _execution_flags(manifest: RunManifest | None) -> str | None:
     if manifest is None:
         return None
     return " | ".join(
-        (
-            _yes_no(_execution_flag(manifest, "resume")),
-            _yes_no(_execution_flag(manifest, "dry_run")),
-            _yes_no(_execution_flag(manifest, "use_cached_bronze")),
-        )
+        _yes_no(execution_flag(manifest, key))
+        for key in ("resume", "dry_run", "use_cached_bronze")
     )
-
-
-def _execution_flag(manifest: RunManifest, key: str) -> object | None:
-    """Read launch flags without discarding an explicit higher-priority false."""
-    for payload in (
-        manifest.runtime_config,
-        manifest.launch_context,
-        manifest.resolved_config,
-    ):
-        if key in payload and payload[key] is not None:
-            return payload[key]
-        cached_bronze = payload.get("cached_bronze")
-        if (
-            key == "use_cached_bronze"
-            and isinstance(cached_bronze, dict)
-            and cached_bronze.get("enabled") is not None
-        ):
-            return cached_bronze["enabled"]
-    return None
 
 
 def _replay_summary(values: dict[str, object | None]) -> str | None:

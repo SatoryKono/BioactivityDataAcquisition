@@ -22,6 +22,26 @@ from bioetl.interfaces.http.control_plane_identity.formatting import (
 from bioetl.interfaces.http.control_plane_identity.types import AnchorValues
 
 
+def execution_flag(manifest: RunManifest, key: str) -> object | None:
+    """Read launch flags without discarding an explicit higher-priority false."""
+    for payload in (
+        manifest.runtime_config,
+        manifest.launch_context,
+        manifest.resolved_config,
+    ):
+        if key in payload and payload[key] is not None:
+            return payload[key]
+        cached_bronze = payload.get("cached_bronze")
+        if (
+            key == "use_cached_bronze"
+            and isinstance(cached_bronze, dict)
+            and cached_bronze.get("enabled") is not None
+        ):
+            enabled: object = cached_bronze["enabled"]
+            return enabled
+    return None
+
+
 def identity_graph_diagnostics(manifest: RunManifest) -> dict[str, object]:
     """Return identity graph diagnostics embedded in known manifest payloads."""
     diagnostics: dict[str, object] = {}
@@ -132,6 +152,7 @@ __all__ = [
     "artifact_ref_values",
     "correlation_anchor_gaps",
     "diagnostic_value",
+    "execution_flag",
     "extract_manifest_anchors",
     "identity_graph_diagnostics",
     "input_snapshot_fingerprint",
