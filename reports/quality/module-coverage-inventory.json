@@ -1,7 +1,7 @@
 {
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
-  "coverage_xml_sha256": "46d45d133e836b0120c45bd364a5ba2f756a5ba73dda6c82c11cb7e3b905e8a1",
+  "coverage_xml_sha256": "1360947f8a4e6c0d5274f0d7e8252aef00f6c0789b26aa24cc911a3edc722c16",
   "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
   "measurement_mode": "coverage_xml",
   "modules": [
@@ -24388,12 +24388,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 112,
-      "executable_lines": 112,
+      "covered_lines": 107,
+      "executable_lines": 107,
       "missing_lines": 0,
       "module": "bioetl.interfaces.http._processed_records_table_support",
       "path": "src/bioetl/interfaces/http/_processed_records_table_support.py",
-      "source_lines": 354
+      "source_lines": 340
     },
     {
       "coverage_percent": 96.92,
@@ -24653,7 +24653,7 @@
       "missing_lines": 0,
       "module": "bioetl.interfaces.http.processed_records_table",
       "path": "src/bioetl/interfaces/http/processed_records_table.py",
-      "source_lines": 216
+      "source_lines": 215
     },
     {
       "coverage_percent": 100.0,
@@ -49070,12 +49070,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 112,
-      "executable_lines": 112,
+      "covered_lines": 107,
+      "executable_lines": 107,
       "missing_lines": 0,
       "module": "bioetl.interfaces.http._processed_records_table_support",
       "path": "src/bioetl/interfaces/http/_processed_records_table_support.py",
-      "source_lines": 354
+      "source_lines": 340
     },
     {
       "coverage_percent": 96.92,
@@ -49335,7 +49335,7 @@
       "missing_lines": 0,
       "module": "bioetl.interfaces.http.processed_records_table",
       "path": "src/bioetl/interfaces/http/processed_records_table.py",
-      "source_lines": 216
+      "source_lines": 215
     },
     {
       "coverage_percent": 100.0,
