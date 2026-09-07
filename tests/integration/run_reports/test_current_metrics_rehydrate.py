@@ -22,7 +22,7 @@ from bioetl.application.observability.current_metrics_reconciliation import (
     reconcile_current_metrics_with_run_reports,
 )
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.integration
 
 
 def _write_report(

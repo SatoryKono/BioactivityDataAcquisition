@@ -35,7 +35,7 @@ from bioetl.infrastructure.storage.run_report_store_adapter import (
 
 import pytest
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.integration
 
 import json
 from pathlib import Path

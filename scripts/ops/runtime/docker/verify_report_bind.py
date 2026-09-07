@@ -13,9 +13,9 @@ Usage (from repository root)::
     python scripts/ops/runtime/docker/verify_report_bind.py --ops-url http://127.0.0.1:8000
 
 Exit codes:
-    0 — host marker, host reports, and (when reachable) ops HTTP agree
-    1 — mismatch or missing marker / empty bind
-    2 — usage / infrastructure error (docker inspect failed, etc.)
+    0 â€” host marker, host reports, and (when reachable) ops HTTP agree
+    1 â€” mismatch or missing marker / empty bind
+    2 â€” usage / infrastructure error (docker inspect failed, etc.)
 """
 
 from __future__ import annotations
@@ -47,7 +47,9 @@ from bioetl.application.services.run_reports.paths import (
     inspect_report_root_marker,
     inspect_report_root_source_identity,
 )
-from bioetl.composition.entrypoints import create_run_report_store
+from typing import cast
+from bioetl.domain.ports import RunReportStorePort
+from bioetl.composition.entrypoints import resolve
 from bioetl.application.services.run_reports.query import (
     list_pipeline_reports,
 )
@@ -316,7 +318,7 @@ def _host_pipeline_summary(
         pipeline_name=pipeline,
         limit=100,
         root=host_root,
-        store=create_run_report_store(),
+        store=resolve(cast("type[RunReportStorePort]", RunReportStorePort)),
     )
     count = len(entries)
     latest_run_id = entries[0].run_id if entries else None
@@ -349,7 +351,7 @@ def _verify_container_mount(
         return
     if not _paths_equivalent(source, host_mount):
         state.fail(
-            f"FAIL: bind mismatch — container source={source!r} "
+            f"FAIL: bind mismatch â€” container source={source!r} "
             f"expected host_reports_mount={host_mount}"
         )
         state.warn(
@@ -387,7 +389,7 @@ def _verify_container_identity(
         return
     if comparison.state != IDENTITY_STATE_ALIGNED or not resolution.is_consistent:
         state.fail(
-            "FAIL: container source identity mismatch — "
+            "FAIL: container source identity mismatch â€” "
             f"state={comparison.state!r} actual={actual!r} "
             f"expected={expected_source_id!r} conflicts={resolution.conflicts!r}"
         )
@@ -503,7 +505,7 @@ def _verify_pipeline_endpoint(
     if host_count is not None and host_count > 0 and ops_count == 0:
         state.fail(
             f"FAIL: host has {host_count} report(s) for {pipeline!r} "
-            "but ops HTTP returns count=0 — classic bind mismatch"
+            "but ops HTTP returns count=0 â€” classic bind mismatch"
         )
     elif host_count is not None and ops_count > 0:
         print("OK: ops HTTP sees pipeline reports")
@@ -511,7 +513,7 @@ def _verify_pipeline_endpoint(
     print(f"ops_latest_run_id={ops_latest_run_id!r}")
     if host_latest_run_id != ops_latest_run_id:
         state.fail(
-            "FAIL: newest run mismatch — "
+            "FAIL: newest run mismatch â€” "
             f"host={host_latest_run_id!r} ops={ops_latest_run_id!r}"
         )
 
