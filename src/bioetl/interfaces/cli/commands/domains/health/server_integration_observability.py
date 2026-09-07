@@ -5,8 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Protocol, cast
 
-from bioetl.composition.entrypoints import resolve
-from bioetl.domain.ports import RunReportStorePort
+from bioetl.composition.observability_runtime import create_run_report_store
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort
@@ -132,7 +131,7 @@ def _rehydrate_current_metrics(*, logger: LoggerPort | None = None) -> None:
         deps = get_health_server_dependencies()
         result = rehydrate_current_pipeline_run_metrics(
             deps.metrics,
-            store=resolve(cast("type[RunReportStorePort]", RunReportStorePort)),
+            store=create_run_report_store(),
         )
         _rehydrate_provider_health_gauges(deps)
     except (

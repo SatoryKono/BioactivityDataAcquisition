@@ -1,5 +1,6 @@
 """In-memory run-report storage double."""
 
+from os.path import normpath
 from pathlib import Path
 
 
@@ -40,7 +41,9 @@ class MemoryReportStore:
         return self.times[path]
 
     def remove_tree(self, path: str, *, root: str) -> None:
-        assert Path(path).is_relative_to(Path(root))
+        target, boundary = Path(normpath(path)), Path(normpath(root))
+        if target == boundary or not target.is_relative_to(boundary):
+            raise ValueError("report directory escapes report root")
         for key in list(self.files):
             if Path(key).is_relative_to(Path(path)):
                 del self.files[key]
