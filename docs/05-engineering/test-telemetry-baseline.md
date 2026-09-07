@@ -28,13 +28,13 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `fix/run-explorer-trust-10174-10191`
-- Source commit: `4964755e33a54280bade6a30b1f1f52460cac7d1`
-- Source run id: `34138902302`
+- Source commit: `876230b15a232091ea2e5ef9b77eb51e043d9cd8`
+- Source run id: `34143907977`
 - Source event: `pull_request`
-- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34138902302`
-- Source tree sha256: `5e6521c0af095343229027266478068d691d6bfd27e37397e54bdbe1b44831dd`
+- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34143907977`
+- Source tree sha256: `10a669eddf1f5bc71e307e2a192c00cc038feff076764988134b686e14af35d1`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-09-07T15:50:52.591165+00:00`
+- Refreshed at (UTC): `2026-09-07T16:43:37.148661+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -60,38 +60,38 @@ trend evidence only.
 
 ## Duration Telemetry
 
-- Total collected test cases: `49776`
+- Total collected test cases: `49797`
 - Freshness guard: `<=45 days` via `refreshed_at_utc`
 
 ### Top Slowest Tests
 
 | Rank | Duration (s) | Test | Source |
 |---:|---:|---|---|
-| 1 | `17.735` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing` | `junit-unit-scripts-tooling.debt-governance.xml` |
-| 2 | `10.899` | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation` | `junit-repo-backed-unit.ops.xml` |
-| 3 | `10.576` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale` | `junit-unit-scripts-tooling.debt-governance.xml` |
-| 4 | `10.409` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact` | `junit-unit-scripts-tooling.debt-governance.xml` |
-| 5 | `9.045` | `tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]` | `junit-contract-confidence.xml` |
-| 6 | `8.145` | `tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts` | `junit.integration.xml` |
-| 7 | `7.289` | `tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures::test_cached_populated_isolated_registry_contains_pipeline_factories` | `junit-repo-backed-unit.product.xml` |
-| 8 | `7.005` | `tests.unit.composition.factories.pipeline.test_registry::test_registry_completeness` | `junit.unit-other.xml` |
-| 9 | `6.671` | `tests.unit.scripts.docs.passports.test_passport_projector::test_workflow_operations_are_classified` | `junit-unit-scripts-tooling.passport.xml` |
-| 10 | `6.492` | `tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts` | `junit-track-d.xml` |
+| 1 | `12.479` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing` | `junit-unit-scripts-tooling.debt-governance.xml` |
+| 2 | `10.602` | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation` | `junit-repo-backed-unit.ops.xml` |
+| 3 | `9.404` | `tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]` | `junit-contract-confidence.xml` |
+| 4 | `8.193` | `tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts` | `junit.integration.xml` |
+| 5 | `8.138` | `tests.unit.scripts.qa.test_check_quality_exemptions::test_check_quality_exemptions_passes_current_zero_budget_registry` | `junit-unit-scripts-tooling.other.xml` |
+| 6 | `7.439` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact` | `junit-unit-scripts-tooling.debt-governance.xml` |
+| 7 | `7.396` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale` | `junit-unit-scripts-tooling.debt-governance.xml` |
+| 8 | `7.26` | `tests.unit.composition.factories.pipeline.test_registry::test_registry_completeness` | `junit.unit-other.xml` |
+| 9 | `7.015` | `tests.unit.composition.test_registry_protocol.TestPipelineRegistryUnifiedAPI::test_list_keys_returns_list` | `junit.unit-other.xml` |
+| 10 | `6.26` | `tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts` | `junit-track-d.xml` |
 
 ### Top Slow Zones
 
 | Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |
 |---:|---|---:|---:|---:|
-| 1 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 4 | 42.828 | 17.735 |
-| 2 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 2 | 16.341 | 10.899 |
-| 3 | `tests.integration.ci.test_track_d_fixture_control_plane_linkage` | 2 | 14.637 | 8.145 |
-| 4 | `tests.contract.test_normalization_cross_layer_contracts` | 3 | 11.671 | 3.981 |
-| 5 | `tests.contract.test_provider_contract_drift_replay` | 1 | 9.045 | 9.045 |
-| 6 | `tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures` | 1 | 7.289 | 7.289 |
-| 7 | `tests.unit.composition.factories.pipeline.test_registry` | 1 | 7.005 | 7.005 |
-| 8 | `tests.unit.scripts.docs.passports.test_passport_projector` | 1 | 6.671 | 6.671 |
-| 9 | `tests.unit.composition.factories.pipeline.test_registry_consistency.TestListAvailablePipelinesFunction` | 1 | 6.335 | 6.335 |
-| 10 | `tests.unit.scripts.ops.test_recover_renderer` | 1 | 6.003 | 6.003 |
+| 1 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 3 | 27.314 | 12.479 |
+| 2 | `tests.integration.ci.test_track_d_fixture_control_plane_linkage` | 2 | 14.453 | 8.193 |
+| 3 | `tests.unit.scripts.qa.test_report_normalization_fallback_inventory` | 3 | 12.861 | 4.388 |
+| 4 | `tests.contract.test_normalization_cross_layer_contracts` | 3 | 12.408 | 4.212 |
+| 5 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 1 | 10.602 | 10.602 |
+| 6 | `tests.contract.test_provider_contract_drift_replay` | 1 | 9.404 | 9.404 |
+| 7 | `tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix` | 2 | 8.155 | 4.125 |
+| 8 | `tests.unit.scripts.qa.test_check_quality_exemptions` | 1 | 8.138 | 8.138 |
+| 9 | `tests.unit.composition.factories.pipeline.test_registry` | 1 | 7.26 | 7.26 |
+| 10 | `tests.unit.composition.test_registry_protocol.TestPipelineRegistryUnifiedAPI` | 1 | 7.015 | 7.015 |
 
 ## Refresh Procedure
 

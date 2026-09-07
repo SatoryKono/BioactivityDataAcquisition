@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-07T11:34:05.719486+00:00",
+  "generated_at": "2026-09-07T16:45:57.197513+00:00",
   "summary": {
     "total_scripts": 613,
     "status_counts": {
@@ -20192,13 +20192,13 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 193,
+          "line": 194,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/generate_trust_validation_fixtures.py\""
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 208,
+          "line": 209,
           "source_group": "tests",
           "text": "\"generate_trust_validation_fixtures.py must not call write_text; \""
         }
@@ -20743,7 +20743,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 190,
+          "line": 191,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/trust_validation_fixture_materialization.py\""
         }

@@ -273,7 +273,7 @@
       "snapshot_date": "2026-07-27"
     },
     "module_coverage_inventory": {
-      "coverage_xml_sha256": "ffa37200930692f9d632cf7565013543f85c6a58932e86a8c7fbed863dff1621",
+      "coverage_xml_sha256": "370695021612ec91767611ef261a2dfc7c4b258fd66b23f2a4a0708c231816db",
       "path": "reports/quality/module-coverage-inventory.json",
       "source_tree_sha256": "6599a6c473a427383ab81eb52cd0cf66309469b25710120668f6d98edb283e16"
     },
