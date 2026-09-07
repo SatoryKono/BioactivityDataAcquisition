@@ -1,8 +1,8 @@
 # Сводка evidence: project-package-topology
 
-Refresh note (2026-09-06): SHA-bound reconciliation for the CodeQL and Actions repair; `source_tree_sha256` and `source_module_count` match `reports/quality/module-coverage-inventory.json`.
+Refresh note (2026-09-07): architecture closeout structural recount and CI run 34094034058 coverage reconciliation; `source_tree_sha256` and `source_module_count` match `reports/quality/module-coverage-inventory.json`.
 
-`source_tree_sha256=27e25aad2df15c988777d61fbdba2b1daca1886a11e3a5b287ce3a5d3b0176c2`
+`source_tree_sha256=1bc329a12509cabbab4a277472d6404637b6ba3fd8b28502ccdd084f1b60bb52`
 
 `source_module_count=2468`
 
@@ -89,8 +89,9 @@ Collected: `6`
   top-level package modules outside the five first-order architecture layers.
 - Current layer file counts are: `domain=608`, `application=772`,
   `infrastructure=632`, `composition=295`, `interfaces=159`.
-- Current first-order package counts are: `domain=22`, `application=6`,
-  `infrastructure=20`, `composition=5`, `interfaces=2`.
+- Current first-order package counts (direct child directories with `__init__.py`)
+  are: `domain=22`, `application=7`, `infrastructure=19`, `composition=6`,
+  `interfaces=2`.
 - `application` and `infrastructure` remain the broadest package surfaces by
   Python file count; `infrastructure` remains the broadest adapter and
   external-system implementation boundary.
@@ -107,6 +108,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `27e25aad2df15c988777d61fbdba2b1daca1886a11e3a5b287ce3a5d3b0176c2`
+- source_tree_sha256: `1bc329a12509cabbab4a277472d6404637b6ba3fd8b28502ccdd084f1b60bb52`
 
 `source_module_count=2468`
