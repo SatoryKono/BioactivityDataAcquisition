@@ -69,3 +69,22 @@ def test_report_tree_removal_unlinks_symlink(tmp_path: Path) -> None:
 
     assert not link.exists()
     assert target.is_dir()
+
+
+def test_remove_tree_unlinks_symlinks_without_traversing_targets(
+    tmp_path: Path,
+) -> None:
+    _require_symlink_privilege(tmp_path)
+    external = tmp_path / "external"
+    external.mkdir()
+    external_file = external / "keep.txt"
+    external_file.write_text("keep", encoding="utf-8")
+    report_dir = tmp_path / "report"
+    report_dir.mkdir()
+    (report_dir / "directory-link").symlink_to(external, target_is_directory=True)
+    (report_dir / "file-link").symlink_to(external_file)
+
+    FileRunReportStoreAdapter().remove_tree(str(report_dir), root=str(tmp_path))
+
+    assert not report_dir.exists()
+    assert external_file.read_text(encoding="utf-8") == "keep"
