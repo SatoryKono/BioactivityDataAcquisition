@@ -550,6 +550,15 @@
           }
         },
         {
+          "id": "extractFields",
+          "options": {
+            "source": "action",
+            "format": "regexp",
+            "regExp": "/(?<action_detail>.*)/",
+            "replace": false
+          }
+        },
+        {
           "id": "organize",
           "options": {
             "excludeByName": {
@@ -574,8 +583,9 @@
               "provider": 4,
               "signal": 5,
               "action": 6,
-              "domain": 7,
-              "object": 3
+              "domain": 8,
+              "object": 3,
+              "action_detail": 7
             },
             "renameByName": {
               "domain": "Domain",
@@ -585,7 +595,8 @@
               "confidence": "Confidence",
               "object": "Object",
               "pipeline": "Pipeline",
-              "provider": "Provider"
+              "provider": "Provider",
+              "action_detail": "Details"
             }
           }
         }
@@ -967,7 +978,7 @@
               },
               {
                 "id": "custom.inspect",
-                "value": true
+                "value": false
               },
               {
                 "id": "links",
@@ -977,6 +988,46 @@
                     "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?${workflow:queryparam}&var-pipeline=${__data.fields.Pipeline}&${run_type:queryparam}&var-run_id=-&${__data.fields.action_scope}&${__url_time_range}",
                     "targetBlank": false,
                     "includeVars": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Details"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto"
+                }
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
+              },
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": ".*",
+                      "result": {
+                        "text": "Inspect value"
+                      }
+                    }
                   }
                 ]
               }
