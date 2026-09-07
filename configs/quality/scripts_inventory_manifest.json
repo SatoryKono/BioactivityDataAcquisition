@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-07T06:32:06.480346+00:00",
+  "generated_at": "2026-09-07T08:05:01.959384+00:00",
   "summary": {
     "total_scripts": 613,
     "status_counts": {
@@ -19943,7 +19943,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 169,
+          "line": 179,
           "source_group": "other",
           "text": "> `bash scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh`."
         }
@@ -20317,7 +20317,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 171,
+          "line": 181,
           "source_group": "other",
           "text": "> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1`."
         }
@@ -20568,7 +20568,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 155,
+          "line": 165,
           "source_group": "other",
           "text": "> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1`."
         },
@@ -20611,7 +20611,7 @@
         },
         {
           "path": "grafana/README.md",
-          "line": 146,
+          "line": 156,
           "source_group": "other",
           "text": "> `bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh`."
         },

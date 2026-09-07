@@ -556,7 +556,7 @@ def test_runtime_selected_count_zeroes_are_scope_anchored() -> None:
     """Selected runtime count cards must keep UNKNOWN when selected scope is absent."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expected_panels = {
-        "Monitor Failed Runs": "bioetl_runtime_pipeline_run_type_universe",
+        "Monitor Failed Runs": "bioetl_pipeline_runs_total",
         "Monitor No-Records Runs": "bioetl_runtime_pipeline_run_type_universe",
     }
     panels = {
@@ -575,7 +575,7 @@ def test_runtime_selected_count_zeroes_are_scope_anchored() -> None:
         ]
         assert expressions
         assert any(anchor_metric in expr for expr in expressions), (
-            f"{panel_title} must anchor zero fallback to runtime universe telemetry"
+            f"{panel_title} must require its documented telemetry anchor"
         )
         assert all("or vector(0)" not in expr for expr in expressions), (
             f"{panel_title} must not convert missing selected scope into false OK"

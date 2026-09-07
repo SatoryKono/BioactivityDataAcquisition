@@ -64,6 +64,16 @@ dashboard or starts the optional monitoring stack. Exact states and selectors
 are documented in
 `tests/fixtures/grafana/control_plane_validation/README.md`.
 
+Panel `bioetl-runtime/205` (Monitor Failed Runs) estimates the failed-run counter
+increase over the dashboard-selected window, using an instant query at its end.
+`increase` handles resets per series before the result is summed across the selected
+Pipeline and Run Type; extrapolation can produce fractional values. This is counter
+telemetry, not exact-run accounting. A measured zero requires at least two matching
+failed-counter samples with no increase. Absent or insufficient failed-counter samples
+remain `UNKNOWN`, even when the runtime scope universe or success counters exist.
+A wider range can retain historical evidence after the latest samples have gone stale;
+use the separate Metrics Coverage card for current scrape confidence.
+
 ## Содержание
 
 1. [Архитектура мониторинга](#1-%D0%B0%D1%80%D1%85%D0%B8%D1%82%D0%B5%D0%BA%D1%82%D1%83%D1%80%D0%B0-%D0%BC%D0%BE%D0%BD%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D0%BD%D0%B3%D0%B0)
