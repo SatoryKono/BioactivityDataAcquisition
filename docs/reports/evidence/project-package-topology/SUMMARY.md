@@ -1,8 +1,8 @@
 # Сводка evidence: project-package-topology
 
-Refresh note (2026-09-07): architecture closeout structural recount and CI run 34094034058 coverage reconciliation; `source_tree_sha256` and `source_module_count` match `reports/quality/module-coverage-inventory.json`.
+Refresh note (2026-09-07): Grafana identity projection structural recount and successful coverage producer in CI run 34103657627; `source_tree_sha256` and `source_module_count` match `reports/quality/module-coverage-inventory.json`.
 
-`source_tree_sha256=1bc329a12509cabbab4a277472d6404637b6ba3fd8b28502ccdd084f1b60bb52`
+`source_tree_sha256=c0cda22ac93d6b0395d548235151dd7eb41bab098643aff23058155eff890f4c`
 
 `source_module_count=2468`
 
@@ -108,6 +108,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `1bc329a12509cabbab4a277472d6404637b6ba3fd8b28502ccdd084f1b60bb52`
+- source_tree_sha256: `c0cda22ac93d6b0395d548235151dd7eb41bab098643aff23058155eff890f4c`
 
 `source_module_count=2468`
