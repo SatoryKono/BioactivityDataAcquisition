@@ -88,6 +88,8 @@ class RenderConfig:
     fixture_manifest: Path | None = None
     fixture_state: dict[str, object] | None = None
     fixture_case: str = ""
+    range_from: str = ""
+    range_to: str = ""
 
 
 @dataclass(frozen=True)
@@ -340,8 +342,8 @@ def _finalize_manifest(config: RenderConfig, manifest: dict[str, Any]) -> None:
             },
             "capture_context": {
                 "time_range": {
-                    "from": f"now-{config.range_hours}h",
-                    "to": "now",
+                    "from": _scope_query_params(config)["from"],
+                    "to": _scope_query_params(config)["to"],
                     "timezone": "UTC",
                 },
                 "variables": {
@@ -610,6 +612,16 @@ def _build_render_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--range-hours", type=int, default=12)
     parser.add_argument(
+        "--range-from",
+        default="",
+        help="Fixed UTC Unix milliseconds; requires --range-to.",
+    )
+    parser.add_argument(
+        "--range-to",
+        default="",
+        help="Fixed UTC Unix milliseconds; requires --range-from.",
+    )
+    parser.add_argument(
         "--occurrence-id",
         default="",
         help="Bind render evidence to one dashboard release occurrence.",
@@ -697,6 +709,16 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
     """Parse command-line arguments for Grafana screenshot rendering."""
     parser = _build_render_parser()
     args = parser.parse_args(argv)
+    if bool(args.range_from) != bool(args.range_to):
+        parser.error("--range-from and --range-to must be supplied together")
+    if args.range_from and (
+        not args.range_from.isascii()
+        or not args.range_to.isascii()
+        or not args.range_from.isdigit()
+        or not args.range_to.isdigit()
+        or int(args.range_from) >= int(args.range_to)
+    ):
+        parser.error("fixed range must use increasing UTC Unix millisecond integers")
     variables = _deduplicate_dashboard_variables(args.variables, parser=parser)
     fixture_manifest, fixture_state, fixture_case = _resolve_render_fixture_state(
         args, parser
@@ -728,6 +750,8 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
         fixture_manifest=fixture_manifest,
         fixture_state=fixture_state,
         fixture_case=fixture_case,
+        range_from=args.range_from,
+        range_to=args.range_to,
     )
 
 
@@ -791,8 +815,8 @@ def _load_dashboards(config: RenderConfig) -> list[DashboardRecord]:
 
 def _scope_query_params(config: RenderConfig) -> dict[str, str]:
     params: dict[str, str] = {
-        "from": f"now-{config.range_hours}h",
-        "to": "now",
+        "from": config.range_from or f"now-{config.range_hours}h",
+        "to": config.range_to or "now",
         "timezone": "UTC",
         "theme": config.theme,
     }
@@ -1696,6 +1720,14 @@ def main(argv: list[str] | None = None) -> int:
         print(_missing_credentials_message())
         return EXIT_CREDENTIALS
     config.output_dir.mkdir(parents=True, exist_ok=True)
+    if config.occurrence_id and (
+        (config.output_dir / _RENDER_MANIFEST_JSON).exists()
+        or any(config.output_dir.glob("*.png"))
+    ):
+        print(
+            "Explicit render occurrences require a fresh output directory; existing evidence is preserved."
+        )
+        return 1
 
     try:
         if config.fallback == "playwright":
