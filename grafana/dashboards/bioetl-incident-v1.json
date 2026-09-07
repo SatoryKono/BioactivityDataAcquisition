@@ -7,10 +7,227 @@
   "graphTooltip": 1,
   "id": null,
   "links": [],
+  "refresh": "60s",
+  "schemaVersion": 39,
+  "tags": [
+    "bioetl",
+    "incident",
+    "dashboard-2.0",
+    "phase-2"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(bioetl_workflow_universe, workflow)",
+        "description": "Optional workflow evidence context and workflow-dashboard handoff selector. Overview remains pipeline-summary-first: workflow does not yet drive exact intersection filtering for the current-status PromQL surfaces.",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Workflow",
+        "multi": false,
+        "name": "workflow",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_workflow_universe, workflow)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": false,
+          "text": "unknown",
+          "value": "unknown"
+        },
+        "datasource": "BioETL Ops HTTP",
+        "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list&workflow=${workflow}",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Pipeline",
+        "multi": false,
+        "name": "pipeline",
+        "options": [
+          {
+            "selected": true,
+            "text": "unknown",
+            "value": "unknown"
+          }
+        ],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$.items",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list&workflow=${workflow}"
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false,
+        "description": "Core scope: pipeline option list from the local control-plane catalog (/ops/control-plane/filter-options?dimension=pipeline), not the Prometheus universe. PromQL current-state panels still match $pipeline against the shared universe metrics. Single-select unless this board documents All. Unknown is the fail-closed default until a source dashboard or the operator selects a concrete pipeline. A pasted var-pipeline value that exists in the catalog remains selectable even when Prometheus has no series."
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "backfill",
+          "value": "backfill"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(bioetl_overview_pipeline_run_type_universe{pipeline=~\"$pipeline\"}, run_type)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Run Type",
+        "multi": true,
+        "name": "run_type",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_overview_pipeline_run_type_universe{pipeline=~\"$pipeline\"}, run_type)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false,
+        "description": "Core scope: run_type selector bounded by pipeline; fallback: All run types for selected pipeline. Default run_type is backfill (SEL-P0 fallback); Include All remains available for aggregate diagnostics."
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "-",
+          "value": "-"
+        },
+        "datasource": "BioETL Ops HTTP",
+        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
+        "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Run ID",
+        "multi": false,
+        "name": "run_id",
+        "options": [
+          {
+            "selected": true,
+            "text": "-",
+            "value": "-"
+          }
+        ],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$.items",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}"
+          }
+        },
+        "refresh": 1,
+        "regex": "/^\\s*(\\S(?:.*\\S)?)\\s*$/",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": false,
+          "text": "unknown",
+          "value": "unknown"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "query_result(label_replace(label_replace(label_replace(label_replace(label_replace(vector(1), \"src\", \"${pipeline}|${workflow}\", \"\", \"\"), \"hint\", \"unknown\", \"src\", \".*\"), \"hint\", \"$1\", \"src\", \"^(?:workflow_)?([^_|]+)(?:_[^|]*)?[|].*$\"), \"hint\", \"$1\", \"src\", \"^(?:unknown|[$]__all|All|[.][*]|)[|](?:workflow_)?([^_|]+)(?:_[^|]*)?$\"), \"hint\", \"unknown\", \"hint\", \"^(?:unknown|[$]|[$]__all|All|[.][*]|)$\"))",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Provider",
+        "multi": false,
+        "name": "provider",
+        "options": [],
+        "query": {
+          "query": "query_result(label_replace(label_replace(label_replace(label_replace(label_replace(vector(1), \"src\", \"${pipeline}|${workflow}\", \"\", \"\"), \"hint\", \"unknown\", \"src\", \".*\"), \"hint\", \"$1\", \"src\", \"^(?:workflow_)?([^_|]+)(?:_[^|]*)?[|].*$\"), \"hint\", \"$1\", \"src\", \"^(?:unknown|[$]__all|All|[.][*]|)[|](?:workflow_)?([^_|]+)(?:_[^|]*)?$\"), \"hint\", \"unknown\", \"hint\", \"^(?:unknown|[$]|[$]__all|All|[.][*]|)$\"))",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "regex": "/.*hint=\"([^\"]+)\".*/",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false,
+        "description": "Provider scope: derived from Pipeline when set (first name segment, same heuristic as runtime $provider_hint), else from Workflow when set; fail-closed default is unknown when neither Pipeline nor Workflow is set. Operators may still open handoffs that pass an explicit provider value."
+      }
+    ]
+  },
+  "time": {
+    "from": "now-12h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "5. Incident Workspace",
+  "uid": "bioetl-incident-v1",
+  "version": 3,
+  "style": "dark",
   "panels": [
     {
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 24,
         "x": 0,
         "y": 0
@@ -19,7 +236,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1;margin:0 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:2px;flex-wrap:nowrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health). Preserves selected scope and time range.\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${provider:queryparam}&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">4. Data Quality</a><a class=\"bioetl-nav-current\" href=\"#bioetl-incident-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"5. Incident Workspace (Incident Workspace)\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">5. Incident Workspace (current)</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Run Explorer</a></div>"
+        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1;margin:0 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:2px;flex-wrap:nowrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health). Preserves selected scope and time range.\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${provider:queryparam}&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">4. Data Quality</a><a class=\"bioetl-nav-current\" href=\"#bioetl-incident-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"5. Incident Workspace (Incident Workspace)\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Run Explorer</a></div>"
       },
       "title": "",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
@@ -103,17 +320,17 @@
       "id": 9400,
       "type": "text",
       "title": "",
-      "description": "Explains the incident-triage question and the evidence scopes used on this read-only dashboard. CURRENT ranks suspects from current fleet telemetry using the active filters. SELECTED RUN uses HTTP-backed evidence for one exact run; run_id never filters Prometheus. No suspects means none were found in the current scope and does not prove the fleet is healthy Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: provider=${provider}.",
+      "description": "Explains the incident-triage question and the evidence scopes used on this read-only dashboard. CURRENT ranks suspects from current fleet telemetry in GLOBAL scope; Pipeline and Run ID do not filter suspects. SELECTED RUN uses HTTP-backed evidence for one exact run; run_id never filters Prometheus. No suspects means none were found in the current scope and does not prove the fleet is healthy Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: provider=${provider}.",
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 16,
         "x": 0,
-        "y": 4
+        "y": 3
       },
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Incident Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">What is the highest-confidence active suspect? CURRENT = suspects. SELECTED RUN = proof. EMPTY DOMAIN is not a healthy-fleet verdict.</div></div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">GLOBAL fleet triage: Pipeline / Run ID do not filter suspects. Open the row’s domain and object; selected-run evidence is separate.</div></div>"
       },
       "links": []
     },
@@ -123,10 +340,10 @@
       "title": "Monitor Incident Status",
       "description": "CURRENT · TIME RANGE · Pair with Provenance reason + action; never read as OK. Not a healthy OK. Ranked suspects may be WORKFLOW/GLOBAL blast radius — check scope labels on tables. Incident header status (labelled only). Map 0=OK,1=WARN,2=CRIT,3/null=UNKNOWN. Never bare numbers. Confidence from missing telemetry / VALID_EMPTY suspects. Read-only workspace",
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 8,
         "x": 16,
-        "y": 4
+        "y": 3
       },
       "datasource": {
         "type": "prometheus",
@@ -224,15 +441,15 @@
       "title": "",
       "description": "DSA-07 decision rail. Read-only",
       "gridPos": {
-        "h": 3,
+        "h": 2,
         "w": 24,
         "x": 0,
-        "y": 8
+        "y": 6
       },
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Start Incident Triage",
-        "content": "<div style=\"font-size:16px;line-height:1;padding:0;margin:0;white-space:normal;overflow-wrap:anywhere\">First action: open the top Ranked Suspect.</div>"
+        "content": "<div style=\"font-size:16px;line-height:1.25;padding:0;white-space:normal;overflow-wrap:anywhere\">GLOBAL · CURRENT · Rank: CRIT before WARN; ties have equal urgency. Confidence: signal only, unverified cause. Impact / event age: UNKNOWN until verified.</div>"
       },
       "links": [
         {
@@ -247,12 +464,12 @@
       "id": 2010,
       "type": "table",
       "title": "Inspect Ranked Suspects",
-      "description": "TIME RANGE · Selected pipeline may differ from row pipeline (blast radius). Cross-domain first-screen ranking uses shipped severity labels (failing/crit=2, degraded/warn=1), not boolean activation. Priority 0 is telemetry_gap/UNKNOWN for a domain with no recording-rule or universe series. Global sort by Priority then cap five rows. Domain, signal, priority, and action identify source and next handoff; row links preserve scope. VALID_EMPTY when no active suspects — empty domains are not a healthy-fleet verdict. Complete per-domain evidence stays in Domain Suspect Details. TELEMETRY MISSING is not a zero and not VALID EMPTY. One Prometheus union preserves a single Value column before descending priority sort and the five-row limit; domain labels keep sources distinct.",
+      "description": "GLOBAL · CURRENT at query evaluation time (range end), not SELECTED RUN. Rank is severity order: CRIT=2, WARN=1, UNKNOWN=0; ties have equal urgency, not higher confidence. Confidence is UNVERIFIED: a rule signal alone does not establish cause or impact. Pipeline/provider identifies potential impact scope; confirm with domain evidence. Only active (>0) signals are ranked; telemetry_gap stays UNKNOWN. VALID EMPTY means no active suspects with available evidence; TELEMETRY MISSING is not a zero and not VALID EMPTY. Domain details use the same GLOBAL scope and evaluation time. Rule sample time is not the underlying event time. Inspect retains source labels; Action preserves row scope. TIME RANGE selects evaluation time, not an event-history rank.",
       "gridPos": {
-        "h": 7,
+        "h": 10,
         "w": 24,
         "x": 0,
-        "y": 11
+        "y": 8
       },
       "datasource": {
         "type": "prometheus",
@@ -264,17 +481,35 @@
           "instant": true,
           "range": false,
           "format": "table",
-          "expr": "bioetl_incident_ranked_runtime or bioetl_incident_ranked_provider or bioetl_incident_ranked_dq"
+          "expr": "label_join(label_replace((bioetl_incident_ranked_runtime or bioetl_incident_ranked_provider or bioetl_incident_ranked_dq),\"confidence\",\"UNVERIFIED\",\"\",\"\"),\"object\",\" / \",\"pipeline\",\"provider\")"
         }
       ],
       "transformations": [
         {
-          "id": "extractFields",
+          "id": "filterByValue",
           "options": {
-            "source": "action",
-            "format": "regexp",
-            "regExp": "/(?<action_detail>.*)/",
-            "replace": false
+            "filters": [
+              {
+                "fieldName": "Value",
+                "config": {
+                  "id": "greater",
+                  "options": {
+                    "value": 0
+                  }
+                }
+              },
+              {
+                "fieldName": "signal",
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": "telemetry_gap"
+                  }
+                }
+              }
+            ],
+            "type": "include",
+            "match": "any"
           }
         },
         {
@@ -296,6 +531,34 @@
           }
         },
         {
+          "id": "calculateField",
+          "options": {
+            "mode": "index",
+            "alias": "row_index"
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "mode": "binary",
+            "binary": {
+              "left": "row_index",
+              "operator": "+",
+              "right": "1"
+            },
+            "alias": "Rank"
+          }
+        },
+        {
+          "id": "extractFields",
+          "options": {
+            "source": "action",
+            "format": "regexp",
+            "regExp": "/(?<action_detail>.*)/",
+            "replace": false
+          }
+        },
+        {
           "id": "organize",
           "options": {
             "excludeByName": {
@@ -307,22 +570,30 @@
               "run_type": true,
               "severity": true,
               "action_target": true,
-              "__name__": true
+              "__name__": true,
+              "row_index": true,
+              "confidence": false,
+              "object": false
             },
             "indexByName": {
-              "domain": 0,
-              "signal": 1,
-              "Value": 2,
-              "action": 3,
-              "pipeline": 5,
-              "provider": 6,
-              "action_detail": 4
+              "Rank": 0,
+              "Value": 1,
+              "confidence": 2,
+              "pipeline": 3,
+              "provider": 4,
+              "signal": 5,
+              "action": 6,
+              "domain": 8,
+              "object": 3,
+              "action_detail": 7
             },
             "renameByName": {
               "domain": "Domain",
               "signal": "Signal",
-              "Value": "Priority",
+              "Value": "Severity",
               "action": "Action",
+              "confidence": "Confidence",
+              "object": "Object",
               "pipeline": "Pipeline",
               "provider": "Provider",
               "action_detail": "Details"
@@ -332,14 +603,15 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
+          "noValue": "UNKNOWN",
           "custom": {
             "align": "left",
             "cellOptions": {
               "type": "auto",
               "wrapText": false
             },
-            "inspect": true
+            "inspect": true,
+            "hidden": true
           },
           "color": {
             "mode": "thresholds"
@@ -391,123 +663,191 @@
               "includeVars": false
             }
           ],
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null+nan",
-                "result": {
-                  "text": "—",
-                  "color": "transparent",
-                  "index": 0
-                }
-              }
-            },
-            {
-              "type": "value",
-              "options": {
-                "2": {
-                  "text": "CRIT",
-                  "color": "red",
-                  "index": 1
-                },
-                "1": {
-                  "text": "WARN",
-                  "color": "orange",
-                  "index": 2
-                },
-                "0": {
-                  "text": "UNKNOWN",
-                  "color": "gray",
-                  "index": 3
-                }
-              }
-            }
-          ]
+          "mappings": []
         },
         "overrides": [
           {
             "matcher": {
               "id": "byName",
-              "options": "Value"
+              "options": "Rank"
             },
             "properties": [
               {
-                "id": "displayName",
-                "value": "Priority"
+                "id": "custom.width",
+                "value": 48
+              },
+              {
+                "id": "mappings",
+                "value": []
+              },
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "0": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      },
+                      "1": {
+                        "text": "WARN",
+                        "color": "orange"
+                      },
+                      "2": {
+                        "text": "CRIT",
+                        "color": "red"
+                      }
+                    }
+                  }
+                ]
               },
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background",
-                  "mode": "basic",
-                  "wrapText": false
+                  "type": "color-text"
                 }
               },
               {
-                "id": "color",
+                "id": "custom.hidden",
+                "value": false
+              },
+              {
+                "id": "displayName",
+                "value": "Severity"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Confidence"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 112
+              },
+              {
+                "id": "noValue",
+                "value": "UNVERIFIED"
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pipeline"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Provider"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Signal"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
                 "value": {
-                  "mode": "thresholds"
+                  "type": "auto",
+                  "wrapText": true
                 }
               },
               {
-                "id": "thresholds",
-                "value": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "gray",
-                      "value": null
-                    },
-                    {
-                      "color": "gray",
-                      "value": 0
-                    },
-                    {
-                      "color": "orange",
-                      "value": 1
-                    },
-                    {
-                      "color": "red",
-                      "value": 2
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "telemetry_gap": {
+                        "text": "Telemetry missing"
+                      },
+                      "runtime_failed": {
+                        "text": "Run failed"
+                      },
+                      "dq_failure": {
+                        "text": "DQ failure"
+                      }
                     }
-                  ]
-                }
+                  }
+                ]
               },
+              {
+                "id": "custom.hidden",
+                "value": false
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Domain"
+            },
+            "properties": [
               {
                 "id": "custom.width",
                 "value": 100
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "domain"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 90
               },
               {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "signal"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 210
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "provider": {
+                        "text": "Provider"
+                      },
+                      "runtime": {
+                        "text": "Runtime"
+                      },
+                      "dq": {
+                        "text": "DQ"
+                      }
+                    }
+                  }
+                ]
               },
               {
                 "id": "custom.cellOptions",
@@ -515,33 +855,26 @@
                   "type": "auto",
                   "wrapText": true
                 }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "pipeline"
-            },
-            "properties": [
+              },
               {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
+                "id": "custom.hidden",
+                "value": false
               }
             ]
           },
           {
             "matcher": {
               "id": "byName",
-              "options": "provider"
+              "options": "Object"
             },
             "properties": [
               {
                 "id": "custom.width",
-                "value": 110
+                "value": 130
+              },
+              {
+                "id": "noValue",
+                "value": "GLOBAL"
               },
               {
                 "id": "custom.cellOptions",
@@ -549,6 +882,23 @@
                   "type": "auto",
                   "wrapText": true
                 }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "unknown / unknown": {
+                        "text": "UNKNOWN"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
               }
             ]
           },
@@ -579,6 +929,73 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "Action"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 105
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              },
+              {
+                "id": "noValue",
+                "value": "Inspect"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "provider": {
+                        "text": "Provider"
+                      },
+                      "runtime": {
+                        "text": "Runtime"
+                      },
+                      "dq": {
+                        "text": "DQ"
+                      },
+                      "UNKNOWN": {
+                        "text": "Inspect"
+                      },
+                      "unknown": {
+                        "text": "Inspect"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
+              },
+              {
+                "id": "custom.inspect",
+                "value": false
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open domain diagnostics",
+                    "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?${workflow:queryparam}&var-pipeline=${__data.fields.Pipeline}&${run_type:queryparam}&var-run_id=-&${__data.fields.action_scope}&${__url_time_range}",
+                    "targetBlank": false,
+                    "includeVars": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "Details"
             },
             "properties": [
@@ -591,6 +1008,10 @@
               {
                 "id": "custom.inspect",
                 "value": true
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
               },
               {
                 "id": "links",
@@ -611,39 +1032,6 @@
                 ]
               }
             ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Action"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 120
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto"
-                }
-              },
-              {
-                "id": "custom.inspect",
-                "value": false
-              },
-              {
-                "id": "links",
-                "value": [
-                  {
-                    "title": "Open domain diagnostics",
-                    "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?${workflow:queryparam}&var-pipeline=${__data.fields.Pipeline}&${run_type:queryparam}&var-run_id=-&${__data.fields.action_scope}&${__url_time_range}",
-                    "targetBlank": false,
-                    "includeVars": false
-                  }
-                ]
-              }
-            ]
           }
         ]
       },
@@ -660,8 +1048,8 @@
         },
         "sortBy": [
           {
-            "displayName": "Priority",
-            "desc": true
+            "displayName": "Rank",
+            "desc": false
           }
         ]
       }
@@ -799,7 +1187,7 @@
           "id": 2006,
           "type": "state-timeline",
           "title": "Track Alert State History",
-          "description": "TIME RANGE · Range ALERTS history, not a persistent incident log. State is written in every band and row label; color is redundant. Use Current Alerts for the current verdict. VALID EMPTY (no events) is not TELEMETRY MISSING.",
+          "description": "GLOBAL · TIME RANGE · ALERTS history, not a persistent incident log. FIRING/PENDING legend names the states; adjacent equal samples merge. Auto labels avoid clipped fragments. Hover a band for full alert name and interval start/end; gaps remain gaps. VALID EMPTY (no events) is not TELEMETRY MISSING. Outlined intervals use semantic state colors; hover for exact interval boundaries. Gaps mean no observed samples, not OK. State is explicit in the full row label and legend; narrow intervals carry no clipped in-band text.",
           "gridPos": {
             "h": 8,
             "w": 24,
@@ -812,8 +1200,8 @@
           },
           "targets": [
             {
-              "expr": "ALERTS{alertstate=~\"firing|pending\"}",
-              "legendFormat": "{{alertstate}} · {{alertname}}",
+              "expr": "ALERTS{alertstate=\"firing\"} or (ALERTS{alertstate=\"pending\"} * 2)",
+              "legendFormat": "{{alertname}} · {{alertstate}}",
               "refId": "A",
               "instant": false,
               "range": true
@@ -821,13 +1209,15 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
+              "noValue": "GAP",
               "custom": {
                 "fillOpacity": 0,
-                "lineWidth": 0
+                "lineWidth": 2,
+                "axisWidth": 360
               },
               "color": {
-                "mode": "thresholds"
+                "mode": "fixed",
+                "fixedColor": "gray"
               },
               "thresholds": {
                 "mode": "absolute",
@@ -846,84 +1236,29 @@
                 {
                   "type": "value",
                   "options": {
-                    "0": {
-                      "text": "inactive"
-                    },
                     "1": {
-                      "text": "active"
+                      "text": "FIRING",
+                      "color": "red"
+                    },
+                    "2": {
+                      "text": "PENDING",
+                      "color": "orange"
                     }
                   }
                 }
               ]
             },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": ".*firing.*"
-                },
-                "properties": [
-                  {
-                    "id": "color",
-                    "value": {
-                      "mode": "fixed",
-                      "fixedColor": "red"
-                    }
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "1": {
-                            "text": "FIRING"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": ".*pending.*"
-                },
-                "properties": [
-                  {
-                    "id": "color",
-                    "value": {
-                      "mode": "fixed",
-                      "fixedColor": "orange"
-                    }
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "1": {
-                            "text": "PENDING"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
+            "overrides": []
           },
           "options": {
             "mergeValues": true,
-            "showValue": "always",
+            "showValue": "never",
             "alignValue": "left",
             "rowHeight": 1.0,
             "legend": {
               "displayMode": "list",
               "placement": "bottom",
-              "showLegend": false
+              "showLegend": true
             },
             "tooltip": {
               "mode": "single",
@@ -945,7 +1280,7 @@
           },
           "options": {
             "mode": "html",
-            "content": "<div style=\"display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:4px 8px;line-height:1.3;font-size:16px;white-space:normal\"><div><strong>Impact</strong><br>Affected pipeline/provider scope from suspects and current alerts.</div><div><strong>Confidence</strong><br>High with mapped Status + suspects; low with UNKNOWN or missing telemetry.</div><div><strong>Basis</strong><br>Domain label + alertname; read-only evidence, not AI diagnosis.</div></div>"
+            "content": "<div style=\"font-size:16px;line-height:1.25;padding:0;white-space:normal;overflow-wrap:anywhere\">Impact: confirm the row’s pipeline/provider. Confidence: UNVERIFIED until domain status and independent evidence agree. UNKNOWN means missing telemetry; it does not identify a cause.</div>"
           }
         }
       ]
@@ -953,7 +1288,7 @@
     {
       "id": 2099,
       "type": "row",
-      "title": "Domain Suspect Details",
+      "title": "Domain Suspect Details · GLOBAL / CURRENT",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -961,12 +1296,13 @@
         "y": 19
       },
       "collapsed": true,
+      "description": "Selected pipeline may differ from row pipeline (blast radius)",
       "panels": [
         {
           "id": 2002,
           "type": "table",
           "title": "Inspect Runtime Suspects",
-          "description": "TIME RANGE · SELECTED RUN · Selected pipeline may differ from row pipeline (blast radius). Runtime blockers (current topk by domain). VALID EMPTY when none. Handoff: Pipeline Diagnostics. Not cross-domain ranking TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "GLOBAL · CURRENT at query evaluation time (range end). Same fleet scope as Ranked Suspects; pipeline and run selectors do not filter this table. Active signals only. VALID EMPTY is not TELEMETRY MISSING or a healthy-fleet verdict. TIME RANGE · SELECTED RUN · Selected pipeline may differ from row pipeline (blast radius). Runtime blockers (current topk by domain). VALID EMPTY when none. Handoff: Pipeline Diagnostics. Not cross-domain ranking ",
           "gridPos": {
             "h": 7,
             "w": 8,
@@ -1155,7 +1491,7 @@
           "id": 2003,
           "type": "table",
           "title": "Inspect Provider Suspects",
-          "description": "TIME RANGE · Do not put full UUIDs into Prometheus labels. Selected pipeline may differ from row pipeline (blast radius). Provider causes (current fleet topk). Empty + non-OK Status is an explainability gap. Handoff: Provider Health TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "GLOBAL · CURRENT at query evaluation time (range end). Same fleet scope as Ranked Suspects; pipeline and run selectors do not filter this table. Active signals only. VALID EMPTY is not TELEMETRY MISSING or a healthy-fleet verdict. TIME RANGE · Do not put full UUIDs into Prometheus labels. Selected pipeline may differ from row pipeline (blast radius). Provider causes (current fleet topk). Empty + non-OK Status is an explainability gap. Handoff: Provider Health ",
           "gridPos": {
             "h": 7,
             "w": 8,
@@ -1344,7 +1680,7 @@
           "id": 2004,
           "type": "table",
           "title": "Inspect DQ Suspects",
-          "description": "TIME RANGE · Selected pipeline may differ from row pipeline (blast radius). DQ current reasons (NOW topk). VALID EMPTY when none. Handoff: Data Quality. Not a persistent incident record TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "GLOBAL · CURRENT at query evaluation time (range end). Same fleet scope as Ranked Suspects; pipeline and run selectors do not filter this table. Active signals only. VALID EMPTY is not TELEMETRY MISSING or a healthy-fleet verdict. TIME RANGE · Selected pipeline may differ from row pipeline (blast radius). DQ current reasons (NOW topk). VALID EMPTY when none. Handoff: Data Quality. Not a persistent incident record ",
           "gridPos": {
             "h": 7,
             "w": 8,
@@ -1556,8 +1892,7 @@
             }
           }
         }
-      ],
-      "description": "Selected pipeline may differ from row pipeline (blast radius)"
+      ]
     },
     {
       "id": 2100,
@@ -2002,222 +2337,5 @@
         }
       ]
     }
-  ],
-  "refresh": "60s",
-  "schemaVersion": 39,
-  "tags": [
-    "bioetl",
-    "incident",
-    "dashboard-2.0",
-    "phase-2"
-  ],
-  "templating": {
-    "list": [
-      {
-        "allValue": ".*",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "definition": "label_values(bioetl_workflow_universe, workflow)",
-        "description": "Optional workflow evidence context and workflow-dashboard handoff selector. Overview remains pipeline-summary-first: workflow does not yet drive exact intersection filtering for the current-status PromQL surfaces.",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Workflow",
-        "multi": false,
-        "name": "workflow",
-        "options": [],
-        "query": {
-          "query": "label_values(bioetl_workflow_universe, workflow)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": false,
-          "text": "unknown",
-          "value": "unknown"
-        },
-        "datasource": "BioETL Ops HTTP",
-        "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list&workflow=${workflow}",
-        "hide": 0,
-        "includeAll": false,
-        "label": "Pipeline",
-        "multi": false,
-        "name": "pipeline",
-        "options": [
-          {
-            "selected": true,
-            "text": "unknown",
-            "value": "unknown"
-          }
-        ],
-        "query": {
-          "queryType": "infinity",
-          "refId": "variable",
-          "infinityQuery": {
-            "format": "table",
-            "parser": "backend",
-            "root_selector": "$.items",
-            "type": "json",
-            "source": "url",
-            "url_options": {
-              "method": "GET",
-              "data": ""
-            },
-            "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list&workflow=${workflow}"
-          }
-        },
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false,
-        "description": "Core scope: pipeline option list from the local control-plane catalog (/ops/control-plane/filter-options?dimension=pipeline), not the Prometheus universe. PromQL current-state panels still match $pipeline against the shared universe metrics. Single-select unless this board documents All. Unknown is the fail-closed default until a source dashboard or the operator selects a concrete pipeline. A pasted var-pipeline value that exists in the catalog remains selectable even when Prometheus has no series."
-      },
-      {
-        "allValue": ".*",
-        "current": {
-          "selected": true,
-          "text": "backfill",
-          "value": "backfill"
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "definition": "label_values(bioetl_overview_pipeline_run_type_universe{pipeline=~\"$pipeline\"}, run_type)",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Run Type",
-        "multi": true,
-        "name": "run_type",
-        "options": [],
-        "query": {
-          "query": "label_values(bioetl_overview_pipeline_run_type_universe{pipeline=~\"$pipeline\"}, run_type)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false,
-        "description": "Core scope: run_type selector bounded by pipeline; fallback: All run types for selected pipeline. Default run_type is backfill (SEL-P0 fallback); Include All remains available for aggregate diagnostics."
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "-",
-          "value": "-"
-        },
-        "datasource": "BioETL Ops HTTP",
-        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
-        "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
-        "hide": 0,
-        "includeAll": false,
-        "label": "Run ID",
-        "multi": false,
-        "name": "run_id",
-        "options": [
-          {
-            "selected": true,
-            "text": "-",
-            "value": "-"
-          }
-        ],
-        "query": {
-          "queryType": "infinity",
-          "refId": "variable",
-          "infinityQuery": {
-            "format": "table",
-            "parser": "backend",
-            "root_selector": "$.items",
-            "type": "json",
-            "source": "url",
-            "url_options": {
-              "method": "GET",
-              "data": ""
-            },
-            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}"
-          }
-        },
-        "refresh": 1,
-        "regex": "/^\\s*(\\S(?:.*\\S)?)\\s*$/",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": false,
-          "text": "unknown",
-          "value": "unknown"
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "definition": "query_result(label_replace(label_replace(label_replace(label_replace(label_replace(vector(1), \"src\", \"${pipeline}|${workflow}\", \"\", \"\"), \"hint\", \"unknown\", \"src\", \".*\"), \"hint\", \"$1\", \"src\", \"^(?:workflow_)?([^_|]+)(?:_[^|]*)?[|].*$\"), \"hint\", \"$1\", \"src\", \"^(?:unknown|[$]__all|All|[.][*]|)[|](?:workflow_)?([^_|]+)(?:_[^|]*)?$\"), \"hint\", \"unknown\", \"hint\", \"^(?:unknown|[$]|[$]__all|All|[.][*]|)$\"))",
-        "hide": 0,
-        "includeAll": false,
-        "label": "Provider",
-        "multi": false,
-        "name": "provider",
-        "options": [],
-        "query": {
-          "query": "query_result(label_replace(label_replace(label_replace(label_replace(label_replace(vector(1), \"src\", \"${pipeline}|${workflow}\", \"\", \"\"), \"hint\", \"unknown\", \"src\", \".*\"), \"hint\", \"$1\", \"src\", \"^(?:workflow_)?([^_|]+)(?:_[^|]*)?[|].*$\"), \"hint\", \"$1\", \"src\", \"^(?:unknown|[$]__all|All|[.][*]|)[|](?:workflow_)?([^_|]+)(?:_[^|]*)?$\"), \"hint\", \"unknown\", \"hint\", \"^(?:unknown|[$]|[$]__all|All|[.][*]|)$\"))",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 2,
-        "regex": "/.*hint=\"([^\"]+)\".*/",
-        "skipUrlSync": false,
-        "sort": 1,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false,
-        "description": "Provider scope: derived from Pipeline when set (first name segment, same heuristic as runtime $provider_hint), else from Workflow when set; fail-closed default is unknown when neither Pipeline nor Workflow is set. Operators may still open handoffs that pass an explicit provider value."
-      }
-    ]
-  },
-  "time": {
-    "from": "now-12h",
-    "to": "now"
-  },
-  "timepicker": {},
-  "timezone": "browser",
-  "title": "5. Incident Workspace",
-  "uid": "bioetl-incident-v1",
-  "version": 3,
-  "style": "dark"
+  ]
 }

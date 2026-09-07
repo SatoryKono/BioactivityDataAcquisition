@@ -358,39 +358,37 @@ def _fix_artifact_links(panel: dict) -> None:
 
 
 def _fix_ranked_links(panel: dict) -> None:
-    panel["targets"][0]["expr"] = (
-        "bioetl_incident_ranked_runtime or bioetl_incident_ranked_provider "
-        "or bioetl_incident_ranked_dq"
-    )
+    """Bind domain actions without replacing ranking or presentation semantics."""
     _hide_field(panel, "action_dashboard_uid")
     _hide_field(panel, "action_scope")
     _separate_action_inspector(panel)
     overrides = panel["fieldConfig"]["overrides"]
-    overrides[:] = [
-        o
-        for o in overrides
-        if o.get("matcher", {}).get("options") not in {"Action", "action"}
+    action = next(
+        (o for o in overrides if o.get("matcher", {}).get("options") == "Action"),
+        None,
+    )
+    if action is None:
+        action = {"matcher": {"id": "byName", "options": "Action"}, "properties": []}
+        overrides.append(action)
+    properties = action["properties"]
+    properties[:] = [
+        p for p in properties if p["id"] not in {"links", "custom.inspect"}
     ]
-    overrides.append(
-        {
-            "matcher": {"id": "byName", "options": "Action"},
-            "properties": [
-                {"id": "custom.width", "value": 120},
-                {"id": "custom.cellOptions", "value": {"type": "auto"}},
-                {"id": "custom.inspect", "value": False},
-                {
-                    "id": "links",
-                    "value": [
-                        {
-                            "title": "Open domain diagnostics",
-                            "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?${workflow:queryparam}&var-pipeline=${__data.fields.Pipeline}&${run_type:queryparam}&var-run_id=-&${__data.fields.action_scope}&${__url_time_range}",
-                            "targetBlank": False,
-                            "includeVars": False,
-                        }
-                    ],
-                },
-            ],
-        }
+    properties.extend(
+        [
+            {"id": "custom.inspect", "value": False},
+            {
+                "id": "links",
+                "value": [
+                    {
+                        "title": "Open domain diagnostics",
+                        "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?${workflow:queryparam}&var-pipeline=${__data.fields.Pipeline}&${run_type:queryparam}&var-run_id=-&${__data.fields.action_scope}&${__url_time_range}",
+                        "targetBlank": False,
+                        "includeVars": False,
+                    }
+                ],
+            },
+        ]
     )
 
 
@@ -399,7 +397,7 @@ def _separate_action_inspector(panel: dict) -> None:
     transforms = panel["transformations"]
     transforms[:] = [t for t in transforms if t.get("id") != "extractFields"]
     transforms.insert(
-        0,
+        next(i for i, t in enumerate(transforms) if t["id"] == "organize"),
         {
             "id": "extractFields",
             "options": {
@@ -412,7 +410,13 @@ def _separate_action_inspector(panel: dict) -> None:
     )
     organize = next(t["options"] for t in transforms if t["id"] == "organize")
     organize["renameByName"]["action_detail"] = "Details"
-    organize["indexByName"].update(action_detail=4, pipeline=5, provider=6)
+    indexes = organize["indexByName"]
+    if "action_detail" not in indexes:
+        position = indexes["action"] + 1
+        for name, index in list(indexes.items()):
+            if index >= position:
+                indexes[name] = index + 1
+        indexes["action_detail"] = position
     overrides = panel["fieldConfig"]["overrides"]
     overrides[:] = [o for o in overrides if o["matcher"]["options"] != "Details"]
     overrides.append(
@@ -421,6 +425,7 @@ def _separate_action_inspector(panel: dict) -> None:
             "properties": [
                 {"id": "custom.cellOptions", "value": {"type": "auto"}},
                 {"id": "custom.inspect", "value": True},
+                {"id": "custom.hidden", "value": False},
                 {"id": "links", "value": []},
                 {
                     "id": "mappings",

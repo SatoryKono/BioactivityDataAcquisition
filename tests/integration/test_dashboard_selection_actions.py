@@ -93,6 +93,7 @@ def test_ranked_action_overrides_inspect_value_with_domain_link() -> None:
         if o["matcher"]["options"] == "Details"
     )
     assert {"id": "custom.inspect", "value": True} in details["properties"]
+    assert {"id": "custom.hidden", "value": False} in details["properties"]
     assert {"id": "links", "value": []} in details["properties"]
     extractor = next(t for t in panel["transformations"] if t["id"] == "extractFields")
     assert extractor["options"]["source"] == "action"

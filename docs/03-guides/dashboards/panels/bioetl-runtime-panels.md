@@ -19,7 +19,8 @@ used.
 
 ### 2. Understand Pipeline Scope
 - **Type:** Text
-- **Purpose:** Show run ID, manifest ID, and replay provenance anchors.
+- **Purpose:** Direct the first action to the highest-severity CURRENT blocker; separate
+  selected-run evidence and unverified full telemetry.
 - **Data sources:** Dashboard variables and operator copy.
 
 ### 3. Monitor Pipeline Status
@@ -43,10 +44,14 @@ used.
 
 ### 7. Monitor Metrics Coverage
 - **Type:** Stat
-- **Purpose:** Confidence chip for missing/stale scrape or rule-group evidence
-  (not pipeline health). Non-zero makes runtime Status `INCOMPLETE`.
-- **Data sources:** `bioetl_runtime_trust_gap_status_10m`
-- **DSA-05:** Do not present SCRAPING/gap as a peer OK health KPI.
+- **Purpose:** Neutral Endpoint, Baseline and Rule age evidence beside blockers.
+  SCRAPING proves endpoint access. PRESENT proves only the existing limited
+  rule/series baseline; full telemetry remains UNVERIFIED.
+- **Data sources:** `up`, `bioetl_runtime_trust_gap_status_10m` and
+  `prometheus_rule_group_last_evaluation_timestamp_seconds`.
+- **Presentation:** Value-only gray evidence for SCRAPING/PRESENT, explicit
+  unavailable/gap labels and rule age in seconds. A non-zero trust gap still
+  makes Pipeline Status INCOMPLETE; missing data remains UNKNOWN.
 
 ### 8. Track Stage Lag
 - **Type:** Timeseries
@@ -56,7 +61,8 @@ used.
 
 ### 9. Review Runtime Blockers
 - **Type:** Table
-- **Purpose:** Show active runtime blockers with details.
+- **Purpose:** Show active runtime blockers directly below status on the first screen,
+  including 900 by 768; empty is None observed, not proof of complete telemetry.
 - **Data sources:** `bioetl_runtime_current_blocker_reason_scoped`
 
 ### 9. Monitor Active Blocker Count
@@ -167,7 +173,8 @@ used.
 
 ### 29. Review Cross-Domain Handoffs
 - **Type:** Text
-- **Purpose:** Explain cross-domain handoff patterns.
+- **Purpose:** Show the complete concise handoff instruction with working Provider, DQ,
+  Trust and Incident links, without nested scrolling at 1000/1366 px.
 - **Data sources:** Dashboard variables and operator copy.
 
 ### 30. Inspect DQ Alert Conditions
@@ -200,7 +207,8 @@ used.
 
 ### 35. Review Global Process Signals
 - **Type:** Text
-- **Purpose:** Explain global process-level signals.
+- **Purpose:** Show the complete concise global-signal instruction without nested
+  scrolling; global process signals are not selected-run proof.
 - **Data sources:** Dashboard variables and operator copy.
 
 ### 36. Track Global Shutdown Starts

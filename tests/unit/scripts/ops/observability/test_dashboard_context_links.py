@@ -89,3 +89,48 @@ def test_action_targets_use_allowlisted_dashboard_routes() -> None:
     assert "${__data.fields.action_dashboard_uid}" in url
     assert "var-run_id=${__data.fields.run_id}" in url
     assert "${__url_time_range}" in url
+
+
+def test_action_normalization_preserves_rank_query_and_visible_column() -> None:
+    """A navigation refresh must not erase confidence or hide the Action field."""
+    from copy import deepcopy
+
+    from scripts.ops.observability.grafana.dashboard_context_links import (
+        normalize_dashboard_actions,
+    )
+
+    panel = {
+        "id": 2010,
+        "targets": [{"expr": "rank_with_confidence"}],
+        "transformations": [
+            {
+                "id": "organize",
+                "options": {
+                    "renameByName": {"action": "Action"},
+                    "indexByName": {"action": 0, "domain": 1},
+                },
+            }
+        ],
+        "fieldConfig": {
+            "overrides": [
+                {
+                    "matcher": {"id": "byName", "options": "Action"},
+                    "properties": [
+                        {"id": "custom.width", "value": 105},
+                        {"id": "custom.hidden", "value": False},
+                    ],
+                }
+            ],
+        },
+    }
+    dashboard = {"uid": "bioetl-incident-v1", "panels": [panel]}
+    normalize_dashboard_actions(dashboard)
+    first = deepcopy(dashboard)
+    normalize_dashboard_actions(dashboard)
+    assert dashboard == first
+    assert panel["targets"][0]["expr"] == "rank_with_confidence"
+    properties = panel["fieldConfig"]["overrides"][0]["properties"]
+    assert {"id": "custom.hidden", "value": False} in properties
+    assert {"id": "custom.width", "value": 105} in properties
+    link = next(prop["value"][0] for prop in properties if prop["id"] == "links")
+    assert "${__data.fields.Pipeline}" in link["url"]

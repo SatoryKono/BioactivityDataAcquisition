@@ -826,7 +826,7 @@ def test_incident_ranked_suspects_uses_one_comparable_value_column() -> None:
         str(target.get("expr") or "").strip() for target in suspects.get("targets", [])
     ]
     assert len(exprs) == 1
-    assert exprs[0].split(" or ") == [
+    assert exprs[0].split("(", 3)[3].split(")", 1)[0].split(" or ") == [
         "bioetl_incident_ranked_runtime",
         "bioetl_incident_ranked_provider",
         "bioetl_incident_ranked_dq",
@@ -852,7 +852,7 @@ def test_incident_ranked_suspects_uses_one_comparable_value_column() -> None:
     for field in ("Time", "Time 1", "Time 2"):
         assert exclude.get(field) is True
     assert exclude.get("Value") is not True
-    assert rename.get("Value") == "Priority"
+    assert rename.get("Value") == "Severity"
     assert rename.get("action") == "Action"
     assert rename.get("signal") == "Signal"
     assert not {value for value in rename.values() if str(value).startswith("Series ")}
@@ -875,7 +875,7 @@ def test_incident_ranked_suspects_limit_requires_comparable_rank() -> None:
         str(target.get("expr") or "").strip() for target in suspects.get("targets", [])
     ]
     assert len(exprs) == 1
-    sources = exprs[0].split(" or ")
+    sources = exprs[0].split("(", 3)[3].split(")", 1)[0].split(" or ")
     assert sources == [
         "bioetl_incident_ranked_runtime",
         "bioetl_incident_ranked_provider",
@@ -909,8 +909,8 @@ def test_incident_alert_history_has_readable_full_width_layout() -> None:
     assert history_grid.get("x") == 0
     assert history_grid.get("w") == 24
     assert history_grid.get("h") == 8
-    assert history.get("options", {}).get("legend", {}).get("showLegend") is False
-    assert history.get("options", {}).get("showValue") == "always"
+    assert history.get("options", {}).get("legend", {}).get("showLegend") is True
+    assert history.get("options", {}).get("showValue") == "never"
     assert history.get("options", {}).get("rowHeight") == 1.0
     assert impact.get("gridPos", {}).get("y", 0) >= (
         history_grid.get("y", 0) + history_grid.get("h", 0)
@@ -918,29 +918,14 @@ def test_incident_alert_history_has_readable_full_width_layout() -> None:
     assert current_alerts.get("gridPos", {}).get("y", 0) >= 18
     assert "ALERTS" in str(history.get("targets", [{}])[0].get("expr", ""))
     assert str(history.get("targets", [{}])[0].get("legendFormat", "")).startswith(
-        "{{alertstate}}"
+        "{{alertname}}"
     )
-    color_overrides = {
-        override.get("matcher", {}).get("options"): {
-            prop.get("id"): prop.get("value") for prop in override.get("properties", [])
-        }
-        for override in history.get("fieldConfig", {}).get("overrides", [])
-    }
-    assert color_overrides[".*firing.*"]["color"] == {
-        "mode": "fixed",
-        "fixedColor": "red",
-    }
-    assert (
-        color_overrides[".*firing.*"]["mappings"][0]["options"]["1"]["text"] == "FIRING"
-    )
-    assert (
-        color_overrides[".*pending.*"]["mappings"][0]["options"]["1"]["text"]
-        == "PENDING"
-    )
-    assert color_overrides[".*pending.*"]["color"] == {
-        "mode": "fixed",
-        "fixedColor": "orange",
-    }
+    mappings = history["fieldConfig"]["defaults"]["mappings"][0]["options"]
+    assert mappings["1"] == {"text": "FIRING", "color": "red"}
+    assert mappings["2"] == {"text": "PENDING", "color": "orange"}
+    assert history["options"]["mergeValues"] is True
+    assert history["fieldConfig"]["defaults"]["custom"]["axisWidth"] >= 360
+    assert history["fieldConfig"]["defaults"]["custom"]["lineWidth"] > 0
 
 
 def test_incident_alert_count_and_dq_reason_have_honest_table_semantics() -> None:
@@ -1411,11 +1396,11 @@ def test_cycle5_wrap_text_columns_restore_declared_widths() -> None:
             "trust_status",
         ),
         ("bioetl-control-plane-v1.json", 9416, 12, "reason", 150, "status"),
-        ("bioetl-overview-v2.json", 9003, 4, "Value", 40, "pipeline"),
-        ("bioetl-overview-v2.json", 9004, 5, "Value", 40, "pipeline"),
-        ("bioetl-overview-v2.json", 9005, 6, "Value", 40, "pipeline"),
-        ("bioetl-overview-v2.json", 9006, 5, "Value", 40, "pipeline"),
-        ("bioetl-overview-v2.json", 9007, 4, "Value", 40, "provider"),
+        ("bioetl-overview-v2.json", 9003, 24, "Value", 100, "pipeline"),
+        ("bioetl-overview-v2.json", 9004, 24, "Value", 100, "pipeline"),
+        ("bioetl-overview-v2.json", 9005, 24, "Value", 100, "pipeline"),
+        ("bioetl-overview-v2.json", 9006, 24, "Value", 100, "pipeline"),
+        ("bioetl-overview-v2.json", 9007, 24, "Value", 100, "provider"),
     )
     for dashboard_name, panel_id, grid_w, wrap_field, wrap_width, flex_field in cases:
         panel = _panel(_load(dashboard_name), panel_id)
@@ -1462,3 +1447,97 @@ def test_all_shipped_table_panels_enable_inspect() -> None:
                 continue
             missing.append(f"{path.name}:{panel.get('id')}:{panel.get('title')}")
     assert not missing, "tables missing inspect=true:\n" + "\n".join(missing)
+
+
+def test_incident_scope_and_rank_do_not_confuse_inactive_signals_with_unknown() -> None:
+    """Inactive zero signals cannot become UNKNOWN suspects (#10181)."""
+    incident = _load("bioetl-incident-v1.json")
+    panel = _panel(incident, 2010)
+    transforms = panel["transformations"]
+    assert transforms[0]["id"] == "filterByValue"
+    filters = transforms[0]["options"]
+    assert filters["match"] == "any"
+    assert filters["filters"] == [
+        {"fieldName": "Value", "config": {"id": "greater", "options": {"value": 0}}},
+        {
+            "fieldName": "signal",
+            "config": {"id": "equal", "options": {"value": "telemetry_gap"}},
+        },
+    ]
+    assert "GLOBAL" in _panel(incident, 9400)["options"]["content"]
+    assert "UNVERIFIED" in panel["targets"][0]["expr"]
+    assert "same GLOBAL scope" in panel["description"]
+    rules = yaml.safe_load(OBSERVABILITY_RULES.read_text(encoding="utf-8"))
+    for group in rules["groups"]:
+        for rule in group["rules"]:
+            if str(rule.get("record", "")).startswith("bioetl_incident_ranked_"):
+                assert rule["expr"].count(" > 0") == 2
+                assert '"telemetry_gap"' in rule["expr"]
+
+
+def test_runtime_first_action_separates_endpoint_from_completeness() -> None:
+    runtime = _load("bioetl-runtime.json")
+    coverage = _panel(runtime, 9102)
+    blockers = _panel(runtime, 9101)
+    assert blockers["gridPos"]["y"] <= 6
+    assert coverage["options"]["colorMode"] == "value"
+    assert {target["legendFormat"] for target in coverage["targets"]} == {
+        "Endpoint",
+        "Baseline",
+        "Rule age",
+    }
+    assert "UNVERIFIED" in _panel(runtime, 9400)["options"]["content"]
+    for panel_id in (2542, 2543):
+        panel = _panel(runtime, panel_id)
+        assert panel["gridPos"]["h"] >= 3
+        assert "overflow:hidden" not in panel["options"]["content"]
+    assert "<a href=" in _panel(runtime, 2542)["options"]["content"]
+
+
+def test_overview_routes_and_timelines_exclude_inactive_fallbacks() -> None:
+    """Positive routes and absent-only fallback prevent false diagnostic rows."""
+    overview = _load("bioetl-overview-v2.json")
+    route = _panel(overview, 215)["targets"][0]["expr"]
+    assert route.count(">0") == 1
+    assert "max without(run_type)" in route
+    assert "or on() bioetl_l0_next_action_no_route" in route
+    for panel_id in (9018, 9019, 9020):
+        panel = _panel(overview, panel_id)
+        assert "or on()" in panel["targets"][0]["expr"]
+        assert panel["targets"][0]["range"] is True
+        assert panel["fieldConfig"]["defaults"]["custom"]["lineWidth"] > 0
+
+
+def test_runtime_evidence_validator_rejects_scraping_as_health() -> None:
+    """Endpoint presence must never be promoted to a green completeness verdict."""
+    from scripts.engineering.qa.check_dashboard_visual_semantics import (
+        _telemetry_evidence_errors,
+    )
+
+    coverage = _panel(_load("bioetl-runtime.json"), 9102)
+    assert not _telemetry_evidence_errors(coverage)
+    coverage["options"]["colorMode"] = "background"
+    assert _telemetry_evidence_errors(coverage)
+
+
+def test_incident_main_columns_hide_future_service_labels_but_keep_inspect() -> None:
+    """Evolving recording-rule metadata cannot leak into the operator table."""
+    panel = _panel(_load("bioetl-incident-v1.json"), 2010)
+    defaults = panel["fieldConfig"]["defaults"]["custom"]
+    assert defaults["hidden"] is True
+    assert defaults["inspect"] is True
+    visible = {
+        override["matcher"]["options"]
+        for override in panel["fieldConfig"]["overrides"]
+        if {"id": "custom.hidden", "value": False} in override["properties"]
+    }
+    assert visible == {
+        "Rank",
+        "Severity",
+        "Confidence",
+        "Object",
+        "Signal",
+        "Action",
+        "Details",
+        "Domain",
+    }
