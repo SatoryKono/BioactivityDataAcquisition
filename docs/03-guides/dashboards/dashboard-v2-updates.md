@@ -7,7 +7,14 @@ ______________________________________________________________________
 `docs/reports/dashboard-ux-checks/YYYY-MM-DD.md`.
 
 Latest dashboard UX artifact for current shipped JSON changes:
-`docs/reports/dashboard-ux-checks/2026-09-07.md`. Panel 205 now evaluates the
+`docs/reports/dashboard-ux-checks/2026-09-07.md`. The Overview, Runtime and
+Incident follow-up (#10176, #10177, #10181, #10193, #10194) adds readable
+routing priorities, a first-screen blocker action, explicit global incident
+scope and unverified confidence, complete alert names and neutral telemetry
+evidence. Common navigation uses three grid rows on all seven dashboards;
+the existing text sizes and query budgets remain unchanged.
+
+Panel 205 now evaluates the
 selected window once and preserves absent counters. Incident 2010 combines the
 three recorded ranking metrics in one short union so Priority has one numeric
 field before sorting. The earlier long raw-query union limitation no longer

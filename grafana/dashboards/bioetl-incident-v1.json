@@ -720,6 +720,10 @@
               {
                 "id": "custom.hidden",
                 "value": false
+              },
+              {
+                "id": "displayName",
+                "value": "Severity"
               }
             ]
           },
