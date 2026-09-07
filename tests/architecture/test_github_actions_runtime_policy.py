@@ -421,6 +421,31 @@ def test_release_publish_requires_same_sha_quality_gates() -> None:
         assert "test-install" in needs
 
 
+def test_release_wheel_smoke_installs_locked_dependencies_before_local_artifact() -> (
+    None
+):
+    """The isolated wheel smoke must exercise CLI dependencies and fail on errors."""
+    steps = _load_yaml(RELEASE_WORKFLOW)["jobs"]["test-install"]["steps"]
+    names = [step["name"] for step in steps]
+    by_name = {step["name"]: step for step in steps}
+    assert (
+        names.index("Checkout dependency lock")
+        < names.index("Install locked runtime dependencies")
+        < names.index("Install from wheel")
+        < names.index("Verify installation")
+    )
+    dependency_run = by_name["Install locked runtime dependencies"]["run"]
+    for flag in ("--frozen", "--no-dev", "--no-emit-project", "--require-hashes"):
+        assert flag in dependency_run
+    wheel_run = by_name["Install from wheel"]["run"]
+    for flag in ("--require-hashes", "--no-deps", "--no-index", "--find-links=dist"):
+        assert flag in wheel_run
+    assert "bioetl --help" in by_name["Verify installation"]["run"]
+    version_run = by_name["Verify CLI entrypoint"]["run"]
+    assert "bioetl --version" in version_run
+    assert "||" not in version_run
+
+
 def _step_uses(workflow: dict[str, Any], job_name: str) -> list[str]:
     jobs = cast(dict[str, dict[str, Any]], workflow["jobs"])
     return [
