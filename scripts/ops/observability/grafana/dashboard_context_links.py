@@ -419,7 +419,6 @@ def _separate_action_inspector(panel: dict) -> None:
         {
             "matcher": {"id": "byName", "options": "Details"},
             "properties": [
-                {"id": "custom.width", "value": 120},
                 {"id": "custom.cellOptions", "value": {"type": "auto"}},
                 {"id": "custom.inspect", "value": True},
                 {"id": "links", "value": []},

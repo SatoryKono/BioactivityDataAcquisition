@@ -583,10 +583,6 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 120
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto"
