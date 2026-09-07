@@ -93,6 +93,41 @@ def _gitleaks_boundaries(argv: list[str]) -> int:
         "data/output/chembl_target.csv",
         f"CHEMBL1,homo {'sapiens'},{'5-hydroxytryptamine'} receptor 1d,9606\n",
     )
+    gastrin = (
+        f"CHEMBL1,homo {'sapiens'},{'gastrin/cholecystokinin'} type b receptor,9606\n"
+    )
+    serotonin = f"CHEMBL1,homo {'sapiens'},{'5-hydroxytryptamine'} receptor 1d,9606\n"
+    pair("biology-gastrin", "data/output/activity/activity.csv", gastrin)
+    pair("biology-staging", "data/output/activity/activity.tmp", serotonin)
+    CASES.extend(
+        [
+            (
+                "biology-gastrin-smoke",
+                "data/output/activity_smoke/activity.csv",
+                gastrin,
+                False,
+            ),
+            ("biology-gastrin-other-csv", "data/output/unreviewed.csv", gastrin, True),
+            (
+                "biology-staging-other-tmp",
+                "data/output/activity/other.tmp",
+                serotonin,
+                True,
+            ),
+            (
+                "biology-gastrin-adjacent-credential",
+                "data/output/activity/activity.csv",
+                gastrin.rstrip() + ',api_key="' + TOKEN + '"\n',
+                True,
+            ),
+            (
+                "biology-staging-adjacent-credential",
+                "data/output/activity/activity.tmp",
+                serotonin.rstrip() + ',api_key="' + TOKEN + '"\n',
+                True,
+            ),
+        ]
+    )
     pair(
         "hash",
         "tests/unit/domain/hash_policy/snapshots/chembl_high_risk_hashes.json",

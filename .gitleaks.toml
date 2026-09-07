@@ -127,6 +127,20 @@ regexTarget = "match"
 regexes = ['''(?i)^s?apiens,(?:5-hydroxytryptamine|d-3-phosphoglycerate|3-hydroxy-3-methylglutaryl-coenzyme|1-acyl-sn-glycerol-3-phosphate)[ \t\r\n]*$''']
 
 [[rules.allowlists]]
+description = "Reviewed activity CSV rows: gastrin/cholecystokinin is a target name"
+condition = "AND"
+paths = ['''^data/output/(?:activity|activity_smoke)/activity\.csv$''']
+regexTarget = "match"
+regexes = ['''(?i)^s?apiens,gastrin/cholecystokinin[ \t\r\n]*$''']
+
+[[rules.allowlists]]
+description = "Exact historical activity staging file: serotonin target text"
+condition = "AND"
+paths = ['''^data/output/activity/activity\.tmp$''']
+regexTarget = "match"
+regexes = ['''(?i)^s?apiens,5-hydroxytryptamine[ \t\r\n]*$''']
+
+[[rules.allowlists]]
 description = "Named SHA-256 business-key expectations in historical golden tests"
 condition = "AND"
 paths = ['''^tests/(?:unit/domain/hash_policy/(?:snapshots/chembl_high_risk_hashes\.json|test_chembl_high_risk_hash_golden\.py)|bioetl/domain/transform/golden_examples\.json|(?:document|assay|testitem|target)_chembl_golden\.py)$''']
