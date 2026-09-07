@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-07T06:09:32.009139+00:00",
+  "generated_at": "2026-09-07T06:32:06.480346+00:00",
   "summary": {
     "total_scripts": 613,
     "status_counts": {
@@ -21114,7 +21114,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/verify_report_bind.py",
-          "line": 60,
+          "line": 61,
           "source_group": "scripts",
           "text": "from scripts.ops.runtime.docker import docker_runtime_preflight as runtime_preflight"
         },

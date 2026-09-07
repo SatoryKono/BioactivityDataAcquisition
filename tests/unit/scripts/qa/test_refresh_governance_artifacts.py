@@ -210,3 +210,49 @@ def test_atomic_writer_uses_utf8_lf_and_replaces_target(tmp_path: Path) -> None:
 
     assert target.read_bytes() == "owner: architecture\nvalue: тест\n".encode()
     assert list(tmp_path.iterdir()) == [target]
+
+
+@pytest.mark.parametrize("outcome", ["pass", "fail", "skip"])
+def test_coverage_closeout_rebinds_only_after_executed_tests(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, outcome: str
+) -> None:
+    import json
+
+    quality = tmp_path / "reports/quality"
+    quality.mkdir(parents=True)
+    closeout = quality / "low-coverage-targeted-tests-6045.json"
+    initial = {
+        "module_coverage_inventory_source_tree_sha256": "old",
+        "targeted_modules": [{"targeted_tests": ["tests/test_target.py"]}],
+        "validation": [{"status": "pass", "tests": 1}],
+    }
+    closeout.write_text(json.dumps(initial), encoding="utf-8")
+    (quality / "module-coverage-inventory.json").write_text(
+        '{"source_tree_sha256": "new"}', encoding="utf-8"
+    )
+    monkeypatch.setattr(refresh, "ROOT", tmp_path)
+
+    def run(command: list[str]) -> int:
+        assert "tests/test_target.py" in command
+        if outcome == "fail":
+            raise SystemExit(1)
+        skipped = 1 if outcome == "skip" else 0
+        (quality / "low-coverage-6045-revalidation.xml").write_text(
+            f'<testsuites><testsuite tests="1" skipped="{skipped}"/></testsuites>',
+            encoding="utf-8",
+        )
+        return 0
+
+    monkeypatch.setattr(refresh, "_run", run)
+    if outcome == "pass":
+        refresh._refresh_targeted_coverage_closeout()
+        assert (
+            json.loads(closeout.read_text())[
+                "module_coverage_inventory_source_tree_sha256"
+            ]
+            == "new"
+        )
+    else:
+        with pytest.raises(SystemExit):
+            refresh._refresh_targeted_coverage_closeout()
+        assert json.loads(closeout.read_text()) == initial
