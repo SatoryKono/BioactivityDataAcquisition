@@ -44,6 +44,11 @@ def test_report_selection_missing_and_loaded_empty_are_distinct(key: str) -> Non
     assert "TELEMETRY MISSING" in missing[f"{key}_display"][0].values()
     assert "VALID EMPTY" in empty[f"{key}_display"][0].values()
     assert unselected[key] == missing[key] == empty[key] == []
+    if key == "artifacts":
+        for payload in (unselected, missing, empty):
+            row = payload["artifacts_display"][0]
+            assert "state" in row
+            assert not {"kind", "name", "ref"}.intersection(row)
 
 
 @pytest.mark.parametrize(

@@ -49390,7 +49390,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-07",
-  "source_tree_sha256": "471100d2d6cdb44f813dde5765d217e566db86418e782cc32620f744a8ab9a72",
+  "source_tree_sha256": "6599a6c473a427383ab81eb52cd0cf66309469b25710120668f6d98edb283e16",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

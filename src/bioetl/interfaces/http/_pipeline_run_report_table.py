@@ -72,7 +72,7 @@ def _empty_pipeline_run_report_shell(
     for key, label in (
         ("funnel", "stage_id"),
         ("reasons_top_n", "reason_code"),
-        ("artifacts", "kind"),
+        ("artifacts", "state"),
     ):
         payload[f"{key}_display"] = [{label: state, "message": message}]
     return payload
@@ -257,7 +257,7 @@ def _table_shape_pipeline_run_report(
     for key, label in (
         ("funnel", "stage_id"),
         ("reasons_top_n", "reason_code"),
-        ("artifacts", "kind"),
+        ("artifacts", "state"),
     ):
         shaped.setdefault(f"{key}_display", shaped.get(key) or [{label: "VALID EMPTY"}])
     shaped["timings_and_failure"] = [

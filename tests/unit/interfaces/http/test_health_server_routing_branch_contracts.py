@@ -251,7 +251,7 @@ async def test_pipeline_run_report_returns_unresolved_and_missing_shells(
             ],
             "artifacts_display": [
                 {
-                    "kind": "SELECT RUN",
+                    "state": "SELECT RUN",
                     "message": "run_id not selected; pick a run from Inspect Recent Runs",
                 }
             ],
