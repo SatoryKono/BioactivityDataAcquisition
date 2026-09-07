@@ -19,7 +19,7 @@ ______________________________________________________________________
 | --- | --- |
 | `grafana/dashboards/*.json` | Shipped dashboards (edit carefully) |
 | `docs/03-guides/dashboards/**` | Human inventory, panels, checklists |
-| Skills `grafana-dashboard-extension` / `render` | Agent workflows |
+| Skill `observability-dashboard` | Agent edit, render, and debug workflow |
 
 ## Setup (when enabled)
 
@@ -32,7 +32,7 @@ ______________________________________________________________________
 
 - Workflow / pipeline overview
 - Runtime / resource
-- DQ / Silver reject explorer
+- Data Quality / Run Explorer
 - Alerts / SLO (when rules present)
 - Incident views
 
@@ -50,6 +50,38 @@ See [dashboard-guide.md](dashboard-guide.md) and `dashboards/README.md`.
 - Dashboard JSON validates in Grafana UI
 - Render preflight/skill when screenshots required
 - No dependency on removed Loki/Tempo/Quarantine Explorer UI surfaces
+
+## Reproducible acceptance captures
+
+For regression acceptance, use a fresh output directory and one explicit
+occurrence ID with fixed UTC Unix-millisecond boundaries:
+
+```bash
+python -m scripts.ops.observability.grafana.rerender_grafana_screenshots \
+  --fallback playwright --width 1366 --height 768 \
+  --capture-surface viewport --no-expand-collapsed-rows \
+  --range-from 1788782400000 --range-to 1788804000000 \
+  --occurrence-id acceptance-20260907-1366-dark \
+  --output-dir reports/observability/grafana/acceptance-20260907-1366-dark
+```
+
+Supply credentials through the existing repository environment. Both fixed
+boundaries are required, and the end must follow the start. Omit them to retain
+the interactive `--range-hours` behavior. Repeat full expanded captures in a
+different directory; their image height does not prove first-viewport fit.
+
+Explicit occurrences refuse existing PNG/manifest output before capture. Use
+the named `render-manifest--…--<capture_id>.json` in reviewer bundles; the
+mutable `render-manifest.json` is a navigation pointer. Preserve the whole
+capture directory. Preflight compares source digests to the selected checkout,
+so validating older evidence requires its matching source checkout.
+
+Failed captures retain available screenshots and measurements and keep a
+nonzero exit status. A partial manifest is evidence of the failure, never a
+passing render. DOM text contrast measurements include computed foreground,
+composited background, font classification, and unrounded ratio; gradients,
+filters, canvas graphics, hidden/virtualized content, and unobserved states
+need separate evidence. The collector does not certify overall accessibility.
 
 ## Related
 
