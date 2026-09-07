@@ -1,0 +1,58 @@
+[
+  {
+    "id": "DI-LIVE-001",
+    "severity": "P2",
+    "dashboard": "bioetl-runtime",
+    "panels": [
+      205
+    ],
+    "root_cause": "time/query",
+    "expected": "Selected-window instant increase; absent failed-counter samples remain UNKNOWN.",
+    "actual": "Provisioned rolling 15m query returns 0 from scope universe despite absent failed samples.",
+    "evidence": [
+      "captures.json.gz#bioetl-runtime-205-normal-6h",
+      "reference-results.json.gz#bioetl-runtime-205-normal-6h"
+    ],
+    "remediation": "Candidate uses instant increase over $__range and removes universe zero fallback.",
+    "verification": "test_grafana_failed_runs_window.py plus canonical promtool cases and exact candidate API request",
+    "state": "fixed_in_candidate"
+  },
+  {
+    "id": "DI-LIVE-002",
+    "severity": "P2",
+    "dashboard": "bioetl-incident-v1",
+    "panels": [
+      2010
+    ],
+    "root_cause": "transformation",
+    "expected": "One numeric Priority field sorted before limit(5).",
+    "actual": "Grafana 12 produces Value #A/#B/#C; sortBy(Value) has no matching field and first five runtime rows win.",
+    "evidence": [
+      "transformed.json.gz#bioetl-incident-v1-2010-normal-6h",
+      "synthetic-rank-output.json.gz"
+    ],
+    "remediation": "One union of the three recorded metrics yields one Value field; sort, limit and organize preserve rank.",
+    "verification": "Synthetic Grafana 12 replay yields priorities 2,2,1,1,0 across domains; live candidate matches source-row union.",
+    "state": "fixed_in_candidate"
+  },
+  {
+    "id": "DI-LIVE-003",
+    "severity": "P2",
+    "dashboard": "bioetl-run-explorer-v1 / bioetl-control-plane-v1",
+    "panels": [
+      3022,
+      9402
+    ],
+    "root_cause": "source projection",
+    "expected": "Cached Bronze Yes for selected manifest launch_context.cached_bronze.enabled=true.",
+    "actual": "Identity-table reports No; persisted manifest and pipeline report independently say enabled/true.",
+    "evidence": [
+      "manifest-reference.json",
+      "captures.json.gz#bioetl-run-explorer-v1-3022-normal-6h",
+      "persisted-references.json.gz"
+    ],
+    "remediation": "Read nested cached_bronze.enabled and preserve explicit false before lower-priority configuration.",
+    "verification": "test_health_server_identity_support_helpers.py and HTTP identity tests; deployed backend recheck required.",
+    "state": "fixed_in_candidate_pending_live_backend"
+  }
+]

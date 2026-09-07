@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "source_base_head": "b2ca49e81f705640c25ea35be97fa190223a8394",
+  "artifacts": [
+    {
+      "path": "annotations.json",
+      "bytes": 1340,
+      "sha256": "a2c54bee4b7297780eb6178a6be5d0ee11de4246755d68c931a5d74c246c0f40"
+    },
+    {
+      "path": "bootstrap-status.json",
+      "bytes": 324,
+      "sha256": "ffbb884f62eb447c0ec682f5573eb7df0a8d1028a46705f114a7b06099284022"
+    },
+    {
+      "path": "capture_live.py.txt",
+      "bytes": 13113,
+      "sha256": "9cfbb2f56ca4b4331b403e197169e27ea14de5740fd4b01f0b04453e72e815aa",
+      "original_filename": "capture_live.py",
+      "artifact_role": "historical_python_source_snapshot"
+    },
+    {
+      "path": "captures.json.gz",
+      "bytes": 366495,
+      "sha256": "bf0080b5079e13d122af2533f240a2b99cf6932a2f4f2610f41eb8702f9e977e"
+    },
+    {
+      "path": "check_rank_replay.py.txt",
+      "bytes": 1508,
+      "sha256": "a20940cc55fcaed021d694702b232bd36283062af29e081ea12cca39f736e5dd",
+      "original_filename": "check_rank_replay.py",
+      "artifact_role": "historical_python_source_snapshot"
+    },
+    {
+      "path": "coverage-guard-captures.json.gz",
+      "bytes": 24321,
+      "sha256": "a74c8fb5490eb7312bf31c869aca3584b04b88550364b65a767879d29249f690"
+    },
+    {
+      "path": "coverage-guard-reconciliation.json.gz",
+      "bytes": 294,
+      "sha256": "9c69bf702f1824b9376937f61456898484413ecfadb3f86b18ed4f4947300dcf"
+    },
+    {
+      "path": "coverage-guard-transformed.json.gz",
+      "bytes": 1189,
+      "sha256": "9d3fc0f6408c1c9adc6e2ffb4465daa74224abbe9be04365247eb2228ad3ec17"
+    },
+    {
+      "path": "dashboards.json.gz",
+      "bytes": 197740,
+      "sha256": "41458681a14d18cc7d33e622cb9b34fbd6cdcc013ebf6c407e3cb986b1f5bccb"
+    },
+    {
+      "path": "data-findings.json",
+      "bytes": 2438,
+      "sha256": "2cc1802411146aa7b3f26b064ee1b62544ddf4cb8dd107340e47a28ca7d7cfcf"
+    },
+    {
+      "path": "data-integrity-report.md",
+      "bytes": 9851,
+      "sha256": "56f13d5d731ea523c06a76a7f1ae814772f01995ab6ee5aa2f40fc70a34508d4"
+    },
+    {
+      "path": "extended-reference-availability.json.gz",
+      "bytes": 520,
+      "sha256": "710824826b3987406f8479ac0667424f3c25fbe8680f8158b15a27b893f72bcf"
+    },
+    {
+      "path": "grafana-transformer-source.json",
+      "bytes": 372,
+      "sha256": "8491216145923aa459ddc0ff2d965ccba8561f750e086c0ace9804f88971986c"
+    },
+    {
+      "path": "historical-captures.json.gz",
+      "bytes": 18187,
+      "sha256": "f5c290098e067dc92c9f1f4892842e4722ce363d46f1018a99325041fb318099"
+    },
+    {
+      "path": "historical-reconciliation.json.gz",
+      "bytes": 341,
+      "sha256": "343fddb2dc77000d13647a2c483e1947a1852ab7fce2328be86c7aa0e0b5667e"
+    },
+    {
+      "path": "historical-transformed.json.gz",
+      "bytes": 9858,
+      "sha256": "4ffbd549a2cc91f823d44185968ec8907fb920cbba28472df99373a57cfc4616"
+    },
+    {
+      "path": "index-membership-reconciliation.json",
+      "bytes": 10331,
+      "sha256": "92d9af440a8f8b739f18ef1bb49c33bcdb2ad0a8a994f38fcd766db11da7ae4d"
+    },
+    {
+      "path": "integrity-tests.json",
+      "bytes": 224629,
+      "sha256": "8933d6590073892e1b1fd1e0f2709dc0ba84d89c74fab53a12d16f9a93d17a36"
+    },
+    {
+      "path": "ledger-reference.json",
+      "bytes": 6930,
+      "sha256": "a643c92cb1d4582b78f55596b779d9b34aff5b7bae9e1932fc5c39572a585730"
+    },
+    {
+      "path": "lineage.json",
+      "bytes": 548412,
+      "sha256": "1ba971d66f15aa598e9c010b4d62221a376f969aa802d6fe16fd371baeec31aa"
+    },
+    {
+      "path": "manifest-reference.json",
+      "bytes": 4200,
+      "sha256": "78d1ae57ff0913fa7e7c43b651d916d1bd6fb5bc775f68f57da452874eb3d2ee"
+    },
+    {
+      "path": "persisted-references.json.gz",
+      "bytes": 118176,
+      "sha256": "056fa9a4a795fcfe048b8b0973d64f070f90fa376da469523a697700447e0325"
+    },
+    {
+      "path": "reconcile.py.txt",
+      "bytes": 12495,
+      "sha256": "6d345b623af9f8ac356c90f0ec9d1a6ffdffe30e9bc26c1709a9a3cf5cc57e33",
+      "original_filename": "reconcile.py",
+      "artifact_role": "historical_python_source_snapshot"
+    },
+    {
+      "path": "reconciliation.csv",
+      "bytes": 57379,
+      "sha256": "6e88b2d447ca1725e865b9020d171f6e45a23276e0653a4a565983ce1b6b01a8"
+    },
+    {
+      "path": "reference-results.json.gz",
+      "bytes": 9055,
+      "sha256": "a97f4845e387d1ef79354f951f284cb62488dc7232f6576ed24b52fd42365515"
+    },
+    {
+      "path": "report-bind.json",
+      "bytes": 591,
+      "sha256": "a57bbd8e43d8d978709ac672915325f91348877554213eb5619ae035a5026d9f"
+    },
+    {
+      "path": "runtime-metadata.json",
+      "bytes": 308284,
+      "sha256": "90d1f0c784a063e1e6530b717539a8a50e3148e97b798ed819c6f2a3c4e0d606"
+    },
+    {
+      "path": "source-responses.json.gz",
+      "bytes": 126027,
+      "sha256": "2e77c236d8c6ca8ba26c68194b9c610c8a62031c1ec6223e44facf6f2343a7e3"
+    },
+    {
+      "path": "synthetic-rank-input.json.gz",
+      "bytes": 3816,
+      "sha256": "781d9e370915ccb2206e0a0d7bb9702cbebb448e407b47b47f39c8efd501d857"
+    },
+    {
+      "path": "synthetic-rank-output.json.gz",
+      "bytes": 3436,
+      "sha256": "4f35c453970cb2dfc90d4b9dbe5d1404354ec578dd9cb8e5f443b58631b20041"
+    },
+    {
+      "path": "transform.cjs",
+      "bytes": 4617,
+      "sha256": "c387249a9fe8183d3b5edc40e18e73d524232eebdeb25625caa8d58128321c92"
+    },
+    {
+      "path": "transformed.json.gz",
+      "bytes": 166284,
+      "sha256": "fad907427f66780a152fb4d61304b70baaceddfe724f9a4eb04585f74207a922"
+    }
+  ],
+  "artifact_count": 32
+}

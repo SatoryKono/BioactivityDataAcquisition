@@ -1,0 +1,47 @@
+[
+  {
+    "uid": "bioetl-control-plane-v1",
+    "response": {
+      "url": "http://127.0.0.1:3000/api/annotations?dashboardId=418&from=1788742800000&to=1788765000000",
+      "status": 200,
+      "body": [],
+      "captured_at": "2026-09-07T07:38:58.154341+00:00"
+    }
+  },
+  {
+    "uid": "bioetl-overview-v2",
+    "response": {
+      "url": "http://127.0.0.1:3000/api/annotations?dashboardId=421&from=1788742800000&to=1788765000000",
+      "status": 200,
+      "body": [],
+      "captured_at": "2026-09-07T07:38:58.169515+00:00"
+    }
+  },
+  {
+    "uid": "bioetl-runtime",
+    "response": {
+      "url": "http://127.0.0.1:3000/api/annotations?dashboardId=424&from=1788742800000&to=1788765000000",
+      "status": 200,
+      "body": [],
+      "captured_at": "2026-09-07T07:38:58.184907+00:00"
+    }
+  },
+  {
+    "uid": "bioetl-provider-health-v2",
+    "response": {
+      "url": "http://127.0.0.1:3000/api/annotations?dashboardId=422&from=1788742800000&to=1788765000000",
+      "status": 200,
+      "body": [],
+      "captured_at": "2026-09-07T07:38:58.200724+00:00"
+    }
+  },
+  {
+    "uid": "bioetl-dq-v2",
+    "response": {
+      "url": "http://127.0.0.1:3000/api/annotations?dashboardId=419&from=1788742800000&to=1788765000000",
+      "status": 200,
+      "body": [],
+      "captured_at": "2026-09-07T07:38:58.215389+00:00"
+    }
+  }
+]

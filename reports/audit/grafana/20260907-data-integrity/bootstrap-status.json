@@ -1,0 +1,13 @@
+{
+  "ops_http": "ready",
+  "reason": "identity_matched",
+  "ops_url": "http://bioetl:8000",
+  "ops_url_valid": "1",
+  "require_ops_http": "0",
+  "expected_runtime_source_id_valid": "1",
+  "source_id_matched": "1",
+  "dashboard_profile": "full",
+  "ready_attempts": "5",
+  "ready_sleep_sec": "1",
+  "bootstrap_errors": "0"
+}
