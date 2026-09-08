@@ -137,7 +137,10 @@ def verify_capture(manifest_path: Path, *, repo_root: Path) -> dict:
         item_errors.extend(
             model_errors(json.loads(current), dashboard.get("provisionedModel"))
         )
-        if identity.get("path") != f"grafana/dashboards/{path.name}":
+        if (
+            str(identity.get("path", "")).replace("\\", "/")
+            != f"grafana/dashboards/{path.name}"
+        ):
             item_errors.append("source path mismatch")
         model = dashboard.get("provisionedModel") or {}
         if model.get("captureId") != capture_id:

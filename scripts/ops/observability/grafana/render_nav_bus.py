@@ -115,7 +115,7 @@ _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     893: (12, 14, 6, 3),
     907: (18, 14, 6, 3),
 }
-_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 18
+_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 17
 NAV_TITLE_STYLE = "font-size:19px;font-weight:600;line-height:1;margin:0 2px"
 CHIP_BASE = (
     "box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;"

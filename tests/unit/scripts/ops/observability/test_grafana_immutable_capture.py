@@ -206,3 +206,15 @@ def test_attachment_path_must_stay_within_pack(capture) -> None:
         (path.parent / "test.png").read_bytes()
     )
     assert provenance.attachment_errors(path.parent, evidence)
+
+
+def test_windows_source_separators_preserve_resource_identity(capture):
+    root, path, manifest = capture
+    manifest["dashboards"][0]["dashboardSource"]["path"] = (
+        "grafana\\dashboards\\test.json"
+    )
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "PASS"
+    manifest["dashboards"][0]["dashboardSource"]["path"] = "grafana/other/test.json"
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "FAIL"

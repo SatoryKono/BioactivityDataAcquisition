@@ -1285,7 +1285,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 17
       },
       "panels": [
         {
@@ -1521,7 +1521,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 19
+            "y": 18
           },
           "id": 9102,
           "options": {
@@ -1742,7 +1742,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 19
+            "y": 18
           },
           "id": 9103,
           "options": {
@@ -1819,7 +1819,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 18
       },
       "id": 9105,
       "title": "Inspect Full Fleet Evidence",
@@ -1835,7 +1835,7 @@
             "h": 8,
             "w": 8,
             "x": 0,
-            "y": 20
+            "y": 19
           },
           "id": 9111,
           "options": {
@@ -1990,7 +1990,7 @@
             "h": 8,
             "w": 6,
             "x": 8,
-            "y": 20
+            "y": 19
           },
           "id": 9112,
           "options": {
@@ -2145,7 +2145,7 @@
             "h": 8,
             "w": 10,
             "x": 14,
-            "y": 20
+            "y": 19
           },
           "id": 9113,
           "options": {
@@ -2224,7 +2224,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 19
       },
       "id": 91,
       "title": "Selected Provider Details",
@@ -2279,7 +2279,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 21
+            "y": 20
           },
           "id": 106,
           "options": {
@@ -2382,7 +2382,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 27
+            "y": 26
           },
           "id": 107,
           "options": {
@@ -2531,7 +2531,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 33
+            "y": 32
           },
           "id": 108,
           "options": {
@@ -2625,7 +2625,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 40
+            "y": 39
           },
           "id": 109,
           "options": {
@@ -2709,7 +2709,7 @@
             "h": 3,
             "w": 12,
             "x": 0,
-            "y": 47
+            "y": 46
           },
           "id": 102,
           "options": {
@@ -2793,7 +2793,7 @@
             "h": 5,
             "w": 12,
             "x": 12,
-            "y": 47
+            "y": 46
           },
           "id": 110,
           "options": {
@@ -2879,7 +2879,7 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 52
+            "y": 51
           },
           "id": 111,
           "options": {
@@ -2957,7 +2957,7 @@
             "h": 5,
             "w": 12,
             "x": 12,
-            "y": 52
+            "y": 51
           },
           "id": 115,
           "options": {
@@ -3046,7 +3046,7 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 57
+            "y": 56
           },
           "id": 112,
           "options": {
@@ -3124,7 +3124,7 @@
             "h": 3,
             "w": 12,
             "x": 12,
-            "y": 57
+            "y": 56
           },
           "id": 113,
           "options": {
@@ -3220,7 +3220,7 @@
             "h": 3,
             "w": 12,
             "x": 0,
-            "y": 62
+            "y": 61
           },
           "id": 31,
           "options": {
@@ -3295,7 +3295,7 @@
             "h": 5,
             "w": 12,
             "x": 12,
-            "y": 62
+            "y": 61
           },
           "id": 32,
           "options": {
@@ -3335,7 +3335,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 20
       },
       "id": 9404,
       "description": "Expand for selected-range and debug evidence after current fleet severity, causes, and telemetry presence have been interpreted together.",
@@ -3460,7 +3460,7 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 68
+            "y": 67
           },
           "id": 114,
           "options": {
@@ -3553,7 +3553,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 68
+            "y": 67
           },
           "id": 1,
           "options": {
@@ -3624,7 +3624,7 @@
             "h": 3,
             "w": 12,
             "x": 0,
-            "y": 74
+            "y": 73
           },
           "id": 2,
           "options": {
@@ -3693,7 +3693,7 @@
             "h": 3,
             "w": 12,
             "x": 12,
-            "y": 74
+            "y": 73
           },
           "id": 105,
           "options": {
@@ -3772,7 +3772,7 @@
             "h": 3,
             "w": 12,
             "x": 0,
-            "y": 80
+            "y": 79
           },
           "id": 104,
           "options": {
@@ -3847,7 +3847,7 @@
             "h": 3,
             "w": 12,
             "x": 0,
-            "y": 85
+            "y": 84
           },
           "id": 7,
           "options": {
@@ -3885,7 +3885,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 21
       },
       "id": 9405,
       "description": "Expand for compact HTTP-backed run context; Run Explorer is the canonical exact-run workspace.",
@@ -3898,7 +3898,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 90
+            "y": 89
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Do not put full UUIDs into Prometheus labels. Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. This card is bounded pipeline/run context evidence only and does not prove current provider health. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero",
@@ -4049,7 +4049,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 90
+            "y": 89
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · TIME RANGE · Do not put full UUIDs into Prometheus labels. Current stage/outcome accounting evidence for the shared pipeline/run_type context. Provider remains the primary health selector; this table is bounded pipeline/run_type accounting evidence and does not prove current provider health by itself. Missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status, Monitor Provider Telemetry Freshness, and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",

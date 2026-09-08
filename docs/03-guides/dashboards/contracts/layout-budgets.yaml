@@ -8,6 +8,8 @@ note: >-
 
 # Answer band / area-fill / visual fold (DASHBOARD_REQUIREMENTS.md §2).
 first_window_y: 18
+# A collapsed one-row header may occupy y=17..18; detail data starts at y=18.
+# This packs the grid after the measured 17-row answer band without a blank row.
 
 # PromQL/HTTP first-load selection window. Not the visual fold.
 first_load_y_max: 28

@@ -1045,7 +1045,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 17
       },
       "collapsed": true,
       "panels": [
@@ -1058,7 +1058,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 19
+            "y": 18
           },
           "datasource": {
             "type": "prometheus",
@@ -1175,7 +1175,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 25
+            "y": 24
           },
           "datasource": {
             "type": "prometheus",
@@ -1259,7 +1259,7 @@
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 33
+            "y": 32
           },
           "options": {
             "mode": "html",
@@ -1276,7 +1276,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 18
       },
       "collapsed": true,
       "description": "Selected pipeline may differ from row pipeline (blast radius)",
@@ -1290,7 +1290,7 @@
             "h": 7,
             "w": 8,
             "x": 0,
-            "y": 38
+            "y": 37
           },
           "datasource": {
             "type": "prometheus",
@@ -1479,7 +1479,7 @@
             "h": 7,
             "w": 8,
             "x": 8,
-            "y": 38
+            "y": 37
           },
           "datasource": {
             "type": "prometheus",
@@ -1668,7 +1668,7 @@
             "h": 7,
             "w": 8,
             "x": 16,
-            "y": 38
+            "y": 37
           },
           "datasource": {
             "type": "prometheus",
@@ -1886,7 +1886,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 19
       },
       "description": "SELECTED RUN · Compact pipeline_run_report_v1 projection. Expand after selecting an exact Run ID. Missing run is SELECT RUN / VALID EMPTY, not OK.",
       "panels": [
@@ -1896,7 +1896,7 @@
           "title": "Review Selected Run Summary",
           "gridPos": {
             "x": 0,
-            "y": 21,
+            "y": 20,
             "w": 24,
             "h": 5
           },

@@ -202,12 +202,12 @@ def test_dq_duplicate_validation_fact_is_removed_and_grid_is_compacted() -> None
     assert "or vector(0)" not in canonical["targets"][0]["expr"]
 
     expected_geometry = {
-        3: {"x": 6, "y": 62, "w": 6, "h": 4},
-        4: {"x": 0, "y": 62, "w": 6, "h": 4},
-        101: {"x": 12, "y": 62, "w": 6, "h": 4},
-        9: {"x": 18, "y": 62, "w": 6, "h": 4},
-        12: {"x": 0, "y": 66, "w": 6, "h": 4},
-        151: {"x": 6, "y": 66, "w": 6, "h": 4},
+        3: {"x": 6, "y": 61, "w": 6, "h": 4},
+        4: {"x": 0, "y": 61, "w": 6, "h": 4},
+        101: {"x": 12, "y": 61, "w": 6, "h": 4},
+        9: {"x": 18, "y": 61, "w": 6, "h": 4},
+        12: {"x": 0, "y": 65, "w": 6, "h": 4},
+        151: {"x": 6, "y": 65, "w": 6, "h": 4},
     }
     for panel_id, geometry in expected_geometry.items():
         assert panels[panel_id]["gridPos"] == geometry
@@ -497,26 +497,26 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
     assert all(panel.get("collapsed") is True for panel in control_rows)
     assert all(panel.get("panels") for panel in control_rows)
     first_row_y = min(panel["gridPos"]["y"] for panel in control_rows)
-    # layout-budgets.yaml:first_window_y — collapsed rows start at the visual fold.
-    assert first_row_y == FIRST_WINDOW_Y
+    # The row header ends at the logical data fold; expanded children start at 18.
+    assert first_row_y + 1 == FIRST_WINDOW_Y
     assert [panel["gridPos"]["y"] for panel in control_rows] == list(
-        range(FIRST_WINDOW_Y, FIRST_WINDOW_Y + len(control_rows))
+        range(first_row_y, first_row_y + len(control_rows))
     )
     assert not any(collapsed_row_above_fold(panel) for panel in control_rows)
 
 
 def test_rf006_collapsed_row_above_fold_fails_closed() -> None:
-    """Mutation: a collapsed diagnostic row at FIRST_WINDOW_Y - 1 is above the fold."""
+    """Mutation: detail children before FIRST_WINDOW_Y remain forbidden."""
     above = {
         "type": "row",
         "collapsed": True,
-        "gridPos": {"x": 0, "y": FIRST_WINDOW_Y - 1, "w": 24, "h": 1},
+        "gridPos": {"x": 0, "y": FIRST_WINDOW_Y - 2, "w": 24, "h": 1},
         "panels": [{"id": 1, "type": "stat"}],
     }
     at_fold = {
         "type": "row",
         "collapsed": True,
-        "gridPos": {"x": 0, "y": FIRST_WINDOW_Y, "w": 24, "h": 1},
+        "gridPos": {"x": 0, "y": FIRST_WINDOW_Y - 1, "w": 24, "h": 1},
         "panels": [{"id": 1, "type": "stat"}],
     }
     assert collapsed_row_above_fold(above) is True
@@ -571,11 +571,11 @@ def test_audit_followup_action_first_layout_contracts() -> None:
     ]
     assert [panel.get("id") for panel in provider_rows] == [9106, 9105, 91, 9404, 9405]
     assert [panel.get("gridPos", {}).get("y") for panel in provider_rows] == [
+        17,
         18,
         19,
         20,
         21,
-        22,
     ]
     assert all(panel.get("collapsed") is True for panel in provider_rows)
     for panel_id in (9101, 9102, 9103):
@@ -592,10 +592,10 @@ def test_audit_followup_action_first_layout_contracts() -> None:
         "Selected Range · Validation Diagnostics",
     ]
     assert [panel.get("gridPos", {}).get("y") for panel in dq_rows] == [
+        17,
         18,
         19,
         20,
-        21,
     ]
     assert all(panel.get("collapsed") is True for panel in dq_rows)
 

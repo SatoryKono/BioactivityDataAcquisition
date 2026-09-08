@@ -177,7 +177,7 @@ def _dashboard_source_by_uid() -> dict[str, dict[str, object]]:
         if not isinstance(uid, str) or not uid:
             continue
         try:
-            source_path = str(dashboard_path.relative_to(repo_root))
+            source_path = dashboard_path.relative_to(repo_root).as_posix()
         except ValueError:
             source_path = dashboard_path.name
         result[uid] = {
@@ -351,6 +351,7 @@ def _finalize_manifest(config: RenderConfig, manifest: dict[str, Any]) -> None:
                     "pipeline": config.pipeline,
                     "run_type": config.run_type,
                     "run_id": config.run_id,
+                    **dict(config.variables),
                 },
                 "row_state": {
                     "expand_collapsed_rows": config.expand_collapsed_rows,
