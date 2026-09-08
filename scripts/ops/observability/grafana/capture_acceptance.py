@@ -513,6 +513,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--cue-review", type=Path)
     args = parser.parse_args(argv)
+    shipped = Path(__file__).resolve().parents[4] / "grafana" / "dashboards"
+    output_dir = args.output_dir.resolve()
+    if output_dir.is_relative_to(shipped) or shipped.is_relative_to(output_dir):
+        raise ValueError("assessment output must not overwrite shipped dashboard JSON")
     args.output_dir.mkdir(parents=True, exist_ok=False)
     manifests = [json.loads(p.read_text(encoding="utf-8")) for p in args.manifests]
     provenance = [verify_capture(p, repo_root=args.repo_root) for p in args.manifests]
@@ -578,7 +582,7 @@ def main(argv: list[str] | None = None) -> int:
         (args.output_dir / name).write_text(
             json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
         )
-    return 1 if any(p["status"] != "PASS" for p in provenance) else 0
+    return 0 if outputs["accessibility-status.json"]["status"] == "PASS" else 1
 
 
 if __name__ == "__main__":

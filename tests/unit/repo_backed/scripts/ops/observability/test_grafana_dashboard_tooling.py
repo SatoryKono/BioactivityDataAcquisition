@@ -215,9 +215,12 @@ def test_playwright_fallback_prepares_inner_scroll_before_screenshot() -> None:
 
     assert "setDashboardScrollPosition(page, 0)" in script
     assert "dashboardCaptureMetrics(page)" in script
-    assert "prepareDashboardForCapture(page, dashboard, index, total)" in script
-    assert "height: MAX_CAPTURE_VIEWPORT_HEIGHT" in script
-    assert "dashboard.captureHeight = Math.round(desiredLayoutHeight * scale)" in script
+    assert "async function prepareDashboardForCapture(page)" in script
+    prepare = script.split("async function prepareDashboardForCapture(page)", 1)[
+        1
+    ].split("async function", 1)[0]
+    assert "setViewportSize" not in prepare
+    assert "await captureScrollSurface(page" in script
     assert "function screenshotOptions" in script
     assert "options.clip" in script
     assert script.index(
@@ -746,7 +749,12 @@ def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() 
     assert "waitForDashboardContent" in script
     assert "materializeLazyPanels" in script
     assert "settleDashboardAfterViewportChange" in script
-    assert script.index("await settleDashboardAfterViewportChange") < script.index(
+    assert (
+        script.index("await collectVerifiedTerminalState")
+        < script.index("dashboard.preCaptureTerminalStateValidation")
+        < script.index("await page.screenshot(screenshotOptions")
+    )
+    assert script.index("await settleDashboardAfterViewportChange") < script.rindex(
         "await collectVerifiedTerminalState"
     )
     assert "dashboard.terminalStateValidation = CONFIG.navigationOnly" in script

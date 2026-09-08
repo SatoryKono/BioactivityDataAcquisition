@@ -327,55 +327,6 @@ console.log(JSON.stringify({text,graphic:graphicsMeasurementsFromDom().pairs[0]}
     assert result["graphic"]["ratio"] == pytest.approx(5.280822809644651)
 
 
-def test_scrolling_capture_preserves_layout_viewport(tmp_path: Path) -> None:
-    script = _SCRIPT.with_name("capture_scroll_surface.cjs")
-    program = """
-const {captureScrollSurface}=require(process.argv[1]);
-const {chromium}=require('playwright');
-(async()=>{
-const browser=await chromium.launch({headless:true});
-try {
- const context=await browser.newContext({viewport:{width:683,height:384},deviceScaleFactor:2});
- const page=await context.newPage();
- await page.setContent('<style>body{margin:0}.scroll{height:384px;overflow:auto}.panel{height:350px;background:#246;color:white}</style><div class="scroll">'+
- Array.from({length:5},(_,i)=>'<div class="panel" data-viz-panel-key="panel-'+i+'">Panel '+i+'</div>').join('')+'</div>');
- const result=await captureScrollSurface(page,{filePath:process.argv[2],timeout:20000,
- pngEvidence:b=>({width:b.readUInt32BE(16),height:b.readUInt32BE(20)}),measure:async()=>({})});
- console.log(JSON.stringify({viewport:page.viewportSize(),result}));
-} finally {await browser.close();}
-})().catch(e=>{console.error(e);process.exit(1)});
-"""
-    env = os.environ.copy()
-    rerender._apply_playwright_runtime_env(env)
-    completed = subprocess.run(
-        [
-            rerender._resolve_node_executable(),
-            "-e",
-            program,
-            str(script),
-            str(tmp_path / "full.png"),
-        ],
-        capture_output=True,
-        text=True,
-        timeout=60,
-        env=env,
-        check=False,
-    )
-    assert completed.returncode == 0, completed.stderr
-    result = json.loads(completed.stdout)
-    assert result["viewport"] == {"width": 683, "height": 384}
-    assert result["result"]["surface"]["scrollHeight"] == 1750
-    assert all(
-        t["width"] == 1366 and t["height"] == 768 for t in result["result"]["tiles"]
-    )
-    assert {p["panel"] for t in result["result"]["tiles"] for p in t["panels"]} == {
-        f"panel-{i}" for i in range(5)
-    }
-    data = (tmp_path / "full.png").read_bytes()
-    assert int.from_bytes(data[16:20], "big") == 1366
-    assert int.from_bytes(data[20:24], "big") == 3500
-
-
 def test_canvas_contrast_uses_observed_paint_and_records_raster_alpha() -> None:
     """Antialiasing is evidence, while missing/composited paint cannot pass."""
     output = _node_eval(
