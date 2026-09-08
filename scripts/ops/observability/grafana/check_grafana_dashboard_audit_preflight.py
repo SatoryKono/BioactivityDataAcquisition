@@ -1795,15 +1795,20 @@ def _check_bioetl_control_plane_source(
 def _immutable_acceptance(args: argparse.Namespace) -> int:
     from scripts.ops.observability.grafana.capture_provenance import verify_capture
 
-    result = verify_capture(args.immutable_manifest, repo_root=_REPO_ROOT)
+    manifest_bytes = args.immutable_manifest.read_bytes()
+    result = verify_capture(
+        args.immutable_manifest,
+        repo_root=_REPO_ROOT,
+        expected_sha256=args.manifest_sha256,
+        expected_commit=args.expected_commit,
+        manifest_bytes=manifest_bytes,
+    )
     if args.acceptance_scope != "provenance":
         from scripts.ops.observability.grafana.capture_acceptance import (
             assess_manifest,
         )
 
-        assessment = assess_manifest(
-            json.loads(args.immutable_manifest.read_text(encoding="utf-8"))
-        )
+        assessment = assess_manifest(json.loads(manifest_bytes))
         result["acceptance"] = assessment
         if assessment[f"{args.acceptance_scope}_status"] != "PASS":
             result["status"] = "FAIL"
@@ -1814,6 +1819,12 @@ def _immutable_acceptance(args: argparse.Namespace) -> int:
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     parser.add_argument("--immutable-manifest", type=Path)
+    parser.add_argument(
+        "--manifest-sha256", help="Externally pinned immutable manifest digest"
+    )
+    parser.add_argument(
+        "--expected-commit", help="Externally selected capture source commit"
+    )
     parser.add_argument(
         "--acceptance-scope",
         choices=("provenance", "layout", "accessibility"),
