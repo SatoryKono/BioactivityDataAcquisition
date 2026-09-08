@@ -80,6 +80,44 @@ def test_pipeline_idempotency_reuses_materialized_cassette() -> None:
     assert cassette_name == "test_pipeline_idempotency"
 
 
+def test_managed_e2e_data_dir_isolates_strict_live_sink_paths(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    from bioetl.composition.factories.storage._context_resolution import (
+        resolve_storage_paths,
+    )
+    from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
+    from bioetl.infrastructure.config.settings_api import get_settings
+
+    monkeypatch.setenv("BIOETL_TEST_MODE", "false")
+    monkeypatch.setenv("BIOETL_PIPELINE__HEALTH_CHECK_MODE", "strict")
+    e2e_conftest._clear_runtime_config_caches()
+    original = load_pipeline_config("chembl_activity")
+    original_paths = {layer: sink.path for layer, sink in original.sink.items()}
+
+    with e2e_conftest.managed_e2e_data_dir(tmp_path) as sandbox:
+        settings = get_settings()
+        config = load_pipeline_config("chembl_activity")
+        assert settings.test_mode is False
+        assert os.environ["BIOETL_PIPELINE__HEALTH_CHECK_MODE"] == "strict"
+        use_yaml_paths, *paths = resolve_storage_paths(
+            settings, config.sink["bronze"], config.sink["silver"], config.sink["gold"]
+        )
+        assert use_yaml_paths is True
+        for layer, path in zip(("bronze", "silver", "gold"), paths, strict=True):
+            assert path == sandbox / "output" / layer / "chembl" / "activity"
+            csv_export = config.sink[layer].csv_export
+            if csv_export is not None:
+                assert Path(csv_export.path) == path
+        assert {
+            layer: sink.path for layer, sink in original.sink.items()
+        } == original_paths
+
+    restored = load_pipeline_config("chembl_activity")
+    assert {layer: sink.path for layer, sink in restored.sink.items()} == original_paths
+
+
 def test_read_delta_records_uses_shared_delta_reader(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
