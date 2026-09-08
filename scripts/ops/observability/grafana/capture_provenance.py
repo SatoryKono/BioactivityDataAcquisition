@@ -63,6 +63,18 @@ def png_structure_errors(raw: bytes) -> list[str]:
             return ["incomplete PNG pixel stream"]
     except zlib.error:
         return ["corrupted PNG pixel stream"]
+    width, height, depth, color, compression, filtering, interlace = struct.unpack(
+        ">IIBBBBB", raw[16:29]
+    )
+    # Chromium and the canonical stitcher emit non-interlaced 8-bit RGB/RGBA.
+    # Other encodings remain unverified rather than receiving a header-only PASS.
+    if depth != 8 or color not in {2, 6} or compression or filtering or interlace:
+        return ["unsupported PNG pixel encoding"]
+    stride = 1 + width * (3 if color == 2 else 4)
+    if not width or not height or len(decoded) != stride * height:
+        return ["PNG pixel dimensions mismatch"]
+    if any(decoded[index] > 4 for index in range(0, len(decoded), stride)):
+        return ["invalid PNG scanline filter"]
     return []
 
 
@@ -292,6 +304,8 @@ def verify_capture(
         errors.append("pinned immutable manifest SHA mismatch")
     capture_id = manifest.get("capture_id", "")
     expected_name = f"render-manifest--full-set--{capture_id}.json"
+    if not re.fullmatch(r"[A-Za-z0-9._-]+", capture_id):
+        errors.append("missing or invalid capture ID")
     if (
         manifest_path.name != expected_name
         or manifest.get("immutable_manifest") != expected_name
@@ -311,6 +325,8 @@ def verify_capture(
         for p in (repo_root / "grafana/dashboards").glob("*.json")
     }
     dashboards = manifest.get("dashboards", [])
+    if not expected:
+        errors.append("missing shipped dashboard roster")
     if sorted(d.get("uid", "") for d in dashboards) != sorted(expected):
         errors.append("full-set UID coverage mismatch")
     if manifest.get("file_set") != sorted(f"{uid}.png" for uid in expected):

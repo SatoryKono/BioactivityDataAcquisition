@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-08T13:58:46.209535+00:00",
+  "generated_at": "2026-09-08T14:55:16.377569+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -19955,7 +19955,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
-          "line": 1800,
+          "line": 1805,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.capture_acceptance import ("
         },
@@ -20099,7 +20099,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 14,
       "references": [
         {
           "path": "docs/01-requirements/DASHBOARD_REQUIREMENTS.md",
@@ -20127,7 +20127,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/capture_provenance.py",
-          "line": 78,
+          "line": 83,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana import ("
+        },
+        {
+          "path": "scripts/ops/observability/grafana/capture_provenance.py",
+          "line": 217,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import ("
         },
@@ -20142,12 +20148,6 @@
           "line": 425,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py\""
-        },
-        {
-          "path": "tests/unit/scripts/ops/observability/test_grafana_acceptance_provenance.py",
-          "line": 10,
-          "source_group": "tests",
-          "text": "from scripts.ops.observability.grafana import ("
         }
       ]
     },

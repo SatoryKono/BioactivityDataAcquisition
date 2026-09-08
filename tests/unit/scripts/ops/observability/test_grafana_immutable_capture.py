@@ -249,6 +249,7 @@ def test_windows_source_separators_preserve_resource_identity(capture):
     "mutation",
     [
         "truncated_png",
+        "wrong_pixel_dimensions",
         "url_time",
         "url_variable",
         "dsf",
@@ -260,9 +261,21 @@ def test_windows_source_separators_preserve_resource_identity(capture):
 def test_context_and_rehashed_corruption_are_rejected(capture, mutation):
     root, path, manifest = capture
     dashboard = manifest["dashboards"][0]
-    if mutation == "truncated_png":
+    if mutation in {"truncated_png", "wrong_pixel_dimensions"}:
         png_path = path.parent / "test.png"
-        raw = png_path.read_bytes()[:24]
+        raw = png_path.read_bytes()
+        if mutation == "truncated_png":
+            raw = raw[:24]
+        else:
+            compressed = zlib.compress(b"\0")
+            chunk = b"IDAT" + compressed
+            raw = (
+                raw[:33]
+                + struct.pack(">I", len(compressed))
+                + chunk
+                + struct.pack(">I", zlib.crc32(chunk))
+                + raw[-12:]
+            )
         png_path.write_bytes(raw)
         dashboard["screenshotEvidence"].update(
             sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw)
