@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-08T13:58:46.209535+00:00",
+  "generated_at": "2026-09-08T15:21:28.617641+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -12763,7 +12763,7 @@
         },
         {
           "path": "tests/integration/test_grafana_render_first_remediation.py",
-          "line": 1543,
+          "line": 1548,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         }
@@ -19955,7 +19955,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
-          "line": 1800,
+          "line": 1913,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.capture_acceptance import ("
         },
@@ -20035,7 +20035,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
-          "line": 1796,
+          "line": 1909,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.capture_provenance import verify_capture"
         },
@@ -20574,7 +20574,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/run_grafana_render_matrix.py",
-          "line": 21,
+          "line": 22,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import ("
         },

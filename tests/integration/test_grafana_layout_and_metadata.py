@@ -1019,7 +1019,14 @@ def test_all_table_panels_use_uniform_cell_height() -> None:
                 assert paginated and wrapped
                 assert panel["gridPos"]["h"] > 6
             if wrapped:
-                assert paginated
+                if not paginated:
+                    # A bounded first-screen summary has no second page. Grafana's
+                    # empty pagination footer otherwise overflows its body (#10165).
+                    assert any(
+                        item.get("id") == "limit"
+                        and item.get("options", {}).get("limitField") == 5
+                        for item in panel.get("transformations", [])
+                    )
                 assert custom.get("minWidth") == 50
     assert tables
 
