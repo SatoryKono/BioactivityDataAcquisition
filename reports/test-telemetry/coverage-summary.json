@@ -1,11 +1,11 @@
 {
-  "source_branch": "codex/rf007-audit-auth-fail-closed",
-  "source_commit": "6391d86a41cd1359c4624a4d03b998dad88fd6eb",
-  "source_run_id": "34206477644",
-  "source_event": "pull_request",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34206477644",
-  "source_tree_sha256": "32750415cbc74668265b25a26c18e2fd041be680c1f2ef254dc3494825633333",
-  "refreshed_at_utc": "2026-09-08T08:58:14.262584+00:00",
+  "source_branch": "main",
+  "source_commit": "7a85e1a8cdf8c222a3bd873f8311f56f4f2b350e",
+  "source_run_id": "34212268521",
+  "source_event": "push",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34212268521",
+  "source_tree_sha256": "600eefaa801107d17f3847fa50859d96e3fe04badd7c030832afa5bfd8b1e374",
+  "refreshed_at_utc": "2026-09-08T10:19:26.455474+00:00",
   "refresh_status": "captured",
   "coverage_percent": 96.71,
   "coverage": {
