@@ -412,7 +412,7 @@
                       },
                       "success": {
                         "text": "success",
-                        "color": "text"
+                        "color": "green"
                       },
                       "failed": {
                         "text": "failed",
@@ -429,6 +429,10 @@
                       "dry_run": {
                         "text": "dry_run",
                         "color": "blue"
+                      },
+                      "fail": {
+                        "text": "fail",
+                        "color": "red"
                       }
                     }
                   }
@@ -662,7 +666,7 @@
                       },
                       "success": {
                         "text": "success",
-                        "color": "text"
+                        "color": "green"
                       },
                       "failed": {
                         "text": "failed",
@@ -679,6 +683,10 @@
                       "dry_run": {
                         "text": "dry_run",
                         "color": "blue"
+                      },
+                      "fail": {
+                        "text": "fail",
+                        "color": "red"
                       }
                     }
                   }
@@ -817,7 +825,7 @@
           "gridPos": {
             "x": 0,
             "y": 18,
-            "w": 24,
+            "w": 12,
             "h": 20
           },
           "datasource": "BioETL Ops HTTP",
@@ -914,10 +922,10 @@
           "title": "Inspect Processed Records",
           "description": "SELECTED RUN · Complete Bronze/Silver/Gold accounting. Zero-valued outcomes remain evidence. SELECT RUN / VALID EMPTY is not OK. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
           "gridPos": {
-            "x": 0,
-            "y": 38,
-            "w": 24,
-            "h": 14
+            "x": 12,
+            "y": 18,
+            "w": 12,
+            "h": 20
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -1280,7 +1288,7 @@
           "description": "SELECTED RUN · Selected run: Stage counts from pipeline_run_report_v1 for the selected run. This is a stage funnel, not start/end chronology. Removals is a compact reason summary; empty stages show — (not VALID EMPTY). VALID EMPTY is only when the report has no stage rows. Selection required when no run ID is set. Unexpected empty or errors require an Ops HTTP /health/live check. SELECT RUN / VALID EMPTY is not OK.",
           "gridPos": {
             "x": 0,
-            "y": 52,
+            "y": 38,
             "w": 24,
             "h": 10
           },
@@ -1480,7 +1488,7 @@
           "description": "SELECTED RUN · Selected run: Top removal and outcome reason codes recorded in pipeline_run_report_v1 for the selected run. Selection required when no run ID is set. Valid empty means the run recorded no reason rows; unexpected empty or errors require an Ops HTTP /health/live check. SELECT RUN / VALID EMPTY is not OK.",
           "gridPos": {
             "x": 0,
-            "y": 62,
+            "y": 48,
             "w": 24,
             "h": 9
           },
@@ -1599,7 +1607,7 @@
           "description": "SELECTED RUN · Selected run: Artifact references recorded in pipeline_run_report_v1 for the selected run. The ref cell wraps so rows stay distinguishable; Copy still yields the full location. Selection required when no run ID is set. Valid empty means no artifacts were recorded; verify /health/live for unexpected empty or errors. SELECT RUN / VALID EMPTY is not OK.",
           "gridPos": {
             "x": 0,
-            "y": 71,
+            "y": 57,
             "w": 24,
             "h": 10
           },
@@ -1732,7 +1740,7 @@
           "description": "SELECTED RUN · Optional pipeline_run_report_v1 failure and stage_timings blocks. Empty means those optional blocks were not recorded — not zero duration and not proof of success. Selection required when no run ID is set. VALID EMPTY / PARTIAL is not OK. Backend failure renders as QUERY ERROR.",
           "gridPos": {
             "x": 0,
-            "y": 81,
+            "y": 67,
             "w": 24,
             "h": 6
           },
@@ -1841,7 +1849,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 87
+        "y": 73
       },
       "description": "Optional below-fold workflow-run-reports browser. Not first-screen. Does not change panel 3010.",
       "panels": [
@@ -1854,7 +1862,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 88
+            "y": 74
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {

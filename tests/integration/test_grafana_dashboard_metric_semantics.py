@@ -1835,12 +1835,12 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     processed = panels[processed_id]
     if dashboard_name == "bioetl-run-explorer-v1.json":
         assert identity.get("gridPos", {}).get("h") == 20
-        assert processed.get("gridPos", {}).get("h") == 14
-        assert identity.get("gridPos", {}).get("w") == 24
-        assert processed.get("gridPos", {}).get("w") == 24
-        assert processed["gridPos"]["y"] >= (
-            identity["gridPos"]["y"] + identity["gridPos"]["h"]
-        )
+        assert processed.get("gridPos", {}).get("h") == 20
+        assert identity.get("gridPos", {}).get("w") == 12
+        assert processed.get("gridPos", {}).get("w") == 12
+        assert identity["gridPos"]["x"] == 0
+        assert processed["gridPos"]["x"] == 12
+        assert processed["gridPos"]["y"] == identity["gridPos"]["y"]
     else:
         expected_height = 6
         assert (
