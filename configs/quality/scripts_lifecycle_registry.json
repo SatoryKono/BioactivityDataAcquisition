@@ -1662,6 +1662,12 @@
       "next_step": "Retain as the immutable source/attachment verifier imported by the canonical check-grafana-audit-preflight command and capture acceptance backend; no separate operator entrypoint.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
+    },
+    "scripts/ops/observability/grafana/regression_acceptance.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the imported RF-005 receipt verifier behind run_grafana_dashboard_audit_cycle.py; it has no main function or standalone CLI. Keep operator invocation through the existing scripts.ops run-grafana-audit-cycle command.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-11-30"
     }
   },
   "schema_version": "1.0"

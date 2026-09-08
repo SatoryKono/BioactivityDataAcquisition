@@ -1,0 +1,866 @@
+{
+  "schema_version": 1,
+  "task_count": 21,
+  "primary_role": "pipeline operator",
+  "page_goals_approved_by": null,
+  "human_measurement_required": true,
+  "requested_agent_operator": "Astra",
+  "agent_participant_type": "AI_AGENT",
+  "agent_results_separate": true,
+  "tasks": [
+    {
+      "task_id": "bioetl-control-plane-v1:Q1",
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "page_goal": "Определить готовность replay и доверие к evidence выбранного запуска, затем открыть нужную проверку.",
+      "goal_approval": "PENDING_OWNER",
+      "question": "Каково состояние и достаточно ли evidence для вывода?",
+      "answer_rubric": "Назвать состояние, его scope и достаточность evidence; неизвестность не заменять OK/нулём.",
+      "answer_key_evidence": null,
+      "target_panels": [
+        {
+          "panel_id": 9401,
+          "title": "Monitor Replay Readiness"
+        },
+        {
+          "panel_id": 891,
+          "title": "Monitor Replay Safety"
+        },
+        {
+          "panel_id": 907,
+          "title": "Monitor Telemetry"
+        }
+      ],
+      "initial_context": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "rows": "shipped collapsed",
+        "fixture_id": null,
+        "candidate_ref": null,
+        "time_range": null,
+        "variables": null
+      },
+      "target_first_correct_seconds": {
+        "desired_band": [
+          5,
+          10
+        ],
+        "maximum": 10,
+        "faster_is_acceptable": true
+      }
+    },
+    {
+      "task_id": "bioetl-control-plane-v1:Q2",
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "page_goal": "Определить готовность replay и доверие к evidence выбранного запуска, затем открыть нужную проверку.",
+      "goal_approval": "PENDING_OWNER",
+      "question": "Где находится проблема и какова причина?",
+      "answer_rubric": "Назвать затронутый домен/причину и её scope, привести видимое основание либо явно указать недостаток данных.",
+      "answer_key_evidence": null,
+      "target_panels": [
+        {
+          "panel_id": 893,
+          "title": "Monitor Manifest/Ledger"
+        }
+      ],
+      "initial_context": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "rows": "shipped collapsed",
+        "fixture_id": null,
+        "candidate_ref": null,
+        "time_range": null,
+        "variables": null
+      },
+      "target_first_correct_seconds": {
+        "desired_band": [
+          5,
+          10
+        ],
+        "maximum": 10,
+        "faster_is_acceptable": true
+      }
+    },
+    {
+      "task_id": "bioetl-control-plane-v1:Q3",
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "page_goal": "Определить готовность replay и доверие к evidence выбранного запуска, затем открыть нужную проверку.",
+      "goal_approval": "PENDING_OWNER",
+      "question": "Какое следующее безопасное действие и куда перейти?",
+      "answer_rubric": "Открыть подходящую существующую диагностику/runbook, объяснить безопасный следующий шаг и вернуться без потери допустимого контекста.",
+      "answer_key_evidence": null,
+      "target_panels": [
+        {
+          "panel_id": 1000,
+          "title": ""
+        },
+        {
+          "panel_id": 9400,
+          "title": ""
+        },
+        {
+          "panel_id": 906,
+          "title": ""
+        },
+        {
+          "panel_id": 894,
+          "title": "Review Coverage Limits"
+        },
+        {
+          "panel_id": 9410,
+          "title": "Explain Missing Identity Data"
+        },
+        {
+          "panel_id": 9411,
+          "title": "Explain Missing Record Counts"
+        },
+        {
+          "panel_id": 139,
+          "title": "Review Uncovered Replay Signals"
+        }
+      ],
+      "initial_context": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "rows": "shipped collapsed",
+        "fixture_id": null,
+        "candidate_ref": null,
+        "time_range": null,
+        "variables": null
+      },
+      "target_first_correct_seconds": {
+        "desired_band": [
+          5,
+          10
+        ],
+        "maximum": 10,
+        "faster_is_acceptable": true
+      }
+    },
+    {
+      "task_id": "bioetl-overview-v2:Q1",
+      "dashboard_uid": "bioetl-overview-v2",
+      "page_goal": "Определить текущее состояние fleet, затронутый домен и первое действие с сохранением контекста.",
+      "goal_approval": "PENDING_OWNER",
+      "question": "Каково состояние и достаточно ли evidence для вывода?",
+      "answer_rubric": "Назвать состояние, его scope и достаточность evidence; неизвестность не заменять OK/нулём.",
+      "answer_key_evidence": null,
+      "target_panels": [
+        {
+          "panel_id": 214,
+          "title": "Monitor Fleet Health"
+        }
+      ],
+      "initial_context": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "rows": "shipped collapsed",
+        "fixture_id": null,
+        "candidate_ref": null,
+        "time_range": null,
+        "variables": null
+      },
+      "target_first_correct_seconds": {
+        "desired_band": [
+          5,
+          10
+        ],
+        "maximum": 10,
+        "faster_is_acceptable": true
+      }
+    },
+    {
+      "task_id": "bioetl-overview-v2:Q2",
+      "dashboard_uid": "bioetl-overview-v2",
+      "page_goal": "Определить текущее состояние fleet, затронутый домен и первое действие с сохранением контекста.",
+      "goal_approval": "PENDING_OWNER",
+      "question": "Где находится проблема и какова причина?",
+      "answer_rubric": "Назвать затронутый домен/причину и её scope, привести видимое основание либо явно указать недостаток данных.",
+      "answer_key_evidence": null,
+      "target_panels": [
+        {
+          "panel_id": 9002,
+          "title": "Review Domain Status"
+        }
+      ],
+      "initial_context": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "rows": "shipped collapsed",
+        "fixture_id": null,
+        "candidate_ref": null,
+        "time_range": null,
+        "variables": null
+      },
+      "target_first_correct_seconds": {
+        "desired_band": [
+          5,
+          10
+        ],
+        "maximum": 10,
+        "faster_is_acceptable": true
+      }
+    },
+    {
+      "task_id": "bioetl-overview-v2:Q3",
+      "dashboard_uid": "bioetl-overview-v2",
+      "page_goal": "Определить текущее состояние fleet, затронутый домен и первое действие с сохранением контекста.",
+      "goal_approval": "PENDING_OWNER",
+      "question": "Какое следующее безопасное действие и куда перейти?",
+      "answer_rubric": "Открыть подходящую существующую диагностику/runbook, объяснить безопасный следующий шаг и вернуться без потери допустимого контекста.",
+      "answer_key_evidence": null,
+      "target_panels": [
+        {
+          "panel_id": 1000,
+          "title": ""
+        },
+        {
+          "panel_id": 99,
+          "title": ""
+        },
+        {
+          "panel_id": 215,
+          "title": "Review First Action"
+        },
+        {
+          "panel_id": 9021,
+          "title": "Navigate Diagnostics"
+        }
+      ],
+      "initial_context": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "rows": "shipped collapsed",
+        "fixture_id": null,
+        "candidate_ref": null,
+        "time_range": null,
+        "variables": null
+      },
+      "target_first_correct_seconds": {
+        "desired_band": [
+          5,
+          10
+        ],
+        "maximum": 10,
+        "faster_is_acceptable": true
+      }
+    },
+    {
+      "task_id": "bioetl-runtime:Q1",
+      "dashboard_uid": "bioetl-runtime",
+      "page_goal": "Локализовать runtime blockers выбранного pipeline и перейти к причине или runbook.",
+      "goal_approval": "PENDING_OWNER",
+      "question": "Каково состояние и достаточно ли evidence для вывода?",
+      "answer_rubric": "Назвать состояние, его scope и достаточность evidence; неизвестность не заменять OK/нулём.",
+      "answer_key_evidence": null,
+      "target_panels": [
+        {
+          "panel_id": 9401,
+          "title": "Monitor Pipeline Status"
+        },
+        {
+          "panel_id": 9102,
+          "title": "Monitor Metrics Coverage"
+        }
+      ],
+      "initial_context": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "rows": "shipped collapsed",
+        "fixture_id": null,
+        "candidate_ref": null,
+        "time_range": null,
+        "variables": null
+      },
+      "target_first_correct_seconds": {
+        "desired_band": [
+          5,
+          10
+        ],
+        "maximum": 10,
+        "faster_is_acceptable": true
+      }
+    },
+    {
+      "task_id": "bioetl-runtime:Q2",
+      "dashboard_uid": "bioetl-runtime",
+      "page_goal": "Локализовать runtime blockers выбранного pipeline и перейти к причине или runbook.",
+      "goal_approval": "PENDING_OWNER",
+      "question": "Где находится проблема и какова причина?",
+      "answer_rubric": "Назвать затронутый домен/причину и её scope, привести видимое основание либо явно указать недостаток данных.",
+      "answer_key_evidence": null,
+      "target_panels": [
+        {
+          "panel_id": 9101,
+          "title": "Review Runtime Blockers"
+        },
+        {
+          "panel_id": 16,
+          "title": "Monitor Active Blocker Count"
+        }
+      ],
+      "initial_context": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "rows": "shipped collapsed",
+        "fixture_id": null,
+        "candidate_ref": null,
+        "time_range": null,
+        "variables": null
+      },
+      "target_first_correct_seconds": {
+        "desired_band": [
+          5,
+          10
+        ],
+        "maximum": 10,
+        "faster_is_acceptable": true
+      }
+    },
+    {
+      "task_id": "bioetl-runtime:Q3",
+      "dashboard_uid": "bioetl-runtime",
+      "page_goal": "Локализовать runtime blockers выбранного pipeline и перейти к причине или runbook.",
+      "goal_approval": "PENDING_OWNER",
+      "question": "Какое следующее безопасное действие и куда перейти?",
+      "answer_rubric": "Открыть подходящую существующую диагностику/runbook, объяснить безопасный следующий шаг и вернуться без потери допустимого контекста.",
+      "answer_key_evidence": null,
+      "target_panels": [
+        {
+          "panel_id": 1000,
+          "title": ""
+        },
+        {
+          "panel_id": 9400,
+          "title": ""
+        },
+        {
+          "panel_id": 9991,
+          "title": ""
+        },
+        {
+          "panel_id": 2541,
+          "title": "Review Runtime Escalation"
+        },
+        {
+          "panel_id": 2542,
+          "title": "Review Cross-Domain Handoffs"
+        },
+        {
+          "panel_id": 2543,
+          "title": "Review Global Process Signals"
+        }
+      ],
+      "initial_context": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "rows": "shipped collapsed",
+        "fixture_id": null,
+        "candidate_ref": null,
+        "time_range": null,
+        "variables": null
+      },
+      "target_first_correct_seconds": {
+        "desired_band": [
+          5,
+          10
+        ],
+        "maximum": 10,
+        "faster_is_acceptable": true
+      }
+    },
+    {
+      "task_id": "bioetl-provider-health-v2:Q1",
+      "dashboard_uid": "bioetl-provider-health-v2",
+      "page_goal": "Различить состояние выбранного provider и fleet, затем найти причину и следующий шаг.",
+      "goal_approval": "PENDING_OWNER",
+      "question": "Каково состояние и достаточно ли evidence для вывода?",
+      "answer_rubric": "Назвать состояние, его scope и достаточность evidence; неизвестность не заменять OK/нулём.",
+      "answer_key_evidence": null,
+      "target_panels": [
+        {
+          "panel_id": 9401,
+          "title": "Monitor Selected Provider"
+        },
+        {
+          "panel_id": 9104,
+          "title": "Monitor Telemetry Presence"
+        }
+      ],
+      "initial_context": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "rows": "shipped collapsed",
+        "fixture_id": null,
+        "candidate_ref": null,
+        "time_range": null,
+        "variables": null
+      },
+      "target_first_correct_seconds": {
+        "desired_band": [
+          5,
+          10
+        ],
+        "maximum": 10,
+        "faster_is_acceptable": true
+      }
+    },
+    {
+      "task_id": "bioetl-provider-health-v2:Q2",
+      "dashboard_uid": "bioetl-provider-health-v2",
+      "page_goal": "Различить состояние выбранного provider и fleet, затем найти причину и следующий шаг.",
+      "goal_approval": "PENDING_OWNER",
+      "question": "Где находится проблема и какова причина?",
+      "answer_rubric": "Назвать затронутый домен/причину и её scope, привести видимое основание либо явно указать недостаток данных.",
+      "answer_key_evidence": null,
+      "target_panels": [
+        {
+          "panel_id": 9101,
+          "title": "Monitor Fleet Severity"
+        },
+        {
+          "panel_id": 9107,
+          "title": "Inspect Status Reason"
+        },
+        {
+          "panel_id": 9103,
+          "title": "Inspect Top Provider Causes"
+        }
+      ],
+      "initial_context": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "rows": "shipped collapsed",
+        "fixture_id": null,
+        "candidate_ref": null,
+        "time_range": null,
+        "variables": null
+      },
+      "target_first_correct_seconds": {
+        "desired_band": [
+          5,
+          10
+        ],
+        "maximum": 10,
+        "faster_is_acceptable": true
+      }
+    },
+    {
+      "task_id": "bioetl-provider-health-v2:Q3",
+      "dashboard_uid": "bioetl-provider-health-v2",
+      "page_goal": "Различить состояние выбранного provider и fleet, затем найти причину и следующий шаг.",
+      "goal_approval": "PENDING_OWNER",
+      "question": "Какое следующее безопасное действие и куда перейти?",
+      "answer_rubric": "Открыть подходящую существующую диагностику/runbook, объяснить безопасный следующий шаг и вернуться без потери допустимого контекста.",
+      "answer_key_evidence": null,
+      "target_panels": [
+        {
+          "panel_id": 1000,
+          "title": ""
+        },
+        {
+          "panel_id": 9400,
+          "title": ""
+        },
+        {
+          "panel_id": 9002,
+          "title": ""
+        }
+      ],
+      "initial_context": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "rows": "shipped collapsed",
+        "fixture_id": null,
+        "candidate_ref": null,
+        "time_range": null,
+        "variables": null
+      },
+      "target_first_correct_seconds": {
+        "desired_band": [
+          5,
+          10
+        ],
+        "maximum": 10,
+        "faster_is_acceptable": true
+      }
+    },
+    {
+      "task_id": "bioetl-dq-v2:Q1",
+      "dashboard_uid": "bioetl-dq-v2",
+      "page_goal": "Определить текущую DQ-проблему и перейти от причины к range impact или exact-run evidence.",
+      "goal_approval": "PENDING_OWNER",
+      "question": "Каково состояние и достаточно ли evidence для вывода?",
+      "answer_rubric": "Назвать состояние, его scope и достаточность evidence; неизвестность не заменять OK/нулём.",
+      "answer_key_evidence": null,
+      "target_panels": [
+        {
+          "panel_id": 9401,
+          "title": "Monitor Current DQ Status"
+        },
+        {
+          "panel_id": 9101,
+          "title": "Monitor DQ Threshold State"
+        }
+      ],
+      "initial_context": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "rows": "shipped collapsed",
+        "fixture_id": null,
+        "candidate_ref": null,
+        "time_range": null,
+        "variables": null
+      },
+      "target_first_correct_seconds": {
+        "desired_band": [
+          5,
+          10
+        ],
+        "maximum": 10,
+        "faster_is_acceptable": true
+      }
+    },
+    {
+      "task_id": "bioetl-dq-v2:Q2",
+      "dashboard_uid": "bioetl-dq-v2",
+      "page_goal": "Определить текущую DQ-проблему и перейти от причины к range impact или exact-run evidence.",
+      "goal_approval": "PENDING_OWNER",
+      "question": "Где находится проблема и какова причина?",
+      "answer_rubric": "Назвать затронутый домен/причину и её scope, привести видимое основание либо явно указать недостаток данных.",
+      "answer_key_evidence": null,
+      "target_panels": [
+        {
+          "panel_id": 9102,
+          "title": "Inspect Current DQ Reasons"
+        }
+      ],
+      "initial_context": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "rows": "shipped collapsed",
+        "fixture_id": null,
+        "candidate_ref": null,
+        "time_range": null,
+        "variables": null
+      },
+      "target_first_correct_seconds": {
+        "desired_band": [
+          5,
+          10
+        ],
+        "maximum": 10,
+        "faster_is_acceptable": true
+      }
+    },
+    {
+      "task_id": "bioetl-dq-v2:Q3",
+      "dashboard_uid": "bioetl-dq-v2",
+      "page_goal": "Определить текущую DQ-проблему и перейти от причины к range impact или exact-run evidence.",
+      "goal_approval": "PENDING_OWNER",
+      "question": "Какое следующее безопасное действие и куда перейти?",
+      "answer_rubric": "Открыть подходящую существующую диагностику/runbook, объяснить безопасный следующий шаг и вернуться без потери допустимого контекста.",
+      "answer_key_evidence": null,
+      "target_panels": [
+        {
+          "panel_id": 1000,
+          "title": ""
+        },
+        {
+          "panel_id": 9400,
+          "title": ""
+        },
+        {
+          "panel_id": 9103,
+          "title": ""
+        },
+        {
+          "panel_id": 116,
+          "title": "Inspect Lineage in Control Plane"
+        },
+        {
+          "panel_id": 150,
+          "title": "Inspect Aggregate Control-Plane Issues"
+        }
+      ],
+      "initial_context": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "rows": "shipped collapsed",
+        "fixture_id": null,
+        "candidate_ref": null,
+        "time_range": null,
+        "variables": null
+      },
+      "target_first_correct_seconds": {
+        "desired_band": [
+          5,
+          10
+        ],
+        "maximum": 10,
+        "faster_is_acceptable": true
+      }
+    },
+    {
+      "task_id": "bioetl-incident-v1:Q1",
+      "dashboard_uid": "bioetl-incident-v1",
+      "page_goal": "Выбрать приоритетного подозреваемого и перейти к доменной диагностике инцидента.",
+      "goal_approval": "PENDING_OWNER",
+      "question": "Каково состояние и достаточно ли evidence для вывода?",
+      "answer_rubric": "Назвать состояние, его scope и достаточность evidence; неизвестность не заменять OK/нулём.",
+      "answer_key_evidence": null,
+      "target_panels": [
+        {
+          "panel_id": 9401,
+          "title": "Monitor Incident Status"
+        }
+      ],
+      "initial_context": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "rows": "shipped collapsed",
+        "fixture_id": null,
+        "candidate_ref": null,
+        "time_range": null,
+        "variables": null
+      },
+      "target_first_correct_seconds": {
+        "desired_band": [
+          5,
+          10
+        ],
+        "maximum": 10,
+        "faster_is_acceptable": true
+      }
+    },
+    {
+      "task_id": "bioetl-incident-v1:Q2",
+      "dashboard_uid": "bioetl-incident-v1",
+      "page_goal": "Выбрать приоритетного подозреваемого и перейти к доменной диагностике инцидента.",
+      "goal_approval": "PENDING_OWNER",
+      "question": "Где находится проблема и какова причина?",
+      "answer_rubric": "Назвать затронутый домен/причину и её scope, привести видимое основание либо явно указать недостаток данных.",
+      "answer_key_evidence": null,
+      "target_panels": [
+        {
+          "panel_id": 2010,
+          "title": "Inspect Ranked Suspects"
+        },
+        {
+          "panel_id": 2020,
+          "title": "Review Alert Evidence"
+        },
+        {
+          "panel_id": 2005,
+          "title": "Monitor Current Alerts"
+        }
+      ],
+      "initial_context": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "rows": "shipped collapsed",
+        "fixture_id": null,
+        "candidate_ref": null,
+        "time_range": null,
+        "variables": null
+      },
+      "target_first_correct_seconds": {
+        "desired_band": [
+          5,
+          10
+        ],
+        "maximum": 10,
+        "faster_is_acceptable": true
+      }
+    },
+    {
+      "task_id": "bioetl-incident-v1:Q3",
+      "dashboard_uid": "bioetl-incident-v1",
+      "page_goal": "Выбрать приоритетного подозреваемого и перейти к доменной диагностике инцидента.",
+      "goal_approval": "PENDING_OWNER",
+      "question": "Какое следующее безопасное действие и куда перейти?",
+      "answer_rubric": "Открыть подходящую существующую диагностику/runbook, объяснить безопасный следующий шаг и вернуться без потери допустимого контекста.",
+      "answer_key_evidence": null,
+      "target_panels": [
+        {
+          "panel_id": 1000,
+          "title": ""
+        },
+        {
+          "panel_id": 9400,
+          "title": ""
+        },
+        {
+          "panel_id": 2001,
+          "title": ""
+        },
+        {
+          "panel_id": 2007,
+          "title": "Assess Impact & Confidence"
+        }
+      ],
+      "initial_context": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "rows": "shipped collapsed",
+        "fixture_id": null,
+        "candidate_ref": null,
+        "time_range": null,
+        "variables": null
+      },
+      "target_first_correct_seconds": {
+        "desired_band": [
+          5,
+          10
+        ],
+        "maximum": 10,
+        "faster_is_acceptable": true
+      }
+    },
+    {
+      "task_id": "bioetl-run-explorer-v1:Q1",
+      "dashboard_uid": "bioetl-run-explorer-v1",
+      "page_goal": "Найти запуск и открыть его identity, accounting и stage evidence.",
+      "goal_approval": "PENDING_OWNER",
+      "question": "Как найти нужный pipeline run и понять состояние каталога?",
+      "answer_rubric": "Найти заданный pipeline run в каталоге Ops HTTP; отличить VALID_EMPTY от недоступного/повреждённого каталога.",
+      "answer_key_evidence": null,
+      "target_panels": [
+        {
+          "panel_id": 3010,
+          "title": "Inspect Recent Runs (last 10)"
+        }
+      ],
+      "initial_context": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "rows": "shipped collapsed",
+        "fixture_id": null,
+        "candidate_ref": null,
+        "time_range": null,
+        "variables": null
+      },
+      "target_first_correct_seconds": {
+        "desired_band": [
+          5,
+          10
+        ],
+        "maximum": 10,
+        "faster_is_acceptable": true
+      }
+    },
+    {
+      "task_id": "bioetl-run-explorer-v1:Q2",
+      "dashboard_uid": "bioetl-run-explorer-v1",
+      "page_goal": "Найти запуск и открыть его identity, accounting и stage evidence.",
+      "goal_approval": "PENDING_OWNER",
+      "question": "Что произошло на стадиях выбранного запуска?",
+      "answer_rubric": "Для выбранного UUID назвать состояние стадий и processing_status по Ops HTTP; не выводить trust_status из успешной обработки.",
+      "answer_key_evidence": null,
+      "target_panels": [
+        {
+          "panel_id": 3011,
+          "title": "Inspect Stage Funnel"
+        }
+      ],
+      "initial_context": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "rows": "shipped collapsed",
+        "fixture_id": null,
+        "candidate_ref": null,
+        "time_range": null,
+        "variables": null
+      },
+      "target_first_correct_seconds": {
+        "desired_band": [
+          5,
+          10
+        ],
+        "maximum": 10,
+        "faster_is_acceptable": true
+      }
+    },
+    {
+      "task_id": "bioetl-run-explorer-v1:Q3",
+      "dashboard_uid": "bioetl-run-explorer-v1",
+      "page_goal": "Найти запуск и открыть его identity, accounting и stage evidence.",
+      "goal_approval": "PENDING_OWNER",
+      "question": "Откройте доказательство для выбранного запуска, подтвердите UUID и вернитесь к его диагностике.",
+      "answer_rubric": "Открыть JSON или Markdown artifact выбранного UUID, сверить identity и вернуться; отсутствие артефакта назвать явно.",
+      "answer_key_evidence": null,
+      "target_panels": [
+        {
+          "panel_id": 3022,
+          "title": "Inspect Run Identity"
+        },
+        {
+          "panel_id": 3013,
+          "title": "Inspect Run Artifacts"
+        },
+        {
+          "panel_id": 1000,
+          "title": ""
+        }
+      ],
+      "initial_context": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "rows": "shipped collapsed",
+        "fixture_id": null,
+        "candidate_ref": null,
+        "time_range": null,
+        "variables": null
+      },
+      "target_first_correct_seconds": {
+        "desired_band": [
+          5,
+          10
+        ],
+        "maximum": 10,
+        "faster_is_acceptable": true
+      }
+    }
+  ]
+}
