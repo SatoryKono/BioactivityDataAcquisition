@@ -3522,6 +3522,21 @@
                     }
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "manifest / get_by_run_id / success"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#8456a8"
+                    }
+                  }
+                ]
               }
             ]
           },
