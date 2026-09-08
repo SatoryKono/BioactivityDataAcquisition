@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-07T19:28:45.238947+00:00",
+  "generated_at": "2026-09-08T06:50:26.610304+00:00",
   "summary": {
-    "total_scripts": 613,
+    "total_scripts": 614,
     "status_counts": {
-      "active": 338,
+      "active": 339,
       "supporting": 275
     },
     "reference_group_coverage": {
       "agents": 8,
       "build": 17,
       "ci": 83,
-      "docs": 252,
+      "docs": 253,
       "other": 75,
-      "scripts": 512,
+      "scripts": 513,
       "skills": 12,
-      "tests": 425
+      "tests": 426
     }
   },
   "scripts": [
@@ -18381,7 +18381,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 63,
+      "reference_count": 65,
       "references": [
         {
           "path": ".github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md",
@@ -19888,7 +19888,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 14,
       "references": [
         {
           "path": ".github/ISSUES/AUD-OBS-20260714-002-Add-Truthful-Observability-Validation-Gates.md",
@@ -20333,6 +20333,33 @@
       "next_step": "Retain only as a bounded optional renderer-only recovery helper while Grafana monitoring remains local and optional; consolidate it into the canonical observability command surface before promotion."
     },
     {
+      "path": "scripts/ops/observability/grafana/regression_acceptance.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "docs/03-guides/dashboards/regression-acceptance.md",
+          "line": 29,
+          "source_group": "docs",
+          "text": "[`regression_acceptance.py`](../../../scripts/ops/observability/grafana/regression_acceptance.py)."
+        },
+        {
+          "path": "scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py",
+          "line": 1073,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.regression_acceptance import write_report"
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_regression_acceptance.py",
+          "line": 8,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana import regression_acceptance as subject"
+        }
+      ]
+    },
+    {
       "path": "scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1",
       "type": "ps1",
       "status": "supporting",
@@ -20378,7 +20405,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 180,
+          "line": 183,
           "source_group": "docs",
           "text": "`scripts/ops/observability/grafana/render_nav_bus.py`). The current dashboard"
         },
@@ -20474,7 +20501,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/ops/__main__.py",
@@ -20505,6 +20532,12 @@
           "line": 929,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/run_grafana_dashboard_audit_cycle.py\","
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_grafana_fixed_acceptance_window.py",
+          "line": 8,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana import run_grafana_dashboard_audit_cycle as cycle"
         }
       ]
     },
@@ -20629,7 +20662,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 170,
+          "line": 173,
           "source_group": "docs",
           "text": "- On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap"
         },
