@@ -223,8 +223,8 @@ def _series_control_errors(dashboard: dict) -> list[str]:
     return errors
 
 
-def _panel_review_errors(dashboard: dict, by_id: dict, first: set[int]) -> list[str]:
-    """Match panel review statuses and quotes against observed browser text."""
+def _observed_panel_texts(dashboard: dict) -> dict:
+    """Collect measured and terminal-state text by model panel identifier."""
     texts = {}
     for p in measurement_pairs(dashboard, "text"):
         texts.setdefault(_panel_number(p.get("panel")), []).append(
@@ -232,6 +232,12 @@ def _panel_review_errors(dashboard: dict, by_id: dict, first: set[int]) -> list[
         )
     for p in dashboard.get("terminalStateValidation", {}).get("panelStates", []):
         texts.setdefault(p.get("id"), []).append(str(p.get("bodyText") or ""))
+    return texts
+
+
+def _panel_review_errors(dashboard: dict, by_id: dict, first: set[int]) -> list[str]:
+    """Match panel review statuses and quotes against observed browser text."""
+    texts = _observed_panel_texts(dashboard)
     errors = []
     for id_, review in by_id.items():
         if review.get("status") not in {"PASS", "NOT_VERIFIABLE", "COLOR_ONLY"}:
