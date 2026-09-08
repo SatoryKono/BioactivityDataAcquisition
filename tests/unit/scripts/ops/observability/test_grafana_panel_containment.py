@@ -48,6 +48,24 @@ def _node_eval(program: str) -> str:
     return result.stdout.strip()
 
 
+def test_scroll_typography_requires_every_panel_and_retains_failed_frames() -> None:
+    output = _node_eval("""
+const {mergeTypographyObservations: merge} = require(process.argv[1]);
+const required = [{id:1},{id:2}];
+const first = {panels:[{id:1}],violations:[]};
+const second = {panels:[{id:2}],violations:[]};
+const failed = {panels:[{id:1}],violations:[{id:1,reason:'font below floor'}]};
+console.log(JSON.stringify([merge(required,[first,second]),merge(required,[first]),
+  merge(required,[failed,first,second]),merge(required,[])]));
+""")
+    complete, missing, failed, empty = json.loads(output)
+    assert complete["status"] == "ok"
+    assert complete["checkedPanelCount"] == 2
+    assert missing["status"] == empty["status"] == failed["status"] == "error"
+    assert failed["violations"] == [{"id": 1, "reason": "font below floor"}]
+    assert missing["violations"][0]["id"] == 2
+
+
 def test_text_contrast_composites_alpha_and_preserves_unmeasured_gradients() -> None:
     output = _node_eval(
         """

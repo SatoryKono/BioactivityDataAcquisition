@@ -2041,6 +2041,22 @@ async function collectTypographyValidation(page, dashboard) {
   });
 }
 
+function mergeTypographyObservations(requiredPanels, observations) {
+  const byId = new Map();
+  const violations = observations.flatMap(observation => observation.violations || []);
+  for (const observation of observations) {
+    for (const panel of observation.panels || []) {
+      if (!byId.has(panel.id)) byId.set(panel.id, panel);
+    }
+  }
+  for (const panel of requiredPanels) {
+    if (!byId.has(panel.id)) violations.push({id: panel.id, reason: 'missing scroll-tile typography evidence'});
+  }
+  return {...observations[0], method: 'all required panels measured in their visible scroll tiles',
+    panels: [...byId.values()], checkedPanelCount: byId.size, violations,
+    status: violations.length === 0 && byId.size === requiredPanels.length ? 'ok' : 'error'};
+}
+
 async function verifyRenderedPanelCount(page, dashboard, index, total) {
   const evidence = await countRenderedPanels(page);
   dashboard.renderedPanelCount = evidence.count;
@@ -2229,7 +2245,10 @@ async function collectVerifiedRenderContext(page, dashboard) {
 async function collectVerifiedPanelSurfaces(page, dashboard) {
   dashboard.panelContainment ??= await collectPanelContainment(page, dashboard);
   // Collect all independent evidence even when one surface fails acceptance.
-  dashboard.typographyValidation = await collectTypographyValidation(page, dashboard);
+  const tileTypography = (dashboard.scrollCapture?.tiles || []).map(tile => tile.evidence?.typography).filter(Boolean);
+  dashboard.typographyValidation = tileTypography.length
+    ? mergeTypographyObservations(dashboard.requiredPanels, tileTypography)
+    : await collectTypographyValidation(page, dashboard);
   dashboard.navigationValidation = await collectNavigationValidation(page);
   const containmentSchema = validateContainmentManifest(dashboard.panelContainment);
   if (containmentSchema.status !== "ok") {
@@ -2406,10 +2425,16 @@ async function renderDashboard(page, dashboard, index, total) {
     const {captureScrollSurface} = require('./capture_scroll_surface.cjs');
     dashboard.scrollCapture = await captureScrollSurface(page, {filePath,
       timeout: CONFIG.captureTimeoutMs, pngEvidence,
-      measure: async () => ({terminal: await validateVisibleTerminalState(page, dashboard, index, total),
-        text: await page.evaluate(accessibilityMeasurementsFromDom),
-        graphics: await page.evaluate(graphicsMeasurementsFromDom),
-        canvas: await page.evaluate(canvasEvidenceFromDom)})});
+      measure: async () => {
+        const terminal = await validateVisibleTerminalState(page, dashboard, index, total);
+        const visibleIds = new Set(terminal.panelStates.map(panel => panel.id));
+        return {terminal,
+          typography: await collectTypographyValidation(page, {...dashboard,
+            requiredPanels: dashboard.requiredPanels.filter(panel => visibleIds.has(panel.id))}),
+          text: await page.evaluate(accessibilityMeasurementsFromDom),
+          graphics: await page.evaluate(graphicsMeasurementsFromDom),
+          canvas: await page.evaluate(canvasEvidenceFromDom)};
+      }});
   } else {
     await require('./native_browser_zoom.cjs').capturePageScreenshot(page, screenshotOptions(dashboard, filePath));
   }
@@ -2607,6 +2632,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  mergeTypographyObservations,
   layoutFitMeasurementsFromDom,
   navigationValidationFromDom,
   graphicsMeasurementsFromDom,
