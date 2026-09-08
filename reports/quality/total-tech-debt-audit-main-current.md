@@ -12,6 +12,10 @@ Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
 Evidence surface SHA-256: `c3bb948ce1dd8d8af9dc6165f4d3fac01d520660d902aec39570d9ca485af1a9`
 
+Evidence metadata refresh (2026-09-07): the canonical registry digest was
+recomputed after synchronizing the remote-main baseline in the debt gate report.
+The historical audited commit above is retained; this metadata refresh does not
+constitute a new repository-wide architecture audit.
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 

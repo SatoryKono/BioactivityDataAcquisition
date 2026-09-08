@@ -1,13 +1,13 @@
 version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
-source_branch: main
-refreshed_at_utc: '2026-09-08T17:27:35.506412+00:00'
+source_branch: fix/ori-five-main-evidence
+refreshed_at_utc: '2026-09-08T19:02:00.307593+00:00'
 refresh_status: captured
-source_commit: 5c69cbb40942086db5bd48922ebd147ffd45f35f
-source_run_id: '34251820402'
-source_event: push
-source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34251820402
+source_commit: d9226c9fce46cdf3c92afa81a5e0fa6e2f2ce23a
+source_run_id: '34262650914'
+source_event: pull_request
+source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34262650914
 source_tree_sha256: a633f906d04a230f09e14ed34f94a8c5b050436be4878d9514d26f102dbfe67d
 freshness_guard:
   timestamp_field: refreshed_at_utc
@@ -23,129 +23,129 @@ coverage:
   actual_percent: 96.71
   threshold_satisfied: true
 duration_telemetry:
-  total_cases: 49958
+  total_cases: 49970
   top_slowest:
-  - duration_s: 17.425
+  - duration_s: 16.827
     source: junit-unit-scripts-tooling.debt-governance.xml
     test: tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing
-  - duration_s: 10.803
+  - duration_s: 11.025
     source: junit-repo-backed-unit.ops.xml
     test: tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation
-  - duration_s: 10.406
+  - duration_s: 9.753
     source: junit-unit-scripts-tooling.debt-governance.xml
     test: tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale
-  - duration_s: 10.356
+  - duration_s: 9.749
     source: junit-unit-scripts-tooling.debt-governance.xml
     test: tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact
-  - duration_s: 9.37
-    source: junit-contract-confidence.xml
-    test: tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]
-  - duration_s: 8.409
+  - duration_s: 9.622
     source: junit-repo-backed-unit.ops.xml
     test: tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_cli_unavailable_fails_closed_with_redacted_report
-  - duration_s: 7.199
+  - duration_s: 9.026
+    source: junit-contract-confidence.xml
+    test: tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]
+  - duration_s: 7.887
+    source: junit.integration.xml
+    test: tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts
+  - duration_s: 7.241
+    source: junit.unit-other.xml
+    test: tests.unit.composition.bootstrap.test_runner_bootstrap.TestBootstrapPipelineRunnerServiceIntegration::test_bootstrapped_service_can_list_pipelines
+  - duration_s: 7.092
     source: junit.unit-other.xml
     test: tests.unit.composition.factories.pipeline.test_registry::test_registry_completeness
-  - duration_s: 7.115
-    source: junit.unit-other.xml
-    test: tests.unit.composition.factories.pipeline.test_registry_consistency.TestFactoryValidity::test_all_factories_have_pipeline_name
-  - duration_s: 7.064
-    source: junit-unit-scripts-tooling.passport.xml
-    test: tests.unit.scripts.docs.passports.test_passport_projector::test_workflow_operations_are_classified
-  - duration_s: 6.824
-    source: junit-track-d.xml
-    test: tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts
-  - duration_s: 6.29
-    source: junit.integration.xml
-    test: tests.integration.test_grafana_render_first_remediation::test_scrolling_capture_preserves_layout_viewport
-  - duration_s: 6.179
-    source: junit-repo-backed-unit.tooling.xml
-    test: tests.unit.repo_backed.scripts.ai.mcp.test_mcp_wrapper_contracts::test_powershell_fetch_wrapper_executes_resolved_uvx
-  - duration_s: 6.003
-    source: junit-unit-scripts-tooling.other.xml
-    test: tests.unit.scripts.ops.test_recover_renderer::test_check_only_suggests_recover
-  - duration_s: 5.986
-    source: junit.integration.xml
-    test: tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts
-  - duration_s: 5.899
+  - duration_s: 6.954
     source: junit-unit-scripts-tooling.other.xml
     test: tests.unit.scripts.qa.test_check_quality_exemptions::test_check_quality_exemptions_passes_current_zero_budget_registry
-  - duration_s: 5.414
+  - duration_s: 6.438
+    source: junit-track-d.xml
+    test: tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts
+  - duration_s: 6.004
+    source: junit-unit-scripts-tooling.other.xml
+    test: tests.unit.scripts.ops.test_recover_renderer::test_check_only_suggests_recover
+  - duration_s: 4.711
+    source: junit.integration.xml
+    test: tests.integration.config.test_chembl_dq_catalog_sync::test_audited_chembl_dq_enum_fields_are_synced_to_catalog_rows
+  - duration_s: 4.691
+    source: junit-contract-confidence.xml
+    test: tests.contract.test_gold_pk_consistency.TestGoldPkConsistency::test_pipeline_configs_use_new_pk_naming
+  - duration_s: 4.432
     source: junit-repo-backed-unit.product.xml
     test: tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures::test_cached_populated_isolated_registry_contains_pipeline_factories
-  - duration_s: 5.284
+  - duration_s: 4.412
+    source: junit-unit-scripts-tooling.other.xml
+    test: tests.unit.scripts.qa.test_generate_semantic_pipeline_audit::test_build_current_member_facts_exposes_composite_inherited_field_types
+  - duration_s: 4.209
+    source: junit-unit-scripts-tooling.debt-governance.xml
+    test: tests.unit.scripts.qa.test_report_debt_governance_gates::test_release_review_freshness_gate_passes_for_recent_live_review
+  - duration_s: 4.115
+    source: junit-unit-scripts-tooling.passport.xml
+    test: tests.unit.scripts.docs.passports.test_passport_projector::test_workflow_operations_are_classified
+  - duration_s: 4.072
+    source: junit-repo-backed-unit.ops.xml
+    test: tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_bounded_restart_failure_uses_supported_stop_start_fallback
+  - duration_s: 3.966
+    source: junit-repo-backed-unit.ops.xml
+    test: tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_diagnostic_subprocess_timeout_is_bounded
+  - duration_s: 3.963
     source: junit-unit-scripts-tooling.other.xml
     test: tests.unit.scripts.ai.mcp.test_export_mcp_env_from_dotenv.TestExportMcpEnvFromDotenv::test_script_runs_without_errors
-  - duration_s: 5.048
+  - duration_s: 3.947
+    source: junit-contract-confidence.xml
+    test: tests.contract.test_normalization_cross_layer_contracts::test_profile_matrix_distinguishes_provider_universe_from_project_policy_scope
+  - duration_s: 3.883
+    source: junit-repo-backed-unit.tooling.xml
+    test: tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix::test_field_matrix__is_deterministic__61401586
+  - duration_s: 3.852
+    source: junit-unit-scripts-tooling.other.xml
+    test: tests.unit.scripts.qa.test_report_normalization_fallback_inventory::test_main_accepts_current_fallback_business_budget
+  - duration_s: 3.851
     source: junit-repo-backed-unit.tooling.xml
     test: tests.unit.repo_backed.scripts.ai.mcp.test_mcp_wrapper_contracts::test_powershell_token_warnings_stay_on_stderr[Remove-Item
       Env:OPTIONAL_TOKEN -ErrorAction SilentlyContinue; Test-McpOptionalToken -Name
       'OPTIONAL_TOKEN' -MinLength 8 -Purpose 'test MCP'-OPTIONAL_TOKEN is not set
       for test MCP]
-  - duration_s: 4.972
-    source: junit-contract-confidence.xml
-    test: tests.contract.test_gold_pk_consistency.TestGoldPkConsistency::test_pipeline_configs_use_new_pk_naming
-  - duration_s: 4.255
-    source: junit-contract-confidence.xml
-    test: tests.contract.test_normalization_cross_layer_contracts::test_profile_matrix_distinguishes_provider_universe_from_project_policy_scope
-  - duration_s: 4.118
-    source: junit-contract-confidence.xml
-    test: tests.contract.test_normalization_cross_layer_contracts::test_chembl_publication_prefixed_identifiers_and_raw_type_are_schema_visible
-  - duration_s: 4.095
-    source: junit-contract-confidence.xml
-    test: tests.contract.test_normalization_cross_layer_contracts::test_profile_matrix_exposes_shared_chembl_policy_surfaces
-  - duration_s: 4.034
-    source: junit-unit-scripts-tooling.debt-governance.xml
-    test: tests.unit.scripts.qa.test_report_debt_governance_gates::test_release_review_freshness_gate_passes_for_recent_live_review
-  - duration_s: 3.87
-    source: junit-contract-confidence.xml
-    test: tests.contract.test_chembl_case_and_ontology_consistency::test_chembl_ontology_identifier_families_are_profile_and_matrix_aligned[profile0-chembl_assay-bao_format-bao:0000190-BAO_0000190]
-  - duration_s: 3.827
-    source: junit-unit-scripts-tooling.other.xml
-    test: tests.unit.scripts.qa.test_generate_semantic_pipeline_audit::test_build_current_member_facts_exposes_composite_inherited_field_types
   top_slowest_zones:
   - zone: tests.unit.scripts.qa.test_report_debt_governance_gates
     test_count: 4
-    total_duration_s: 42.221
-    max_duration_s: 17.425
+    total_duration_s: 40.538
+    max_duration_s: 16.827
   - zone: tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery
-    test_count: 2
-    total_duration_s: 19.212
-    max_duration_s: 10.803
+    test_count: 4
+    total_duration_s: 28.685
+    max_duration_s: 11.025
   - zone: tests.integration.ci.test_track_d_fixture_control_plane_linkage
     test_count: 2
-    total_duration_s: 12.81
-    max_duration_s: 6.824
-  - zone: tests.contract.test_normalization_cross_layer_contracts
-    test_count: 3
-    total_duration_s: 12.468
-    max_duration_s: 4.255
-  - zone: tests.unit.repo_backed.scripts.ai.mcp.test_mcp_wrapper_contracts
-    test_count: 2
-    total_duration_s: 11.227
-    max_duration_s: 6.179
+    total_duration_s: 14.325
+    max_duration_s: 7.887
   - zone: tests.contract.test_provider_contract_drift_replay
     test_count: 1
-    total_duration_s: 9.37
-    max_duration_s: 9.37
+    total_duration_s: 9.026
+    max_duration_s: 9.026
+  - zone: tests.unit.composition.bootstrap.test_runner_bootstrap.TestBootstrapPipelineRunnerServiceIntegration
+    test_count: 1
+    total_duration_s: 7.241
+    max_duration_s: 7.241
   - zone: tests.unit.composition.factories.pipeline.test_registry
     test_count: 1
-    total_duration_s: 7.199
-    max_duration_s: 7.199
-  - zone: tests.unit.composition.factories.pipeline.test_registry_consistency.TestFactoryValidity
+    total_duration_s: 7.092
+    max_duration_s: 7.092
+  - zone: tests.unit.scripts.qa.test_check_quality_exemptions
     test_count: 1
-    total_duration_s: 7.115
-    max_duration_s: 7.115
-  - zone: tests.unit.scripts.docs.passports.test_passport_projector
+    total_duration_s: 6.954
+    max_duration_s: 6.954
+  - zone: tests.unit.scripts.ops.test_recover_renderer
     test_count: 1
-    total_duration_s: 7.064
-    max_duration_s: 7.064
-  - zone: tests.integration.test_grafana_render_first_remediation
+    total_duration_s: 6.004
+    max_duration_s: 6.004
+  - zone: tests.integration.config.test_chembl_dq_catalog_sync
     test_count: 1
-    total_duration_s: 6.29
-    max_duration_s: 6.29
+    total_duration_s: 4.711
+    max_duration_s: 4.711
+  - zone: tests.contract.test_gold_pk_consistency.TestGoldPkConsistency
+    test_count: 1
+    total_duration_s: 4.691
+    max_duration_s: 4.691
   execution_context:
-    executed_count: 49958
+    executed_count: 49970
     explicit_exclusions:
     - lane: live-provider-contracts
       reason: scheduled network-owned workflow
@@ -178,51 +178,51 @@ duration_telemetry:
     - junit.unit-infrastructure.xml
     - junit.unit-other.xml
     junit_testcase_duration_sum_s:
-      junit-contract-confidence.xml: 81.292
-      junit-fast.unit-application.xml: 19.072
-      junit-fast.unit-domain.xml: 42.913
-      junit-fast.unit-infrastructure.xml: 16.47
-      junit-fast.unit-other.xml: 26.132
-      junit-memory.xml: 3.264
-      junit-repo-backed-unit.ops.xml: 38.156
-      junit-repo-backed-unit.product.xml: 14.905
-      junit-repo-backed-unit.tooling.xml: 109.216
-      junit-serial-coverage.xml: 0.099
-      junit-track-d.xml: 8.342
-      junit-unit-filesystem-contracts.xml: 2.438
-      junit-unit-scripts-tooling.debt-governance.xml: 44.468
-      junit-unit-scripts-tooling.other.xml: 79.173
-      junit-unit-scripts-tooling.passport.xml: 16.722
-      junit-unit-subprocess-backed.xml: 0.216
-      junit.integration.xml: 98.817
-      junit.security.xml: 8.437
-      junit.unit-application.xml: 52.603
-      junit.unit-domain.xml: 152.008
-      junit.unit-infrastructure.xml: 43.657
-      junit.unit-other.xml: 71.338
+      junit-contract-confidence.xml: 75.646
+      junit-fast.unit-application.xml: 22.266
+      junit-fast.unit-domain.xml: 61.736
+      junit-fast.unit-infrastructure.xml: 16.103
+      junit-fast.unit-other.xml: 21.502
+      junit-memory.xml: 3.284
+      junit-repo-backed-unit.ops.xml: 42.818
+      junit-repo-backed-unit.product.xml: 12.094
+      junit-repo-backed-unit.tooling.xml: 111.037
+      junit-serial-coverage.xml: 0.104
+      junit-track-d.xml: 7.965
+      junit-unit-filesystem-contracts.xml: 2.821
+      junit-unit-scripts-tooling.debt-governance.xml: 42.635
+      junit-unit-scripts-tooling.other.xml: 85.384
+      junit-unit-scripts-tooling.passport.xml: 10.127
+      junit-unit-subprocess-backed.xml: 0.206
+      junit.integration.xml: 138.017
+      junit.security.xml: 11.798
+      junit.unit-application.xml: 51.812
+      junit.unit-domain.xml: 132.048
+      junit.unit-infrastructure.xml: 42.572
+      junit.unit-other.xml: 69.918
     lane_wall_time_s:
-      junit-contract-confidence.xml: 91.404
-      junit-fast.unit-application.xml: 40.37
-      junit-fast.unit-domain.xml: 55.256
-      junit-fast.unit-infrastructure.xml: 38.014
-      junit-fast.unit-other.xml: 45.119
-      junit-memory.xml: 3.379
-      junit-repo-backed-unit.ops.xml: 41.478
-      junit-repo-backed-unit.product.xml: 24.685
-      junit-repo-backed-unit.tooling.xml: 116.893
-      junit-serial-coverage.xml: 144.682
-      junit-track-d.xml: 12.528
-      junit-unit-filesystem-contracts.xml: 110.441
-      junit-unit-scripts-tooling.debt-governance.xml: 46.199
-      junit-unit-scripts-tooling.other.xml: 93.439
-      junit-unit-scripts-tooling.passport.xml: 19.208
-      junit-unit-subprocess-backed.xml: 98.768
-      junit.integration.xml: 115.275
-      junit.security.xml: 8.787
-      junit.unit-application.xml: 70.122
-      junit.unit-domain.xml: 116.833
-      junit.unit-infrastructure.xml: 57.65
-      junit.unit-other.xml: 68.423
+      junit-contract-confidence.xml: 85.641
+      junit-fast.unit-application.xml: 47.945
+      junit-fast.unit-domain.xml: 82.97
+      junit-fast.unit-infrastructure.xml: 37.216
+      junit-fast.unit-other.xml: 36.573
+      junit-memory.xml: 3.407
+      junit-repo-backed-unit.ops.xml: 47.249
+      junit-repo-backed-unit.product.xml: 19.935
+      junit-repo-backed-unit.tooling.xml: 118.52
+      junit-serial-coverage.xml: 145.737
+      junit-track-d.xml: 11.975
+      junit-unit-filesystem-contracts.xml: 114.348
+      junit-unit-scripts-tooling.debt-governance.xml: 44.253
+      junit-unit-scripts-tooling.other.xml: 100.564
+      junit-unit-scripts-tooling.passport.xml: 11.64
+      junit-unit-subprocess-backed.xml: 95.927
+      junit.integration.xml: 162.744
+      junit.security.xml: 11.632
+      junit.unit-application.xml: 69.945
+      junit.unit-domain.xml: 104.276
+      junit.unit-infrastructure.xml: 55.707
+      junit.unit-other.xml: 66.911
     lane_wall_time_source: junit_testsuite_time
     worker_mode: 'mixed: xdist unit/integration; serial contracts/repo-backed/memory'
 slow_governance_cache_probe:
