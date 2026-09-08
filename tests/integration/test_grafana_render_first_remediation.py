@@ -1138,9 +1138,12 @@ def test_run_explorer_selected_run_details_row_nests_forensics() -> None:
     timings_grid = nested[3014].get("gridPos") or {}
     assert int(identity_grid.get("h") or 0) >= 14
     assert int(records_grid.get("h") or 0) >= 14
-    assert int(records_grid.get("w") or 0) == int(reasons_grid.get("w") or 0)
-    assert identity_grid["w"] == records_grid["w"] == 24
-    assert records_grid["y"] >= identity_grid["y"] + identity_grid["h"]
+    assert identity_grid["w"] == records_grid["w"] == 12
+    assert identity_grid["x"] == 0
+    assert records_grid["x"] == identity_grid["x"] + identity_grid["w"]
+    assert identity_grid["y"] == records_grid["y"]
+    assert identity_grid["h"] == records_grid["h"]
+    assert funnel_grid["y"] == identity_grid["y"] + identity_grid["h"]
     assert funnel_grid["w"] == reasons_grid["w"] == 24
     assert reasons_grid["y"] >= funnel_grid["y"] + funnel_grid["h"]
     assert timings_grid["w"] == 24

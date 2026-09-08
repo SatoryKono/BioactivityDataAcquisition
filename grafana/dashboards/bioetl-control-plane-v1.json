@@ -1378,11 +1378,64 @@
                     "value": 110
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "check"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 180
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 270
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "detail"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
               }
             ]
           },
           "gridPos": {
-            "h": 6,
+            "h": 8,
             "w": 24,
             "x": 0,
             "y": 18
@@ -4423,9 +4476,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 12,
+            "x": 0,
             "y": 178,
-            "w": 12,
+            "w": 24,
             "h": 6
           },
           "id": 112,
