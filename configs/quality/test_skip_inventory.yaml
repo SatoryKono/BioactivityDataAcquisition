@@ -270,6 +270,19 @@ entries:
     vcr_related: false
     review_date: "2026-07-27"
     rationale: Reviewed skip/importorskip surface tracked for governance.
+  - path: tests/integration/test_grafana_render_first_remediation.py
+    suite: integration
+    category: conditional_environment_guard
+    owner: "@bioetl-platform"
+    linked_issue: "#10231"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 2
+    vcr_related: false
+    review_date: "2026-09-08"
+    rationale: >
+      The scrolling-capture browser integration requires the optional Node.js
+      and Playwright runtimes. Existing guards skip only when either runtime
+      is absent; browser execution and capture assertions still fail closed.
   - path: tests/e2e/conftest.py
     suite: e2e
     category: live_endpoint_unavailability

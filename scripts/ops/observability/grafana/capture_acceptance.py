@@ -223,6 +223,32 @@ def _series_control_errors(dashboard: dict) -> list[str]:
     return errors
 
 
+def _panel_review_errors(
+    dashboard: dict, by_id: dict, first: set[int]
+) -> list[str]:
+    """Match panel review statuses and quotes against observed browser text."""
+    texts = {}
+    for p in measurement_pairs(dashboard, "text"):
+        texts.setdefault(_panel_number(p.get("panel")), []).append(
+            str(p.get("text") or "")
+        )
+    for p in dashboard.get("terminalStateValidation", {}).get("panelStates", []):
+        texts.setdefault(p.get("id"), []).append(str(p.get("bodyText") or ""))
+    errors = []
+    for id_, review in by_id.items():
+        if review.get("status") not in {"PASS", "NOT_VERIFIABLE", "COLOR_ONLY"}:
+            errors.append(f"invalid review status: {id_}")
+        if id_ in first:
+            quote = str(review.get("evidence_text") or "").strip()
+            if (
+                review.get("status") != "PASS"
+                or not quote
+                or not any(quote in text for text in texts.get(id_, []))
+            ):
+                errors.append(f"critical non-color cue is not observed: {id_}")
+    return errors
+
+
 def validate_panel_cues(
     dashboard: dict, reviews: list[dict] | None, panels: set[int], first: set[int]
 ) -> dict:
@@ -240,26 +266,8 @@ def validate_panel_cues(
             "findings": None,
             "reason": "panel review coverage differs from provisioned model",
         }
-    texts = {}
-    for p in measurement_pairs(dashboard, "text"):
-        texts.setdefault(_panel_number(p.get("panel")), []).append(
-            str(p.get("text") or "")
-        )
-    for p in dashboard.get("terminalStateValidation", {}).get("panelStates", []):
-        texts.setdefault(p.get("id"), []).append(str(p.get("bodyText") or ""))
-    errors = []
     findings = sum(r.get("status") == "COLOR_ONLY" for r in reviews)
-    for id_, review in by_id.items():
-        if review.get("status") not in {"PASS", "NOT_VERIFIABLE", "COLOR_ONLY"}:
-            errors.append(f"invalid review status: {id_}")
-        if id_ in first:
-            quote = str(review.get("evidence_text") or "").strip()
-            if (
-                review.get("status") != "PASS"
-                or not quote
-                or not any(quote in text for text in texts.get(id_, []))
-            ):
-                errors.append(f"critical non-color cue is not observed: {id_}")
+    errors = _panel_review_errors(dashboard, by_id, first)
     errors.extend(_series_control_errors(dashboard))
     return {
         "status": "PASS" if not errors and findings == 0 else "NOT_PROVEN",
