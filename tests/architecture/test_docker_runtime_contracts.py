@@ -22,6 +22,8 @@ from types import ModuleType
 from typing import Any
 
 import pytest
+
+from tests.helpers.secret_fingerprints import assert_no_historical_neo4j_passwords
 import yaml
 
 
@@ -726,7 +728,7 @@ def test_neo4j_helpers_delegate_to_the_single_compose_owner() -> None:
         assert "docker compose -p bioetl-neo4j" in content
         assert "docker run" not in content
         assert "docker rm -f" not in content
-        assert "[REDACTED]" not in content
+        assert_no_historical_neo4j_passwords(content)
         assert "-p 7474:7474" not in content
 
 
@@ -742,9 +744,6 @@ def test_operator_surfaces_do_not_advertise_legacy_neo4j_owners_or_credentials()
         "docker kill bioetl-neo4j",
         "docker rm bioetl-neo4j",
         "docker rm -f bioetl-neo4j",
-        "NEO4J_AUTH=neo4j/[REDACTED]",
-        "[REDACTED]",
-        "[REDACTED]",
     )
 
     paths = list(operations_root.rglob("*.md"))
@@ -752,6 +751,7 @@ def test_operator_surfaces_do_not_advertise_legacy_neo4j_owners_or_credentials()
     paths.extend((ROOT / "scripts").rglob("*.ps1"))
     for path in paths:
         content = path.read_text(encoding="utf-8")
+        assert_no_historical_neo4j_passwords(content)
         for marker in forbidden:
             assert marker not in content, f"{path.relative_to(ROOT)}: {marker}"
         for line in content.splitlines():
@@ -1321,7 +1321,7 @@ def test_pre_change_baseline_captures_all_original_root_causes_without_secrets()
     assert baseline["summary"]["ok"] is False
     assert {"F001", "F002", "F003"} <= codes
     assert "ghp_" not in rendered
-    assert "[REDACTED]" not in rendered
+    assert_no_historical_neo4j_passwords(rendered)
     assert "environment_names" in rendered
 
 

@@ -3045,7 +3045,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 65,
+          "line": 67,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.ps1\": \"Test-McpRequiredToken\","
         }
@@ -3090,7 +3090,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 51,
+          "line": 53,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\": \"mcp_validate_required_token\","
         }
@@ -3235,7 +3235,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 66,
+          "line": 68,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\": \"Test-McpRequiredToken\","
         },
@@ -3296,7 +3296,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 52,
+          "line": 54,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\": \"mcp_validate_required_token\","
         },
@@ -3826,7 +3826,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 67,
+          "line": 69,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.ps1\": \"Test-McpOptionalToken\","
         },
@@ -3887,7 +3887,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 53,
+          "line": 55,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.sh\": \"mcp_validate_optional_token\","
         },
@@ -4135,7 +4135,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 69,
+          "line": 71,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\": \"Test-McpNeo4jCredentials\","
         },
@@ -4178,7 +4178,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 55,
+          "line": 57,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\": \"mcp_validate_neo4j_credentials\","
         },
@@ -4205,7 +4205,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 70,
+          "line": 72,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\": \"Test-McpNeo4jCredentials\","
         }
@@ -4300,7 +4300,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 68,
+          "line": 70,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.ps1\": \"Test-McpOptionalToken\","
         }
@@ -4337,7 +4337,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 54,
+          "line": 56,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\": \"mcp_validate_optional_token\","
         }
@@ -4917,7 +4917,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 80,
+          "line": 82,
           "source_group": "tests",
           "text": "text = _read(\"scripts/ai/mcp/test_env_loading.sh\")"
         }
@@ -21273,7 +21273,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 32,
+          "line": 34,
           "source_group": "tests",
           "text": "PREFLIGHT_PATH = ROOT / \"scripts/ops/runtime/docker/docker_runtime_preflight.py\""
         }
@@ -22152,7 +22152,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 720,
+          "line": 722,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1\","
         }
@@ -22213,7 +22213,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 719,
+          "line": 721,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/runtime/neo4j/neo4j_quick_start.sh\","
         }
@@ -22486,7 +22486,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 30,
+          "line": 32,
           "source_group": "tests",
           "text": "shell_loader = _read(\"scripts/ops/support/load_repo_env.sh\")"
         },

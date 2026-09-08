@@ -3890,7 +3890,6 @@ def _default_neo4j_host(env: dict[str, str]) -> str:
 
 
 _DEFAULT_NEO4J_AUDIT_USERNAME = "neo4j"
-_DEFAULT_NEO4J_AUDIT_PASSWORD = "[REDACTED]"
 _DEFAULT_NEO4J_AUDIT_DATABASE = "neo4j"
 
 
@@ -3911,7 +3910,11 @@ def resolve_neo4j_connection(
         )
         auth_username, auth_password = _parse_auth_pair(env.get("NEO4J_AUDIT_AUTH"))
         username = username or auth_username or _DEFAULT_NEO4J_AUDIT_USERNAME
-        password = password or auth_password or _DEFAULT_NEO4J_AUDIT_PASSWORD
+        password = password or auth_password
+        if not password:
+            raise RuntimeError(
+                "Neo4j audit password not found in NEO4J_AUDIT_PASSWORD or NEO4J_AUDIT_AUTH"
+            )
         http_uri = (
             explicit_http_uri
             or env.get("NEO4J_AUDIT_HTTP_URI")
