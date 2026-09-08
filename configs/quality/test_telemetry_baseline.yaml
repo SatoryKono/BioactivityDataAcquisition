@@ -2,7 +2,7 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: codex/issue-10186-provenance
-refreshed_at_utc: '2026-09-08T15:10:34.083152+00:00'
+refreshed_at_utc: '2026-09-08T15:16:56.164152+00:00'
 refresh_status: captured
 source_commit: bf932fe7fffcf412174cb467b48eb00cfe0af034
 source_run_id: '34241472828'

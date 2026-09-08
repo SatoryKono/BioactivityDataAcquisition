@@ -133,6 +133,7 @@ def capture(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
                     "layoutViewport": {"width": 1366, "height": 768},
                     "physicalViewport": {"width": 1366, "height": 768},
                     "visibleGrafanaChrome": True,
+                    "visualViewportScale": 1,
                 },
                 "screenshotEvidence": {
                     "file": "test.png",
@@ -246,19 +247,21 @@ def test_windows_source_separators_preserve_resource_identity(capture):
 
 
 @pytest.mark.parametrize(
-    "mutation",
+    "mutation,expected_error",
     [
-        "truncated_png",
-        "wrong_pixel_dimensions",
-        "url_time",
-        "url_variable",
-        "dsf",
-        "css_viewport",
-        "file_count",
-        "file_set",
+        ("truncated_png", "truncated PNG chunk"),
+        ("wrong_pixel_dimensions", "PNG pixel dimensions mismatch"),
+        ("url_time", "browser URL context mismatch: from"),
+        ("url_variable", "browser URL context mismatch: var-pipeline"),
+        ("dsf", "device scale mismatch"),
+        ("css_viewport", "CSS viewport mismatch: width"),
+        ("file_count", "full-set file_count mismatch"),
+        ("file_set", "full-set file_set mismatch"),
     ],
 )
-def test_context_and_rehashed_corruption_are_rejected(capture, mutation):
+def test_context_and_rehashed_corruption_are_rejected(
+    capture, mutation, expected_error
+):
     root, path, manifest = capture
     dashboard = manifest["dashboards"][0]
     if mutation in {"truncated_png", "wrong_pixel_dimensions"}:
@@ -295,7 +298,12 @@ def test_context_and_rehashed_corruption_are_rejected(capture, mutation):
     else:
         manifest["file_set"] = ["other.png"]
     path.write_text(json.dumps(manifest))
-    assert provenance.verify_capture(path, repo_root=root)["status"] == "FAIL"
+    result = provenance.verify_capture(path, repo_root=root)
+    assert result["status"] == "FAIL"
+    errors = result["errors"] + [
+        error for item in result["dashboards"] for error in item["errors"]
+    ]
+    assert any(expected_error in error for error in errors), errors
 
 
 def test_external_manifest_and_commit_pins_reject_self_consistent_replacement(capture):
@@ -334,3 +342,118 @@ def test_grafana_iso_rewrite_preserves_exact_time_bounds(capture):
     model["observedUrl"] = model["observedUrl"].replace("01.000Z", "01.001Z")
     path.write_text(json.dumps(manifest))
     assert provenance.verify_capture(path, repo_root=root)["status"] == "FAIL"
+
+
+@pytest.mark.parametrize(
+    "epoch,iso",
+    [
+        ("1001", "1970-01-01T00:00:01.001Z"),
+        ("1788825600001", "2026-09-08T00:00:00.001Z"),
+    ],
+)
+def test_iso_millisecond_comparison_is_exact(epoch, iso):
+    assert provenance.query_values_match("from", [iso], [epoch])
+    assert not provenance.query_values_match("from", [iso], [str(int(epoch) + 1)])
+    assert not provenance.query_values_match(
+        "from", [iso.replace("001Z", "001001Z")], [epoch]
+    )
+
+
+@pytest.mark.parametrize(
+    "mutation,expected_error",
+    [
+        ("extra_variable", "browser variable set mismatch"),
+        ("css_height", "CSS viewport mismatch: height"),
+        ("css_zoom", "non-neutral browser scale"),
+        ("visual_scale", "non-neutral browser scale"),
+        ("timezone", "UTC acceptance timezone required"),
+        ("missing_viewport", "invalid requested viewport"),
+        ("numeric_capture_id", "missing or invalid capture ID"),
+        ("kiosk_chrome", "visible browser chrome in full kiosk"),
+    ],
+)
+def test_browser_context_substitutions_have_specific_failures(
+    capture, mutation, expected_error
+):
+    root, path, manifest = capture
+    dashboard = manifest["dashboards"][0]
+    state = dashboard["browserState"]
+    if mutation == "extra_variable":
+        dashboard["provisionedModel"]["observedUrl"] += "&var-pipeline=foreign"
+    elif mutation == "css_height":
+        state["layoutViewport"]["height"] = 100
+    elif mutation == "css_zoom":
+        state["cssZoom"] = "2"
+    elif mutation == "visual_scale":
+        state["visualViewportScale"] = 2
+    elif mutation == "timezone":
+        manifest["capture_context"]["time_range"]["timezone"] = "Europe/Kiev"
+        dashboard["provisionedModel"]["observedUrl"] = dashboard["provisionedModel"][
+            "observedUrl"
+        ].replace("timezone=UTC", "timezone=Europe%2FKiev")
+    elif mutation == "missing_viewport":
+        del manifest["requested"]["viewport"]
+    elif mutation == "numeric_capture_id":
+        manifest["capture_id"] = 42
+    else:
+        manifest["requested"]["kiosk_mode"] = "full"
+        state["actualKiosk"] = "full"
+    path.write_text(json.dumps(manifest))
+    result = provenance.verify_capture(path, repo_root=root)
+    assert result["status"] == "FAIL"
+    errors = result["errors"] + [
+        error for item in result["dashboards"] for error in item["errors"]
+    ]
+    assert any(expected_error in error for error in errors), errors
+
+
+def test_scoped_acceptance_uses_the_same_pinned_byte_snapshot(capture, monkeypatch):
+    from scripts.ops.observability.grafana import (
+        capture_acceptance,
+        check_grafana_dashboard_audit_preflight as preflight,
+    )
+
+    root, path, manifest = capture
+    original = path.read_bytes()
+    real_read = Path.read_bytes
+    reads = []
+    assessed = []
+
+    def read_once(candidate):
+        if candidate != path:
+            return real_read(candidate)
+        reads.append(candidate)
+        return original if len(reads) == 1 else b'{"capture_id":"substituted"}'
+
+    def assess(payload):
+        assessed.append(payload["capture_id"])
+        return {"layout_status": "PASS"}
+
+    monkeypatch.setattr(Path, "read_bytes", read_once)
+    monkeypatch.setattr(preflight, "_REPO_ROOT", root)
+    monkeypatch.setattr(capture_acceptance, "assess_manifest", assess)
+    args = SimpleNamespace(
+        immutable_manifest=path,
+        manifest_sha256=hashlib.sha256(original).hexdigest(),
+        expected_commit="a" * 40,
+        acceptance_scope="layout",
+    )
+    assert preflight._immutable_acceptance(args) == 0
+    assert len(reads) == 1
+    assert assessed == [manifest["capture_id"]]
+
+
+def test_dynamic_dashboard_selectors_must_be_declared_and_not_explicitly_empty():
+    model = {
+        "before": {"templating": {"list": [{"name": "stage"}, {"name": "pipeline"}]}}
+    }
+    context = {"variables": {"pipeline": ""}}
+    assert not provenance.unexpected_browser_variables(
+        model, context, set(), {"var-stage": ["$__all"]}
+    )
+    assert provenance.unexpected_browser_variables(
+        model, context, set(), {"var-pipeline": ["foreign"]}
+    )
+    assert provenance.unexpected_browser_variables(
+        model, context, set(), {"var-unknown": ["foreign"]}
+    )

@@ -8,7 +8,7 @@ import re
 import subprocess
 import struct
 import zlib
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
@@ -26,9 +26,13 @@ def query_values_match(key: str, actual: list[str] | None, expected: list[str]) 
         return False
     try:
         parsed = datetime.fromisoformat(actual[0].replace("Z", "+00:00"))
-        return parsed.tzinfo is not None and parsed.timestamp() * 1000 == int(
-            expected[0]
-        )
+        if parsed.tzinfo is None:
+            return False
+        delta = parsed - datetime(1970, 1, 1, tzinfo=UTC)
+        microseconds = (
+            delta.days * 86400 + delta.seconds
+        ) * 1_000_000 + delta.microseconds
+        return microseconds == int(expected[0]) * 1000
     except ValueError:
         return False
 
@@ -49,6 +53,8 @@ def png_structure_errors(raw: bytes) -> list[str]:
         if zlib.crc32(kind + payload) != crc:
             return ["PNG chunk CRC mismatch"]
         kinds.append(kind)
+        if kind == b"IHDR" and length != 13:
+            return ["invalid PNG IHDR length"]
         if kind == b"IDAT":
             compressed.extend(payload)
         offset = end
@@ -99,17 +105,86 @@ def browser_url_errors(manifest: dict, dashboard: dict) -> list[str]:
     for key, value in expected.items():
         if not query_values_match(key, query.get(key), [str(value)]):
             errors.append(f"browser URL context mismatch: {key}")
-    bounds = context["time_range"]
+    errors.extend(fixed_time_errors(context["time_range"]))
+    scope = parse_qs(manifest.get("scope_query", ""), keep_blank_values=True)
+    for key, values in scope.items():
+        if not query_values_match(key, query.get(key), values):
+            errors.append(f"browser scope mismatch: {key}")
+    expected_variables = {
+        key for key in expected.keys() | scope.keys() if key.startswith("var-")
+    }
+    if unexpected_browser_variables(model, context, expected_variables, query):
+        errors.append("browser variable set mismatch")
+    return errors
+
+
+def unexpected_browser_variables(
+    model: dict, context: dict, expected: set[str], query: dict
+) -> bool:
+    """Reject unknown selectors and the reintroduction of explicitly empty ones."""
+    # Grafana resolves dashboard-specific selectors (stage, adapter, etc.) and
+    # appends them to the observed URL. They must be declared by the already
+    # source-verified model. An explicitly empty capture selector stays absent.
+    declared = {
+        f"var-{item['name']}"
+        for item in model.get("before", {}).get("templating", {}).get("list", [])
+    }
+    dedicated = {f"var-{key}" for key in context["variables"]}
+    extra = {key for key in query if key.startswith("var-")} - expected
+    return bool(extra - (declared - dedicated))
+
+
+def fixed_time_errors(bounds: dict) -> list[str]:
+    """Require increasing fixed millisecond bounds in the UTC timezone."""
+    errors = []
+    if bounds.get("timezone") != "UTC":
+        errors.append("UTC acceptance timezone required")
     if not all(str(bounds.get(key, "")).isdigit() for key in ("from", "to")):
         errors.append("fixed UTC acceptance time range required")
     elif int(bounds["from"]) >= int(bounds["to"]):
         errors.append("invalid acceptance time range")
-    for key, values in parse_qs(
-        manifest.get("scope_query", ""), keep_blank_values=True
-    ).items():
-        if not query_values_match(key, query.get(key), values):
-            errors.append(f"browser scope mismatch: {key}")
     return errors
+
+
+def browser_scale_errors(requested: dict, state: dict) -> list[str]:
+    """Bind both CSS dimensions and neutral root/visual scales to the viewport."""
+    errors = []
+    scale = state.get("devicePixelRatio")
+    if (
+        not isinstance(scale, (float, int))
+        or scale != requested.get("browser_zoom", 0) / 100
+    ):
+        errors.append("device scale mismatch")
+    else:
+        for dimension in ("width", "height"):
+            actual = state.get("layoutViewport", {}).get(dimension)
+            if (
+                not isinstance(actual, (float, int))
+                or abs(actual * scale - requested["viewport"][dimension]) > 1
+            ):
+                errors.append(f"CSS viewport mismatch: {dimension}")
+    if (
+        state.get("cssZoom") not in {"1", "normal"}
+        or state.get("visualViewportScale") != 1
+    ):
+        errors.append("non-neutral browser scale")
+    if state.get("physicalViewport") != requested.get("viewport"):
+        errors.append("physical viewport mismatch")
+    return errors
+
+
+def requested_viewport_valid(manifest: dict) -> bool:
+    """Require a usable requested viewport before any numeric comparisons."""
+    requested = manifest.get("requested")
+    if not isinstance(requested, dict) or not isinstance(
+        requested.get("viewport"), dict
+    ):
+        return False
+    return all(
+        isinstance(requested["viewport"].get(key), (float, int))
+        and requested["viewport"][key] > 0
+        for key in ("width", "height")
+    )
 
 
 def browser_context_errors(manifest: dict, dashboard: dict) -> list[str]:
@@ -118,6 +193,8 @@ def browser_context_errors(manifest: dict, dashboard: dict) -> list[str]:
         check_grafana_dashboard_audit_preflight as preflight,
     )
 
+    if not requested_viewport_valid(manifest):
+        return ["invalid requested viewport"]
     context_error = preflight._validate_capture_context(manifest)
     if context_error:
         return [context_error]
@@ -134,26 +211,15 @@ def browser_context_errors(manifest: dict, dashboard: dict) -> list[str]:
     )
     if error:
         errors.append(error)
-    scale = state.get("devicePixelRatio")
-    width = state.get("layoutViewport", {}).get("width")
-    if (
-        not isinstance(scale, (float, int))
-        or scale != requested.get("browser_zoom", 0) / 100
-    ):
-        errors.append("device scale mismatch")
-    elif (
-        not isinstance(width, (float, int))
-        or abs(width * scale - requested["viewport"]["width"]) > 1
-    ):
-        errors.append("CSS viewport mismatch")
-    if state.get("physicalViewport") != requested.get("viewport"):
-        errors.append("physical viewport mismatch")
+    errors.extend(browser_scale_errors(requested, state))
     if dashboard.get("actualTheme") != requested.get("theme"):
         errors.append("actual theme mismatch")
     if not model.get("browserVersion") or not isinstance(
         state.get("visibleGrafanaChrome"), bool
     ):
         errors.append("missing browser version/chrome context")
+    elif state.get("actualKiosk") == "full" and state["visibleGrafanaChrome"]:
+        errors.append("visible browser chrome in full kiosk")
     if context["row_state"]["expand_collapsed_rows"] != manifest.get(
         "expand_collapsed_rows"
     ):
@@ -232,6 +298,8 @@ def _dashboard_errors(
         check_grafana_dashboard_audit_preflight as preflight,
     )
 
+    if not requested_viewport_valid(manifest):
+        return ["invalid requested viewport"]
     source = manifest.get("source", {})
     commit = source.get("commit_sha", "")
     capture_id = manifest.get("capture_id", "")
@@ -316,7 +384,9 @@ def manifest_identity_errors(
         errors.append("pinned immutable manifest SHA mismatch")
     capture_id = manifest.get("capture_id", "")
     expected_name = f"render-manifest--full-set--{capture_id}.json"
-    if not re.fullmatch(r"[A-Za-z0-9._-]+", capture_id):
+    if not isinstance(capture_id, str) or not re.fullmatch(
+        r"[A-Za-z0-9._-]+", capture_id
+    ):
         errors.append("missing or invalid capture ID")
     if (
         manifest_path.name != expected_name
@@ -341,9 +411,10 @@ def verify_capture(
     repo_root: Path,
     expected_sha256: str | None = None,
     expected_commit: str | None = None,
+    manifest_bytes: bytes | None = None,
 ) -> dict:
-    """Fail closed on source, occurrence, PNG or observed model substitution."""
-    raw = manifest_path.read_bytes()
+    """Verify a file or one caller-held byte snapshot shared with scoped assessment."""
+    raw = manifest_path.read_bytes() if manifest_bytes is None else manifest_bytes
     manifest = json.loads(raw)
     errors = manifest_identity_errors(
         manifest_path, manifest, raw, expected_sha256, expected_commit
