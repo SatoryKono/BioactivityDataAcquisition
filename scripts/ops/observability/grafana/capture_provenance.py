@@ -8,8 +8,29 @@ import re
 import subprocess
 import struct
 import zlib
+from datetime import datetime
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
+
+
+def query_values_match(key: str, actual: list[str] | None, expected: list[str]) -> bool:
+    """Grafana rewrites Unix milliseconds as equivalent ISO UTC timestamps."""
+    if actual == expected:
+        return True
+    if (
+        key not in {"from", "to"}
+        or not actual
+        or len(actual) != 1
+        or len(expected) != 1
+    ):
+        return False
+    try:
+        parsed = datetime.fromisoformat(actual[0].replace("Z", "+00:00"))
+        return parsed.tzinfo is not None and parsed.timestamp() * 1000 == int(
+            expected[0]
+        )
+    except ValueError:
+        return False
 
 
 def png_structure_errors(raw: bytes) -> list[str]:
@@ -67,7 +88,7 @@ def browser_context_errors(manifest: dict, dashboard: dict) -> list[str]:
         {f"var-{key}": value for key, value in context["variables"].items() if value}
     )
     for key, value in expected.items():
-        if query.get(key) != [str(value)]:
+        if not query_values_match(key, query.get(key), [str(value)]):
             errors.append(f"browser URL context mismatch: {key}")
     bounds = context["time_range"]
     if not all(str(bounds.get(key, "")).isdigit() for key in ("from", "to")):
@@ -77,7 +98,7 @@ def browser_context_errors(manifest: dict, dashboard: dict) -> list[str]:
     for key, values in parse_qs(
         manifest.get("scope_query", ""), keep_blank_values=True
     ).items():
-        if query.get(key) != values:
+        if not query_values_match(key, query.get(key), values):
             errors.append(f"browser scope mismatch: {key}")
     error = preflight._browser_state_error(
         str(dashboard["uid"]),

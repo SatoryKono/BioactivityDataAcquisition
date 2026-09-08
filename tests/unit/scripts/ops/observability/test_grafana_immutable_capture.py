@@ -308,3 +308,16 @@ def test_external_manifest_and_commit_pins_reject_self_consistent_replacement(ca
         ]
         == "FAIL"
     )
+
+
+def test_grafana_iso_rewrite_preserves_exact_time_bounds(capture):
+    root, path, manifest = capture
+    model = manifest["dashboards"][0]["provisionedModel"]
+    model["observedUrl"] = model["observedUrl"].replace(
+        "from=1000", "from=1970-01-01T00:00:01.000Z"
+    )
+    path.write_text(json.dumps(manifest))
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "PASS"
+    model["observedUrl"] = model["observedUrl"].replace("01.000Z", "01.001Z")
+    path.write_text(json.dumps(manifest))
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "FAIL"
