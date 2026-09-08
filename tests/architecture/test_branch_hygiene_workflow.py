@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -28,7 +29,7 @@ def test_branch_hygiene_allows_established_automation_providers() -> None:
     workflow = WORKFLOW.read_text(encoding="utf-8")
     policy = POLICY.read_text(encoding="utf-8")
 
-    for provider in ("dependabot", "renovate", "devin", "bolt", "copilot"):
+    for provider in ("dependabot", "renovate", "devin", "bolt", "copilot", "codex"):
         assert provider in workflow
         assert f"`{provider}/`" in policy
 
@@ -40,3 +41,25 @@ def test_branch_lifecycle_policy_protects_active_work() -> None:
     assert "checked out by" in policy and "worktree" in policy
     assert "MUST default to dry-run" in policy
     assert "Branch-count ceilings MUST NOT be enforced" in policy
+
+
+@pytest.mark.parametrize(
+    ("branch", "accepted"),
+    [
+        ("codex/operator-regression-10167-10185-10171", True),
+        ("codex/repair-ci", True),
+        ("dependabot/pip/requests-2.32.0", True),
+        ("copilot/fix-error", True),
+        ("codex/", False),
+        ("codex-repair-ci", False),
+        ("unknown/repair-ci", False),
+        ("tmp", False),
+    ],
+)
+def test_automation_branch_pattern_accepts_only_named_namespaces(
+    branch: str, accepted: bool
+) -> None:
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    match = re.search(r"automation='([^']+)'", workflow)
+    assert match is not None
+    assert (re.fullmatch(match.group(1), branch) is not None) is accepted

@@ -94,6 +94,15 @@ See [usability-baseline-protocol.md](usability-baseline-protocol.md):
 | Screens per investigation | 4–5 | 2–3 |
 | Time-to-first-suspect | often >60s | ≤30s on first screen |
 
+The table above is the historical pre-2.0 investigation proxy. RF-004 (#10167)
+uses the current 21-task protocol: first correct insight target 5–10 seconds,
+with loading and understanding reported separately. Publish success, participant
+type/count, first/repeat sample sizes, median/max time and clicks/interactions,
+diagnostic depth and context loss. Historical counts and static navigation edges
+are not a baseline measurement for a new candidate. Deviations require a reason,
+panel/question-specific disposition and retest after any improvement. Astra is an
+AI operator; agent performance remains separate from human usability evidence.
+
 ## WCAG notes
 
 - Status colors use green/orange/red/gray with **text mappings** (OK/WARN/CRIT/UNKNOWN).
