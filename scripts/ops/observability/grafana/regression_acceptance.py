@@ -147,6 +147,36 @@ def _measurements(payload: dict[str, Any], inventory: dict[str, Any]) -> dict[st
     }
 
 
+def _task_statistics(
+    rows: list[dict[str, Any]], participant_type: str, attempt_kind: str, task_id: str
+) -> dict[str, Any]:
+    row: dict[str, Any] = {
+        "participant_type": participant_type,
+        "attempt_kind": attempt_kind,
+        "task_id": task_id,
+        "attempt_count": len(rows),
+        "participant_count": len(
+            {r.get("participant_id") for r in rows if r.get("participant_id")}
+        ),
+        "success_count": sum(r.get("success") is True for r in rows),
+    }
+    for field in (
+        "first_correct_seconds",
+        "clicks",
+        "interactions",
+        "diagnostic_depth",
+        "context_loss",
+        "back_navigation",
+    ):
+        values = [r[field] for r in rows if _number(r.get(field)) and r[field] >= 0]
+        row[field] = {
+            "sample_size": len(values),
+            "median": median(values) if values else None,
+            "max": max(values) if values else None,
+        }
+    return row
+
+
 def _operator_statistics(observations: list[dict[str, Any]]) -> list[dict[str, Any]]:
     statistics = []
     for participant_type in ("HUMAN", "AI_AGENT"):
@@ -163,40 +193,44 @@ def _operator_statistics(observations: list[dict[str, Any]]) -> list[dict[str, A
                     if task_id == "ALL"
                     else [r for r in group if r["task_id"] == task_id]
                 )
-                row: dict[str, Any] = {
-                    "participant_type": participant_type,
-                    "attempt_kind": attempt_kind,
-                    "task_id": task_id,
-                    "attempt_count": len(rows),
-                    "participant_count": len(
-                        {
-                            r.get("participant_id")
-                            for r in rows
-                            if r.get("participant_id")
-                        }
-                    ),
-                    "success_count": sum(r.get("success") is True for r in rows),
-                }
-                for field in (
-                    "first_correct_seconds",
-                    "clicks",
-                    "interactions",
-                    "diagnostic_depth",
-                    "context_loss",
-                    "back_navigation",
-                ):
-                    values = [
-                        r[field]
-                        for r in rows
-                        if _number(r.get(field)) and r[field] >= 0
-                    ]
-                    row[field] = {
-                        "sample_size": len(values),
-                        "median": median(values) if values else None,
-                        "max": max(values) if values else None,
-                    }
-                statistics.append(row)
+                statistics.append(
+                    _task_statistics(rows, participant_type, attempt_kind, task_id)
+                )
     return statistics
+
+
+def _completed_human_attempt(row: dict[str, Any]) -> bool:
+    seconds = row.get("first_correct_seconds")
+    if (
+        row.get("participant_type") != "HUMAN"
+        or row.get("attempt_kind") != "first"
+        or row.get("success") is not True
+        or not row.get("participant_id")
+        or not row.get("reviewer")
+        or not row.get("answer_key_evidence")
+        or not row.get("answer")
+        or not row.get("path")
+        or not row.get("evidence")
+        or not _number(seconds)
+        or seconds < 0
+    ):
+        return False
+    if not all(
+        type(row.get(k)) is int and row[k] >= 0
+        for k in (
+            "clicks",
+            "interactions",
+            "diagnostic_depth",
+            "back_navigation",
+            "context_loss",
+        )
+    ):
+        return False
+    if seconds > 10 and not row.get("deviation_disposition"):
+        return False
+    if row["context_loss"] and not row.get("context_loss_disposition"):
+        return False
+    return True
 
 
 def _operator(payload: dict[str, Any]) -> dict[str, Any]:
@@ -211,37 +245,8 @@ def _operator(payload: dict[str, Any]) -> dict[str, Any]:
     if len(first_keys) != len(set(first_keys)):
         raise ValueError("duplicate first attempt for participant/task")
     for row in observations:
-        seconds = row.get("first_correct_seconds")
-        if (
-            row.get("participant_type") != "HUMAN"
-            or row.get("attempt_kind") != "first"
-            or row.get("success") is not True
-            or not row.get("participant_id")
-            or not row.get("reviewer")
-            or not row.get("answer_key_evidence")
-            or not row.get("answer")
-            or not row.get("path")
-            or not row.get("evidence")
-            or not _number(seconds)
-            or seconds < 0
-        ):
-            continue
-        if not all(
-            type(row.get(k)) is int and row[k] >= 0
-            for k in (
-                "clicks",
-                "interactions",
-                "diagnostic_depth",
-                "back_navigation",
-                "context_loss",
-            )
-        ):
-            continue
-        if seconds > 10 and not row.get("deviation_disposition"):
-            continue
-        if row["context_loss"] and not row.get("context_loss_disposition"):
-            continue
-        completed.add(row["task_id"])
+        if _completed_human_attempt(row):
+            completed.add(row["task_id"])
     approved = bool(
         payload.get("page_goals_approved_by") and payload.get("primary_role")
     )
@@ -255,6 +260,127 @@ def _operator(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _validate_scope(contract: dict[str, Any]) -> None:
+    for key in ("baseline_ref", "candidate_ref"):
+        if not re.fullmatch(r"[0-9a-f]{40}", contract[key]):
+            raise ValueError(f"{key} must be immutable full SHA")
+    if contract["baseline_ref"] == contract["candidate_ref"]:
+        raise ValueError("baseline and candidate refs are identical")
+    window = contract["time_range"]
+    if (
+        window.get("timezone") != "UTC"
+        or not str(window["from"]).isascii()
+        or not str(window["from"]).isdigit()
+        or not str(window["to"]).isascii()
+        or not str(window["to"]).isdigit()
+        or int(window["from"]) >= int(window["to"])
+    ):
+        raise ValueError("fixed increasing UTC millisecond window required")
+    if not contract["occurrence_id"] or not contract["variable_matrix"]:
+        raise ValueError("occurrence and variable matrix required")
+    if [1366, 768] not in contract["viewports"] or [900, 768] not in contract[
+        "viewports"
+    ]:
+        raise ValueError("original wide and narrow viewports required")
+
+
+def _validate_baseline(baseline: dict[str, Any], contract: dict[str, Any]) -> None:
+    if baseline.get("baseline_ref") != contract["baseline_ref"] or not baseline.get(
+        "approved_by"
+    ):
+        raise ValueError("baseline identity/approval missing")
+    rows = baseline["findings"]
+    baseline_ids = [r["id"] for r in rows]
+    if len(set(baseline_ids)) != len(baseline_ids) or not FINDINGS <= set(baseline_ids):
+        raise ValueError(
+            "baseline must include F01-F20 and all 28 original observations"
+        )
+    if any(
+        r.get("severity") not in ("P0", "P1", "P2", "P3")
+        or not r.get("acceptance_test")
+        for r in rows
+    ):
+        raise ValueError("baseline severity and original acceptance tests required")
+
+
+def _verify_finding(root: Path, row: dict[str, Any], before: dict[str, Any]) -> None:
+    for key in ("before", "after", "reference", "evidence"):
+        _read(root, row[key])
+    if any(
+        row.get(k) != before.get(k)
+        for k in (
+            "severity",
+            "acceptance_test",
+            "expected",
+            "comparison",
+            "tolerance",
+        )
+    ):
+        raise ValueError("severity or original acceptance test changed")
+    if (
+        row.get("disposition") != "FIXED"
+        or not row.get("before")
+        or not row.get("after")
+        or not _measurement_pass(row)
+    ):
+        raise ValueError(f"unproven finding: {row['id']}")
+
+
+def _findings(
+    root: Path, payload: dict[str, Any], baseline: dict[str, Any]
+) -> dict[str, Any]:
+    retests = payload["findings"]
+    ids = [r["id"] for r in retests]
+    original = {r["id"]: r for r in baseline["findings"]}
+    if set(ids) != set(original) or len(set(ids)) != len(ids):
+        raise ValueError("missing or duplicate baseline retest")
+    for row in retests:
+        _verify_finding(root, row, original[row["id"]])
+    return {"status": "PASS", "numerator": len(ids), "denominator": len(ids)}
+
+
+def _new_regressions(root: Path, payload: dict[str, Any]) -> dict[str, Any]:
+    if not payload.get("search_evidence") or not payload.get("reviewer"):
+        raise ValueError("new regression search evidence/reviewer missing")
+    _read(root, payload["search_evidence"])
+    findings = payload["findings"]
+    if not isinstance(findings, list) or any(
+        r.get("severity") not in ("P0", "P1", "P2", "P3") for r in findings
+    ):
+        raise ValueError("invalid regression findings")
+    blockers = sum(r["severity"] in ("P0", "P1") for r in findings)
+    return {
+        "status": "PASS" if blockers == 0 else "FAIL",
+        "actual": blockers,
+    }
+
+
+def _verify_evidence(root: Path, name: str, payload: dict[str, Any]) -> None:
+    evidence_rows = payload.get("measurements", payload.get("observations", []))
+    for row in evidence_rows:
+        for key in (
+            ("evidence", "answer_key_evidence")
+            if name == "operator"
+            else ("evidence", "reference")
+        ):
+            _read(root, row[key])
+
+
+def _evaluate_gate(
+    root: Path, name: str, contract: dict[str, Any], baseline: dict[str, Any]
+) -> dict[str, Any]:
+    payload = _read(root, contract["artifacts"][name])
+    _bound(payload, contract)
+    _verify_evidence(root, name, payload)
+    if name == "operator":
+        return _operator(payload)
+    if name == "findings":
+        return _findings(root, payload, baseline)
+    if name == "new_regressions":
+        return _new_regressions(root, payload)
+    return _measurements(payload, baseline["required_measurements"][name])
+
+
 def evaluate(input_path: Path) -> dict[str, Any]:
     """Return all available gate results; malformed/missing inputs fail closed."""
     gates: dict[str, Any] = {}
@@ -266,115 +392,16 @@ def evaluate(input_path: Path) -> dict[str, Any]:
     try:
         contract = json.loads(input_path.read_text(encoding="utf-8"))
         result["candidate_ref"] = contract["candidate_ref"]
-        for key in ("baseline_ref", "candidate_ref"):
-            if not re.fullmatch(r"[0-9a-f]{40}", contract[key]):
-                raise ValueError(f"{key} must be immutable full SHA")
-        if contract["baseline_ref"] == contract["candidate_ref"]:
-            raise ValueError("baseline and candidate refs are identical")
-        window = contract["time_range"]
-        if (
-            window.get("timezone") != "UTC"
-            or not str(window["from"]).isascii()
-            or not str(window["from"]).isdigit()
-            or not str(window["to"]).isascii()
-            or not str(window["to"]).isdigit()
-            or int(window["from"]) >= int(window["to"])
-        ):
-            raise ValueError("fixed increasing UTC millisecond window required")
-        if not contract["occurrence_id"] or not contract["variable_matrix"]:
-            raise ValueError("occurrence and variable matrix required")
-        if [1366, 768] not in contract["viewports"] or [900, 768] not in contract[
-            "viewports"
-        ]:
-            raise ValueError("original wide and narrow viewports required")
+        _validate_scope(contract)
         baseline = _read(input_path.parent, contract["baseline"])
-        if baseline.get("baseline_ref") != contract["baseline_ref"] or not baseline.get(
-            "approved_by"
-        ):
-            raise ValueError("baseline identity/approval missing")
-        rows = baseline["findings"]
-        baseline_ids = [r["id"] for r in rows]
-        if len(set(baseline_ids)) != len(baseline_ids) or not FINDINGS <= set(
-            baseline_ids
-        ):
-            raise ValueError(
-                "baseline must include F01-F20 and all 28 original observations"
-            )
-        if any(
-            r.get("severity") not in ("P0", "P1", "P2", "P3")
-            or not r.get("acceptance_test")
-            for r in rows
-        ):
-            raise ValueError("baseline severity and original acceptance tests required")
+        _validate_baseline(baseline, contract)
         gates["contract"] = {"status": "PASS"}
     except (OSError, ValueError, KeyError, TypeError, AttributeError) as exc:
         gates["contract"] = {"status": "CANNOT_VERIFY", "reason": str(exc)}
         return result
     for name in (*MEASUREMENT_GATES, "operator", "findings", "new_regressions"):
         try:
-            payload = _read(input_path.parent, contract["artifacts"][name])
-            _bound(payload, contract)
-            evidence_rows = payload.get("measurements", payload.get("observations", []))
-            for row in evidence_rows:
-                for key in (
-                    ("evidence", "answer_key_evidence")
-                    if name == "operator"
-                    else ("evidence", "reference")
-                ):
-                    _read(input_path.parent, row[key])
-            if name == "operator":
-                gates[name] = _operator(payload)
-            elif name == "findings":
-                retests = payload["findings"]
-                ids = [r["id"] for r in retests]
-                if set(ids) != set(baseline_ids) or len(set(ids)) != len(ids):
-                    raise ValueError("missing or duplicate baseline retest")
-                original = {r["id"]: r for r in rows}
-                for row in retests:
-                    for key in ("before", "after", "reference", "evidence"):
-                        _read(input_path.parent, row[key])
-                    before = original[row["id"]]
-                    if any(
-                        row.get(k) != before.get(k)
-                        for k in (
-                            "severity",
-                            "acceptance_test",
-                            "expected",
-                            "comparison",
-                            "tolerance",
-                        )
-                    ):
-                        raise ValueError("severity or original acceptance test changed")
-                    if (
-                        row.get("disposition") != "FIXED"
-                        or not row.get("before")
-                        or not row.get("after")
-                        or not _measurement_pass(row)
-                    ):
-                        raise ValueError(f"unproven finding: {row['id']}")
-                gates[name] = {
-                    "status": "PASS",
-                    "numerator": len(ids),
-                    "denominator": len(ids),
-                }
-            elif name == "new_regressions":
-                if not payload.get("search_evidence") or not payload.get("reviewer"):
-                    raise ValueError("new regression search evidence/reviewer missing")
-                _read(input_path.parent, payload["search_evidence"])
-                findings = payload["findings"]
-                if not isinstance(findings, list) or any(
-                    r.get("severity") not in ("P0", "P1", "P2", "P3") for r in findings
-                ):
-                    raise ValueError("invalid regression findings")
-                blockers = sum(r["severity"] in ("P0", "P1") for r in findings)
-                gates[name] = {
-                    "status": "PASS" if blockers == 0 else "FAIL",
-                    "actual": blockers,
-                }
-            else:
-                gates[name] = _measurements(
-                    payload, baseline["required_measurements"][name]
-                )
+            gates[name] = _evaluate_gate(input_path.parent, name, contract, baseline)
         except (OSError, ValueError, KeyError, TypeError, AttributeError) as exc:
             gates[name] = {"status": "CANNOT_VERIFY", "reason": str(exc)}
     result["release_passed"] = all(
