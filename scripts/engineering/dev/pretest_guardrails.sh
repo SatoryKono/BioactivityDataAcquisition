@@ -702,6 +702,11 @@ run_architecture_checks() {
     fi
 
     mapfile -t architecture_targets < <(config_architecture_targets "$ARCHITECTURE_GROUP")
+    # Native Windows Python emits CRLF; mapfile removes only the LF delimiter.
+    local index
+    for index in "${!architecture_targets[@]}"; do
+        architecture_targets[index]="${architecture_targets[index]%$'\r'}"
+    done
     if [[ "${#architecture_targets[@]}" -eq 0 ]]; then
         record_skip architecture-checks "profile architecture group has no targets" "repair configs/quality/pretest_guardrails.yaml"
         return 0

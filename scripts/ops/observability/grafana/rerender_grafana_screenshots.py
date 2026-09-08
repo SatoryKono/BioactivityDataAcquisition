@@ -177,7 +177,7 @@ def _dashboard_source_by_uid() -> dict[str, dict[str, object]]:
         if not isinstance(uid, str) or not uid:
             continue
         try:
-            source_path = str(dashboard_path.relative_to(repo_root))
+            source_path = dashboard_path.relative_to(repo_root).as_posix()
         except ValueError:
             source_path = dashboard_path.name
         result[uid] = {
@@ -351,6 +351,7 @@ def _finalize_manifest(config: RenderConfig, manifest: dict[str, Any]) -> None:
                     "pipeline": config.pipeline,
                     "run_type": config.run_type,
                     "run_id": config.run_id,
+                    **dict(config.variables),
                 },
                 "row_state": {
                     "expand_collapsed_rows": config.expand_collapsed_rows,
@@ -1169,6 +1170,7 @@ def _playwright_env(config: RenderConfig) -> dict[str, str]:
     if config.service_account_token:
         env["GRAFANA_SERVICE_ACCOUNT_TOKEN"] = config.service_account_token
     env["GRAFANA_SCREENSHOT_OUTPUT_DIR"] = str(config.output_dir)
+    env["GRAFANA_CAPTURE_ID"] = _capture_id(config)
     env["GRAFANA_SCREENSHOT_WIDTH"] = str(config.width)
     env["GRAFANA_SCREENSHOT_HEIGHT"] = str(config.height)
     env["GRAFANA_SCREENSHOT_THEME"] = config.theme
@@ -1745,16 +1747,22 @@ def _handle_render_http_error(config: RenderConfig, exc: HTTPError) -> int:
     return _maybe_playwright_fallback(config)
 
 
+def _output_has_capture(config: RenderConfig) -> bool:
+    return bool(config.occurrence_id) and (
+        (config.output_dir / _RENDER_MANIFEST_JSON).exists()
+        or any(config.output_dir.glob("*.png"))
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     config = _parse_args(argv)
+    if not config.occurrence_id:
+        config = replace(config, occurrence_id=_capture_id(config))
     if not config.service_account_token and not config.password:
         print(_missing_credentials_message())
         return EXIT_CREDENTIALS
     config.output_dir.mkdir(parents=True, exist_ok=True)
-    if config.occurrence_id and (
-        (config.output_dir / _RENDER_MANIFEST_JSON).exists()
-        or any(config.output_dir.glob("*.png"))
-    ):
+    if _output_has_capture(config):
         print(
             "Explicit render occurrences require a fresh output directory; existing evidence is preserved."
         )

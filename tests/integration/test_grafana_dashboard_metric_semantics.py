@@ -923,7 +923,7 @@ def test_dq_current_status_panels_use_explicit_status_value_mappings() -> None:
             "0": {"text": "OK", "color": "green"},
             "1": {"text": "WARN", "color": "orange"},
             "2": {"text": "CRIT", "color": "red"},
-            "3": {"text": "UNKNOWN", "color": "gray"},
+            "3": {"text": "UNKNOWN", "color": "#555555"},
         },
         "Monitor DQ Threshold State": {
             "0": {"text": "OK", "color": "green"},

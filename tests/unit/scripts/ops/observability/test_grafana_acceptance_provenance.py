@@ -82,12 +82,19 @@ def test_fixed_window_reaches_url_and_immutable_manifest(tmp_path: Path) -> None
             str(tmp_path),
             "--occurrence-id",
             "fixed-window-test",
+            "--var",
+            "pipeline=chembl_assay",
+            "--var",
+            "run_type=backfill",
         ]
     )
     query = rerender._scope_query_params(config)
+    assert query["var-pipeline"] == "chembl_assay"
     assert (query["from"], query["to"]) == ("1788782400000", "1788804000000")
     rerender._finalize_manifest(config, {"dashboards": []})
     manifest = json.loads((tmp_path / "render-manifest.json").read_text())
+    assert manifest["capture_context"]["variables"]["pipeline"] == query["var-pipeline"]
+    assert manifest["capture_context"]["variables"]["run_type"] == "backfill"
     assert manifest["capture_context"]["time_range"] == {
         "from": query["from"],
         "to": query["to"],

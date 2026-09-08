@@ -12,6 +12,8 @@ Stable commands:
     rerender-grafana   Rerender Grafana dashboard screenshots
     render-grafana-matrix
                        Render the standard, full-page, kiosk, and repeat matrix
+    assess-grafana-captures
+                       Assess explicit immutable provenance/layout/accessibility packs
     audit-live-grafana Run reviewed live Grafana datasource/frame audit
     check-dashboard-panel-fill
                        Fail if any shipped panel fill returns gateway/query error
@@ -51,6 +53,7 @@ _PYTHON_COMMAND_PATHS = {
     "check-observability-ports": "observability/check_published_observability_endpoints.py",
     "rerender-grafana": "observability/grafana/rerender_grafana_screenshots.py",
     "render-grafana-matrix": ("observability/grafana/run_grafana_render_matrix.py"),
+    "assess-grafana-captures": "observability/grafana/capture_acceptance.py",
     "audit-live-grafana": "observability/grafana/audit_live_grafana_panels.py",
     "check-dashboard-panel-fill": (
         "observability/grafana/check_dashboard_panel_fill.py"

@@ -21,6 +21,9 @@ requirements:
 - id: DASH-COLOR-001
   gate: pytest+manual
   tests:
+  - tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py::test_absent_or_unmeasured_contrast_denominator_is_null
+  - tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py::test_claimed_pass_does_not_override_the_measured_ratio
+  - tests/unit/scripts/ops/observability/test_grafana_panel_containment.py::test_text_contrast_composites_alpha_and_preserves_unmeasured_gradients
   - tests/integration/test_dashboard_presentation_requirements.py::test_area_fills_are_confined_to_first_window
   - tests/integration/test_dashboard_presentation_requirements.py::test_area_fill_fails_closed_on_below_fold_background_stat
   prompt: prompt.observability.dashboard-manual-validation
@@ -107,6 +110,8 @@ requirements:
 - id: DASH-FIT-004
   gate: pytest+manual
   tests:
+  - tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py::test_reported_first_panel_list_cannot_hide_missing_model_coverage
+  - tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py::test_matrix_requires_every_viewport_theme_zoom_profile_and_matching_context
   - tests/integration/test_dashboard_first_window_noscroll.py::test_first_window_has_no_internal_scroll
   - tests/integration/test_dashboard_operator_readability.py::test_first_window_panels_do_not_declare_internal_scroll
   - tests/integration/test_dashboard_first_window_containment.py::test_first_window_overflow_allowlist_stays_empty
@@ -223,6 +228,7 @@ requirements:
 - id: DASH-TYPOGRAPHY-001
   gate: pytest+manual
   tests:
+  - tests/unit/scripts/ops/observability/test_grafana_panel_containment.py::test_text_contrast_composites_alpha_and_preserves_unmeasured_gradients
   - tests/integration/test_dashboard_presentation_requirements.py::test_authored_text_font_sizes_meet_body_floor
   prompt: prompt.observability.dashboard-manual-validation
 - id: DASH-VIZ-001

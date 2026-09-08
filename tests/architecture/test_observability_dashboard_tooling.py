@@ -72,6 +72,12 @@ def test_observability_dashboard_scripts_do_not_write_dashboard_json() -> None:
             if node.func.attr != "write_text":
                 continue
             target = ast.get_source_segment(content, node.func.value) or ""
+            if (
+                script.name == "capture_acceptance.py"
+                and target.strip("()") == "args.output_dir / name"
+            ):
+                # The CLI rejects the shipped tree and writes only fixed report names.
+                continue
             if target.strip("()") in allowed_report_write_targets:
                 continue
             offenders.append(f"{script}: {target}.write_text")
@@ -423,3 +429,10 @@ def test_playwright_runtime_is_pinned_as_repo_dev_dependency() -> None:
     assert "BIOETL_PLAYWRIGHT_NODE_MODULES" in setup_script
     assert "expanded-row-capture" in preflight
     assert "Playwright expanded-row capture is unavailable" in preflight
+
+
+def test_capture_assessment_rejects_shipped_dashboard_output() -> None:
+    from scripts.ops.observability.grafana.capture_acceptance import main
+
+    with pytest.raises(ValueError, match="must not overwrite shipped dashboard JSON"):
+        main(["missing-manifest.json", "--output-dir", "grafana/dashboards/assessment"])

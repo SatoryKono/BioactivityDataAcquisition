@@ -33,8 +33,10 @@ control-plane Run ID catalog. `run_id` is never a Prometheus label.
   timestamps, and workflow identifiers inside the first-window fold. Older
   runs: pick Run ID from the catalog.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
-- **Layout:** First-window table at `y=7,h=11` with `limitField=10` and
-  `cellHeight=sm` so ten rows fit the fold without internal scroll. Identity
+- **Layout:** First-window table at `y=6,h=11` with `limitField=10`,
+  wrapped columns and native `footer.enablePagination=true`. The `lg` cell
+  height lets Grafana calculate pages that fit the wrapped rows at 200% zoom.
+  All ten runs remain available through the page controls. Identity
   (`3022`) and processed records (`3023`) stay collapsed under Selected Run
   Details.
 - **Empty states:** Valid empty (`noValue` starts with `VALID EMPTY` and must

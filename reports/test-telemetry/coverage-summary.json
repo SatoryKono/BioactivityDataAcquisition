@@ -1,11 +1,11 @@
 {
-  "source_branch": "main",
-  "source_commit": "447715d13cf278c1cadbebad1659ca989647fa2a",
-  "source_run_id": "34221792853",
-  "source_event": "workflow_dispatch",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34221792853",
-  "source_tree_sha256": "600eefaa801107d17f3847fa50859d96e3fe04badd7c030832afa5bfd8b1e374",
-  "refreshed_at_utc": "2026-09-08T11:46:08.420968+00:00",
+  "source_branch": "codex/stream-a-provenance-layout-accessibility",
+  "source_commit": "9881f0306235c957086bed9a6c2faf7b38714e01",
+  "source_run_id": "34235189753",
+  "source_event": "pull_request",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34235189753",
+  "source_tree_sha256": "e85ca2d3a871364b4eec086262678456282dad56debda55146c9997f21da2f06",
+  "refreshed_at_utc": "2026-09-08T14:05:52.555701+00:00",
   "refresh_status": "captured",
   "coverage_percent": 96.71,
   "coverage": {

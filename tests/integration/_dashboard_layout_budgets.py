@@ -276,7 +276,11 @@ def select_first_screen_budget_panels(
 def collapsed_row_above_fold(
     panel: dict[str, Any], *, first_window_y: int | None = None
 ) -> bool:
-    """True when a collapsed row header sits strictly above the visual fold."""
+    """True when a collapsed row would introduce detail data above the fold.
+
+    A one-unit row header can occupy y=17; its first child starts at y=18.
+    The first-window data-panel and physical DOM limits remain unchanged.
+    """
     if panel.get("type") != "row" or panel.get("collapsed") is not True:
         return False
     fold = FIRST_WINDOW_Y if first_window_y is None else first_window_y
@@ -284,7 +288,8 @@ def collapsed_row_above_fold(
     if not isinstance(grid, dict):
         return False
     y = grid.get("y")
-    return isinstance(y, int) and y < fold
+    height = grid.get("h")
+    return isinstance(y, int) and isinstance(height, int) and y + height < fold
 
 
 def select_first_window_panels(

@@ -743,8 +743,8 @@ def test_run_explorer_identity_is_on_the_first_screen() -> None:
         "Inspect Processed Records must ship inside collapsed Selected Run Details "
         "so first-paint Ops HTTP stays within budget (#9147/#9191)"
     )
-    assert identity.get("gridPos", {}).get("y", 0) >= 19
-    assert records.get("gridPos", {}).get("y", 0) >= 19
+    assert identity.get("gridPos", {}).get("y", 0) >= FIRST_WINDOW_Y
+    assert records.get("gridPos", {}).get("y", 0) >= FIRST_WINDOW_Y
     assert "last 10" in str(browse.get("title", "")).lower()
 
 
@@ -801,6 +801,6 @@ def test_incident_alert_evidence_is_collapsed_below_the_fold() -> None:
     row = next(panel for panel in root if panel.get("id") == 2020)
     assert row.get("type") == "row"
     assert row.get("collapsed") is True
-    assert row.get("gridPos", {}).get("y") == 18
+    assert row["gridPos"]["y"] + row["gridPos"]["h"] == FIRST_WINDOW_Y
     nested_ids = {child.get("id") for child in (row.get("panels") or [])}
     assert nested_ids == {2005, 2006, 2007}
