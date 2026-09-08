@@ -2321,7 +2321,10 @@ async function renderDashboard(page, dashboard, index, total) {
       );
     });
   console.log(`[${index}/${total}] waiting for networkidle ${dashboard.uid} ...`);
-  await page.waitForLoadState("networkidle", { timeout: CONFIG.timeoutMs }).catch(() => {
+  // Network idle is advisory: live background requests can remain open. The
+  // mandatory terminal-state gate below now runs before the actual capture.
+  const networkIdleTimeoutMs = Math.max(3000, Math.min(CONFIG.timeoutMs, 15000));
+  await page.waitForLoadState("networkidle", { timeout: networkIdleTimeoutMs }).catch(() => {
     console.warn(
       `[${index}/${total}] networkidle timeout for ${dashboard.uid}; continuing with settled page wait`,
     );
