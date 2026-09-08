@@ -453,6 +453,119 @@ def _validate_global_terminal_state(manifest: dict[str, object]) -> str | None:
     return None
 
 
+def validate_layout_surface(
+    manifest: dict, *, source_models: dict[str, dict], expanded: bool
+) -> list[str]:
+    """Validate the two distinct RF-002 surfaces against source panel IDs.
+
+    This scoped gate supplements immutable capture provenance. The legacy
+    full-release preflight still requires all descendants and typography.
+    """
+    errors: list[str] = []
+    requested = manifest.get("requested", {})
+    surface = "full" if expanded else "viewport"
+    if requested.get("capture_surface") != surface:
+        errors.append(f"expected {surface} surface")
+    if manifest.get("expand_collapsed_rows") is not expanded:
+        errors.append("row state does not match requested surface")
+    if requested.get("viewport") != {"width": 1366, "height": 768}:
+        errors.append("layout requires physical viewport 1366x768")
+    if requested.get("browser_zoom") != 100:
+        errors.append("layout requires 100 percent browser zoom")
+    dashboards = manifest.get("dashboards", [])
+    if sorted(d.get("uid", "") for d in dashboards) != sorted(source_models):
+        errors.append("layout UID coverage mismatch")
+    for dashboard in dashboards:
+        uid = dashboard.get("uid")
+        source = source_models.get(uid)
+        if source is None:
+            continue
+        errors.extend(_layout_dashboard_errors(uid, dashboard, source, expanded))
+    return errors
+
+
+def _layout_dashboard_errors(
+    uid: str, dashboard: dict, source: dict, expanded: bool
+) -> list[str]:
+    errors: list[str] = []
+    roots = [p for p in source["panels"] if p["type"] != "row"]
+    expected = {p["id"] for p in roots if p["gridPos"]["y"] < 18}
+    contained = dashboard.get("panelContainment", {}).get("panels", [])
+    if sorted(p.get("id", -1) for p in contained) != sorted(expected):
+        errors.append(f"{uid}: first-window DOM coverage mismatch")
+    for panel in contained:
+        reasons = _layout_panel_errors(panel, enforce_fold=not expanded)
+        errors.extend(f"{uid}:{panel.get('id')}: {reason}" for reason in reasons)
+    layout = dashboard.get("layoutFit", {})
+    if layout.get("cssViewport") != {"width": 1366, "height": 768}:
+        errors.append(f"{uid}: actual CSS viewport mismatch")
+    if layout.get("devicePixelRatio") != 1 or layout.get("fold") != 768:
+        errors.append(f"{uid}: actual scale/fold mismatch")
+    terminal = dashboard.get("preCaptureTerminalStateValidation", {})
+    required = (
+        set(_required_non_row_panel_ids(source["panels"]))
+        if expanded
+        else {p["id"] for p in roots}
+    )
+    observed = {p.get("id") for p in terminal.get("panelStates", [])}
+    if terminal.get("status") != "ok" or observed != required:
+        errors.append(f"{uid}: pre-capture terminal coverage mismatch")
+    if expanded:
+        rows = [
+            p for p in source["panels"] if p["type"] == "row" and p.get("collapsed")
+        ]
+        expanded_titles = [
+            r.get("title")
+            for r in dashboard.get("rowExpansion", [])
+            if r.get("clicked")
+        ]
+        if sorted(expanded_titles) != sorted(r["title"] for r in rows):
+            errors.append(f"{uid}: incomplete row expansion")
+        tiles = dashboard.get("scrollCapture", {}).get("tiles", [])
+        visible_ids = {
+            int(p["panel"].removeprefix("panel-"))
+            for t in tiles
+            for p in t.get("panels", [])
+        }
+        if not required.issubset(visible_ids):
+            errors.append(
+                f"{uid}: expanded scroll tiles miss panels {sorted(required - visible_ids)}"
+            )
+    return errors
+
+
+def _layout_panel_errors(panel: dict, *, enforce_fold: bool) -> list[str]:
+    errors = []
+    if panel.get("missing") or panel.get("status") != "ok":
+        errors.append("panel missing or failed")
+    for axis in ("Height", "Width"):
+        client, scroll = panel.get(f"client{axis}"), panel.get(f"scroll{axis}")
+        if (
+            not isinstance(client, (int, float))
+            or not isinstance(scroll, (int, float))
+            or client <= 0
+            or scroll > client + 2
+        ):
+            errors.append(f"internal {axis.lower()} overflow or missing measurement")
+    box = panel.get("bbox", {})
+    if any(
+        not isinstance(box.get(k), (int, float)) for k in ("x", "y", "width", "height")
+    ):
+        return [*errors, "missing panel bbox"]
+    if box["width"] <= 0 or box["height"] <= 0:
+        errors.append("empty panel bbox")
+    if enforce_fold and (
+        panel.get("enforceFold") is not True
+        or panel.get("fold") != 768
+        or box["y"] < -2
+        or box["y"] + box["height"] > 770
+        or box["x"] < -2
+        or box["x"] + box["width"] > 1368
+    ):
+        errors.append("outside actual first viewport or missing fold enforcement")
+    return errors
+
+
 def _index_manifest_dashboards(
     manifest: dict[str, object],
 ) -> tuple[dict[str, dict[str, object]], str | None]:
@@ -1795,15 +1908,20 @@ def _check_bioetl_control_plane_source(
 def _immutable_acceptance(args: argparse.Namespace) -> int:
     from scripts.ops.observability.grafana.capture_provenance import verify_capture
 
-    result = verify_capture(args.immutable_manifest, repo_root=_REPO_ROOT)
+    manifest_bytes = args.immutable_manifest.read_bytes()
+    result = verify_capture(
+        args.immutable_manifest,
+        repo_root=_REPO_ROOT,
+        expected_sha256=args.manifest_sha256,
+        expected_commit=args.expected_commit,
+        manifest_bytes=manifest_bytes,
+    )
     if args.acceptance_scope != "provenance":
         from scripts.ops.observability.grafana.capture_acceptance import (
             assess_manifest,
         )
 
-        assessment = assess_manifest(
-            json.loads(args.immutable_manifest.read_text(encoding="utf-8"))
-        )
+        assessment = assess_manifest(json.loads(manifest_bytes))
         result["acceptance"] = assessment
         if assessment[f"{args.acceptance_scope}_status"] != "PASS":
             result["status"] = "FAIL"
@@ -1814,6 +1932,12 @@ def _immutable_acceptance(args: argparse.Namespace) -> int:
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     parser.add_argument("--immutable-manifest", type=Path)
+    parser.add_argument(
+        "--manifest-sha256", help="Externally pinned immutable manifest digest"
+    )
+    parser.add_argument(
+        "--expected-commit", help="Externally selected capture source commit"
+    )
     parser.add_argument(
         "--acceptance-scope",
         choices=("provenance", "layout", "accessibility"),
