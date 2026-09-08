@@ -33,6 +33,11 @@ jobs:
         timeout-minutes: 10
         steps:
             -   uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+                with:
+                    fetch-depth: 1
+
+            -   name: Unshallow current-ref history for ancestor gates
+                run: git fetch --unshallow --filter=blob:none --no-tags
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -55,6 +60,12 @@ jobs:
         timeout-minutes: 25
         steps:
             -   uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+                with:
+                    fetch-depth: 1
+                    lfs: true
+
+            -   name: Unshallow current-ref history for ancestor gates
+                run: git fetch --unshallow --filter=blob:none --no-tags
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
