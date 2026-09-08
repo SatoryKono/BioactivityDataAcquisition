@@ -904,8 +904,11 @@ async function expandCollapsedRows(page, dashboard, index, total) {
     `[${index}/${total}] expanding ${titles.length} collapsed row(s) for ${dashboard.uid} ...`,
   );
   let expanded = 0;
+  dashboard.rowExpansion = [];
   for (const title of titles) {
-    if (await tryExpandCollapsedRow(page, title, index, total, dashboard.uid)) {
+    const clicked = await tryExpandCollapsedRow(page, title, index, total, dashboard.uid);
+    dashboard.rowExpansion.push({title, clicked});
+    if (clicked) {
       expanded += 1;
     }
   }
@@ -2076,6 +2079,14 @@ function accessibilityMeasurementsFromDom() {
         if (!reason) status = ratio >= threshold ? 'PASS' : 'FAIL';
         return {panel: panel.dataset.vizPanelKey, text: directText.slice(0, 240),
           tag: element.tagName, foreground: style.color, background, effectiveForeground: effective,
+          backgroundLayers: (() => {
+            const layers = [];
+            for (let node = element; node; node = node.parentElement) {
+              const value = getComputedStyle(node);
+              if (value.backgroundImage !== 'none') layers.push(value.backgroundImage);
+            }
+            return layers;
+          })(),
           fontSize: size, fontWeight: weight, large, ratio, threshold,
           status, reason,
           bbox: {x: rect.x, y: rect.y, width: rect.width, height: rect.height},
@@ -2096,8 +2107,58 @@ function accessibilityMeasurementsFromDom() {
       url: location.href, pairs};
 }
 
+function graphicsMeasurementsFromDom() {
+  const rgba = (value) => {
+    const parts = String(value).match(/[\d.]+/g)?.map(Number);
+    return parts && parts.length >= 3 ? [...parts.slice(0, 3), parts[3] ?? 1] : null;
+  };
+  const luminance = (rgb) => rgb.slice(0, 3).map((value) => {
+    const channel = value / 255;
+    return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+  }).reduce((sum, value, index) => sum + value * [0.2126, 0.7152, 0.0722][index], 0);
+  const pairs = [];
+  const canvases = [];
+  for (const panel of document.querySelectorAll('[data-viz-panel-key]')) {
+    for (const element of panel.querySelectorAll('svg path, svg line, svg circle, svg rect, canvas')) {
+      const box = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      if ((!box.width && !box.height) || style.display === 'none' || style.visibility !== 'visible') continue;
+      const bbox = {x: box.x, y: box.y, width: box.width, height: box.height};
+      if (element.tagName.toLowerCase() === 'canvas') {
+        canvases.push({panel: panel.dataset.vizPanelKey, bbox,
+          status: 'NOT_VERIFIABLE', reason: 'canvas needs independent pixel/series evidence'});
+        continue;
+      }
+      const control = element.closest('button, a, [role="button"]');
+      const name = control?.getAttribute('aria-label') || control?.textContent?.trim() || '';
+      let background = null;
+      let reason = null;
+      for (let node = element.parentElement; node; node = node.parentElement) {
+        const parentStyle = getComputedStyle(node);
+        if (parentStyle.backgroundImage !== 'none' || Number(parentStyle.opacity) !== 1 || parentStyle.filter !== 'none') {
+          reason = 'unsupported background compositing';
+        }
+        const color = rgba(parentStyle.backgroundColor);
+        if (!background && color?.[3] === 1) background = color;
+        else if (!background && color?.[3] > 0) reason = 'translucent graphic background needs pixel evidence';
+      }
+      const foreground = rgba(style.stroke !== 'none' ? style.stroke : style.fill);
+      if (!background || !foreground || foreground[3] !== 1 || Number(style.opacity) !== 1
+          || Number(style.fillOpacity) !== 1 || Number(style.strokeOpacity) !== 1) reason ||= 'unsupported graphic foreground/background';
+      const ratio = reason ? null : (Math.max(luminance(foreground), luminance(background)) + 0.05) / (Math.min(luminance(foreground), luminance(background)) + 0.05);
+      const disabled = control?.matches(':disabled, [aria-disabled="true"]') || false;
+      pairs.push({panel: panel.dataset.vizPanelKey, tag: element.tagName, bbox,
+        accessibleName: name, foreground, background, ratio, threshold: 3,
+        role: control ? 'interactive icon' : 'graphic', disabled,
+        status: disabled ? 'EXEMPT_DISABLED' : (ratio === null ? 'NOT_VERIFIABLE' : (ratio >= 3 ? 'PASS' : 'FAIL')), reason});
+    }
+  }
+  return {method: 'computed opaque SVG foreground and adjacent background', pairs, canvases};
+}
+
 async function collectVerifiedRenderContext(page, dashboard) {
   dashboard.accessibilityMeasurements = await page.evaluate(accessibilityMeasurementsFromDom);
+  dashboard.graphicsMeasurements = await page.evaluate(graphicsMeasurementsFromDom);
   dashboard.requestedViewport = { ...CONFIG.viewport };
   dashboard.layoutViewport =
     page.viewportSize() || layoutViewportForZoom(CONFIG.viewport, CONFIG.browserZoom);
@@ -2275,9 +2336,22 @@ async function renderDashboard(page, dashboard, index, total) {
     capturedAt: new Date().toISOString(),
   };
   await Promise.all(observedModels);
-  dashboard.provisionedModel.after = await readModel();
   dashboard.provisionedModel.observedUrl = page.url();
   dashboard.provisionedModel.browserVersion = page.context().browser().version();
+  const panelDir = path.join(CONFIG.outputDir, 'panels', dashboard.uid);
+  await fs.promises.mkdir(panelDir, {recursive: true});
+  dashboard.criticalPanelScreenshots = [];
+  for (const panel of dashboard.firstWindowPanels || []) {
+    const element = page.locator(`[data-viz-panel-key="panel-${panel.id}"]`).first();
+    if (await element.count()) {
+      const file = path.join(panelDir, `${panel.id}.png`);
+      const bytes = await element.screenshot({path: file, animations: 'disabled', timeout: CONFIG.captureTimeoutMs});
+      dashboard.criticalPanelScreenshots.push({panelId: panel.id,
+        file: path.relative(CONFIG.outputDir, file), ...pngEvidence(bytes)});
+    }
+  }
+  await setDashboardScrollPosition(page, 0);
+  dashboard.provisionedModel.after = await readModel();
   if (dashboard.actualTheme !== CONFIG.theme) {
     throw new Error(
       `Theme verification failed for ${dashboard.uid}: requested=${CONFIG.theme} actual=${dashboard.actualTheme}`,
@@ -2435,6 +2509,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  graphicsMeasurementsFromDom,
   browserAndKioskStateFromDom,
   accessibilityMeasurementsFromDom,
   classifyPanelTerminalEvidence,

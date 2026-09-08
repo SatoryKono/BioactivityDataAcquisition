@@ -270,3 +270,36 @@ def test_python_preflight_fails_closed_on_recorded_overflow() -> None:
     assert error is not None
     assert "2010" in error
     assert preflight._validate_dashboard_panel_containment("bioetl-runtime", {}) is None
+
+
+def test_actual_fold_cannot_pass_with_internal_fit_only() -> None:
+    output = _node_eval("""
+const {evaluatePanelContainment} = require(process.argv[1]);
+const panel={uid:'test',id:1,type:'table',gridPos:{y:11},clientHeight:200,scrollHeight:200,
+ clientWidth:600,scrollWidth:600,bbox:{x:0,y:602,width:600,height:266},fold:768,enforceFold:true};
+console.log(JSON.stringify(evaluatePanelContainment(panel)));
+""")
+    result = json.loads(output)
+    assert result["status"] == "error"
+    assert "outside-first-viewport" in result["reasons"]
+
+
+def test_graphic_contrast_does_not_promote_canvas_or_translucency() -> None:
+    output = _node_eval("""
+const {graphicsMeasurementsFromDom} = require(process.argv[1]);
+const base={opacity:'1',fillOpacity:'1',strokeOpacity:'1',filter:'none',backgroundImage:'none',
+ backgroundColor:'rgb(255, 255, 255)',fill:'rgb(0, 0, 0)',stroke:'none',display:'block',visibility:'visible'};
+const control={getAttribute:()=> 'Inspect',textContent:'Inspect',matches:()=>false};
+const make=(tag,style={})=>({tagName:tag,style:{...base,...style},parentElement:{style:base,parentElement:null},
+ getBoundingClientRect:()=>({x:0,y:0,width:20,height:20}),closest:()=>control});
+const shapes=[make('path'),make('path',{fill:'rgb(220, 220, 220)'}),make('canvas'),make('path',{opacity:'0.5'})];
+global.document={querySelectorAll:()=>[{dataset:{vizPanelKey:'panel-1'},querySelectorAll:()=>shapes}]};
+global.getComputedStyle=(el)=>el.style;
+console.log(JSON.stringify(graphicsMeasurementsFromDom()));
+""")
+    result = json.loads(output)
+    assert result["pairs"][0]["ratio"] == pytest.approx(21)
+    assert result["pairs"][0]["status"] == "PASS"
+    assert result["pairs"][1]["status"] == "FAIL"
+    assert result["pairs"][2]["status"] == "NOT_VERIFIABLE"
+    assert result["canvases"][0]["status"] == "NOT_VERIFIABLE"

@@ -871,7 +871,7 @@
                     "options": {
                       "1": {
                         "text": "SCRAPING",
-                        "color": "gray"
+                        "color": "text"
                       },
                       "0": {
                         "text": "UNAVAILABLE",
@@ -885,7 +885,7 @@
                 "id": "color",
                 "value": {
                   "mode": "fixed",
-                  "fixedColor": "gray"
+                  "fixedColor": "text"
                 }
               }
             ]
@@ -904,7 +904,7 @@
                     "options": {
                       "0": {
                         "text": "PRESENT",
-                        "color": "gray"
+                        "color": "text"
                       },
                       "1": {
                         "text": "RULE/SERIES GAP",
@@ -922,7 +922,7 @@
                 "id": "color",
                 "value": {
                   "mode": "fixed",
-                  "fixedColor": "gray"
+                  "fixedColor": "text"
                 }
               }
             ]
@@ -945,7 +945,7 @@
                 "id": "color",
                 "value": {
                   "mode": "fixed",
-                  "fixedColor": "gray"
+                  "fixedColor": "text"
                 }
               }
             ]

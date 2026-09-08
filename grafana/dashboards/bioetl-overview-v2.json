@@ -830,11 +830,11 @@
                       },
                       "monitor": {
                         "text": "Monitor",
-                        "color": "gray"
+                        "color": "text"
                       },
                       "no_route": {
                         "text": "No route",
-                        "color": "gray"
+                        "color": "text"
                       },
                       "provider": {
                         "text": "Provider",
@@ -1180,7 +1180,7 @@
                 },
                 "3": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "text"
                 }
               }
             },
@@ -1190,7 +1190,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "text"
                 }
               }
             }

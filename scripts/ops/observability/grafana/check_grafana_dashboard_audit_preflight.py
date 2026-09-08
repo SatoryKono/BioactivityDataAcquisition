@@ -1795,11 +1795,27 @@ def _check_bioetl_control_plane_source(
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     parser.add_argument("--immutable-manifest", type=Path)
+    parser.add_argument(
+        "--acceptance-scope",
+        choices=("provenance", "layout", "accessibility"),
+        default="provenance",
+    )
     args = parser.parse_args(argv)
     if args.immutable_manifest is not None:
         from scripts.ops.observability.grafana.capture_provenance import verify_capture
 
         result = verify_capture(args.immutable_manifest, repo_root=_REPO_ROOT)
+        if args.acceptance_scope != "provenance":
+            from scripts.ops.observability.grafana.capture_acceptance import (
+                assess_manifest,
+            )
+
+            assessment = assess_manifest(
+                json.loads(args.immutable_manifest.read_text(encoding="utf-8"))
+            )
+            result["acceptance"] = assessment
+            if assessment[f"{args.acceptance_scope}_status"] != "PASS":
+                result["status"] = "FAIL"
         print(json.dumps(result, indent=2))
         return 0 if result["status"] == "PASS" else 1
     username = str(args.grafana_username)

@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -182,6 +182,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--range-to", required=True)
     parser.add_argument("--variable", action="append", default=[])
     parser.add_argument("--profiles", nargs="*")
+    parser.add_argument("--kiosk-mode", choices=("off", "full", "tv"), default="full")
     parser.add_argument(
         "--include-kiosk",
         action=argparse.BooleanOptionalAction,
@@ -195,6 +196,9 @@ def main(argv: list[str] | None = None) -> int:
     output_dir = resolve_output_path(Path(args.output_dir))
     output_dir.mkdir(parents=True, exist_ok=True)
     profiles = build_profiles(include_kiosk=bool(args.include_kiosk))
+    profiles = tuple(
+        replace(profile, kiosk_mode=args.kiosk_mode) for profile in profiles
+    )
     if args.profiles:
         unknown = set(args.profiles) - {profile.name for profile in profiles}
         if unknown:

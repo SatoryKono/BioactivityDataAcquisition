@@ -708,7 +708,7 @@
                     "options": {
                       "0": {
                         "text": "UNKNOWN",
-                        "color": "gray"
+                        "color": "text"
                       },
                       "1": {
                         "text": "WARN",
