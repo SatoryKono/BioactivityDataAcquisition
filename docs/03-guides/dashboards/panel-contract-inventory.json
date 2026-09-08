@@ -3047,7 +3047,7 @@
           "value": 2
         },
         {
-          "color": "gray",
+          "color": "#555555",
           "value": 3
         }
       ],
@@ -3106,7 +3106,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "gray",
+          "color": "#555555",
           "value": null
         },
         {
@@ -3143,11 +3143,11 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "gray",
+          "color": "text",
           "value": null
         },
         {
-          "color": "green",
+          "color": "text",
           "value": 0
         },
         {
@@ -3159,7 +3159,7 @@
           "value": 2
         },
         {
-          "color": "gray",
+          "color": "text",
           "value": 3
         }
       ],
@@ -3184,7 +3184,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "green",
+          "color": "text",
           "value": null
         },
         {
@@ -3217,7 +3217,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "green",
+          "color": "text",
           "value": null
         },
         {
@@ -3250,7 +3250,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "green",
+          "color": "text",
           "value": null
         },
         {
@@ -3283,7 +3283,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "green",
+          "color": "text",
           "value": null
         },
         {
@@ -3389,7 +3389,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "green",
+          "color": "text",
           "value": null
         },
         {
@@ -3587,11 +3587,11 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "gray",
+          "color": "text",
           "value": null
         },
         {
-          "color": "green",
+          "color": "text",
           "value": 0
         },
         {
@@ -3603,7 +3603,7 @@
           "value": 2
         },
         {
-          "color": "gray",
+          "color": "text",
           "value": 3
         }
       ],
@@ -4240,7 +4240,7 @@
           "value": 1
         },
         {
-          "color": "green",
+          "color": "text",
           "value": 5
         }
       ],
@@ -4592,7 +4592,7 @@
           "value": 2
         },
         {
-          "color": "gray",
+          "color": "#555555",
           "value": 3
         }
       ],
