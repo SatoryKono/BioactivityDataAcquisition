@@ -225,7 +225,7 @@ def test_playwright_fallback_prepares_inner_scroll_before_screenshot() -> None:
     assert "options.clip" in script
     assert script.index(
         "const viewportChanged = await prepareDashboardForCapture("
-    ) < script.index("await page.screenshot(screenshotOptions")
+    ) < script.index(".capturePageScreenshot(page, screenshotOptions")
 
 
 def test_rerender_scope_maps_run_id_to_silver_reject_explorer_run_filter(
@@ -752,7 +752,7 @@ def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() 
     assert (
         script.index("await collectVerifiedTerminalState")
         < script.index("dashboard.preCaptureTerminalStateValidation")
-        < script.index("await page.screenshot(screenshotOptions")
+        < script.index(".capturePageScreenshot(page, screenshotOptions")
     )
     assert script.index("await settleDashboardAfterViewportChange") < script.rindex(
         "await collectVerifiedTerminalState"
@@ -764,8 +764,8 @@ def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() 
     assert "window.scrollTo" in script
     assert "chromium.launch" in script
     assert "headless: true" in script
-    assert "page = await context.newPage();" in script
-    assert "await page.close();" in script
+    assert "session.page = await session.context.newPage();" in script
+    assert "await closeCaptureBrowser(session);" in script
     assert "GRAFANA_SCREENSHOT_EXPAND_COLLAPSED_ROWS" in script
     assert "--expand-collapsed-rows" in script
     assert (

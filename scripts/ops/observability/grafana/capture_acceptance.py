@@ -457,7 +457,30 @@ def assess_manifest(manifest: dict, cue_review: dict | None = None) -> dict:
     }
 
 
-def matrix_coverage(manifests: list[dict]) -> dict:
+def native_zoom_matches(dashboard: dict, requested: dict) -> bool:
+    """Require native browser API proof in addition to matching layout geometry."""
+    proof = dashboard.get("nativeBrowserZoom", {})
+    percent = requested.get("browser_zoom", 100)
+    if percent not in (100, 200):
+        return False
+    scale = percent / 100
+    viewport = requested.get("viewport", {})
+    actual = proof.get("actual", {})
+    return (
+        proof.get("actualFactor") == scale
+        and proof.get("physicalContentViewport") == viewport
+        and proof.get("method", "").startswith("chrome.tabs.setZoom/getZoom;")
+        and actual.get("devicePixelRatio") == scale
+        and actual.get("innerWidth") == math.floor(viewport.get("width", 0) / scale)
+        and actual.get("innerHeight") == math.floor(viewport.get("height", 0) / scale)
+        and actual.get("cssZoom") in {"1", "normal"}
+        and bool(proof.get("browserVersion"))
+    )
+
+
+def matrix_coverage(
+    manifests: list[dict], *, require_native_zoom: bool = False
+) -> dict:
     """Require fixed, matching source/context and every mandatory actual profile."""
     profiles = set()
     identities = set()
@@ -484,6 +507,10 @@ def matrix_coverage(manifests: list[dict]) -> dict:
             )
         )
         for d in m.get("dashboards", []):
+            if require_native_zoom and not native_zoom_matches(d, r):
+                errors.append(
+                    f"native browser zoom not proved: {m.get('capture_id')}/{d.get('uid')}"
+                )
             state = d.get("browserState", {})
             zoom = r.get("browser_zoom", 100)
             expected = {
@@ -542,6 +569,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--cue-review", type=Path)
+    parser.add_argument("--require-native-browser-zoom", action="store_true")
     args = parser.parse_args(argv)
     shipped = Path(__file__).resolve().parents[4] / "grafana" / "dashboards"
     output_dir = args.output_dir.resolve()
@@ -575,7 +603,9 @@ def main(argv: list[str] | None = None) -> int:
         "scenarios": review.get("scenarios") if review else None,
         "manifests": references,
         "provenance": provenance,
-        "matrix": matrix_coverage(manifests),
+        "matrix": matrix_coverage(
+            manifests, require_native_zoom=args.require_native_browser_zoom
+        ),
     }
     outputs = {
         "reflow-results.json": {**common, "profiles": assessments},
@@ -600,7 +630,7 @@ def main(argv: list[str] | None = None) -> int:
             **common,
             "status": "PASS"
             if not review_errors
-            and matrix_coverage(manifests)["status"] == "PASS"
+            and common["matrix"]["status"] == "PASS"
             and all(p["status"] == "PASS" for p in provenance)
             and all(a["accessibility_status"] == "PASS" for a in assessments)
             else "NOT_PROVEN",

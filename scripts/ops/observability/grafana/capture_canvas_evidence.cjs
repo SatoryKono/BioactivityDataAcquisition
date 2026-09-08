@@ -149,7 +149,8 @@ async function captureSeriesControls(page, {dashboard, outputDir, pngEvidence, t
       const canvas=await page.evaluate(canvasEvidenceFromDom);
       const file=path.join(outputDir,'series',dashboard.uid,id,`${String(index).padStart(3,'0')}.png`);
       await fs.promises.mkdir(path.dirname(file),{recursive:true});
-      const png=await panel.screenshot({path:file,timeout,animations:'disabled'});
+      const png=await require('./native_browser_zoom.cjs').captureElementScreenshot(page,panel,
+        {path:file,timeout,animations:'disabled'});
       await button.focus();await page.keyboard.press('Enter');await page.waitForTimeout(250);
       const restored=await rows.evaluateAll(els=>els.filter(el=>!el.className.includes('LegendLabelDisabled')).map(el=>el.querySelector('button')?.textContent));
       entries.push({label:labels[index],canvas:canvas.filter(c=>c.panel===id),method:'native legend button focus + Enter isolates one named series; Enter restores all',focused,active,restored,

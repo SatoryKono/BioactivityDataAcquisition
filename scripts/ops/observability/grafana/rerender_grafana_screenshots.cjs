@@ -752,14 +752,20 @@ async function createAuthenticatedApiContext() {
   return api;
 }
 
-async function createBrowserContext(browser) {
+async function createBrowserContext(browser, nativeContext = null) {
+  const newContext = async (options) => {
+    if (!nativeContext) return browser.newContext(options);
+    if (options.storageState) await nativeContext.addCookies(options.storageState.cookies);
+    if (options.extraHTTPHeaders) await nativeContext.setExtraHTTPHeaders(options.extraHTTPHeaders);
+    return nativeContext;
+  };
   const zoomContext = {
     viewport: layoutViewportForZoom(CONFIG.viewport, CONFIG.browserZoom),
     deviceScaleFactor: zoomScale(CONFIG.browserZoom),
   };
   if (CONFIG.serviceAccountToken) {
     return {
-      context: await browser.newContext({
+      context: await newContext({
         ...zoomContext,
         extraHTTPHeaders: {
           Authorization: `Bearer ${CONFIG.serviceAccountToken}`,
@@ -776,7 +782,7 @@ async function createBrowserContext(browser) {
       `warning: Grafana login failed for Playwright fallback; continuing anonymously (${String(error?.message ?? error)})`,
     );
     return {
-      context: await browser.newContext({
+      context: await newContext({
         ...zoomContext,
       }),
       api: null,
@@ -784,7 +790,7 @@ async function createBrowserContext(browser) {
   }
   const storageState = await api.storageState();
   return {
-    context: await browser.newContext({
+    context: await newContext({
       storageState,
       ...zoomContext,
     }),
@@ -1482,6 +1488,10 @@ function dashboardRenderUrl(dashboard) {
 }
 
 async function applyBrowserZoom(page) {
+  if (page.nativeZoomController) {
+    page.nativeZoomEvidence = await page.nativeZoomController(page, CONFIG.viewport, CONFIG.browserZoom);
+    return;
+  }
   // Browser zoom reduces the CSS layout viewport while retaining the physical
   // output surface. The context combines a reduced viewport with matching DPR;
   // root CSS zoom would magnify a desktop layout and manufacture overflow.
@@ -2031,6 +2041,22 @@ async function collectTypographyValidation(page, dashboard) {
   });
 }
 
+function mergeTypographyObservations(requiredPanels, observations) {
+  const byId = new Map();
+  const violations = observations.flatMap(observation => observation.violations || []);
+  for (const observation of observations) {
+    for (const panel of observation.panels || []) {
+      if (!byId.has(panel.id)) byId.set(panel.id, panel);
+    }
+  }
+  for (const panel of requiredPanels) {
+    if (!byId.has(panel.id)) violations.push({id: panel.id, reason: 'missing scroll-tile typography evidence'});
+  }
+  return {...observations[0], method: 'all required panels measured in their visible scroll tiles',
+    panels: [...byId.values()], checkedPanelCount: byId.size, violations,
+    status: violations.length === 0 && byId.size === requiredPanels.length ? 'ok' : 'error'};
+}
+
 async function verifyRenderedPanelCount(page, dashboard, index, total) {
   const evidence = await countRenderedPanels(page);
   dashboard.renderedPanelCount = evidence.count;
@@ -2219,7 +2245,10 @@ async function collectVerifiedRenderContext(page, dashboard) {
 async function collectVerifiedPanelSurfaces(page, dashboard) {
   dashboard.panelContainment ??= await collectPanelContainment(page, dashboard);
   // Collect all independent evidence even when one surface fails acceptance.
-  dashboard.typographyValidation = await collectTypographyValidation(page, dashboard);
+  const tileTypography = (dashboard.scrollCapture?.tiles || []).map(tile => tile.evidence?.typography).filter(Boolean);
+  dashboard.typographyValidation = tileTypography.length
+    ? mergeTypographyObservations(dashboard.requiredPanels, tileTypography)
+    : await collectTypographyValidation(page, dashboard);
   dashboard.navigationValidation = await collectNavigationValidation(page);
   const containmentSchema = validateContainmentManifest(dashboard.panelContainment);
   if (containmentSchema.status !== "ok") {
@@ -2267,6 +2296,16 @@ async function validateVisibleTerminalState(page, dashboard, index, total) {
 }
 
 async function collectVerifiedTerminalState(page, dashboard, index, total) {
+  if (dashboard.scrollCapture?.tiles?.length) {
+    const observations = dashboard.scrollCapture.tiles.flatMap(tile =>
+      [tile.evidence.terminal, tile.evidence.terminalAfter]);
+    observations.push(await validateVisibleTerminalState(page, dashboard, index, total));
+    dashboard.terminalStateValidation = mergeTerminalObservations(dashboard, observations);
+    if (dashboard.terminalStateValidation.status !== 'ok') {
+      throw new Error(`Incomplete before/after scroll-tile readiness: ${dashboard.uid}`);
+    }
+    return;
+  }
   dashboard.terminalStateValidation = CONFIG.navigationOnly
     ? {
         status: "ok",
@@ -2280,6 +2319,21 @@ async function collectVerifiedTerminalState(page, dashboard, index, total) {
       `Terminal-state validation failed for ${dashboard.uid}: ${describeTerminalStateFailure(dashboard)}`,
     );
   }
+}
+
+function mergeTerminalObservations(dashboard, observations) {
+  const states = new Map();
+  let valid = observations.length > 0;
+  for (const observation of observations) {
+    if (observation?.status !== 'ok') valid = false;
+    for (const state of observation?.panelStates || []) {
+      if (!ACCEPTED_TERMINAL_CLASSIFICATIONS.has(state.classification)) valid = false;
+      states.set(state.id, state);
+    }
+  }
+  if (!dashboard.requiredPanels.every(panel => states.has(panel.id))) valid = false;
+  return {...terminalStateSummary(dashboard, [...states.values()], valid ? 'ok' : 'error'),
+    method: 'every panel ready before and after its native scroll-tile PNG'};
 }
 
 function screenshotOptions(dashboard, filePath) {
@@ -2332,7 +2386,9 @@ async function renderDashboard(page, dashboard, index, total) {
   });
   console.log(`[${index}/${total}] loading ${dashboard.uid} ...`);
   // Keep the requested layout viewport for both viewport and scrolling packs.
-  await page.setViewportSize(layoutViewportForZoom(CONFIG.viewport, CONFIG.browserZoom));
+  if (!page.nativeZoomController) {
+    await page.setViewportSize(layoutViewportForZoom(CONFIG.viewport, CONFIG.browserZoom));
+  }
   console.log(`[${index}/${total}] goto ${dashboard.uid} -> ${target}`);
   await page.goto(target, {
     timeout: CONFIG.timeoutMs,
@@ -2377,6 +2433,11 @@ async function renderDashboard(page, dashboard, index, total) {
     await settleDashboardAfterViewportChange(page, dashboard, index, total);
   }
   await collectVerifiedRenderContext(page, dashboard);
+  if (page.nativeZoomEvidence) {
+    dashboard.nativeBrowserZoom = page.nativeZoomEvidence;
+    dashboard.browserState.zoomEmulation = null;
+    dashboard.browserState.zoomMethod = page.nativeZoomEvidence.method;
+  }
   dashboard.layoutFit = await page.evaluate(layoutFitMeasurementsFromDom);
   dashboard.panelContainment = await collectPanelContainment(page, dashboard);
   dashboard.canvasEvidence = await page.evaluate(canvasEvidenceFromDom);
@@ -2389,12 +2450,19 @@ async function renderDashboard(page, dashboard, index, total) {
     const {captureScrollSurface} = require('./capture_scroll_surface.cjs');
     dashboard.scrollCapture = await captureScrollSurface(page, {filePath,
       timeout: CONFIG.captureTimeoutMs, pngEvidence,
-      measure: async () => ({terminal: await validateVisibleTerminalState(page, dashboard, index, total),
-        text: await page.evaluate(accessibilityMeasurementsFromDom),
-        graphics: await page.evaluate(graphicsMeasurementsFromDom),
-        canvas: await page.evaluate(canvasEvidenceFromDom)})});
+      verify: () => validateVisibleTerminalState(page, dashboard, index, total),
+      measure: async () => {
+        const terminal = await validateVisibleTerminalState(page, dashboard, index, total);
+        const visibleIds = new Set(terminal.panelStates.map(panel => panel.id));
+        return {terminal,
+          typography: await collectTypographyValidation(page, {...dashboard,
+            requiredPanels: dashboard.requiredPanels.filter(panel => visibleIds.has(panel.id))}),
+          text: await page.evaluate(accessibilityMeasurementsFromDom),
+          graphics: await page.evaluate(graphicsMeasurementsFromDom),
+          canvas: await page.evaluate(canvasEvidenceFromDom)};
+      }});
   } else {
-    await page.screenshot(screenshotOptions(dashboard, filePath));
+    await require('./native_browser_zoom.cjs').capturePageScreenshot(page, screenshotOptions(dashboard, filePath));
   }
   const screenshotBuffer = await fs.promises.readFile(filePath);
   dashboard.screenshotEvidence = {
@@ -2404,7 +2472,7 @@ async function renderDashboard(page, dashboard, index, total) {
   };
   await Promise.all(observedModels);
   dashboard.provisionedModel.observedUrl = page.url();
-  dashboard.provisionedModel.browserVersion = page.context().browser().version();
+  dashboard.provisionedModel.browserVersion = page.nativeZoomEvidence?.browserVersion || page.context().browser().version();
   const panelDir = path.join(CONFIG.outputDir, 'panels', dashboard.uid);
   await fs.promises.mkdir(panelDir, {recursive: true});
   dashboard.criticalPanelScreenshots = [];
@@ -2412,7 +2480,8 @@ async function renderDashboard(page, dashboard, index, total) {
     const element = page.locator(`[data-viz-panel-key="panel-${panel.id}"]`).first();
     if (await element.count()) {
       const file = path.join(panelDir, `${panel.id}.png`);
-      const bytes = await element.screenshot({path: file, animations: 'disabled', timeout: CONFIG.captureTimeoutMs});
+      const bytes = await require('./native_browser_zoom.cjs').captureElementScreenshot(page, element,
+        {path: file, animations: 'disabled', timeout: CONFIG.captureTimeoutMs});
       dashboard.criticalPanelScreenshots.push({panelId: panel.id,
         file: path.relative(CONFIG.outputDir, file), ...pngEvidence(bytes)});
     }
@@ -2514,6 +2583,30 @@ async function writeManifest(dashboards) {
   );
 }
 
+async function closeCaptureBrowser(session) {
+  if (session.contextBundle?.api) await session.contextBundle.api.dispose();
+  if (session.native) await session.native.close();
+  else if (session.context) await session.context.close();
+  if (session.browser) await session.browser.close();
+}
+
+async function openRenderSession(launchOptions) {
+  const native = process.env.GRAFANA_NATIVE_BROWSER_ZOOM === '1'
+    ? await require('./native_browser_zoom.cjs').createNativeZoomContext(playwright().chromium, launchOptions)
+    : null;
+  const session = {native, browser: native ? null : await playwright().chromium.launch(launchOptions)};
+  try {
+    session.contextBundle = await createBrowserContext(session.browser, native?.context);
+    session.context = session.contextBundle.context || session.contextBundle;
+    session.page = await session.context.newPage();
+    if (native) session.page.nativeZoomController = native.setZoom;
+    return session;
+  } catch (error) {
+    await closeCaptureBrowser(session);
+    throw error;
+  }
+}
+
 async function main() {
   await ensureOutputDir();
   const dashboards = listDashboardsFromRepo();
@@ -2531,30 +2624,15 @@ async function main() {
     if (executablePath) {
       launchOptions.executablePath = executablePath;
     }
-    const browser = await playwright().chromium.launch(launchOptions);
-    let contextBundle = null;
-    let context = null;
+    const session = await openRenderSession(launchOptions);
     try {
-      contextBundle = await createBrowserContext(browser);
-      context = contextBundle.context || contextBundle;
-      const page = await context.newPage();
-      try {
-        await renderDashboard(page, dashboard, index + 1, dashboards.length);
-      } catch (error) {
-        dashboard.renderStatus = "error";
-        dashboard.error = String(error?.message ?? error);
-        renderFailure = error;
-      } finally {
-        await page.close();
-      }
+      await renderDashboard(session.page, dashboard, index + 1, dashboards.length);
+    } catch (error) {
+      dashboard.renderStatus = "error";
+      dashboard.error = String(error?.message ?? error);
+      renderFailure = error;
     } finally {
-      if (contextBundle?.api) {
-        await contextBundle.api.dispose();
-      }
-      if (context) {
-        await context.close();
-      }
-      await browser.close();
+      await closeCaptureBrowser(session);
     }
     if (renderFailure) {
       break;
@@ -2583,6 +2661,9 @@ if (require.main === module) {
 }
 
 module.exports = {
+  closeCaptureBrowser,
+  mergeTerminalObservations,
+  mergeTypographyObservations,
   layoutFitMeasurementsFromDom,
   navigationValidationFromDom,
   graphicsMeasurementsFromDom,
