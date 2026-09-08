@@ -65,6 +65,8 @@ def dashboard_attachment_errors(root: Path, dashboard: dict) -> list[str]:
     attachments.extend(dashboard.get("scrollCapture", {}).get("tiles", []))
     for table in dashboard.get("tablePagination", []):
         attachments.extend(table.get("pages", []))
+    for control in dashboard.get("seriesControls", []):
+        attachments.extend(control.get("entries", []))
     return [
         error for evidence in attachments for error in attachment_errors(root, evidence)
     ]

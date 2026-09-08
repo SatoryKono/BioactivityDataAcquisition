@@ -2221,6 +2221,22 @@ async function collectVerifiedPanelSurfaces(page, dashboard) {
   }
 }
 
+async function validateVisibleTerminalState(page, dashboard, index, total) {
+  const visible = await page.evaluate(() => [...document.querySelectorAll('[data-viz-panel-key]')].flatMap(el => {
+    const r = el.getBoundingClientRect();
+    return r.bottom > 0 && r.top < innerHeight && r.width && r.height
+      ? [Number(el.dataset.vizPanelKey.replace('panel-', ''))] : [];
+  }));
+  const scoped = {...dashboard,
+    requiredPanels: dashboard.requiredPanels.filter(p => visible.includes(p.id)),
+    requiredTerminalPanelIds: dashboard.requiredTerminalPanelIds.filter(id => visible.includes(id))};
+  const result = await validateDashboardTerminalStates(page, scoped, index, total);
+  if (!result.checkedPanelCount || result.status !== 'ok') {
+    throw new Error(`Visible panels are not ready for a scroll tile: ${dashboard.uid}`);
+  }
+  return result;
+}
+
 async function collectVerifiedTerminalState(page, dashboard, index, total) {
   dashboard.terminalStateValidation = CONFIG.navigationOnly
     ? {
@@ -2320,6 +2336,10 @@ async function renderDashboard(page, dashboard, index, total) {
   await materializeLazyPanels(page, dashboard, index, total);
 
   await verifyRenderedPanelCount(page, dashboard, index, total);
+  // Bracket the actual PNG with terminal evidence; a later settled panel cannot
+  // retroactively validate a screenshot taken while it was still blank/loading.
+  await collectVerifiedTerminalState(page, dashboard, index, total);
+  dashboard.preCaptureTerminalStateValidation = dashboard.terminalStateValidation;
   const viewportChanged = await prepareDashboardForCapture(
     page,
     dashboard,
@@ -2340,7 +2360,8 @@ async function renderDashboard(page, dashboard, index, total) {
     const {captureScrollSurface} = require('./capture_scroll_surface.cjs');
     dashboard.scrollCapture = await captureScrollSurface(page, {filePath,
       timeout: CONFIG.captureTimeoutMs, pngEvidence,
-      measure: async () => ({text: await page.evaluate(accessibilityMeasurementsFromDom),
+      measure: async () => ({terminal: await validateVisibleTerminalState(page, dashboard, index, total),
+        text: await page.evaluate(accessibilityMeasurementsFromDom),
         graphics: await page.evaluate(graphicsMeasurementsFromDom),
         canvas: await page.evaluate(canvasEvidenceFromDom)})});
   } else {
@@ -2370,6 +2391,10 @@ async function renderDashboard(page, dashboard, index, total) {
   const {captureTablePages} = require('./capture_table_pages.cjs');
   dashboard.tablePagination = await captureTablePages(page, {dashboard,
     outputDir:CONFIG.outputDir,pngEvidence,timeout:CONFIG.captureTimeoutMs});
+  if(CONFIG.captureSurface === 'full') {
+    const {captureSeriesControls}=require('./capture_canvas_evidence.cjs');
+    dashboard.seriesControls=await captureSeriesControls(page,{dashboard,outputDir:CONFIG.outputDir,pngEvidence,timeout:CONFIG.captureTimeoutMs});
+  }
   await setDashboardScrollPosition(page, 0);
   dashboard.provisionedModel.after = await readModel();
   if (dashboard.actualTheme !== CONFIG.theme) {

@@ -929,7 +929,13 @@ def test_incident_alert_history_has_readable_full_width_layout() -> None:
     )
     mappings = history["fieldConfig"]["defaults"]["mappings"][0]["options"]
     assert mappings["1"] == {"text": "FIRING", "color": "red"}
-    assert mappings["2"] == {"text": "PENDING", "color": "orange"}
+    # Native orange measured 2.64:1 on Light; preserve the PENDING label and hue
+    # with the source-bound contrast remediation instead of the failing token.
+    assert mappings["2"] == {"text": "PENDING", "color": "#bd5907"}
+    assert all(
+        _contrast_ratio(mappings["2"]["color"], background) >= 3
+        for background in ("#ffffff", "#181b1f")
+    )
     assert history["options"]["mergeValues"] is True
     assert history["fieldConfig"]["defaults"]["custom"]["axisWidth"] >= 360
     assert history["fieldConfig"]["defaults"]["custom"]["lineWidth"] > 0

@@ -374,3 +374,30 @@ try {
     data = (tmp_path / "full.png").read_bytes()
     assert int.from_bytes(data[16:20], "big") == 1366
     assert int.from_bytes(data[20:24], "big") == 3500
+
+
+def test_canvas_contrast_uses_observed_paint_and_records_raster_alpha() -> None:
+    """Antialiasing is evidence, while missing/composited paint cannot pass."""
+    output = _node_eval(
+        r"""
+const {canvasEvidenceFromDom}=require(require('node:path').join(require('node:path').dirname(process.argv[1]),'capture_canvas_evidence.cjs'));
+const pixels=new Uint8ClampedArray(20*20*4);
+const index=(5*20+5)*4;pixels.set([0,0,0,96],index);
+const calls=[{method:'fillText',text:'X',foreground:'#000000',font:'12px sans-serif',alpha:1,composition:'source-over',bounds:{x:4,y:4,width:4,height:4}}];
+const canvas={width:20,height:20,parentElement:null,getBoundingClientRect:()=>({x:0,y:0,width:20,height:20}),
+ closest:()=>({dataset:{vizPanelKey:'panel-1'}}),getContext:()=>({getImageData:()=>({data:pixels})}),toDataURL:()=>''};
+global.document={querySelectorAll:()=>[canvas]};
+global.window={__bioetlCanvasEvidence:new Map([[canvas,new Map(calls.map((x,i)=>[i,x]))]])};
+global.getComputedStyle=()=>({backgroundColor:'rgb(255, 255, 255)',backgroundImage:'none',opacity:'1',filter:'none'});
+const pair=canvasEvidenceFromDom()[0].measurements.pairs.text[0];
+if(pair.ratio!==21||pair.status!=='PASS'||pair.pixelWitness.foreground.rasterAlpha!==96/255)throw Error(JSON.stringify(pair));
+pixels.fill(0);
+const absent=canvasEvidenceFromDom()[0].measurements.pairs.text[0];
+if(absent.ratio!==null||absent.status!=='NOT_VERIFIABLE')throw Error('Absent pixels passed');
+calls[0].alpha=.5;
+const unsupported=canvasEvidenceFromDom()[0].measurements.pairs.text[0];
+if(unsupported.ratio!==null||unsupported.status!=='NOT_VERIFIABLE')throw Error('Unsupported paint passed');
+process.stdout.write('ok');
+"""
+    )
+    assert output == "ok"

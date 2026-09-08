@@ -105,3 +105,110 @@ def test_matrix_requires_every_viewport_theme_zoom_profile_and_matching_context(
     changed = copy.deepcopy(manifests)
     changed[0]["dashboards"][0]["browserState"]["devicePixelRatio"] = 0.5
     assert matrix_coverage(changed)["status"] == "NOT_PROVEN"
+
+
+def test_later_terminal_pass_cannot_validate_an_earlier_loading_png():
+    dashboard = {
+        "uid": "test",
+        "provisionedModel": {
+            "before": {"panels": [{"id": 1, "type": "text", "gridPos": {"y": 0}}]}
+        },
+        "terminalStateValidation": {
+            "status": "ok",
+            "panelStates": [{"id": 1, "classification": "healthy"}],
+        },
+    }
+    reasons = assess_dashboard(dashboard, {})["layout"]["reasons"]
+    assert "terminal readiness was not proved before PNG capture" in reasons
+
+
+def test_manual_review_must_bind_exact_capture_hashes_and_all_scenarios():
+    from scripts.ops.observability.grafana.capture_acceptance import (
+        review_binding_errors,
+    )
+
+    manifests = [{"capture_id": "one", "source": {"commit_sha": "a" * 40}}]
+    references = [{"sha256": "b" * 64}]
+    review = {
+        "reviewer": "reviewer",
+        "source_sha": "a" * 40,
+        "captures": {"one": "b" * 64},
+        "scenarios": {
+            key: {"status": "NOT_VERIFIABLE", "reason": "not available in this runtime"}
+            for key in (
+                "normal_populated",
+                "valid_zero",
+                "expected_empty_or_selection",
+                "error_or_anomaly",
+            )
+        },
+    }
+    assert not review_binding_errors(review, manifests, references)
+    review["captures"]["one"] = "c" * 64
+    assert review_binding_errors(review, manifests, references)
+    review["captures"]["one"] = "b" * 64
+    del review["scenarios"]["valid_zero"]
+    assert review_binding_errors(review, manifests, references)
+
+
+def test_color_only_zero_requires_observed_critical_copy_and_complete_series_controls():
+    from scripts.ops.observability.grafana.capture_acceptance import validate_panel_cues
+
+    dashboard = {
+        "terminalStateValidation": {
+            "panelStates": [{"id": 1, "bodyText": "UNKNOWN: inspect source"}]
+        }
+    }
+    reviews = [{"id": 1, "status": "PASS", "evidence_text": "UNKNOWN"}]
+    assert validate_panel_cues(dashboard, reviews, {1}, {1})["status"] == "PASS"
+    reviews[0]["evidence_text"] = "OK"
+    assert validate_panel_cues(dashboard, reviews, {1}, {1})["status"] == "NOT_PROVEN"
+    reviews[0]["evidence_text"] = "UNKNOWN"
+    dashboard["seriesControls"] = [
+        {
+            "panel": "panel-2",
+            "status": "PASS",
+            "labels": ["a", "b"],
+            "entries": [
+                {"label": "a", "focused": True, "active": ["a"], "restored": ["a", "b"]}
+            ],
+        }
+    ]
+    assert validate_panel_cues(dashboard, reviews, {1}, {1})["status"] == "NOT_PROVEN"
+
+
+def test_isolated_canvas_measurement_resolves_occlusion_but_preserves_failure():
+    from scripts.ops.observability.grafana.capture_acceptance import canvas_pairs
+
+    base = {
+        "panel": "panel-1",
+        "element": "canvas stroke",
+        "text": None,
+        "foreground": [240, 200, 0],
+        "background": [255, 255, 255],
+        "threshold": 3,
+        "method": "native",
+        "ratio": None,
+        "status": "NOT_VERIFIABLE",
+    }
+    measured = {
+        **base,
+        "ratio": 1.6,
+        "status": "FAIL",
+        "pixelWitness": {"foreground": {"x": 1, "y": 1}},
+    }
+    dashboard = {
+        "canvasEvidence": [{"measurements": {"pairs": {"graphics": [base]}}}],
+        "seriesControls": [
+            {
+                "entries": [
+                    {"canvas": [{"measurements": {"pairs": {"graphics": [measured]}}}]}
+                ]
+            }
+        ],
+    }
+    result = canvas_pairs(dashboard, "graphics")
+    assert len(result) == 1
+    assert result[0]["status"] == "FAIL"
+    assert result[0]["measured_frames"] == 1
+    assert result[0]["observed_frames"] == 2

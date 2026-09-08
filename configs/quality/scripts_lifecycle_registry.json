@@ -1650,6 +1650,18 @@
       "next_step": "Retain as the typed action-target allowlist shared by Grafana dashboard tooling and regression tests; keep it supporting unless promoted through the canonical scripts.ops command surface.",
       "owner": "@bioetl-observability",
       "review_by": "2026-11-30"
+    },
+    "scripts/ops/observability/grafana/capture_acceptance.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the layout/accessibility assessment backend used by check-grafana-audit-preflight; route matrix report assembly through the scripts.ops dispatcher instead of counting the backend twice.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-09-30"
+    },
+    "scripts/ops/observability/grafana/capture_provenance.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the immutable source/attachment verifier imported by the canonical check-grafana-audit-preflight command and capture acceptance backend; no separate operator entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-09-30"
     }
   },
   "schema_version": "1.0"

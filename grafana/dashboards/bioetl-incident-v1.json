@@ -1225,7 +1225,7 @@
                     },
                     "2": {
                       "text": "PENDING",
-                      "color": "orange"
+                      "color": "#bd5907"
                     }
                   }
                 }
