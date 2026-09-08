@@ -2583,7 +2583,7 @@ async function writeManifest(dashboards) {
   );
 }
 
-async function closeRenderSession(session) {
+async function closeCaptureBrowser(session) {
   if (session.contextBundle?.api) await session.contextBundle.api.dispose();
   if (session.native) await session.native.close();
   else if (session.context) await session.context.close();
@@ -2602,7 +2602,7 @@ async function openRenderSession(launchOptions) {
     if (native) session.page.nativeZoomController = native.setZoom;
     return session;
   } catch (error) {
-    await closeRenderSession(session);
+    await closeCaptureBrowser(session);
     throw error;
   }
 }
@@ -2632,7 +2632,7 @@ async function main() {
       dashboard.error = String(error?.message ?? error);
       renderFailure = error;
     } finally {
-      await closeRenderSession(session);
+      await closeCaptureBrowser(session);
     }
     if (renderFailure) {
       break;
@@ -2661,6 +2661,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  closeCaptureBrowser,
   mergeTerminalObservations,
   mergeTypographyObservations,
   layoutFitMeasurementsFromDom,

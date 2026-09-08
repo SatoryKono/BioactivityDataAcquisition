@@ -48,6 +48,32 @@ def _node_eval(program: str) -> str:
     return result.stdout.strip()
 
 
+def test_browser_cleanup_preserves_ownership_and_disposal_order() -> None:
+    output = _node_eval("""
+const {closeCaptureBrowser} = require(process.argv[1]);
+(async () => {
+  const calls = [];
+  const resource = (label) => ({close: async () => calls.push(label)});
+  const contextBundle = {api: {dispose: async () => calls.push('api')}};
+  await closeCaptureBrowser({contextBundle, context: resource('context'),
+    browser: resource('browser')});
+  await closeCaptureBrowser({contextBundle, context: resource('owned-context'),
+    native: resource('native')});
+  await closeCaptureBrowser({browser: resource('partial-browser')});
+  await closeCaptureBrowser({});
+  console.log(JSON.stringify(calls));
+})().catch(error => {console.error(error); process.exitCode = 1;});
+""")
+    assert json.loads(output) == [
+        "api",
+        "context",
+        "browser",
+        "api",
+        "native",
+        "partial-browser",
+    ]
+
+
 def test_scroll_typography_requires_every_panel_and_retains_failed_frames() -> None:
     output = _node_eval("""
 const {mergeTypographyObservations: merge} = require(process.argv[1]);
