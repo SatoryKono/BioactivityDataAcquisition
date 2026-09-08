@@ -46,7 +46,6 @@ from bioetl.composition.factories.services.bundle import (
     _create_cached_bronze_data_source,
     build_pipeline_services,
 )
-from bioetl.composition.factories.services.factory import BaseServicesFactory
 from bioetl.domain.value_objects.dq_report import SilverDQCheckType
 from bioetl.infrastructure.schemas.dq_report_config import (
     SilverDQReportConfig,
@@ -182,8 +181,12 @@ def test_create_cached_bronze_data_source_falls_back_to_convention_path(
 
 
 @pytest.mark.unit
-@patch.object(BaseServicesFactory, "create_common_services")
-@patch.object(BaseServicesFactory, "_create_metrics")
+@patch(
+    "bioetl.composition.factories.services.factory.BaseServicesFactory.create_common_services"
+)
+@patch(
+    "bioetl.composition.factories.services.factory.BaseServicesFactory._create_metrics"
+)
 @patch("bioetl.composition.factories.services.bundle._create_data_source")
 @patch("bioetl.composition.factories.services.bundle._create_cached_bronze_data_source")
 def test_build_pipeline_services_uses_cached_bronze_when_enabled(
@@ -223,8 +226,12 @@ def test_build_pipeline_services_uses_cached_bronze_when_enabled(
 
 
 @pytest.mark.unit
-@patch.object(BaseServicesFactory, "create_common_services")
-@patch.object(BaseServicesFactory, "_create_metrics")
+@patch(
+    "bioetl.composition.factories.services.factory.BaseServicesFactory.create_common_services"
+)
+@patch(
+    "bioetl.composition.factories.services.factory.BaseServicesFactory._create_metrics"
+)
 @patch("bioetl.composition.factories.services.bundle._create_data_source")
 @patch("bioetl.composition.factories.services.bundle._create_cached_bronze_data_source")
 def test_build_pipeline_services_uses_regular_data_source_when_cached_disabled(
