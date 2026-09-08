@@ -23,6 +23,7 @@ requirements:
   tests:
   - tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py::test_absent_or_unmeasured_contrast_denominator_is_null
   - tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py::test_claimed_pass_does_not_override_the_measured_ratio
+  - tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py::test_native_zoom_requires_browser_api_proof_not_only_emulated_dimensions
   - tests/unit/scripts/ops/observability/test_grafana_panel_containment.py::test_text_contrast_composites_alpha_and_preserves_unmeasured_gradients
   - tests/integration/test_dashboard_presentation_requirements.py::test_area_fills_are_confined_to_first_window
   - tests/integration/test_dashboard_presentation_requirements.py::test_area_fill_fails_closed_on_below_fold_background_stat
