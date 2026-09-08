@@ -1169,6 +1169,7 @@ def _playwright_env(config: RenderConfig) -> dict[str, str]:
     if config.service_account_token:
         env["GRAFANA_SERVICE_ACCOUNT_TOKEN"] = config.service_account_token
     env["GRAFANA_SCREENSHOT_OUTPUT_DIR"] = str(config.output_dir)
+    env["GRAFANA_CAPTURE_ID"] = _capture_id(config)
     env["GRAFANA_SCREENSHOT_WIDTH"] = str(config.width)
     env["GRAFANA_SCREENSHOT_HEIGHT"] = str(config.height)
     env["GRAFANA_SCREENSHOT_THEME"] = config.theme
@@ -1747,6 +1748,8 @@ def _handle_render_http_error(config: RenderConfig, exc: HTTPError) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     config = _parse_args(argv)
+    if not config.occurrence_id:
+        config = replace(config, occurrence_id=_capture_id(config))
     if not config.service_account_token and not config.password:
         print(_missing_credentials_message())
         return EXIT_CREDENTIALS

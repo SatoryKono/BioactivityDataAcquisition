@@ -1,0 +1,157 @@
+"""RF-001 negative controls for provisioned and immutable capture identity."""
+
+from __future__ import annotations
+
+import copy
+import hashlib
+import json
+import struct
+import zlib
+from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
+
+from scripts.ops.observability.grafana import capture_provenance as provenance
+
+pytestmark = pytest.mark.unit
+
+
+def test_only_root_database_fields_are_normalized() -> None:
+    source = {
+        "uid": "test",
+        "id": None,
+        "version": 1,
+        "panels": [{"id": 4, "version": 1}],
+    }
+    provisioned = {**source, "id": 42, "version": 99}
+    evidence = {"before": provisioned, "loaded": [provisioned], "after": provisioned}
+    assert provenance.model_errors(source, evidence) == []
+    changed = copy.deepcopy(evidence)
+    changed["after"]["panels"] = [{"id": 5, "version": 1}]
+    assert provenance.model_errors(source, changed)
+
+
+@pytest.mark.parametrize("phase", ["before", "loaded", "after"])
+def test_semantic_model_substitution_is_rejected(phase: str) -> None:
+    source = {"uid": "test", "panels": [{"targets": [{"expr": "up"}]}]}
+    evidence = {
+        "before": copy.deepcopy(source),
+        "loaded": [copy.deepcopy(source)],
+        "after": copy.deepcopy(source),
+    }
+    target = evidence[phase][0] if phase == "loaded" else evidence[phase]
+    target["panels"][0]["targets"][0]["expr"] = "vector(0)"
+    assert provenance.model_errors(source, evidence)
+
+
+def test_api_reads_without_browser_model_are_insufficient() -> None:
+    assert provenance.model_errors(
+        {"uid": "test"}, {"before": {}, "after": {}, "loaded": []}
+    )
+
+
+@pytest.fixture
+def capture(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    source_dir = tmp_path / "grafana/dashboards"
+    source_dir.mkdir(parents=True)
+    source = {"uid": "test", "id": None, "version": 1, "panels": []}
+    raw = json.dumps(source).encode()
+    (source_dir / "test.json").write_bytes(raw)
+    monkeypatch.setattr(
+        provenance.subprocess,
+        "run",
+        lambda *a, **k: SimpleNamespace(returncode=0, stdout=raw),
+    )
+    output = tmp_path / "capture"
+    output.mkdir()
+
+    def chunk(kind, data):
+        return (
+            struct.pack(">I", len(data))
+            + kind
+            + data
+            + struct.pack(">I", zlib.crc32(kind + data))
+        )
+
+    png_data = b"\x89PNG\r\n\x1a\n"
+    png_data += chunk(b"IHDR", struct.pack(">IIBBBBB", 1366, 768, 8, 2, 0, 0, 0))
+    png_data += chunk(b"IDAT", zlib.compress((b"\0" + b"\xff\xff\xff" * 1366) * 768))
+    png_data += chunk(b"IEND", b"")
+    (output / "test.png").write_bytes(png_data)
+    png = (output / "test.png").read_bytes()
+    identity = {
+        "path": "grafana/dashboards/test.json",
+        "sha256": hashlib.sha256(raw).hexdigest(),
+        "version": 1,
+    }
+    name = "render-manifest--full-set--test-capture.json"
+    manifest = {
+        "capture_id": "test-capture",
+        "immutable_manifest": name,
+        "manifest_kind": "full-set",
+        "base_url": "http://localhost:3000",
+        "requested": {"viewport": {"width": 1366, "height": 768}},
+        "source": {
+            "commit_sha": "a" * 40,
+            "working_tree_dirty": False,
+            "dashboards": {"test": identity},
+        },
+        "dashboards": [
+            {
+                "uid": "test",
+                "file": "test.png",
+                "dashboardSource": identity,
+                "provisionedModel": {
+                    "before": source,
+                    "loaded": [source],
+                    "after": source,
+                    "captureId": "test-capture",
+                    "observedUrl": "http://localhost:3000/d/test/title",
+                },
+                "screenshotEvidence": {
+                    "file": "test.png",
+                    "sha256": hashlib.sha256(png).hexdigest(),
+                    "bytes": len(png),
+                    "width": 1366,
+                    "height": 768,
+                },
+            }
+        ],
+    }
+    path = output / name
+    path.write_text(json.dumps(manifest))
+    return tmp_path, path, manifest
+
+
+def test_latest_pointer_cannot_select_or_change_acceptance(capture) -> None:
+    root, path, _ = capture
+    (path.parent / "render-manifest.json").write_text('{"another": "capture"}')
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "PASS"
+    assert (
+        provenance.verify_capture(path.parent / "render-manifest.json", repo_root=root)[
+            "status"
+        ]
+        == "FAIL"
+    )
+
+
+@pytest.mark.parametrize(
+    "mutation", ["png", "source", "occurrence", "subset", "missing", "provisioned"]
+)
+def test_substituted_evidence_never_passes(capture, mutation: str) -> None:
+    root, path, manifest = capture
+    if mutation == "png":
+        (path.parent / "test.png").write_bytes(b"corrupt")
+    elif mutation == "missing":
+        (path.parent / "test.png").unlink()
+    elif mutation == "source":
+        manifest["dashboards"][0]["dashboardSource"]["sha256"] = "0" * 64
+    elif mutation == "occurrence":
+        manifest["dashboards"][0]["provisionedModel"]["captureId"] = "other"
+    elif mutation == "provisioned":
+        manifest["dashboards"][0]["provisionedModel"]["after"] = {"uid": "other"}
+    else:
+        manifest["dashboards"] = []
+    path.write_text(json.dumps(manifest))
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "FAIL"

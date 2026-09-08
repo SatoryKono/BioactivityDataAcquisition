@@ -574,6 +574,12 @@ function containmentReasons(measurement, resolvedPolicy, flags) {
   const allowed = (allowlist) =>
     allowlist.has(allowKey) || allowlist.has(String(measurement.id));
   const reasons = [];
+  if (firstWindow && measurement.enforceFold && measurement.bbox) {
+    const box = measurement.bbox;
+    if (box.y < -resolvedPolicy.tolerance || box.y + box.height > measurement.fold + resolvedPolicy.tolerance) {
+      reasons.push("outside-first-viewport");
+    }
+  }
   if (firstWindow && resolvedPolicy.containedTypes.has(measurement.type)) {
     if (allowed(resolvedPolicy.firstWindowOverflowAllow)) {
       reasons.push("forbidden-first-window-overflow-exception");
@@ -1514,48 +1520,62 @@ async function applyBrowserZoom(page) {
   });
 }
 
-async function detectBrowserAndKioskState(page) {
-  return page.evaluate(({ requestedZoom, requestedKiosk, physicalViewport }) => {
-    const visible = (element) => {
-      if (!element) return false;
-      const rect = element.getBoundingClientRect();
-      const style = getComputedStyle(element);
-      return (
-        rect.width > 0 &&
-        rect.height > 0 &&
-        style.display !== "none" &&
-        style.visibility !== "hidden"
-      );
-    };
-    const url = new URL(window.location.href);
-    const kioskParam = url.searchParams.get("kiosk");
-    const chromeSelectors = [
-      '[data-testid="sidemenu"]',
-      '[data-testid="navbarmenu"]',
-      '[aria-label="Main menu"]',
-    ];
-    const visibleChrome = chromeSelectors.some((selector) =>
-      visible(document.querySelector(selector)),
+function browserAndKioskStateFromDom({ requestedZoom, requestedKiosk, physicalViewport }) {
+  const visible = (element) => {
+    if (!element) return false;
+    const rect = element.getBoundingClientRect();
+    const style = getComputedStyle(element);
+    return (
+      rect.width > 0 &&
+      rect.height > 0 &&
+      style.display !== "none" &&
+      style.visibility !== "hidden" &&
+      Number(style.opacity) > 0
     );
-    let actualKiosk = "off";
-    if (kioskParam === "tv") actualKiosk = "tv";
-    if (kioskParam === "1" || kioskParam === "true" || kioskParam === "") {
-      actualKiosk = url.searchParams.has("kiosk") ? "full" : "off";
-    }
-    return {
-      requestedZoom,
-      cssZoom: getComputedStyle(document.documentElement).zoom || "1",
-      visualViewportScale: window.visualViewport?.scale || 1,
-      devicePixelRatio: window.devicePixelRatio,
-      layoutViewport: { width: window.innerWidth, height: window.innerHeight },
-      physicalViewport,
-      zoomEmulation: "layout-viewport-and-device-scale-factor",
-      requestedKiosk,
-      actualKiosk,
-      kioskParam,
-      visibleGrafanaChrome: visibleChrome,
-    };
-  }, {
+  };
+  const url = new URL(window.location.href);
+  const kioskParam = url.searchParams.get("kiosk");
+  const sidebarSelectors = [
+    '[data-testid="sidemenu"]',
+    '[data-testid="navbarmenu"]',
+    '[aria-label="Main menu"]',
+    '[data-testid="data-testid navigation mega-menu"]',
+  ];
+  const toolbarSelectors = ['[data-testid="data-testid Nav toolbar"]'];
+  const visibleSelectors = (selectors) => selectors.filter((selector) =>
+    [...document.querySelectorAll(selector)].some(visible));
+  const visibleSidebar = visibleSelectors(sidebarSelectors);
+  const visibleToolbar = visibleSelectors(toolbarSelectors);
+  let actualKiosk = "off";
+  if (kioskParam === "tv") actualKiosk = "tv";
+  if (kioskParam === "1" || kioskParam === "true" || kioskParam === "") {
+    actualKiosk = url.searchParams.has("kiosk") ? "full" : "off";
+  }
+  // A URL parameter is a request, not evidence that Grafana applied it.
+  const urlKiosk = actualKiosk;
+  if (visibleSidebar.length || (actualKiosk === "full" && visibleToolbar.length)) {
+    actualKiosk = "off";
+  }
+  return {
+    requestedZoom,
+    cssZoom: getComputedStyle(document.documentElement).zoom || "1",
+    visualViewportScale: window.visualViewport?.scale || 1,
+    devicePixelRatio: window.devicePixelRatio,
+    layoutViewport: { width: window.innerWidth, height: window.innerHeight },
+    physicalViewport,
+    zoomEmulation: "layout-viewport-and-device-scale-factor",
+    requestedKiosk,
+    actualKiosk,
+    urlKiosk,
+    kioskParam,
+    visibleGrafanaChrome: visibleSidebar.length + visibleToolbar.length > 0,
+    visibleSidebarSelectors: visibleSidebar,
+    visibleToolbarSelectors: visibleToolbar,
+  };
+}
+
+async function detectBrowserAndKioskState(page) {
+  return page.evaluate(browserAndKioskStateFromDom, {
     requestedZoom: CONFIG.browserZoom,
     requestedKiosk: CONFIG.kioskMode,
     physicalViewport: CONFIG.viewport,
@@ -1600,7 +1620,7 @@ async function collectLayoutGeometry(page, dashboard) {
 
 async function collectPanelContainment(page, dashboard) {
   const raw = await page.evaluate(
-    ({ panels, uid, scrollerSelectors }) => {
+    ({ panels, uid, scrollerSelectors, enforceFold }) => {
       const panelElement = (panel) =>
         document.querySelector(`[data-panelid="${panel.id}"]`) ||
         document.querySelector(`[data-viz-panel-key="panel-${panel.id}"]`) ||
@@ -1679,6 +1699,7 @@ async function collectPanelContainment(page, dashboard) {
           };
         }
         const scroller = resolveScroller(container);
+        const box = container.getBoundingClientRect();
         return {
           uid,
           id: panel.id,
@@ -1687,6 +1708,9 @@ async function collectPanelContainment(page, dashboard) {
           gridPos: panel.gridPos,
           missing: false,
           scroller: scroller.selector,
+          bbox: {x: box.x, y: box.y, width: box.width, height: box.height},
+          fold: window.innerHeight,
+          enforceFold,
           clientHeight: scroller.element.clientHeight,
           scrollHeight: scroller.element.scrollHeight,
           clientWidth: scroller.element.clientWidth,
@@ -1698,6 +1722,7 @@ async function collectPanelContainment(page, dashboard) {
       panels: dashboard.firstWindowPanels || [],
       uid: dashboard.uid,
       scrollerSelectors: PANEL_CONTENT_SCROLLER_SELECTORS,
+      enforceFold: CONFIG.captureSurface === "viewport" && CONFIG.browserZoom === 100,
     },
   );
   return evaluateContainmentResults(raw, {
@@ -2082,23 +2107,11 @@ async function collectVerifiedRenderContext(page, dashboard) {
   );
   dashboard.requestedTheme = CONFIG.theme;
   dashboard.actualTheme = await detectActualTheme(page);
-  if (dashboard.actualTheme !== CONFIG.theme) {
-    throw new Error(
-      `Theme verification failed for ${dashboard.uid}: requested=${CONFIG.theme} actual=${dashboard.actualTheme}`,
-    );
-  }
+
   dashboard.browserState = await detectBrowserAndKioskState(page);
-  if (dashboard.browserState.actualKiosk !== CONFIG.kioskMode) {
-    throw new Error(
-      `Kiosk verification failed for ${dashboard.uid}: requested=${CONFIG.kioskMode} actual=${dashboard.browserState.actualKiosk}`,
-    );
-  }
+
   dashboard.layoutGeometry = await collectLayoutGeometry(page, dashboard);
-  if (dashboard.layoutGeometry.horizontalOverflow) {
-    throw new Error(
-      `Layout validation failed for ${dashboard.uid}: documentWidth=${dashboard.layoutGeometry.documentWidth} layoutViewportWidth=${dashboard.layoutGeometry.layoutViewport.width}`,
-    );
-  }
+
 }
 
 async function collectVerifiedPanelSurfaces(page, dashboard) {
@@ -2174,6 +2187,28 @@ function screenshotOptions(dashboard, filePath) {
 
 async function renderDashboard(page, dashboard, index, total) {
   const target = dashboardRenderUrl(dashboard);
+  // Keep the actual API response loaded by the browser, bracketed by API reads.
+  // Only root id/version are provisioning metadata; nested fields are semantic.
+  const modelUrl = `${CONFIG.baseUrl}/api/dashboards/uid/${dashboard.uid}`;
+  const readModel = async () => {
+    const response = await page.request.get(modelUrl);
+    if (!response.ok()) throw new Error(`Model read failed: ${response.status()}`);
+    const payload = await response.json();
+    if (payload.meta?.provisioned !== true) throw new Error('Dashboard is not provisioned');
+    return payload.dashboard;
+  };
+  dashboard.provisionedModel = {
+    captureId: process.env.GRAFANA_CAPTURE_ID || '',
+    before: await readModel(), loaded: [], after: null,
+  };
+  const observedModels = [];
+  page.on('response', (response) => {
+    if (response.url().split('?')[0] === modelUrl && response.ok()) {
+      observedModels.push(response.json().then((payload) => {
+        dashboard.provisionedModel.loaded.push(payload.dashboard);
+      }));
+    }
+  });
   console.log(`[${index}/${total}] loading ${dashboard.uid} ...`);
   // Start full-surface audits with enough vertical space for expanded rows.
   // Shrinking/resizing only after queries settle makes Grafana re-run every
@@ -2239,6 +2274,25 @@ async function renderDashboard(page, dashboard, index, total) {
     ...pngEvidence(screenshotBuffer),
     capturedAt: new Date().toISOString(),
   };
+  await Promise.all(observedModels);
+  dashboard.provisionedModel.after = await readModel();
+  dashboard.provisionedModel.observedUrl = page.url();
+  dashboard.provisionedModel.browserVersion = page.context().browser().version();
+  if (dashboard.actualTheme !== CONFIG.theme) {
+    throw new Error(
+      `Theme verification failed for ${dashboard.uid}: requested=${CONFIG.theme} actual=${dashboard.actualTheme}`,
+    );
+  }
+  if (dashboard.browserState.actualKiosk !== CONFIG.kioskMode) {
+    throw new Error(
+      `Kiosk verification failed for ${dashboard.uid}: requested=${CONFIG.kioskMode} actual=${dashboard.browserState.actualKiosk}`,
+    );
+  }
+  if (dashboard.layoutGeometry.horizontalOverflow) {
+    throw new Error(
+      `Layout validation failed for ${dashboard.uid}: documentWidth=${dashboard.layoutGeometry.documentWidth} layoutViewportWidth=${dashboard.layoutGeometry.layoutViewport.width}`,
+    );
+  }
   // Preserve the observed screen even when a validation below fails. The catch
   // keeps renderStatus=error; an available PNG is never a passing verdict.
   await collectVerifiedPanelSurfaces(page, dashboard);
@@ -2381,6 +2435,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  browserAndKioskStateFromDom,
   accessibilityMeasurementsFromDom,
   classifyPanelTerminalEvidence,
   evaluateContainmentResults,
