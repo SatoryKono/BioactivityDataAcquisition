@@ -238,7 +238,7 @@ def test_review_domain_status_is_deviation_first_and_capped() -> None:
     assert "set a concrete" not in content
     assert "What is broken or degraded right now?" in content
 
-    # Phase 2: Priority is a short color-background badge; Action is sole color-text CTA.
+    # #10170: theme text keeps Priority and Action readable without colored fills.
     overrides = next_action.get("fieldConfig", {}).get("overrides", [])
     value_override = next(
         (
@@ -254,7 +254,7 @@ def test_review_domain_status_is_deviation_first_and_capped() -> None:
         for prop in value_override.get("properties", [])
     }
     priority_cell = value_props.get("custom.cellOptions", {})
-    assert priority_cell.get("type") == "color-background"
+    assert priority_cell.get("type") == "auto"
     assert priority_cell.get("applyToRow") is not True, (
         "Priority badge must not paint the whole row (verdict-ontology anti-pattern)"
     )
@@ -293,7 +293,7 @@ def test_review_domain_status_is_deviation_first_and_capped() -> None:
         prop.get("id"): prop.get("value")
         for prop in action_override.get("properties", [])
     }
-    assert action_props.get("custom.cellOptions", {}).get("type") == "color-text"
+    assert action_props.get("custom.cellOptions", {}).get("type") == "auto"
     assert next_action.get("options", {}).get("cellHeight") == "sm"
     assert int(action_props.get("custom.width") or 0) >= 90, (
         "Action column keeps a named width that still fits DASH-REFLOW-001 200%"
@@ -314,6 +314,7 @@ def test_review_domain_status_is_deviation_first_and_capped() -> None:
     }.items():
         assert key in action_maps, f"missing Action map for {key}"
         assert action_maps[key].get("text") == text
+        assert action_maps[key].get("color") == "text"
         assert len(str(action_maps[key].get("text") or "")) <= 16
     links = action_props.get("links") or []
     assert links, "Action column must expose row-aware board links"

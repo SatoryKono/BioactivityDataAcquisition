@@ -139,6 +139,12 @@ ______________________________________________________________________
 > overflow, and stable panel geometry. The 200% accessibility profile halves
 > the CSS layout viewport and uses a matching device scale so Grafana reflows
 > into the same physical output size; root-document CSS `zoom` is forbidden.
+> For native browser-zoom acceptance, set `GRAFANA_NATIVE_BROWSER_ZOOM=1`.
+> Chromium then uses a disposable profile and `chrome.tabs.setZoom/getZoom`,
+> calibrates the physical content viewport, and records the observed zoom,
+> CSS viewport, DPR, browser version, and chrome dimensions. Captures use
+> native CDP pixels without image rescaling. The acceptance assembler's
+> `--require-native-browser-zoom` gate rejects emulation-only evidence.
 > Typography evidence distinguishes BioETL-authored copy (19px/16px) from
 > Grafana-managed theme text (14px/12px plus the 200% reflow gate). Live values
 > and timestamps are excluded from consistency comparison.

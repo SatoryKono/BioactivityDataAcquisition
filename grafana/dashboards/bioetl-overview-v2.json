@@ -835,11 +835,11 @@
                     "options": {
                       "control_plane": {
                         "text": "Control Plane",
-                        "color": "red"
+                        "color": "text"
                       },
                       "dq": {
                         "text": "DQ",
-                        "color": "orange"
+                        "color": "text"
                       },
                       "monitor": {
                         "text": "Monitor",
@@ -851,15 +851,15 @@
                       },
                       "provider": {
                         "text": "Provider",
-                        "color": "orange"
+                        "color": "text"
                       },
                       "runtime": {
                         "text": "Runtime",
-                        "color": "red"
+                        "color": "text"
                       },
                       "workflow": {
                         "text": "Runtime (wf)",
-                        "color": "green"
+                        "color": "text"
                       }
                     }
                   }
@@ -868,7 +868,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text"
+                  "type": "auto"
                 }
               },
               {
@@ -925,7 +925,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background"
+                  "type": "auto"
                 }
               },
               {
@@ -936,7 +936,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 90
+                "value": 110
               }
             ]
           },
