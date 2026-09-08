@@ -16,6 +16,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.helpers.secret_fingerprints import assert_no_historical_neo4j_passwords
+
 
 pytestmark = pytest.mark.architecture
 
@@ -152,7 +154,7 @@ def test_env_example_documents_mcp_token_sources_without_real_tokens() -> None:
         "PROMETHEUS_TOKEN=",
         "GRAFANA_SERVICE_ACCOUNT_TOKEN=",
         "HUB_PAT_TOKEN=",
-        "NEO4J_AUTH=neo4j/bioetl_secure_password",
+        "NEO4J_AUTH=",
         "Never commit real token values",
     ):
         assert needle in text
@@ -163,4 +165,4 @@ def test_env_example_documents_mcp_token_sources_without_real_tokens() -> None:
 
 def test_readme_mcp_env_block_does_not_embed_neo4j_password() -> None:
     readme = _read("README.md")
-    assert "bioetl_secure_password" not in readme
+    assert_no_historical_neo4j_passwords(readme)
