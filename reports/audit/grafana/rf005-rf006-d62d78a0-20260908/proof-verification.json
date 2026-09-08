@@ -1,0 +1,12 @@
+{
+  "bundle": "reports\\audit\\stream-b-closeout-20260908\\main-d62-proof\\extracted\\bundle.json",
+  "bundle_digest": "ce6278780327173c4a1363912856d10ab4ae7e90630d3d23e48043c1b1191859",
+  "claim": "ready_to_merge",
+  "claim_qualified": true,
+  "degradations": [],
+  "errors": [],
+  "exit_code": 0,
+  "outcome": "ADMIT",
+  "run_id": "github-34242865248-1",
+  "schema_version": 1
+}
