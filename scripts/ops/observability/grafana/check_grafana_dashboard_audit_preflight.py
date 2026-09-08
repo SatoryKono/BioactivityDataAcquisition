@@ -880,6 +880,15 @@ def _dashboard_source_error(
         return f"render manifest dashboard {uid} source SHA is invalid"
     if not isinstance(version, int):
         return f"render manifest dashboard {uid} version is missing"
+    expected_path = _DASHBOARD_DIR / f"{uid}.json"
+    if source_path.replace("\\", "/") != expected_path.as_posix():
+        return f"render manifest dashboard {uid} JSON source path drift"
+    try:
+        actual_sha = _sha256(_REPO_ROOT / expected_path)
+    except OSError as exc:
+        return f"render manifest dashboard {uid} JSON source is unreadable: {exc}"
+    if source_sha != actual_sha:
+        return f"render manifest dashboard {uid} JSON source sha256 drift"
     return None
 
 
