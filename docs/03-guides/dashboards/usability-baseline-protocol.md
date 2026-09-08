@@ -36,6 +36,27 @@ Maps to scenarios in [operator-scenarios-s1-s6.md](operator-scenarios-s1-s6.md).
 
 ## Required scenarios (21)
 
+### Approved AI-only scope for RF-004
+
+On 2026-09-08 the task owner chose “Принять только AI-проверку сценариев” for
+#10167 and the operator component of #10185/#10171. Astra is `AI_AGENT`.
+For this acceptance use `AI_SCENARIOS` with a candidate-bound, hashed owner-decision
+receipt as specified in [regression acceptance](regression-acceptance.md).
+Record `human_usability_status=NOT_MEASURED`, human sample size zero and null human
+timing/success aggregates. The stopwatch procedure and 5–10 second target above
+remain the human protocol; they are not applied to AI elapsed time.
+
+For each AI task record the start/end timestamps and elapsed wall-clock seconds,
+including tool/model latency, prior exposure, answer, observed evidence and reviewer
+score against the answer key. Keep first and repeat attempts separate. Q3 passes
+only after observing the destination and return context; an unobserved popup or a
+link inferred from JSON is not a completed navigation. Record clicks/interactions,
+diagnostic depth, back-navigation, context loss and dispositions as above.
+AI success and elapsed median/max use their own sample sizes. No AI result is a
+human comprehension measurement. The remaining regression gates are unchanged.
+
+### Scenario inventory
+
 Execute Q1–Q3 for each of the seven current dashboards in the linked scenario
 guide. Use at least one first attempt per task, with first/repeat statistics kept
 separate. One participant is a descriptive pilot, not population-level evidence.

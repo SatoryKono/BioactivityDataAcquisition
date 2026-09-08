@@ -162,6 +162,7 @@ def _task_statistics(
     }
     for field in (
         "first_correct_seconds",
+        "elapsed_seconds",
         "clicks",
         "interactions",
         "diagnostic_depth",
@@ -199,11 +200,9 @@ def _operator_statistics(observations: list[dict[str, Any]]) -> list[dict[str, A
     return statistics
 
 
-def _completed_human_attempt(row: dict[str, Any]) -> bool:
-    seconds = row.get("first_correct_seconds")
+def _attempt_evidence_complete(row: dict[str, Any]) -> bool:
     if (
-        row.get("participant_type") != "HUMAN"
-        or row.get("attempt_kind") != "first"
+        row.get("attempt_kind") != "first"
         or row.get("success") is not True
         or not row.get("participant_id")
         or not row.get("reviewer")
@@ -211,8 +210,6 @@ def _completed_human_attempt(row: dict[str, Any]) -> bool:
         or not row.get("answer")
         or not row.get("path")
         or not row.get("evidence")
-        or not _number(seconds)
-        or seconds < 0
     ):
         return False
     if not all(
@@ -226,14 +223,43 @@ def _completed_human_attempt(row: dict[str, Any]) -> bool:
         )
     ):
         return False
-    if seconds > 10 and not row.get("deviation_disposition"):
-        return False
     if row["context_loss"] and not row.get("context_loss_disposition"):
         return False
     return True
 
 
-def _operator(payload: dict[str, Any]) -> dict[str, Any]:
+def _completed_human_attempt(row: dict[str, Any]) -> bool:
+    seconds = row.get("first_correct_seconds")
+    return bool(
+        row.get("participant_type") == "HUMAN"
+        and _attempt_evidence_complete(row)
+        and _number(seconds)
+        and seconds >= 0
+        and (seconds <= 10 or row.get("deviation_disposition"))
+    )
+
+
+def _completed_ai_attempt(row: dict[str, Any]) -> bool:
+    elapsed = row.get("elapsed_seconds")
+    return bool(
+        row.get("participant_type") == "AI_AGENT"
+        and _attempt_evidence_complete(row)
+        and row.get("first_correct_seconds") is None
+        and _number(elapsed)
+        and elapsed >= 0
+        and (
+            not row["task_id"].endswith(":Q3")
+            or (
+                row.get("destination_verified") is True
+                and row.get("return_verified") is True
+            )
+        )
+    )
+
+
+def _operator(
+    payload: dict[str, Any], acceptance_mode: str = "HUMAN_USABILITY"
+) -> dict[str, Any]:
     expected = {f"{uid}:Q{q}" for uid in UIDS for q in (1, 2, 3)}
     observations = payload.get("observations", [])
     completed: set[str] = set()
@@ -244,8 +270,20 @@ def _operator(payload: dict[str, Any]) -> dict[str, Any]:
     ]
     if len(first_keys) != len(set(first_keys)):
         raise ValueError("duplicate first attempt for participant/task")
+    ai_only = acceptance_mode == "AI_SCENARIOS"
+    if ai_only and payload.get("human_usability_status") != "NOT_MEASURED":
+        raise ValueError(
+            "AI scenario acceptance must disclose unmeasured human usability"
+        )
+    if ai_only and any(
+        r.get("participant_type") != "AI_AGENT"
+        or r.get("first_correct_seconds") is not None
+        for r in observations
+    ):
+        raise ValueError("AI-only receipts cannot claim human measurements")
+    completed_attempt = _completed_ai_attempt if ai_only else _completed_human_attempt
     for row in observations:
-        if _completed_human_attempt(row):
+        if completed_attempt(row):
             completed.add(row["task_id"])
     approved = bool(
         payload.get("page_goals_approved_by") and payload.get("primary_role")
@@ -254,7 +292,9 @@ def _operator(payload: dict[str, Any]) -> dict[str, Any]:
         "status": "PASS" if approved and completed == expected else "CANNOT_VERIFY",
         "numerator": len(completed & expected),
         "denominator": 21,
-        "human_required": True,
+        "acceptance_mode": acceptance_mode,
+        "human_required": not ai_only,
+        "human_usability_status": "NOT_MEASURED" if ai_only else "REQUIRED",
         "agent_observations_do_not_measure_human_insight": True,
         "statistics": _operator_statistics(observations),
     }
@@ -366,6 +406,24 @@ def _verify_evidence(root: Path, name: str, payload: dict[str, Any]) -> None:
             _read(root, row[key])
 
 
+def _operator_acceptance_mode(root: Path, contract: dict[str, Any]) -> str:
+    mode = contract.get("operator_acceptance_mode", "HUMAN_USABILITY")
+    if mode not in {"HUMAN_USABILITY", "AI_SCENARIOS"}:
+        raise ValueError("unknown operator acceptance mode")
+    if mode == "HUMAN_USABILITY":
+        return mode
+    decision = _read(root, contract["operator_scope_decision"])
+    if (
+        decision.get("candidate_ref") != contract["candidate_ref"]
+        or decision.get("acceptance_mode") != mode
+        or decision.get("human_usability_status") != "NOT_MEASURED"
+        or decision.get("task_count") != 21
+        or not all(decision.get(k) for k in ("approved_by", "approved_at", "reason"))
+    ):
+        raise ValueError("AI scenario scope requires a bound explicit owner decision")
+    return mode
+
+
 def _evaluate_gate(
     root: Path, name: str, contract: dict[str, Any], baseline: dict[str, Any]
 ) -> dict[str, Any]:
@@ -373,7 +431,7 @@ def _evaluate_gate(
     _bound(payload, contract)
     _verify_evidence(root, name, payload)
     if name == "operator":
-        return _operator(payload)
+        return _operator(payload, _operator_acceptance_mode(root, contract))
     if name == "findings":
         return _findings(root, payload, baseline)
     if name == "new_regressions":

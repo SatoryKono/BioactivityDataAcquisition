@@ -3,9 +3,10 @@
 ## Current protocol
 
 The primary role is the operator investigating pipeline execution and evidence.
-The following page goals are proposed from shipped contracts; owner approval is
-required in each measurement bundle. Assigning Astra as the operator records an
-`AI_AGENT` session, not a human participant or a page-goal approval.
+The task owner explicitly approved the following seven page goals and Astra's
+diagnostic operator role on 2026-09-08: “Подтверждаю эти семь целей”. Record that
+approval in each measurement bundle. Astra performs `AI_AGENT` scenario checks;
+human usability is `NOT_MEASURED`. The approved role does not execute replay.
 
 | Dashboard / UID | Page goal | Q1: state/object | Q2: basis/reason | Q3: first safe action |
 | --- | --- | --- | --- | --- |
