@@ -223,9 +223,7 @@ def _series_control_errors(dashboard: dict) -> list[str]:
     return errors
 
 
-def _panel_review_errors(
-    dashboard: dict, by_id: dict, first: set[int]
-) -> list[str]:
+def _panel_review_errors(dashboard: dict, by_id: dict, first: set[int]) -> list[str]:
     """Match panel review statuses and quotes against observed browser text."""
     texts = {}
     for p in measurement_pairs(dashboard, "text"):
