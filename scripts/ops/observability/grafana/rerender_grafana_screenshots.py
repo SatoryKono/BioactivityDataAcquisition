@@ -1747,6 +1747,13 @@ def _handle_render_http_error(config: RenderConfig, exc: HTTPError) -> int:
     return _maybe_playwright_fallback(config)
 
 
+def _output_has_capture(config: RenderConfig) -> bool:
+    return bool(config.occurrence_id) and (
+        (config.output_dir / _RENDER_MANIFEST_JSON).exists()
+        or any(config.output_dir.glob("*.png"))
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     config = _parse_args(argv)
     if not config.occurrence_id:
@@ -1755,10 +1762,7 @@ def main(argv: list[str] | None = None) -> int:
         print(_missing_credentials_message())
         return EXIT_CREDENTIALS
     config.output_dir.mkdir(parents=True, exist_ok=True)
-    if config.occurrence_id and (
-        (config.output_dir / _RENDER_MANIFEST_JSON).exists()
-        or any(config.output_dir.glob("*.png"))
-    ):
+    if _output_has_capture(config):
         print(
             "Explicit render occurrences require a fresh output directory; existing evidence is preserved."
         )

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-08T10:20:52.047355+00:00",
+  "generated_at": "2026-09-08T10:56:06.488762+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -19955,7 +19955,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
-          "line": 1809,
+          "line": 1800,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.capture_acceptance import ("
         },
@@ -20029,13 +20029,13 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/capture_acceptance.py",
-          "line": 508,
+          "line": 526,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.capture_provenance import verify_capture"
         },
         {
           "path": "scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
-          "line": 1805,
+          "line": 1796,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.capture_provenance import verify_capture"
         },
@@ -20127,7 +20127,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/capture_provenance.py",
-          "line": 77,
+          "line": 78,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import ("
         },

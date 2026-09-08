@@ -1471,7 +1471,7 @@
               "custom": {
                 "align": "left",
                 "cellOptions": {
-                  "type": "auto"
+                  "type": "color-text"
                 },
                 "inspect": true,
                 "minWidth": 50
@@ -1491,7 +1491,11 @@
                   "targetBlank": false,
                   "includeVars": false
                 }
-              ]
+              ],
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "text"
+              }
             },
             "overrides": [
               {
@@ -1551,7 +1555,7 @@
                           },
                           "UNKNOWN": {
                             "text": "UNKNOWN",
-                            "color": "gray"
+                            "color": "text"
                           }
                         }
                       }
@@ -1624,7 +1628,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "auto",
+                      "type": "color-text",
                       "wrapText": false
                     }
                   }
@@ -1663,7 +1667,7 @@
                           },
                           "UNKNOWN": {
                             "text": "UNKNOWN",
-                            "color": "gray"
+                            "color": "text"
                           }
                         }
                       }

@@ -22,7 +22,7 @@ async function captureTablePages(page, {dashboard, outputDir, pngEvidence, timeo
           links:[...cell.querySelectorAll('a[href]')].map(a=>({text:a.textContent,href:a.href,title:a.title,tabIndex:a.tabIndex})),
         })), scrollers:[...el.querySelectorAll('.scrollbar-view,[data-testid*="scrollbar viewport"]')].map(s=>({
           bbox:rect(s),clientHeight:s.clientHeight,scrollHeight:s.scrollHeight,clientWidth:s.clientWidth,scrollWidth:s.scrollWidth,
-        })), summary:el.innerText.match(/\d+\s*-\s*\d+ of \d+ rows/)?.[0] || null};
+        })), summary:(/\b\d+\s*-\s*\d+ of \d+ rows\b/).exec(el.innerText)?.[0] || null};
       });
       const dir=path.join(outputDir,'panels',dashboard.uid,String(panel.id));
       await fs.promises.mkdir(dir,{recursive:true});

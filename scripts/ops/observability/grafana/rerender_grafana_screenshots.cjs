@@ -2021,50 +2021,45 @@ function accessibilityMeasurementsFromDom() {
       const c = v / 255;
       return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
     }).reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0);
+    function gradientInfo(image, layers) {
+      const match=/^linear-gradient\([\d.]+deg, (rgb\([\d, ]+\)), (rgb\([\d, ]+\))\)$/.exec(image);
+      const stops=match ? [rgba(match[1]),rgba(match[2])] : [];
+      const opaque=stops.length===2 && stops.every(c=>c?.[3]===1);
+      const monotonic=opaque && (stops[0].slice(0,3).every((v,i)=>v<=stops[1][i]) || stops[0].slice(0,3).every((v,i)=>v>=stops[1][i]));
+      if(monotonic && layers.every(c=>c[3]===0))return {bounds:stops.map(c=>c.slice(0,3)).sort((a,b)=>luminance(a)-luminance(b)),reason:null};
+      return {bounds:null,reason:'background image or gradient requires pixel measurement'};
+    }
     function backgroundInfo(element) {
-        const layers = [];
-        let reason = null;
-        let opaque = false;
-        let gradientBounds = null;
-        for (let node = element; node; node = node.parentElement) {
-          const s = getComputedStyle(node);
-          if (Number(s.opacity) !== 1 || s.filter !== 'none' || s.mixBlendMode !== 'normal') reason = 'unsupported opacity/filter/blend';
-          if (!opaque) {
-            if (s.backgroundImage !== 'none') {
-              // A conservative bound for a native monotonic opaque RGB gradient.
-              // Only this fully specified form is supported; no arbitrary image
-              // or colored gradient is inferred from its underlying solid color.
-              const match = s.backgroundImage.match(/^linear-gradient\([\d.]+deg, (rgb\([\d, ]+\)), (rgb\([\d, ]+\))\)$/);
-              const stops = match ? [rgba(match[1]), rgba(match[2])] : [];
-              if (stops.length === 2 && stops.every(c => c && c[3] === 1) && (stops[0].slice(0,3).every((v,i)=>v<=stops[1][i]) || stops[0].slice(0,3).every((v,i)=>v>=stops[1][i])) && layers.every(c => c[3] === 0)) {
-                gradientBounds = stops.map(c=>c.slice(0,3)).sort((a,b)=>luminance(a)-luminance(b));
-              } else reason = 'background image or gradient requires pixel measurement';
-            }
-            const color = rgba(s.backgroundColor);
-            if (color) layers.push(color);
-            opaque = color?.[3] === 1;
-          }
+      const layers=[];let reason=null,opaque=false,gradientBounds=null;
+      for(let node=element;node;node=node.parentElement) {
+        const style=getComputedStyle(node);
+        if(Number(style.opacity)!==1 || style.filter!=='none' || style.mixBlendMode!=='normal')reason='unsupported opacity/filter/blend';
+        if(opaque)continue;
+        if(style.backgroundImage!=='none') {
+          const gradient=gradientInfo(style.backgroundImage,layers);
+          if(gradient.reason)reason=gradient.reason;
+          else gradientBounds=gradient.bounds;
         }
-        if (!opaque) reason = reason || 'opaque background unavailable';
-        let background = [0, 0, 0];
-        for (const layer of layers.toReversed()) background = over(layer, background);
-        return {background, reason, gradientBounds};
+        const color=rgba(style.backgroundColor);
+        if(color)layers.push(color);
+        opaque=color?.[3]===1;
+      }
+      if(!opaque)reason ||= 'opaque background unavailable';
+      let background=[0,0,0];
+      for(const layer of layers.toReversed())background=over(layer,background);
+      return {background,reason,gradientBounds};
+    }
+    function gradientForeground(bounds, foreground, background) {
+      if(foreground?.[3]!==1)return {background,reason:'gradient foreground requires pixel measurement'};
+      const value=luminance(foreground.slice(0,3)),lower=luminance(bounds[0]),upper=luminance(bounds[1]);
+      return {background:value>=upper?bounds[1]:bounds[0],reason:value>lower&&value<upper?'gradient crosses foreground luminance':null};
     }
     function contrastValues(style, element) {
       let {background, reason, gradientBounds} = backgroundInfo(element);
       const foreground = rgba(style.color);
       if (!foreground) reason = reason || 'unsupported foreground';
       if (gradientBounds && !reason) {
-        if (!foreground || foreground[3] !== 1) {
-          reason = 'gradient foreground requires pixel measurement';
-        } else {
-          const foregroundLuminance = luminance(foreground.slice(0, 3));
-          const lower = luminance(gradientBounds[0]);
-          const upper = luminance(gradientBounds[1]);
-          const nearest = foregroundLuminance >= upper ? gradientBounds[1] : gradientBounds[0];
-          if (foregroundLuminance > lower && foregroundLuminance < upper) reason = 'gradient crosses foreground luminance';
-          background = nearest;
-        }
+        ({background, reason} = gradientForeground(gradientBounds, foreground, background));
       }
       const effective = foreground ? over(foreground, background) : null;
       const values = effective ? [luminance(effective), luminance(background)] : null;
@@ -2123,46 +2118,46 @@ function graphicsMeasurementsFromDom() {
     const channel = value / 255;
     return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
   }).reduce((sum, value, index) => sum + value * [0.2126, 0.7152, 0.0722][index], 0);
-  const pairs = [];
-  const canvases = [];
-  for (const panel of document.querySelectorAll('[data-viz-panel-key]')) {
-    for (const element of panel.querySelectorAll('svg path, svg line, svg circle, svg rect, canvas')) {
-      const box = element.getBoundingClientRect();
-      const style = getComputedStyle(element);
-      if ((!box.width && !box.height) || style.display === 'none' || style.visibility !== 'visible') continue;
-      const bbox = {x: box.x, y: box.y, width: box.width, height: box.height};
-      if (element.tagName.toLowerCase() === 'canvas') {
-        canvases.push({panel: panel.dataset.vizPanelKey, bbox,
-          status: 'NOT_VERIFIABLE', reason: 'canvas needs independent pixel/series evidence'});
-        continue;
-      }
-      const control = element.closest('button, a, [role="button"]');
-      const name = control?.getAttribute('aria-label') || control?.textContent?.trim() || '';
-      let background = null;
-      const backgroundLayers = [];
-      let reason = null;
-      for (let node = element.parentElement; node; node = node.parentElement) {
-        const parentStyle = getComputedStyle(node);
-        if (parentStyle.backgroundImage !== 'none' || Number(parentStyle.opacity) !== 1 || parentStyle.filter !== 'none') {
-          reason = 'unsupported background compositing';
-        }
-        const color = rgba(parentStyle.backgroundColor);
-        if (!background && color?.[3] === 1) background = color;
-        else if (!background && color?.[3] > 0) backgroundLayers.push(color);
-      }
-      if (background) for (const layer of backgroundLayers.reverse()) {
-        background = [...layer.slice(0,3).map((v,i)=>v*layer[3]+background[i]*(1-layer[3])),1];
-      }
-      const foreground = rgba(style.stroke !== 'none' ? style.stroke : style.fill);
-      if (!background || !foreground || Number(style.opacity) !== 1
-          || Number(style.fillOpacity) !== 1 || Number(style.strokeOpacity) !== 1) reason ||= 'unsupported graphic foreground/background';
-      const effectiveForeground = foreground && background ? foreground.slice(0, 3).map((v, i) => v * foreground[3] + background[i] * (1 - foreground[3])) : null;
-      const ratio = reason ? null : (Math.max(luminance(effectiveForeground), luminance(background)) + 0.05) / (Math.min(luminance(effectiveForeground), luminance(background)) + 0.05);
-      const disabled = control?.matches(':disabled, [aria-disabled="true"]') || false;
-      pairs.push({panel: panel.dataset.vizPanelKey, tag: element.tagName, bbox,
-        accessibleName: name, foreground, effectiveForeground, background, backgroundLayers, ratio, threshold: 3,
-        role: control ? 'interactive icon' : 'graphic', disabled,
-        status: disabled ? 'EXEMPT_DISABLED' : (ratio === null ? 'NOT_VERIFIABLE' : (ratio >= 3 ? 'PASS' : 'FAIL')), reason});
+  function backgroundFor(element) {
+    let background=null,reason=null;
+    const backgroundLayers=[];
+    for(let node=element.parentElement;node;node=node.parentElement) {
+      const style=getComputedStyle(node);
+      if(style.backgroundImage!=='none'||Number(style.opacity)!==1||style.filter!=='none')reason='unsupported background compositing';
+      const color=rgba(style.backgroundColor);
+      if(background)continue;
+      if(color?.[3]===1)background=color;
+      else if(color?.[3]>0)backgroundLayers.push(color);
+    }
+    if(background)for(const layer of backgroundLayers.toReversed()) {
+      background=[...layer.slice(0,3).map((v,i)=>v*layer[3]+background[i]*(1-layer[3])),1];
+    }
+    return {background,backgroundLayers,reason};
+  }
+  function measureGraphic(element,panel,box,style) {
+    const control=element.closest('button, a, [role="button"]');
+    const name=control?.getAttribute('aria-label') || control?.textContent?.trim() || '';
+    let {background,backgroundLayers,reason}=backgroundFor(element);
+    const foreground=rgba(style.stroke!=='none'?style.stroke:style.fill);
+    if(!background||!foreground||Number(style.opacity)!==1||Number(style.fillOpacity)!==1||Number(style.strokeOpacity)!==1)reason ||= 'unsupported graphic foreground/background';
+    const effectiveForeground=foreground && background ? foreground.slice(0,3).map((v,i)=>v*foreground[3]+background[i]*(1-foreground[3])) : null;
+    const ratio=reason ? null : (Math.max(luminance(effectiveForeground),luminance(background))+.05)/(Math.min(luminance(effectiveForeground),luminance(background))+.05);
+    const disabled=control?.matches(':disabled, [aria-disabled="true"]') || false;
+    let status='NOT_VERIFIABLE';
+    if(ratio!==null)status=ratio>=3?'PASS':'FAIL';
+    if(disabled)status='EXEMPT_DISABLED';
+    return {panel:panel.dataset.vizPanelKey,tag:element.tagName,bbox:{x:box.x,y:box.y,width:box.width,height:box.height},
+      accessibleName:name,foreground,effectiveForeground,background,backgroundLayers,ratio,threshold:3,
+      role:control?'interactive icon':'graphic',disabled,status,reason};
+  }
+  const pairs=[],canvases=[];
+  for(const panel of document.querySelectorAll('[data-viz-panel-key]')) {
+    for(const element of panel.querySelectorAll('svg path, svg line, svg circle, svg rect, canvas')) {
+      const box=element.getBoundingClientRect(),style=getComputedStyle(element);
+      if((!box.width&&!box.height)||style.display==='none'||style.visibility!=='visible')continue;
+      if(element.tagName.toLowerCase()==='canvas') {
+        canvases.push({panel:panel.dataset.vizPanelKey,bbox:{x:box.x,y:box.y,width:box.width,height:box.height},status:'NOT_VERIFIABLE',reason:'canvas needs independent pixel/series evidence'});
+      } else pairs.push(measureGraphic(element,panel,box,style));
     }
   }
   return {method: 'computed alpha-composited SVG foreground and opaque adjacent background', pairs, canvases};
@@ -2343,12 +2338,7 @@ async function renderDashboard(page, dashboard, index, total) {
   // retroactively validate a screenshot taken while it was still blank/loading.
   await collectVerifiedTerminalState(page, dashboard, index, total);
   dashboard.preCaptureTerminalStateValidation = dashboard.terminalStateValidation;
-  const viewportChanged = await prepareDashboardForCapture(
-    page,
-    dashboard,
-    index,
-    total,
-  );
+  const viewportChanged = await prepareDashboardForCapture(page);
   if (viewportChanged) {
     await settleDashboardAfterViewportChange(page, dashboard, index, total);
   }

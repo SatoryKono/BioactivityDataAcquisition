@@ -139,7 +139,7 @@ def _panel_number(value: object) -> int | None:
         return None
 
 
-def _layout_reasons(dashboard: dict, requested: dict, first: set[int]) -> list[str]:
+def _terminal_capture_reasons(dashboard: dict, first: set[int]) -> list[str]:
     reasons = []
     before = dashboard.get("preCaptureTerminalStateValidation", {})
     before_ids = {p.get("id") for p in before.get("panelStates", [])}
@@ -153,6 +153,30 @@ def _layout_reasons(dashboard: dict, requested: dict, first: set[int]) -> list[s
             reasons.append(
                 "scroll tile was captured without matching terminal readiness"
             )
+    return reasons
+
+
+def _table_page_reasons(dashboard: dict) -> list[str]:
+    reasons = []
+    for table in dashboard.get("tablePagination", []):
+        if table.get("status") not in {"COMPLETE", "NOT_PAGINATED"}:
+            reasons.append(f"incomplete table pagination: {table.get('panelId')}")
+        for page in table.get("pages", []):
+            for scroller in page.get("scrollers", []):
+                if any(
+                    scroller.get(f"scroll{axis}", 0)
+                    > scroller.get(f"client{axis}", 0) + 2
+                    for axis in ("Width", "Height")
+                ):
+                    reasons.append(
+                        f"table page overflow: {table.get('panelId')}/{page.get('page')}"
+                    )
+    return reasons
+
+
+def _layout_reasons(dashboard: dict, requested: dict, first: set[int]) -> list[str]:
+    reasons = []
+    reasons.extend(_terminal_capture_reasons(dashboard, first))
     containment = dashboard.get("panelContainment", {})
     measured = {p.get("id") for p in containment.get("panels", [])}
     screenshots = {
@@ -173,20 +197,30 @@ def _layout_reasons(dashboard: dict, requested: dict, first: set[int]) -> list[s
     for key in ("typographyValidation", "navigationValidation"):
         if dashboard.get(key, {}).get("status") != "ok":
             reasons.append(f"{key} failed or unavailable")
-    for table in dashboard.get("tablePagination", []):
-        if table.get("status") not in {"COMPLETE", "NOT_PAGINATED"}:
-            reasons.append(f"incomplete table pagination: {table.get('panelId')}")
-        for page in table.get("pages", []):
-            for scroller in page.get("scrollers", []):
-                if any(
-                    scroller.get(f"scroll{axis}", 0)
-                    > scroller.get(f"client{axis}", 0) + 2
-                    for axis in ("Width", "Height")
-                ):
-                    reasons.append(
-                        f"table page overflow: {table.get('panelId')}/{page.get('page')}"
-                    )
+    reasons.extend(_table_page_reasons(dashboard))
     return reasons
+
+
+def _series_control_errors(dashboard: dict) -> list[str]:
+    errors = []
+    for control in dashboard.get("seriesControls", []):
+        if (
+            control.get("status") != "PASS"
+            or [e.get("label") for e in control.get("entries", [])]
+            != control.get("labels")
+            or len(control.get("labels", [])) < 2
+        ):
+            errors.append(f"series keyboard control failed: {control.get('panel')}")
+        for entry in control.get("entries", []):
+            if (
+                not entry.get("focused")
+                or entry.get("active") != [entry.get("label")]
+                or entry.get("restored") != control.get("labels")
+            ):
+                errors.append(
+                    f"series isolation evidence disagrees: {control.get('panel')}"
+                )
+    return errors
 
 
 def validate_panel_cues(
@@ -226,23 +260,7 @@ def validate_panel_cues(
                 or not any(quote in text for text in texts.get(id_, []))
             ):
                 errors.append(f"critical non-color cue is not observed: {id_}")
-    for control in dashboard.get("seriesControls", []):
-        if (
-            control.get("status") != "PASS"
-            or [e.get("label") for e in control.get("entries", [])]
-            != control.get("labels")
-            or len(control.get("labels", [])) < 2
-        ):
-            errors.append(f"series keyboard control failed: {control.get('panel')}")
-        for entry in control.get("entries", []):
-            if (
-                not entry.get("focused")
-                or entry.get("active") != [entry.get("label")]
-                or entry.get("restored") != control.get("labels")
-            ):
-                errors.append(
-                    f"series isolation evidence disagrees: {control.get('panel')}"
-                )
+    errors.extend(_series_control_errors(dashboard))
     return {
         "status": "PASS" if not errors and findings == 0 else "NOT_PROVEN",
         "findings": findings,

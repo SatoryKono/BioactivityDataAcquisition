@@ -15,7 +15,7 @@ async function captureScrollSurface(page, {filePath, timeout, pngEvidence, measu
       return scrollable;
     });
     if(!el)throw new Error('No programmatically scrollable dashboard container');
-    el.setAttribute('data-bioetl-capture-scroll','true');
+    el.dataset.bioetlCaptureScroll='true';
     el.scrollTop=0;
     const r=el.getBoundingClientRect();
     const stickyBottom = [...el.querySelectorAll('*')].reduce((bottom,node)=>{
@@ -26,14 +26,14 @@ async function captureScrollSurface(page, {filePath, timeout, pngEvidence, measu
     return {top:Math.max(0,r.top),stickyBottom,clientHeight:Math.min(el.clientHeight,innerHeight-Math.max(0,r.top)),
       scrollHeight:el.scrollHeight,elementClientHeight:el.clientHeight,layoutViewport:{width:innerWidth,height:innerHeight},scale:devicePixelRatio};
   });
-  if (!(surface.clientHeight>0)) throw new Error('No measurable dashboard scroll surface');
+  if (!Number.isFinite(surface.clientHeight) || surface.clientHeight<=0) throw new Error('No measurable dashboard scroll surface');
   const tileDir=filePath.replace(/\.png$/,'-tiles');
   await fs.promises.mkdir(tileDir,{recursive:true});
   await fs.promises.writeFile(path.join(tileDir,'surface.json'),JSON.stringify(surface,null,2));
   const tiles=[];
   let previous=-1;
   const visibleHeight=surface.clientHeight-(surface.stickyBottom-surface.top);
-  if(!(visibleHeight>0))throw new Error('Sticky chrome covers scroll surface');
+  if(!Number.isFinite(visibleHeight) || visibleHeight<=0)throw new Error('Sticky chrome covers scroll surface');
   let target=0;
   for (;;) {
     const actual=await page.evaluate(y=>{
@@ -78,7 +78,7 @@ async function captureScrollSurface(page, {filePath, timeout, pngEvidence, measu
     await fs.promises.writeFile(filePath,Buffer.from(png,'base64'));
   } finally {await compositor.close();}
   await page.evaluate(()=>{
-    const el=document.querySelector('[data-bioetl-capture-scroll]');el.scrollTop=0;el.removeAttribute('data-bioetl-capture-scroll');
+    const el=document.querySelector('[data-bioetl-capture-scroll]');el.scrollTop=0;delete el.dataset.bioetlCaptureScroll;
   });
   return {method:'vertical tiles at fixed browser viewport; original tiles retained',surface,tiles};
 }

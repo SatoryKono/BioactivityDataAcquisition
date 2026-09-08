@@ -72,12 +72,79 @@ def dashboard_attachment_errors(root: Path, dashboard: dict) -> list[str]:
     ]
 
 
-def verify_capture(manifest_path: Path, *, repo_root: Path) -> dict:
-    """Fail closed on source, occurrence, PNG or observed model substitution."""
+def _dashboard_errors(
+    manifest_path: Path, repo_root: Path, path: Path, dashboard: dict, manifest: dict
+) -> list[str]:
     from scripts.ops.observability.grafana import (
         check_grafana_dashboard_audit_preflight as preflight,
     )
 
+    source = manifest.get("source", {})
+    commit = source.get("commit_sha", "")
+    capture_id = manifest.get("capture_id", "")
+    uid = dashboard.get("uid")
+    item_errors = []
+    current = path.read_bytes()
+    # Git checkouts may materialize LF or CRLF; no other source bytes
+    # are normalized. The claimed commit is checked independently below.
+    lf = current.replace(b"\r\n", b"\n")
+    source_digests = {
+        hashlib.sha256(raw).hexdigest()
+        for raw in (current, lf, lf.replace(b"\n", b"\r\n"))
+    }
+    identity = dashboard.get("dashboardSource", {})
+    if (
+        identity.get("sha256") not in source_digests
+        or source.get("dashboards", {}).get(uid) != identity
+    ):
+        item_errors.append("source digest mismatch")
+    if re.fullmatch(r"[0-9a-f]{40}", commit):
+        committed = subprocess.run(
+            ["git", "show", f"{commit}:grafana/dashboards/{path.name}"],
+            cwd=repo_root,
+            capture_output=True,
+            check=False,
+            timeout=15,
+        )
+        if committed.returncode or committed.stdout.replace(
+            b"\r\n", b"\n"
+        ) != current.replace(b"\r\n", b"\n"):
+            item_errors.append("source is not the claimed committed JSON")
+    item_errors.extend(
+        model_errors(json.loads(current), dashboard.get("provisionedModel"))
+    )
+    if (
+        str(identity.get("path", "")).replace("\\", "/")
+        != f"grafana/dashboards/{path.name}"
+    ):
+        item_errors.append("source path mismatch")
+    model = dashboard.get("provisionedModel") or {}
+    if model.get("captureId") != capture_id:
+        item_errors.append("model occurrence mismatch")
+    observed = urlparse(model.get("observedUrl", ""))
+    base = urlparse(manifest.get("base_url", ""))
+    if (observed.scheme, observed.netloc) != (
+        base.scheme,
+        base.netloc,
+    ) or not observed.path.startswith(f"/d/{uid}/"):
+        item_errors.append("observed browser resource mismatch")
+    if dashboard.get("file") != f"{uid}.png":
+        item_errors.append("PNG resource mismatch")
+    else:
+        png_error = preflight._validate_screenshot_evidence(
+            uid,
+            dashboard,
+            requested_width=manifest["requested"]["viewport"]["width"],
+            screenshot_dir=manifest_path.parent,
+        )
+        if png_error:
+            item_errors.append(png_error)
+    item_errors.extend(dashboard_attachment_errors(manifest_path.parent, dashboard))
+    return item_errors
+
+
+def verify_capture(manifest_path: Path, *, repo_root: Path) -> dict:
+    """Fail closed on source, occurrence, PNG or observed model substitution."""
     raw = manifest_path.read_bytes()
     manifest = json.loads(raw)
     errors: list[str] = []
@@ -105,67 +172,13 @@ def verify_capture(manifest_path: Path, *, repo_root: Path) -> dict:
     results = []
     for dashboard in dashboards:
         uid = dashboard.get("uid")
-        item_errors = []
         path = expected.get(uid)
         if path is None:
             errors.append(f"unexpected UID: {uid}")
             continue
-        current = path.read_bytes()
-        # Git checkouts may materialize LF or CRLF; no other source bytes
-        # are normalized. The claimed commit is checked independently below.
-        lf = current.replace(b"\r\n", b"\n")
-        source_digests = {
-            hashlib.sha256(raw).hexdigest()
-            for raw in (current, lf, lf.replace(b"\n", b"\r\n"))
-        }
-        identity = dashboard.get("dashboardSource", {})
-        if (
-            identity.get("sha256") not in source_digests
-            or source.get("dashboards", {}).get(uid) != identity
-        ):
-            item_errors.append("source digest mismatch")
-        if re.fullmatch(r"[0-9a-f]{40}", commit):
-            committed = subprocess.run(
-                ["git", "show", f"{commit}:grafana/dashboards/{path.name}"],
-                cwd=repo_root,
-                capture_output=True,
-                check=False,
-                timeout=15,
-            )
-            if committed.returncode or committed.stdout.replace(
-                b"\r\n", b"\n"
-            ) != current.replace(b"\r\n", b"\n"):
-                item_errors.append("source is not the claimed committed JSON")
-        item_errors.extend(
-            model_errors(json.loads(current), dashboard.get("provisionedModel"))
+        item_errors = _dashboard_errors(
+            manifest_path, repo_root, path, dashboard, manifest
         )
-        if (
-            str(identity.get("path", "")).replace("\\", "/")
-            != f"grafana/dashboards/{path.name}"
-        ):
-            item_errors.append("source path mismatch")
-        model = dashboard.get("provisionedModel") or {}
-        if model.get("captureId") != capture_id:
-            item_errors.append("model occurrence mismatch")
-        observed = urlparse(model.get("observedUrl", ""))
-        base = urlparse(manifest.get("base_url", ""))
-        if (observed.scheme, observed.netloc) != (
-            base.scheme,
-            base.netloc,
-        ) or not observed.path.startswith(f"/d/{uid}/"):
-            item_errors.append("observed browser resource mismatch")
-        if dashboard.get("file") != f"{uid}.png":
-            item_errors.append("PNG resource mismatch")
-        else:
-            png_error = preflight._validate_screenshot_evidence(
-                uid,
-                dashboard,
-                requested_width=manifest["requested"]["viewport"]["width"],
-                screenshot_dir=manifest_path.parent,
-            )
-            if png_error:
-                item_errors.append(png_error)
-        item_errors.extend(dashboard_attachment_errors(manifest_path.parent, dashboard))
         results.append(
             {
                 "uid": uid,
