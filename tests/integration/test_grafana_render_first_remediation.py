@@ -730,12 +730,7 @@ def test_operator_critical_tables_expose_full_values() -> None:
                 # wrap via named-column overrides (same pattern as #8977).
                 if panel_id == 2010:
                     assert custom["cellOptions"]["wrapText"] is True
-                    assert panel["options"]["footer"]["enablePagination"] is False
-                    assert any(
-                        item.get("id") == "limit"
-                        and item.get("options", {}).get("limitField") == 5
-                        for item in panel["transformations"]
-                    )
+                    assert panel["options"]["footer"]["enablePagination"] is True
                 else:
                     assert custom.get("cellOptions", {}).get("wrapText") is not True
                 if dashboard_name == "bioetl-run-explorer-v1.json" and panel_id == 3022:

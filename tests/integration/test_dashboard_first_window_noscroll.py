@@ -51,13 +51,14 @@ def _root_panels(dashboard: dict[str, Any]) -> list[dict[str, Any]]:
     return [panel for panel in dashboard.get("panels") or [] if isinstance(panel, dict)]
 
 
-def test_bounded_incident_summary_has_no_pagination_footer() -> None:
-    """Grafana 12's empty table footer caused 24px internal overflow (RF-002)."""
+def test_bounded_incident_summary_uses_wrapped_row_pagination() -> None:
+    """Native page sizing must account for wrapped rows, including all five (RF-002)."""
     source = next(
         path for path in get_dashboard_files() if path.stem == "bioetl-incident-v1"
     )
     panel = next(p for p in load_dashboard(source)["panels"] if p["id"] == 2010)
-    assert panel["options"]["footer"].get("enablePagination") is False
+    assert panel["options"]["footer"].get("enablePagination") is True
+    assert panel["options"]["cellHeight"] == "lg"
     assert any(
         t["id"] == "limit" and t["options"]["limitField"] == 5
         for t in panel["transformations"]

@@ -1024,7 +1024,7 @@
       },
       "options": {
         "showHeader": true,
-        "cellHeight": "sm",
+        "cellHeight": "lg",
         "footer": {
           "show": false,
           "reducer": [
@@ -1032,7 +1032,7 @@
           ],
           "countRows": false,
           "fields": "",
-          "enablePagination": false
+          "enablePagination": true
         },
         "sortBy": [
           {
