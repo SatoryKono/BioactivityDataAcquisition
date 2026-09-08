@@ -119,6 +119,118 @@ def test_complete_reviewed_receipts_pass(bundle):
     assert human["first_correct_seconds"] == {"sample_size": 21, "median": 3, "max": 3}
 
 
+@pytest.fixture
+def ai_bundle(bundle, tmp_path):
+    contract, _, artifacts, _ = bundle
+    contract["operator_acceptance_mode"] = "AI_SCENARIOS"
+    decision = {
+        "candidate_ref": contract["candidate_ref"],
+        "acceptance_mode": "AI_SCENARIOS",
+        "human_usability_status": "NOT_MEASURED",
+        "task_count": 21,
+        "approved_by": "owner",
+        "approved_at": "2026-09-08",
+        "reason": "Explicitly accept AI scenario checks only",
+    }
+    contract["operator_scope_decision"] = put(tmp_path, "decision.json", decision)
+    artifacts["operator"]["human_usability_status"] = "NOT_MEASURED"
+    for row in artifacts["operator"]["observations"]:
+        row.update(
+            participant_type="AI_AGENT",
+            first_correct_seconds=None,
+            elapsed_seconds=42,
+            destination_verified=True,
+            return_verified=True,
+        )
+    return bundle
+
+
+def test_explicit_ai_scope_passes_without_claiming_human_usability(ai_bundle):
+    report = subject.evaluate(ai_bundle[3]())
+    assert report["release_passed"] is True
+    gate = report["gates"]["operator"]
+    assert gate["numerator"] == 21
+    assert gate["human_required"] is False
+    assert gate["human_usability_status"] == "NOT_MEASURED"
+    human = gate["statistics"][0]
+    assert human["attempt_count"] == human["success_count"] == 0
+    assert human["first_correct_seconds"]["median"] is None
+    ai = next(
+        row
+        for row in gate["statistics"]
+        if row["participant_type"] == "AI_AGENT"
+        and row["task_id"] == "ALL"
+        and row["attempt_kind"] == "first"
+    )
+    assert ai["elapsed_seconds"] == {"sample_size": 21, "median": 42, "max": 42}
+    assert ai["first_correct_seconds"]["sample_size"] == 0
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("elapsed_seconds", None),
+        ("elapsed_seconds", float("nan")),
+        ("first_correct_seconds", 3),
+        ("participant_type", "HUMAN"),
+        ("destination_verified", False),
+        ("return_verified", False),
+        ("answer", ""),
+        ("reviewer", ""),
+        ("context_loss", 1),
+    ],
+)
+def test_incomplete_ai_task_blocks_release(ai_bundle, field, value):
+    row = next(
+        r
+        for r in ai_bundle[2]["operator"]["observations"]
+        if r["task_id"].endswith(":Q3")
+    )
+    row[field] = value
+    report = subject.evaluate(ai_bundle[3]())
+    assert report["release_passed"] is False
+    assert report["gates"]["operator"]["status"] == "CANNOT_VERIFY"
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "missing_decision",
+        "changed_hash",
+        "wrong_candidate",
+        "no_approval",
+        "no_disclosure",
+        "unknown_mode",
+        "no_opt_in",
+        "missing_task",
+        "layout_failure",
+    ],
+)
+def test_ai_scope_cannot_bypass_acceptance_contract(ai_bundle, tmp_path, mutation):
+    contract, _, artifacts, save = ai_bundle
+    if mutation == "missing_decision":
+        del contract["operator_scope_decision"]
+    elif mutation == "changed_hash":
+        (tmp_path / "decision.json").write_text("{}")
+    elif mutation in {"wrong_candidate", "no_approval"}:
+        decision = json.loads((tmp_path / "decision.json").read_text())
+        decision[
+            "candidate_ref" if mutation == "wrong_candidate" else "approved_by"
+        ] = ""
+        contract["operator_scope_decision"] = put(tmp_path, "decision.json", decision)
+    elif mutation == "no_disclosure":
+        del artifacts["operator"]["human_usability_status"]
+    elif mutation == "unknown_mode":
+        contract["operator_acceptance_mode"] = "PASS"
+    elif mutation == "no_opt_in":
+        del contract["operator_acceptance_mode"]
+    elif mutation == "missing_task":
+        artifacts["operator"]["observations"].pop()
+    elif mutation == "layout_failure":
+        artifacts["layout"]["measurements"] = []
+    assert subject.evaluate(save())["release_passed"] is False
+
+
 @pytest.mark.parametrize(
     "mutation",
     [
