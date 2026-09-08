@@ -2557,6 +2557,18 @@ async function writeManifest(dashboards) {
   );
 }
 
+async function closeCaptureBrowser({native, contextBundle, context, browser}) {
+  if (contextBundle?.api) {
+    await contextBundle.api.dispose();
+  }
+  if (native) {
+    await native.close();
+  } else if (context) {
+    await context.close();
+  }
+  if (browser) await browser.close();
+}
+
 async function main() {
   await ensureOutputDir();
   const dashboards = listDashboardsFromRepo();
@@ -2595,15 +2607,7 @@ async function main() {
         await page.close();
       }
     } finally {
-      if (contextBundle?.api) {
-        await contextBundle.api.dispose();
-      }
-      if (native) {
-        await native.close();
-      } else if (context) {
-        await context.close();
-      }
-      if (browser) await browser.close();
+      await closeCaptureBrowser({native, contextBundle, context, browser});
     }
     if (renderFailure) {
       break;
@@ -2632,6 +2636,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  closeCaptureBrowser,
   mergeTypographyObservations,
   layoutFitMeasurementsFromDom,
   navigationValidationFromDom,
