@@ -77,10 +77,11 @@ def _manifest(*, classification: str = "incomplete") -> dict[str, object]:
 
 
 def _bind_provenance(tmp_path: Path, manifest: dict[str, object]) -> None:
+    source_path = Path("grafana/dashboards/bioetl-runtime.json")
     source = {
-        "path": "grafana/dashboards/bioetl-runtime.json",
-        "sha256": "b" * 64,
-        "version": 1,
+        "path": source_path.as_posix(),
+        "sha256": hashlib.sha256(source_path.read_bytes()).hexdigest(),
+        "version": json.loads(source_path.read_text(encoding="utf-8"))["version"],
     }
     dashboards = manifest["dashboards"]
     assert isinstance(dashboards, list)
@@ -128,6 +129,34 @@ def _bind_provenance(tmp_path: Path, manifest: dict[str, object]) -> None:
     text = json.dumps(manifest, indent=2, sort_keys=True) + "\n"
     (tmp_path / "render-manifest.json").write_text(text, encoding="utf-8")
     (tmp_path / str(manifest["immutable_manifest"])).write_text(text, encoding="utf-8")
+
+
+@pytest.mark.parametrize("mutation", ["digest", "path", "missing", "changed"])
+def test_source_binding_rejects_stale_or_misbound_json(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mutation: str
+) -> None:
+    relative = Path("grafana/dashboards/bioetl-runtime.json")
+    source_file = tmp_path / relative
+    source_file.parent.mkdir(parents=True)
+    source_file.write_text('{"uid":"bioetl-runtime","version":1}', encoding="utf-8")
+    source = {
+        "path": relative.as_posix(),
+        "sha256": hashlib.sha256(source_file.read_bytes()).hexdigest(),
+        "version": 1,
+    }
+    monkeypatch.setattr(preflight, "_REPO_ROOT", tmp_path)
+    assert preflight._dashboard_source_error("bioetl-runtime", source, source) is None
+    if mutation == "digest":
+        source["sha256"] = "0" * 64
+    elif mutation == "path":
+        source["path"] = "grafana/dashboards/bioetl-dq-v2.json"
+    elif mutation == "missing":
+        source_file.unlink()
+    else:
+        source_file.write_text('{"uid":"bioetl-runtime","version":2}', encoding="utf-8")
+    assert (
+        preflight._dashboard_source_error("bioetl-runtime", source, source) is not None
+    )
 
 
 def test_git_capture_keeps_commit_when_dirty_probe_times_out(
