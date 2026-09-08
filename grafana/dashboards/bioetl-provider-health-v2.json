@@ -1936,12 +1936,12 @@
                   },
                   {
                     "id": "custom.width",
-                    "value": 100
+                    "value": 130
                   },
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text",
+                      "type": "auto",
                       "wrapText": false
                     }
                   }
@@ -2091,12 +2091,12 @@
                   },
                   {
                     "id": "custom.width",
-                    "value": 100
+                    "value": 130
                   },
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text",
+                      "type": "auto",
                       "wrapText": false
                     }
                   }

@@ -50,7 +50,8 @@ async function captureScrollSurface(page, {filePath, timeout, pngEvidence, measu
         clientWidth:el.clientWidth,scrollWidth:el.scrollWidth,clientHeight:el.clientHeight,scrollHeight:el.scrollHeight}];
     }));
     const file=path.join(tileDir,`${String(tiles.length).padStart(3,'0')}.png`);
-    const bytes=await page.screenshot({path:file,timeout,animations:'disabled',caret:'hide'});
+    const bytes=await require('./native_browser_zoom.cjs').capturePageScreenshot(page,
+      {path:file,timeout,animations:'disabled',caret:'hide'});
     tiles.push({file:path.relative(path.dirname(filePath),file),scrollTop:actual,...pngEvidence(bytes),panels,evidence});
     if(actual+surface.clientHeight>=surface.scrollHeight-2)break;
     const next=Math.min(actual+visibleHeight,surface.scrollHeight-surface.clientHeight);

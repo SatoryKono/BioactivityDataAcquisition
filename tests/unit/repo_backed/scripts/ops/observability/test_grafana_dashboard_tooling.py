@@ -225,7 +225,7 @@ def test_playwright_fallback_prepares_inner_scroll_before_screenshot() -> None:
     assert "options.clip" in script
     assert script.index(
         "const viewportChanged = await prepareDashboardForCapture("
-    ) < script.index("await page.screenshot(screenshotOptions")
+    ) < script.index(".capturePageScreenshot(page, screenshotOptions")
 
 
 def test_rerender_scope_maps_run_id_to_silver_reject_explorer_run_filter(
@@ -752,7 +752,7 @@ def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() 
     assert (
         script.index("await collectVerifiedTerminalState")
         < script.index("dashboard.preCaptureTerminalStateValidation")
-        < script.index("await page.screenshot(screenshotOptions")
+        < script.index(".capturePageScreenshot(page, screenshotOptions")
     )
     assert script.index("await settleDashboardAfterViewportChange") < script.rindex(
         "await collectVerifiedTerminalState"

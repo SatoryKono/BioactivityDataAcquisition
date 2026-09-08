@@ -27,7 +27,8 @@ async function captureTablePages(page, {dashboard, outputDir, pngEvidence, timeo
       const dir=path.join(outputDir,'panels',dashboard.uid,String(panel.id));
       await fs.promises.mkdir(dir,{recursive:true});
       const file=path.join(dir,`page-${index}.png`);
-      const bytes=await root.screenshot({path:file,animations:'disabled',timeout});
+      const bytes=await require('./native_browser_zoom.cjs').captureElementScreenshot(page,root,
+        {path:file,animations:'disabled',timeout});
       pages.push({page:index,...evidence,file:path.relative(outputDir,file),...pngEvidence(bytes)});
       if (await next.isDisabled()) { complete=true; break; }
       await next.focus();

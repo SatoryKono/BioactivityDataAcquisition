@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-08T17:20:43.378209+00:00",
+  "generated_at": "2026-09-08T19:01:24.704492+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -19979,19 +19979,19 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py",
-          "line": 126,
+          "line": 155,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana.capture_acceptance import ("
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py",
-          "line": 155,
+          "line": 184,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana.capture_acceptance import validate_panel_cues"
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py",
-          "line": 181,
+          "line": 210,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana.capture_acceptance import canvas_pairs"
         }
@@ -20010,7 +20010,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 180,
+          "line": 186,
           "source_group": "other",
           "text": "> `bash scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh`."
         }
@@ -20029,7 +20029,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/capture_acceptance.py",
-          "line": 538,
+          "line": 565,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.capture_provenance import verify_capture"
         },
@@ -20464,7 +20464,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 182,
+          "line": 188,
           "source_group": "other",
           "text": "> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1`."
         }
@@ -20721,7 +20721,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 166,
+          "line": 172,
           "source_group": "other",
           "text": "> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1`."
         },
@@ -20764,7 +20764,7 @@
         },
         {
           "path": "grafana/README.md",
-          "line": 157,
+          "line": 163,
           "source_group": "other",
           "text": "> `bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh`."
         },
