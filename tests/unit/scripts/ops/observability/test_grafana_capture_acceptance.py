@@ -6,9 +6,38 @@ from scripts.ops.observability.grafana.capture_acceptance import (
     contrast_summary,
     assess_dashboard,
     matrix_coverage,
+    native_zoom_matches,
 )
 
 pytestmark = pytest.mark.unit
+
+
+def test_native_zoom_requires_browser_api_proof_not_only_emulated_dimensions():
+    requested = {"browser_zoom": 200, "viewport": {"width": 1366, "height": 768}}
+    dashboard = {
+        "nativeBrowserZoom": {
+            "actualFactor": 2,
+            "physicalContentViewport": requested["viewport"],
+            "method": "chrome.tabs.setZoom/getZoom; native content viewport",
+            "browserVersion": "Chrome/131.0.6778.33",
+            "actual": {
+                "devicePixelRatio": 2,
+                "innerWidth": 683,
+                "innerHeight": 384,
+                "cssZoom": "1",
+            },
+        }
+    }
+    assert native_zoom_matches(dashboard, requested)
+    for changed in (
+        {"actualFactor": 1},
+        {"method": "layout-viewport-and-device-scale-factor"},
+        {"actual": {**dashboard["nativeBrowserZoom"]["actual"], "cssZoom": "2"}},
+        {"actual": {**dashboard["nativeBrowserZoom"]["actual"], "innerWidth": 1366}},
+    ):
+        invalid = {"nativeBrowserZoom": {**dashboard["nativeBrowserZoom"], **changed}}
+        assert not native_zoom_matches(invalid, requested)
+    assert not native_zoom_matches({}, requested)
 
 
 def test_absent_or_unmeasured_contrast_denominator_is_null():
