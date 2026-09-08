@@ -1,0 +1,62 @@
+{
+  "candidate_ref": "d62d78a0db36118df302f5f63e6ed992e01154dc",
+  "manifest_sha256": "aa2def6e1d8196735fd2d684e441eb59e72a5a967a7466f8b4ab0c767e35d247",
+  "files_roundtrip_verified": 2964,
+  "archives": [
+    {
+      "file": "reviewer-part-01.zip",
+      "bytes": 22011159,
+      "sha256": "46d3f7707a172a1557f54c1fae6ca2236d0619e1e770db5e7bacde631785911b",
+      "files": 613
+    },
+    {
+      "file": "reviewer-part-02.zip",
+      "bytes": 42454338,
+      "sha256": "079cafa9dbe1c6d816d27b8947a5651e908ec40a46f2c8f5bbf8e8bc625fcd33",
+      "files": 1053
+    },
+    {
+      "file": "reviewer-part-03.zip",
+      "bytes": 28285751,
+      "sha256": "76ceadc3177ded751044d3d7d399d8f7f365ed72eaf01b934ae1de4c5b4ea2aa",
+      "files": 285
+    },
+    {
+      "file": "reviewer-part-04.zip",
+      "bytes": 10847940,
+      "sha256": "5b4df24b2d871e565f617d85d2092b35ffa5b5dc3a0bd205152783c41ca6a46f",
+      "files": 343
+    },
+    {
+      "file": "reviewer-part-05.zip",
+      "bytes": 40404173,
+      "sha256": "c8a6fc37c37316597f27a819cfabaafa315896fc8f93d17e577095a9fd94c472",
+      "files": 365
+    },
+    {
+      "file": "reviewer-part-06.zip",
+      "bytes": 4862160,
+      "sha256": "750ba36bed3547fccae97347116e1a33d173499e4840531c934362d2cb774c75",
+      "files": 147
+    },
+    {
+      "file": "reviewer-part-07.zip",
+      "bytes": 45187517,
+      "sha256": "bf9fe5f1eb4b9215c117c89fe8ffcb3370ee9cfa4107cc445da1c56de65b6ab1",
+      "files": 7
+    },
+    {
+      "file": "reviewer-part-08.zip",
+      "bytes": 44741669,
+      "sha256": "d6c4a92a0c9f8a35625946f696ad5676b596214b102781708ff5a9d124ea49d7",
+      "files": 12
+    },
+    {
+      "file": "reviewer-part-09.zip",
+      "bytes": 2434659,
+      "sha256": "ea2d66eb1cd2bf7e104259a2353054d7b1d4ca32f4daa95a73f31dd38ba57a8e",
+      "files": 139
+    }
+  ],
+  "extraction": "Extract all independent ZIP parts into the same empty directory, then run python verify_bundle.py."
+}
