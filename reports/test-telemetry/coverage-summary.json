@@ -1,11 +1,11 @@
 {
-  "source_branch": "fix/ori-five-main-evidence",
-  "source_commit": "d9226c9fce46cdf3c92afa81a5e0fa6e2f2ce23a",
-  "source_run_id": "34262650914",
+  "source_branch": "codex/accessibility-contrast-10170",
+  "source_commit": "466d9e02126215f3dbb35d031b35098dff179bc3",
+  "source_run_id": "34268688351",
   "source_event": "pull_request",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34262650914",
-  "source_tree_sha256": "a633f906d04a230f09e14ed34f94a8c5b050436be4878d9514d26f102dbfe67d",
-  "refreshed_at_utc": "2026-09-08T19:02:00.307593+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34268688351",
+  "source_tree_sha256": "4f4f7ebf8e6e04294d3e16de36cf0ab6611338049b8d68c2066b88a3e9b765ef",
+  "refreshed_at_utc": "2026-09-08T19:45:18.742184+00:00",
   "refresh_status": "captured",
   "coverage_percent": 96.71,
   "coverage": {
