@@ -750,6 +750,10 @@
               {
                 "id": "custom.hidden",
                 "value": false
+              },
+              {
+                "id": "custom.width",
+                "value": 100
               }
             ]
           },
