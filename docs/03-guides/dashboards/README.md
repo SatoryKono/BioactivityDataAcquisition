@@ -175,6 +175,9 @@ is `6. Run Explorer` and alert triage lives in Incident Workspace.
   render validation still runs when semantic validation fails. The render-only
   preflight excludes full Prometheus readiness when render-only, so neither
   gate can mask or contaminate the other.
+- RF-005 adds a separate [regression acceptance](regression-acceptance.md) mode
+  with immutable baseline/candidate references and reviewed evidence for every
+  mandatory gate. Semantic/render success alone does not close #10185 or #10171.
 - Every full-cycle occurrence has one `occurrence_id`. The semantic report,
   Playwright manifest, and combined receipt must carry the same value; the
   receipt records the current commit/tree plus SHA-256 and dashboard/panel scope
