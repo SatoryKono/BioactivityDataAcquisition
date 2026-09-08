@@ -67,13 +67,6 @@ def png_structure_errors(raw: bytes) -> list[str]:
 
 def png_pixel_errors(raw: bytes, compressed: bytes) -> list[str]:
     """Verify the complete decoded pixel stream matches its declared shape."""
-    try:
-        decoder = zlib.decompressobj()
-        decoded = decoder.decompress(compressed)
-        if not decoded or not decoder.eof or decoder.unused_data:
-            return ["incomplete PNG pixel stream"]
-    except zlib.error:
-        return ["corrupted PNG pixel stream"]
     width, height, depth, color, compression, filtering, interlace = struct.unpack(
         ">IIBBBBB", raw[16:29]
     )
@@ -82,8 +75,15 @@ def png_pixel_errors(raw: bytes, compressed: bytes) -> list[str]:
     if depth != 8 or color not in {2, 6} or compression or filtering or interlace:
         return ["unsupported PNG pixel encoding"]
     stride = 1 + width * (3 if color == 2 else 4)
+    try:
+        decoder = zlib.decompressobj()
+        decoded = decoder.decompress(compressed, stride * height + 1)
+    except zlib.error:
+        return ["corrupted PNG pixel stream"]
     if not width or not height or len(decoded) != stride * height:
         return ["PNG pixel dimensions mismatch"]
+    if not decoder.eof or decoder.unused_data or decoder.unconsumed_tail:
+        return ["incomplete PNG pixel stream"]
     if any(decoded[index] > 4 for index in range(0, len(decoded), stride)):
         return ["invalid PNG scanline filter"]
     return []
@@ -252,8 +252,10 @@ def model_errors(source: dict, evidence: object) -> list[str]:
     return errors
 
 
-def attachment_errors(root: Path, evidence: dict) -> list[str]:
+def attachment_errors(root: Path, evidence: object) -> list[str]:
     """Verify a referenced PNG without allowing a path outside its capture pack."""
+    if not isinstance(evidence, dict):
+        return ["invalid PNG attachment metadata"]
     name = evidence.get("file")
     if not isinstance(name, str) or not name:
         return ["missing PNG attachment path"]
@@ -304,6 +306,57 @@ def browser_resource_errors(manifest: dict, dashboard: dict) -> list[str]:
         base.netloc,
     ) or not observed.path.startswith(f"/d/{dashboard.get('uid')}/"):
         errors.append("observed browser resource mismatch")
+    return errors
+
+
+def collapsed_row_structure(dashboard: dict) -> tuple[list[dict], set[str]]:
+    """Read collapsed rows and their child IDs from the source-verified model."""
+    source = dashboard.get("provisionedModel", {}).get("before", {})
+    rows = [
+        panel
+        for panel in source.get("panels", [])
+        if panel.get("type") == "row" and panel.get("collapsed")
+    ]
+    children = {
+        str(panel["id"])
+        for row in rows
+        for panel in row.get("panels", [])
+        if panel.get("type") != "row"
+    }
+    return rows, children
+
+
+def observed_row_errors(manifest: dict, dashboard: dict) -> list[str]:
+    """Cross-check requested row expansion with clicks and observed panel inventory."""
+    rows, children = collapsed_row_structure(dashboard)
+    if not rows:
+        return []
+    geometry = dashboard.get("layoutGeometry", {}).get("panelGeometry")
+    if not isinstance(geometry, dict):
+        return ["missing observed row panel inventory"]
+    expansion = dashboard.get("rowExpansion", [])
+    if not isinstance(expansion, list) or not all(
+        isinstance(row, dict) for row in expansion
+    ):
+        return ["invalid observed row expansion"]
+    if manifest.get("expand_collapsed_rows"):
+        return expanded_row_errors(rows, expansion, children, set(geometry))
+    if children.intersection(geometry) or any(row.get("clicked") for row in expansion):
+        return ["observed rows contradict collapsed capture"]
+    return []
+
+
+def expanded_row_errors(
+    rows: list[dict], expansion: list[dict], children: set[str], observed: set[str]
+) -> list[str]:
+    """Require every collapsed source row to open and expose its child panels."""
+    errors = []
+    if sorted(row["title"] for row in rows) != sorted(
+        str(row.get("title", "")) for row in expansion
+    ) or not all(row.get("clicked") is True for row in expansion):
+        errors.append("observed row expansion is incomplete")
+    if not children.issubset(observed):
+        errors.append("expanded row child panels missing from browser inventory")
     return errors
 
 
@@ -371,6 +424,7 @@ def _dashboard_errors(
         attachment_errors(manifest_path.parent, dashboard.get("screenshotEvidence", {}))
     )
     item_errors.extend(browser_context_errors(manifest, dashboard))
+    item_errors.extend(observed_row_errors(manifest, dashboard))
     return item_errors
 
 
