@@ -1,0 +1,11 @@
+{
+  "archive": "reviewer-final-a1533745a1ce.zip",
+  "sha256": "a3af00156666af2e12a1d0ed3c6462b6c4b945b276ea94c6df4292e72b5afd8e",
+  "bytes": 5826979,
+  "zip_crc": "PASS",
+  "file_hashes": "PASS",
+  "extracted_provenance": "PASS",
+  "source_commit": "a1533745a1ce7647f6a1fe55d12741e25bda1982",
+  "manifest_sha256": "9daa8be78d574b50f355a7ba3c1b09dd8c7f20365d6686763f1e02a747860438",
+  "negative_controls": 32
+}
