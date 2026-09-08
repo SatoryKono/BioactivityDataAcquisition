@@ -56,9 +56,14 @@ def png_structure_errors(raw: bytes) -> list[str]:
             break
     if not kinds or kinds[0] != b"IHDR" or kinds[-1] != b"IEND" or offset != len(raw):
         return ["incomplete PNG structure"]
+    return png_pixel_errors(raw, bytes(compressed))
+
+
+def png_pixel_errors(raw: bytes, compressed: bytes) -> list[str]:
+    """Verify the complete decoded pixel stream matches its declared shape."""
     try:
         decoder = zlib.decompressobj()
-        decoded = decoder.decompress(bytes(compressed))
+        decoded = decoder.decompress(compressed)
         if not decoded or not decoder.eof or decoder.unused_data:
             return ["incomplete PNG pixel stream"]
     except zlib.error:
@@ -78,17 +83,9 @@ def png_structure_errors(raw: bytes) -> list[str]:
     return []
 
 
-def browser_context_errors(manifest: dict, dashboard: dict) -> list[str]:
-    """Check time, variables, physical/CSS viewport, scale, theme and chrome."""
-    from scripts.ops.observability.grafana import (
-        check_grafana_dashboard_audit_preflight as preflight,
-    )
-
-    context_error = preflight._validate_capture_context(manifest)
-    if context_error:
-        return [context_error]
+def browser_url_errors(manifest: dict, dashboard: dict) -> list[str]:
+    """Bind the browser's actual URL to the fixed time and variable scope."""
     requested = manifest.get("requested", {})
-    state = dashboard.get("browserState", {})
     model = dashboard.get("provisionedModel", {})
     context = manifest["capture_context"]
     errors = []
@@ -112,6 +109,23 @@ def browser_context_errors(manifest: dict, dashboard: dict) -> list[str]:
     ).items():
         if not query_values_match(key, query.get(key), values):
             errors.append(f"browser scope mismatch: {key}")
+    return errors
+
+
+def browser_context_errors(manifest: dict, dashboard: dict) -> list[str]:
+    """Check time, variables, physical/CSS viewport, scale, theme and chrome."""
+    from scripts.ops.observability.grafana import (
+        check_grafana_dashboard_audit_preflight as preflight,
+    )
+
+    context_error = preflight._validate_capture_context(manifest)
+    if context_error:
+        return [context_error]
+    requested = manifest.get("requested", {})
+    state = dashboard.get("browserState", {})
+    model = dashboard.get("provisionedModel", {})
+    context = manifest["capture_context"]
+    errors = browser_url_errors(manifest, dashboard)
     error = preflight._browser_state_error(
         str(dashboard["uid"]),
         state,
@@ -286,16 +300,14 @@ def _dashboard_errors(
     return item_errors
 
 
-def verify_capture(
+def manifest_identity_errors(
     manifest_path: Path,
-    *,
-    repo_root: Path,
-    expected_sha256: str | None = None,
-    expected_commit: str | None = None,
-) -> dict:
-    """Fail closed on source, occurrence, PNG or observed model substitution."""
-    raw = manifest_path.read_bytes()
-    manifest = json.loads(raw)
+    manifest: dict,
+    raw: bytes,
+    expected_sha256: str | None,
+    expected_commit: str | None,
+) -> list[str]:
+    """Require an immutable full-set identity and external pins when supplied."""
     errors: list[str] = []
     if (
         expected_sha256 is not None
@@ -320,6 +332,22 @@ def verify_capture(
         errors.append("missing committed source")
     if source.get("working_tree_dirty") is not False:
         errors.append("source working tree was not clean")
+    return errors
+
+
+def verify_capture(
+    manifest_path: Path,
+    *,
+    repo_root: Path,
+    expected_sha256: str | None = None,
+    expected_commit: str | None = None,
+) -> dict:
+    """Fail closed on source, occurrence, PNG or observed model substitution."""
+    raw = manifest_path.read_bytes()
+    manifest = json.loads(raw)
+    errors = manifest_identity_errors(
+        manifest_path, manifest, raw, expected_sha256, expected_commit
+    )
     expected = {
         json.loads(p.read_text(encoding="utf-8"))["uid"]: p
         for p in (repo_root / "grafana/dashboards").glob("*.json")
@@ -356,7 +384,7 @@ def verify_capture(
         else "FAIL",
         "manifest": str(manifest_path),
         "manifest_sha256": hashlib.sha256(raw).hexdigest(),
-        "capture_id": capture_id,
+        "capture_id": manifest.get("capture_id", ""),
         "errors": errors,
         "dashboards": results,
         "scope": "provenance only; layout and accessibility are separate verdicts",
