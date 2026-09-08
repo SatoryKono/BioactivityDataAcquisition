@@ -2296,6 +2296,16 @@ async function validateVisibleTerminalState(page, dashboard, index, total) {
 }
 
 async function collectVerifiedTerminalState(page, dashboard, index, total) {
+  if (dashboard.scrollCapture?.tiles?.length) {
+    const observations = dashboard.scrollCapture.tiles.flatMap(tile =>
+      [tile.evidence.terminal, tile.evidence.terminalAfter]);
+    observations.push(await validateVisibleTerminalState(page, dashboard, index, total));
+    dashboard.terminalStateValidation = mergeTerminalObservations(dashboard, observations);
+    if (dashboard.terminalStateValidation.status !== 'ok') {
+      throw new Error(`Incomplete before/after scroll-tile readiness: ${dashboard.uid}`);
+    }
+    return;
+  }
   dashboard.terminalStateValidation = CONFIG.navigationOnly
     ? {
         status: "ok",
@@ -2309,6 +2319,21 @@ async function collectVerifiedTerminalState(page, dashboard, index, total) {
       `Terminal-state validation failed for ${dashboard.uid}: ${describeTerminalStateFailure(dashboard)}`,
     );
   }
+}
+
+function mergeTerminalObservations(dashboard, observations) {
+  const states = new Map();
+  let valid = observations.length > 0;
+  for (const observation of observations) {
+    if (!observation || observation.status !== 'ok') valid = false;
+    for (const state of observation?.panelStates || []) {
+      if (!ACCEPTED_TERMINAL_CLASSIFICATIONS.has(state.classification)) valid = false;
+      states.set(state.id, state);
+    }
+  }
+  if (!dashboard.requiredPanels.every(panel => states.has(panel.id))) valid = false;
+  return {...terminalStateSummary(dashboard, [...states.values()], valid ? 'ok' : 'error'),
+    method: 'every panel ready before and after its native scroll-tile PNG'};
 }
 
 function screenshotOptions(dashboard, filePath) {
@@ -2425,6 +2450,7 @@ async function renderDashboard(page, dashboard, index, total) {
     const {captureScrollSurface} = require('./capture_scroll_surface.cjs');
     dashboard.scrollCapture = await captureScrollSurface(page, {filePath,
       timeout: CONFIG.captureTimeoutMs, pngEvidence,
+      verify: () => validateVisibleTerminalState(page, dashboard, index, total),
       measure: async () => {
         const terminal = await validateVisibleTerminalState(page, dashboard, index, total);
         const visibleIds = new Set(terminal.panelStates.map(panel => panel.id));
@@ -2557,6 +2583,30 @@ async function writeManifest(dashboards) {
   );
 }
 
+async function closeRenderSession(session) {
+  if (session.contextBundle?.api) await session.contextBundle.api.dispose();
+  if (session.native) await session.native.close();
+  else if (session.context) await session.context.close();
+  if (session.browser) await session.browser.close();
+}
+
+async function openRenderSession(launchOptions) {
+  const native = process.env.GRAFANA_NATIVE_BROWSER_ZOOM === '1'
+    ? await require('./native_browser_zoom.cjs').createNativeZoomContext(playwright().chromium, launchOptions)
+    : null;
+  const session = {native, browser: native ? null : await playwright().chromium.launch(launchOptions)};
+  try {
+    session.contextBundle = await createBrowserContext(session.browser, native?.context);
+    session.context = session.contextBundle.context || session.contextBundle;
+    session.page = await session.context.newPage();
+    if (native) session.page.nativeZoomController = native.setZoom;
+    return session;
+  } catch (error) {
+    await closeRenderSession(session);
+    throw error;
+  }
+}
+
 async function main() {
   await ensureOutputDir();
   const dashboards = listDashboardsFromRepo();
@@ -2574,36 +2624,15 @@ async function main() {
     if (executablePath) {
       launchOptions.executablePath = executablePath;
     }
-    const native = process.env.GRAFANA_NATIVE_BROWSER_ZOOM === '1'
-      ? await require('./native_browser_zoom.cjs').createNativeZoomContext(playwright().chromium, launchOptions)
-      : null;
-    const browser = native ? null : await playwright().chromium.launch(launchOptions);
-    let contextBundle = null;
-    let context = null;
+    const session = await openRenderSession(launchOptions);
     try {
-      contextBundle = await createBrowserContext(browser, native?.context);
-      context = contextBundle.context || contextBundle;
-      const page = await context.newPage();
-      if (native) page.nativeZoomController = native.setZoom;
-      try {
-        await renderDashboard(page, dashboard, index + 1, dashboards.length);
-      } catch (error) {
-        dashboard.renderStatus = "error";
-        dashboard.error = String(error?.message ?? error);
-        renderFailure = error;
-      } finally {
-        await page.close();
-      }
+      await renderDashboard(session.page, dashboard, index + 1, dashboards.length);
+    } catch (error) {
+      dashboard.renderStatus = "error";
+      dashboard.error = String(error?.message ?? error);
+      renderFailure = error;
     } finally {
-      if (contextBundle?.api) {
-        await contextBundle.api.dispose();
-      }
-      if (native) {
-        await native.close();
-      } else if (context) {
-        await context.close();
-      }
-      if (browser) await browser.close();
+      await closeRenderSession(session);
     }
     if (renderFailure) {
       break;
@@ -2632,6 +2661,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  mergeTerminalObservations,
   mergeTypographyObservations,
   layoutFitMeasurementsFromDom,
   navigationValidationFromDom,

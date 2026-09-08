@@ -72,15 +72,14 @@ async function capturePageScreenshot(page, options) {
   if (!page.nativeZoomEvidence) return page.screenshot(options);
   const cdp = await page.context().newCDPSession(page);
   try {
-    const parameters = {format: 'png', captureBeyondViewport: true};
+    const parameters = {format: 'png', captureBeyondViewport: false};
     // CDP clip coordinates are device-independent screen pixels, while DOM
     // rectangles shrink in CSS pixels under native browser zoom. Keep scale=1:
     // rescaling a CSS-sized crop would magnify only a fraction of the viewport.
-    if (options.clip) {
-      const factor = page.nativeZoomEvidence.actualFactor;
-      parameters.clip = Object.fromEntries(Object.entries(options.clip).map(([key, value]) => [key, value * factor]));
-      parameters.clip.scale = 1;
-    }
+    const clip = options.clip || await page.evaluate(() => ({x:0,y:0,width:innerWidth,height:innerHeight}));
+    const factor = page.nativeZoomEvidence.actualFactor;
+    parameters.clip = Object.fromEntries(Object.entries(clip).map(([key, value]) => [key, value * factor]));
+    parameters.clip.scale = 1;
     const {data} = await cdp.send('Page.captureScreenshot', parameters);
     const bytes = Buffer.from(data, 'base64');
     if (options.path) await fs.promises.writeFile(options.path, bytes);
