@@ -2,7 +2,7 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: codex/operator-regression-10167-10185-10171
-refreshed_at_utc: '2026-09-08T07:09:53.985527+00:00'
+refreshed_at_utc: '2026-09-08T07:20:18.633574+00:00'
 refresh_status: captured
 source_commit: bb27ebe249a2b93eec87175b8ec56c642eb4cf40
 source_run_id: '34197052873'
@@ -13,10 +13,10 @@ freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
 artifact_inputs:
-  coverage_xml: reports/audit/pr-10229-telemetry-34197052873/coverage-report/coverage/coverage.xml
+  coverage_xml: reports/coverage/coverage.xml
   coverage_log: null
   coverage_percent_fallback: null
-  slowest_tests_json: reports/audit/pr-10229-telemetry-34197052873/test-duration-telemetry/slowest-tests.json
+  slowest_tests_json: reports/test-telemetry/slowest-tests.json
   junit_inputs: []
 coverage:
   threshold_percent: 85.0
