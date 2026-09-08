@@ -29,6 +29,154 @@ from scripts.ops.observability.grafana import (
 pytestmark = pytest.mark.unit
 
 
+def _layout_manifest(expanded: bool) -> tuple[dict, dict]:
+    panel = {"id": 1, "type": "table", "gridPos": {"y": 0}}
+    child = {"id": 3, "type": "table", "gridPos": {"y": 19}}
+    source = {
+        "one": {
+            "panels": [
+                panel,
+                {
+                    "id": 2,
+                    "type": "row",
+                    "title": "Details",
+                    "collapsed": True,
+                    "panels": [child],
+                },
+            ]
+        }
+    }
+    measured = {
+        "id": 1,
+        "status": "ok",
+        "missing": False,
+        "clientHeight": 100,
+        "scrollHeight": 100,
+        "clientWidth": 300,
+        "scrollWidth": 300,
+        "bbox": {"x": 16, "y": 80, "width": 300, "height": 132},
+        "fold": 768,
+        "enforceFold": not expanded,
+    }
+    dashboard = {
+        "uid": "one",
+        "panelContainment": {"panels": [measured]},
+        "layoutFit": {
+            "cssViewport": {"width": 1366, "height": 768},
+            "devicePixelRatio": 1,
+            "fold": 768,
+        },
+        "preCaptureTerminalStateValidation": {
+            "status": "ok",
+            "panelStates": [{"id": 1}],
+        },
+        "rowExpansion": [{"title": "Details", "clicked": True}],
+        "scrollCapture": {
+            "tiles": [{"panels": [{"panel": "panel-1"}, {"panel": "panel-3"}]}]
+        },
+    }
+    if expanded:
+        dashboard["preCaptureTerminalStateValidation"]["panelStates"].append({"id": 3})
+    return {
+        "requested": {
+            "viewport": {"width": 1366, "height": 768},
+            "browser_zoom": 100,
+            "capture_surface": "full" if expanded else "viewport",
+        },
+        "expand_collapsed_rows": expanded,
+        "dashboards": [dashboard],
+    }, source
+
+
+@pytest.mark.parametrize("expanded", [False, True])
+def test_layout_surface_requires_its_own_panel_scope(expanded: bool) -> None:
+    manifest, source = _layout_manifest(expanded)
+    assert (
+        preflight.validate_layout_surface(
+            manifest, source_models=source, expanded=expanded
+        )
+        == []
+    )
+    assert preflight.validate_layout_surface(
+        manifest, source_models=source, expanded=not expanded
+    )
+
+
+@pytest.mark.parametrize("defect", ["missing", "overflow", "fold", "unmeasured_fold"])
+def test_layout_first_viewport_rejects_missing_or_uncontained_panel(
+    defect: str,
+) -> None:
+    manifest, source = _layout_manifest(False)
+    dashboard = manifest["dashboards"][0]
+    panel = dashboard["panelContainment"]["panels"][0]
+    if defect == "missing":
+        dashboard["panelContainment"]["panels"].clear()
+    elif defect == "overflow":
+        panel["scrollHeight"] = 110
+    elif defect == "fold":
+        panel["bbox"]["y"] = 700
+    else:
+        panel["enforceFold"] = False
+    assert preflight.validate_layout_surface(
+        manifest, source_models=source, expanded=False
+    )
+
+
+@pytest.mark.parametrize("defect", ["row", "tile", "terminal"])
+def test_layout_expanded_requires_rows_and_observed_descendants(defect: str) -> None:
+    manifest, source = _layout_manifest(True)
+    dashboard = manifest["dashboards"][0]
+    if defect == "row":
+        dashboard["rowExpansion"][0]["clicked"] = False
+    elif defect == "tile":
+        dashboard["scrollCapture"]["tiles"][0]["panels"].pop()
+    else:
+        dashboard["preCaptureTerminalStateValidation"]["panelStates"].pop()
+    assert preflight.validate_layout_surface(
+        manifest, source_models=source, expanded=True
+    )
+
+
+@pytest.mark.parametrize("write_manifest", [True, False])
+def test_selected_layout_matrix_binds_immutable_manifest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, write_manifest: bool
+) -> None:
+    def render(argv: list[str]) -> int:
+        if write_manifest:
+            root = Path(argv[argv.index("--output-dir") + 1])
+            root.mkdir(parents=True)
+            immutable = "render-manifest--full-set--unit.json"
+            raw = json.dumps({"immutable_manifest": immutable})
+            (root / "render-manifest.json").write_text(raw)
+            (root / immutable).write_text(raw)
+        return 0
+
+    monkeypatch.setattr(render_matrix.rerender, "main", render)
+    result = render_matrix.main(
+        [
+            "--output-dir",
+            str(tmp_path),
+            "--range-from",
+            "1000",
+            "--range-to",
+            "2000",
+            "--profiles",
+            "1366x768-dark",
+            "--no-include-kiosk",
+        ]
+    )
+    manifest = json.loads((tmp_path / "matrix-manifest.json").read_text())
+    assert result == (0 if write_manifest else 1)
+    assert manifest["scope"] == "selected-profiles"
+    assert manifest["consistency"]["status"] == "not-applicable"
+    if write_manifest:
+        profile = manifest["profiles"][0]
+        assert (
+            profile["manifest_sha256"]
+            == hashlib.sha256(Path(profile["manifest"]).read_bytes()).hexdigest()
+        )
+
+
 def _png(width: int = 1024, height: int = 900) -> bytes:
     return (
         b"\x89PNG\r\n\x1a\n"

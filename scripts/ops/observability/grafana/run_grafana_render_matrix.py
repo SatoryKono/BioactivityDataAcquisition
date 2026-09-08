@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from dataclasses import dataclass, replace
@@ -191,6 +192,28 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _matrix_consistency(
+    output_dir: Path, profiles: tuple[RenderProfile, ...]
+) -> dict[str, object]:
+    baseline_path = output_dir / "1440x900-dark" / _RENDER_MANIFEST
+    repeat_path = output_dir / "1440x900-dark-repeat" / _RENDER_MANIFEST
+    if baseline_path.exists() and repeat_path.exists():
+        return compare_repeat_geometry(
+            _read_manifest(baseline_path), _read_manifest(repeat_path)
+        )
+    if not {"1440x900-dark", "1440x900-dark-repeat"}.issubset(
+        {profile.name for profile in profiles}
+    ):
+        return {
+            "status": "not-applicable",
+            "reason": "repeat comparison is outside the explicitly selected profile set",
+        }
+    return {
+        "status": "not-checked",
+        "reason": "required repeat groups did not both complete",
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
     output_dir = resolve_output_path(Path(args.output_dir))
@@ -240,31 +263,28 @@ def main(argv: list[str] | None = None) -> int:
                 "name": profile.name,
                 "exit_code": code,
                 "manifest": str(manifest_path),
+                "manifest_sha256": hashlib.sha256(
+                    manifest_path.read_bytes()
+                ).hexdigest()
+                if manifest_path.is_file()
+                else None,
             }
         )
 
-    consistency: dict[str, object] = {
-        "status": "not-checked",
-        "reason": "required repeat groups did not both complete",
-    }
-    baseline_path = output_dir / "1440x900-dark" / _RENDER_MANIFEST
-    repeat_path = output_dir / "1440x900-dark-repeat" / _RENDER_MANIFEST
-    if baseline_path.exists() and repeat_path.exists():
-        consistency = compare_repeat_geometry(
-            _read_manifest(baseline_path),
-            _read_manifest(repeat_path),
-        )
+    consistency = _matrix_consistency(output_dir, profiles)
 
     status = (
         "ok"
         if len(results) == len(profiles)
-        and all(item["exit_code"] == 0 for item in results)
-        and consistency.get("status") == "ok"
+        and all(item["exit_code"] == 0 and item["manifest_sha256"] for item in results)
+        and consistency.get("status") in {"ok", "not-applicable"}
         else "error"
     )
     matrix_manifest = {
         "generated_at": datetime.now(tz=UTC).isoformat(),
         "status": status,
+        "scope": "selected-profiles" if args.profiles else "full-matrix",
+        "expected_profiles": [profile.name for profile in profiles],
         "profiles": results,
         "consistency": consistency,
         "backend_applicability": {
