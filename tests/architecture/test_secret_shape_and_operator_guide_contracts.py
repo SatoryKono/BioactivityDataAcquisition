@@ -7,6 +7,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.helpers.secret_fingerprints import assert_no_historical_neo4j_passwords
+
 pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -31,7 +33,7 @@ def _docker_identity(raw: str) -> tuple[int, int]:
 
 def test_readme_mcp_env_example_has_no_neo4j_password_literal() -> None:
     readme = _read("README.md")
-    assert "[REDACTED]" not in readme
+    assert_no_historical_neo4j_passwords(readme)
     assert "NEO4J_AUTH=" in readme
 
 

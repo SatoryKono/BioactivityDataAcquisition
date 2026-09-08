@@ -1,11 +1,11 @@
 {
-  "source_branch": "codex/operator-regression-10167-10185-10171",
-  "source_commit": "bb27ebe249a2b93eec87175b8ec56c642eb4cf40",
-  "source_run_id": "34197052873",
+  "source_branch": "codex/rf007-audit-auth-fail-closed",
+  "source_commit": "6391d86a41cd1359c4624a4d03b998dad88fd6eb",
+  "source_run_id": "34206477644",
   "source_event": "pull_request",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34197052873",
-  "source_tree_sha256": "500197f667c791a6f3dc82b0700fb00e9c5e06a65932126a0f0383dad605361a",
-  "refreshed_at_utc": "2026-09-08T07:20:18.633574+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34206477644",
+  "source_tree_sha256": "32750415cbc74668265b25a26c18e2fd041be680c1f2ef254dc3494825633333",
+  "refreshed_at_utc": "2026-09-08T08:58:14.262584+00:00",
   "refresh_status": "captured",
   "coverage_percent": 96.71,
   "coverage": {
