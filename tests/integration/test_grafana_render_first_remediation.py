@@ -353,7 +353,7 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
         ]
         assert len(containers) == 1, path.name
         container_style = containers[0].get("style", "")
-        for token in ("display:flex", "flex-wrap:nowrap", "overflow:visible"):
+        for token in ("display:flex", "flex-wrap:wrap", "overflow:visible"):
             assert token in container_style, (path.name, token)
 
         anchors = [attrs for tag, attrs in parser.elements if tag == "a"]
@@ -379,7 +379,7 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
         for attrs in handoff_links:
             style = attrs.get("style", "")
             for token in (
-                "flex:1 1 0",
+                "flex:1 1 auto",
                 "text-align:center",
                 "color:#f8fafc",
                 "background:#334155",
@@ -389,7 +389,7 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
             assert attrs.get("href"), path.name
         current_style = current[0].get("style", "")
         for token in (
-            "flex:1 1 0",
+            "flex:1 1 auto",
             "background:#1d4ed8",
             "border:2px solid #7dd3fc",
         ):

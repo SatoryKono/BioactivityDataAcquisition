@@ -465,11 +465,11 @@ def _telemetry_evidence_errors(panel: JsonObject) -> list[str]:
     }
     expected = {
         "Endpoint": {
-            "1": {"text": "SCRAPING", "color": "gray"},
+            "1": {"text": "SCRAPING", "color": "text"},
             "0": {"text": "UNAVAILABLE", "color": "orange"},
         },
         "Baseline": {
-            "0": {"text": "PRESENT", "color": "gray"},
+            "0": {"text": "PRESENT", "color": "text"},
             "1": {"text": "RULE/SERIES GAP", "color": "orange"},
             "2": {"text": "RULE+SERIES GAP", "color": "red"},
         },

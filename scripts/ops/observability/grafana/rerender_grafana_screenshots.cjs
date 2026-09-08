@@ -1409,42 +1409,9 @@ async function dashboardCaptureMetrics(page) {
   );
 }
 
-async function prepareDashboardForCapture(page, dashboard, index, total) {
-  if (CONFIG.captureSurface !== "full") {
-    return false;
-  }
-  const metrics = await dashboardCaptureMetrics(page);
-  const measuredBottom =
-    metrics.panelBottom > 0 ? metrics.panelBottom : metrics.scrollBottom;
-  const scale = zoomScale(CONFIG.browserZoom);
-  const requestedLayoutViewport = layoutViewportForZoom(
-    CONFIG.viewport,
-    CONFIG.browserZoom,
-  );
-  const desiredLayoutHeight = Math.min(
-    Math.floor(MAX_CAPTURE_VIEWPORT_HEIGHT / scale),
-    Math.max(
-      Math.ceil(900 / scale),
-      Math.ceil(measuredBottom || requestedLayoutViewport.height) + 32,
-    ),
-  );
-  dashboard.captureHeight = Math.round(desiredLayoutHeight * scale);
-  const currentViewport = page.viewportSize() || requestedLayoutViewport;
-  let viewportChanged = false;
-  if (desiredLayoutHeight > currentViewport.height + 4) {
-    console.log(
-      `[${index}/${total}] setting capture layout viewport for ${dashboard.uid} to ${requestedLayoutViewport.width}x${desiredLayoutHeight} based on ${metrics.markerCount} panel marker(s) ...`,
-    );
-    await page.setViewportSize({
-      width: requestedLayoutViewport.width,
-      height: desiredLayoutHeight,
-    });
-    viewportChanged = true;
-    await page.waitForTimeout(Math.max(250, Math.min(1000, CONFIG.settleMs)));
-  }
+async function prepareDashboardForCapture(page) {
   await setDashboardScrollPosition(page, 0);
-  await page.waitForTimeout(Math.max(250, Math.min(1000, Math.floor(CONFIG.settleMs / 3))));
-  return viewportChanged;
+  return false;
 }
 
 async function settleDashboardAfterViewportChange(page, dashboard, index, total) {
@@ -1767,6 +1734,7 @@ function navigationValidationFromDom() {
           inner.top >= outer.top - tolerance &&
           inner.bottom <= outer.bottom + tolerance,
       );
+    const linkTextFits = links.every(link => link.scrollWidth <= link.clientWidth + tolerance && link.scrollHeight <= link.clientHeight + tolerance);
     const linksInsidePanel = linkRects.every((rect) =>
       rectInside(rect, panelRect),
     );
@@ -1796,6 +1764,7 @@ function navigationValidationFromDom() {
       linkCount: links.length,
       contentInsidePanel,
       linksInsidePanel,
+      linkTextFits,
       focusTargetFound: Boolean(focusTarget),
       focusInsideNavigation: Boolean(focusTarget?.closest(".bioetl-nav")),
       focusIndicatorVisible,
@@ -1815,6 +1784,7 @@ function navigationValidationFromDom() {
         evidence.linkCount === 7 &&
         evidence.contentInsidePanel &&
         evidence.linksInsidePanel &&
+        evidence.linkTextFits &&
         evidence.focusTargetFound &&
         evidence.focusInsideNavigation &&
         evidence.focusIndicatorVisible
@@ -1825,6 +1795,7 @@ function navigationValidationFromDom() {
 }
 
 async function collectNavigationValidation(page) {
+  await page.keyboard.press("Tab");
   return page.evaluate(navigationValidationFromDom);
 }
 
@@ -2041,11 +2012,21 @@ function accessibilityMeasurementsFromDom() {
         const layers = [];
         let reason = null;
         let opaque = false;
+        let gradientBounds = null;
         for (let node = element; node; node = node.parentElement) {
           const s = getComputedStyle(node);
           if (Number(s.opacity) !== 1 || s.filter !== 'none' || s.mixBlendMode !== 'normal') reason = 'unsupported opacity/filter/blend';
           if (!opaque) {
-            if (s.backgroundImage !== 'none') reason = 'background image or gradient requires pixel measurement';
+            if (s.backgroundImage !== 'none') {
+              // A conservative bound for the native opaque grayscale gradient.
+              // Only this fully specified form is supported; no arbitrary image
+              // or colored gradient is inferred from its underlying solid color.
+              const match = s.backgroundImage.match(/^linear-gradient\([\d.]+deg, (rgb\([\d, ]+\)), (rgb\([\d, ]+\))\)$/);
+              const stops = match ? [rgba(match[1]), rgba(match[2])] : [];
+              if (stops.length === 2 && stops.every(c => c && c[3] === 1 && c[0] === c[1] && c[1] === c[2]) && layers.every(c => c[3] === 0)) {
+                gradientBounds = [Math.min(...stops.map(c => c[0])), Math.max(...stops.map(c => c[0]))];
+              } else reason = 'background image or gradient requires pixel measurement';
+            }
             const color = rgba(s.backgroundColor);
             if (color) layers.push(color);
             opaque = color?.[3] === 1;
@@ -2054,23 +2035,35 @@ function accessibilityMeasurementsFromDom() {
         if (!opaque) reason = reason || 'opaque background unavailable';
         let background = [0, 0, 0];
         for (const layer of layers.toReversed()) background = over(layer, background);
-        return {background, reason};
+        return {background, reason, gradientBounds};
     }
     function contrastValues(style, element) {
-      let {background, reason} = backgroundInfo(element);
+      let {background, reason, gradientBounds} = backgroundInfo(element);
       const foreground = rgba(style.color);
       if (!foreground) reason = reason || 'unsupported foreground';
+      if (gradientBounds && !reason) {
+        if (!foreground || foreground[3] !== 1) {
+          reason = 'gradient foreground requires pixel measurement';
+        } else {
+          const foregroundLuminance = luminance(foreground.slice(0, 3));
+          const lower = luminance(Array(3).fill(gradientBounds[0]));
+          const upper = luminance(Array(3).fill(gradientBounds[1]));
+          const nearest = foregroundLuminance >= upper ? gradientBounds[1] : gradientBounds[0];
+          if (foregroundLuminance > lower && foregroundLuminance < upper) reason = 'gradient crosses foreground luminance';
+          background = [nearest, nearest, nearest];
+        }
+      }
       const effective = foreground ? over(foreground, background) : null;
       const values = effective ? [luminance(effective), luminance(background)] : null;
       const ratio = values && !reason ? (Math.max(...values) + 0.05) / (Math.min(...values) + 0.05) : null;
-      return {background, reason, effective, ratio};
+      return {background, reason, effective, ratio, gradientBounds};
     }
     function measureElement(element, panel) {
         const directText = [...element.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').trim();
         const rect = element.getBoundingClientRect();
         const style = getComputedStyle(element);
         if (!directText || !rect.width || !rect.height || style.visibility !== 'visible' || style.display === 'none') return null;
-        const {background, reason, effective, ratio} = contrastValues(style, element);
+        const {background, reason, effective, ratio, gradientBounds} = contrastValues(style, element);
         const size = Number.parseFloat(style.fontSize);
         const weight = Number.parseFloat(style.fontWeight);
         const large = size >= 24 || (size >= 18.6666666667 && weight >= 700);
@@ -2087,7 +2080,8 @@ function accessibilityMeasurementsFromDom() {
             }
             return layers;
           })(),
-          fontSize: size, fontWeight: weight, large, ratio, threshold,
+          fontSize: size, fontWeight: weight, large, ratio, threshold, gradientBounds,
+          ratioMethod: gradientBounds ? 'conservative minimum over native grayscale gradient' : 'computed composited colors',
           status, reason,
           bbox: {x: rect.x, y: rect.y, width: rect.width, height: rect.height},
           clientWidth: element.clientWidth, scrollWidth: element.scrollWidth,
@@ -2143,17 +2137,18 @@ function graphicsMeasurementsFromDom() {
         else if (!background && color?.[3] > 0) reason = 'translucent graphic background needs pixel evidence';
       }
       const foreground = rgba(style.stroke !== 'none' ? style.stroke : style.fill);
-      if (!background || !foreground || foreground[3] !== 1 || Number(style.opacity) !== 1
+      if (!background || !foreground || Number(style.opacity) !== 1
           || Number(style.fillOpacity) !== 1 || Number(style.strokeOpacity) !== 1) reason ||= 'unsupported graphic foreground/background';
-      const ratio = reason ? null : (Math.max(luminance(foreground), luminance(background)) + 0.05) / (Math.min(luminance(foreground), luminance(background)) + 0.05);
+      const effectiveForeground = foreground && background ? foreground.slice(0, 3).map((v, i) => v * foreground[3] + background[i] * (1 - foreground[3])) : null;
+      const ratio = reason ? null : (Math.max(luminance(effectiveForeground), luminance(background)) + 0.05) / (Math.min(luminance(effectiveForeground), luminance(background)) + 0.05);
       const disabled = control?.matches(':disabled, [aria-disabled="true"]') || false;
       pairs.push({panel: panel.dataset.vizPanelKey, tag: element.tagName, bbox,
-        accessibleName: name, foreground, background, ratio, threshold: 3,
+        accessibleName: name, foreground, effectiveForeground, background, ratio, threshold: 3,
         role: control ? 'interactive icon' : 'graphic', disabled,
         status: disabled ? 'EXEMPT_DISABLED' : (ratio === null ? 'NOT_VERIFIABLE' : (ratio >= 3 ? 'PASS' : 'FAIL')), reason});
     }
   }
-  return {method: 'computed opaque SVG foreground and adjacent background', pairs, canvases};
+  return {method: 'computed alpha-composited SVG foreground and opaque adjacent background', pairs, canvases};
 }
 
 async function collectVerifiedRenderContext(page, dashboard) {
@@ -2201,7 +2196,7 @@ async function collectVerifiedPanelSurfaces(page, dashboard) {
     );
   }
   dashboard.navigationValidation = await collectNavigationValidation(page);
-  if (CONFIG.navigationOnly && dashboard.navigationValidation.status !== "ok") {
+  if (dashboard.navigationValidation.status !== "ok") {
     throw new Error(
       `Navigation validation failed for ${dashboard.uid}: ${JSON.stringify(dashboard.navigationValidation)}`,
     );
@@ -2232,7 +2227,7 @@ function screenshotOptions(dashboard, filePath) {
     caret: "hide",
   };
   if (CONFIG.captureSurface === "viewport") {
-    options.clip = { x: 0, y: 0, ...CONFIG.viewport };
+    options.clip = { x: 0, y: 0, ...layoutViewportForZoom(CONFIG.viewport, CONFIG.browserZoom) };
   } else if (CONFIG.expandCollapsedRows && Number.isFinite(dashboard.captureHeight)) {
     options.clip = {
       x: 0,
@@ -2248,6 +2243,8 @@ function screenshotOptions(dashboard, filePath) {
 
 async function renderDashboard(page, dashboard, index, total) {
   const target = dashboardRenderUrl(dashboard);
+  const {observeCanvasDrawing,canvasEvidenceFromDom} = require('./capture_canvas_evidence.cjs');
+  await page.addInitScript(observeCanvasDrawing);
   // Keep the actual API response loaded by the browser, bracketed by API reads.
   // Only root id/version are provisioning metadata; nested fields are semantic.
   const modelUrl = `${CONFIG.baseUrl}/api/dashboards/uid/${dashboard.uid}`;
@@ -2271,16 +2268,8 @@ async function renderDashboard(page, dashboard, index, total) {
     }
   });
   console.log(`[${index}/${total}] loading ${dashboard.uid} ...`);
-  // Start full-surface audits with enough vertical space for expanded rows.
-  // Shrinking/resizing only after queries settle makes Grafana re-run every
-  // panel and can strand Infinity/HTTP panels in a loading state.
-  const auditPhysicalViewport =
-    CONFIG.captureSurface === "full" && CONFIG.expandCollapsedRows
-      ? { width: CONFIG.viewport.width, height: MAX_CAPTURE_VIEWPORT_HEIGHT }
-      : CONFIG.viewport;
-  await page.setViewportSize(
-    layoutViewportForZoom(auditPhysicalViewport, CONFIG.browserZoom),
-  );
+  // Keep the requested layout viewport for both viewport and scrolling packs.
+  await page.setViewportSize(layoutViewportForZoom(CONFIG.viewport, CONFIG.browserZoom));
   console.log(`[${index}/${total}] goto ${dashboard.uid} -> ${target}`);
   await page.goto(target, {
     timeout: CONFIG.timeoutMs,
@@ -2323,12 +2312,22 @@ async function renderDashboard(page, dashboard, index, total) {
     await settleDashboardAfterViewportChange(page, dashboard, index, total);
   }
   await collectVerifiedRenderContext(page, dashboard);
+  dashboard.canvasEvidence = await page.evaluate(canvasEvidenceFromDom);
 
   const filePath = path.join(CONFIG.outputDir, dashboard.file);
   console.log(
     `[${index}/${total}] capturing screenshot ${dashboard.uid} with timeout ${CONFIG.captureTimeoutMs}ms ...`,
   );
-  await page.screenshot(screenshotOptions(dashboard, filePath));
+  if (CONFIG.captureSurface === 'full') {
+    const {captureScrollSurface} = require('./capture_scroll_surface.cjs');
+    dashboard.scrollCapture = await captureScrollSurface(page, {filePath,
+      timeout: CONFIG.captureTimeoutMs, pngEvidence,
+      measure: async () => ({text: await page.evaluate(accessibilityMeasurementsFromDom),
+        graphics: await page.evaluate(graphicsMeasurementsFromDom),
+        canvas: await page.evaluate(canvasEvidenceFromDom)})});
+  } else {
+    await page.screenshot(screenshotOptions(dashboard, filePath));
+  }
   const screenshotBuffer = await fs.promises.readFile(filePath);
   dashboard.screenshotEvidence = {
     file: dashboard.file,

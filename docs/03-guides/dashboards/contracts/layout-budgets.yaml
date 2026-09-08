@@ -16,9 +16,11 @@ first_load_y_max: 28
 # Calibrated 2026-08-14 against the repo 1366x768 first-viewport contract
 # (grafana README render matrix + Grafana grid GRID_CELL_HEIGHT=30,
 # GRID_CELL_VMARGIN=8 => stride 38px). Panel bottom px = 38*(y+h)-8.
-# kiosk=tv / first-viewport chrome (~88px) => floor((768-88+8)/38)=18.
-# kiosk=off with two variable rows is tighter (~15-16) and is a future
-# tightening, not this constant. Equals FIRST_WINDOW_Y by design.
+# Historical kiosk=tv calibration used ~88px chrome. Grafana 12 accepts
+# kiosk=1 (full); tv leaves navigation visible. Full kiosk retains filters:
+# two variable rows place the grid at 104px and require bottom <= 17 for
+# 1366x768. The DOM fold gate enforces the actual viewport independently
+# of this unchanged static ceiling. Equals FIRST_WINDOW_Y by design.
 viewport_rows: 18
 
 # Regression cap on always-visible first-window budget panels (current max = 8).

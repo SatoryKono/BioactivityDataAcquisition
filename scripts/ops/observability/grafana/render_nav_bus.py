@@ -118,7 +118,7 @@ _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
 _CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 18
 NAV_TITLE_STYLE = "font-size:19px;font-weight:600;line-height:1;margin:0 2px"
 CHIP_BASE = (
-    "box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;"
+    "box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;"
     "border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere"
 )
 # Theme-safe chips: slate link surface works on dark and light Grafana themes.
@@ -134,7 +134,7 @@ CURRENT_STYLE = (
     "cursor:default;text-decoration:underline;pointer-events:none"
 )
 CONTAINER_STYLE = (
-    "display:flex;gap:2px;flex-wrap:nowrap;align-items:center;"
+    "display:flex;gap:2px;flex-wrap:wrap;align-items:center;"
     "padding:0 2px;overflow:visible;white-space:normal;font-size:16px"
 )
 _PROVIDER_VARIABLE_UIDS = {"bioetl-provider-health-v2", "bioetl-incident-v1"}
@@ -214,7 +214,7 @@ def _chip_html(item: dict[str, str], *, current_uid: str, source_uid: str) -> st
 
 
 def render_html(*, current_uid: str) -> str:
-    """Render the full seven-destination bus as one reflow-safe flex row."""
+    """Render the full seven-destination bus as reflowing flex rows."""
     primary = BUS[:5]
     adjunct = BUS[5:]
     parts: list[str] = [
