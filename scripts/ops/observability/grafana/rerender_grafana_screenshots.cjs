@@ -2325,7 +2325,7 @@ function mergeTerminalObservations(dashboard, observations) {
   const states = new Map();
   let valid = observations.length > 0;
   for (const observation of observations) {
-    if (!observation || observation.status !== 'ok') valid = false;
+    if (observation?.status !== 'ok') valid = false;
     for (const state of observation?.panelStates || []) {
       if (!ACCEPTED_TERMINAL_CLASSIFICATIONS.has(state.classification)) valid = false;
       states.set(state.id, state);

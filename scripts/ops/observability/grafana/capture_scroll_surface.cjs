@@ -21,7 +21,8 @@ function tileIsStable(evidence, scrollTop, scrollAfter, verify) {
 async function captureStableTile(page, {tileDir, index, timeout, measure, verify, pngEvidence}) {
   const deadline = Date.now() + timeout;
   const rejected = [];
-  for (let attempt = 0; Date.now() < deadline; attempt++) {
+  let attempt = 0;
+  while (Date.now() < deadline) {
     const evidence = await measure();
     const panels = await page.evaluate(visiblePanelGeometryFromDom);
     const file = path.join(tileDir, `${String(index).padStart(3,'0')}-${attempt}.png`);
@@ -36,6 +37,7 @@ async function captureStableTile(page, {tileDir, index, timeout, measure, verify
     }
     rejected.push({...result, reason:'visible panel set changed across capture'});
     await fs.promises.writeFile(path.join(tileDir, `${index}-rejected.json`), JSON.stringify(rejected));
+    attempt++;
   }
   throw new Error('Visible panel set did not stabilize within the capture timeout');
 }
