@@ -90,8 +90,22 @@ def capture(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         "capture_id": "test-capture",
         "immutable_manifest": name,
         "manifest_kind": "full-set",
+        "file_set": ["test.png"],
+        "file_count": 1,
         "base_url": "http://localhost:3000",
-        "requested": {"viewport": {"width": 1366, "height": 768}},
+        "requested": {
+            "viewport": {"width": 1366, "height": 768},
+            "theme": "dark",
+            "browser_zoom": 100,
+            "kiosk_mode": "off",
+            "capture_surface": "viewport",
+        },
+        "capture_context": {
+            "time_range": {"from": "1000", "to": "2000", "timezone": "UTC"},
+            "variables": {"workflow": "", "pipeline": "", "run_type": "", "run_id": ""},
+            "row_state": {"expand_collapsed_rows": False},
+        },
+        "expand_collapsed_rows": False,
         "source": {
             "commit_sha": "a" * 40,
             "working_tree_dirty": False,
@@ -107,7 +121,18 @@ def capture(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
                     "loaded": [source],
                     "after": source,
                     "captureId": "test-capture",
-                    "observedUrl": "http://localhost:3000/d/test/title",
+                    "observedUrl": "http://localhost:3000/d/test/title?from=1000&to=2000&timezone=UTC&theme=dark",
+                    "browserVersion": "123.0.0",
+                },
+                "actualTheme": "dark",
+                "browserState": {
+                    "requestedZoom": 100,
+                    "cssZoom": "1",
+                    "actualKiosk": "off",
+                    "devicePixelRatio": 1,
+                    "layoutViewport": {"width": 1366, "height": 768},
+                    "physicalViewport": {"width": 1366, "height": 768},
+                    "visibleGrafanaChrome": True,
                 },
                 "screenshotEvidence": {
                     "file": "test.png",
@@ -218,3 +243,68 @@ def test_windows_source_separators_preserve_resource_identity(capture):
     manifest["dashboards"][0]["dashboardSource"]["path"] = "grafana/other/test.json"
     path.write_text(json.dumps(manifest), encoding="utf-8")
     assert provenance.verify_capture(path, repo_root=root)["status"] == "FAIL"
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "truncated_png",
+        "url_time",
+        "url_variable",
+        "dsf",
+        "css_viewport",
+        "file_count",
+        "file_set",
+    ],
+)
+def test_context_and_rehashed_corruption_are_rejected(capture, mutation):
+    root, path, manifest = capture
+    dashboard = manifest["dashboards"][0]
+    if mutation == "truncated_png":
+        png_path = path.parent / "test.png"
+        raw = png_path.read_bytes()[:24]
+        png_path.write_bytes(raw)
+        dashboard["screenshotEvidence"].update(
+            sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw)
+        )
+    elif mutation == "url_time":
+        dashboard["provisionedModel"]["observedUrl"] = dashboard["provisionedModel"][
+            "observedUrl"
+        ].replace("from=1000", "from=999")
+    elif mutation == "url_variable":
+        manifest["capture_context"]["variables"]["pipeline"] = "chembl_assay"
+    elif mutation == "dsf":
+        dashboard["browserState"]["devicePixelRatio"] = 2
+    elif mutation == "css_viewport":
+        dashboard["browserState"]["layoutViewport"]["width"] = 1000
+    elif mutation == "file_count":
+        manifest["file_count"] = 99
+    else:
+        manifest["file_set"] = ["other.png"]
+    path.write_text(json.dumps(manifest))
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "FAIL"
+
+
+def test_external_manifest_and_commit_pins_reject_self_consistent_replacement(capture):
+    root, path, manifest = capture
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    assert (
+        provenance.verify_capture(
+            path, repo_root=root, expected_sha256=digest, expected_commit="a" * 40
+        )["status"]
+        == "PASS"
+    )
+    manifest["generated_at"] = "another occurrence"
+    path.write_text(json.dumps(manifest))
+    assert (
+        provenance.verify_capture(path, repo_root=root, expected_sha256=digest)[
+            "status"
+        ]
+        == "FAIL"
+    )
+    assert (
+        provenance.verify_capture(path, repo_root=root, expected_commit="b" * 40)[
+            "status"
+        ]
+        == "FAIL"
+    )
