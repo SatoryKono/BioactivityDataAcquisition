@@ -68,8 +68,8 @@ The script reports `SET` / `NOT SET` only and must not print secret values.
 | OpenRouter | `OPENROUTER_API_KEY` | Only for OpenRouter-backed tooling | OpenRouter key console | Models explicitly selected by the local tool | 90 days |
 | Prometheus | `PROMETHEUS_TOKEN` or username/password | No | Local protected Prometheus endpoint | Read/query only | 90 days for shared service accounts |
 | Grafana | `GRAFANA_SERVICE_ACCOUNT_TOKEN` or username/password | No | Grafana service account preferred | Viewer/read-only dashboard and datasource access | 90 days |
-| Neo4j Cypher | `NEO4J_*` | No for local defaults | Local Neo4j memory instance | Local memory database only | Rotate default before shared-host use |
-| Neo4j Memory | `NEO4J_*` | No for local defaults | Local Neo4j memory instance | Local memory database only | Rotate default before shared-host use |
+| Neo4j Cypher | `NEO4J_USERNAME` / `NEO4J_PASSWORD` or `NEO4J_AUTH` | Yes when Neo4j MCP is used | Local Neo4j memory instance | Local memory database only | Rotate after exposure or ownership changes |
+| Neo4j Memory | `NEO4J_USERNAME` / `NEO4J_PASSWORD` or `NEO4J_AUTH` | Yes when Neo4j MCP is used | Local Neo4j memory instance | Local memory database only | Rotate after exposure or ownership changes |
 | Docker Hub | `HUB_PAT_TOKEN` | No | Docker Hub PAT | Read-only pull access unless publishing is explicitly required | 90 days |
 
 ## Wrapper Validation
@@ -113,7 +113,7 @@ bash scripts/ai/mcp/check.sh
 | Ref MCP requires login | Use interactive OAuth, or set `REF_TOOL_API_KEY`; Codex sends it through `env_http_headers` as `x-ref-api-key` without placing the value in config. |
 | Grafana MCP starts but queries fail | Set `GRAFANA_SERVICE_ACCOUNT_TOKEN` or local username/password; confirm `GRAFANA_URL`. |
 | Prometheus MCP cannot query | Confirm `PROMETHEUS_URL`; add token or username/password only if the endpoint is protected. |
-| Neo4j MCP authentication fails | Confirm `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`, or `NEO4J_AUTH`. Rotate the documented local default before shared-host use. |
+| Neo4j MCP authentication fails | Confirm `NEO4J_URI`; configure `NEO4J_USERNAME` and `NEO4J_PASSWORD`, or `NEO4J_AUTH`, with the instance credentials. The template supplies no password. With `LIVE_AUDIT_MODE=true`, configure `NEO4J_AUDIT_PASSWORD` or `NEO4J_AUDIT_AUTH`; audit mode does not fall back to main credentials. `NEO4J_AUDIT_USERNAME` takes priority over the username in `NEO4J_AUDIT_AUTH`: clear the template's username to use the complete AUTH pair, or set it to the intended audit account. |
 | OpenRouter authentication fails | Set a dedicated `OPENROUTER_API_KEY`; never reuse or alias `OPENAI_API_KEY`. |
 | Docker-backed MCP cannot start | Confirm Docker is installed and available through the wrapper resolver. |
 
