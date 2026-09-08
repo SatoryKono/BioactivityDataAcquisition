@@ -291,6 +291,22 @@ def dashboard_attachment_errors(root: Path, dashboard: dict) -> list[str]:
     ]
 
 
+def browser_resource_errors(manifest: dict, dashboard: dict) -> list[str]:
+    """Bind the observed browser resource to this UID, origin and occurrence."""
+    errors = []
+    model = dashboard.get("provisionedModel") or {}
+    if model.get("captureId") != manifest.get("capture_id", ""):
+        errors.append("model occurrence mismatch")
+    observed = urlparse(model.get("observedUrl", ""))
+    base = urlparse(manifest.get("base_url", ""))
+    if (observed.scheme, observed.netloc) != (
+        base.scheme,
+        base.netloc,
+    ) or not observed.path.startswith(f"/d/{dashboard.get('uid')}/"):
+        errors.append("observed browser resource mismatch")
+    return errors
+
+
 def _dashboard_errors(
     manifest_path: Path, repo_root: Path, path: Path, dashboard: dict, manifest: dict
 ) -> list[str]:
@@ -302,7 +318,6 @@ def _dashboard_errors(
         return ["invalid requested viewport"]
     source = manifest.get("source", {})
     commit = source.get("commit_sha", "")
-    capture_id = manifest.get("capture_id", "")
     uid = dashboard.get("uid")
     item_errors = []
     current = path.read_bytes()
@@ -339,16 +354,7 @@ def _dashboard_errors(
         != f"grafana/dashboards/{path.name}"
     ):
         item_errors.append("source path mismatch")
-    model = dashboard.get("provisionedModel") or {}
-    if model.get("captureId") != capture_id:
-        item_errors.append("model occurrence mismatch")
-    observed = urlparse(model.get("observedUrl", ""))
-    base = urlparse(manifest.get("base_url", ""))
-    if (observed.scheme, observed.netloc) != (
-        base.scheme,
-        base.netloc,
-    ) or not observed.path.startswith(f"/d/{uid}/"):
-        item_errors.append("observed browser resource mismatch")
+    item_errors.extend(browser_resource_errors(manifest, dashboard))
     if dashboard.get("file") != f"{uid}.png":
         item_errors.append("PNG resource mismatch")
     else:
