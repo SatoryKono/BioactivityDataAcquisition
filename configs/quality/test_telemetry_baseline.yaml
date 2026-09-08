@@ -2,7 +2,7 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: fix/ori-five-main-evidence
-refreshed_at_utc: '2026-09-08T18:40:25.171360+00:00'
+refreshed_at_utc: '2026-09-08T19:02:00.307593+00:00'
 refresh_status: captured
 source_commit: d9226c9fce46cdf3c92afa81a5e0fa6e2f2ce23a
 source_run_id: '34262650914'
@@ -13,10 +13,10 @@ freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
 artifact_inputs:
-  coverage_xml: E:\github\BioactivityDataAcquisition\reports\audit\ci-ori-five-10242\producer\coverage\coverage\coverage.xml
+  coverage_xml: reports/coverage/coverage.xml
   coverage_log: null
   coverage_percent_fallback: null
-  slowest_tests_json: E:\github\BioactivityDataAcquisition\reports\audit\ci-ori-five-10242\producer\duration\slowest-tests.json
+  slowest_tests_json: reports/test-telemetry/slowest-tests.json
   junit_inputs: []
 coverage:
   threshold_percent: 85.0
