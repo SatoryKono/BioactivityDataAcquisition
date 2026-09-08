@@ -11,6 +11,19 @@ on:
         description: Representative run type
         required: true
         default: incremental
+      range_from:
+        description: Fixed UTC Unix milliseconds (paired with range_to)
+        required: false
+      range_to:
+        description: Fixed UTC Unix milliseconds (paired with range_from)
+        required: false
+      regression_acceptance:
+        description: Verify a pre-staged immutable reviewer bundle for this exact checkout
+        type: boolean
+        default: false
+      acceptance_capture:
+        description: Capture ID under runner.temp/bioetl-dashboard-acceptance (letters, digits, underscore, dash)
+        required: false
 
 permissions:
   contents: read
@@ -34,15 +47,45 @@ jobs:
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
 
+      - name: Resolve pre-staged acceptance bundle
+        id: acceptance_bundle
+        if: ${{ inputs.regression_acceptance }}
+        env:
+          ACCEPTANCE_CAPTURE: ${{ inputs.acceptance_capture }}
+        run: |
+          if ! [[ "${ACCEPTANCE_CAPTURE}" =~ ^[A-Za-z0-9_-]+$ ]]; then
+            echo "A bounded acceptance capture ID is required" >&2
+            exit 1
+          fi
+          bundle_path="${RUNNER_TEMP}/bioetl-dashboard-acceptance/${ACCEPTANCE_CAPTURE}"
+          test -f "${bundle_path}/acceptance-input.json"
+          printf 'path=%s\n' "${bundle_path}" >> "${GITHUB_OUTPUT}"
+
       - name: Run occurrence-bound dashboard release cycle
         env:
           PIPELINE: ${{ inputs.pipeline }}
           RUN_TYPE: ${{ inputs.run_type }}
+          RANGE_FROM: ${{ inputs.range_from }}
+          RANGE_TO: ${{ inputs.range_to }}
+          REGRESSION_ACCEPTANCE: ${{ inputs.regression_acceptance }}
+          ACCEPTANCE_BUNDLE: ${{ steps.acceptance_bundle.outputs.path }}
           GRAFANA_USERNAME: ${{ secrets.GRAFANA_USERNAME }}
           GRAFANA_PASSWORD: ${{ secrets.GRAFANA_PASSWORD }}
         run: |
           occurrence_id="dashboard-host-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          if [ "${REGRESSION_ACCEPTANCE}" = "true" ]; then
+            uv run --frozen --no-build python -m scripts.ops run-grafana-audit-cycle \
+              --acceptance-input "${ACCEPTANCE_BUNDLE}/acceptance-input.json" \
+              --gate-output reports/observability/grafana/dashboard-release-gates.json
+            exit $?
+          fi
+          fixed_range=()
+          if [ -n "${RANGE_FROM}${RANGE_TO}" ]; then
+            fixed_range=(--range-from "${RANGE_FROM}" --range-to "${RANGE_TO}")
+          fi
           uv run --frozen --no-build python -m scripts.ops run-grafana-audit-cycle \
+            "${fixed_range[@]}" \
+            --no-render-filled-only \
             --pipeline "${PIPELINE}" \
             --run-type "${RUN_TYPE}" \
             --occurrence-id "${occurrence_id}" \
@@ -51,7 +94,7 @@ jobs:
             --gate-output reports/observability/grafana/dashboard-release-gates.json
 
       - name: Upload semantic gate source
-        if: ${{ always() && !cancelled() }}
+        if: ${{ always() && !cancelled() && !inputs.regression_acceptance }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: dashboard-semantic-gate-${{ github.run_id }}-${{ github.run_attempt }}
@@ -60,13 +103,22 @@ jobs:
           retention-days: 7
 
       - name: Upload render gate source
-        if: ${{ always() && !cancelled() }}
+        if: ${{ always() && !cancelled() && !inputs.regression_acceptance }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: dashboard-render-gate-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             reports/observability/grafana/screenshots/render-manifest.json
             reports/observability/grafana/screenshots/*.png
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload regression reviewer bundle
+        if: ${{ always() && !cancelled() && inputs.regression_acceptance && steps.acceptance_bundle.outputs.path != '' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: dashboard-regression-bundle-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ steps.acceptance_bundle.outputs.path }}
           if-no-files-found: error
           retention-days: 7
 
