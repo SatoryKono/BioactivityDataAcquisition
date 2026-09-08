@@ -119,7 +119,7 @@ def test_trust_9418_keeps_verdict_and_reason_count_visible() -> None:
         p for p in get_dashboard_files() if p.name == "bioetl-control-plane-v1.json"
     )
     panel = next(p for p in _root_panels(load_dashboard(path)) if p.get("id") == 9418)
-    assert panel["gridPos"] == {"h": 5, "w": 12, "x": 0, "y": 7}
+    assert panel["gridPos"] == {"h": 5, "w": 12, "x": 0, "y": 6}
     props = {
         o["matcher"]["options"]: {p["id"]: p["value"] for p in o["properties"]}
         for o in panel["fieldConfig"]["overrides"]
@@ -151,7 +151,7 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
     dashboard = load_dashboard(dashboard_path)
     panel = next(item for item in _root_panels(dashboard) if item.get("id") == 9416)
 
-    assert panel.get("gridPos") == {"h": 5, "w": 12, "x": 12, "y": 7}
+    assert panel.get("gridPos") == {"h": 5, "w": 12, "x": 12, "y": 6}
     assert panel.get("options", {}).get("cellHeight") == "sm"
     defaults = panel.get("fieldConfig", {}).get("defaults", {}).get("custom", {})
     assert defaults.get("inspect") is True
@@ -291,7 +291,7 @@ def test_overview_215_9002_fit_first_window_without_raising_fold() -> None:
 
     assert action.get("title") == "Review First Action"
     assert action.get("type") == "table"
-    assert action.get("gridPos") == {"h": 7, "w": 16, "x": 0, "y": 11}
+    assert action.get("gridPos") == {"h": 6, "w": 16, "x": 0, "y": 11}
     assert action.get("options", {}).get("cellHeight") == "sm"
     defaults = action.get("fieldConfig", {}).get("defaults", {}).get("custom", {})
     assert defaults.get("cellOptions", {}).get("wrapText") is not True
@@ -300,7 +300,7 @@ def test_overview_215_9002_fit_first_window_without_raising_fold() -> None:
 
     assert domain.get("title") == "Review Domain Status"
     assert domain.get("type") == "table"
-    assert domain.get("gridPos") == {"h": 7, "w": 8, "x": 16, "y": 11}
+    assert domain.get("gridPos") == {"h": 6, "w": 8, "x": 16, "y": 11}
     assert domain.get("options", {}).get("cellHeight") == "sm"
     assert panel_declared_row_cap(domain) == 2
     assert int(domain["gridPos"]["y"]) + int(domain["gridPos"]["h"]) <= FIRST_WINDOW_Y

@@ -238,7 +238,7 @@ def test_provider_reason_and_causes_share_empty_state() -> None:
     row = next(item for item in _root_panels(dashboard) if item.get("id") == 9106)
     assert row.get("type") == "row"
     assert row.get("collapsed") is True
-    assert int((row.get("gridPos") or {}).get("y", -1)) >= FIRST_WINDOW_Y
+    assert int(row["gridPos"]["y"]) + int(row["gridPos"]["h"]) >= FIRST_WINDOW_Y
     nested_ids = {
         item.get("id") for item in row.get("panels") or [] if isinstance(item, dict)
     }

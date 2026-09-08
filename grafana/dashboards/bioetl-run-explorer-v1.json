@@ -213,7 +213,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1;margin:0 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:2px;flex-wrap:nowrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health). Scope reset: provider=unknown; preserves time range, pipeline context.\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-provider=unknown&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">4. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">5. Incident Workspace</a><a class=\"bioetl-nav-current\" href=\"#bioetl-run-explorer-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"6. Run Explorer (Run Explorer)\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">6. Run Explorer</a></div>"
+        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1;margin:0 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:2px;flex-wrap:wrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health). Scope reset: provider=unknown; preserves time range, pipeline context.\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-provider=unknown&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">4. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">5. Incident Workspace</a><a class=\"bioetl-nav-current\" href=\"#bioetl-run-explorer-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"6. Run Explorer (Run Explorer)\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">6. Run Explorer</a></div>"
       },
       "links": [
         {
@@ -296,7 +296,7 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 24,
         "x": 0,
         "y": 3
@@ -325,14 +325,19 @@
         "h": 11,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 6
       },
       "datasource": "BioETL Ops HTTP",
       "fieldConfig": {
         "defaults": {
           "custom": {
             "align": "left",
-            "inspect": true
+            "inspect": true,
+            "minWidth": 50,
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": true
+            }
           },
           "noValue": "VALID EMPTY — no pipeline-run-report artifacts for the selected pipeline under reports/run-reports/pipeline/<name>/ (first screen is last 10).",
           "links": []
@@ -383,7 +388,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text"
+                  "type": "color-text",
+                  "wrapText": true
                 }
               },
               {
@@ -406,7 +412,7 @@
                       },
                       "success": {
                         "text": "success",
-                        "color": "green"
+                        "color": "text"
                       },
                       "failed": {
                         "text": "failed",
@@ -451,7 +457,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 }
               },
               {
@@ -487,10 +493,6 @@
                 "value": true
               },
               {
-                "id": "custom.width",
-                "value": 120
-              },
-              {
                 "id": "noValue",
                 "value": "—"
               }
@@ -507,13 +509,10 @@
                 "value": " "
               },
               {
-                "id": "custom.width",
-                "value": 36
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text"
+                  "type": "color-text",
+                  "wrapText": true
                 }
               },
               {
@@ -541,6 +540,10 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 50
               }
             ]
           },
@@ -563,10 +566,6 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 120
-              },
-              {
                 "id": "custom.inspect",
                 "value": true
               }
@@ -581,10 +580,6 @@
               {
                 "id": "displayName",
                 "value": "Workflow"
-              },
-              {
-                "id": "custom.width",
-                "value": 118
               },
               {
                 "id": "custom.inspect",
@@ -616,10 +611,6 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 140
-              },
-              {
                 "id": "unit",
                 "value": "time:YYYY-MM-DD HH:mm"
               },
@@ -635,10 +626,6 @@
               "options": "Completed"
             },
             "properties": [
-              {
-                "id": "custom.width",
-                "value": 140
-              },
               {
                 "id": "unit",
                 "value": "time:YYYY-MM-DD HH:mm"
@@ -675,7 +662,7 @@
                       },
                       "success": {
                         "text": "success",
-                        "color": "green"
+                        "color": "text"
                       },
                       "failed": {
                         "text": "failed",
@@ -698,14 +685,10 @@
                 ]
               },
               {
-                "id": "custom.width",
-                "value": 88
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-text",
-                  "wrapText": false
+                  "wrapText": true
                 }
               }
             ]
@@ -715,9 +698,10 @@
       "options": {
         "showHeader": true,
         "footer": {
-          "show": false
+          "show": false,
+          "enablePagination": true
         },
-        "cellHeight": "sm"
+        "cellHeight": "lg"
       },
       "targets": [
         {
@@ -821,7 +805,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 17
       },
       "description": "",
       "panels": [
@@ -832,7 +816,7 @@
           "description": "SELECTED RUN · Identity rows for the selected run (control-plane table plus pipeline_run_report_v1 identity/tracking_coverage). Selection required when no run ID is set. VALID EMPTY means the selected run has no identity; backend failure renders as QUERY ERROR.",
           "gridPos": {
             "x": 0,
-            "y": 19,
+            "y": 18,
             "w": 24,
             "h": 20
           },
@@ -931,7 +915,7 @@
           "description": "SELECTED RUN · Complete Bronze/Silver/Gold accounting. Zero-valued outcomes remain evidence. SELECT RUN / VALID EMPTY is not OK. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
           "gridPos": {
             "x": 0,
-            "y": 39,
+            "y": 38,
             "w": 24,
             "h": 14
           },
@@ -1296,7 +1280,7 @@
           "description": "SELECTED RUN · Selected run: Stage counts from pipeline_run_report_v1 for the selected run. This is a stage funnel, not start/end chronology. Removals is a compact reason summary; empty stages show — (not VALID EMPTY). VALID EMPTY is only when the report has no stage rows. Selection required when no run ID is set. Unexpected empty or errors require an Ops HTTP /health/live check. SELECT RUN / VALID EMPTY is not OK.",
           "gridPos": {
             "x": 0,
-            "y": 53,
+            "y": 52,
             "w": 24,
             "h": 10
           },
@@ -1496,7 +1480,7 @@
           "description": "SELECTED RUN · Selected run: Top removal and outcome reason codes recorded in pipeline_run_report_v1 for the selected run. Selection required when no run ID is set. Valid empty means the run recorded no reason rows; unexpected empty or errors require an Ops HTTP /health/live check. SELECT RUN / VALID EMPTY is not OK.",
           "gridPos": {
             "x": 0,
-            "y": 63,
+            "y": 62,
             "w": 24,
             "h": 9
           },
@@ -1615,7 +1599,7 @@
           "description": "SELECTED RUN · Selected run: Artifact references recorded in pipeline_run_report_v1 for the selected run. The ref cell wraps so rows stay distinguishable; Copy still yields the full location. Selection required when no run ID is set. Valid empty means no artifacts were recorded; verify /health/live for unexpected empty or errors. SELECT RUN / VALID EMPTY is not OK.",
           "gridPos": {
             "x": 0,
-            "y": 72,
+            "y": 71,
             "w": 24,
             "h": 10
           },
@@ -1748,7 +1732,7 @@
           "description": "SELECTED RUN · Optional pipeline_run_report_v1 failure and stage_timings blocks. Empty means those optional blocks were not recorded — not zero duration and not proof of success. Selection required when no run ID is set. VALID EMPTY / PARTIAL is not OK. Backend failure renders as QUERY ERROR.",
           "gridPos": {
             "x": 0,
-            "y": 82,
+            "y": 81,
             "w": 24,
             "h": 6
           },
@@ -1857,7 +1841,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 88
+        "y": 87
       },
       "description": "Optional below-fold workflow-run-reports browser. Not first-screen. Does not change panel 3010.",
       "panels": [
@@ -1870,7 +1854,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 89
+            "y": 88
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -1930,7 +1914,7 @@
                           },
                           "success": {
                             "text": "success",
-                            "color": "green"
+                            "color": "text"
                           },
                           "failed": {
                             "text": "failed",
@@ -1956,7 +1940,7 @@
                           "pattern": ".+",
                           "result": {
                             "text": "UNKNOWN",
-                            "color": "gray"
+                            "color": "text"
                           }
                         }
                       },
@@ -1966,7 +1950,7 @@
                           "match": "null",
                           "result": {
                             "text": "UNKNOWN",
-                            "color": "gray"
+                            "color": "text"
                           }
                         }
                       },
@@ -1976,7 +1960,7 @@
                           "match": "nan",
                           "result": {
                             "text": "UNKNOWN",
-                            "color": "gray"
+                            "color": "text"
                           }
                         }
                       }
@@ -2071,7 +2055,7 @@
                           },
                           "success": {
                             "text": "success",
-                            "color": "green"
+                            "color": "text"
                           },
                           "failed": {
                             "text": "failed",
@@ -2097,7 +2081,7 @@
                           "pattern": ".+",
                           "result": {
                             "text": "UNKNOWN",
-                            "color": "gray"
+                            "color": "text"
                           }
                         }
                       },
@@ -2107,7 +2091,7 @@
                           "match": "null",
                           "result": {
                             "text": "UNKNOWN",
-                            "color": "gray"
+                            "color": "text"
                           }
                         }
                       },
@@ -2117,7 +2101,7 @@
                           "match": "nan",
                           "result": {
                             "text": "UNKNOWN",
-                            "color": "gray"
+                            "color": "text"
                           }
                         }
                       }

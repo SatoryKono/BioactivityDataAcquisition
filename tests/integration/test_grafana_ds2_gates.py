@@ -198,7 +198,7 @@ def test_incident_operator_tables_no_default_color_background() -> None:
         defaults = (panel.get("fieldConfig") or {}).get("defaults") or {}
         custom = defaults.get("custom") or {}
         cell = custom.get("cellOptions") or {}
-        assert cell.get("type") in {None, "auto"}, (
+        assert cell.get("type") in {None, "auto", "color-text"}, (
             f"Incident table id={panel.get('id')} must not default color-background; "
             f"got {cell.get('type')!r}"
         )

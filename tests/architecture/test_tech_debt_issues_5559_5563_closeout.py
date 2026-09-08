@@ -144,8 +144,7 @@ def test_issue_5561_config_duplication_clusters_are_owner_addressable() -> None:
 
 
 def test_issue_5562_skip_inventory_entries_are_individually_accountable() -> None:
-    payload = _load_yaml(SKIP_INVENTORY)
-    entries = payload["entries"]
+    entries = _load_yaml(SKIP_INVENTORY)["entries"]
 
     entries_by_issue: dict[str, int] = {}
     for entry in entries:
@@ -166,6 +165,7 @@ def test_issue_5562_skip_inventory_entries_are_individually_accountable() -> Non
         "#7249": 4,
         "#8969": 1,
         "#9729": 6,
+        "#10231": 1,
     }
 
 

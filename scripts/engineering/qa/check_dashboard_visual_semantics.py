@@ -198,6 +198,20 @@ def iter_panels(panels: list[JsonObject]) -> list[JsonObject]:
     return collected
 
 
+def _semantic_palette(value: object) -> object:
+    """Keep the neutral ontology while accepting the measured dark-gray swatch."""
+    if isinstance(value, list):
+        return [_semantic_palette(item) for item in value]
+    if isinstance(value, dict):
+        return {
+            key: "gray"
+            if key == "color" and item == "#555555"
+            else _semantic_palette(item)
+            for key, item in value.items()
+        }
+    return value
+
+
 def _stat_color_mode_error(
     dashboard_path: Path, title: str, defaults: JsonObject
 ) -> str | None:
@@ -210,7 +224,7 @@ def _stat_threshold_steps_error(
     dashboard_path: Path, title: str, defaults: JsonObject
 ) -> str | None:
     expected_steps = _expected_threshold_steps(dashboard_path, str(title))
-    steps = defaults.get("thresholds", {}).get("steps")
+    steps = _semantic_palette(defaults.get("thresholds", {}).get("steps"))
     if expected_steps is None or steps == expected_steps:
         return None
     return f"{dashboard_path}: panel '{title}' must use standardized threshold steps"
@@ -224,7 +238,7 @@ def _stat_unknown_mapping_error(
 ) -> str | None:
     if not _requires_unknown_mapping(panel):
         return None
-    if EXPECTED_UNKNOWN_MAPPING in mappings:
+    if EXPECTED_UNKNOWN_MAPPING in _semantic_palette(mappings):
         return None
     return f"{dashboard_path}: panel '{title}' must map null to UNKNOWN/gray"
 
@@ -253,7 +267,7 @@ def _stat_value_mapping_error(
     )
     if (
         value_mapping is not None
-        and value_mapping.get("options") == expected_value_mapping
+        and _semantic_palette(value_mapping.get("options")) == expected_value_mapping
     ):
         return None
     return (
@@ -465,12 +479,12 @@ def _telemetry_evidence_errors(panel: JsonObject) -> list[str]:
     }
     expected = {
         "Endpoint": {
-            "1": {"text": "SCRAPING", "color": "gray"},
-            "0": {"text": "UNAVAILABLE", "color": "orange"},
+            "1": {"text": "SCRAPING", "color": "text"},
+            "0": {"text": "UNAVAILABLE", "color": "text"},
         },
         "Baseline": {
-            "0": {"text": "PRESENT", "color": "gray"},
-            "1": {"text": "RULE/SERIES GAP", "color": "orange"},
+            "0": {"text": "PRESENT", "color": "text"},
+            "1": {"text": "RULE/SERIES GAP", "color": "text"},
             "2": {"text": "RULE+SERIES GAP", "color": "red"},
         },
     }

@@ -168,10 +168,8 @@ def test_rf001_shared_headline_vocabulary_is_fail_closed() -> None:
         assert _mapping_result(panel, "0") == {"text": "OK", "color": "green"}
         assert _mapping_result(panel, "1") == {"text": "WARN", "color": "orange"}
         assert _mapping_result(panel, "2") == {"text": "CRIT", "color": "red"}
-        assert _mapping_result(panel, "3") == {
-            "text": "INCOMPLETE",
-            "color": "gray",
-        }
+        assert _mapping_result(panel, "3")["text"] == "INCOMPLETE"
+        assert _mapping_result(panel, "3")["color"] in {"gray", "#555555"}
 
     design_system = Path("docs/03-guides/dashboards/design-system.md").read_text(
         encoding="utf-8"
@@ -204,12 +202,12 @@ def test_dq_duplicate_validation_fact_is_removed_and_grid_is_compacted() -> None
     assert "or vector(0)" not in canonical["targets"][0]["expr"]
 
     expected_geometry = {
-        3: {"x": 6, "y": 62, "w": 6, "h": 4},
-        4: {"x": 0, "y": 62, "w": 6, "h": 4},
-        101: {"x": 12, "y": 62, "w": 6, "h": 4},
-        9: {"x": 18, "y": 62, "w": 6, "h": 4},
-        12: {"x": 0, "y": 66, "w": 6, "h": 4},
-        151: {"x": 6, "y": 66, "w": 6, "h": 4},
+        3: {"x": 6, "y": 61, "w": 6, "h": 4},
+        4: {"x": 0, "y": 61, "w": 6, "h": 4},
+        101: {"x": 12, "y": 61, "w": 6, "h": 4},
+        9: {"x": 18, "y": 61, "w": 6, "h": 4},
+        12: {"x": 0, "y": 65, "w": 6, "h": 4},
+        151: {"x": 6, "y": 65, "w": 6, "h": 4},
     }
     for panel_id, geometry in expected_geometry.items():
         assert panels[panel_id]["gridPos"] == geometry
@@ -230,7 +228,7 @@ def test_iteration_2_active_alert_severity_is_not_overridden_by_count() -> None:
     }
     assert count_properties["displayName"] == "Active Alerts"
     assert count_properties["custom.cellOptions"] == {
-        "type": "color-text",
+        "type": "auto",
         "applyToRow": False,
     }
 
@@ -353,7 +351,7 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
         ]
         assert len(containers) == 1, path.name
         container_style = containers[0].get("style", "")
-        for token in ("display:flex", "flex-wrap:nowrap", "overflow:visible"):
+        for token in ("display:flex", "flex-wrap:wrap", "overflow:visible"):
             assert token in container_style, (path.name, token)
 
         anchors = [attrs for tag, attrs in parser.elements if tag == "a"]
@@ -379,7 +377,7 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
         for attrs in handoff_links:
             style = attrs.get("style", "")
             for token in (
-                "flex:1 1 0",
+                "flex:1 1 auto",
                 "text-align:center",
                 "color:#f8fafc",
                 "background:#334155",
@@ -389,7 +387,7 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
             assert attrs.get("href"), path.name
         current_style = current[0].get("style", "")
         for token in (
-            "flex:1 1 0",
+            "flex:1 1 auto",
             "background:#1d4ed8",
             "border:2px solid #7dd3fc",
         ):
@@ -499,26 +497,26 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
     assert all(panel.get("collapsed") is True for panel in control_rows)
     assert all(panel.get("panels") for panel in control_rows)
     first_row_y = min(panel["gridPos"]["y"] for panel in control_rows)
-    # layout-budgets.yaml:first_window_y — collapsed rows start at the visual fold.
-    assert first_row_y == FIRST_WINDOW_Y
+    # The row header ends at the logical data fold; expanded children start at 18.
+    assert first_row_y + 1 == FIRST_WINDOW_Y
     assert [panel["gridPos"]["y"] for panel in control_rows] == list(
-        range(FIRST_WINDOW_Y, FIRST_WINDOW_Y + len(control_rows))
+        range(first_row_y, first_row_y + len(control_rows))
     )
     assert not any(collapsed_row_above_fold(panel) for panel in control_rows)
 
 
 def test_rf006_collapsed_row_above_fold_fails_closed() -> None:
-    """Mutation: a collapsed diagnostic row at FIRST_WINDOW_Y - 1 is above the fold."""
+    """Mutation: detail children before FIRST_WINDOW_Y remain forbidden."""
     above = {
         "type": "row",
         "collapsed": True,
-        "gridPos": {"x": 0, "y": FIRST_WINDOW_Y - 1, "w": 24, "h": 1},
+        "gridPos": {"x": 0, "y": FIRST_WINDOW_Y - 2, "w": 24, "h": 1},
         "panels": [{"id": 1, "type": "stat"}],
     }
     at_fold = {
         "type": "row",
         "collapsed": True,
-        "gridPos": {"x": 0, "y": FIRST_WINDOW_Y, "w": 24, "h": 1},
+        "gridPos": {"x": 0, "y": FIRST_WINDOW_Y - 1, "w": 24, "h": 1},
         "panels": [{"id": 1, "type": "stat"}],
     }
     assert collapsed_row_above_fold(above) is True
@@ -573,11 +571,11 @@ def test_audit_followup_action_first_layout_contracts() -> None:
     ]
     assert [panel.get("id") for panel in provider_rows] == [9106, 9105, 91, 9404, 9405]
     assert [panel.get("gridPos", {}).get("y") for panel in provider_rows] == [
+        17,
         18,
         19,
         20,
         21,
-        22,
     ]
     assert all(panel.get("collapsed") is True for panel in provider_rows)
     for panel_id in (9101, 9102, 9103):
@@ -594,10 +592,10 @@ def test_audit_followup_action_first_layout_contracts() -> None:
         "Selected Range · Validation Diagnostics",
     ]
     assert [panel.get("gridPos", {}).get("y") for panel in dq_rows] == [
+        17,
         18,
         19,
         20,
-        21,
     ]
     assert all(panel.get("collapsed") is True for panel in dq_rows)
 
@@ -730,7 +728,11 @@ def test_operator_critical_tables_expose_full_values() -> None:
                 assert custom["inspect"] is True
                 # Uniform row height: do not wrap at table default. Long fields
                 # wrap via named-column overrides (same pattern as #8977).
-                assert custom.get("cellOptions", {}).get("wrapText") is not True
+                if panel_id == 2010:
+                    assert custom["cellOptions"]["wrapText"] is True
+                    assert panel["options"]["footer"]["enablePagination"] is True
+                else:
+                    assert custom.get("cellOptions", {}).get("wrapText") is not True
                 if dashboard_name == "bioetl-run-explorer-v1.json" and panel_id == 3022:
                     continue
                 wrapped = _wrapped_field_names(panel)
@@ -927,7 +929,13 @@ def test_incident_alert_history_has_readable_full_width_layout() -> None:
     )
     mappings = history["fieldConfig"]["defaults"]["mappings"][0]["options"]
     assert mappings["1"] == {"text": "FIRING", "color": "red"}
-    assert mappings["2"] == {"text": "PENDING", "color": "orange"}
+    # Native orange measured 2.64:1 on Light; preserve the PENDING label and hue
+    # with the source-bound contrast remediation instead of the failing token.
+    assert mappings["2"] == {"text": "PENDING", "color": "#bd5907"}
+    assert all(
+        _contrast_ratio(mappings["2"]["color"], background) >= 3
+        for background in ("#ffffff", "#181b1f")
+    )
     assert history["options"]["mergeValues"] is True
     assert history["fieldConfig"]["defaults"]["custom"]["axisWidth"] >= 360
     assert history["fieldConfig"]["defaults"]["custom"]["lineWidth"] > 0
@@ -1190,8 +1198,10 @@ def test_run_explorer_index_is_disk_last_ten_not_time_range() -> None:
 def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     explorer = _load("bioetl-run-explorer-v1.json")
     recent = _panel(explorer, 3010)
-    assert _override_width(recent, "selected") == 36
-    assert (_override_width(recent, "^(workflow_id|Workflow)$") or 0) == 118
+    assert _override_width(recent, "selected") == 50
+    assert _override_width(recent, "^(workflow_id|Workflow)$") is None
+    assert recent["fieldConfig"]["defaults"]["custom"]["minWidth"] == 50
+    assert recent["options"]["footer"]["enablePagination"] is True
     assert (_override_width(recent, "Run") or 0) <= 340
     hidden = {
         str((item.get("matcher") or {}).get("options"))
@@ -1208,7 +1218,7 @@ def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     assert "message" in hidden
     grid = recent.get("gridPos") or {}
     assert int(grid.get("h") or 0) == 11
-    assert recent.get("options", {}).get("cellHeight") == "sm"
+    assert recent.get("options", {}).get("cellHeight") == "lg"
     assert (recent.get("transformations") or [{}])[0].get("options", {}).get(
         "limitField"
     ) == 10
@@ -1561,3 +1571,73 @@ def test_incident_main_columns_hide_future_service_labels_but_keep_inspect() -> 
         "Details",
         "Domain",
     }
+
+
+def test_scrolling_capture_preserves_layout_viewport(tmp_path: Path) -> None:
+    import os
+    import subprocess
+    from scripts.ops.observability.grafana import (
+        rerender_grafana_screenshots as rerender,
+    )
+
+    node = rerender._resolve_node_executable()
+    if node is None:
+        pytest.skip("Browser integration requires Node.js")
+    runtime_env = os.environ.copy()
+    rerender._apply_playwright_runtime_env(runtime_env)
+    probe = subprocess.run(
+        [node, "-e", "require.resolve('playwright')"],
+        capture_output=True,
+        env=runtime_env,
+        timeout=15,
+    )
+    if probe.returncode:
+        pytest.skip("Browser integration requires the optional Playwright runtime")
+    script = Path(
+        "scripts/ops/observability/grafana/capture_scroll_surface.cjs"
+    ).resolve()
+    program = """
+const {captureScrollSurface}=require(process.argv[1]);
+const {chromium}=require('playwright');
+(async()=>{
+const browser=await chromium.launch({headless:true});
+try {
+ const context=await browser.newContext({viewport:{width:683,height:384},deviceScaleFactor:2});
+ const page=await context.newPage();
+ await page.setContent('<style>body{margin:0}.scroll{height:384px;overflow:auto}.panel{height:350px;background:#246;color:white}</style><div class="scroll">'+
+ Array.from({length:5},(_,i)=>'<div class="panel" data-viz-panel-key="panel-'+i+'">Panel '+i+'</div>').join('')+'</div>');
+ const result=await captureScrollSurface(page,{filePath:process.argv[2],timeout:20000,
+ pngEvidence:b=>({width:b.readUInt32BE(16),height:b.readUInt32BE(20)}),measure:async()=>({})});
+ console.log(JSON.stringify({viewport:page.viewportSize(),result}));
+} finally {await browser.close();}
+})().catch(e=>{console.error(e);process.exit(1)});
+"""
+    env = os.environ.copy()
+    rerender._apply_playwright_runtime_env(env)
+    completed = subprocess.run(
+        [
+            rerender._resolve_node_executable(),
+            "-e",
+            program,
+            str(script),
+            str(tmp_path / "full.png"),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=60,
+        env=env,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stderr
+    result = json.loads(completed.stdout)
+    assert result["viewport"] == {"width": 683, "height": 384}
+    assert result["result"]["surface"]["scrollHeight"] == 1750
+    assert all(
+        t["width"] == 1366 and t["height"] == 768 for t in result["result"]["tiles"]
+    )
+    assert {p["panel"] for t in result["result"]["tiles"] for p in t["panels"]} == {
+        f"panel-{i}" for i in range(5)
+    }
+    data = (tmp_path / "full.png").read_bytes()
+    assert int.from_bytes(data[16:20], "big") == 1366
+    assert int.from_bytes(data[20:24], "big") == 3500

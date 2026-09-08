@@ -327,7 +327,7 @@ def test_control_plane_named_review_surfaces_are_findable() -> None:
     assert lineage_row.get("collapsed") is True
     assert trust.get("gridPos", {}).get("y", 99) < 18
     assert retention.get("gridPos", {}).get("y", 99) < 18
-    assert lineage_row.get("gridPos", {}).get("y") == 18
+    assert lineage_row.get("gridPos", {}).get("y") == 17
     child_ids = [child.get("id") for child in lineage_row.get("panels") or []]
     assert 9415 in child_ids
     lineage = next(
@@ -419,7 +419,7 @@ def test_control_plane_trust_panels_follow_reference_widths() -> None:
     processed = panels["Review Processed Records"]["gridPos"]
     telemetry = panels["Monitor Telemetry"]["gridPos"]
 
-    assert scope == {"x": 0, "y": 3, "w": 16, "h": 4}
+    assert scope == {"x": 0, "y": 3, "w": 16, "h": 3}
     assert readiness == {"x": 16, "y": 3, "w": 8, "h": 3}
     assert readiness["w"] * readiness["h"] == 24
     assert run_summary["w"] == 18
@@ -992,57 +992,36 @@ def test_short_table_panels_use_compact_cell_height() -> None:
     )
 
 
-UNIFORM_TABLE_CELL_HEIGHT = "sm"
-
-
 def test_all_table_panels_use_uniform_cell_height() -> None:
-    """Every shipped table panel uses the same Grafana row-height contract.
+    """Compact tables use sm; wrapped pagination uses native size-aware pages.
 
-    Mixed or omitted ``cellHeight`` presets make rows differ across boards.
-    FIT-004 already requires ``sm`` on short tables; this lock extends that
-    preset to every table. Table-default ``wrapText=True`` still grows some
-    rows, so defaults must not wrap; long fields wrap on named columns.
+    Grafana 12 calculates page size from the cellHeight preset, so wrapped
+    last-10 browse rows require lg to avoid clipping at a 683 px CSS viewport.
+    Rendered containment remains mandatory for every pagination page.
     """
-    tables: list[tuple[str, int | str, str]] = []
-    violations: list[str] = []
-    heights: set[object] = set()
-
+    tables = []
     for dashboard_path in sorted(Path("grafana/dashboards").glob("*.json")):
-        dashboard = load_dashboard(dashboard_path)
-        for panel in get_dashboard_panels(dashboard):
+        for panel in get_dashboard_panels(load_dashboard(dashboard_path)):
             if panel.get("type") != "table":
                 continue
-            panel_id = panel.get("id", "?")
-            title = panel_display_title(panel) or panel.get("title") or f"id={panel_id}"
-            tables.append((dashboard_path.name, panel_id, str(title)))
-            cell_height = panel.get("options", {}).get("cellHeight")
-            heights.add(cell_height)
-            if cell_height != UNIFORM_TABLE_CELL_HEIGHT:
-                violations.append(
-                    f"{dashboard_path.name} panel {panel_id} ({title!r}) "
-                    f"cellHeight={cell_height!r}"
-                )
-            custom = ((panel.get("fieldConfig") or {}).get("defaults") or {}).get(
-                "custom"
-            ) or {}
-            wrap_default = (custom.get("cellOptions") or {}).get("wrapText")
-            if wrap_default is True:
-                violations.append(
-                    f"{dashboard_path.name} panel {panel_id} ({title!r}) "
-                    "defaults.custom.cellOptions.wrapText=True "
-                    "(grows row height; wrap named columns instead)"
-                )
-
-    assert tables, "expected at least one table panel in shipped dashboards"
-    assert heights == {UNIFORM_TABLE_CELL_HEIGHT}, (
-        "all table panels must share options.cellHeight="
-        f"{UNIFORM_TABLE_CELL_HEIGHT!r}; observed={sorted(heights, key=str)}"
-    )
-    assert not violations, (
-        "table panels must set options.cellHeight="
-        f"{UNIFORM_TABLE_CELL_HEIGHT!r} and must not wrap at table default:\n"
-        + "\n".join(violations)
-    )
+            tables.append(panel)
+            options = panel.get("options", {})
+            custom = panel.get("fieldConfig", {}).get("defaults", {}).get("custom", {})
+            paginated = options.get("footer", {}).get("enablePagination") is True
+            wrapped = custom.get("cellOptions", {}).get("wrapText") is True
+            height = options.get("cellHeight")
+            assert height in {"sm", "lg"}, (
+                dashboard_path.name,
+                panel.get("id"),
+                height,
+            )
+            if height == "lg":
+                assert paginated and wrapped
+                assert panel["gridPos"]["h"] > 6
+            if wrapped:
+                assert paginated
+                assert custom.get("minWidth") == 50
+    assert tables
 
 
 def _table_hidden_fields(panel: dict) -> set[str]:
