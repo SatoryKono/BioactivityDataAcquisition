@@ -1650,6 +1650,12 @@
       "next_step": "Retain as the typed action-target allowlist shared by Grafana dashboard tooling and regression tests; keep it supporting unless promoted through the canonical scripts.ops command surface.",
       "owner": "@bioetl-observability",
       "review_by": "2026-11-30"
+    },
+    "scripts/ops/observability/grafana/regression_acceptance.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the imported RF-005 receipt verifier behind run_grafana_dashboard_audit_cycle.py; it has no main function or standalone CLI. Keep operator invocation through the existing scripts.ops run-grafana-audit-cycle command.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-11-30"
     }
   },
   "schema_version": "1.0"
