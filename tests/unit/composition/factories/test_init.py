@@ -39,6 +39,11 @@ def test_factory_root_exports_from_map_via_import_module(monkeypatch):
     """Mapped exports should be loaded from their configured module."""
     import bioetl.composition.factories as factories_pkg
 
+    for name in ("BaseServicesFactory", "DataSourceCreatorProtocol"):
+        # Start with a cold lazy-export cache and restore its exact prior state.
+        monkeypatch.setitem(factories_pkg.__dict__, name, None)
+        monkeypatch.delitem(factories_pkg.__dict__, name)
+
     calls: list[str] = []
 
     def _fake_import_module(name: str) -> object:
