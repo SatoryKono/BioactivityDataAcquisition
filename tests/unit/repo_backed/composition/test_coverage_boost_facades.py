@@ -247,6 +247,9 @@ def _install_workflow_execution_service_dependencies(
 def test_factories_package_lazy_exports_and_unknown_attributes(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    # __getattr__ caches map-backed exports directly in the package namespace.
+    # Record that slot so the synthetic export is removed/restored at teardown.
+    monkeypatch.setitem(factories_pkg.__dict__, "BaseServicesFactory", None)
     fake_module = ModuleType("fake_services")
     fake_module.BaseServicesFactory = object()
     fake_pipeline = ModuleType("fake_pipeline")
@@ -306,6 +309,15 @@ def test_services_factory_import_does_not_eagerly_load_storage_runtime(
         "bioetl.infrastructure.storage.silver_writer",
     )
     for module_name in target_modules:
+        parent_name, _, child_name = module_name.rpartition(".")
+        parent = sys.modules.get(parent_name)
+        if parent is not None:
+            # Importing a fresh child also mutates its parent package. Restoring
+            # only sys.modules leaves two different factory module identities.
+            monkeypatch.setitem(
+                parent.__dict__, child_name, parent.__dict__.get(child_name)
+            )
+            monkeypatch.delitem(parent.__dict__, child_name)
         monkeypatch.delitem(sys.modules, module_name, raising=False)
 
     module = __import__(

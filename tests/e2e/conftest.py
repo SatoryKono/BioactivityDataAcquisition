@@ -647,6 +647,18 @@ def managed_e2e_data_dir(data_dir: Path) -> Generator[Path, None, None]:
     E2E suites can share one data directory when they intentionally reuse the
     same pipeline run output across multiple assertions.
     """
+    from bioetl.infrastructure.config import pipeline_config_api
+
+    def isolate_sink_paths(config):
+        isolated = config.model_copy(deep=True)
+        for layer, sink in isolated.sink.items():
+            sink.path = str(
+                data_dir / "output" / layer / config.provider / config.entity_type
+            )
+            if sink.csv_export is not None:
+                sink.csv_export.path = sink.path
+        return isolated
+
     data_dir.mkdir(parents=True, exist_ok=True)
 
     # Create Medallion subdirectories
@@ -667,9 +679,13 @@ def managed_e2e_data_dir(data_dir: Path) -> Generator[Path, None, None]:
     _clear_runtime_config_caches()
 
     try:
-        # StoragePathSettingsMixin derives the medallion paths from data_dir;
-        # BIOETL_DATA_DIR therefore provides the required output/* isolation.
-        yield data_dir
+        # Strict live checks keep test_mode disabled and therefore use YAML sink
+        # paths. Rebase those paths as well as settings into the same sandbox.
+        with pytest.MonkeyPatch.context() as paths:
+            paths.setattr(
+                pipeline_config_api, "map_pipeline_config", isolate_sink_paths
+            )
+            yield data_dir
     finally:
         if previous_data_dir is None:
             os.environ.pop("BIOETL_DATA_DIR", None)
