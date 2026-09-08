@@ -61,12 +61,24 @@ descriptors. Unproven FIXED, PARTIAL, NOT_FIXED and CANNOT_VERIFY block completi
 New-regression evidence includes `findings`, `reviewer` and `search_evidence`;
 any new P0/P1 blocks release. Preserve secondary findings with their disposition.
 
-Operator receipts follow [the stopwatch protocol](usability-baseline-protocol.md):
-page-goal approval, primary role, 21 tasks with real human first attempts, independently
-scored answers and timers, paths/interactions/context loss, and dispositions for
-missed targets. Astra observations stay in a separate AI_AGENT dataset. Selecting
-an AI operator does not manufacture human measurements. A request to change the
-acceptance policy itself requires an explicit policy revision.
+Operator receipts follow [the operator protocol](usability-baseline-protocol.md).
+The default `operator_acceptance_mode=HUMAN_USABILITY` retains human first attempts
+and the human insight target. On 2026-09-08 the task owner explicitly accepted
+AI-only scenario checks for #10167 and the operator component of #10185/#10171:
+“Принять только AI-проверку сценариев”. This revision does not waive other gates.
+
+For this scope set `operator_acceptance_mode=AI_SCENARIOS` and provide an
+`operator_scope_decision` hashed descriptor. Its JSON must contain the exact
+`candidate_ref`, `acceptance_mode=AI_SCENARIOS`, `human_usability_status=NOT_MEASURED`,
+`task_count=21`, and nonempty `approved_by`, `approved_at`, `reason` fields recording
+the owner decision. The operator receipt repeats `human_usability_status=NOT_MEASURED`.
+All observations must be `AI_AGENT`, with null `first_correct_seconds`; human N is
+zero. Every task needs a successful first recorded attempt, measured `elapsed_seconds`,
+reviewer, answer, hashed answer-key and observation evidence, path, clicks,
+interactions, diagnostic depth, back-navigation and context-loss count/disposition.
+Each Q3 additionally requires `destination_verified=true` and `return_verified=true`.
+Page-goal approval and the primary role remain required. AI elapsed time includes
+tool/model latency and is descriptive; it cannot satisfy a human insight target.
 
 ## Collection and publication
 
