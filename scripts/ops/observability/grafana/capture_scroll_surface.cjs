@@ -2,7 +2,47 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-async function captureScrollSurface(page, {filePath, timeout, pngEvidence, measure}) {
+function visiblePanelGeometryFromDom() {
+  return [...document.querySelectorAll('[data-viz-panel-key]')].flatMap(el => {
+    const r = el.getBoundingClientRect();
+    if (r.bottom <= 0 || r.top >= innerHeight || !r.width || !r.height) return [];
+    return [{panel: el.dataset.vizPanelKey, bbox: {x:r.x,y:r.y,width:r.width,height:r.height},
+      clientWidth:el.clientWidth,scrollWidth:el.scrollWidth,clientHeight:el.clientHeight,scrollHeight:el.scrollHeight}];
+  });
+}
+
+function tileIsStable(evidence, scrollTop, scrollAfter, verify) {
+  if (scrollTop !== scrollAfter) return false;
+  if (!verify) return true;
+  const ids = terminal => terminal.panelStates.map(panel => panel.id).sort((a,b)=>a-b);
+  return JSON.stringify(ids(evidence.terminal)) === JSON.stringify(ids(evidence.terminalAfter));
+}
+
+async function captureStableTile(page, {tileDir, index, timeout, measure, verify, pngEvidence}) {
+  const deadline = Date.now() + timeout;
+  const rejected = [];
+  let attempt = 0;
+  while (Date.now() < deadline) {
+    const evidence = await measure();
+    const panels = await page.evaluate(visiblePanelGeometryFromDom);
+    const file = path.join(tileDir, `${String(index).padStart(3,'0')}-${attempt}.png`);
+    const scrollTop = await page.evaluate(() => document.querySelector('[data-bioetl-capture-scroll]').scrollTop);
+    const bytes = await require('./native_browser_zoom.cjs').capturePageScreenshot(page,
+      {path:file,timeout,animations:'disabled',caret:'hide'});
+    if (verify) evidence.terminalAfter = await verify();
+    const scrollAfter = await page.evaluate(() => document.querySelector('[data-bioetl-capture-scroll]').scrollTop);
+    const result = {file, ...pngEvidence(bytes), panels, evidence, scrollTop};
+    if (tileIsStable(evidence, scrollTop, scrollAfter, verify)) {
+      return {...result, rejected};
+    }
+    rejected.push({...result, reason:'visible panel set changed across capture'});
+    await fs.promises.writeFile(path.join(tileDir, `${index}-rejected.json`), JSON.stringify(rejected));
+    attempt++;
+  }
+  throw new Error('Visible panel set did not stabilize within the capture timeout');
+}
+
+async function captureScrollSurface(page, {filePath, timeout, pngEvidence, measure, verify}) {
   const surface = await page.evaluate(() => {
     const candidates = [...document.querySelectorAll('*')].filter(el => {
       const r=el.getBoundingClientRect();
@@ -36,22 +76,15 @@ async function captureScrollSurface(page, {filePath, timeout, pngEvidence, measu
   if(!Number.isFinite(visibleHeight) || visibleHeight<=0)throw new Error('Sticky chrome covers scroll surface');
   let target=0;
   for (;;) {
-    const actual=await page.evaluate(y=>{
+    let actual=await page.evaluate(y=>{
       const el=document.querySelector('[data-bioetl-capture-scroll]');el.scrollTop=y;return el.scrollTop;
     },target);
     if(actual<=previous)throw new Error(`Dashboard scroll capture stalled at ${actual}; surface=${JSON.stringify(surface)}`);
     previous=actual;
     await page.waitForTimeout(750);
-    const evidence=await measure();
-    const panels=await page.evaluate(()=>[...document.querySelectorAll('[data-viz-panel-key]')].flatMap(el=>{
-      const r=el.getBoundingClientRect();
-      if(r.bottom<=0||r.top>=innerHeight||!r.width||!r.height)return [];
-      return [{panel:el.dataset.vizPanelKey,bbox:{x:r.x,y:r.y,width:r.width,height:r.height},
-        clientWidth:el.clientWidth,scrollWidth:el.scrollWidth,clientHeight:el.clientHeight,scrollHeight:el.scrollHeight}];
-    }));
-    const file=path.join(tileDir,`${String(tiles.length).padStart(3,'0')}.png`);
-    const bytes=await page.screenshot({path:file,timeout,animations:'disabled',caret:'hide'});
-    tiles.push({file:path.relative(path.dirname(filePath),file),scrollTop:actual,...pngEvidence(bytes),panels,evidence});
+    const tile = await captureStableTile(page, {tileDir,index:tiles.length,timeout,measure,verify,pngEvidence});
+    actual = tile.scrollTop;
+    tiles.push({...tile,file:path.relative(path.dirname(filePath),tile.file)});
     if(actual+surface.clientHeight>=surface.scrollHeight-2)break;
     const next=Math.min(actual+visibleHeight,surface.scrollHeight-surface.clientHeight);
     if(next<=actual)throw new Error('Dashboard scroll capture made no progress');

@@ -48,6 +48,105 @@ def _node_eval(program: str) -> str:
     return result.stdout.strip()
 
 
+def test_browser_cleanup_preserves_ownership_and_disposal_order() -> None:
+    output = _node_eval("""
+const {closeCaptureBrowser} = require(process.argv[1]);
+(async () => {
+  const calls = [];
+  const resource = (label) => ({close: async () => calls.push(label)});
+  const contextBundle = {api: {dispose: async () => calls.push('api')}};
+  await closeCaptureBrowser({contextBundle, context: resource('context'),
+    browser: resource('browser')});
+  await closeCaptureBrowser({contextBundle, context: resource('owned-context'),
+    native: resource('native')});
+  await closeCaptureBrowser({browser: resource('partial-browser')});
+  await closeCaptureBrowser({});
+  console.log(JSON.stringify(calls));
+})().catch(error => {console.error(error); process.exitCode = 1;});
+""")
+    assert json.loads(output) == [
+        "api",
+        "context",
+        "browser",
+        "api",
+        "native",
+        "partial-browser",
+    ]
+
+
+def test_scroll_typography_requires_every_panel_and_retains_failed_frames() -> None:
+    output = _node_eval("""
+const {mergeTypographyObservations: merge} = require(process.argv[1]);
+const required = [{id:1},{id:2}];
+const first = {panels:[{id:1}],violations:[]};
+const second = {panels:[{id:2}],violations:[]};
+const failed = {panels:[{id:1}],violations:[{id:1,reason:'font below floor'}]};
+console.log(JSON.stringify([merge(required,[first,second]),merge(required,[first]),
+  merge(required,[failed,first,second]),merge(required,[])]));
+""")
+    complete, missing, failed, empty = json.loads(output)
+    assert complete["status"] == "ok"
+    assert complete["checkedPanelCount"] == 2
+    assert missing["status"] == empty["status"] == failed["status"] == "error"
+    assert failed["violations"] == [{"id": 1, "reason": "font below floor"}]
+    assert missing["violations"][0]["id"] == 2
+
+
+def test_scroll_readiness_cannot_hide_missing_or_loading_evidence() -> None:
+    output = _node_eval("""
+const {mergeTerminalObservations: merge} = require(process.argv[1]);
+const dashboard = {requiredPanels:[{id:1},{id:2}],requiredTerminalPanelIds:[1,2]};
+const ready = id => ({status:'ok',panelStates:[{id,classification:'healthy'}]});
+const loading = {status:'error',panelStates:[{id:1,classification:'loading'}]};
+console.log(JSON.stringify([merge(dashboard,[ready(1),ready(2)]),
+  merge(dashboard,[ready(1)]),merge(dashboard,[ready(1),undefined,ready(2)]),
+  merge(dashboard,[loading,ready(1),ready(2)])]));
+""")
+    complete, missing, absent_after, transient_failure = json.loads(output)
+    assert complete["status"] == "ok"
+    assert complete["checkedPanelCount"] == 2
+    assert (
+        missing["status"]
+        == absent_after["status"]
+        == transient_failure["status"]
+        == "error"
+    )
+
+
+def test_native_screenshot_clips_physical_pixels_without_rescaling() -> None:
+    output = _node_eval("""
+const path = require('node:path');
+const {capturePageScreenshot} = require(path.join(path.dirname(process.argv[1]), 'native_browser_zoom.cjs'));
+const calls = [];
+const page = {nativeZoomEvidence:{actualFactor:2},
+  evaluate:async()=>({x:0,y:0,width:683,height:384}),
+  context:()=>({newCDPSession:async()=>({send:async(method,params)=>{
+    calls.push({method,params});return {data:Buffer.from('test').toString('base64')};
+  },detach:async()=>{}})})};
+(async()=>{
+  await capturePageScreenshot(page,{});
+  await capturePageScreenshot(page,{clip:{x:10,y:20,width:100,height:50}});
+  console.log(JSON.stringify(calls));
+})();
+""")
+    viewport, panel = json.loads(output)
+    assert viewport["params"]["captureBeyondViewport"] is False
+    assert viewport["params"]["clip"] == {
+        "x": 0,
+        "y": 0,
+        "width": 1366,
+        "height": 768,
+        "scale": 1,
+    }
+    assert panel["params"]["clip"] == {
+        "x": 20,
+        "y": 40,
+        "width": 200,
+        "height": 100,
+        "scale": 1,
+    }
+
+
 def test_text_contrast_composites_alpha_and_preserves_unmeasured_gradients() -> None:
     output = _node_eval(
         """
