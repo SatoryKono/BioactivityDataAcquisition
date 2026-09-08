@@ -59,3 +59,10 @@ tests/fixtures/vcr/uniprot/test_uniprot_protein_full_cycle.yaml text eol=lf -fil
 # VCR metadata sidecars are small governance payloads and must remain readable
 # text for architecture tests and review diffs.
 tests/fixtures/vcr/**/*_meta.yaml text eol=lf -filter -diff -merge
+
+# Preserve the original bytes of this immutable RF-004 operator evidence bundle.
+# Its captured CRLF text must not be normalized during checkout or verification.
+reports/audit/grafana/rf004-ai-1895351a8a-20260908/** -text
+
+# Preserve the original bytes of the sealed RF-005/RF-006 evidence bundle.
+reports/audit/grafana/rf005-rf006-d62d78a0-20260908/** -text

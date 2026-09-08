@@ -1588,6 +1588,40 @@ async function collectLayoutGeometry(page, dashboard) {
   }, { requiredPanels: dashboard.requiredPanels, physicalViewport: CONFIG.viewport });
 }
 
+// Capture grid placeholders as well as loaded panels: Grafana virtualizes row
+// contents, but placeholder geometry remains measurable at the fixed viewport.
+function layoutFitMeasurementsFromDom() {
+  const box = (element) => {
+    const r = element.getBoundingClientRect();
+    return {x:r.x, y:r.y, width:r.width, height:r.height};
+  };
+  const shown = (el) => {
+    const r=el.getBoundingClientRect(), s=getComputedStyle(el);
+    return r.width>0 && r.height>0 && s.display!=='none' && s.visibility!=='hidden';
+  };
+  const grids=[...document.querySelectorAll('[data-griditem-key]')].map(el=>{
+    let scrollTop=window.scrollY;
+    for(let parent=el.parentElement;parent;parent=parent.parentElement) scrollTop+=parent.scrollTop;
+    return {key:el.dataset.griditemKey,bbox:box(el),scrollTop,
+      text:el.textContent.trim().slice(0,240),shown:shown(el)};
+  });
+  const controls=[...document.querySelectorAll('[data-viz-panel-key] a[href], [data-viz-panel-key] button')]
+    .filter(shown).map(el=>{
+      const r=box(el), x=r.x+r.width/2, y=r.y+r.height/2;
+      const within=x>=0 && x<innerWidth && y>=0 && y<innerHeight;
+      const target=within?document.elementFromPoint(x,y):null;
+      return {panel:el.closest('[data-viz-panel-key]').dataset.vizPanelKey,
+        name:el.getAttribute('aria-label') || el.textContent.trim(),href:el.getAttribute('href'),
+        bbox:r,withinViewport:within,hitTarget:!!target && (target===el || el.contains(target)),
+        disabled:el.matches(':disabled, [aria-disabled="true"]')};
+    });
+  const variables=[...document.querySelectorAll('[data-testid*="template variables"]')]
+    .filter(shown).map(el=>({testid:el.dataset.testid,bbox:box(el)}));
+  return {cssViewport:{width:innerWidth,height:innerHeight},devicePixelRatio,
+    pageScroll:{x:scrollX,y:scrollY},fold:innerHeight,grids,controls,variables,
+    gridTop:Math.min(...grids.filter(g=>g.shown).map(g=>g.bbox.y))};
+}
+
 async function collectPanelContainment(page, dashboard) {
   const raw = await page.evaluate(
     ({ panels, uid, scrollerSelectors, enforceFold }) => {
@@ -2183,7 +2217,7 @@ async function collectVerifiedRenderContext(page, dashboard) {
 }
 
 async function collectVerifiedPanelSurfaces(page, dashboard) {
-  dashboard.panelContainment = await collectPanelContainment(page, dashboard);
+  dashboard.panelContainment ??= await collectPanelContainment(page, dashboard);
   // Collect all independent evidence even when one surface fails acceptance.
   dashboard.typographyValidation = await collectTypographyValidation(page, dashboard);
   dashboard.navigationValidation = await collectNavigationValidation(page);
@@ -2343,6 +2377,8 @@ async function renderDashboard(page, dashboard, index, total) {
     await settleDashboardAfterViewportChange(page, dashboard, index, total);
   }
   await collectVerifiedRenderContext(page, dashboard);
+  dashboard.layoutFit = await page.evaluate(layoutFitMeasurementsFromDom);
+  dashboard.panelContainment = await collectPanelContainment(page, dashboard);
   dashboard.canvasEvidence = await page.evaluate(canvasEvidenceFromDom);
 
   const filePath = path.join(CONFIG.outputDir, dashboard.file);
@@ -2547,6 +2583,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  layoutFitMeasurementsFromDom,
   navigationValidationFromDom,
   graphicsMeasurementsFromDom,
   browserAndKioskStateFromDom,
