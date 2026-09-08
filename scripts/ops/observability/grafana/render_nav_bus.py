@@ -105,15 +105,15 @@ _FALLBACK_COMPACTION_HEIGHTS: dict[str, dict[int, int]] = {
     "bioetl-run-explorer-v1": {3010: 11},
 }
 _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    9400: (0, 3, 16, 4),
+    9400: (0, 3, 16, 3),
     9401: (16, 3, 8, 3),
-    9418: (0, 7, 12, 5),
-    9416: (12, 7, 12, 5),
-    906: (0, 12, 24, 3),
-    891: (0, 15, 6, 3),
-    892: (6, 15, 6, 3),
-    893: (12, 15, 6, 3),
-    907: (18, 15, 6, 3),
+    9418: (0, 6, 12, 5),
+    9416: (12, 6, 12, 5),
+    906: (0, 11, 24, 3),
+    891: (0, 14, 6, 3),
+    892: (6, 14, 6, 3),
+    893: (12, 14, 6, 3),
+    907: (18, 14, 6, 3),
 }
 _CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 18
 NAV_TITLE_STYLE = "font-size:19px;font-weight:600;line-height:1;margin:0 2px"

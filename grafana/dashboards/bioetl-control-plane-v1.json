@@ -314,7 +314,7 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 16,
         "x": 0,
         "y": 3
@@ -366,7 +366,7 @@
                 },
                 "3": {
                   "text": "INCOMPLETE",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             },
@@ -376,7 +376,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             }
@@ -446,7 +446,7 @@
         "h": 5,
         "w": 12,
         "x": 0,
-        "y": 7
+        "y": 6
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Processing outcome, fail-closed Trust verdict and total Reasons remain visible together. Select Reasons to inspect the full evidence in panel 9414; full reasons also remain in table inspection. INCOMPLETE / UNKNOWN is not OK. SELECT RUN / VALID EMPTY is not OK. Processing is processing_status; Trust is trust_status. Backend unavailable means QUERY ERROR, never VALID EMPTY.",
@@ -789,7 +789,7 @@
         "h": 5,
         "w": 12,
         "x": 12,
-        "y": 7
+        "y": 6
       },
       "id": 9416,
       "options": {
@@ -889,7 +889,7 @@
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 11
       },
       "options": {
         "bioetlDisplayTitle": "Review Recovery Action",
@@ -960,7 +960,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             }
@@ -991,7 +991,7 @@
         "h": 3,
         "w": 6,
         "x": 0,
-        "y": 15
+        "y": 14
       },
       "id": 891,
       "options": {
@@ -1052,7 +1052,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             }
@@ -1083,7 +1083,7 @@
         "h": 3,
         "w": 6,
         "x": 6,
-        "y": 15
+        "y": 14
       },
       "id": 892,
       "options": {
@@ -1171,7 +1171,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             }
@@ -1202,7 +1202,7 @@
         "h": 3,
         "w": 6,
         "x": 12,
-        "y": 15
+        "y": 14
       },
       "id": 893,
       "options": {
@@ -1272,7 +1272,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             }
@@ -1303,7 +1303,7 @@
         "h": 3,
         "w": 6,
         "x": 18,
-        "y": 15
+        "y": 14
       },
       "id": 907,
       "options": {
@@ -5064,7 +5064,7 @@
               "showLineNumbers": false,
               "showMiniMap": false
             },
-            "content": "<div style=\"font-size:16px;line-height:1.45;color:#c9d1d9\">Identity table guardrail.<br/>If no rows are visible, check <code style=\"font-size:16px\">/health/live</code>, selector scope, and a concrete <code style=\"font-size:16px\">pipeline</code>/<code style=\"font-size:16px\">run_id</code> before treating the empty state as expected.</div>",
+            "content": "<div style=\"font-size:16px;line-height:1.45\">Identity table guardrail.<br/>If no rows are visible, check <code style=\"font-size:16px\">/health/live</code>, selector scope, and a concrete <code style=\"font-size:16px\">pipeline</code>/<code style=\"font-size:16px\">run_id</code> before treating the empty state as expected.</div>",
             "mode": "html"
           },
           "title": "Explain Missing Identity Data",
@@ -5093,7 +5093,7 @@
               "showLineNumbers": false,
               "showMiniMap": false
             },
-            "content": "<div style=\"font-size:16px;line-height:1.45;color:#c9d1d9\">Accounting table guardrail.<br/>Visible rows are backend accounting evidence; if this table becomes empty, verify backend health and scope before reading it as zero records.</div>",
+            "content": "<div style=\"font-size:16px;line-height:1.45\">Accounting table guardrail.<br/>Visible rows are backend accounting evidence; if this table becomes empty, verify backend health and scope before reading it as zero records.</div>",
             "mode": "html"
           },
           "title": "Explain Missing Record Counts",

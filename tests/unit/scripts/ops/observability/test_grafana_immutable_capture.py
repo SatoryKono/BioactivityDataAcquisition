@@ -155,3 +155,54 @@ def test_substituted_evidence_never_passes(capture, mutation: str) -> None:
         manifest["dashboards"] = []
     path.write_text(json.dumps(manifest))
     assert provenance.verify_capture(path, repo_root=root)["status"] == "FAIL"
+
+
+def test_git_line_endings_are_portable_but_source_content_is_bound(
+    capture, monkeypatch
+) -> None:
+    root, path, manifest = capture
+    source_path = root / "grafana/dashboards/test.json"
+    lf = json.dumps(json.loads(source_path.read_bytes()), indent=2).encode() + b"\n"
+    crlf = lf.replace(b"\n", b"\r\n")
+    source_path.write_bytes(lf)
+    manifest["dashboards"][0]["dashboardSource"]["sha256"] = hashlib.sha256(
+        crlf
+    ).hexdigest()
+    monkeypatch.setattr(
+        provenance.subprocess,
+        "run",
+        lambda *a, **k: SimpleNamespace(returncode=0, stdout=lf),
+    )
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "PASS"
+    source_path.write_bytes(lf.replace(b'"panels": []', b'"panels": [{}]'))
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "FAIL"
+
+
+@pytest.mark.parametrize("kind", ["critical", "tile", "page"])
+def test_every_linked_capture_surface_is_hash_bound(capture, kind: str) -> None:
+    root, path, manifest = capture
+    dashboard = manifest["dashboards"][0]
+    evidence = copy.deepcopy(dashboard["screenshotEvidence"])
+    evidence["file"] = "closeup.png"
+    (path.parent / "closeup.png").write_bytes((path.parent / "test.png").read_bytes())
+    if kind == "critical":
+        dashboard["criticalPanelScreenshots"] = [evidence]
+    elif kind == "tile":
+        dashboard["scrollCapture"] = {"tiles": [evidence]}
+    else:
+        dashboard["tablePagination"] = [{"pages": [evidence]}]
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "PASS"
+    (path.parent / "closeup.png").write_bytes(b"substituted")
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "FAIL"
+
+
+def test_attachment_path_must_stay_within_pack(capture) -> None:
+    root, path, manifest = capture
+    evidence = copy.deepcopy(manifest["dashboards"][0]["screenshotEvidence"])
+    evidence["file"] = "../outside.png"
+    (path.parent.parent / "outside.png").write_bytes(
+        (path.parent / "test.png").read_bytes()
+    )
+    assert provenance.attachment_errors(path.parent, evidence)

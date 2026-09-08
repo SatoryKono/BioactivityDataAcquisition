@@ -445,7 +445,7 @@
                 },
                 "3": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             },
@@ -455,7 +455,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             },
@@ -465,7 +465,7 @@
                 "match": "nan",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             }
@@ -487,7 +487,7 @@
                 "value": 2
               },
               {
-                "color": "gray",
+                "color": "#555555",
                 "value": 3
               }
             ]
@@ -1213,7 +1213,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             }
@@ -3093,7 +3093,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -3111,7 +3111,7 @@
                     "value": 1
                   },
                   {
-                    "color": "green",
+                    "color": "text",
                     "value": 5
                   }
                 ]

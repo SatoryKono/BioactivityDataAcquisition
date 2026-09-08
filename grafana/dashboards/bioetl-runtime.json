@@ -459,7 +459,7 @@
         "overrides": []
       },
       "options": {
-        "colorMode": "background",
+        "colorMode": "none",
         "dataLinks": [
           {
             "title": "Open Runtime Blockers",
@@ -845,7 +845,7 @@
                 "value": null
               },
               {
-                "color": "orange",
+                "color": "text",
                 "value": 1
               },
               {
@@ -875,7 +875,7 @@
                       },
                       "0": {
                         "text": "UNAVAILABLE",
-                        "color": "orange"
+                        "color": "text"
                       }
                     }
                   }
@@ -908,7 +908,7 @@
                       },
                       "1": {
                         "text": "RULE/SERIES GAP",
-                        "color": "orange"
+                        "color": "text"
                       },
                       "2": {
                         "text": "RULE+SERIES GAP",

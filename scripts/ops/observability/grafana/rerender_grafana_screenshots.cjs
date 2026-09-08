@@ -1747,15 +1747,24 @@ function navigationValidationFromDom() {
       focusStyle?.outlineWidth || "0",
     );
     const focusBoxShadow = (focusStyle?.boxShadow || "").trim().toLowerCase();
+    // Multiple transparent shadows are still invisible. Inspect each computed
+    // color rather than comparing against one serialized shadow string.
+    const opaqueFocusColor = color => {
+      if (!color || color === 'transparent') return false;
+      const rgba = color.match(/^rgba?\(([^)]+)\)$/);
+      if (!rgba) return false;
+      const values = rgba[1].split(',').map(Number);
+      return values.length === 3 || values[3] > 0;
+    };
+    const visibleShadow = [...focusBoxShadow.matchAll(/rgba?\([^)]+\)/g)]
+      .some(match => opaqueFocusColor(match[0]));
     const focusIndicatorVisible = Boolean(
       focusTarget &&
         document.activeElement === focusTarget &&
         ((focusStyle?.outlineStyle || "").toLowerCase() !== "none" &&
           Number.isFinite(focusOutlineWidthPx) &&
-          focusOutlineWidthPx > 0 ||
-          focusBoxShadow &&
-            focusBoxShadow !== "none" &&
-            focusBoxShadow !== "rgba(0, 0, 0, 0) 0px 0px 0px 0px"),
+          focusOutlineWidthPx > 0 && opaqueFocusColor(focusStyle?.outlineColor) ||
+          visibleShadow),
     );
     const evidence = {
       panelFound: Boolean(panel),
@@ -1796,6 +1805,10 @@ function navigationValidationFromDom() {
 
 async function collectNavigationValidation(page) {
   await page.keyboard.press("Tab");
+  await page.locator('.bioetl-nav a.bioetl-nav-link[href*="/d/"]').first().focus();
+  // Grafana's native focus shadow has a 200 ms transition. Sampling in the
+  // focus event frame observes its transparent start rather than the indicator.
+  await page.waitForTimeout(250);
   return page.evaluate(navigationValidationFromDom);
 }
 
@@ -2018,13 +2031,13 @@ function accessibilityMeasurementsFromDom() {
           if (Number(s.opacity) !== 1 || s.filter !== 'none' || s.mixBlendMode !== 'normal') reason = 'unsupported opacity/filter/blend';
           if (!opaque) {
             if (s.backgroundImage !== 'none') {
-              // A conservative bound for the native opaque grayscale gradient.
+              // A conservative bound for a native monotonic opaque RGB gradient.
               // Only this fully specified form is supported; no arbitrary image
               // or colored gradient is inferred from its underlying solid color.
               const match = s.backgroundImage.match(/^linear-gradient\([\d.]+deg, (rgb\([\d, ]+\)), (rgb\([\d, ]+\))\)$/);
               const stops = match ? [rgba(match[1]), rgba(match[2])] : [];
-              if (stops.length === 2 && stops.every(c => c && c[3] === 1 && c[0] === c[1] && c[1] === c[2]) && layers.every(c => c[3] === 0)) {
-                gradientBounds = [Math.min(...stops.map(c => c[0])), Math.max(...stops.map(c => c[0]))];
+              if (stops.length === 2 && stops.every(c => c && c[3] === 1) && (stops[0].slice(0,3).every((v,i)=>v<=stops[1][i]) || stops[0].slice(0,3).every((v,i)=>v>=stops[1][i])) && layers.every(c => c[3] === 0)) {
+                gradientBounds = stops.map(c=>c.slice(0,3)).sort((a,b)=>luminance(a)-luminance(b));
               } else reason = 'background image or gradient requires pixel measurement';
             }
             const color = rgba(s.backgroundColor);
@@ -2046,11 +2059,11 @@ function accessibilityMeasurementsFromDom() {
           reason = 'gradient foreground requires pixel measurement';
         } else {
           const foregroundLuminance = luminance(foreground.slice(0, 3));
-          const lower = luminance(Array(3).fill(gradientBounds[0]));
-          const upper = luminance(Array(3).fill(gradientBounds[1]));
+          const lower = luminance(gradientBounds[0]);
+          const upper = luminance(gradientBounds[1]);
           const nearest = foregroundLuminance >= upper ? gradientBounds[1] : gradientBounds[0];
           if (foregroundLuminance > lower && foregroundLuminance < upper) reason = 'gradient crosses foreground luminance';
-          background = [nearest, nearest, nearest];
+          background = nearest;
         }
       }
       const effective = foreground ? over(foreground, background) : null;
@@ -2081,7 +2094,7 @@ function accessibilityMeasurementsFromDom() {
             return layers;
           })(),
           fontSize: size, fontWeight: weight, large, ratio, threshold, gradientBounds,
-          ratioMethod: gradientBounds ? 'conservative minimum over native grayscale gradient' : 'computed composited colors',
+          ratioMethod: gradientBounds ? 'conservative minimum over monotonic native RGB gradient' : 'computed composited colors',
           status, reason,
           bbox: {x: rect.x, y: rect.y, width: rect.width, height: rect.height},
           clientWidth: element.clientWidth, scrollWidth: element.scrollWidth,
@@ -2126,6 +2139,7 @@ function graphicsMeasurementsFromDom() {
       const control = element.closest('button, a, [role="button"]');
       const name = control?.getAttribute('aria-label') || control?.textContent?.trim() || '';
       let background = null;
+      const backgroundLayers = [];
       let reason = null;
       for (let node = element.parentElement; node; node = node.parentElement) {
         const parentStyle = getComputedStyle(node);
@@ -2134,7 +2148,10 @@ function graphicsMeasurementsFromDom() {
         }
         const color = rgba(parentStyle.backgroundColor);
         if (!background && color?.[3] === 1) background = color;
-        else if (!background && color?.[3] > 0) reason = 'translucent graphic background needs pixel evidence';
+        else if (!background && color?.[3] > 0) backgroundLayers.push(color);
+      }
+      if (background) for (const layer of backgroundLayers.reverse()) {
+        background = [...layer.slice(0,3).map((v,i)=>v*layer[3]+background[i]*(1-layer[3])),1];
       }
       const foreground = rgba(style.stroke !== 'none' ? style.stroke : style.fill);
       if (!background || !foreground || Number(style.opacity) !== 1
@@ -2143,7 +2160,7 @@ function graphicsMeasurementsFromDom() {
       const ratio = reason ? null : (Math.max(luminance(effectiveForeground), luminance(background)) + 0.05) / (Math.min(luminance(effectiveForeground), luminance(background)) + 0.05);
       const disabled = control?.matches(':disabled, [aria-disabled="true"]') || false;
       pairs.push({panel: panel.dataset.vizPanelKey, tag: element.tagName, bbox,
-        accessibleName: name, foreground, effectiveForeground, background, ratio, threshold: 3,
+        accessibleName: name, foreground, effectiveForeground, background, backgroundLayers, ratio, threshold: 3,
         role: control ? 'interactive icon' : 'graphic', disabled,
         status: disabled ? 'EXEMPT_DISABLED' : (ratio === null ? 'NOT_VERIFIABLE' : (ratio >= 3 ? 'PASS' : 'FAIL')), reason});
     }
@@ -2172,6 +2189,9 @@ async function collectVerifiedRenderContext(page, dashboard) {
 
 async function collectVerifiedPanelSurfaces(page, dashboard) {
   dashboard.panelContainment = await collectPanelContainment(page, dashboard);
+  // Collect all independent evidence even when one surface fails acceptance.
+  dashboard.typographyValidation = await collectTypographyValidation(page, dashboard);
+  dashboard.navigationValidation = await collectNavigationValidation(page);
   const containmentSchema = validateContainmentManifest(dashboard.panelContainment);
   if (containmentSchema.status !== "ok") {
     throw new Error(
@@ -2189,13 +2209,11 @@ async function collectVerifiedPanelSurfaces(page, dashboard) {
       `Panel containment failed for ${dashboard.uid}: ${overflow.join("; ")}`,
     );
   }
-  dashboard.typographyValidation = await collectTypographyValidation(page, dashboard);
   if (dashboard.typographyValidation.status !== "ok") {
     throw new Error(
       `Typography validation failed for ${dashboard.uid}: ${dashboard.typographyValidation.violations.length} violation(s)`,
     );
   }
-  dashboard.navigationValidation = await collectNavigationValidation(page);
   if (dashboard.navigationValidation.status !== "ok") {
     throw new Error(
       `Navigation validation failed for ${dashboard.uid}: ${JSON.stringify(dashboard.navigationValidation)}`,
@@ -2349,6 +2367,9 @@ async function renderDashboard(page, dashboard, index, total) {
         file: path.relative(CONFIG.outputDir, file), ...pngEvidence(bytes)});
     }
   }
+  const {captureTablePages} = require('./capture_table_pages.cjs');
+  dashboard.tablePagination = await captureTablePages(page, {dashboard,
+    outputDir:CONFIG.outputDir,pngEvidence,timeout:CONFIG.captureTimeoutMs});
   await setDashboardScrollPosition(page, 0);
   dashboard.provisionedModel.after = await readModel();
   if (dashboard.actualTheme !== CONFIG.theme) {
@@ -2508,6 +2529,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  navigationValidationFromDom,
   graphicsMeasurementsFromDom,
   browserAndKioskStateFromDom,
   accessibilityMeasurementsFromDom,

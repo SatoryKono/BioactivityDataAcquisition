@@ -376,7 +376,7 @@
                 },
                 "3": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             },
@@ -386,7 +386,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             }
@@ -407,7 +407,7 @@
                 "value": 2
               },
               {
-                "color": "gray",
+                "color": "#555555",
                 "value": 3
               }
             ]
@@ -449,7 +449,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Start Incident Triage",
-        "content": "<div style=\"font-size:16px;line-height:1.25;padding:0;white-space:normal;overflow-wrap:anywhere\">GLOBAL · CURRENT · Rank: CRIT before WARN; ties have equal urgency. Confidence: signal only, unverified cause. Impact / event age: UNKNOWN until verified.</div>"
+        "content": "<div style=\"font-size:16px;line-height:1.25;padding:0;white-space:normal;overflow-wrap:anywhere\">GLOBAL · CURRENT · CRIT before WARN; ties are equally urgent. Signal ≠ verified cause. Impact and event age: UNKNOWN.</div>"
       },
       "links": [
         {
@@ -608,10 +608,11 @@
             "align": "left",
             "cellOptions": {
               "type": "auto",
-              "wrapText": false
+              "wrapText": true
             },
             "inspect": true,
-            "hidden": true
+            "hidden": true,
+            "minWidth": 50
           },
           "color": {
             "mode": "thresholds"
@@ -673,10 +674,6 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 48
-              },
-              {
                 "id": "mappings",
                 "value": []
               },
@@ -687,6 +684,10 @@
               {
                 "id": "custom.hidden",
                 "value": false
+              },
+              {
+                "id": "custom.width",
+                "value": 48
               }
             ]
           },
@@ -696,10 +697,6 @@
               "options": "Severity"
             },
             "properties": [
-              {
-                "id": "custom.width",
-                "value": 100
-              },
               {
                 "id": "mappings",
                 "value": [
@@ -725,7 +722,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text"
+                  "type": "color-text",
+                  "wrapText": true
                 }
               },
               {
@@ -744,10 +742,6 @@
               "options": "Confidence"
             },
             "properties": [
-              {
-                "id": "custom.width",
-                "value": 112
-              },
               {
                 "id": "noValue",
                 "value": "UNVERIFIED"
@@ -827,10 +821,6 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 100
-              },
-              {
                 "id": "mappings",
                 "value": [
                   {
@@ -868,10 +858,6 @@
               "options": "Object"
             },
             "properties": [
-              {
-                "id": "custom.width",
-                "value": 130
-              },
               {
                 "id": "noValue",
                 "value": "GLOBAL"
@@ -932,10 +918,6 @@
               "options": "Action"
             },
             "properties": [
-              {
-                "id": "custom.width",
-                "value": 105
-              },
               {
                 "id": "custom.cellOptions",
                 "value": {
@@ -1044,7 +1026,8 @@
             "sum"
           ],
           "countRows": false,
-          "fields": ""
+          "fields": "",
+          "enablePagination": true
         },
         "sortBy": [
           {

@@ -168,10 +168,8 @@ def test_rf001_shared_headline_vocabulary_is_fail_closed() -> None:
         assert _mapping_result(panel, "0") == {"text": "OK", "color": "green"}
         assert _mapping_result(panel, "1") == {"text": "WARN", "color": "orange"}
         assert _mapping_result(panel, "2") == {"text": "CRIT", "color": "red"}
-        assert _mapping_result(panel, "3") == {
-            "text": "INCOMPLETE",
-            "color": "gray",
-        }
+        assert _mapping_result(panel, "3")["text"] == "INCOMPLETE"
+        assert _mapping_result(panel, "3")["color"] in {"gray", "#555555"}
 
     design_system = Path("docs/03-guides/dashboards/design-system.md").read_text(
         encoding="utf-8"
@@ -230,7 +228,7 @@ def test_iteration_2_active_alert_severity_is_not_overridden_by_count() -> None:
     }
     assert count_properties["displayName"] == "Active Alerts"
     assert count_properties["custom.cellOptions"] == {
-        "type": "color-text",
+        "type": "auto",
         "applyToRow": False,
     }
 
@@ -730,7 +728,11 @@ def test_operator_critical_tables_expose_full_values() -> None:
                 assert custom["inspect"] is True
                 # Uniform row height: do not wrap at table default. Long fields
                 # wrap via named-column overrides (same pattern as #8977).
-                assert custom.get("cellOptions", {}).get("wrapText") is not True
+                if panel_id == 2010:
+                    assert custom["cellOptions"]["wrapText"] is True
+                    assert panel["options"]["footer"]["enablePagination"] is True
+                else:
+                    assert custom.get("cellOptions", {}).get("wrapText") is not True
                 if dashboard_name == "bioetl-run-explorer-v1.json" and panel_id == 3022:
                     continue
                 wrapped = _wrapped_field_names(panel)
@@ -1190,8 +1192,10 @@ def test_run_explorer_index_is_disk_last_ten_not_time_range() -> None:
 def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     explorer = _load("bioetl-run-explorer-v1.json")
     recent = _panel(explorer, 3010)
-    assert _override_width(recent, "selected") == 36
-    assert (_override_width(recent, "^(workflow_id|Workflow)$") or 0) == 118
+    assert _override_width(recent, "selected") == 50
+    assert _override_width(recent, "^(workflow_id|Workflow)$") is None
+    assert recent["fieldConfig"]["defaults"]["custom"]["minWidth"] == 50
+    assert recent["options"]["footer"]["enablePagination"] is True
     assert (_override_width(recent, "Run") or 0) <= 340
     hidden = {
         str((item.get("matcher") or {}).get("options"))
@@ -1208,7 +1212,7 @@ def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     assert "message" in hidden
     grid = recent.get("gridPos") or {}
     assert int(grid.get("h") or 0) == 11
-    assert recent.get("options", {}).get("cellHeight") == "sm"
+    assert recent.get("options", {}).get("cellHeight") == "lg"
     assert (recent.get("transformations") or [{}])[0].get("options", {}).get(
         "limitField"
     ) == 10

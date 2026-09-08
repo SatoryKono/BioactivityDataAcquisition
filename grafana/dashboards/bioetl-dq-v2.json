@@ -395,7 +395,7 @@
                 },
                 "3": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             },
@@ -405,7 +405,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             }
@@ -536,7 +536,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             }
@@ -3567,7 +3567,18 @@
                   "mode": "off"
                 }
               },
-              "mappings": [],
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "No quarantined records in range",
+                      "color": "text"
+                    }
+                  }
+                }
+              ],
               "noValue": "No quarantined records in range",
               "unit": "short",
               "decimals": 0

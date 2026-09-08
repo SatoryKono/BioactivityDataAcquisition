@@ -138,6 +138,7 @@ def test_threshold_steps_have_canonical_colors():
                         "blue",
                         "purple",
                         "gray",
+                        "text",
                     }
                     for step in steps:
                         color = step.get("color")

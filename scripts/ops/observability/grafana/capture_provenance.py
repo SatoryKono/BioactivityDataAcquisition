@@ -6,6 +6,7 @@ import hashlib
 import json
 import re
 import subprocess
+import struct
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -33,6 +34,40 @@ def model_errors(source: dict, evidence: object) -> list[str]:
         ):
             errors.append(f"{label} provisioned model differs from source")
     return errors
+
+
+def attachment_errors(root: Path, evidence: dict) -> list[str]:
+    """Verify a referenced PNG without allowing a path outside its capture pack."""
+    name = evidence.get("file")
+    if not isinstance(name, str) or not name:
+        return ["missing PNG attachment path"]
+    path = (root / name).resolve()
+    if not path.is_relative_to(root.resolve()):
+        return [f"PNG attachment escapes capture pack: {name}"]
+    if not path.is_file():
+        return [f"missing PNG attachment: {name}"]
+    raw = path.read_bytes()
+    if len(raw) < 24 or raw[:8] != b"\x89PNG\r\n\x1a\n":
+        return [f"invalid PNG attachment: {name}"]
+    width, height = struct.unpack(">II", raw[16:24])
+    expected = (hashlib.sha256(raw).hexdigest(), len(raw), width, height)
+    actual = tuple(evidence.get(key) for key in ("sha256", "bytes", "width", "height"))
+    return (
+        []
+        if expected == actual
+        else [f"PNG attachment digest/dimensions mismatch: {name}"]
+    )
+
+
+def dashboard_attachment_errors(root: Path, dashboard: dict) -> list[str]:
+    """Bind critical closeups, original full-capture tiles and pagination pages."""
+    attachments = list(dashboard.get("criticalPanelScreenshots", []))
+    attachments.extend(dashboard.get("scrollCapture", {}).get("tiles", []))
+    for table in dashboard.get("tablePagination", []):
+        attachments.extend(table.get("pages", []))
+    return [
+        error for evidence in attachments for error in attachment_errors(root, evidence)
+    ]
 
 
 def verify_capture(manifest_path: Path, *, repo_root: Path) -> dict:
@@ -74,10 +109,16 @@ def verify_capture(manifest_path: Path, *, repo_root: Path) -> dict:
             errors.append(f"unexpected UID: {uid}")
             continue
         current = path.read_bytes()
-        digest = hashlib.sha256(current).hexdigest()
+        # Git checkouts may materialize LF or CRLF; no other source bytes
+        # are normalized. The claimed commit is checked independently below.
+        lf = current.replace(b"\r\n", b"\n")
+        source_digests = {
+            hashlib.sha256(raw).hexdigest()
+            for raw in (current, lf, lf.replace(b"\n", b"\r\n"))
+        }
         identity = dashboard.get("dashboardSource", {})
         if (
-            identity.get("sha256") != digest
+            identity.get("sha256") not in source_digests
             or source.get("dashboards", {}).get(uid) != identity
         ):
             item_errors.append("source digest mismatch")
@@ -96,6 +137,8 @@ def verify_capture(manifest_path: Path, *, repo_root: Path) -> dict:
         item_errors.extend(
             model_errors(json.loads(current), dashboard.get("provisionedModel"))
         )
+        if identity.get("path") != f"grafana/dashboards/{path.name}":
+            item_errors.append("source path mismatch")
         model = dashboard.get("provisionedModel") or {}
         if model.get("captureId") != capture_id:
             item_errors.append("model occurrence mismatch")
@@ -117,6 +160,7 @@ def verify_capture(manifest_path: Path, *, repo_root: Path) -> dict:
             )
             if png_error:
                 item_errors.append(png_error)
+        item_errors.extend(dashboard_attachment_errors(manifest_path.parent, dashboard))
         results.append(
             {
                 "uid": uid,
