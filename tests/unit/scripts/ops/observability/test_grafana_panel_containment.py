@@ -48,6 +48,37 @@ def _node_eval(program: str) -> str:
     return result.stdout.strip()
 
 
+def test_text_contrast_composites_alpha_and_preserves_unmeasured_gradients() -> None:
+    output = _node_eval(
+        """
+const {accessibilityMeasurementsFromDom} = require(process.argv[1]);
+const base = {opacity:'1',filter:'none',mixBlendMode:'normal',backgroundImage:'none',
+  backgroundColor:'rgb(255, 255, 255)',color:'rgb(0, 0, 0)',fontSize:'16px',fontWeight:'400',
+  visibility:'visible',display:'block',textOverflow:'clip',overflowX:'visible',overflowY:'visible'};
+const make = (style) => ({childNodes:[{nodeType:3,textContent:'Example'}],
+  getBoundingClientRect:()=>({x:0,y:0,width:100,height:24}),style:{...base,...style},parentElement:null});
+const black=make({});
+const same=make({color:'rgb(255, 255, 255)'});
+const alpha=make({color:'rgba(0, 0, 0, 0.5)'});
+const gradient=make({backgroundImage:'linear-gradient(white, black)'});
+global.document={querySelectorAll:()=>[{dataset:{vizPanelKey:'panel-1'},querySelectorAll:()=>[black,same,alpha,gradient]}]};
+global.getComputedStyle=(el)=>el.style;
+global.window={devicePixelRatio:1}; global.innerWidth=1366; global.innerHeight=768;
+global.location={href:'http://localhost/test'};
+console.log(JSON.stringify(accessibilityMeasurementsFromDom().pairs));
+"""
+    )
+    pairs = json.loads(output)
+    assert pairs[0]["ratio"] == pytest.approx(21)
+    assert pairs[0]["status"] == "PASS"
+    assert pairs[1]["ratio"] == pytest.approx(1)
+    assert pairs[1]["status"] == "FAIL"
+    assert pairs[2]["ratio"] == pytest.approx(3.976653024912438)
+    assert pairs[2]["status"] == "FAIL"
+    assert pairs[3]["ratio"] is None
+    assert pairs[3]["status"] == "NOT_VERIFIABLE"
+
+
 def test_select_first_window_panels_skips_rows_and_below_fold() -> None:
     output = _node_eval(
         """
@@ -239,3 +270,85 @@ def test_python_preflight_fails_closed_on_recorded_overflow() -> None:
     assert error is not None
     assert "2010" in error
     assert preflight._validate_dashboard_panel_containment("bioetl-runtime", {}) is None
+
+
+def test_actual_fold_cannot_pass_with_internal_fit_only() -> None:
+    output = _node_eval("""
+const {evaluatePanelContainment} = require(process.argv[1]);
+const panel={uid:'test',id:1,type:'table',gridPos:{y:11},clientHeight:200,scrollHeight:200,
+ clientWidth:600,scrollWidth:600,bbox:{x:0,y:602,width:600,height:266},fold:768,enforceFold:true};
+console.log(JSON.stringify(evaluatePanelContainment(panel)));
+""")
+    result = json.loads(output)
+    assert result["status"] == "error"
+    assert "outside-first-viewport" in result["reasons"]
+
+
+def test_graphic_contrast_does_not_promote_canvas_or_translucency() -> None:
+    output = _node_eval("""
+const {graphicsMeasurementsFromDom} = require(process.argv[1]);
+const base={opacity:'1',fillOpacity:'1',strokeOpacity:'1',filter:'none',backgroundImage:'none',
+ backgroundColor:'rgb(255, 255, 255)',fill:'rgb(0, 0, 0)',stroke:'none',display:'block',visibility:'visible'};
+const control={getAttribute:()=> 'Inspect',textContent:'Inspect',matches:()=>false};
+const make=(tag,style={})=>({tagName:tag,style:{...base,...style},parentElement:{style:base,parentElement:null},
+ getBoundingClientRect:()=>({x:0,y:0,width:20,height:20}),closest:()=>control});
+const shapes=[make('path'),make('path',{fill:'rgb(220, 220, 220)'}),make('canvas'),make('path',{opacity:'0.5'})];
+global.document={querySelectorAll:()=>[{dataset:{vizPanelKey:'panel-1'},querySelectorAll:()=>shapes}]};
+global.getComputedStyle=(el)=>el.style;
+console.log(JSON.stringify(graphicsMeasurementsFromDom()));
+""")
+    result = json.loads(output)
+    assert result["pairs"][0]["ratio"] == pytest.approx(21)
+    assert result["pairs"][0]["status"] == "PASS"
+    assert result["pairs"][1]["status"] == "FAIL"
+    assert result["pairs"][2]["status"] == "NOT_VERIFIABLE"
+    assert result["canvases"][0]["status"] == "NOT_VERIFIABLE"
+
+
+def test_native_gradient_uses_worst_case_bound_and_svg_composites_alpha() -> None:
+    output = _node_eval("""
+const {accessibilityMeasurementsFromDom,graphicsMeasurementsFromDom}=require(process.argv[1]);
+const base={opacity:'1',filter:'none',mixBlendMode:'normal',backgroundImage:'none',backgroundColor:'rgb(0, 0, 0)',
+ color:'rgb(247, 247, 247)',fontSize:'24px',fontWeight:'400',display:'block',visibility:'visible',fillOpacity:'1',strokeOpacity:'1'};
+const el={childNodes:[{nodeType:3,textContent:'UNKNOWN'}],parentElement:null,tagName:'SPAN',
+ getBoundingClientRect:()=>({x:0,y:0,width:120,height:30}),style:{...base,backgroundImage:'linear-gradient(120deg, rgb(90, 90, 90), rgb(115, 115, 115))'}};
+global.getComputedStyle=e=>e.style;global.window={devicePixelRatio:1};global.innerWidth=1366;global.innerHeight=768;global.location={href:'http://test/'};
+global.document={querySelectorAll:()=>[{dataset:{vizPanelKey:'panel-1'},querySelectorAll:()=>[el]}]};
+const text=accessibilityMeasurementsFromDom().pairs[0];
+const shape={tagName:'path',getBoundingClientRect:el.getBoundingClientRect,parentElement:{style:base,parentElement:null},
+ closest:()=>null,style:{...base,stroke:'none',fill:'rgba(255, 255, 255, 0.5)'}};
+global.document={querySelectorAll:()=>[{dataset:{vizPanelKey:'panel-1'},querySelectorAll:()=>[shape]}]};
+console.log(JSON.stringify({text,graphic:graphicsMeasurementsFromDom().pairs[0]}));
+""")
+    result = json.loads(output)
+    assert result["text"]["background"] == [115, 115, 115]
+    assert result["text"]["status"] == "PASS"
+    assert result["graphic"]["effectiveForeground"] == [127.5, 127.5, 127.5]
+    assert result["graphic"]["ratio"] == pytest.approx(5.280822809644651)
+
+
+def test_canvas_contrast_uses_observed_paint_and_records_raster_alpha() -> None:
+    """Antialiasing is evidence, while missing/composited paint cannot pass."""
+    output = _node_eval(
+        r"""
+const {canvasEvidenceFromDom}=require(require('node:path').join(require('node:path').dirname(process.argv[1]),'capture_canvas_evidence.cjs'));
+const pixels=new Uint8ClampedArray(20*20*4);
+const index=(5*20+5)*4;pixels.set([0,0,0,96],index);
+const calls=[{method:'fillText',text:'X',foreground:'#000000',font:'12px sans-serif',alpha:1,composition:'source-over',bounds:{x:4,y:4,width:4,height:4}}];
+const canvas={width:20,height:20,parentElement:null,getBoundingClientRect:()=>({x:0,y:0,width:20,height:20}),
+ closest:()=>({dataset:{vizPanelKey:'panel-1'}}),getContext:()=>({getImageData:()=>({data:pixels})}),toDataURL:()=>''};
+global.document={querySelectorAll:()=>[canvas]};
+global.window={__bioetlCanvasEvidence:new Map([[canvas,new Map(calls.map((x,i)=>[i,x]))]])};
+global.getComputedStyle=()=>({backgroundColor:'rgb(255, 255, 255)',backgroundImage:'none',opacity:'1',filter:'none'});
+const pair=canvasEvidenceFromDom()[0].measurements.pairs.text[0];
+if(pair.ratio!==21||pair.status!=='PASS'||pair.pixelWitness.foreground.rasterAlpha!==96/255)throw Error(JSON.stringify(pair));
+pixels.fill(0);
+const absent=canvasEvidenceFromDom()[0].measurements.pairs.text[0];
+if(absent.ratio!==null||absent.status!=='NOT_VERIFIABLE')throw Error('Absent pixels passed');
+calls[0].alpha=.5;
+const unsupported=canvasEvidenceFromDom()[0].measurements.pairs.text[0];
+if(unsupported.ratio!==null||unsupported.status!=='NOT_VERIFIABLE')throw Error('Unsupported paint passed');
+process.stdout.write('ok');
+"""
+    )
+    assert output == "ok"

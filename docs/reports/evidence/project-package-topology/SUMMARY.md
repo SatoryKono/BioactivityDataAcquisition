@@ -1,10 +1,10 @@
 # Сводка evidence: project-package-topology
 
-Refresh note (2026-09-07): Grafana table/accounting fixes merged with navigation and report-artifact fixes; source fingerprint refreshed from the canonical coverage-verify candidate produced by CI run 34137787172. Python file and layer counts were remeasured and remain unchanged; the candidate retains the current measured coverage evidence.
+Refresh note (2026-09-07): Run Explorer adds the report-section ordering module and isolates summary I/O from the health server executor. Counts and the source fingerprint below come from the canonical source inventory. Coverage measurements come from successful coverage-verify for 93cf65f495 (CI run 34151672662). Historical notes remain historical.
 
-`source_tree_sha256=1171e7fc06e1dd8622f9738c1b8cf16e19aa2d7e253e88f4f4a5bbcce394cd9d`
+`source_tree_sha256=3bd6e0b20e190e5be94697e7432cfa83865f053700b5c121f0a084730be1af4c`
 
-`source_module_count=2468`
+`source_module_count=2469`
 
 Дата: 2026-08-17
 Статус: refreshed
@@ -85,10 +85,10 @@ Collected: `6`
   for source, config, tests, scripts, docs, and reports.
 - `src/bioetl/` reflects the intended layered architecture through distinct
   first-order package groups.
-- Current Python file count under `src/bioetl` is `2468`, including two
+- Current Python file count under `src/bioetl` is `2469`, including two
   top-level package modules outside the five first-order architecture layers.
 - Current layer file counts are: `domain=608`, `application=772`,
-  `infrastructure=632`, `composition=295`, `interfaces=159`.
+  `infrastructure=632`, `composition=295`, `interfaces=160`.
 - Current first-order package counts (direct child directories with `__init__.py`)
   are: `domain=22`, `application=7`, `infrastructure=19`, `composition=6`,
   `interfaces=2`.
@@ -108,6 +108,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `1171e7fc06e1dd8622f9738c1b8cf16e19aa2d7e253e88f4f4a5bbcce394cd9d`
+- source_tree_sha256: `3bd6e0b20e190e5be94697e7432cfa83865f053700b5c121f0a084730be1af4c`
 
-`source_module_count=2468`
+`source_module_count=2469`

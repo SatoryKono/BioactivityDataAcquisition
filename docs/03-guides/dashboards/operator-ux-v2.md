@@ -94,6 +94,21 @@ See [usability-baseline-protocol.md](usability-baseline-protocol.md):
 | Screens per investigation | 4–5 | 2–3 |
 | Time-to-first-suspect | often >60s | ≤30s on first screen |
 
+The table above is the historical pre-2.0 investigation proxy. RF-004 (#10167)
+uses the current 21-task protocol: first correct insight target 5–10 seconds,
+with loading and understanding reported separately. Publish success, participant
+type/count, first/repeat sample sizes, median/max time and clicks/interactions,
+diagnostic depth and context loss. Historical counts and static navigation edges
+are not a baseline measurement for a new candidate. Deviations require a reason,
+panel/question-specific disposition and retest after any improvement. Astra is an
+AI operator; agent performance remains separate from human usability evidence.
+
+For the owner-approved 2026-09-08 closeout of #10167, the operator gate uses
+`AI_SCENARIOS`: 21 verified AI tasks, descriptive elapsed time and explicit
+`human_usability_status=NOT_MEASURED` with human N=0. The 5–10 second human target
+is not measured in that scope. See the protocol for the required decision receipt
+and destination/return evidence; the remaining #10185/#10171 gates still apply.
+
 ## WCAG notes
 
 - Status colors use green/orange/red/gray with **text mappings** (OK/WARN/CRIT/UNKNOWN).

@@ -229,7 +229,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1;margin:0 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:2px;flex-wrap:nowrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-current\" href=\"#bioetl-control-plane-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"0. Trust (Trust)\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health). Scope reset: provider=unknown; preserves time range, pipeline context.\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-provider=unknown&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">4. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Run Explorer</a></div>"
+        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1;margin:0 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:2px;flex-wrap:wrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-current\" href=\"#bioetl-control-plane-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"0. Trust (Trust)\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health). Scope reset: provider=unknown; preserves time range, pipeline context.\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-provider=unknown&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">4. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Run Explorer</a></div>"
       },
       "title": "",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
@@ -314,7 +314,7 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 16,
         "x": 0,
         "y": 3
@@ -366,7 +366,7 @@
                 },
                 "3": {
                   "text": "INCOMPLETE",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             },
@@ -376,7 +376,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             }
@@ -446,10 +446,10 @@
         "h": 5,
         "w": 12,
         "x": 0,
-        "y": 7
+        "y": 6
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN HTTP trust summary on the first screen. processing_status is the data-processing outcome; trust_status is fail-closed exact-run evidence (INCOMPLETE/ERROR/UNKNOWN are not OK). First screen shows evidence freshness plus top-3 trust.reasons_text (newline-joined); the full reason list stays in rows / panel 9414. Scope is exact_run when run_id resolves. Valid empty means no selected exact-run payload; backend unavailable is not a health verdict. SELECT RUN / VALID EMPTY is not OK.",
+      "description": "SELECTED RUN · Processing outcome, fail-closed Trust verdict and total Reasons remain visible together. Select Reasons to inspect the full evidence in panel 9414; full reasons also remain in table inspection. INCOMPLETE / UNKNOWN is not OK. SELECT RUN / VALID EMPTY is not OK. Processing is processing_status; Trust is trust_status. Backend unavailable means QUERY ERROR, never VALID EMPTY.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -464,40 +464,6 @@
           "links": []
         },
         "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "processing_status"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 72
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "trust_status"
-            },
-            "properties": [
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              }
-            ]
-          },
           {
             "matcher": {
               "id": "byName",
@@ -525,33 +491,6 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "reasons_text"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "reasons"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
-              },
-              {
-                "id": "custom.inspect",
-                "value": true
-              },
-              {
-                "id": "custom.width",
-                "value": 150
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
               "options": "evidence_observed_at"
             },
             "properties": [
@@ -562,6 +501,91 @@
               {
                 "id": "custom.hidden",
                 "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "processing_status"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Processing"
+              },
+              {
+                "id": "custom.width",
+                "value": 100
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "trust_status"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Trust"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "reasons_text"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "reasons_count"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Reasons"
+              },
+              {
+                "id": "custom.width",
+                "value": 80
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Inspect all trust reasons",
+                    "url": "/d/bioetl-control-plane-v1/0-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9414&${__url_time_range}",
+                    "targetBlank": false,
+                    "includeVars": false
+                  }
+                ]
               }
             ]
           }
@@ -621,8 +645,9 @@
             "indexByName": {
               "processing_status": 0,
               "trust_status": 1,
-              "reasons_text": 2,
-              "evidence_observed_at": 3
+              "reasons_count": 2,
+              "reasons_text": 3,
+              "evidence_observed_at": 4
             },
             "renameByName": {}
           }
@@ -764,7 +789,7 @@
         "h": 5,
         "w": 12,
         "x": 12,
-        "y": 7
+        "y": 6
       },
       "id": 9416,
       "options": {
@@ -864,7 +889,7 @@
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 11
       },
       "options": {
         "bioetlDisplayTitle": "Review Recovery Action",
@@ -935,7 +960,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             }
@@ -966,7 +991,7 @@
         "h": 3,
         "w": 6,
         "x": 0,
-        "y": 15
+        "y": 14
       },
       "id": 891,
       "options": {
@@ -1027,7 +1052,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             }
@@ -1058,7 +1083,7 @@
         "h": 3,
         "w": 6,
         "x": 6,
-        "y": 15
+        "y": 14
       },
       "id": 892,
       "options": {
@@ -1146,7 +1171,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             }
@@ -1177,7 +1202,7 @@
         "h": 3,
         "w": 6,
         "x": 12,
-        "y": 15
+        "y": 14
       },
       "id": 893,
       "options": {
@@ -1247,7 +1272,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             }
@@ -1278,7 +1303,7 @@
         "h": 3,
         "w": 6,
         "x": 18,
-        "y": 15
+        "y": 14
       },
       "id": 907,
       "options": {
@@ -1319,7 +1344,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 17
       },
       "id": 9419,
       "title": "Review Lineage Validation",
@@ -1360,7 +1385,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 19
+            "y": 18
           },
           "id": 9415,
           "options": {
@@ -1407,7 +1432,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 18
       },
       "id": 902,
       "title": "Inspect Replay & Checkpoint Evidence",
@@ -1419,7 +1444,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 20
+            "y": 19
           },
           "id": 894,
           "options": {
@@ -1490,7 +1515,7 @@
             "h": 3,
             "w": 6,
             "x": 0,
-            "y": 25
+            "y": 24
           },
           "id": 130,
           "options": {
@@ -1581,7 +1606,7 @@
             "h": 3,
             "w": 6,
             "x": 6,
-            "y": 25
+            "y": 24
           },
           "id": 3,
           "options": {
@@ -1672,7 +1697,7 @@
             "h": 3,
             "w": 6,
             "x": 12,
-            "y": 25
+            "y": 24
           },
           "id": 104,
           "options": {
@@ -1763,7 +1788,7 @@
             "h": 3,
             "w": 6,
             "x": 18,
-            "y": 25
+            "y": 24
           },
           "id": 120,
           "options": {
@@ -1854,7 +1879,7 @@
             "h": 3,
             "w": 6,
             "x": 0,
-            "y": 28
+            "y": 27
           },
           "id": 101,
           "options": {
@@ -1945,7 +1970,7 @@
             "h": 3,
             "w": 6,
             "x": 6,
-            "y": 28
+            "y": 27
           },
           "id": 102,
           "options": {
@@ -2036,7 +2061,7 @@
             "h": 3,
             "w": 6,
             "x": 12,
-            "y": 28
+            "y": 27
           },
           "id": 103,
           "options": {
@@ -2127,7 +2152,7 @@
             "h": 3,
             "w": 6,
             "x": 18,
-            "y": 28
+            "y": 27
           },
           "id": 121,
           "options": {
@@ -2190,7 +2215,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 31
+            "y": 30
           },
           "id": 5,
           "options": {
@@ -2257,7 +2282,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 37
+            "y": 36
           },
           "id": 134,
           "options": {
@@ -2328,7 +2353,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 37
+            "y": 36
           },
           "id": 135,
           "options": {
@@ -2399,7 +2424,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 43
+            "y": 42
           },
           "id": 105,
           "options": {
@@ -2481,7 +2506,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 50
+            "y": 49
           },
           "id": 106,
           "options": {
@@ -2552,7 +2577,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 57
+            "y": 56
           },
           "id": 9413,
           "options": {
@@ -2599,7 +2624,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 19
       },
       "id": 901,
       "title": "Inspect Manifest & Ledger Evidence",
@@ -2672,7 +2697,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 77,
+            "y": 76,
             "w": 24,
             "h": 6
           },
@@ -2772,7 +2797,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 83,
+            "y": 82,
             "w": 6,
             "h": 3
           },
@@ -2863,7 +2888,7 @@
           },
           "gridPos": {
             "x": 6,
-            "y": 83,
+            "y": 82,
             "w": 6,
             "h": 3
           },
@@ -2926,7 +2951,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 86,
+            "y": 85,
             "w": 24,
             "h": 7
           },
@@ -2980,7 +3005,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 93,
+            "y": 92,
             "w": 24,
             "h": 7
           },
@@ -3062,7 +3087,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 83,
+            "y": 82,
             "w": 6,
             "h": 3
           },
@@ -3153,7 +3178,7 @@
           },
           "gridPos": {
             "x": 18,
-            "y": 83,
+            "y": 82,
             "w": 6,
             "h": 3
           },
@@ -3222,7 +3247,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 112,
+            "y": 111,
             "w": 24,
             "h": 6
           },
@@ -3271,7 +3296,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 20
       },
       "id": 903,
       "title": "Inspect Global Store Reliability",
@@ -3332,7 +3357,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 122,
+            "y": 121,
             "w": 6,
             "h": 3
           },
@@ -3423,7 +3448,7 @@
           },
           "gridPos": {
             "x": 6,
-            "y": 122,
+            "y": 121,
             "w": 6,
             "h": 3
           },
@@ -3482,11 +3507,27 @@
               "unit": "short",
               "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "manifest / list_all / success"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#8e7300"
+                    }
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
             "x": 0,
-            "y": 125,
+            "y": 124,
             "w": 24,
             "h": 6
           },
@@ -3519,7 +3560,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows p50, p95, and p99 read latency across all control-plane stores during the selected range. Filters do not apply. No data means no latency samples were recorded in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Shows p50, p95, and p99 read latency for each control-plane store and operation during the selected range, excluding failed reads (status!=\"failed\"). Filters do not apply. No data means no latency samples were recorded in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3553,13 +3594,134 @@
               "unit": "s",
               "noValue": "No optional latency samples in range. Treat this as telemetry absence, not proof of a healthy control-plane path."
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "manifest / list_all · p50"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#8e7300"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "ledger / list_entries · p99"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#677b60"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "ledger / list_entries_by_run_id · p99"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#847352"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "manifest / get_by_run_id · p99"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#b05f56"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "manifest / list_all · p99"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#5179a2"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "workflow_manifest / list_all · p99"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#9a6492"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "lineage / list_by_manifest_id · p95"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#8a7407"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "lineage / list_by_manifest_id · p99"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#7e6e96"
+                    }
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
             "x": 0,
-            "y": 131,
+            "y": 130,
             "w": 24,
-            "h": 7
+            "h": 11
           },
           "id": 111,
           "options": {
@@ -3567,7 +3729,7 @@
               "calcs": [],
               "displayMode": "list",
               "placement": "bottom",
-              "showLegend": false
+              "showLegend": true
             },
             "tooltip": {
               "mode": "multi",
@@ -3576,18 +3738,18 @@
           },
           "targets": [
             {
-              "expr": "histogram_quantile(0.50, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
-              "legendFormat": "p50",
+              "expr": "histogram_quantile(0.50, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
+              "legendFormat": "{{store}} / {{operation}} · p50",
               "refId": "A"
             },
             {
-              "expr": "histogram_quantile(0.95, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
-              "legendFormat": "p95",
+              "expr": "histogram_quantile(0.95, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
+              "legendFormat": "{{store}} / {{operation}} · p95",
               "refId": "B"
             },
             {
-              "expr": "histogram_quantile(0.99, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
-              "legendFormat": "p99",
+              "expr": "histogram_quantile(0.99, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
+              "legendFormat": "{{store}} / {{operation}} · p99",
               "refId": "C"
             }
           ],
@@ -3604,7 +3766,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 21
       },
       "id": 904,
       "title": "Inspect Audit & Lineage Evidence",
@@ -3666,7 +3828,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 142,
+            "y": 141,
             "w": 6,
             "h": 3
           },
@@ -3757,7 +3919,7 @@
           },
           "gridPos": {
             "x": 6,
-            "y": 142,
+            "y": 141,
             "w": 6,
             "h": 3
           },
@@ -3905,7 +4067,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 145,
+            "y": 144,
             "w": 24,
             "h": 6
           },
@@ -3977,7 +4139,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 151,
+            "y": 150,
             "w": 24,
             "h": 7
           },
@@ -4031,7 +4193,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 158,
+            "y": 157,
             "w": 24,
             "h": 7
           },
@@ -4102,7 +4264,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 165,
+            "y": 164,
             "w": 24,
             "h": 7
           },
@@ -4183,7 +4345,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 172,
+            "y": 171,
             "w": 24,
             "h": 7
           },
@@ -4247,7 +4409,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 179,
+            "y": 178,
             "w": 12,
             "h": 6
           },
@@ -4283,7 +4445,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 22
       },
       "id": 905,
       "title": "Inspect Run Identity Evidence",
@@ -4292,7 +4454,7 @@
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · TIME RANGE · Summarizes the selected run’s identity and replay anchors. Short values are shown in the table; full values remain available for copying. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "description": "SELECTED RUN · TIME RANGE · Summarizes the selected run’s identity and replay anchors. Full values are shown in the table and remain available for copying through Inspect value. Source metadata remains in table inspection. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4309,12 +4471,96 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "status"
+                  "options": "priority"
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 110
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source_type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source_quality"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "format"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "why"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "rendering"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               },
@@ -4325,23 +4571,156 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               },
               {
                 "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                  "id": "byName",
+                  "options": "copy"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "copy_mode"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "copy_value"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown_type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown_target"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown_label"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "missing_severity"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "identity_gap"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "present"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "label"
                 },
                 "properties": [
                   {
                     "id": "displayName",
-                    "value": "Count"
+                    "value": "Anchor"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 180
                   }
                 ]
               },
@@ -4352,11 +4731,35 @@
                 },
                 "properties": [
                   {
+                    "id": "displayName",
+                    "value": "Value"
+                  },
+                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
                       "wrapText": true
                     }
+                  },
+                  {
+                    "id": "custom.inspect",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "ui_status"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "State"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 160
                   }
                 ]
               }
@@ -4364,9 +4767,9 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 207,
+            "y": 206,
             "w": 24,
-            "h": 4
+            "h": 18
           },
           "id": 9404,
           "options": {
@@ -4398,42 +4801,14 @@
               "id": "organize",
               "options": {
                 "excludeByName": {
-                  "Time": true,
-                  "__name__": true,
-                  "Value": true,
-                  "copy_value": true,
-                  "format": true,
-                  "rendering": true,
-                  "why": true
+                  "Time": true
                 },
                 "indexByName": {
                   "label": 0,
-                  "value_short": 1,
-                  "value_full": 2,
-                  "ui_status": 3,
-                  "missing_severity": 4,
-                  "source_type": 5,
-                  "source_quality": 6,
-                  "drilldown_type": 7,
-                  "drilldown_target": 8,
-                  "drilldown": 9
+                  "value_full": 1,
+                  "ui_status": 2
                 },
-                "renameByName": {
-                  "drilldown": "drilldown",
-                  "drilldown_target": "drilldown target",
-                  "drilldown_type": "drilldown type",
-                  "label": "anchor",
-                  "missing_severity": "severity",
-                  "source_quality": "source quality",
-                  "source_type": "source type",
-                  "ui_status": "status",
-                  "value_full": "full value",
-                  "value_short": "short value",
-                  "Value": "Count",
-                  "Value #A": "Series A",
-                  "Value #B": "Series B",
-                  "Value #C": "Series C"
-                }
+                "renameByName": {}
               }
             }
           ],
@@ -4451,14 +4826,6 @@
                 },
                 "inspect": true
               },
-              "links": [
-                {
-                  "includeVars": false,
-                  "targetBlank": true,
-                  "title": "Open full value as plain text",
-                  "url": "data:text/plain,${__data.fields.copy_value}"
-                }
-              ],
               "unit": "none",
               "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity."
             },
@@ -4466,12 +4833,96 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "status"
+                  "options": "priority"
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 110
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source_type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source_quality"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "format"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "why"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "rendering"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               },
@@ -4482,41 +4933,32 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto"
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Count"
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               },
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "value"
+                  "options": "copy"
                 },
                 "properties": [
                   {
-                    "id": "links",
-                    "value": [
-                      {
-                        "title": "Copy/Open full value (plain text)",
-                        "url": "data:text/plain,${__value.raw}",
-                        "targetBlank": true,
-                        "includeVars": false
-                      }
-                    ]
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "copy_mode"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               },
@@ -4527,15 +4969,159 @@
                 },
                 "properties": [
                   {
-                    "id": "links",
-                    "value": [
-                      {
-                        "title": "Copy/Open full value (plain text)",
-                        "url": "data:text/plain,${__value.raw}",
-                        "targetBlank": true,
-                        "includeVars": false
-                      }
-                    ]
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown_type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown_target"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown_label"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "missing_severity"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "identity_gap"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "present"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "label"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Anchor"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 180
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "value_full"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Value"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  },
+                  {
+                    "id": "custom.inspect",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "ui_status"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "State"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 160
                   }
                 ]
               }
@@ -4543,9 +5129,9 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 211,
+            "y": 224,
             "w": 24,
-            "h": 4
+            "h": 30
           },
           "id": 9407,
           "options": {
@@ -4579,7 +5165,13 @@
               "options": {
                 "excludeByName": {
                   "Time": true
-                }
+                },
+                "indexByName": {
+                  "label": 0,
+                  "value_full": 1,
+                  "ui_status": 2
+                },
+                "renameByName": {}
               }
             }
           ]
@@ -4598,7 +5190,7 @@
           "description": "Shown when no identity rows are returned. This can mean no matching run, unresolved scope, or an unavailable backend; it is not a critical verdict by itself.",
           "gridPos": {
             "x": 0,
-            "y": 215,
+            "y": 254,
             "w": 12,
             "h": 4
           },
@@ -4609,7 +5201,7 @@
               "showLineNumbers": false,
               "showMiniMap": false
             },
-            "content": "<div style=\"font-size:16px;line-height:1.45;color:#c9d1d9\">Identity table guardrail.<br/>If no rows are visible, check <code style=\"font-size:16px\">/health/live</code>, selector scope, and a concrete <code style=\"font-size:16px\">pipeline</code>/<code style=\"font-size:16px\">run_id</code> before treating the empty state as expected.</div>",
+            "content": "<div style=\"font-size:16px;line-height:1.45\">Identity table guardrail.<br/>If no rows are visible, check <code style=\"font-size:16px\">/health/live</code>, selector scope, and a concrete <code style=\"font-size:16px\">pipeline</code>/<code style=\"font-size:16px\">run_id</code> before treating the empty state as expected.</div>",
             "mode": "html"
           },
           "title": "Explain Missing Identity Data",
@@ -4627,7 +5219,7 @@
           "description": "Shown when no processed-record rows are returned. This can mean no activity, a run that has not started, unresolved scope, or an unavailable backend.",
           "gridPos": {
             "x": 12,
-            "y": 215,
+            "y": 254,
             "w": 12,
             "h": 4
           },
@@ -4638,7 +5230,7 @@
               "showLineNumbers": false,
               "showMiniMap": false
             },
-            "content": "<div style=\"font-size:16px;line-height:1.45;color:#c9d1d9\">Accounting table guardrail.<br/>Visible rows are backend accounting evidence; if this table becomes empty, verify backend health and scope before reading it as zero records.</div>",
+            "content": "<div style=\"font-size:16px;line-height:1.45\">Accounting table guardrail.<br/>Visible rows are backend accounting evidence; if this table becomes empty, verify backend health and scope before reading it as zero records.</div>",
             "mode": "html"
           },
           "title": "Explain Missing Record Counts",
@@ -4663,12 +5255,96 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "status"
+                  "options": "priority"
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 110
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source_type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source_quality"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "format"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "why"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "rendering"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               },
@@ -4679,22 +5355,195 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto"
-                    }
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               },
               {
                 "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                  "id": "byName",
+                  "options": "copy"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "copy_mode"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "copy_value"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown_type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown_target"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown_label"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "missing_severity"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "identity_gap"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "present"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "label"
                 },
                 "properties": [
                   {
                     "id": "displayName",
-                    "value": "Count"
+                    "value": "Anchor"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 180
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "value_full"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Value"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  },
+                  {
+                    "id": "custom.inspect",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "ui_status"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "State"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 160
                   }
                 ]
               }
@@ -4702,9 +5551,9 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 219,
-            "w": 12,
-            "h": 4
+            "y": 258,
+            "w": 24,
+            "h": 18
           },
           "id": 9405,
           "options": {
@@ -4738,7 +5587,13 @@
               "options": {
                 "excludeByName": {
                   "Time": true
-                }
+                },
+                "indexByName": {
+                  "label": 0,
+                  "value_full": 1,
+                  "ui_status": 2
+                },
+                "renameByName": {}
               }
             }
           ]
@@ -4801,7 +5656,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 219,
+            "y": 276,
             "w": 12,
             "h": 4
           },
@@ -4900,7 +5755,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 223,
+            "y": 280,
             "w": 12,
             "h": 4
           },
@@ -4999,7 +5854,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 223,
+            "y": 280,
             "w": 12,
             "h": 4
           },
@@ -5043,7 +5898,7 @@
         {
           "gridPos": {
             "x": 0,
-            "y": 227,
+            "y": 284,
             "w": 24,
             "h": 4
           },
@@ -5066,7 +5921,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 24
+        "y": 23
       },
       "id": 9412,
       "description": "Expand for HTTP-backed run details. Run Explorer remains the canonical exact-run workspace.",
@@ -5077,7 +5932,7 @@
           "title": "Review Run Summary",
           "gridPos": {
             "x": 0,
-            "y": 232,
+            "y": 285,
             "w": 18,
             "h": 6
           },
@@ -5228,7 +6083,7 @@
           "title": "Review Processed Records",
           "gridPos": {
             "x": 18,
-            "y": 232,
+            "y": 285,
             "w": 6,
             "h": 6
           },
@@ -5653,7 +6508,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 238,
+            "y": 291,
             "w": 24,
             "h": 6
           },

@@ -86,6 +86,9 @@ class AuditCycleConfig:
     workflow: str
     run_id: str
     range_hours: int
+    range_from: str = ""
+    range_to: str = ""
+    acceptance_input: Path | None = None
 
 
 @dataclass(frozen=True)
@@ -188,11 +191,34 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--workflow", default=live_audit.DEFAULT_WORKFLOW)
     parser.add_argument("--run-id", default=live_audit.DEFAULT_RUN_ID)
     parser.add_argument("--range-hours", type=int, default=DEFAULT_RANGE_HOURS)
+    parser.add_argument("--range-from", default="", help="Fixed UTC Unix milliseconds.")
+    parser.add_argument("--range-to", default="", help="Fixed UTC Unix milliseconds.")
+    parser.add_argument(
+        "--acceptance-input",
+        type=Path,
+        help="Verify an immutable RF-005 reviewer bundle offline.",
+    )
     return parser
 
 
 def _parse_args(argv: list[str] | None) -> AuditCycleConfig:
-    args = _build_parser().parse_args(argv)
+    parser = _build_parser()
+    args = parser.parse_args(argv)
+    if bool(args.range_from) != bool(args.range_to) or (
+        args.range_from
+        and (
+            not args.range_from.isascii()
+            or not args.range_from.isdigit()
+            or not args.range_to.isascii()
+            or not args.range_to.isdigit()
+            or int(args.range_from) >= int(args.range_to)
+        )
+    ):
+        parser.error(
+            "fixed --range-from/--range-to must be increasing UTC milliseconds"
+        )
+    if args.acceptance_input and args.gate_output is None:
+        parser.error("acceptance mode requires a new explicit --gate-output")
     gate_output = args.gate_output
     if gate_output is None:
         gate_output = (
@@ -228,6 +254,9 @@ def _parse_args(argv: list[str] | None) -> AuditCycleConfig:
         workflow=args.workflow,
         run_id=args.run_id,
         range_hours=args.range_hours,
+        range_from=args.range_from,
+        range_to=args.range_to,
+        acceptance_input=args.acceptance_input,
     )
 
 
@@ -325,6 +354,7 @@ def _write_gate_report(
             "source_artifact": render_source,
         },
         "release_passed": release_passed,
+        "acceptance_scope": "semantic_and_render_only; RF-005 requires --acceptance-input",
     }
     atomic_write_text(
         output_path,
@@ -510,6 +540,10 @@ def _run_rerender(config: AuditCycleConfig, *, screenshot_uids: tuple[str, ...])
         "--occurrence-id",
         config.occurrence_id,
     ]
+    if config.range_from:
+        common_argv.extend(
+            ["--range-from", config.range_from, "--range-to", config.range_to]
+        )
     if screenshot_uids:
         common_argv.extend(["--uids", *screenshot_uids])
 
@@ -812,6 +846,11 @@ def _run_live_audit(config: AuditCycleConfig, *, app_base_url: str) -> int:
             str(config.semantic_output_path),
             "--occurrence-id",
             config.occurrence_id,
+            *(
+                ["--range-from", config.range_from, "--range-to", config.range_to]
+                if config.range_from
+                else []
+            ),
         ]
     )
 
@@ -874,6 +913,8 @@ def _discover_filled_dashboard_uids(
                 range_hours=config.range_hours,
                 output_path=config.semantic_output_path,
                 occurrence_id=config.occurrence_id,
+                range_from=config.range_from,
+                range_to=config.range_to,
             )
         )
         filled = _filled_dashboard_uids_from_results(results)
@@ -1011,8 +1052,36 @@ def _terminate_managed_backend(
         managed_backend_process.wait(timeout=5)
 
 
+def _tracked_checkout_clean() -> bool:
+    try:
+        result = subprocess.run(
+            ["git", "status", "--porcelain", "--untracked-files=no"],
+            cwd=Path(__file__).resolve().parents[4],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return result.returncode == 0 and not result.stdout.strip()
+
+
 def main(argv: list[str] | None = None) -> int:
     config = _parse_args(argv)
+    if config.acceptance_input is not None:
+        from scripts.ops.observability.grafana.regression_acceptance import write_report
+
+        return (
+            0
+            if write_report(
+                config.acceptance_input,
+                _resolve_gate_output_path(config.gate_output_path),
+                expected_candidate=_git_identity()["commit"],
+                working_tree_clean=_tracked_checkout_clean(),
+            )
+            else 1
+        )
     managed_backend_process: subprocess.Popen[bytes] | None = None
 
     try:

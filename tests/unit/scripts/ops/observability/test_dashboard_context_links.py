@@ -102,6 +102,15 @@ def test_action_normalization_preserves_rank_query_and_visible_column() -> None:
     panel = {
         "id": 2010,
         "targets": [{"expr": "rank_with_confidence"}],
+        "transformations": [
+            {
+                "id": "organize",
+                "options": {
+                    "renameByName": {"action": "Action"},
+                    "indexByName": {"action": 0, "domain": 1},
+                },
+            }
+        ],
         "fieldConfig": {
             "overrides": [
                 {

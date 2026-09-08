@@ -258,7 +258,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1;margin:0 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:2px;flex-wrap:nowrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health). Scope reset: provider=unknown; preserves time range, pipeline context.\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-provider=unknown&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">3. Provider Health</a><a class=\"bioetl-nav-current\" href=\"#bioetl-dq-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"4. Data Quality (Data Quality)\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">4. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Run Explorer</a></div>"
+        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1;margin:0 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:2px;flex-wrap:wrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health). Scope reset: provider=unknown; preserves time range, pipeline context.\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-provider=unknown&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">3. Provider Health</a><a class=\"bioetl-nav-current\" href=\"#bioetl-dq-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"4. Data Quality (Data Quality)\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">4. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Run Explorer</a></div>"
       },
       "title": "",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
@@ -395,7 +395,7 @@
                 },
                 "3": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             },
@@ -405,7 +405,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             }
@@ -536,7 +536,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             }
@@ -564,7 +564,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 7,
         "w": 8,
         "x": 0,
         "y": 10
@@ -855,7 +855,7 @@
         ]
       },
       "gridPos": {
-        "h": 8,
+        "h": 7,
         "w": 16,
         "x": 8,
         "y": 10
@@ -938,7 +938,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 17
       },
       "id": 9405,
       "description": "Expand after selecting an exact Run ID for HTTP-backed identity and accounting evidence.",
@@ -949,7 +949,7 @@
           "title": "Inspect Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 101,
+            "y": 100,
             "w": 12,
             "h": 6
           },
@@ -1100,7 +1100,7 @@
           "title": "Inspect Processed Records",
           "gridPos": {
             "x": 12,
-            "y": 101,
+            "y": 100,
             "w": 12,
             "h": 6
           },
@@ -1460,7 +1460,7 @@
           "title": "Review Selected Run Summary",
           "gridPos": {
             "x": 0,
-            "y": 107,
+            "y": 106,
             "w": 24,
             "h": 5
           },
@@ -1471,7 +1471,7 @@
               "custom": {
                 "align": "left",
                 "cellOptions": {
-                  "type": "auto"
+                  "type": "color-text"
                 },
                 "inspect": true,
                 "minWidth": 50
@@ -1491,7 +1491,11 @@
                   "targetBlank": false,
                   "includeVars": false
                 }
-              ]
+              ],
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "text"
+              }
             },
             "overrides": [
               {
@@ -1551,7 +1555,7 @@
                           },
                           "UNKNOWN": {
                             "text": "UNKNOWN",
-                            "color": "gray"
+                            "color": "text"
                           }
                         }
                       }
@@ -1624,7 +1628,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "auto",
+                      "type": "color-text",
                       "wrapText": false
                     }
                   }
@@ -1663,7 +1667,7 @@
                           },
                           "UNKNOWN": {
                             "text": "UNKNOWN",
-                            "color": "gray"
+                            "color": "text"
                           }
                         }
                       }
@@ -1875,7 +1879,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 18
       },
       "id": 9404,
       "description": "Expand for selected-range impact and freshness after resolving the current reason lane.",
@@ -1929,7 +1933,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 20,
+            "y": 19,
             "w": 12,
             "h": 3
           },
@@ -2011,7 +2015,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 20,
+            "y": 19,
             "w": 12,
             "h": 3
           },
@@ -2099,7 +2103,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 23,
+            "y": 22,
             "w": 12,
             "h": 3
           },
@@ -2187,7 +2191,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 23,
+            "y": 22,
             "w": 12,
             "h": 3
           },
@@ -2277,7 +2281,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 26,
+            "y": 25,
             "w": 12,
             "h": 3
           },
@@ -2365,7 +2369,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 26,
+            "y": 25,
             "w": 12,
             "h": 3
           },
@@ -2407,7 +2411,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 19
       },
       "id": 220,
       "title": "Selected Range · Reject Evidence",
@@ -2476,7 +2480,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 39,
+            "y": 38,
             "w": 8,
             "h": 4
           },
@@ -2622,7 +2626,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 44,
+            "y": 43,
             "w": 12,
             "h": 6
           },
@@ -2777,7 +2781,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 44,
+            "y": 43,
             "w": 12,
             "h": 6
           },
@@ -2930,7 +2934,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 50,
+            "y": 49,
             "w": 12,
             "h": 6
           },
@@ -3143,7 +3147,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 50,
+            "y": 49,
             "w": 12,
             "h": 6
           },
@@ -3217,7 +3221,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 20
       },
       "id": 221,
       "title": "Selected Range · Validation Diagnostics",
@@ -3271,7 +3275,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 57,
+            "y": 56,
             "w": 24,
             "h": 5
           },
@@ -3348,7 +3352,7 @@
           },
           "gridPos": {
             "x": 6,
-            "y": 62,
+            "y": 61,
             "w": 6,
             "h": 4
           },
@@ -3418,7 +3422,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 62,
+            "y": 61,
             "w": 6,
             "h": 4
           },
@@ -3494,7 +3498,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 62,
+            "y": 61,
             "w": 6,
             "h": 4
           },
@@ -3567,7 +3571,18 @@
                   "mode": "off"
                 }
               },
-              "mappings": [],
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "No quarantined records in range",
+                      "color": "text"
+                    }
+                  }
+                }
+              ],
               "noValue": "No quarantined records in range",
               "unit": "short",
               "decimals": 0
@@ -3576,7 +3591,7 @@
           },
           "gridPos": {
             "x": 18,
-            "y": 62,
+            "y": 61,
             "w": 6,
             "h": 4
           },
@@ -3664,7 +3679,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 66,
+            "y": 65,
             "w": 6,
             "h": 4
           },
@@ -3748,7 +3763,7 @@
           },
           "gridPos": {
             "x": 6,
-            "y": 66,
+            "y": 65,
             "w": 6,
             "h": 4
           },
@@ -3830,7 +3845,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 70,
+            "y": 69,
             "w": 12,
             "h": 6
           },
@@ -3909,7 +3924,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 70,
+            "y": 69,
             "w": 12,
             "h": 6
           },
@@ -3981,7 +3996,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 76,
+            "y": 75,
             "w": 12,
             "h": 6
           },
@@ -4065,7 +4080,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 76,
+            "y": 75,
             "w": 12,
             "h": 4
           },
@@ -4110,7 +4125,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 82,
+            "y": 81,
             "w": 24,
             "h": 4
           },
@@ -4154,7 +4169,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 86,
+            "y": 85,
             "w": 24,
             "h": 4
           },

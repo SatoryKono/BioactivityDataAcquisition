@@ -574,6 +574,12 @@ function containmentReasons(measurement, resolvedPolicy, flags) {
   const allowed = (allowlist) =>
     allowlist.has(allowKey) || allowlist.has(String(measurement.id));
   const reasons = [];
+  if (firstWindow && measurement.enforceFold && measurement.bbox) {
+    const box = measurement.bbox;
+    if (box.y < -resolvedPolicy.tolerance || box.y + box.height > measurement.fold + resolvedPolicy.tolerance) {
+      reasons.push("outside-first-viewport");
+    }
+  }
   if (firstWindow && resolvedPolicy.containedTypes.has(measurement.type)) {
     if (allowed(resolvedPolicy.firstWindowOverflowAllow)) {
       reasons.push("forbidden-first-window-overflow-exception");
@@ -898,8 +904,11 @@ async function expandCollapsedRows(page, dashboard, index, total) {
     `[${index}/${total}] expanding ${titles.length} collapsed row(s) for ${dashboard.uid} ...`,
   );
   let expanded = 0;
+  dashboard.rowExpansion = [];
   for (const title of titles) {
-    if (await tryExpandCollapsedRow(page, title, index, total, dashboard.uid)) {
+    const clicked = await tryExpandCollapsedRow(page, title, index, total, dashboard.uid);
+    dashboard.rowExpansion.push({title, clicked});
+    if (clicked) {
       expanded += 1;
     }
   }
@@ -1400,42 +1409,9 @@ async function dashboardCaptureMetrics(page) {
   );
 }
 
-async function prepareDashboardForCapture(page, dashboard, index, total) {
-  if (CONFIG.captureSurface !== "full") {
-    return false;
-  }
-  const metrics = await dashboardCaptureMetrics(page);
-  const measuredBottom =
-    metrics.panelBottom > 0 ? metrics.panelBottom : metrics.scrollBottom;
-  const scale = zoomScale(CONFIG.browserZoom);
-  const requestedLayoutViewport = layoutViewportForZoom(
-    CONFIG.viewport,
-    CONFIG.browserZoom,
-  );
-  const desiredLayoutHeight = Math.min(
-    Math.floor(MAX_CAPTURE_VIEWPORT_HEIGHT / scale),
-    Math.max(
-      Math.ceil(900 / scale),
-      Math.ceil(measuredBottom || requestedLayoutViewport.height) + 32,
-    ),
-  );
-  dashboard.captureHeight = Math.round(desiredLayoutHeight * scale);
-  const currentViewport = page.viewportSize() || requestedLayoutViewport;
-  let viewportChanged = false;
-  if (desiredLayoutHeight > currentViewport.height + 4) {
-    console.log(
-      `[${index}/${total}] setting capture layout viewport for ${dashboard.uid} to ${requestedLayoutViewport.width}x${desiredLayoutHeight} based on ${metrics.markerCount} panel marker(s) ...`,
-    );
-    await page.setViewportSize({
-      width: requestedLayoutViewport.width,
-      height: desiredLayoutHeight,
-    });
-    viewportChanged = true;
-    await page.waitForTimeout(Math.max(250, Math.min(1000, CONFIG.settleMs)));
-  }
+async function prepareDashboardForCapture(page) {
   await setDashboardScrollPosition(page, 0);
-  await page.waitForTimeout(Math.max(250, Math.min(1000, Math.floor(CONFIG.settleMs / 3))));
-  return viewportChanged;
+  return false;
 }
 
 async function settleDashboardAfterViewportChange(page, dashboard, index, total) {
@@ -1514,48 +1490,62 @@ async function applyBrowserZoom(page) {
   });
 }
 
-async function detectBrowserAndKioskState(page) {
-  return page.evaluate(({ requestedZoom, requestedKiosk, physicalViewport }) => {
-    const visible = (element) => {
-      if (!element) return false;
-      const rect = element.getBoundingClientRect();
-      const style = getComputedStyle(element);
-      return (
-        rect.width > 0 &&
-        rect.height > 0 &&
-        style.display !== "none" &&
-        style.visibility !== "hidden"
-      );
-    };
-    const url = new URL(window.location.href);
-    const kioskParam = url.searchParams.get("kiosk");
-    const chromeSelectors = [
-      '[data-testid="sidemenu"]',
-      '[data-testid="navbarmenu"]',
-      '[aria-label="Main menu"]',
-    ];
-    const visibleChrome = chromeSelectors.some((selector) =>
-      visible(document.querySelector(selector)),
+function browserAndKioskStateFromDom({ requestedZoom, requestedKiosk, physicalViewport }) {
+  const visible = (element) => {
+    if (!element) return false;
+    const rect = element.getBoundingClientRect();
+    const style = getComputedStyle(element);
+    return (
+      rect.width > 0 &&
+      rect.height > 0 &&
+      style.display !== "none" &&
+      style.visibility !== "hidden" &&
+      Number(style.opacity) > 0
     );
-    let actualKiosk = "off";
-    if (kioskParam === "tv") actualKiosk = "tv";
-    if (kioskParam === "1" || kioskParam === "true" || kioskParam === "") {
-      actualKiosk = url.searchParams.has("kiosk") ? "full" : "off";
-    }
-    return {
-      requestedZoom,
-      cssZoom: getComputedStyle(document.documentElement).zoom || "1",
-      visualViewportScale: window.visualViewport?.scale || 1,
-      devicePixelRatio: window.devicePixelRatio,
-      layoutViewport: { width: window.innerWidth, height: window.innerHeight },
-      physicalViewport,
-      zoomEmulation: "layout-viewport-and-device-scale-factor",
-      requestedKiosk,
-      actualKiosk,
-      kioskParam,
-      visibleGrafanaChrome: visibleChrome,
-    };
-  }, {
+  };
+  const url = new URL(window.location.href);
+  const kioskParam = url.searchParams.get("kiosk");
+  const sidebarSelectors = [
+    '[data-testid="sidemenu"]',
+    '[data-testid="navbarmenu"]',
+    '[aria-label="Main menu"]',
+    '[data-testid="data-testid navigation mega-menu"]',
+  ];
+  const toolbarSelectors = ['[data-testid="data-testid Nav toolbar"]'];
+  const visibleSelectors = (selectors) => selectors.filter((selector) =>
+    [...document.querySelectorAll(selector)].some(visible));
+  const visibleSidebar = visibleSelectors(sidebarSelectors);
+  const visibleToolbar = visibleSelectors(toolbarSelectors);
+  let actualKiosk = "off";
+  if (kioskParam === "tv") actualKiosk = "tv";
+  if (kioskParam === "1" || kioskParam === "true" || kioskParam === "") {
+    actualKiosk = url.searchParams.has("kiosk") ? "full" : "off";
+  }
+  // A URL parameter is a request, not evidence that Grafana applied it.
+  const urlKiosk = actualKiosk;
+  if (visibleSidebar.length || (actualKiosk === "full" && visibleToolbar.length)) {
+    actualKiosk = "off";
+  }
+  return {
+    requestedZoom,
+    cssZoom: getComputedStyle(document.documentElement).zoom || "1",
+    visualViewportScale: window.visualViewport?.scale || 1,
+    devicePixelRatio: window.devicePixelRatio,
+    layoutViewport: { width: window.innerWidth, height: window.innerHeight },
+    physicalViewport,
+    zoomEmulation: "layout-viewport-and-device-scale-factor",
+    requestedKiosk,
+    actualKiosk,
+    urlKiosk,
+    kioskParam,
+    visibleGrafanaChrome: visibleSidebar.length + visibleToolbar.length > 0,
+    visibleSidebarSelectors: visibleSidebar,
+    visibleToolbarSelectors: visibleToolbar,
+  };
+}
+
+async function detectBrowserAndKioskState(page) {
+  return page.evaluate(browserAndKioskStateFromDom, {
     requestedZoom: CONFIG.browserZoom,
     requestedKiosk: CONFIG.kioskMode,
     physicalViewport: CONFIG.viewport,
@@ -1598,9 +1588,43 @@ async function collectLayoutGeometry(page, dashboard) {
   }, { requiredPanels: dashboard.requiredPanels, physicalViewport: CONFIG.viewport });
 }
 
+// Capture grid placeholders as well as loaded panels: Grafana virtualizes row
+// contents, but placeholder geometry remains measurable at the fixed viewport.
+function layoutFitMeasurementsFromDom() {
+  const box = (element) => {
+    const r = element.getBoundingClientRect();
+    return {x:r.x, y:r.y, width:r.width, height:r.height};
+  };
+  const shown = (el) => {
+    const r=el.getBoundingClientRect(), s=getComputedStyle(el);
+    return r.width>0 && r.height>0 && s.display!=='none' && s.visibility!=='hidden';
+  };
+  const grids=[...document.querySelectorAll('[data-griditem-key]')].map(el=>{
+    let scrollTop=window.scrollY;
+    for(let parent=el.parentElement;parent;parent=parent.parentElement) scrollTop+=parent.scrollTop;
+    return {key:el.dataset.griditemKey,bbox:box(el),scrollTop,
+      text:el.textContent.trim().slice(0,240),shown:shown(el)};
+  });
+  const controls=[...document.querySelectorAll('[data-viz-panel-key] a[href], [data-viz-panel-key] button')]
+    .filter(shown).map(el=>{
+      const r=box(el), x=r.x+r.width/2, y=r.y+r.height/2;
+      const within=x>=0 && x<innerWidth && y>=0 && y<innerHeight;
+      const target=within?document.elementFromPoint(x,y):null;
+      return {panel:el.closest('[data-viz-panel-key]').dataset.vizPanelKey,
+        name:el.getAttribute('aria-label') || el.textContent.trim(),href:el.getAttribute('href'),
+        bbox:r,withinViewport:within,hitTarget:!!target && (target===el || el.contains(target)),
+        disabled:el.matches(':disabled, [aria-disabled="true"]')};
+    });
+  const variables=[...document.querySelectorAll('[data-testid*="template variables"]')]
+    .filter(shown).map(el=>({testid:el.dataset.testid,bbox:box(el)}));
+  return {cssViewport:{width:innerWidth,height:innerHeight},devicePixelRatio,
+    pageScroll:{x:scrollX,y:scrollY},fold:innerHeight,grids,controls,variables,
+    gridTop:Math.min(...grids.filter(g=>g.shown).map(g=>g.bbox.y))};
+}
+
 async function collectPanelContainment(page, dashboard) {
   const raw = await page.evaluate(
-    ({ panels, uid, scrollerSelectors }) => {
+    ({ panels, uid, scrollerSelectors, enforceFold }) => {
       const panelElement = (panel) =>
         document.querySelector(`[data-panelid="${panel.id}"]`) ||
         document.querySelector(`[data-viz-panel-key="panel-${panel.id}"]`) ||
@@ -1679,6 +1703,7 @@ async function collectPanelContainment(page, dashboard) {
           };
         }
         const scroller = resolveScroller(container);
+        const box = container.getBoundingClientRect();
         return {
           uid,
           id: panel.id,
@@ -1687,6 +1712,9 @@ async function collectPanelContainment(page, dashboard) {
           gridPos: panel.gridPos,
           missing: false,
           scroller: scroller.selector,
+          bbox: {x: box.x, y: box.y, width: box.width, height: box.height},
+          fold: window.innerHeight,
+          enforceFold,
           clientHeight: scroller.element.clientHeight,
           scrollHeight: scroller.element.scrollHeight,
           clientWidth: scroller.element.clientWidth,
@@ -1698,6 +1726,7 @@ async function collectPanelContainment(page, dashboard) {
       panels: dashboard.firstWindowPanels || [],
       uid: dashboard.uid,
       scrollerSelectors: PANEL_CONTENT_SCROLLER_SELECTORS,
+      enforceFold: CONFIG.captureSurface === "viewport" && CONFIG.browserZoom === 100,
     },
   );
   return evaluateContainmentResults(raw, {
@@ -1739,6 +1768,7 @@ function navigationValidationFromDom() {
           inner.top >= outer.top - tolerance &&
           inner.bottom <= outer.bottom + tolerance,
       );
+    const linkTextFits = links.every(link => link.scrollWidth <= link.clientWidth + tolerance && link.scrollHeight <= link.clientHeight + tolerance);
     const linksInsidePanel = linkRects.every((rect) =>
       rectInside(rect, panelRect),
     );
@@ -1751,15 +1781,24 @@ function navigationValidationFromDom() {
       focusStyle?.outlineWidth || "0",
     );
     const focusBoxShadow = (focusStyle?.boxShadow || "").trim().toLowerCase();
+    // Multiple transparent shadows are still invisible. Inspect each computed
+    // color rather than comparing against one serialized shadow string.
+    const opaqueFocusColor = color => {
+      if (!color || color === 'transparent') return false;
+      const rgba = color.match(/^rgba?\(([^)]+)\)$/);
+      if (!rgba) return false;
+      const values = rgba[1].split(',').map(Number);
+      return values.length === 3 || values[3] > 0;
+    };
+    const visibleShadow = [...focusBoxShadow.matchAll(/rgba?\([^)]+\)/g)]
+      .some(match => opaqueFocusColor(match[0]));
     const focusIndicatorVisible = Boolean(
       focusTarget &&
         document.activeElement === focusTarget &&
         ((focusStyle?.outlineStyle || "").toLowerCase() !== "none" &&
           Number.isFinite(focusOutlineWidthPx) &&
-          focusOutlineWidthPx > 0 ||
-          focusBoxShadow &&
-            focusBoxShadow !== "none" &&
-            focusBoxShadow !== "rgba(0, 0, 0, 0) 0px 0px 0px 0px"),
+          focusOutlineWidthPx > 0 && opaqueFocusColor(focusStyle?.outlineColor) ||
+          visibleShadow),
     );
     const evidence = {
       panelFound: Boolean(panel),
@@ -1768,6 +1807,7 @@ function navigationValidationFromDom() {
       linkCount: links.length,
       contentInsidePanel,
       linksInsidePanel,
+      linkTextFits,
       focusTargetFound: Boolean(focusTarget),
       focusInsideNavigation: Boolean(focusTarget?.closest(".bioetl-nav")),
       focusIndicatorVisible,
@@ -1787,6 +1827,7 @@ function navigationValidationFromDom() {
         evidence.linkCount === 7 &&
         evidence.contentInsidePanel &&
         evidence.linksInsidePanel &&
+        evidence.linkTextFits &&
         evidence.focusTargetFound &&
         evidence.focusInsideNavigation &&
         evidence.focusIndicatorVisible
@@ -1797,6 +1838,11 @@ function navigationValidationFromDom() {
 }
 
 async function collectNavigationValidation(page) {
+  await page.keyboard.press("Tab");
+  await page.locator('.bioetl-nav a.bioetl-nav-link[href*="/d/"]').first().focus();
+  // Grafana's native focus shadow has a 200 ms transition. Sampling in the
+  // focus event frame observes its transparent start rather than the indicator.
+  await page.waitForTimeout(250);
   return page.evaluate(navigationValidationFromDom);
 }
 
@@ -1999,7 +2045,161 @@ async function verifyRenderedPanelCount(page, dashboard, index, total) {
   );
 }
 
+function accessibilityMeasurementsFromDom() {
+    const rgba = (value) => {
+      const parts = value.match(/[\d.]+/g)?.map(Number);
+      return parts && parts.length >= 3 ? [...parts.slice(0, 3), parts[3] ?? 1] : null;
+    };
+    const over = (fg, bg) => fg.slice(0, 3).map((v, i) => v * fg[3] + bg[i] * (1 - fg[3]));
+    const luminance = (rgb) => rgb.map((v) => {
+      const c = v / 255;
+      return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    }).reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0);
+    function gradientInfo(image, layers) {
+      const match=/^linear-gradient\([\d.]+deg, (rgb\([\d, ]+\)), (rgb\([\d, ]+\))\)$/.exec(image);
+      const stops=match ? [rgba(match[1]),rgba(match[2])] : [];
+      const opaque=stops.length===2 && stops.every(c=>c?.[3]===1);
+      const monotonic=opaque && (stops[0].slice(0,3).every((v,i)=>v<=stops[1][i]) || stops[0].slice(0,3).every((v,i)=>v>=stops[1][i]));
+      if(monotonic && layers.every(c=>c[3]===0))return {bounds:stops.map(c=>c.slice(0,3)).sort((a,b)=>luminance(a)-luminance(b)),reason:null};
+      return {bounds:null,reason:'background image or gradient requires pixel measurement'};
+    }
+    function backgroundInfo(element) {
+      const layers=[];let reason=null,opaque=false,gradientBounds=null;
+      for(let node=element;node;node=node.parentElement) {
+        const style=getComputedStyle(node);
+        if(Number(style.opacity)!==1 || style.filter!=='none' || style.mixBlendMode!=='normal')reason='unsupported opacity/filter/blend';
+        if(opaque)continue;
+        if(style.backgroundImage!=='none') {
+          const gradient=gradientInfo(style.backgroundImage,layers);
+          if(gradient.reason)reason=gradient.reason;
+          else gradientBounds=gradient.bounds;
+        }
+        const color=rgba(style.backgroundColor);
+        if(color)layers.push(color);
+        opaque=color?.[3]===1;
+      }
+      if(!opaque)reason ||= 'opaque background unavailable';
+      let background=[0,0,0];
+      for(const layer of layers.toReversed())background=over(layer,background);
+      return {background,reason,gradientBounds};
+    }
+    function gradientForeground(bounds, foreground, background) {
+      if(foreground?.[3]!==1)return {background,reason:'gradient foreground requires pixel measurement'};
+      const value=luminance(foreground.slice(0,3)),lower=luminance(bounds[0]),upper=luminance(bounds[1]);
+      return {background:value>=upper?bounds[1]:bounds[0],reason:value>lower&&value<upper?'gradient crosses foreground luminance':null};
+    }
+    function contrastValues(style, element) {
+      let {background, reason, gradientBounds} = backgroundInfo(element);
+      const foreground = rgba(style.color);
+      if (!foreground) reason = reason || 'unsupported foreground';
+      if (gradientBounds && !reason) {
+        ({background, reason} = gradientForeground(gradientBounds, foreground, background));
+      }
+      const effective = foreground ? over(foreground, background) : null;
+      const values = effective ? [luminance(effective), luminance(background)] : null;
+      const ratio = values && !reason ? (Math.max(...values) + 0.05) / (Math.min(...values) + 0.05) : null;
+      return {background, reason, effective, ratio, gradientBounds};
+    }
+    function measureElement(element, panel) {
+        const directText = [...element.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').trim();
+        const rect = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        if (!directText || !rect.width || !rect.height || style.visibility !== 'visible' || style.display === 'none') return null;
+        const {background, reason, effective, ratio, gradientBounds} = contrastValues(style, element);
+        const size = Number.parseFloat(style.fontSize);
+        const weight = Number.parseFloat(style.fontWeight);
+        const large = size >= 24 || (size >= 18.6666666667 && weight >= 700);
+        const threshold = large ? 3 : 4.5;
+        let status = 'NOT_VERIFIABLE';
+        if (!reason) status = ratio >= threshold ? 'PASS' : 'FAIL';
+        return {panel: panel.dataset.vizPanelKey, text: directText.slice(0, 240),
+          tag: element.tagName, foreground: style.color, background, effectiveForeground: effective,
+          backgroundLayers: (() => {
+            const layers = [];
+            for (let node = element; node; node = node.parentElement) {
+              const value = getComputedStyle(node);
+              if (value.backgroundImage !== 'none') layers.push(value.backgroundImage);
+            }
+            return layers;
+          })(),
+          fontSize: size, fontWeight: weight, large, ratio, threshold, gradientBounds,
+          ratioMethod: gradientBounds ? 'conservative minimum over monotonic native RGB gradient' : 'computed composited colors',
+          status, reason,
+          bbox: {x: rect.x, y: rect.y, width: rect.width, height: rect.height},
+          clientWidth: element.clientWidth, scrollWidth: element.scrollWidth,
+          clientHeight: element.clientHeight, scrollHeight: element.scrollHeight,
+          textOverflow: style.textOverflow, overflowX: style.overflowX, overflowY: style.overflowY};
+    }
+    const pairs = [];
+    for (const panel of document.querySelectorAll('[data-viz-panel-key]')) {
+      for (const element of panel.querySelectorAll('*')) {
+        const measurement = measureElement(element, panel);
+        if (measurement) pairs.push(measurement);
+      }
+    }
+    return {method: 'computed sRGB colors; alpha backgrounds composited to opaque ancestor',
+      scope: 'rendered DOM text only; graphics/canvas, gradients, hidden/virtualized content and state matrix require separate evidence',
+      devicePixelRatio: window.devicePixelRatio, cssViewport: {width: innerWidth, height: innerHeight},
+      url: location.href, pairs};
+}
+
+function graphicsMeasurementsFromDom() {
+  const rgba = (value) => {
+    const parts = String(value).match(/[\d.]+/g)?.map(Number);
+    return parts && parts.length >= 3 ? [...parts.slice(0, 3), parts[3] ?? 1] : null;
+  };
+  const luminance = (rgb) => rgb.slice(0, 3).map((value) => {
+    const channel = value / 255;
+    return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+  }).reduce((sum, value, index) => sum + value * [0.2126, 0.7152, 0.0722][index], 0);
+  function backgroundFor(element) {
+    let background=null,reason=null;
+    const backgroundLayers=[];
+    for(let node=element.parentElement;node;node=node.parentElement) {
+      const style=getComputedStyle(node);
+      if(style.backgroundImage!=='none'||Number(style.opacity)!==1||style.filter!=='none')reason='unsupported background compositing';
+      const color=rgba(style.backgroundColor);
+      if(background)continue;
+      if(color?.[3]===1)background=color;
+      else if(color?.[3]>0)backgroundLayers.push(color);
+    }
+    if(background)for(const layer of backgroundLayers.toReversed()) {
+      background=[...layer.slice(0,3).map((v,i)=>v*layer[3]+background[i]*(1-layer[3])),1];
+    }
+    return {background,backgroundLayers,reason};
+  }
+  function measureGraphic(element,panel,box,style) {
+    const control=element.closest('button, a, [role="button"]');
+    const name=control?.getAttribute('aria-label') || control?.textContent?.trim() || '';
+    let {background,backgroundLayers,reason}=backgroundFor(element);
+    const foreground=rgba(style.stroke!=='none'?style.stroke:style.fill);
+    if(!background||!foreground||Number(style.opacity)!==1||Number(style.fillOpacity)!==1||Number(style.strokeOpacity)!==1)reason ||= 'unsupported graphic foreground/background';
+    const effectiveForeground=foreground && background ? foreground.slice(0,3).map((v,i)=>v*foreground[3]+background[i]*(1-foreground[3])) : null;
+    const ratio=reason ? null : (Math.max(luminance(effectiveForeground),luminance(background))+.05)/(Math.min(luminance(effectiveForeground),luminance(background))+.05);
+    const disabled=control?.matches(':disabled, [aria-disabled="true"]') || false;
+    let status='NOT_VERIFIABLE';
+    if(ratio!==null)status=ratio>=3?'PASS':'FAIL';
+    if(disabled)status='EXEMPT_DISABLED';
+    return {panel:panel.dataset.vizPanelKey,tag:element.tagName,bbox:{x:box.x,y:box.y,width:box.width,height:box.height},
+      accessibleName:name,foreground,effectiveForeground,background,backgroundLayers,ratio,threshold:3,
+      role:control?'interactive icon':'graphic',disabled,status,reason};
+  }
+  const pairs=[],canvases=[];
+  for(const panel of document.querySelectorAll('[data-viz-panel-key]')) {
+    for(const element of panel.querySelectorAll('svg path, svg line, svg circle, svg rect, canvas')) {
+      const box=element.getBoundingClientRect(),style=getComputedStyle(element);
+      if((!box.width&&!box.height)||style.display==='none'||style.visibility!=='visible')continue;
+      if(element.tagName.toLowerCase()==='canvas') {
+        canvases.push({panel:panel.dataset.vizPanelKey,bbox:{x:box.x,y:box.y,width:box.width,height:box.height},status:'NOT_VERIFIABLE',reason:'canvas needs independent pixel/series evidence'});
+      } else pairs.push(measureGraphic(element,panel,box,style));
+    }
+  }
+  return {method: 'computed alpha-composited SVG foreground and opaque adjacent background', pairs, canvases};
+}
+
 async function collectVerifiedRenderContext(page, dashboard) {
+  dashboard.accessibilityMeasurements = await page.evaluate(accessibilityMeasurementsFromDom);
+  dashboard.graphicsMeasurements = await page.evaluate(graphicsMeasurementsFromDom);
   dashboard.requestedViewport = { ...CONFIG.viewport };
   dashboard.layoutViewport =
     page.viewportSize() || layoutViewportForZoom(CONFIG.viewport, CONFIG.browserZoom);
@@ -2009,27 +2209,18 @@ async function collectVerifiedRenderContext(page, dashboard) {
   );
   dashboard.requestedTheme = CONFIG.theme;
   dashboard.actualTheme = await detectActualTheme(page);
-  if (dashboard.actualTheme !== CONFIG.theme) {
-    throw new Error(
-      `Theme verification failed for ${dashboard.uid}: requested=${CONFIG.theme} actual=${dashboard.actualTheme}`,
-    );
-  }
+
   dashboard.browserState = await detectBrowserAndKioskState(page);
-  if (dashboard.browserState.actualKiosk !== CONFIG.kioskMode) {
-    throw new Error(
-      `Kiosk verification failed for ${dashboard.uid}: requested=${CONFIG.kioskMode} actual=${dashboard.browserState.actualKiosk}`,
-    );
-  }
+
   dashboard.layoutGeometry = await collectLayoutGeometry(page, dashboard);
-  if (dashboard.layoutGeometry.horizontalOverflow) {
-    throw new Error(
-      `Layout validation failed for ${dashboard.uid}: documentWidth=${dashboard.layoutGeometry.documentWidth} layoutViewportWidth=${dashboard.layoutGeometry.layoutViewport.width}`,
-    );
-  }
+
 }
 
 async function collectVerifiedPanelSurfaces(page, dashboard) {
-  dashboard.panelContainment = await collectPanelContainment(page, dashboard);
+  dashboard.panelContainment ??= await collectPanelContainment(page, dashboard);
+  // Collect all independent evidence even when one surface fails acceptance.
+  dashboard.typographyValidation = await collectTypographyValidation(page, dashboard);
+  dashboard.navigationValidation = await collectNavigationValidation(page);
   const containmentSchema = validateContainmentManifest(dashboard.panelContainment);
   if (containmentSchema.status !== "ok") {
     throw new Error(
@@ -2047,18 +2238,32 @@ async function collectVerifiedPanelSurfaces(page, dashboard) {
       `Panel containment failed for ${dashboard.uid}: ${overflow.join("; ")}`,
     );
   }
-  dashboard.typographyValidation = await collectTypographyValidation(page, dashboard);
   if (dashboard.typographyValidation.status !== "ok") {
     throw new Error(
       `Typography validation failed for ${dashboard.uid}: ${dashboard.typographyValidation.violations.length} violation(s)`,
     );
   }
-  dashboard.navigationValidation = await collectNavigationValidation(page);
-  if (CONFIG.navigationOnly && dashboard.navigationValidation.status !== "ok") {
+  if (dashboard.navigationValidation.status !== "ok") {
     throw new Error(
       `Navigation validation failed for ${dashboard.uid}: ${JSON.stringify(dashboard.navigationValidation)}`,
     );
   }
+}
+
+async function validateVisibleTerminalState(page, dashboard, index, total) {
+  const visible = await page.evaluate(() => [...document.querySelectorAll('[data-viz-panel-key]')].flatMap(el => {
+    const r = el.getBoundingClientRect();
+    return r.bottom > 0 && r.top < innerHeight && r.width && r.height
+      ? [Number(el.dataset.vizPanelKey.replace('panel-', ''))] : [];
+  }));
+  const scoped = {...dashboard,
+    requiredPanels: dashboard.requiredPanels.filter(p => visible.includes(p.id)),
+    requiredTerminalPanelIds: dashboard.requiredTerminalPanelIds.filter(id => visible.includes(id))};
+  const result = await validateDashboardTerminalStates(page, scoped, index, total);
+  if (!result.checkedPanelCount || result.status !== 'ok') {
+    throw new Error(`Visible panels are not ready for a scroll tile: ${dashboard.uid}`);
+  }
+  return result;
 }
 
 async function collectVerifiedTerminalState(page, dashboard, index, total) {
@@ -2085,7 +2290,7 @@ function screenshotOptions(dashboard, filePath) {
     caret: "hide",
   };
   if (CONFIG.captureSurface === "viewport") {
-    options.clip = { x: 0, y: 0, ...CONFIG.viewport };
+    options.clip = { x: 0, y: 0, ...layoutViewportForZoom(CONFIG.viewport, CONFIG.browserZoom) };
   } else if (CONFIG.expandCollapsedRows && Number.isFinite(dashboard.captureHeight)) {
     options.clip = {
       x: 0,
@@ -2101,17 +2306,33 @@ function screenshotOptions(dashboard, filePath) {
 
 async function renderDashboard(page, dashboard, index, total) {
   const target = dashboardRenderUrl(dashboard);
+  const {observeCanvasDrawing,canvasEvidenceFromDom} = require('./capture_canvas_evidence.cjs');
+  await page.addInitScript(observeCanvasDrawing);
+  // Keep the actual API response loaded by the browser, bracketed by API reads.
+  // Only root id/version are provisioning metadata; nested fields are semantic.
+  const modelUrl = `${CONFIG.baseUrl}/api/dashboards/uid/${dashboard.uid}`;
+  const readModel = async () => {
+    const response = await page.request.get(modelUrl);
+    if (!response.ok()) throw new Error(`Model read failed: ${response.status()}`);
+    const payload = await response.json();
+    if (payload.meta?.provisioned !== true) throw new Error('Dashboard is not provisioned');
+    return payload.dashboard;
+  };
+  dashboard.provisionedModel = {
+    captureId: process.env.GRAFANA_CAPTURE_ID || '',
+    before: await readModel(), loaded: [], after: null,
+  };
+  const observedModels = [];
+  page.on('response', (response) => {
+    if (response.url().split('?')[0] === modelUrl && response.ok()) {
+      observedModels.push(response.json().then((payload) => {
+        dashboard.provisionedModel.loaded.push(payload.dashboard);
+      }));
+    }
+  });
   console.log(`[${index}/${total}] loading ${dashboard.uid} ...`);
-  // Start full-surface audits with enough vertical space for expanded rows.
-  // Shrinking/resizing only after queries settle makes Grafana re-run every
-  // panel and can strand Infinity/HTTP panels in a loading state.
-  const auditPhysicalViewport =
-    CONFIG.captureSurface === "full" && CONFIG.expandCollapsedRows
-      ? { width: CONFIG.viewport.width, height: MAX_CAPTURE_VIEWPORT_HEIGHT }
-      : CONFIG.viewport;
-  await page.setViewportSize(
-    layoutViewportForZoom(auditPhysicalViewport, CONFIG.browserZoom),
-  );
+  // Keep the requested layout viewport for both viewport and scrolling packs.
+  await page.setViewportSize(layoutViewportForZoom(CONFIG.viewport, CONFIG.browserZoom));
   console.log(`[${index}/${total}] goto ${dashboard.uid} -> ${target}`);
   await page.goto(target, {
     timeout: CONFIG.timeoutMs,
@@ -2129,7 +2350,10 @@ async function renderDashboard(page, dashboard, index, total) {
       );
     });
   console.log(`[${index}/${total}] waiting for networkidle ${dashboard.uid} ...`);
-  await page.waitForLoadState("networkidle", { timeout: CONFIG.timeoutMs }).catch(() => {
+  // Network idle is advisory: live background requests can remain open. The
+  // mandatory terminal-state gate below now runs before the actual capture.
+  const networkIdleTimeoutMs = Math.max(3000, Math.min(CONFIG.timeoutMs, 15000));
+  await page.waitForLoadState("networkidle", { timeout: networkIdleTimeoutMs }).catch(() => {
     console.warn(
       `[${index}/${total}] networkidle timeout for ${dashboard.uid}; continuing with settled page wait`,
     );
@@ -2144,30 +2368,83 @@ async function renderDashboard(page, dashboard, index, total) {
   await materializeLazyPanels(page, dashboard, index, total);
 
   await verifyRenderedPanelCount(page, dashboard, index, total);
-  const viewportChanged = await prepareDashboardForCapture(
-    page,
-    dashboard,
-    index,
-    total,
-  );
+  // Bracket the actual PNG with terminal evidence; a later settled panel cannot
+  // retroactively validate a screenshot taken while it was still blank/loading.
+  await collectVerifiedTerminalState(page, dashboard, index, total);
+  dashboard.preCaptureTerminalStateValidation = dashboard.terminalStateValidation;
+  const viewportChanged = await prepareDashboardForCapture(page);
   if (viewportChanged) {
     await settleDashboardAfterViewportChange(page, dashboard, index, total);
   }
   await collectVerifiedRenderContext(page, dashboard);
-  await collectVerifiedPanelSurfaces(page, dashboard);
-  await collectVerifiedTerminalState(page, dashboard, index, total);
+  dashboard.layoutFit = await page.evaluate(layoutFitMeasurementsFromDom);
+  dashboard.panelContainment = await collectPanelContainment(page, dashboard);
+  dashboard.canvasEvidence = await page.evaluate(canvasEvidenceFromDom);
 
   const filePath = path.join(CONFIG.outputDir, dashboard.file);
   console.log(
     `[${index}/${total}] capturing screenshot ${dashboard.uid} with timeout ${CONFIG.captureTimeoutMs}ms ...`,
   );
-  await page.screenshot(screenshotOptions(dashboard, filePath));
+  if (CONFIG.captureSurface === 'full') {
+    const {captureScrollSurface} = require('./capture_scroll_surface.cjs');
+    dashboard.scrollCapture = await captureScrollSurface(page, {filePath,
+      timeout: CONFIG.captureTimeoutMs, pngEvidence,
+      measure: async () => ({terminal: await validateVisibleTerminalState(page, dashboard, index, total),
+        text: await page.evaluate(accessibilityMeasurementsFromDom),
+        graphics: await page.evaluate(graphicsMeasurementsFromDom),
+        canvas: await page.evaluate(canvasEvidenceFromDom)})});
+  } else {
+    await page.screenshot(screenshotOptions(dashboard, filePath));
+  }
   const screenshotBuffer = await fs.promises.readFile(filePath);
   dashboard.screenshotEvidence = {
     file: dashboard.file,
     ...pngEvidence(screenshotBuffer),
     capturedAt: new Date().toISOString(),
   };
+  await Promise.all(observedModels);
+  dashboard.provisionedModel.observedUrl = page.url();
+  dashboard.provisionedModel.browserVersion = page.context().browser().version();
+  const panelDir = path.join(CONFIG.outputDir, 'panels', dashboard.uid);
+  await fs.promises.mkdir(panelDir, {recursive: true});
+  dashboard.criticalPanelScreenshots = [];
+  for (const panel of dashboard.firstWindowPanels || []) {
+    const element = page.locator(`[data-viz-panel-key="panel-${panel.id}"]`).first();
+    if (await element.count()) {
+      const file = path.join(panelDir, `${panel.id}.png`);
+      const bytes = await element.screenshot({path: file, animations: 'disabled', timeout: CONFIG.captureTimeoutMs});
+      dashboard.criticalPanelScreenshots.push({panelId: panel.id,
+        file: path.relative(CONFIG.outputDir, file), ...pngEvidence(bytes)});
+    }
+  }
+  const {captureTablePages} = require('./capture_table_pages.cjs');
+  dashboard.tablePagination = await captureTablePages(page, {dashboard,
+    outputDir:CONFIG.outputDir,pngEvidence,timeout:CONFIG.captureTimeoutMs});
+  if(CONFIG.captureSurface === 'full') {
+    const {captureSeriesControls}=require('./capture_canvas_evidence.cjs');
+    dashboard.seriesControls=await captureSeriesControls(page,{dashboard,outputDir:CONFIG.outputDir,pngEvidence,timeout:CONFIG.captureTimeoutMs});
+  }
+  await setDashboardScrollPosition(page, 0);
+  dashboard.provisionedModel.after = await readModel();
+  if (dashboard.actualTheme !== CONFIG.theme) {
+    throw new Error(
+      `Theme verification failed for ${dashboard.uid}: requested=${CONFIG.theme} actual=${dashboard.actualTheme}`,
+    );
+  }
+  if (dashboard.browserState.actualKiosk !== CONFIG.kioskMode) {
+    throw new Error(
+      `Kiosk verification failed for ${dashboard.uid}: requested=${CONFIG.kioskMode} actual=${dashboard.browserState.actualKiosk}`,
+    );
+  }
+  if (dashboard.layoutGeometry.horizontalOverflow) {
+    throw new Error(
+      `Layout validation failed for ${dashboard.uid}: documentWidth=${dashboard.layoutGeometry.documentWidth} layoutViewportWidth=${dashboard.layoutGeometry.layoutViewport.width}`,
+    );
+  }
+  // Preserve the observed screen even when a validation below fails. The catch
+  // keeps renderStatus=error; an available PNG is never a passing verdict.
+  await collectVerifiedPanelSurfaces(page, dashboard);
+  await collectVerifiedTerminalState(page, dashboard, index, total);
   if (isMateriallyBlankPng(screenshotBuffer)) {
     throw new Error(
       `Render gate failed for ${dashboard.uid}: screenshot is materially blank (near-uniform pixels)`,
@@ -2306,6 +2583,11 @@ if (require.main === module) {
 }
 
 module.exports = {
+  layoutFitMeasurementsFromDom,
+  navigationValidationFromDom,
+  graphicsMeasurementsFromDom,
+  browserAndKioskStateFromDom,
+  accessibilityMeasurementsFromDom,
   classifyPanelTerminalEvidence,
   evaluateContainmentResults,
   evaluatePanelContainment,

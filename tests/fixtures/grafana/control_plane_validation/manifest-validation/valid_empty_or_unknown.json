@@ -32,6 +32,7 @@
     "reasons": [
       "selected_run_id_not_found"
     ],
+    "reasons_count": 1,
     "reasons_text": "selected_run_id_not_found",
     "reasons_truncated": false,
     "scope_kind": "unresolved",

@@ -88,6 +88,8 @@ class RenderConfig:
     fixture_manifest: Path | None = None
     fixture_state: dict[str, object] | None = None
     fixture_case: str = ""
+    range_from: str = ""
+    range_to: str = ""
 
 
 @dataclass(frozen=True)
@@ -175,7 +177,7 @@ def _dashboard_source_by_uid() -> dict[str, dict[str, object]]:
         if not isinstance(uid, str) or not uid:
             continue
         try:
-            source_path = str(dashboard_path.relative_to(repo_root))
+            source_path = dashboard_path.relative_to(repo_root).as_posix()
         except ValueError:
             source_path = dashboard_path.name
         result[uid] = {
@@ -340,8 +342,8 @@ def _finalize_manifest(config: RenderConfig, manifest: dict[str, Any]) -> None:
             },
             "capture_context": {
                 "time_range": {
-                    "from": f"now-{config.range_hours}h",
-                    "to": "now",
+                    "from": _scope_query_params(config)["from"],
+                    "to": _scope_query_params(config)["to"],
                     "timezone": "UTC",
                 },
                 "variables": {
@@ -349,6 +351,7 @@ def _finalize_manifest(config: RenderConfig, manifest: dict[str, Any]) -> None:
                     "pipeline": config.pipeline,
                     "run_type": config.run_type,
                     "run_id": config.run_id,
+                    **dict(config.variables),
                 },
                 "row_state": {
                     "expand_collapsed_rows": config.expand_collapsed_rows,
@@ -610,6 +613,16 @@ def _build_render_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--range-hours", type=int, default=12)
     parser.add_argument(
+        "--range-from",
+        default="",
+        help="Fixed UTC Unix milliseconds; requires --range-to.",
+    )
+    parser.add_argument(
+        "--range-to",
+        default="",
+        help="Fixed UTC Unix milliseconds; requires --range-from.",
+    )
+    parser.add_argument(
         "--occurrence-id",
         default="",
         help="Bind render evidence to one dashboard release occurrence.",
@@ -697,6 +710,16 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
     """Parse command-line arguments for Grafana screenshot rendering."""
     parser = _build_render_parser()
     args = parser.parse_args(argv)
+    if bool(args.range_from) != bool(args.range_to):
+        parser.error("--range-from and --range-to must be supplied together")
+    if args.range_from and (
+        not args.range_from.isascii()
+        or not args.range_to.isascii()
+        or not args.range_from.isdigit()
+        or not args.range_to.isdigit()
+        or int(args.range_from) >= int(args.range_to)
+    ):
+        parser.error("fixed range must use increasing UTC Unix millisecond integers")
     variables = _deduplicate_dashboard_variables(args.variables, parser=parser)
     fixture_manifest, fixture_state, fixture_case = _resolve_render_fixture_state(
         args, parser
@@ -728,6 +751,8 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
         fixture_manifest=fixture_manifest,
         fixture_state=fixture_state,
         fixture_case=fixture_case,
+        range_from=args.range_from,
+        range_to=args.range_to,
     )
 
 
@@ -791,8 +816,8 @@ def _load_dashboards(config: RenderConfig) -> list[DashboardRecord]:
 
 def _scope_query_params(config: RenderConfig) -> dict[str, str]:
     params: dict[str, str] = {
-        "from": f"now-{config.range_hours}h",
-        "to": "now",
+        "from": config.range_from or f"now-{config.range_hours}h",
+        "to": config.range_to or "now",
         "timezone": "UTC",
         "theme": config.theme,
     }
@@ -1145,6 +1170,7 @@ def _playwright_env(config: RenderConfig) -> dict[str, str]:
     if config.service_account_token:
         env["GRAFANA_SERVICE_ACCOUNT_TOKEN"] = config.service_account_token
     env["GRAFANA_SCREENSHOT_OUTPUT_DIR"] = str(config.output_dir)
+    env["GRAFANA_CAPTURE_ID"] = _capture_id(config)
     env["GRAFANA_SCREENSHOT_WIDTH"] = str(config.width)
     env["GRAFANA_SCREENSHOT_HEIGHT"] = str(config.height)
     env["GRAFANA_SCREENSHOT_THEME"] = config.theme
@@ -1454,13 +1480,32 @@ def _playwright_manifest_screenshot_problem(
     return None
 
 
+def _read_failed_playwright_manifest(config: RenderConfig) -> dict[str, Any] | None:
+    """Preserve only the failed attempt, never a preceding dashboard's evidence."""
+    try:
+        failed = _read_playwright_manifest(config.output_dir / _RENDER_MANIFEST_JSON)
+    except RuntimeError:
+        return None
+    actual_uids = {
+        item.get("uid")
+        for item in failed.get("dashboards", [])
+        if isinstance(item, dict)
+    }
+    if actual_uids != set(config.selected_uids):
+        return None
+    failed["terminal_state_validation"] = {"status": "error"}
+    for item in failed["dashboards"]:
+        item["renderStatus"] = "error"
+    return failed
+
+
 def _run_playwright_with_retry(
     config: RenderConfig,
 ) -> tuple[int, dict[str, Any] | None]:
     for attempt in range(2):
         result = _run_playwright_process(config)
         if result != 0:
-            return result, None
+            return result, _read_failed_playwright_manifest(config)
         try:
             manifest = _read_playwright_manifest(
                 config.output_dir / _RENDER_MANIFEST_JSON
@@ -1483,12 +1528,12 @@ def _run_playwright_fallback(config: RenderConfig) -> int:
     dashboards = _load_dashboards(config)
     if len(dashboards) <= 1:
         result, manifest = _run_playwright_with_retry(config)
-        if result != 0 or manifest is None:
-            return result or 1
-        _write_merged_playwright_manifest(config, [manifest])
-        return 0
+        if manifest is not None:
+            _write_merged_playwright_manifest(config, [manifest])
+        return result or int(manifest is None)
 
     manifests: list[dict[str, Any]] = []
+    failed = False
     for dashboard in dashboards:
         single_config = cast(
             RenderConfig,
@@ -1496,11 +1541,23 @@ def _run_playwright_fallback(config: RenderConfig) -> int:
         )
         result, manifest = _run_playwright_with_retry(single_config)
         if result != 0 or manifest is None:
-            return result or 1
+            failed = True
+            if manifest is None:
+                manifest = {
+                    "terminal_state_validation": {"status": "error"},
+                    "dashboards": [
+                        {
+                            "uid": dashboard.uid,
+                            "file": f"{dashboard.uid}.png",
+                            "renderStatus": "error",
+                            "error": "capture failed without matching manifest",
+                        }
+                    ],
+                }
         manifests.append(manifest)
 
     _write_merged_playwright_manifest(config, manifests)
-    return 0
+    return 1 if failed else 0
 
 
 def _playwright_runtime_failure_detail(raw_detail: str) -> str:
@@ -1690,12 +1747,26 @@ def _handle_render_http_error(config: RenderConfig, exc: HTTPError) -> int:
     return _maybe_playwright_fallback(config)
 
 
+def _output_has_capture(config: RenderConfig) -> bool:
+    return bool(config.occurrence_id) and (
+        (config.output_dir / _RENDER_MANIFEST_JSON).exists()
+        or any(config.output_dir.glob("*.png"))
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     config = _parse_args(argv)
+    if not config.occurrence_id:
+        config = replace(config, occurrence_id=_capture_id(config))
     if not config.service_account_token and not config.password:
         print(_missing_credentials_message())
         return EXIT_CREDENTIALS
     config.output_dir.mkdir(parents=True, exist_ok=True)
+    if _output_has_capture(config):
+        print(
+            "Explicit render occurrences require a fresh output directory; existing evidence is preserved."
+        )
+        return 1
 
     try:
         if config.fallback == "playwright":

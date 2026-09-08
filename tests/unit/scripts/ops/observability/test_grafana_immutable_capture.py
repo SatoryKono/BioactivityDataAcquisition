@@ -1,0 +1,459 @@
+"""RF-001 negative controls for provisioned and immutable capture identity."""
+
+from __future__ import annotations
+
+import copy
+import hashlib
+import json
+import struct
+import zlib
+from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
+
+from scripts.ops.observability.grafana import capture_provenance as provenance
+
+pytestmark = pytest.mark.unit
+
+
+def test_only_root_database_fields_are_normalized() -> None:
+    source = {
+        "uid": "test",
+        "id": None,
+        "version": 1,
+        "panels": [{"id": 4, "version": 1}],
+    }
+    provisioned = {**source, "id": 42, "version": 99}
+    evidence = {"before": provisioned, "loaded": [provisioned], "after": provisioned}
+    assert provenance.model_errors(source, evidence) == []
+    changed = copy.deepcopy(evidence)
+    changed["after"]["panels"] = [{"id": 5, "version": 1}]
+    assert provenance.model_errors(source, changed)
+
+
+@pytest.mark.parametrize("phase", ["before", "loaded", "after"])
+def test_semantic_model_substitution_is_rejected(phase: str) -> None:
+    source = {"uid": "test", "panels": [{"targets": [{"expr": "up"}]}]}
+    evidence = {
+        "before": copy.deepcopy(source),
+        "loaded": [copy.deepcopy(source)],
+        "after": copy.deepcopy(source),
+    }
+    target = evidence[phase][0] if phase == "loaded" else evidence[phase]
+    target["panels"][0]["targets"][0]["expr"] = "vector(0)"
+    assert provenance.model_errors(source, evidence)
+
+
+def test_api_reads_without_browser_model_are_insufficient() -> None:
+    assert provenance.model_errors(
+        {"uid": "test"}, {"before": {}, "after": {}, "loaded": []}
+    )
+
+
+@pytest.fixture
+def capture(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    source_dir = tmp_path / "grafana/dashboards"
+    source_dir.mkdir(parents=True)
+    source = {"uid": "test", "id": None, "version": 1, "panels": []}
+    raw = json.dumps(source).encode()
+    (source_dir / "test.json").write_bytes(raw)
+    monkeypatch.setattr(
+        provenance.subprocess,
+        "run",
+        lambda *a, **k: SimpleNamespace(returncode=0, stdout=raw),
+    )
+    output = tmp_path / "capture"
+    output.mkdir()
+
+    def chunk(kind, data):
+        return (
+            struct.pack(">I", len(data))
+            + kind
+            + data
+            + struct.pack(">I", zlib.crc32(kind + data))
+        )
+
+    png_data = b"\x89PNG\r\n\x1a\n"
+    png_data += chunk(b"IHDR", struct.pack(">IIBBBBB", 1366, 768, 8, 2, 0, 0, 0))
+    png_data += chunk(b"IDAT", zlib.compress((b"\0" + b"\xff\xff\xff" * 1366) * 768))
+    png_data += chunk(b"IEND", b"")
+    (output / "test.png").write_bytes(png_data)
+    png = (output / "test.png").read_bytes()
+    identity = {
+        "path": "grafana/dashboards/test.json",
+        "sha256": hashlib.sha256(raw).hexdigest(),
+        "version": 1,
+    }
+    name = "render-manifest--full-set--test-capture.json"
+    manifest = {
+        "capture_id": "test-capture",
+        "immutable_manifest": name,
+        "manifest_kind": "full-set",
+        "file_set": ["test.png"],
+        "file_count": 1,
+        "base_url": "http://localhost:3000",
+        "requested": {
+            "viewport": {"width": 1366, "height": 768},
+            "theme": "dark",
+            "browser_zoom": 100,
+            "kiosk_mode": "off",
+            "capture_surface": "viewport",
+        },
+        "capture_context": {
+            "time_range": {"from": "1000", "to": "2000", "timezone": "UTC"},
+            "variables": {"workflow": "", "pipeline": "", "run_type": "", "run_id": ""},
+            "row_state": {"expand_collapsed_rows": False},
+        },
+        "expand_collapsed_rows": False,
+        "source": {
+            "commit_sha": "a" * 40,
+            "working_tree_dirty": False,
+            "dashboards": {"test": identity},
+        },
+        "dashboards": [
+            {
+                "uid": "test",
+                "file": "test.png",
+                "dashboardSource": identity,
+                "provisionedModel": {
+                    "before": source,
+                    "loaded": [source],
+                    "after": source,
+                    "captureId": "test-capture",
+                    "observedUrl": "http://localhost:3000/d/test/title?from=1000&to=2000&timezone=UTC&theme=dark",
+                    "browserVersion": "123.0.0",
+                },
+                "actualTheme": "dark",
+                "browserState": {
+                    "requestedZoom": 100,
+                    "cssZoom": "1",
+                    "actualKiosk": "off",
+                    "devicePixelRatio": 1,
+                    "layoutViewport": {"width": 1366, "height": 768},
+                    "physicalViewport": {"width": 1366, "height": 768},
+                    "visibleGrafanaChrome": True,
+                    "visualViewportScale": 1,
+                },
+                "screenshotEvidence": {
+                    "file": "test.png",
+                    "sha256": hashlib.sha256(png).hexdigest(),
+                    "bytes": len(png),
+                    "width": 1366,
+                    "height": 768,
+                },
+            }
+        ],
+    }
+    path = output / name
+    path.write_text(json.dumps(manifest))
+    return tmp_path, path, manifest
+
+
+def test_latest_pointer_cannot_select_or_change_acceptance(capture) -> None:
+    root, path, _ = capture
+    (path.parent / "render-manifest.json").write_text('{"another": "capture"}')
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "PASS"
+    assert (
+        provenance.verify_capture(path.parent / "render-manifest.json", repo_root=root)[
+            "status"
+        ]
+        == "FAIL"
+    )
+
+
+@pytest.mark.parametrize(
+    "mutation", ["png", "source", "occurrence", "subset", "missing", "provisioned"]
+)
+def test_substituted_evidence_never_passes(capture, mutation: str) -> None:
+    root, path, manifest = capture
+    if mutation == "png":
+        (path.parent / "test.png").write_bytes(b"corrupt")
+    elif mutation == "missing":
+        (path.parent / "test.png").unlink()
+    elif mutation == "source":
+        manifest["dashboards"][0]["dashboardSource"]["sha256"] = "0" * 64
+    elif mutation == "occurrence":
+        manifest["dashboards"][0]["provisionedModel"]["captureId"] = "other"
+    elif mutation == "provisioned":
+        manifest["dashboards"][0]["provisionedModel"]["after"] = {"uid": "other"}
+    else:
+        manifest["dashboards"] = []
+    path.write_text(json.dumps(manifest))
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "FAIL"
+
+
+def test_git_line_endings_are_portable_but_source_content_is_bound(
+    capture, monkeypatch
+) -> None:
+    root, path, manifest = capture
+    source_path = root / "grafana/dashboards/test.json"
+    lf = json.dumps(json.loads(source_path.read_bytes()), indent=2).encode() + b"\n"
+    crlf = lf.replace(b"\n", b"\r\n")
+    source_path.write_bytes(lf)
+    manifest["dashboards"][0]["dashboardSource"]["sha256"] = hashlib.sha256(
+        crlf
+    ).hexdigest()
+    monkeypatch.setattr(
+        provenance.subprocess,
+        "run",
+        lambda *a, **k: SimpleNamespace(returncode=0, stdout=lf),
+    )
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "PASS"
+    source_path.write_bytes(lf.replace(b'"panels": []', b'"panels": [{}]'))
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "FAIL"
+
+
+@pytest.mark.parametrize("kind", ["critical", "tile", "page"])
+def test_every_linked_capture_surface_is_hash_bound(capture, kind: str) -> None:
+    root, path, manifest = capture
+    dashboard = manifest["dashboards"][0]
+    evidence = copy.deepcopy(dashboard["screenshotEvidence"])
+    evidence["file"] = "closeup.png"
+    (path.parent / "closeup.png").write_bytes((path.parent / "test.png").read_bytes())
+    if kind == "critical":
+        dashboard["criticalPanelScreenshots"] = [evidence]
+    elif kind == "tile":
+        dashboard["scrollCapture"] = {"tiles": [evidence]}
+    else:
+        dashboard["tablePagination"] = [{"pages": [evidence]}]
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "PASS"
+    (path.parent / "closeup.png").write_bytes(b"substituted")
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "FAIL"
+
+
+def test_attachment_path_must_stay_within_pack(capture) -> None:
+    root, path, manifest = capture
+    evidence = copy.deepcopy(manifest["dashboards"][0]["screenshotEvidence"])
+    evidence["file"] = "../outside.png"
+    (path.parent.parent / "outside.png").write_bytes(
+        (path.parent / "test.png").read_bytes()
+    )
+    assert provenance.attachment_errors(path.parent, evidence)
+
+
+def test_windows_source_separators_preserve_resource_identity(capture):
+    root, path, manifest = capture
+    manifest["dashboards"][0]["dashboardSource"]["path"] = (
+        "grafana\\dashboards\\test.json"
+    )
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "PASS"
+    manifest["dashboards"][0]["dashboardSource"]["path"] = "grafana/other/test.json"
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "FAIL"
+
+
+@pytest.mark.parametrize(
+    "mutation,expected_error",
+    [
+        ("truncated_png", "truncated PNG chunk"),
+        ("wrong_pixel_dimensions", "PNG pixel dimensions mismatch"),
+        ("url_time", "browser URL context mismatch: from"),
+        ("url_variable", "browser URL context mismatch: var-pipeline"),
+        ("dsf", "device scale mismatch"),
+        ("css_viewport", "CSS viewport mismatch: width"),
+        ("file_count", "full-set file_count mismatch"),
+        ("file_set", "full-set file_set mismatch"),
+    ],
+)
+def test_context_and_rehashed_corruption_are_rejected(
+    capture, mutation, expected_error
+):
+    root, path, manifest = capture
+    dashboard = manifest["dashboards"][0]
+    if mutation in {"truncated_png", "wrong_pixel_dimensions"}:
+        png_path = path.parent / "test.png"
+        raw = png_path.read_bytes()
+        if mutation == "truncated_png":
+            raw = raw[:24]
+        else:
+            compressed = zlib.compress(b"\0")
+            chunk = b"IDAT" + compressed
+            raw = (
+                raw[:33]
+                + struct.pack(">I", len(compressed))
+                + chunk
+                + struct.pack(">I", zlib.crc32(chunk))
+                + raw[-12:]
+            )
+        png_path.write_bytes(raw)
+        dashboard["screenshotEvidence"].update(
+            sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw)
+        )
+    elif mutation == "url_time":
+        dashboard["provisionedModel"]["observedUrl"] = dashboard["provisionedModel"][
+            "observedUrl"
+        ].replace("from=1000", "from=999")
+    elif mutation == "url_variable":
+        manifest["capture_context"]["variables"]["pipeline"] = "chembl_assay"
+    elif mutation == "dsf":
+        dashboard["browserState"]["devicePixelRatio"] = 2
+    elif mutation == "css_viewport":
+        dashboard["browserState"]["layoutViewport"]["width"] = 1000
+    elif mutation == "file_count":
+        manifest["file_count"] = 99
+    else:
+        manifest["file_set"] = ["other.png"]
+    path.write_text(json.dumps(manifest))
+    result = provenance.verify_capture(path, repo_root=root)
+    assert result["status"] == "FAIL"
+    errors = result["errors"] + [
+        error for item in result["dashboards"] for error in item["errors"]
+    ]
+    assert any(expected_error in error for error in errors), errors
+
+
+def test_external_manifest_and_commit_pins_reject_self_consistent_replacement(capture):
+    root, path, manifest = capture
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    assert (
+        provenance.verify_capture(
+            path, repo_root=root, expected_sha256=digest, expected_commit="a" * 40
+        )["status"]
+        == "PASS"
+    )
+    manifest["generated_at"] = "another occurrence"
+    path.write_text(json.dumps(manifest))
+    assert (
+        provenance.verify_capture(path, repo_root=root, expected_sha256=digest)[
+            "status"
+        ]
+        == "FAIL"
+    )
+    assert (
+        provenance.verify_capture(path, repo_root=root, expected_commit="b" * 40)[
+            "status"
+        ]
+        == "FAIL"
+    )
+
+
+def test_grafana_iso_rewrite_preserves_exact_time_bounds(capture):
+    root, path, manifest = capture
+    model = manifest["dashboards"][0]["provisionedModel"]
+    model["observedUrl"] = model["observedUrl"].replace(
+        "from=1000", "from=1970-01-01T00:00:01.000Z"
+    )
+    path.write_text(json.dumps(manifest))
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "PASS"
+    model["observedUrl"] = model["observedUrl"].replace("01.000Z", "01.001Z")
+    path.write_text(json.dumps(manifest))
+    assert provenance.verify_capture(path, repo_root=root)["status"] == "FAIL"
+
+
+@pytest.mark.parametrize(
+    "epoch,iso",
+    [
+        ("1001", "1970-01-01T00:00:01.001Z"),
+        ("1788825600001", "2026-09-08T00:00:00.001Z"),
+    ],
+)
+def test_iso_millisecond_comparison_is_exact(epoch, iso):
+    assert provenance.query_values_match("from", [iso], [epoch])
+    assert not provenance.query_values_match("from", [iso], [str(int(epoch) + 1)])
+    assert not provenance.query_values_match(
+        "from", [iso.replace("001Z", "001001Z")], [epoch]
+    )
+
+
+@pytest.mark.parametrize(
+    "mutation,expected_error",
+    [
+        ("extra_variable", "browser variable set mismatch"),
+        ("css_height", "CSS viewport mismatch: height"),
+        ("css_zoom", "non-neutral browser scale"),
+        ("visual_scale", "non-neutral browser scale"),
+        ("timezone", "UTC acceptance timezone required"),
+        ("missing_viewport", "invalid requested viewport"),
+        ("numeric_capture_id", "missing or invalid capture ID"),
+        ("kiosk_chrome", "visible browser chrome in full kiosk"),
+    ],
+)
+def test_browser_context_substitutions_have_specific_failures(
+    capture, mutation, expected_error
+):
+    root, path, manifest = capture
+    dashboard = manifest["dashboards"][0]
+    state = dashboard["browserState"]
+    if mutation == "extra_variable":
+        dashboard["provisionedModel"]["observedUrl"] += "&var-pipeline=foreign"
+    elif mutation == "css_height":
+        state["layoutViewport"]["height"] = 100
+    elif mutation == "css_zoom":
+        state["cssZoom"] = "2"
+    elif mutation == "visual_scale":
+        state["visualViewportScale"] = 2
+    elif mutation == "timezone":
+        manifest["capture_context"]["time_range"]["timezone"] = "Europe/Kiev"
+        dashboard["provisionedModel"]["observedUrl"] = dashboard["provisionedModel"][
+            "observedUrl"
+        ].replace("timezone=UTC", "timezone=Europe%2FKiev")
+    elif mutation == "missing_viewport":
+        del manifest["requested"]["viewport"]
+    elif mutation == "numeric_capture_id":
+        manifest["capture_id"] = 42
+    else:
+        manifest["requested"]["kiosk_mode"] = "full"
+        state["actualKiosk"] = "full"
+    path.write_text(json.dumps(manifest))
+    result = provenance.verify_capture(path, repo_root=root)
+    assert result["status"] == "FAIL"
+    errors = result["errors"] + [
+        error for item in result["dashboards"] for error in item["errors"]
+    ]
+    assert any(expected_error in error for error in errors), errors
+
+
+def test_scoped_acceptance_uses_the_same_pinned_byte_snapshot(capture, monkeypatch):
+    from scripts.ops.observability.grafana import (
+        capture_acceptance,
+        check_grafana_dashboard_audit_preflight as preflight,
+    )
+
+    root, path, manifest = capture
+    original = path.read_bytes()
+    real_read = Path.read_bytes
+    reads = []
+    assessed = []
+
+    def read_once(candidate):
+        if candidate != path:
+            return real_read(candidate)
+        reads.append(candidate)
+        return original if len(reads) == 1 else b'{"capture_id":"substituted"}'
+
+    def assess(payload):
+        assessed.append(payload["capture_id"])
+        return {"layout_status": "PASS"}
+
+    monkeypatch.setattr(Path, "read_bytes", read_once)
+    monkeypatch.setattr(preflight, "_REPO_ROOT", root)
+    monkeypatch.setattr(capture_acceptance, "assess_manifest", assess)
+    args = SimpleNamespace(
+        immutable_manifest=path,
+        manifest_sha256=hashlib.sha256(original).hexdigest(),
+        expected_commit="a" * 40,
+        acceptance_scope="layout",
+    )
+    assert preflight._immutable_acceptance(args) == 0
+    assert len(reads) == 1
+    assert assessed == [manifest["capture_id"]]
+
+
+def test_dynamic_dashboard_selectors_must_be_declared_and_not_explicitly_empty():
+    model = {
+        "before": {"templating": {"list": [{"name": "stage"}, {"name": "pipeline"}]}}
+    }
+    context = {"variables": {"pipeline": ""}}
+    assert not provenance.unexpected_browser_variables(
+        model, context, set(), {"var-stage": ["$__all"]}
+    )
+    assert provenance.unexpected_browser_variables(
+        model, context, set(), {"var-pipeline": ["foreign"]}
+    )
+    assert provenance.unexpected_browser_variables(
+        model, context, set(), {"var-unknown": ["foreign"]}
+    )

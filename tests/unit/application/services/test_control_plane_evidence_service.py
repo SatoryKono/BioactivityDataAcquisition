@@ -14,6 +14,7 @@ from bioetl.application.observability.control_plane_evidence import (
 )
 from bioetl.application.observability.control_plane_evidence.checks import (
     EvidenceCheckResult,
+    EvidenceStatus,
 )
 from bioetl.application.observability.control_plane_evidence.models import (
     FIRST_SCREEN_TRUST_REASONS_CAP,
@@ -680,6 +681,38 @@ def test_trust_reasons_text_caps_first_screen_lines_and_flags_truncation() -> No
     assert reasons_text == "\n".join(reasons[:FIRST_SCREEN_TRUST_REASONS_CAP])
     assert reasons_text.count("\n") == FIRST_SCREEN_TRUST_REASONS_CAP - 1
     assert trust["reasons_truncated"] is True
+
+
+@pytest.mark.parametrize("severity", ["UNKNOWN", "WARNING", "ERROR"])
+def test_trust_reason_count_includes_checks_beyond_payload_cap(
+    severity: EvidenceStatus,
+) -> None:
+    checks = [
+        EvidenceCheckResult(
+            check=f"check_{index}",
+            status=severity,
+            reason=f"reason_{index}",
+            detail="evidence requiring attention",
+        )
+        for index in range(13)
+    ]
+    checks.append(
+        EvidenceCheckResult(check="valid", status="OK", reason="ok", detail="valid")
+    )
+    payload = evidence_payload(
+        endpoint="manifest-validation",
+        checks=tuple(checks),
+        requested_pipeline="chembl_activity",
+        selected_run_id=str(_RUN_ID),
+        selected_run_types=("incremental",),
+        resolved_via="selected_run_id",
+        manifest=_manifest(),
+    )
+    trust = _payload_mapping(payload, "trust")
+    assert trust["reasons_count"] == 13
+    assert trust["reasons"] == [f"reason_{index}" for index in range(12)]
+    assert trust["reasons_truncated"] is True
+    assert len(payload["rows"]) == 14
 
 
 def test_trust_reasons_text_at_cap_is_not_truncated() -> None:

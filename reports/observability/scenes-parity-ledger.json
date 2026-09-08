@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "0bacc70615d88003f5c118a9598bf4a3674f8e01f8eb2dae3c27db79521cfa45",
-    "bioetl-dq-v2": "91316bc49d46e45ea0bbab6107492ab6aadc9a0451881737ad00e4ed21ef6288",
-    "bioetl-incident-v1": "deaad94888bacd98a7c741a18daad31a8c2d32da195cb33b9548a46bf51dafce",
-    "bioetl-overview-v2": "b9b8219561eefc254d3cec0a4ccadeb8332b35103c65bd4eeb2d2dc5a5077b35",
-    "bioetl-provider-health-v2": "0c62a72cd4c4345f54e9a6dd0198efbf28a14eaa2befd658264f42bb5fa4f2b7",
-    "bioetl-run-explorer-v1": "373ea0f209343634a88401a6df4e383bcca6d311796c7e26ce085956da66df6b",
-    "bioetl-runtime": "3069483ddb5441045649a77fa2810142ab56ee4798eaf027374dbe003a4865d8"
+    "bioetl-control-plane-v1": "3e3bee3f5c660c4f4b07af99a1f0873b378ee436ad5e36cdb0bceb07aabcdbed",
+    "bioetl-dq-v2": "197e3a0b7f85a8e833b08c792382b5a4ddfbac6fc386e1e5bd2854ceb2698c39",
+    "bioetl-incident-v1": "d771384e2377196dfd2c98b0adef5cfbf03daa1e9f4aa974035dab649bdeff70",
+    "bioetl-overview-v2": "231b042ee60ed404086bdb6fd5cb6dd7e713835ac40091f2f6d8f19be8c78740",
+    "bioetl-provider-health-v2": "6f2e79a61fc8345624995b2d2ea23a453ed26ab88e1a29193779793c0317355e",
+    "bioetl-run-explorer-v1": "aa99a9aae4395a93f059dd29cbd07d463507edcddc67e0ec0849737a08c7e2ef",
+    "bioetl-runtime": "edcfcf6a89266b5a798ae43b1e2d8ef287c5e97b506b116e162b900776dd88e7"
   },
   "panels": [
     {
@@ -742,9 +742,9 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "histogram_quantile(0.50, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
-          "histogram_quantile(0.95, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
-          "histogram_quantile(0.99, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))"
+          "histogram_quantile(0.50, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
+          "histogram_quantile(0.95, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
+          "histogram_quantile(0.99, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))"
         ],
         "target_count": 3
       }
@@ -3070,10 +3070,9 @@
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
-          "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}"
+          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
         ],
-        "target_count": 2
+        "target_count": 1
       }
     },
     {

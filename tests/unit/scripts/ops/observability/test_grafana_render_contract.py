@@ -29,6 +29,154 @@ from scripts.ops.observability.grafana import (
 pytestmark = pytest.mark.unit
 
 
+def _layout_manifest(expanded: bool) -> tuple[dict, dict]:
+    panel = {"id": 1, "type": "table", "gridPos": {"y": 0}}
+    child = {"id": 3, "type": "table", "gridPos": {"y": 19}}
+    source = {
+        "one": {
+            "panels": [
+                panel,
+                {
+                    "id": 2,
+                    "type": "row",
+                    "title": "Details",
+                    "collapsed": True,
+                    "panels": [child],
+                },
+            ]
+        }
+    }
+    measured = {
+        "id": 1,
+        "status": "ok",
+        "missing": False,
+        "clientHeight": 100,
+        "scrollHeight": 100,
+        "clientWidth": 300,
+        "scrollWidth": 300,
+        "bbox": {"x": 16, "y": 80, "width": 300, "height": 132},
+        "fold": 768,
+        "enforceFold": not expanded,
+    }
+    dashboard = {
+        "uid": "one",
+        "panelContainment": {"panels": [measured]},
+        "layoutFit": {
+            "cssViewport": {"width": 1366, "height": 768},
+            "devicePixelRatio": 1,
+            "fold": 768,
+        },
+        "preCaptureTerminalStateValidation": {
+            "status": "ok",
+            "panelStates": [{"id": 1}],
+        },
+        "rowExpansion": [{"title": "Details", "clicked": True}],
+        "scrollCapture": {
+            "tiles": [{"panels": [{"panel": "panel-1"}, {"panel": "panel-3"}]}]
+        },
+    }
+    if expanded:
+        dashboard["preCaptureTerminalStateValidation"]["panelStates"].append({"id": 3})
+    return {
+        "requested": {
+            "viewport": {"width": 1366, "height": 768},
+            "browser_zoom": 100,
+            "capture_surface": "full" if expanded else "viewport",
+        },
+        "expand_collapsed_rows": expanded,
+        "dashboards": [dashboard],
+    }, source
+
+
+@pytest.mark.parametrize("expanded", [False, True])
+def test_layout_surface_requires_its_own_panel_scope(expanded: bool) -> None:
+    manifest, source = _layout_manifest(expanded)
+    assert (
+        preflight.validate_layout_surface(
+            manifest, source_models=source, expanded=expanded
+        )
+        == []
+    )
+    assert preflight.validate_layout_surface(
+        manifest, source_models=source, expanded=not expanded
+    )
+
+
+@pytest.mark.parametrize("defect", ["missing", "overflow", "fold", "unmeasured_fold"])
+def test_layout_first_viewport_rejects_missing_or_uncontained_panel(
+    defect: str,
+) -> None:
+    manifest, source = _layout_manifest(False)
+    dashboard = manifest["dashboards"][0]
+    panel = dashboard["panelContainment"]["panels"][0]
+    if defect == "missing":
+        dashboard["panelContainment"]["panels"].clear()
+    elif defect == "overflow":
+        panel["scrollHeight"] = 110
+    elif defect == "fold":
+        panel["bbox"]["y"] = 700
+    else:
+        panel["enforceFold"] = False
+    assert preflight.validate_layout_surface(
+        manifest, source_models=source, expanded=False
+    )
+
+
+@pytest.mark.parametrize("defect", ["row", "tile", "terminal"])
+def test_layout_expanded_requires_rows_and_observed_descendants(defect: str) -> None:
+    manifest, source = _layout_manifest(True)
+    dashboard = manifest["dashboards"][0]
+    if defect == "row":
+        dashboard["rowExpansion"][0]["clicked"] = False
+    elif defect == "tile":
+        dashboard["scrollCapture"]["tiles"][0]["panels"].pop()
+    else:
+        dashboard["preCaptureTerminalStateValidation"]["panelStates"].pop()
+    assert preflight.validate_layout_surface(
+        manifest, source_models=source, expanded=True
+    )
+
+
+@pytest.mark.parametrize("write_manifest", [True, False])
+def test_selected_layout_matrix_binds_immutable_manifest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, write_manifest: bool
+) -> None:
+    def render(argv: list[str]) -> int:
+        if write_manifest:
+            root = Path(argv[argv.index("--output-dir") + 1])
+            root.mkdir(parents=True)
+            immutable = "render-manifest--full-set--unit.json"
+            raw = json.dumps({"immutable_manifest": immutable})
+            (root / "render-manifest.json").write_text(raw)
+            (root / immutable).write_text(raw)
+        return 0
+
+    monkeypatch.setattr(render_matrix.rerender, "main", render)
+    result = render_matrix.main(
+        [
+            "--output-dir",
+            str(tmp_path),
+            "--range-from",
+            "1000",
+            "--range-to",
+            "2000",
+            "--profiles",
+            "1366x768-dark",
+            "--no-include-kiosk",
+        ]
+    )
+    manifest = json.loads((tmp_path / "matrix-manifest.json").read_text())
+    assert result == (0 if write_manifest else 1)
+    assert manifest["scope"] == "selected-profiles"
+    assert manifest["consistency"]["status"] == "not-applicable"
+    if write_manifest:
+        profile = manifest["profiles"][0]
+        assert (
+            profile["manifest_sha256"]
+            == hashlib.sha256(Path(profile["manifest"]).read_bytes()).hexdigest()
+        )
+
+
 def _png(width: int = 1024, height: int = 900) -> bytes:
     return (
         b"\x89PNG\r\n\x1a\n"
@@ -77,11 +225,7 @@ def _manifest(*, classification: str = "incomplete") -> dict[str, object]:
 
 
 def _bind_provenance(tmp_path: Path, manifest: dict[str, object]) -> None:
-    source = {
-        "path": "grafana/dashboards/bioetl-runtime.json",
-        "sha256": "b" * 64,
-        "version": 1,
-    }
+    source = rerender._dashboard_source_by_uid()["bioetl-runtime"]
     dashboards = manifest["dashboards"]
     assert isinstance(dashboards, list)
     dashboard = dashboards[0]
@@ -128,6 +272,34 @@ def _bind_provenance(tmp_path: Path, manifest: dict[str, object]) -> None:
     text = json.dumps(manifest, indent=2, sort_keys=True) + "\n"
     (tmp_path / "render-manifest.json").write_text(text, encoding="utf-8")
     (tmp_path / str(manifest["immutable_manifest"])).write_text(text, encoding="utf-8")
+
+
+@pytest.mark.parametrize("mutation", ["digest", "path", "missing", "changed"])
+def test_source_binding_rejects_stale_or_misbound_json(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mutation: str
+) -> None:
+    relative = Path("grafana/dashboards/bioetl-runtime.json")
+    source_file = tmp_path / relative
+    source_file.parent.mkdir(parents=True)
+    source_file.write_text('{"uid":"bioetl-runtime","version":1}', encoding="utf-8")
+    source = {
+        "path": relative.as_posix(),
+        "sha256": hashlib.sha256(source_file.read_bytes()).hexdigest(),
+        "version": 1,
+    }
+    monkeypatch.setattr(preflight, "_REPO_ROOT", tmp_path)
+    assert preflight._dashboard_source_error("bioetl-runtime", source, source) is None
+    if mutation == "digest":
+        source["sha256"] = "0" * 64
+    elif mutation == "path":
+        source["path"] = "grafana/dashboards/bioetl-dq-v2.json"
+    elif mutation == "missing":
+        source_file.unlink()
+    else:
+        source_file.write_text('{"uid":"bioetl-runtime","version":2}', encoding="utf-8")
+    assert (
+        preflight._dashboard_source_error("bioetl-runtime", source, source) is not None
+    )
 
 
 def test_git_capture_keeps_commit_when_dirty_probe_times_out(
@@ -394,6 +566,11 @@ def test_render_matrix_covers_standard_full_repeat_and_kiosk_profiles() -> None:
         "1920x1080-dark",
         "1920x1080-light",
         "1440x900-dark-full",
+        "1366x768-dark-full",
+        "1366x768-light-full",
+        "1440x900-light-full",
+        "1920x1080-dark-full",
+        "1920x1080-light-full",
         "1440x900-dark-repeat",
         "1366x768-dark-zoom-200",
         "1366x768-light-zoom-200",

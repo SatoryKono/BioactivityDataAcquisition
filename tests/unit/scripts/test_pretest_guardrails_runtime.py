@@ -96,3 +96,33 @@ def test_pretest_guardrails_rejects_runtime_without_required_yaml(
     assert result.returncode == 1
     assert "cannot import required module 'yaml'" in result.stderr
     assert "[pretest-guardrails] OK" not in result.stdout
+
+
+@pytest.mark.parametrize("line_ending", ["\n", "\r\n"])
+def test_architecture_targets_do_not_leak_line_terminators(line_ending: str) -> None:
+    """Configuration line endings must not become part of pytest node IDs."""
+    source = SCRIPT.read_text(encoding="utf-8")
+    body = source.split("run_architecture_checks() {", 1)[1].split("\n}\n", 1)[0]
+    function = "run_architecture_checks() {" + body + "\n}\n"
+    target = "tests/architecture/test_generated_artifact_routing.py::test_example"
+    env = os.environ.copy()
+    env["TARGET_OUTPUT"] = target + line_ending
+    harness = (
+        "set -euo pipefail\n"
+        + function
+        + 'config_architecture_targets() { printf "%s" "$TARGET_OUTPUT"; }\n'
+        + 'run_step() { printf "%s\\0" "$@"; }\n'
+        + "SKIP_ARCHITECTURE=0\nARCHITECTURE_GROUP=fixture\n"
+        + "run_architecture_checks\n"
+    )
+    result = subprocess.run(
+        [_bash_executable(), "-c", harness],
+        cwd=ROOT,
+        env=env,
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr.decode(errors="replace")
+    arguments = result.stdout.split(b"\0")
+    assert target.encode() in arguments
+    assert all(b"\r" not in argument for argument in arguments)

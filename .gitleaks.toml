@@ -105,3 +105,118 @@ stopwords = [
     "placeholder",
     "your-api-key-here",
 ]
+
+
+# Review proposal for #10136. Every exception requires BOTH path and matched value.
+# No credential dispositions, commit exemptions, or fingerprint baseline included.
+[[rules]]
+id = "generic-api-key"
+
+[[rules.allowlists]]
+description = "Sonar issue IDs in the seven reviewed historical JSON exports"
+condition = "AND"
+paths = ['''^reports/quality/sonar/(?:live-issues-20260728-(?:manifest|postmerge-full)|live-issues-20260807-full|live-issues-20260819-(?:baseline|current)-full|live-issues-20260820-rf009-full|live-snapshot-20260728-summary)\.json$''']
+regexTarget = "match"
+regexes = ['''^"?key"[ \t]*:[ \t]*"(?:[A-Za-z0-9_-]{20}|[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12})"[, \t\r\n]*$''']
+
+[[rules.allowlists]]
+description = "ChEMBL species/target text: api inside sapiens is not an API assignment"
+condition = "AND"
+paths = ['''^data/output/.*\.csv$''']
+regexTarget = "match"
+regexes = ['''(?i)^s?apiens,(?:5-hydroxytryptamine|d-3-phosphoglycerate|3-hydroxy-3-methylglutaryl-coenzyme|1-acyl-sn-glycerol-3-phosphate)[ \t\r\n]*$''']
+
+[[rules.allowlists]]
+description = "Reviewed activity CSV rows: gastrin/cholecystokinin is a target name"
+condition = "AND"
+paths = ['''^data/output/(?:activity|activity_smoke)/activity\.csv$''']
+regexTarget = "match"
+regexes = ['''(?i)^s?apiens,gastrin/cholecystokinin[ \t\r\n]*$''']
+
+[[rules.allowlists]]
+description = "Exact historical activity staging file: serotonin target text"
+condition = "AND"
+paths = ['''^data/output/activity/activity\.tmp$''']
+regexTarget = "match"
+regexes = ['''(?i)^s?apiens,5-hydroxytryptamine[ \t\r\n]*$''']
+
+[[rules.allowlists]]
+description = "Named SHA-256 business-key expectations in historical golden tests"
+condition = "AND"
+paths = ['''^tests/(?:unit/domain/hash_policy/(?:snapshots/chembl_high_risk_hashes\.json|test_chembl_high_risk_hash_golden\.py)|bioetl/domain/transform/golden_examples\.json|(?:document|assay|testitem|target)_chembl_golden\.py)$''']
+regexTarget = "match"
+regexes = ['''^"?(?:target_component_key_order_[ab]|(?:expected_)?hash_business_key)"[ \t]*:[ \t]*"[0-9a-f]{64}"[, \t\r\n]*$''']
+
+[[rules.allowlists]]
+description = "Canonical semantic-pair row identifiers, not generic hex credentials"
+condition = "AND"
+paths = ['''^configs/field_registry/semantic_pair_matrix_budget\.yaml$''']
+regexTarget = "match"
+regexes = ['''^row_key: [0-9a-f]{16}[ \t\r\n]*$''']
+
+[[rules.allowlists]]
+description = "Parsed knowledge-graph metadata names"
+condition = "AND"
+paths = ['''^src/bioetl_knowledge_graph_expanded(?:_compact)?\.json$''']
+regexTarget = "match"
+regexes = ['''^accession","normalized=true"$''']
+
+[[rules.allowlists]]
+description = "Audit prose heading, not a credential assignment"
+condition = "AND"
+paths = ['''^src/memory/episodic/summaries/full-tech-debt-audit-main-2026-06-19\.md$''']
+regexTarget = "match"
+regexes = ['''^Key findings: compatibility(?:/facade)?[ \t\r\n]*$''']
+
+[[rules.allowlists]]
+description = "Exact sequential dummy in the reviewed memory security regression"
+condition = "AND"
+paths = ['''^tests/unit/memory/test_security\.py$''']
+regexTarget = "secret"
+regexes = ['''^ghp_abcdefghijklmnopqrstuvwxyz123456$''']
+
+[[rules.allowlists]]
+description = "Exact sequential dummy in token-validation tests"
+condition = "AND"
+paths = ['''^tests/unit/repo_backed/scripts/ai/mcp/test_token_validation_helpers\.py$''']
+regexTarget = "secret"
+regexes = ['''^ghp_12345678901234567890$''']
+
+[[rules.allowlists]]
+description = "Exact numeric mock in request-collector tests and two historical copies"
+condition = "AND"
+paths = ['''^(?:\.worktrees/(?:bioetl-wave1-3|pr-2438-review)/)?tests/unit/infrastructure/adapters/common/test_api_request_collector\.py$''']
+regexTarget = "secret"
+regexes = ['''^secret_key_12345$''']
+
+[[rules.allowlists]]
+description = "Exact numeric bad-practice example already replaced in current guidance"
+condition = "AND"
+paths = ['''^docs/03-guides/github-setup-plan\.md$''']
+regexTarget = "secret"
+regexes = ['''^sk-1234567890$''']
+
+[[rules]]
+id = "curl-auth-header"
+[[rules.allowlists]]
+description = "Literal YOUR_API_KEY/TOKEN placeholders in reviewed curl documentation"
+condition = "AND"
+paths = ['''^(?:(?:\.worktrees/(?:bioetl-wave1-3|pr-2438-review)/)?docs/(?:05-operations/verification/endpoint-validation-checklist\.md|(?:99-archive/dashboards-legacy|03-guides/dashbords)/BIOETL_DASHBOARD_EXAMPLES\.md)|docs/exports/full-documentation-no-plans-reports-skills\.merged\.md|src/tools/reports/documentation_merged\.md)$''']
+regexTarget = "secret"
+regexes = ['''^YOUR[_-]API[_-](?:KEY|TOKEN)$''']
+
+[[rules]]
+id = "curl-auth-user"
+[[rules.allowlists]]
+description = "PowerShell environment references, not literal passwords"
+condition = "AND"
+paths = ['''^docs/05-operations/deployment/neo4j-audit-instance-implementation\.md$''']
+regexTarget = "secret"
+regexes = ['''^["']?\$\{env:NEO4J_AUDIT_USERNAME\}:\$\{env:NEO4J_AUDIT_PASSWORD\}["']?$''']
+
+[[rules.allowlists]]
+description = "Literal ellipsis in abbreviated curl syntax"
+condition = "AND"
+paths = ['''(?:^|/)MCP_MEMORY_OPERATIONAL\.md$''']
+regexTarget = "secret"
+regexes = ['''^neo4j:\.\.\.$''']

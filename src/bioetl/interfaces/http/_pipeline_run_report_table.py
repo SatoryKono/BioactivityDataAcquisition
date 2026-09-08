@@ -8,63 +8,18 @@ from __future__ import annotations
 
 import json
 
+from bioetl.interfaces.http._pipeline_run_report_sections import (
+    _FAILURE_ROW_ORDER,
+    _IDENTITY_ROW_ORDER,
+    _LAYER_ROW_ORDER,
+    _RECONCILIATION_ROW_ORDER,
+)
 from bioetl.interfaces.http._processed_records_value_support import (
     _coverage_chip,
     _coverage_fields,
     _padded_range_ms,
     _parse_grafana_ms,
     _parse_iso_to_ms,
-)
-
-# Canonical reconciliation key order for Run Explorer panel 3015 (REC-04).
-_RECONCILIATION_ROW_ORDER: tuple[str, ...] = (
-    "silver_accounted",
-    "silver_delta",
-    "silver_vs_bronze_status",
-    "gold_accounted",
-    "gold_delta",
-    "gold_vs_silver_status",
-)
-
-# pipeline_run_report_v1.layers required keys (D6-IA-02).
-_LAYER_ROW_ORDER: tuple[str, ...] = (
-    "bronze_records",
-    "silver_valid",
-    "silver_filtered_out",
-    "silver_quarantined",
-    "silver_skipped",
-    "silver_deduplicated",
-    "gold_written",
-    "gold_excluded_by_contract",
-    "gold_quarantined",
-    "gold_skipped",
-    "gold_deduplicated",
-)
-
-# Optional failure object keys (D6-IA-01).
-_FAILURE_ROW_ORDER: tuple[str, ...] = (
-    "error_type",
-    "error_message",
-    "failed_stage",
-    "exit_hint",
-)
-
-# Report identity keys surfaced on Run Explorer 3022 (D6-IA-09).
-_IDENTITY_ROW_ORDER: tuple[str, ...] = (
-    "run_id",
-    "pipeline_name",
-    "run_type",
-    "status",
-    "started_at",
-    "completed_at",
-    "duration_seconds",
-    "tracking_coverage",
-    "workflow_id",
-    "workflow_run_id",
-    "workflow_step_id",
-    "manifest_id",
-    "provider",
-    "entity",
 )
 
 # Grafana selector sentinels for "no concrete run selected" (never a real run_id).
@@ -96,7 +51,7 @@ def _empty_pipeline_run_report_shell(
     message: str,
 ) -> dict[str, object]:
     """Empty report shell for Grafana table root_selectors (no QUERY_ERROR)."""
-    return {
+    payload: dict[str, object] = {
         "status": status,
         "message": message,
         "run_id": run_id,
@@ -113,6 +68,14 @@ def _empty_pipeline_run_report_shell(
         "timings_and_failure": [],
         "schema_version": "pipeline_run_report_v1",
     }
+    state = "SELECT RUN" if status == "unresolved_scope" else "TELEMETRY MISSING"
+    for key, label in (
+        ("funnel", "stage_id"),
+        ("reasons_top_n", "reason_code"),
+        ("artifacts", "state"),
+    ):
+        payload[f"{key}_display"] = [{label: state, "message": message}]
+    return payload
 
 
 def _unresolved_pipeline_run_report_shell(
@@ -291,6 +254,12 @@ def _table_shape_pipeline_run_report(
     _shape_object_or_list_block(payload, shaped, "stage_timings")
     shaped["identity_rows"] = _shape_identity_rows(payload)
     shaped["funnel"] = _shape_funnel_rows(payload)
+    for key, label in (
+        ("funnel", "stage_id"),
+        ("reasons_top_n", "reason_code"),
+        ("artifacts", "state"),
+    ):
+        shaped.setdefault(f"{key}_display", shaped.get(key) or [{label: "VALID EMPTY"}])
     shaped["timings_and_failure"] = [
         *_section_param_value_rows("failure", shaped.get("failure")),
         *_section_param_value_rows("stage_timings", shaped.get("stage_timings")),

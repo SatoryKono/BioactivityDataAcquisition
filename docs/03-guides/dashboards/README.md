@@ -22,6 +22,42 @@ shadow review. The seven JSON UIDs remain authoritative and reachable. See
 [Optional Scenes dual path](scenes-dual-path.md) for ownership and rollback.
 
 
+## Source-bound capture acceptance
+
+Keep renderer, validator, and navigation generator integration under one owner.
+Use a clean committed candidate, fixed UTC `--range-from` / `--range-to`, and
+explicit selectors with `python -m scripts.ops render-grafana-matrix`. The matrix
+records three viewports in both themes, collapsed and expanded surfaces, and
+physical 1366x768 at 100%/200% reflow. At 200%, the CSS viewport is 683x384 and DSF
+is 2; the page root is not scaled with CSS. Full captures retain their original
+fixed-viewport scroll tiles. Terminal readiness is checked before each PNG.
+
+Validate provenance independently with
+`python -m scripts.ops check-grafana-audit-preflight --immutable-manifest <full-set-manifest> --acceptance-scope provenance`.
+Only an explicitly named immutable full-set manifest is admissible. API models
+before and after capture and the browser-loaded model must match committed JSON;
+main PNGs, tiles, critical closeups, pagination, and keyboard series captures are
+hash-bound. Historical mismatches remain unsuitable for acceptance until their
+original source/artifact identity is recovered. A layout failure does not by
+itself invalidate provenance.
+
+Assemble the separate results with
+`python -m scripts.ops assess-grafana-captures <immutable-manifests...> --output-dir <new-directory> --cue-review <review.json>`.
+The review records `reviewer`, `source_sha`, exact `captures` hashes, all model
+`panels` by UID, and `scenarios` for normal/populated, valid zero, expected
+empty/selection, and error/anomaly. Critical panel reviews need observed
+`evidence_text`; unavailable scenarios stay `NOT_VERIFIABLE`. Without this review,
+accessibility remains `NOT_PROVEN`. Known contrast failures block acceptance;
+remaining unsupported panels retain explicit status and do not imply full WCAG
+conformance. Zero measured pairs produce a null rate.
+
+Canvas measurements preserve native draw calls and current RGBA pixel witnesses;
+paint contrast is computed before raster antialiasing, whose alpha is recorded
+separately. Overlapping series can be measured through native named legend
+buttons using keyboard isolation, with restoration and PNG evidence. This is also
+an observable route to series identity without relying on color. Re-run affected
+layout acceptance whenever an accessibility fix changes geometry or typography.
+
 ## Versioning strategy (issue #8632)
 
 | Track | Status | Where |
@@ -139,6 +175,9 @@ is `6. Run Explorer` and alert triage lives in Incident Workspace.
   render validation still runs when semantic validation fails. The render-only
   preflight excludes full Prometheus readiness when render-only, so neither
   gate can mask or contaminate the other.
+- RF-005 adds a separate [regression acceptance](regression-acceptance.md) mode
+  with immutable baseline/candidate references and reviewed evidence for every
+  mandatory gate. Semantic/render success alone does not close #10185 or #10171.
 - Every full-cycle occurrence has one `occurrence_id`. The semantic report,
   Playwright manifest, and combined receipt must carry the same value; the
   receipt records the current commit/tree plus SHA-256 and dashboard/panel scope

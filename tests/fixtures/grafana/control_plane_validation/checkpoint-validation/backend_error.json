@@ -32,6 +32,7 @@
     "reasons": [
       "checkpoint_parse_error"
     ],
+    "reasons_count": 1,
     "reasons_text": "checkpoint_parse_error",
     "reasons_truncated": false,
     "scope_kind": "exact_run",

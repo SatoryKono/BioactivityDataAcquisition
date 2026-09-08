@@ -33,6 +33,7 @@
     "reasons": [
       "checkpoint_not_found"
     ],
+    "reasons_count": 1,
     "reasons_text": "checkpoint_not_found",
     "reasons_truncated": false,
     "scope_kind": "exact_run",

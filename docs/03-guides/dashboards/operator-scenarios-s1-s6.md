@@ -1,4 +1,39 @@
-# Operator scenarios S1–S6 (Grafana simplification #6570 / #6577)
+# Operator scenarios: seven dashboards and Q1–Q3 (#10167)
+
+## Current protocol
+
+The primary role is the operator investigating pipeline execution and evidence.
+The task owner explicitly approved the following seven page goals and Astra's
+diagnostic operator role on 2026-09-08: “Подтверждаю эти семь целей”. Record that
+approval in each measurement bundle. Astra performs `AI_AGENT` scenario checks;
+human usability is `NOT_MEASURED`. The approved role does not execute replay.
+
+| Dashboard / UID | Page goal | Q1: state/object | Q2: basis/reason | Q3: first safe action |
+| --- | --- | --- | --- | --- |
+| Trust / `bioetl-control-plane-v1` | Decide what evidence is needed before replay/resume | State trust and replay scope | Identify missing identity/integrity evidence | Open the relevant evidence check; do not authorize replay from processing success |
+| Overview / `bioetl-overview-v2` | Triage current fleet state and selected-run summary | Separate current state from selected UUID | Identify the affected domain and visible basis | Follow First Action to the matching diagnostics |
+| Pipeline Diagnostics / `bioetl-runtime` | Investigate execution blockers | Separate SCRAPING from execution health | Identify blocker reason or missing telemetry | Open blocker details or the relevant runbook |
+| Provider Health / `bioetl-provider-health-v2` | Identify provider impact and cause | Name provider and fleet severity | Read status reason and scope | Open provider diagnostics with allowed context |
+| Data Quality / `bioetl-dq-v2` | Separate current quality from range impact | State current DQ status | Explain range rejects/threshold evidence | Open supported DQ diagnostics or CLI runbook |
+| Incident / `bioetl-incident-v1` | Rank evidence-backed diagnostic hypotheses | Name incident impact and scope | Explain suspect rank, basis and confidence | Follow the suspect domain action and return |
+| Run Explorer / `bioetl-run-explorer-v1` | Find a run and inspect exact-run evidence | Identify run/pipeline/workflow | Explain selected-run accounting and trust limitations | Open a real report artifact and return to the same run |
+
+For each row execute all three questions: **21 mandatory tasks**. Q3 includes the
+actual destination and return, not just naming a link. Preserve allowed variables,
+fixed UTC range and explicit timezone. The ordered `0..6` navigation bus omits
+the current page. Static reachability is not measured diagnostic click depth.
+
+The recorder follows [usability-baseline-protocol.md](usability-baseline-protocol.md).
+Machine-readable task IDs, roles and initial-state requirements are in
+[operator-task-protocol.json](contracts/operator-task-protocol.json).
+Before a session, bind fixture-specific answer keys to independently checked
+evidence; unknown data must remain an explicit acceptable answer when warranted.
+Do not show answer keys or target panels to an unexposed participant.
+
+## Historical S1–S6 protocol and offline results (2026-07-27)
+
+Everything below is retained as historical evidence. Its five-surface plan,
+navigation counts and offline results do not describe current acceptance.
 
 Offline-first playbook for the post-simplification dashboard set. **Family cause**
 (which surface / which KPI) is the acceptance bar; row-level forensics stay on CLI.
@@ -90,4 +125,3 @@ evidence under collapsed progressive-disclosure rows.
 | E4 | Active alerts | Overview → Alert triage | `ALERTS` / alert condition recordings |
 | E5 | CP latency | Trust | Manifest/ledger/checkpoint series |
 | E6 | Reject topk | Data Quality collapsed range rows | Quarantine/reject series; row forensics on CLI |
-

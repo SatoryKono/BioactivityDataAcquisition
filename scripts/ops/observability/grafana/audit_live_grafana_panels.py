@@ -94,6 +94,8 @@ class AuditConfig:
     output_path: Path
     request_timeout_seconds: float = DEFAULT_REQUEST_TIMEOUT_SECONDS
     occurrence_id: str = ""
+    range_from: str = ""
+    range_to: str = ""
 
 
 @dataclass(frozen=True)
@@ -108,6 +110,10 @@ class AuditResult:
     detail: str
     query_preview: str
     target_ref_id: str | None = None
+
+    # Full exact requests/responses are evidence; query_preview remains display-only.
+    request_url: str | None = None
+    response: object = None
 
 
 SEMANTIC_CLASSIFICATION_POLICY: dict[str, str] = {
@@ -403,7 +409,22 @@ def _parse_args(argv: list[str] | None) -> AuditConfig:
         default="",
         help="Bind this semantic artifact to one dashboard release occurrence.",
     )
+    parser.add_argument("--range-from", default="")
+    parser.add_argument("--range-to", default="")
     args = parser.parse_args(argv)
+    if bool(args.range_from) != bool(args.range_to) or (
+        args.range_from
+        and (
+            not args.range_from.isascii()
+            or not args.range_from.isdigit()
+            or not args.range_to.isascii()
+            or not args.range_to.isdigit()
+            or int(args.range_from) >= int(args.range_to)
+        )
+    ):
+        parser.error(
+            "fixed --range-from/--range-to must be increasing UTC milliseconds"
+        )
     return AuditConfig(
         prometheus_base_url=args.prometheus_base_url.rstrip("/"),
         app_base_url=args.app_base_url.rstrip("/"),
@@ -420,6 +441,8 @@ def _parse_args(argv: list[str] | None) -> AuditConfig:
         output_path=args.output,
         request_timeout_seconds=max(float(args.request_timeout_seconds), 0.1),
         occurrence_id=str(args.occurrence_id).strip(),
+        range_from=args.range_from,
+        range_to=args.range_to,
     )
 
 
@@ -686,8 +709,15 @@ def _time_window(
     range_hours: int | None = None,
 ) -> tuple[str, str]:
     effective_range_hours = config.range_hours if range_hours is None else range_hours
-    end = datetime.now(tz=UTC)
+    end = (
+        datetime.fromtimestamp(int(config.range_to) / 1000, tz=UTC)
+        if config.range_to
+        else datetime.now(tz=UTC)
+    )
     start = end - timedelta(hours=effective_range_hours)
+    if config.range_from:
+        fixed_start = datetime.fromtimestamp(int(config.range_from) / 1000, tz=UTC)
+        start = max(start, fixed_start) if range_hours is not None else fixed_start
     return start.isoformat(), end.isoformat()
 
 
@@ -699,6 +729,22 @@ def _substitute_dashboard_tokens(
 ) -> str:
     effective_range_hours = config.range_hours if range_hours is None else range_hours
     start_iso, end_iso = _time_window(config, range_hours=effective_range_hours)
+    if config.range_from and range_hours is None:
+        start_iso, end_iso = _time_window(config)
+    range_millis = round(
+        (
+            datetime.fromisoformat(end_iso) - datetime.fromisoformat(start_iso)
+        ).total_seconds()
+        * 1000
+    )
+    range_seconds = (
+        range_millis // 1000 if range_millis % 1000 == 0 else range_millis / 1000
+    )
+    range_literal = (
+        f"{range_seconds}s" if config.range_from else f"{effective_range_hours}h"
+    )
+    if config.range_from and range_millis % 1000:
+        range_literal = f"{range_millis}ms"
     quarantine_run_id = "" if config.run_id in {"", "-"} else config.run_id
     replacements = {
         "$workflow": config.workflow,
@@ -756,9 +802,16 @@ def _substitute_dashboard_tokens(
         "$provider_hint": "chembl",
         "${provider_hint}": "chembl",
         "${provider_hint:regex}": "chembl",
-        "$__range": f"{effective_range_hours}h",
-        "${__range}": f"{effective_range_hours}h",
-        "${__range_s}": str(effective_range_hours * 3600),
+        "$__range": range_literal,
+        "${__range}": range_literal,
+        "${__range_s}": str(
+            range_seconds if config.range_from else effective_range_hours * 3600
+        ),
+        "$__range_s": str(
+            range_seconds if config.range_from else effective_range_hours * 3600
+        ),
+        "${__from}": str(int(datetime.fromisoformat(start_iso).timestamp() * 1000)),
+        "${__to}": str(int(datetime.fromisoformat(end_iso).timestamp() * 1000)),
         "$__interval": "5m",
         "${__interval}": "5m",
         "$__rate_interval": "5m",
@@ -1401,7 +1454,10 @@ def _audit_prometheus_panel(
         )
     rendered_expr = _substitute_dashboard_tokens(expr, config)
     query_url = f"{config.prometheus_base_url}/api/v1/query?" + urlencode(
-        {"query": rendered_expr}
+        {
+            "query": rendered_expr,
+            **({"time": str(int(config.range_to) / 1000)} if config.range_to else {}),
+        }
     )
     payload = _fetch_json(query_url, timeout_seconds=config.request_timeout_seconds)
     classification, detail = _classify_prometheus_payload(payload)
@@ -1425,6 +1481,8 @@ def _audit_prometheus_panel(
         detail=detail,
         query_preview=rendered_expr[:400],
         target_ref_id=spec.target_ref_id,
+        request_url=_redact_url(query_url),
+        response=payload,
     )
 
 
@@ -1505,6 +1563,8 @@ def _audit_http_panel(
         detail=f"{detail}; app_base_url={_redact_url(app_base_url)}",
         query_preview=rendered_url,
         target_ref_id=spec.target_ref_id,
+        request_url=_redact_url(f"{app_base_url}{rendered_url}"),
+        response=payload,
     )
 
 
@@ -1989,6 +2049,11 @@ def _write_report(
             "run_type": config.run_type,
             "run_id": config.run_id,
             "range_hours": config.range_hours,
+            "time_range": {
+                "from": config.range_from,
+                "to": config.range_to,
+                "timezone": "UTC",
+            },
             "loki_range_hours": _bounded_loki_range_hours(config),
             "request_timeout_seconds": config.request_timeout_seconds,
         },

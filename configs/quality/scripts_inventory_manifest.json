@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-07T16:27:53.073078+00:00",
+  "generated_at": "2026-09-08T17:20:43.378209+00:00",
   "summary": {
-    "total_scripts": 613,
+    "total_scripts": 616,
     "status_counts": {
       "active": 338,
-      "supporting": 275
+      "supporting": 278
     },
     "reference_group_coverage": {
       "agents": 8,
       "build": 17,
       "ci": 83,
-      "docs": 252,
+      "docs": 253,
       "other": 75,
-      "scripts": 512,
+      "scripts": 515,
       "skills": 12,
-      "tests": 425
+      "tests": 428
     }
   },
   "scripts": [
@@ -276,7 +276,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 80,
+          "line": 83,
           "source_group": "scripts",
           "text": "\"diagnose-codex-wsl\": \"../ai/codex/diagnose_wsl.sh\","
         },
@@ -1609,7 +1609,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 81,
+          "line": 84,
           "source_group": "scripts",
           "text": "\"setup-agents\": \"../ai/codex/setup_agents.sh\","
         },
@@ -3045,7 +3045,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 65,
+          "line": 67,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.ps1\": \"Test-McpRequiredToken\","
         }
@@ -3090,7 +3090,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 51,
+          "line": 53,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\": \"mcp_validate_required_token\","
         }
@@ -3235,7 +3235,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 66,
+          "line": 68,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\": \"Test-McpRequiredToken\","
         },
@@ -3296,7 +3296,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 52,
+          "line": 54,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\": \"mcp_validate_required_token\","
         },
@@ -3826,7 +3826,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 67,
+          "line": 69,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.ps1\": \"Test-McpOptionalToken\","
         },
@@ -3887,7 +3887,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 53,
+          "line": 55,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.sh\": \"mcp_validate_optional_token\","
         },
@@ -4135,7 +4135,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 69,
+          "line": 71,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\": \"Test-McpNeo4jCredentials\","
         },
@@ -4178,7 +4178,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 55,
+          "line": 57,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\": \"mcp_validate_neo4j_credentials\","
         },
@@ -4205,7 +4205,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 70,
+          "line": 72,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\": \"Test-McpNeo4jCredentials\","
         }
@@ -4300,7 +4300,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 68,
+          "line": 70,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.ps1\": \"Test-McpOptionalToken\","
         }
@@ -4337,7 +4337,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 54,
+          "line": 56,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\": \"mcp_validate_optional_token\","
         }
@@ -4917,7 +4917,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 80,
+          "line": 82,
           "source_group": "tests",
           "text": "text = _read(\"scripts/ai/mcp/test_env_loading.sh\")"
         }
@@ -9817,7 +9817,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 44,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"apply-ci-fixes\": \"apply_ci_fixes.py\","
         },
@@ -9856,7 +9856,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 37,
+          "line": 39,
           "source_group": "scripts",
           "text": "\"e2e-skip-rate\": \"check_e2e_matrix_skip_rate.py\","
         },
@@ -9895,7 +9895,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 38,
+          "line": 40,
           "source_group": "scripts",
           "text": "\"e2e-rerun\": \"check_e2e_rerun_stability.py\","
         },
@@ -9928,7 +9928,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 40,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"neo4j-memory-live\": \"check_neo4j_memory_live_audit.py\","
         }
@@ -9943,7 +9943,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 39,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"neo4j-memory\": \"check_neo4j_memory_ontology.py\","
         }
@@ -9964,7 +9964,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 36,
+          "line": 38,
           "source_group": "scripts",
           "text": "\"pr-gate\": \"pr_gate.py\","
         },
@@ -9995,13 +9995,13 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 34,
+          "line": 36,
           "source_group": "scripts",
           "text": "\"quality-gate\": \"quality_integral_gate.py\","
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 35,
+          "line": 37,
           "source_group": "scripts",
           "text": "\"architecture-junit-skips\": \"quality_integral_gate.py\","
         },
@@ -10052,7 +10052,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 41,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"docker-timing\": \"report_docker_actions_timing.py\","
         },
@@ -10095,7 +10095,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 42,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"pr-gate-timing\": \"report_pr_gate_timing.py\","
         },
@@ -10132,7 +10132,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 43,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"debt-report\": \"report_quality_debt_weekly.py\","
         },
@@ -10177,7 +10177,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 33,
+          "line": 35,
           "source_group": "scripts",
           "text": "\"run-tests\": \"run_pytest_resilient.py\","
         },
@@ -10444,7 +10444,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 27,
+          "line": 29,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.cli_dispatch import ("
         },
@@ -12763,7 +12763,7 @@
         },
         {
           "path": "tests/integration/test_grafana_render_first_remediation.py",
-          "line": 1513,
+          "line": 1543,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         }
@@ -16702,7 +16702,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 317,
+          "line": 323,
           "source_group": "tests",
           "text": "Path(\"scripts/engineering/qa/run_observability_closure_campaign.py\"),"
         },
@@ -18381,7 +18381,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 63,
+      "reference_count": 68,
       "references": [
         {
           "path": ".github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md",
@@ -19484,7 +19484,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 50,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"salt-rotate\": \"maintenance/security/salt_rotate.py\","
         },
@@ -19695,7 +19695,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 62,
+          "line": 65,
           "source_group": "scripts",
           "text": "\"observability/check_bioetl_prometheus_scrape.py\""
         },
@@ -19753,7 +19753,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 51,
+          "line": 53,
           "source_group": "scripts",
           "text": "\"check-observability-ports\": \"observability/check_published_observability_endpoints.py\","
         },
@@ -19888,7 +19888,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 14,
       "references": [
         {
           "path": ".github/ISSUES/AUD-OBS-20260714-002-Add-Truthful-Observability-Validation-Gates.md",
@@ -19898,7 +19898,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 54,
+          "line": 57,
           "source_group": "scripts",
           "text": "\"audit-live-grafana\": \"observability/grafana/audit_live_grafana_panels.py\","
         },
@@ -19934,11 +19934,72 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 315,
+          "line": 321,
           "source_group": "tests",
           "text": "Path(\"scripts/ops/observability/grafana/audit_live_grafana_panels.py\"),"
         }
       ]
+    },
+    {
+      "path": "scripts/ops/observability/grafana/capture_acceptance.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 9,
+      "references": [
+        {
+          "path": "scripts/ops/__main__.py",
+          "line": 56,
+          "source_group": "scripts",
+          "text": "\"assess-grafana-captures\": \"observability/grafana/capture_acceptance.py\","
+        },
+        {
+          "path": "scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
+          "line": 1920,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.capture_acceptance import ("
+        },
+        {
+          "path": "tests/architecture/test_observability_dashboard_tooling.py",
+          "line": 76,
+          "source_group": "tests",
+          "text": "script.name == \"capture_acceptance.py\""
+        },
+        {
+          "path": "tests/architecture/test_observability_dashboard_tooling.py",
+          "line": 435,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana.capture_acceptance import main"
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py",
+          "line": 5,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana.capture_acceptance import ("
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py",
+          "line": 126,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana.capture_acceptance import ("
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py",
+          "line": 155,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana.capture_acceptance import validate_panel_cues"
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_grafana_capture_acceptance.py",
+          "line": 181,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana.capture_acceptance import canvas_pairs"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the layout/accessibility assessment backend used by check-grafana-audit-preflight; route matrix report assembly through the scripts.ops dispatcher instead of counting the backend twice."
     },
     {
       "path": "scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh",
@@ -19960,6 +20021,37 @@
       "next_step": "Retain as an optional Docker-based screenshot fallback for hosts where the canonical Grafana render flow cannot launch Chromium; keep it supporting and do not make Docker monitoring mandatory."
     },
     {
+      "path": "scripts/ops/observability/grafana/capture_provenance.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/ops/observability/grafana/capture_acceptance.py",
+          "line": 538,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.capture_provenance import verify_capture"
+        },
+        {
+          "path": "scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
+          "line": 1909,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.capture_provenance import verify_capture"
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_grafana_immutable_capture.py",
+          "line": 15,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana import capture_provenance as provenance"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the immutable source/attachment verifier imported by the canonical check-grafana-audit-preflight command and capture acceptance backend; no separate operator entrypoint."
+    },
+    {
       "path": "scripts/ops/observability/grafana/check_dashboard_panel_fill.py",
       "type": "py",
       "status": "supporting",
@@ -19968,7 +20060,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 56,
+          "line": 59,
           "source_group": "scripts",
           "text": "\"observability/grafana/check_dashboard_panel_fill.py\""
         },
@@ -20007,7 +20099,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 15,
       "references": [
         {
           "path": "docs/01-requirements/DASHBOARD_REQUIREMENTS.md",
@@ -20023,7 +20115,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 59,
+          "line": 62,
           "source_group": "scripts",
           "text": "\"observability/grafana/check_grafana_dashboard_audit_preflight.py\""
         },
@@ -20034,6 +20126,18 @@
           "text": "$GrafanaPreflight = Join-Path $ProjectRoot \"scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py\""
         },
         {
+          "path": "scripts/ops/observability/grafana/capture_provenance.py",
+          "line": 192,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana import ("
+        },
+        {
+          "path": "scripts/ops/observability/grafana/capture_provenance.py",
+          "line": 366,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana import ("
+        },
+        {
           "path": "scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py",
           "line": 27,
           "source_group": "scripts",
@@ -20041,21 +20145,9 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 419,
+          "line": 425,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py\""
-        },
-        {
-          "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
-          "line": 25,
-          "source_group": "tests",
-          "text": "from scripts.ops.observability.grafana import ("
-        },
-        {
-          "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
-          "line": 134,
-          "source_group": "tests",
-          "text": "expected_target=\"observability/grafana/check_grafana_dashboard_audit_preflight.py\","
         }
       ]
     },
@@ -20123,7 +20215,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 685,
+          "line": 698,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_state_fixture_v2 import ("
         },
@@ -20148,7 +20240,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 65,
+          "line": 68,
           "source_group": "scripts",
           "text": "\"observability/grafana/ensure_quarantine_explorer.py\""
         }
@@ -20192,25 +20284,25 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 91,
+          "line": 97,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/generate_trust_validation_fixtures.py\""
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 107,
+          "line": 113,
           "source_group": "tests",
           "text": "\"generate_trust_validation_fixtures.py must not call write_text \""
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 193,
+          "line": 194,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/generate_trust_validation_fixtures.py\""
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 208,
+          "line": 209,
           "source_group": "tests",
           "text": "\"generate_trust_validation_fixtures.py must not call write_text; \""
         }
@@ -20333,6 +20425,37 @@
       "next_step": "Retain only as a bounded optional renderer-only recovery helper while Grafana monitoring remains local and optional; consolidate it into the canonical observability command surface before promotion."
     },
     {
+      "path": "scripts/ops/observability/grafana/regression_acceptance.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "docs/03-guides/dashboards/regression-acceptance.md",
+          "line": 29,
+          "source_group": "docs",
+          "text": "[`regression_acceptance.py`](../../../scripts/ops/observability/grafana/regression_acceptance.py)."
+        },
+        {
+          "path": "scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py",
+          "line": 1073,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.regression_acceptance import write_report"
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_regression_acceptance.py",
+          "line": 8,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana import regression_acceptance as subject"
+        }
+      ],
+      "owner": "@bioetl-observability",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the imported RF-005 receipt verifier behind run_grafana_dashboard_audit_cycle.py; it has no main function or standalone CLI. Keep operator invocation through the existing scripts.ops run-grafana-audit-cycle command."
+    },
+    {
       "path": "scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1",
       "type": "ps1",
       "status": "supporting",
@@ -20378,7 +20501,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 180,
+          "line": 219,
           "source_group": "docs",
           "text": "`scripts/ops/observability/grafana/render_nav_bus.py`). The current dashboard"
         },
@@ -20417,7 +20540,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 18,
       "references": [
         {
           "path": "docs/03-guides/dashboards/archive/audit-protocols/dux5-screenshot-regression-protocol.md",
@@ -20433,7 +20556,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 52,
+          "line": 54,
           "source_group": "scripts",
           "text": "\"rerender-grafana\": \"observability/grafana/rerender_grafana_screenshots.py\","
         },
@@ -20451,7 +20574,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/run_grafana_render_matrix.py",
-          "line": 21,
+          "line": 22,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import ("
         },
@@ -20463,7 +20586,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 316,
+          "line": 322,
           "source_group": "tests",
           "text": "Path(\"scripts/ops/observability/grafana/rerender_grafana_screenshots.py\"),"
         }
@@ -20474,11 +20597,11 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 68,
+          "line": 71,
           "source_group": "scripts",
           "text": "\"observability/grafana/run_grafana_dashboard_audit_cycle.py\""
         },
@@ -20490,21 +20613,27 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 314,
+          "line": 320,
           "source_group": "tests",
           "text": "Path(\"scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py\"),"
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
-          "line": 31,
+          "line": 32,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana import ("
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
-          "line": 924,
+          "line": 929,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/run_grafana_dashboard_audit_cycle.py\","
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_grafana_fixed_acceptance_window.py",
+          "line": 8,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana import run_grafana_dashboard_audit_cycle as cycle"
         }
       ]
     },
@@ -20517,7 +20646,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 53,
+          "line": 55,
           "source_group": "scripts",
           "text": "\"render-grafana-matrix\": (\"observability/grafana/run_grafana_render_matrix.py\"),"
         },
@@ -20604,7 +20733,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 698,
+          "line": 701,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1\""
         }
@@ -20629,7 +20758,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 170,
+          "line": 209,
           "source_group": "docs",
           "text": "- On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap"
         },
@@ -20641,31 +20770,31 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1510,
+          "line": 1567,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1597,
+          "line": 1654,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 416,
+          "line": 422,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh\""
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 512,
+          "line": 515,
           "source_group": "tests",
           "text": "assert \"setup_grafana_screenshot_runtime.sh\" in detail"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 695,
+          "line": 698,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh\""
         }
@@ -20743,7 +20872,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 88,
+          "line": 94,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/trust_validation_fixture_materialization.py\""
         },
@@ -20755,7 +20884,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 190,
+          "line": 191,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/trust_validation_fixture_materialization.py\""
         }
@@ -20937,7 +21066,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 86,
+          "line": 89,
           "source_group": "scripts",
           "text": "\"deploy\": \"runtime/deploy/deploy-bioetl.sh\","
         }
@@ -21144,7 +21273,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 32,
+          "line": 34,
           "source_group": "tests",
           "text": "PREFLIGHT_PATH = ROOT / \"scripts/ops/runtime/docker/docker_runtime_preflight.py\""
         }
@@ -21517,7 +21646,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/panels/bioetl-run-explorer-v1-panels.md",
-          "line": 45,
+          "line": 47,
           "source_group": "docs",
           "text": "`python scripts/ops/runtime/docker/verify_report_bind.py` from the checkout"
         },
@@ -22023,7 +22152,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 720,
+          "line": 722,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1\","
         }
@@ -22084,7 +22213,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 719,
+          "line": 721,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/runtime/neo4j/neo4j_quick_start.sh\","
         }
@@ -22351,19 +22480,19 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 445,
+          "line": 448,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/load_repo_env.sh or pass --username/--password \""
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 30,
+          "line": 32,
           "source_group": "tests",
           "text": "shell_loader = _read(\"scripts/ops/support/load_repo_env.sh\")"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 370,
+          "line": 373,
           "source_group": "tests",
           "text": "assert \"scripts/ops/support/load_repo_env.sh\" in hint"
         }
@@ -22463,7 +22592,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 84,
+          "line": 87,
           "source_group": "scripts",
           "text": "\"check-skills\": \"support/skills/check_ai_skills_layout.sh\","
         }

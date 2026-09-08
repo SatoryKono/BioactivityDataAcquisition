@@ -32,6 +32,7 @@
     "reasons": [
       "retention_plan_read_error"
     ],
+    "reasons_count": 1,
     "reasons_text": "retention_plan_read_error",
     "reasons_truncated": false,
     "scope_kind": "exact_run",
