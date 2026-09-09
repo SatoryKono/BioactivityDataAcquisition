@@ -108,8 +108,8 @@ _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     9400: (0, 3, 16, 3),
     9401: (16, 3, 8, 3),
     9418: (0, 6, 12, 5),
-    9416: (12, 6, 12, 5),
-    906: (0, 11, 24, 3),
+    9416: (12, 6, 12, 8),
+    906: (0, 11, 12, 3),
     891: (0, 14, 6, 3),
     892: (6, 14, 6, 3),
     893: (12, 14, 6, 3),
@@ -118,7 +118,7 @@ _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
 _CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 17
 NAV_TITLE_STYLE = "font-size:19px;font-weight:600;line-height:1;margin:0 2px"
 CHIP_BASE = (
-    "box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 2px;"
+    "box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;"
     "border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere"
 )
 # Theme-safe chips: slate link surface works on dark and light Grafana themes.
@@ -134,7 +134,7 @@ CURRENT_STYLE = (
     "cursor:default;text-decoration:underline;pointer-events:none"
 )
 CONTAINER_STYLE = (
-    "display:flex;gap:2px;flex-wrap:wrap;align-items:center;"
+    "display:flex;gap:8px;flex-wrap:wrap;align-items:center;"
     "padding:0 2px;overflow:visible;white-space:normal;font-size:16px"
 )
 _PROVIDER_VARIABLE_UIDS = {"bioetl-provider-health-v2", "bioetl-incident-v1"}
