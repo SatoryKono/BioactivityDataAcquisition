@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -22,6 +23,7 @@ def test_branch_hygiene_workflow_enforces_only_current_pr_head() -> None:
     assert "generate-branch-cleanup-inventory" in workflow
     assert "github.event_name != 'pull_request'" in workflow
     assert "apply-branch-cleanup" not in workflow
+    assert "--apply" not in workflow
 
 
 def test_branch_hygiene_allows_established_automation_providers() -> None:
@@ -34,6 +36,19 @@ def test_branch_hygiene_allows_established_automation_providers() -> None:
         assert f"`{provider}/`" in policy
 
 
+def test_committed_branch_hygiene_inventory_is_dry_run() -> None:
+    snapshot = ROOT / "reports" / "quality" / "branch-hygiene-inventory-2026-09-09.json"
+    payload = json.loads(snapshot.read_text(encoding="utf-8"))
+
+    assert payload["mode"] == "dry-run"
+    assert payload["deletion_applied"] is False
+    assert payload["non_compliant_owner_decisions"]
+    for row in payload["non_compliant_owner_decisions"]:
+        assert row["proposed_action"] in {"keep", "tag", "delete", "review"}
+    for worktree in payload.get("local_worktrees", []):
+        assert "path" not in worktree
+
+
 def test_branch_lifecycle_policy_protects_active_work() -> None:
     policy = POLICY.read_text(encoding="utf-8")
 
@@ -41,6 +56,9 @@ def test_branch_lifecycle_policy_protects_active_work() -> None:
     assert "checked out by" in policy and "worktree" in policy
     assert "MUST default to dry-run" in policy
     assert "Branch-count ceilings MUST NOT be enforced" in policy
+    assert "master20260910" in policy
+    assert "temp-branch" in policy
+    assert "12323" in policy
 
 
 @pytest.mark.parametrize(

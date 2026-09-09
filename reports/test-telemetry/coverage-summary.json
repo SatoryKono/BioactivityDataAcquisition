@@ -1,11 +1,11 @@
 {
-  "source_branch": "fix/gha-disabled-map-10263",
-  "source_commit": "4d97d266bc4120eee53a38fed98b4058dff5c1ee",
-  "source_run_id": "34402915245",
+  "source_branch": "chore/branch-hygiene-inventory-10266",
+  "source_commit": "07aed8a80a7c53a66b3a1ebac1f528f396df6856",
+  "source_run_id": "34408395148",
   "source_event": "pull_request",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34402915245",
-  "source_tree_sha256": "0c5c70c8606f21efc282adf2164247f619ddd13b9f4080831a6ab43d501f43b7",
-  "refreshed_at_utc": "2026-09-09T21:27:01.873153+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34408395148",
+  "source_tree_sha256": "6a4fcfb58dd5044407100e3954410ba27b81dc6267c3f4091092695415d5f964",
+  "refreshed_at_utc": "2026-09-09T21:50:00+00:00",
   "refresh_status": "captured",
   "coverage_percent": 96.73,
   "coverage": {

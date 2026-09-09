@@ -50,8 +50,12 @@ ______________________________________________________________________
 Automation-owned branches MAY use a provider prefix already established by
 the integration (`dependabot/`, `renovate/`, `devin/`, `bolt/`, `copilot/`, `codex/`). Human-created
 branches MUST use one of the project types above and a lowercase kebab-case
-description. Opaque names (`a1`, `tmp`, numeric-only names), date-only names,
-and persistent `backup/*` branches are non-compliant.
+description. Opaque names (`a1`, `tmp`, `temp-branch`, numeric-only names such as
+`12323`), date-only names, and persistent `backup/*` branches are non-compliant.
+Dated snapshots such as `master20260910`, `master20260910-*`, and
+`codex/fix-main-*` are recovery points, not working branches: inventory them as
+`tag` or `review`, and do not rebase them into `main`. Bare `jules-*` names are
+non-compliant; use an approved automation prefix or a project type.
 
 ### Branch Lifecycle
 
@@ -70,7 +74,10 @@ Before deleting a local or remote branch, the operator MUST verify all of:
    a historical cleanup list;
 1. unmerged branches have an explicit owner decision (`keep`, `tag`, or
    `delete`);
-1. the cleanup command is reviewed in dry-run form before apply.
+1. the cleanup command is reviewed in dry-run form before apply. A dry-run
+   `delete` proposal is an owner decision, not an applied deletion. Active PR
+   heads stay `keep`. Dated `masterYYYYMMDD` snapshots that are not protected
+   prefixes are proposed as `tag`, not deleted by age or branch count.
 
 Branch-count ceilings MUST NOT be enforced by failing unrelated pull requests.
 CI may reject the current PR head when its name violates this policy. Scheduled
