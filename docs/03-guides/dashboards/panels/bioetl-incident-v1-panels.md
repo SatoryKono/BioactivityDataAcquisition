@@ -71,13 +71,15 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
 
 ### 7. Review Alert Evidence
 - **Type:** Row (**collapsed by default**, `id=2020`)
-- **Purpose:** Progressive disclosure for the current alert table, range alert
-  history, and impact/confidence guidance after ranked-suspect triage.
+- **Purpose:** Progressive disclosure for range alert history and
+  impact/confidence guidance after ranked-suspect triage. Current alerts
+  (`id=2005`) stay on the first screen.
 - **Data sources:** Nested Prometheus and static evidence panels below.
 
 ### 8. Monitor Current Alerts
-- **Type:** Table
-- **Purpose:** Instant ALERTS snapshot (firing|pending). `Active Alerts` is a
+- **Type:** Table (first-screen, `id=2005`, below ranked suspects)
+- **Purpose:** Instant ALERTS snapshot (firing|pending) with a runbook link.
+  Limited to three rows. `Active Alerts` is a
   neutral multiplicity count, never an inferred severity. Not a range timeline.
 - **Data sources:** Prometheus `ALERTS` (instant)
 
