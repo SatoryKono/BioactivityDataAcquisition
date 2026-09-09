@@ -3434,11 +3434,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
-      "formula": "max by (pipeline,run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
+      "formula": "label_replace(label_replace(max by (pipeline,run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"pipeline\",\"All\",\"pipeline\",\"^\\\\.\\\\*$\"),\"run_type\",\"All\",\"run_type\",\"^\\\\.\\\\*$\") or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
       "kind": "promql",
       "panel_id": 9018,
       "panel_title": "Track Runtime Blockers",
-      "query": "max by (pipeline,run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
+      "query": "label_replace(label_replace(max by (pipeline,run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"pipeline\",\"All\",\"pipeline\",\"^\\\\.\\\\*$\"),\"run_type\",\"All\",\"run_type\",\"^\\\\.\\\\*$\") or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
       "query_tokens": [
         "bioetl_l1_runtime_blocker_status"
       ],
@@ -3467,11 +3467,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
-      "formula": "max by (pipeline,run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
+      "formula": "label_replace(label_replace(max by (pipeline,run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"pipeline\",\"All\",\"pipeline\",\"^\\\\.\\\\*$\"),\"run_type\",\"All\",\"run_type\",\"^\\\\.\\\\*$\") or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
       "kind": "promql",
       "panel_id": 9019,
       "panel_title": "Track Data Quality Status",
-      "query": "max by (pipeline,run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
+      "query": "label_replace(label_replace(max by (pipeline,run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"pipeline\",\"All\",\"pipeline\",\"^\\\\.\\\\*$\"),\"run_type\",\"All\",\"run_type\",\"^\\\\.\\\\*$\") or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
       "query_tokens": [
         "bioetl_l1_dq_status"
       ],
@@ -3500,11 +3500,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
-      "formula": "max by (pipeline,run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
+      "formula": "label_replace(label_replace(max by (pipeline,run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"pipeline\",\"All\",\"pipeline\",\"^\\\\.\\\\*$\"),\"run_type\",\"All\",\"run_type\",\"^\\\\.\\\\*$\") or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
       "kind": "promql",
       "panel_id": 9020,
       "panel_title": "Track Gold Lifecycle",
-      "query": "max by (pipeline,run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
+      "query": "label_replace(label_replace(max by (pipeline,run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"pipeline\",\"All\",\"pipeline\",\"^\\\\.\\\\*$\"),\"run_type\",\"All\",\"run_type\",\"^\\\\.\\\\*$\") or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
       "query_tokens": [
         "bioetl_l1_gold_lifecycle_status"
       ],

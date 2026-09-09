@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `main`
-- Source commit: `3b3ec775cecd96d3a8221d1fa40c8fad1836c5ee`
-- Source run id: `34275831569`
-- Source event: `push`
-- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34275831569`
-- Source tree sha256: `9690f9f242591cc4d4b24af7a20a45c6a9f33a160b93535569e4dbc35504b5e5`
+- Source branch: `fix/grafana-vis-stream3-layout`
+- Source commit: `28a15f9695029dceb919944859023f3266c40cf3`
+- Source run id: `34388828802`
+- Source event: `pull_request`
+- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34388828802`
+- Source tree sha256: `5d62a56e18b4780c3492c1f3cbe303576220625756708b7f92197f7199e78300`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-09-09T05:51:11.176394+00:00`
+- Refreshed at (UTC): `2026-09-09T18:39:36.692943+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -55,7 +55,7 @@ trend evidence only.
 ## Coverage
 
 - Hard threshold: `85.0%`
-- Actual coverage: `96.71%`
+- Actual coverage: `96.73%`
 - Threshold satisfied: `True`
 
 ## Duration Telemetry
