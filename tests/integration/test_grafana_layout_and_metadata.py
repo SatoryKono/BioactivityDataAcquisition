@@ -1079,6 +1079,17 @@ def _organize_visible_fields(panel: dict) -> list[str] | None:
     return None
 
 
+# Stream-2 compact Trust/fleet tables pin every visible column (#10247/#10252).
+_STREAM2_FULLY_PINNED_TABLES = {
+    ("bioetl-control-plane-v1.json", 9405),
+    ("bioetl-control-plane-v1.json", 9406),
+    ("bioetl-control-plane-v1.json", 9407),
+    ("bioetl-control-plane-v1.json", 9408),
+    ("bioetl-control-plane-v1.json", 9409),
+    ("bioetl-provider-health-v2.json", 9102),
+}
+
+
 def test_table_panels_fill_panel_width() -> None:
     """Grafana TableNG only distributes leftover panel width to columns without custom.width.
 
@@ -1092,6 +1103,8 @@ def test_table_panels_fill_panel_width() -> None:
         dashboard = load_dashboard(dashboard_path)
         for panel in get_dashboard_panels(dashboard):
             if panel.get("type") != "table":
+                continue
+            if (dashboard_path.name, panel.get("id")) in _STREAM2_FULLY_PINNED_TABLES:
                 continue
             visible = _organize_visible_fields(panel)
             if not visible:

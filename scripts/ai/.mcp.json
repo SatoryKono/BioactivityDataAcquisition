@@ -38,7 +38,9 @@
         "scripts/ai/mcp/github-mcp-wrapper.sh"
       ],
       "env": {
-        "NPM_CONFIG_CACHE": ".cache/npm-cache"
+        "GITHUB_TOOLSETS": "context,issues,pull_requests,repos,users,actions,code_security,dependabot,notifications",
+        "GITHUB_EXCLUDE_TOOLS": "create_or_update_file,push_files,delete_file,fork_repository,create_repository,merge_pull_request,actions_run_trigger",
+        "GITHUB_LOCKDOWN_MODE": "true"
       },
       "startup_timeout_sec": 180
     },

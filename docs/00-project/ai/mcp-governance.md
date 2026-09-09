@@ -20,6 +20,8 @@ Canonical token guidance lives in
 Required local tokens:
 
 - `GITHUB_PERSONAL_ACCESS_TOKEN` or alias `GITHUB_TOKEN` for `github`
+  (one path only; wrappers may fall back to `gh auth token` when both are
+  unset — they never overwrite a configured PAT)
 - `BRAVE_API_KEY` or alias `BRAVE_SEARCH_API_KEY` / `BRAVE_API_KEY1` for `brave-search`
 
 Optional local auth:
@@ -54,6 +56,15 @@ brave-search,
 docker, neo4j-cypher, neo4j-memory,
 deja, adr-analysis, mutmut, code-analyzer, github-actions,
 deepwiki, ref
+
+`github` is the single daily GitHub MCP. It launches the official
+[`github/github-mcp-server`](https://github.com/github/github-mcp-server)
+binary (`github-mcp-server`), not the retired npx package
+`@modelcontextprotocol/server-github`. Default toolsets are
+`context,issues,pull_requests,repos,users,actions,code_security,dependabot,notifications`
+with `--lockdown-mode` and excludes for remote file write, merge, and
+`actions_run_trigger`. `github-actions` remains in the full/ops inventory
+only; it is not part of the daily `stable` profile.
 
 `mermaid` is served by the pinned Windows-native `mcp-mermaid@0.4.1` backend.
 The Docker MCP catalog entry is not used because it exposes no Mermaid tools on
@@ -157,9 +168,11 @@ Git URL в runtime-командах запрещены.
 - **Обёртки:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1` (Windows)
 
 ### github-actions
-- **Статус:** ✅ Работает
-- **Описание:** Анализ и генерация GitHub Actions workflows
+- **Статус:** ops-only (не daily). Daily GitHub Actions reads go through
+  official `github-mcp-server` `actions` toolset on the `github` server.
+- **Описание:** Отдельный npm `github-actions-mcp` для генерации workflows
 - **Настройка:** Локальная установка в `~/github-actions-mcp/dist/index.js` или fallback на npx
+- **Профиль:** `ops` / `shared` / `full`; catalog `daily: false`; port 8831
 - **Обёртки:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_github_actions_wrapper.ps1` (Windows)
 
 ## Удалённые MCP

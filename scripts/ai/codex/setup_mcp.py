@@ -56,6 +56,21 @@ REMOVED_MCP_SERVER_NAMES = frozenset(
     }
 )
 
+# Official local GitHub MCP (#10262). Not the retired
+# ``@modelcontextprotocol/server-github`` npx package. ``default`` includes
+# copilot, so the daily pin is an explicit list.
+GITHUB_MCP_OFFICIAL_SERVER = "github/github-mcp-server"
+GITHUB_MCP_TOOLSETS = (
+    "context,issues,pull_requests,repos,users,"
+    "actions,code_security,dependabot,notifications"
+)
+GITHUB_MCP_EXCLUDE_TOOLS = (
+    "create_or_update_file,push_files,delete_file,"
+    "fork_repository,create_repository,merge_pull_request,"
+    "actions_run_trigger"
+)
+GITHUB_MCP_RETIRED_NPX_PACKAGE = "@modelcontextprotocol/server-github"
+
 # Least-privilege local materialization profiles. Tracked portable inventory
 # stays full unless a separate reviewed change says otherwise.
 #
@@ -65,6 +80,8 @@ REMOVED_MCP_SERVER_NAMES = frozenset(
 # the task needs those tools.
 MCP_PROFILE_STABLE = (
     # No Docker/gateway/stdio container MCP — host process or remote HTTP only.
+    # github-actions is ops-only (see MCP_PROFILE_OPS); official github already
+    # exposes actions_* via GITHUB_MCP_TOOLSETS.
     "memory",
     "filesystem",
     "fetch",
@@ -460,7 +477,11 @@ def _canonical_servers(
         "UV_TOOL_DIR": uv_tool_dir,
         "NPM_CONFIG_CACHE": npm_cache_dir,
     }
-    servers["github"]["env"] = {"NPM_CONFIG_CACHE": npm_cache_dir}
+    servers["github"]["env"] = {
+        "GITHUB_TOOLSETS": GITHUB_MCP_TOOLSETS,
+        "GITHUB_EXCLUDE_TOOLS": GITHUB_MCP_EXCLUDE_TOOLS,
+        "GITHUB_LOCKDOWN_MODE": "true",
+    }
     servers["memory"]["env"] = {
         "NPM_CONFIG_CACHE": npm_cache_dir,
         "MEMORY_FILE_PATH": str(memory_file_path),
@@ -506,7 +527,6 @@ def _codex_runtime_servers(
         "memory",
         "filesystem",
         "fetch",
-        "github",
         "context7",
         "ast-grep",
         "mcp-code-interpreter",
