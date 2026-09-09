@@ -2,6 +2,8 @@
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from bioetl.interfaces.http._identity_display_rows import identity_display_rows
 
 

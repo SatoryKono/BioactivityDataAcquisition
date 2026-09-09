@@ -478,7 +478,7 @@
       "title": "Inspect Ranked Suspects",
       "description": "GLOBAL · CURRENT at query evaluation time (range end), not SELECTED RUN. Rank is severity order: CRIT=2, WARN=1, UNKNOWN=0; ties have equal urgency, not higher confidence. Confidence is UNVERIFIED: a rule signal alone does not establish cause or impact. Pipeline/provider identifies potential impact scope; confirm with domain evidence. Only active (>0) signals are ranked; telemetry_gap stays UNKNOWN. VALID EMPTY means no active suspects with available evidence; TELEMETRY MISSING is not a zero and not VALID EMPTY. Domain details use the same GLOBAL scope and evaluation time. Rule sample time is not the underlying event time. Inspect retains source labels; Action preserves row scope. TIME RANGE selects evaluation time, not an event-history rank.",
       "gridPos": {
-        "h": 5,
+        "h": 7,
         "w": 24,
         "x": 0,
         "y": 8
@@ -1036,7 +1036,7 @@
       },
       "options": {
         "showHeader": true,
-        "cellHeight": "sm",
+        "cellHeight": "lg",
         "footer": {
           "show": false,
           "reducer": [
@@ -1060,10 +1060,10 @@
       "title": "Monitor Current Alerts",
       "description": "CURRENT · Do not put full UUIDs into Prometheus labels. Instant ALERTS snapshot (firing/pending). Pair with Alert State History as one temporal chain. VALID_EMPTY when none VALID EMPTY (no events) is not TELEMETRY MISSING.",
       "gridPos": {
-        "h": 5,
+        "h": 3,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 15
       },
       "datasource": {
         "type": "prometheus",

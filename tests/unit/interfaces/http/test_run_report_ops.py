@@ -56,6 +56,7 @@ from bioetl.interfaces.http._pipeline_run_report_table import (
     _coverage_fields,
     _excluded_by_contract_count,
     _funnel_gold_and_excluded,
+    _param_value_rows,
     _parse_grafana_ms,
     _parse_iso_to_ms,
     _scalar_or_json,
@@ -640,6 +641,8 @@ def test_summary_rows_unresolved_and_missing_are_not_ok() -> None:
 
 def test_table_shape_funnel_and_scalar_edge_branches() -> None:
     assert _scalar_or_json(None) == ""
+    assert _param_value_rows([]) == []
+    assert _param_value_rows({}) == []
     assert _scalar_or_json(True) == "true"
     assert _scalar_or_json(False) == "false"
     assert json.loads(_scalar_or_json({"b": 1, "a": 2})) == {"a": 2, "b": 1}
@@ -807,6 +810,8 @@ def test_summary_rows_coverage_window_and_funnel_helpers() -> None:
 
 def test_run_report_display_helpers_cover_fallbacks_and_unknown_kinds() -> None:
     assert _reason_operator_label("not_a_known_code") == "not_a_known_code"
+    assert _shape_reasons_display({}) == []
+    assert _shape_artifacts_display({}) == []
     assert _shape_reasons_display(
         {"reasons_top_n_display": [{"reason_code": "x"}]}
     ) == [{"reason_code": "x"}]

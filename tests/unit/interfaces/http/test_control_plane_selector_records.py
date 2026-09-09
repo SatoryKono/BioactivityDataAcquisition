@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from typing import cast
 from uuid import UUID
@@ -541,3 +542,67 @@ def test_filter_options_apply_exact_run_fallback_and_validate_dimension() -> Non
             response_shape="list",
             requested_pipeline=None,
         )
+
+
+def test_pipeline_filter_options_prefix_unknown_scope() -> None:
+    manifest = _manifest(11)
+    payload = selector_context.build_selector_filter_options_payload(
+        manifests=(manifest,),
+        ledger_port=None,
+        dimension="pipeline",
+        response_shape="list",
+        requested_pipeline=None,
+    )
+    assert payload["items"][0] == "unknown"
+    assert str(manifest.pipeline_name) in payload["items"]
+
+
+def test_run_id_filter_options_use_ledger_when_status_is_selected() -> None:
+    manifest = _manifest(12)
+    ledger = _Ledger(
+        {
+            manifest.run_id: [
+                _entry(
+                    manifest,
+                    "finished",
+                    RUN_FINISHED_EVENT,
+                    offset=1,
+                    status="success",
+                )
+            ]
+        }
+    )
+    payload = selector_context.build_selector_filter_options_payload(
+        manifests=(manifest,),
+        ledger_port=ledger,
+        dimension="run_id",
+        response_shape="list",
+        requested_pipeline=None,
+        selected_run_statuses=("success",),
+    )
+    assert ledger.lookups == [manifest.run_id]
+    assert str(manifest.run_id) in payload["items"]
+
+
+def test_run_option_label_treats_naive_started_at_as_utc() -> None:
+    records = subject.build_selector_records((_manifest(13),), None)
+    naive = replace(records[0], started_at=datetime(2026, 8, 10, 8, 30))
+    label = selector_context._run_option_label(str(records[0].run_id), naive)
+    assert label.startswith("2026-08-10 08:30 UTC ·")
+    assert records[0].pipeline in label
+    assert str(records[0].run_id) in label
+
+
+def test_run_option_labels_mark_unknown_when_catalog_record_is_missing() -> None:
+    payload = selector_context.build_selector_filter_options_payload(
+        manifests=(),
+        ledger_port=None,
+        dimension="run_id",
+        response_shape="options",
+        requested_pipeline=None,
+        exact_run_only=True,
+        fallback_value="orphan-run",
+    )
+    items = cast(list[dict[str, str]], payload["items"])
+    assert items[0] == {"text": "SELECT RUN", "value": "-"}
+    assert items[1] == {"text": "UNKNOWN · orphan-run", "value": "orphan-run"}
