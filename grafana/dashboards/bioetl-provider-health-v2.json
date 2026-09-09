@@ -797,22 +797,6 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Severity"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 160
-              },
-              {
-                "id": "custom.minWidth",
-                "value": 160
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
               "options": "bioetl_provider_current_status"
             },
             "properties": [
@@ -1608,22 +1592,6 @@
                   {
                     "id": "custom.minWidth",
                     "value": 130
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Severity"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 160
-                  },
-                  {
-                    "id": "custom.minWidth",
-                    "value": 160
                   }
                 ]
               },
