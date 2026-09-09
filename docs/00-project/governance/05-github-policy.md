@@ -192,6 +192,24 @@ Upgrade mermaid-cli (keep diagram golden pins) and/or Grafana plugin majors, or
 renew the exception with a new dated issue. Scorecard Vulnerabilities **#1294**
 stays undismissed.
 
+### 2.3.3 GitHub supply-chain settings (#10264)
+
+Live contract (API-verified `2026-09-10`). SHA-pin stays required. Do not
+weaken gates, raise tech-debt budgets, or force Grafana npm majors
+(`react-router` 7 / `uuid` 11). CodeQL default setup stays `not-configured`.
+
+| Setting | Required value | Notes |
+| --- | --- | --- |
+| `sha_pinning_required` | `true` | Workflow SHA-pin SSOT: [`check_github_actions_runtime_policy.py`](../../../scripts/engineering/repo/check_github_actions_runtime_policy.py) `ALLOWED_USES` |
+| `allowed_actions` | `selected` | `github_owned_allowed: true`, `verified_allowed: false`. Third-party patterns are `owner/repo@*` plus nested `owner/repo/path@*` from `ALLOWED_USES` (GitHub `*` does not cross `/`). Live selected vs allowlist is [`github_settings_review.py`](../../../scripts/engineering/repo/github_settings_review.py) `GH-ACTIONS-003`; the SHA-pin checker does not call the Actions allowlist API. |
+| Secret scanning | enabled | Push protection enabled |
+| `secret_scanning_validity_checks` | enabled | Partner-pattern validity. `PATCH /repos/{owner}/{repo}` with this field returns HTTP 200 on this user-owned repository but leaves the setting `disabled` (verified `2026-09-10`). Enable in GitHub UI: Settings → Code security → Secret scanning → Validity checks. Review control `GH-SECRET-002` stays blocking until live status is `enabled`. |
+| `secret_scanning_non_provider_patterns` | disabled | Intentionally off (noisy). Do not enable without a dated issue. |
+| Unused environments | absent | `copilot` and `staging` are not publish surfaces and MUST NOT exist. Publish environments stay `ghcr-publish`, `observability-render-host`, `pypi`, `testpypi`. |
+| `allow_auto_merge` | `true` | Safe only after #10267 activates ruleset `main` with required context `pr-gate-complete`. Do not treat empty applied rules as merge protection. |
+
+Controls live in [`github_governance_policy.json`](../../../configs/quality/github_governance_policy.json): `GH-SECRET-002`, `GH-SECRET-003`, `GH-ACTIONS-002`, `GH-ACTIONS-003`, `GH-ENV-002`.
+
 `security.yml` OSV-Scanner still scans `uv.lock` only and fails on HIGH/CRITICAL.
 `pip-audit --strict` no longer ignores `PYSEC-2026-3721` / `CVE-2026-3219`
 because `uv.lock` pins `pip==26.2.1`.
@@ -693,10 +711,12 @@ Each listed environment has a required-reviewer rule and a custom deployment
 branch/tag policy. Self-review remains allowed because the repository currently
 has one maintainer; this prevents deployment lockout while retaining an explicit
 approval gate. The environment-secret inventory was empty at verification time;
-PyPI uses OIDC trusted publishing. `copilot` and `staging` are not referenced by
-tracked workflows and have no environment secrets, so they are not classified
-as write-capable deployment surfaces. Environment secrets, if later added, must
-be scoped/rotated and never echoed in logs.
+PyPI uses OIDC trusted publishing. `copilot` and `staging` were unused
+GitHub environment stubs (no tracked workflow `environment:` refs, no
+environment secrets) and were removed on `2026-09-10` (#10264). They MUST
+NOT be recreated as write-capable deployment surfaces. Environment secrets,
+if later added to the publish environments above, must be scoped/rotated and
+never echoed in logs.
 
 `contract-tests.yml` keeps `contents: read` as the workflow baseline and grants
 `issues: write` only to the live contract-test job that creates a failure issue.
@@ -947,6 +967,13 @@ Merge-block proof: `PUT /repos/SatoryKono/BioactivityDataAcquisition/pulls/9895/
 
 ### Migration notes (1.2.12)
 
+- #10264: `allowed_actions` is `selected` (GitHub-owned plus third-party
+  `ALLOWED_USES` patterns), unused `copilot`/`staging` environments are
+  removed, and SHA-pin remains required. Non-provider secret patterns stay
+  disabled. `secret_scanning_validity_checks` is required by
+  `GH-SECRET-002`; the REST PATCH is a no-op on this user-owned repository
+  and must be enabled in the GitHub UI. Auto-merge still depends on #10267
+  for required checks.
 - #10283 / #10263: mapped GitHub live `active` vs `keep-disabled` lanes and
   restored PR-gate reusable owners `docs.yml` and `compiled-artifacts-block.yml`.
 - #10268: RF-008 / quarterly checklist now match live GET `2026-09-10`

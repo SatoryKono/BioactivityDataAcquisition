@@ -15951,7 +15951,7 @@
       "github_issue_url": null,
       "inbound_links": 6,
       "lifecycle": null,
-      "outbound_links": 6,
+      "outbound_links": 9,
       "owner": "BioETL Team",
       "path": "docs/00-project/governance/05-github-policy.md",
       "recommended_action": "keep",

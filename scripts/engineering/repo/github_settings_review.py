@@ -23,6 +23,9 @@ from scripts.engineering.common.repo_paths import (
     resolve_cli_path,
     resolve_output_path,
 )
+from scripts.engineering.repo.check_github_actions_runtime_policy import (
+    selected_actions_patterns,
+)
 
 MUTATING_GH_ARGUMENTS = frozenset(
     {
@@ -379,11 +382,18 @@ def collect_snapshot(
             "allow_merge_commit": repo_payload.get("allow_merge_commit"),
             "allow_rebase_merge": repo_payload.get("allow_rebase_merge"),
             "delete_branch_on_merge": repo_payload.get("delete_branch_on_merge"),
+            "allow_auto_merge": repo_payload.get("allow_auto_merge"),
             "secret_scanning": (security_analysis.get("secret_scanning") or {}).get(
                 "status"
             ),
             "secret_scanning_push_protection": (
                 security_analysis.get("secret_scanning_push_protection") or {}
+            ).get("status"),
+            "secret_scanning_validity_checks": (
+                security_analysis.get("secret_scanning_validity_checks") or {}
+            ).get("status"),
+            "secret_scanning_non_provider_patterns": (
+                security_analysis.get("secret_scanning_non_provider_patterns") or {}
             ).get("status"),
         },
         "rulesets": [
@@ -397,6 +407,9 @@ def collect_snapshot(
         ],
         "actions_permissions": client.api_optional(
             f"repos/{repository}/actions/permissions"
+        ),
+        "actions_selected": client.api_optional(
+            f"repos/{repository}/actions/permissions/selected-actions"
         ),
         "environments": [
             {
@@ -533,6 +546,82 @@ def _control_secret_scanning(
     return value == "enabled", f"secret_scanning={value}"
 
 
+def _control_secret_scanning_validity(
+    snapshot: dict[str, Any], _policy: dict[str, Any]
+) -> ControlResult:
+    value = snapshot["settings"].get("secret_scanning_validity_checks")
+    if value is None:
+        return None, f"secret_scanning_validity_checks={value}"
+    return value == "enabled", f"secret_scanning_validity_checks={value}"
+
+
+def _control_secret_scanning_non_provider_off(
+    snapshot: dict[str, Any], _policy: dict[str, Any]
+) -> ControlResult:
+    value = snapshot["settings"].get("secret_scanning_non_provider_patterns")
+    if value is None:
+        return None, f"secret_scanning_non_provider_patterns={value}"
+    return (
+        value == "disabled",
+        f"secret_scanning_non_provider_patterns={value}",
+    )
+
+
+def _control_allowed_actions_selected(
+    snapshot: dict[str, Any], _policy: dict[str, Any]
+) -> ControlResult:
+    allowed = _optional_payload_value(
+        snapshot["actions_permissions"], "allowed_actions"
+    )
+    sha_pin = _optional_payload_value(
+        snapshot["actions_permissions"], "sha_pinning_required"
+    )
+    if allowed is None or sha_pin is None:
+        return None, f"allowed_actions={allowed}; sha_pinning_required={sha_pin}"
+    passed = allowed == "selected" and sha_pin is True
+    return passed, f"allowed_actions={allowed}; sha_pinning_required={sha_pin}"
+
+
+def _control_selected_actions_cover_allowlist(
+    snapshot: dict[str, Any], _policy: dict[str, Any]
+) -> ControlResult:
+    allowed = _optional_payload_value(
+        snapshot["actions_permissions"], "allowed_actions"
+    )
+    if allowed is None:
+        return None, f"allowed_actions={allowed}"
+    if allowed != "selected":
+        return False, f"allowed_actions={allowed}"
+    selected = snapshot.get("actions_selected") or {}
+    if not selected.get("available"):
+        return None, f"selected-actions unavailable: {selected.get('reason')}"
+    payload = selected.get("payload")
+    if not isinstance(payload, dict):
+        return None, "selected-actions payload missing"
+    patterns = set(payload.get("patterns_allowed") or [])
+    expected = set(selected_actions_patterns())
+    missing = sorted(expected - patterns)
+    extra = sorted(patterns - expected)
+    github_owned = payload.get("github_owned_allowed") is True
+    verified = payload.get("verified_allowed") is False
+    passed = github_owned and verified and not missing and not extra
+    evidence = (
+        f"github_owned_allowed={payload.get('github_owned_allowed')}; "
+        f"verified_allowed={payload.get('verified_allowed')}; "
+        f"missing={missing or 'none'}; extra={extra or 'none'}"
+    )
+    return passed, evidence
+
+
+def _control_unused_environments_absent(
+    snapshot: dict[str, Any], policy: dict[str, Any]
+) -> ControlResult:
+    unused = list(policy.get("unused_environments") or [])
+    present_names = {item["name"] for item in snapshot["environments"]}
+    present = sorted(name for name in unused if name in present_names)
+    return not present, f"present={present or 'none'}"
+
+
 def _control_codeowners(
     snapshot: dict[str, Any], _policy: dict[str, Any]
 ) -> ControlResult:
@@ -598,6 +687,11 @@ _CONTROL_CHECKS: dict[
     "advanced_codeql": _control_advanced_codeql,
     "codeql_default_setup_off": _control_codeql_default_setup_off,
     "secret_scanning": _control_secret_scanning,
+    "secret_scanning_validity": _control_secret_scanning_validity,
+    "secret_scanning_non_provider_off": _control_secret_scanning_non_provider_off,
+    "allowed_actions_selected": _control_allowed_actions_selected,
+    "selected_actions_cover_allowlist": _control_selected_actions_cover_allowlist,
+    "unused_environments_absent": _control_unused_environments_absent,
     "codeowners": _control_codeowners,
     "squash_only": _control_squash_only,
     "wiki_disabled": _control_wiki_disabled,

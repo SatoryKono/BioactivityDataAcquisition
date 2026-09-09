@@ -69,6 +69,10 @@ ALLOWED_USES: dict[str, set[str]] = {
     "anchore/sbom-action": {
         "e22c389904149dbc22b58101806040fa8d37a610",  # v0.24.0
     },
+    "aquasecurity/trivy-action": {
+        "57a97c7e7821a5776cebc9bb87c984fa69cba8f1",  # v0.35.0
+        "ed142fd0673e97e23eac54620cfb913e5ce36c25",  # v0.36.0
+    },
     "docker/build-push-action": {"ca052bb54ab0790a636c9b5f226502c73d547a25"},
     "docker/login-action": {"dbcb813823bdd20940b903addbd779551569679f"},
     "docker/setup-buildx-action": {"bb05f3f5519dd87d3ba754cc423b652a5edd6d2c"},
@@ -112,6 +116,33 @@ ALLOWED_DOCKER_IMAGES: dict[str, set[str]] = {
         "sha256:a5741a479f21d20a9bbeca7847a720f92ac6f427e8dc0920fefa039ecafd5e6f"
     },
 }
+_GITHUB_OWNED_ACTION_OWNERS = frozenset({"actions", "github"})
+
+
+def selected_actions_patterns(
+    allowed_uses: dict[str, set[str]] | None = None,
+) -> list[str]:
+    """Return GitHub selected-actions patterns for third-party ALLOWED_USES repos.
+
+    SHA-pin enforcement stays in this module. Live `allowed_actions: selected`
+    vs this list is reviewed by `github_settings_review.py`, not here.
+
+    Nested actions (``owner/repo/path``) need an explicit pattern: GitHub ``*``
+    does not match ``/``.
+    """
+    uses = ALLOWED_USES if allowed_uses is None else allowed_uses
+    patterns: set[str] = set()
+    for action in uses:
+        parts = action.split("/")
+        owner = parts[0]
+        if owner in _GITHUB_OWNED_ACTION_OWNERS:
+            continue
+        if len(parts) >= 2:
+            patterns.add(f"{owner}/{parts[1]}@*")
+        if len(parts) >= 3:
+            patterns.add(f"{'/'.join(parts)}@*")
+    return sorted(patterns)
+
 
 USES_PATTERN = re.compile(r"^\s*(?:-\s*)?uses:\s*([^\s#]+)")
 FULL_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")

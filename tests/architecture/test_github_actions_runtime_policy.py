@@ -85,6 +85,25 @@ def test_runtime_policy_scans_workflows_and_composite_actions() -> None:
     assert all("/vendor/" not in path for path in scanned)
 
 
+def test_selected_actions_patterns_cover_third_party_allowed_uses_only() -> None:
+    patterns = policy.selected_actions_patterns()
+    assert patterns == sorted(patterns)
+    assert all(item.endswith("@*") for item in patterns)
+    assert all(not item.startswith(("actions/", "github/")) for item in patterns)
+    assert "astral-sh/setup-uv@*" in patterns
+    assert "aquasecurity/trivy-action@*" in patterns
+    assert "aquasecurity/setup-trivy@*" not in patterns
+    assert "google/osv-scanner-action@*" in patterns
+    assert "google/osv-scanner-action/osv-scanner-action@*" in patterns
+    assert "docker/build-push-action@*" in patterns
+    owners_repos = {
+        "/".join(action.split("/")[:2])
+        for action in policy.ALLOWED_USES
+        if action.split("/")[0] not in {"actions", "github"}
+    }
+    assert owners_repos <= {item.removesuffix("@*") for item in patterns}
+
+
 def test_runtime_policy_rejects_mutable_external_action_refs() -> None:
     violation = policy._validate_allowed_uses_ref(
         "actions/github-script@v7", "actions/github-script"
