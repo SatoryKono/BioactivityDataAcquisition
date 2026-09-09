@@ -358,18 +358,6 @@
           {
             "matcher": {
               "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Count"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
               "options": "^(started_at|Started)$"
             },
             "properties": [
@@ -773,7 +761,9 @@
               "row_kind": true,
               "workflow_run_id": true,
               "Workflow run": true,
-              "Time": true
+              "Time": true,
+              "Value": true,
+              "#Value": true
             },
             "indexByName": {
               "selected": 0,
@@ -1667,6 +1657,52 @@
                     ]
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason_label"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 280
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "explain"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Next step"
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Open Data Quality",
+                        "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+                        "targetBlank": false,
+                        "includeVars": false
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -1733,18 +1769,6 @@
               "noValue": "UNKNOWN — inspect the state row. SELECT RUN before choosing an exact run; VALID EMPTY only for a loaded report. Backend failure renders as QUERY ERROR."
             },
             "overrides": [
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Count"
-                  }
-                ]
-              },
               {
                 "matcher": {
                   "id": "byName",
@@ -1817,6 +1841,28 @@
                     ]
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "title"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Artifact"
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "${__data.fields.action} ${__data.fields.title}",
+                        "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=${__data.fields.format}",
+                        "targetBlank": true
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -1854,7 +1900,9 @@
                   "path": true,
                   "report_path": true,
                   "artifact_path": true,
-                  "ref": true
+                  "ref": true,
+                  "Value": true,
+                  "#Value": true
                 },
                 "renameByName": {
                   "completed_at": "Completed",

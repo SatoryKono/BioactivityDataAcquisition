@@ -6269,10 +6269,6 @@
                     "value": "Checkpoint"
                   },
                   {
-                    "id": "custom.width",
-                    "value": 140
-                  },
-                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",

@@ -1451,10 +1451,6 @@
                     ]
                   },
                   {
-                    "id": "custom.width",
-                    "value": 160
-                  },
-                  {
                     "id": "custom.minWidth",
                     "value": 160
                   }
@@ -1497,10 +1493,6 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 80
-                  },
-                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
@@ -1530,10 +1522,6 @@
                   "options": "Value"
                 },
                 "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 80
-                  },
                   {
                     "id": "custom.cellOptions",
                     "value": {
