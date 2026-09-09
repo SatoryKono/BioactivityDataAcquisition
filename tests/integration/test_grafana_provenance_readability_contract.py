@@ -155,6 +155,7 @@ def test_provenance_panel_readability_contract(
             "bioetl-control-plane-v1.json",
             "bioetl-runtime.json",
             "bioetl-incident-v1.json",
+            "bioetl-dq-v2.json",
         }
         else 4
     )

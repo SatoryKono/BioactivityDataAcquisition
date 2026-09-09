@@ -151,7 +151,7 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
     dashboard = load_dashboard(dashboard_path)
     panel = next(item for item in _root_panels(dashboard) if item.get("id") == 9416)
 
-    assert panel.get("gridPos") == {"h": 5, "w": 12, "x": 12, "y": 6}
+    assert panel.get("gridPos") == {"h": 8, "w": 12, "x": 12, "y": 6}
     assert panel.get("options", {}).get("cellHeight") == "sm"
     assert panel.get("options", {}).get("sortBy") == [
         {"displayName": "Status", "desc": True}

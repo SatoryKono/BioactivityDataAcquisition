@@ -14,9 +14,12 @@ from bioetl.interfaces.http._pipeline_run_report_display import (
     _shape_reasons_display,
 )
 from bioetl.interfaces.http._pipeline_run_report_sections import (
+    _ARTIFACT_ACTIONS,
+    _ARTIFACT_TITLES,
     _FAILURE_ROW_ORDER,
     _IDENTITY_ROW_ORDER,
     _LAYER_ROW_ORDER,
+    _REASON_OPERATOR_LABELS,
     _RECONCILIATION_ROW_ORDER,
 )
 from bioetl.interfaces.http._processed_records_value_support import (
@@ -26,26 +29,6 @@ from bioetl.interfaces.http._processed_records_value_support import (
     _parse_grafana_ms,
     _parse_iso_to_ms,
 )
-
-# Grafana selector sentinels for "no concrete run selected" (never a real run_id).
-_UNRESOLVED_RUN_ID_SENTINELS = frozenset(
-    {
-        "",
-        "-",
-        "all",
-        "All",
-        "$__all",
-        "unknown",
-        "None",
-        "null",
-    }
-)
-
-
-def _is_unresolved_run_scope(run_id: str) -> bool:
-    """Return True when run_id is a dashboard no-selection sentinel."""
-    token = run_id.strip()
-    return token in _UNRESOLVED_RUN_ID_SENTINELS
 
 
 def _empty_pipeline_run_report_shell(

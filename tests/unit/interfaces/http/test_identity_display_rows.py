@@ -1,11 +1,9 @@
 """Clock and duration presentation must preserve precise original evidence."""
 
 import pytest
-
-pytestmark = pytest.mark.unit
-
 from bioetl.interfaces.http._identity_display_rows import identity_display_rows
 
+pytestmark = pytest.mark.unit
 
 @pytest.mark.parametrize(
     "zone,expected",
@@ -39,7 +37,7 @@ def test_duration_rounding_and_unknown_values() -> None:
     assert result[1]["value"] == "UNKNOWN"
 
 
-def test_identity_display_skips_non_row_items() -> None:
+def test_identity_display_skips_non_list_and_non_dict_rows() -> None:
     result = identity_display_rows(
         [{"parameter": "Pipeline", "value": "chembl_assay"}, "skip", 1, None],
         "UTC",
@@ -59,12 +57,16 @@ def test_identity_clock_and_duration_keep_unparseable_raw_values() -> None:
         {"parameter": "Started at", "value": "2026-09-08T05:10:43"},
         {"parameter": "Duration seconds", "value": "-1"},
         {"parameter": "Duration seconds", "value": "nan"},
+        {"parameter": "Duration seconds", "value": "inf"},
     ]
     result = identity_display_rows(rows, "UTC")
     assert result[0]["value"] == "2026-09-08T05:10:43"
     assert result[1]["parameter"] == "Duration seconds"
     assert result[1]["value"] == "-1"
     assert result[2]["value"] == "nan"
+    assert result[2]["parameter"] == "Duration seconds"
+    assert result[3]["parameter"] == "Duration seconds"
+    assert result[3]["value"] == "inf"
 
 
 def test_timeout_display_preserves_failure_instead_of_generic_empty() -> None:

@@ -519,6 +519,10 @@ def _assert_overview_run_id_infinity_query(run_id_query: dict) -> None:
     assert infinity_query.get("parser") == "backend"
     assert infinity_query.get("root_selector") == "$.items"
     assert infinity_query.get("url_options", {}).get("method") == "GET"
+    selectors = {
+        (i.get("selector"), i.get("text")) for i in infinity_query.get("columns") or []
+    }
+    assert selectors >= {("text", "__text"), ("value", "__value")}
     _assert_overview_run_id_query_url(str(infinity_query.get("url", "")))
 
 
@@ -1691,5 +1695,4 @@ def test_stage_drilldown_variable_is_available_for_runtime_and_dq_dashboards(
         if dashboard_file == "bioetl-runtime.json"
         else "bioetl_records_processed_total"
     )
-    assert f"label_values({expected_source}" in query_text
-    assert "stage" in query_text
+    assert f"label_values({expected_source}" in query_text and "stage" in query_text

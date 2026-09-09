@@ -52,3 +52,48 @@ _IDENTITY_ROW_ORDER: tuple[str, ...] = (
     "provider",
     "entity",
 )
+
+# Grafana selector sentinels for "no concrete run selected" (never a real run_id).
+_UNRESOLVED_RUN_ID_SENTINELS = frozenset(
+    {
+        "",
+        "-",
+        "all",
+        "All",
+        "$__all",
+        "unknown",
+        "None",
+        "null",
+    }
+)
+
+_REASON_OPERATOR_LABELS: dict[str, str] = {
+    "gold_contract_schema_failure": "Excluded by Gold schema contract",
+    "gold_contract_required_failure": "Excluded by Gold required-field contract",
+    "gold_contract_reference_failure": "Excluded by Gold reference contract",
+    "gold_semantic_business_exclusion": "Excluded by Gold business rule",
+    "gold_semantic_profile_exclusion": "Excluded by Gold profile rule",
+    "SCHEMA_VALIDATION_FAILURE": "Silver schema validation failed",
+    "DQ_THRESHOLD_VIOLATION": "DQ threshold exceeded",
+    "structural_policy_required_missing": "Required Silver field missing",
+    "structural_policy_null_optional_forbidden": "Forbidden null in optional Silver field",
+    "structural_policy_type_mismatch": "Silver type mismatch",
+    "FILTERED_OUT_SILVER": "Filtered out in Silver",
+    "DEDUP_KEY_COLLISION": "Deduplicated on business key",
+}
+
+_ARTIFACT_TITLES: dict[str, str] = {
+    "pipeline_run_report_json": "Report JSON",
+    "pipeline_run_report_md": "Readable Markdown report",
+}
+
+_ARTIFACT_ACTIONS: dict[str, str] = {
+    "pipeline_run_report_json": "Download",
+    "pipeline_run_report_md": "Open",
+}
+
+
+def _is_unresolved_run_scope(run_id: str) -> bool:
+    """Return True when run_id is a dashboard no-selection sentinel."""
+    token = run_id.strip()
+    return token in _UNRESOLVED_RUN_ID_SENTINELS

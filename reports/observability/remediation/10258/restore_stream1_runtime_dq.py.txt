@@ -1,0 +1,314 @@
+"""Apply #10251/#10253 dashboard and contract patches. Not a scripts/ module."""
+
+from __future__ import annotations
+
+import json
+import os
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[4]
+RUNTIME = ROOT / "grafana/dashboards/bioetl-runtime.json"
+DQ = ROOT / "grafana/dashboards/bioetl-dq-v2.json"
+CONTRACT = ROOT / "docs/03-guides/dashboards/contracts/panel-content-contract.yaml"
+ZERO_POLICY = ROOT / "docs/03-guides/dashboards/contracts/synthetic-zero-policy.yaml"
+
+TELEMETRY_MISSING = (
+    "TELEMETRY MISSING — series not emitted for this selector (not a zero). "
+    "Check Monitor Metrics Coverage."
+)
+SELECT_RUN_FIRST = "SELECT RUN — no exact Run ID selected. Choose a run first."
+SELECT_RUN_RECENT = (
+    "SELECT RUN — no exact Run ID selected. Choose a run in Inspect Recent Runs."
+)
+EXPECTEDNESS_UNKNOWN = (
+    "UNKNOWN — stage expectedness telemetry is missing or stale. "
+    "Verify Prometheus scrape, then Monitor Metrics Coverage."
+)
+EXPECTED_NA = "N/A — stage is not in this pipeline's expectedness contract"
+COVERAGE_LINK = {
+    "title": "Check Monitor Metrics Coverage",
+    "url": (
+        "/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}"
+        "&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}"
+        "&viewPanel=9102&${__url_time_range}"
+    ),
+    "targetBlank": False,
+    "includeVars": False,
+}
+
+
+def _atomic_write(path: Path, text: str) -> None:
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, path)
+
+
+def _load(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _dump(path: Path, payload: dict) -> None:
+    _atomic_write(path, json.dumps(payload, indent=2, ensure_ascii=False) + "\n")
+
+
+def _walk(panels: list[object]) -> list[dict]:
+    found: list[dict] = []
+    for panel in panels:
+        if not isinstance(panel, dict):
+            continue
+        found.append(panel)
+        nested = panel.get("panels")
+        if isinstance(nested, list):
+            found.extend(_walk(nested))
+    return found
+
+
+def _by_id(dashboard: dict) -> dict[int, dict]:
+    return {
+        int(panel["id"]): panel
+        for panel in _walk(dashboard.get("panels") or [])
+        if isinstance(panel.get("id"), int)
+    }
+
+
+def _defaults(panel: dict) -> dict:
+    field = panel.setdefault("fieldConfig", {})
+    return field.setdefault("defaults", {})
+
+
+def _strip_none_mapping(panel: dict, field_name: str) -> None:
+    overrides = list(panel.get("fieldConfig", {}).get("overrides") or [])
+    kept = []
+    for override in overrides:
+        matcher = override.get("matcher") or {}
+        if matcher.get("id") == "byName" and matcher.get("options") == field_name:
+            props = []
+            for prop in override.get("properties") or []:
+                if prop.get("id") != "mappings":
+                    props.append(prop)
+                    continue
+                value = prop.get("value")
+                if not isinstance(value, list):
+                    continue
+                cleaned = []
+                for mapping in value:
+                    options = (mapping or {}).get("options")
+                    if isinstance(options, dict) and "none" in options:
+                        options = dict(options)
+                        options.pop("none", None)
+                        if options:
+                            cleaned.append({**mapping, "options": options})
+                    else:
+                        cleaned.append(mapping)
+                if cleaned:
+                    props.append({**prop, "value": cleaned})
+            if props:
+                kept.append({**override, "properties": props})
+        else:
+            kept.append(override)
+    panel.setdefault("fieldConfig", {})["overrides"] = kept
+
+
+def _ensure_link(panel: dict, link: dict) -> None:
+    defaults = _defaults(panel)
+    links = list(defaults.get("links") or [])
+    if not any(item.get("title") == link["title"] for item in links if isinstance(item, dict)):
+        links.append(link)
+    defaults["links"] = links
+    options = panel.setdefault("options", {})
+    data_links = list(options.get("dataLinks") or [])
+    if not any(item.get("title") == link["title"] for item in data_links if isinstance(item, dict)):
+        data_links.append(link)
+    options["dataLinks"] = data_links
+
+
+def _strip_vector_zero(expr: str) -> str:
+    marker = " or label_replace(label_replace(vector(0)"
+    if marker in expr:
+        return expr.split(marker, 1)[0]
+    return expr
+
+
+def apply_runtime(dashboard: dict) -> None:
+    panels = _by_id(dashboard)
+    for panel_id, drop_fields in ((256, ("stage", "error_code")), (241, ("stage", "run_type"))):
+        panel = panels[panel_id]
+        for target in panel.get("targets") or []:
+            if isinstance(target.get("expr"), str):
+                target["expr"] = _strip_vector_zero(target["expr"])
+        _defaults(panel)["noValue"] = TELEMETRY_MISSING
+        for field_name in drop_fields:
+            _strip_none_mapping(panel, field_name)
+        _ensure_link(panel, COVERAGE_LINK)
+
+    expectedness = panels[243]
+    _defaults(expectedness)["noValue"] = EXPECTEDNESS_UNKNOWN
+    overrides = expectedness.setdefault("fieldConfig", {}).setdefault("overrides", [])
+    expected_override = None
+    for override in overrides:
+        matcher = override.get("matcher") or {}
+        if matcher.get("id") == "byName" and matcher.get("options") == "Expected":
+            expected_override = override
+            break
+    if expected_override is None:
+        expected_override = {
+            "matcher": {"id": "byName", "options": "Expected"},
+            "properties": [],
+        }
+        overrides.append(expected_override)
+    props = list(expected_override.get("properties") or [])
+    props = [prop for prop in props if prop.get("id") != "noValue"]
+    props.append({"id": "noValue", "value": EXPECTED_NA})
+    expected_override["properties"] = props
+
+    _defaults(panels[9402])["noValue"] = SELECT_RUN_FIRST
+    _defaults(panels[9403])["noValue"] = SELECT_RUN_RECENT
+    _defaults(panels[9998])["noValue"] = SELECT_RUN_FIRST
+    description = str(panels[9998].get("description") or "")
+    panels[9998]["description"] = description.replace(
+        "Missing run is VALID EMPTY / SELECT RUN, not OK.",
+        "Missing run is SELECT RUN, not OK.",
+    )
+
+
+def apply_dq(dashboard: dict) -> None:
+    root = dashboard.setdefault("panels", [])
+    panels = _by_id(dashboard)
+    _defaults(panels[9402])["noValue"] = SELECT_RUN_FIRST
+    _defaults(panels[9403])["noValue"] = SELECT_RUN_RECENT
+    _defaults(panels[9406])["noValue"] = SELECT_RUN_FIRST
+    description = str(panels[9406].get("description") or "")
+    panels[9406]["description"] = description.replace(
+        "Missing run is VALID EMPTY / SELECT RUN, not OK.",
+        "Missing run is SELECT RUN, not OK.",
+    )
+    _defaults(panels[155])["noValue"] = (
+        "TELEMETRY MISSING — series not emitted for this selector (not a zero). "
+        "Verify DQ threshold counters, then Monitor Current DQ Status."
+    )
+
+    identity_row = panels[9405]
+    nested = list(identity_row.get("panels") or [])
+    summary = next(item for item in nested if item.get("id") == 9406)
+    identity_row["panels"] = [item for item in nested if item.get("id") != 9406]
+    root_ids = [item.get("id") for item in root]
+    if 9406 not in root_ids:
+        insert_at = next(i for i, item in enumerate(root) if item.get("id") == 9405)
+        root.insert(insert_at, summary)
+
+    panels[1000]["gridPos"] = {"h": 3, "w": 24, "x": 0, "y": 0}
+    panels[9400]["gridPos"] = {"h": 3, "w": 16, "x": 0, "y": 3}
+    panels[9401]["gridPos"] = {"h": 3, "w": 8, "x": 16, "y": 3}
+    panels[9103]["gridPos"] = {"h": 2, "w": 24, "x": 0, "y": 6}
+    panels[9101]["gridPos"] = {"h": 5, "w": 8, "x": 0, "y": 8}
+    panels[9102]["gridPos"] = {"h": 5, "w": 16, "x": 8, "y": 8}
+    panels[9406]["gridPos"] = {"h": 5, "w": 24, "x": 0, "y": 13}
+    panels[9405]["gridPos"] = {"h": 1, "w": 24, "x": 0, "y": 18}
+    if int((panels[9404].get("gridPos") or {}).get("y") or 0) <= 18:
+        grid = dict(panels[9404]["gridPos"])
+        grid["y"] = 19
+        panels[9404]["gridPos"] = grid
+
+    organize = next(
+        item
+        for item in panels[9406].get("transformations") or []
+        if item.get("id") == "organize"
+    )
+    options = organize.setdefault("options", {})
+    exclude = options.setdefault("excludeByName", {})
+    for field in ("started_at", "completed_at", "run_id", "Time", "__name__", "Value"):
+        exclude[field] = True
+    options["indexByName"] = {
+        "status": 0,
+        "coverage_chip": 1,
+        "gold_records_out": 2,
+        "excluded_by_contract": 3,
+        "from_ms": 4,
+        "to_ms": 5,
+    }
+    transforms = list(panels[9406].get("transformations") or [])
+    if not any(item.get("id") == "limit" for item in transforms):
+        transforms.append({"id": "limit", "options": {"limitField": 1}})
+        panels[9406]["transformations"] = transforms
+
+
+def _patch_contract(text: str) -> str:
+    replacements = (
+        (
+            "      '241':\n        title: Compare Records by Stage & Run Type\n",
+            "VALID_EMPTY",
+            "UNKNOWN",
+        ),
+        (
+            "      '243':\n        title: Inspect Stage Expectedness\n",
+            "VALID_EMPTY",
+            "UNKNOWN",
+        ),
+        (
+            "      '256':\n        title: Review Errors by Stage & Code\n",
+            "VALID_EMPTY",
+            "UNKNOWN",
+        ),
+        (
+            "      '9402':\n        title: Inspect Pipeline Identity\n",
+            "VALID_EMPTY",
+            "UNKNOWN",
+        ),
+        (
+            "      '9403':\n        title: Inspect Processed Records\n",
+            "VALID_EMPTY",
+            "UNKNOWN",
+        ),
+        (
+            "      '9998':\n        title: Review Selected Run Summary\n",
+            "VALID_EMPTY",
+            "UNKNOWN",
+        ),
+        (
+            "      '9406':\n        title: Review Selected Run Summary\n",
+            "VALID_EMPTY",
+            "UNKNOWN",
+        ),
+    )
+    for header, old, new in replacements:
+        start = text.find(header)
+        if start < 0:
+            raise SystemExit(f"contract header missing: {header!r}")
+        chunk_end = text.find("\n      '", start + len(header))
+        if chunk_end < 0:
+            chunk_end = text.find("\n  bioetl-", start + len(header))
+        chunk = text[start:chunk_end]
+        if old not in chunk:
+            continue
+        text = text[:start] + chunk.replace(old, new, 1) + text[chunk_end:]
+    dq_9402 = text.find("      '9402':\n        title: Inspect Run Identity\n")
+    if dq_9402 >= 0:
+        chunk_end = text.find("\n      '", dq_9402 + 20)
+        chunk = text[dq_9402:chunk_end]
+        if "VALID_EMPTY" in chunk:
+            text = text[:dq_9402] + chunk.replace("VALID_EMPTY", "UNKNOWN", 1) + text[chunk_end:]
+    return text
+
+
+def _patch_zero_policy(text: str) -> str:
+    start = text.find("  - dashboard: bioetl-runtime.json\n    id: 256\n")
+    if start < 0:
+        return text
+    end = text.find("contract_symbol:", start)
+    return text[:start] + text[end:]
+
+
+def main() -> None:
+    runtime = _load(RUNTIME)
+    apply_runtime(runtime)
+    _dump(RUNTIME, runtime)
+    dq = _load(DQ)
+    apply_dq(dq)
+    _dump(DQ, dq)
+    _atomic_write(CONTRACT, _patch_contract(CONTRACT.read_text(encoding="utf-8")))
+    _atomic_write(ZERO_POLICY, _patch_zero_policy(ZERO_POLICY.read_text(encoding="utf-8")))
+    print("applied #10251 and #10253")
+
+
+if __name__ == "__main__":
+    main()

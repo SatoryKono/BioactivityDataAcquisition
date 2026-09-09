@@ -76,7 +76,7 @@
     "test_governance_budget_violation_count": 0,
     "test_governance_source_tree_sha256": "a711ed77700dfdecb9b748b0594202b0d43974e90bdc1421e17b7520fa6b9c72",
     "total_flaky": 0,
-    "total_test_files": 2428,
-    "total_tests_analyzed": 25546
+    "total_test_files": 2429,
+    "total_tests_analyzed": 25552
   }
 }

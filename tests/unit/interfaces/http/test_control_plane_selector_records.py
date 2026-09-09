@@ -487,6 +487,16 @@ def test_run_option_labels_preserve_uuid_order_and_terminal_status() -> None:
     assert str(older.run_id) in items[2]["text"]
 
 
+def test_run_option_label_marks_unknown_catalog_id() -> None:
+    payload = selector_context._run_option_labels(
+        ["missing-run-id"],
+        (),
+    )
+    assert payload == {
+        "items": [
+            {"text": "UNKNOWN · missing-run-id", "value": "missing-run-id"},
+        ]
+    }
 def test_empty_run_option_labels_do_not_invent_a_run() -> None:
     payload = selector_context.build_selector_filter_options_payload(
         manifests=(),

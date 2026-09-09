@@ -1848,18 +1848,20 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
             == processed.get("gridPos", {}).get("h")
             == expected_height
         )
-        assert (
-            "valid empty"
-            in str(
-                identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
-            ).lower()
+        identity_no_value = str(
+            identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
         )
-        assert (
-            "query error"
-            in str(
-                processed.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
-            ).lower()
+        processed_no_value = str(
+            processed.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
         )
+        if dashboard_name in {"bioetl-runtime.json", "bioetl-dq-v2.json"}:
+            assert identity_no_value.startswith("SELECT RUN")
+            assert processed_no_value.startswith("SELECT RUN")
+            assert "valid empty" not in identity_no_value.lower()
+            assert "query error" not in processed_no_value.lower()
+        else:
+            assert "valid empty" in identity_no_value.lower()
+            assert "query error" in processed_no_value.lower()
     assert (
         identity.get("options", {}).get("cellHeight")
         == processed.get("options", {}).get("cellHeight")

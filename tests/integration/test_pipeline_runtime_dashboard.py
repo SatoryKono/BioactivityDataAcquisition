@@ -168,7 +168,8 @@ def test_pipeline_runtime_localization_empty_states_are_explicit() -> None:
     records_panel = panels["Compare Records by Stage & Run Type"]
     records_description = records_panel.get("description", "")
     records_defaults = records_panel.get("fieldConfig", {}).get("defaults", {})
-    assert records_defaults.get("noValue") == "No processed-record samples"
+    no_value = str(records_defaults.get("noValue") or "")
+    assert no_value.startswith("TELEMETRY MISSING")
     assert (
         "phase duration"
         not in f"{records_description} {records_defaults.get('noValue', '')}"

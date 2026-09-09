@@ -3075,7 +3075,7 @@
           "value": 2
         },
         {
-          "color": "#555555",
+          "color": "gray",
           "value": 3
         }
       ],
@@ -4423,13 +4423,15 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
-      "formula": "topk(4, max by (provider, cause) (bioetl_provider_current_cause) > 0)",
+      "formula": "topk(4, max by (provider, cause) (bioetl_provider_current_cause) > 0) or label_replace(((count(max by (provider) (bioetl_provider_current_status)) > bool 0) * (count(max by (provider) (bioetl_provider_current_cause)) > bool 0) * absent(max by (provider) (bioetl_provider_current_status) != 0) * absent(max by (provider) (bioetl_provider_current_status) unless on(provider) max by (provider) (bioetl_provider_health_status)) * absent(max by (provider, cause) (bioetl_provider_current_cause) > 0)), \"cause\", \"VALID EMPTY - FLEET coverage proven, no active provider causes\", \"\", \"\") or label_replace((absent(max by (provider, cause) (bioetl_provider_current_cause) > 0) unless ((count(max by (provider) (bioetl_provider_current_status)) > bool 0) * (count(max by (provider) (bioetl_provider_current_cause)) > bool 0) * absent(max by (provider) (bioetl_provider_current_status) != 0) * absent(max by (provider) (bioetl_provider_current_status) unless on(provider) max by (provider) (bioetl_provider_health_status)) * absent(max by (provider, cause) (bioetl_provider_current_cause) > 0))), \"cause\", \"UNKNOWN - FLEET cause coverage unproven, restore provider telemetry\", \"\", \"\")",
       "kind": "promql",
       "panel_id": 9103,
       "panel_title": "Inspect Top Provider Causes",
-      "query": "topk(4, max by (provider, cause) (bioetl_provider_current_cause) > 0)",
+      "query": "topk(4, max by (provider, cause) (bioetl_provider_current_cause) > 0) or label_replace(((count(max by (provider) (bioetl_provider_current_status)) > bool 0) * (count(max by (provider) (bioetl_provider_current_cause)) > bool 0) * absent(max by (provider) (bioetl_provider_current_status) != 0) * absent(max by (provider) (bioetl_provider_current_status) unless on(provider) max by (provider) (bioetl_provider_health_status)) * absent(max by (provider, cause) (bioetl_provider_current_cause) > 0)), \"cause\", \"VALID EMPTY - FLEET coverage proven, no active provider causes\", \"\", \"\") or label_replace((absent(max by (provider, cause) (bioetl_provider_current_cause) > 0) unless ((count(max by (provider) (bioetl_provider_current_status)) > bool 0) * (count(max by (provider) (bioetl_provider_current_cause)) > bool 0) * absent(max by (provider) (bioetl_provider_current_status) != 0) * absent(max by (provider) (bioetl_provider_current_status) unless on(provider) max by (provider) (bioetl_provider_health_status)) * absent(max by (provider, cause) (bioetl_provider_current_cause) > 0))), \"cause\", \"UNKNOWN - FLEET cause coverage unproven, restore provider telemetry\", \"\", \"\")",
       "query_tokens": [
-        "bioetl_provider_current_cause"
+        "bioetl_provider_current_cause",
+        "bioetl_provider_current_status",
+        "bioetl_provider_health_status"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -4577,13 +4579,15 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
-      "formula": "max by (provider, cause) (bioetl_provider_current_cause) > 0",
+      "formula": "(max by (provider, cause) (bioetl_provider_current_cause) > 0) or label_replace(((count(max by (provider) (bioetl_provider_current_status)) > bool 0) * (count(max by (provider) (bioetl_provider_current_cause)) > bool 0) * absent(max by (provider) (bioetl_provider_current_status) != 0) * absent(max by (provider) (bioetl_provider_current_status) unless on(provider) max by (provider) (bioetl_provider_health_status)) * absent(max by (provider, cause) (bioetl_provider_current_cause) > 0)), \"cause\", \"VALID EMPTY - FLEET coverage proven, no active provider causes\", \"\", \"\") or label_replace((absent(max by (provider, cause) (bioetl_provider_current_cause) > 0) unless ((count(max by (provider) (bioetl_provider_current_status)) > bool 0) * (count(max by (provider) (bioetl_provider_current_cause)) > bool 0) * absent(max by (provider) (bioetl_provider_current_status) != 0) * absent(max by (provider) (bioetl_provider_current_status) unless on(provider) max by (provider) (bioetl_provider_health_status)) * absent(max by (provider, cause) (bioetl_provider_current_cause) > 0))), \"cause\", \"UNKNOWN - FLEET cause coverage unproven, restore provider telemetry\", \"\", \"\")",
       "kind": "promql",
       "panel_id": 9113,
       "panel_title": "Inspect Full Provider Causes",
-      "query": "max by (provider, cause) (bioetl_provider_current_cause) > 0",
+      "query": "(max by (provider, cause) (bioetl_provider_current_cause) > 0) or label_replace(((count(max by (provider) (bioetl_provider_current_status)) > bool 0) * (count(max by (provider) (bioetl_provider_current_cause)) > bool 0) * absent(max by (provider) (bioetl_provider_current_status) != 0) * absent(max by (provider) (bioetl_provider_current_status) unless on(provider) max by (provider) (bioetl_provider_health_status)) * absent(max by (provider, cause) (bioetl_provider_current_cause) > 0)), \"cause\", \"VALID EMPTY - FLEET coverage proven, no active provider causes\", \"\", \"\") or label_replace((absent(max by (provider, cause) (bioetl_provider_current_cause) > 0) unless ((count(max by (provider) (bioetl_provider_current_status)) > bool 0) * (count(max by (provider) (bioetl_provider_current_cause)) > bool 0) * absent(max by (provider) (bioetl_provider_current_status) != 0) * absent(max by (provider) (bioetl_provider_current_status) unless on(provider) max by (provider) (bioetl_provider_health_status)) * absent(max by (provider, cause) (bioetl_provider_current_cause) > 0))), \"cause\", \"UNKNOWN - FLEET cause coverage unproven, restore provider telemetry\", \"\", \"\")",
       "query_tokens": [
-        "bioetl_provider_current_cause"
+        "bioetl_provider_current_cause",
+        "bioetl_provider_current_status",
+        "bioetl_provider_health_status"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -5483,11 +5487,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "sum by(stage, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\",stage!~\"none.*\"}[$__range])) or label_replace(label_replace(vector(0), \"stage\", \"none\", \"\", \"\"), \"run_type\", \"none\", \"\", \"\")",
+      "formula": "sum by(stage, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\",stage!~\"none.*\"}[$__range]))",
       "kind": "promql",
       "panel_id": 241,
       "panel_title": "Compare Records by Stage & Run Type",
-      "query": "sum by(stage, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\",stage!~\"none.*\"}[$__range])) or label_replace(label_replace(vector(0), \"stage\", \"none\", \"\", \"\"), \"run_type\", \"none\", \"\", \"\")",
+      "query": "sum by(stage, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\",stage!~\"none.*\"}[$__range]))",
       "query_tokens": [
         "bioetl_records_processed_total"
       ],
@@ -5900,11 +5904,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "sum by(stage, error_code) (increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\",stage!~\"none.*\"}[$__range])) or label_replace(label_replace(vector(0), \"stage\", \"none\", \"\", \"\"), \"error_code\", \"none\", \"\", \"\")",
+      "formula": "sum by(stage, error_code) (increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\",stage!~\"none.*\"}[$__range]))",
       "kind": "promql",
       "panel_id": 256,
       "panel_title": "Review Errors by Stage & Code",
-      "query": "sum by(stage, error_code) (increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\",stage!~\"none.*\"}[$__range])) or label_replace(label_replace(vector(0), \"stage\", \"none\", \"\", \"\"), \"error_code\", \"none\", \"\", \"\")",
+      "query": "sum by(stage, error_code) (increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\",stage!~\"none.*\"}[$__range]))",
       "query_tokens": [
         "bioetl_errors_total"
       ],
