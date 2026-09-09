@@ -6,6 +6,11 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../../.." && pwd)"
 
 # shellcheck source=./support/load_repo_env.sh
+if [[ -n "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" ]]; then
+  export BIOETL_GITHUB_TOKEN_SOURCE="GITHUB_PERSONAL_ACCESS_TOKEN"
+elif [[ -n "${GITHUB_TOKEN:-}" ]]; then
+  export BIOETL_GITHUB_TOKEN_SOURCE="GITHUB_TOKEN alias"
+fi
 export BIOETL_SKIP_ENV_LOCAL=1
 source "${SCRIPT_DIR}/support/load_repo_env.sh"
 load_repo_env_if_present

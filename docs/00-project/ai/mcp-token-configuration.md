@@ -38,9 +38,8 @@ GitHub MCP uses one token path per process:
 
 1. `GITHUB_PERSONAL_ACCESS_TOKEN` if already set (never overwritten)
 1. else alias `GITHUB_TOKEN` copied into `GITHUB_PERSONAL_ACCESS_TOKEN`
-1. else `gh auth token` when the GitHub CLI is logged in
 
-Wrappers log the chosen path name on stderr and never print the secret.
+Wrappers log the chosen path name on stderr and never print the secret. Tokens must be supplied by the repository environment loader; local GitHub CLI credentials are not used.
 Do not configure PAT and `gh auth` as two silent sources for the same
 process.
 

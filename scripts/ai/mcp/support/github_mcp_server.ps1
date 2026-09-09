@@ -5,22 +5,16 @@ $script:BioetlGithubMcpDefaultToolsets = "context,issues,pull_requests,repos,use
 $script:BioetlGithubMcpDefaultExcludeTools = "create_or_update_file,push_files,delete_file,fork_repository,create_repository,merge_pull_request,actions_run_trigger"
 
 function Set-BioetlGithubMcpPolicyEnv {
-    if (-not $env:GITHUB_TOOLSETS) {
-        $env:GITHUB_TOOLSETS = $script:BioetlGithubMcpDefaultToolsets
-    }
-    if (-not $env:GITHUB_EXCLUDE_TOOLS) {
-        $env:GITHUB_EXCLUDE_TOOLS = $script:BioetlGithubMcpDefaultExcludeTools
-    }
-    if (-not $env:GITHUB_LOCKDOWN_MODE) {
-        $env:GITHUB_LOCKDOWN_MODE = "true"
-    }
+    $env:GITHUB_TOOLSETS = $script:BioetlGithubMcpDefaultToolsets
+    $env:GITHUB_EXCLUDE_TOOLS = $script:BioetlGithubMcpDefaultExcludeTools
+    $env:GITHUB_LOCKDOWN_MODE = "true"
 }
 
 function Resolve-BioetlGithubMcpToken {
-    # One token path: existing PAT, else GITHUB_TOKEN alias, else `gh auth token`.
-    # Never overwrite a configured PAT and never print the secret.
+    # Tokens must come from the repository environment loader; never use local CLI credentials.
     if ($env:GITHUB_PERSONAL_ACCESS_TOKEN) {
-        [Console]::Error.WriteLine("github MCP token path: GITHUB_PERSONAL_ACCESS_TOKEN")
+        $source = if ($env:BIOETL_GITHUB_TOKEN_SOURCE) { $env:BIOETL_GITHUB_TOKEN_SOURCE } else { "GITHUB_PERSONAL_ACCESS_TOKEN" }
+        [Console]::Error.WriteLine("github MCP token path: $source")
         return
     }
     if ($env:GITHUB_TOKEN) {
@@ -28,16 +22,7 @@ function Resolve-BioetlGithubMcpToken {
         [Console]::Error.WriteLine("github MCP token path: GITHUB_TOKEN alias")
         return
     }
-    $gh = Get-Command gh -ErrorAction SilentlyContinue
-    if ($gh) {
-        $token = & gh auth token 2>$null
-        if ($token) {
-            $env:GITHUB_PERSONAL_ACCESS_TOKEN = [string]$token
-            [Console]::Error.WriteLine("github MCP token path: gh auth token")
-            return
-        }
-    }
-    throw "GitHub MCP requires one token path: GITHUB_PERSONAL_ACCESS_TOKEN, GITHUB_TOKEN alias, or gh auth token. Do not commit secrets."
+    throw "GitHub MCP requires GITHUB_PERSONAL_ACCESS_TOKEN from the repository environment. Do not commit secrets."
 }
 
 function Resolve-BioetlGithubMcpServerBin {

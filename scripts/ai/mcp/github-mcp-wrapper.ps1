@@ -3,6 +3,11 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "../../..")).Path
+if ($env:GITHUB_PERSONAL_ACCESS_TOKEN) {
+    $env:BIOETL_GITHUB_TOKEN_SOURCE = "GITHUB_PERSONAL_ACCESS_TOKEN"
+} elseif ($env:GITHUB_TOKEN) {
+    $env:BIOETL_GITHUB_TOKEN_SOURCE = "GITHUB_TOKEN alias"
+}
 . (Join-Path $PSScriptRoot "support/load_repo_env.ps1")
 $env:BIOETL_SKIP_ENV_LOCAL = "1"
 Import-BioetlRepoEnv -RepoRoot $repoRoot

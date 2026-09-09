@@ -8,22 +8,15 @@ BIOETL_GITHUB_MCP_DEFAULT_TOOLSETS="context,issues,pull_requests,repos,users,act
 BIOETL_GITHUB_MCP_DEFAULT_EXCLUDE_TOOLS="create_or_update_file,push_files,delete_file,fork_repository,create_repository,merge_pull_request,actions_run_trigger"
 
 bioetl_github_mcp_apply_policy_env() {
-  if [[ -z "${GITHUB_TOOLSETS:-}" ]]; then
-    export GITHUB_TOOLSETS="${BIOETL_GITHUB_MCP_DEFAULT_TOOLSETS}"
-  fi
-  if [[ -z "${GITHUB_EXCLUDE_TOOLS:-}" ]]; then
-    export GITHUB_EXCLUDE_TOOLS="${BIOETL_GITHUB_MCP_DEFAULT_EXCLUDE_TOOLS}"
-  fi
-  if [[ -z "${GITHUB_LOCKDOWN_MODE:-}" ]]; then
-    export GITHUB_LOCKDOWN_MODE="true"
-  fi
+  export GITHUB_TOOLSETS="${BIOETL_GITHUB_MCP_DEFAULT_TOOLSETS}"
+  export GITHUB_EXCLUDE_TOOLS="${BIOETL_GITHUB_MCP_DEFAULT_EXCLUDE_TOOLS}"
+  export GITHUB_LOCKDOWN_MODE="true"
 }
 
 bioetl_github_mcp_resolve_token() {
-  # One token path: existing PAT, else GITHUB_TOKEN alias, else `gh auth token`.
-  # Never overwrite a configured PAT and never print the secret.
+  # Tokens must come from the repository environment loader; never use local CLI credentials.
   if [[ -n "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" ]]; then
-    printf 'github MCP token path: GITHUB_PERSONAL_ACCESS_TOKEN\n' >&2
+    printf 'github MCP token path: %s\n' "${BIOETL_GITHUB_TOKEN_SOURCE:-GITHUB_PERSONAL_ACCESS_TOKEN}" >&2
     return 0
   fi
   if [[ -n "${GITHUB_TOKEN:-}" ]]; then
@@ -31,16 +24,7 @@ bioetl_github_mcp_resolve_token() {
     printf 'github MCP token path: GITHUB_TOKEN alias\n' >&2
     return 0
   fi
-  if command -v gh >/dev/null 2>&1; then
-    local token
-    token="$(gh auth token 2>/dev/null || true)"
-    if [[ -n "${token}" ]]; then
-      export GITHUB_PERSONAL_ACCESS_TOKEN="${token}"
-      printf 'github MCP token path: gh auth token\n' >&2
-      return 0
-    fi
-  fi
-  mcp_fail "GitHub MCP requires one token path: GITHUB_PERSONAL_ACCESS_TOKEN, GITHUB_TOKEN alias, or gh auth token. Do not commit secrets."
+  mcp_fail "GitHub MCP requires GITHUB_PERSONAL_ACCESS_TOKEN from the repository environment. Do not commit secrets."
   return 1
 }
 
