@@ -323,7 +323,7 @@ def test_table_shape_pipeline_run_report_reconciliation_rows() -> None:
         }
     )
     assert with_removals["funnel"][0]["removals_summary"] == (
-        "17 gold_contract_schema_failure"
+        "17 Excluded by Gold schema contract (gold_contract_schema_failure)"
     )
 
 
@@ -675,7 +675,7 @@ def test_table_shape_funnel_and_scalar_edge_branches() -> None:
     )
     assert {"parameter": "ok", "value": "true"} in nested["identity_rows"]
     assert nested["funnel"][0]["removals_summary"] == (
-        "2 gold_contract_schema_failure, n/a other"
+        "2 Excluded by Gold schema contract (gold_contract_schema_failure), n/a other"
     )
 
 

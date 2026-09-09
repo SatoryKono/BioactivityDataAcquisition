@@ -339,6 +339,30 @@ def _identity_row_needs_timeout_value(
     ) or value in _IDENTITY_UNAVAILABLE_VALUES
 
 
+def _rewrite_timeout_identity_rows(
+    payload: dict[str, object],
+    *,
+    pipeline: str,
+) -> None:
+    """Replace generic unavailability copy with an explicit timeout marker."""
+    rows = payload.get("rows")
+    if not isinstance(rows, list):
+        return
+    timeout_msg = (
+        "scope resolve timed out — retry or select exact run_id "
+        "(control-plane store slow)"
+    )
+    rewritten: list[object] = []
+    for row in rows:
+        if isinstance(row, dict) and _identity_row_needs_timeout_value(
+            row, pipeline=pipeline
+        ):
+            rewritten.append({**row, "value": timeout_msg})
+        else:
+            rewritten.append(row)
+    payload["rows"] = rewritten
+
+
 def _timeout_identity_payload(query: dict[str, str]) -> dict[str, object]:
     """Fail-open identity payload when scope resolution exceeds SLA.
 
@@ -360,23 +384,7 @@ def _timeout_identity_payload(query: dict[str, str]) -> dict[str, object]:
         checkpoint_metadata=None,
         identity_evidence_summary=None,
     )
-    # Rewrite generic unavailability copy on timeout so Grafana does not look like
-    # "no data for this pipeline" when the store was simply slow.
-    rows = payload.get("rows")
-    if isinstance(rows, list):
-        timeout_msg = (
-            "scope resolve timed out — retry or select exact run_id "
-            "(control-plane store slow)"
-        )
-        rewritten: list[object] = []
-        for row in rows:
-            if not isinstance(row, dict):
-                rewritten.append(row)
-                continue
-            if _identity_row_needs_timeout_value(row, pipeline=pipeline):
-                row = {**row, "value": timeout_msg}
-            rewritten.append(row)
-        payload["rows"] = rewritten
+    _rewrite_timeout_identity_rows(payload, pipeline=pipeline)
     payload["display_rows"] = identity_display_rows(
         payload.get("rows"), query.get("timezone") or "UTC"
     )
