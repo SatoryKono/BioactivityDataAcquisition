@@ -70,7 +70,7 @@ ______________________________________________________________________
 
 | Dashboard UID | Variables |
 |---|---|
-| `bioetl-control-plane-v1` | `$pipeline`, `$run_id`, `$run_type`, `$workflow` |
+| `bioetl-control-plane-v1` | `$pipeline`, `$read_latency_quantile`, `$run_id`, `$run_type`, `$workflow` |
 | `bioetl-dq-v2` | `$pipeline`, `$run_id`, `$run_type`, `$stage`, `$workflow` |
 | `bioetl-incident-v1` | `$pipeline`, `$provider`, `$run_id`, `$run_type`, `$workflow` |
 | `bioetl-overview-v2` | `$pipeline`, `$run_id`, `$run_type`, `$workflow` |
