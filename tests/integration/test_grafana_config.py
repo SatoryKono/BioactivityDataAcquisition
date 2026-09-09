@@ -21,6 +21,7 @@ import pytest
 import yaml
 from tests.integration._grafana_test_support import (
     _PROMQL_METRIC_SELECTOR_RE,
+    _assert_latency_panel_has_quantiles,
     _assert_operator_context_shell_contract,
     _assert_provider_health_variable_contract,
     _assert_standard_variable_contract,
@@ -623,23 +624,6 @@ def _assert_control_plane_read_panel_no_pipeline_filter(
         _assert_global_metric_expr_unscoped(
             dashboard_name, panel_title, expr, forbidden_metrics
         )
-
-
-def _assert_latency_panel_has_quantiles(panel_title: str, panel: dict | None) -> None:
-    assert panel is not None, f"Control-plane dashboard missing {panel_title!r}"
-    expressions = "\n".join(
-        target.get("expr", "")
-        for target in panel.get("targets", [])
-        if isinstance(target.get("expr"), str)
-    )
-    if "$read_latency_quantile" in expressions:
-        assert "histogram_quantile($read_latency_quantile" in expressions
-        assert "histogram_quantile(0.50" not in expressions
-    else:
-        assert "histogram_quantile(0.50" in expressions
-        assert "histogram_quantile(0.95" in expressions
-        assert "histogram_quantile(0.99" in expressions
-    assert "or vector(0)" not in expressions
 
 
 def _assert_identity_evidence_panel(panels: dict, title: str, view: str) -> None:

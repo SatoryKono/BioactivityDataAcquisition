@@ -28,11 +28,11 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `fix/opt-10262-github-mcp-toolsets`
-- Source commit: `81a84df8f920493f2594c85ac242520b45bf3ded`
+- Source commit: `c25be33fdb9e06950096f903dec88c4a59658c19`
 - Source run id: `34368235108`
 - Source event: `pull_request`
 - Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34368235108`
-- Source tree sha256: `80410e7741ddf053e62e11eca4fdd3338c234a04625d6f2104d5915580e3b700`
+- Source tree sha256: `a06dfd25cfc3ab9fe00ee8ee95659346c383ad817c741594944f289faf099b7c`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-09-09T15:33:10.808916+00:00`
 

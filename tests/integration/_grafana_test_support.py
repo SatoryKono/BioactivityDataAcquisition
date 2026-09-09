@@ -37,6 +37,7 @@ SCOPE_TITLE_PREFIX_RE = re.compile(
 __all__ = [
     "SCOPE_TITLE_PREFIX_RE",
     "_PROMQL_METRIC_SELECTOR_RE",
+    "_assert_latency_panel_has_quantiles",
     "_assert_operator_context_shell_contract",
     "_assert_provider_health_variable_contract",
     "_assert_silver_reject_explorer_variable_contract",
@@ -875,3 +876,20 @@ def _emit_sample_structured_log(*, pipeline: str, provider: str) -> str:
         operation="health_check",
     )
     return stream.getvalue().strip().splitlines()[-1]
+
+
+def _assert_latency_panel_has_quantiles(panel_title: str, panel: dict | None) -> None:
+    assert panel is not None, f"Control-plane dashboard missing {panel_title!r}"
+    expressions = "\n".join(
+        target.get("expr", "")
+        for target in panel.get("targets", [])
+        if isinstance(target.get("expr"), str)
+    )
+    if "$read_latency_quantile" in expressions:
+        assert "histogram_quantile($read_latency_quantile" in expressions
+        assert "histogram_quantile(0.50" not in expressions
+    else:
+        assert "histogram_quantile(0.50" in expressions
+        assert "histogram_quantile(0.95" in expressions
+        assert "histogram_quantile(0.99" in expressions
+    assert "or vector(0)" not in expressions
