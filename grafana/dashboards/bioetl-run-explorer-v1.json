@@ -1652,7 +1652,15 @@
             "footer": {
               "show": false
             },
-            "cellHeight": "sm"
+            "cellHeight": "sm",
+            "dataLinks": [
+              {
+                "title": "Open Data Quality",
+                "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+                "targetBlank": false,
+                "includeVars": false
+              }
+            ]
           },
           "targets": [
             {
