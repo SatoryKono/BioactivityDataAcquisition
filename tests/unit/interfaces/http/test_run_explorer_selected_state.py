@@ -107,6 +107,27 @@ def test_reasons_display_keeps_code_and_adds_operator_label() -> None:
     )
 
 
+def test_reasons_and_artifacts_display_skip_non_dict_items() -> None:
+    shaped = _table_shape_pipeline_run_report(
+        {
+            "reasons_top_n": [
+                "skip",
+                {"reason_code": "gold_contract_schema_failure", "count": 2},
+            ],
+            "artifacts": [
+                "skip",
+                {"kind": "pipeline_run_report_json", "ref": "/tmp/report.json"},
+            ],
+        }
+    )
+    assert len(shaped["reasons_top_n_display"]) == 1
+    assert shaped["reasons_top_n_display"][0]["reason_code"] == (
+        "gold_contract_schema_failure"
+    )
+    assert len(shaped["artifacts_display"]) == 1
+    assert shaped["artifacts_display"][0]["format"] == "pipeline_run_report_json"
+
+
 def test_artifacts_display_uses_operator_titles_and_keeps_ref() -> None:
     ref = "/data/reports/pipeline/chembl_assay/run-1/pipeline-run-report.json"
     shaped = _table_shape_pipeline_run_report(

@@ -39,6 +39,32 @@ def test_duration_rounding_and_unknown_values() -> None:
     assert result[1]["value"] == "UNKNOWN"
 
 
+def test_identity_display_skips_non_list_and_non_dict_rows() -> None:
+    assert identity_display_rows("not-a-list", "UTC") == []
+    result = identity_display_rows(
+        [None, "skip", {"parameter": "Run id", "value": "abc"}],
+        "UTC",
+    )
+    assert result == [
+        {"parameter": "Run id", "value": "abc", "raw_value": "abc"},
+    ]
+
+
+def test_naive_clock_and_invalid_duration_keep_raw_evidence() -> None:
+    naive = "2026-09-08T05:10:43"
+    rows = [
+        {"parameter": "Started at", "value": naive},
+        {"parameter": "Duration seconds", "value": "-1"},
+        {"parameter": "Duration seconds", "value": "inf"},
+    ]
+    result = identity_display_rows(rows, "UTC")
+    assert result[0]["value"] == naive
+    assert result[1]["parameter"] == "Duration seconds"
+    assert result[1]["value"] == "-1"
+    assert result[2]["parameter"] == "Duration seconds"
+    assert result[2]["value"] == "inf"
+
+
 def test_timeout_display_preserves_failure_instead_of_generic_empty() -> None:
     from bioetl.interfaces.http._health_server_identity_routing_support import (
         _timeout_identity_payload,
