@@ -696,7 +696,7 @@
             },
             "properties": [
               {
-                "id": "custom.width",
+                "id": "custom.minWidth",
                 "value": 130
               },
               {
@@ -1472,10 +1472,6 @@
                       "type": "auto",
                       "wrapText": true
                     }
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 130
                   }
                 ]
               },
@@ -1816,10 +1812,6 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 130
-                  },
-                  {
                     "id": "custom.minWidth",
                     "value": 130
                   }
@@ -2040,7 +2032,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-background",
+                      "type": "color-text",
                       "mode": "basic",
                       "wrapText": false
                     }
@@ -2243,7 +2235,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-background",
+                      "type": "color-text",
                       "mode": "basic",
                       "wrapText": false
                     }

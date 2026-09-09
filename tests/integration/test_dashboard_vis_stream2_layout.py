@@ -119,13 +119,15 @@ def test_provider_severity_column_has_min_width_and_narrower_provider() -> None:
         }
         if "custom.width" in props:
             widths[field] = int(props["custom.width"])
+        if field == "provider":
+            assert "custom.width" not in props
+            assert props.get("custom.minWidth") == 130
         if field == "Value":
             assert props.get("custom.minWidth") == 160
             assert (props.get("custom.cellOptions") or {}).get("wrapText") is False
-    assert widths.get("provider") == 130
+    assert "provider" not in widths
     assert widths.get("Value") == 160
     assert "Severity" not in widths
-    assert widths.get("provider", 0) + widths.get("Value", 0) <= 301
     assert int((panel.get("gridPos") or {}).get("y") or 0) < 18
     for panel_id in (9102, 9111, 9112):
         expander = _panel(dashboard, panel_id)
