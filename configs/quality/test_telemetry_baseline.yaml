@@ -2,7 +2,7 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: chore/branch-hygiene-inventory-10266
-refreshed_at_utc: '2026-09-10T00:35:00+00:00'
+refreshed_at_utc: '2026-09-09T21:30:00+00:00'
 refresh_status: captured
 source_commit: 12314daf58f640aef29e5bcefb8d19a2760643bb
 source_run_id: '34401978625'
