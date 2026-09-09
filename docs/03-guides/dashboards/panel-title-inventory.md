@@ -121,8 +121,8 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-incident-v1.json | 9401 | Monitor Incident Status |
 | bioetl-incident-v1.json | 2001 | Start Incident Triage |
 | bioetl-incident-v1.json | 2010 | Inspect Ranked Suspects |
-| bioetl-incident-v1.json | 2020 | Review Alert Evidence |
 | bioetl-incident-v1.json | 2005 | Monitor Current Alerts |
+| bioetl-incident-v1.json | 2020 | Review Alert Evidence |
 | bioetl-incident-v1.json | 2006 | Track Alert State History |
 | bioetl-incident-v1.json | 2007 | Assess Impact & Confidence |
 | bioetl-incident-v1.json | 2099 | Domain Suspect Details · GLOBAL / CURRENT |

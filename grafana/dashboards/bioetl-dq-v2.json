@@ -1464,6 +1464,13 @@
                   {
                     "id": "custom.align",
                     "value": "left"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
                   }
                 ]
               },
@@ -4043,7 +4050,7 @@
                   }
                 }
               ],
-              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero). Verify DQ threshold counters, then Monitor Current DQ Status."
+              "noValue": "VALID EMPTY — no events in the selected range (not missing telemetry)"
             },
             "overrides": []
           },
@@ -4193,7 +4200,7 @@
             }
           ],
           "options": {
-            "content": "<div style=\"padding:2px 8px;font-size:16px;line-height:1.25;overflow:hidden\"><strong>Lineage handoff</strong> — <a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">canonical Control Plane</a> for lineage trust, checkpoint integrity, and replay blockers. Preserve time range + pipeline scope.</div>",
+            "content": "<div style=\"padding:2px 8px;font-size:16px;line-height:1.25;overflow:hidden\"><strong>Lineage handoff</strong> — open the canonical <a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Control Plane</a> for lineage trust, checkpoint integrity, and replay blockers. Preserve time range + pipeline scope.</div>",
             "dataLinks": [
               {
                 "includeVars": false,

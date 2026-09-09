@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-09T17:21:40.712834+00:00",
+  "generated_at": "2026-09-09T17:16:52.713194+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -9994,7 +9994,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/engineering/ci/test_pr_gate.py",
-          "line": 10,
+          "line": 11,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pr_gate import ("
         }
@@ -12787,7 +12787,7 @@
         },
         {
           "path": "tests/integration/test_grafana_render_first_remediation.py",
-          "line": 1543,
+          "line": 1541,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         },

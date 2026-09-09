@@ -865,7 +865,18 @@
                   },
                   {
                     "id": "custom.width",
-                    "value": 280
+                    "value": 210
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "left"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
                   }
                 ]
               },
@@ -880,11 +891,8 @@
                     "value": "Value"
                   },
                   {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
+                    "id": "custom.align",
+                    "value": "left"
                   },
                   {
                     "id": "custom.inspect",
@@ -945,7 +953,14 @@
               "id": "organize",
               "options": {
                 "excludeByName": {
-                  "Time": true
+                  "Time": true,
+                  "__name__": true,
+                  "Value": true,
+                  "raw_value": true
+                },
+                "renameByName": {
+                  "parameter": "Parameter",
+                  "value": "Value"
                 }
               }
             }
@@ -1537,7 +1552,15 @@
                   "type": "auto"
                 }
               },
-              "noValue": "UNKNOWN — inspect the state row. SELECT RUN before choosing an exact run; VALID EMPTY only for a loaded report. Backend failure renders as QUERY ERROR."
+              "noValue": "UNKNOWN — inspect the state row. SELECT RUN before choosing an exact run; VALID EMPTY only for a loaded report. Backend failure renders as QUERY ERROR.",
+              "links": [
+                {
+                  "title": "Open Data Quality",
+                  "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+                  "targetBlank": false,
+                  "includeVars": false
+                }
+              ]
             },
             "overrides": [
               {

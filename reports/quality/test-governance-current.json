@@ -34,7 +34,7 @@
   "assertless_candidates": [
     {
       "category": "architecture_helper_guard",
-      "line": "144",
+      "line": "145",
       "path": "tests/architecture/test_pr_gate_complete.py",
       "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
       "test_name": "test_called_owner_workflows_reject_duplicate_yaml_keys"
@@ -657,7 +657,7 @@
     "weak_no_value": 0
   },
   "assertless_examples": [
-    "tests/architecture/test_pr_gate_complete.py:144",
+    "tests/architecture/test_pr_gate_complete.py:145",
     "tests/architecture/test_quality_debt_scorecard.py:1127",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
     "tests/integration/infrastructure/storage/test_delta_reader.py:586",
@@ -1185,7 +1185,7 @@
     "assertless_candidates": [
       {
         "category": "architecture_helper_guard",
-        "line": "144",
+        "line": "145",
         "path": "tests/architecture/test_pr_gate_complete.py",
         "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
         "test_name": "test_called_owner_workflows_reject_duplicate_yaml_keys"
@@ -1808,7 +1808,7 @@
       "weak_no_value": 0
     },
     "assertless_examples": [
-      "tests/architecture/test_pr_gate_complete.py:144",
+      "tests/architecture/test_pr_gate_complete.py:145",
       "tests/architecture/test_quality_debt_scorecard.py:1127",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
       "tests/integration/infrastructure/storage/test_delta_reader.py:586",
@@ -2069,12 +2069,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2430,
-    "total_test_functions": 25558,
+    "total_test_functions": 25566,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "686d6fdbfdccbf0e80a37dadc919e0d39e8e108e6fbffcbe2146424d19c025af",
+  "source_tree_sha256": "9dda2cb9b54ed8aedb0daf320abd6ce0eccf8777d35290e656bd10eec8f0d289",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 88,
@@ -2137,7 +2137,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2430,
-  "total_test_functions": 25558,
+  "total_test_functions": 25566,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

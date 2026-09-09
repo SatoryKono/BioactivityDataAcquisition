@@ -554,3 +554,20 @@ def test_overview_queries_are_backed_by_expected_records_and_metrics() -> None:
         "bioetl_records_processed_total",
     ):
         assert required_token in all_expressions
+
+
+def test_overview_timelines_use_all_labels_and_hide_clipped_in_band_text() -> None:
+    """#10249: All instead of .* on empty fallback; no clipped in-band state text."""
+    panels = {panel.get("id"): panel for panel in get_dashboard_panels(_dashboard())}
+    for panel_id in (9018, 9019, 9020):
+        panel = panels[panel_id]
+        assert panel.get("type") == "state-timeline"
+        assert panel.get("options", {}).get("showValue") == "never"
+        expr = "\n".join(
+            str(target.get("expr", ""))
+            for target in panel.get("targets") or []
+            if isinstance(target, dict)
+        )
+        assert "${pipeline:text}" in expr
+        assert "${run_type:text}" in expr
+        assert 'pipeline=~"$pipeline"' in expr

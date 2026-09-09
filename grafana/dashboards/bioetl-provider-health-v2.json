@@ -1812,6 +1812,10 @@
                 },
                 "properties": [
                   {
+                    "id": "custom.width",
+                    "value": 130
+                  },
+                  {
                     "id": "custom.minWidth",
                     "value": 130
                   }
@@ -2032,8 +2036,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text",
-                      "mode": "basic",
+                      "type": "auto",
                       "wrapText": false
                     }
                   }
@@ -2235,8 +2238,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text",
-                      "mode": "basic",
+                      "type": "auto",
                       "wrapText": false
                     }
                   }
@@ -4245,6 +4247,13 @@
                   {
                     "id": "custom.align",
                     "value": "left"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
                   }
                 ]
               },
