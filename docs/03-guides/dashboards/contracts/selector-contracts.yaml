@@ -545,6 +545,7 @@ ship_now_selector_contract_by_uid:
       - pipeline
       - run_type
       - run_id
+      - read_latency_quantile
     time_range: grafana_builtin
   bioetl-overview-v2:
     visible_selectors:
