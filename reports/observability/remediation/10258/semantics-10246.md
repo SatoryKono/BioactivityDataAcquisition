@@ -264,3 +264,42 @@ backend.
 1. Anti-hedge инвариант намеренно узкий: класс
  `SELECT RUN … VALID EMPTY if …` (control-plane, runtime, dq, overview,
  run-explorer) пока не покрыт гейтом. Ужесточение — после #10251/#10253.
+1. Рабочее дерево во время работы над #10246 многократно сбрасывалось,
+ коммитилось и переключалось между ветками параллельными агентами stream 1.
+ Патч #10246 воспроизводим идемпотентным скриптом
+ `reports/observability/remediation/10258/apply_10246.py`; если правки снова
+ окажутся затёрты, восстановление — один запуск этого скрипта.
+
+## 10. Доказательства валидации
+
+Required-набор на стабильном снимке дерева — 83 passed, 0 failed:
+
+```
+tests/integration/test_grafana_dashboard_metric_semantics.py
+tests/integration/test_dashboard_operator_readability.py
+tests/integration/test_dashboard_first_window_noscroll.py
+tests/integration/test_dashboard_qa_check_gates.py
+```
+
+Промежуточные прогоны содержали до 36 посторонних падений из файлов других
+агентов (в один момент `grafana/dashboards/bioetl-dq-v2.json` был невалидным
+JSON). Для чистой атрибуции использован
+`reports/observability/remediation/10258/attribute_10246.py`: он дважды подряд
+гоняет required-набор на одном дереве — с патчем #10246 и с четырьмя своими
+файлами, восстановленными из `HEAD` (без обращения к git index). Результат:
+
+```
+failures attributable to #10246: 0
+failures only without the patch: 0
+pre-existing/concurrent failures: 36
+```
+
+Дополнительные зелёные гейты: `check-dashboard-visual-semantics`,
+`validate_dashboard_content_contract`,
+`generate_dashboard_content_contract --check`,
+`report-dashboard-query-duplicates --check`,
+`report-dashboard-promql-scope --check`,
+`check-dashboard-performance-budgets`.
+`max_first_screen_expr_chars` для provider-health остался `188`: `9103` живёт в
+свёрнутом ряду `9106` и не входит в first-load-окно, поэтому удлинение запроса
+не тратит бюджет.

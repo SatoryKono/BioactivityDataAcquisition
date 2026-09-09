@@ -4202,7 +4202,7 @@
           "id": 150,
           "description": "Compact handoff note for aggregate control-plane symptoms. Keep this as footer guidance only; operational evidence still lives in `0. Control Plane` and its runbook surfaces",
           "options": {
-            "content": "<div style=\"padding:2px 8px;font-size:16px;line-height:1.25;overflow:hidden\"><strong>Aggregate control-plane handoff</strong> — <a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Trust</a> for store/manifest failures and fleet-wide control-plane reliability. Use when DQ impact is global. <a href="/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}">Back to top</a>.</div>",
+            "content": "<div style=\"padding:2px 8px;font-size:16px;line-height:1.25;overflow:hidden\"><strong>Aggregate control-plane handoff</strong> — <a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Trust</a> for store/manifest failures and fleet-wide control-plane reliability. Use when DQ impact is global. <a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Back to top</a>.</div>",
             "mode": "html"
           },
           "title": "Inspect Aggregate Control-Plane Issues",
