@@ -432,6 +432,11 @@ required_panel_links_by_uid:
     target_uid: bioetl-run-explorer-v1
     link_titles:
     - Open Run Explorer
+  bioetl-run-explorer-v1:
+  - panel_id: 3012
+    target_uid: bioetl-dq-v2
+    link_titles:
+    - Open Data Quality
 default_time_refresh_policy:
   L0:
     dashboards:

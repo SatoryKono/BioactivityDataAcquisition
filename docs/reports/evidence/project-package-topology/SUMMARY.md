@@ -2,9 +2,9 @@
 
 Refresh note (2026-09-07): Run Explorer adds the report-section ordering module and isolates summary I/O from the health server executor. Counts and the source fingerprint below come from the canonical source inventory. Coverage measurements come from successful coverage-verify for 93cf65f495 (CI run 34151672662). Historical notes remain historical.
 
-`source_tree_sha256=3bd6e0b20e190e5be94697e7432cfa83865f053700b5c121f0a084730be1af4c`
+`source_tree_sha256=196110f16049e51bde60504010f665a2bc44a4d9683d0ea7d412ef7a804e41c6`
 
-`source_module_count=2469`
+`source_module_count=2471`
 
 Дата: 2026-08-17
 Статус: refreshed
@@ -85,10 +85,10 @@ Collected: `6`
   for source, config, tests, scripts, docs, and reports.
 - `src/bioetl/` reflects the intended layered architecture through distinct
   first-order package groups.
-- Current Python file count under `src/bioetl` is `2469`, including two
+- Current Python file count under `src/bioetl` is `2471`, including two
   top-level package modules outside the five first-order architecture layers.
 - Current layer file counts are: `domain=608`, `application=772`,
-  `infrastructure=632`, `composition=295`, `interfaces=160`.
+  `infrastructure=632`, `composition=295`, `interfaces=162`.
 - Current first-order package counts (direct child directories with `__init__.py`)
   are: `domain=22`, `application=7`, `infrastructure=19`, `composition=6`,
   `interfaces=2`.
@@ -108,6 +108,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `3bd6e0b20e190e5be94697e7432cfa83865f053700b5c121f0a084730be1af4c`
+- source_tree_sha256: `196110f16049e51bde60504010f665a2bc44a4d9683d0ea7d412ef7a804e41c6`
 
-`source_module_count=2469`
+`source_module_count=2471`

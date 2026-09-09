@@ -14,7 +14,7 @@
   "schema_version": 1,
   "source": "grafana/dashboards/*.json",
   "target_counts": {
-    "http": 34,
+    "http": 35,
     "loki": 0,
     "promql": 173,
     "tempo": 0,
@@ -1564,12 +1564,13 @@
       "kind": "http",
       "panel_id": 9402,
       "panel_title": "Review Run Summary",
-      "query": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+      "query": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}",
       "query_tokens": [
         "/ops/control-plane/identity-table",
         "pipeline",
         "run_type",
-        "run_id"
+        "run_id",
+        "timezone"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -1834,6 +1835,30 @@
         "error_as_row"
       ],
       "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": "none"
+    },
+    {
+      "coverage_class": null,
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "empty_state": "valid_empty",
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9416,
+      "panel_title": "Review Retention Compliance",
+      "query": "/ops/control-plane/retention-compliance?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&error_as_row=1",
+      "query_tokens": [
+        "/ops/control-plane/retention-compliance",
+        "pipeline",
+        "run_type",
+        "run_id",
+        "error_as_row"
+      ],
+      "ref_id": "B",
       "runbook_urls": [],
       "thresholds": [],
       "unit": "none"
@@ -2719,12 +2744,13 @@
       "kind": "http",
       "panel_id": 9402,
       "panel_title": "Inspect Run Identity",
-      "query": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+      "query": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}",
       "query_tokens": [
         "/ops/control-plane/identity-table",
         "pipeline",
         "run_type",
-        "run_id"
+        "run_id",
+        "timezone"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -2906,7 +2932,9 @@
         "ALERTS"
       ],
       "ref_id": "A",
-      "runbook_urls": [],
+      "runbook_urls": [
+        "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md"
+      ],
       "thresholds": [
         {
           "color": "gray",
@@ -3476,11 +3504,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
-      "formula": "max by (pipeline,run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"$pipeline\",\"\",\"\"),\"run_type\",\"$run_type\",\"\",\"\")",
+      "formula": "max by (pipeline,run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
       "kind": "promql",
       "panel_id": 9018,
       "panel_title": "Track Runtime Blockers",
-      "query": "max by (pipeline,run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"$pipeline\",\"\",\"\"),\"run_type\",\"$run_type\",\"\",\"\")",
+      "query": "max by (pipeline,run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
       "query_tokens": [
         "bioetl_l1_runtime_blocker_status"
       ],
@@ -3509,11 +3537,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
-      "formula": "max by (pipeline,run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"$pipeline\",\"\",\"\"),\"run_type\",\"$run_type\",\"\",\"\")",
+      "formula": "max by (pipeline,run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
       "kind": "promql",
       "panel_id": 9019,
       "panel_title": "Track Data Quality Status",
-      "query": "max by (pipeline,run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"$pipeline\",\"\",\"\"),\"run_type\",\"$run_type\",\"\",\"\")",
+      "query": "max by (pipeline,run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
       "query_tokens": [
         "bioetl_l1_dq_status"
       ],
@@ -3542,11 +3570,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
-      "formula": "max by (pipeline,run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"$pipeline\",\"\",\"\"),\"run_type\",\"$run_type\",\"\",\"\")",
+      "formula": "max by (pipeline,run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
       "kind": "promql",
       "panel_id": 9020,
       "panel_title": "Track Gold Lifecycle",
-      "query": "max by (pipeline,run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"$pipeline\",\"\",\"\"),\"run_type\",\"$run_type\",\"\",\"\")",
+      "query": "max by (pipeline,run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
       "query_tokens": [
         "bioetl_l1_gold_lifecycle_status"
       ],
@@ -3620,12 +3648,13 @@
       "kind": "http",
       "panel_id": 9300,
       "panel_title": "Review Run Identity",
-      "query": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+      "query": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}",
       "query_tokens": [
         "/ops/control-plane/identity-table",
         "pipeline",
         "run_type",
-        "run_id"
+        "run_id",
+        "timezone"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -4609,12 +4638,13 @@
       "kind": "http",
       "panel_id": 9402,
       "panel_title": "Inspect Run Identity",
-      "query": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+      "query": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}",
       "query_tokens": [
         "/ops/control-plane/identity-table",
         "pipeline",
         "run_type",
-        "run_id"
+        "run_id",
+        "timezone"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -4790,12 +4820,13 @@
       "kind": "http",
       "panel_id": 3022,
       "panel_title": "Inspect Run Identity",
-      "query": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+      "query": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}",
       "query_tokens": [
         "/ops/control-plane/identity-table",
         "pipeline",
         "run_type",
-        "run_id"
+        "run_id",
+        "timezone"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -6145,12 +6176,13 @@
       "kind": "http",
       "panel_id": 9402,
       "panel_title": "Inspect Pipeline Identity",
-      "query": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+      "query": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}",
       "query_tokens": [
         "/ops/control-plane/identity-table",
         "pipeline",
         "run_type",
-        "run_id"
+        "run_id",
+        "timezone"
       ],
       "ref_id": "A",
       "runbook_urls": [],

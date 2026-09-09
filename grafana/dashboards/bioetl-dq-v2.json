@@ -4166,7 +4166,7 @@
             }
           ],
           "options": {
-            "content": "<div style=\"padding:2px 8px;font-size:16px;line-height:1.25;overflow:hidden\"><strong>Lineage handoff</strong> — <a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Control Plane</a> for lineage trust, checkpoint integrity, and replay blockers. Preserve time range + pipeline scope.</div>",
+            "content": "<div style=\"padding:2px 8px;font-size:16px;line-height:1.25;overflow:hidden\"><strong>Lineage handoff</strong> — open the canonical <a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Control Plane</a> for lineage trust, checkpoint integrity, and replay blockers. Preserve time range + pipeline scope.</div>",
             "dataLinks": [
               {
                 "includeVars": false,

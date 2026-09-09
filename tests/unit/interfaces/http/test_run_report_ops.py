@@ -44,6 +44,13 @@ from bioetl.interfaces.http._health_server_observability_routing import (
     _table_shape_pipeline_run_report,
     _unresolved_pipeline_run_report_shell,
 )
+from bioetl.interfaces.http._pipeline_run_report_display import (
+    _reason_operator_label,
+    _removals_summary,
+    _shape_artifacts_display,
+    _shape_funnel_rows,
+    _shape_reasons_display,
+)
 from bioetl.interfaces.http._pipeline_run_report_table import (
     _coverage_chip,
     _coverage_fields,
@@ -51,10 +58,8 @@ from bioetl.interfaces.http._pipeline_run_report_table import (
     _funnel_gold_and_excluded,
     _parse_grafana_ms,
     _parse_iso_to_ms,
-    _removals_summary,
     _scalar_or_json,
     _section_param_value_rows,
-    _shape_funnel_rows,
 )
 from bioetl.interfaces.http.run_report_ops import (
     _normalize_list_owner,
@@ -798,3 +803,28 @@ def test_summary_rows_coverage_window_and_funnel_helpers() -> None:
     assert row["excluded_by_contract"] == "3"
     assert row["covers_selected_run"] == "outside"
     assert row["coverage_chip"] == "OUT OF RANGE"
+
+
+def test_run_report_display_helpers_cover_fallbacks_and_unknown_kinds() -> None:
+    assert _reason_operator_label("not_a_known_code") == "not_a_known_code"
+    assert _shape_reasons_display(
+        {"reasons_top_n_display": [{"reason_code": "x"}]}
+    ) == [{"reason_code": "x"}]
+    assert _shape_reasons_display({"reasons_top_n": ["skip"]}) == []
+    assert (
+        _shape_reasons_display({"reasons_top_n": [{"reason_code": ""}]})[0][
+            "reason_label"
+        ]
+        == ""
+    )
+    unnamed = _shape_artifacts_display({"artifacts": [{"name": ""}]})
+    assert unnamed[0]["title"] == "Artifact"
+    assert unnamed[0]["action"] == "Open"
+    assert _shape_artifacts_display({"artifacts_display": [{"title": "kept"}]}) == [
+        {"title": "kept"}
+    ]
+    json_row = _shape_artifacts_display(
+        {"artifacts": [{"kind": "pipeline_run_report_json"}]}
+    )[0]
+    assert json_row["title"] == "Report JSON"
+    assert json_row["action"] == "Download"

@@ -1036,7 +1036,7 @@
       },
       "options": {
         "showHeader": true,
-        "cellHeight": "lg",
+        "cellHeight": "sm",
         "footer": {
           "show": false,
           "reducer": [

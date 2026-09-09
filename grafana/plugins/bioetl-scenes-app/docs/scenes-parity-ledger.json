@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "83a140f1fbb8e13f834c05fde7b88d32794cbd0508b3aade471e5dd3d94c01f5",
-    "bioetl-dq-v2": "197e3a0b7f85a8e833b08c792382b5a4ddfbac6fc386e1e5bd2854ceb2698c39",
-    "bioetl-incident-v1": "d771384e2377196dfd2c98b0adef5cfbf03daa1e9f4aa974035dab649bdeff70",
-    "bioetl-overview-v2": "f713557831b35bc61ff962a79b4da697a71be775a348cc4c1439e5bbb039dabb",
-    "bioetl-provider-health-v2": "1ec80d08efc02efacbd0c5cccd60d30e8046bf2ab7f6ba41eef811e60f09e4d8",
-    "bioetl-run-explorer-v1": "889ee19cb167172345b4fd26835ab3165ab7b95b9f941c93c331bfe5f00cd25f",
-    "bioetl-runtime": "edcfcf6a89266b5a798ae43b1e2d8ef287c5e97b506b116e162b900776dd88e7"
+    "bioetl-control-plane-v1": "481a0aa2d46bff0edd87b2bb6cbff84284159026564b7de40079cdc7d32c7675",
+    "bioetl-dq-v2": "ffcf1aaa27c472cc4bbaddd30b70df080226221ef1fa8fd3a5f476f24a975d77",
+    "bioetl-incident-v1": "ca0ef0cf966384c729e28e2f94fadabd4efb2ef9055ad2674bab43d6bfcc6cf4",
+    "bioetl-overview-v2": "c041a0862a27d0e4756b968ca1e144416253b5520274b16e9234887d97122b81",
+    "bioetl-provider-health-v2": "cb24d2d0a35eee844fa34d55671a0bfc0cde55462ad308611a2024b147f455c5",
+    "bioetl-run-explorer-v1": "8c2917539de47f4d41463dde1c07ee442cf91df8de4e245d06a26ba5ccff05b9",
+    "bioetl-runtime": "7d627777a9ca41deef8a928f2ca281afd5091d60432f80d7d38514507c667912"
   },
   "panels": [
     {
@@ -115,9 +115,10 @@
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
+          "/ops/control-plane/retention-compliance?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&error_as_row=1",
           "/ops/control-plane/retention-compliance?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&error_as_row=1"
         ],
-        "target_count": 1
+        "target_count": 2
       }
     },
     {
@@ -1084,7 +1085,7 @@
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}"
         ],
         "target_count": 1
       }
@@ -1251,7 +1252,7 @@
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}"
         ],
         "target_count": 1
       }
@@ -2130,7 +2131,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (pipeline,run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"$pipeline\",\"\",\"\"),\"run_type\",\"$run_type\",\"\",\"\")"
+          "max by (pipeline,run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")"
         ],
         "target_count": 1
       }
@@ -2149,7 +2150,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (pipeline,run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"$pipeline\",\"\",\"\"),\"run_type\",\"$run_type\",\"\",\"\")"
+          "max by (pipeline,run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")"
         ],
         "target_count": 1
       }
@@ -2168,7 +2169,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (pipeline,run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"$pipeline\",\"\",\"\"),\"run_type\",\"$run_type\",\"\",\"\")"
+          "max by (pipeline,run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")"
         ],
         "target_count": 1
       }
@@ -2376,7 +2377,7 @@
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}"
         ],
         "target_count": 1
       }
@@ -2979,7 +2980,7 @@
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}"
         ],
         "target_count": 1
       }
@@ -3070,7 +3071,7 @@
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}"
         ],
         "target_count": 1
       }
@@ -3815,7 +3816,7 @@
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}"
         ],
         "target_count": 1
       }
