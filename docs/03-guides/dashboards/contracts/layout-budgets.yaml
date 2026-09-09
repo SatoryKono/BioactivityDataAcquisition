@@ -355,3 +355,20 @@ allowlists:
         Collapsed Range & Debug Evidence row (h=1) is below-fold forensic
         evidence, not a first-screen scalar group.
       retire_when: range/debug evidence is represented by first-window scalar cards
+    - dashboard: bioetl-dq-v2.json
+      id: 9404
+      owner: "@bioetl-observability"
+      rationale: >-
+        Collapsed Selected Range · Impact & Freshness row (h=1, y=19) is
+        below-fold range evidence after #10253 moved selected-run accounting
+        onto the first screen. Density cannot exceed the first-screen floor
+        without adding first-window scalar cards.
+      retire_when: selected-range impact/freshness is represented by first-window scalar cards
+    - dashboard: bioetl-dq-v2.json
+      id: 220
+      owner: "@bioetl-observability"
+      rationale: >-
+        Collapsed Selected Range · Reject Evidence row (h=1, y=20) is
+        below-fold range evidence, not a first-screen scalar group.
+      retire_when: selected-range reject evidence is represented by first-window scalar cards
+
