@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-09T22:56:42.405613+00:00",
+  "generated_at": "2026-09-09T23:21:43.928663+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -17959,7 +17959,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_github_actions_runtime_policy.py",
-          "line": 132,
+          "line": 128,
           "source_group": "scripts",
           "text": "vs this list is reviewed by `github_settings_review.py`, not here."
         },
