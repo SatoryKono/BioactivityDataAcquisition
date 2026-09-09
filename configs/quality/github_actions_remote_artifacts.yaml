@@ -19,3 +19,12 @@ artifacts:
       Official CodeRabbit CLI linux-x64 zip. Digest taken from
       https://cli.coderabbit.ai/releases/0.7.5/SHA256SUMS and independently
       hashed. Bump version+digest together; do not follow /releases/latest.
+  - id: trivy-cli-linux-64bit
+    version: "0.70.0"
+    url: https://github.com/aquasecurity/trivy/releases/download/v0.70.0/trivy_0.70.0_Linux-64bit.tar.gz
+    sha256: 8b4376d5d6befe5c24d503f10ff136d9e0c49f9127a4279fd110b727929a5aa9
+    notes: >
+      Official Trivy Linux-64bit tarball. Digest taken from
+      https://github.com/aquasecurity/trivy/releases/download/v0.70.0/trivy_0.70.0_checksums.txt
+      and independently hashed. Used by .github/actions/install-trivy because
+      aquasecurity/setup-trivy is not on the org Actions allowlist.

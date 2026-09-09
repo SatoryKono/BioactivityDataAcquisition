@@ -1,21 +1,21 @@
 version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
-source_branch: chore/branch-hygiene-inventory-10266
-refreshed_at_utc: '2026-09-09T21:50:00+00:00'
+source_branch: main
+refreshed_at_utc: '2026-09-09T22:40:00+00:00'
 refresh_status: captured
-source_commit: 07aed8a80a7c53a66b3a1ebac1f528f396df6856
-source_run_id: '34408395148'
-source_event: pull_request
-source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34408395148
-source_tree_sha256: 6a4fcfb58dd5044407100e3954410ba27b81dc6267c3f4091092695415d5f964
+source_commit: f106e46f1d8eea4335e558488e120bb09aff4a42
+source_run_id: '34408858880'
+source_event: push
+source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34408858880
+source_tree_sha256: 7cc20b7a2233200cb925a5de728eb13ee73844c3f27fa65d8e7f9cdf196b18d7
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
 artifact_inputs:
   coverage_xml: reports/coverage/coverage.xml
   coverage_log: null
-  coverage_percent_fallback: null
+  coverage_percent_fallback: 96.73
   slowest_tests_json: reports/test-telemetry/slowest-tests.json
   junit_inputs: []
 coverage:

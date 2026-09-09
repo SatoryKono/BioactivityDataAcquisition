@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-09T19:33:50.724697+00:00",
+  "generated_at": "2026-09-09T22:55:03.168657+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -5770,7 +5770,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 177,
+          "line": 179,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.data_quality"
         },
@@ -6016,7 +6016,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 81,
+          "line": 83,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.diagrams generate-dataflows \\"
         },
@@ -6130,13 +6130,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 290,
+          "line": 292,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 410,
+          "line": 412,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
@@ -6187,7 +6187,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 432,
+          "line": 434,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_quality_gates.py \\"
         },
@@ -6264,7 +6264,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 421,
+          "line": 423,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_visual_smoke.py \\"
         },
@@ -6342,13 +6342,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 293,
+          "line": 295,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 415,
+          "line": 417,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
@@ -6778,7 +6778,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 427,
+          "line": 429,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/fix/harmonize_link_styles.py --dry-run --fail-on-errors"
         },
@@ -7074,7 +7074,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 365,
+          "line": 367,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/lint_diagrams.py \"${lint_targets[@]}\" --json > /tmp/diagram-lint.json"
         },
@@ -7119,7 +7119,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 368,
+          "line": 370,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -7395,7 +7395,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 88,
+          "line": 90,
           "source_group": "ci",
           "text": "scripts/diagrams/render/generate_package_family_class_diagrams.py --check"
         },
@@ -7867,7 +7867,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 324,
+          "line": 326,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -8233,7 +8233,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 166,
+          "line": 168,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.docs check-links --report-json reports/docs-link-check-report.json"
         },
@@ -10144,7 +10144,7 @@
       "references": [
         {
           "path": ".github/workflows/quality-debt-weekly.yml",
-          "line": 34,
+          "line": 36,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/report_quality_debt_weekly.py \\"
         },
@@ -13386,7 +13386,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 50,
+          "line": 52,
           "source_group": "ci",
           "text": "- 'scripts/engineering/qa/check_xwalk_missing_backlog.py'"
         },
@@ -14110,13 +14110,13 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 184,
+          "line": 186,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 188,
+          "line": 190,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --update"
         },
@@ -17261,13 +17261,13 @@
         },
         {
           "path": ".github/workflows/compiled-artifacts-block.yml",
-          "line": 46,
+          "line": 48,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo check-cleanliness"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 163,
+          "line": 165,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo check-versions"
         },
@@ -17535,7 +17535,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 485,
+          "line": 504,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -19470,7 +19470,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 405,
+          "line": 424,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }
@@ -22744,7 +22744,7 @@
         },
         {
           "path": ".github/workflows/quality-debt-weekly.yml",
-          "line": 43,
+          "line": 45,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.schema analyze-gaps"
         },
@@ -22948,7 +22948,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 31,
+          "line": 33,
           "source_group": "ci",
           "text": "- 'scripts/schema/analysis/generate_unified_schema_map.py'"
         },
