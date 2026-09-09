@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "83a140f1fbb8e13f834c05fde7b88d32794cbd0508b3aade471e5dd3d94c01f5",
-    "bioetl-dq-v2": "197e3a0b7f85a8e833b08c792382b5a4ddfbac6fc386e1e5bd2854ceb2698c39",
-    "bioetl-incident-v1": "d771384e2377196dfd2c98b0adef5cfbf03daa1e9f4aa974035dab649bdeff70",
-    "bioetl-overview-v2": "f713557831b35bc61ff962a79b4da697a71be775a348cc4c1439e5bbb039dabb",
-    "bioetl-provider-health-v2": "1ec80d08efc02efacbd0c5cccd60d30e8046bf2ab7f6ba41eef811e60f09e4d8",
-    "bioetl-run-explorer-v1": "889ee19cb167172345b4fd26835ab3165ab7b95b9f941c93c331bfe5f00cd25f",
-    "bioetl-runtime": "edcfcf6a89266b5a798ae43b1e2d8ef287c5e97b506b116e162b900776dd88e7"
+    "bioetl-control-plane-v1": "d464819661f24fd93999926565a2c5496cd3f311d65d80ff9457bafb548a82cc",
+    "bioetl-dq-v2": "e8e469c9aec8cd285cebee7369b2f1005fe862c49074a29b220618176e96cb20",
+    "bioetl-incident-v1": "f946ce941c2500071318c158e7081b44240ba0649d0815bc7cb05a6ae5458ec1",
+    "bioetl-overview-v2": "bd2da4fcc6d0a444e270d87ea52439aa1ea1c94a815cb0c5c904d217200fd070",
+    "bioetl-provider-health-v2": "cd01a7359c5856b58aaa7c49edfec736df3c7315debac580f9ae335089cb793a",
+    "bioetl-run-explorer-v1": "f86338e554a310c1ac96c445a6ddd6eb91bc549c887dd3279a373e3fe48226a9",
+    "bioetl-runtime": "1569b44ed635e81bcdd0c5ffe98e60233039a4fc0a1798864410b047497c9372"
   },
   "panels": [
     {
@@ -115,9 +115,10 @@
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
+          "/ops/control-plane/retention-compliance?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&error_as_row=1",
           "/ops/control-plane/retention-compliance?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&error_as_row=1"
         ],
-        "target_count": 1
+        "target_count": 2
       }
     },
     {
@@ -1084,7 +1085,7 @@
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}"
         ],
         "target_count": 1
       }
@@ -1244,6 +1245,25 @@
       "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-dq-v2",
+      "panel_id": 9406,
+      "panel_title": "Review Selected Run Summary",
+      "route": "data-trust-recovery",
+      "source": {
+        "datasource_type": null,
+        "datasource_uid": null,
+        "expressions": [
+          "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}&view=summary&from=${__from}&to=${__to}"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-dq-v2",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-dq-v2",
       "panel_id": 9402,
       "panel_title": "Inspect Run Identity",
       "route": "data-trust-recovery",
@@ -1251,7 +1271,7 @@
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}"
         ],
         "target_count": 1
       }
@@ -1271,25 +1291,6 @@
         "datasource_uid": null,
         "expressions": [
           "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
-        ],
-        "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-dq-v2",
-      "disposition": "advanced-evidence",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-dq-v2",
-      "panel_id": 9406,
-      "panel_title": "Review Selected Run Summary",
-      "route": "data-trust-recovery",
-      "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
-        "expressions": [
-          "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}&view=summary&from=${__from}&to=${__to}"
         ],
         "target_count": 1
       }
@@ -2130,7 +2131,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (pipeline,run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"$pipeline\",\"\",\"\"),\"run_type\",\"$run_type\",\"\",\"\")"
+          "max by (pipeline,run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")"
         ],
         "target_count": 1
       }
@@ -2149,7 +2150,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (pipeline,run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"$pipeline\",\"\",\"\"),\"run_type\",\"$run_type\",\"\",\"\")"
+          "max by (pipeline,run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")"
         ],
         "target_count": 1
       }
@@ -2168,7 +2169,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (pipeline,run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"$pipeline\",\"\",\"\"),\"run_type\",\"$run_type\",\"\",\"\")"
+          "max by (pipeline,run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")"
         ],
         "target_count": 1
       }
@@ -2376,7 +2377,7 @@
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}"
         ],
         "target_count": 1
       }
@@ -2560,7 +2561,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "topk(4, max by (provider, cause) (bioetl_provider_current_cause) > 0)"
+          "topk(4, max by (provider, cause) (bioetl_provider_current_cause) > 0) or label_replace(((count(max by (provider) (bioetl_provider_current_status)) > bool 0) * (count(max by (provider) (bioetl_provider_current_cause)) > bool 0) * absent(max by (provider) (bioetl_provider_current_status) != 0) * absent(max by (provider) (bioetl_provider_current_status) unless on(provider) max by (provider) (bioetl_provider_health_status)) * absent(max by (provider, cause) (bioetl_provider_current_cause) > 0)), \"cause\", \"VALID EMPTY - FLEET coverage proven, no active provider causes\", \"\", \"\") or label_replace((absent(max by (provider, cause) (bioetl_provider_current_cause) > 0) unless ((count(max by (provider) (bioetl_provider_current_status)) > bool 0) * (count(max by (provider) (bioetl_provider_current_cause)) > bool 0) * absent(max by (provider) (bioetl_provider_current_status) != 0) * absent(max by (provider) (bioetl_provider_current_status) unless on(provider) max by (provider) (bioetl_provider_health_status)) * absent(max by (provider, cause) (bioetl_provider_current_cause) > 0))), \"cause\", \"UNKNOWN - FLEET cause coverage unproven, restore provider telemetry\", \"\", \"\")"
         ],
         "target_count": 1
       }
@@ -2617,7 +2618,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (provider, cause) (bioetl_provider_current_cause) > 0"
+          "(max by (provider, cause) (bioetl_provider_current_cause) > 0) or label_replace(((count(max by (provider) (bioetl_provider_current_status)) > bool 0) * (count(max by (provider) (bioetl_provider_current_cause)) > bool 0) * absent(max by (provider) (bioetl_provider_current_status) != 0) * absent(max by (provider) (bioetl_provider_current_status) unless on(provider) max by (provider) (bioetl_provider_health_status)) * absent(max by (provider, cause) (bioetl_provider_current_cause) > 0)), \"cause\", \"VALID EMPTY - FLEET coverage proven, no active provider causes\", \"\", \"\") or label_replace((absent(max by (provider, cause) (bioetl_provider_current_cause) > 0) unless ((count(max by (provider) (bioetl_provider_current_status)) > bool 0) * (count(max by (provider) (bioetl_provider_current_cause)) > bool 0) * absent(max by (provider) (bioetl_provider_current_status) != 0) * absent(max by (provider) (bioetl_provider_current_status) unless on(provider) max by (provider) (bioetl_provider_health_status)) * absent(max by (provider, cause) (bioetl_provider_current_cause) > 0))), \"cause\", \"UNKNOWN - FLEET cause coverage unproven, restore provider telemetry\", \"\", \"\")"
         ],
         "target_count": 1
       }
@@ -2979,7 +2980,7 @@
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}"
         ],
         "target_count": 1
       }
@@ -3070,7 +3071,7 @@
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}"
         ],
         "target_count": 1
       }
@@ -3462,7 +3463,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "sum by(stage, error_code) (increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\",stage!~\"none.*\"}[$__range])) or label_replace(label_replace(vector(0), \"stage\", \"none\", \"\", \"\"), \"error_code\", \"none\", \"\", \"\")"
+          "sum by(stage, error_code) (increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\",stage!~\"none.*\"}[$__range]))"
         ],
         "target_count": 1
       }
@@ -3481,7 +3482,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "sum by(stage, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\",stage!~\"none.*\"}[$__range])) or label_replace(label_replace(vector(0), \"stage\", \"none\", \"\", \"\"), \"run_type\", \"none\", \"\", \"\")"
+          "sum by(stage, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\",stage!~\"none.*\"}[$__range]))"
         ],
         "target_count": 1
       }
@@ -3815,7 +3816,7 @@
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}"
         ],
         "target_count": 1
       }

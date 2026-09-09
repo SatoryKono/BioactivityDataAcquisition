@@ -139,7 +139,7 @@
           "value": "-"
         },
         "datasource": "BioETL Ops HTTP",
-        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
+        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
         "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
         "hide": 0,
         "includeAll": false,
@@ -166,7 +166,19 @@
               "method": "GET",
               "data": ""
             },
-            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}"
+            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
           }
         },
         "refresh": 1,
@@ -368,7 +380,7 @@
                 },
                 "1": {
                   "text": "WARN",
-                  "color": "orange"
+                  "color": "#bd5907"
                 },
                 "2": {
                   "text": "CRIT",
@@ -376,7 +388,7 @@
                 },
                 "3": {
                   "text": "UNKNOWN",
-                  "color": "#555555"
+                  "color": "gray"
                 }
               }
             },
@@ -386,7 +398,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "#555555"
+                  "color": "gray"
                 }
               }
             }
@@ -407,7 +419,7 @@
                 "value": 2
               },
               {
-                "color": "#555555",
+                "color": "gray",
                 "value": 3
               }
             ]
@@ -449,7 +461,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Start Incident Triage",
-        "content": "<div style=\"font-size:16px;line-height:1.25;padding:0;white-space:normal;overflow-wrap:anywhere\">GLOBAL · CURRENT · CRIT before WARN; ties are equally urgent. Signal ≠ verified cause. Impact and event age: UNKNOWN.</div>"
+        "content": "<div style=\"font-size:16px;line-height:1.25;padding:0;white-space:normal;overflow-wrap:anywhere\">GLOBAL · CURRENT · Rank: CRIT before WARN; ties have equal urgency. Confidence: signal only, unverified cause. Impact / event age: UNKNOWN until verified.</div>"
       },
       "links": [
         {
@@ -607,7 +619,7 @@
           "custom": {
             "align": "left",
             "cellOptions": {
-              "type": "color-text",
+              "type": "auto",
               "wrapText": true
             },
             "inspect": true,
@@ -615,8 +627,7 @@
             "minWidth": 50
           },
           "color": {
-            "mode": "fixed",
-            "fixedColor": "text"
+            "mode": "thresholds"
           },
           "thresholds": {
             "mode": "absolute",
@@ -675,6 +686,10 @@
             },
             "properties": [
               {
+                "id": "custom.width",
+                "value": 48
+              },
+              {
                 "id": "mappings",
                 "value": []
               },
@@ -685,10 +700,6 @@
               {
                 "id": "custom.hidden",
                 "value": false
-              },
-              {
-                "id": "custom.width",
-                "value": 48
               }
             ]
           },
@@ -699,6 +710,10 @@
             },
             "properties": [
               {
+                "id": "custom.width",
+                "value": 100
+              },
+              {
                 "id": "mappings",
                 "value": [
                   {
@@ -706,11 +721,11 @@
                     "options": {
                       "0": {
                         "text": "UNKNOWN",
-                        "color": "text"
+                        "color": "gray"
                       },
                       "1": {
                         "text": "WARN",
-                        "color": "orange"
+                        "color": "#bd5907"
                       },
                       "2": {
                         "text": "CRIT",
@@ -723,8 +738,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text",
-                  "wrapText": true
+                  "type": "color-text"
                 }
               },
               {
@@ -744,16 +758,16 @@
             },
             "properties": [
               {
+                "id": "custom.width",
+                "value": 112
+              },
+              {
                 "id": "noValue",
                 "value": "UNVERIFIED"
               },
               {
                 "id": "custom.hidden",
                 "value": false
-              },
-              {
-                "id": "custom.width",
-                "value": 100
               }
             ]
           },
@@ -790,7 +804,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text",
+                  "type": "auto",
                   "wrapText": true
                 }
               },
@@ -826,6 +840,10 @@
             },
             "properties": [
               {
+                "id": "custom.width",
+                "value": 100
+              },
+              {
                 "id": "mappings",
                 "value": [
                   {
@@ -847,7 +865,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text",
+                  "type": "auto",
                   "wrapText": true
                 }
               },
@@ -864,13 +882,17 @@
             },
             "properties": [
               {
+                "id": "custom.width",
+                "value": 130
+              },
+              {
                 "id": "noValue",
                 "value": "GLOBAL"
               },
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text",
+                  "type": "auto",
                   "wrapText": true
                 }
               },
@@ -924,9 +946,13 @@
             },
             "properties": [
               {
+                "id": "custom.width",
+                "value": 105
+              },
+              {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text",
+                  "type": "auto",
                   "wrapText": true
                 }
               },
@@ -1107,7 +1133,15 @@
                     "value": 2
                   }
                 ]
-              }
+              },
+              "links": [
+                {
+                  "title": "Open incident response runbook",
+                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md",
+                  "targetBlank": true,
+                  "includeVars": false
+                }
+              ]
             },
             "overrides": [
               {
@@ -1161,6 +1195,12 @@
             "cellHeight": "sm"
           },
           "transformations": [
+            {
+              "id": "limit",
+              "options": {
+                "limitField": 3
+              }
+            },
             {
               "id": "organize",
               "options": {
@@ -1912,7 +1952,7 @@
               "custom": {
                 "align": "left",
                 "cellOptions": {
-                  "type": "color-text"
+                  "type": "auto"
                 },
                 "inspect": true,
                 "minWidth": 50
@@ -1926,7 +1966,7 @@
                   "targetBlank": true
                 },
                 {
-                  "title": "Set range to run",
+                  "title": "Open run in Run Explorer",
                   "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=3022&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
                   "targetBlank": false,
                   "includeVars": false
@@ -1937,11 +1977,7 @@
                   "targetBlank": false,
                   "includeVars": false
                 }
-              ],
-              "color": {
-                "mode": "fixed",
-                "fixedColor": "text"
-              }
+              ]
             },
             "overrides": [
               {
@@ -1954,7 +1990,7 @@
                     "id": "links",
                     "value": [
                       {
-                        "title": "Set range to run",
+                        "title": "Open run in Run Explorer",
                         "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=3022&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
                         "targetBlank": false,
                         "includeVars": false
@@ -2009,7 +2045,7 @@
                           },
                           "UNKNOWN": {
                             "text": "UNKNOWN",
-                            "color": "text"
+                            "color": "gray"
                           }
                         }
                       }
@@ -2086,7 +2122,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text",
+                      "type": "auto",
                       "wrapText": false
                     }
                   }
@@ -2125,7 +2161,7 @@
                           },
                           "UNKNOWN": {
                             "text": "UNKNOWN",
-                            "color": "text"
+                            "color": "gray"
                           }
                         }
                       }
@@ -2238,7 +2274,7 @@
             "cellHeight": "sm",
             "dataLinks": [
               {
-                "title": "Set range to run",
+                "title": "Open run in Run Explorer",
                 "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=3022&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
                 "targetBlank": false,
                 "includeVars": false

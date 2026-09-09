@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import UTC
+
 from bioetl.domain.control_plane import RunManifest, WorkflowManifest
 from bioetl.interfaces.http._control_plane_selector_filters import (
     filter_records,
@@ -19,6 +21,7 @@ from bioetl.interfaces.http._control_plane_selector_payloads import (
 )
 from bioetl.interfaces.http._control_plane_selector_records import (
     RunLedgerLookup,
+    SelectorRecord,
     build_selector_records,
     build_workflow_aliases,
     narrow_manifest_catalog,
@@ -150,6 +153,27 @@ def _filter_options_response(
     }
 
 
+def _run_option_label(value: str, record: SelectorRecord | None) -> str:
+    """Readable catalog label; Grafana value stays the stable UUID."""
+    if value == RUN_ID_NO_SELECTION:
+        return "SELECT RUN"
+    if record is None:
+        return f"UNKNOWN · {value}"
+    started = record.started_at.astimezone(UTC).strftime("%Y-%m-%d %H:%M")
+    return f"{started} UTC · {record.pipeline} · {record.run_status} · {record.run_id}"
+
+
+def _run_option_labels(
+    values: list[str], records: tuple[SelectorRecord, ...]
+) -> dict[str, object]:
+    by_id = {record.run_id: record for record in records}
+    items = [
+        {"text": _run_option_label(value, by_id.get(value)), "value": value}
+        for value in values
+    ]
+    return {"items": items}
+
+
 def build_selector_filter_options_payload(
     *,
     manifests: tuple[RunManifest, ...],
@@ -173,6 +197,8 @@ def build_selector_filter_options_payload(
         selected_run_statuses,
         ledger_port,
     )
+    if response_shape == "options" and dimension == "run_id":
+        selector_ledger_port = ledger_port
     records = build_selector_records(
         narrow_manifest_catalog(
             manifests,
@@ -205,6 +231,8 @@ def build_selector_filter_options_payload(
         selected_run_id=selected_run_id,
         fallback_value=fallback_value,
     )
+    if response_shape == "options" and dimension == "run_id":
+        return _run_option_labels(values, option_records)
     return _filter_options_response(
         response_shape=response_shape,
         dimension=dimension,

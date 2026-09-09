@@ -152,7 +152,7 @@
           "value": "-"
         },
         "datasource": "BioETL Ops HTTP",
-        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
+        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
         "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
         "hide": 0,
         "includeAll": false,
@@ -179,7 +179,19 @@
               "method": "GET",
               "data": ""
             },
-            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}"
+            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
           }
         },
         "refresh": 1,
@@ -343,7 +355,7 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 16,
         "x": 0,
         "y": 3
@@ -361,7 +373,7 @@
       "type": "stat",
       "title": "Monitor Current DQ Status",
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 8,
         "x": 16,
         "y": 3
@@ -473,10 +485,10 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 3,
+        "h": 2,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 6
       },
       "options": {
         "content": "<div style=\"font-size:16px;line-height:1.15\">OK: review run accounting. WARN/CRIT: inspect reasons. UNKNOWN: verify <a href=\"https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md\">DQ metrics, freshness and source</a>.</div>",
@@ -564,10 +576,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
+        "h": 5,
         "w": 8,
         "x": 0,
-        "y": 10
+        "y": 8
       },
       "id": 9101,
       "options": {
@@ -855,10 +867,10 @@
         ]
       },
       "gridPos": {
-        "h": 7,
+        "h": 5,
         "w": 16,
         "x": 8,
-        "y": 10
+        "y": 8
       },
       "id": 9102,
       "options": {
@@ -931,6 +943,447 @@
       ]
     },
     {
+      "id": 9406,
+      "type": "table",
+      "title": "Review Selected Run Summary",
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "datasource": "BioETL Ops HTTP",
+      "description": "SELECTED RUN · Compact pipeline_run_report_v1 projection (identity, times, gold out, contract exclusions, coverage). Missing run is SELECT RUN, not OK. A selected run with no summary rows is VALID EMPTY, not OK. SELECT RUN is not VALID EMPTY. Set range to run opens 6. Run Explorer at started_at-5m .. <code style='font-size:16px'>completed_at</code>+5m. Do not treat CURRENT Prometheus as this UUID. Backend unavailable means the query could not be evaluated. Verify /health/live. Coverage chip is IN RANGE / OUT OF RANGE / UNKNOWN from covers_selected_run. Set range to run opens Run Explorer 3022 at from_ms..to_ms. A covered run does not show an outside-range warning. Status, coverage and local timestamps precede the UUID. Inspect the Run cell to copy its complete value; range-bound fields remain available to the Set range to run action and panel data inspection.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "color-text"
+            },
+            "inspect": true,
+            "minWidth": 50
+          },
+          "unit": "none",
+          "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first.",
+          "links": [
+            {
+              "title": "Open run in Run Explorer",
+              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=3022&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
+              "targetBlank": false,
+              "includeVars": false
+            },
+            {
+              "title": "Open Run Explorer",
+              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false
+            }
+          ],
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "set_range_to_run"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open run in Run Explorer",
+                    "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=3022&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
+                    "targetBlank": false,
+                    "includeVars": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "run_id"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "coverage_chip"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "coverage"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "IN RANGE": {
+                        "text": "IN RANGE",
+                        "color": "green"
+                      },
+                      "OUT OF RANGE": {
+                        "text": "OUT OF RANGE",
+                        "color": "orange"
+                      },
+                      "UNKNOWN": {
+                        "text": "UNKNOWN",
+                        "color": "text"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              },
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Started"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "time:YYYY-MM-DD HH:mm"
+              },
+              {
+                "id": "custom.width",
+                "value": 152
+              },
+              {
+                "id": "noValue",
+                "value": "—"
+              },
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Completed"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "time:YYYY-MM-DD HH:mm"
+              },
+              {
+                "id": "custom.width",
+                "value": 152
+              },
+              {
+                "id": "noValue",
+                "value": "—"
+              },
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Coverage"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 125
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text",
+                  "wrapText": false
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "IN RANGE": {
+                        "text": "IN RANGE",
+                        "color": "green"
+                      },
+                      "OUT OF RANGE": {
+                        "text": "OUT OF RANGE",
+                        "color": "orange"
+                      },
+                      "UNKNOWN": {
+                        "text": "UNKNOWN",
+                        "color": "text"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Gold"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 76
+              },
+              {
+                "id": "custom.align",
+                "value": "right"
+              },
+              {
+                "id": "unit",
+                "value": "locale"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Excluded"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 76
+              },
+              {
+                "id": "custom.align",
+                "value": "right"
+              },
+              {
+                "id": "unit",
+                "value": "locale"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Run"
+            },
+            "properties": [
+              {
+                "id": "custom.inspect",
+                "value": true
+              },
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              },
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "from_ms"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "to_ms"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false
+        },
+        "cellHeight": "sm",
+        "dataLinks": [
+          {
+            "title": "Open run in Run Explorer",
+            "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=3022&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
+            "targetBlank": false,
+            "includeVars": false
+          },
+          {
+            "title": "Open Run Explorer",
+            "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+            "targetBlank": false,
+            "includeVars": false
+          }
+        ]
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "summary",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}&view=summary&from=${__from}&to=${__to}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
+        }
+      ],
+      "transformations": [
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "targetField": "started_at",
+                "destinationType": "time"
+              },
+              {
+                "targetField": "completed_at",
+                "destinationType": "time"
+              }
+            ]
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "Value": true,
+              "covers_selected_run": true,
+              "coverage_offset": true,
+              "set_range_to_run": true,
+              "started_at": true,
+              "completed_at": true,
+              "run_id": true
+            },
+            "indexByName": {
+              "status": 0,
+              "coverage_chip": 1,
+              "gold_records_out": 2,
+              "excluded_by_contract": 3,
+              "from_ms": 4,
+              "to_ms": 5
+            },
+            "renameByName": {
+              "coverage_chip": "Coverage",
+              "covers_selected_run": "covers_selected_run",
+              "status": "Status",
+              "started_at": "Started",
+              "completed_at": "Completed",
+              "gold_records_out": "Gold",
+              "excluded_by_contract": "Excluded",
+              "run_id": "Run"
+            }
+          }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 1
+          }
+        }
+      ],
+      "links": [
+        {
+          "title": "Open Run Explorer",
+          "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        }
+      ]
+    },
+    {
       "type": "row",
       "title": "Selected Run · Identity & Accounting",
       "collapsed": true,
@@ -938,7 +1391,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 18
       },
       "id": 9405,
       "description": "Expand after selecting an exact Run ID for HTTP-backed identity and accounting evidence.",
@@ -965,7 +1418,7 @@
                 "inspect": true
               },
               "unit": "none",
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity.",
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first.",
               "links": [
                 {
                   "title": "Copy/Open full value (plain text)",
@@ -993,18 +1446,16 @@
                 },
                 "properties": [
                   {
+                    "id": "displayName",
+                    "value": "Parameter"
+                  },
+                  {
                     "id": "custom.width",
-                    "value": 165
+                    "value": 210
                   },
                   {
                     "id": "custom.align",
                     "value": "left"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto"
-                    }
                   }
                 ]
               },
@@ -1015,8 +1466,16 @@
                 },
                 "properties": [
                   {
+                    "id": "displayName",
+                    "value": "Value"
+                  },
+                  {
                     "id": "custom.align",
                     "value": "left"
+                  },
+                  {
+                    "id": "custom.inspect",
+                    "value": true
                   },
                   {
                     "id": "links",
@@ -1033,13 +1492,13 @@
               },
               {
                 "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                  "id": "byName",
+                  "options": "raw_value"
                 },
                 "properties": [
                   {
-                    "id": "displayName",
-                    "value": "value"
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               }
@@ -1057,10 +1516,10 @@
               "format": "table",
               "parser": "backend",
               "refId": "A",
-              "root_selector": "rows",
+              "root_selector": "display_rows",
               "source": "url",
               "type": "json",
-              "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+              "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}",
               "url_options": {
                 "data": "",
                 "method": "GET"
@@ -1075,15 +1534,16 @@
                 "excludeByName": {
                   "Time": true,
                   "__name__": true,
-                  "Value": true
+                  "Value": true,
+                  "raw_value": true
                 },
                 "indexByName": {
                   "parameter": 0,
                   "value": 1
                 },
                 "renameByName": {
-                  "parameter": "parameter",
-                  "value": "value",
+                  "parameter": "Parameter",
+                  "value": "Value",
                   "Value": "value",
                   "Value #A": "Series A",
                   "Value #B": "Series B",
@@ -1117,7 +1577,7 @@
               },
               "decimals": 0,
               "unit": "none",
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run in Inspect Recent Runs. UNKNOWN/QUERY ERROR if a selected run has no accounting.",
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run in Inspect Recent Runs.",
               "links": [
                 {
                   "title": "Check BioETL Ops HTTP health",
@@ -1453,421 +1913,6 @@
               }
             }
           ]
-        },
-        {
-          "id": 9406,
-          "type": "table",
-          "title": "Review Selected Run Summary",
-          "gridPos": {
-            "x": 0,
-            "y": 106,
-            "w": 24,
-            "h": 5
-          },
-          "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Compact pipeline_run_report_v1 projection (identity, times, gold out, contract exclusions, coverage). Missing run is VALID EMPTY / SELECT RUN, not OK. Set range to run opens 6. Run Explorer at started_at-5m .. <code style='font-size:16px'>completed_at</code>+5m. Do not treat CURRENT Prometheus as this UUID. Backend unavailable means the query could not be evaluated. Verify /health/live. Coverage chip is IN RANGE / OUT OF RANGE / UNKNOWN from covers_selected_run. Set range to run opens Run Explorer 3022 at from_ms..to_ms. A covered run does not show an outside-range warning. Status, coverage and local timestamps precede the UUID. Inspect the Run cell to copy its complete value; range-bound fields remain available to the Set range to run action and panel data inspection.",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "align": "left",
-                "cellOptions": {
-                  "type": "color-text"
-                },
-                "inspect": true,
-                "minWidth": 50
-              },
-              "unit": "none",
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no report.",
-              "links": [
-                {
-                  "title": "Set range to run",
-                  "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=3022&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
-                  "targetBlank": false,
-                  "includeVars": false
-                },
-                {
-                  "title": "Open Run Explorer",
-                  "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-                  "targetBlank": false,
-                  "includeVars": false
-                }
-              ],
-              "color": {
-                "mode": "fixed",
-                "fixedColor": "text"
-              }
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "set_range_to_run"
-                },
-                "properties": [
-                  {
-                    "id": "links",
-                    "value": [
-                      {
-                        "title": "Set range to run",
-                        "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=3022&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
-                        "targetBlank": false,
-                        "includeVars": false
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "run_id"
-                },
-                "properties": [
-                  {
-                    "id": "links",
-                    "value": []
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "coverage_chip"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "coverage"
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "IN RANGE": {
-                            "text": "IN RANGE",
-                            "color": "green"
-                          },
-                          "OUT OF RANGE": {
-                            "text": "OUT OF RANGE",
-                            "color": "orange"
-                          },
-                          "UNKNOWN": {
-                            "text": "UNKNOWN",
-                            "color": "text"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "status"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 110
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Started"
-                },
-                "properties": [
-                  {
-                    "id": "unit",
-                    "value": "time:YYYY-MM-DD HH:mm"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 152
-                  },
-                  {
-                    "id": "noValue",
-                    "value": "—"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Completed"
-                },
-                "properties": [
-                  {
-                    "id": "unit",
-                    "value": "time:YYYY-MM-DD HH:mm"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 152
-                  },
-                  {
-                    "id": "noValue",
-                    "value": "—"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Status"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 90
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text",
-                      "wrapText": false
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Coverage"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 125
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text",
-                      "wrapText": false
-                    }
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "IN RANGE": {
-                            "text": "IN RANGE",
-                            "color": "green"
-                          },
-                          "OUT OF RANGE": {
-                            "text": "OUT OF RANGE",
-                            "color": "orange"
-                          },
-                          "UNKNOWN": {
-                            "text": "UNKNOWN",
-                            "color": "text"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Gold"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 76
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "right"
-                  },
-                  {
-                    "id": "unit",
-                    "value": "locale"
-                  },
-                  {
-                    "id": "decimals",
-                    "value": 0
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Excluded"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 76
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "right"
-                  },
-                  {
-                    "id": "unit",
-                    "value": "locale"
-                  },
-                  {
-                    "id": "decimals",
-                    "value": 0
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Run"
-                },
-                "properties": [
-                  {
-                    "id": "custom.inspect",
-                    "value": true
-                  },
-                  {
-                    "id": "links",
-                    "value": []
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "from_ms"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "to_ms"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              }
-            ]
-          },
-          "options": {
-            "showHeader": true,
-            "footer": {
-              "show": false
-            },
-            "cellHeight": "sm",
-            "dataLinks": [
-              {
-                "title": "Set range to run",
-                "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=3022&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
-                "targetBlank": false,
-                "includeVars": false
-              },
-              {
-                "title": "Open Run Explorer",
-                "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-                "targetBlank": false,
-                "includeVars": false
-              }
-            ]
-          },
-          "targets": [
-            {
-              "format": "table",
-              "parser": "backend",
-              "refId": "A",
-              "root_selector": "summary",
-              "source": "url",
-              "type": "json",
-              "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}&view=summary&from=${__from}&to=${__to}",
-              "url_options": {
-                "data": "",
-                "method": "GET"
-              },
-              "expr": ""
-            }
-          ],
-          "transformations": [
-            {
-              "id": "convertFieldType",
-              "options": {
-                "conversions": [
-                  {
-                    "targetField": "started_at",
-                    "destinationType": "time"
-                  },
-                  {
-                    "targetField": "completed_at",
-                    "destinationType": "time"
-                  }
-                ]
-              }
-            },
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": true,
-                  "__name__": true,
-                  "Value": true,
-                  "covers_selected_run": true,
-                  "coverage_offset": true,
-                  "set_range_to_run": true
-                },
-                "indexByName": {
-                  "status": 0,
-                  "coverage_chip": 1,
-                  "started_at": 2,
-                  "completed_at": 3,
-                  "gold_records_out": 4,
-                  "excluded_by_contract": 5,
-                  "run_id": 6,
-                  "from_ms": 7,
-                  "to_ms": 8
-                },
-                "renameByName": {
-                  "coverage_chip": "Coverage",
-                  "covers_selected_run": "covers_selected_run",
-                  "status": "Status",
-                  "started_at": "Started",
-                  "completed_at": "Completed",
-                  "gold_records_out": "Gold",
-                  "excluded_by_contract": "Excluded",
-                  "run_id": "Run"
-                }
-              }
-            }
-          ],
-          "links": [
-            {
-              "title": "Open Run Explorer",
-              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-              "targetBlank": false,
-              "includeVars": false
-            }
-          ]
         }
       ]
     },
@@ -1879,7 +1924,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 19
       },
       "id": 9404,
       "description": "Expand for selected-range impact and freshness after resolving the current reason lane.",
@@ -2411,7 +2456,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 20
       },
       "id": 220,
       "title": "Selected Range · Reject Evidence",
@@ -3221,7 +3266,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 21
       },
       "id": 221,
       "title": "Selected Range · Validation Diagnostics",
@@ -3990,7 +4035,7 @@
                   }
                 }
               ],
-              "noValue": "VALID EMPTY — no events in the selected range (not missing telemetry)"
+              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero). Verify DQ threshold counters, then Monitor Current DQ Status."
             },
             "overrides": []
           },
@@ -4140,7 +4185,7 @@
             }
           ],
           "options": {
-            "content": "<div style=\"padding:2px 8px;font-size:16px;line-height:1.25;overflow:hidden\"><strong>Lineage handoff</strong> — open the canonical Control Plane for lineage trust, checkpoint integrity, and replay blockers. Preserve time range + pipeline scope.</div>",
+            "content": "<div style=\"padding:2px 8px;font-size:16px;line-height:1.25;overflow:hidden\"><strong>Lineage handoff</strong> — <a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">canonical Control Plane</a> for lineage trust, checkpoint integrity, and replay blockers. Preserve time range + pipeline scope.</div>",
             "dataLinks": [
               {
                 "includeVars": false,
@@ -4176,7 +4221,7 @@
           "id": 150,
           "description": "Compact handoff note for aggregate control-plane symptoms. Keep this as footer guidance only; operational evidence still lives in `0. Control Plane` and its runbook surfaces",
           "options": {
-            "content": "<div style=\"padding:2px 8px;font-size:16px;line-height:1.25;overflow:hidden\"><strong>Aggregate control-plane handoff</strong> — open Trust for store/manifest failures and fleet-wide control-plane reliability. Use when DQ impact is global.</div>",
+            "content": "<div style=\"padding:2px 8px;font-size:16px;line-height:1.25;overflow:hidden\"><strong>Aggregate control-plane handoff</strong> — <a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Trust</a> for store/manifest failures and fleet-wide control-plane reliability. Use when DQ impact is global. <a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Back to top</a>.</div>",
             "mode": "html"
           },
           "title": "Inspect Aggregate Control-Plane Issues",

@@ -153,7 +153,7 @@
           "value": "-"
         },
         "datasource": "BioETL Ops HTTP",
-        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
+        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
         "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
         "hide": 0,
         "includeAll": false,
@@ -180,7 +180,19 @@
               "method": "GET",
               "data": ""
             },
-            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}"
+            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
           }
         },
         "refresh": 1,
@@ -656,7 +668,7 @@
     },
     {
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Retention policy, evidence floor, required evidence, snapshot evidence, and archive (five structured rows). UNKNOWN is not a healthy zero. HTTP 504 deadline_exceeded is backend unavailable — refresh; datasource error must not be treated as OK. TIME RANGE · SELECTED RUN retention policy, reproducibility evidence floor, required evidence, and archive support. First-screen table — not inside a collapsed row. UNKNOWN is not a healthy zero. No matching rows are a valid empty result; HTTP 504 deadline_exceeded is backend unavailable — refresh the panel; datasource error must not be treated as OK. SELECT RUN / VALID EMPTY is not OK. These rows are trust_status / retention evidence, not processing_status success.",
+      "description": "SELECTED RUN · Retention policy, evidence floor, required evidence, snapshot evidence, and archive (five structured rows). Check column header is the live summary from payload summary.ok_count / summary.unknown_count (not a hardcoded title). Non-OK statuses sort before OK. UNKNOWN is not a healthy zero. HTTP 504 deadline_exceeded is backend unavailable — refresh; datasource error must not be treated as OK. TIME RANGE · SELECTED RUN retention policy, reproducibility evidence floor, required evidence, and archive support. First-screen table — not inside a collapsed row. UNKNOWN is not a healthy zero. No matching rows are a valid empty result; HTTP 504 deadline_exceeded is backend unavailable — refresh the panel; datasource error must not be treated as OK. SELECT RUN / VALID EMPTY is not OK. These rows are trust_status / retention evidence, not processing_status success.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -686,7 +698,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 80
+                "value": 150
               },
               {
                 "id": "custom.cellOptions",
@@ -694,6 +706,35 @@
                   "type": "auto",
                   "wrapText": false
                 }
+              },
+              {
+                "id": "displayName",
+                "value": "Check"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "retention_policy": {
+                        "text": "Retention policy"
+                      },
+                      "evidence_floor": {
+                        "text": "Evidence floor"
+                      },
+                      "required_evidence": {
+                        "text": "Required evidence"
+                      },
+                      "snapshot_evidence": {
+                        "text": "Snapshots"
+                      },
+                      "archive": {
+                        "text": "Archive"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -709,6 +750,10 @@
                   "type": "auto",
                   "wrapText": false
                 }
+              },
+              {
+                "id": "displayName",
+                "value": "Status"
               }
             ]
           },
@@ -722,7 +767,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -732,6 +777,35 @@
               {
                 "id": "custom.width",
                 "value": 150
+              },
+              {
+                "id": "displayName",
+                "value": "Reason"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "retention_policy_satisfied": {
+                        "text": "Retained by policy"
+                      },
+                      "reproducibility_evidence_within_retention": {
+                        "text": "Within retention"
+                      },
+                      "required_evidence_surfaces_present": {
+                        "text": "Evidence present"
+                      },
+                      "snapshot_lifecycle_evidence_incomplete": {
+                        "text": "Snapshot incomplete"
+                      },
+                      "archive_evidence_not_recorded": {
+                        "text": "Archive missing"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -782,11 +856,83 @@
                 "value": true
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "headline"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ok_count"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "unknown_count"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "warning_count"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "error_count"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "check_count"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
           }
         ]
       },
       "gridPos": {
-        "h": 5,
+        "h": 8,
         "w": 12,
         "x": 12,
         "y": 6
@@ -797,7 +943,13 @@
           "show": false
         },
         "showHeader": true,
-        "cellHeight": "sm"
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "Status",
+            "desc": true
+          }
+        ]
       },
       "targets": [
         {
@@ -850,11 +1002,75 @@
               "type": "string"
             }
           ]
+        },
+        {
+          "expr": "",
+          "format": "table",
+          "parser": "uql",
+          "refId": "B",
+          "root_selector": "summary",
+          "source": "url",
+          "type": "json",
+          "uql": "parse-json | jsonata \"summary.{'headline': $string(ok_count) & ' OK, ' & $string(unknown_count) & ' UNKNOWN', 'ok_count': ok_count, 'unknown_count': unknown_count, 'warning_count': warning_count, 'error_count': error_count, 'check_count': check_count}\"",
+          "url": "/ops/control-plane/retention-compliance?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&error_as_row=1",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "columns": [
+            {
+              "selector": "headline",
+              "text": "headline",
+              "type": "string"
+            },
+            {
+              "selector": "ok_count",
+              "text": "ok_count",
+              "type": "number"
+            },
+            {
+              "selector": "unknown_count",
+              "text": "unknown_count",
+              "type": "number"
+            }
+          ]
         }
       ],
       "title": "Review Retention Compliance",
       "type": "table",
       "transformations": [
+        {
+          "id": "configFromData",
+          "options": {
+            "configRefId": "B",
+            "mappings": [
+              {
+                "fieldName": "headline",
+                "handlerKey": "displayName",
+                "reducerId": "lastNotNull",
+                "targetField": "check"
+              }
+            ]
+          }
+        },
+        {
+          "id": "filterByRefId",
+          "options": {
+            "include": "A"
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "field": "status",
+                "desc": true
+              }
+            ]
+          }
+        },
         {
           "id": "limit",
           "options": {
@@ -887,7 +1103,7 @@
       "title": "",
       "gridPos": {
         "h": 3,
-        "w": 24,
+        "w": 12,
         "x": 0,
         "y": 11
       },
@@ -6044,18 +6260,16 @@
                 },
                 "properties": [
                   {
+                    "id": "displayName",
+                    "value": "Parameter"
+                  },
+                  {
                     "id": "custom.width",
-                    "value": 165
+                    "value": 210
                   },
                   {
                     "id": "custom.align",
                     "value": "left"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto"
-                    }
                   }
                 ]
               },
@@ -6066,8 +6280,16 @@
                 },
                 "properties": [
                   {
+                    "id": "displayName",
+                    "value": "Value"
+                  },
+                  {
                     "id": "custom.align",
                     "value": "left"
+                  },
+                  {
+                    "id": "custom.inspect",
+                    "value": true
                   },
                   {
                     "id": "links",
@@ -6084,13 +6306,13 @@
               },
               {
                 "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                  "id": "byName",
+                  "options": "raw_value"
                 },
                 "properties": [
                   {
-                    "id": "displayName",
-                    "value": "Count"
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               }
@@ -6108,10 +6330,10 @@
               "format": "table",
               "parser": "backend",
               "refId": "A",
-              "root_selector": "rows",
+              "root_selector": "display_rows",
               "source": "url",
               "type": "json",
-              "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+              "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}",
               "url_options": {
                 "data": "",
                 "method": "GET"
@@ -6126,15 +6348,16 @@
                 "excludeByName": {
                   "Time": true,
                   "__name__": true,
-                  "Value": true
+                  "Value": true,
+                  "raw_value": true
                 },
                 "indexByName": {
                   "parameter": 0,
                   "value": 1
                 },
                 "renameByName": {
-                  "parameter": "parameter",
-                  "value": "value",
+                  "parameter": "Parameter",
+                  "value": "Value",
                   "Value": "Count",
                   "Value #A": "Series A",
                   "Value #B": "Series B",

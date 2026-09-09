@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import cast
 
 from bioetl.domain.control_plane import RunManifest
+from bioetl.interfaces.http._identity_display_rows import identity_display_rows
 from bioetl.interfaces.http.control_plane_identity.checkpoint import (
     build_checkpoint_compare,
 )
@@ -45,29 +46,27 @@ def build_control_plane_identity_payload(
     resolved_via: str,
     checkpoint_metadata: dict[str, object] | None = None,
     identity_evidence_summary: dict[str, object] | None = None,
+    timezone: str = "UTC",
 ) -> dict[str, object]:
     """Build the Grafana identity-table payload for one control-plane scope."""
     if resolved_via == "selection_required":
-        return {
-            "pipeline": requested_pipeline,
-            "run_type": list(selected_run_types),
-            "selected_run_id": selected_run_id,
-            "resolved_via": resolved_via,
-            "rows": [],
-        }
-    return {
-        "pipeline": requested_pipeline,
-        "run_type": list(selected_run_types),
-        "selected_run_id": selected_run_id,
-        "resolved_via": resolved_via,
-        "rows": _build_identity_rows(
+        rows: list[dict[str, str]] = []
+    else:
+        rows = _build_identity_rows(
             requested_pipeline=requested_pipeline,
             resolved_manifest=resolved_manifest,
             selected_pipelines=selected_pipelines,
             selected_run_id=selected_run_id,
             checkpoint_metadata=checkpoint_metadata,
             identity_evidence_summary=identity_evidence_summary,
-        ),
+        )
+    return {
+        "pipeline": requested_pipeline,
+        "run_type": list(selected_run_types),
+        "selected_run_id": selected_run_id,
+        "resolved_via": resolved_via,
+        "rows": rows,
+        "display_rows": identity_display_rows(rows, timezone),
     }
 
 

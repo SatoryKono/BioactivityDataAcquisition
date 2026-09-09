@@ -504,7 +504,7 @@ def _assert_overview_run_id_variable_flags(run_id_var: dict) -> None:
 def _assert_overview_run_id_query_url(run_id_query_url: str) -> None:
     assert "/ops/control-plane/filter-options" in run_id_query_url
     assert "dimension=run_id" in run_id_query_url
-    assert "response_shape=list" in run_id_query_url
+    assert "response_shape=options" in run_id_query_url
     assert "workflow=${workflow}" in run_id_query_url
     assert "pipeline=${pipeline}" in run_id_query_url
     assert "run_type=${run_type:csv}" in run_id_query_url
@@ -519,6 +519,10 @@ def _assert_overview_run_id_infinity_query(run_id_query: dict) -> None:
     assert infinity_query.get("parser") == "backend"
     assert infinity_query.get("root_selector") == "$.items"
     assert infinity_query.get("url_options", {}).get("method") == "GET"
+    selectors = {
+        (i.get("selector"), i.get("text")) for i in infinity_query.get("columns") or []
+    }
+    assert selectors >= {("text", "__text"), ("value", "__value")}
     _assert_overview_run_id_query_url(str(infinity_query.get("url", "")))
 
 
@@ -540,10 +544,10 @@ def _assert_overview_identity_panel(dashboard: dict) -> None:
     assert isinstance(identity_targets, list) and len(identity_targets) == 1
     identity_target = identity_targets[0]
     assert identity_target.get("parser") == "backend"
-    assert identity_target.get("root_selector") == "rows"
+    assert identity_target.get("root_selector") == "display_rows"
     assert (
         str(identity_target.get("url", ""))
-        == "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+        == "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}"
     )
 
 
@@ -1691,5 +1695,4 @@ def test_stage_drilldown_variable_is_available_for_runtime_and_dq_dashboards(
         if dashboard_file == "bioetl-runtime.json"
         else "bioetl_records_processed_total"
     )
-    assert f"label_values({expected_source}" in query_text
-    assert "stage" in query_text
+    assert f"label_values({expected_source}" in query_text and "stage" in query_text

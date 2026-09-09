@@ -147,7 +147,7 @@
           "value": "-"
         },
         "datasource": "BioETL Ops HTTP",
-        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
+        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
         "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
         "hide": 0,
         "includeAll": false,
@@ -174,7 +174,19 @@
               "method": "GET",
               "data": ""
             },
-            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}"
+            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
           }
         },
         "refresh": 1,
@@ -877,6 +889,29 @@
                   {
                     "id": "custom.inspect",
                     "value": true
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Copy/Open full value (plain text)",
+                        "url": "data:text/plain,${__value.raw}",
+                        "targetBlank": true,
+                        "includeVars": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "raw_value"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               }
@@ -894,10 +929,10 @@
               "format": "table",
               "parser": "backend",
               "refId": "A",
-              "root_selector": "rows",
+              "root_selector": "display_rows",
               "source": "url",
               "type": "json",
-              "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+              "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}",
               "url_options": {
                 "data": "",
                 "method": "GET"
@@ -1563,6 +1598,52 @@
                     }
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason_label"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 280
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "explain"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Next step"
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Open Data Quality",
+                        "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+                        "targetBlank": false,
+                        "includeVars": false
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -1571,7 +1652,15 @@
             "footer": {
               "show": false
             },
-            "cellHeight": "sm"
+            "cellHeight": "sm",
+            "dataLinks": [
+              {
+                "title": "Open Data Quality",
+                "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+                "targetBlank": false,
+                "includeVars": false
+              }
+            ]
           },
           "targets": [
             {
@@ -1683,6 +1772,28 @@
                     ]
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "title"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Artifact"
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "${__data.fields.action} ${__data.fields.title}",
+                        "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=${__data.fields.format}",
+                        "targetBlank": true
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -1719,15 +1830,19 @@
                   "markdown_path": true,
                   "path": true,
                   "report_path": true,
-                  "artifact_path": true
+                  "artifact_path": true,
+                  "ref": true
                 },
                 "renameByName": {
                   "completed_at": "Completed",
                   "run_id": "Run",
                   "pipeline": "Pipeline",
                   "status": "Status",
-                  "kind": "Artifact",
-                  "name": "Artifact"
+                  "kind": "Format",
+                  "name": "Artifact",
+                  "title": "Artifact",
+                  "action": "Action",
+                  "format": "Format"
                 }
               }
             }

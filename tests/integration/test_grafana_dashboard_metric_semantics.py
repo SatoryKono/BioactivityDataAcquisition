@@ -448,12 +448,12 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
     identity_target = identity.get("targets", [])[0]
     assert identity_target.get("format") == "table"
     assert identity_target.get("parser") == "backend"
-    assert identity_target.get("root_selector") == "rows"
+    assert identity_target.get("root_selector") == "display_rows"
     assert identity_target.get("source") == "url"
     assert identity_target.get("url_options", {}).get("method") == "GET"
     assert identity_target.get("url") == (
         "/ops/control-plane/identity-table?"
-        "pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+        "pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}"
     )
     if dashboard_name == "bioetl-provider-health-v2.json":
         assert "pipeline/run context evidence only" in identity_description
@@ -1848,18 +1848,20 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
             == processed.get("gridPos", {}).get("h")
             == expected_height
         )
-        assert (
-            "valid empty"
-            in str(
-                identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
-            ).lower()
+        identity_no_value = str(
+            identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
         )
-        assert (
-            "query error"
-            in str(
-                processed.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
-            ).lower()
+        processed_no_value = str(
+            processed.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
         )
+        if dashboard_name in {"bioetl-runtime.json", "bioetl-dq-v2.json"}:
+            assert identity_no_value.startswith("SELECT RUN")
+            assert processed_no_value.startswith("SELECT RUN")
+            assert "valid empty" not in identity_no_value.lower()
+            assert "query error" not in processed_no_value.lower()
+        else:
+            assert "valid empty" in identity_no_value.lower()
+            assert "query error" in processed_no_value.lower()
     assert (
         identity.get("options", {}).get("cellHeight")
         == processed.get("options", {}).get("cellHeight")

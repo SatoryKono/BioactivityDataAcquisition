@@ -68,6 +68,86 @@ def test_report_selection_missing_and_loaded_empty_are_distinct(key: str) -> Non
             assert not {"kind", "name", "ref"}.intersection(row)
 
 
+def test_reasons_display_keeps_code_and_adds_operator_label() -> None:
+    shaped = _table_shape_pipeline_run_report(
+        {
+            "reasons_top_n": [
+                {
+                    "reason_code": "gold_contract_schema_failure",
+                    "outcome": "excluded_by_contract",
+                    "count": 17,
+                }
+            ]
+        }
+    )
+    row = shaped["reasons_top_n_display"][0]
+    assert row["reason_code"] == "gold_contract_schema_failure"
+    assert row["reason_label"] == (
+        "Excluded by Gold schema contract (gold_contract_schema_failure)"
+    )
+    assert row["explain"] == "Open Data Quality"
+    assert (
+        "17 Excluded by Gold schema contract"
+        in _table_shape_pipeline_run_report(
+            {
+                "funnel": [
+                    {
+                        "stage_id": "gold",
+                        "removals": [
+                            {
+                                "reason_code": "gold_contract_schema_failure",
+                                "outcome": "excluded_by_contract",
+                                "count": 17,
+                            }
+                        ],
+                    }
+                ]
+            }
+        )["funnel"][0]["removals_summary"]
+    )
+
+
+def test_reasons_and_artifacts_display_skip_non_dict_items() -> None:
+    shaped = _table_shape_pipeline_run_report(
+        {
+            "reasons_top_n": [
+                "skip",
+                {"reason_code": "gold_contract_schema_failure", "count": 2},
+            ],
+            "artifacts": [
+                "skip",
+                {"kind": "pipeline_run_report_json", "ref": "/tmp/report.json"},
+            ],
+        }
+    )
+    assert len(shaped["reasons_top_n_display"]) == 1
+    assert shaped["reasons_top_n_display"][0]["reason_code"] == (
+        "gold_contract_schema_failure"
+    )
+    assert len(shaped["artifacts_display"]) == 1
+    assert shaped["artifacts_display"][0]["format"] == "pipeline_run_report_json"
+
+
+def test_artifacts_display_uses_operator_titles_and_keeps_ref() -> None:
+    ref = "/data/reports/pipeline/chembl_assay/run-1/pipeline-run-report.json"
+    shaped = _table_shape_pipeline_run_report(
+        {
+            "artifacts": [
+                {"kind": "pipeline_run_report_json", "ref": ref},
+                {"kind": "pipeline_run_report_md", "ref": ref.replace(".json", ".md")},
+            ]
+        }
+    )
+    rows = shaped["artifacts_display"]
+    assert [row["title"] for row in rows] == [
+        "Report JSON",
+        "Readable Markdown report",
+    ]
+    assert [row["action"] for row in rows] == ["Download", "Open"]
+    assert rows[0]["ref"] == ref
+    assert rows[0]["format"] == "pipeline_run_report_json"
+
+
 @pytest.mark.parametrize(
     "view", ["overview", "copy_values", "gaps", "anchors", "checkpoint_compare"]
 )
@@ -121,7 +201,9 @@ def test_funnel_display_keeps_gold_and_full_exclusion_reason() -> None:
     rows = result["funnel_display"]
     assert [row["stage_id"] for row in rows] == ["extract", "bronze", "silver", "gold"]
     assert rows[-1]["records_out"] == 983
-    assert rows[-1]["removals_summary"] == "17 gold_contract_schema_failure"
+    assert rows[-1]["removals_summary"] == (
+        "17 Excluded by Gold schema contract (gold_contract_schema_failure)"
+    )
 
 
 @pytest.mark.parametrize(
@@ -135,7 +217,17 @@ def test_loaded_report_display_preserves_reason_and_artifact_fields(
     key: str, row: dict[str, str | int]
 ) -> None:
     result = _table_shape_pipeline_run_report({key: [row]})
-    assert result[f"{key}_display"] == [row]
+    display_row = result[f"{key}_display"][0]
+    assert display_row.items() >= row.items()
+    if key == "reasons_top_n":
+        assert display_row["reason_label"] == (
+            "Excluded by Gold schema contract (gold_contract_schema_failure)"
+        )
+        assert display_row["explain"] == "Open Data Quality"
+    else:
+        assert display_row["title"] == "gold"
+        assert display_row["action"] == "Open"
+        assert display_row["format"] == "gold"
 
 
 @pytest.mark.asyncio

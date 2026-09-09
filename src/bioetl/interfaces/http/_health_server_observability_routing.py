@@ -13,8 +13,10 @@ from bioetl.interfaces.http._forensic_request_budget import (
     forensic_unavailable_payload,
     run_bounded_forensic_operation,
 )
-from bioetl.interfaces.http._pipeline_run_report_table import (
+from bioetl.interfaces.http._pipeline_run_report_sections import (
     _is_unresolved_run_scope,
+)
+from bioetl.interfaces.http._pipeline_run_report_table import (
     _not_found_pipeline_run_report_shell,
     _summary_rows_pipeline_run_report,
     _table_shape_pipeline_run_report,

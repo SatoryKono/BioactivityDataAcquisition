@@ -1,10 +1,10 @@
 # Сводка evidence: project-package-topology
 
-Refresh note (2026-09-07): Run Explorer adds the report-section ordering module and isolates summary I/O from the health server executor. Counts and the source fingerprint below come from the canonical source inventory. Coverage measurements come from successful coverage-verify for 93cf65f495 (CI run 34151672662). Historical notes remain historical.
+Refresh note (2026-09-09): inventory grew to `source_module_count=2470` after adding `bioetl.interfaces.http._identity_display_rows`. Counts and the source fingerprint below come from `reports/quality/module-coverage-inventory.json`. Historical notes remain historical.
 
-`source_tree_sha256=3bd6e0b20e190e5be94697e7432cfa83865f053700b5c121f0a084730be1af4c`
+`source_tree_sha256=2ce86bdc77ad3447589cdcd9f963887abe313e2c5774b29f64f0911f9d87e7b6`
 
-`source_module_count=2469`
+`source_module_count=2470`
 
 Дата: 2026-08-17
 Статус: refreshed
@@ -108,6 +108,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `3bd6e0b20e190e5be94697e7432cfa83865f053700b5c121f0a084730be1af4c`
+- source_tree_sha256: `2ce86bdc77ad3447589cdcd9f963887abe313e2c5774b29f64f0911f9d87e7b6`
 
-`source_module_count=2469`
+`source_module_count=2470`

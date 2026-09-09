@@ -47,22 +47,6 @@ allowed_or_vector_zero:
       Compare Checkpoint Outcomes uses `or label_replace(vector(0), disposition=no_events)`
       as a documented empty-event placeholder series, not a healthy status.
     retire_when: Grafana can render an explicit no_events series without PromQL vector(0)
-  - dashboard: bioetl-runtime.json
-    id: 256
-    owner: "@bioetl-observability"
-    rationale: >-
-      Review Errors by Stage & Code is a below-fold event-counter table. The
-      `or label_replace(vector(0), ...)` placeholder keeps the grouping axes
-      visible when the selected range has zero matching error samples.
-    retire_when: the table can show a VALID EMPTY state without a synthetic series
-  - dashboard: bioetl-runtime.json
-    id: 241
-    owner: "@bioetl-observability"
-    rationale: >-
-      Compare Records by Stage & Run Type is a below-fold event-counter table.
-      The placeholder series is a documented zero-valid count, not a status
-      verdict.
-    retire_when: the table can show a VALID EMPTY state without a synthetic series
 contract_symbol: SUMMARY_NO_VECTOR_ZERO_FALLBACK_PANELS
 notes:
   - Operators must use trust/telemetry_missing signals when data-plane is empty.
