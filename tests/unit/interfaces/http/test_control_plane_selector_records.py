@@ -497,6 +497,8 @@ def test_run_option_label_marks_unknown_catalog_id() -> None:
             {"text": "UNKNOWN · missing-run-id", "value": "missing-run-id"},
         ]
     }
+
+
 def test_empty_run_option_labels_do_not_invent_a_run() -> None:
     payload = selector_context.build_selector_filter_options_payload(
         manifests=(),

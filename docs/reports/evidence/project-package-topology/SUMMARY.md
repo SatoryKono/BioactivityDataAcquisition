@@ -1,10 +1,10 @@
 # Сводка evidence: project-package-topology
 
-Refresh note (2026-09-09): inventory grew to `source_module_count=2470` after adding `bioetl.interfaces.http._identity_display_rows`. Counts and the source fingerprint below come from `reports/quality/module-coverage-inventory.json`. Historical notes remain historical.
+Refresh note (2026-09-09): inventory grew to `source_module_count=2471` after the flow3 HTTP display helpers and stream-1 merge. Counts and the source fingerprint below come from `reports/quality/module-coverage-inventory.json`. Historical notes remain historical.
 
-`source_tree_sha256=2ce86bdc77ad3447589cdcd9f963887abe313e2c5774b29f64f0911f9d87e7b6`
+`source_tree_sha256=0874ce1e8f99dd863fa788e8afa945398d4d077e4f9f513a0576605c1271af75`
 
-`source_module_count=2470`
+`source_module_count=2471`
 
 Дата: 2026-08-17
 Статус: refreshed
@@ -108,6 +108,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `2ce86bdc77ad3447589cdcd9f963887abe313e2c5774b29f64f0911f9d87e7b6`
+- source_tree_sha256: `0874ce1e8f99dd863fa788e8afa945398d4d077e4f9f513a0576605c1271af75`
 
-`source_module_count=2470`
+`source_module_count=2471`

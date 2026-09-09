@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "481a0aa2d46bff0edd87b2bb6cbff84284159026564b7de40079cdc7d32c7675",
-    "bioetl-dq-v2": "ffcf1aaa27c472cc4bbaddd30b70df080226221ef1fa8fd3a5f476f24a975d77",
-    "bioetl-incident-v1": "0e832e1b738ac4d0d462ae8fed7bb6f9713c0f493d3a93d388cb2d36fc997b28",
-    "bioetl-overview-v2": "c041a0862a27d0e4756b968ca1e144416253b5520274b16e9234887d97122b81",
-    "bioetl-provider-health-v2": "cb24d2d0a35eee844fa34d55671a0bfc0cde55462ad308611a2024b147f455c5",
-    "bioetl-run-explorer-v1": "8c2917539de47f4d41463dde1c07ee442cf91df8de4e245d06a26ba5ccff05b9",
-    "bioetl-runtime": "7d627777a9ca41deef8a928f2ca281afd5091d60432f80d7d38514507c667912"
+    "bioetl-control-plane-v1": "fe4689612b0a25efa83f87e372f9cfd1cc05e3a907777864d4232011c956994e",
+    "bioetl-dq-v2": "96f2f67895ffbc9903a733960f64f82416c491a8ec89a5c09a3f2122b870192b",
+    "bioetl-incident-v1": "12c7a45a81bb7eba62184e46811de0be18a481e33a46d56cf7a1997bef65d0a8",
+    "bioetl-overview-v2": "6917ba846417687dfca52a1f4d97a788caf4cab4c9a1e4b9f5d9e38799e2151b",
+    "bioetl-provider-health-v2": "a28c008bf8b79f8fcfbc78299417053fe6e5179e09ef890d9c87081333d0aa5b",
+    "bioetl-run-explorer-v1": "4dccf5d4bf32c80b42837e2800bc3c0c79b6847d235b3cb19a3ca35375d8b4a0",
+    "bioetl-runtime": "e4ed9e7ead235971a8d06a5da353fb2ebdef18dd94f10f2baee31728ecc35de9"
   },
   "panels": [
     {
@@ -743,11 +743,9 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "histogram_quantile(0.50, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
-          "histogram_quantile(0.95, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
-          "histogram_quantile(0.99, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))"
+          "histogram_quantile($read_latency_quantile, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))"
         ],
-        "target_count": 3
+        "target_count": 1
       }
     },
     {
@@ -1245,6 +1243,25 @@
       "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-dq-v2",
+      "panel_id": 9406,
+      "panel_title": "Review Selected Run Summary",
+      "route": "data-trust-recovery",
+      "source": {
+        "datasource_type": null,
+        "datasource_uid": null,
+        "expressions": [
+          "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}&view=summary&from=${__from}&to=${__to}"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-dq-v2",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-dq-v2",
       "panel_id": 9402,
       "panel_title": "Inspect Run Identity",
       "route": "data-trust-recovery",
@@ -1272,25 +1289,6 @@
         "datasource_uid": null,
         "expressions": [
           "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
-        ],
-        "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-dq-v2",
-      "disposition": "advanced-evidence",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-dq-v2",
-      "panel_id": 9406,
-      "panel_title": "Review Selected Run Summary",
-      "route": "data-trust-recovery",
-      "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
-        "expressions": [
-          "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}&view=summary&from=${__from}&to=${__to}"
         ],
         "target_count": 1
       }
@@ -2561,7 +2559,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "topk(4, max by (provider, cause) (bioetl_provider_current_cause) > 0)"
+          "topk(4, max by (provider, cause) (bioetl_provider_current_cause) > 0) or label_replace(((count(max by (provider) (bioetl_provider_current_status)) > bool 0) * (count(max by (provider) (bioetl_provider_current_cause)) > bool 0) * absent(max by (provider) (bioetl_provider_current_status) != 0) * absent(max by (provider) (bioetl_provider_current_status) unless on(provider) max by (provider) (bioetl_provider_health_status)) * absent(max by (provider, cause) (bioetl_provider_current_cause) > 0)), \"cause\", \"VALID EMPTY - FLEET coverage proven, no active provider causes\", \"\", \"\") or label_replace((absent(max by (provider, cause) (bioetl_provider_current_cause) > 0) unless ((count(max by (provider) (bioetl_provider_current_status)) > bool 0) * (count(max by (provider) (bioetl_provider_current_cause)) > bool 0) * absent(max by (provider) (bioetl_provider_current_status) != 0) * absent(max by (provider) (bioetl_provider_current_status) unless on(provider) max by (provider) (bioetl_provider_health_status)) * absent(max by (provider, cause) (bioetl_provider_current_cause) > 0))), \"cause\", \"UNKNOWN - FLEET cause coverage unproven, restore provider telemetry\", \"\", \"\")"
         ],
         "target_count": 1
       }
@@ -2618,7 +2616,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (provider, cause) (bioetl_provider_current_cause) > 0"
+          "(max by (provider, cause) (bioetl_provider_current_cause) > 0) or label_replace(((count(max by (provider) (bioetl_provider_current_status)) > bool 0) * (count(max by (provider) (bioetl_provider_current_cause)) > bool 0) * absent(max by (provider) (bioetl_provider_current_status) != 0) * absent(max by (provider) (bioetl_provider_current_status) unless on(provider) max by (provider) (bioetl_provider_health_status)) * absent(max by (provider, cause) (bioetl_provider_current_cause) > 0)), \"cause\", \"VALID EMPTY - FLEET coverage proven, no active provider causes\", \"\", \"\") or label_replace((absent(max by (provider, cause) (bioetl_provider_current_cause) > 0) unless ((count(max by (provider) (bioetl_provider_current_status)) > bool 0) * (count(max by (provider) (bioetl_provider_current_cause)) > bool 0) * absent(max by (provider) (bioetl_provider_current_status) != 0) * absent(max by (provider) (bioetl_provider_current_status) unless on(provider) max by (provider) (bioetl_provider_health_status)) * absent(max by (provider, cause) (bioetl_provider_current_cause) > 0))), \"cause\", \"UNKNOWN - FLEET cause coverage unproven, restore provider telemetry\", \"\", \"\")"
         ],
         "target_count": 1
       }
@@ -3463,7 +3461,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "sum by(stage, error_code) (increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\",stage!~\"none.*\"}[$__range])) or label_replace(label_replace(vector(0), \"stage\", \"none\", \"\", \"\"), \"error_code\", \"none\", \"\", \"\")"
+          "sum by(stage, error_code) (increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\",stage!~\"none.*\"}[$__range]))"
         ],
         "target_count": 1
       }
@@ -3482,7 +3480,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "sum by(stage, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\",stage!~\"none.*\"}[$__range])) or label_replace(label_replace(vector(0), \"stage\", \"none\", \"\", \"\"), \"run_type\", \"none\", \"\", \"\")"
+          "sum by(stage, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\",stage!~\"none.*\"}[$__range]))"
         ],
         "target_count": 1
       }

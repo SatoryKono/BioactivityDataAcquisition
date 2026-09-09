@@ -5,6 +5,7 @@ from bioetl.interfaces.http._identity_display_rows import identity_display_rows
 
 pytestmark = pytest.mark.unit
 
+
 @pytest.mark.parametrize(
     "zone,expected",
     [
