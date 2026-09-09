@@ -171,7 +171,7 @@ gates:
     legacy_context: docker-build
     decision: path_scoped
     paths:
-      include: [Dockerfile.bioetl, pyproject.toml, uv.lock, src/**, configs/**, docker-compose*.yml, scripts/ops/runtime/docker/**, scripts/engineering/qa/docker_stability_campaign/**, scripts/engineering/qa/run_docker_stability_campaign.py, scripts/engineering/ci/pr_gate.py, configs/quality/docker_runtime_contracts.yaml, configs/quality/github_required_checks.yaml, tests/architecture/test_docker_runtime_contracts.py, tests/unit/repo_backed/scripts/ops/docker/**, tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py, .dockerignore, .github/workflows/docker.yml, .github/workflows/pr-required.yml, .github/actions/setup-python-uv/**]
+      include: [Dockerfile.bioetl, pyproject.toml, uv.lock, src/**, configs/**, docker-compose*.yml, scripts/ops/runtime/docker/**, scripts/engineering/qa/docker_stability_campaign/**, scripts/engineering/qa/run_docker_stability_campaign.py, scripts/engineering/ci/pr_gate.py, configs/quality/docker_runtime_contracts.yaml, configs/quality/github_required_checks.yaml, tests/architecture/test_docker_runtime_contracts.py, tests/unit/repo_backed/scripts/ops/docker/**, tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py, .dockerignore, .github/workflows/docker.yml, .github/workflows/pr-required.yml, .github/actions/setup-python-uv/**, .github/actions/install-trivy/**]
     allowed_results: [success, not_applicable]
     not_applicable_allowed: true
     not_applicable_reason_required: true

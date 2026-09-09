@@ -1442,21 +1442,29 @@ def test_docker_built_image_uses_one_canonical_trivy_scan_and_blocks_all_medium_
 ):
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
     steps = workflow["jobs"]["docker-build"]["steps"]
-    app_scans = [
+    assert not any(
+        str(step.get("uses", "")).startswith("aquasecurity/trivy-action@")
+        or str(step.get("uses", "")).startswith("aquasecurity/setup-trivy@")
+        for step in steps
+    )
+    install = next(
+        step for step in steps if step.get("name") == "Install pinned Trivy CLI"
+    )
+    assert install["uses"] == "./.github/actions/install-trivy"
+    evidence = next(
         step
         for step in steps
-        if step.get("uses", "").startswith("aquasecurity/trivy-action@")
-        and "bioetl:${{ github.sha }}" in str(step.get("with", {}).get("image-ref", ""))
-    ]
-
-    assert len(app_scans) == 1
-    evidence = app_scans[0]
-    assert evidence["name"] == "Run full Trivy JSON evidence scan"
-    assert evidence["with"]["format"] == "json"
-    assert str(evidence["with"].get("exit-code")) == "0"
-    assert evidence["with"]["severity"] == "CRITICAL,HIGH,MEDIUM,UNKNOWN"
-    assert evidence["with"].get("ignore-unfixed") is False
-    assert evidence["with"].get("version") == "v0.70.0"
+        if step.get("name") == "Run full Trivy JSON evidence scan"
+    )
+    evidence_run = str(evidence["run"])
+    assert "trivy image" in evidence_run
+    assert "bioetl:${{ github.sha }}" in str(evidence.get("env", {}))
+    assert "--format json" in evidence_run
+    assert "--output reports/security/trivy-results.json" in evidence_run
+    assert "--exit-code 0" in evidence_run
+    assert "--severity CRITICAL,HIGH,MEDIUM,UNKNOWN" in evidence_run
+    assert "--ignore-unfixed" not in evidence_run
+    assert steps.index(install) < steps.index(evidence)
 
     conversion = next(
         step
@@ -1571,8 +1579,10 @@ def test_docker_security_baseline_is_uploaded_with_bounded_retention() -> None:
         for step in steps
         if step.get("name") == "Run Trivy on pinned Wolfi runtime base image"
     )
-    assert base_scan["with"]["format"] == "json"
-    assert base_scan["with"]["output"] == ("reports/security/trivy-base-results.json")
+    base_run = str(base_scan["run"])
+    assert "--format json" in base_run
+    assert "--output reports/security/trivy-base-results.json" in base_run
+    assert "chainguard/wolfi-base@sha256:" in base_run
     assert step_names.index("Validate complete security baseline") < step_names.index(
         "Upload reproducible security baseline"
     )
@@ -1629,4 +1639,5 @@ def test_docker_security_gate_covers_dependency_build_inputs() -> None:
         "src/**",
         "configs/**",
         ".dockerignore",
+        ".github/actions/install-trivy/**",
     } <= paths

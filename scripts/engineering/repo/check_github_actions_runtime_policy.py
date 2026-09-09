@@ -69,10 +69,6 @@ ALLOWED_USES: dict[str, set[str]] = {
     "anchore/sbom-action": {
         "e22c389904149dbc22b58101806040fa8d37a610",  # v0.24.0
     },
-    "aquasecurity/trivy-action": {
-        "57a97c7e7821a5776cebc9bb87c984fa69cba8f1",  # v0.35.0
-        "ed142fd0673e97e23eac54620cfb913e5ce36c25",  # v0.36.0
-    },
     "docker/build-push-action": {"ca052bb54ab0790a636c9b5f226502c73d547a25"},
     "docker/login-action": {"dbcb813823bdd20940b903addbd779551569679f"},
     "docker/setup-buildx-action": {"bb05f3f5519dd87d3ba754cc423b652a5edd6d2c"},
