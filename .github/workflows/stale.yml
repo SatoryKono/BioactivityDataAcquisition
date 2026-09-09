@@ -1,4 +1,8 @@
 name: Stale
+# KEEP-DISABLED (#10263): 14/7 PR stale/close contradicts
+# `.github/PULL_REQUEST_HYGIENE.md` (21 days, draft + report-noise only).
+# Do not re-enable until days/exemptions match that policy. Do not weaken
+# stale to close non-draft engineering PRs.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
