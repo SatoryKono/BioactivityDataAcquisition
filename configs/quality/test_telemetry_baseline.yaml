@@ -1,14 +1,14 @@
 version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
-source_branch: chore/branch-hygiene-inventory-10266
-refreshed_at_utc: '2026-09-09T21:50:00+00:00'
+source_branch: fix/github-supply-chain-10264
+refreshed_at_utc: '2026-09-09T22:50:00+00:00'
 refresh_status: captured
-source_commit: 07aed8a80a7c53a66b3a1ebac1f528f396df6856
-source_run_id: '34408395148'
+source_commit: 2d9835fb368b40423de8902adff375dc1ceee32d
+source_run_id: '34413668513'
 source_event: pull_request
-source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34408395148
-source_tree_sha256: 6a4fcfb58dd5044407100e3954410ba27b81dc6267c3f4091092695415d5f964
+source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34413668513
+source_tree_sha256: f764b5fc8189407482bd561054ff4c0526a95bf2eed4af741710c1327dfc72ed
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
