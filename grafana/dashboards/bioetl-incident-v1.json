@@ -456,7 +456,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 21
       },
       "options": {
         "mode": "html",
@@ -481,7 +481,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 8
+        "y": 6
       },
       "datasource": {
         "type": "prometheus",
@@ -1060,10 +1060,10 @@
       "title": "Monitor Current Alerts",
       "description": "CURRENT · Do not put full UUIDs into Prometheus labels. Instant ALERTS snapshot (firing/pending). Pair with Alert State History as one temporal chain. VALID_EMPTY when none VALID EMPTY (no events) is not TELEMETRY MISSING.",
       "gridPos": {
-        "h": 3,
+        "h": 5,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 13
       },
       "datasource": {
         "type": "prometheus",

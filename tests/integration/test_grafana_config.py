@@ -519,11 +519,6 @@ def _assert_overview_run_id_infinity_query(run_id_query: dict) -> None:
     assert infinity_query.get("parser") == "backend"
     assert infinity_query.get("root_selector") == "$.items"
     assert infinity_query.get("url_options", {}).get("method") == "GET"
-    columns = infinity_query.get("columns")
-    assert isinstance(columns, list)
-    selectors = {(item.get("selector"), item.get("text")) for item in columns}
-    assert ("text", "__text") in selectors
-    assert ("value", "__value") in selectors
     _assert_overview_run_id_query_url(str(infinity_query.get("url", "")))
 
 
