@@ -50,9 +50,7 @@ NUMERIC_ONLY_NAME: Final[re.Pattern[str]] = re.compile(r"^\d+$")
 TEMP_BRANCH_NAME: Final[re.Pattern[str]] = re.compile(
     r"^(?:temp-branch|temp/.+|tmp(?:[-_].*)?)$"
 )
-CODEX_FIX_MAIN_NAME: Final[re.Pattern[str]] = re.compile(
-    r"^codex/fix-main(?:[-_].*)?$"
-)
+CODEX_FIX_MAIN_NAME: Final[re.Pattern[str]] = re.compile(r"^codex/fix-main(?:[-_].*)?$")
 JULES_BARE_NAME: Final[re.Pattern[str]] = re.compile(r"^jules(?:[-_].+)?$")
 
 STALE_DRAFT_BRANCH_PATTERNS: Final[tuple[re.Pattern[str], ...]] = (
