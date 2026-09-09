@@ -2,13 +2,13 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: fix/github-supply-chain-10264
-refreshed_at_utc: '2026-09-09T22:50:00+00:00'
+refreshed_at_utc: '2026-09-09T23:00:00+00:00'
 refresh_status: captured
-source_commit: 2d9835fb368b40423de8902adff375dc1ceee32d
-source_run_id: '34413668513'
+source_commit: e34afa84690e9c86dfdc4b89e7c436dd551010b7
+source_run_id: '34415505605'
 source_event: pull_request
-source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34413668513
-source_tree_sha256: f764b5fc8189407482bd561054ff4c0526a95bf2eed4af741710c1327dfc72ed
+source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34415505605
+source_tree_sha256: 74a85dc2c94804883e907423ae2dd1a7a7508785b8a5e4c09fb815820c42c511
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45

@@ -91,8 +91,8 @@ def test_selected_actions_patterns_cover_third_party_allowed_uses_only() -> None
     assert all(item.endswith("@*") for item in patterns)
     assert all(not item.startswith(("actions/", "github/")) for item in patterns)
     assert "astral-sh/setup-uv@*" in patterns
-    assert "aquasecurity/setup-trivy@*" in patterns
     assert "aquasecurity/trivy-action@*" in patterns
+    assert "aquasecurity/setup-trivy@*" not in patterns
     assert "google/osv-scanner-action@*" in patterns
     assert "google/osv-scanner-action/osv-scanner-action@*" in patterns
     assert "docker/build-push-action@*" in patterns
