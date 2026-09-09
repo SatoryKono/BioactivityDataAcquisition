@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "d464819661f24fd93999926565a2c5496cd3f311d65d80ff9457bafb548a82cc",
-    "bioetl-dq-v2": "e8e469c9aec8cd285cebee7369b2f1005fe862c49074a29b220618176e96cb20",
-    "bioetl-incident-v1": "f946ce941c2500071318c158e7081b44240ba0649d0815bc7cb05a6ae5458ec1",
-    "bioetl-overview-v2": "bd2da4fcc6d0a444e270d87ea52439aa1ea1c94a815cb0c5c904d217200fd070",
-    "bioetl-provider-health-v2": "cd01a7359c5856b58aaa7c49edfec736df3c7315debac580f9ae335089cb793a",
-    "bioetl-run-explorer-v1": "f86338e554a310c1ac96c445a6ddd6eb91bc549c887dd3279a373e3fe48226a9",
-    "bioetl-runtime": "1569b44ed635e81bcdd0c5ffe98e60233039a4fc0a1798864410b047497c9372"
+    "bioetl-control-plane-v1": "d5b51b68a5915bb210f5ee60c4e51d9ff7d5da88e6bad4953492a597f90ff1f8",
+    "bioetl-dq-v2": "d79e458bba9b6acfd4274706b256e662529318de7d118e22fff3c537b1d3b488",
+    "bioetl-incident-v1": "1594dc397bbfd7894a35d18733f6e47371bcec196cca917b9baf1c19aeeabaa3",
+    "bioetl-overview-v2": "49e92e2c7aadce6ceef74a77f6f7902161742943ce8218c47266fb3fdf9ca1fb",
+    "bioetl-provider-health-v2": "4e9c9c24b4b5bfbeab6f265d4ba69a539911ac8daffb7eda171672a7f51d538c",
+    "bioetl-run-explorer-v1": "3ace4a90e7b96959f8fae771386851d206d9434f8e23ddb17d57b23472fb0661",
+    "bioetl-runtime": "e8f1935e6b169d053f31d0575d02ca94f40c83f1f4cc677301e1550d6d9e2001"
   },
   "panels": [
     {
@@ -743,11 +743,9 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "histogram_quantile(0.50, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
-          "histogram_quantile(0.95, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
-          "histogram_quantile(0.99, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))"
+          "histogram_quantile($read_latency_quantile, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))"
         ],
-        "target_count": 3
+        "target_count": 1
       }
     },
     {

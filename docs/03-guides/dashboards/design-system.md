@@ -111,7 +111,7 @@ blanket rule for every plugin type.
 
 | Panel role | Required visualization settings |
 | --- | --- |
-| Current-status `stat` | `fieldConfig.defaults.color.mode=thresholds`; `options.colorMode=background` for designated first-screen severity cards; `null -> UNKNOWN` mapping where the panel is fail-closed. |
+| Current-status `stat` | `fieldConfig.defaults.color.mode=thresholds`; `options.colorMode=background` for designated first-screen severity cards; `options.textMode=value_and_name`; `options.text.valueSize=20` and `titleSize=14` so UNKNOWN is compact text-on-fill, not a full-panel glyph; `null -> UNKNOWN` mapping where the panel is fail-closed. |
 | Selected-range trend `stat` | `options.colorMode=value`; `options.graphMode=area` is allowed only in the first window, otherwise `none`; threshold colors must match the measured operator risk. |
 | Selected-range count `stat` | `options.colorMode=value`; `options.graphMode=none`; `or vector(0)` only when missing series means zero events. |
 | Percentage, score, latency, or duration `gauge` | `options.showThresholdMarkers=true`; `options.showThresholdLabels=false` unless a panel-specific exception is documented with operator rationale. |
@@ -735,7 +735,8 @@ but its former smaller floors are superseded.
 Operator-facing HTML in text panels MUST distinguish five inline roles so
 dashboard names, panel titles, and status tokens do not share one bold style.
 Color MUST NOT be the only carrier of the role. Navigation-bus chips stay on
-the existing theme-safe chip contract and are not this inline rule.
+the existing theme-safe chip contract (`gap:8px`, chip `padding:0 8px`) and are
+not this inline rule.
 
 | Role | Visible form | HTML | Example |
 | --- | --- | --- | --- |

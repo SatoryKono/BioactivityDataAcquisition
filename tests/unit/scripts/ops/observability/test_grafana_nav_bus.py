@@ -165,7 +165,7 @@ def test_trust_layout_preserves_scalar_area_and_readable_cta() -> None:
     assert status["gridPos"]["w"] * status["gridPos"]["h"] == 24
     assert trust["gridPos"]["y"] == retention["gridPos"]["y"] == 6
     assert all(kpi["gridPos"]["y"] == 14 for kpi in kpis)
-    assert recovery["gridPos"] == {"x": 0, "y": 11, "w": 24, "h": 3}
+    assert recovery["gridPos"] == {"x": 0, "y": 11, "w": 12, "h": 3}
     assert collapsed_row["gridPos"]["y"] == 17
     assert nested["gridPos"]["y"] == 18
     assert nav_bus._first_window_overflow(panels) == 0
