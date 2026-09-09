@@ -380,19 +380,12 @@ def test_github_mcp_wrappers_load_repo_env() -> None:
         encoding="utf-8"
     )
 
-    sh_support = (root / "scripts/ai/mcp/support/github_mcp_server.sh").read_text(
-        encoding="utf-8"
-    )
-    ps_support = (root / "scripts/ai/mcp/support/github_mcp_server.ps1").read_text(
-        encoding="utf-8"
-    )
-
     assert "load_repo_env.sh" in sh_content
     assert "load_repo_env.ps1" in ps_content
-    assert "GITHUB_PERSONAL_ACCESS_TOKEN" in sh_support
-    assert "GITHUB_TOKEN" in sh_support
-    assert "GITHUB_PERSONAL_ACCESS_TOKEN" in ps_support
-    assert "GITHUB_TOKEN" in ps_support
+    assert "GITHUB_PERSONAL_ACCESS_TOKEN" in sh_content
+    assert "GITHUB_TOKEN" in sh_content
+    assert "GITHUB_PERSONAL_ACCESS_TOKEN" in ps_content
+    assert "GITHUB_TOKEN" in ps_content
 
 
 def test_remote_mcp_servers_are_in_allowlist() -> None:

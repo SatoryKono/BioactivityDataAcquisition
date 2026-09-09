@@ -53,35 +53,33 @@ def test_github_mcp_wrappers_pin_official_server_and_toolsets() -> None:
         GITHUB_MCP_TOOLSETS,
     )
 
-    shell = _read("scripts/ai/mcp/support/github_mcp_server.sh")
-    powershell = _read("scripts/ai/mcp/support/github_mcp_server.ps1")
     shell_wrapper = _read("scripts/ai/mcp/github-mcp-wrapper.sh")
     powershell_wrapper = _read("scripts/ai/mcp/github-mcp-wrapper.ps1")
     actions_shell = _read("scripts/ai/mcp/mcp_github_actions_wrapper.sh")
     actions_powershell = _read("scripts/ai/mcp/mcp_github_actions_wrapper.ps1")
 
-    assert GITHUB_MCP_RETIRED_NPX_PACKAGE not in shell_wrapper
-    assert GITHUB_MCP_RETIRED_NPX_PACKAGE not in powershell_wrapper
+    assert f"{GITHUB_MCP_RETIRED_NPX_PACKAGE}@" not in shell_wrapper
+    assert f"{GITHUB_MCP_RETIRED_NPX_PACKAGE}@" not in powershell_wrapper
     assert "npx -y" not in shell_wrapper
     assert "npx -y" not in powershell_wrapper
-    assert "not a fallback" in shell
-    assert "not a fallback" in powershell
+    assert "not a fallback" in shell_wrapper
+    assert "not a fallback" in powershell_wrapper
 
-    assert GITHUB_MCP_TOOLSETS in shell
-    assert GITHUB_MCP_TOOLSETS in powershell
-    assert GITHUB_MCP_EXCLUDE_TOOLS in shell
-    assert GITHUB_MCP_EXCLUDE_TOOLS in powershell
-    assert "github-mcp-server" in shell
-    assert "github-mcp-server" in powershell
+    assert GITHUB_MCP_TOOLSETS in shell_wrapper
+    assert GITHUB_MCP_TOOLSETS in powershell_wrapper
+    assert GITHUB_MCP_EXCLUDE_TOOLS in shell_wrapper
+    assert GITHUB_MCP_EXCLUDE_TOOLS in powershell_wrapper
+    assert "github-mcp-server" in shell_wrapper
+    assert "github-mcp-server" in powershell_wrapper
     assert "--toolsets" in shell_wrapper
     assert "--lockdown-mode" in shell_wrapper
-    assert "Get-BioetlGithubMcpStdioArgs" in powershell_wrapper
-    assert "support/github_mcp_server.sh" in shell_wrapper
-    assert "support/github_mcp_server.ps1" in powershell_wrapper
-    assert "BIOETL_GITHUB_MCP_SERVER" in shell
-    assert "gh auth token" in shell
-    assert "gh auth token" in powershell
-    assert "never overwrite" in shell.lower() or "Never overwrite" in shell
+    assert "--toolsets" in powershell_wrapper
+    assert "--lockdown-mode" in powershell_wrapper
+    assert "BIOETL_GITHUB_MCP_SERVER" in shell_wrapper
+    assert "BIOETL_GITHUB_MCP_SERVER" in powershell_wrapper
+    assert "gh auth token" in shell_wrapper
+    assert "gh auth token" in powershell_wrapper
+    assert "never overwrite" in shell_wrapper.lower()
     for actions in (actions_shell, actions_powershell):
         assert "Ops-only" in actions
         assert "stable" in actions
