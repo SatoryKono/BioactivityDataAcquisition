@@ -180,7 +180,9 @@ def test_funnel_display_keeps_gold_and_full_exclusion_reason() -> None:
     rows = result["funnel_display"]
     assert [row["stage_id"] for row in rows] == ["extract", "bronze", "silver", "gold"]
     assert rows[-1]["records_out"] == 983
-    assert rows[-1]["removals_summary"] == "17 gold_contract_schema_failure"
+    assert rows[-1]["removals_summary"] == (
+        "17 Excluded by Gold schema contract (gold_contract_schema_failure)"
+    )
 
 
 @pytest.mark.parametrize(
@@ -194,7 +196,17 @@ def test_loaded_report_display_preserves_reason_and_artifact_fields(
     key: str, row: dict[str, str | int]
 ) -> None:
     result = _table_shape_pipeline_run_report({key: [row]})
-    assert result[f"{key}_display"] == [row]
+    display_row = result[f"{key}_display"][0]
+    assert display_row.items() >= row.items()
+    if key == "reasons_top_n":
+        assert display_row["reason_label"] == (
+            "Excluded by Gold schema contract (gold_contract_schema_failure)"
+        )
+        assert display_row["explain"] == "Open Data Quality"
+    else:
+        assert display_row["title"] == "gold"
+        assert display_row["action"] == "Open"
+        assert display_row["format"] == "gold"
 
 
 @pytest.mark.asyncio
