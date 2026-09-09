@@ -181,6 +181,7 @@ tracked_suite_inventory:
     - tests/integration/test_dashboard_structural_invariants.py
     - tests/integration/test_dashboard_units_decimals.py
     - tests/integration/test_dashboard_variable_dependencies.py
+    - tests/integration/test_dashboard_vis_stream2_layout.py
     - tests/integration/test_dashboard_visual_semantics.py
     - tests/integration/test_dux4_scope_title_helpers.py
     - tests/integration/test_dux5_residual_contracts.py
@@ -217,6 +218,7 @@ tracked_suite_inventory:
       - tests/integration/test_dashboard_navigation_contract_sync.py
       - tests/integration/test_dashboard_operator_readability.py
       - tests/integration/test_dashboard_ux_report_freshness.py
+      - tests/integration/test_dashboard_vis_stream2_layout.py
       - tests/integration/test_grafana_action_target_coverage.py
       - tests/integration/test_grafana_config.py
       - tests/integration/test_grafana_control_plane_variables.py
