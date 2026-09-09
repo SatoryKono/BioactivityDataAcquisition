@@ -456,7 +456,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 6
       },
       "options": {
         "mode": "html",
@@ -478,10 +478,10 @@
       "title": "Inspect Ranked Suspects",
       "description": "GLOBAL · CURRENT at query evaluation time (range end), not SELECTED RUN. Rank is severity order: CRIT=2, WARN=1, UNKNOWN=0; ties have equal urgency, not higher confidence. Confidence is UNVERIFIED: a rule signal alone does not establish cause or impact. Pipeline/provider identifies potential impact scope; confirm with domain evidence. Only active (>0) signals are ranked; telemetry_gap stays UNKNOWN. VALID EMPTY means no active suspects with available evidence; TELEMETRY MISSING is not a zero and not VALID EMPTY. Domain details use the same GLOBAL scope and evaluation time. Rule sample time is not the underlying event time. Inspect retains source labels; Action preserves row scope. TIME RANGE selects evaluation time, not an event-history rank.",
       "gridPos": {
-        "h": 7,
+        "h": 5,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 8
       },
       "datasource": {
         "type": "prometheus",
