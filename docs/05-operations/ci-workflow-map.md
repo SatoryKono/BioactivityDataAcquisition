@@ -1,19 +1,27 @@
 ______________________________________________________________________
 
-Version: 1.0.1
+Version: 1.0.2
 Status: active
 Class: published
 Owner: BioETL Team
-Last verified: '2026-08-21'
+Last verified: '2026-09-10'
 
 ______________________________________________________________________
 
 # CI / GitHub Actions Workflow Map
 
 Curated map of `.github/workflows/*` (DOC-GOV-06 / #6886).
-**Count at verification:** 46 workflow files.
-YAML self-description remains authoritative for triggers/secrets; this page is
-the human index.
+**Count at verification:** 48 tracked workflow files on `main`.
+GitHub API `GET /actions/workflows` `total_count` was **77** on `2026-09-10`
+(tracked YAML + hosted `dynamic/**` + GitHub-only orphan/residual objects).
+See [github-actions-workflows.md](../04-reference/github-actions-workflows.md)
+for the 48-vs-77 breakdown. YAML self-description remains authoritative for
+triggers/secrets; this page is the human index.
+
+`pr-required.yml` (`pr-gate-complete`) is the repo-side coordinator. It is
+**not** a GitHub ruleset required context while `main` (13643213) and
+`root-hygiene-required-check` (15730586) stay `enforcement: disabled`
+([#10267](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/10267)).
 
 ## How to use
 
@@ -45,6 +53,7 @@ the human index.
 | `docs-kpi-weekly.yml` | Docs KPI Weekly | Documentation navigation KPI plus calendar freshness/runtime-mirror drift |
 | `duplication-complexity.yml` | Duplication and Complexity Checks | Dup/complexity quality gates |
 | `e2e-matrix-health.yml` | E2E Matrix Health | End-to-end matrix health |
+| `github-settings-quarterly-review.yml` | Quarterly GitHub Settings Review | Read-only quarterly GitHub settings review; does not enforce branch rulesets |
 | `import-linter.yml` | Lint and Architecture Gates | import-linter + layer architecture |
 | `labeler.yml` | Labeler | PR auto-labeling |
 | `memory-freshness.yml` | Memory freshness | Repository memory freshness and contract checks |
@@ -54,6 +63,7 @@ the human index.
 | `performance-nightly.yml` | Performance Nightly | Performance benchmarks |
 | `port-contracts.yml` | Port Contract Tests | Domain port contract tests |
 | `pr-hygiene.yml` | PR Hygiene | PR hygiene checks |
+| `pr-required.yml` | PR Gate Complete | Shadow coordinator `pr-gate-complete`; not GitHub-required while rulesets are disabled (#10267) |
 | `provider-contract-drift.yml` | Provider Contract Drift | Provider contract drift detection |
 | `quality-debt-weekly.yml` | Quality Debt Weekly | Debt budget / scorecard weekly |
 | `release.yml` | Release | Release packaging/publish |
