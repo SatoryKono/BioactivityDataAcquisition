@@ -478,7 +478,7 @@
       "title": "Inspect Ranked Suspects",
       "description": "GLOBAL · CURRENT at query evaluation time (range end), not SELECTED RUN. Rank is severity order: CRIT=2, WARN=1, UNKNOWN=0; ties have equal urgency, not higher confidence. Confidence is UNVERIFIED: a rule signal alone does not establish cause or impact. Pipeline/provider identifies potential impact scope; confirm with domain evidence. Only active (>0) signals are ranked; telemetry_gap stays UNKNOWN. VALID EMPTY means no active suspects with available evidence; TELEMETRY MISSING is not a zero and not VALID EMPTY. Domain details use the same GLOBAL scope and evaluation time. Rule sample time is not the underlying event time. Inspect retains source labels; Action preserves row scope. TIME RANGE selects evaluation time, not an event-history rank.",
       "gridPos": {
-        "h": 5,
+        "h": 9,
         "w": 24,
         "x": 0,
         "y": 8
@@ -1068,137 +1068,6 @@
       }
     },
     {
-      "id": 2005,
-      "type": "table",
-      "title": "Monitor Current Alerts",
-      "description": "CURRENT · Do not put full UUIDs into Prometheus labels. Instant ALERTS snapshot (firing/pending). Pair with Alert State History as one temporal chain. VALID_EMPTY when none VALID EMPTY (no events) is not TELEMETRY MISSING.",
-      "gridPos": {
-        "h": 6,
-        "w": 24,
-        "x": 0,
-        "y": 18
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "targets": [
-        {
-          "expr": "count by (alertname, alertstate) (ALERTS{alertstate=~\"firing|pending\"})",
-          "format": "table",
-          "instant": true,
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto",
-              "wrapText": false
-            },
-            "inspect": true
-          },
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "gray",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "links": [
-            {
-              "title": "Open incident response runbook",
-              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md",
-              "targetBlank": true,
-              "includeVars": false
-            }
-          ]
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value)$"
-            },
-            "properties": [
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto"
-                }
-              },
-              {
-                "id": "custom.align",
-                "value": "right"
-              },
-              {
-                "id": "custom.width",
-                "value": 120
-              },
-              {
-                "id": "displayName",
-                "value": "Active Alerts"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "alertname"
-            },
-            "properties": [
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "options": {
-        "showHeader": true,
-        "footer": {
-          "show": false
-        },
-        "cellHeight": "sm"
-      },
-      "transformations": [
-        {
-          "id": "limit",
-          "options": {
-            "limitField": 3
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true
-            }
-          }
-        }
-      ]
-    },
-    {
       "id": 2020,
       "type": "row",
       "title": "Review Alert Evidence",
@@ -1206,10 +1075,141 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 17
       },
       "collapsed": true,
       "panels": [
+        {
+          "id": 2005,
+          "type": "table",
+          "title": "Monitor Current Alerts",
+          "description": "CURRENT · Do not put full UUIDs into Prometheus labels. Instant ALERTS snapshot (firing/pending). Pair with Alert State History as one temporal chain. VALID_EMPTY when none VALID EMPTY (no events) is not TELEMETRY MISSING.",
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 18
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "count by (alertname, alertstate) (ALERTS{alertstate=~\"firing|pending\"})",
+              "format": "table",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": false
+                },
+                "inspect": true
+              },
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "gray",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "links": [
+                {
+                  "title": "Open incident response runbook",
+                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md",
+                  "targetBlank": true,
+                  "includeVars": false
+                }
+              ]
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value)$"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto"
+                    }
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "right"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 120
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Active Alerts"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "alertname"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false
+            },
+            "cellHeight": "sm"
+          },
+          "transformations": [
+            {
+              "id": "limit",
+              "options": {
+                "limitField": 3
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                }
+              }
+            }
+          ]
+        },
         {
           "id": 2006,
           "type": "state-timeline",
@@ -1219,7 +1219,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 25
+            "y": 24
           },
           "datasource": {
             "type": "prometheus",
@@ -1303,7 +1303,7 @@
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 33
+            "y": 32
           },
           "options": {
             "mode": "html",
@@ -1320,7 +1320,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 18
       },
       "collapsed": true,
       "description": "Selected pipeline may differ from row pipeline (blast radius)",
@@ -1334,7 +1334,7 @@
             "h": 7,
             "w": 8,
             "x": 0,
-            "y": 38
+            "y": 37
           },
           "datasource": {
             "type": "prometheus",
@@ -1523,7 +1523,7 @@
             "h": 7,
             "w": 8,
             "x": 8,
-            "y": 38
+            "y": 37
           },
           "datasource": {
             "type": "prometheus",
@@ -1712,7 +1712,7 @@
             "h": 7,
             "w": 8,
             "x": 16,
-            "y": 38
+            "y": 37
           },
           "datasource": {
             "type": "prometheus",
@@ -1930,7 +1930,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 19
       },
       "description": "SELECTED RUN · Compact pipeline_run_report_v1 projection. Expand after selecting an exact Run ID. Missing run is SELECT RUN / VALID EMPTY, not OK.",
       "panels": [
@@ -1940,7 +1940,7 @@
           "title": "Review Selected Run Summary",
           "gridPos": {
             "x": 0,
-            "y": 21,
+            "y": 20,
             "w": 24,
             "h": 5
           },

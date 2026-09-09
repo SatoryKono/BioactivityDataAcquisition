@@ -856,7 +856,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "value"
+                  "options": "parameter"
                 },
                 "properties": [
                   {
@@ -865,18 +865,7 @@
                   },
                   {
                     "id": "custom.width",
-                    "value": 210
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "left"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
+                    "value": 280
                   }
                 ]
               },
@@ -891,8 +880,11 @@
                     "value": "Value"
                   },
                   {
-                    "id": "custom.align",
-                    "value": "left"
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
                   },
                   {
                     "id": "custom.inspect",
@@ -953,14 +945,7 @@
               "id": "organize",
               "options": {
                 "excludeByName": {
-                  "Time": true,
-                  "__name__": true,
-                  "Value": true,
-                  "raw_value": true
-                },
-                "renameByName": {
-                  "parameter": "Parameter",
-                  "value": "Value"
+                  "Time": true
                 }
               }
             }
