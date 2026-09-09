@@ -24,6 +24,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import subprocess
 import sys
 import time
 import urllib.error
@@ -47,11 +48,13 @@ from scripts.engineering.repo._branch_cleanup_policy import (
     DEFAULT_CUTOFF_ISO,
     DEFAULT_OWNER,
     DEFAULT_REPO,
+    PROPOSED_ACTIONS,
     BranchRecord,
     CATEGORY_ORDER,
     build_branch_record,
     is_protected_branch,
     parse_cutoff,
+    propose_worktree_action,
 )
 
 API_BASE: Final[str] = "https://api.github.com"
@@ -293,6 +296,7 @@ def build_inventory(
         pr_by_head=pr_by_head,
     )
     category_counts = Counter(record.category for record in records)
+    action_counts = Counter(record.proposed_action for record in records)
     generated_at = datetime.now(tz=UTC).isoformat()
     phase1_targets = [row.name for row in records if row.phase1_garbage]
     phase2_targets = [
@@ -310,16 +314,36 @@ def build_inventory(
         "owner": owner,
         "repo": repo,
         "cutoff_iso": cutoff_iso,
+        "mode": "dry-run",
+        "deletion_applied": False,
         "summary": {
             "total_branches": len(records),
             "protected_branches": sum(1 for row in records if row.protected),
+            "non_compliant_branches": sum(
+                1 for row in records if not row.name_compliant
+            ),
             "phase1_garbage_targets": len(phase1_targets),
             "phase2_stale_draft_targets": len(phase2_targets),
             "categories": {
                 category: category_counts.get(category, 0)
                 for category in CATEGORY_ORDER
             },
+            "proposed_actions": {
+                action: action_counts.get(action, 0) for action in PROPOSED_ACTIONS
+            },
         },
+        "non_compliant_owner_decisions": [
+            {
+                "name": row.name,
+                "category": row.category,
+                "is_default": row.name in {"main", "master"},
+                "open_pr_number": row.open_pr_number,
+                "committed_at": row.committed_at,
+                "proposed_action": row.proposed_action,
+            }
+            for row in records
+            if not row.name_compliant
+        ],
         "phase1_garbage_targets": phase1_targets,
         "phase2_stale_draft_targets": phase2_targets,
         "branches": [asdict(row) for row in records],
@@ -605,6 +629,65 @@ def _parse_phases(raw: str) -> set[int]:
     return phases
 
 
+def collect_local_worktrees(*, repo_root: Path | None = None) -> list[dict[str, Any]]:
+    """Parse ``git worktree list --porcelain`` without pruning or unlocking."""
+    root = repo_root or _repo_root()
+    completed = subprocess.run(
+        ["git", "worktree", "list", "--porcelain"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+    records: list[dict[str, Any]] = []
+    current: dict[str, str] = {}
+
+    def flush() -> None:
+        if not current:
+            return
+        branch_ref = current.get("branch")
+        branch = branch_ref.removeprefix("refs/heads/") if branch_ref else None
+        detached = "detached" in current
+        locked = "locked" in current
+        prunable = "prunable" in current
+        action, reason = propose_worktree_action(
+            branch=branch,
+            detached=detached,
+            locked=locked,
+            prunable=prunable,
+        )
+        records.append(
+            {
+                "branch": branch,
+                "head": current.get("HEAD", ""),
+                "detached": detached,
+                "locked": locked,
+                "prunable": prunable,
+                "proposed_action": action,
+                "reason": reason,
+            }
+        )
+
+    for raw_line in completed.stdout.splitlines():
+        line = raw_line.strip()
+        if not line:
+            flush()
+            current = {}
+            continue
+        if line.startswith("worktree "):
+            if current:
+                flush()
+                current = {}
+            current["worktree"] = line.removeprefix("worktree ")
+            continue
+        key, _, value = line.partition(" ")
+        current[key] = value
+    flush()
+    records.sort(key=lambda row: (str(row["branch"] or ""), str(row["head"])))
+    return records
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -616,6 +699,11 @@ def build_parser() -> argparse.ArgumentParser:
     inventory.add_argument("--repo", default=DEFAULT_REPO)
     inventory.add_argument("--cutoff-iso", default=DEFAULT_CUTOFF_ISO)
     inventory.add_argument("--output", type=Path, default=None)
+    inventory.add_argument(
+        "--include-local-worktrees",
+        action="store_true",
+        help="Attach a local worktree inventory. Does not prune or unlock.",
+    )
 
     apply_cmd = subparsers.add_parser("apply", help="Apply cleanup phases 1-2")
     apply_cmd.add_argument("--owner", default=DEFAULT_OWNER)
@@ -644,6 +732,9 @@ def main(argv: list[str] | None = None) -> int:
             repo=args.repo,
             cutoff_iso=args.cutoff_iso,
         )
+        if args.include_local_worktrees:
+            payload["local_worktrees"] = collect_local_worktrees()
+            payload["summary"]["local_worktrees"] = len(payload["local_worktrees"])
         output = args.output or _default_inventory_path()
         _atomic_write_json(output, payload)
         print(f"[DONE] inventory written to {output}")

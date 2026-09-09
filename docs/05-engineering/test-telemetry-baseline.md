@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `fix/grafana-vis-stream3-layout`
-- Source commit: `28a15f9695029dceb919944859023f3266c40cf3`
-- Source run id: `34388828802`
+- Source branch: `chore/branch-hygiene-inventory-10266`
+- Source commit: `07aed8a80a7c53a66b3a1ebac1f528f396df6856`
+- Source run id: `34408395148`
 - Source event: `pull_request`
-- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34388828802`
-- Source tree sha256: `8fbbedc5f75ec66535d02ccdcb2c63056958e1d7fe74758f758e5446f0548faf`
+- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34408395148`
+- Source tree sha256: `6a4fcfb58dd5044407100e3954410ba27b81dc6267c3f4091092695415d5f964`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-09-09T18:39:36.692943+00:00`
+- Refreshed at (UTC): `2026-09-09T21:50:00+00:00`
 
 ## Branch-accurate provenance (#5729)
 
