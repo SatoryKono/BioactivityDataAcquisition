@@ -80,6 +80,7 @@ def test_runtime_policy_scans_workflows_and_composite_actions() -> None:
     assert ".github/workflows/contract-tests.yml" in scanned
     assert ".github/workflows/labeler.yml" in scanned
     assert ".github/actions/setup-python-uv/action.yml" in scanned
+    assert ".github/actions/install-trivy/action.yml" in scanned
     assert all("/node_modules/" not in path for path in scanned)
     assert all("/vendor/" not in path for path in scanned)
 
@@ -419,6 +420,33 @@ def test_runtime_policy_requires_pinned_coderabbit_zip_digest() -> None:
 
     assert any("missing pinned sha256" in item for item in missing)
     assert pinned == []
+
+
+def test_trivy_cli_installer_is_checksum_pinned_and_avoids_setup_trivy() -> None:
+    action = (ROOT / ".github" / "actions" / "install-trivy" / "action.yml").read_text(
+        encoding="utf-8"
+    )
+    digest = "8b4376d5d6befe5c24d503f10ff136d9e0c49f9127a4279fd110b727929a5aa9"
+    url = (
+        "https://github.com/aquasecurity/trivy/releases/download/"
+        "v0.70.0/trivy_0.70.0_Linux-64bit.tar.gz"
+    )
+
+    assert "uses: aquasecurity/setup-trivy" not in action
+    assert "uses: aquasecurity/trivy-action" not in action
+    assert url in action
+    assert digest in action
+    assert "sha256sum -c" in action
+    assert (
+        policy.remote_download_violations_in_text(
+            action,
+            rel_path=".github/actions/install-trivy/action.yml",
+        )
+        == []
+    )
+    assert "trivy-cli-linux-64bit" in (
+        ROOT / "configs/quality/github_actions_remote_artifacts.yaml"
+    ).read_text(encoding="utf-8")
 
 
 def test_release_publish_requires_same_sha_quality_gates() -> None:
