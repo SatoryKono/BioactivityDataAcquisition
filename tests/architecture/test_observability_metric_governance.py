@@ -223,13 +223,16 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     assert all(
         str(target["url"]).startswith(("/ops/", "/health/")) for target in http_targets
     )
-    assert report["typed_target_counts"] == {
-        "promql": 173,  # Runtime evidence and DQ OK/UNKNOWN add two targets each.
-        "http": 35,
-        "loki": 0,
-        "tempo": 0,
-        "unknown": 0,
-    }
+    assert (
+        report["typed_target_counts"]
+        == {
+            "promql": 171,  # Stream-2 compact Trust/latency/fleet panels dropped two PromQL targets.
+            "http": 35,
+            "loki": 0,
+            "tempo": 0,
+            "unknown": 0,
+        }
+    )
     assert all(target["datasource_type"] for target in report["typed_targets"])
     assert all(
         target["datasource_type"] == "yesoreyeram-infinity-datasource"

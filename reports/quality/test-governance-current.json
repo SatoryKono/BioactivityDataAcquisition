@@ -34,7 +34,7 @@
   "assertless_candidates": [
     {
       "category": "architecture_helper_guard",
-      "line": "144",
+      "line": "145",
       "path": "tests/architecture/test_pr_gate_complete.py",
       "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
       "test_name": "test_called_owner_workflows_reject_duplicate_yaml_keys"
@@ -657,7 +657,7 @@
     "weak_no_value": 0
   },
   "assertless_examples": [
-    "tests/architecture/test_pr_gate_complete.py:144",
+    "tests/architecture/test_pr_gate_complete.py:145",
     "tests/architecture/test_quality_debt_scorecard.py:1127",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
     "tests/integration/infrastructure/storage/test_delta_reader.py:586",
@@ -1185,7 +1185,7 @@
     "assertless_candidates": [
       {
         "category": "architecture_helper_guard",
-        "line": "144",
+        "line": "145",
         "path": "tests/architecture/test_pr_gate_complete.py",
         "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
         "test_name": "test_called_owner_workflows_reject_duplicate_yaml_keys"
@@ -1808,7 +1808,7 @@
       "weak_no_value": 0
     },
     "assertless_examples": [
-      "tests/architecture/test_pr_gate_complete.py:144",
+      "tests/architecture/test_pr_gate_complete.py:145",
       "tests/architecture/test_quality_debt_scorecard.py:1127",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
       "tests/integration/infrastructure/storage/test_delta_reader.py:586",
@@ -2026,8 +2026,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2429,
-      "test_python_file_count": 2663,
+      "test_glob_file_count": 2430,
+      "test_python_file_count": 2664,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2068,13 +2068,13 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2429,
-    "total_test_functions": 25558,
+    "total_test_files": 2430,
+    "total_test_functions": 25565,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "2b46cadba127b89bf7c5a3c39c552c126621424006279fc218482bcc1cb7be19",
+  "source_tree_sha256": "935c22b3d913d260d5fbbae59a0d4d7076dd205f28baa3913934a1c0aede210a",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 88,
@@ -2094,8 +2094,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2429,
-    "test_python_file_count": 2663,
+    "test_glob_file_count": 2430,
+    "test_python_file_count": 2664,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2136,8 +2136,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2429,
-  "total_test_functions": 25558,
+  "total_test_files": 2430,
+  "total_test_functions": 25565,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

@@ -391,6 +391,7 @@ shipped_selector_registry:
       - pipeline
       - run_type
       - run_id
+      - read_latency_quantile
     hidden_context_selectors: []
     hidden_detail_selectors: []
     top_bar_order:
@@ -398,11 +399,13 @@ shipped_selector_registry:
       - pipeline
       - run_type
       - run_id
+      - read_latency_quantile
     query_source_families:
       workflow: prometheus_workflow_runs_total
       pipeline: control_plane_filter_options_api
       run_type: prometheus_control_plane_run_type_universe
       run_id: control_plane_filter_options_api
+      read_latency_quantile: custom_read_latency_quantile
   bioetl-overview-v2:
     family: hybrid_overview
     visible_selectors:
@@ -542,6 +545,7 @@ ship_now_selector_contract_by_uid:
       - pipeline
       - run_type
       - run_id
+      - read_latency_quantile
     time_range: grafana_builtin
   bioetl-overview-v2:
     visible_selectors:

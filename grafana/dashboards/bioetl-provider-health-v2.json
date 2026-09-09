@@ -2036,8 +2036,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-background",
-                      "mode": "basic",
+                      "type": "auto",
                       "wrapText": false
                     }
                   }
@@ -2239,8 +2238,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-background",
-                      "mode": "basic",
+                      "type": "auto",
                       "wrapText": false
                     }
                   }

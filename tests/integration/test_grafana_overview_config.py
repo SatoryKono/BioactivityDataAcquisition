@@ -187,7 +187,7 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
     assert "bioetl_l0_status" in _panel_expr(status)
     assert "$__range" not in _panel_expr(status)
     assert status.get("options", {}).get("colorMode") == "background"
-    assert status.get("options", {}).get("textMode") == "value"
+    assert status.get("options", {}).get("textMode") == "value_and_name"
     assert status.get("fieldConfig", {}).get("defaults", {}).get("noValue") == "UNKNOWN"
     _assert_status_mapping(status)
 

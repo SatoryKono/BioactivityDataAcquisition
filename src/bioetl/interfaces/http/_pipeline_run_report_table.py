@@ -14,12 +14,9 @@ from bioetl.interfaces.http._pipeline_run_report_display import (
     _shape_reasons_display,
 )
 from bioetl.interfaces.http._pipeline_run_report_sections import (
-    _ARTIFACT_ACTIONS,
-    _ARTIFACT_TITLES,
     _FAILURE_ROW_ORDER,
     _IDENTITY_ROW_ORDER,
     _LAYER_ROW_ORDER,
-    _REASON_OPERATOR_LABELS,
     _RECONCILIATION_ROW_ORDER,
 )
 from bioetl.interfaces.http._processed_records_value_support import (

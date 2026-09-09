@@ -683,7 +683,11 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
             assert expressions, (
                 f"Dashboard {dashboard_name} panel {panel_title!r} has no expressions"
             )
-            assert any("histogram_quantile(0.95" in expr for expr in expressions), (
+            assert any(
+                "histogram_quantile(0.95" in expr
+                or "histogram_quantile($read_latency_quantile" in expr
+                for expr in expressions
+            ), (
                 f"Dashboard {dashboard_name} panel {panel_title!r} must stay histogram-backed"
             )
             assert all("or vector(0)" not in expr for expr in expressions), (

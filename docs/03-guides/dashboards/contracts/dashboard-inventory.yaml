@@ -41,6 +41,7 @@ dashboards:
       - pipeline
       - run_id
       - run_type
+      - read_latency_quantile
   - uid: bioetl-overview-v2
     title: 1. Overview
     owner: "@bioetl-observability"

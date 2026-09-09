@@ -2,7 +2,7 @@
 
 Refresh note (2026-09-09): inventory grew to `source_module_count=2471` after the flow3 HTTP display helpers and stream-1 merge. Counts and the source fingerprint below come from `reports/quality/module-coverage-inventory.json`. Historical notes remain historical.
 
-`source_tree_sha256=0874ce1e8f99dd863fa788e8afa945398d4d077e4f9f513a0576605c1271af75`
+`source_tree_sha256=3e4af34912c125fcf6294903e81ef499c40c919f01c60e7699a3dd9d33a39aac`
 
 `source_module_count=2471`
 
@@ -108,6 +108,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `0874ce1e8f99dd863fa788e8afa945398d4d077e4f9f513a0576605c1271af75`
+- source_tree_sha256: `3e4af34912c125fcf6294903e81ef499c40c919f01c60e7699a3dd9d33a39aac`
 
 `source_module_count=2471`

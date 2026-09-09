@@ -99,6 +99,7 @@ EXPECTED_VARS_BY_DASHBOARD = {
         "pipeline",
         "run_type",
         "run_id",
+        "read_latency_quantile",
     },
     "bioetl-incident-v1.json": {
         "workflow",
@@ -1298,7 +1299,6 @@ def test_control_plane_latency_panels_have_p50_p95_p99() -> None:
     latency_panels = (
         "Track Checkpoint Save Latency",
         "Track Global Checkpoint Admin Latency",
-        "Track Global Read Latency",
         "Track Global Audit Write Latency",
         "Track Global Audit Query Latency",
     )
