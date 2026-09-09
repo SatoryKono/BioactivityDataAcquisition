@@ -66,6 +66,23 @@ REMOVED_FULL_PROFILE_SERVERS = {
 }
 
 
+def _assert_github_mcp_policy_env(
+    servers: dict[str, dict[str, object]],
+    runtime_servers: dict[str, dict[str, object]],
+) -> None:
+    github_env = {
+        "GITHUB_TOOLSETS": setup_mcp.GITHUB_MCP_TOOLSETS,
+        "GITHUB_EXCLUDE_TOOLS": setup_mcp.GITHUB_MCP_EXCLUDE_TOOLS,
+        "GITHUB_LOCKDOWN_MODE": "true",
+    }
+    assert servers["github"]["env"] == github_env
+    runtime_env = runtime_servers["github"]["env"]
+    assert isinstance(runtime_env, dict)
+    assert runtime_env["GITHUB_TOOLSETS"] == github_env["GITHUB_TOOLSETS"]
+    assert "NPM_CONFIG_CACHE" not in servers["github"]["env"]
+    assert "NPM_CONFIG_CACHE" not in runtime_env
+
+
 def _to_bash_path(path: Path) -> str:
     value = path.as_posix()
     if len(value) >= 3 and value[1] == ":" and value[2] == "/":
@@ -592,16 +609,7 @@ def test_main_uses_workspace_root_for_generated_server_paths(
             workspace_root / f"scripts/ai/mcp/github-mcp-wrapper{host_wrapper_suffix}"
         ).resolve()
     )
-    assert servers["github"]["env"] == {
-        "GITHUB_TOOLSETS": setup_mcp.GITHUB_MCP_TOOLSETS,
-        "GITHUB_EXCLUDE_TOOLS": setup_mcp.GITHUB_MCP_EXCLUDE_TOOLS,
-        "GITHUB_LOCKDOWN_MODE": "true",
-    }
-    assert runtime_servers["github"]["env"]["GITHUB_TOOLSETS"] == (
-        setup_mcp.GITHUB_MCP_TOOLSETS
-    )
-    assert "NPM_CONFIG_CACHE" not in servers["github"]["env"]
-    assert "NPM_CONFIG_CACHE" not in runtime_servers["github"]["env"]
+    _assert_github_mcp_policy_env(servers, runtime_servers)
     assert servers["docker"]["args"][0] == (
         f"scripts/ai/mcp/mcp_docker_wrapper{portable_wrapper_suffix}"
     )
