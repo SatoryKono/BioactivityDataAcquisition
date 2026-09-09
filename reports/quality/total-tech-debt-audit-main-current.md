@@ -10,12 +10,13 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `ae38f8b303d32c7e0c6bebb880ff8c0cd9219c12ea6cfbf562ca71e4326ce9f7`
+Evidence surface SHA-256: `409221b8308120a961d848215053565b48bbd739c6a8f2ff8119d48196e73722`
 
 Evidence metadata refresh (2026-09-09): the canonical registry digest was
-recomputed after the remote-main debt baseline rebind to `f78869f826f`
-(#10270). The historical audited commit above is retained; this metadata
-refresh does not constitute a new repository-wide architecture audit.
+recomputed after the SHA-bound module coverage inventory and remote-main
+debt baseline rebind to `bf54831c255` (#10285). The historical audited
+commit above is retained; this metadata refresh does not constitute a new
+repository-wide architecture audit.
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -23,7 +24,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "ae38f8b303d32c7e0c6bebb880ff8c0cd9219c12ea6cfbf562ca71e4326ce9f7",
+  "evidence_surface_sha256": "409221b8308120a961d848215053565b48bbd739c6a8f2ff8119d48196e73722",
   "metrics": {
     "architecture_integral_score": 9.14,
     "architecture_interpretation": "good_targeted_improvements",
