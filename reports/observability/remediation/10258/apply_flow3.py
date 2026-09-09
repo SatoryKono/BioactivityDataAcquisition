@@ -183,6 +183,9 @@ def _patch_overview_timelines(dashboard: dict[str, object]) -> None:
     for panel in _walk(list(dashboard.get("panels") or [])):
         if panel.get("type") != "state-timeline":
             continue
+        options = panel.get("options")
+        if isinstance(options, dict):
+            options["showValue"] = "never"
         for target in panel.get("targets") or []:
             if not isinstance(target, dict):
                 continue
@@ -256,12 +259,28 @@ def _patch_incident(dashboard: dict[str, object]) -> None:
     root = dashboard.get("panels")
     if not isinstance(root, list):
         return
-    if any(isinstance(panel, dict) and panel.get("id") == 2005 for panel in root):
-        return
-    alert = _extract_alert_panel(dashboard)
+    alert = next(
+        (
+            panel
+            for panel in root
+            if isinstance(panel, dict) and panel.get("id") == 2005
+        ),
+        None,
+    )
     if alert is None:
-        return
-    alert["gridPos"] = {"h": 5, "w": 10, "x": 14, "y": 8}
+        alert = _extract_alert_panel(dashboard)
+        if alert is None:
+            return
+        insert_at = next(
+            (
+                index
+                for index, panel in enumerate(root)
+                if isinstance(panel, dict) and panel.get("id") == 2010
+            ),
+            len(root),
+        )
+        root.insert(insert_at + 1, alert)
+    alert["gridPos"] = {"h": 5, "w": 24, "x": 0, "y": 13}
     defaults = (alert.get("fieldConfig") or {}).get("defaults") or {}
     links = list(defaults.get("links") or []) if isinstance(defaults, dict) else []
     if not any(
@@ -279,20 +298,9 @@ def _patch_incident(dashboard: dict[str, object]) -> None:
         if isinstance(defaults, dict):
             defaults["links"] = links
     _ensure_limit(alert, 3)
-    root = dashboard.setdefault("panels", [])
-    if isinstance(root, list):
-        insert_at = next(
-            (
-                index
-                for index, panel in enumerate(root)
-                if isinstance(panel, dict) and panel.get("id") == 2010
-            ),
-            len(root),
-        )
-        root.insert(insert_at + 1, alert)
     for panel in _walk(list(dashboard.get("panels") or [])):
         if panel.get("id") == 2010:
-            panel["gridPos"] = {"h": 5, "w": 14, "x": 0, "y": 8}
+            panel["gridPos"] = {"h": 5, "w": 24, "x": 0, "y": 8}
 
 
 def _patch_run_explorer_reasons_artifacts(dashboard: dict[str, object]) -> None:

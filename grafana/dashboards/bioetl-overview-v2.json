@@ -2051,7 +2051,7 @@
               }
             ],
             "mergeValues": true,
-            "showValue": "auto",
+            "showValue": "never",
             "legend": {
               "displayMode": "list",
               "placement": "bottom",
@@ -2159,7 +2159,7 @@
               }
             ],
             "mergeValues": true,
-            "showValue": "auto",
+            "showValue": "never",
             "legend": {
               "displayMode": "list",
               "placement": "bottom",
@@ -2273,7 +2273,7 @@
               }
             ],
             "mergeValues": true,
-            "showValue": "auto",
+            "showValue": "never",
             "legend": {
               "displayMode": "list",
               "placement": "bottom",
