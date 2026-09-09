@@ -170,8 +170,10 @@ def test_run_id_selector_and_recent_runs_do_not_label_uuid_as_count() -> None:
         for item in (recent.get("transformations") or [])
         if item.get("id") == "organize"
     )
-    assert ((organize.get("options") or {}).get("excludeByName") or {}).get("Value") is True
-    rename = ((organize.get("options") or {}).get("renameByName") or {})
+    assert ((organize.get("options") or {}).get("excludeByName") or {}).get(
+        "Value"
+    ) is True
+    rename = (organize.get("options") or {}).get("renameByName") or {}
     assert rename.get("run_id") == "Run"
     assert rename.get("started_at") == "Started"
     assert rename.get("status") == "Status"

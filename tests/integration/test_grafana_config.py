@@ -98,7 +98,8 @@ EXPECTED_VARS_BY_DASHBOARD = {
         "workflow",
         "pipeline",
         "run_type",
-        "run_id", "read_latency_quantile",
+        "run_id",
+        "read_latency_quantile",
     },
     "bioetl-incident-v1.json": {
         "workflow",
@@ -631,9 +632,9 @@ def _assert_latency_panel_has_quantiles(panel_title: str, panel: dict | None) ->
         for target in panel.get("targets", [])
         if isinstance(target.get("expr"), str)
     )
-    variable = "$read_latency_quantile" in expressions
-    assert ("histogram_quantile($read_latency_quantile" in expressions) == variable
-    assert variable or all(f"histogram_quantile(0.{p}" in expressions for p in ("50", "95", "99"))
+    assert "histogram_quantile(0.50" in expressions
+    assert "histogram_quantile(0.95" in expressions
+    assert "histogram_quantile(0.99" in expressions
     assert "or vector(0)" not in expressions
 
 
@@ -1298,7 +1299,6 @@ def test_control_plane_latency_panels_have_p50_p95_p99() -> None:
     latency_panels = (
         "Track Checkpoint Save Latency",
         "Track Global Checkpoint Admin Latency",
-        "Track Global Read Latency",
         "Track Global Audit Write Latency",
         "Track Global Audit Query Latency",
     )

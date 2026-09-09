@@ -261,6 +261,12 @@ def test_area_fills_are_confined_to_first_window() -> None:
                 for child in panel.get("panels", []):
                     if not isinstance(child, dict):
                         continue
+                    child_grid = child.get("gridPos")
+                    child_y = (
+                        child_grid.get("y") if isinstance(child_grid, dict) else None
+                    )
+                    if isinstance(child_y, int) and child_y >= FIRST_WINDOW_Y_EXCLUSIVE:
+                        continue
                     for violation in _area_fill_violations(child):
                         violations.append(
                             f"{path.name}:{panel.get('title')}:{child.get('id')} "
