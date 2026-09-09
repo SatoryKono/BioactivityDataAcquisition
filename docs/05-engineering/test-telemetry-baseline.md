@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `fix/opt-10262-github-mcp-toolsets`
-- Source commit: `81a84df8f920493f2594c85ac242520b45bf3ded`
-- Source run id: `34368235108`
+- Source branch: `fix/grafana-vis-stream3-layout`
+- Source commit: `51a603e6d2523d996be6fac080ec97783e01d051`
+- Source run id: `34384855221`
 - Source event: `pull_request`
-- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34368235108`
+- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34384855221`
 - Source tree sha256: `0c4a3276236137db6887fc3df9bd34d8fe195f112248bc4b3d26c5c310ae8188`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-09-09T15:33:10.808916+00:00`
+- Refreshed at (UTC): `2026-09-09T17:55:30.666384+00:00`
 
 ## Branch-accurate provenance (#5729)
 
