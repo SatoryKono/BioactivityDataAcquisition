@@ -129,7 +129,7 @@ mention `6. Alerts & SLO` / Explore Logs / Explore Traces as removed surfaces.
 ## Фильтрация
 
 - `bioetl-overview-v2`: `$workflow`, `$pipeline`, `$run_type`, `$run_id`
-- `bioetl-control-plane-v1`: `$workflow`, `$pipeline`, `$run_type`, `$run_id`
+- `bioetl-control-plane-v1`: `$workflow`, `$pipeline`, `$run_type`, `$run_id`, `$read_latency_quantile`
 - `bioetl-runtime`: `$workflow`, `$pipeline`, `$run_type`, `$run_id`, `$stage`
 - `bioetl-dq-v2`: `$workflow`, `$pipeline`, `$run_type`, `$run_id`, `$stage`
 - `bioetl-provider-health-v2`: `$workflow`, `$pipeline`, `$run_type`,
