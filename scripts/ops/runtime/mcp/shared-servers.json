@@ -74,7 +74,9 @@
       "priority": 3,
       "daily": true,
       "readiness_timeout_sec": 240,
-      "state_model": "shared_credentials"
+      "state_model": "shared_credentials",
+      "binary": "github-mcp-server",
+      "toolsets": "context,issues,pull_requests,repos,users,actions,code_security,dependabot,notifications"
     },
     "fetch": {
       "port": 8821,
