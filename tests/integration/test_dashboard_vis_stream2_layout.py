@@ -95,6 +95,7 @@ def test_read_latency_defaults_to_p95_table_legend() -> None:
         if item.get("name") == "read_latency_quantile"
     )
     assert quantile.get("current", {}).get("value") == "0.95"
+    assert str(quantile.get("description") or "").strip()
     reads = _panel(dashboard, 6)
     axis = (
         (reads.get("fieldConfig") or {})
@@ -125,6 +126,10 @@ def test_provider_severity_column_has_min_width_and_narrower_provider() -> None:
     assert widths.get("Value") == 160
     assert "Severity" not in widths
     assert widths.get("provider", 0) + widths.get("Value", 0) <= 301
+    assert int((panel.get("gridPos") or {}).get("y") or 0) < 18
+    for panel_id in (9102, 9111, 9112):
+        expander = _panel(dashboard, panel_id)
+        assert int((expander.get("gridPos") or {}).get("y") or 0) >= 18
 
 
 def test_nav_chips_use_eight_px_gap_and_status_stats_stay_compact() -> None:

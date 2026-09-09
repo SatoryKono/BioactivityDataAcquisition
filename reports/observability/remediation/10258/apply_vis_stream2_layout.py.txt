@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
-"""Apply VIS-20260908 stream-2 layout fixes (#10247, #10248, #10252, #10257)."""
+"""Idempotent re-apply of VIS stream 2 (#10247, #10248, #10252, #10257).
+
+One-shot helper, not a scripts/ generator. Dashboard tooling under
+scripts/ops/observability/grafana/ must stay validation/render-only.
+
+Run from the repository root:
+    .venv-win\\Scripts\\python.exe reports/observability/remediation/10258/apply_vis_stream2_layout.py.txt
+"""
 
 from __future__ import annotations
 
 import json
-from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -310,13 +316,25 @@ def patch_control_plane(payload: dict[str, Any]) -> None:
     }
 
     templating = payload.setdefault("templating", {}).setdefault("list", [])
-    if not any(
-        isinstance(item, dict) and item.get("name") == "read_latency_quantile"
-        for item in templating
-    ):
+    quantile_description = (
+        "Select one control-plane global read-latency quantile. Default p95 "
+        "keeps a single series per store/operation instead of overlaying "
+        "p50/p95/p99. Track Global Read Latency shows last and max for the "
+        "selected quantile."
+    )
+    quantile = next(
+        (
+            item
+            for item in templating
+            if isinstance(item, dict) and item.get("name") == "read_latency_quantile"
+        ),
+        None,
+    )
+    if quantile is None:
         templating.append(
             {
                 "current": {"selected": True, "text": "p95", "value": "0.95"},
+                "description": quantile_description,
                 "hide": 0,
                 "includeAll": False,
                 "label": "Read latency",
@@ -332,6 +350,8 @@ def patch_control_plane(payload: dict[str, Any]) -> None:
                 "type": "custom",
             }
         )
+    else:
+        quantile["description"] = quantile_description
 
 
 def _set_width(panel: dict[str, Any], field: str, width: int) -> None:
@@ -408,7 +428,6 @@ def compact_status_stats(payload: dict[str, Any]) -> None:
         options = panel.setdefault("options", {})
         if options.get("colorMode") != "background":
             continue
-        options["colorMode"] = "value"
         options["textMode"] = "value_and_name"
         options["graphMode"] = "none"
         options["text"] = {"titleSize": 14, "valueSize": 20}

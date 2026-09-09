@@ -216,6 +216,7 @@
         "label": "Read latency",
         "multi": false,
         "name": "read_latency_quantile",
+        "description": "Select one control-plane global read-latency quantile. Default p95 keeps a single series per store/operation instead of overlaying p50/p95/p99. Track Global Read Latency shows last and max for the selected quantile.",
         "options": [
           {
             "selected": false,
