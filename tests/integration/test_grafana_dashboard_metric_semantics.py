@@ -1984,3 +1984,155 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
             _expected_processed_records_row_status_mappings()
         ),
     )
+
+
+_PROVIDER_HEALTH_DASHBOARD = Path("grafana/dashboards/bioetl-provider-health-v2.json")
+_PROVIDER_HEALTH_UID = "bioetl-provider-health-v2"
+# #10246: fleet-coverage proof required before any provider-health VALID EMPTY.
+_PROVIDER_CAUSE_COVERAGE_GUARD = (
+    "(count(max by (provider) (bioetl_provider_current_status)) > bool 0)"
+    " * (count(max by (provider) (bioetl_provider_current_cause)) > bool 0)"
+    " * absent(max by (provider) (bioetl_provider_current_status) != 0)"
+    " * absent(max by (provider) (bioetl_provider_current_status)"
+    " unless on(provider) max by (provider) (bioetl_provider_health_status))"
+    " * absent(max by (provider, cause) (bioetl_provider_current_cause) > 0)"
+)
+_PROVIDER_CAUSE_VALID_EMPTY_LABEL = (
+    "VALID EMPTY - FLEET coverage proven, no active provider causes"
+)
+_PROVIDER_CAUSE_UNKNOWN_LABEL = (
+    "UNKNOWN - FLEET cause coverage unproven, restore provider telemetry"
+)
+_PROVIDER_CAUSE_PANEL_IDS = (9103, 9113)
+_PROVIDER_SINGLE_STATE_NO_VALUE_PANEL_IDS = (9102, 9103, 9107)
+
+
+def _provider_health_panels_by_id() -> dict[int, dict[str, object]]:
+    dashboard = load_dashboard(_PROVIDER_HEALTH_DASHBOARD)
+    return {
+        panel["id"]: panel
+        for panel in get_dashboard_panels(dashboard)
+        if isinstance(panel.get("id"), int)
+    }
+
+
+def test_provider_health_no_value_copy_confirms_exactly_one_empty_state() -> None:
+    """#10246 H1: a provider-health noValue must not offer UNKNOWN *or* VALID EMPTY."""
+    panels = _provider_health_panels_by_id()
+    for panel_id in _PROVIDER_SINGLE_STATE_NO_VALUE_PANEL_IDS:
+        panel = panels.get(panel_id)
+        assert panel is not None, f"provider-health panel {panel_id} is missing"
+        no_value = panel.get("fieldConfig", {}).get("defaults", {}).get("noValue")
+        assert isinstance(no_value, str) and no_value, (
+            f"panel {panel_id} must declare a fail-closed noValue"
+        )
+        assert not ("UNKNOWN" in no_value and "VALID EMPTY" in no_value), (
+            f"panel {panel_id} noValue concatenates UNKNOWN and VALID EMPTY as "
+            f"alternative explanations: {no_value!r}"
+        )
+        assert no_value.startswith("UNKNOWN"), (
+            f"panel {panel_id} noValue must lead with the confirmed UNKNOWN state: "
+            f"{no_value!r}"
+        )
+
+
+def test_provider_health_copy_never_hedges_two_empty_states() -> None:
+    """Provider-health noValue/description must confirm one state, not alternatives."""
+    from scripts.engineering.qa import check_dashboard_visual_semantics as subject
+
+    errors = [
+        error
+        for panel in get_dashboard_panels(load_dashboard(_PROVIDER_HEALTH_DASHBOARD))
+        for error in subject._empty_state_hedge_errors(
+            _PROVIDER_HEALTH_DASHBOARD, panel
+        )
+    ]
+    assert not errors, "hedged provider-health empty-state copy:\n" + "\n".join(errors)
+
+
+def test_empty_state_hedge_invariant_rejects_the_10246_regression() -> None:
+    """The anti-hedge invariant must fail on the exact copy #10246 removed."""
+    from scripts.engineering.qa import check_dashboard_visual_semantics as subject
+
+    regression = {
+        "title": "Inspect Top Provider Causes",
+        "fieldConfig": {
+            "defaults": {
+                "noValue": (
+                    "UNKNOWN \u2014 missing/stale provider telemetry, or VALID EMPTY "
+                    "if the fleet has no matching rows."
+                )
+            }
+        },
+    }
+    assert subject._empty_state_hedge_errors(_PROVIDER_HEALTH_DASHBOARD, regression)
+
+    taxonomy_copy = {
+        "title": "Inspect Top Provider Causes",
+        "description": "TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+        "fieldConfig": {
+            "defaults": {"noValue": "UNKNOWN \u2014 cause evidence unavailable"}
+        },
+    }
+    assert not subject._empty_state_hedge_errors(
+        _PROVIDER_HEALTH_DASHBOARD, taxonomy_copy
+    )
+
+
+def test_provider_cause_tables_emit_one_fleet_verdict_row() -> None:
+    """VALID EMPTY needs the coverage proof; otherwise the fleet row stays UNKNOWN."""
+    panels = _provider_health_panels_by_id()
+    for panel_id in _PROVIDER_CAUSE_PANEL_IDS:
+        panel = panels.get(panel_id)
+        assert panel is not None, f"provider-health panel {panel_id} is missing"
+        expressions = [
+            target["expr"]
+            for target in panel.get("targets", [])
+            if isinstance(target.get("expr"), str)
+        ]
+        assert len(expressions) == 1, (
+            f"panel {panel_id} must answer from one instant snapshot"
+        )
+        expr = expressions[0]
+
+        valid_empty_index = expr.find(_PROVIDER_CAUSE_VALID_EMPTY_LABEL)
+        unknown_index = expr.find(_PROVIDER_CAUSE_UNKNOWN_LABEL)
+        assert valid_empty_index > 0, (
+            f"panel {panel_id} must expose a proven VALID EMPTY fleet row"
+        )
+        assert unknown_index > valid_empty_index, (
+            f"panel {panel_id} must fall back to an UNKNOWN fleet row"
+        )
+        assert expr.count(_PROVIDER_CAUSE_COVERAGE_GUARD) == 2, (
+            f"panel {panel_id} must gate VALID EMPTY on the coverage proof and "
+            "exclude it from the UNKNOWN branch"
+        )
+        # The UNKNOWN branch must subtract the VALID EMPTY branch, so the two
+        # fleet verdict rows can never render together.
+        assert f"unless ({_PROVIDER_CAUSE_COVERAGE_GUARD})" in expr, (
+            f"panel {panel_id} UNKNOWN row must exclude the proven-empty case"
+        )
+        assert "or vector(0)" not in expr
+        assert "unless on (provider)" not in expr
+
+
+def test_provider_cause_contract_declares_unknown_beside_valid_empty() -> None:
+    """Contract must admit the UNKNOWN fleet row that #10246 locked in."""
+    contract = yaml.safe_load(
+        Path(
+            "docs/03-guides/dashboards/contracts/panel-content-contract.yaml"
+        ).read_text(encoding="utf-8")
+    )
+    panels = contract["dashboards"][_PROVIDER_HEALTH_UID]["panels"]
+    for panel_id in _PROVIDER_CAUSE_PANEL_IDS:
+        record = panels[str(panel_id)]
+        assert {"VALID_EMPTY", "UNKNOWN"} <= set(record["state_model"]), (
+            f"panel {panel_id} must declare both proven-empty and UNKNOWN states"
+        )
+        assert record["empty_state_class"] == "telemetry_missing"
+    for panel_id in (9102, 9107):
+        record = panels[str(panel_id)]
+        assert "UNKNOWN" in record["state_model"]
+        assert "VALID_EMPTY" not in record["state_model"], (
+            f"panel {panel_id} cannot prove VALID EMPTY from its own query"
+        )

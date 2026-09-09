@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any, cast
 
@@ -146,6 +147,25 @@ REQUIRED_TRUST_MARKER_PANELS = {
     DASHBOARD_RUNTIME: {PANEL_METRICS_EVIDENCE},
     DASHBOARD_CONTROL_PLANE_V1: {PANEL_INSPECT_TELEMETRY_MISSING},
 }
+
+# DASH-STATE-001/003 (#10246): operator copy must confirm one empty state.
+# Offering UNKNOWN and VALID EMPTY as alternatives for the same render leaves
+# the operator unable to choose between "restore telemetry" and "nothing to do".
+# A negation list ("not a healthy zero or VALID EMPTY") teaches the taxonomy and
+# stays allowed; only alternatives offered for the same render are rejected.
+HEDGED_EMPTY_STATE_PATTERNS = (
+    re.compile(r"\bor\s+VALID\s+EMPTY\s+if\b", re.IGNORECASE),
+    re.compile(r"\bor\s+UNKNOWN\s+if\b", re.IGNORECASE),
+    re.compile(r"\bor\s+TELEMETRY\s+MISSING\s+if\b", re.IGNORECASE),
+    re.compile(r"\bUNKNOWN\b[^.;]{0,80}?\bor\s+VALID\s+EMPTY\b", re.IGNORECASE),
+    re.compile(
+        r"\bTELEMETRY\s+MISSING\b[^.;]{0,80}?\bor\s+VALID\s+EMPTY\b",
+        re.IGNORECASE,
+    ),
+    re.compile(r"\bVALID\s+EMPTY\b[^.;]{0,80}?\bor\s+UNKNOWN\b", re.IGNORECASE),
+    re.compile(r"\bUNKNOWN\s*/\s*VALID\s+EMPTY\b", re.IGNORECASE),
+    re.compile(r"\bVALID\s+EMPTY\s*/\s*UNKNOWN\b", re.IGNORECASE),
+)
 
 
 def _grid_pos(panel: JsonObject) -> JsonObject:
@@ -486,6 +506,52 @@ def _telemetry_evidence_errors(panel: JsonObject) -> list[str]:
     return errors
 
 
+def _override_no_value_texts(panel: JsonObject) -> list[str]:
+    return [
+        prop["value"]
+        for override in panel.get("fieldConfig", {}).get("overrides", [])
+        if isinstance(override, dict)
+        for prop in override.get("properties", [])
+        if isinstance(prop, dict)
+        and prop.get("id") == "noValue"
+        and isinstance(prop.get("value"), str)
+    ]
+
+
+def _empty_state_copy_texts(panel: JsonObject) -> list[tuple[str, str]]:
+    defaults = panel.get("fieldConfig", {}).get("defaults", {})
+    texts: list[tuple[str, str]] = []
+    for field, value in (
+        ("noValue", defaults.get("noValue")),
+        ("description", panel.get("description")),
+    ):
+        if isinstance(value, str):
+            texts.append((field, value))
+    texts.extend(("override noValue", text) for text in _override_no_value_texts(panel))
+    return texts
+
+
+def _empty_state_hedge_errors(dashboard_path: Path, panel: JsonObject) -> list[str]:
+    """Reject copy that offers two empty states as alternatives (DASH-STATE-001)."""
+    title = str(panel.get("title", UNTITLED_PANEL_TITLE))
+    errors: list[str] = []
+    for field, text in _empty_state_copy_texts(panel):
+        hedge = next(
+            (
+                pattern.pattern
+                for pattern in HEDGED_EMPTY_STATE_PATTERNS
+                if pattern.search(text)
+            ),
+            None,
+        )
+        if hedge is not None:
+            errors.append(
+                f"{dashboard_path}: panel '{title}' {field} must confirm one empty "
+                f"state, not offer alternatives (matched {hedge!r})"
+            )
+    return errors
+
+
 def _panel_errors(dashboard_path: Path, panel: JsonObject) -> list[str]:
     title = str(panel.get("title", ""))
     panel_key = (dashboard_path.name, title)
@@ -501,6 +567,7 @@ def _panel_errors(dashboard_path: Path, panel: JsonObject) -> list[str]:
         + _status_panel_errors(dashboard_path, panel)
         + _panel_type_errors(dashboard_path, panel)
         + _fail_closed_panel_errors(dashboard_path, panel, expected_no_value)
+        + _empty_state_hedge_errors(dashboard_path, panel)
     )
 
 

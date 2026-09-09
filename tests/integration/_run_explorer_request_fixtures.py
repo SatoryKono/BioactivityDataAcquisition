@@ -37,6 +37,7 @@ SELECTED = {
     "pipeline": "chembl_assay",
     "run_type": "backfill",
     "run_id": "00000000-0000-4000-8000-000000000942",
+    "__timezone": "UTC",
 }
 EMPTY_SELECTION = {
     **SELECTED,

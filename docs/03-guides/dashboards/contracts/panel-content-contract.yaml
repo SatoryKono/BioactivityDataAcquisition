@@ -3779,7 +3779,7 @@ dashboards:
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
-        - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -3787,7 +3787,6 @@ dashboards:
         - no_data
         fixture_cases:
         - populated
-        - valid_empty
         - telemetry_absent
         - backend_error
         render_profiles: *id001
@@ -3801,7 +3800,9 @@ dashboards:
         empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -3809,6 +3810,7 @@ dashboards:
         fixture_cases:
         - populated
         - valid_empty
+        - telemetry_absent
         - backend_error
         render_profiles:
         - first_window_dark
@@ -3883,7 +3885,7 @@ dashboards:
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
-        - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -3891,7 +3893,6 @@ dashboards:
         - no_data
         fixture_cases:
         - populated
-        - valid_empty
         - telemetry_absent
         - backend_error
         render_profiles: *id002
@@ -3947,6 +3948,7 @@ dashboards:
         empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
