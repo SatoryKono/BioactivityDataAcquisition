@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-09-09'
+  Last verified: '2026-09-10'
 
 ______________________________________________________________________
 
@@ -16,14 +16,20 @@ ______________________________________________________________________
 ## Purpose
 
 This page is the canonical published inventory of the **48** live GitHub Actions
-workflows shipped under `.github/workflows/` on the default branch.
-The count is derived from the tracked `*.yml` files; it is not a separately
+workflow files tracked under `.github/workflows/` on the default branch.
+The count is derived from those tracked `*.yml` files; it is not a separately
 maintained target and it is **not** equal to the GitHub Actions API
-`total_count`. The API also returns dynamic hosted workflows (Dependabot,
-CodeQL default setup, Copilot, Codex) and orphan temp files that are not in
-this tree. Those extras are owned by [#10268](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/10268)
-(docs live-state) and [#10265](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/10265)
-(orphan temp). Do not treat them as canonical lanes here.
+`total_count`. Do not claim that 48 equals every workflow object GitHub returns.
+
+Live GET `2026-09-10`: API `total_count` is **77**.
+
+| Bucket | Count | Meaning |
+| --- | --- | --- |
+| Tracked `.github/workflows/*.yml` | 48 | Canonical inventory on `main`; this page |
+| GitHub-hosted `dynamic/**` | 10 | Dependabot, CodeQL default, agent reviewers; not PR gates |
+| GitHub-only orphan temp/codex IDs | 16 | Files left `main`; `disabled_manually` after #10265 |
+| GitHub-only residual deleted files | 3 | Former tracked workflows; `disabled_manually`; not gates |
+| API `total_count` | 77 | 48 + 10 + 16 + 3 |
 
 GitHub live `state` in the tables below is the Actions UI/API value
 (`active` or `disabled_manually`) after the #10263 map. `deprecated` reusable
@@ -238,6 +244,35 @@ this inventory, and do not re-enable them as required checks.
 | `.github/workflows/tmp-pr-9880-ci-repair.yml` | 346467453 | `disabled_manually` |
 | `.github/workflows/tmp-pr-9889-final-governance.yml` | 346590707 | `disabled_manually` |
 | `.github/workflows/tmp-remote-main-baseline-hashes.yml` | 349108333 | `disabled_manually` |
+
+## GitHub-only residual deleted files
+
+These objects still exist on GitHub after the YAML left `.github/workflows/`.
+They are `disabled_manually` and MUST NOT be treated as canonical PR gates.
+
+| Path | ID | State |
+| --- | --- | --- |
+| `.github/workflows/contract-snapshot-diff.yml` | 235363915 | `disabled_manually` |
+| `.github/workflows/diagrams.yml` | 239669677 | `disabled_manually` |
+| `.github/workflows/schema-drift-check.yml` | 235364479 | `disabled_manually` |
+
+## GitHub-hosted dynamic workflows
+
+Hosted `dynamic/**` objects count toward API `total_count`. They are not tracked
+YAML and are not repository required-check owners.
+
+| Path | ID | State |
+| --- | --- | --- |
+| `dynamic/agents/anthropic-code-agent` | 243971367 | `active` |
+| `dynamic/agents/copilot-pull-request-reviewer` | 312611708 | `active` |
+| `dynamic/agents/openai-code-agent` | 262875535 | `active` |
+| `dynamic/anthropic-code-agent/claude` | 235054673 | `active` |
+| `dynamic/copilot-pull-request-reviewer/copilot-pull-request-reviewer` | 215108871 | `active` |
+| `dynamic/copilot-swe-agent/copilot` | 215109867 | `active` |
+| `dynamic/dependabot/dependabot-updates` | 234158378 | `active` |
+| `dynamic/dependabot/update-graph` | 344512696 | `active` |
+| `dynamic/github-code-scanning/codeql` | 235193651 | `active` |
+| `dynamic/openai-code-agent/codex` | 235140883 | `active` |
 
 ## Related References
 

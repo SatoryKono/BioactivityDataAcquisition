@@ -53,7 +53,11 @@ def _passing_snapshot() -> dict:
             "allow_rebase_merge": False,
             "secret_scanning": "enabled",
         },
-        "rulesets": [{"name": "main", "enforcement": "active"}],
+        "rulesets": [
+            # Desired-target fixture for GH-RULESET-001 (active merge wall).
+            # Live GET 2026-09-10 is enforcement=disabled; that drift maps to #10267.
+            {"name": "main", "enforcement": "active"}
+        ],
         "actions_permissions": {
             "available": True,
             "payload": {"sha_pinning_required": True},
@@ -157,6 +161,27 @@ def test_evaluation_maps_drift_to_existing_issues() -> None:
     assert by_id["GH-WIKI-001"]["status"] == "drift"
     assert by_id["GH-LABELS-001"]["known_issue"] == 9787
     assert result["automation_mutated_github"] is False
+
+
+def test_disabled_rulesets_map_to_issue_10267() -> None:
+    """Live disabled rulesets are GH-RULESET-001 drift tracked by #10267."""
+    snapshot = _passing_snapshot()
+    snapshot["rulesets"] = [
+        {"name": "main", "enforcement": "disabled"},
+        {"name": "root-hygiene-required-check", "enforcement": "disabled"},
+    ]
+    result = TOOL.evaluate_snapshot(
+        snapshot,
+        _policy(),
+        now=datetime(2026, 9, 10, tzinfo=UTC),
+    )
+    by_id = {item["id"]: item for item in result["controls"]}
+
+    assert result["overall"] == "drift"
+    assert by_id["GH-RULESET-001"]["status"] == "drift"
+    assert by_id["GH-RULESET-001"]["known_issue"] == 10267
+    assert "#10267" in by_id["GH-RULESET-001"]["decision"]
+    assert "active rulesets: none" in by_id["GH-RULESET-001"]["evidence"]
 
 
 def test_passing_snapshot_is_conformant_and_default_setup_drift_is_detected() -> None:

@@ -125,3 +125,5 @@ def test_github_policy_records_root_hygiene_admin_verification_lane() -> None:
     assert "Enforcement: `disabled`" in policy
     assert "`checks-complete` and `root-hygiene`" in policy
     assert "pr-gate-complete" in policy
+    assert "required checks and ref protection active" not in policy
+    assert "Rules currently enforced:" not in policy

@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-09-09'
+  Last verified: '2026-09-10'
 
 ______________________________________________________________________
 
 # GitHub Interaction Policy
 
-*Synced with RULES.md and ADR-047 | Last updated: 2026-09-09*
+*Synced with RULES.md and ADR-047 | Last updated: 2026-09-10*
 
 ______________________________________________________________________
 
@@ -93,7 +93,14 @@ ______________________________________________________________________
 
 ## 2. CI/CD Workflows
 
-BioETL uses **48 GitHub Actions workflows** (including reusable helper workflows). For the canonical file-level inventory, see [GitHub Actions Workflows](../../04-reference/github-actions-workflows.md). Temporary and Codex diagnostic workflows MUST NOT remain `active` after merge; GitHub-only orphan objects are disabled, not treated as canonical PR gates.
+BioETL uses **48 GitHub Actions workflows** (including reusable helper workflows).
+That number is the tracked `.github/workflows/*.yml` inventory, not GitHub's
+`GET /actions/workflows` `total_count` (live GET `2026-09-10`: **77** objects =
+48 tracked files + hosted `dynamic/**` workflows + GitHub-only orphan/residual
+IDs). For the file-level inventory and the 48-vs-77 breakdown, see
+[GitHub Actions Workflows](../../04-reference/github-actions-workflows.md).
+Temporary and Codex diagnostic workflows MUST NOT remain `active` after merge;
+GitHub-only orphan objects are disabled, not treated as canonical PR gates.
 
 ### 2.1 Core Quality Workflows
 
@@ -387,7 +394,7 @@ repository ruleset state plus the workflows that materialize
 
 Activated and re-verified on `2026-08-28` with repository admin credentials via the GitHub REST API (closeout for #9782). Re-verified disabled on `2026-08-30` via the GitHub REST API (maintainer request during 72h branch consolidation). Re-activated on `2026-08-31` via the GitHub REST API (closeout for #9800; owner-approved required-check set). On `2026-09-01`, strict up-to-date enforcement was enabled and the companion `main` ruleset was activated for deletion and non-fast-forward protection.
 
-Live GitHub enforcement state (as of `2026-09-03`, GET-verified):
+Live GitHub enforcement state (as of `2026-09-10`, GET-verified):
 
 - Repository ruleset `root-hygiene-required-check` (15730586) targets
   `refs/heads/main`.
@@ -404,7 +411,8 @@ Live GitHub enforcement state (as of `2026-09-03`, GET-verified):
   SSOT; a 404 on `GET .../branches/main/protection` is expected.
 - Applied rules on `main`: none (`GET .../rules/branches/main` returns `[]`)
   because both rulesets are `disabled`.
-- Tracking references: `#3380`, `#8619`, `#9800`, `#9975`, `#9979`, Scorecard `#1272`.
+- Tracking references: `#3380`, `#8619`, `#9800`, `#9975`, `#9979` (closed; not live
+  enforcement), `#10267` (activation), `#10268` (docs live-state), Scorecard `#1272`.
 - Evidence: `https://github.com/SatoryKono/BioactivityDataAcquisition/rules/15730586`
 - API: `GET /repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586`
 - Applied rules: `GET /repos/SatoryKono/BioactivityDataAcquisition/rules/branches/main`
@@ -739,17 +747,34 @@ ______________________________________________________________________
 *See also: [CONTRIBUTING.md](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/.github/CONTRIBUTING.md) | [SECURITY.md](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/.github/SECURITY.md) | [RULES.md](../RULES.md)*
 
 
-### Main rulesets (RF-008 / GH-RULESET-001 — required checks and ref protection active)
+### Main rulesets (RF-008 / GH-RULESET-001 — live enforcement disabled)
 
-Target: `refs/heads/main` (ruleset `15730586` `root-hygiene-required-check`).
-Rules currently enforced: required status checks `[checks-complete, root-hygiene]` (`strict_required_status_checks_policy:true`). Companion ruleset `13643213` `main` enforces `deletion` and `non_fast_forward` protection on the same ref. Both rulesets have no bypass actors (`current_user_can_bypass: never`). Additional review/linear-history/signature rules remain out of these rulesets. Rollback requires an explicitly approved PUT for the affected ruleset and a new entry in §3 Evidence. Tracking: Scorecard #1272 (BranchProtection), #1295 (CodeReview), #1296 (CIIBestPractices).
+SSOT for live GitHub enforcement is §3 plus this block. Both rulesets targeting
+`refs/heads/main` are **`enforcement: disabled`**. Applied rules are empty
+(`GET .../rules/branches/main` = `[]`). Closed `#9975` / `#9979` do **not** mean
+the merge wall is on. Re-activation of required context `pr-gate-complete` is
+[#10267](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/10267);
+this docs sync is #10268.
+
+Live GET `2026-09-10`:
+
+- `15730586` `root-hygiene-required-check`: `enforcement: disabled` (stored checks
+  `[checks-complete, root-hygiene]`, `strict_required_status_checks_policy: true`).
+- `13643213` `main`: `enforcement: disabled` (stored `deletion`,
+  `non_fast_forward`, `pull_request`, and the same required-check pair).
+- No bypass actors (`current_user_can_bypass: never`).
+- None of those stored rules are applied while enforcement stays `disabled`.
+
+Rollback or activation requires an explicitly approved PUT for the affected
+ruleset and a new entry in §3 Evidence. Tracking: #10267, Scorecard #1272
+(BranchProtection), #1295 (CodeReview), #1296 (CIIBestPractices).
 
 ### Quarterly Read-Only Review Runbook (read-only, no mutations)
 
 Owner: @SatoryKono · Cadence: quarterly · Last: 2026-08-28 → Next: 2026-11-28 · Due: +5 days after quarter (Q4 due `2026-12-05`, cron `23 6 1 1,4,7,10`) · Evidence: `reports/governance/quarterly-review-YYYY-QN.md` + `reports/quality/github-settings-review*.json` (30d retention, `automation_mutated_github:false`).
 
 Checklist (read-only `GET`, `--paginate` where paginated, no `PUT/PATCH/POST/DELETE`):
-`GET /repos/{owner}/{repo}/rulesets` → `GET /rulesets/{id}` (15730586 and 13643213 both active) → `GET /rules/branches/main` (required status checks when 15730586 is active) → `GET /code-scanning/alerts?per_page=100` → `GET /labels?per_page=100 --paginate` (209 labels) → `GET /repos/{repo} --jq '{has_wiki,default_branch}'`.
+`GET /repos/{owner}/{repo}/rulesets` → `GET /rulesets/{id}` (expect 15730586 and 13643213 **`enforcement: disabled` until #10267 closes**; do not record "both active" as the live expectation) → `GET /rules/branches/main` (expect `[]` while both are disabled) → `GET /code-scanning/alerts?per_page=100` → `GET /labels?per_page=100 --paginate` (209 labels) → `GET /repos/{repo} --jq '{has_wiki,default_branch}'`.
 Escalation: drift → open/update governance issue (high-risk → Security lane/Release engineering day of review); do not expand token scopes.
 Verification (no token, dry-run): `pytest tests/architecture/test_github_governance_review.py` (`READ_ONLY_GH_COMMANDS` + `workflow_dispatch` + `cron 23 6 1 1,4,7,10`).
 
@@ -785,6 +810,26 @@ Verification (no token, dry-run): `pytest tests/architecture/test_github_governa
 ```
 
 `Re-enable: gh api --method PUT repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586` with `enforcement=active`
+
+### Evidence (2026-09-10) — live disabled; #9979 closed ≠ enforcement
+
+```json
+{
+  "captured_at": "2026-09-10T00:00:00Z",
+  "source": "GET /repos/SatoryKono/BioactivityDataAcquisition/rulesets/{id} and GET .../rules/branches/main and GET .../actions/workflows",
+  "rulesets": [
+    {"id": 13643213, "name": "main", "enforcement": "disabled", "updated_at": "2026-09-02T09:24:27.854+03:00"},
+    {"id": 15730586, "name": "root-hygiene-required-check", "enforcement": "disabled", "updated_at": "2026-09-02T09:41:27.708+03:00"}
+  ],
+  "applied_rules_main": [],
+  "stored_required_status_checks": ["checks-complete", "root-hygiene"],
+  "aggregator_shadow": {"context": "pr-gate-complete", "enforcement": "not GitHub-required"},
+  "workflows_api_total_count": 77,
+  "tracked_workflow_yml": 48,
+  "closed_issues_do_not_restore_enforcement": [9975, 9979],
+  "activation_issue": 10267
+}
+```
 
 ### Evidence (2026-08-31)
 
@@ -899,3 +944,13 @@ Merge-block proof: `PUT /repos/SatoryKono/BioactivityDataAcquisition/pulls/9895/
   `non_fast_forward`.
 - `pr-gate-complete` remains shadow evidence for #9975. #9979 must not mutate
   rulesets until the aggregator is proven on a fresh exact SHA.
+
+### Migration notes (1.2.12)
+
+- #10283 / #10263: mapped GitHub live `active` vs `keep-disabled` lanes and
+  restored PR-gate reusable owners `docs.yml` and `compiled-artifacts-block.yml`.
+- #10268: RF-008 / quarterly checklist now match live GET `2026-09-10`
+  (`enforcement: disabled`, applied rules `[]`). Closing `#9979` does not
+  restore a merge wall. Activation remains #10267. `GH-RULESET-001.known_issue`
+  points at #10267. Workflow inventory distinguishes 48 tracked files from
+  GitHub API `total_count` 77.
