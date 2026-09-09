@@ -1,6 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-09T16:32:00.140215+00:00",  "summary": {
+  "generated_at": "2026-09-09T19:33:50.724697+00:00",
+  "summary": {
     "total_scripts": 616,
     "status_counts": {
       "active": 338,
@@ -17293,7 +17294,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/branch_cleanup.py",
-          "line": 46,
+          "line": 47,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo._branch_cleanup_policy import ("
         },
@@ -17534,7 +17535,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 478,
+          "line": 485,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -19469,7 +19470,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 398,
+          "line": 405,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }

@@ -190,9 +190,12 @@ def test_propose_worktree_action_does_not_unlock_or_prune() -> None:
         locked=True,
         prunable=True,
     ) == ("keep", "locked; confirm a live agent before unlock")
-    assert propose_worktree_action(
-        branch=None,
-        detached=True,
-        locked=False,
-        prunable=False,
-    )[0] == "review"
+    assert (
+        propose_worktree_action(
+            branch=None,
+            detached=True,
+            locked=False,
+            prunable=False,
+        )[0]
+        == "review"
+    )
