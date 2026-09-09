@@ -161,6 +161,29 @@ def _unpin_flex_columns(dashboard: dict[str, object]) -> None:
             ]
 
 
+def _strip_below_fold_color_background(dashboard: dict[str, object]) -> None:
+    """REQ-DASH-001: nested/below-fold tables must not use color-background."""
+    wanted = {9111, 9112}
+    for panel in _walk(list(dashboard.get("panels") or [])):
+        if panel.get("id") not in wanted:
+            continue
+        overrides = (panel.get("fieldConfig") or {}).get("overrides")
+        if not isinstance(overrides, list):
+            continue
+        for override in overrides:
+            if not isinstance(override, dict):
+                continue
+            props = override.get("properties")
+            if not isinstance(props, list):
+                continue
+            for item in props:
+                if not (isinstance(item, dict) and item.get("id") == "custom.cellOptions"):
+                    continue
+                value = item.get("value")
+                if isinstance(value, dict) and value.get("type") == "color-background":
+                    value["type"] = "auto"
+
+
 def _replace_set_range_titles(node: object) -> None:
     if isinstance(node, dict):
         title = node.get("title")
@@ -464,6 +487,8 @@ def patch_dashboard(path: Path) -> None:
         "bioetl-provider-health-v2",
     }:
         _unpin_flex_columns(dashboard)
+    if str(dashboard.get("uid") or "") == "bioetl-provider-health-v2":
+        _strip_below_fold_color_background(dashboard)
     path.write_text(
         json.dumps(dashboard, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
