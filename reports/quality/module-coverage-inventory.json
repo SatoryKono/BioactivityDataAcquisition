@@ -1,7 +1,7 @@
 {
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
-  "coverage_xml_sha256": "6d81bb374e5c78ee38cc33d6cd149424456baf2f8ff41aab0538cd5162b9317d",
+  "coverage_xml_sha256": "03539aab27ad20c4c3a901a3fee37ed7128872aabc087e199d8c5fe261282c4e",
   "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
   "measurement_mode": "coverage_xml",
   "modules": [
