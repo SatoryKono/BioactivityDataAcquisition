@@ -1695,5 +1695,4 @@ def test_stage_drilldown_variable_is_available_for_runtime_and_dq_dashboards(
         if dashboard_file == "bioetl-runtime.json"
         else "bioetl_records_processed_total"
     )
-    assert f"label_values({expected_source}" in query_text
-    assert "stage" in query_text
+    assert f"label_values({expected_source}" in query_text and "stage" in query_text
