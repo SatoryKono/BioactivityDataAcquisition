@@ -256,13 +256,10 @@ def test_iteration_2_runtime_valid_empty_frames_are_semantic_tables() -> None:
         )
         assert no_value.startswith("TELEMETRY MISSING")
         organize = next(
-            item
-            for item in panel["transformations"]
-            if item.get("id") == "organize"
+            item for item in panel["transformations"] if item.get("id") == "organize"
         )
         assert organize["options"]["excludeByName"]["Time"] is True
         assert organize["options"]["renameByName"]["Value"] == "Count"
-
 
 
 def test_iteration_2_empty_distributions_use_no_data_capable_tables() -> None:

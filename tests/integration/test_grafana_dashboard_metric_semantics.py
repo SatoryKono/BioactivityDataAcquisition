@@ -2188,7 +2188,9 @@ def test_runtime_10251_select_run_novalue_drops_hedge_tails() -> None:
         9998: "SELECT RUN — no exact Run ID selected. Choose a run first.",
     }
     for panel_id, expected_no_value in expected.items():
-        no_value = panels[panel_id].get("fieldConfig", {}).get("defaults", {}).get("noValue")
+        no_value = (
+            panels[panel_id].get("fieldConfig", {}).get("defaults", {}).get("noValue")
+        )
         assert no_value == expected_no_value
         assert "VALID EMPTY if" not in str(no_value)
         assert "UNKNOWN/QUERY ERROR if" not in str(no_value)
@@ -2232,8 +2234,9 @@ def test_dq_10253_select_run_novalue_drops_hedge_tails() -> None:
         9406: "SELECT RUN — no exact Run ID selected. Choose a run first.",
     }
     for panel_id, expected_no_value in expected.items():
-        no_value = panels[panel_id].get("fieldConfig", {}).get("defaults", {}).get("noValue")
+        no_value = (
+            panels[panel_id].get("fieldConfig", {}).get("defaults", {}).get("noValue")
+        )
         assert no_value == expected_no_value
         assert "VALID EMPTY if" not in str(no_value)
         assert "UNKNOWN/QUERY ERROR if" not in str(no_value)
-

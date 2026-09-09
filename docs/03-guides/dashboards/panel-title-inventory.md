@@ -85,10 +85,10 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 9103 | Start DQ Triage |
 | bioetl-dq-v2.json | 9101 | Monitor DQ Threshold State |
 | bioetl-dq-v2.json | 9102 | Inspect Current DQ Reasons |
+| bioetl-dq-v2.json | 9406 | Review Selected Run Summary |
 | bioetl-dq-v2.json | 9405 | Selected Run · Identity & Accounting |
 | bioetl-dq-v2.json | 9402 | Inspect Run Identity |
 | bioetl-dq-v2.json | 9403 | Inspect Processed Records |
-| bioetl-dq-v2.json | 9406 | Review Selected Run Summary |
 | bioetl-dq-v2.json | 9404 | Selected Range · Impact & Freshness |
 | bioetl-dq-v2.json | 2 | Monitor Volume-Weighted DQ Score |
 | bioetl-dq-v2.json | 5 | Monitor Worst-Entity DQ Score |
