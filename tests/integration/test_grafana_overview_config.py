@@ -571,4 +571,3 @@ def test_overview_timelines_use_all_labels_and_hide_clipped_in_band_text() -> No
         assert "${pipeline:text}" in expr
         assert "${run_type:text}" in expr
         assert 'pipeline=~"$pipeline"' in expr
-

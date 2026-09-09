@@ -160,9 +160,7 @@ def _run_option_label(value: str, record: SelectorRecord | None) -> str:
     if record is None:
         return f"UNKNOWN · {value}"
     started = record.started_at.astimezone(UTC).strftime("%Y-%m-%d %H:%M")
-    return (
-        f"{started} UTC · {record.pipeline} · {record.run_status} · {record.run_id}"
-    )
+    return f"{started} UTC · {record.pipeline} · {record.run_status} · {record.run_id}"
 
 
 def _run_option_labels(
