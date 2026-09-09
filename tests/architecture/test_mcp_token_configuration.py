@@ -45,6 +45,48 @@ def test_repo_env_loaders_preserve_mcp_token_aliases() -> None:
     assert "$env:OPENROUTER_API_KEY = $env:OPENAI_API_KEY" not in powershell_loader
 
 
+def test_github_mcp_wrappers_pin_official_server_and_toolsets() -> None:
+    """#10262: GitHub MCP is official github-mcp-server, not retired npx."""
+    from scripts.ai.codex.setup_mcp import (
+        GITHUB_MCP_EXCLUDE_TOOLS,
+        GITHUB_MCP_RETIRED_NPX_PACKAGE,
+        GITHUB_MCP_TOOLSETS,
+    )
+
+    shell = _read("scripts/ai/mcp/support/github_mcp_server.sh")
+    powershell = _read("scripts/ai/mcp/support/github_mcp_server.ps1")
+    shell_wrapper = _read("scripts/ai/mcp/github-mcp-wrapper.sh")
+    powershell_wrapper = _read("scripts/ai/mcp/github-mcp-wrapper.ps1")
+    actions_shell = _read("scripts/ai/mcp/mcp_github_actions_wrapper.sh")
+    actions_powershell = _read("scripts/ai/mcp/mcp_github_actions_wrapper.ps1")
+
+    assert GITHUB_MCP_RETIRED_NPX_PACKAGE not in shell_wrapper
+    assert GITHUB_MCP_RETIRED_NPX_PACKAGE not in powershell_wrapper
+    assert "npx -y" not in shell_wrapper
+    assert "npx -y" not in powershell_wrapper
+    assert "not a fallback" in shell
+    assert "not a fallback" in powershell
+
+    assert GITHUB_MCP_TOOLSETS in shell
+    assert GITHUB_MCP_TOOLSETS in powershell
+    assert GITHUB_MCP_EXCLUDE_TOOLS in shell
+    assert GITHUB_MCP_EXCLUDE_TOOLS in powershell
+    assert "github-mcp-server" in shell
+    assert "github-mcp-server" in powershell
+    assert "--toolsets" in shell_wrapper
+    assert "--lockdown-mode" in shell_wrapper
+    assert "Get-BioetlGithubMcpStdioArgs" in powershell_wrapper
+    assert "support/github_mcp_server.sh" in shell_wrapper
+    assert "support/github_mcp_server.ps1" in powershell_wrapper
+    assert "BIOETL_GITHUB_MCP_SERVER" in shell
+    assert "gh auth token" in shell
+    assert "gh auth token" in powershell
+    assert "never overwrite" in shell.lower() or "Never overwrite" in shell
+    for actions in (actions_shell, actions_powershell):
+        assert "Ops-only" in actions
+        assert "stable" in actions
+
+
 def test_token_validation_helpers_are_used_by_token_bearing_wrappers() -> None:
     assert (ROOT / "scripts/ai/mcp/support/token_validation.sh").exists()
     assert (ROOT / "scripts/ai/mcp/support/token_validation.ps1").exists()
@@ -117,6 +159,10 @@ def test_mcp_token_docs_cover_sources_rotation_validation_and_ci_stance() -> Non
         assert needle in token_doc
 
     assert "mcp-token-configuration.md" in governance
+    assert "github/github-mcp-server" in governance
+    assert "token path per process" in token_doc
+    assert "gh auth token" in token_doc
+    assert "Grok GitHub overlay vs shared HTTP" in runtime_config
     assert "BIOETL_MCP_VALIDATE_ONLY=1" in governance
     assert "BIOETL_UVX_DIRECT_NETWORK=1" in governance
     assert "token_validation.sh" in runtime_config

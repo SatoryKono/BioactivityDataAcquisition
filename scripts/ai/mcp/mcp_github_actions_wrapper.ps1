@@ -1,4 +1,6 @@
 #!/usr/bin/env pwsh
+# Ops-only GitHub Actions MCP. Daily profile `stable` does not register this
+# server. Prefer the official github-mcp-server `actions` toolset on `github`.
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 

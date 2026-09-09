@@ -8,22 +8,18 @@ $env:BIOETL_SKIP_ENV_LOCAL = "1"
 Import-BioetlRepoEnv -RepoRoot $repoRoot
 Remove-Item Env:BIOETL_SKIP_ENV_LOCAL -ErrorAction SilentlyContinue
 . (Join-Path $PSScriptRoot "support/token_validation.ps1")
+. (Join-Path $PSScriptRoot "support/github_mcp_server.ps1")
 
-if (-not $env:NPM_CONFIG_CACHE) {
-    # Prefer a writable Windows temp path; /tmp is not reliable under native pwsh.
-    $env:NPM_CONFIG_CACHE = Join-Path ([System.IO.Path]::GetTempPath()) "bioetl-npm-cache"
-}
-
-if (-not $env:GITHUB_PERSONAL_ACCESS_TOKEN -and $env:GITHUB_TOKEN) {
-    $env:GITHUB_PERSONAL_ACCESS_TOKEN = $env:GITHUB_TOKEN
-}
-
+Resolve-BioetlGithubMcpToken
 Test-McpRequiredToken `
     -Name "GITHUB_PERSONAL_ACCESS_TOKEN" `
     -MinLength 20 `
     -Purpose "GitHub MCP" `
     -AllowedPrefixes @("ghp_", "github_pat_", "gho_", "ghu_", "ghs_", "ghr_")
+Set-BioetlGithubMcpPolicyEnv
 Exit-McpValidateOnly -ServerName "github"
 
-& npx -y "@modelcontextprotocol/server-github@2025.4.8" --stdio
+$githubMcpBin = Resolve-BioetlGithubMcpServerBin
+$stdioArgs = Get-BioetlGithubMcpStdioArgs
+& $githubMcpBin @stdioArgs
 exit $LASTEXITCODE

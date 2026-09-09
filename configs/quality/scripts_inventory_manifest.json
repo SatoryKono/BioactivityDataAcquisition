@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-09T09:35:28.085892+00:00",
+  "generated_at": "2026-09-09T13:28:33.202419+00:00",
   "summary": {
-    "total_scripts": 616,
+    "total_scripts": 618,
     "status_counts": {
-      "active": 338,
+      "active": 340,
       "supporting": 278
     },
     "reference_group_coverage": {
@@ -13,9 +13,9 @@
       "ci": 83,
       "docs": 253,
       "other": 75,
-      "scripts": 515,
+      "scripts": 517,
       "skills": 12,
-      "tests": 428
+      "tests": 432
     }
   },
   "scripts": [
@@ -1642,7 +1642,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 67,
+      "reference_count": 68,
       "references": [
         {
           "path": ".github/ISSUES/AI-AGENT-CONFIG-AUDIT-2026-07-14-ISSUE-PACK.md",
@@ -2884,15 +2884,15 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 102,
+          "line": 112,
           "source_group": "docs",
           "text": "bash scripts/ai/mcp/check.sh"
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 109,
+          "line": 119,
           "source_group": "docs",
-          "text": "| GitHub MCP says token missing | Set `GITHUB_PERSONAL_ACCESS_TOKEN` or `GITHUB_TOKEN`; verify alias normalization with `test_env_loading.sh` or `check.sh`. |"
+          "text": "| GitHub MCP says token missing | Set **one** of `GITHUB_PERSONAL_ACCESS_TOKEN`, `GITHUB_TOKEN`, or a working `gh auth token`; verify alias normalization with `test_env_loading.sh` or `check.sh`. |"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
@@ -3035,7 +3035,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
@@ -3045,7 +3045,13 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 67,
+          "line": 59,
+          "source_group": "tests",
+          "text": "powershell_wrapper = _read(\"scripts/ai/mcp/github-mcp-wrapper.ps1\")"
+        },
+        {
+          "path": "tests/architecture/test_mcp_token_configuration.py",
+          "line": 109,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.ps1\": \"Test-McpRequiredToken\","
         }
@@ -3056,7 +3062,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".zed/mcp.json",
@@ -3066,7 +3072,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 94,
+          "line": 104,
           "source_group": "docs",
           "text": "BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/github-mcp-wrapper.sh"
         },
@@ -3090,7 +3096,13 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 53,
+          "line": 58,
+          "source_group": "tests",
+          "text": "shell_wrapper = _read(\"scripts/ai/mcp/github-mcp-wrapper.sh\")"
+        },
+        {
+          "path": "tests/architecture/test_mcp_token_configuration.py",
+          "line": 95,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\": \"mcp_validate_required_token\","
         }
@@ -3105,7 +3117,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 137,
+          "line": 148,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_adr_analysis_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1` (Windows)"
         },
@@ -3136,19 +3148,19 @@
       "references": [
         {
           "path": ".zed/mcp.json",
-          "line": 128,
+          "line": 130,
           "source_group": "other",
           "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\""
         },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 137,
+          "line": 148,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_adr_analysis_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1` (Windows)"
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 128,
+          "line": 130,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\""
         },
@@ -3192,7 +3204,7 @@
       "references": [
         {
           "path": ".zed/mcp.json",
-          "line": 62,
+          "line": 64,
           "source_group": "other",
           "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.sh\""
         },
@@ -3204,7 +3216,7 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 62,
+          "line": 64,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.sh\""
         },
@@ -3235,25 +3247,25 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 68,
+          "line": 110,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\": \"Test-McpRequiredToken\","
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 271,
+          "line": 274,
           "source_group": "tests",
           "text": "\"mcp_brave_search_wrapper.ps1\","
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 283,
+          "line": 286,
           "source_group": "tests",
           "text": "not in sources[\"mcp_brave_search_wrapper.ps1\"]"
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 291,
+          "line": 294,
           "source_group": "tests",
           "text": "assert '\"BRAVE_API_KEY\"' in sources[\"mcp_brave_search_wrapper.ps1\"]"
         }
@@ -3272,19 +3284,19 @@
       "references": [
         {
           "path": ".zed/mcp.json",
-          "line": 90,
+          "line": 92,
           "source_group": "other",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 95,
+          "line": 105,
           "source_group": "docs",
           "text": "BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/mcp_brave_search_wrapper.sh"
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 90,
+          "line": 92,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
         },
@@ -3296,25 +3308,25 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 54,
+          "line": 96,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\": \"mcp_validate_required_token\","
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 270,
+          "line": 273,
           "source_group": "tests",
           "text": "\"mcp_brave_search_wrapper.sh\","
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 279,
+          "line": 282,
           "source_group": "tests",
           "text": "not in sources[\"mcp_brave_search_wrapper.sh\"]"
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 290,
+          "line": 293,
           "source_group": "tests",
           "text": "assert \"-e BRAVE_API_KEY\" in sources[\"mcp_brave_search_wrapper.sh\"]"
         }
@@ -3329,7 +3341,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 157,
+          "line": 168,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1` (Windows)"
         }
@@ -3348,13 +3360,13 @@
       "references": [
         {
           "path": ".zed/mcp.json",
-          "line": 149,
+          "line": 151,
           "source_group": "other",
           "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\""
         },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 157,
+          "line": 168,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1` (Windows)"
         },
@@ -3372,7 +3384,7 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 149,
+          "line": 151,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\""
         }
@@ -3410,13 +3422,13 @@
       "references": [
         {
           "path": ".zed/mcp.json",
-          "line": 69,
+          "line": 71,
           "source_group": "other",
           "text": "\"scripts/ai/mcp/mcp_code_interpreter_wrapper.sh\""
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 69,
+          "line": 71,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_code_interpreter_wrapper.sh\""
         },
@@ -3462,13 +3474,13 @@
       "references": [
         {
           "path": ".zed/mcp.json",
-          "line": 55,
+          "line": 57,
           "source_group": "other",
           "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\""
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 55,
+          "line": 57,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\""
         },
@@ -3501,7 +3513,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 131,
+          "line": 142,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_deja_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_deja_wrapper.ps1` (Windows)"
         }
@@ -3520,19 +3532,19 @@
       "references": [
         {
           "path": ".zed/mcp.json",
-          "line": 118,
+          "line": 120,
           "source_group": "other",
           "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\""
         },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 131,
+          "line": 142,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_deja_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_deja_wrapper.ps1` (Windows)"
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 118,
+          "line": 120,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\""
         }
@@ -3551,7 +3563,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 194,
+          "line": 207,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_docker_docs_wrapper.sh`"
         }
@@ -3595,13 +3607,13 @@
       "references": [
         {
           "path": ".zed/mcp.json",
-          "line": 48,
+          "line": 50,
           "source_group": "other",
           "text": "\"scripts/ai/mcp/mcp_docker_wrapper.sh\""
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 48,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_docker_wrapper.sh\""
         },
@@ -3622,7 +3634,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 196,
+          "line": 209,
           "source_group": "docs",
           "text": "`scripts/ai/mcp/mcp_dockerhub_wrapper.ps1` (Windows)"
         }
@@ -3641,7 +3653,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 195,
+          "line": 208,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_dockerhub_wrapper.sh` (Linux/WSL),"
         }
@@ -3755,13 +3767,13 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 1076,
+          "line": 1092,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 1146,
+          "line": 1162,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
         }
@@ -3772,13 +3784,19 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 163,
+          "line": 176,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_github_actions_wrapper.ps1` (Windows)"
+        },
+        {
+          "path": "tests/architecture/test_mcp_token_configuration.py",
+          "line": 61,
+          "source_group": "tests",
+          "text": "actions_powershell = _read(\"scripts/ai/mcp/mcp_github_actions_wrapper.ps1\")"
         }
       ],
       "owner": "@bioetl-platform",
@@ -3791,25 +3809,31 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": ".zed/mcp.json",
-          "line": 159,
+          "line": 161,
           "source_group": "other",
           "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\""
         },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 163,
+          "line": 176,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_github_actions_wrapper.ps1` (Windows)"
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 159,
+          "line": 161,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\""
+        },
+        {
+          "path": "tests/architecture/test_mcp_token_configuration.py",
+          "line": 60,
+          "source_group": "tests",
+          "text": "actions_shell = _read(\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\")"
         }
       ],
       "owner": "@bioetl-platform",
@@ -3826,25 +3850,25 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 69,
+          "line": 111,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.ps1\": \"Test-McpOptionalToken\","
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 273,
+          "line": 276,
           "source_group": "tests",
           "text": "\"mcp_grafana_wrapper.ps1\","
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 298,
+          "line": 301,
           "source_group": "tests",
           "text": "'@(\"-e\", \"GRAFANA_SERVICE_ACCOUNT_TOKEN\")' in sources[\"mcp_grafana_wrapper.ps1\"]"
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 300,
+          "line": 303,
           "source_group": "tests",
           "text": "assert '@(\"-e\", \"GRAFANA_PASSWORD\")' in sources[\"mcp_grafana_wrapper.ps1\"]"
         }
@@ -3863,19 +3887,19 @@
       "references": [
         {
           "path": ".zed/mcp.json",
-          "line": 83,
+          "line": 85,
           "source_group": "other",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.sh\""
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 96,
+          "line": 106,
           "source_group": "docs",
           "text": "BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/mcp_grafana_wrapper.sh"
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 83,
+          "line": 85,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.sh\""
         },
@@ -3887,25 +3911,25 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 55,
+          "line": 97,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.sh\": \"mcp_validate_optional_token\","
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 272,
+          "line": 275,
           "source_group": "tests",
           "text": "\"mcp_grafana_wrapper.sh\","
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 294,
+          "line": 297,
           "source_group": "tests",
           "text": "in sources[\"mcp_grafana_wrapper.sh\"]"
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 296,
+          "line": 299,
           "source_group": "tests",
           "text": "assert \"docker_args+=(-e GRAFANA_PASSWORD)\" in sources[\"mcp_grafana_wrapper.sh\"]"
         }
@@ -3977,7 +4001,7 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 551,
+          "line": 557,
           "source_group": "tests",
           "text": "assert servers[\"memory\"][\"args\"][0].endswith(\"mcp_memory_wrapper.sh\")"
         }
@@ -4023,13 +4047,13 @@
       "references": [
         {
           "path": ".zed/mcp.json",
-          "line": 111,
+          "line": 113,
           "source_group": "other",
           "text": "\"scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 111,
+          "line": 113,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
         },
@@ -4054,7 +4078,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 144,
+          "line": 155,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_mutmut_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_mutmut_wrapper.ps1` (Windows)"
         },
@@ -4079,19 +4103,19 @@
       "references": [
         {
           "path": ".zed/mcp.json",
-          "line": 139,
+          "line": 141,
           "source_group": "other",
           "text": "\"scripts/ai/mcp/mcp_mutmut_wrapper.sh\""
         },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 144,
+          "line": 155,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_mutmut_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_mutmut_wrapper.ps1` (Windows)"
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 139,
+          "line": 141,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_mutmut_wrapper.sh\""
         },
@@ -4116,7 +4140,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 197,
+          "line": 210,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_needle_wrapper.sh`"
         }
@@ -4135,7 +4159,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 71,
+          "line": 113,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\": \"Test-McpNeo4jCredentials\","
         },
@@ -4160,13 +4184,13 @@
       "references": [
         {
           "path": ".zed/mcp.json",
-          "line": 97,
+          "line": 99,
           "source_group": "other",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 97,
+          "line": 99,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
         },
@@ -4178,7 +4202,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 57,
+          "line": 99,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\": \"mcp_validate_neo4j_credentials\","
         },
@@ -4205,7 +4229,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 72,
+          "line": 114,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\": \"Test-McpNeo4jCredentials\","
         }
@@ -4224,7 +4248,7 @@
       "references": [
         {
           "path": ".zed/mcp.json",
-          "line": 104,
+          "line": 106,
           "source_group": "other",
           "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh\""
         },
@@ -4281,7 +4305,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 198,
+          "line": 211,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_paper_search_wrapper.sh`"
         }
@@ -4300,7 +4324,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 70,
+          "line": 112,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.ps1\": \"Test-McpOptionalToken\","
         }
@@ -4319,13 +4343,13 @@
       "references": [
         {
           "path": ".zed/mcp.json",
-          "line": 76,
+          "line": 78,
           "source_group": "other",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 76,
+          "line": 78,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
         },
@@ -4337,7 +4361,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 56,
+          "line": 98,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\": \"mcp_validate_optional_token\","
         }
@@ -4529,6 +4553,78 @@
       ]
     },
     {
+      "path": "scripts/ai/mcp/support/github_mcp_server.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/github-mcp-wrapper.ps1",
+          "line": 11,
+          "source_group": "scripts",
+          "text": ". (Join-Path $PSScriptRoot \"support/github_mcp_server.ps1\")"
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 386,
+          "source_group": "tests",
+          "text": "ps_support = (root / \"scripts/ai/mcp/support/github_mcp_server.ps1\").read_text("
+        },
+        {
+          "path": "tests/architecture/test_mcp_token_configuration.py",
+          "line": 57,
+          "source_group": "tests",
+          "text": "powershell = _read(\"scripts/ai/mcp/support/github_mcp_server.ps1\")"
+        },
+        {
+          "path": "tests/architecture/test_mcp_token_configuration.py",
+          "line": 80,
+          "source_group": "tests",
+          "text": "assert \"support/github_mcp_server.ps1\" in powershell_wrapper"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/support/github_mcp_server.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/github-mcp-wrapper.sh",
+          "line": 15,
+          "source_group": "scripts",
+          "text": "# shellcheck source=./support/github_mcp_server.sh"
+        },
+        {
+          "path": "scripts/ai/mcp/github-mcp-wrapper.sh",
+          "line": 16,
+          "source_group": "scripts",
+          "text": "source \"${SCRIPT_DIR}/support/github_mcp_server.sh\""
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 383,
+          "source_group": "tests",
+          "text": "sh_support = (root / \"scripts/ai/mcp/support/github_mcp_server.sh\").read_text("
+        },
+        {
+          "path": "tests/architecture/test_mcp_token_configuration.py",
+          "line": 56,
+          "source_group": "tests",
+          "text": "shell = _read(\"scripts/ai/mcp/support/github_mcp_server.sh\")"
+        },
+        {
+          "path": "tests/architecture/test_mcp_token_configuration.py",
+          "line": 79,
+          "source_group": "tests",
+          "text": "assert \"support/github_mcp_server.sh\" in shell_wrapper"
+        }
+      ]
+    },
+    {
       "path": "scripts/ai/mcp/support/load_repo_env.ps1",
       "type": "ps1",
       "status": "active",
@@ -4687,13 +4783,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 252,
+          "line": 264,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.ps1`"
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 80,
+          "line": 90,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.ps1`"
         },
@@ -4744,13 +4840,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 251,
+          "line": 263,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.sh`"
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 79,
+          "line": 89,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.sh`"
         },
@@ -4899,15 +4995,15 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 56,
+          "line": 66,
           "source_group": "docs",
           "text": "bash scripts/ai/mcp/test_env_loading.sh"
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 109,
+          "line": 119,
           "source_group": "docs",
-          "text": "| GitHub MCP says token missing | Set `GITHUB_PERSONAL_ACCESS_TOKEN` or `GITHUB_TOKEN`; verify alias normalization with `test_env_loading.sh` or `check.sh`. |"
+          "text": "| GitHub MCP says token missing | Set **one** of `GITHUB_PERSONAL_ACCESS_TOKEN`, `GITHUB_TOKEN`, or a working `gh auth token`; verify alias normalization with `test_env_loading.sh` or `check.sh`. |"
         },
         {
           "path": "scripts/ai/mcp/__main__.py",
@@ -4917,7 +5013,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 82,
+          "line": 124,
           "source_group": "tests",
           "text": "text = _read(\"scripts/ai/mcp/test_env_loading.sh\")"
         }
@@ -10599,7 +10695,7 @@
         },
         {
           "path": "scripts/ai/codex/setup_mcp.py",
-          "line": 562,
+          "line": 582,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.repo_paths import ("
         }
@@ -21736,7 +21832,7 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 304,
+          "line": 307,
           "source_group": "tests",
           "text": "from scripts.ops.runtime.mcp import _materialize_shared_http_configs as materialize"
         }

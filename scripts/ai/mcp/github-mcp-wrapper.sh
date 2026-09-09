@@ -12,19 +12,26 @@ load_repo_env_if_present
 unset BIOETL_SKIP_ENV_LOCAL
 # shellcheck source=./support/token_validation.sh
 source "${REPO_ROOT}/scripts/ai/mcp/support/token_validation.sh"
+# shellcheck source=./support/github_mcp_server.sh
+source "${SCRIPT_DIR}/support/github_mcp_server.sh"
 
-export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-/tmp/npm-cache}"
-
-# Preserve compatibility with local shells that still export the legacy token name.
-if [[ -z "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" && -n "${GITHUB_TOKEN:-}" ]]; then
-  export GITHUB_PERSONAL_ACCESS_TOKEN="${GITHUB_TOKEN}"
-fi
-
+bioetl_github_mcp_resolve_token
 mcp_validate_required_token \
   "GITHUB_PERSONAL_ACCESS_TOKEN" \
   20 \
   "GitHub MCP" \
   "ghp_" "github_pat_" "gho_" "ghu_" "ghs_" "ghr_"
+bioetl_github_mcp_apply_policy_env
 mcp_exit_if_validate_only "github"
 
-exec npx -y "@modelcontextprotocol/server-github@2025.4.8" --stdio
+GITHUB_MCP_BIN="$(bioetl_github_mcp_resolve_bin)"
+stdio_args=(stdio --toolsets "${GITHUB_TOOLSETS}")
+if [[ -n "${GITHUB_EXCLUDE_TOOLS:-}" ]]; then
+  stdio_args+=(--exclude-tools "${GITHUB_EXCLUDE_TOOLS}")
+fi
+case "${GITHUB_LOCKDOWN_MODE:-true}" in
+  0|false|FALSE|False|no|NO|off|OFF) ;;
+  *) stdio_args+=(--lockdown-mode) ;;
+esac
+
+exec "${GITHUB_MCP_BIN}" "${stdio_args[@]}"

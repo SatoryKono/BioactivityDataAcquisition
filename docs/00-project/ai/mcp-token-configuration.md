@@ -34,6 +34,16 @@ The MCP wrappers load environment values through:
 
 Supported aliases:
 
+GitHub MCP uses one token path per process:
+
+1. `GITHUB_PERSONAL_ACCESS_TOKEN` if already set (never overwritten)
+1. else alias `GITHUB_TOKEN` copied into `GITHUB_PERSONAL_ACCESS_TOKEN`
+1. else `gh auth token` when the GitHub CLI is logged in
+
+Wrappers log the chosen path name on stderr and never print the secret.
+Do not configure PAT and `gh auth` as two silent sources for the same
+process.
+
 | Canonical variable | Accepted aliases |
 | --- | --- |
 | `GITHUB_PERSONAL_ACCESS_TOKEN` | `GITHUB_TOKEN` |
@@ -62,7 +72,7 @@ The script reports `SET` / `NOT SET` only and must not print secret values.
 
 | MCP | Variable | Required | Source | Minimum scope | Rotation |
 | --- | --- | --- | --- | --- | --- |
-| GitHub | `GITHUB_PERSONAL_ACCESS_TOKEN` | Yes for GitHub MCP | GitHub fine-grained PAT or classic PAT | Repository read access needed for the task | 90 days |
+| GitHub | `GITHUB_PERSONAL_ACCESS_TOKEN` | Yes for GitHub MCP | GitHub fine-grained PAT, classic PAT, or `gh auth token` (one path) | Repository read access needed for the task | 90 days |
 | Brave Search | `BRAVE_API_KEY` | Yes for Brave MCP | Brave Search API console | Web Search API quota | 90 days |
 | Ref Tools | `REF_TOOL_API_KEY` or OAuth | No when OAuth is used | Ref Tools key console or interactive OAuth | Documentation search only | 90 days |
 | OpenRouter | `OPENROUTER_API_KEY` | Only for OpenRouter-backed tooling | OpenRouter key console | Models explicitly selected by the local tool | 90 days |
@@ -106,7 +116,8 @@ bash scripts/ai/mcp/check.sh
 
 | Symptom | Check |
 | --- | --- |
-| GitHub MCP says token missing | Set `GITHUB_PERSONAL_ACCESS_TOKEN` or `GITHUB_TOKEN`; verify alias normalization with `test_env_loading.sh` or `check.sh`. |
+| GitHub MCP says token missing | Set **one** of `GITHUB_PERSONAL_ACCESS_TOKEN`, `GITHUB_TOKEN`, or a working `gh auth token`; verify alias normalization with `test_env_loading.sh` or `check.sh`. |
+| GitHub MCP says official binary missing | Install [`github/github-mcp-server`](https://github.com/github/github-mcp-server) and set `BIOETL_GITHUB_MCP_SERVER` (or `GITHUB_MCP_SERVER_BIN`) to the executable. Wrappers do not fall back to `@modelcontextprotocol/server-github`. |
 | GitHub token prefix warning | Confirm the token came from GitHub and has only the scopes needed by the local MCP task. |
 | Brave MCP exits immediately | Set `BRAVE_API_KEY` or a supported alias; keys shorter than 31 characters are rejected. |
 | DeepWiki MCP requires login | Set `DEEPWIKI_API_KEY` and `DEEPWIKI_ORGANISATION_ID`; tracked projections contain environment references, never credential values. |
