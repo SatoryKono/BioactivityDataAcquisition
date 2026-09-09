@@ -217,6 +217,9 @@ nightlies from this section.
 | PR Hygiene | `pr-hygiene.yml` | Weekly Mon 06:30 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
 | Release | `release.yml` | `release` + `workflow_dispatch` (YAML only) | optional | `disabled_manually` | `keep-disabled` |
 
+`release.yml` YAML still **Build and test on Python 3.13**, then publish to
+TestPyPI+PyPI, when that optional lane is re-enabled for an actual release.
+
 ______________________________________________________________________
 
 ## 3. Status Checks and Ruleset Contract
