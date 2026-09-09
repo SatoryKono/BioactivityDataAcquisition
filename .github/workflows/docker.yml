@@ -27,6 +27,7 @@ on:
       - ".dockerignore"
       - ".github/workflows/docker.yml"
       - ".github/actions/setup-python-uv/**"
+      - ".github/actions/install-trivy/**"
 concurrency:
   # Only main push validation is run-scoped so protected publish approval cannot
   # block newer main SHA checks. PR and non-main pushes remain ref-scoped.
@@ -233,16 +234,24 @@ jobs:
           cleanup
           trap - EXIT
 
+      # aquasecurity/trivy-action always resolves nested aquasecurity/setup-trivy
+      # at job prepare time, even with skip-setup-trivy. That nested action is
+      # not on the org allowlist (only aquasecurity/trivy-action@* is).
+      - name: Install pinned Trivy CLI
+        uses: ./.github/actions/install-trivy
+
       - name: Run full Trivy JSON evidence scan
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          image-ref: "bioetl:${{ github.sha }}"
-          format: "json"
-          output: "reports/security/trivy-results.json"
-          severity: "CRITICAL,HIGH,MEDIUM,UNKNOWN"
-          exit-code: "0"
-          ignore-unfixed: false
-          version: "v0.70.0"
+        env:
+          IMAGE_REF: bioetl:${{ github.sha }}
+        run: |
+          set -euo pipefail
+          trivy image \
+            --format json \
+            --output reports/security/trivy-results.json \
+            --severity CRITICAL,HIGH,MEDIUM,UNKNOWN \
+            --exit-code 0 \
+            "${IMAGE_REF}"
+          test -s reports/security/trivy-results.json
 
       - name: Convert canonical Trivy JSON evidence
         run: |
@@ -281,15 +290,15 @@ jobs:
           python3 -c "from pathlib import Path; from scripts.engineering.qa.docker_stability_campaign.trivy_baseline import export_trivy_baseline_csv; count = export_trivy_baseline_csv(trivy_json=Path('reports/security/trivy-results.json'), github_alerts_json=Path('reports/security/github-trivy-alerts.json'), output=Path('reports/security/trivy-alerts.csv')); print(f'rows={count}')"
 
       - name: Run Trivy on pinned Wolfi runtime base image
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          image-ref: "chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669"
-          format: "json"
-          output: "reports/security/trivy-base-results.json"
-          severity: "CRITICAL,HIGH,MEDIUM,UNKNOWN"
-          exit-code: "0"
-          ignore-unfixed: false
-          version: "v0.70.0"
+        run: |
+          set -euo pipefail
+          trivy image \
+            --format json \
+            --output reports/security/trivy-base-results.json \
+            --severity CRITICAL,HIGH,MEDIUM,UNKNOWN \
+            --exit-code 0 \
+            "chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669"
+          test -s reports/security/trivy-base-results.json
 
       - name: Generate Trivy fixability audit
         run: |

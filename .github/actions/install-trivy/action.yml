@@ -1,0 +1,28 @@
+name: Install pinned Trivy CLI
+description: >
+  Download and checksum-verify Trivy Linux-64bit v0.70.0. Replaces
+  aquasecurity/trivy-action, whose nested aquasecurity/setup-trivy is not on
+  the org Actions allowlist even when skip-setup-trivy is set.
+
+runs:
+  using: composite
+  steps:
+    - name: Install Trivy CLI
+      shell: bash
+      env:
+        TRIVY_VERSION: "0.70.0"
+        TRIVY_TARBALL_SHA256: "8b4376d5d6befe5c24d503f10ff136d9e0c49f9127a4279fd110b727929a5aa9"
+        TRIVY_TARBALL_URL: "https://github.com/aquasecurity/trivy/releases/download/v0.70.0/trivy_0.70.0_Linux-64bit.tar.gz"
+      run: |
+        set -euo pipefail
+        archive="${RUNNER_TEMP}/trivy_0.70.0_Linux-64bit.tar.gz"
+        curl -fsSL --proto '=https' --tlsv1.2 "${TRIVY_TARBALL_URL}" -o "${archive}"
+        echo "${TRIVY_TARBALL_SHA256}  ${archive}" | sha256sum -c -
+        install_dir="${HOME}/.local/bin"
+        mkdir -p "${install_dir}"
+        tar -xzf "${archive}" -C "${install_dir}" trivy
+        chmod 0755 "${install_dir}/trivy"
+        echo "${install_dir}" >> "${GITHUB_PATH}"
+        PATH="${install_dir}:${PATH}" command -v trivy >/dev/null
+        PATH="${install_dir}:${PATH}" trivy version
+        rm -f "${archive}"
