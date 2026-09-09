@@ -52,11 +52,24 @@ def _passing_snapshot() -> dict:
             "allow_merge_commit": False,
             "allow_rebase_merge": False,
             "secret_scanning": "enabled",
+            "secret_scanning_validity_checks": "enabled",
+            "secret_scanning_non_provider_patterns": "disabled",
         },
         "rulesets": [{"name": "main", "enforcement": "active"}],
         "actions_permissions": {
             "available": True,
-            "payload": {"sha_pinning_required": True},
+            "payload": {
+                "sha_pinning_required": True,
+                "allowed_actions": "selected",
+            },
+        },
+        "actions_selected": {
+            "available": True,
+            "payload": {
+                "github_owned_allowed": True,
+                "verified_allowed": False,
+                "patterns_allowed": TOOL.selected_actions_patterns(),
+            },
         },
         "environments": [
             {
@@ -123,10 +136,11 @@ def test_cli_paths_are_confined_but_explicit_runner_temp_is_supported(
 
 def test_unused_github_environments_are_not_required_protection_surfaces() -> None:
     protected = set(_policy()["protected_environments"])
+    unused = set(_policy()["unused_environments"])
     assert "ghcr-publish" in protected
     assert "observability-render-host" in protected
-    assert "staging" not in protected
-    assert "copilot" not in protected
+    assert unused == {"staging", "copilot"}
+    assert protected.isdisjoint(unused)
 
 
 def test_unknown_labels_are_retained_by_default() -> None:
@@ -179,6 +193,37 @@ def test_passing_snapshot_is_conformant_and_default_setup_drift_is_detected() ->
     assert drifted["overall"] == "drift"
     assert by_id["GH-CODEQL-002"]["status"] == "drift"
     assert "state=configured" in by_id["GH-CODEQL-002"]["evidence"]
+
+
+def test_supply_chain_controls_detect_validity_and_allowlist_drift() -> None:
+    now = datetime(2026, 9, 10, tzinfo=UTC)
+    passing = TOOL.evaluate_snapshot(_passing_snapshot(), _policy(), now=now)
+    by_id = {item["id"]: item for item in passing["controls"]}
+    assert by_id["GH-SECRET-002"]["status"] == "pass"
+    assert by_id["GH-SECRET-003"]["status"] == "pass"
+    assert by_id["GH-ACTIONS-002"]["status"] == "pass"
+    assert by_id["GH-ACTIONS-003"]["status"] == "pass"
+    assert by_id["GH-ENV-002"]["status"] == "pass"
+
+    snapshot = _passing_snapshot()
+    snapshot["settings"]["secret_scanning_validity_checks"] = "disabled"
+    snapshot["actions_permissions"]["payload"]["allowed_actions"] = "all"
+    snapshot["environments"] = [
+        *snapshot["environments"],
+        {
+            "name": "staging",
+            "protection_rules": [],
+            "deployment_branch_policy": None,
+        },
+    ]
+    drifted = TOOL.evaluate_snapshot(snapshot, _policy(), now=now)
+    by_id = {item["id"]: item for item in drifted["controls"]}
+    assert drifted["overall"] == "drift"
+    assert by_id["GH-SECRET-002"]["status"] == "drift"
+    assert by_id["GH-ACTIONS-002"]["status"] == "drift"
+    assert by_id["GH-ACTIONS-003"]["status"] == "drift"
+    assert by_id["GH-ENV-002"]["status"] == "drift"
+    assert "present=['staging']" in by_id["GH-ENV-002"]["evidence"]
 
 
 def test_policy_and_workflow_preserve_read_only_contract() -> None:

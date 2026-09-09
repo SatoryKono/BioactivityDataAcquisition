@@ -128,6 +128,10 @@
     "ghcr-publish",
     "observability-render-host"
   ],
+  "unused_environments": [
+    "copilot",
+    "staging"
+  ],
   "controls": [
     {
       "id": "GH-RULESET-001",
@@ -189,6 +193,51 @@
       "check": "secret_scanning",
       "owner": "Security lane",
       "risk": "high",
+      "known_issue": null,
+      "due_days": 14
+    },
+    {
+      "id": "GH-SECRET-002",
+      "title": "Secret scanning validity checks are enabled",
+      "check": "secret_scanning_validity",
+      "owner": "Security lane",
+      "risk": "high",
+      "known_issue": null,
+      "due_days": 14
+    },
+    {
+      "id": "GH-SECRET-003",
+      "title": "Secret scanning non-provider patterns stay disabled",
+      "check": "secret_scanning_non_provider_off",
+      "owner": "Security lane",
+      "risk": "medium",
+      "known_issue": null,
+      "due_days": 30
+    },
+    {
+      "id": "GH-ACTIONS-002",
+      "title": "GitHub Actions allowlist is selected and SHA pinning stays required",
+      "check": "allowed_actions_selected",
+      "owner": "Security lane",
+      "risk": "high",
+      "known_issue": null,
+      "due_days": 14
+    },
+    {
+      "id": "GH-ACTIONS-003",
+      "title": "Selected Actions patterns match third-party ALLOWED_USES repos",
+      "check": "selected_actions_cover_allowlist",
+      "owner": "Security lane",
+      "risk": "high",
+      "known_issue": null,
+      "due_days": 14
+    },
+    {
+      "id": "GH-ENV-002",
+      "title": "Unused copilot and staging environments are absent",
+      "check": "unused_environments_absent",
+      "owner": "Release engineering",
+      "risk": "medium",
       "known_issue": null,
       "due_days": 14
     },

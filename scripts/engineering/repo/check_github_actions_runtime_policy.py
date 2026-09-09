@@ -116,6 +116,32 @@ ALLOWED_DOCKER_IMAGES: dict[str, set[str]] = {
         "sha256:a5741a479f21d20a9bbeca7847a720f92ac6f427e8dc0920fefa039ecafd5e6f"
     },
 }
+_GITHUB_OWNED_ACTION_OWNERS = frozenset({"actions", "github"})
+
+
+def selected_actions_patterns(
+    allowed_uses: dict[str, set[str]] | None = None,
+) -> list[str]:
+    """Return GitHub selected-actions patterns for third-party ALLOWED_USES repos.
+
+    SHA-pin enforcement stays in this module. Live `allowed_actions: selected`
+    vs this list is reviewed by `github_settings_review.py`, not here.
+
+    Nested actions (``owner/repo/path``) need an explicit pattern: GitHub ``*``
+    does not match ``/``.
+    """
+    uses = ALLOWED_USES if allowed_uses is None else allowed_uses
+    patterns: set[str] = set()
+    for action in uses:
+        parts = action.split("/")
+        owner = parts[0]
+        if owner in _GITHUB_OWNED_ACTION_OWNERS:
+            continue
+        if len(parts) >= 2:
+            patterns.add(f"{owner}/{parts[1]}@*")
+        if len(parts) >= 3:
+            patterns.add(f"{'/'.join(parts)}@*")
+    return sorted(patterns)
 
 USES_PATTERN = re.compile(r"^\s*(?:-\s*)?uses:\s*([^\s#]+)")
 FULL_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")

@@ -114,6 +114,7 @@ make security-check
 - **Dependabot triage**: owner `@SatoryKono` (CODEOWNERS), weekly; SLA Critical ≤ 24h, High ≤ 72h (see `05-github-policy.md §5`). PRs must pass all checks; auto-merge forbidden.
 - **Dependency review**: PR-time fail-closed scan of lockfile/manifest diffs (`.github/workflows/dependency-review.yml`, `fail-on-severity: high`)
 - **detect-secrets**: Runs in CI (`.github/workflows/security.yml`) to prevent credential leaks
+- **GitHub secret scanning**: enabled with push protection and partner-pattern **validity checks**. Non-provider patterns stay **disabled** (noisy; #10264).
 - **Gitleaks**: Runs in CI (`.github/workflows/security.yml`) with `.gitleaks.toml` (`--redact`; no secret values in job summaries/comments)
 - **pip-audit**: Runs in CI (`.github/workflows/security.yml`) for dependency vulnerability scanning. `PYSEC-2026-3721` / `CVE-2026-3219` is remediated at `pip==26.2.1`; do not restore `--ignore-vuln` for that advisory. Residual mermaid/Grafana GHSA remain timeboxed to **2026-11-30** (#9853/#9859). Not a Scorecard dismiss.
 - **OSV-Scanner**: Primary lockfile scanner in CI (`.github/workflows/security.yml`) against `uv.lock`; job fails on HIGH/CRITICAL (and unknown severity), not Medium/Low. Do **not** add `osv-scanner.toml`. Residual mermaid-cli/Grafana GHSA: `05-github-policy.md` §2.3.2, re-triage #9859. Scorecard Vulnerabilities (**#1294**) stays open.
@@ -209,4 +210,4 @@ httpx.get(url)  # verify=True by default
 
 ______________________________________________________________________
 
-*Last updated: 2026-08-24*
+*Last updated: 2026-09-10*
