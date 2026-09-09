@@ -358,10 +358,6 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 160
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
@@ -376,6 +372,23 @@
                     "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=3022&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
                     "targetBlank": false,
                     "includeVars": false
+                  }
+                ]
+              },
+              {
+                "id": "displayName",
+                "value": "Time range"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "Set range to run (started_at-5m .. completed_at+5m)": {
+                        "text": "Set range to run"
+                      }
+                    }
                   }
                 ]
               }
@@ -408,7 +421,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 110
+                "value": 90
               },
               {
                 "id": "custom.cellOptions",
@@ -421,13 +434,13 @@
           },
           {
             "matcher": {
-              "id": "byName",
-              "options": "coverage_chip"
+              "id": "byRegexp",
+              "options": "^(coverage_chip|coverage)$"
             },
             "properties": [
               {
                 "id": "custom.width",
-                "value": 140
+                "value": 130
               },
               {
                 "id": "custom.cellOptions",
@@ -1011,15 +1024,15 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 150
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
                   "wrapText": true
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 150
               }
             ]
           }
@@ -1226,8 +1239,8 @@
         "overrides": [
           {
             "matcher": {
-              "id": "byName",
-              "options": "input"
+              "id": "byRegexp",
+              "options": "^(input|Input)$"
             },
             "properties": [
               {
@@ -1275,6 +1288,10 @@
                   "mode": "fixed",
                   "fixedColor": "text"
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 160
               }
             ]
           },
@@ -1339,18 +1356,6 @@
                   "type": "color-text",
                   "wrapText": false
                 }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|Status|bioetl_l0_input_status_selected)$"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 110
               }
             ]
           }
@@ -1531,7 +1536,7 @@
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 280
+                    "value": 360
                   },
                   {
                     "id": "custom.cellOptions",
@@ -1554,11 +1559,7 @@
                   },
                   {
                     "id": "custom.align",
-                    "value": "right"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 80
+                    "value": "left"
                   },
                   {
                     "id": "custom.cellOptions",
@@ -1609,7 +1610,49 @@
                   },
                   {
                     "id": "custom.width",
-                    "value": 110
+                    "value": 130
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Alert"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 360
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Active Alerts"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Active Alerts"
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "left"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "applyToRow": false
+                    }
                   }
                 ]
               }
@@ -1775,8 +1818,8 @@
             "overrides": [
               {
                 "matcher": {
-                  "id": "byName",
-                  "options": "input"
+                  "id": "byRegexp",
+                  "options": "^(input|Input)$"
                 },
                 "properties": [
                   {
@@ -1810,13 +1853,17 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 180
                   }
                 ]
               },
               {
                 "matcher": {
-                  "id": "byName",
-                  "options": "Value"
+                  "id": "byRegexp",
+                  "options": "^(Value|Status)$"
                 },
                 "properties": [
                   {
@@ -1828,10 +1875,6 @@
                     "value": {
                       "type": "color-text"
                     }
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 80
                   }
                 ]
               }
