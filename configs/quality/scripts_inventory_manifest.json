@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-09T23:21:43.928663+00:00",
+  "generated_at": "2026-09-09T23:24:50.865099+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -17535,13 +17535,13 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 196,
+          "line": 203,
           "source_group": "docs",
           "text": "| `sha_pinning_required` | `true` | Workflow SHA-pin SSOT: [`check_github_actions_runtime_policy.py`](../../../scripts/engineering/repo/check_github_actions_runtime_policy.py) `ALLOWED_USES` |"
         },
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 522,
+          "line": 530,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -17935,7 +17935,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 197,
+          "line": 204,
           "source_group": "docs",
           "text": "| `allowed_actions` | `selected` | `github_owned_allowed: true`, `verified_allowed: false`. Third-party patterns are `owner/repo@*` plus nested `owner/repo/path@*` from `ALLOWED_USES` (GitHub `*` does"
         },
@@ -17971,13 +17971,13 @@
         },
         {
           "path": "tests/architecture/test_github_governance_review.py",
-          "line": 248,
+          "line": 273,
           "source_group": "tests",
           "text": "assert \"python scripts/engineering/repo/github_settings_review.py\" not in workflow"
         },
         {
           "path": "tests/architecture/test_github_governance_review.py",
-          "line": 249,
+          "line": 274,
           "source_group": "tests",
           "text": "assert \".github/tooling/github_settings_review.py\" not in workflow"
         }
@@ -19494,7 +19494,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 442,
+          "line": 450,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }
