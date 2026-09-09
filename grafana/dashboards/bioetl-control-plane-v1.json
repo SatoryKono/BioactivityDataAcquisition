@@ -5360,7 +5360,7 @@
                     "value": "Current"
                   },
                   {
-                    "id": "custom.width",
+                    "id": "custom.minWidth",
                     "value": 220
                   },
                   {
@@ -5837,7 +5837,7 @@
                     "value": "Current"
                   },
                   {
-                    "id": "custom.width",
+                    "id": "custom.minWidth",
                     "value": 220
                   },
                   {
@@ -6254,7 +6254,7 @@
                     "value": "Current"
                   },
                   {
-                    "id": "custom.width",
+                    "id": "custom.minWidth",
                     "value": 140
                   },
                   {
@@ -6700,7 +6700,7 @@
                     "value": "Current"
                   },
                   {
-                    "id": "custom.width",
+                    "id": "custom.minWidth",
                     "value": 160
                   },
                   {
@@ -7142,7 +7142,7 @@
                     "value": "Current"
                   },
                   {
-                    "id": "custom.width",
+                    "id": "custom.minWidth",
                     "value": 160
                   },
                   {
