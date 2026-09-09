@@ -1,13 +1,13 @@
 version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
-source_branch: fix/grafana-vis-stream3-layout
+source_branch: main
 refreshed_at_utc: '2026-09-09T18:39:36.692943+00:00'
 refresh_status: captured
-source_commit: 831f97268df0d627e365af5e55a56c82d2492eeb
-source_run_id: '34388828802'
-source_event: pull_request
-source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34388828802
+source_commit: 16e758932f93be457fe702229efaad52930c94d8
+source_run_id: '34392105739'
+source_event: push
+source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34392105739
 source_tree_sha256: 5d62a56e18b4780c3492c1f3cbe303576220625756708b7f92197f7199e78300
 freshness_guard:
   timestamp_field: refreshed_at_utc
