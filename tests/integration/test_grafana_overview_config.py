@@ -140,7 +140,7 @@ def test_run_id_selector_is_control_plane_backed_table_query() -> None:
     query_url = str(infinity_query.get("url", ""))
     assert "/ops/control-plane/filter-options" in query_url
     assert "dimension=run_id" in query_url
-    assert "response_shape=list" in query_url
+    assert "response_shape=options" in query_url
     assert "workflow=${workflow}" in query_url
     assert "pipeline=${pipeline}" in query_url
     assert "run_type=${run_type:csv}" in query_url
@@ -368,10 +368,10 @@ def test_identity_panel_uses_run_id_without_leaking_to_prometheus_queries() -> N
 
     assert identity.get("datasource") == "BioETL Ops HTTP"
     assert identity.get("targets", [{}])[0].get("parser") == "backend"
-    assert identity.get("targets", [{}])[0].get("root_selector") == "rows"
+    assert identity.get("targets", [{}])[0].get("root_selector") == "display_rows"
     assert identity.get("targets", [{}])[0].get("url") == (
         "/ops/control-plane/identity-table?pipeline=${pipeline}"
-        "&run_type=${run_type:csv}&run_id=${run_id}"
+        "&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}"
     )
 
     prometheus_expressions = "\n".join(get_panel_expressions(_dashboard()))

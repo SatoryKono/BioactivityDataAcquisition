@@ -161,7 +161,6 @@ def test_query_panel_descriptions_carry_scope_badge() -> None:
 
 def test_first_window_coverage_set_range_and_refresh_copy() -> None:
     required = (
-        "Set range to run",
         "Effective refresh",
         "60s",
         "timezone",
@@ -176,6 +175,11 @@ def test_first_window_coverage_set_range_and_refresh_copy() -> None:
         for token in required:
             if token not in blob:
                 missing.append(f"{path.name} missing {token}")
+        if (
+            "Set range to run" not in blob
+            and "Open run in Run Explorer" not in blob
+        ):
+            missing.append(f"{path.name} missing run-range action copy")
         assert dashboard.get("refresh") == "60s", path.name
         assert dashboard.get("timezone") == "browser", path.name
     assert not missing, "coverage/refresh header:\n" + "\n".join(missing)

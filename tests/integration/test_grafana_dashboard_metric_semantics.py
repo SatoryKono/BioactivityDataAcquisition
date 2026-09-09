@@ -448,12 +448,12 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
     identity_target = identity.get("targets", [])[0]
     assert identity_target.get("format") == "table"
     assert identity_target.get("parser") == "backend"
-    assert identity_target.get("root_selector") == "rows"
+    assert identity_target.get("root_selector") == "display_rows"
     assert identity_target.get("source") == "url"
     assert identity_target.get("url_options", {}).get("method") == "GET"
     assert identity_target.get("url") == (
         "/ops/control-plane/identity-table?"
-        "pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+        "pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}"
     )
     if dashboard_name == "bioetl-provider-health-v2.json":
         assert "pipeline/run context evidence only" in identity_description

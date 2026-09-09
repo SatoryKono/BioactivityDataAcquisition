@@ -68,6 +68,62 @@ def test_report_selection_missing_and_loaded_empty_are_distinct(key: str) -> Non
             assert not {"kind", "name", "ref"}.intersection(row)
 
 
+def test_reasons_display_keeps_code_and_adds_operator_label() -> None:
+    shaped = _table_shape_pipeline_run_report(
+        {
+            "reasons_top_n": [
+                {
+                    "reason_code": "gold_contract_schema_failure",
+                    "outcome": "excluded_by_contract",
+                    "count": 17,
+                }
+            ]
+        }
+    )
+    row = shaped["reasons_top_n_display"][0]
+    assert row["reason_code"] == "gold_contract_schema_failure"
+    assert row["reason_label"] == (
+        "Excluded by Gold schema contract (gold_contract_schema_failure)"
+    )
+    assert row["explain"] == "Open Data Quality"
+    assert "17 Excluded by Gold schema contract" in _table_shape_pipeline_run_report(
+        {
+            "funnel": [
+                {
+                    "stage_id": "gold",
+                    "removals": [
+                        {
+                            "reason_code": "gold_contract_schema_failure",
+                            "outcome": "excluded_by_contract",
+                            "count": 17,
+                        }
+                    ],
+                }
+            ]
+        }
+    )["funnel"][0]["removals_summary"]
+
+
+def test_artifacts_display_uses_operator_titles_and_keeps_ref() -> None:
+    ref = "/data/reports/pipeline/chembl_assay/run-1/pipeline-run-report.json"
+    shaped = _table_shape_pipeline_run_report(
+        {
+            "artifacts": [
+                {"kind": "pipeline_run_report_json", "ref": ref},
+                {"kind": "pipeline_run_report_md", "ref": ref.replace(".json", ".md")},
+            ]
+        }
+    )
+    rows = shaped["artifacts_display"]
+    assert [row["title"] for row in rows] == [
+        "Report JSON",
+        "Readable Markdown report",
+    ]
+    assert [row["action"] for row in rows] == ["Download", "Open"]
+    assert rows[0]["ref"] == ref
+    assert rows[0]["format"] == "pipeline_run_report_json"
+
+
 @pytest.mark.parametrize(
     "view", ["overview", "copy_values", "gaps", "anchors", "checkpoint_compare"]
 )
