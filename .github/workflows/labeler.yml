@@ -1,4 +1,7 @@
 name: Labeler
+# KEEP-DISABLED (#10263): do not re-enable until live GitHub labels match
+# `.github/labeler.yml` and `docs/00-project/governance/github-label-taxonomy.md`.
+# `pull_request_target` remains a dangerous trigger.
 
 # pull_request_target is required so fork PRs can receive labels.
 # This job does not checkout untrusted PR HEAD and does not expose
