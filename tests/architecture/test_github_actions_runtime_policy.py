@@ -734,12 +734,21 @@ def test_write_capable_jobs_do_not_checkout_pull_request_merge_refs() -> None:
 
 
 def test_workflows_do_not_ship_temporary_files() -> None:
-    temporary = sorted(
-        path.name for path in (ROOT / ".github" / "workflows").glob("tmp-*.yml")
+    forbidden = (
+        re.compile(r"^tmp-"),
+        re.compile(r"^temporary-"),
+        re.compile(r"^codex-.*diagnostic"),
+        re.compile(r"^codex-temp-"),
+        re.compile(r"^temp-.*diagnosis"),
     )
-    assert temporary == [], (
+    shipped = sorted(
+        path.name
+        for path in (ROOT / ".github" / "workflows").glob("*.yml")
+        if any(pattern.search(path.stem) for pattern in forbidden)
+    )
+    assert shipped == [], (
         "temporary GitHub Actions workflows must not remain on the default branch:\n"
-        + "\n".join(temporary)
+        + "\n".join(shipped)
     )
 
 
