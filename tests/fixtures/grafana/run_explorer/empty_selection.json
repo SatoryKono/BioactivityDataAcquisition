@@ -11,12 +11,13 @@
   "root_selector": "display_rows",
   "scenario": "empty_selection",
   "selectors": {
+    "__timezone": "UTC",
     "pipeline": "chembl_assay",
     "run_id": "-",
     "run_type": "backfill",
     "workflow": "chembl_baseline"
   },
   "title": "Inspect Run Identity",
-  "url": "/ops/control-plane/identity-table?pipeline=chembl_assay&run_type=backfill&run_id=-",
+  "url": "/ops/control-plane/identity-table?pipeline=chembl_assay&run_type=backfill&run_id=-&timezone=UTC",
   "url_template": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}"
 }

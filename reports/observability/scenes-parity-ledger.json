@@ -21,12 +21,12 @@
   },
   "dashboard_sha256": {
     "bioetl-control-plane-v1": "d464819661f24fd93999926565a2c5496cd3f311d65d80ff9457bafb548a82cc",
-    "bioetl-dq-v2": "f5ea90a028718005788fee1670394ef8c6cd2eb3b448f545b06618a5b5a4b680",
-    "bioetl-incident-v1": "8ac2e72320413efd7cf3a4766b76f4f49729512429e56bdb8cb95d83652eee47",
+    "bioetl-dq-v2": "e8e469c9aec8cd285cebee7369b2f1005fe862c49074a29b220618176e96cb20",
+    "bioetl-incident-v1": "f946ce941c2500071318c158e7081b44240ba0649d0815bc7cb05a6ae5458ec1",
     "bioetl-overview-v2": "bd2da4fcc6d0a444e270d87ea52439aa1ea1c94a815cb0c5c904d217200fd070",
-    "bioetl-provider-health-v2": "01db2b07896d79caac59666f84c5950c13ef89b27023d70b48e1d6da65c644f6",
+    "bioetl-provider-health-v2": "cd01a7359c5856b58aaa7c49edfec736df3c7315debac580f9ae335089cb793a",
     "bioetl-run-explorer-v1": "7e76becfd028e095cb49815a43299113b8b00b5ce5d4ce1a28df2c60d49314fa",
-    "bioetl-runtime": "f41ea04915f80373f8b2d2af5607cacb3b5424c90068e4da4eec6e47fab48384"
+    "bioetl-runtime": "1569b44ed635e81bcdd0c5ffe98e60233039a4fc0a1798864410b047497c9372"
   },
   "panels": [
     {
@@ -1245,6 +1245,25 @@
       "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-dq-v2",
+      "panel_id": 9406,
+      "panel_title": "Review Selected Run Summary",
+      "route": "data-trust-recovery",
+      "source": {
+        "datasource_type": null,
+        "datasource_uid": null,
+        "expressions": [
+          "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}&view=summary&from=${__from}&to=${__to}"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-dq-v2",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-dq-v2",
       "panel_id": 9402,
       "panel_title": "Inspect Run Identity",
       "route": "data-trust-recovery",
@@ -1272,25 +1291,6 @@
         "datasource_uid": null,
         "expressions": [
           "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
-        ],
-        "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-dq-v2",
-      "disposition": "advanced-evidence",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-dq-v2",
-      "panel_id": 9406,
-      "panel_title": "Review Selected Run Summary",
-      "route": "data-trust-recovery",
-      "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
-        "expressions": [
-          "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}&view=summary&from=${__from}&to=${__to}"
         ],
         "target_count": 1
       }
@@ -3463,7 +3463,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "sum by(stage, error_code) (increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\",stage!~\"none.*\"}[$__range])) or label_replace(label_replace(vector(0), \"stage\", \"none\", \"\", \"\"), \"error_code\", \"none\", \"\", \"\")"
+          "sum by(stage, error_code) (increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\",stage!~\"none.*\"}[$__range]))"
         ],
         "target_count": 1
       }
@@ -3482,7 +3482,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "sum by(stage, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\",stage!~\"none.*\"}[$__range])) or label_replace(label_replace(vector(0), \"stage\", \"none\", \"\", \"\"), \"run_type\", \"none\", \"\", \"\")"
+          "sum by(stage, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\",stage!~\"none.*\"}[$__range]))"
         ],
         "target_count": 1
       }

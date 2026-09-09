@@ -24356,6 +24356,16 @@
       "source_lines": 308
     },
     {
+      "coverage_percent": 0.0,
+      "coverage_status": "uncovered",
+      "covered_lines": 0,
+      "executable_lines": 0,
+      "missing_lines": 0,
+      "module": "bioetl.interfaces.http._identity_display_rows",
+      "path": "src/bioetl/interfaces/http/_identity_display_rows.py",
+      "source_lines": 63
+    },
+    {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 5,
@@ -49048,6 +49058,16 @@
       "source_lines": 308
     },
     {
+      "coverage_percent": 0.0,
+      "coverage_status": "uncovered",
+      "covered_lines": 0,
+      "executable_lines": 0,
+      "missing_lines": 0,
+      "module": "bioetl.interfaces.http._identity_display_rows",
+      "path": "src/bioetl/interfaces/http/_identity_display_rows.py",
+      "source_lines": 63
+    },
+    {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 5,
@@ -49545,7 +49565,7 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2469,
+    "source_module_count": 2470,
     "status_counts": {
       "coverage_xml_missing": 0,
       "fully_covered": 1611,

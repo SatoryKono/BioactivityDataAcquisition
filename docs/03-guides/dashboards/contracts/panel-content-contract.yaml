@@ -2367,6 +2367,7 @@ dashboards:
         empty_state_class: select_run
         state_model:
         - UNKNOWN
+        - VALID_EMPTY
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -5262,6 +5263,7 @@ dashboards:
         empty_state_class: select_run
         state_model:
         - UNKNOWN
+        - VALID_EMPTY
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:

@@ -33,6 +33,10 @@ def test_range_action_keeps_its_frame_fields(path: Path) -> None:
             t.get("root_selector") == "summary" for t in panel.get("targets", [])
         ):
             continue
+        # Retention 9416 also reads a JSON `summary` object for OK/UNKNOWN
+        # counts; that is not the selected-run range action.
+        if "from_ms" not in json.dumps(panel):
+            continue
         for name in ("from_ms", "to_ms"):
             assert all(
                 not t.get("options", {}).get("excludeByName", {}).get(name)

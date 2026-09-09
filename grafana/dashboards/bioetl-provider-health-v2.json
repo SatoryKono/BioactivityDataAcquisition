@@ -1762,6 +1762,7 @@
             "dataLinks": [
               {
                 "targetBlank": false,
+                "includeVars": false,
                 "title": "Diagnose provider telemetry coverage",
                 "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&viewPanel=9104&${__url_time_range}"
               },

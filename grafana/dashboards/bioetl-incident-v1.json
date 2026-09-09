@@ -623,7 +623,8 @@
               "wrapText": true
             },
             "inspect": true,
-            "hidden": true
+            "hidden": true,
+            "minWidth": 50
           },
           "color": {
             "mode": "thresholds"
