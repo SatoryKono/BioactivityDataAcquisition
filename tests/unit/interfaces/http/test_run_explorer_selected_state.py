@@ -217,6 +217,7 @@ def test_loaded_report_display_preserves_reason_and_artifact_fields(
     key: str, row: dict[str, str | int]
 ) -> None:
     result = _table_shape_pipeline_run_report({key: [row]})
+    assert result[key] == [row]
     display_row = result[f"{key}_display"][0]
     assert display_row.items() >= row.items()
     if key == "reasons_top_n":

@@ -111,6 +111,7 @@ def test_coordinator_has_classify_and_aggregate_jobs() -> None:
         )
     classify = jobs["classify-changes"]
     assert "head_sha" in str(classify.get("outputs", {}))
+    assert int(classify.get("timeout-minutes", 0)) >= 15
 
 
 def test_leaf_workflows_expose_workflow_call() -> None:
@@ -177,3 +178,12 @@ def test_called_owner_workflows_reject_duplicate_yaml_keys() -> None:
     for relative in sorted(owners):
         path = ROOT / relative
         yaml.load(path.read_text(encoding="utf-8"), Loader=_UniqueKeyLoader)
+
+
+def test_docs_governance_anchors_grafana_reports_and_tests() -> None:
+    data = _load_yaml(CATALOG)
+    docs_gate = next(gate for gate in data["gates"] if gate["id"] == "docs-governance")
+    include = docs_gate["paths"]["include"]
+    assert "grafana/**" in include
+    assert "reports/**" in include
+    assert "tests/**" in include

@@ -1885,9 +1885,7 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         if property_.get("id") == "custom.cellOptions"
         and property_.get("value", {}).get("wrapText") is True
     }
-    assert wrapped_identity_fields == (
-        {"value"} if dashboard_name == "bioetl-run-explorer-v1.json" else set()
-    )
+    assert wrapped_identity_fields == {"parameter"}
 
     assert processed.get("datasource") == "BioETL Ops HTTP"
     _assert_processed_records_target_contract(processed)

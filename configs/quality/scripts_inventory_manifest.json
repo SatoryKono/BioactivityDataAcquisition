@@ -9993,7 +9993,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/engineering/ci/test_pr_gate.py",
-          "line": 10,
+          "line": 11,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pr_gate import ("
         }
@@ -12786,7 +12786,7 @@
         },
         {
           "path": "tests/integration/test_grafana_render_first_remediation.py",
-          "line": 1543,
+          "line": 1541,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         },

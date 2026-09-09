@@ -5360,10 +5360,6 @@
                     "value": "Current"
                   },
                   {
-                    "id": "custom.minWidth",
-                    "value": 220
-                  },
-                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
@@ -5837,10 +5833,6 @@
                     "value": "Current"
                   },
                   {
-                    "id": "custom.minWidth",
-                    "value": 220
-                  },
-                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
@@ -6252,10 +6244,6 @@
                   {
                     "id": "displayName",
                     "value": "Current"
-                  },
-                  {
-                    "id": "custom.minWidth",
-                    "value": 140
                   },
                   {
                     "id": "custom.cellOptions",
@@ -6696,10 +6684,6 @@
                     "value": "Current"
                   },
                   {
-                    "id": "custom.minWidth",
-                    "value": 160
-                  },
-                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
@@ -7138,10 +7122,6 @@
                     "value": "Current"
                   },
                   {
-                    "id": "custom.minWidth",
-                    "value": 160
-                  },
-                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
@@ -7368,6 +7348,13 @@
                   {
                     "id": "custom.align",
                     "value": "left"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
                   }
                 ]
               },

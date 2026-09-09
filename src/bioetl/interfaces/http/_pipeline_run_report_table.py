@@ -8,13 +8,15 @@ from __future__ import annotations
 
 import json
 
+from bioetl.interfaces.http._pipeline_run_report_display import (
+    _shape_artifacts_display,
+    _shape_funnel_rows,
+    _shape_reasons_display,
+)
 from bioetl.interfaces.http._pipeline_run_report_sections import (
-    _ARTIFACT_ACTIONS,
-    _ARTIFACT_TITLES,
     _FAILURE_ROW_ORDER,
     _IDENTITY_ROW_ORDER,
     _LAYER_ROW_ORDER,
-    _REASON_OPERATOR_LABELS,
     _RECONCILIATION_ROW_ORDER,
 )
 from bioetl.interfaces.http._processed_records_value_support import (
@@ -157,51 +159,6 @@ def _shape_object_or_list_block(
         shaped[key] = []
 
 
-def _reason_operator_label(code: str) -> str:
-    """Keep the machine code and add a short operator translation."""
-    label = _REASON_OPERATOR_LABELS.get(code)
-    if label is None:
-        return code
-    return f"{label} ({code})"
-
-
-def _removal_label(item: object) -> str:
-    if not isinstance(item, dict):
-        return ""
-    code = str(item.get("reason_code") or item.get("outcome") or "").strip()
-    count = item.get("count")
-    if not code:
-        return ""
-    label = _reason_operator_label(code)
-    if count in (None, ""):
-        return label
-    return f"{count} {label}"
-
-
-def _removals_summary(removals: object) -> str:
-    """Compact funnel removals for Grafana (not raw JSON arrays)."""
-    if not isinstance(removals, list):
-        return "—"
-    parts = [_removal_label(item) for item in removals]
-    return ", ".join(part for part in parts if part) or "—"
-
-
-def _shape_funnel_rows(payload: dict[str, object]) -> object:
-    """Copy funnel stages and add removals_summary for table display."""
-    funnel = payload.get("funnel")
-    if not isinstance(funnel, list):
-        return []
-    shaped_rows: list[object] = []
-    for stage in funnel:
-        if not isinstance(stage, dict):
-            shaped_rows.append(stage)
-            continue
-        row = dict(stage)
-        row["removals_summary"] = _removals_summary(stage.get("removals"))
-        shaped_rows.append(row)
-    return shaped_rows
-
-
 def _shape_identity_rows(payload: dict[str, object]) -> list[dict[str, str]]:
     """Build identity_rows, including tracking_coverage when not already present."""
     identity = payload.get("identity")
@@ -218,41 +175,6 @@ def _shape_identity_rows(payload: dict[str, object]) -> list[dict[str, str]]:
             {"parameter": "tracking_coverage", "value": _scalar_or_json(coverage)}
         )
     return identity_rows
-
-
-def _shape_reasons_display(payload: dict[str, object]) -> list[dict[str, object]]:
-    reasons = payload.get("reasons_top_n")
-    if not isinstance(reasons, list) or not reasons:
-        fallback = payload.get("reasons_top_n_display")
-        return list(fallback) if isinstance(fallback, list) else []
-    rows: list[dict[str, object]] = []
-    for item in reasons:
-        if not isinstance(item, dict):
-            continue
-        code = str(item.get("reason_code") or "").strip()
-        row = dict(item)
-        row["reason_label"] = _reason_operator_label(code) if code else ""
-        row["explain"] = "Open Data Quality"
-        rows.append(row)
-    return rows
-
-
-def _shape_artifacts_display(payload: dict[str, object]) -> list[dict[str, object]]:
-    artifacts = payload.get("artifacts")
-    if not isinstance(artifacts, list) or not artifacts:
-        fallback = payload.get("artifacts_display")
-        return list(fallback) if isinstance(fallback, list) else []
-    rows: list[dict[str, object]] = []
-    for item in artifacts:
-        if not isinstance(item, dict):
-            continue
-        kind = str(item.get("kind") or item.get("name") or "").strip()
-        row = dict(item)
-        row["title"] = _ARTIFACT_TITLES.get(kind, kind or "Artifact")
-        row["action"] = _ARTIFACT_ACTIONS.get(kind, "Open")
-        row["format"] = kind
-        rows.append(row)
-    return rows
 
 
 def _table_shape_pipeline_run_report(

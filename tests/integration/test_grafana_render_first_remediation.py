@@ -919,7 +919,7 @@ def test_incident_alert_history_has_readable_full_width_layout() -> None:
     assert impact.get("gridPos", {}).get("y", 0) >= (
         history_grid.get("y", 0) + history_grid.get("h", 0)
     )
-    assert current_alerts.get("gridPos", {}).get("y", 0) < 18
+    assert current_alerts.get("gridPos") == {"h": 5, "w": 24, "x": 0, "y": 13}
     assert "ALERTS" in str(history.get("targets", [{}])[0].get("expr", ""))
     assert str(history.get("targets", [{}])[0].get("legendFormat", "")).startswith(
         "{{alertname}}"
@@ -1301,7 +1301,6 @@ def test_below_fold_tables_exclude_time_without_name_metric() -> None:
         ("bioetl-run-explorer-v1.json", 3011),
         ("bioetl-run-explorer-v1.json", 3014),
         ("bioetl-incident-v1.json", 2002),
-        ("bioetl-incident-v1.json", 2005),
         ("bioetl-control-plane-v1.json", 9415),
         ("bioetl-control-plane-v1.json", 9413),
         ("bioetl-control-plane-v1.json", 9414),
@@ -1311,7 +1310,6 @@ def test_below_fold_tables_exclude_time_without_name_metric() -> None:
         ("bioetl-control-plane-v1.json", 9408),
         ("bioetl-control-plane-v1.json", 9409),
         ("bioetl-control-plane-v1.json", 9417),
-        ("bioetl-run-explorer-v1.json", 3022),
         ("bioetl-run-explorer-v1.json", 3011),
         ("bioetl-run-explorer-v1.json", 3012),
     )

@@ -380,7 +380,7 @@
                 },
                 "1": {
                   "text": "WARN",
-                  "color": "#bd5907"
+                  "color": "orange"
                 },
                 "2": {
                   "text": "CRIT",
@@ -388,7 +388,7 @@
                 },
                 "3": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             },
@@ -398,7 +398,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             }
@@ -419,7 +419,7 @@
                 "value": 2
               },
               {
-                "color": "gray",
+                "color": "#555555",
                 "value": 3
               }
             ]
@@ -465,7 +465,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Start Incident Triage",
-        "content": "<div style=\"font-size:16px;line-height:1.25;padding:0;white-space:normal;overflow-wrap:anywhere\">GLOBAL · CURRENT · Rank: CRIT before WARN; ties have equal urgency. Confidence: signal only, unverified cause. Impact / event age: UNKNOWN until verified.</div>"
+        "content": "<div style=\"font-size:16px;line-height:1.25;padding:0;white-space:normal;overflow-wrap:anywhere\">GLOBAL · CURRENT · CRIT before WARN; ties are equally urgent. Signal ≠ verified cause. Impact and event age: UNKNOWN.</div>"
       },
       "links": [
         {
@@ -623,7 +623,7 @@
           "custom": {
             "align": "left",
             "cellOptions": {
-              "type": "auto",
+              "type": "color-text",
               "wrapText": true
             },
             "inspect": true,
@@ -631,7 +631,8 @@
             "minWidth": 50
           },
           "color": {
-            "mode": "thresholds"
+            "mode": "fixed",
+            "fixedColor": "text"
           },
           "thresholds": {
             "mode": "absolute",
@@ -690,10 +691,6 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 48
-              },
-              {
                 "id": "mappings",
                 "value": []
               },
@@ -704,6 +701,10 @@
               {
                 "id": "custom.hidden",
                 "value": false
+              },
+              {
+                "id": "custom.width",
+                "value": 48
               }
             ]
           },
@@ -714,10 +715,6 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 100
-              },
-              {
                 "id": "mappings",
                 "value": [
                   {
@@ -725,11 +722,11 @@
                     "options": {
                       "0": {
                         "text": "UNKNOWN",
-                        "color": "gray"
+                        "color": "text"
                       },
                       "1": {
                         "text": "WARN",
-                        "color": "#bd5907"
+                        "color": "orange"
                       },
                       "2": {
                         "text": "CRIT",
@@ -742,7 +739,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text"
+                  "type": "color-text",
+                  "wrapText": true
                 }
               },
               {
@@ -762,16 +760,16 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 112
-              },
-              {
                 "id": "noValue",
                 "value": "UNVERIFIED"
               },
               {
                 "id": "custom.hidden",
                 "value": false
+              },
+              {
+                "id": "custom.width",
+                "value": 100
               }
             ]
           },
@@ -808,7 +806,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto",
+                  "type": "color-text",
                   "wrapText": true
                 }
               },
@@ -844,10 +842,6 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 100
-              },
-              {
                 "id": "mappings",
                 "value": [
                   {
@@ -869,7 +863,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto",
+                  "type": "color-text",
                   "wrapText": true
                 }
               },
@@ -886,17 +880,13 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 130
-              },
-              {
                 "id": "noValue",
                 "value": "GLOBAL"
               },
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto",
+                  "type": "color-text",
                   "wrapText": true
                 }
               },
@@ -950,13 +940,9 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 105
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto",
+                  "type": "color-text",
                   "wrapText": true
                 }
               },
@@ -1956,7 +1942,7 @@
               "custom": {
                 "align": "left",
                 "cellOptions": {
-                  "type": "auto"
+                  "type": "color-text"
                 },
                 "inspect": true,
                 "minWidth": 50
@@ -1981,7 +1967,11 @@
                   "targetBlank": false,
                   "includeVars": false
                 }
-              ]
+              ],
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "text"
+              }
             },
             "overrides": [
               {
@@ -2049,7 +2039,7 @@
                           },
                           "UNKNOWN": {
                             "text": "UNKNOWN",
-                            "color": "gray"
+                            "color": "text"
                           }
                         }
                       }
@@ -2126,7 +2116,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "auto",
+                      "type": "color-text",
                       "wrapText": false
                     }
                   }
@@ -2165,7 +2155,7 @@
                           },
                           "UNKNOWN": {
                             "text": "UNKNOWN",
-                            "color": "gray"
+                            "color": "text"
                           }
                         }
                       }

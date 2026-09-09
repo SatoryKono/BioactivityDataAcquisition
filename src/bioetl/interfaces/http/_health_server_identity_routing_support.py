@@ -339,6 +339,15 @@ def _identity_row_needs_timeout_value(
     ) or value in _IDENTITY_UNAVAILABLE_VALUES
 
 
+_TIMEOUT_COPY = (
+    "scope resolve timed out — retry or select exact run_id (control-plane store slow)"
+)
+
+
+def _csv_run_types(raw: str | None) -> tuple[str, ...]:
+    return tuple(part.strip() for part in (raw or "").split(",") if part.strip())
+
+
 def _rewrite_timeout_identity_rows(
     payload: dict[str, object],
     *,
@@ -348,16 +357,12 @@ def _rewrite_timeout_identity_rows(
     rows = payload.get("rows")
     if not isinstance(rows, list):
         return
-    timeout_msg = (
-        "scope resolve timed out — retry or select exact run_id "
-        "(control-plane store slow)"
-    )
     rewritten: list[object] = []
     for row in rows:
         if isinstance(row, dict) and _identity_row_needs_timeout_value(
             row, pipeline=pipeline
         ):
-            rewritten.append({**row, "value": timeout_msg})
+            rewritten.append({**row, "value": _TIMEOUT_COPY})
         else:
             rewritten.append(row)
     payload["rows"] = rewritten
@@ -370,22 +375,18 @@ def _timeout_identity_payload(query: dict[str, str]) -> dict[str, object]:
     I/O from a true empty scope (no runs / wrong selector).
     """
     pipeline = query.get("pipeline") or "unknown"
-    run_type_raw = query.get("run_type") or ""
-    run_types = (
-        tuple(part.strip() for part in run_type_raw.split(",") if part.strip()) or ()
-    )
+    timezone = query.get("timezone") or "UTC"
     payload = build_control_plane_identity_payload(
         requested_pipeline=pipeline,
         resolved_manifest=None,
         selected_pipelines=(pipeline,),
         selected_run_id=None,
-        selected_run_types=run_types,
+        selected_run_types=_csv_run_types(query.get("run_type")),
         resolved_via="scope_resolve_timeout",
         checkpoint_metadata=None,
         identity_evidence_summary=None,
+        timezone=timezone,
     )
     _rewrite_timeout_identity_rows(payload, pipeline=pipeline)
-    payload["display_rows"] = identity_display_rows(
-        payload.get("rows"), query.get("timezone") or "UTC"
-    )
+    payload["display_rows"] = identity_display_rows(payload.get("rows"), timezone)
     return payload
