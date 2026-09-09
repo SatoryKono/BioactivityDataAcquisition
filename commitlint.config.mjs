@@ -7,7 +7,7 @@ export default {
     'type-enum': [
       2,
       'always',
-      ['feat', 'fix', 'refactor', 'docs', 'test', 'chore', 'perf', 'ci', 'build', 'style', 'revert']
+      ['feat', 'fix', 'refactor', 'docs', 'test', 'chore', 'perf', 'ci', 'build', 'style', 'revert', 'merge']
     ],
     'scope-case': [2, 'always', 'lower-case'],
     'subject-case': [0],

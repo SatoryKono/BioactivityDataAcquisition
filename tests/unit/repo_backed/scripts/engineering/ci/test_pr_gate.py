@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -228,3 +229,25 @@ def test_catalog_rejects_not_applicable_for_always_required(tmp_path: Any) -> No
 
     with pytest.raises(CatalogError, match="always_required"):
         load_catalog(path)
+
+
+def test_live_catalog_classifies_grafana_reports_and_test_fixtures() -> None:
+    catalog = load_catalog(
+        Path(__file__).resolve().parents[6]
+        / "configs/quality/github_required_checks.yaml"
+    )
+    matrix = classify_changes(
+        catalog,
+        [
+            "grafana/dashboards/bioetl-control-plane-v1.json",
+            "grafana/plugins/bioetl-scenes-app/docs/scenes-parity-ledger.json",
+            "reports/observability/scenes-parity-ledger.json",
+            "tests/fixtures/grafana/run_explorer/valid_empty.json",
+        ],
+        head_sha=HEAD_SHA,
+    )
+
+    assert matrix["unclassified_files"] == []
+    assert matrix["decisions"]["docs-governance"]["decision"] == REQUIRED
+    assert matrix["decisions"]["docs-governance"]["reason"] == "path_match"
+    assert matrix["decisions"]["docker"]["decision"] == NOT_APPLICABLE
