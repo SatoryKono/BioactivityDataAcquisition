@@ -445,7 +445,7 @@
         "overrides": []
       },
       "options": {
-        "colorMode": "value",
+        "colorMode": "background",
         "dataLinks": [
           {
             "title": "Inspect DQ Current Status",
@@ -587,7 +587,7 @@
       },
       "id": 9101,
       "options": {
-        "colorMode": "value",
+        "colorMode": "background",
         "dataLinks": [
           {
             "targetBlank": true,

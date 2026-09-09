@@ -244,22 +244,37 @@ def test_iteration_2_active_alert_severity_is_not_overridden_by_count() -> None:
 
 
 def test_iteration_2_runtime_valid_empty_frames_are_semantic_tables() -> None:
-    """#10251: empty Stage tables fail closed without synthetic vector(0)."""
+    """Bounded Runtime fallbacks expose semantic labels instead of raw frames."""
     dashboard = _load("bioetl-runtime.json")
-    for panel_id in (241, 256):
+    expected = {
+        241: ("run_type", "No records in range"),
+        256: ("error_code", "No errors in range"),
+    }
+    for panel_id, (detail_field, detail_text) in expected.items():
         panel = _panel(dashboard, panel_id)
         assert panel["type"] == "table"
         assert panel["targets"][0]["format"] == "table"
-        assert "vector(0)" not in panel["targets"][0]["expr"]
-        no_value = str(
-            (panel.get("fieldConfig") or {}).get("defaults", {}).get("noValue") or ""
-        )
-        assert no_value.startswith("TELEMETRY MISSING")
-        organize = next(
-            item for item in panel["transformations"] if item.get("id") == "organize"
-        )
+        assert "label_replace(label_replace(vector(0)" in panel["targets"][0]["expr"]
+        organize = panel["transformations"][-1]
+        assert organize["id"] == "organize"
         assert organize["options"]["excludeByName"]["Time"] is True
         assert organize["options"]["renameByName"]["Value"] == "Count"
+
+        overrides = {
+            override["matcher"]["options"]: override
+            for override in panel["fieldConfig"]["overrides"]
+            if override["matcher"]["id"] == "byName"
+        }
+        assert (
+            overrides["stage"]["properties"][0]["value"][0]["options"]["none"]["text"]
+            == "VALID EMPTY"
+        )
+        assert (
+            overrides[detail_field]["properties"][0]["value"][0]["options"]["none"][
+                "text"
+            ]
+            == detail_text
+        )
 
 
 def test_iteration_2_empty_distributions_use_no_data_capable_tables() -> None:
@@ -419,9 +434,21 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
     control = _load("bioetl-control-plane-v1.json")
     latency = _panel(control, 111)
     assert latency["options"]["legend"]["showLegend"] is True
-    for target, quantile in zip(latency["targets"], ("p50", "p95", "p99"), strict=True):
-        assert "sum by (le, store, operation)" in target["expr"]
-        assert target["legendFormat"] == "{{store}} / {{operation}} · " + quantile
+    assert len(latency["targets"]) == 1
+    latency_target = latency["targets"][0]
+    assert "sum by (le, store, operation)" in latency_target["expr"]
+    assert "$read_latency_quantile" in latency_target["expr"]
+    assert latency_target["legendFormat"] == "{{store}} / {{operation}}"
+    legend = latency["options"]["legend"]
+    assert legend["displayMode"] == "table"
+    assert "lastNotNull" in legend["calcs"]
+    assert "max" in legend["calcs"]
+    variable_names = {
+        item.get("name")
+        for item in control.get("templating", {}).get("list", [])
+        if isinstance(item, dict)
+    }
+    assert "read_latency_quantile" in variable_names
     # Expanded detail groups place identity panels under their section headers.
     assert _panel(control, 9404)["gridPos"]["y"] >= 0
     copy_panel = _panel(control, 9407)
@@ -577,10 +604,10 @@ def test_audit_followup_action_first_layout_contracts() -> None:
         "Selected Range · Validation Diagnostics",
     ]
     assert [panel.get("gridPos", {}).get("y") for panel in dq_rows] == [
+        17,
         18,
         19,
         20,
-        21,
     ]
     assert all(panel.get("collapsed") is True for panel in dq_rows)
 

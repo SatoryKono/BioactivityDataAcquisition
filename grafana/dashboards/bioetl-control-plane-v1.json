@@ -448,7 +448,7 @@
         "overrides": []
       },
       "options": {
-        "colorMode": "value",
+        "colorMode": "background",
         "dataLinks": [
           {
             "title": "Inspect Replay Safety State",
@@ -1271,7 +1271,7 @@
       },
       "id": 891,
       "options": {
-        "colorMode": "value",
+        "colorMode": "background",
         "dataLinks": [
           {
             "targetBlank": true,
@@ -1367,7 +1367,7 @@
       },
       "id": 892,
       "options": {
-        "colorMode": "value",
+        "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "horizontal",
@@ -1490,7 +1490,7 @@
       },
       "id": 893,
       "options": {
-        "colorMode": "value",
+        "colorMode": "background",
         "dataLinks": [
           {
             "targetBlank": true,
@@ -1595,7 +1595,7 @@
       },
       "id": 907,
       "options": {
-        "colorMode": "value",
+        "colorMode": "background",
         "dataLinks": [
           {
             "targetBlank": true,
