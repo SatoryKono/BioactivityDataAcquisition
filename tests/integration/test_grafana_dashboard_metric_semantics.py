@@ -1848,18 +1848,20 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
             == processed.get("gridPos", {}).get("h")
             == expected_height
         )
-        assert (
-            "valid empty"
-            in str(
-                identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
-            ).lower()
+        identity_no_value = str(
+            identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
         )
-        assert (
-            "query error"
-            in str(
-                processed.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
-            ).lower()
+        processed_no_value = str(
+            processed.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
         )
+        if dashboard_name in {"bioetl-runtime.json", "bioetl-dq-v2.json"}:
+            assert identity_no_value.startswith("SELECT RUN")
+            assert processed_no_value.startswith("SELECT RUN")
+            assert "valid empty" not in identity_no_value.lower()
+            assert "query error" not in processed_no_value.lower()
+        else:
+            assert "valid empty" in identity_no_value.lower()
+            assert "query error" in processed_no_value.lower()
     assert (
         identity.get("options", {}).get("cellHeight")
         == processed.get("options", {}).get("cellHeight")
@@ -2136,3 +2138,102 @@ def test_provider_cause_contract_declares_unknown_beside_valid_empty() -> None:
         assert "VALID_EMPTY" not in record["state_model"], (
             f"panel {panel_id} cannot prove VALID EMPTY from its own query"
         )
+
+
+def _runtime_panels_by_id() -> dict[int, dict]:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    return {
+        panel["id"]: panel
+        for panel in get_dashboard_panels(dashboard)
+        if isinstance(panel.get("id"), int)
+    }
+
+
+def test_runtime_10251_stage_empty_is_not_valid_empty_in_stage_column() -> None:
+    """#10251 P1: empty Stage/Code tables fail closed on the full-width noValue."""
+    for panel_id in (241, 256):
+        panel = _runtime_panels_by_id()[panel_id]
+        expr = panel["targets"][0]["expr"]
+        assert "vector(0)" not in expr
+        no_value = str(panel.get("fieldConfig", {}).get("defaults", {}).get("noValue"))
+        assert no_value.startswith("TELEMETRY MISSING")
+        assert "VALID EMPTY" not in json.dumps(panel.get("fieldConfig", {}))
+
+
+def test_runtime_10251_expectedness_unknown_vs_contract_na() -> None:
+    """#10251 P2: missing telemetry is UNKNOWN; N/A is only inapplicable-by-construction."""
+    panel = _runtime_panels_by_id()[243]
+    no_value = panel.get("fieldConfig", {}).get("defaults", {}).get("noValue")
+    assert isinstance(no_value, str) and no_value.startswith("UNKNOWN")
+    assert "N/A" not in no_value
+    expected_no_value = None
+    for override in panel.get("fieldConfig", {}).get("overrides", []):
+        if override.get("matcher", {}).get("options") != "Expected":
+            continue
+        for prop in override.get("properties", []):
+            if prop.get("id") == "noValue":
+                expected_no_value = prop.get("value")
+    assert isinstance(expected_no_value, str) and expected_no_value.startswith("N/A —")
+
+
+def test_runtime_10251_select_run_novalue_drops_hedge_tails() -> None:
+    """#10251 §7.3: SELECT RUN names one state."""
+    panels = _runtime_panels_by_id()
+    expected = {
+        9402: "SELECT RUN — no exact Run ID selected. Choose a run first.",
+        9403: (
+            "SELECT RUN — no exact Run ID selected. "
+            "Choose a run in Inspect Recent Runs."
+        ),
+        9998: "SELECT RUN — no exact Run ID selected. Choose a run first.",
+    }
+    for panel_id, expected_no_value in expected.items():
+        no_value = panels[panel_id].get("fieldConfig", {}).get("defaults", {}).get("noValue")
+        assert no_value == expected_no_value
+        assert "VALID EMPTY if" not in str(no_value)
+        assert "UNKNOWN/QUERY ERROR if" not in str(no_value)
+
+
+def test_dq_10253_selected_run_summary_is_first_window() -> None:
+    """#10253 D1: compact selected-run summary sits on the first screen."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    root = {panel.get("id"): panel for panel in dashboard.get("panels") or []}
+    summary = root[9406]
+    assert summary.get("gridPos") == {"h": 5, "w": 24, "x": 0, "y": 13}
+    assert int((root[9405].get("gridPos") or {}).get("y", 0)) >= 18
+    assert all(item.get("id") != 9406 for item in (root[9405].get("panels") or []))
+    organize = next(
+        item
+        for item in summary.get("transformations") or []
+        if item.get("id") == "organize"
+    )
+    exclude = (organize.get("options") or {}).get("excludeByName") or {}
+    assert exclude.get("started_at") is True
+    assert exclude.get("completed_at") is True
+    no_value = str(summary.get("fieldConfig", {}).get("defaults", {}).get("noValue"))
+    assert no_value.startswith("SELECT RUN")
+    assert "VALID EMPTY if" not in no_value
+
+
+def test_dq_10253_select_run_novalue_drops_hedge_tails() -> None:
+    """#10253 §7.3: DQ HTTP empty copy names one state."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    panels = {
+        panel["id"]: panel
+        for panel in get_dashboard_panels(dashboard)
+        if isinstance(panel.get("id"), int)
+    }
+    expected = {
+        9402: "SELECT RUN — no exact Run ID selected. Choose a run first.",
+        9403: (
+            "SELECT RUN — no exact Run ID selected. "
+            "Choose a run in Inspect Recent Runs."
+        ),
+        9406: "SELECT RUN — no exact Run ID selected. Choose a run first.",
+    }
+    for panel_id, expected_no_value in expected.items():
+        no_value = panels[panel_id].get("fieldConfig", {}).get("defaults", {}).get("noValue")
+        assert no_value == expected_no_value
+        assert "VALID EMPTY if" not in str(no_value)
+        assert "UNKNOWN/QUERY ERROR if" not in str(no_value)
+

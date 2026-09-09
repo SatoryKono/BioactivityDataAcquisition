@@ -102,7 +102,7 @@ first_screen_shell_panels:
     id: 9103
     owner: "@bioetl-observability"
     rationale: >-
-      Native title omitted so h=3 Start DQ Triage body fits DASH-FIT-004.
+      Native title omitted so h=2 Start DQ Triage body fits DASH-FIT-004.
       Display title stays in bioetlDisplayTitle.
     retire_when: the CTA can keep a native title without overflowing at 200%
   - dashboard: bioetl-incident-v1.json
@@ -221,6 +221,11 @@ first_window_summary_tables:
     max_rows: 5
     owner: "@bioetl-observability"
     bind: topk
+  - dashboard: bioetl-dq-v2.json
+    id: 9406
+    max_rows: 1
+    owner: "@bioetl-observability"
+    bind: limit
   - dashboard: bioetl-provider-health-v2.json
     id: 9101
     max_rows: 3

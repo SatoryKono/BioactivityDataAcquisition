@@ -244,37 +244,25 @@ def test_iteration_2_active_alert_severity_is_not_overridden_by_count() -> None:
 
 
 def test_iteration_2_runtime_valid_empty_frames_are_semantic_tables() -> None:
-    """Bounded Runtime fallbacks expose semantic labels instead of raw frames."""
+    """#10251: empty Stage tables fail closed without synthetic vector(0)."""
     dashboard = _load("bioetl-runtime.json")
-    expected = {
-        241: ("run_type", "No records in range"),
-        256: ("error_code", "No errors in range"),
-    }
-    for panel_id, (detail_field, detail_text) in expected.items():
+    for panel_id in (241, 256):
         panel = _panel(dashboard, panel_id)
         assert panel["type"] == "table"
         assert panel["targets"][0]["format"] == "table"
-        assert "label_replace(label_replace(vector(0)" in panel["targets"][0]["expr"]
-        organize = panel["transformations"][-1]
-        assert organize["id"] == "organize"
+        assert "vector(0)" not in panel["targets"][0]["expr"]
+        no_value = str(
+            (panel.get("fieldConfig") or {}).get("defaults", {}).get("noValue") or ""
+        )
+        assert no_value.startswith("TELEMETRY MISSING")
+        organize = next(
+            item
+            for item in panel["transformations"]
+            if item.get("id") == "organize"
+        )
         assert organize["options"]["excludeByName"]["Time"] is True
         assert organize["options"]["renameByName"]["Value"] == "Count"
 
-        overrides = {
-            override["matcher"]["options"]: override
-            for override in panel["fieldConfig"]["overrides"]
-            if override["matcher"]["id"] == "byName"
-        }
-        assert (
-            overrides["stage"]["properties"][0]["value"][0]["options"]["none"]["text"]
-            == "VALID EMPTY"
-        )
-        assert (
-            overrides[detail_field]["properties"][0]["value"][0]["options"]["none"][
-                "text"
-            ]
-            == detail_text
-        )
 
 
 def test_iteration_2_empty_distributions_use_no_data_capable_tables() -> None:

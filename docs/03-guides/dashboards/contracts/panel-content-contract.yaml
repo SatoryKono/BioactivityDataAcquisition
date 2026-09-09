@@ -2294,7 +2294,7 @@ dashboards:
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:
-        - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -2315,7 +2315,7 @@ dashboards:
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:
-        - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -2366,7 +2366,7 @@ dashboards:
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:
-        - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -4767,7 +4767,7 @@ dashboards:
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
-        - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -4809,7 +4809,7 @@ dashboards:
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
-        - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -4875,7 +4875,7 @@ dashboards:
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
-        - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -5103,7 +5103,7 @@ dashboards:
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:
-        - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:
@@ -5261,7 +5261,7 @@ dashboards:
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:
-        - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
         required_copy:

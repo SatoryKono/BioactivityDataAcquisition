@@ -1,0 +1,318 @@
+"""Follow-up after restore_stream1_runtime_dq: layout, widths, tests, notes."""
+
+from __future__ import annotations
+
+import json
+import os
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[4]
+DQ = ROOT / "grafana/dashboards/bioetl-dq-v2.json"
+LAYOUT = ROOT / "docs/03-guides/dashboards/contracts/layout-budgets.yaml"
+SEMANTICS = ROOT / "tests/integration/test_grafana_dashboard_metric_semantics.py"
+RENDER = ROOT / "tests/integration/test_grafana_render_first_remediation.py"
+RUNTIME_TEST = ROOT / "tests/integration/test_pipeline_runtime_dashboard.py"
+NOTES_DIR = ROOT / "reports/observability/remediation/10258"
+
+
+def _atomic_write(path: Path, text: str) -> None:
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, path)
+
+
+def _dump(path: Path, payload: dict) -> None:
+    _atomic_write(path, json.dumps(payload, indent=2, ensure_ascii=False) + "\n")
+
+
+def patch_dq_layout() -> None:
+    dashboard = json.loads(DQ.read_text(encoding="utf-8"))
+    for panel in dashboard.get("panels") or []:
+        gp = panel.get("gridPos") or {}
+        y = int(gp.get("y") or 0)
+        pid = panel.get("id")
+        if y >= 19 and pid not in {9404, 9406, 9405, 9101, 9102, 9103, 9400, 9401, 1000}:
+            gp = dict(gp)
+            gp["y"] = y + 1
+            panel["gridPos"] = gp
+        if pid != 9406:
+            continue
+        for override in panel.get("fieldConfig", {}).get("overrides") or []:
+            field = str((override.get("matcher") or {}).get("options") or "")
+            if field not in {"status", "Started", "Completed", "Run", "run_id"}:
+                continue
+            props = list(override.get("properties") or [])
+            if any(item.get("id") == "custom.hidden" for item in props):
+                continue
+            props.append({"id": "custom.hidden", "value": True})
+            override["properties"] = props
+    _dump(DQ, dashboard)
+
+
+def patch_layout_budgets() -> None:
+    text = LAYOUT.read_text(encoding="utf-8")
+    needle = (
+        "  - dashboard: bioetl-dq-v2.json\n"
+        "    id: 9102\n"
+        "    max_rows: 5\n"
+        "    owner: \"@bioetl-observability\"\n"
+        "    bind: topk\n"
+    )
+    insert = needle + (
+        "  - dashboard: bioetl-dq-v2.json\n"
+        "    id: 9406\n"
+        "    max_rows: 1\n"
+        "    owner: \"@bioetl-observability\"\n"
+        "    bind: limit\n"
+    )
+    if "    id: 9406\n" not in text.split("bioetl-dq-v2.json", 2)[-1][:400] and needle in text:
+        text = text.replace(needle, insert, 1)
+    text = text.replace(
+        "Native title omitted so h=3 Start DQ Triage body fits DASH-FIT-004.",
+        "Native title omitted so h=2 Start DQ Triage body fits DASH-FIT-004.",
+        1,
+    )
+    _atomic_write(LAYOUT, text)
+
+
+def patch_processed_records_test() -> None:
+    text = SEMANTICS.read_text(encoding="utf-8")
+    old = '''        assert (
+            "valid empty"
+            in str(
+                identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
+            ).lower()
+        )
+        assert (
+            "query error"
+            in str(
+                processed.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
+            ).lower()
+        )'''
+    new = '''        identity_no_value = str(
+            identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
+        )
+        processed_no_value = str(
+            processed.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
+        )
+        if dashboard_name in {"bioetl-runtime.json", "bioetl-dq-v2.json"}:
+            assert identity_no_value.startswith("SELECT RUN")
+            assert processed_no_value.startswith("SELECT RUN")
+            assert "valid empty" not in identity_no_value.lower()
+            assert "query error" not in processed_no_value.lower()
+        else:
+            assert "valid empty" in identity_no_value.lower()
+            assert "query error" in processed_no_value.lower()'''
+    if old not in text:
+        raise SystemExit("processed-records assertion block missing")
+    text = text.replace(old, new, 1)
+    suffix = '''
+
+
+def _runtime_panels_by_id() -> dict[int, dict]:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    return {
+        panel["id"]: panel
+        for panel in get_dashboard_panels(dashboard)
+        if isinstance(panel.get("id"), int)
+    }
+
+
+def test_runtime_10251_stage_empty_is_not_valid_empty_in_stage_column() -> None:
+    """#10251 P1: empty Stage/Code tables fail closed on the full-width noValue."""
+    for panel_id in (241, 256):
+        panel = _runtime_panels_by_id()[panel_id]
+        expr = panel["targets"][0]["expr"]
+        assert "vector(0)" not in expr
+        no_value = str(panel.get("fieldConfig", {}).get("defaults", {}).get("noValue"))
+        assert no_value.startswith("TELEMETRY MISSING")
+        assert "VALID EMPTY" not in json.dumps(panel.get("fieldConfig", {}))
+
+
+def test_runtime_10251_expectedness_unknown_vs_contract_na() -> None:
+    """#10251 P2: missing telemetry is UNKNOWN; N/A is only inapplicable-by-construction."""
+    panel = _runtime_panels_by_id()[243]
+    no_value = panel.get("fieldConfig", {}).get("defaults", {}).get("noValue")
+    assert isinstance(no_value, str) and no_value.startswith("UNKNOWN")
+    assert "N/A" not in no_value
+    expected_no_value = None
+    for override in panel.get("fieldConfig", {}).get("overrides", []):
+        if override.get("matcher", {}).get("options") != "Expected":
+            continue
+        for prop in override.get("properties", []):
+            if prop.get("id") == "noValue":
+                expected_no_value = prop.get("value")
+    assert isinstance(expected_no_value, str) and expected_no_value.startswith("N/A —")
+
+
+def test_runtime_10251_select_run_novalue_drops_hedge_tails() -> None:
+    """#10251 §7.3: SELECT RUN names one state."""
+    panels = _runtime_panels_by_id()
+    expected = {
+        9402: "SELECT RUN — no exact Run ID selected. Choose a run first.",
+        9403: (
+            "SELECT RUN — no exact Run ID selected. "
+            "Choose a run in Inspect Recent Runs."
+        ),
+        9998: "SELECT RUN — no exact Run ID selected. Choose a run first.",
+    }
+    for panel_id, expected_no_value in expected.items():
+        no_value = panels[panel_id].get("fieldConfig", {}).get("defaults", {}).get("noValue")
+        assert no_value == expected_no_value
+        assert "VALID EMPTY if" not in str(no_value)
+        assert "UNKNOWN/QUERY ERROR if" not in str(no_value)
+
+
+def test_dq_10253_selected_run_summary_is_first_window() -> None:
+    """#10253 D1: compact selected-run summary sits on the first screen."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    root = {panel.get("id"): panel for panel in dashboard.get("panels") or []}
+    summary = root[9406]
+    assert summary.get("gridPos") == {"h": 5, "w": 24, "x": 0, "y": 13}
+    assert int((root[9405].get("gridPos") or {}).get("y", 0)) >= 18
+    assert all(item.get("id") != 9406 for item in (root[9405].get("panels") or []))
+    organize = next(
+        item
+        for item in summary.get("transformations") or []
+        if item.get("id") == "organize"
+    )
+    exclude = (organize.get("options") or {}).get("excludeByName") or {}
+    assert exclude.get("started_at") is True
+    assert exclude.get("completed_at") is True
+    no_value = str(summary.get("fieldConfig", {}).get("defaults", {}).get("noValue"))
+    assert no_value.startswith("SELECT RUN")
+    assert "VALID EMPTY if" not in no_value
+
+
+def test_dq_10253_select_run_novalue_drops_hedge_tails() -> None:
+    """#10253 §7.3: DQ HTTP empty copy names one state."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    panels = {
+        panel["id"]: panel
+        for panel in get_dashboard_panels(dashboard)
+        if isinstance(panel.get("id"), int)
+    }
+    expected = {
+        9402: "SELECT RUN — no exact Run ID selected. Choose a run first.",
+        9403: (
+            "SELECT RUN — no exact Run ID selected. "
+            "Choose a run in Inspect Recent Runs."
+        ),
+        9406: "SELECT RUN — no exact Run ID selected. Choose a run first.",
+    }
+    for panel_id, expected_no_value in expected.items():
+        no_value = panels[panel_id].get("fieldConfig", {}).get("defaults", {}).get("noValue")
+        assert no_value == expected_no_value
+        assert "VALID EMPTY if" not in str(no_value)
+        assert "UNKNOWN/QUERY ERROR if" not in str(no_value)
+'''
+    if "def test_runtime_10251_stage_empty_is_not_valid_empty_in_stage_column" not in text:
+        text = text.rstrip() + suffix + "\n"
+    _atomic_write(SEMANTICS, text)
+
+
+def patch_render_test() -> None:
+    text = RENDER.read_text(encoding="utf-8")
+    start = text.find("def test_iteration_2_runtime_valid_empty_frames_are_semantic_tables()")
+    end = text.find("\ndef test_iteration_2_empty_distributions_use_no_data_capable_tables()")
+    if start < 0 or end < 0:
+        raise SystemExit("render-first iteration 2 test block missing")
+    replacement = '''def test_iteration_2_runtime_valid_empty_frames_are_semantic_tables() -> None:
+    """#10251: empty Stage tables fail closed without synthetic vector(0)."""
+    dashboard = _load("bioetl-runtime.json")
+    for panel_id in (241, 256):
+        panel = _panel(dashboard, panel_id)
+        assert panel["type"] == "table"
+        assert panel["targets"][0]["format"] == "table"
+        assert "vector(0)" not in panel["targets"][0]["expr"]
+        no_value = str(
+            (panel.get("fieldConfig") or {}).get("defaults", {}).get("noValue") or ""
+        )
+        assert no_value.startswith("TELEMETRY MISSING")
+        organize = next(
+            item
+            for item in panel["transformations"]
+            if item.get("id") == "organize"
+        )
+        assert organize["options"]["excludeByName"]["Time"] is True
+        assert organize["options"]["renameByName"]["Value"] == "Count"
+
+
+'''
+    text = text[:start] + replacement + text[end:]
+    _atomic_write(RENDER, text)
+
+
+def patch_runtime_localization() -> None:
+    text = RUNTIME_TEST.read_text(encoding="utf-8")
+    old = '    assert records_defaults.get("noValue") == "No processed-record samples"'
+    new = (
+        '    no_value = str(records_defaults.get("noValue") or "")\n'
+        '    assert no_value.startswith("TELEMETRY MISSING")'
+    )
+    if old not in text:
+        raise SystemExit("runtime localization noValue assertion missing")
+    text = text.replace(old, new, 1)
+    _atomic_write(RUNTIME_TEST, text)
+
+
+def write_notes() -> None:
+    _atomic_write(
+        NOTES_DIR / "10251-note.md",
+        """# #10251 — Runtime: Stage VALID EMPTY vs UNKNOWN / N/A
+
+Issue: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/10251
+Memo: `semantics-10246.md` (do not re-decide).
+
+## P1 — Compare Records by Stage (241) / Review Errors by Stage & Code (256)
+
+- Removed `or label_replace(vector(0)…)` so absence is not a synthetic zero.
+- Removed Stage `none` → `VALID EMPTY` value mapping.
+- Panel `noValue` is `TELEMETRY MISSING … Check Monitor Metrics Coverage.` with diagnostic `viewPanel=9102`.
+
+## P2 — Inspect Stage Expectedness (243)
+
+- Panel `noValue` is `UNKNOWN…` (missing telemetry), not bare `N/A`.
+- Override `Expected` `noValue`: `N/A — stage is not in this pipeline's expectedness contract`.
+
+## SELECT RUN (#10246 §7.3)
+
+9402 / 9403 / 9998 name one state: `SELECT RUN — … Choose a run…` with no hedge tails.
+""",
+    )
+    _atomic_write(
+        NOTES_DIR / "10253-note.md",
+        """# #10253 — DQ: first-screen selected-run accounting
+
+Issue: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/10253
+Memo: `semantics-10246.md` (do not re-decide).
+
+## D1 — Review Selected Run Summary (9406)
+
+- Root first-window table at `y=13 h=5 w=24`.
+- Compact columns: Status, Coverage, Gold, Excluded.
+- `limitField: 1` and `layout-budgets.yaml` first-window row-cap (`max_rows: 1`).
+- Compacted 9400/9401 (`h=3`), 9103 (`h=2`), 9101/9102 (`h=5`) so 9406 ends at the fold.
+- Row 9405 stays at `y=18`; 9404/220/221 shifted to avoid overlap.
+
+## D2 — mixed empty copy
+
+- 9402 / 9403 / 9406 `noValue` is a single SELECT RUN state.
+- Panel 155 `increase()` `noValue` is `TELEMETRY MISSING`.
+- HTTP first-paint stays at budget 5.
+""",
+    )
+
+
+def main() -> None:
+    patch_dq_layout()
+    patch_layout_budgets()
+    patch_processed_records_test()
+    patch_render_test()
+    patch_runtime_localization()
+    write_notes()
+    print("follow-up applied")
+
+
+if __name__ == "__main__":
+    main()

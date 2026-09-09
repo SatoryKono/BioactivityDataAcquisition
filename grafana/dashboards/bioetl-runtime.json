@@ -1546,7 +1546,7 @@
                 ]
               },
               "unit": "short",
-              "noValue": "N/A"
+              "noValue": "UNKNOWN — stage expectedness telemetry is missing or stale. Verify Prometheus scrape, then Monitor Metrics Coverage."
             },
             "overrides": [
               {
@@ -1606,6 +1606,10 @@
                   {
                     "id": "custom.width",
                     "value": 80
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "N/A — stage is not in this pipeline's expectedness contract"
                   }
                 ]
               },
@@ -2033,7 +2037,15 @@
                 ]
               },
               "unit": "short",
-              "noValue": "No errors in selected range"
+              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero). Check Monitor Metrics Coverage.",
+              "links": [
+                {
+                  "title": "Check Monitor Metrics Coverage",
+                  "url": "/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9102&${__url_time_range}",
+                  "targetBlank": false,
+                  "includeVars": false
+                }
+              ]
             },
             "overrides": [
               {
@@ -2055,44 +2067,8 @@
                 },
                 "properties": [
                   {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "none": {
-                            "text": "VALID EMPTY",
-                            "color": "gray"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
                     "id": "custom.width",
                     "value": 80
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "error_code"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "none": {
-                            "text": "No errors in range",
-                            "color": "gray"
-                          }
-                        }
-                      }
-                    ]
                   }
                 ]
               },
@@ -2148,11 +2124,19 @@
               ],
               "countRows": false,
               "fields": ""
-            }
+            },
+            "dataLinks": [
+              {
+                "title": "Check Monitor Metrics Coverage",
+                "url": "/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9102&${__url_time_range}",
+                "targetBlank": false,
+                "includeVars": false
+              }
+            ]
           },
           "targets": [
             {
-              "expr": "sum by(stage, error_code) (increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\",stage!~\"none.*\"}[$__range])) or label_replace(label_replace(vector(0), \"stage\", \"none\", \"\", \"\"), \"error_code\", \"none\", \"\", \"\")",
+              "expr": "sum by(stage, error_code) (increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\",stage!~\"none.*\"}[$__range]))",
               "instant": true,
               "refId": "A",
               "format": "table"
@@ -2207,7 +2191,7 @@
                 }
               ],
               "min": 0,
-              "noValue": "No processed-record samples",
+              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero). Check Monitor Metrics Coverage.",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -2225,7 +2209,15 @@
               "decimals": 0,
               "custom": {
                 "inspect": true
-              }
+              },
+              "links": [
+                {
+                  "title": "Check Monitor Metrics Coverage",
+                  "url": "/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9102&${__url_time_range}",
+                  "targetBlank": false,
+                  "includeVars": false
+                }
+              ]
             },
             "overrides": [
               {
@@ -2235,44 +2227,8 @@
                 },
                 "properties": [
                   {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "none": {
-                            "text": "VALID EMPTY",
-                            "color": "gray"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
                     "id": "custom.width",
                     "value": 80
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "run_type"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "none": {
-                            "text": "No records in range",
-                            "color": "gray"
-                          }
-                        }
-                      }
-                    ]
                   }
                 ]
               },
@@ -2314,11 +2270,19 @@
             "footer": {
               "show": false
             },
-            "cellHeight": "sm"
+            "cellHeight": "sm",
+            "dataLinks": [
+              {
+                "title": "Check Monitor Metrics Coverage",
+                "url": "/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9102&${__url_time_range}",
+                "targetBlank": false,
+                "includeVars": false
+              }
+            ]
           },
           "targets": [
             {
-              "expr": "sum by(stage, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\",stage!~\"none.*\"}[$__range])) or label_replace(label_replace(vector(0), \"stage\", \"none\", \"\", \"\"), \"run_type\", \"none\", \"\", \"\")",
+              "expr": "sum by(stage, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\",stage!~\"none.*\"}[$__range]))",
               "instant": true,
               "refId": "A",
               "legendFormat": "{{stage}} · {{run_type}}",
@@ -3624,7 +3588,7 @@
                 "inspect": true
               },
               "unit": "none",
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity.",
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first.",
               "links": [
                 {
                   "title": "Copy/Open full value (plain text)",
@@ -3783,7 +3747,7 @@
               },
               "decimals": 0,
               "unit": "none",
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run in Inspect Recent Runs. UNKNOWN/QUERY ERROR if a selected run has no accounting.",
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run in Inspect Recent Runs.",
               "links": [
                 {
                   "title": "Check BioETL Ops HTTP health",
@@ -4081,7 +4045,7 @@
             "h": 5
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Compact pipeline_run_report_v1 projection (identity, times, gold out, contract exclusions, coverage). Missing run is VALID EMPTY / SELECT RUN, not OK. Set range to run opens 6. Run Explorer at started_at-5m .. <code style='font-size:16px'>completed_at</code>+5m. Do not treat CURRENT Prometheus as this UUID. Backend unavailable means the query could not be evaluated. Verify /health/live. Coverage chip is IN RANGE / OUT OF RANGE / UNKNOWN from covers_selected_run. Set range to run opens Run Explorer 3022 at from_ms..to_ms. A covered run does not show an outside-range warning. Status, coverage and local timestamps precede the UUID. Inspect the Run cell to copy its complete value; range-bound fields remain available to the Set range to run action and panel data inspection.",
+          "description": "SELECTED RUN · Compact pipeline_run_report_v1 projection (identity, times, gold out, contract exclusions, coverage). Missing run is SELECT RUN, not OK. Set range to run opens 6. Run Explorer at started_at-5m .. <code style='font-size:16px'>completed_at</code>+5m. Do not treat CURRENT Prometheus as this UUID. Backend unavailable means the query could not be evaluated. Verify /health/live. Coverage chip is IN RANGE / OUT OF RANGE / UNKNOWN from covers_selected_run. Set range to run opens Run Explorer 3022 at from_ms..to_ms. A covered run does not show an outside-range warning. Status, coverage and local timestamps precede the UUID. Inspect the Run cell to copy its complete value; range-bound fields remain available to the Set range to run action and panel data inspection.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4093,7 +4057,7 @@
                 "minWidth": 50
               },
               "unit": "none",
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no report.",
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first.",
               "links": [
                 {
                   "title": "Open run in Run Explorer",
