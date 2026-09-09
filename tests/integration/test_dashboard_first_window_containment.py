@@ -179,15 +179,11 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
     assert (filter_ref.get("options") or {}).get("include") == "A"
 
     limit = next(
-        transform
-        for transform in transforms
-        if transform.get("id") == "limit"
+        transform for transform in transforms if transform.get("id") == "limit"
     )
     assert limit.get("options", {}).get("limitField") == 5
     organize = next(
-        transform
-        for transform in transforms
-        if transform.get("id") == "organize"
+        transform for transform in transforms if transform.get("id") == "organize"
     ).get("options", {})
     assert organize.get("excludeByName") == {
         "Time": True,

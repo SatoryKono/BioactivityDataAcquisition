@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-08T20:08:16.512701+00:00",
+  "generated_at": "2026-09-09T07:39:22.004637+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -12741,7 +12741,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
@@ -12760,6 +12760,18 @@
           "line": 27,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
+        },
+        {
+          "path": "tests/integration/test_grafana_dashboard_metric_semantics.py",
+          "line": 2041,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import check_dashboard_visual_semantics as subject"
+        },
+        {
+          "path": "tests/integration/test_grafana_dashboard_metric_semantics.py",
+          "line": 2055,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import check_dashboard_visual_semantics as subject"
         },
         {
           "path": "tests/integration/test_grafana_render_first_remediation.py",

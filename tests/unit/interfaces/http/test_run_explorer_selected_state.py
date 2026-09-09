@@ -86,22 +86,25 @@ def test_reasons_display_keeps_code_and_adds_operator_label() -> None:
         "Excluded by Gold schema contract (gold_contract_schema_failure)"
     )
     assert row["explain"] == "Open Data Quality"
-    assert "17 Excluded by Gold schema contract" in _table_shape_pipeline_run_report(
-        {
-            "funnel": [
-                {
-                    "stage_id": "gold",
-                    "removals": [
-                        {
-                            "reason_code": "gold_contract_schema_failure",
-                            "outcome": "excluded_by_contract",
-                            "count": 17,
-                        }
-                    ],
-                }
-            ]
-        }
-    )["funnel"][0]["removals_summary"]
+    assert (
+        "17 Excluded by Gold schema contract"
+        in _table_shape_pipeline_run_report(
+            {
+                "funnel": [
+                    {
+                        "stage_id": "gold",
+                        "removals": [
+                            {
+                                "reason_code": "gold_contract_schema_failure",
+                                "outcome": "excluded_by_contract",
+                                "count": 17,
+                            }
+                        ],
+                    }
+                ]
+            }
+        )["funnel"][0]["removals_summary"]
+    )
 
 
 def test_artifacts_display_uses_operator_titles_and_keeps_ref() -> None:
