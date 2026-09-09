@@ -398,7 +398,7 @@
                     "type": "value",
                     "options": {
                       "Set range to run (started_at-5m .. completed_at+5m)": {
-                        "text": "Set range to run"
+                        "text": "Open run in Run Explorer"
                       }
                     }
                   }
@@ -2068,7 +2068,7 @@
           },
           "targets": [
             {
-              "expr": "max by (pipeline,run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
+              "expr": "label_replace(label_replace(max by (pipeline,run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"pipeline\",\"All\",\"pipeline\",\"^\\\\.\\\\*$\"),\"run_type\",\"All\",\"run_type\",\"^\\\\.\\\\*$\") or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
               "refId": "A",
               "legendFormat": "{{pipeline}} / {{run_type}}",
               "instant": false,
@@ -2176,7 +2176,7 @@
           },
           "targets": [
             {
-              "expr": "max by (pipeline,run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
+              "expr": "label_replace(label_replace(max by (pipeline,run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"pipeline\",\"All\",\"pipeline\",\"^\\\\.\\\\*$\"),\"run_type\",\"All\",\"run_type\",\"^\\\\.\\\\*$\") or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
               "refId": "A",
               "legendFormat": "{{pipeline}} / {{run_type}}",
               "instant": false,
@@ -2290,7 +2290,7 @@
           },
           "targets": [
             {
-              "expr": "max by (pipeline,run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
+              "expr": "label_replace(label_replace(max by (pipeline,run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"pipeline\",\"All\",\"pipeline\",\"^\\\\.\\\\*$\"),\"run_type\",\"All\",\"run_type\",\"^\\\\.\\\\*$\") or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
               "refId": "A",
               "legendFormat": "{{pipeline}} / {{run_type}}",
               "instant": false,

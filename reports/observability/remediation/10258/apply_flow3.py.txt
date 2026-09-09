@@ -83,46 +83,6 @@ def _patch_run_id_variable(variable: dict[str, object]) -> None:
     infinity_query["columns"] = list(RUN_ID_COLUMNS)
 
 
-def _identity_overrides() -> list[dict[str, object]]:
-    return [
-        {
-            "matcher": {"id": "byName", "options": "parameter"},
-            "properties": [
-                {"id": "displayName", "value": "Parameter"},
-                {"id": "custom.width", "value": 210},
-                {"id": "custom.align", "value": "left"},
-                {
-                    "id": "custom.cellOptions",
-                    "value": {"type": "auto", "wrapText": True},
-                },
-            ],
-        },
-        {
-            "matcher": {"id": "byName", "options": "value"},
-            "properties": [
-                {"id": "displayName", "value": "Value"},
-                {"id": "custom.align", "value": "left"},
-                {"id": "custom.inspect", "value": True},
-                {
-                    "id": "links",
-                    "value": [
-                        {
-                            "title": "Copy/Open full value (plain text)",
-                            "url": "data:text/plain,${__value.raw}",
-                            "targetBlank": True,
-                            "includeVars": False,
-                        }
-                    ],
-                },
-            ],
-        },
-        {
-            "matcher": {"id": "byName", "options": "raw_value"},
-            "properties": [{"id": "custom.hidden", "value": True}],
-        },
-    ]
-
-
 def _patch_identity_panel(panel: dict[str, object]) -> None:
     for target in panel.get("targets") or []:
         if not isinstance(target, dict):
@@ -132,25 +92,73 @@ def _patch_identity_panel(panel: dict[str, object]) -> None:
             continue
         target["url"] = IDENTITY_URL
         target["root_selector"] = "display_rows"
-        field = panel.setdefault("fieldConfig", {})
-        if not isinstance(field, dict):
+
+
+def _hide_value_count(panel: dict[str, object]) -> None:
+    overrides = (panel.get("fieldConfig") or {}).get("overrides")
+    if isinstance(overrides, list):
+        kept: list[object] = []
+        for override in overrides:
+            if not isinstance(override, dict):
+                kept.append(override)
+                continue
+            options = str(((override.get("matcher") or {}).get("options")) or "")
+            props = override.get("properties") or []
+            is_count = any(
+                isinstance(item, dict)
+                and item.get("id") == "displayName"
+                and item.get("value") == "Count"
+                for item in props
+            )
+            if "Value" in options and is_count:
+                continue
+            kept.append(override)
+        overrides[:] = kept
+    for transform in panel.get("transformations") or []:
+        if not isinstance(transform, dict) or transform.get("id") != "organize":
             continue
-        field["overrides"] = _identity_overrides()
-        organize = None
-        for transform in panel.get("transformations") or []:
-            if isinstance(transform, dict) and transform.get("id") == "organize":
-                organize = transform.setdefault("options", {})
-        if isinstance(organize, dict):
-            exclude = organize.setdefault("excludeByName", {})
-            if isinstance(exclude, dict):
-                exclude["Time"] = True
-                exclude["__name__"] = True
-                exclude["Value"] = True
-                exclude["raw_value"] = True
-            rename = organize.setdefault("renameByName", {})
-            if isinstance(rename, dict):
-                rename["parameter"] = "Parameter"
-                rename["value"] = "Value"
+        options = transform.setdefault("options", {})
+        if not isinstance(options, dict):
+            continue
+        exclude = options.setdefault("excludeByName", {})
+        if isinstance(exclude, dict):
+            exclude["Value"] = True
+            exclude["#Value"] = True
+
+
+def _unpin_flex_columns(dashboard: dict[str, object]) -> None:
+    wanted = {
+        "bioetl-control-plane-v1": {9405, 9406, 9407, 9408, 9409},
+        "bioetl-provider-health-v2": {9102},
+    }
+    panel_ids = wanted.get(str(dashboard.get("uid") or ""), set())
+    flex = {
+        "value_short",
+        "current_value_short",
+        "checkpoint_value_short",
+        "Value",
+    }
+    for panel in _walk(list(dashboard.get("panels") or [])):
+        ident = panel.get("id")
+        if ident not in panel_ids:
+            continue
+        overrides = (panel.get("fieldConfig") or {}).get("overrides")
+        if not isinstance(overrides, list):
+            continue
+        for override in overrides:
+            if not isinstance(override, dict):
+                continue
+            field = str(((override.get("matcher") or {}).get("options")) or "")
+            if field not in flex:
+                continue
+            props = override.get("properties")
+            if not isinstance(props, list):
+                continue
+            override["properties"] = [
+                item
+                for item in props
+                if not (isinstance(item, dict) and item.get("id") == "custom.width")
+            ]
 
 
 def _replace_set_range_titles(node: object) -> None:
@@ -158,6 +166,9 @@ def _replace_set_range_titles(node: object) -> None:
         title = node.get("title")
         if title == "Set range to run":
             node["title"] = "Open run in Run Explorer"
+        text = node.get("text")
+        if text == "Set range to run":
+            node["text"] = "Open run in Run Explorer"
         for value in node.values():
             _replace_set_range_titles(value)
     elif isinstance(node, list):
@@ -176,6 +187,20 @@ def _all_label_replace(expr: str) -> str:
             '"run_type","$run_type","",""',
             '"run_type","${run_type:text}","",""',
         )
+    expr = expr.replace('*$")) or on()', '*$") or on()')
+    marker = '"pipeline","All","pipeline","^\\\\.\\\\*$"'
+    if "max by (pipeline,run_type)" in expr and marker not in expr:
+        prefix = "max by (pipeline,run_type) ("
+        split_at = expr.find(") or on()")
+        if expr.startswith(prefix) and split_at >= 0:
+            inner = expr[len(prefix) : split_at]
+            tail = expr[split_at + 1 :]
+            expr = (
+                "label_replace(label_replace(max by (pipeline,run_type) ("
+                f"{inner}),{marker}),"
+                '"run_type","All","run_type","^\\\\.\\\\*$")'
+                + tail
+            )
     return expr
 
 
@@ -186,6 +211,9 @@ def _patch_overview_timelines(dashboard: dict[str, object]) -> None:
         options = panel.get("options")
         if isinstance(options, dict):
             options["showValue"] = "never"
+            tooltip = options.setdefault("tooltip", {})
+            if isinstance(tooltip, dict):
+                tooltip["mode"] = "single"
         for target in panel.get("targets") or []:
             if not isinstance(target, dict):
                 continue
@@ -298,9 +326,34 @@ def _patch_incident(dashboard: dict[str, object]) -> None:
         if isinstance(defaults, dict):
             defaults["links"] = links
     _ensure_limit(alert, 3)
-    for panel in _walk(list(dashboard.get("panels") or [])):
-        if panel.get("id") == 2010:
-            panel["gridPos"] = {"h": 5, "w": 24, "x": 0, "y": 8}
+    if isinstance(suspects := next(
+        (
+            panel
+            for panel in root
+            if isinstance(panel, dict) and panel.get("id") == 2010
+        ),
+        None,
+    ), dict):
+        suspects["gridPos"] = {"h": 5, "w": 24, "x": 0, "y": 8}
+        options = suspects.setdefault("options", {})
+        if isinstance(options, dict):
+            options["cellHeight"] = "sm"
+    row_y = {2020: 18, 2099: 19, 2100: 20}
+    for panel in root:
+        if not isinstance(panel, dict):
+            continue
+        ident = panel.get("id")
+        if ident == 2020:
+            nested = panel.get("panels")
+            if isinstance(nested, list):
+                panel["panels"] = [
+                    child
+                    for child in nested
+                    if not (isinstance(child, dict) and child.get("id") == 2005)
+                ]
+        grid = panel.get("gridPos")
+        if ident in row_y and isinstance(grid, dict):
+            grid.update({"h": 1, "w": 24, "x": 0, "y": row_y[ident]})
 
 
 def _patch_run_explorer_reasons_artifacts(dashboard: dict[str, object]) -> None:
@@ -403,6 +456,14 @@ def patch_dashboard(path: Path) -> None:
         _patch_incident(dashboard)
     if uid == "bioetl-run-explorer-v1":
         _patch_run_explorer_reasons_artifacts(dashboard)
+        for panel in _walk(list(dashboard.get("panels") or [])):
+            if panel.get("id") in {3010, 3013}:
+                _hide_value_count(panel)
+    if str(dashboard.get("uid") or "") in {
+        "bioetl-control-plane-v1",
+        "bioetl-provider-health-v2",
+    }:
+        _unpin_flex_columns(dashboard)
     path.write_text(
         json.dumps(dashboard, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",

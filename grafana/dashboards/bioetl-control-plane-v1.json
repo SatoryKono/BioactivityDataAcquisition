@@ -5360,10 +5360,6 @@
                     "value": "Current"
                   },
                   {
-                    "id": "custom.width",
-                    "value": 220
-                  },
-                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
@@ -5837,10 +5833,6 @@
                     "value": "Current"
                   },
                   {
-                    "id": "custom.width",
-                    "value": 220
-                  },
-                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
@@ -6254,10 +6246,6 @@
                     "value": "Current"
                   },
                   {
-                    "id": "custom.width",
-                    "value": 140
-                  },
-                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
@@ -6279,10 +6267,6 @@
                   {
                     "id": "displayName",
                     "value": "Checkpoint"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 140
                   },
                   {
                     "id": "custom.cellOptions",
@@ -6698,10 +6682,6 @@
                   {
                     "id": "displayName",
                     "value": "Current"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 160
                   },
                   {
                     "id": "custom.cellOptions",
@@ -7140,10 +7120,6 @@
                   {
                     "id": "displayName",
                     "value": "Current"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 160
                   },
                   {
                     "id": "custom.cellOptions",

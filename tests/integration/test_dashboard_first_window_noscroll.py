@@ -58,7 +58,7 @@ def test_bounded_incident_summary_uses_wrapped_row_pagination() -> None:
     )
     panel = next(p for p in load_dashboard(source)["panels"] if p["id"] == 2010)
     assert panel["options"]["footer"].get("enablePagination") is True
-    assert panel["options"]["cellHeight"] == "lg"
+    assert panel["options"]["cellHeight"] == "sm"
     assert any(
         t["id"] == "limit" and t["options"]["limitField"] == 5
         for t in panel["transformations"]
