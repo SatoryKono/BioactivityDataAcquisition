@@ -696,7 +696,7 @@
             },
             "properties": [
               {
-                "id": "custom.width",
+                "id": "custom.minWidth",
                 "value": 130
               },
               {
