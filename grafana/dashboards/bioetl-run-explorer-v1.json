@@ -856,7 +856,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "parameter"
+                  "options": "value"
                 },
                 "properties": [
                   {

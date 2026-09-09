@@ -3916,13 +3916,6 @@
                   {
                     "id": "custom.align",
                     "value": "left"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
                   }
                 ]
               },
