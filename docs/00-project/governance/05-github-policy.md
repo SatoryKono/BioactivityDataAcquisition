@@ -93,7 +93,7 @@ ______________________________________________________________________
 
 ## 2. CI/CD Workflows
 
-BioETL uses **48 GitHub Actions workflows** (including reusable helper workflows). For the canonical file-level inventory, see [GitHub Actions Workflows](../../04-reference/github-actions-workflows.md).
+BioETL uses **48 GitHub Actions workflows** (including reusable helper workflows). For the canonical file-level inventory, see [GitHub Actions Workflows](../../04-reference/github-actions-workflows.md). Temporary and Codex diagnostic workflows MUST NOT remain `active` after merge; GitHub-only orphan objects are disabled, not treated as canonical PR gates.
 
 ### 2.1 Core Quality Workflows
 

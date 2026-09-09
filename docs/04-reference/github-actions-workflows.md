@@ -157,6 +157,33 @@ Do **not** expand this workflow to untrusted PR code paths. Operator checklist:
 `docs/05-operations/runbooks/observability-checklist.md` (ownership
 `@bioetl-observability`).
 
+## GitHub-only orphan/disabled IDs
+
+These workflow objects exist only on GitHub. They are not tracked under
+`.github/workflows/` and are not canonical PR gates. After the files left
+`main`, the objects stayed `active` and could still run from old SHAs. On
+`2026-09-09` they were set to `disabled_manually`. Do not DELETE them from
+this inventory, and do not re-enable them as required checks.
+
+| Path | ID | State |
+| --- | --- | --- |
+| `.github/workflows/codex-baseline-diagnostic.yml` | 348464441 | `disabled_manually` |
+| `.github/workflows/codex-ci-diagnostic.yml` | 348449565 | `disabled_manually` |
+| `.github/workflows/codex-inventory-diagnostic.yml` | 348472435 | `disabled_manually` |
+| `.github/workflows/codex-temp-coverage-inventory-diff.yml` | 349060658 | `disabled_manually` |
+| `.github/workflows/codex-test-governance-refresh.yml` | 348870616 | `disabled_manually` |
+| `.github/workflows/temp-trivy-artifact-diagnosis.yml` | 349397659 | `disabled_manually` |
+| `.github/workflows/temporary-governance-artifact-9977.yml` | 349312647 | `disabled_manually` |
+| `.github/workflows/temporary-governance-log-9977.yml` | 349328204 | `disabled_manually` |
+| `.github/workflows/temporary-pr-10037-telemetry-refresh.yml` | 349405434 | `disabled_manually` |
+| `.github/workflows/tmp-canonical-governance.yml` | 346434904 | `disabled_manually` |
+| `.github/workflows/tmp-canonical-refresh.yml` | 346403953 | `disabled_manually` |
+| `.github/workflows/tmp-canonical-test-governance.yml` | 346429358 | `disabled_manually` |
+| `.github/workflows/tmp-final-pr9889-remote-baseline.yml` | 346596417 | `disabled_manually` |
+| `.github/workflows/tmp-pr-9880-ci-repair.yml` | 346467453 | `disabled_manually` |
+| `.github/workflows/tmp-pr-9889-final-governance.yml` | 346590707 | `disabled_manually` |
+| `.github/workflows/tmp-remote-main-baseline-hashes.yml` | 349108333 | `disabled_manually` |
+
 ## Related References
 
 - [GitHub Local Workflow](../03-guides/github-local-workflow.md)

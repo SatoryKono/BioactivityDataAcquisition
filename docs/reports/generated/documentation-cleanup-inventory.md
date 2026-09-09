@@ -41,7 +41,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 21 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 975 |
+| working_report | 976 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -80,7 +80,7 @@
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 336 |
-| archive-after-migration | 983 |
+| archive-after-migration | 984 |
 | generate-automatically | 1023 |
 | keep | 1251 |
 | reconcile-with-github-state | 8 |
