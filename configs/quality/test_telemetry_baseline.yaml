@@ -1,14 +1,14 @@
 version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
-source_branch: main
-refreshed_at_utc: '2026-09-09T05:51:11.176394+00:00'
+source_branch: fix/grafana-vis-stream3-layout
+refreshed_at_utc: '2026-09-09T18:34:41.256990+00:00'
 refresh_status: captured
-source_commit: 3b3ec775cecd96d3a8221d1fa40c8fad1836c5ee
-source_run_id: '34275831569'
-source_event: push
-source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34275831569
-source_tree_sha256: 3df861faccbbabfedc71a3d63e9cbf5a768fedb9b2a227c66321bb9b6eca5880
+source_commit: 608c3a9cbb9fe8682b43d330f2cde6c61cd29294
+source_run_id: '34388828802'
+source_event: pull_request
+source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34388828802
+source_tree_sha256: 68699ba23547685e71aaeed9a430cacf7ac6fccb0496eb2d99c6d390cf29f14b
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
@@ -20,7 +20,7 @@ artifact_inputs:
   junit_inputs: []
 coverage:
   threshold_percent: 85.0
-  actual_percent: 96.71
+  actual_percent: 96.73
   threshold_satisfied: true
 duration_telemetry:
   total_cases: 49975
