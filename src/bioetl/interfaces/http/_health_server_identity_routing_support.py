@@ -25,6 +25,7 @@ from bioetl.interfaces.http._health_server_identity_support import (
     IDENTITY_UNAVAILABLE_VALUES,
     build_control_plane_identity_payload,
 )
+from bioetl.interfaces.http._identity_display_rows import identity_display_rows
 from bioetl.interfaces.http.run_report_ops import load_pipeline_run_report_payload
 
 if TYPE_CHECKING:
@@ -93,6 +94,7 @@ async def handle_control_plane_identity_table(
             resolved_via=scope.resolved_via,
             checkpoint_metadata=checkpoint_metadata,
             identity_evidence_summary=summary,
+            timezone=query.get("timezone") or "UTC",
         ),
     )
 
@@ -375,4 +377,7 @@ def _timeout_identity_payload(query: dict[str, str]) -> dict[str, object]:
                 row = {**row, "value": timeout_msg}
             rewritten.append(row)
         payload["rows"] = rewritten
+    payload["display_rows"] = identity_display_rows(
+        payload.get("rows"), query.get("timezone") or "UTC"
+    )
     return payload

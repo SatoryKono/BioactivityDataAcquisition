@@ -149,7 +149,7 @@
           "value": "-"
         },
         "datasource": "BioETL Ops HTTP",
-        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
+        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
         "description": "Run ID selector sourced from the local control-plane run-manifest catalog for the current pipeline/run_type scope. Grafana All values are normalized to an unbounded scope, so Run Type = All no longer empties the selector; Pipeline = All exposes aggregate exact-run handoff options from the catalog. This selector remains HTTP-backed and does not reintroduce run_id into Prometheus labels. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
         "hide": 0,
         "includeAll": false,
@@ -176,7 +176,19 @@
               "method": "GET",
               "data": ""
             },
-            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}"
+            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
           }
         },
         "refresh": 1,
@@ -368,7 +380,7 @@
                 "id": "links",
                 "value": [
                   {
-                    "title": "Set range to run",
+                    "title": "Open run in Run Explorer",
                     "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=3022&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
                     "targetBlank": false,
                     "includeVars": false
@@ -511,7 +523,7 @@
         "cellHeight": "sm",
         "dataLinks": [
           {
-            "title": "Set range to run",
+            "title": "Open run in Run Explorer",
             "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=3022&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
             "targetBlank": false,
             "includeVars": false
@@ -2039,7 +2051,7 @@
               }
             ],
             "mergeValues": true,
-            "showValue": "auto",
+            "showValue": "never",
             "legend": {
               "displayMode": "list",
               "placement": "bottom",
@@ -2052,7 +2064,7 @@
           },
           "targets": [
             {
-              "expr": "max by (pipeline,run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"$pipeline\",\"\",\"\"),\"run_type\",\"$run_type\",\"\",\"\")",
+              "expr": "max by (pipeline,run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
               "refId": "A",
               "legendFormat": "{{pipeline}} / {{run_type}}",
               "instant": false,
@@ -2147,7 +2159,7 @@
               }
             ],
             "mergeValues": true,
-            "showValue": "auto",
+            "showValue": "never",
             "legend": {
               "displayMode": "list",
               "placement": "bottom",
@@ -2160,7 +2172,7 @@
           },
           "targets": [
             {
-              "expr": "max by (pipeline,run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"$pipeline\",\"\",\"\"),\"run_type\",\"$run_type\",\"\",\"\")",
+              "expr": "max by (pipeline,run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
               "refId": "A",
               "legendFormat": "{{pipeline}} / {{run_type}}",
               "instant": false,
@@ -2261,7 +2273,7 @@
               }
             ],
             "mergeValues": true,
-            "showValue": "auto",
+            "showValue": "never",
             "legend": {
               "displayMode": "list",
               "placement": "bottom",
@@ -2274,7 +2286,7 @@
           },
           "targets": [
             {
-              "expr": "max by (pipeline,run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"$pipeline\",\"\",\"\"),\"run_type\",\"$run_type\",\"\",\"\")",
+              "expr": "max by (pipeline,run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")",
               "refId": "A",
               "legendFormat": "{{pipeline}} / {{run_type}}",
               "instant": false,
@@ -3823,7 +3835,7 @@
             "y": 73
           },
           "options": {
-            "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:16px;white-space:normal\"><strong>Next dashboard:</strong> Trust for evidence confidence · Pipeline Diagnostics for runtime blockers · Data Quality for DQ reasons · Provider Health for provider causes. Scope and time range are preserved.</div>",
+            "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:16px;white-space:normal\"><strong>Next dashboard:</strong> <a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Trust</a> for evidence · <a href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">Pipeline Diagnostics</a> for runtime blockers · <a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">Data Quality</a> for DQ reasons · <a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${provider:queryparam}&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">Provider Health</a> for provider causes. <a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Back to top</a>.</div>",
             "mode": "html"
           },
           "links": [],
@@ -3894,8 +3906,12 @@
                 },
                 "properties": [
                   {
+                    "id": "displayName",
+                    "value": "Parameter"
+                  },
+                  {
                     "id": "custom.width",
-                    "value": 165
+                    "value": 210
                   },
                   {
                     "id": "custom.align",
@@ -3904,7 +3920,8 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "auto"
+                      "type": "auto",
+                      "wrapText": true
                     }
                   }
                 ]
@@ -3916,8 +3933,16 @@
                 },
                 "properties": [
                   {
+                    "id": "displayName",
+                    "value": "Value"
+                  },
+                  {
                     "id": "custom.align",
                     "value": "left"
+                  },
+                  {
+                    "id": "custom.inspect",
+                    "value": true
                   },
                   {
                     "id": "links",
@@ -3934,13 +3959,13 @@
               },
               {
                 "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                  "id": "byName",
+                  "options": "raw_value"
                 },
                 "properties": [
                   {
-                    "id": "displayName",
-                    "value": "value"
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               }
@@ -3951,10 +3976,10 @@
               "format": "table",
               "parser": "backend",
               "refId": "A",
-              "root_selector": "rows",
+              "root_selector": "display_rows",
               "source": "url",
               "type": "json",
-              "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+              "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}",
               "url_options": {
                 "data": "",
                 "method": "GET"
@@ -3976,15 +4001,16 @@
                 "excludeByName": {
                   "Time": true,
                   "__name__": true,
-                  "Value": true
+                  "Value": true,
+                  "raw_value": true
                 },
                 "indexByName": {
                   "parameter": 0,
                   "value": 1
                 },
                 "renameByName": {
-                  "parameter": "parameter",
-                  "value": "value",
+                  "parameter": "Parameter",
+                  "value": "Value",
                   "Value": "value",
                   "Value #A": "Series A",
                   "Value #B": "Series B",

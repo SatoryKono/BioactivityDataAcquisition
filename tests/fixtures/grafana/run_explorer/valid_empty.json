@@ -10,6 +10,7 @@
   "root_selector": "items",
   "scenario": "valid_empty",
   "selectors": {
+    "__timezone": "utc",
     "pipeline": "chembl_assay",
     "run_id": "00000000-0000-4000-8000-000000000942",
     "run_type": "backfill",

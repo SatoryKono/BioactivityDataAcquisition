@@ -33,6 +33,9 @@ def test_range_action_keeps_its_frame_fields(path: Path) -> None:
             t.get("root_selector") == "summary" for t in panel.get("targets", [])
         ):
             continue
+        blob = json.dumps(panel)
+        if "from_ms" not in blob:
+            continue
         for name in ("from_ms", "to_ms"):
             assert all(
                 not t.get("options", {}).get("excludeByName", {}).get(name)

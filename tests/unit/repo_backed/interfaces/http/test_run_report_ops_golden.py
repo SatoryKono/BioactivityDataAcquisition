@@ -41,7 +41,7 @@ def test_summary_rows_pipeline_run_report_projects_funnel_and_coverage() -> None
     assert row["from_ms"] == str(started_ms - 5 * 60 * 1000)
     assert row["to_ms"] == str(started_ms + 60_000 + 5 * 60 * 1000)
     params = {item["parameter"]: item["value"] for item in payload["rows"]}
-    assert params["set_range_to_run"].startswith("Set range to run")
+    assert params["set_range_to_run"].startswith("Open run in Run Explorer")
     in_range = _summary_rows_pipeline_run_report(
         golden,
         grafana_from=str(started_ms - 3_600_000),

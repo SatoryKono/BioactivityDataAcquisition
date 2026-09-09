@@ -236,6 +236,11 @@ first_window_summary_tables:
     max_rows: 5
     owner: "@bioetl-observability"
     bind: topk
+  - dashboard: bioetl-incident-v1.json
+    id: 2005
+    max_rows: 3
+    owner: "@bioetl-observability"
+    bind: limit
   - dashboard: bioetl-run-explorer-v1.json
     id: 3010
     max_rows: 10

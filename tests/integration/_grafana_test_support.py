@@ -552,7 +552,7 @@ def _assert_workflow_context_variable(
 def _assert_run_id_filter_options_url(query_url: str) -> None:
     assert "/ops/control-plane/filter-options" in query_url
     assert "dimension=run_id" in query_url
-    assert "response_shape=list" in query_url
+    assert "response_shape=options" in query_url
     assert "workflow=${workflow}" in query_url
     assert "pipeline=${pipeline}" in query_url
     assert "run_type=${run_type:csv}" in query_url
@@ -599,6 +599,11 @@ def _assert_run_id_infinity_shell(
     assert infinity_query.get("parser") == "backend"
     assert infinity_query.get("root_selector") == "$.items"
     assert infinity_query.get("url_options", {}).get("method") == "GET"
+    columns = infinity_query.get("columns")
+    assert isinstance(columns, list)
+    selectors = {(item.get("selector"), item.get("text")) for item in columns}
+    assert ("text", "__text") in selectors
+    assert ("value", "__value") in selectors
     _assert_run_id_filter_options_url(str(infinity_query.get("url", "")))
 
 
