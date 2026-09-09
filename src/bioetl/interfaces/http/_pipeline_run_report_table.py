@@ -36,6 +36,31 @@ _UNRESOLVED_RUN_ID_SENTINELS = frozenset(
     }
 )
 
+_REASON_OPERATOR_LABELS: dict[str, str] = {
+    "gold_contract_schema_failure": "Excluded by Gold schema contract",
+    "gold_contract_required_failure": "Excluded by Gold required-field contract",
+    "gold_contract_reference_failure": "Excluded by Gold reference contract",
+    "gold_semantic_business_exclusion": "Excluded by Gold business rule",
+    "gold_semantic_profile_exclusion": "Excluded by Gold profile rule",
+    "SCHEMA_VALIDATION_FAILURE": "Silver schema validation failed",
+    "DQ_THRESHOLD_VIOLATION": "DQ threshold exceeded",
+    "structural_policy_required_missing": "Required Silver field missing",
+    "structural_policy_null_optional_forbidden": "Forbidden null in optional Silver field",
+    "structural_policy_type_mismatch": "Silver type mismatch",
+    "FILTERED_OUT_SILVER": "Filtered out in Silver",
+    "DEDUP_KEY_COLLISION": "Deduplicated on business key",
+}
+
+_ARTIFACT_TITLES: dict[str, str] = {
+    "pipeline_run_report_json": "Report JSON",
+    "pipeline_run_report_md": "Readable Markdown report",
+}
+
+_ARTIFACT_ACTIONS: dict[str, str] = {
+    "pipeline_run_report_json": "Download",
+    "pipeline_run_report_md": "Open",
+}
+
 
 def _is_unresolved_run_scope(run_id: str) -> bool:
     """Return True when run_id is a dashboard no-selection sentinel."""
@@ -174,13 +199,22 @@ def _shape_object_or_list_block(
         shaped[key] = []
 
 
+def _reason_operator_label(code: str) -> str:
+    """Keep the machine code and add a short operator translation."""
+    label = _REASON_OPERATOR_LABELS.get(code)
+    if label is None:
+        return code
+    return f"{label} ({code})"
+
+
 def _removal_label(item: object) -> str:
     if not isinstance(item, dict):
         return ""
-    label = str(item.get("reason_code") or item.get("outcome") or "").strip()
+    code = str(item.get("reason_code") or item.get("outcome") or "").strip()
     count = item.get("count")
-    if not label:
+    if not code:
         return ""
+    label = _reason_operator_label(code)
     if count in (None, ""):
         return label
     return f"{count} {label}"
@@ -228,6 +262,41 @@ def _shape_identity_rows(payload: dict[str, object]) -> list[dict[str, str]]:
     return identity_rows
 
 
+def _shape_reasons_display(payload: dict[str, object]) -> list[dict[str, object]]:
+    reasons = payload.get("reasons_top_n")
+    if not isinstance(reasons, list) or not reasons:
+        fallback = payload.get("reasons_top_n_display")
+        return list(fallback) if isinstance(fallback, list) else []
+    rows: list[dict[str, object]] = []
+    for item in reasons:
+        if not isinstance(item, dict):
+            continue
+        code = str(item.get("reason_code") or "").strip()
+        row = dict(item)
+        row["reason_label"] = _reason_operator_label(code) if code else ""
+        row["explain"] = "Open Data Quality"
+        rows.append(row)
+    return rows
+
+
+def _shape_artifacts_display(payload: dict[str, object]) -> list[dict[str, object]]:
+    artifacts = payload.get("artifacts")
+    if not isinstance(artifacts, list) or not artifacts:
+        fallback = payload.get("artifacts_display")
+        return list(fallback) if isinstance(fallback, list) else []
+    rows: list[dict[str, object]] = []
+    for item in artifacts:
+        if not isinstance(item, dict):
+            continue
+        kind = str(item.get("kind") or item.get("name") or "").strip()
+        row = dict(item)
+        row["title"] = _ARTIFACT_TITLES.get(kind, kind or "Artifact")
+        row["action"] = _ARTIFACT_ACTIONS.get(kind, "Open")
+        row["format"] = kind
+        rows.append(row)
+    return rows
+
+
 def _table_shape_pipeline_run_report(
     payload: dict[str, object],
 ) -> dict[str, object]:
@@ -260,6 +329,12 @@ def _table_shape_pipeline_run_report(
         ("artifacts", "state"),
     ):
         shaped.setdefault(f"{key}_display", shaped.get(key) or [{label: "VALID EMPTY"}])
+    shaped["reasons_top_n_display"] = (
+        _shape_reasons_display(shaped) or shaped["reasons_top_n_display"]
+    )
+    shaped["artifacts_display"] = (
+        _shape_artifacts_display(shaped) or shaped["artifacts_display"]
+    )
     shaped["timings_and_failure"] = [
         *_section_param_value_rows("failure", shaped.get("failure")),
         *_section_param_value_rows("stage_timings", shaped.get("stage_timings")),
@@ -340,7 +415,7 @@ def _summary_rows_pipeline_run_report(
         status=status,
     )
     set_range = (
-        "Set range to run (started_at-5m .. completed_at+5m)"
+        "Open run in Run Explorer (started_at-5m .. completed_at+5m)"
         if started_ms is not None and completed_ms is not None
         else None
     )

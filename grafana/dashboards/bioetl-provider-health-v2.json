@@ -154,7 +154,7 @@
           "value": "-"
         },
         "datasource": "BioETL Ops HTTP",
-        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
+        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
         "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
         "hide": 0,
         "includeAll": false,
@@ -181,7 +181,19 @@
               "method": "GET",
               "data": ""
             },
-            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}"
+            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
           }
         },
         "refresh": 1,
@@ -3940,8 +3952,12 @@
                 },
                 "properties": [
                   {
+                    "id": "displayName",
+                    "value": "Parameter"
+                  },
+                  {
                     "id": "custom.width",
-                    "value": 165
+                    "value": 210
                   },
                   {
                     "id": "custom.align",
@@ -3950,7 +3966,8 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "auto"
+                      "type": "auto",
+                      "wrapText": true
                     }
                   }
                 ]
@@ -3962,8 +3979,16 @@
                 },
                 "properties": [
                   {
+                    "id": "displayName",
+                    "value": "Value"
+                  },
+                  {
                     "id": "custom.align",
                     "value": "left"
+                  },
+                  {
+                    "id": "custom.inspect",
+                    "value": true
                   },
                   {
                     "id": "links",
@@ -3980,13 +4005,13 @@
               },
               {
                 "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                  "id": "byName",
+                  "options": "raw_value"
                 },
                 "properties": [
                   {
-                    "id": "displayName",
-                    "value": "value"
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               }
@@ -4004,10 +4029,10 @@
               "format": "table",
               "parser": "backend",
               "refId": "A",
-              "root_selector": "rows",
+              "root_selector": "display_rows",
               "source": "url",
               "type": "json",
-              "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+              "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}",
               "url_options": {
                 "data": "",
                 "method": "GET"
@@ -4022,15 +4047,16 @@
                 "excludeByName": {
                   "Time": true,
                   "__name__": true,
-                  "Value": true
+                  "Value": true,
+                  "raw_value": true
                 },
                 "indexByName": {
                   "parameter": 0,
                   "value": 1
                 },
                 "renameByName": {
-                  "parameter": "parameter",
-                  "value": "value",
+                  "parameter": "Parameter",
+                  "value": "Value",
                   "Value": "value",
                   "Value #A": "Series A",
                   "Value #B": "Series B",

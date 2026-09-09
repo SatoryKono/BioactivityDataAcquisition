@@ -456,6 +456,47 @@ def test_status_filter_options_use_ledger_and_return_contract_shape() -> None:
     }
 
 
+def test_run_option_labels_preserve_uuid_order_and_terminal_status() -> None:
+    older, newer = _manifest(1), _manifest(2)
+    ledger = _Ledger(
+        {
+            newer.run_id: [
+                _entry(newer, "failed", RUN_FAILED_EVENT, offset=2, status="failed")
+            ]
+        }
+    )
+    payload = selector_context.build_selector_filter_options_payload(
+        manifests=(older, newer),
+        ledger_port=ledger,
+        dimension="run_id",
+        response_shape="options",
+        requested_pipeline="chembl_activity",
+    )
+    items = cast(list[dict[str, str]], payload["items"])
+    assert items[0] == {"text": "SELECT RUN", "value": "-"}
+    assert [item["value"] for item in items[1:]] == [
+        str(newer.run_id),
+        str(older.run_id),
+    ]
+    assert items[1]["text"].startswith("20")
+    assert "UTC ·" in items[1]["text"]
+    assert "failed" in items[1]["text"]
+    assert str(newer.run_id) in items[1]["text"]
+    assert "unknown" in items[2]["text"].lower()
+    assert str(older.run_id) in items[2]["text"]
+
+
+def test_empty_run_option_labels_do_not_invent_a_run() -> None:
+    payload = selector_context.build_selector_filter_options_payload(
+        manifests=(),
+        ledger_port=None,
+        dimension="run_id",
+        response_shape="options",
+        requested_pipeline="unknown",
+    )
+    assert payload == {"items": [{"text": "SELECT RUN", "value": "-"}]}
+
+
 def test_filter_options_apply_exact_run_fallback_and_validate_dimension() -> None:
     fallback = selector_context.build_selector_filter_options_payload(
         manifests=(),

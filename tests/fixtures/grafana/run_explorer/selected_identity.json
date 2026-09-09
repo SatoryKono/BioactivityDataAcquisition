@@ -8,7 +8,7 @@
   "method": "GET",
   "panel_id": 3022,
   "response_state": "ok",
-  "root_selector": "rows",
+  "root_selector": "display_rows",
   "scenario": "selected_identity",
   "selectors": {
     "pipeline": "chembl_assay",
@@ -18,5 +18,5 @@
   },
   "title": "Inspect Run Identity",
   "url": "/ops/control-plane/identity-table?pipeline=chembl_assay&run_type=backfill&run_id=00000000-0000-4000-8000-000000000942",
-  "url_template": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+  "url_template": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}"
 }
