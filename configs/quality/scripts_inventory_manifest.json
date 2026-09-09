@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-09T08:50:55.895531+00:00",
+  "generated_at": "2026-09-09T09:35:28.085892+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -12762,22 +12762,22 @@
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         },
         {
-          "path": "tests/integration/test_grafana_dashboard_metric_semantics.py",
-          "line": 2043,
-          "source_group": "tests",
-          "text": "from scripts.engineering.qa import check_dashboard_visual_semantics as subject"
-        },
-        {
-          "path": "tests/integration/test_grafana_dashboard_metric_semantics.py",
-          "line": 2057,
-          "source_group": "tests",
-          "text": "from scripts.engineering.qa import check_dashboard_visual_semantics as subject"
-        },
-        {
           "path": "tests/integration/test_grafana_render_first_remediation.py",
           "line": 1531,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
+        },
+        {
+          "path": "tests/integration/test_grafana_stream1_empty_states.py",
+          "line": 81,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import check_dashboard_visual_semantics as subject"
+        },
+        {
+          "path": "tests/integration/test_grafana_stream1_empty_states.py",
+          "line": 95,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import check_dashboard_visual_semantics as subject"
         }
       ]
     },
