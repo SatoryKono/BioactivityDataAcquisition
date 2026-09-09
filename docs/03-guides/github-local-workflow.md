@@ -170,6 +170,14 @@ Use worktrees by default when:
 - you are cherry-picking from bot or review branches
 - the task is large enough to live for more than one commit
 
+Do not start new work on a dated `master*` or `masterYYYYMMDD` snapshot
+(`master20260910` and similar). Those checkouts are recovery points, not
+`origin/main`. Create the worktree from `origin/main` as shown above.
+
+`git worktree prune` is only for entries already marked prunable. Locked
+worktrees stay until a live agent is confirmed absent. Do not rebase a dated
+`master*` snapshot into `main`.
+
 ## Daily sync flow
 
 Keep topic branches current without merge commits:

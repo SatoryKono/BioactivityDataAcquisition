@@ -24,6 +24,8 @@ from scripts.engineering.repo._branch_cleanup_policy import (
     is_stale_draft_pr_candidate,
     matches_stale_draft_branch_pattern,
     parse_cutoff,
+    propose_owner_action,
+    propose_worktree_action,
 )
 
 pytestmark = pytest.mark.unit
@@ -129,3 +131,68 @@ def test_build_branch_record_marks_phase2_for_stale_draft() -> None:
 def test_parse_cutoff_accepts_z_suffix() -> None:
     parsed = parse_cutoff("2026-06-10T00:00:00Z")
     assert parsed == datetime(2026, 6, 10, tzinfo=UTC)
+
+
+@pytest.mark.parametrize(
+    ("branch", "expected"),
+    [
+        ("master20260910", "dated-snapshot"),
+        ("master20260910-2", "dated-snapshot"),
+        ("master_20260601", "protected-snapshot"),
+        ("temp-branch", "other"),
+        ("12323", "other"),
+        ("jules-wip", "agent-other"),
+        ("codex/fix-main-snapshot", "agent-other"),
+        ("fix/panel-title", "feature-fix"),
+    ],
+)
+def test_categorize_branch_covers_live_noncompliant_names(
+    branch: str, expected: str
+) -> None:
+    assert categorize_branch(branch) == expected
+
+
+@pytest.mark.parametrize(
+    ("branch", "open_pr", "expected"),
+    [
+        ("main", None, "keep"),
+        ("master_20260709", None, "keep"),
+        ("master20260910", None, "tag"),
+        ("master20260910", 12, "keep"),
+        ("12323", None, "delete"),
+        ("tmp", None, "delete"),
+        ("temp-branch", None, "review"),
+        ("jules-wip", None, "review"),
+        ("codex/fix-main-10266", None, "review"),
+        ("fix/panel-title", None, "keep"),
+        ("fix/panel-title", 9, "keep"),
+        ("develop", None, "keep"),
+    ],
+)
+def test_propose_owner_action_is_dry_run_only(
+    branch: str, open_pr: int | None, expected: str
+) -> None:
+    assert (
+        propose_owner_action(
+            name=branch,
+            protected=is_protected_branch(branch),
+            open_pr_number=open_pr,
+            category=categorize_branch(branch),
+        )
+        == expected
+    )
+
+
+def test_propose_worktree_action_does_not_unlock_or_prune() -> None:
+    assert propose_worktree_action(
+        branch="master20260910",
+        detached=False,
+        locked=True,
+        prunable=True,
+    ) == ("keep", "locked; confirm a live agent before unlock")
+    assert propose_worktree_action(
+        branch=None,
+        detached=True,
+        locked=False,
+        prunable=False,
+    )[0] == "review"
