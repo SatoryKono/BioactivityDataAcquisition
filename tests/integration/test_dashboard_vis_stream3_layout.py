@@ -70,8 +70,10 @@ def test_overview_and_dq_lower_handoffs_are_explicit_links() -> None:
         for panel in get_dashboard_panels(dq)
         if panel.get("type") == "text"
     )
-    assert "canonical Control Plane" in html
+    assert "bioetl-control-plane-v1" in html
     assert "<a href=" in html
+    assert "canonical" in html
+    assert ">Control Plane</a>" in html
     assert "${__url_time_range}" in content
 
 
