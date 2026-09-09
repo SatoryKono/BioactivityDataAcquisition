@@ -107,7 +107,7 @@ privilege servers are not always-on:
 | `stable` | host/HTTP MCP only; Ref remains available, credentialed DeepWiki is excluded | **yes — daily default for local IDE projections** |
 | `shared` | full sanctioned local set over shared HTTP plus opt-in remote HTTP MCP, including DeepWiki | explicit multi-client heavy plane (`--profile shared`) |
 | `core` | `stable` + pinned Mermaid MCP | explicit legacy/local profile |
-| `ops` | `core` + prometheus, grafana, github-actions | observability / dashboard work |
+| `ops` | `core` + prometheus, grafana, github-actions | observability / dashboard work; `github-actions` is ops-only |
 | `graph` | `ops` + neo4j-*, brave-search, mutmut, mcp-code-interpreter, docker | research / graph / mutation work |
 | `full` | entire sanctioned inventory (same as tracked portable set) | only when explicitly needed |
 
@@ -241,10 +241,22 @@ write secret values into tracked MCP configuration.
 
 They load local env files when present and normalize common aliases such as:
 
-- `GITHUB_TOKEN` <-> `GITHUB_PERSONAL_ACCESS_TOKEN`
+- `GITHUB_TOKEN` -> `GITHUB_PERSONAL_ACCESS_TOKEN` when the PAT is unset
+  (GitHub MCP wrappers then try `gh auth token`; they never overwrite a
+  configured PAT)
 - `BRAVE_SEARCH_API_KEY` / `BRAVE_API_KEY1` -> `BRAVE_API_KEY`
 - `GRAFANA_TOKEN` / `GRAFANA_API_KEY` -> `GRAFANA_SERVICE_ACCOUNT_TOKEN`
 - `DOCKERHUB_PAT` / `DOCKERHUB_TOKEN` -> `HUB_PAT_TOKEN`
+
+### Grok GitHub overlay vs shared HTTP `:8820`
+
+Daily Grok on this host may launch GitHub MCP as **stdio** through
+`github-mcp-stdio.cmd` → official `github-mcp-server.exe` with the same
+toolsets/lockdown/excludes as `scripts/ai/mcp/github-mcp-wrapper.*`.
+Codex and the shared plane keep `github` on `http://127.0.0.1:8820/mcp`,
+where the long-lived process is still that wrapper. Do not run a second
+`github-actions` HTTP client on `:8831` in a daily Grok session: disable
+it (catalog `daily: false`) and use `github` `actions_*` tools instead.
 
 Token-bearing wrappers must also use:
 

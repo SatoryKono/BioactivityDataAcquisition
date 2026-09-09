@@ -408,7 +408,7 @@ shipped_selector_registry:
       pipeline: control_plane_filter_options_api
       run_type: prometheus_control_plane_run_type_universe
       run_id: control_plane_filter_options_api
-      read_latency_quantile: grafana_custom_enum
+      read_latency_quantile: custom_read_latency_quantile
   bioetl-overview-v2:
     family: hybrid_overview
     visible_selectors:
