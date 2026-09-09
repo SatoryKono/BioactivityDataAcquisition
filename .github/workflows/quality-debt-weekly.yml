@@ -1,4 +1,6 @@
 name: Quality Debt Weekly
+# KEEP-DISABLED (#10263): optional weekly scorecard. Do not raise debt
+# budgets to justify re-enable.
 
 permissions:
   contents: read

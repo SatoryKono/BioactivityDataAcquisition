@@ -1,4 +1,6 @@
 name: Block Compiled Python Artifacts
+# Re-enabled 2026-09-09 (#10263): reusable owner for pr-gate-complete
+# (`no-pyc-check`). Do not disable without a replacement owner.
 
 permissions:
   contents: read

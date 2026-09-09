@@ -17,6 +17,8 @@ import yaml
 from scripts.engineering.common.repo_paths import REPO_ROOT
 
 BRANCH_TELEMETRY_DIR = Path("reports/test-telemetry")
+CANONICAL_COVERAGE_XML = "reports/coverage/coverage.xml"
+CANONICAL_SLOWEST_TESTS_JSON = "reports/test-telemetry/slowest-tests.json"
 TELEMETRY_FRESHNESS_MAX_AGE_DAYS = 45
 UNKNOWN_LABEL = "<unknown>"
 SUPPORTED_SOURCE_EVENTS = ("pull_request", "push", "workflow_dispatch", "schedule")
@@ -367,12 +369,12 @@ def build_baseline_payload(
             "max_age_days": TELEMETRY_FRESHNESS_MAX_AGE_DAYS,
         },
         "artifact_inputs": {
-            "coverage_xml": _portable_artifact_path(coverage_xml_path),
+            "coverage_xml": CANONICAL_COVERAGE_XML,
             "coverage_log": _portable_artifact_path(coverage_log_path),
             "coverage_percent_fallback": resolved_coverage_percent
             if not coverage_xml_path.exists()
             else None,
-            "slowest_tests_json": _portable_artifact_path(slowest_json_path),
+            "slowest_tests_json": CANONICAL_SLOWEST_TESTS_JSON,
             "junit_inputs": [_portable_artifact_path(path) for path in junit_paths],
         },
         "coverage": {

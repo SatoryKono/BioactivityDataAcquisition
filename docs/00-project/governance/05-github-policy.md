@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.2.11
+Version: 1.2.12
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-09-03'
+  Last verified: '2026-09-09'
 
 ______________________________________________________________________
 
 # GitHub Interaction Policy
 
-*Synced with RULES.md and ADR-047 | Last updated: 2026-09-02*
+*Synced with RULES.md and ADR-047 | Last updated: 2026-09-09*
 
 ______________________________________________________________________
 
@@ -200,13 +200,32 @@ because `uv.lock` pins `pip==26.2.1`.
 
 ### 2.5 Scheduled & On-Demand
 
-| Workflow               | File                         | Schedule                    | What It Does                                                                  |
-| ---------------------- | ---------------------------- | --------------------------- | ----------------------------------------------------------------------------- |
-| **Mutation Testing**   | `mutation-testing.yml`       | Weekly (Sun 00:00 UTC) + PR | mutmut on domain layer, 70% mutation score threshold; application gate staged |
-| **Contract Tests**     | `contract-tests.yml`         | Monthly (1st, 02:00 UTC)    | Live API contract tests, creates GitHub issue on failure                      |
-| **Weekly VACUUM**      | `vacuum.yml`                 | Weekly (Sun 02:00 UTC)      | Delta Lake VACUUM on all layers                                               |
-| **Release**            | `release.yml`                | On release publish          | Build and test on Python 3.13, publish to TestPyPI+PyPI                      |
-| `quality-debt-weekly.yml` | Weekly + manual dispatch | Debt scorecard and exemption-registry drift visibility |
+YAML `on.schedule` is a cadence claim only. A `keep-disabled` workflow does
+**not** run while GitHub Actions `state` is `disabled_manually`. Do not describe
+those lanes as currently executing on their YAML cron. Live map: #10263 and
+[GitHub Actions Workflows](../../04-reference/github-actions-workflows.md).
+
+Required scheduled lanes stay `active`. Optional scheduled lanes stay
+`keep-disabled` until a measured spend/safety decision. Do not enable heavy
+nightlies from this section.
+
+| Workflow | File | YAML cadence | Lane class | GitHub live state | Decision |
+| --- | --- | --- | --- | --- | --- |
+| Architecture Metrics | `architecture.yml` | `schedule` + `workflow_dispatch` | required | `active` | `active` |
+| Diagram Nightly Regression | `diagram-nightly.yml` | `schedule` + `workflow_dispatch` | required | `active` | `active` |
+| OpenSSF Scorecard | `scorecard.yml` | weekly + `push` + `workflow_dispatch` | required | `active` | `active` |
+| Quarterly GitHub Settings Review | `github-settings-quarterly-review.yml` | quarterly + `workflow_dispatch` | required | `active` | `active` |
+| Mutation Testing | `mutation-testing.yml` | Weekly (Sun 00:00 UTC) + PR (YAML only) | optional | `disabled_manually` | `keep-disabled` |
+| Contract Tests | `contract-tests.yml` | Monthly 1st 02:00 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
+| Weekly VACUUM | `vacuum.yml` | Weekly Sun 02:00 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
+| Docs KPI Weekly | `docs-kpi-weekly.yml` | Weekly Mon 04:30 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
+| Quality Debt Weekly | `quality-debt-weekly.yml` | Weekly Mon 04:45 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
+| Stale | `stale.yml` | Weekly Mon 06:00 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
+| PR Hygiene | `pr-hygiene.yml` | Weekly Mon 06:30 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
+| Release | `release.yml` | `release` + `workflow_dispatch` (YAML only) | optional | `disabled_manually` | `keep-disabled` |
+
+`release.yml` YAML still **Build and test on Python 3.13**, then publish to
+TestPyPI+PyPI, when that optional lane is re-enabled for an actual release.
 
 ______________________________________________________________________
 
