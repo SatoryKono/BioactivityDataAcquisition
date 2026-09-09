@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `ae38f8b303d32c7e0c6bebb880ff8c0cd9219c12ea6cfbf562ca71e4326ce9f7`
+Evidence surface SHA-256: `8704fb7ba47bfb0a2b75e972fc0acbe663ea482f6408252e51e0ae4409f7c292`
 
 Evidence metadata refresh (2026-09-09): the canonical registry digest was
 recomputed after the remote-main debt baseline rebind to `f78869f826f`
