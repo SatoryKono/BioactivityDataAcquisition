@@ -65,7 +65,7 @@ Classes:
 | adr-analysis | T2 | npx stdio | **Phase 1 MVP** port 8813 |
 | mutmut | T2 | wrapper | shared port 8830 |
 | code-analyzer | T2 | wrapper | shared port 8828 |
-| github-actions | T2 | wrapper | shared port 8831 |
+| github-actions | T2 | wrapper, ops-only (`daily: false`) | shared port 8831; daily Actions reads use `github` |
 | jetbrains | T3 | Desktop Toolkit | disable in Desktop |
 | node-code-sandbox | T3 | Desktop Toolkit | disable in Desktop |
 

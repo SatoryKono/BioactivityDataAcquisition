@@ -66,6 +66,23 @@ REMOVED_FULL_PROFILE_SERVERS = {
 }
 
 
+def _assert_github_mcp_policy_env(
+    servers: dict[str, dict[str, object]],
+    runtime_servers: dict[str, dict[str, object]],
+) -> None:
+    github_env = {
+        "GITHUB_TOOLSETS": setup_mcp.GITHUB_MCP_TOOLSETS,
+        "GITHUB_EXCLUDE_TOOLS": setup_mcp.GITHUB_MCP_EXCLUDE_TOOLS,
+        "GITHUB_LOCKDOWN_MODE": "true",
+    }
+    assert servers["github"]["env"] == github_env
+    runtime_env = runtime_servers["github"]["env"]
+    assert isinstance(runtime_env, dict)
+    assert runtime_env["GITHUB_TOOLSETS"] == github_env["GITHUB_TOOLSETS"]
+    assert "NPM_CONFIG_CACHE" not in servers["github"]["env"]
+    assert "NPM_CONFIG_CACHE" not in runtime_env
+
+
 def _to_bash_path(path: Path) -> str:
     value = path.as_posix()
     if len(value) >= 3 and value[1] == ":" and value[2] == "/":
@@ -231,6 +248,9 @@ def test_shared_endpoints_sync_with_catalog() -> None:
         assert setup_mcp.MCP_SHARED_SERVER_ENDPOINTS[name] == expected
     assert servers["docker"]["launch_mode"] == "windows_docker_streaming"
     assert servers["mermaid"]["launch_mode"] == "windows_npx_streaming"
+    assert servers["github"]["binary"] == "github-mcp-server"
+    assert servers["github"]["toolsets"] == setup_mcp.GITHUB_MCP_TOOLSETS
+    assert servers["github-actions"]["daily"] is False
 
 
 def test_shared_launcher_enforces_singleton_and_loopback() -> None:
@@ -335,6 +355,9 @@ def test_default_local_transport_is_shared_http(
     assert "deepwiki" not in setup_mcp.MCP_PROFILE_STABLE
     assert "deepwiki" in setup_mcp.MCP_PROFILE_SHARED
     assert "ref" in setup_mcp.MCP_PROFILE_STABLE
+    assert "github-actions" not in setup_mcp.MCP_PROFILE_STABLE
+    assert "github-actions" in setup_mcp.MCP_PROFILE_OPS
+    assert "github-actions" in setup_mcp.MCP_PROFILE_SHARED
 
     exit_code = setup_mcp.main(
         [
@@ -586,6 +609,7 @@ def test_main_uses_workspace_root_for_generated_server_paths(
             workspace_root / f"scripts/ai/mcp/github-mcp-wrapper{host_wrapper_suffix}"
         ).resolve()
     )
+    _assert_github_mcp_policy_env(servers, runtime_servers)
     assert servers["docker"]["args"][0] == (
         f"scripts/ai/mcp/mcp_docker_wrapper{portable_wrapper_suffix}"
     )
