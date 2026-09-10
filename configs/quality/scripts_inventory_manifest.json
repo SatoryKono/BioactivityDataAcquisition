@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-10T18:37:54.044373+00:00",
+  "generated_at": "2026-09-10T18:30:34.633578+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -99,19 +99,19 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
-          "line": 163,
+          "line": 148,
           "source_group": "docs",
           "text": "python -m scripts.ai.agent_tools doctor"
         },
         {
           "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
-          "line": 164,
+          "line": 149,
           "source_group": "docs",
           "text": "python -m scripts.ai.agent_tools debug --task-id <id> \\"
         },
         {
           "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
-          "line": 166,
+          "line": 151,
           "source_group": "docs",
           "text": "python -m scripts.ai.agent_tools evaluate --task-id <id> \\"
         },
@@ -2591,7 +2591,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 83,
+          "line": 84,
           "source_group": "docs",
           "text": "- Grok project-domain audit workflow: scripts/ai/generate_project_domain_audit_workflow.py -- generates .grok/workflows/project-domain-audit.rhai"
         }
@@ -2616,19 +2616,19 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
-          "line": 84,
+          "line": 69,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\grok\\install_skills.ps1"
         },
         {
           "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
-          "line": 116,
+          "line": 101,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\grok\\install_skills.ps1          # user: ~/.grok/skills"
         },
         {
           "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
-          "line": 117,
+          "line": 102,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\grok\\install_skills.ps1 -Project # project: .grok/skills"
         },
@@ -5035,19 +5035,19 @@
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 73,
+          "line": 74,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts compile --domain docs --profile audit-readonly"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 74,
+          "line": 75,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.audit.cycle --param SCOPE=src/bioetl --param DOMAIN=docs"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 75,
+          "line": 76,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts check"
         },

@@ -42,6 +42,9 @@ Render helpers:
   --param TASK="..." --param MODE=implement --param SCOPE="..."
 ```
 
+Do not invent telemetry or test-governance SHA; use `prompt.session.grok-bootstrap`
+(includes `prompt.fragment.generated-artifact-ci`).
+
 ## Guardrails (do not restate full RULES)
 
 - No `.env` create/edit/delete without explicit approval
