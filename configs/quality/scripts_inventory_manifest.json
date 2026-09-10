@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-10T11:54:26.025312+00:00",
+  "generated_at": "2026-09-10T17:54:20.667884+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -11,7 +11,7 @@
       "agents": 8,
       "build": 17,
       "ci": 83,
-      "docs": 254,
+      "docs": 255,
       "other": 75,
       "scripts": 515,
       "skills": 12,
@@ -10248,8 +10248,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
+        {
+          "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
+          "line": 46,
+          "source_group": "docs",
+          "text": "`scripts/engineering/ci/update_test_telemetry_baseline.py`: LF-normalized"
+        },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
           "line": 204,
@@ -12436,7 +12442,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 346,
+      "reference_count": 348,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
