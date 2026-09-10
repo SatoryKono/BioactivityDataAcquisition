@@ -65,3 +65,11 @@ only when a formal report bundle is part of the task.
 
 The `.env`, secret, destructive-action, and machine-local guardrails in
 `AGENTS.md` remain hard boundaries.
+
+## Least-privilege (SUBAGENT-20260910)
+
+Allowed skills: `py-plan-bot`.
+Allowed MCP: `ast-grep`, `context7`; `adr-analysis` opt-in.
+Forbidden MCP includes `github`. Do not call undeclared MCP.
+Do not run `gh`, `hub`, or `api.github.com`. Local `git` status/diff/log is
+allowed; `git push` is not.

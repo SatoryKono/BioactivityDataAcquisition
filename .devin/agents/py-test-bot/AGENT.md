@@ -7,15 +7,21 @@ allowed-tools:
   - grep
   - glob
   - exec
+  - write
+  - edit
 permissions:
   allow:
     - Read(**)
+    - Write(tests/**)
     - Exec(pytest)
     - Exec(python)
     - Exec(make)
   deny:
-    - write
-    - edit
+    - Write(src/**)
+    - Write(configs/**)
+    - Write(docs/**)
+    - Exec(gh)
+    - Exec(hub)
 ---
 
 ## Canonical Sources
