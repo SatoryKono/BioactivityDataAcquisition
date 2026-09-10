@@ -111,10 +111,10 @@ def test_issue_5598_cli_duplication_first_wave_is_burned_down() -> None:
     payload = _load_json(DUPLICATION_BASELINE)
     cli = _target_row(payload, "src/bioetl/interfaces/cli")
 
-    assert cli["duplicate_count"] <= 7
-    assert cli["raw_duplicate_count"] <= 7
-    assert cli["excluded_duplicate_count"] <= 2
-    assert payload["summary"]["total_duplicate_clusters"] <= 101
+    assert cli["duplicate_count"] == 0
+    assert cli["raw_duplicate_count"] == 3
+    assert cli["excluded_duplicate_count"] == 3
+    assert payload["summary"]["total_duplicate_clusters"] == 0
 
 
 @pytest.mark.architecture
