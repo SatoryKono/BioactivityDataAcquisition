@@ -1378,9 +1378,14 @@ def _payload_for_check(args: argparse.Namespace) -> dict[str, Any]:
         )
 
     snapshot_date = args.snapshot_date
-    if args.check and args.json_out.exists() and snapshot_date is None:
-        current = json.loads(args.json_out.read_text(encoding="utf-8"))
-        snapshot_date = str(current.get("snapshot_date") or date.today().isoformat())
+    if snapshot_date is None:
+        date_source = args.baseline_json if args.baseline_json else args.json_out
+        if args.check:
+            date_source = args.json_out
+        if date_source is not None and date_source.exists():
+            current = json.loads(date_source.read_text(encoding="utf-8"))
+            if isinstance(current, dict) and current.get("snapshot_date"):
+                snapshot_date = str(current["snapshot_date"])
     return build_module_coverage_inventory(
         repo_root=args.repo_root,
         coverage_xml=args.coverage_xml,

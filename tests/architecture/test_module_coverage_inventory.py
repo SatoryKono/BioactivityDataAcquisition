@@ -771,6 +771,7 @@ def test_coverage_verify_workflow_generates_module_coverage_inventory() -> None:
     assert "reports/quality/module-coverage-inventory.candidate.json" in workflow
     assert "--baseline-json reports/quality/module-coverage-inventory.json" in workflow
     assert "cmp --silent" in workflow
+    assert "del(.coverage_xml_sha256, .snapshot_date)" in workflow
     assert "--refresh-from-coverage-xml" in workflow
 
 
