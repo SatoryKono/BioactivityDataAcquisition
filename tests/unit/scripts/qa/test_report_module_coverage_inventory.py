@@ -19,6 +19,7 @@ from scripts.engineering.qa.report_module_coverage_inventory import (
     _SourceModuleSnapshot,
     _parse_coverage_xml,
     _module_is_declaration_only,
+    _payload_for_check,
     _read_source_module_snapshots,
     _read_stable_source_module_snapshots,
     _refresh_existing_inventory_source_tree,
@@ -318,3 +319,71 @@ def test_coverage_xml_prefers_bioetl_source_for_ambiguous_root_module(
             "missing_lines": 0,
         }
     }
+
+
+def test_refresh_from_coverage_xml_preserves_baseline_snapshot_date(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    baseline = tmp_path / "module-coverage-inventory.json"
+    baseline.write_text('{"snapshot_date": "2026-09-09"}\n', encoding="utf-8")
+    captured: dict[str, str | None] = {}
+
+    def _fake_build(*, repo_root: Path, coverage_xml: Path, snapshot_date: str | None):
+        captured["snapshot_date"] = snapshot_date
+        return {"snapshot_date": snapshot_date}
+
+    monkeypatch.setattr(
+        "scripts.engineering.qa.report_module_coverage_inventory.build_module_coverage_inventory",
+        _fake_build,
+    )
+    payload = _payload_for_check(
+        SimpleNamespace(
+            json_out=tmp_path / "module-coverage-inventory.candidate.json",
+            refresh_nonregressing_from_coverage_xml=False,
+            refresh_from_coverage_xml=True,
+            snapshot_date=None,
+            check=False,
+            baseline_json=baseline,
+            repo_root=tmp_path,
+            coverage_xml=tmp_path / "coverage.xml",
+        )
+    )
+
+    assert captured["snapshot_date"] == "2026-09-09"
+    assert payload["snapshot_date"] == "2026-09-09"
+
+
+def test_check_mode_uses_json_out_snapshot_date_not_baseline(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    baseline = tmp_path / "module-coverage-inventory.baseline.json"
+    committed = tmp_path / "module-coverage-inventory.json"
+    baseline.write_text('{"snapshot_date": "2026-09-09"}\n', encoding="utf-8")
+    committed.write_text('{"snapshot_date": "2026-09-10"}\n', encoding="utf-8")
+    captured: dict[str, str | None] = {}
+
+    def _fake_build(*, repo_root: Path, coverage_xml: Path, snapshot_date: str | None):
+        captured["snapshot_date"] = snapshot_date
+        return {"snapshot_date": snapshot_date}
+
+    monkeypatch.setattr(
+        "scripts.engineering.qa.report_module_coverage_inventory.build_module_coverage_inventory",
+        _fake_build,
+    )
+    payload = _payload_for_check(
+        SimpleNamespace(
+            json_out=committed,
+            refresh_nonregressing_from_coverage_xml=False,
+            refresh_from_coverage_xml=True,
+            snapshot_date=None,
+            check=True,
+            baseline_json=baseline,
+            repo_root=tmp_path,
+            coverage_xml=tmp_path / "coverage.xml",
+        )
+    )
+
+    assert captured["snapshot_date"] == "2026-09-10"
+    assert payload["snapshot_date"] == "2026-09-10"
