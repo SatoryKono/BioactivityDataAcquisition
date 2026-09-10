@@ -60,9 +60,9 @@ def _named_mcp_block(text: str) -> str:
     start = text.find("mcpInheritance:")
     if start < 0:
         return ""
-    end = text.find("\n---", start + 1)
+    end = text.find("\n---", 3)
     if end < 0:
-        end = text.find("\n\n", start)
+        end = text.find("\r\n---", 3)
     if end < 0:
         end = len(text)
     return text[start:end]
