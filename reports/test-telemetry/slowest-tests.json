@@ -1,11 +1,11 @@
 {
   "source_branch": "main",
-  "source_commit": "25a0013a5e9dd936a8d56e01f13ab17d3e20e215",
-  "source_run_id": "34476249533",
+  "source_commit": "a461931bedbab69571729d126ec35d28a70ad884",
+  "source_run_id": "34495805847",
   "source_event": "push",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34476249533",
-  "source_tree_sha256": "f00252fec80753e7f5cea15d2ede5a9cf597ee9f4324896d55e9ca521b63f1d6",
-  "refreshed_at_utc": "2026-09-10T14:06:23.601734+00:00",
+  "source_run_url": null,
+  "source_tree_sha256": "646b5b6384b1ab606448594dfcae6ee99352b1b22e89315a8aea03ad1933bb56",
+  "refreshed_at_utc": "2026-09-10T16:10:53.899886+00:00",
   "refresh_status": "captured",
   "total_cases": 49975,
   "top_slowest": [

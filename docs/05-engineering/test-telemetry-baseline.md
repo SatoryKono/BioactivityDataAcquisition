@@ -28,13 +28,13 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `main`
-- Source commit: `25a0013a5e9dd936a8d56e01f13ab17d3e20e215`
-- Source run id: `34476249533`
+- Source commit: `a461931bedbab69571729d126ec35d28a70ad884`
+- Source run id: `34495805847`
 - Source event: `push`
-- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34476249533`
-- Source tree sha256: `f00252fec80753e7f5cea15d2ede5a9cf597ee9f4324896d55e9ca521b63f1d6`
+- Source run URL: `pending`
+- Source tree sha256: `646b5b6384b1ab606448594dfcae6ee99352b1b22e89315a8aea03ad1933bb56`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-09-10T14:06:23.601734+00:00`
+- Refreshed at (UTC): `2026-09-10T16:10:53.899886+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -55,7 +55,7 @@ trend evidence only.
 ## Coverage
 
 - Hard threshold: `85.0%`
-- Actual coverage: `96.73%`
+- Actual coverage: `96.29%`
 - Threshold satisfied: `True`
 
 ## Duration Telemetry
