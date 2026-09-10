@@ -3,6 +3,10 @@
 - mode: report-only
 - targets: 4
 - total_duplicate_clusters: 0
+- total_raw_duplicate_clusters: 58
+- excluded_duplicate_clusters: 58
+- normalized_view: enabled
+- exclude_actionability_categories: `export_facade_or_package_barrel`
 
 > Interpretation note: this is a visibility baseline. `R0801` can over-report
 > around facades, export barrels, and compatibility shims, so use it as
@@ -18,8 +22,8 @@
 ## src/bioetl/infrastructure/adapters
 
 - duplicate clusters: 0
-- raw duplicate clusters: 40
-- excluded duplicate clusters: 40
+- raw duplicate clusters: 51
+- excluded duplicate clusters: 51
 - no `R0801` findings
 
 ## src/bioetl/application/pipelines
@@ -32,15 +36,15 @@
 ## src/bioetl/composition/bootstrap
 
 - duplicate clusters: 0
-- raw duplicate clusters: 1
-- excluded duplicate clusters: 1
+- raw duplicate clusters: 3
+- excluded duplicate clusters: 3
 - no `R0801` findings
 
 ## src/bioetl/interfaces/cli
 
 - duplicate clusters: 0
-- raw duplicate clusters: 2
-- excluded duplicate clusters: 2
+- raw duplicate clusters: 3
+- excluded duplicate clusters: 3
 
 | Actionability category | Duplicate clusters |
 | --- | ---: |

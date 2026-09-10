@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-13'
+  Last verified: '2026-09-11'
 
 ______________________________________________________________________
 
 # Current State Inventory
 
-This inventory is synchronized against the current worktree on 2026-08-27.
+This inventory is synchronized against the current worktree on 2026-09-11.
 Code, configs, domain contracts, ADRs, and tests are the source of
 truth; existing documentation is evidence only when it matches those sources.
 
@@ -44,7 +44,7 @@ Current committed quality artifacts agree on the following architecture evidence
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
 | Families at fan-in budget | `2` (`application_services_control_plane`, `composition_runtime_builders`) | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
 | Debt-governance gates | `45` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
-| Full-app duplication hotspot baseline | `0` actionable / `44` raw excluded clusters | `reports/quality/full-app-duplication-baseline.json` |
+| Full-app duplication hotspot baseline | `0` actionable / `58` raw excluded clusters | `reports/quality/full-app-duplication-baseline.json` |
 
 The full-app duplication baseline distinguishes actionable clusters from raw
 excluded visibility: current actionable duplication is zero, while the retained
@@ -301,7 +301,7 @@ by storage technology. Current owner boundaries:
 | Runtime Gold Pandera strictness had no production-path non-strict guard | `tests/architecture/test_gold_validator_strict_runtime_paths.py` scans `src/bioetl` for `PanderaGoldValidator(..., strict=False)` and `ContractAwareGoldValidator(..., strict=False)`. | `src/bioetl/infrastructure/storage/silver/merged_operations.py`; `src/bioetl/infrastructure/validation/pandera_validator.py`. | Replaced the Silver merged-write non-strict Gold validator with `PanderaSilverValidator(strict=False)` and added the runtime guard. |
 | Quarantine payload immutability evidence stopped at aggregate/mock level | `tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineUpdateStatus::test_update_status_preserves_persisted_payload_and_hash` writes a real Delta table, updates status, and checks persisted `payload`, `payload_hash`, and `metadata`. | `src/bioetl/infrastructure/quarantine/unified.py`. | Added persisted immutability coverage and a read fallback for Delta string-view filter failures after status updates. |
 | Test governance refined assertless residuals are now fully eliminated while compatibility coverage stays bounded | `reports/quality/test-governance-current.json` now reports `assertless_total_candidates=88`, `refined_assertless_tests=0`, `compatibility_test_files=0`, and zero budget violations. | Contract schema tests under `tests/contract/**` plus governance inventory under `tests/architecture/**`. | Tightened observable assertions and governance classification so the refined assertless residual count is zero without regrowing compatibility-test scope. |
-| Current-state architecture evidence table lagged live quality reports | `reports/quality/debt-governance-gates.json` reports score `9.14`, `45` passing gates, and zero failing gates; `reports/quality/module-coverage-inventory.json` reports `2468` source modules with `0` unmeasured, `0` uncovered, and `852` partially covered modules; `reports/quality/full-app-duplication-baseline.json` reports `0` actionable / `44` raw excluded clusters. | Current committed `reports/quality/*.json` artifacts and `reports/quality/total-tech-debt-audit-main-current.md`. | Refreshed the current-state table while keeping module inventory distinct from full line/branch coverage and preserving shrink-only budgets. |
+| Current-state architecture evidence table lagged live quality reports | `reports/quality/debt-governance-gates.json` reports score `9.14`, `45` passing gates, and zero failing gates; `reports/quality/module-coverage-inventory.json` reports `2468` source modules with `0` unmeasured, `0` uncovered, and `852` partially covered modules; `reports/quality/full-app-duplication-baseline.json` reports `0` actionable / `58` raw excluded clusters. | Current committed `reports/quality/*.json` artifacts and `reports/quality/total-tech-debt-audit-main-current.md`. | Refreshed the current-state table while keeping module inventory distinct from full line/branch coverage and preserving shrink-only budgets. |
 
 ## Open Questions
 

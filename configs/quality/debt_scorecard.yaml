@@ -424,7 +424,7 @@ hotspot_budgets:
     class_size: 1
     god_object: 1
 hotspot_family_ratchets:
-  snapshot_date: '2026-07-27'
+  snapshot_date: '2026-09-11'
   mode: fail-fast
   artifact_policy:
     duplication_command: uv run python -m scripts.engineering.qa report-duplication-baseline --targets
@@ -434,7 +434,7 @@ hotspot_family_ratchets:
       --history-jsonl reports/quality/hotspot-duplication-history.jsonl --max-duplicate-clusters 0
     baseline_artifact: reports/quality/hotspot-duplication-baseline.json
     history_artifact: reports/quality/hotspot-duplication-history.jsonl
-    latest_reviewed_snapshot: '2026-07-27'
+    latest_reviewed_snapshot: '2026-09-11'
     confirming_clean_snapshots_required: 2
     expected_direction: downward
     ratchet_policy: Enforce a hotspot-level zero-duplication budget in CI after the clean 2026-07-19 baseline;
@@ -576,7 +576,7 @@ hotspot_family_ratchets:
       next_action: 2026-08-27 audit-cycle-tech-debt ratchets runtime_builders max_internal_fan_in budget
         5->3 to live observed fan-in. No technical-debt budget is increased.
 full_app_duplication_ratchets:
-  snapshot_date: '2026-07-07'
+  snapshot_date: '2026-09-11'
   mode: fail-fast
   artifact_policy:
     generator_command: python -m scripts.engineering.qa report-duplication-baseline --targets src/bioetl/infrastructure/adapters
