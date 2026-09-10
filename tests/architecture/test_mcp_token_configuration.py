@@ -139,9 +139,10 @@ def test_mcp_env_loading_smoke_redacts_secret_values() -> None:
     for github_name in (
         "GITHUB_PERSONAL_ACCESS_TOKEN",
         "GITHUB_TOKEN",
-        "GITHUB_CDX_PERSONAL_ACCESS_TOKEN",
-        "GITHUB_TOKEN_02",
         "GH_TOKEN",
+        "GITHUB_CDX_PERSONAL_ACCESS_TOKEN",
+        "GITHUB_ANY_PERSONAL_ACCESS_TOKEN",
+        "GITHUB_TOKEN_02",
     ):
         assert github_name in text
     assert "${GITHUB_PERSONAL_ACCESS_TOKEN}" not in text
@@ -180,7 +181,11 @@ def test_mcp_token_docs_cover_sources_rotation_validation_and_ci_stance() -> Non
     assert "XOR (#10299)" in runtime_config
     assert "http://127.0.0.1:8820/mcp" in runtime_config
     assert "Do not alias PAT into `GITHUB_TOKEN`" in governance
+    assert "GITHUB_CDX_PERSONAL_ACCESS_TOKEN" in runtime_config
+    assert "GITHUB_ANY_PERSONAL_ACCESS_TOKEN" in runtime_config
+    assert "GITHUB_TOKEN_02" in runtime_config
     assert "GITHUB_TOKEN_02" in token_doc
+    assert "GITHUB_ANY_PERSONAL_ACCESS_TOKEN" in token_doc
     assert "HTTP 401 after `Import-BioetlRepoEnv`" in token_doc
     assert "BIOETL_MCP_VALIDATE_ONLY=1" in governance
     assert "BIOETL_UVX_DIRECT_NETWORK=1" in governance
