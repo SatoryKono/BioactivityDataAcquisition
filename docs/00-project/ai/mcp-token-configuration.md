@@ -38,6 +38,7 @@ GitHub MCP uses one token path per process:
 
 1. `GITHUB_PERSONAL_ACCESS_TOKEN` if already set (never overwritten)
 1. else alias `GITHUB_TOKEN` copied into `GITHUB_PERSONAL_ACCESS_TOKEN`
+1. else `GH_TOKEN` (bash loader only) copied into `GITHUB_PERSONAL_ACCESS_TOKEN`
 1. else `GITHUB_CDX_PERSONAL_ACCESS_TOKEN` or `GITHUB_ANY_PERSONAL_ACCESS_TOKEN`
    (compat only; do not add `ANY` to new `.env` files)
 1. else `gh auth token` when the GitHub CLI is logged in
@@ -59,7 +60,7 @@ MCP child: PAT in the child process only. `export_mcp_env_from_dotenv.ps1
 
 | Canonical variable | Accepted aliases |
 | --- | --- |
-| `GITHUB_PERSONAL_ACCESS_TOKEN` | `GITHUB_TOKEN`, `GH_TOKEN` (bash → PAT only), `GITHUB_CDX_PERSONAL_ACCESS_TOKEN` |
+| `GITHUB_PERSONAL_ACCESS_TOKEN` | `GITHUB_TOKEN`, `GH_TOKEN` (bash → PAT only), `GITHUB_CDX_PERSONAL_ACCESS_TOKEN`, `GITHUB_ANY_PERSONAL_ACCESS_TOKEN` (compat) |
 | `BRAVE_API_KEY` | `BRAVE_SEARCH_API_KEY`, `BRAVE_API_KEY1` |
 | `GRAFANA_SERVICE_ACCOUNT_TOKEN` | `GRAFANA_TOKEN`, `GRAFANA_API_KEY` |
 | `GRAFANA_USERNAME` | `GF_SECURITY_ADMIN_USER` |
@@ -80,9 +81,10 @@ bash scripts/ai/mcp/test_env_loading.sh
 ```
 
 The script reports `SET` / `NOT SET` only and must not print secret values.
-GitHub names (`GITHUB_PERSONAL_ACCESS_TOKEN`, `GITHUB_TOKEN`,
-`GITHUB_CDX_PERSONAL_ACCESS_TOKEN`, `GITHUB_TOKEN_02`, `GH_TOKEN`) are status
-only: `NOT SET` is allowed and must not fail the script.
+GitHub names (`GITHUB_PERSONAL_ACCESS_TOKEN`, `GITHUB_TOKEN`, `GH_TOKEN`,
+`GITHUB_CDX_PERSONAL_ACCESS_TOKEN`, `GITHUB_ANY_PERSONAL_ACCESS_TOKEN`,
+`GITHUB_TOKEN_02`) are status only: `NOT SET` is allowed and must not fail the
+script.
 
 ### Credential surfaces (no values)
 
