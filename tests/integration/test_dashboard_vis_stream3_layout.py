@@ -88,7 +88,7 @@ def test_incident_current_alerts_share_first_window_with_runbook() -> None:
     assert int(grid.get("y") or 0) + int(grid.get("h") or 0) <= FIRST_WINDOW_Y
     assert int(grid.get("w") or 0) == 24
     assert int((suspects.get("gridPos") or {}).get("w") or 0) == 24
-    assert int((suspects.get("gridPos") or {}).get("h") or 0) == 5
+    assert int((suspects.get("gridPos") or {}).get("h") or 0) == 4
     assert (suspects.get("options") or {}).get("cellHeight") == "sm"
     links = ((alert.get("fieldConfig") or {}).get("defaults") or {}).get("links") or []
     assert any("runbook" in str(item.get("title", "")).lower() for item in links)
