@@ -727,7 +727,7 @@ def test_operator_critical_tables_expose_full_values() -> None:
                 # wrap via named-column overrides (same pattern as #8977).
                 if panel_id == 2010:
                     assert custom["cellOptions"]["wrapText"] is True
-                    assert panel["options"]["footer"]["enablePagination"] is True
+                    assert panel["options"]["footer"]["enablePagination"] is False
                 else:
                     assert custom.get("cellOptions", {}).get("wrapText") is not True
                 if dashboard_name == "bioetl-run-explorer-v1.json" and panel_id == 3022:
@@ -919,7 +919,7 @@ def test_incident_alert_history_has_readable_full_width_layout() -> None:
     assert impact.get("gridPos", {}).get("y", 0) >= (
         history_grid.get("y", 0) + history_grid.get("h", 0)
     )
-    assert current_alerts.get("gridPos") == {"h": 5, "w": 24, "x": 0, "y": 13}
+    assert current_alerts.get("gridPos") == {"h": 5, "w": 24, "x": 0, "y": 12}
     assert "ALERTS" in str(history.get("targets", [{}])[0].get("expr", ""))
     assert str(history.get("targets", [{}])[0].get("legendFormat", "")).startswith(
         "{{alertname}}"
