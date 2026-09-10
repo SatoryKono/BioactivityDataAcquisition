@@ -7,10 +7,10 @@ owner: BioETL Team
 runtimes:
 - any
 params:
-- SCOPE
-- TARGET_SPEEDUP_PCT
-- BASELINE_RUNS
-- LANGUAGE
+- SCOPE = test surface
+- TARGET_SPEEDUP_PCT = 30
+- BASELINE_RUNS = 3
+- LANGUAGE = ru
 includes:
 - fragments/git-safety.md
 - fragments/debt-budget-ban.md
