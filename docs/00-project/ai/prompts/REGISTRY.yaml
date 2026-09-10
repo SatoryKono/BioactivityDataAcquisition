@@ -162,6 +162,7 @@ scenarios:
   schema: _schema/prompt.schema.json
   deps:
   - prompt.fragment.audit-scale
+  - prompt.fragment.gh-powershell
 - id: agents-runtime
   scenario: AI runtime/skills audit
   role: py-audit-bot
@@ -216,6 +217,7 @@ scenarios:
   schema: _schema/prompt.schema.json
   deps:
   - prompt.fragment.issue-state-machine-v3
+  - prompt.fragment.gh-powershell
 entries:
 - id: prompt.fragment.audit-scale
   path: fragments/audit-scale.md
@@ -254,6 +256,12 @@ entries:
   class: fragment
   tags: []
   summary: Finding fields + findings.json contract including requirement_id (REQ-*/DASH-*)
+- id: prompt.fragment.gh-powershell
+  path: fragments/gh-powershell.md
+  status: active
+  class: fragment
+  tags: []
+  summary: Deterministic gh usage from Windows PowerShell
 - id: prompt.fragment.git-safety
   path: fragments/git-safety.md
   status: active
