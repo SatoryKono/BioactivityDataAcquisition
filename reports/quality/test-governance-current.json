@@ -34,7 +34,7 @@
   "assertless_candidates": [
     {
       "category": "architecture_helper_guard",
-      "line": "145",
+      "line": "146",
       "path": "tests/architecture/test_pr_gate_complete.py",
       "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
       "test_name": "test_called_owner_workflows_reject_duplicate_yaml_keys"
@@ -657,7 +657,7 @@
     "weak_no_value": 0
   },
   "assertless_examples": [
-    "tests/architecture/test_pr_gate_complete.py:145",
+    "tests/architecture/test_pr_gate_complete.py:146",
     "tests/architecture/test_quality_debt_scorecard.py:1127",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
     "tests/integration/infrastructure/storage/test_delta_reader.py:586",
@@ -1185,7 +1185,7 @@
     "assertless_candidates": [
       {
         "category": "architecture_helper_guard",
-        "line": "145",
+        "line": "146",
         "path": "tests/architecture/test_pr_gate_complete.py",
         "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
         "test_name": "test_called_owner_workflows_reject_duplicate_yaml_keys"
@@ -1808,7 +1808,7 @@
       "weak_no_value": 0
     },
     "assertless_examples": [
-      "tests/architecture/test_pr_gate_complete.py:145",
+      "tests/architecture/test_pr_gate_complete.py:146",
       "tests/architecture/test_quality_debt_scorecard.py:1127",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
       "tests/integration/infrastructure/storage/test_delta_reader.py:586",
@@ -2074,7 +2074,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "ebdc41f1062e76a2cb7f2085ced01ad66ac0e04c967f98c1e20aebd67f75bbf5",
+  "source_tree_sha256": "0c614f4e8ed49e74b97d9438978d3e8ba05d8798b40951f994a3f09c33e18fd5",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 88,
