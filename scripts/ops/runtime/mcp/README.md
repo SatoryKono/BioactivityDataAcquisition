@@ -19,7 +19,7 @@ Server ports, wrappers, state models and launch modes:
 | 8811 | brave-search |
 | 8813–8816 | adr-analysis, deja, context7, ast-grep |
 | 8817–8818 | Docker gateway, pinned `mcp-mermaid@0.4.1` |
-| 8820–8821 | github, fetch |
+| 8820–8821 | github, fetch. Grok daily must use URL `http://127.0.0.1:8820/mcp`, not a second stdio github. Check: `Test-NetConnection 127.0.0.1 -Port 8820`. XOR: URL **or** stdio, never both (#10299). |
 | 8822–8823 | prometheus, grafana |
 | 8824–8825 | neo4j-cypher, neo4j-memory (optional) |
 | 8826–8827 | memory, filesystem |

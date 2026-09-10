@@ -1,8 +1,10 @@
 # Сводка evidence: project-package-topology
 
+Refresh note (2026-09-10): hash-only reconcile after composition wrapper docstring alignment on #10170 closeout. `source_tree_sha256` matches `reports/quality/module-coverage-inventory.json`. Historical notes remain historical.
+
 Refresh note (2026-09-09): inventory grew to `source_module_count=2471` after the flow3 HTTP display helpers and stream-1 merge. Counts and the source fingerprint below come from `reports/quality/module-coverage-inventory.json`. Historical notes remain historical.
 
-`source_tree_sha256=3e4af34912c125fcf6294903e81ef499c40c919f01c60e7699a3dd9d33a39aac`
+`source_tree_sha256=136970ba9b594564079c68ca5266079e6bd9ecc2d4935e67cf2e84dd3ad9904b`
 
 `source_module_count=2471`
 

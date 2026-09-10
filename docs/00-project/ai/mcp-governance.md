@@ -57,6 +57,9 @@ docker, neo4j-cypher, neo4j-memory,
 deja, adr-analysis, mutmut, code-analyzer, github-actions,
 deepwiki, ref
 
+Do not alias PAT into `GITHUB_TOKEN` for the caller `gh` (#10298).
+`GITHUB_TOKEN_02` is not in the loader alias chain (#10301).
+
 `github` is the single daily GitHub MCP. It launches the official
 [`github/github-mcp-server`](https://github.com/github/github-mcp-server)
 binary (`github-mcp-server`), not the retired npx package

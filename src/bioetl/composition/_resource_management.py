@@ -16,6 +16,8 @@ from bioetl.composition._pipeline_execution import (
     VacuumOptions,
     _ensure_registrations,
 )
+from bioetl.composition.bootstrap.cli import checkpoint as _checkpoint_cli
+from bioetl.composition.bootstrap.cli import storage as _storage_cli
 from bioetl.composition.contracts.resources import (
     CheckpointRuntimeServiceProtocol,
     CleanupPreviewProtocol,
@@ -46,39 +48,23 @@ __all__ = [
 
 
 def bootstrap_quarantine_runtime_service(pipeline: str) -> object:
-    """Resolve the quarantine runtime bootstrap lazily for patch-friendly tests."""
-    from bioetl.composition.bootstrap.cli.checkpoint import (
-        bootstrap_quarantine_runtime_service as impl,
-    )
-
-    return impl(pipeline)
+    """Delegate quarantine runtime bootstrap for patch-friendly tests."""
+    return _checkpoint_cli.bootstrap_quarantine_runtime_service(pipeline)
 
 
 def bootstrap_checkpoint_runtime_service(pipeline: str) -> object:
-    """Resolve the checkpoint runtime bootstrap lazily for patch-friendly tests."""
-    from bioetl.composition.bootstrap.cli.checkpoint import (
-        bootstrap_checkpoint_runtime_service as impl,
-    )
-
-    return impl(pipeline)
+    """Delegate checkpoint runtime bootstrap for patch-friendly tests."""
+    return _checkpoint_cli.bootstrap_checkpoint_runtime_service(pipeline)
 
 
 def bootstrap_lifecycle_service() -> object:
-    """Resolve the lifecycle bootstrap lazily for patch-friendly tests."""
-    from bioetl.composition.bootstrap.cli.storage import (
-        bootstrap_lifecycle_service as impl,
-    )
-
-    return impl()
+    """Delegate lifecycle bootstrap for patch-friendly tests."""
+    return _storage_cli.bootstrap_lifecycle_service()
 
 
 def bootstrap_cleanup_service() -> CleanupServiceProtocol:
-    """Resolve the cleanup bootstrap lazily for patch-friendly tests."""
-    from bioetl.composition.bootstrap.cli.storage import (
-        bootstrap_cleanup_service as impl,
-    )
-
-    return impl()
+    """Delegate cleanup bootstrap for patch-friendly tests."""
+    return _storage_cli.bootstrap_cleanup_service()
 
 
 def load_pipeline_config(pipeline: str) -> PipelineYamlConfig:

@@ -176,8 +176,8 @@
     ],
     "families_at_budget_count": 2,
     "grade_kind": "diagnostic_proxy",
-    "lazy_import_cap": 97,
-    "lazy_import_observed_count": 97,
+    "lazy_import_cap": 77,
+    "lazy_import_observed_count": 77,
     "lazy_util": 1.0,
     "program_gate_policy": "external_unchanged",
     "proxy_notes": {
@@ -209,8 +209,8 @@
     "hotspot_budget_warning_count": 0,
     "hotspot_family_count": 5,
     "layer_violations": 0,
-    "lazy_import_cap": 97,
-    "lazy_import_observed_count": 97,
+    "lazy_import_cap": 77,
+    "lazy_import_observed_count": 77,
     "lazy_util": 1.0,
     "public_entrypoint_growth_count": 0,
     "public_export_facade_conflict_count": 0,
@@ -256,7 +256,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "3cafb860e31bf26c995fbec8587ca2a22e2c30aaf9d0ca1d53e3f81fbb520068"
+      "source_fingerprint": "57479105a6cdd37e94886cb9768a91fbfe4e0ac788cf749a0998c779bd50bf28"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -273,9 +273,9 @@
       "snapshot_date": "2026-07-27"
     },
     "module_coverage_inventory": {
-      "coverage_xml_sha256": "281372f87362b89ae1215dc165141e595eaed63b43e675a644bd085064364f3b",
+      "coverage_xml_sha256": "30b8d16cd48678c8ac2f92720ad35f709a358f392e3de246292463efd1b821bb",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "3e4af34912c125fcf6294903e81ef499c40c919f01c60e7699a3dd9d33a39aac"
+      "source_tree_sha256": "136970ba9b594564079c68ca5266079e6bd9ecc2d4935e67cf2e84dd3ad9904b"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

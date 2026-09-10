@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-10T07:09:44.909527+00:00",
+  "generated_at": "2026-09-10T11:54:26.025312+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -99,19 +99,19 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
-          "line": 135,
+          "line": 148,
           "source_group": "docs",
           "text": "python -m scripts.ai.agent_tools doctor"
         },
         {
           "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
-          "line": 136,
+          "line": 149,
           "source_group": "docs",
           "text": "python -m scripts.ai.agent_tools debug --task-id <id> \\"
         },
         {
           "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
-          "line": 138,
+          "line": 151,
           "source_group": "docs",
           "text": "python -m scripts.ai.agent_tools evaluate --task-id <id> \\"
         },
@@ -307,7 +307,7 @@
       "agent_usage": [
         "CODEX-RUNTIME"
       ],
-      "reference_count": 14,
+      "reference_count": 15,
       "references": [
         {
           "path": ".codex/agents/CODEX-RUNTIME.md",
@@ -340,6 +340,12 @@
           "text": "run: python3 scripts/ai/codex/doctor.py static --no-write"
         },
         {
+          "path": "docs/00-project/ai/agents/guides/grok-tui-config-checklist.md",
+          "line": 98,
+          "source_group": "docs",
+          "text": "- [ ] `python scripts/ai/codex/doctor.py static --no-write`"
+        },
+        {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
           "line": 126,
           "source_group": "docs",
@@ -350,12 +356,6 @@
           "line": 250,
           "source_group": "docs",
           "text": "- `scripts/ai/codex/doctor.py` - AI runtime diagnostics"
-        },
-        {
-          "path": "scripts/ai/codex/README.md",
-          "line": 21,
-          "source_group": "scripts",
-          "text": "python3 scripts/ai/codex/doctor.py static --no-write"
         }
       ]
     },
@@ -1216,7 +1216,7 @@
       "agent_usage": [
         "README"
       ],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".codex/agents/README.md",
@@ -1253,6 +1253,12 @@
           "line": 46,
           "source_group": "tests",
           "text": "assert \"native_runtime_contract.py\" in text"
+        },
+        {
+          "path": "tests/architecture/test_grok_subagent_least_privilege.py",
+          "line": 11,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex import native_runtime_contract"
         }
       ],
       "owner": "@bioetl-platform",
@@ -1642,7 +1648,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 68,
+      "reference_count": 69,
       "references": [
         {
           "path": ".github/ISSUES/AI-AGENT-CONFIG-AUDIT-2026-07-14-ISSUE-PACK.md",
@@ -2600,7 +2606,7 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 10,
       "references": [
         {
           "path": "docs/00-project/ai/README.md",
@@ -2610,45 +2616,45 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
-          "line": 88,
+          "line": 69,
+          "source_group": "docs",
+          "text": ".\\scripts\\ai\\grok\\install_skills.ps1"
+        },
+        {
+          "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
+          "line": 101,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\grok\\install_skills.ps1          # user: ~/.grok/skills"
         },
         {
           "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
-          "line": 89,
+          "line": 102,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\grok\\install_skills.ps1 -Project # project: .grok/skills"
         },
         {
           "path": "docs/00-project/ai/agents/guides/grok-tui-config-checklist.md",
-          "line": 57,
+          "line": 63,
+          "source_group": "docs",
+          "text": "`.\\scripts\\ai\\grok\\install_skills.ps1`. Children use `mcpInheritance.named`"
+        },
+        {
+          "path": "docs/00-project/ai/agents/guides/grok-tui-config-checklist.md",
+          "line": 84,
           "source_group": "docs",
           "text": "- [ ] `.\\scripts\\ai\\grok\\install_skills.ps1` (user) or `-Project`"
         },
         {
           "path": "docs/00-project/ai/grok/README.md",
-          "line": 24,
+          "line": 25,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\grok\\install_skills.ps1"
         },
         {
           "path": "docs/00-project/ai/grok/README.md",
-          "line": 27,
+          "line": 28,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\grok\\install_skills.ps1 -Project"
-        },
-        {
-          "path": "docs/00-project/ai/grok/README.md",
-          "line": 30,
-          "source_group": "docs",
-          "text": ".\\scripts\\ai\\grok\\install_skills.ps1 -WhatIf"
-        },
-        {
-          "path": "scripts/ai/grok/README.md",
-          "line": 5,
-          "source_group": "scripts",
-          "text": "| `install_skills.ps1` | Copy tracked skills from `docs/00-project/ai/grok/skills/` into `~/.grok/skills` or project `.grok/skills` |"
         }
       ],
       "owner": "@bioetl-platform",
@@ -2704,7 +2710,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 35,
+      "reference_count": 36,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -2884,13 +2890,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 112,
+          "line": 141,
           "source_group": "docs",
           "text": "bash scripts/ai/mcp/check.sh"
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 119,
+          "line": 148,
           "source_group": "docs",
           "text": "| GitHub MCP says token missing | Set **one** of `GITHUB_PERSONAL_ACCESS_TOKEN`, `GITHUB_TOKEN`, or a working `gh auth token`; verify alias normalization with `test_env_loading.sh` or `check.sh`. |"
         },
@@ -2998,13 +3004,19 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
           "line": 238,
           "source_group": "docs",
           "text": "`scripts/ai/mcp/export_mcp_env_from_dotenv.ps1` can export already configured"
+        },
+        {
+          "path": "docs/00-project/ai/mcp-token-configuration.md",
+          "line": 57,
+          "source_group": "docs",
+          "text": "MCP child: PAT in the child process only. `export_mcp_env_from_dotenv.ps1"
         },
         {
           "path": "tests/unit/scripts/ai/mcp/test_export_mcp_env_from_dotenv.py",
@@ -3045,13 +3057,13 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 57,
+          "line": 63,
           "source_group": "tests",
           "text": "powershell_wrapper = _read(\"scripts/ai/mcp/github-mcp-wrapper.ps1\")"
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 107,
+          "line": 113,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.ps1\": \"Test-McpRequiredToken\","
         }
@@ -3072,7 +3084,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 104,
+          "line": 133,
           "source_group": "docs",
           "text": "BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/github-mcp-wrapper.sh"
         },
@@ -3096,13 +3108,13 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 56,
+          "line": 62,
           "source_group": "tests",
           "text": "shell_wrapper = _read(\"scripts/ai/mcp/github-mcp-wrapper.sh\")"
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 93,
+          "line": 99,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\": \"mcp_validate_required_token\","
         }
@@ -3117,7 +3129,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 148,
+          "line": 151,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_adr_analysis_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1` (Windows)"
         },
@@ -3154,7 +3166,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 148,
+          "line": 151,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_adr_analysis_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1` (Windows)"
         },
@@ -3247,7 +3259,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 108,
+          "line": 114,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\": \"Test-McpRequiredToken\","
         },
@@ -3290,7 +3302,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 105,
+          "line": 134,
           "source_group": "docs",
           "text": "BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/mcp_brave_search_wrapper.sh"
         },
@@ -3308,7 +3320,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 94,
+          "line": 100,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\": \"mcp_validate_required_token\","
         },
@@ -3341,7 +3353,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 168,
+          "line": 171,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1` (Windows)"
         }
@@ -3366,7 +3378,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 168,
+          "line": 171,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1` (Windows)"
         },
@@ -3513,7 +3525,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 142,
+          "line": 145,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_deja_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_deja_wrapper.ps1` (Windows)"
         }
@@ -3538,7 +3550,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 142,
+          "line": 145,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_deja_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_deja_wrapper.ps1` (Windows)"
         },
@@ -3563,7 +3575,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 207,
+          "line": 210,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_docker_docs_wrapper.sh`"
         }
@@ -3634,7 +3646,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 209,
+          "line": 212,
           "source_group": "docs",
           "text": "`scripts/ai/mcp/mcp_dockerhub_wrapper.ps1` (Windows)"
         }
@@ -3653,7 +3665,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 208,
+          "line": 211,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_dockerhub_wrapper.sh` (Linux/WSL),"
         }
@@ -3788,13 +3800,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 176,
+          "line": 179,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_github_actions_wrapper.ps1` (Windows)"
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 59,
+          "line": 65,
           "source_group": "tests",
           "text": "actions_powershell = _read(\"scripts/ai/mcp/mcp_github_actions_wrapper.ps1\")"
         }
@@ -3819,7 +3831,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 176,
+          "line": 179,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_github_actions_wrapper.ps1` (Windows)"
         },
@@ -3831,7 +3843,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 58,
+          "line": 64,
           "source_group": "tests",
           "text": "actions_shell = _read(\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\")"
         }
@@ -3850,7 +3862,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 109,
+          "line": 115,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.ps1\": \"Test-McpOptionalToken\","
         },
@@ -3893,7 +3905,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 106,
+          "line": 135,
           "source_group": "docs",
           "text": "BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/mcp_grafana_wrapper.sh"
         },
@@ -3911,7 +3923,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 95,
+          "line": 101,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.sh\": \"mcp_validate_optional_token\","
         },
@@ -4078,7 +4090,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 155,
+          "line": 158,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_mutmut_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_mutmut_wrapper.ps1` (Windows)"
         },
@@ -4109,7 +4121,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 155,
+          "line": 158,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_mutmut_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_mutmut_wrapper.ps1` (Windows)"
         },
@@ -4140,7 +4152,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 210,
+          "line": 213,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_needle_wrapper.sh`"
         }
@@ -4159,7 +4171,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 111,
+          "line": 117,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\": \"Test-McpNeo4jCredentials\","
         },
@@ -4202,7 +4214,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 97,
+          "line": 103,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\": \"mcp_validate_neo4j_credentials\","
         },
@@ -4229,7 +4241,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 112,
+          "line": 118,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\": \"Test-McpNeo4jCredentials\","
         }
@@ -4305,7 +4317,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 211,
+          "line": 214,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_paper_search_wrapper.sh`"
         }
@@ -4324,7 +4336,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 110,
+          "line": 116,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.ps1\": \"Test-McpOptionalToken\","
         }
@@ -4361,7 +4373,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 96,
+          "line": 102,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\": \"mcp_validate_optional_token\","
         }
@@ -4585,7 +4597,7 @@
         },
         {
           "path": "scripts/ai/mcp/export_mcp_env_from_dotenv.ps1",
-          "line": 28,
+          "line": 33,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
         },
@@ -4711,13 +4723,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 264,
+          "line": 269,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.ps1`"
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 90,
+          "line": 119,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.ps1`"
         },
@@ -4768,13 +4780,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 263,
+          "line": 268,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.sh`"
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 89,
+          "line": 118,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.sh`"
         },
@@ -4919,17 +4931,23 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 66,
+          "line": 79,
           "source_group": "docs",
           "text": "bash scripts/ai/mcp/test_env_loading.sh"
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 119,
+          "line": 97,
+          "source_group": "docs",
+          "text": "`.env` edits need explicit per-task approve. Tracked docs and `test_env_loading.sh`"
+        },
+        {
+          "path": "docs/00-project/ai/mcp-token-configuration.md",
+          "line": 148,
           "source_group": "docs",
           "text": "| GitHub MCP says token missing | Set **one** of `GITHUB_PERSONAL_ACCESS_TOKEN`, `GITHUB_TOKEN`, or a working `gh auth token`; verify alias normalization with `test_env_loading.sh` or `check.sh`. |"
         },
@@ -4941,7 +4959,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 122,
+          "line": 128,
           "source_group": "tests",
           "text": "text = _read(\"scripts/ai/mcp/test_env_loading.sh\")"
         }
@@ -7973,7 +7991,7 @@
         "ORCHESTRATION",
         "py-doc-bot"
       ],
-      "reference_count": 215,
+      "reference_count": 216,
       "references": [
         {
           "path": ".codex/agents/ORCHESTRATION.md",
@@ -10623,7 +10641,7 @@
         },
         {
           "path": "scripts/ai/codex/setup_mcp.py",
-          "line": 582,
+          "line": 584,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.repo_paths import ("
         }
@@ -17971,13 +17989,13 @@
         },
         {
           "path": "tests/architecture/test_github_governance_review.py",
-          "line": 270,
+          "line": 273,
           "source_group": "tests",
           "text": "assert \"python scripts/engineering/repo/github_settings_review.py\" not in workflow"
         },
         {
           "path": "tests/architecture/test_github_governance_review.py",
-          "line": 271,
+          "line": 274,
           "source_group": "tests",
           "text": "assert \".github/tooling/github_settings_review.py\" not in workflow"
         }
@@ -22518,7 +22536,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
@@ -22534,7 +22552,13 @@
         },
         {
           "path": "scripts/ai/mcp/support/load_repo_env.sh",
-          "line": 7,
+          "line": 2,
+          "source_group": "scripts",
+          "text": "# GitHub aliases live in scripts/ops/support/load_repo_env.sh (sourced below)."
+        },
+        {
+          "path": "scripts/ai/mcp/support/load_repo_env.sh",
+          "line": 9,
           "source_group": "scripts",
           "text": "source \"${_BIOETL_MCP_REPO_ROOT}/scripts/ops/support/load_repo_env.sh\""
         },

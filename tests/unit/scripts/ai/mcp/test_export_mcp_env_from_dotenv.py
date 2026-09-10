@@ -300,6 +300,14 @@ class TestExportMcpEnvFromDotenv:
         assert "Process-only" in result.stdout
         assert "User-scope updates applied" not in result.stdout
 
+    def test_user_scope_skips_github_keys_in_script(self) -> None:
+        """-UserScope: must not persist GitHub keys into the User hive (#10298)."""
+        content = EXPORT_SCRIPT.read_text(encoding="utf-8")
+        assert "githubUserScopeDenied" in content
+        assert "GITHUB_PERSONAL_ACCESS_TOKEN" in content
+        assert "GH_TOKEN" in content
+        assert "Do not persist GitHub credentials into the User hive" in content
+
     def test_known_mcp_keys_listed(self) -> None:
         """Test that the script lists known MCP keys."""
         content = EXPORT_SCRIPT.read_text(encoding="utf-8")

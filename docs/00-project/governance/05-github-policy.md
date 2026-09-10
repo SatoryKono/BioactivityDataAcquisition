@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.2.13
+Version: 1.2.15
 Status: active
 Class: published
 Owner: BioETL Team
@@ -203,10 +203,10 @@ weaken gates, raise tech-debt budgets, or force Grafana npm majors
 | `sha_pinning_required` | `true` | Workflow SHA-pin SSOT: [`check_github_actions_runtime_policy.py`](../../../scripts/engineering/repo/check_github_actions_runtime_policy.py) `ALLOWED_USES` |
 | `allowed_actions` | `selected` | `github_owned_allowed: true`, `verified_allowed: false`. Third-party patterns are `owner/repo@*` plus nested `owner/repo/path@*` from `ALLOWED_USES` (GitHub `*` does not cross `/`). Live selected vs allowlist is [`github_settings_review.py`](../../../scripts/engineering/repo/github_settings_review.py) `GH-ACTIONS-003`; the SHA-pin checker does not call the Actions allowlist API. |
 | Secret scanning | enabled | Push protection enabled |
-| `secret_scanning_validity_checks` | enabled | Partner-pattern validity. `PATCH /repos/{owner}/{repo}` with this field returns HTTP 200 on this user-owned repository but leaves the setting `disabled` (verified `2026-09-10`). Enable in GitHub UI: Settings → Code security → Secret scanning → Validity checks. Review control `GH-SECRET-002` stays blocking until live status is `enabled`. |
+| `secret_scanning_validity_checks` | enabled | Partner-pattern validity. `PATCH /repos/{owner}/{repo}` with this field returns HTTP 200 on this user-owned repository but leaves the setting `disabled` (re-verified GET `2026-09-10`). Enable in GitHub UI only (#10310). `GH-SECRET-002.known_issue: 10310` until live status is `enabled`. Do not git-claim `enabled` before that GET. |
 | `secret_scanning_non_provider_patterns` | disabled | Intentionally off (noisy). Do not enable without a dated issue. |
-| Unused environments | absent | `copilot` and `staging` are not publish surfaces and MUST NOT exist. Publish environments stay `ghcr-publish`, `observability-render-host`, `pypi`, `testpypi`. |
-| `allow_auto_merge` | `true` | Safe only after #10267 activates ruleset `main` with required context `pr-gate-complete`. Do not treat empty applied rules as merge protection. |
+| Unused environments | absent | `copilot` and `staging` MUST NOT exist. Live GET `2026-09-10`: `copilot` still present (0 protection rules); `staging` absent. DELETE `copilot` only after explicit owner phrase (#10311). `GH-ENV-002.known_issue: 10311`. Publish environments stay `ghcr-publish`, `observability-render-host`, `pypi`, `testpypi`. |
+| `allow_auto_merge` | `true` | Allowed after #10267: live `GET .../rules/branches/main` applies required context `pr-gate-complete`. Do not treat a disabled companion ruleset as a merge wall. |
 
 Controls live in [`github_governance_policy.json`](../../../configs/quality/github_governance_policy.json): `GH-SECRET-002`, `GH-SECRET-003`, `GH-ACTIONS-002`, `GH-ACTIONS-003`, `GH-ENV-002`.
 
@@ -1021,3 +1021,22 @@ Merge-block proof: `PUT /repos/SatoryKono/BioactivityDataAcquisition/pulls/9895/
 - Auto-merge may remain enabled now that a required check is applied.
 - `GH-RULESET-001.known_issue` returns to `null` because an active ruleset exists.
 - Scorecard #1295 stays open (solo-maintainer; independent approval would deadlock).
+
+### Migration notes (1.2.14)
+
+- Remaining operator SSOT after the #10267 PUT now matches live GET:
+  `ci-workflow-map.md` records `pr-gate-complete` as the GitHub required
+  context; `allow_auto_merge` is no longer gated on a future activation.
+- Closeout GET `2026-09-10` reconfirmed `13643213` `active` (updated
+  `2026-09-10T02:53:01+03:00`) and `15730586` `disabled` (no second PUT).
+- Evidence: `reports/governance/ruleset-10267-closeout-get-2026-09-10.json`.
+
+### Migration notes (1.2.15)
+
+- OPT-20260910 loaders: do not copy PAT into `GITHUB_TOKEN` (#10298). GitHub MCP
+  daily transport XOR `:8820` vs stdio (#10299).
+- Live GET `2026-09-10` (this change): `13643213` still `enforcement: active`
+  with required context `pr-gate-complete`; `15730586` still `disabled`. No PUT.
+- `GH-SECRET-002.known_issue: 10310` while validity checks stay `disabled` (UI).
+- `GH-ENV-002.known_issue: 10311` while unused environment `copilot` is present
+  (DELETE only after explicit owner phrase).

@@ -15,7 +15,8 @@ $defaultToolsets = "context,issues,pull_requests,repos,users,actions,code_securi
 $defaultExcludeTools = "create_or_update_file,push_files,delete_file,fork_repository,create_repository,merge_pull_request,actions_run_trigger"
 
 # One token path: existing PAT, else GITHUB_TOKEN alias, else `gh auth token`.
-# Never overwrite a configured PAT and never print the secret.
+# Never overwrite a configured PAT, never print the secret, and never set
+# process GITHUB_TOKEN from PAT (parent gh must keep hosts.yml; #10298).
 if ($env:GITHUB_PERSONAL_ACCESS_TOKEN) {
     [Console]::Error.WriteLine("github MCP token path: GITHUB_PERSONAL_ACCESS_TOKEN")
 } elseif ($env:GITHUB_TOKEN) {

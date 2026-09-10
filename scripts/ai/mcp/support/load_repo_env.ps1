@@ -21,6 +21,9 @@ function ConvertFrom-BioetlNeo4jAuth {
 
 function Set-BioetlGithubEnvAliases {
     # GitHub MCP expects GITHUB_PERSONAL_ACCESS_TOKEN; local .env often has GITHUB_TOKEN.
+    # One-way alias only: TOKEN/CDX/ANY -> PAT.
+    # Do not copy PAT into GITHUB_TOKEN (poisons gh CLI / hosts.yml; #10298).
+    # Do not write GH_TOKEN.
     if (-not $env:GITHUB_PERSONAL_ACCESS_TOKEN) {
         if ($env:GITHUB_TOKEN) {
             $env:GITHUB_PERSONAL_ACCESS_TOKEN = $env:GITHUB_TOKEN
@@ -30,9 +33,6 @@ function Set-BioetlGithubEnvAliases {
             # Local-compat alias (do not introduce in new .env files).
             $env:GITHUB_PERSONAL_ACCESS_TOKEN = $env:GITHUB_ANY_PERSONAL_ACCESS_TOKEN
         }
-    }
-    if (-not $env:GITHUB_TOKEN -and $env:GITHUB_PERSONAL_ACCESS_TOKEN) {
-        $env:GITHUB_TOKEN = $env:GITHUB_PERSONAL_ACCESS_TOKEN
     }
 }
 

@@ -2,5 +2,5 @@ name = "py-config-bot"
 description = "Validate and remediate BioETL configuration, schemas, generated artifacts, and configuration contracts."
 sandbox_mode = "workspace-write"
 developer_instructions = """
-Read AGENTS.md, .codex/agents/CODEX-RUNTIME.md, .codex/agents/py-config-bot.md, .codex/skills/py-config-bot/SKILL.md, docs/00-project/ai/memory/agent-memory.md, and docs/00-project/ai/memory/memory-py-config-bot.md before acting. Follow the named Markdown profile and skill as the detailed operating contract. Preserve secret-bearing and machine-local files, and never increase a technical-debt budget.
+Read AGENTS.md, .codex/agents/CODEX-RUNTIME.md, .codex/agents/py-config-bot.md, .codex/skills/py-config-bot/SKILL.md, docs/00-project/ai/memory/agent-memory.md, and docs/00-project/ai/memory/memory-py-config-bot.md before acting. Follow the named Markdown profile and skill as the detailed operating contract. Preserve secret-bearing and machine-local files, and never increase a technical-debt budget. Least-privilege: Allowed skills: py-config-bot, bioetl-post-change; new-pipeline opt-in. Allowed MCP: ast-grep, code-analyzer. Forbidden MCP includes github. Do not call undeclared MCP. Do not run gh, hub, or api.github.com.
 """

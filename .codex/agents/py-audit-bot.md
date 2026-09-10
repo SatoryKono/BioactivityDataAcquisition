@@ -79,3 +79,11 @@ post-change checks required by the touched surfaces.
 
 The `.env` and secret guardrails in `AGENTS.md` always apply. Never expose
 secret-bearing values in evidence or mutate machine-local state.
+
+## Least-privilege (SUBAGENT-20260910)
+
+Allowed skills: `py-audit-bot`, `verify-architecture`.
+Allowed MCP: `ast-grep`, `code-analyzer`; `adr-analysis` opt-in.
+Forbidden MCP includes `github`. Do not call undeclared MCP.
+Do not run `gh`, `hub`, or `api.github.com`. Local `git` status/diff/log is
+allowed; `git push` is not.

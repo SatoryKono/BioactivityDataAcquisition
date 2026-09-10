@@ -131,6 +131,11 @@ def test_ci_map_routes_only_active_lanes() -> None:
     assert _table_first_column_yml(disabled_section) == disabled_files
     assert "stale.yml" not in active_section
     assert "`pr-hygiene.yml`" not in active_section
+    assert "while rulesets are disabled" not in ci_map
+    assert "not GitHub-required while" not in ci_map
+    assert "GitHub required context" in ci_map
+    assert "pr-gate-complete" in ci_map
+    assert "13643213" in ci_map
 
 
 def test_scheduled_policy_does_not_claim_disabled_lanes_run() -> None:

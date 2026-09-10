@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3608 |
-| Tracked doc-like files | 3608 |
+| Doc-like files | 3618 |
+| Tracked doc-like files | 3618 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 7 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3608 |
+| tracked | 3618 |
 
 ## Lifecycle Counts
 
@@ -27,7 +27,7 @@
 | active_backlog | 1 |
 | active_draft | 278 |
 | active_quality_baseline | 70 |
-| closeout_evidence | 88 |
+| closeout_evidence | 89 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 6 |
 | docs_reports_generated_or_route_owned | 7 |
@@ -57,23 +57,23 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 733 |
+| Active | 741 |
 | Archived | 291 |
 | Canonical | 73 |
 | Deprecated | 2 |
-| Generated | 1023 |
-| Working | 1486 |
+| Generated | 1024 |
+| Working | 1487 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 733 |
+| active | 741 |
 | archive | 291 |
 | canonical | 73 |
 | duplicate | 2 |
-| generated | 1023 |
-| working | 1486 |
+| generated | 1024 |
+| working | 1487 |
 
 ## Recommended Actions
 
@@ -81,8 +81,8 @@
 | --- | --- |
 | archive-after-github-state-check | 336 |
 | archive-after-migration | 984 |
-| generate-automatically | 1023 |
-| keep | 1255 |
+| generate-automatically | 1024 |
+| keep | 1264 |
 | reconcile-with-github-state | 8 |
 | replace-with-link | 2 |
 
@@ -220,6 +220,7 @@
 | `docs/00-project/ai/prompts/fragments/env-guardrail.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/fragments/evidence-contract-v3.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/fragments/finding-schema.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/gh-powershell.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/fragments/git-safety.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/fragments/issue-state-machine-v3.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/fragments/language-ru.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
@@ -254,7 +255,6 @@
 | `docs/00-project/ai/prompts/library/test/cycle.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/test/fix-retest.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/test/speed-optimization.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/library/test/system-audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 
 ## GitHub Issue Evidence Examples
 
