@@ -1048,7 +1048,7 @@
           ],
           "countRows": false,
           "fields": "",
-          "enablePagination": false
+          "enablePagination": true
         },
         "sortBy": [
           {
