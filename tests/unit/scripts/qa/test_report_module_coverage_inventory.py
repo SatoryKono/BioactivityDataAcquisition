@@ -51,7 +51,12 @@ def test_confined_existing_path_returns_first_confined_result(
         _fake_confine,
     )
 
-    assert _confined_existing_path(Path("reports/quality/inventory.json"), repo_root=tmp_path) == existing
+    assert (
+        _confined_existing_path(
+            Path("reports/quality/inventory.json"), repo_root=tmp_path
+        )
+        == existing
+    )
     assert calls == [Path("reports/quality/inventory.json")]
 
 
