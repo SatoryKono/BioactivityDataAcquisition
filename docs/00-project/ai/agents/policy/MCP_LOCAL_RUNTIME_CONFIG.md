@@ -241,10 +241,12 @@ write secret values into tracked MCP configuration.
 
 They load local env files when present and normalize common aliases such as:
 
-- `GITHUB_TOKEN` -> `GITHUB_PERSONAL_ACCESS_TOKEN` when the PAT is unset
-  (GitHub MCP wrappers then try `gh auth token`; they never overwrite a
-  configured PAT). Alias is one-way: **do not** copy PAT into `GITHUB_TOKEN`
-  or write `GH_TOKEN` (#10298). `GITHUB_TOKEN_02` is not an alias.
+- GitHub one-way into `GITHUB_PERSONAL_ACCESS_TOKEN` when unset, in loader
+  order: `GITHUB_TOKEN`, then `GH_TOKEN` (bash only), then
+  `GITHUB_CDX_PERSONAL_ACCESS_TOKEN`, then `GITHUB_ANY_PERSONAL_ACCESS_TOKEN`
+  (compat; do not add `ANY` to new `.env` files). Wrappers then try
+  `gh auth token`. **Do not** copy PAT into `GITHUB_TOKEN` or write
+  `GH_TOKEN` (#10298). `GITHUB_TOKEN_02` is not an alias (#10301).
 - `BRAVE_SEARCH_API_KEY` / `BRAVE_API_KEY1` -> `BRAVE_API_KEY`
 - `GRAFANA_TOKEN` / `GRAFANA_API_KEY` -> `GRAFANA_SERVICE_ACCOUNT_TOKEN`
 - `DOCKERHUB_PAT` / `DOCKERHUB_TOKEN` -> `HUB_PAT_TOKEN`

@@ -58,7 +58,8 @@ deja, adr-analysis, mutmut, code-analyzer, github-actions,
 deepwiki, ref
 
 Do not alias PAT into `GITHUB_TOKEN` for the caller `gh` (#10298).
-`GITHUB_TOKEN_02` is not in the loader alias chain (#10301).
+CDX/ANY map into PAT only when PAT is unset. `GITHUB_TOKEN_02` is not in the
+loader alias chain (#10301).
 
 `github` is the single daily GitHub MCP. It launches the official
 [`github/github-mcp-server`](https://github.com/github/github-mcp-server)
