@@ -10799,7 +10799,7 @@
       "github_issue_url": null,
       "inbound_links": 2,
       "lifecycle": null,
-      "outbound_links": 1,
+      "outbound_links": 2,
       "owner": "BioETL Team",
       "path": "docs/00-project/ai/agents/guides/grok-tui-config-checklist.md",
       "recommended_action": "keep",
