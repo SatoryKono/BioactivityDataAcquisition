@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3618 |
-| Tracked doc-like files | 3618 |
+| Doc-like files | 3619 |
+| Tracked doc-like files | 3619 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 7 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3618 |
+| tracked | 3619 |
 
 ## Lifecycle Counts
 
@@ -61,7 +61,7 @@
 | Archived | 291 |
 | Canonical | 73 |
 | Deprecated | 2 |
-| Generated | 1024 |
+| Generated | 1025 |
 | Working | 1487 |
 
 ## Surface Families
@@ -72,7 +72,7 @@
 | archive | 291 |
 | canonical | 73 |
 | duplicate | 2 |
-| generated | 1024 |
+| generated | 1025 |
 | working | 1487 |
 
 ## Recommended Actions
@@ -81,7 +81,7 @@
 | --- | --- |
 | archive-after-github-state-check | 336 |
 | archive-after-migration | 984 |
-| generate-automatically | 1024 |
+| generate-automatically | 1025 |
 | keep | 1264 |
 | reconcile-with-github-state | 8 |
 | replace-with-link | 2 |
@@ -250,11 +250,11 @@
 | `docs/00-project/ai/prompts/library/doc/audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/doc/pipeline.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/doc/planning.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/plan/agent-efficiency.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/plan/scoped.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/session/bootstrap.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/test/cycle.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/test/fix-retest.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/library/test/speed-optimization.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 
 ## GitHub Issue Evidence Examples
 
