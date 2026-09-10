@@ -1,6 +1,6 @@
 ---
 id: prompt.tests.fix-retest
-version: 2.1.0
+version: 2.2.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -33,6 +33,11 @@ summary: Run → fix → retest until green or blocked
 # Test fix / re-test loop
 
 Debug and fix until tests are green via **run → fix → run**.
+
+Step 0: if this is a CI/generated-artifact failure, require a
+`prompt.debug.isolate` diagnosis first (family + refresh command). Then apply
+the pin/refresh and re-run **the same focused scope** — not full
+`architecture-fast`.
 
 ## Params
 
