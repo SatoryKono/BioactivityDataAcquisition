@@ -63,7 +63,10 @@ Parent skills KEEP (≤7): `bioetl-session`, `bioetl-closeout`,
 deploy/office/imagegen/`resume-*`, …) via `[skills] disabled`.
 
 Child Grok agents (`docs/00-project/ai/grok/agents/`): `mcpInheritance.named`
-**without** `github`; no `gh` / `hub` / `api.github.com`. Install:
+**without** `github`; no `gh` / `hub` / `api.github.com`. Grok-only extras:
+`implementer` (worktree write, no GitHub) and `obs-dashboard` (grafana +
+prometheus MCP, not daily parent). Personas `rca-handoff` /
+`closeout-table` are overlays via `/personas`, not spawn types. Install:
 
 ```powershell
 .\scripts\ai\grok\install_skills.ps1
@@ -103,6 +106,7 @@ is gitignored). Install into `~/.grok/skills/` or project `.grok/skills/`:
 ```
 
 Skills: `bioetl-session`, `bioetl-closeout`, `bioetl-post-change`.
+The same install also copies agents and overlay personas.
 
 ## 5. Models / session (recommended local)
 

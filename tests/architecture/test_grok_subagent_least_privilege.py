@@ -13,9 +13,22 @@ from scripts.ai.codex import native_runtime_contract
 pytestmark = pytest.mark.architecture
 ROOT = Path(__file__).resolve().parents[2]
 GROK_AGENTS = ROOT / "docs/00-project/ai/grok/agents"
+GROK_PERSONAS = ROOT / "docs/00-project/ai/grok/personas"
 EXPECTED_GROK_AGENTS = {
     "explore",
+    "implementer",
+    "obs-dashboard",
     "plan",
+    "py-audit-bot",
+    "py-config-bot",
+    "py-debug-bot",
+    "py-doc-bot",
+    "py-plan-bot",
+    "py-test-bot",
+}
+EXPECTED_GROK_ONLY_AGENTS = {"implementer", "obs-dashboard"}
+EXPECTED_GROK_PERSONAS = {"closeout-table", "rca-handoff"}
+GOVERNED_PY_AGENTS = {
     "py-audit-bot",
     "py-config-bot",
     "py-debug-bot",
@@ -25,12 +38,40 @@ EXPECTED_GROK_AGENTS = {
 }
 
 
-def test_tracked_grok_child_agents_are_exactly_the_wave_b_set() -> None:
+def test_tracked_grok_child_agents_are_wave_b_plus_grok_only() -> None:
     names = {path.stem for path in GROK_AGENTS.glob("*.md")}
     assert names == EXPECTED_GROK_AGENTS
     assert "py-github-bot" not in names
-    assert "implementer" not in names
-    assert "obs-dashboard" not in names
+    assert EXPECTED_GROK_ONLY_AGENTS <= names
+    assert not (ROOT / ".codex/agents/implementer.md").exists()
+    assert not (ROOT / ".codex/agents/obs-dashboard.md").exists()
+    assert not (ROOT / ".junie/agents/implementer.md").exists()
+    assert not (ROOT / ".devin/agents/implementer.md").exists()
+    assert set(native_runtime_contract.AGENT_NAMES) == GOVERNED_PY_AGENTS
+
+
+def test_grok_only_agents_keep_named_mcp_without_github() -> None:
+    implementer = (GROK_AGENTS / "implementer.md").read_text(encoding="utf-8")
+    obs = (GROK_AGENTS / "obs-dashboard.md").read_text(encoding="utf-8")
+    assert _named_mcp_names(implementer) == ["ast-grep", "code-analyzer"]
+    assert _named_mcp_names(obs) == ["grafana", "prometheus"]
+    assert "docker-compose.monitoring.yml" in obs
+    assert "DEGRADED_MCP" in obs
+    assert "git push" in implementer
+    assert "worktree" in implementer.lower()
+
+
+def test_grok_personas_are_overlays_without_mcp_or_github_tools() -> None:
+    names = {path.stem for path in GROK_PERSONAS.glob("*.toml")}
+    assert names == EXPECTED_GROK_PERSONAS
+    for path in sorted(GROK_PERSONAS.glob("*.toml")):
+        text = path.read_text(encoding="utf-8")
+        data = tomllib.loads(text)
+        assert "mcpInheritance" not in text
+        assert "mcp" not in data
+        instructions = str(data["instructions"])
+        assert "gh" in instructions.lower()
+        assert "github-ops" not in path.stem
 
 
 def test_grok_child_agents_use_named_mcp_without_github() -> None:
@@ -62,3 +103,13 @@ def _named_mcp_block(text: str) -> str:
     if end < 0:
         end = text.find("\n\n", start)
     return text[start:end]
+
+
+def _named_mcp_names(text: str) -> list[str]:
+    names: list[str] = []
+    for line in _named_mcp_block(text).splitlines():
+        stripped = line.strip()
+        if stripped.startswith("- "):
+            names.append(stripped[2:].strip())
+    return names
+

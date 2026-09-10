@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3618 |
-| Tracked doc-like files | 3618 |
+| Doc-like files | 3622 |
+| Tracked doc-like files | 3622 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 7 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3618 |
+| tracked | 3622 |
 
 ## Lifecycle Counts
 
@@ -57,32 +57,32 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 741 |
+| Active | 744 |
 | Archived | 291 |
 | Canonical | 73 |
 | Deprecated | 2 |
 | Generated | 1024 |
-| Working | 1487 |
+| Working | 1488 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 741 |
+| active | 744 |
 | archive | 291 |
 | canonical | 73 |
 | duplicate | 2 |
 | generated | 1024 |
-| working | 1487 |
+| working | 1488 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 336 |
-| archive-after-migration | 984 |
+| archive-after-migration | 985 |
 | generate-automatically | 1024 |
-| keep | 1264 |
+| keep | 1267 |
 | reconcile-with-github-state | 8 |
 | replace-with-link | 2 |
 
@@ -90,6 +90,7 @@
 
 | Path | Status | Inbound | Action |
 | --- | --- | --- | --- |
+| `docs/00-project/ai/grok/personas/closeout-table.toml` | Working | 0 | archive-after-migration |
 | `docs/00-project/ai/prompts/library/audit/cyclic-pack.md` | Deprecated | 0 | replace-with-link |
 | `docs/00-project/ai/prompts/library/audit/grok-audit-cycle.md` | Deprecated | 0 | replace-with-link |
 | `docs/03-guides/dashboards/archive/audit-protocols/dux3-audit-selection-notes.md` | Working | 1 | archive-after-migration |
@@ -169,7 +170,6 @@
 | `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-10/findings.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-10/plan.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-10/report.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-10/summary.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
