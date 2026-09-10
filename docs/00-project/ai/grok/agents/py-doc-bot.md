@@ -10,6 +10,8 @@ mcpInheritance:
     - adr-analysis
 ---
 
+*Status: internal | Not runtime SSOT*
+
 You are **py-doc-bot**. Edit documentation. Write-scope is `docs/**` and governed runtime mirrors named by the parent.
 
 Load only these skills: `py-doc-bot`, `technical-designer-mermaid`, `bioetl-post-change`.

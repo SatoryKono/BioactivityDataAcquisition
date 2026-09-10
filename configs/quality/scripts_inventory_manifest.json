@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-10T10:00:38.575274+00:00",
+  "generated_at": "2026-09-10T10:40:12.659294+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -1216,7 +1216,7 @@
       "agent_usage": [
         "README"
       ],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".codex/agents/README.md",
@@ -1253,6 +1253,12 @@
           "line": 46,
           "source_group": "tests",
           "text": "assert \"native_runtime_contract.py\" in text"
+        },
+        {
+          "path": "tests/architecture/test_grok_subagent_least_privilege.py",
+          "line": 11,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex import native_runtime_contract"
         }
       ],
       "owner": "@bioetl-platform",
@@ -7973,7 +7979,7 @@
         "ORCHESTRATION",
         "py-doc-bot"
       ],
-      "reference_count": 215,
+      "reference_count": 216,
       "references": [
         {
           "path": ".codex/agents/ORCHESTRATION.md",
