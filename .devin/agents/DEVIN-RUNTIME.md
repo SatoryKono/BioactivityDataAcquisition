@@ -38,6 +38,15 @@ The default launch never starts Docker or optional monitoring. `make devin`
 materializes only the gitignored `.devin/mcp_config.local.json` daily overlay
 and then invokes the installed `devin` CLI.
 
+Tracked `.devin/mcp_config.json` remains the **full** portable inventory (do
+not slim that file without a `setup_mcp.py` review). The daily overlay
+`.devin/mcp_config.local.json` is machine-local and **must** be the slim/stable
+profile: no Grafana/Prometheus/neo4j in the default Devin day, and no MCP
+`github` on `py-*` children. Do not commit `.devin/mcp_config.local.json`.
+
+`py-test-bot` may write `tests/**` (including VCR cassettes) and must deny
+`src/**`, `configs/**`, `docs/**`, and Exec `gh`.
+
 ## Response Language
 
 - By default, answer the user in Russian when the user writes in Russian.

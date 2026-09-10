@@ -2,7 +2,8 @@
 
 *Status: internal | Checklist for `~/.grok/config.toml` — never commit secrets*
 
-Use with [grok-operator-runbook.md](grok-operator-runbook.md). Tracks epic #8274.
+Use with [grok-operator-runbook.md](grok-operator-runbook.md). Tracks epic #8274
+and wave `SUBAGENT-20260910` (#10313).
 
 ## Before change
 
@@ -17,24 +18,50 @@ Use with [grok-operator-runbook.md](grok-operator-runbook.md). Tracks epic #8274
 - [ ] `yolo = false`
 - [ ] Ship profile documented as temporary exception only
 
-## P1 MCP slim (#8276)
+## P1 MCP slim (#8276 / #10314 SUBAGENT-01)
 
-Always-on (≤8):
+Daily parent always-on (**≤4 live**, including `github`):
 
-- [ ] github
-- [ ] fetch
-- [ ] brave-search (optional if web_search enough)
-- [ ] context7
+- [ ] github (required; GitHub write stays on the parent orchestrator)
 - [ ] ast-grep
 - [ ] code-analyzer
-- [ ] memory
+- [ ] context7 (keep in the target set; **disable** if handshake FAIL — do not
+      hold a dead server "just in case")
 
-Disabled by default (enable on demand): docker, grafana, prometheus, mutmut,
-github-actions, deepwiki, ref, neo4j-*, mermaid, deja, adr-analysis,
-mcp-code-interpreter, filesystem, dockerhub
+Optional only if actually connected: `memory` (MCP file, not
+`python -m memory.tooling.workflow`), `fetch`.
 
+**Not** daily parent (named-inherit only on `obs-dashboard` later, #10319):
+`grafana`, `prometheus`.
+
+Disabled for BioETL daily (all agents except explicit opt-in): `filesystem`,
+`docker`, `grafana`, `prometheus`, `neo4j-cypher`, `neo4j-memory`, `mermaid`,
+`mutmut`, `mcp-code-interpreter`, `github-actions`, `deepwiki`, `ref`,
+`brave-search`, `deja`, `adr-analysis`, `google_drive`, `tasks`.
+
+- [ ] FAIL handshake servers are **off**, not left enabled
 - [ ] `startup_timeout_sec` ≤ 45 for local daemons
 - [ ] No API keys in git
+- [ ] Do not commit `~/.grok/config.toml`
+
+## P1b Grok skills (#10314)
+
+Enabled on parent (≤7): `bioetl-session`, `bioetl-closeout`,
+`bioetl-post-change`, `long-running-background-tasks`, `pr-babysit`, `review`,
+`gh-address-comments`.
+
+`[skills] disabled` MUST include: `pc-agent-session`, `cloudflare-deploy`,
+`vercel-deploy`, `render-deploy`, `frontend-design`, `playwright`, `screenshot`,
+`doc`, `docx`, `pdf`, `pptx`, `imagegen`, `imagine`, `skill-creator`,
+`skill-installer`, `create-skill`, `create-workflow`, `build-with-ai`, `design`,
+`execute-plan`, `resume-claude`, `resume-codex`, `resume-cursor`, `statusline`,
+`learn`.
+
+Do not copy all 14 `.codex/skills` into `~/.grok/skills`.
+
+Child agents: see [../../grok/agents/](../../grok/agents/). Install with
+`.\scripts\ai\grok\install_skills.ps1`. Children use `mcpInheritance.named`
+**without** `github` and must not run `gh`.
 
 ## P2 Models/session (#8277)
 
@@ -62,6 +89,14 @@ mcp-code-interpreter, filesystem, dockerhub
 ## After change
 
 - [ ] Restart Grok TUI / new session
+- [ ] `grok inspect` (or `/context`): connected MCP ⊆ daily core 4 (or fewer if
+      `context7` is dead); **`github` connected on parent**
+- [ ] `google_drive` / `tasks` / neo4j / grafana / deepwiki **not** connected
+- [ ] `[skills] disabled` covers the non-BioETL list; `pc-agent-session` does
+      not auto-invoke
+- [ ] Child spawn (`explore` / `py-audit-bot`): no MCP `github`; no `gh`
+- [ ] `python scripts/ai/codex/doctor.py static --no-write`
+- [ ] `python scripts/ai/codex/setup_mcp.py --check`
+- [ ] `bash scripts/ai/junie/check_junie_mirror.sh --check` after `.codex`/`.junie` edits
 - [ ] Spot-check: permission prompt appears for risky bash
-- [ ] Spot-check: MCP list matches slim profile
-- [ ] Spot-check: skills listed / invocable after restart
+- [ ] `~/.grok/config.toml` still untracked
