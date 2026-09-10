@@ -1,5 +1,6 @@
 name: PR Gate Complete
-# Repo-side #9975 coordinator. GitHub rulesets are deliberately out of scope.
+# Repo-side #9975 coordinator. Ruleset 13643213 requires this job
+# (`name: pr-gate-complete`) as the only GitHub required context (#10267).
 # Each pull request has one owner invocation per gate and one fail-closed result.
 
 on:

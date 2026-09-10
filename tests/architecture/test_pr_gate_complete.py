@@ -135,6 +135,7 @@ def test_policy_doc_mentions_shadow_aggregator() -> None:
     assert "pr-gate-complete" in text
     assert "configs/quality/github_required_checks.yaml" in text
     assert "shadow" in text.lower()
+    assert "live required context" in text.lower()
 
 
 def test_aggregator_does_not_use_continue_on_error() -> None:
