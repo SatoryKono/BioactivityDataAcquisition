@@ -589,7 +589,7 @@ def test_audit_followup_action_first_layout_contracts() -> None:
         "Selected Range · Validation Diagnostics",
     ]
     assert [panel.get("gridPos", {}).get("y") for panel in dq_rows] == [
-        18,
+        17,
         19,
         20,
         21,
@@ -919,7 +919,7 @@ def test_incident_alert_history_has_readable_full_width_layout() -> None:
     assert impact.get("gridPos", {}).get("y", 0) >= (
         history_grid.get("y", 0) + history_grid.get("h", 0)
     )
-    assert current_alerts.get("gridPos") == {"h": 5, "w": 24, "x": 0, "y": 13}
+    assert current_alerts.get("gridPos") == {"h": 4, "w": 24, "x": 0, "y": 13}
     assert "ALERTS" in str(history.get("targets", [{}])[0].get("expr", ""))
     assert str(history.get("targets", [{}])[0].get("legendFormat", "")).startswith(
         "{{alertname}}"
@@ -957,7 +957,7 @@ def test_incident_alert_count_and_dq_reason_have_honest_table_semantics() -> Non
         for property_ in count_override["properties"]
     }
     assert count_properties == {
-        "custom.cellOptions": {"type": "auto"},
+        "custom.cellOptions": {"type": "color-background"},
         "custom.align": "right",
         "custom.width": 120,
         "displayName": "Active Alerts",

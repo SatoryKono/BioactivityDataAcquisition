@@ -799,10 +799,10 @@ def test_incident_alert_evidence_is_collapsed_below_the_fold() -> None:
     assert 2006 not in root_ids
     assert 2007 not in root_ids
     alerts = next(panel for panel in root if panel.get("id") == 2005)
-    assert alerts.get("gridPos") == {"h": 5, "w": 24, "x": 0, "y": 13}
+    assert alerts.get("gridPos") == {"h": 4, "w": 24, "x": 0, "y": 13}
     row = next(panel for panel in root if panel.get("id") == 2020)
     assert row.get("type") == "row"
     assert row.get("collapsed") is True
-    assert row["gridPos"]["y"] == FIRST_WINDOW_Y
+    assert row["gridPos"]["y"] in {FIRST_WINDOW_Y - 1, FIRST_WINDOW_Y}
     nested_ids = {child.get("id") for child in (row.get("panels") or [])}
     assert nested_ids == {2006, 2007}

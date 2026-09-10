@@ -1064,7 +1064,7 @@
       "title": "Monitor Current Alerts",
       "description": "CURRENT · Do not put full UUIDs into Prometheus labels. Instant ALERTS snapshot (firing/pending). Pair with Alert State History as one temporal chain. VALID_EMPTY when none VALID EMPTY (no events) is not TELEMETRY MISSING.",
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 13
@@ -1103,11 +1103,11 @@
                 "value": null
               },
               {
-                "color": "orange",
+                "color": "#9a3412",
                 "value": 1
               },
               {
-                "color": "red",
+                "color": "#9f1239",
                 "value": 2
               }
             ]
@@ -1131,7 +1131,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto"
+                  "type": "color-background"
                 }
               },
               {
@@ -1159,6 +1159,39 @@
                 "value": {
                   "type": "auto",
                   "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "alertstate"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "firing": {
+                        "text": "firing",
+                        "color": "#9f1239"
+                      },
+                      "pending": {
+                        "text": "pending",
+                        "color": "#9a3412"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "wrapText": false
                 }
               }
             ]
@@ -1197,7 +1230,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 17
       },
       "collapsed": true,
       "panels": [

@@ -955,7 +955,7 @@
       "type": "table",
       "title": "Review Selected Run Summary",
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 13
@@ -1399,7 +1399,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 17
       },
       "id": 9405,
       "description": "Expand after selecting an exact Run ID for HTTP-backed identity and accounting evidence.",
