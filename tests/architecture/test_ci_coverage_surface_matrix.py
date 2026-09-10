@@ -227,6 +227,8 @@ class TestCiCoverageSurfaceMatrix:
             in matrix_block
         )
         assert "if-no-files-found: error" in matrix_block
+        assert "id: run-tests" in matrix_block
+        assert "steps.run-tests.outcome != 'skipped'" in matrix_block
 
     def test_candidate_producer_and_currentness_gate_are_separate(self) -> None:
         """A green SHA-bound producer must remain usable for first refresh."""

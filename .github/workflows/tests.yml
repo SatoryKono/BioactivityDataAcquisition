@@ -1185,6 +1185,7 @@ jobs:
           pytest-cache-fingerprint: ${{ hashFiles(matrix.test-group.cache_glob, 'tests/conftest.py', 'pyproject.toml') }}
 
       - name: Run Tests (${{ matrix.test-group.name }} on Python ${{ matrix.python-version }})
+        id: run-tests
         env:
           COVERAGE_FILE: reports/coverage/.coverage.${{ matrix.test-group.name }}
         run: |
@@ -1208,7 +1209,7 @@ jobs:
           exit $TEST_EXIT
 
       - name: Upload coverage shard (${{ matrix.test-group.name }} on Python 3.13)
-        if: ${{ always() && !cancelled() && matrix.python-version == '3.13' }}
+        if: ${{ always() && !cancelled() && matrix.python-version == '3.13' && steps.run-tests.outcome != 'skipped' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: coverage-data-${{ matrix.test-group.name }}
@@ -1218,7 +1219,7 @@ jobs:
           retention-days: 1
 
       - name: Upload test telemetry (${{ matrix.test-group.name }} on Python 3.13)
-        if: ${{ always() && !cancelled() && matrix.python-version == '3.13' }}
+        if: ${{ always() && !cancelled() && matrix.python-version == '3.13' && steps.run-tests.outcome != 'skipped' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: test-telemetry-${{ matrix.test-group.name }}
