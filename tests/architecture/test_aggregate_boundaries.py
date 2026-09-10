@@ -389,7 +389,7 @@ def _assert_aggregate_invariant_methods(aggregates_dir: Path) -> None:
     """Check aggregate value objects validate their invariants."""
     expected_validators = {
         "batch.py": ["BatchRecord"],
-        "pipeline_run.py": ["StageResult"],
+        "pipeline_run_stage_result.py": ["StageResult"],
         "quarantine_entry.py": ["ResolutionInfo"],
     }
     for filename, class_names in expected_validators.items():
@@ -531,8 +531,7 @@ class TestDomainEventsForCoordination:
             pytest.skip("Aggregates directory not found")
 
         required_events: dict[str, list[str]] = {
-            "_batch_aggregate.py": ["BatchCreated"],
-            "_batch_mixins.py": ["BatchSealed", "BatchWritten"],
+            "_batch_aggregate.py": ["BatchCreated", "BatchSealed", "BatchWritten"],
             "pipeline_run.py": ["PipelineCompleted", "PipelineFailed"],
             "quarantine_entry.py": [
                 "QuarantineEntryCreated",
@@ -591,7 +590,7 @@ class TestAggregateConsistencyBoundary:
 
         # ID properties should not have setters
         id_properties = {
-            "_batch_mixins.py": ["batch_id", "run_id"],
+            "batch.py": ["batch_id", "run_id"],
             "pipeline_run.py": ["run_id"],
             "quarantine_entry.py": ["entry_id", "run_id", "batch_id"],
         }

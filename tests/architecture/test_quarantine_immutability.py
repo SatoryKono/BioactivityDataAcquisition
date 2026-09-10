@@ -138,7 +138,7 @@ def test_quarantine_entry_defensively_copies_constructor_and_accessor_payloads()
     None
 ):
     """Constructor and accessors must preserve payload immutability via defensive copies."""
-    aggregate_path = Path("src/bioetl/domain/aggregates/_quarantine_aggregate.py")
+    aggregate_path = Path("src/bioetl/domain/aggregates/quarantine_entry.py")
     aggregate_tree = ast.parse(aggregate_path.read_text(encoding="utf-8"))
     init_method = _find_class_method(aggregate_tree, "QuarantineEntry", "__init__")
 

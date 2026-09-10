@@ -24,9 +24,9 @@ catalog in [Aggregates](aggregates.md).
 ## Sources Of Truth
 
 - `src/bioetl/domain/aggregates/batch.py`
-- `src/bioetl/domain/aggregates/_batch_mixins.py`
-- `src/bioetl/domain/aggregates/_pipeline_run_mixins.py`
+- `src/bioetl/domain/aggregates/_batch_aggregate.py`
 - `src/bioetl/domain/aggregates/pipeline_run.py`
+- `src/bioetl/domain/aggregates/pipeline_run_stage_result.py`
 - `src/bioetl/domain/aggregates/quarantine_entry.py`
 - `src/bioetl/domain/aggregates/_quarantine_value_objects.py`
 
@@ -45,10 +45,10 @@ catalog in [Aggregates](aggregates.md).
 | From | Operation | To | Source |
 | --- | --- | --- | --- |
 | `OPEN` | create batch | `OPEN` | `emit_batch_created(...)` records creation evidence without changing the initial state |
-| `OPEN` | `seal(...)` | `SEALED` | `_batch_mixins._BatchLifecycleMixin.seal` |
-| `SEALED` | `mark_writing(...)` | `WRITING` | `_batch_mixins._BatchLifecycleMixin.mark_writing` |
-| `WRITING` | `mark_committed(...)` | `COMMITTED` | `_batch_mixins._BatchLifecycleMixin.mark_committed` |
-| `WRITING` | `mark_failed(...)` | `FAILED` | `_batch_mixins._BatchLifecycleMixin.mark_failed` |
+| `OPEN` | `seal(...)` | `SEALED` | `_batch_aggregate._BatchLifecycleMixin.seal` |
+| `SEALED` | `mark_writing(...)` | `WRITING` | `_batch_aggregate._BatchLifecycleMixin.mark_writing` |
+| `WRITING` | `mark_committed(...)` | `COMMITTED` | `_batch_aggregate._BatchLifecycleMixin.mark_committed` |
+| `WRITING` | `mark_failed(...)` | `FAILED` | `_batch_aggregate._BatchLifecycleMixin.mark_failed` |
 
 ### Guard conditions
 
@@ -81,11 +81,11 @@ catalog in [Aggregates](aggregates.md).
 
 | From | Operation | To | Source |
 | --- | --- | --- | --- |
-| `PENDING` | `start(...)` | `RUNNING` | `_pipeline_run_mixins.start` |
-| `RUNNING` | `record_stage_failure(...)` | `FAILED` | `_pipeline_run_mixins.record_stage_failure` |
-| `RUNNING` | `complete(...)` | `COMPLETED` | `_pipeline_run_mixins.complete` |
-| `RUNNING` | `fail(...)` | `FAILED` | `_pipeline_run_mixins.fail` |
-| `RUNNING` | `shutdown(...)` | `SHUTDOWN` | `_pipeline_run_mixins.shutdown` |
+| `PENDING` | `start(...)` | `RUNNING` | `pipeline_run.PipelineRun.start` |
+| `RUNNING` | `record_stage_failure(...)` | `FAILED` | `pipeline_run_stage_result._PipelineRunStageMixin.record_stage_failure` |
+| `RUNNING` | `complete(...)` | `COMPLETED` | `pipeline_run.PipelineRun.complete` |
+| `RUNNING` | `fail(...)` | `FAILED` | `pipeline_run.PipelineRun.fail` |
+| `RUNNING` | `shutdown(...)` | `SHUTDOWN` | `pipeline_run.PipelineRun.shutdown` |
 
 Stage-level evidence is also recorded while the aggregate remains `RUNNING`:
 
