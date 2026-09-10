@@ -1,14 +1,14 @@
 version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
-source_branch: main
-refreshed_at_utc: '2026-09-10T07:02:08.446639+00:00'
+source_branch: fix/ruleset-10267-phase-3
+refreshed_at_utc: '2026-09-10T08:37:38.457660+00:00'
 refresh_status: captured
-source_commit: 2cb4d2d5806fc5b3e783d54ea116bcc464ee1daa
-source_run_id: '34441113111'
-source_event: push
-source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34441113111
-source_tree_sha256: f3bd9e791b5abe2440e4457acab92494061dd47c43a3a2703062277d075f113d
+source_commit: 26c23f334e52b0a3a6f981dd23d3823836d7c662
+source_run_id: '34454650515'
+source_event: pull_request
+source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34454650515
+source_tree_sha256: 90265caec1346683ab0ef7e90dfd9370346a910e63c23f7fc70b1685e9425c83
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
