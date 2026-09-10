@@ -48,22 +48,22 @@ __all__ = [
 
 
 def bootstrap_quarantine_runtime_service(pipeline: str) -> object:
-    """Resolve the quarantine runtime bootstrap lazily for patch-friendly tests."""
+    """Resolve the quarantine runtime bootstrap for patch-friendly tests."""
     return _checkpoint_cli.bootstrap_quarantine_runtime_service(pipeline)
 
 
 def bootstrap_checkpoint_runtime_service(pipeline: str) -> object:
-    """Resolve the checkpoint runtime bootstrap lazily for patch-friendly tests."""
+    """Resolve the checkpoint runtime bootstrap for patch-friendly tests."""
     return _checkpoint_cli.bootstrap_checkpoint_runtime_service(pipeline)
 
 
 def bootstrap_lifecycle_service() -> object:
-    """Resolve the lifecycle bootstrap lazily for patch-friendly tests."""
+    """Resolve the lifecycle bootstrap for patch-friendly tests."""
     return _storage_cli.bootstrap_lifecycle_service()
 
 
 def bootstrap_cleanup_service() -> CleanupServiceProtocol:
-    """Resolve the cleanup bootstrap lazily for patch-friendly tests."""
+    """Resolve the cleanup bootstrap for patch-friendly tests."""
     return _storage_cli.bootstrap_cleanup_service()
 
 
