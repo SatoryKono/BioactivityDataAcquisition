@@ -57,8 +57,10 @@ def test_bounded_incident_summary_uses_wrapped_row_pagination() -> None:
         path for path in get_dashboard_files() if path.stem == "bioetl-incident-v1"
     )
     panel = next(p for p in load_dashboard(source)["panels"] if p["id"] == 2010)
-    assert panel["options"]["footer"].get("enablePagination") is True
-    # First-window alerts sit at y=13, so suspects stay h=5 and must use sm.
+    # First-window alerts sit at y=12 (h=5 bottom 17), suspects use h=4 without pagination
+    # to keep y=8..12 inside viewport without vertical overflow. Narrower h fits 5 rows
+    # as table allocates fixed height; pagination footer caused 21px overflow.
+    assert panel["options"]["footer"].get("enablePagination") is False
     assert panel["options"]["cellHeight"] == "sm"
     assert any(
         t["id"] == "limit" and t["options"]["limitField"] == 5

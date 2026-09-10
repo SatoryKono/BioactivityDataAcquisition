@@ -1019,7 +1019,14 @@ def test_all_table_panels_use_uniform_cell_height() -> None:
                 assert paginated and wrapped
                 assert panel["gridPos"]["h"] > 6
             if wrapped:
-                assert paginated
+                # 1fee6a viewport-fit: incident 2010 h4 with wrap uses no pagination to avoid 21px footer overflow
+                if (
+                    dashboard_path.name == "bioetl-incident-v1.json"
+                    and panel.get("id") == 2010
+                ):
+                    assert paginated is False
+                else:
+                    assert paginated
                 assert custom.get("minWidth") == 50
     assert tables
 
