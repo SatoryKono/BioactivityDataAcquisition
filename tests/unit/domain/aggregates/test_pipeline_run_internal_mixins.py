@@ -582,9 +582,7 @@ class TestStageResultValidationFunctions:
     def test_validate_stage_completion_failed_requires_error(self):
         """FAILED status requires an error message."""
         with pytest.raises(ValueError, match="Failed stage must have an error"):
-            _validate_stage_result(
-                "stage", StageStatus.FAILED, None, _ts(0), 0, _ts(0)
-            )
+            _validate_stage_result("stage", StageStatus.FAILED, None, _ts(0), 0, _ts(0))
 
     def test_validate_stage_completion_success_requires_timestamp(self):
         """SUCCESS status requires completed_at."""
