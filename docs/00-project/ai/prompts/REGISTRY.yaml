@@ -5,7 +5,7 @@
 version: 2.0.0
 root: docs/00-project/ai/prompts
 schema: _schema/prompt.schema.json
-note: 'Epic #10081: 15 scenarios. Operator paste only — not runtime SSOT.'
+note: 'Epic #10081: 16 scenarios. Operator paste only — not runtime SSOT.'
 scenarios:
 - id: session-bootstrap
   scenario: Daily session lock for Grok/Codex
@@ -70,6 +70,21 @@ scenarios:
   schema: _schema/prompt.schema.json
   deps:
   - prompt.fragment.git-safety
+- id: agent-efficiency
+  scenario: Agent-efficiency plan (runtime, operator loop, generated CI)
+  role: py-plan-bot
+  prompt: prompt.plan.agent-efficiency
+  inputs:
+  - TASK
+  - SCOPE
+  - MODE
+  - LANGUAGE
+  outputs:
+  - plan.md
+  schema: _schema/prompt.schema.json
+  deps:
+  - prompt.fragment.git-safety
+  - prompt.fragment.debt-budget-ban
 - id: test-cycle
   scenario: Cyclic test run and triage
   role: py-test-bot
@@ -589,6 +604,16 @@ entries:
   - planning
   - operator
   summary: Plan an audit of docs/00-project/ai surfaces
+- id: prompt.plan.agent-efficiency
+  path: library/plan/agent-efficiency.md
+  status: active
+  class: operator-paste
+  tags:
+  - plan
+  - operator
+  - agents
+  - ci
+  summary: Plan agent-efficiency work (runtime, operator loop, generated CI)
 - id: prompt.plan.scoped
   path: library/plan/scoped.md
   status: active

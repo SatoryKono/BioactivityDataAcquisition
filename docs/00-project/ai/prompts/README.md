@@ -27,7 +27,7 @@ When a prompt conflicts with active sources, **active sources win**:
 ```text
 docs/00-project/ai/prompts/
   README.md
-  REGISTRY.yaml          # 15 scenarios + entries
+  REGISTRY.yaml          # 16 scenarios + entries
   domains.yaml           # 24 ADR-060 overlays (consolidated)
   CATALOG.md             # optional, from python -m scripts.ai.prompts catalog
   _schema/*.json         # 6 schemas
@@ -38,7 +38,7 @@ docs/00-project/ai/prompts/
 
 Historical copies: `docs/99-archive/prompts-2026-09/`.
 
-## 15 scenarios
+## 16 scenarios
 
 See `REGISTRY.yaml` `scenarios:`. Primary cards:
 
@@ -48,6 +48,7 @@ See `REGISTRY.yaml` `scenarios:`. Primary cards:
 | audit-cycle | `prompt.audit.cycle` | [library/audit/cycle.md](library/audit/cycle.md) |
 | audit-tech-debt | `prompt.audit.tech-debt` | [library/audit/tech-debt.md](library/audit/tech-debt.md) |
 | plan-scoped | `prompt.plan.scoped` | [library/plan/scoped.md](library/plan/scoped.md) |
+| agent-efficiency | `prompt.plan.agent-efficiency` | [library/plan/agent-efficiency.md](library/plan/agent-efficiency.md) |
 | test-cycle | `prompt.tests.cycle` | [library/test/cycle.md](library/test/cycle.md) |
 | test-fix-retest | `prompt.tests.fix-retest` | [library/test/fix-retest.md](library/test/fix-retest.md) |
 | config-validate | `prompt.config.validate` | [library/config/validate.md](library/config/validate.md) |

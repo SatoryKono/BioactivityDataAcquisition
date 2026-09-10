@@ -11975,7 +11975,7 @@
       "github_issue_url": null,
       "inbound_links": 3,
       "lifecycle": null,
-      "outbound_links": 15,
+      "outbound_links": 16,
       "owner": "BioETL Team",
       "path": "docs/00-project/ai/prompts/README.md",
       "recommended_action": "generate-automatically",
