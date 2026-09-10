@@ -10,6 +10,7 @@ from bioetl.composition.factories.pipeline.creation_support import (
     _create_pipeline_with_services_impl,
     _PipelineCreationInputs,
 )
+from bioetl.composition.factories.services import factory as _services_factory_module
 from bioetl.composition.factories.services._bundle_support import (
     BaseServicesFactoryProtocol,
     ServiceBundleDependencies,
@@ -18,6 +19,12 @@ from bioetl.composition.factories.services._bundle_support import (
 from bioetl.composition.factories.services._bundle_support import (
     create_pipeline_data_source as _create_pipeline_data_source_impl,
 )
+from bioetl.composition.factories.services.observability_api import (
+    _create_cached_bronze_data_source as _create_cached_bronze_data_source_impl,
+    _create_data_source as _create_observability_data_source,
+    create_shared_metrics,
+)
+from bioetl.composition.services import versioning as _versioning
 from bioetl.infrastructure.config.converters import (
     yaml_config_to_domain as _yaml_config_to_domain_direct,
 )
@@ -64,9 +71,10 @@ class _BaseServicesFactoryProxy:
     """Lazy proxy preserving the bundle-level BaseServicesFactory patch seam."""
 
     def _resolve(self) -> BaseServicesFactoryProtocol:
-        from bioetl.composition.factories.services.factory import BaseServicesFactory
-
-        return cast(BaseServicesFactoryProtocol, BaseServicesFactory)
+        return cast(
+            BaseServicesFactoryProtocol,
+            _services_factory_module.BaseServicesFactory,
+        )
 
     def _create_metrics(self, settings: Settings) -> MetricsPort:
         return self._resolve()._create_metrics(settings)
@@ -128,11 +136,7 @@ def yaml_config_to_domain(
 
 def compute_config_hash(config: PipelineYamlConfig | dict[str, object]) -> str:
     """Compute deterministic config hash for run-manifest and cache identity."""
-    from bioetl.composition.services.versioning import (
-        compute_config_hash as _compute_config_hash_direct,
-    )
-
-    config_hash: str = _compute_config_hash_direct(config)
+    config_hash: str = _versioning.compute_config_hash(config)
     return config_hash
 
 
@@ -141,10 +145,6 @@ def _resolve_base_services_factory() -> BaseServicesFactoryProtocol:
     local_factory = BaseServicesFactory
     if local_factory is not _DEFAULT_BASE_SERVICES_FACTORY:
         return local_factory
-    from bioetl.composition.factories.services import (
-        factory as _services_factory_module,
-    )
-
     return cast(
         "BaseServicesFactoryProtocol",
         _services_factory_module.BaseServicesFactory,
@@ -178,11 +178,7 @@ def _create_data_source(
     metrics: MetricsPort | None,
     pipeline_name: str,
 ) -> DataSourcePort:
-    from bioetl.composition.factories.services.observability_api import (
-        _create_data_source as _create_data_source_impl,
-    )
-
-    return _create_data_source_impl(
+    return _create_observability_data_source(
         create_data_source_fn=create_data_source_fn,
         settings=settings,
         pipeline_config=pipeline_config,
@@ -201,10 +197,6 @@ def _create_cached_bronze_data_source(
     metrics: MetricsPort | None = None,
     cached_bronze: CachedBronzeContext,
 ) -> DataSourcePort:
-    from bioetl.composition.factories.services.observability_api import (
-        _create_cached_bronze_data_source as _create_cached_bronze_data_source_impl,
-    )
-
     return _create_cached_bronze_data_source_impl(
         settings=settings,
         pipeline_config=pipeline_config,
@@ -259,10 +251,6 @@ def build_pipeline_services(
     pipeline_config = (
         config if config is not None else deps.load_pipeline_config(pipeline_name)
     )
-    from bioetl.composition.factories.services.observability_api import (
-        create_shared_metrics,
-    )
-
     shared_metrics = create_shared_metrics(
         settings=settings,
         base_services_factory=deps.base_services_factory,
