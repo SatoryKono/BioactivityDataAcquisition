@@ -1601,7 +1601,7 @@
                           "pattern": "^(critical|page|p0|p1)$",
                           "result": {
                             "text": "CRITICAL",
-                            "color": "red"
+                            "color": "text"
                           }
                         }
                       },

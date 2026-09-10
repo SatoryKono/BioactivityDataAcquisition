@@ -957,7 +957,7 @@ def test_incident_alert_count_and_dq_reason_have_honest_table_semantics() -> Non
         for property_ in count_override["properties"]
     }
     assert count_properties == {
-        "custom.cellOptions": {"type": "auto"},
+        "custom.cellOptions": {"type": "color-background"},
         "custom.align": "right",
         "custom.width": 120,
         "displayName": "Active Alerts",

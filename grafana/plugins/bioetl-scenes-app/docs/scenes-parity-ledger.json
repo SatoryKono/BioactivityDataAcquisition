@@ -20,12 +20,12 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "5f347770b62895bf9c49199a8c679ffeef69ac08d46e1a8b7f18a5e2e33457d4",
+    "bioetl-control-plane-v1": "e2da014d3600a2e6d0bc8ec5478809a1a33493ecbd0b962bbec33880a7623df3",
     "bioetl-dq-v2": "96f2f67895ffbc9903a733960f64f82416c491a8ec89a5c09a3f2122b870192b",
-    "bioetl-incident-v1": "12c7a45a81bb7eba62184e46811de0be18a481e33a46d56cf7a1997bef65d0a8",
-    "bioetl-overview-v2": "6917ba846417687dfca52a1f4d97a788caf4cab4c9a1e4b9f5d9e38799e2151b",
-    "bioetl-provider-health-v2": "fbc42e10c15767c7c161e5d3a9ec168fe7b97ca28b028483977d55a3d2f23062",
-    "bioetl-run-explorer-v1": "4dccf5d4bf32c80b42837e2800bc3c0c79b6847d235b3cb19a3ca35375d8b4a0",
+    "bioetl-incident-v1": "b7cee301613afb69a442e6b653ee86bcd297a578ba380044091f7557c3299f34",
+    "bioetl-overview-v2": "5579453c97053861c31c83cc21d805b6e8f3b5b82bfe3a21b16fe60d21d54e76",
+    "bioetl-provider-health-v2": "8470fa235e211acab68d29b7fcd13f49f92b361be7cb0fdfabb01746fba0176f",
+    "bioetl-run-explorer-v1": "c6ce3dbd919b5efb2d75b9e348735bde18dceb78c974812360066f23db80154a",
     "bioetl-runtime": "e4ed9e7ead235971a8d06a5da353fb2ebdef18dd94f10f2baee31728ecc35de9"
   },
   "panels": [
@@ -2129,7 +2129,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (pipeline,run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")"
+          "label_replace(label_replace(max by (pipeline,run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"pipeline\",\"All\",\"pipeline\",\"^\\\\.\\\\*$\"),\"run_type\",\"All\",\"run_type\",\"^\\\\.\\\\*$\") or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")"
         ],
         "target_count": 1
       }
@@ -2148,7 +2148,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (pipeline,run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")"
+          "label_replace(label_replace(max by (pipeline,run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"pipeline\",\"All\",\"pipeline\",\"^\\\\.\\\\*$\"),\"run_type\",\"All\",\"run_type\",\"^\\\\.\\\\*$\") or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")"
         ],
         "target_count": 1
       }
@@ -2167,7 +2167,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (pipeline,run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")"
+          "label_replace(label_replace(max by (pipeline,run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"pipeline\",\"All\",\"pipeline\",\"^\\\\.\\\\*$\"),\"run_type\",\"All\",\"run_type\",\"^\\\\.\\\\*$\") or on() label_replace(label_replace(vector(3),\"pipeline\",\"${pipeline:text}\",\"\",\"\"),\"run_type\",\"${run_type:text}\",\"\",\"\")"
         ],
         "target_count": 1
       }

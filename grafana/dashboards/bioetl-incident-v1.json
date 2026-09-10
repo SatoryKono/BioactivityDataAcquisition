@@ -1103,11 +1103,11 @@
                 "value": null
               },
               {
-                "color": "orange",
+                "color": "#9a3412",
                 "value": 1
               },
               {
-                "color": "red",
+                "color": "#9f1239",
                 "value": 2
               }
             ]
@@ -1131,7 +1131,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto"
+                  "type": "color-background"
                 }
               },
               {
@@ -1159,6 +1159,39 @@
                 "value": {
                   "type": "auto",
                   "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "alertstate"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "firing": {
+                        "text": "firing",
+                        "color": "#9f1239"
+                      },
+                      "pending": {
+                        "text": "pending",
+                        "color": "#9a3412"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "wrapText": false
                 }
               }
             ]
