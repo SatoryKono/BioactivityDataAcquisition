@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `fix/grafana-a11y-10170-defects`
-- Source commit: `e717b9597217fdc124a05643ee00534a3df28943`
-- Source run id: `34423140978`
-- Source event: `pull_request`
-- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34423140978`
-- Source tree sha256: `b9dba6dfbd72b972d21568907c4e6a72ba4c7b6c316523484074695d44888058`
+- Source branch: `main`
+- Source commit: `2cb4d2d5806fc5b3e783d54ea116bcc464ee1daa`
+- Source run id: `34441113111`
+- Source event: `push`
+- Source run URL: `pending`
+- Source tree sha256: `6f3c6b19ff9b36fd25732568276740f825c10ecf03fd22bbba155948b5ea2bef`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-09-10T05:28:59.677128+00:00`
+- Refreshed at (UTC): `2026-09-10T05:51:42.305946+00:00`
 
 ## Branch-accurate provenance (#5729)
 

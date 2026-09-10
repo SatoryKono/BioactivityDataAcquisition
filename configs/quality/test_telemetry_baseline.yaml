@@ -1,14 +1,14 @@
 version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
-source_branch: fix/grafana-a11y-10170-defects
-refreshed_at_utc: '2026-09-10T05:28:59.677128+00:00'
+source_branch: main
+refreshed_at_utc: '2026-09-10T05:51:42.305946+00:00'
 refresh_status: captured
-source_commit: e717b9597217fdc124a05643ee00534a3df28943
-source_run_id: '34423140978'
-source_event: pull_request
-source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34423140978
-source_tree_sha256: b9dba6dfbd72b972d21568907c4e6a72ba4c7b6c316523484074695d44888058
+source_commit: 2cb4d2d5806fc5b3e783d54ea116bcc464ee1daa
+source_run_id: '34441113111'
+source_event: push
+source_run_url: null
+source_tree_sha256: 6f3c6b19ff9b36fd25732568276740f825c10ecf03fd22bbba155948b5ea2bef
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
