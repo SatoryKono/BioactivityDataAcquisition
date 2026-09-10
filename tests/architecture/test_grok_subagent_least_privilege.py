@@ -58,15 +58,14 @@ def test_codex_py_toml_declares_allowed_and_forbidden_mcp() -> None:
 
 
 def _named_mcp_block(text: str) -> str:
-    start = text.find("mcpInheritance:")
+    normalized = text.replace("\r\n", "\n")
+    start = normalized.find("mcpInheritance:")
     if start < 0:
         return ""
-    frontmatter_start = text.find("\n") + 1
-    end = text.find("\n---", frontmatter_start)
-    if end < 0:
-        end = text.find("\r\n---", frontmatter_start)
+    frontmatter_start = normalized.find("\n") + 1
+    end = normalized.find("\n---\n", frontmatter_start)
     if end < 0:
         return ""
     if start >= end:
         return ""
-    return text[start:end]
+    return normalized[start:end]
