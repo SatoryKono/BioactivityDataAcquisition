@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.2.13
+Version: 1.2.14
 Status: active
 Class: published
 Owner: BioETL Team
@@ -206,7 +206,7 @@ weaken gates, raise tech-debt budgets, or force Grafana npm majors
 | `secret_scanning_validity_checks` | enabled | Partner-pattern validity. `PATCH /repos/{owner}/{repo}` with this field returns HTTP 200 on this user-owned repository but leaves the setting `disabled` (verified `2026-09-10`). Enable in GitHub UI: Settings → Code security → Secret scanning → Validity checks. Review control `GH-SECRET-002` stays blocking until live status is `enabled`. |
 | `secret_scanning_non_provider_patterns` | disabled | Intentionally off (noisy). Do not enable without a dated issue. |
 | Unused environments | absent | `copilot` and `staging` are not publish surfaces and MUST NOT exist. Publish environments stay `ghcr-publish`, `observability-render-host`, `pypi`, `testpypi`. |
-| `allow_auto_merge` | `true` | Safe only after #10267 activates ruleset `main` with required context `pr-gate-complete`. Do not treat empty applied rules as merge protection. |
+| `allow_auto_merge` | `true` | Allowed after #10267: live `GET .../rules/branches/main` applies required context `pr-gate-complete`. Do not treat a disabled companion ruleset as a merge wall. |
 
 Controls live in [`github_governance_policy.json`](../../../configs/quality/github_governance_policy.json): `GH-SECRET-002`, `GH-SECRET-003`, `GH-ACTIONS-002`, `GH-ACTIONS-003`, `GH-ENV-002`.
 
@@ -1021,3 +1021,12 @@ Merge-block proof: `PUT /repos/SatoryKono/BioactivityDataAcquisition/pulls/9895/
 - Auto-merge may remain enabled now that a required check is applied.
 - `GH-RULESET-001.known_issue` returns to `null` because an active ruleset exists.
 - Scorecard #1295 stays open (solo-maintainer; independent approval would deadlock).
+
+### Migration notes (1.2.14)
+
+- Remaining operator SSOT after the #10267 PUT now matches live GET:
+  `ci-workflow-map.md` records `pr-gate-complete` as the GitHub required
+  context; `allow_auto_merge` is no longer gated on a future activation.
+- Closeout GET `2026-09-10` reconfirmed `13643213` `active` (updated
+  `2026-09-10T02:53:01+03:00`) and `15730586` `disabled` (no second PUT).
+- Evidence: `reports/governance/ruleset-10267-closeout-get-2026-09-10.json`.

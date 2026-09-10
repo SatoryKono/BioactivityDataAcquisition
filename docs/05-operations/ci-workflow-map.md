@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.0.2
+Version: 1.0.3
 Status: active
 Class: published
 Owner: BioETL Team
@@ -18,10 +18,11 @@ temp/residual). YAML self-description remains authoritative for
 triggers/secrets; GitHub UI `state` is authoritative for whether the lane
 actually runs. This page routes operators only to **active** lanes.
 
-`pr-required.yml` (`pr-gate-complete`) is the repo-side coordinator. It is
-**not** a GitHub ruleset required context while `main` (13643213) and
-`root-hygiene-required-check` (15730586) stay `enforcement: disabled`
-([#10267](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/10267)).
+`pr-required.yml` (`pr-gate-complete`) is the repo-side coordinator **and**
+the GitHub ruleset required context on `main` (ruleset `13643213`,
+`enforcement: active` as of `2026-09-10T02:53:01+03:00`,
+[#10267](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/10267)).
+Companion `root-hygiene-required-check` (15730586) stays `enforcement: disabled`.
 Orphan temp / dynamic hosted workflows are out of scope here (#10265, #10268).
 
 ## How to use
@@ -50,7 +51,7 @@ Orphan temp / dynamic hosted workflows are out of scope here (#10265, #10268).
 | `e2e-matrix-health.yml` | E2E Matrix Health | End-to-end matrix health |
 | `github-settings-quarterly-review.yml` | Quarterly GitHub Settings Review | Read-only quarterly GitHub settings review |
 | `import-linter.yml` | Lint and Architecture Gates | import-linter + layer architecture |
-| `pr-required.yml` | PR Gate Complete | Fail-closed coordinator `pr-gate-complete`; not GitHub-required while rulesets are disabled (#10267) |
+| `pr-required.yml` | PR Gate Complete | Fail-closed coordinator; GitHub required context `pr-gate-complete` (ruleset 13643213, #10267) |
 | `root-hygiene.yml` | Root Hygiene | Root allowlist / clutter gates |
 | `schema-governance.yml` | Schema Governance | Schema governance checks |
 | `scorecard.yml` | OpenSSF Scorecard | Weekly non-blocking OpenSSF Scorecard baseline |
