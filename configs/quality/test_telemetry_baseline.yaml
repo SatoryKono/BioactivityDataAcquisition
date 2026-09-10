@@ -2,7 +2,7 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: fix/grafana-a11y-10170-defects
-refreshed_at_utc: '2026-09-10T01:17:41.194765+00:00'
+refreshed_at_utc: '2026-09-10T05:28:59.677128+00:00'
 refresh_status: captured
 source_commit: e717b9597217fdc124a05643ee00534a3df28943
 source_run_id: '34423140978'

@@ -34,7 +34,7 @@ trend evidence only.
 - Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34423140978`
 - Source tree sha256: `b9dba6dfbd72b972d21568907c4e6a72ba4c7b6c316523484074695d44888058`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-09-10T01:17:41.194765+00:00`
+- Refreshed at (UTC): `2026-09-10T05:28:59.677128+00:00`
 
 ## Branch-accurate provenance (#5729)
 
