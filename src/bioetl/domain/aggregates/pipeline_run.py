@@ -42,18 +42,7 @@ class PipelineRun(_PipelineRunStageMixin):
         5. run_id is unique and immutable after creation
     """
 
-    __slots__ = (
-        "_ended_at",
-        "_events",
-        "_manifest_id",
-        "_metadata",
-        "_pipeline_name",
-        "_run_id",
-        "_run_type",
-        "_stages",
-        "_started_at",
-        "_status",
-    )
+    __slots__ = ()
 
     def __init__(
         self,

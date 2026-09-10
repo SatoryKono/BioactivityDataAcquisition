@@ -160,21 +160,21 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "579",
+      "line": "578",
       "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_stage_name_accepts_valid"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "598",
+      "line": "601",
       "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_stage_completion_running_allows_none_timestamp"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "180",
+      "line": "178",
       "path": "tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_required_fields_accepts_valid_input"
@@ -675,9 +675,9 @@
     "tests/unit/composition/test_observability_contract.py:430",
     "tests/unit/composition/factories/storage/test_health_mixin.py:72",
     "tests/unit/composition/factories/storage/test_health_mixin.py:103",
-    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:579",
-    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:598",
-    "tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py:180",
+    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:578",
+    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:601",
+    "tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py:178",
     "tests/unit/domain/ports/test_noop_audit.py:90",
     "tests/unit/domain/ports/test_protocol_stubs.py:235",
     "tests/unit/domain/schemas/chembl/test_schemas.py:263",
@@ -1311,21 +1311,21 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "579",
+        "line": "578",
         "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_stage_name_accepts_valid"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "598",
+        "line": "601",
         "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_stage_completion_running_allows_none_timestamp"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "180",
+        "line": "178",
         "path": "tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_required_fields_accepts_valid_input"
@@ -1826,9 +1826,9 @@
       "tests/unit/composition/test_observability_contract.py:430",
       "tests/unit/composition/factories/storage/test_health_mixin.py:72",
       "tests/unit/composition/factories/storage/test_health_mixin.py:103",
-      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:579",
-      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:598",
-      "tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py:180",
+      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:578",
+      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:601",
+      "tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py:178",
       "tests/unit/domain/ports/test_noop_audit.py:90",
       "tests/unit/domain/ports/test_protocol_stubs.py:235",
       "tests/unit/domain/schemas/chembl/test_schemas.py:263",
@@ -2074,7 +2074,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "16189518e2bd61d75c39bfc39c4eba7f5a4de08b4973c7b645e9f74e9a7bc10e",
+  "source_tree_sha256": "3642d1d354345bac4a257182550547daae31f83ef6ad2d605f2d19871607a456",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 88,

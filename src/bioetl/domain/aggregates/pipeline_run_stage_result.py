@@ -5,9 +5,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
+from typing import TYPE_CHECKING
 
 from bioetl.domain.aggregates.events import PipelineFailed
 from bioetl.domain.exceptions import InvalidStateError
+
+if TYPE_CHECKING:
+    from bioetl.domain.aggregates.events import DomainEvent
+    from bioetl.domain.types import JsonDict, RunID, RunType
 
 
 class StageStatus(StrEnum):
@@ -38,12 +43,6 @@ class PipelineRunState(StrEnum):
         }
 
 
-def _validate_stage_name(stage: str) -> None:
-    """Validate stage name is not empty."""
-    if not stage:
-        raise ValueError("Stage name cannot be empty")
-
-
 def _validate_failed_has_error(status: StageStatus, error: str | None) -> None:
     if status != StageStatus.FAILED:
         return
@@ -61,8 +60,7 @@ def _validate_in_progress_no_completion(
     if completed_at is None:
         return
     raise ValueError(
-        f"In-progress stage must not have completed_at timestamp, "
-        f"got status={status.value}"
+        f"In-progress stage must not have completed_at timestamp, got status={status.value}"
     )
 
 
@@ -75,8 +73,7 @@ def _validate_terminal_has_completion(
     if completed_at:
         return
     raise ValueError(
-        f"Completed/Failed stage must have completed_at timestamp, "
-        f"got status={status.value}"
+        f"Completed/Failed stage must have completed_at timestamp, got status={status.value}"
     )
 
 
@@ -94,19 +91,6 @@ def _validate_completion_order(
     )
 
 
-def _validate_stage_completion(
-    status: StageStatus,
-    error: str | None,
-    completed_at: datetime | None,
-    started_at: datetime,
-) -> None:
-    """Validate stage completion invariants."""
-    _validate_failed_has_error(status, error)
-    _validate_in_progress_no_completion(status, completed_at)
-    _validate_terminal_has_completion(status, completed_at)
-    _validate_completion_order(completed_at, started_at)
-
-
 def _validate_stage_result(
     stage: str,
     status: StageStatus,
@@ -115,9 +99,12 @@ def _validate_stage_result(
     records_processed: int,
     started_at: datetime,
 ) -> None:
-    """Validate stage result invariants (extracted for lower CC)."""
-    _validate_stage_name(stage)
-    _validate_stage_completion(status, error, completed_at, started_at)
+    if not stage:
+        raise ValueError("Stage name cannot be empty")
+    _validate_failed_has_error(status, error)
+    _validate_in_progress_no_completion(status, completed_at)
+    _validate_terminal_has_completion(status, completed_at)
+    _validate_completion_order(completed_at, started_at)
     if records_processed < 0:
         raise ValueError(f"records_processed cannot be negative: {records_processed}")
 
@@ -193,9 +180,34 @@ class StageResult:
 
 
 class _PipelineRunStageMixin:
-    """Stage recording behavior for PipelineRun."""
+    """Stage recording behavior for PipelineRun.
 
-    __slots__ = ()
+    Slots and annotations live on this class so mypy sees mixin methods as
+    mutating the same instance layout as ``PipelineRun``.
+    """
+
+    __slots__ = (
+        "_ended_at",
+        "_events",
+        "_manifest_id",
+        "_metadata",
+        "_pipeline_name",
+        "_run_id",
+        "_run_type",
+        "_stages",
+        "_started_at",
+        "_status",
+    )
+    _run_id: RunID
+    _run_type: RunType
+    _pipeline_name: str
+    _status: PipelineRunState
+    _stages: list[StageResult]
+    _started_at: datetime | None
+    _ended_at: datetime | None
+    _events: list[DomainEvent]
+    _manifest_id: str | None
+    _metadata: JsonDict
 
     def record_stage_start(self, stage: str, started_at: datetime) -> None:
         """Record the start of a pipeline stage."""
@@ -239,8 +251,7 @@ class _PipelineRunStageMixin:
 
     def _has_stage_status(self, stage: str, status: StageStatus) -> bool:
         return any(
-            existing.stage == stage and existing.status == status
-            for existing in self._stages
+            item.stage == stage and item.status == status for item in self._stages
         )
 
     def record_stage_failure(

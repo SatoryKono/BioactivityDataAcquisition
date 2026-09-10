@@ -47,8 +47,6 @@ import pytest
 from bioetl.domain.aggregates.pipeline_run import PipelineRun
 from bioetl.domain.aggregates.pipeline_run_stage_result import (
     StageResult,
-    _validate_stage_completion,
-    _validate_stage_name,
     _validate_stage_result,
 )
 from bioetl.domain.aggregates.pipeline_run_stage_result import (
@@ -573,34 +571,36 @@ class TestStageResultValidationFunctions:
     """Tests for StageResult validation functions."""
 
     def test_validate_stage_name_rejects_empty(self):
-        """_validate_stage_name should reject empty stage names."""
+        """Empty stage names are rejected by stage-result validation."""
         with pytest.raises(ValueError, match="Stage name cannot be empty"):
-            _validate_stage_name("")
+            _validate_stage_result("", StageStatus.RUNNING, None, None, 0, _ts(0))
 
     def test_validate_stage_name_accepts_valid(self):
-        """_validate_stage_name should accept valid stage names."""
-        _validate_stage_name("bronze")  # Should not raise
+        """Valid stage names pass stage-result validation."""
+        _validate_stage_result("bronze", StageStatus.RUNNING, None, None, 0, _ts(0))
 
     def test_validate_stage_completion_failed_requires_error(self):
-        """_validate_stage_completion should require error for FAILED status."""
+        """FAILED status requires an error message."""
         with pytest.raises(ValueError, match="Failed stage must have an error"):
-            _validate_stage_completion(StageStatus.FAILED, None, _ts(0), _ts(0))
+            _validate_stage_result(
+                "stage", StageStatus.FAILED, None, _ts(0), 0, _ts(0)
+            )
 
     def test_validate_stage_completion_success_requires_timestamp(self):
-        """_validate_stage_completion should require completed_at for SUCCESS."""
+        """SUCCESS status requires completed_at."""
         with pytest.raises(ValueError, match="must have completed_at"):
-            _validate_stage_completion(StageStatus.SUCCESS, None, None, _ts(0))
+            _validate_stage_result("stage", StageStatus.SUCCESS, None, None, 0, _ts(0))
 
     def test_validate_stage_completion_failed_requires_timestamp(self):
-        """_validate_stage_completion should require completed_at for FAILED."""
+        """FAILED status requires completed_at."""
         with pytest.raises(ValueError, match="must have completed_at"):
-            _validate_stage_completion(StageStatus.FAILED, "error", None, _ts(0))
+            _validate_stage_result(
+                "stage", StageStatus.FAILED, "error", None, 0, _ts(0)
+            )
 
     def test_validate_stage_completion_running_allows_none_timestamp(self):
-        """_validate_stage_completion should allow None for RUNNING status."""
-        _validate_stage_completion(
-            StageStatus.RUNNING, None, None, _ts(0)
-        )  # Should not raise
+        """RUNNING status allows a missing completed_at."""
+        _validate_stage_result("stage", StageStatus.RUNNING, None, None, 0, _ts(0))
 
     def test_validate_stage_result_rejects_negative_records(self):
         """_validate_stage_result should reject negative records_processed."""

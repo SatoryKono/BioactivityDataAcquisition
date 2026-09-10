@@ -1,5 +1,5 @@
 %% Title: Package Family: domain/aggregates
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/aggregates; modules: events, _quarantine_value_objects, batch, pipeline_run_stage_result, _batch_aggregate, quarantine_entry, pipeline_run.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/aggregates; modules: events, batch, _quarantine_value_objects, pipeline_run_stage_result, _batch_aggregate, pipeline_run.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
@@ -23,19 +23,19 @@ classDiagram
         class RecordQuarantined
     }
 
+    namespace batch {
+        class BatchRecord
+        class BatchStatus
+        class _BatchAttrs
+        class _BatchMutationMixin
+        class _BatchReadModelMixin
+    }
+
     namespace quarantine_value_objects {
         class QuarantineEntryPropertiesMixin
         class QuarantineEntryTransitionsMixin
         class QuarantineStatus
         class ResolutionInfo
-    }
-
-    namespace batch {
-        class BatchRecord
-        class BatchStatus
-        class _BatchAttrs
-        class _BatchReadModelMixin
-        class _BatchMutationMixin
     }
 
     namespace pipeline_run_stage_result {
@@ -50,12 +50,12 @@ classDiagram
         class _BatchLifecycleMixin
     }
 
-    namespace quarantine_entry {
-        class QuarantineEntry
-    }
-
     namespace pipeline_run {
         class PipelineRun
+    }
+
+    namespace quarantine_entry {
+        class QuarantineEntry
     }
 
     DomainEvent <|-- BatchCreated
@@ -71,7 +71,8 @@ classDiagram
     QuarantineEntryPropertiesMixin <|-- QuarantineEntry
     QuarantineEntryTransitionsMixin <|-- QuarantineEntry
     _BatchAttrs <|-- _BatchReadModelMixin
-    _BatchReadModelMixin <|-- _BatchMutationMixin
-    _BatchMutationMixin <|-- _BatchLifecycleMixin
     _BatchLifecycleMixin <|-- Batch
+    _BatchMutationMixin <|-- _BatchLifecycleMixin
+    _BatchReadModelMixin <|-- _BatchMutationMixin
     _PipelineRunStageMixin <|-- PipelineRun
+
