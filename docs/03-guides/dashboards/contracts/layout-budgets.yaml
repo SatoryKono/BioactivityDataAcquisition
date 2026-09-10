@@ -331,14 +331,6 @@ allowlists:
   # Horizontal scrolling is allowed only for named below-fold explorers.
   horizontal_scroll: []
   min_height:
-    - dashboard: bioetl-incident-v1.json
-      id: 2010
-      owner: "@bioetl-observability"
-      rationale: >-
-        Inspect Ranked Suspects h=4 fits first-window without vertical overflow
-        after pagination was removed; h=5 overflows at 1366x768. Keeps y=8..12
-        inside viewport with 2005 at y=12..17.
-      retire_when: Ranked Suspects can keep h=5 without overflow at 200% or content shrink
     - dashboard: bioetl-dq-v2.json
       id: 153
       owner: "@bioetl-observability"
@@ -346,13 +338,6 @@ allowlists:
         Track Volume-Weighted DQ Score is an intentional ultra-compact
         timeseries (h=4) with the legend hidden.
       retire_when: DQ score trend moves out of the compact evidence strip
-    - dashboard: bioetl-dq-v2.json
-      id: 9406
-      owner: "@bioetl-observability"
-      rationale: >-
-        Review Selected Run Summary h=4 fits first-window bottom 17 without
-        outside; h=5 at y=13 exceeds viewport 768 with kiosk chrome.
-      retire_when: Selected Run Summary can keep h=5 without outside at 200%
   # DASH-DENSITY-002 governed exceptions keyed by (dashboard, row id).
   scalar_density:
     - dashboard: bioetl-provider-health-v2.json
