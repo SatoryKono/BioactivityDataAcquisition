@@ -41,20 +41,33 @@ yolo = false
 
 Switch back to **safe** after the session. Never leave ship as the long-term default.
 
-## 3. MCP slim profile (always-on target ≤8)
+## 3. MCP slim profile (always-on target ≤4 live)
 
-Recommended always-on:
+Wave `SUBAGENT-20260910` (#10313 / #10314). Daily **parent** connected MCP:
 
-- `github`
-- `fetch`
-- `brave-search` (or drop if using only built-in web_search)
-- `context7`
+- `github` (required; **only** the parent may write GitHub / run `gh`)
 - `ast-grep`
 - `code-analyzer`
-- `memory`
+- `context7` (disable if handshake FAIL)
 
-Enable on demand: `docker`, `grafana`, `prometheus`, `mutmut`, `github-actions`,
-`deepwiki`, `ref` (after auth), `neo4j-memory`, etc.
+Optional if actually live: `memory` (MCP file), `fetch`.
+
+**Off** on daily parent: `grafana`, `prometheus`, `google_drive`, `tasks`,
+`neo4j-*`, `deepwiki`, `brave-search`, `filesystem`, `docker`, `github-actions`.
+`grafana`/`prometheus` stay off here even after Grok-only `obs-dashboard`
+(#10319) — that agent named-inherits them.
+
+Parent skills KEEP (≤7): `bioetl-session`, `bioetl-closeout`,
+`bioetl-post-change`, `long-running-background-tasks`, `pr-babysit`, `review`,
+`gh-address-comments`. Disable the non-BioETL catalog (`pc-agent-session`,
+deploy/office/imagegen/`resume-*`, …) via `[skills] disabled`.
+
+Child Grok agents (`docs/00-project/ai/grok/agents/`): `mcpInheritance.named`
+**without** `github`; no `gh` / `hub` / `api.github.com`. Install:
+
+```powershell
+.\scripts\ai\grok\install_skills.ps1
+```
 
 Local config is machine-only — **do not commit** API keys or full `config.toml`.
 

@@ -67,3 +67,11 @@ workflow for a V1/V2 task.
 - Never weaken config validation to make invalid input pass.
 - Treat secrets and machine-local values as out of tracked config.
 - Do not create or modify any `.env` file without explicit per-task approval.
+
+## Least-privilege (SUBAGENT-20260910)
+
+Allowed skills: `py-config-bot`, `bioetl-post-change`; `new-pipeline` opt-in.
+Allowed MCP: `ast-grep`, `code-analyzer`.
+Forbidden MCP includes `github`. Do not call undeclared MCP.
+Do not run `gh`, `hub`, or `api.github.com`. Local `git` status/diff/log is
+allowed; `git push` is not.
