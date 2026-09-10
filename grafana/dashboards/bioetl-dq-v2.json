@@ -958,7 +958,7 @@
         "h": 5,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 12
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Compact pipeline_run_report_v1 projection (identity, times, gold out, contract exclusions, coverage). Missing run is SELECT RUN, not OK. A selected run with no summary rows is VALID EMPTY, not OK. SELECT RUN is not VALID EMPTY. Set range to run opens 6. Run Explorer at started_at-5m .. <code style='font-size:16px'>completed_at</code>+5m. Do not treat CURRENT Prometheus as this UUID. Backend unavailable means the query could not be evaluated. Verify /health/live. Coverage chip is IN RANGE / OUT OF RANGE / UNKNOWN from covers_selected_run. Set range to run opens Run Explorer 3022 at from_ms..to_ms. A covered run does not show an outside-range warning. Status, coverage and local timestamps precede the UUID. Inspect the Run cell to copy its complete value; range-bound fields remain available to the Set range to run action and panel data inspection.",
