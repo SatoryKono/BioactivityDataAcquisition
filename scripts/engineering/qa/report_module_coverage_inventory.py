@@ -1374,7 +1374,7 @@ def _confined_existing_path(path: Path, *, repo_root: Path) -> Path | None:
     safe = _confine_inventory_path(path, repo_root=repo_root)
     if not safe.exists():
         return None
-    return _confine_inventory_path(safe, repo_root=repo_root)
+    return safe
 
 
 def _load_inventory_mapping(path: Path, *, repo_root: Path) -> dict[str, Any]:
@@ -1385,6 +1385,12 @@ def _load_inventory_mapping(path: Path, *, repo_root: Path) -> dict[str, Any]:
 
 
 def _inventory_date_source(args: argparse.Namespace) -> Path | None:
+    """Choose the artifact whose snapshot_date should survive regeneration.
+
+    Check mode compares against the committed output path, while write mode prefers
+    an explicit baseline snapshot when one was supplied and otherwise falls back
+    to the output artifact being refreshed in place.
+    """
     if args.check:
         return args.json_out
     if args.baseline_json:

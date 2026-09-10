@@ -17,6 +17,7 @@ import pytest
 
 from scripts.engineering.qa.report_module_coverage_inventory import (
     _SourceModuleSnapshot,
+    _confined_existing_path,
     _parse_coverage_xml,
     _module_is_declaration_only,
     _payload_for_check,
@@ -27,6 +28,30 @@ from scripts.engineering.qa.report_module_coverage_inventory import (
 )
 
 pytestmark = pytest.mark.unit
+
+
+def test_confined_existing_path_returns_first_confined_result(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    existing = tmp_path / "inventory.json"
+    existing.write_text("{}", encoding="utf-8")
+    calls: list[Path] = []
+
+    def _fake_confine(candidate: Path, *, repo_root: Path) -> Path:
+        calls.append(candidate)
+        if len(calls) > 1:
+            pytest.fail("existing paths should not be confined twice")
+        assert repo_root == tmp_path
+        return existing
+
+    monkeypatch.setattr(
+        "scripts.engineering.qa.report_module_coverage_inventory._confine_inventory_path",
+        _fake_confine,
+    )
+
+    assert _confined_existing_path(Path("reports/quality/inventory.json"), repo_root=tmp_path) == existing
+    assert calls == [Path("reports/quality/inventory.json")]
 
 
 def test_read_source_module_snapshots_skips_vanished_path(
