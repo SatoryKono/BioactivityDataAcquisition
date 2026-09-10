@@ -12,9 +12,9 @@ Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
 Evidence surface SHA-256: `e2f6d9cc8e49bf525a5ab39f9a18a5fd4aacbb8922863a6c381fae5aca68f717`
 
-Evidence metadata refresh (2026-09-09): the canonical registry digest was
-recomputed after the SHA-bound module coverage inventory and remote-main
-debt baseline rebind to `bf54831c255` (#10285). The historical audited
+Evidence metadata refresh (2026-09-10): the canonical registry digest was
+recomputed after the SHA-bound module coverage inventory `snapshot_date`
+rebind to `2026-09-10` (#10296). The historical audited
 commit above is retained; this metadata refresh does not constitute a new
 repository-wide architecture audit.
 
