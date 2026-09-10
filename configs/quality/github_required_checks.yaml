@@ -1,5 +1,8 @@
 # Canonical required-check catalog for pr-gate-complete aggregator.
 # RF-001 of #9975. One source of truth for GitHub PR gate decisions.
+# GitHub ruleset 13643213 required context is job name `pr-gate-complete`
+# from .github/workflows/pr-required.yml, not leaf names and not
+# `PR Gate Complete / …`.
 schema_version: 1
 version: 2
 aggregator: pr-gate-complete
