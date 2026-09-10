@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `main`
-- Source commit: `25a0013a5e9dd936a8d56e01f13ab17d3e20e215`
-- Source run id: `34476249533`
-- Source event: `push`
-- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34476249533`
-- Source tree sha256: `ef7a96ebc4596573d43b92c8c18a0149bf744a345c6700762f6e28924040e92e`
+- Source branch: `fix/opt-10301-credential-alias-docs`
+- Source commit: `04b6dbc89c3d81f8025128ba100ca4d5af8895fc`
+- Source run id: `34502691172`
+- Source event: `pull_request`
+- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34502691172`
+- Source tree sha256: `60b08e67dc5af14936e50d0ed7e255624dc5ca1a74fba2ff3b726396009fa502`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-09-10T14:06:23.601734+00:00`
+- Refreshed at (UTC): `2026-09-10T17:00:10.817410+00:00`
 
 ## Branch-accurate provenance (#5729)
 

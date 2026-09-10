@@ -1,12 +1,12 @@
 {
   "artifacts": [
     {
-      "blob_sha256": "6467f02e637f0d3814eed7a608e60269837eb56cc7879f381f39614f42c556b8",
+      "blob_sha256": "73e20c962aab291384f9f7b77ab52284c72e448302f69884337e8153dc3fc55a",
       "introduced_after_remote_main": false,
       "path": "reports/quality/architecture-quality-scorecard.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "aa94405242d70bb54394b5024fae1ade21678105",
+      "source_revision": "98749672c1aa05dc71f8da37c540a55bbe1bd0ef",
       "summary": {
         "available": true,
         "integral_score": 9.14,
@@ -15,19 +15,19 @@
       }
     },
     {
-      "blob_sha256": "d0a5703a19485db6d30730b2d5f255bfd3932b8abf878651ec899a2b3006fc15",
+      "blob_sha256": "94381c15380650d7a7c33501cf18fbd34418322f8f547b5506d793e6aca480fc",
       "introduced_after_remote_main": false,
       "path": "reports/quality/module-coverage-inventory.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "aa94405242d70bb54394b5024fae1ade21678105",
+      "source_revision": "98749672c1aa05dc71f8da37c540a55bbe1bd0ef",
       "summary": {
         "available": true,
-        "coverage_xml_sha256": "30b8d16cd48678c8ac2f92720ad35f709a358f392e3de246292463efd1b821bb",
+        "coverage_xml_sha256": "bf812bf08254ac4662336d0fbc84a2c8b785c8e579b9ba5b00e9f7f4bc255092",
         "schema_version": 1,
         "snapshot_date": "2026-09-10",
-        "source_module_count": 2471,
-        "source_tree_sha256": "136970ba9b594564079c68ca5266079e6bd9ecc2d4935e67cf2e84dd3ad9904b",
+        "source_module_count": 2468,
+        "source_tree_sha256": "c5a7e8f28785b3bbc04f32b5d6c49fc20d4848e7b90db779c7a5ff3feed7e1a8",
         "unmeasured_module_count": 0
       }
     },
@@ -37,7 +37,7 @@
       "path": "reports/quality/compatibility-importer-census.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "aa94405242d70bb54394b5024fae1ade21678105",
+      "source_revision": "98749672c1aa05dc71f8da37c540a55bbe1bd0ef",
       "summary": {
         "available": true,
         "retained_entrypoint_count": 12,
@@ -50,7 +50,7 @@
       "path": "reports/quality/dead-code-inventory.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "aa94405242d70bb54394b5024fae1ade21678105",
+      "source_revision": "98749672c1aa05dc71f8da37c540a55bbe1bd0ef",
       "summary": {
         "available": true,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
@@ -63,7 +63,7 @@
       "path": "reports/quality/contract-registry-diagnostics.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "aa94405242d70bb54394b5024fae1ade21678105",
+      "source_revision": "98749672c1aa05dc71f8da37c540a55bbe1bd0ef",
       "summary": {
         "available": true,
         "blocking_issue_count": 0,
@@ -76,13 +76,13 @@
       "path": "reports/observability/runtime_cardinality_inventory.json",
       "required": false,
       "required_on_remote": false,
-      "source_revision": "aa94405242d70bb54394b5024fae1ade21678105",
+      "source_revision": "98749672c1aa05dc71f8da37c540a55bbe1bd0ef",
       "summary": {
         "available": true
       }
     }
   ],
-  "baseline_artifact_fingerprint": "815577489c69b0739ce5cf8f72f1512d84593d7dbd507d6cf538d23cf4243d61",
+  "baseline_artifact_fingerprint": "738d1ef4a9676a2eba18d0cbffc3682218192440ad8d60d6e7f244594bd8263c",
   "branch": "main",
   "dirty_closeout_guard": {
     "command": "git status --porcelain --untracked-files=no",
@@ -101,10 +101,10 @@
     "python -m scripts.engineering.qa report-debt-governance-gates --check"
   ],
   "local_tracking_ref": "origin/main",
-  "local_tracking_ref_matches_remote": true,
-  "local_tracking_ref_sha": "aa94405242d70bb54394b5024fae1ade21678105",
+  "local_tracking_ref_matches_remote": false,
+  "local_tracking_ref_sha": null,
   "remote": "origin",
   "remote_main_ref": "refs/heads/main",
-  "remote_main_sha": "aa94405242d70bb54394b5024fae1ade21678105",
+  "remote_main_sha": "98749672c1aa05dc71f8da37c540a55bbe1bd0ef",
   "schema_version": 1
 }
