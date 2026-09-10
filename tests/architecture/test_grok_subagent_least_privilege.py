@@ -40,7 +40,6 @@ def test_grok_child_agents_use_named_mcp_without_github() -> None:
         assert "named:" in text, path
         assert "mcpInheritance: all" not in text
         named_mcp_block = _named_mcp_block(text)
-        assert "- github" not in named_mcp_block
         assert "github" not in named_mcp_block
         assert "Do not run `gh`" in text or "Do not run gh" in text
 
@@ -64,4 +63,6 @@ def _named_mcp_block(text: str) -> str:
     end = text.find("\n---", start + 1)
     if end < 0:
         end = text.find("\n\n", start)
+    if end < 0:
+        end = len(text)
     return text[start:end]
