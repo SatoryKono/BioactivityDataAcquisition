@@ -81,7 +81,7 @@ def assemble_filter_config(
     ctx: PipelineRunContext,
     test_mode: bool,
 ) -> InputFilterConfig | None:
-    """Lazy wrapper for the bootstrap filter-config assembler seam."""
+    """Delegation wrapper for the bootstrap filter-config assembler seam."""
     return _assemble_filter_config(
         yaml_filter=yaml_filter,
         ctx=ctx,
@@ -110,7 +110,7 @@ def bootstrap_observability_bundle(
     yaml_config: object | None = None,
     skip_gold: bool = False,
 ) -> ObservabilityBundle:
-    """Lazy wrapper for bootstrap observability wiring."""
+    """Delegation wrapper for bootstrap observability wiring."""
     bootstrap: Callable[..., ObservabilityBundle] = _bootstrap_observability_bundle
     bootstrap_kwargs: dict[str, object] = {
         "pipeline": pipeline,
@@ -132,27 +132,27 @@ def bootstrap_observability_bundle(
 def create_pipeline_config_loader(
     configs_root: Path,
 ) -> Callable[[str], PipelineYamlConfig]:
-    """Lazy wrapper for pipeline-config loader construction."""
+    """Delegation wrapper for pipeline-config loader construction."""
     return _create_pipeline_config_loader(configs_root)
 
 
 def create_registry() -> PipelineRegistry:
-    """Lazy wrapper for registry construction."""
+    """Delegation wrapper for registry construction."""
     return _create_registry()
 
 
 def create_source_config_loader(configs_root: Path) -> Callable[[str], object]:
-    """Lazy wrapper for source-config loader construction."""
+    """Delegation wrapper for source-config loader construction."""
     return _create_source_config_loader(configs_root)
 
 
 def ensure_providers_loaded() -> None:
-    """Lazy wrapper for provider registration discovery."""
+    """Delegation wrapper for provider registration discovery."""
     _ensure_providers_loaded()
 
 
 def get_settings() -> Settings:
-    """Lazy wrapper for runtime settings access."""
+    """Delegation wrapper for runtime settings access."""
     return _get_settings()
 
 
