@@ -3,7 +3,7 @@
 Source commit: `e717b9597217fdc124a05643ee00534a3df28943`
 Source run id: `34423140978`
 Source event: `pull_request`
-Source run URL: `pending`
+Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34423140978`
 Refresh status: `captured`
 Collected test cases: `49975`
 Freshness guard: `<=45 days`
