@@ -5,7 +5,7 @@ modules (#10305) reduced the inventory to `source_module_count=2468`. Counts and
 the source fingerprint below come from `reports/quality/module-coverage-inventory.json`.
 Historical notes remain historical.
 
-`source_tree_sha256=fbe1f4c87e5f96e9b0dbaccd91bd0893ea096dca18d178754648e9f6c9d4cce1`
+`source_tree_sha256=0b43e7d2867df5f3e667100145ec3244c67ae30fff1189d50ca9500c5931e190`
 
 `source_module_count=2468`
 
@@ -115,6 +115,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `fbe1f4c87e5f96e9b0dbaccd91bd0893ea096dca18d178754648e9f6c9d4cce1`
+- source_tree_sha256: `0b43e7d2867df5f3e667100145ec3244c67ae30fff1189d50ca9500c5931e190`
 
 `source_module_count=2468`
