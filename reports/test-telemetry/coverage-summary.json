@@ -1,11 +1,11 @@
 {
-  "source_branch": "main",
-  "source_commit": "2ed39c9487b1f14460be1ad71d7311c81a991d86",
-  "source_run_id": "34417595424",
-  "source_event": "push",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34417595424",
-  "source_tree_sha256": "28291e27cdb8c6c4d0a178ea3194dd7506f240551fcf85ce36d78c91e06d7d00",
-  "refreshed_at_utc": "2026-09-09T23:43:35.025665+00:00",
+  "source_branch": "fix/grafana-a11y-10170-defects",
+  "source_commit": "e717b9597217fdc124a05643ee00534a3df28943",
+  "source_run_id": "34423140978",
+  "source_event": "pull_request",
+  "source_run_url": null,
+  "source_tree_sha256": "dbaa7231eab68d170aba22a88736e7aed732e76624cb86fb0d7ae4c093ee2aa6",
+  "refreshed_at_utc": "2026-09-10T01:06:38.139399+00:00",
   "refresh_status": "captured",
   "coverage_percent": 96.73,
   "coverage": {

@@ -2871,11 +2871,11 @@
           "value": null
         },
         {
-          "color": "orange",
+          "color": "#9a3412",
           "value": 1
         },
         {
-          "color": "red",
+          "color": "#9f1239",
           "value": 2
         }
       ],
