@@ -1355,35 +1355,86 @@ def _refresh_nonregressing_inventory_from_coverage(
     return refreshed
 
 
+def _confine_inventory_path(path: Path, *, repo_root: Path) -> Path:
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    return resolve_output_path(path, root=repo_root)
+
+
+def _read_confined_text(path: Path, *, repo_root: Path) -> str:
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    safe = resolve_output_path(path, root=repo_root)
+    # Re-resolve immediately before the read sink (pythonsecurity:S8707).
+    safe = resolve_output_path(safe, root=repo_root)
+    return safe.read_text(encoding="utf-8")
+
+
+def _confined_existing_path(path: Path, *, repo_root: Path) -> Path | None:
+    safe = _confine_inventory_path(path, repo_root=repo_root)
+    if not safe.exists():
+        return None
+    return _confine_inventory_path(safe, repo_root=repo_root)
+
+
+def _load_inventory_mapping(path: Path, *, repo_root: Path) -> dict[str, Any]:
+    payload = json.loads(_read_confined_text(path, repo_root=repo_root))
+    if not isinstance(payload, dict):
+        raise ValueError(f"Invalid module coverage inventory: {path}")
+    return payload
+
+
+def _inventory_date_source(args: argparse.Namespace) -> Path | None:
+    if args.check:
+        return args.json_out
+    if args.baseline_json:
+        return args.baseline_json
+    return args.json_out
+
+
+def _snapshot_date_from_inventory(path: Path | None, *, repo_root: Path) -> str | None:
+    if path is None:
+        return None
+    safe = _confined_existing_path(path, repo_root=repo_root)
+    if safe is None:
+        return None
+    current = json.loads(_read_confined_text(safe, repo_root=repo_root))
+    if isinstance(current, dict) and current.get("snapshot_date"):
+        return str(current["snapshot_date"])
+    return None
+
+
 def _payload_for_check(args: argparse.Namespace) -> dict[str, Any]:
-    if args.json_out.exists() and args.refresh_nonregressing_from_coverage_xml:
-        current = json.loads(args.json_out.read_text(encoding="utf-8"))
-        if not isinstance(current, dict):
-            raise ValueError(f"Invalid module coverage inventory: {args.json_out}")
+    json_out = _confined_existing_path(args.json_out, repo_root=args.repo_root)
+    if json_out is not None and args.refresh_nonregressing_from_coverage_xml:
+        current = _load_inventory_mapping(json_out, repo_root=args.repo_root)
         candidate = build_module_coverage_inventory(
             repo_root=args.repo_root,
-            coverage_xml=args.coverage_xml,
+            coverage_xml=_confine_inventory_path(
+                args.coverage_xml, repo_root=args.repo_root
+            ),
             snapshot_date=args.snapshot_date,
         )
         return _refresh_nonregressing_inventory_from_coverage(
             current, candidate, repo_root=args.repo_root
         )
 
-    if args.json_out.exists() and not args.refresh_from_coverage_xml:
-        current = json.loads(args.json_out.read_text(encoding="utf-8"))
-        if not isinstance(current, dict):
-            raise ValueError(f"Invalid module coverage inventory: {args.json_out}")
+    if json_out is not None and not args.refresh_from_coverage_xml:
+        current = _load_inventory_mapping(json_out, repo_root=args.repo_root)
         return _refresh_existing_inventory_source_tree(
             current, repo_root=args.repo_root
         )
 
     snapshot_date = args.snapshot_date
-    if args.check and args.json_out.exists() and snapshot_date is None:
-        current = json.loads(args.json_out.read_text(encoding="utf-8"))
-        snapshot_date = str(current.get("snapshot_date") or date.today().isoformat())
+    if snapshot_date is None:
+        snapshot_date = _snapshot_date_from_inventory(
+            _inventory_date_source(args), repo_root=args.repo_root
+        )
     return build_module_coverage_inventory(
         repo_root=args.repo_root,
-        coverage_xml=args.coverage_xml,
+        coverage_xml=_confine_inventory_path(
+            args.coverage_xml, repo_root=args.repo_root
+        ),
         snapshot_date=snapshot_date,
     )
 
@@ -1395,9 +1446,10 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     repo_root = args.repo_root.resolve()
     enforcement_mode = _resolve_enforcement_mode(args)
+    coverage_xml = _confine_inventory_path(args.coverage_xml, repo_root=repo_root)
 
-    if not args.coverage_xml.exists() and not args.allow_missing_coverage_xml:
-        print(f"[module-coverage-inventory] missing coverage XML: {args.coverage_xml}")
+    if not coverage_xml.exists() and not args.allow_missing_coverage_xml:
+        print(f"[module-coverage-inventory] missing coverage XML: {coverage_xml}")
         print(
             "[module-coverage-inventory] run the coverage-verify lane first, "
             "or pass --allow-missing-coverage-xml for source-tree-only drift checks"
@@ -1409,13 +1461,16 @@ def main(argv: list[str] | None = None) -> int:
 
     gate_exit = 0
     if enforcement_mode != "off":
-        baseline_path = args.baseline_json or args.json_out
-        if not baseline_path.exists():
+        baseline_path = _confined_existing_path(
+            args.baseline_json or args.json_out, repo_root=repo_root
+        )
+        if baseline_path is None:
             print(
-                f"[module-coverage-inventory] missing baseline inventory: {baseline_path}"
+                "[module-coverage-inventory] missing baseline inventory: "
+                f"{args.baseline_json or args.json_out}"
             )
             return 1
-        baseline_payload = json.loads(baseline_path.read_text(encoding="utf-8"))
+        baseline_payload = _load_inventory_mapping(baseline_path, repo_root=repo_root)
         gates = _load_module_coverage_gates(repo_root, args.gates_config)
         violations = evaluate_module_coverage_gates(
             payload,
@@ -1429,13 +1484,11 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     if args.check:
-        from scripts.engineering.common.repo_paths import resolve_output_path
-
-        json_out = resolve_output_path(args.json_out, root=repo_root)
-        if not json_out.exists():
-            print(f"[module-coverage-inventory] missing artifact: {json_out}")
+        json_out = _confined_existing_path(args.json_out, repo_root=repo_root)
+        if json_out is None:
+            print(f"[module-coverage-inventory] missing artifact: {args.json_out}")
             return 1
-        current = json_out.read_text(encoding="utf-8")
+        current = _read_confined_text(json_out, repo_root=repo_root)
         if current != rendered:
             print(f"[module-coverage-inventory] stale artifact: {json_out}")
             return 1
