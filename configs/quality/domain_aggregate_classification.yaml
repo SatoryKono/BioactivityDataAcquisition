@@ -21,7 +21,6 @@ true_aggregates:
     root_module: src/bioetl/domain/aggregates/batch.py
     implementation_modules:
       - src/bioetl/domain/aggregates/_batch_aggregate.py
-      - src/bioetl/domain/aggregates/_batch_mixins.py
       - src/bioetl/domain/aggregates/batch.py
     invariant_tests:
       - tests/unit/domain/aggregates/test_batch.py
@@ -33,7 +32,6 @@ true_aggregates:
     implementation_modules:
       - src/bioetl/domain/aggregates/pipeline_run.py
       - src/bioetl/domain/aggregates/pipeline_run_stage_result.py
-      - src/bioetl/domain/aggregates/_pipeline_run_mixins.py
     invariant_tests:
       - tests/unit/domain/aggregates/test_pipeline_run.py
       - tests/unit/domain/aggregates/test_pipeline_run_events.py
@@ -43,7 +41,6 @@ true_aggregates:
     # ADR-051 freezes the wide constructor as intentional aggregate surface.
     root_module: src/bioetl/domain/aggregates/quarantine_entry.py
     implementation_modules:
-      - src/bioetl/domain/aggregates/_quarantine_aggregate.py
       - src/bioetl/domain/aggregates/_quarantine_value_objects.py
       - src/bioetl/domain/aggregates/quarantine_entry.py
     invariant_tests:

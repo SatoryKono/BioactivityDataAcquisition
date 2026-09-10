@@ -39,8 +39,9 @@ def test_grok_child_agents_use_named_mcp_without_github() -> None:
         assert "mcpInheritance:" in text, path
         assert "named:" in text, path
         assert "mcpInheritance: all" not in text
-        assert "- github" not in text
-        assert "github" not in _named_mcp_block(text)
+        named_mcp_block = _named_mcp_block(text)
+        assert named_mcp_block, path
+        assert "github" not in named_mcp_block
         assert "Do not run `gh`" in text or "Do not run gh" in text
 
 
@@ -57,8 +58,14 @@ def test_codex_py_toml_declares_allowed_and_forbidden_mcp() -> None:
 
 
 def _named_mcp_block(text: str) -> str:
-    start = text.find("mcpInheritance:")
-    end = text.find("\n---", start + 1)
+    normalized = text.replace("\r\n", "\n")
+    start = normalized.find("mcpInheritance:")
+    if start < 0:
+        return ""
+    frontmatter_start = normalized.find("\n") + 1
+    end = normalized.find("\n---\n", frontmatter_start)
     if end < 0:
-        end = text.find("\n\n", start)
-    return text[start:end]
+        return ""
+    if start >= end:
+        return ""
+    return normalized[start:end]

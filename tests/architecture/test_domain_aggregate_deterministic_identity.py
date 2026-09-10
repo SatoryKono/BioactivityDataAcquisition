@@ -22,7 +22,7 @@ pytestmark = pytest.mark.architecture
 DOMAIN_IDENTITY_SURFACES = (
     Path("src/bioetl/domain/aggregates/events.py"),
     Path("src/bioetl/domain/aggregates/_batch_aggregate.py"),
-    Path("src/bioetl/domain/aggregates/_quarantine_aggregate.py"),
+    Path("src/bioetl/domain/aggregates/quarantine_entry.py"),
 )
 
 

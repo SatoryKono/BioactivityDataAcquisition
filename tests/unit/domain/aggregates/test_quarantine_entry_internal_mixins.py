@@ -29,10 +29,8 @@
 """Tests for QuarantineEntry aggregate internal modules.
 
 This test file provides focused coverage for QuarantineEntry internal modules:
-- _quarantine_aggregate.py: Aggregate root construction and factory methods
-- _quarantine_value_objects.py: Value objects and read-model projections
-- quarantine_entry.py: State transition methods and event collection
-- _quarantine_value_objects.py: Value objects and validation helpers
+- quarantine_entry.py: Aggregate root construction, factory methods, and public facade
+- _quarantine_value_objects.py: Value objects, read-model projections, and validation helpers
 
 These tests complement the existing test_quarantine_entry.py by testing internal
 mixin methods directly and covering validation functions and transformation scenarios.
@@ -44,7 +42,7 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from bioetl.domain.aggregates._quarantine_aggregate import QuarantineEntry
+from bioetl.domain.aggregates.quarantine_entry import QuarantineEntry
 from bioetl.domain.aggregates._quarantine_value_objects import (
     QuarantineStatus,
     ResolutionInfo,
@@ -551,7 +549,7 @@ class TestQuarantineEntryTransitionsMixin:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# _quarantine_aggregate.py Tests
+# quarantine_entry.py Tests
 # ──────────────────────────────────────────────────────────────────────────────
 
 

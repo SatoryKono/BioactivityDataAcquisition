@@ -52,7 +52,7 @@ def test_require_dq_rule_outcome_rejects_wrong_type() -> None:
 
 
 def test_batch_mixin_validate_seal_counts_rejects_invalid_partitions() -> None:
-    from bioetl.domain.aggregates._batch_mixins import _BatchLifecycleMixin
+    from bioetl.domain.aggregates._batch_aggregate import _BatchLifecycleMixin
 
     with pytest.raises(ValueError, match="non-negative"):
         _BatchLifecycleMixin._validate_seal_counts(-1, 0, 0)
