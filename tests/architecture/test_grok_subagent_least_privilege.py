@@ -66,7 +66,7 @@ def _named_mcp_block(text: str) -> str:
     if end < 0:
         end = text.find("\r\n---", frontmatter_start)
     if end < 0:
-        end = len(text)
+        return ""
     if start >= end:
         return ""
     return text[start:end]
