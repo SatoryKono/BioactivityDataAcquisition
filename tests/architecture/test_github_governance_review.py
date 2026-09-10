@@ -56,8 +56,7 @@ def _passing_snapshot() -> dict:
             "secret_scanning_non_provider_patterns": "disabled",
         },
         "rulesets": [
-            # Desired-target fixture for GH-RULESET-001 (active merge wall).
-            # Live GET 2026-09-10 is enforcement=disabled; that drift maps to #10267.
+            # Live GET 2026-09-10T02:53:01+03:00: ruleset main is active (#10267).
             {"name": "main", "enforcement": "active"}
         ],
         "actions_permissions": {
@@ -177,8 +176,8 @@ def test_evaluation_maps_drift_to_existing_issues() -> None:
     assert result["automation_mutated_github"] is False
 
 
-def test_disabled_rulesets_map_to_issue_10267() -> None:
-    """Live disabled rulesets are GH-RULESET-001 drift tracked by #10267."""
+def test_disabled_rulesets_are_gh_ruleset_001_drift() -> None:
+    """Disabled rulesets fail GH-RULESET-001 even after #10267 activation."""
     snapshot = _passing_snapshot()
     snapshot["rulesets"] = [
         {"name": "main", "enforcement": "disabled"},
@@ -193,8 +192,6 @@ def test_disabled_rulesets_map_to_issue_10267() -> None:
 
     assert result["overall"] == "drift"
     assert by_id["GH-RULESET-001"]["status"] == "drift"
-    assert by_id["GH-RULESET-001"]["known_issue"] == 10267
-    assert "#10267" in by_id["GH-RULESET-001"]["decision"]
     assert "active rulesets: none" in by_id["GH-RULESET-001"]["evidence"]
 
 

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-09T23:24:50.865099+00:00",
+  "generated_at": "2026-09-10T00:00:15.344695+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -9630,13 +9630,13 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 90,
+          "line": 91,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-gate classify \"${classify_args[@]}\""
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 359,
+          "line": 360,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-gate aggregate \\"
         },
@@ -17541,7 +17541,7 @@
         },
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 530,
+          "line": 531,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -17971,13 +17971,13 @@
         },
         {
           "path": "tests/architecture/test_github_governance_review.py",
-          "line": 273,
+          "line": 270,
           "source_group": "tests",
           "text": "assert \"python scripts/engineering/repo/github_settings_review.py\" not in workflow"
         },
         {
           "path": "tests/architecture/test_github_governance_review.py",
-          "line": 274,
+          "line": 271,
           "source_group": "tests",
           "text": "assert \".github/tooling/github_settings_review.py\" not in workflow"
         }
@@ -19494,7 +19494,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 450,
+          "line": 451,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }
