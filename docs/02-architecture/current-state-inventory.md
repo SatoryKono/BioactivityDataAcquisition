@@ -56,7 +56,7 @@ drift is currently clear (`stale_artifacts` are all false in
 release-gate failures rather than hidden warning-only coverage drift. Module
 coverage currently reports `0` unmeasured and `0` uncovered source modules
 from the committed coverage inventory (debt-governance gates). That is a module-inventory fact, not
-a blanket line/branch coverage guarantee: `854` modules
+a blanket line/branch coverage guarantee: `852` modules
 remain partially covered and line/branch coverage must be read from the
 `coverage-verify` artifacts. Read-only
 audit evidence should use
@@ -306,7 +306,7 @@ by storage technology. Current owner boundaries:
 ## Open Questions
 
 - Module coverage currently has `0` unmeasured and `0` uncovered source modules
-  in `reports/quality/module-coverage-inventory.json`, while `854` modules remain
+  in `reports/quality/module-coverage-inventory.json`, while `852` modules remain
   partially covered. The inventory is current release evidence for module
   measurement status; do not describe it as complete line/branch coverage.
 - Hotspot family `application_services_control_plane` sits **at**

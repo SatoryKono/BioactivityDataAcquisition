@@ -4,13 +4,13 @@
 
 - evidence_source: `remote_main_git_tree`
 - remote_main_ref: `refs/heads/main`
-- baseline_artifact_fingerprint: `8c38e9a70b6a0cc20fadf4353d727f36162cab6171b4a46ef21c16b5d0bb1921`
+- baseline_artifact_fingerprint: `815577489c69b0739ce5cf8f72f1512d84593d7dbd507d6cf538d23cf4243d61`
 - local_tracking_ref_matches_remote: `True`
 
 | artifact | blob_sha256 | available | required_on_remote | introduced_after_remote_main |
 | --- | --- | --- | --- | --- |
-| `reports/quality/architecture-quality-scorecard.json` | `705191ce0aff584d5321c0d0b0e9bc177329d85375289b81c4bd31a4f99375f1` | `True` | `True` | `False` |
-| `reports/quality/module-coverage-inventory.json` | `88ddfc9e968293f6eb24bf6e4745cbb20daaf07b06bbaf647cb514057384b7c4` | `True` | `True` | `False` |
+| `reports/quality/architecture-quality-scorecard.json` | `6467f02e637f0d3814eed7a608e60269837eb56cc7879f381f39614f42c556b8` | `True` | `True` | `False` |
+| `reports/quality/module-coverage-inventory.json` | `d0a5703a19485db6d30730b2d5f255bfd3932b8abf878651ec899a2b3006fc15` | `True` | `True` | `False` |
 | `reports/quality/compatibility-importer-census.json` | `c28c4ce92edc3509f6b6a23bc4a5dc8c2574da07c236d8f3d87acc9bb8d3e73e` | `True` | `True` | `False` |
 | `reports/quality/dead-code-inventory.json` | `e7c3a87120cdb2f4bdc499764839bd18d33dd32c78d17995e4b36b61f8118385` | `True` | `True` | `False` |
 | `reports/quality/contract-registry-diagnostics.json` | `691ae784ed4f90f7835fed4706fbb586e7d7184b8ddc965a7fd5cab6ef3a2dce` | `True` | `True` | `False` |
