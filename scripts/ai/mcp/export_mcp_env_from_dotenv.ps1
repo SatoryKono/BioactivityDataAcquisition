@@ -12,6 +12,11 @@
 
   By default sets Process scope only. Pass -UserScope to also set User scope
   (requires restart of Grok / new terminals to fully apply).
+
+  -UserScope MUST NOT write GitHub keys (GITHUB_TOKEN, GITHUB_PERSONAL_ACCESS_TOKEN,
+  GITHUB_CDX_PERSONAL_ACCESS_TOKEN, GITHUB_ANY_PERSONAL_ACCESS_TOKEN, GH_TOKEN)
+  into the User hive (#10298). Those stay process-only so new terminals keep
+  gh hosts.yml. HTTP MCP such as ref may still go to User scope.
 #>
 param(
     [string]$RepoRoot = "",
@@ -29,9 +34,19 @@ if (-not $RepoRoot) {
 Import-BioetlRepoEnv -RepoRoot $RepoRoot
 Normalize-BioetlRepoEnvAliases
 
+$githubUserScopeDenied = @(
+    "GITHUB_TOKEN",
+    "GITHUB_PERSONAL_ACCESS_TOKEN",
+    "GITHUB_CDX_PERSONAL_ACCESS_TOKEN",
+    "GITHUB_ANY_PERSONAL_ACCESS_TOKEN",
+    "GH_TOKEN"
+)
+
 $mcpKeys = @(
     "GITHUB_TOKEN",
     "GITHUB_PERSONAL_ACCESS_TOKEN",
+    "GITHUB_CDX_PERSONAL_ACCESS_TOKEN",
+    "GH_TOKEN",
     "BRAVE_API_KEY",
     "REF_TOOL_API_KEY",
     "CONTEXT7_API_KEY",
@@ -59,7 +74,10 @@ foreach ($key in $mcpKeys) {
     if ([string]::IsNullOrEmpty($value)) {
         continue
     }
-    if ($UserScope) {
+    if ($UserScope -and $githubUserScopeDenied -contains $key) {
+        # Process already has the value from Import-BioetlRepoEnv.
+        # Do not persist GitHub credentials into the User hive (#10298).
+    } elseif ($UserScope) {
         $existingUser = [Environment]::GetEnvironmentVariable($key, "User")
         if ($existingUser -ne $value) {
             [Environment]::SetEnvironmentVariable($key, $value, "User")

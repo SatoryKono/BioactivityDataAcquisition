@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.sequential-run
-version: 1.1.0
+version: 1.1.1
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -34,6 +34,7 @@ includes:
 - fragments/orchestrator-guards.md
 - fragments/issue-state-machine-v3.md
 - fragments/cyclic-kernel-v3.md
+- fragments/gh-powershell.md
 related_ssot:
 - AGENTS.md
 - docs/00-project/NORMATIVE_SOURCES.md
@@ -108,6 +109,7 @@ worktree.
 - ADR-010: monitoring не стартовать при `MONITORING={{MONITORING}}`, пока
   оператор явно не попросил render.
 - `unset GH_TOKEN GITHUB_TOKEN` перед `gh` (не печатать секреты).
+- pwsh `gh`: fragment `prompt.fragment.gh-powershell` (`--body-file`, quoted `--jq`, `'@{u}'`).
 
 ## Последовательность (обязательная)
 

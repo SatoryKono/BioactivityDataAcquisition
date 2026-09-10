@@ -21,7 +21,8 @@ unset BIOETL_SKIP_ENV_LOCAL
 source "${REPO_ROOT}/scripts/ai/mcp/support/token_validation.sh"
 
 # One token path: existing PAT, else GITHUB_TOKEN alias, else `gh auth token`.
-# Never overwrite a configured PAT and never print the secret.
+# Never overwrite a configured PAT, never print the secret, and never export
+# GITHUB_TOKEN from PAT (parent gh must keep hosts.yml; #10298).
 if [[ -n "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" ]]; then
   printf 'github MCP token path: GITHUB_PERSONAL_ACCESS_TOKEN\n' >&2
 elif [[ -n "${GITHUB_TOKEN:-}" ]]; then
