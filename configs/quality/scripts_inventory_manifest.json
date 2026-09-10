@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-10T16:16:02.405705+00:00",
+  "generated_at": "2026-09-10T18:30:34.633578+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -2591,7 +2591,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 83,
+          "line": 84,
           "source_group": "docs",
           "text": "- Grok project-domain audit workflow: scripts/ai/generate_project_domain_audit_workflow.py -- generates .grok/workflows/project-domain-audit.rhai"
         }
@@ -5035,19 +5035,19 @@
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 73,
+          "line": 74,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts compile --domain docs --profile audit-readonly"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 74,
+          "line": 75,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.audit.cycle --param SCOPE=src/bioetl --param DOMAIN=docs"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 75,
+          "line": 76,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts check"
         },
