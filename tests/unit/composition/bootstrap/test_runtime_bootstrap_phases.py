@@ -117,9 +117,9 @@ def test_bootstrap_observability_bundle_executes_lazy_wrapper() -> None:
     run_id = MagicMock()
     settings = MagicMock()
 
-    with patch(
-        "bioetl.composition.bootstrap.runtime.observability_bundle."
-        "bootstrap_observability_bundle_impl",
+    with patch.object(
+        phases,
+        "_bootstrap_observability_bundle",
         return_value=expected_bundle,
     ) as mock_bootstrap:
         result = phases.bootstrap_observability_bundle(
