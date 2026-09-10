@@ -1355,11 +1355,33 @@ def _refresh_nonregressing_inventory_from_coverage(
     return refreshed
 
 
+def _load_inventory_mapping(path: Path) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"Invalid module coverage inventory: {path}")
+    return payload
+
+
+def _inventory_date_source(args: argparse.Namespace) -> Path | None:
+    if args.check:
+        return args.json_out
+    if args.baseline_json:
+        return args.baseline_json
+    return args.json_out
+
+
+def _snapshot_date_from_inventory(path: Path | None) -> str | None:
+    if path is None or not path.exists():
+        return None
+    current = json.loads(path.read_text(encoding="utf-8"))
+    if isinstance(current, dict) and current.get("snapshot_date"):
+        return str(current["snapshot_date"])
+    return None
+
+
 def _payload_for_check(args: argparse.Namespace) -> dict[str, Any]:
     if args.json_out.exists() and args.refresh_nonregressing_from_coverage_xml:
-        current = json.loads(args.json_out.read_text(encoding="utf-8"))
-        if not isinstance(current, dict):
-            raise ValueError(f"Invalid module coverage inventory: {args.json_out}")
+        current = _load_inventory_mapping(args.json_out)
         candidate = build_module_coverage_inventory(
             repo_root=args.repo_root,
             coverage_xml=args.coverage_xml,
@@ -1370,22 +1392,14 @@ def _payload_for_check(args: argparse.Namespace) -> dict[str, Any]:
         )
 
     if args.json_out.exists() and not args.refresh_from_coverage_xml:
-        current = json.loads(args.json_out.read_text(encoding="utf-8"))
-        if not isinstance(current, dict):
-            raise ValueError(f"Invalid module coverage inventory: {args.json_out}")
+        current = _load_inventory_mapping(args.json_out)
         return _refresh_existing_inventory_source_tree(
             current, repo_root=args.repo_root
         )
 
     snapshot_date = args.snapshot_date
     if snapshot_date is None:
-        date_source = args.baseline_json if args.baseline_json else args.json_out
-        if args.check:
-            date_source = args.json_out
-        if date_source is not None and date_source.exists():
-            current = json.loads(date_source.read_text(encoding="utf-8"))
-            if isinstance(current, dict) and current.get("snapshot_date"):
-                snapshot_date = str(current["snapshot_date"])
+        snapshot_date = _snapshot_date_from_inventory(_inventory_date_source(args))
     return build_module_coverage_inventory(
         repo_root=args.repo_root,
         coverage_xml=args.coverage_xml,
