@@ -16,7 +16,7 @@ Evidence metadata refresh (2026-09-10): the canonical registry digest was
 recomputed after adopting the SHA-bound coverage-verify inventory
 (`fully_covered` 1611→1612, `partially_covered` 853→852) for #10305,
 then again after the remote-main debt-gates fingerprint rebind on
-`docs/ops-10337-drift-hasher`. The historical audited commit above is
+`fix/opt-gh-10311-10310-closeout`. The historical audited commit above is
 retained; this metadata refresh does not constitute a new
 repository-wide architecture audit.
 

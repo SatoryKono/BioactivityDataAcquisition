@@ -238,7 +238,7 @@
       "check": "unused_environments_absent",
       "owner": "Release engineering",
       "risk": "medium",
-      "known_issue": 10311,
+      "known_issue": null,
       "due_days": 14
     },
     {

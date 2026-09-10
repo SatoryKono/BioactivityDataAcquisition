@@ -252,7 +252,7 @@ def test_policy_and_workflow_preserve_read_only_contract() -> None:
     policy = _policy()
     by_id = {item["id"]: item for item in policy["controls"]}
     assert by_id["GH-SECRET-002"]["known_issue"] == 10310
-    assert by_id["GH-ENV-002"]["known_issue"] == 10311
+    assert by_id["GH-ENV-002"]["known_issue"] is None
     canonical = set(policy["labels"]["canonical"])
     assert set(policy["labels"]["aliases"].values()) <= canonical
     assert policy["migration"]["delete_not_before"] == "2026-11-30"
