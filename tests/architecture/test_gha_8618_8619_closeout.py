@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -43,3 +44,31 @@ def test_github_policy_documents_live_root_hygiene_ruleset() -> None:
     assert "13643213 both active" not in text
     assert "#10267" in text
     assert "applied_required_status_checks" in text
+    assert "Safe only after #10267" not in text
+    assert "empty applied rules as merge protection" not in text
+
+
+def test_ruleset_10267_closeout_evidence_matches_live_contract() -> None:
+    """Sanitized closeout GET must match the #10267 live ruleset contract."""
+    path = (
+        ROOT / "reports" / "governance" / "ruleset-10267-closeout-get-2026-09-10.json"
+    )
+    data = json.loads(path.read_text(encoding="utf-8"))
+    assert data["repository"] == "SatoryKono/BioactivityDataAcquisition"
+    assert data["default_branch"] == "main"
+    assert data["allow_auto_merge"] is True
+    assert data["applied_required_status_checks"] == ["pr-gate-complete"]
+    assert "deletion" in data["applied_rules_main"]
+    assert "required_status_checks" in data["applied_rules_main"]
+    by_id = {item["id"]: item for item in data["rulesets"]}
+    main_rs = by_id[13643213]
+    assert main_rs["name"] == "main"
+    assert main_rs["enforcement"] == "active"
+    assert main_rs["required_status_checks"] == ["pr-gate-complete"]
+    assert main_rs["required_approving_review_count"] == 0
+    assert main_rs["bypass_actors"] == []
+    assert main_rs["strict_required_status_checks_policy"] is True
+    companion = by_id[15730586]
+    assert companion["name"] == "root-hygiene-required-check"
+    assert companion["enforcement"] == "disabled"
+    assert companion["required_status_checks"] == ["checks-complete", "root-hygiene"]
