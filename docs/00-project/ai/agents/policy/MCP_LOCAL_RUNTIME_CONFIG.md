@@ -243,20 +243,25 @@ They load local env files when present and normalize common aliases such as:
 
 - `GITHUB_TOKEN` -> `GITHUB_PERSONAL_ACCESS_TOKEN` when the PAT is unset
   (GitHub MCP wrappers then try `gh auth token`; they never overwrite a
-  configured PAT)
+  configured PAT). Alias is one-way: **do not** copy PAT into `GITHUB_TOKEN`
+  or write `GH_TOKEN` (#10298). `GITHUB_TOKEN_02` is not an alias.
 - `BRAVE_SEARCH_API_KEY` / `BRAVE_API_KEY1` -> `BRAVE_API_KEY`
 - `GRAFANA_TOKEN` / `GRAFANA_API_KEY` -> `GRAFANA_SERVICE_ACCOUNT_TOKEN`
 - `DOCKERHUB_PAT` / `DOCKERHUB_TOKEN` -> `HUB_PAT_TOKEN`
 
 ### Grok GitHub overlay vs shared HTTP `:8820`
 
-Daily Grok on this host may launch GitHub MCP as **stdio** through
-`github-mcp-stdio.cmd` → official `github-mcp-server.exe` with the same
-toolsets/lockdown/excludes as `scripts/ai/mcp/github-mcp-wrapper.*`.
-Codex and the shared plane keep `github` on `http://127.0.0.1:8820/mcp`,
-where the long-lived process is still that wrapper. Do not run a second
-`github-actions` HTTP client on `:8831` in a daily Grok session: disable
-it (catalog `daily: false`) and use `github` `actions_*` tools instead.
+**XOR (#10299):** one live GitHub MCP endpoint per session — shared HTTP
+`http://127.0.0.1:8820/mcp` **or** stdio `github-mcp-stdio.cmd`, never both.
+
+- Daily canon is **B**: `start-shared` raises github `:8820`; Grok
+  `[mcp_servers.github]` uses `url` (no `command`) when the plane is up.
+- Stdio overlay is single-client **fallback** (`--transport-mode stdio` or
+  plane down). Do not start github on `:8820` in parallel with stdio.
+- Tracked `.mcp.json` / `scripts/ai/.mcp.json` stay portable **stdio wrappers**.
+- Overlay must not call `Import-BioetlRepoEnv` into the parent `gh` process.
+- Do not run `github-actions` HTTP on `:8831` in a daily Grok session
+  (catalog `daily: false`); use `github` `actions_*` tools instead.
 
 Token-bearing wrappers must also use:
 

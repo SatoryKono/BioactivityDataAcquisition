@@ -81,7 +81,9 @@ GITHUB_MCP_RETIRED_NPX_PACKAGE = "@modelcontextprotocol/server-github"
 MCP_PROFILE_STABLE = (
     # No Docker/gateway/stdio container MCP — host process or remote HTTP only.
     # github-actions is ops-only (see MCP_PROFILE_OPS); official github already
-    # exposes actions_* via GITHUB_MCP_TOOLSETS.
+    # exposes actions_* via GITHUB_MCP_TOOLSETS. Shared transport projects
+    # github to http://127.0.0.1:8820/mcp (#10299). Tracked portable manifests
+    # stay stdio wrappers. Do not drop github from this profile.
     "memory",
     "filesystem",
     "fetch",

@@ -184,14 +184,11 @@ normalize_repo_env_aliases() {
     export npm_config_cache="${NPM_CONFIG_CACHE}"
   fi
 
+  # One-way alias only: TOKEN/GH_TOKEN/CDX/ANY -> PAT.
+  # Do not copy PAT into GITHUB_TOKEN (poisons gh CLI / hosts.yml; #10298).
+  # Do not write GH_TOKEN.
   if [[ -z "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" && -n "${GITHUB_TOKEN:-}" ]]; then
     export GITHUB_PERSONAL_ACCESS_TOKEN="${GITHUB_TOKEN}"
-  fi
-  if [[ -z "${GITHUB_TOKEN:-}" && -n "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" ]]; then
-    export GITHUB_TOKEN="${GITHUB_PERSONAL_ACCESS_TOKEN}"
-  fi
-  if [[ -z "${GITHUB_TOKEN:-}" && -n "${GH_TOKEN:-}" ]]; then
-    export GITHUB_TOKEN="${GH_TOKEN}"
   fi
   if [[ -z "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" && -n "${GH_TOKEN:-}" ]]; then
     export GITHUB_PERSONAL_ACCESS_TOKEN="${GH_TOKEN}"
