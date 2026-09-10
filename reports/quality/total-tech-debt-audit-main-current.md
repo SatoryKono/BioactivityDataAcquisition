@@ -10,13 +10,13 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `14a26c181571f86c7168dda2748655fe1accec7dc6d629748b74059d7ee7bc45`
+Evidence surface SHA-256: `272b8c6be46c496e11152e683ab172aa82a6b1cdc66f2ae98486598d97d3d6cd`
 
 Evidence metadata refresh (2026-09-10): the canonical registry digest was
-recomputed after the SHA-bound module coverage inventory `snapshot_date`
-rebind to `2026-09-10` (#10296). The historical audited
-commit above is retained; this metadata refresh does not constitute a new
-repository-wide architecture audit.
+recomputed after adopting the SHA-bound coverage-verify inventory
+(`fully_covered` 1611→1612, `partially_covered` 853→852) for #10305.
+The historical audited commit above is retained; this metadata refresh
+does not constitute a new repository-wide architecture audit.
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -24,7 +24,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "14a26c181571f86c7168dda2748655fe1accec7dc6d629748b74059d7ee7bc45",
+  "evidence_surface_sha256": "272b8c6be46c496e11152e683ab172aa82a6b1cdc66f2ae98486598d97d3d6cd",
   "metrics": {
     "architecture_integral_score": 9.14,
     "architecture_interpretation": "good_targeted_improvements",
@@ -35,10 +35,10 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 1611,
+    "fully_covered_module_count": 1612,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 4,
-    "partially_covered_module_count": 853,
+    "partially_covered_module_count": 852,
     "source_module_count": 2468,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
@@ -59,8 +59,8 @@ Refresh reason: Reconcile the current evidence surface and semantic summary with
 1. Architecture quality integral score: **9.14** (`good_targeted_improvements`). Integral score `9.14`.
 1. Module inventory (from module-coverage-inventory.json only):
    - source_module_count: **2468**
-   - fully_covered: **1611**
-   - partially_covered: **853**
+   - fully_covered: **1612**
+   - partially_covered: **852**
    - no_executable_lines: **4**
    - uncovered: **0**
    - unmeasured: **0**
