@@ -18,6 +18,7 @@ import pytest
 from scripts.engineering.qa.report_module_coverage_inventory import (
     _SourceModuleSnapshot,
     _confined_existing_path,
+    _load_inventory_mapping,
     _parse_coverage_xml,
     _module_is_declaration_only,
     _payload_for_check,
@@ -52,6 +53,23 @@ def test_confined_existing_path_returns_first_confined_result(
 
     assert _confined_existing_path(Path("reports/quality/inventory.json"), repo_root=tmp_path) == existing
     assert calls == [Path("reports/quality/inventory.json")]
+
+
+def test_load_inventory_mapping_reads_confined_path_without_reconfining(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    existing = tmp_path / "inventory.json"
+    existing.write_text('{"ok": true}\n', encoding="utf-8")
+    seen: list[Path] = []
+
+    monkeypatch.setattr(
+        "scripts.engineering.qa.report_module_coverage_inventory._read_text",
+        lambda path: seen.append(path) or existing.read_text(encoding="utf-8"),
+    )
+
+    assert _load_inventory_mapping(existing) == {"ok": True}
+    assert seen == [existing]
 
 
 def test_read_source_module_snapshots_skips_vanished_path(

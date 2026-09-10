@@ -1361,13 +1361,8 @@ def _confine_inventory_path(path: Path, *, repo_root: Path) -> Path:
     return resolve_output_path(path, root=repo_root)
 
 
-def _read_confined_text(path: Path, *, repo_root: Path) -> str:
-    from scripts.engineering.common.repo_paths import resolve_output_path
-
-    safe = resolve_output_path(path, root=repo_root)
-    # Re-resolve immediately before the read sink (pythonsecurity:S8707).
-    safe = resolve_output_path(safe, root=repo_root)
-    return safe.read_text(encoding="utf-8")
+def _read_text(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
 
 
 def _confined_existing_path(path: Path, *, repo_root: Path) -> Path | None:
@@ -1377,8 +1372,8 @@ def _confined_existing_path(path: Path, *, repo_root: Path) -> Path | None:
     return safe
 
 
-def _load_inventory_mapping(path: Path, *, repo_root: Path) -> dict[str, Any]:
-    payload = json.loads(_read_confined_text(path, repo_root=repo_root))
+def _load_inventory_mapping(path: Path) -> dict[str, Any]:
+    payload = json.loads(_read_text(path))
     if not isinstance(payload, dict):
         raise ValueError(f"Invalid module coverage inventory: {path}")
     return payload
@@ -1404,8 +1399,8 @@ def _snapshot_date_from_inventory(path: Path | None, *, repo_root: Path) -> str 
     safe = _confined_existing_path(path, repo_root=repo_root)
     if safe is None:
         return None
-    current = json.loads(_read_confined_text(safe, repo_root=repo_root))
-    if isinstance(current, dict) and current.get("snapshot_date"):
+    current = _load_inventory_mapping(safe)
+    if current.get("snapshot_date"):
         return str(current["snapshot_date"])
     return None
 
@@ -1413,7 +1408,7 @@ def _snapshot_date_from_inventory(path: Path | None, *, repo_root: Path) -> str 
 def _payload_for_check(args: argparse.Namespace) -> dict[str, Any]:
     json_out = _confined_existing_path(args.json_out, repo_root=args.repo_root)
     if json_out is not None and args.refresh_nonregressing_from_coverage_xml:
-        current = _load_inventory_mapping(json_out, repo_root=args.repo_root)
+        current = _load_inventory_mapping(json_out)
         candidate = build_module_coverage_inventory(
             repo_root=args.repo_root,
             coverage_xml=_confine_inventory_path(
@@ -1426,7 +1421,7 @@ def _payload_for_check(args: argparse.Namespace) -> dict[str, Any]:
         )
 
     if json_out is not None and not args.refresh_from_coverage_xml:
-        current = _load_inventory_mapping(json_out, repo_root=args.repo_root)
+        current = _load_inventory_mapping(json_out)
         return _refresh_existing_inventory_source_tree(
             current, repo_root=args.repo_root
         )
@@ -1476,7 +1471,7 @@ def main(argv: list[str] | None = None) -> int:
                 f"{args.baseline_json or args.json_out}"
             )
             return 1
-        baseline_payload = _load_inventory_mapping(baseline_path, repo_root=repo_root)
+        baseline_payload = _load_inventory_mapping(baseline_path)
         gates = _load_module_coverage_gates(repo_root, args.gates_config)
         violations = evaluate_module_coverage_gates(
             payload,
@@ -1494,7 +1489,7 @@ def main(argv: list[str] | None = None) -> int:
         if json_out is None:
             print(f"[module-coverage-inventory] missing artifact: {args.json_out}")
             return 1
-        current = _read_confined_text(json_out, repo_root=repo_root)
+        current = _read_text(json_out)
         if current != rendered:
             print(f"[module-coverage-inventory] stale artifact: {json_out}")
             return 1
