@@ -9,6 +9,10 @@
   Logs under logs/mcp-shared/; status in logs/mcp-shared/status.json.
   Does not touch bioetl / bioetl-neo4j compose stacks.
 
+  Daily catalog includes github on port 8820. Do not skip github when using
+  -Daily (#10299). Grok daily should use url http://127.0.0.1:8820/mcp rather
+  than a second stdio github process.
+
   W1.2 hardening:
   - Sequential start (one server at a time)
   - Pre-warm mcp-proxy package once

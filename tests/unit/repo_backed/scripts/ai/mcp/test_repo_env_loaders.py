@@ -68,6 +68,11 @@ ENV_NAMES = (
     "NEO4J_AUTH",
     "NEO4J_USERNAME",
     "NEO4J_PASSWORD",
+    "GITHUB_PERSONAL_ACCESS_TOKEN",
+    "GITHUB_TOKEN",
+    "GITHUB_CDX_PERSONAL_ACCESS_TOKEN",
+    "GITHUB_ANY_PERSONAL_ACCESS_TOKEN",
+    "GH_TOKEN",
 )
 
 
@@ -499,6 +504,73 @@ def test_powershell_explicit_neo4j_credentials_take_precedence() -> None:
     )
 
     assert _powershell_values(result) == ("explicit-user", "explicit-password")
+
+
+def test_bash_does_not_copy_pat_into_github_token() -> None:
+    result = _run_bash(
+        "normalize_repo_env_aliases; "
+        + _bash_printenv("GITHUB_PERSONAL_ACCESS_TOKEN", "GITHUB_TOKEN"),
+        env=_clean_env(
+            GITHUB_PERSONAL_ACCESS_TOKEN="synthetic-pat-only",
+            GITHUB_TOKEN=None,
+        ),
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.splitlines() == ["synthetic-pat-only", "unset"]
+
+
+def test_bash_aliases_github_token_into_pat_when_pat_empty() -> None:
+    result = _run_bash(
+        "normalize_repo_env_aliases; "
+        + _bash_printenv("GITHUB_PERSONAL_ACCESS_TOKEN", "GITHUB_TOKEN"),
+        env=_clean_env(
+            GITHUB_PERSONAL_ACCESS_TOKEN=None,
+            GITHUB_TOKEN="synthetic-token-alias",
+        ),
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.splitlines() == [
+        "synthetic-token-alias",
+        "synthetic-token-alias",
+    ]
+
+
+@POWERSHELL_MARK
+def test_powershell_does_not_copy_pat_into_github_token() -> None:
+    result = _run_powershell(
+        "Normalize-BioetlRepoEnvAliases; "
+        "[Console]::Out.WriteLine($env:GITHUB_PERSONAL_ACCESS_TOKEN); "
+        "[Console]::Out.WriteLine($(if ($env:GITHUB_TOKEN) "
+        "{ $env:GITHUB_TOKEN } else { 'unset' }))",
+        env=_clean_env(
+            GITHUB_PERSONAL_ACCESS_TOKEN="synthetic-pat-only",
+            GITHUB_TOKEN=None,
+        ),
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.splitlines() == ["synthetic-pat-only", "unset"]
+
+
+@POWERSHELL_MARK
+def test_powershell_aliases_github_token_into_pat_when_pat_empty() -> None:
+    result = _run_powershell(
+        "Normalize-BioetlRepoEnvAliases; "
+        "[Console]::Out.WriteLine($env:GITHUB_PERSONAL_ACCESS_TOKEN); "
+        "[Console]::Out.WriteLine($env:GITHUB_TOKEN)",
+        env=_clean_env(
+            GITHUB_PERSONAL_ACCESS_TOKEN=None,
+            GITHUB_TOKEN="synthetic-token-alias",
+        ),
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.splitlines() == [
+        "synthetic-token-alias",
+        "synthetic-token-alias",
+    ]
 
 
 def test_bash_loader_reads_explicit_fixture_and_skips_local_overlay(
