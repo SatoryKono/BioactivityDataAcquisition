@@ -31,14 +31,15 @@ def test_github_policy_documents_live_root_hygiene_ruleset() -> None:
     """GHA-003: policy SSOT must document the live ruleset enforcement state."""
     text = GITHUB_POLICY.read_text(encoding="utf-8")
     assert "root-hygiene-required-check" in text
-    # Live enforcement is currently disabled (2026-09-10) with shadow pr-gate-complete; docs must reflect that
+    # Live: 13643213 active with pr-gate-complete; 15730586 stays disabled.
+    assert "Enforcement: `active`" in text
     assert "Enforcement: `disabled`" in text
+    assert "`pr-gate-complete`" in text
     assert "`checks-complete`" in text
     assert "`root-hygiene`" in text
-    assert "pr-gate-complete" in text
     assert "no bypass actors" in text
     assert "required checks and ref protection active" not in text
     assert "Rules currently enforced:" not in text
     assert "13643213 both active" not in text
     assert "#10267" in text
-    assert "applied_rules_main" in text or "`[]`" in text
+    assert "applied_required_status_checks" in text

@@ -51,12 +51,11 @@ state.
 
 1. Confirm the report records the discovered repository/default branch and
    automation_mutated_github: false.
-1. Until [#10267](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/10267)
-   closes, live GET of rulesets `main` (13643213) and
-   `root-hygiene-required-check` (15730586) MUST be recorded as
-   `enforcement: disabled`, and `GET .../rules/branches/main` MUST be `[]`.
-   Do not write "both active" as the live expectation. Closed `#9975`/`#9979`
-   are not proof of enforcement. `GH-RULESET-001` drift maps to #10267.
+1. Live GET of ruleset `main` (13643213) MUST be `enforcement: active` with
+   required context `pr-gate-complete`. Companion
+   `root-hygiene-required-check` (15730586) MUST remain `enforcement: disabled`.
+   `GET .../rules/branches/main` MUST include `pr-gate-complete`. Do not write
+   "both active". Closed `#9975`/`#9979` are history; live activation is #10267.
 1. Review every control: rulesets, merge settings, Actions SHA policy,
    protected environments, Dependabot, CodeQL, secret scanning, workflow
    health, CODEOWNERS, Wiki, Issue Forms, and automation labels.
