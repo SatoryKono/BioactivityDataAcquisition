@@ -50,7 +50,9 @@ def test_github_policy_documents_live_root_hygiene_ruleset() -> None:
 
 def test_ruleset_10267_closeout_evidence_matches_live_contract() -> None:
     """Sanitized closeout GET must match the #10267 live ruleset contract."""
-    path = ROOT / "reports" / "governance" / "ruleset-10267-closeout-get-2026-09-10.json"
+    path = (
+        ROOT / "reports" / "governance" / "ruleset-10267-closeout-get-2026-09-10.json"
+    )
     data = json.loads(path.read_text(encoding="utf-8"))
     assert data["repository"] == "SatoryKono/BioactivityDataAcquisition"
     assert data["default_branch"] == "main"
