@@ -14,9 +14,11 @@ Evidence surface SHA-256: `589910c6ba166a02811a0ed4b0849bc67c5602c96d53324ae6d45
 
 Evidence metadata refresh (2026-09-10): the canonical registry digest was
 recomputed after adopting the SHA-bound coverage-verify inventory
-(`fully_covered` 1611→1612, `partially_covered` 853→852) for #10305.
-The historical audited commit above is retained; this metadata refresh
-does not constitute a new repository-wide architecture audit.
+(`fully_covered` 1611→1612, `partially_covered` 853→852) for #10305,
+then again after the remote-main debt-gates fingerprint rebind on
+`fix/opt-gh-10311-10310-closeout`. The historical audited commit above is
+retained; this metadata refresh does not constitute a new
+repository-wide architecture audit.
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 

@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.2.15
+Version: 1.2.16
 Status: active
 Class: published
 Owner: BioETL Team
@@ -203,9 +203,9 @@ weaken gates, raise tech-debt budgets, or force Grafana npm majors
 | `sha_pinning_required` | `true` | Workflow SHA-pin SSOT: [`check_github_actions_runtime_policy.py`](../../../scripts/engineering/repo/check_github_actions_runtime_policy.py) `ALLOWED_USES` |
 | `allowed_actions` | `selected` | `github_owned_allowed: true`, `verified_allowed: false`. Third-party patterns are `owner/repo@*` plus nested `owner/repo/path@*` from `ALLOWED_USES` (GitHub `*` does not cross `/`). Live selected vs allowlist is [`github_settings_review.py`](../../../scripts/engineering/repo/github_settings_review.py) `GH-ACTIONS-003`; the SHA-pin checker does not call the Actions allowlist API. |
 | Secret scanning | enabled | Push protection enabled |
-| `secret_scanning_validity_checks` | enabled | Partner-pattern validity. `PATCH /repos/{owner}/{repo}` with this field returns HTTP 200 on this user-owned repository but leaves the setting `disabled` (re-verified GET `2026-09-10`). Enable in GitHub UI only (#10310). `GH-SECRET-002.known_issue: 10310` until live status is `enabled`. Do not git-claim `enabled` before that GET. |
+| `secret_scanning_validity_checks` | enabled | Partner-pattern validity. GitHub documents validity checks as GitHub Team/Enterprise **Secret Protection** only. This repo is user-owned public: `PATCH /repos/{owner}/{repo}` returns HTTP 200 and GET stays `disabled` (re-verified `2026-09-10`). Do not git-claim `enabled`. Standing exception #10310. `GH-SECRET-002.known_issue: 10310`. |
 | `secret_scanning_non_provider_patterns` | disabled | Intentionally off (noisy). Do not enable without a dated issue. |
-| Unused environments | absent | `copilot` and `staging` MUST NOT exist. Live GET `2026-09-10`: `copilot` still present (0 protection rules); `staging` absent. DELETE `copilot` only after explicit owner phrase (#10311). `GH-ENV-002.known_issue: 10311`. Publish environments stay `ghcr-publish`, `observability-render-host`, `pypi`, `testpypi`. |
+| Unused environments | absent | `copilot` and `staging` MUST NOT exist. Live GET `2026-09-10` (after DELETE): `copilot` absent; `staging` absent. Publish environments stay `ghcr-publish`, `observability-render-host`, `pypi`, `testpypi` (2 protection rules each). `GH-ENV-002.known_issue: null` (#10311). |
 | `allow_auto_merge` | `true` | Allowed after #10267: live `GET .../rules/branches/main` applies required context `pr-gate-complete`. Do not treat a disabled companion ruleset as a merge wall. |
 
 Controls live in [`github_governance_policy.json`](../../../configs/quality/github_governance_policy.json): `GH-SECRET-002`, `GH-SECRET-003`, `GH-ACTIONS-002`, `GH-ACTIONS-003`, `GH-ENV-002`.
@@ -1040,3 +1040,12 @@ Merge-block proof: `PUT /repos/SatoryKono/BioactivityDataAcquisition/pulls/9895/
 - `GH-SECRET-002.known_issue: 10310` while validity checks stay `disabled` (UI).
 - `GH-ENV-002.known_issue: 10311` while unused environment `copilot` is present
   (DELETE only after explicit owner phrase).
+
+### Migration notes (1.2.16)
+
+- #10311: DELETE unused environment `copilot` after owner closeout request
+  (`2026-09-10`). Live GET: only `ghcr-publish`, `observability-render-host`,
+  `pypi`, `testpypi`. `GH-ENV-002.known_issue: null`.
+- #10310: validity checks remain `disabled`. GitHub Secret Protection /
+  Team|Enterprise is required; PATCH stays a no-op on this user-owned public
+  repo. Do not git-claim `enabled`. `GH-SECRET-002.known_issue: 10310`.
