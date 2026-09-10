@@ -29,7 +29,8 @@
 """Tests for PipelineRun aggregate internal modules.
 
 This test file provides focused coverage for PipelineRun internal modules:
-- _pipeline_run_mixins.py: State transition methods and lifecycle operations
+- pipeline_run.py: Aggregate root, lifecycle transitions, and read-model
+- pipeline_run_stage_result.py: Stage value objects and stage-recording mixin
 - pipeline_run.py: Read model properties and event collection
 - pipeline_run_stage_result.py: Stage result value objects and transformations
 
@@ -46,8 +47,6 @@ import pytest
 from bioetl.domain.aggregates.pipeline_run import PipelineRun
 from bioetl.domain.aggregates.pipeline_run_stage_result import (
     StageResult,
-    _validate_stage_completion,
-    _validate_stage_name,
     _validate_stage_result,
 )
 from bioetl.domain.aggregates.pipeline_run_stage_result import (
@@ -260,7 +259,7 @@ class TestPipelineRunReadModelMixin:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# _pipeline_run_mixins.py Tests
+# pipeline_run.py lifecycle Tests
 # ──────────────────────────────────────────────────────────────────────────────
 
 
@@ -325,6 +324,45 @@ class TestPipelineRunLifecycleMixin:
         assert stage.status == StageStatus.SUCCESS
         assert stage.records_processed == 100
         assert stage.result == {"output": "data"}
+
+    def test_record_stage_success_replaces_running_stage_entry(
+        self, started_run: PipelineRun
+    ) -> None:
+        """record_stage_success must replace RUNNING, not append."""
+        started_run.record_stage_start("bronze", started_at=_ts(0))
+        started_run.record_stage_success(
+            "bronze",
+            records_processed=10,
+            started_at=_ts(0),
+            completed_at=_ts(5),
+        )
+
+        bronze = [stage for stage in started_run.stages if stage.stage == "bronze"]
+        assert len(bronze) == 1
+        assert bronze[0].status == StageStatus.SUCCESS
+        assert bronze[0].records_processed == 10
+
+    def test_record_stage_success_is_idempotent_for_completed_stage(
+        self, started_run: PipelineRun
+    ) -> None:
+        """A second SUCCESS for the same stage must not append another entry."""
+        started_run.record_stage_success(
+            "bronze",
+            records_processed=10,
+            started_at=_ts(0),
+            completed_at=_ts(5),
+        )
+        started_run.record_stage_success(
+            "bronze",
+            records_processed=99,
+            started_at=_ts(0),
+            completed_at=_ts(8),
+        )
+
+        bronze = [stage for stage in started_run.stages if stage.stage == "bronze"]
+        assert len(bronze) == 1
+        assert bronze[0].records_processed == 10
+        assert bronze[0].completed_at == _ts(5)
 
     def test_record_stage_success_invalid_after_complete(
         self, started_run: PipelineRun
@@ -572,40 +610,62 @@ class TestStageResultValidationFunctions:
     """Tests for StageResult validation functions."""
 
     def test_validate_stage_name_rejects_empty(self):
-        """_validate_stage_name should reject empty stage names."""
+        """Empty stage names are rejected by stage-result validation."""
         with pytest.raises(ValueError, match="Stage name cannot be empty"):
-            _validate_stage_name("")
+            _validate_stage_result("", StageStatus.RUNNING, None, None, 0, _ts(0))
 
     def test_validate_stage_name_accepts_valid(self):
-        """_validate_stage_name should accept valid stage names."""
-        _validate_stage_name("bronze")  # Should not raise
+        """Valid stage names pass stage-result validation."""
+        _validate_stage_result("bronze", StageStatus.RUNNING, None, None, 0, _ts(0))
 
     def test_validate_stage_completion_failed_requires_error(self):
-        """_validate_stage_completion should require error for FAILED status."""
+        """FAILED status requires an error message."""
         with pytest.raises(ValueError, match="Failed stage must have an error"):
-            _validate_stage_completion(StageStatus.FAILED, None, _ts(0), _ts(0))
+            _validate_stage_result("stage", StageStatus.FAILED, None, _ts(0), 0, _ts(0))
 
     def test_validate_stage_completion_success_requires_timestamp(self):
-        """_validate_stage_completion should require completed_at for SUCCESS."""
+        """SUCCESS status requires completed_at."""
         with pytest.raises(ValueError, match="must have completed_at"):
-            _validate_stage_completion(StageStatus.SUCCESS, None, None, _ts(0))
+            _validate_stage_result("stage", StageStatus.SUCCESS, None, None, 0, _ts(0))
 
     def test_validate_stage_completion_failed_requires_timestamp(self):
-        """_validate_stage_completion should require completed_at for FAILED."""
+        """FAILED status requires completed_at."""
         with pytest.raises(ValueError, match="must have completed_at"):
-            _validate_stage_completion(StageStatus.FAILED, "error", None, _ts(0))
+            _validate_stage_result(
+                "stage", StageStatus.FAILED, "error", None, 0, _ts(0)
+            )
 
     def test_validate_stage_completion_running_allows_none_timestamp(self):
-        """_validate_stage_completion should allow None for RUNNING status."""
-        _validate_stage_completion(
-            StageStatus.RUNNING, None, None, _ts(0)
-        )  # Should not raise
+        """RUNNING status allows a missing completed_at."""
+        _validate_stage_result("stage", StageStatus.RUNNING, None, None, 0, _ts(0))
 
     def test_validate_stage_result_rejects_negative_records(self):
         """_validate_stage_result should reject negative records_processed."""
         with pytest.raises(ValueError, match="cannot be negative"):
             _validate_stage_result(
                 "test", StageStatus.SUCCESS, None, _ts(0), -1, _ts(0)
+            )
+
+    def test_validate_in_progress_rejects_completed_at(self) -> None:
+        """PENDING/RUNNING stages must not carry completed_at."""
+        with pytest.raises(
+            ValueError, match="In-progress stage must not have completed_at"
+        ):
+            _validate_stage_result(
+                "stage", StageStatus.RUNNING, None, _ts(1), 0, _ts(0)
+            )
+        with pytest.raises(
+            ValueError, match="In-progress stage must not have completed_at"
+        ):
+            _validate_stage_result(
+                "stage", StageStatus.PENDING, None, _ts(1), 0, _ts(0)
+            )
+
+    def test_validate_completion_order_rejects_earlier_completed_at(self) -> None:
+        """completed_at must not precede started_at."""
+        with pytest.raises(ValueError, match="completed_at cannot be earlier"):
+            _validate_stage_result(
+                "stage", StageStatus.SUCCESS, None, _ts(0), 0, _ts(1)
             )
 
 
@@ -632,6 +692,27 @@ class TestStageResultValueObject:
             completed_at=None,
         )
 
+        assert stage.duration_seconds is None
+
+    def test_duration_seconds_none_when_in_progress_has_timestamp(self) -> None:
+        """Defensive: RUNNING with completed_at still reports no duration."""
+        stage = StageResult(
+            stage="bronze",
+            status=StageStatus.RUNNING,
+            started_at=_ts(0),
+        )
+        object.__setattr__(stage, "completed_at", _ts(5))
+        assert stage.duration_seconds is None
+
+    def test_duration_seconds_none_when_completion_precedes_start(self) -> None:
+        """Defensive: negative duration is treated as missing."""
+        stage = StageResult(
+            stage="bronze",
+            status=StageStatus.SUCCESS,
+            started_at=_ts(5),
+            completed_at=_ts(10),
+        )
+        object.__setattr__(stage, "completed_at", _ts(0))
         assert stage.duration_seconds is None
 
     def test_with_success_creates_successful_copy(self):

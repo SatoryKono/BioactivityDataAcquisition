@@ -161,7 +161,7 @@ from bioetl.domain.ports.storage import BronzeStoragePort
 
 ##### 2.2.2.1. Batch Aggregate State Machine
 
-**Реализация:** `src/bioetl/domain/aggregates/_batch_mixins.py`
+**Реализация:** `src/bioetl/domain/aggregates/_batch_aggregate.py`
 
 ```mermaid
 stateDiagram-v2
@@ -174,7 +174,7 @@ stateDiagram-v2
 
 ##### 2.2.2.2. PipelineRun Aggregate State Machine
 
-**Реализация:** `src/bioetl/domain/aggregates/_pipeline_run_mixins.py`
+**Реализация:** `src/bioetl/domain/aggregates/pipeline_run.py`
 
 ```mermaid
 stateDiagram-v2
@@ -229,7 +229,7 @@ stateDiagram-v2
 
 ##### 2.2.4.2. StageStatus
 
-**Файл:** `src/bioetl/domain/aggregates/pipeline_run_state.py`
+**Файл:** `src/bioetl/domain/aggregates/pipeline_run_stage_result.py`
 
 **Назначение:** Enum, определяющий статус отдельной стадии pipeline.
 
@@ -242,7 +242,7 @@ stateDiagram-v2
 
 ##### 2.2.4.3. PipelineRunState
 
-**Файл:** `src/bioetl/domain/aggregates/pipeline_run_state.py`
+**Файл:** `src/bioetl/domain/aggregates/pipeline_run_stage_result.py`
 
 **Назначение:** Enum, определяющий жизненный цикл pipeline run (текущее состояние во время выполнения).
 

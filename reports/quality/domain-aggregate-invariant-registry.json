@@ -5,7 +5,6 @@
       "aggregate": "Batch",
       "implementation_modules": [
         "src/bioetl/domain/aggregates/_batch_aggregate.py",
-        "src/bioetl/domain/aggregates/_batch_mixins.py",
         "src/bioetl/domain/aggregates/batch.py"
       ],
       "invariants": [
@@ -26,8 +25,7 @@
       "aggregate": "PipelineRun",
       "implementation_modules": [
         "src/bioetl/domain/aggregates/pipeline_run.py",
-        "src/bioetl/domain/aggregates/pipeline_run_stage_result.py",
-        "src/bioetl/domain/aggregates/_pipeline_run_mixins.py"
+        "src/bioetl/domain/aggregates/pipeline_run_stage_result.py"
       ],
       "invariants": [
         "run_id is assigned at creation and exposed read-only",
@@ -46,7 +44,6 @@
     {
       "aggregate": "QuarantineEntry",
       "implementation_modules": [
-        "src/bioetl/domain/aggregates/_quarantine_aggregate.py",
         "src/bioetl/domain/aggregates/_quarantine_value_objects.py",
         "src/bioetl/domain/aggregates/quarantine_entry.py"
       ],
