@@ -10,15 +10,13 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `d2547f49c64d06d4da9c0b49e0e1ead02475969c75cb2f793b1c4b64461ec401`
+Evidence surface SHA-256: `49550b233b35615f508df9bdbfb2ec6e3dd41c47501cb236b96c603e12517fde`
 
 Evidence metadata refresh (2026-09-10): the canonical registry digest was
-recomputed after the SHA-bound module coverage inventory `snapshot_date`
-rebind to `2026-09-10` (#10296) and again after the #10303 lazy-import
-shrink (scorecard fingerprint bind to the Linux dependency-map digest,
-debt-governance, module-coverage inventory). The historical audited
-commit above is retained; this metadata refresh does not constitute a
-new repository-wide architecture audit.
+recomputed after adopting the SHA-bound coverage-verify inventory
+(`fully_covered` 1611→1612, `partially_covered` 853→852) for #10305.
+The historical audited commit above is retained; this metadata refresh
+does not constitute a new repository-wide architecture audit.
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -26,7 +24,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "d2547f49c64d06d4da9c0b49e0e1ead02475969c75cb2f793b1c4b64461ec401",
+  "evidence_surface_sha256": "49550b233b35615f508df9bdbfb2ec6e3dd41c47501cb236b96c603e12517fde",
   "metrics": {
     "architecture_integral_score": 9.14,
     "architecture_interpretation": "good_targeted_improvements",

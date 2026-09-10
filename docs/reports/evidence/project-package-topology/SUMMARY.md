@@ -1,12 +1,17 @@
 # Сводка evidence: project-package-topology
 
-Refresh note (2026-09-10): hash-only reconcile after merging #10325 into #10305. source_tree_sha256=c5a7e8f28785b3bbc04f32b5d6c49fc20d4848e7b90db779c7a5ff3feed7e1a8. `source_tree_sha256` matches `reports/quality/module-coverage-inventory.json`. Historical notes remain historical.
+Refresh note (2026-09-10): `src/bioetl/domain/aggregates/` cohesion shrink 11→8
+modules (#10305) reduced the inventory to `source_module_count=2468`. Counts and
+the source fingerprint below come from `reports/quality/module-coverage-inventory.json`.
+Historical notes remain historical.
+
+`source_tree_sha256=c5a7e8f28785b3bbc04f32b5d6c49fc20d4848e7b90db779c7a5ff3feed7e1a8`
+
+`source_module_count=2468`
 
 Refresh note (2026-09-09): inventory grew to `source_module_count=2471` after the flow3 HTTP display helpers and stream-1 merge. Counts and the source fingerprint below come from `reports/quality/module-coverage-inventory.json`. Historical notes remain historical.
 
-`source_tree_sha256=136970ba9b594564079c68ca5266079e6bd9ecc2d4935e67cf2e84dd3ad9904b`
-
-`source_module_count=2471`
+`source_tree_sha256=3e4af34912c125fcf6294903e81ef499c40c919f01c60e7699a3dd9d33a39aac`
 
 Дата: 2026-08-17
 Статус: refreshed
@@ -110,6 +115,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `3e4af34912c125fcf6294903e81ef499c40c919f01c60e7699a3dd9d33a39aac`
+- source_tree_sha256: `c5a7e8f28785b3bbc04f32b5d6c49fc20d4848e7b90db779c7a5ff3feed7e1a8`
 
-`source_module_count=2471`
+`source_module_count=2468`
