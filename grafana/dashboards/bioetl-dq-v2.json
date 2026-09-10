@@ -955,7 +955,7 @@
       "type": "table",
       "title": "Review Selected Run Summary",
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 13
