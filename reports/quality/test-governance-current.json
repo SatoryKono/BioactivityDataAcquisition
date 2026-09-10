@@ -160,14 +160,14 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "578",
+      "line": "617",
       "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_stage_name_accepts_valid"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "599",
+      "line": "638",
       "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_stage_completion_running_allows_none_timestamp"
@@ -675,8 +675,8 @@
     "tests/unit/composition/test_observability_contract.py:430",
     "tests/unit/composition/factories/storage/test_health_mixin.py:72",
     "tests/unit/composition/factories/storage/test_health_mixin.py:103",
-    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:578",
-    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:599",
+    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:617",
+    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:638",
     "tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py:178",
     "tests/unit/domain/ports/test_noop_audit.py:90",
     "tests/unit/domain/ports/test_protocol_stubs.py:235",
@@ -1311,14 +1311,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "578",
+        "line": "617",
         "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_stage_name_accepts_valid"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "599",
+        "line": "638",
         "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_stage_completion_running_allows_none_timestamp"
@@ -1826,8 +1826,8 @@
       "tests/unit/composition/test_observability_contract.py:430",
       "tests/unit/composition/factories/storage/test_health_mixin.py:72",
       "tests/unit/composition/factories/storage/test_health_mixin.py:103",
-      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:578",
-      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:599",
+      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:617",
+      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:638",
       "tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py:178",
       "tests/unit/domain/ports/test_noop_audit.py:90",
       "tests/unit/domain/ports/test_protocol_stubs.py:235",
@@ -2069,12 +2069,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2433,
-    "total_test_functions": 25600,
+    "total_test_functions": 25606,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "75ec34dde52da19e9addf6d06693a28a3352f4e7b95915264efcfd7e82b85e0b",
+  "source_tree_sha256": "3809632cde9d2705f7647981e04895c3b52310fb7de8b767c8e26305f551825f",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 88,
@@ -2137,7 +2137,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2433,
-  "total_test_functions": 25600,
+  "total_test_functions": 25606,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
