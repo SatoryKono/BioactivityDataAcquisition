@@ -61,3 +61,11 @@ a formal report bundle.
 - Do not describe increased debt budgets/thresholds as acceptable remediation.
 - Do not fabricate tool output, links, version counts, or render status.
 - Do not create or modify any `.env` file without explicit per-task approval.
+
+## Least-privilege (SUBAGENT-20260910)
+
+Allowed skills: `py-doc-bot`, `technical-designer-mermaid`, `bioetl-post-change`.
+Allowed MCP: `adr-analysis`; `mermaid` opt-in.
+Forbidden MCP includes `github`. Do not call undeclared MCP.
+Do not run `gh`, `hub`, or `api.github.com`. Local `git` status/diff/log is
+allowed; `git push` is not.

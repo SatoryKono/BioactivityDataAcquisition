@@ -59,3 +59,11 @@ refactoring/debug log and propose plan changes without editing either file.
 
 The `.env`, secret, destructive-action, and machine-local-state guardrails in
 `AGENTS.md` apply without exception.
+
+## Least-privilege (SUBAGENT-20260910)
+
+Allowed skills: `py-debug-bot`; `vcr-record` and `agent-debugging` opt-in.
+Allowed MCP: `ast-grep`, `code-analyzer`.
+Forbidden MCP includes `github`. Do not call undeclared MCP.
+Do not run `gh`, `hub`, or `api.github.com`. Local `git` status/diff/log is
+allowed; `git push` is not.
