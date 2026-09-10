@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.github-actions
-version: 1.2.0
+version: 1.2.1
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -21,6 +21,7 @@ includes:
 - fragments/audit-scale.md
 - fragments/finding-schema.md
 - fragments/peer-review-gate.md
+- fragments/gh-powershell.md
 related_ssot:
 - AGENTS.md
 - .github/workflows

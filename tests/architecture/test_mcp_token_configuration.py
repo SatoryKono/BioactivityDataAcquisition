@@ -43,6 +43,12 @@ def test_repo_env_loaders_preserve_mcp_token_aliases() -> None:
 
     assert 'export OPENROUTER_API_KEY="${OPENAI_API_KEY}"' not in shell_loader
     assert "$env:OPENROUTER_API_KEY = $env:OPENAI_API_KEY" not in powershell_loader
+    assert 'export GITHUB_TOKEN="${GITHUB_PERSONAL_ACCESS_TOKEN}"' not in shell_loader
+    assert (
+        "$env:GITHUB_TOKEN = $env:GITHUB_PERSONAL_ACCESS_TOKEN" not in powershell_loader
+    )
+    assert "Do not copy PAT into GITHUB_TOKEN" in shell_loader
+    assert "Do not copy PAT into GITHUB_TOKEN" in powershell_loader
 
 
 def test_github_mcp_wrappers_pin_official_server_and_toolsets() -> None:
@@ -130,6 +136,16 @@ def test_mcp_env_loading_smoke_redacts_secret_values() -> None:
     assert '[[ -z "${NEO4J_PASSWORD:-}" ]]' in text
     assert '[[ "${NEO4J_PASSWORD}" == *_secure_password ]]' in text
     assert "matches a legacy placeholder pattern" in text
+    for github_name in (
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "GITHUB_TOKEN",
+        "GITHUB_CDX_PERSONAL_ACCESS_TOKEN",
+        "GITHUB_TOKEN_02",
+        "GH_TOKEN",
+    ):
+        assert github_name in text
+    assert "${GITHUB_PERSONAL_ACCESS_TOKEN}" not in text
+    assert "${GITHUB_TOKEN}" not in text
 
 
 def test_mcp_token_docs_cover_sources_rotation_validation_and_ci_stance() -> None:
@@ -161,6 +177,11 @@ def test_mcp_token_docs_cover_sources_rotation_validation_and_ci_stance() -> Non
     assert "token path per process" in token_doc
     assert "gh auth token" in token_doc
     assert "Grok GitHub overlay vs shared HTTP" in runtime_config
+    assert "XOR (#10299)" in runtime_config
+    assert "http://127.0.0.1:8820/mcp" in runtime_config
+    assert "Do not alias PAT into `GITHUB_TOKEN`" in governance
+    assert "GITHUB_TOKEN_02" in token_doc
+    assert "HTTP 401 after `Import-BioetlRepoEnv`" in token_doc
     assert "BIOETL_MCP_VALIDATE_ONLY=1" in governance
     assert "BIOETL_UVX_DIRECT_NETWORK=1" in governance
     assert "token_validation.sh" in runtime_config

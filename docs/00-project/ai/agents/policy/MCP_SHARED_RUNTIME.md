@@ -50,7 +50,7 @@ Classes:
 | memory | T2 | wrapper stdio | shared port 8826; single-process file owner |
 | filesystem | T2 | wrapper stdio | shared port 8827; repository-root allowlist |
 | fetch | T2 | uvx wrapper | **Phase 2** port 8821 |
-| github | T2 | wrapper | **Phase 2** port 8820 |
+| github | T2 | wrapper | **Phase 2** port 8820. Daily Grok uses this URL; stdio is fallback only. XOR: not both (#10299). |
 | docker | T2 | Windows Docker MCP streaming gateway | **daily** port 8817 |
 | context7 | T2 | wrapper | **daily** port 8815 |
 | ast-grep | T2 | wrapper | **daily** port 8816 |

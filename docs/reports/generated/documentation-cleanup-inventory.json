@@ -12397,6 +12397,34 @@
       "lifecycle": null,
       "outbound_links": 0,
       "owner": "BioETL Team",
+      "path": "docs/00-project/ai/prompts/fragments/gh-powershell.md",
+      "recommended_action": "generate-automatically",
+      "root_doc_kind": null,
+      "section": "00-project",
+      "status": "Generated",
+      "surface_family": "generated",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": "ignored_local_export",
+      "declared_class": "fragment",
+      "declared_status": "active",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "regenerate",
+      "generated_route": "ai-local-generated-docs-helpers",
+      "generated_route_exception": null,
+      "generator": "AI runtime memory, prompts, and local skill generators",
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
       "path": "docs/00-project/ai/prompts/fragments/git-safety.md",
       "recommended_action": "generate-automatically",
       "root_doc_kind": null,
@@ -102093,14 +102121,14 @@
     "by_recommended_action": {
       "archive-after-github-state-check": 336,
       "archive-after-migration": 984,
-      "generate-automatically": 1023,
+      "generate-automatically": 1024,
       "keep": 1264,
       "reconcile-with-github-state": 8,
       "replace-with-link": 2
     },
     "by_section": {
       ".github": 352,
-      "00-project": 234,
+      "00-project": 235,
       "01-requirements": 4,
       "02-architecture": 991,
       "03-data-model": 2,
@@ -102133,7 +102161,7 @@
       "Archived": 291,
       "Canonical": 73,
       "Deprecated": 2,
-      "Generated": 1023,
+      "Generated": 1024,
       "Working": 1487
     },
     "by_surface_family": {
@@ -102141,11 +102169,11 @@
       "archive": 291,
       "canonical": 73,
       "duplicate": 2,
-      "generated": 1023,
+      "generated": 1024,
       "working": 1487
     },
     "by_tracking_state": {
-      "tracked": 3617
+      "tracked": 3618
     },
     "docs_reports_local_count": 36,
     "duplicate_group_count": 7,
@@ -102161,8 +102189,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3617,
+    "total_doc_like": 3618,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3617
+    "total_doc_like_tracked": 3618
   }
 }

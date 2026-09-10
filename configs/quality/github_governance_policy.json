@@ -202,7 +202,7 @@
       "check": "secret_scanning_validity",
       "owner": "Security lane",
       "risk": "high",
-      "known_issue": null,
+      "known_issue": 10310,
       "due_days": 14
     },
     {
@@ -238,7 +238,7 @@
       "check": "unused_environments_absent",
       "owner": "Release engineering",
       "risk": "medium",
-      "known_issue": null,
+      "known_issue": 10311,
       "due_days": 14
     },
     {
