@@ -59,7 +59,7 @@ FINDINGS: tuple[FindingRebaseline, ...] = (
         classification="implemented",
         current_source_anchors=(
             "src/bioetl/application/core/lifecycle/batch_fsm.py",
-            "src/bioetl/domain/aggregates/_batch_mixins.py",
+            "src/bioetl/domain/aggregates/_batch_aggregate.py",
         ),
         current_test_anchors=("tests/unit/application/core/test_batch_fsm.py",),
         existing_issue_anchors=("#5444", ISSUE_5451),
@@ -77,7 +77,7 @@ FINDINGS: tuple[FindingRebaseline, ...] = (
         classification="implemented",
         current_source_anchors=(
             "src/bioetl/domain/aggregates/pipeline_run.py",
-            "src/bioetl/domain/aggregates/_pipeline_run_mixins.py",
+            "src/bioetl/domain/aggregates/pipeline_run_stage_result.py",
         ),
         current_test_anchors=(
             "tests/unit/domain/aggregates/test_pipeline_run.py",

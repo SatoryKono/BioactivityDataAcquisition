@@ -29,7 +29,8 @@
 """Tests for PipelineRun aggregate internal modules.
 
 This test file provides focused coverage for PipelineRun internal modules:
-- _pipeline_run_mixins.py: State transition methods and lifecycle operations
+- pipeline_run.py: Aggregate root, lifecycle transitions, and read-model
+- pipeline_run_stage_result.py: Stage value objects and stage-recording mixin
 - pipeline_run.py: Read model properties and event collection
 - pipeline_run_stage_result.py: Stage result value objects and transformations
 
@@ -260,7 +261,7 @@ class TestPipelineRunReadModelMixin:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# _pipeline_run_mixins.py Tests
+# pipeline_run.py lifecycle Tests
 # ──────────────────────────────────────────────────────────────────────────────
 
 

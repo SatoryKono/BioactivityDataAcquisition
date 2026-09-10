@@ -1,8 +1,4 @@
-"""PipelineRun aggregate re-export facade for lifecycle tracking.
-
-Re-export facade: implementation mixins are split into private modules
-for maintainability while the public aggregate API remains stable.
-"""
+"""PipelineRun aggregate root for lifecycle tracking."""
 
 from __future__ import annotations
 
@@ -10,21 +6,23 @@ from copy import deepcopy
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from bioetl.domain.aggregates._pipeline_run_mixins import (
-    _PipelineRunLifecycleMixin,
+from bioetl.domain.aggregates.events import (
+    PipelineCompleted,
+    PipelineFailed,
+    PipelineShutdown,
 )
 from bioetl.domain.aggregates.pipeline_run_stage_result import (
     PipelineRunState,
     StageResult,
     StageStatus,
+    _PipelineRunStageMixin,
 )
+from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.types import JsonDict, RunID, RunType
 
 if TYPE_CHECKING:
     from bioetl.domain.aggregates.events import DomainEvent
 
-# StageResult invariants are enforced in StageResult.__post_init__ in
-# pipeline_run_stage_result.py; this aggregate keeps the public import surface.
 __all__ = [
     "PipelineRun",
     "PipelineRunState",
@@ -33,7 +31,7 @@ __all__ = [
 ]
 
 
-class PipelineRun(_PipelineRunLifecycleMixin):
+class PipelineRun(_PipelineRunStageMixin):
     """Aggregate Root for pipeline execution.
 
     Invariants:
@@ -44,18 +42,18 @@ class PipelineRun(_PipelineRunLifecycleMixin):
         5. run_id is unique and immutable after creation
     """
 
-    __slots__ = ()
-
-    _run_id: RunID
-    _run_type: RunType
-    _pipeline_name: str
-    _status: PipelineRunState
-    _stages: list[StageResult]
-    _started_at: datetime | None
-    _ended_at: datetime | None
-    _events: list[DomainEvent]
-    _manifest_id: str | None
-    _metadata: JsonDict
+    __slots__ = (
+        "_ended_at",
+        "_events",
+        "_manifest_id",
+        "_metadata",
+        "_pipeline_name",
+        "_run_id",
+        "_run_type",
+        "_stages",
+        "_started_at",
+        "_status",
+    )
 
     def __init__(
         self,
@@ -65,25 +63,127 @@ class PipelineRun(_PipelineRunLifecycleMixin):
         manifest_id: str | None = None,
         metadata: JsonDict | None = None,
     ) -> None:
-        """Initialize a new pipeline run.
-
-        Args:
-            run_id: Unique identifier for this pipeline execution.
-            run_type: Type of run (incremental, backfill, rebuild).
-            pipeline_name: Human-readable pipeline name (e.g., 'chembl_activity'). Defaults to ''.
-            metadata: Optional key-value metadata to attach to the run.
-        """
-        super().__init__()
+        """Initialize a new pipeline run."""
         self._run_id = run_id
         self._run_type = run_type
         self._pipeline_name = pipeline_name
         self._status = PipelineRunState.PENDING
-        self._stages = []
-        self._started_at = None
-        self._ended_at = None
-        self._events = []
+        self._stages: list[StageResult] = []
+        self._started_at: datetime | None = None
+        self._ended_at: datetime | None = None
+        self._events: list[DomainEvent] = []
         self._manifest_id = manifest_id
-        self._metadata = deepcopy(metadata) if metadata is not None else {}
+        self._metadata: JsonDict = deepcopy(metadata) if metadata is not None else {}
+
+    def start(self, started_at: datetime) -> None:
+        """Start the pipeline run at an explicit timestamp."""
+        if self._status != PipelineRunState.PENDING:
+            raise InvalidStateError(
+                f"Cannot start run in status {self._status.value}",
+                current_state=self._status.value,
+                attempted_operation="start",
+            )
+        self._status = PipelineRunState.RUNNING
+        self._started_at = started_at
+
+    def complete(self, completed_at: datetime) -> None:
+        """Mark run as COMPLETED if all stages succeeded."""
+        self._assert_running("complete")
+        self._assert_can_complete()
+        self._status = PipelineRunState.COMPLETED
+        self._ended_at = completed_at
+        duration_seconds = 0.0
+        if self._started_at is not None:
+            duration_seconds = (completed_at - self._started_at).total_seconds()
+        self._events.append(
+            PipelineCompleted(
+                occurred_at=completed_at,
+                run_id=self._run_id,
+                pipeline_name=self._pipeline_name,
+                records_processed=sum(
+                    stage.records_processed for stage in self._stages
+                ),
+                duration_seconds=duration_seconds,
+                stages_count=len(self._stages),
+            )
+        )
+
+    def fail(
+        self,
+        error: str,
+        error_type: str | None = None,
+        *,
+        failed_at: datetime,
+    ) -> None:
+        """Mark run as failed without stage-level details."""
+        self._assert_running("fail")
+        self._status = PipelineRunState.FAILED
+        self._ended_at = failed_at
+        self._events.append(
+            PipelineFailed(
+                occurred_at=failed_at,
+                run_id=self._run_id,
+                pipeline_name=self._pipeline_name,
+                failed_stage="unknown",
+                error=error,
+                error_type=error_type,
+            )
+        )
+
+    def shutdown(self, shutdown_at: datetime) -> None:
+        """Mark the run as gracefully shutdown."""
+        self._assert_running("shutdown")
+        self._status = PipelineRunState.SHUTDOWN
+        self._ended_at = shutdown_at
+        self._events.append(
+            PipelineShutdown(
+                occurred_at=shutdown_at,
+                run_id=self._run_id,
+                pipeline_name=self._pipeline_name,
+                records_processed=sum(
+                    stage.records_processed for stage in self._stages
+                ),
+            )
+        )
+
+    def _assert_can_complete(self) -> None:
+        self._assert_no_failed_stages()
+        self._assert_has_recorded_stages()
+        self._assert_all_stages_successful()
+
+    def _assert_no_failed_stages(self) -> None:
+        failed_stage_names = [
+            stage.stage for stage in self._stages if stage.status == StageStatus.FAILED
+        ]
+        if failed_stage_names:
+            raise InvalidStateError(
+                f"Cannot complete run: {len(failed_stage_names)} stages failed: {failed_stage_names}",
+                current_state=self._status.value,
+                attempted_operation="complete",
+            )
+
+    def _assert_has_recorded_stages(self) -> None:
+        if not self._stages:
+            raise InvalidStateError(
+                "Cannot complete run: no stages recorded",
+                current_state=self._status.value,
+                attempted_operation="complete",
+            )
+
+    def _assert_all_stages_successful(self) -> None:
+        incomplete_stage_names = [
+            f"{stage.stage}:{stage.status.value}"
+            for stage in self._stages
+            if stage.status != StageStatus.SUCCESS
+        ]
+        if incomplete_stage_names:
+            raise InvalidStateError(
+                "Cannot complete run: "
+                "all recorded stages must be SUCCESS before terminal completion; "
+                f"found {incomplete_stage_names}",
+                current_state=self._status.value,
+                attempted_operation="complete",
+            )
 
     @property
     def run_id(self) -> RunID:

@@ -37,6 +37,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Domain aggregates cohesion (#10305):** fold `_quarantine_aggregate.py`,
+  `_batch_mixins.py`, and `_pipeline_run_mixins.py` into the remaining public
+  aggregate modules. `src/bioetl/domain/aggregates/` is 11→8 modules;
+  `package_cohesion_budget.yaml` `max_modules` 11→8. Domain file-size cap 305
+  and `max_package_loc` 2100 are unchanged.
+
 - **Grafana Ops HTTP bootstrap:** `runtime_manager start|recover --stack monitoring`
   retries Grafana once when soft bootstrap froze `prometheus_only` notices after
   `identity_timeout_or_unreachable` and `/ops/control-plane/ready` now matches.

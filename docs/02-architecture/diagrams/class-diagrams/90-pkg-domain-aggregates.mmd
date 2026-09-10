@@ -1,11 +1,11 @@
 %% Title: Package Family: domain/aggregates
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/aggregates; modules: events, _quarantine_value_objects, batch, pipeline_run_stage_result, _batch_mixins, _pipeline_run_mixins.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/aggregates; modules: events, _quarantine_value_objects, batch, pipeline_run_stage_result, _batch_aggregate, quarantine_entry, pipeline_run.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-09-02
+%% @date    2026-09-10
 %% @level   Package Family / Inventory Slice
-%% @nodes   29
+%% @nodes   28
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -35,29 +35,22 @@ classDiagram
         class BatchStatus
         class _BatchAttrs
         class _BatchReadModelMixin
+        class _BatchMutationMixin
     }
 
     namespace pipeline_run_stage_result {
         class PipelineRunState
         class StageResult
         class StageStatus
-    }
-
-    namespace batch_mixins {
-        class _BatchLifecycleMixin
-        class _BatchMutationMixin
-    }
-
-    namespace pipeline_run_mixins {
-        class _PipelineRunAttrs
-        class _PipelineRunLifecycleMixin
+        class _PipelineRunStageMixin
     }
 
     namespace batch_aggregate {
         class Batch
+        class _BatchLifecycleMixin
     }
 
-    namespace quarantine_aggregate {
+    namespace quarantine_entry {
         class QuarantineEntry
     }
 
@@ -78,10 +71,7 @@ classDiagram
     QuarantineEntryPropertiesMixin <|-- QuarantineEntry
     QuarantineEntryTransitionsMixin <|-- QuarantineEntry
     _BatchAttrs <|-- _BatchReadModelMixin
-    _BatchLifecycleMixin <|-- Batch
-    _BatchMutationMixin <|-- Batch
-    _BatchReadModelMixin <|-- _BatchLifecycleMixin
     _BatchReadModelMixin <|-- _BatchMutationMixin
-    _PipelineRunAttrs <|-- _PipelineRunLifecycleMixin
-    _PipelineRunLifecycleMixin <|-- PipelineRun
-
+    _BatchMutationMixin <|-- _BatchLifecycleMixin
+    _BatchLifecycleMixin <|-- Batch
+    _PipelineRunStageMixin <|-- PipelineRun

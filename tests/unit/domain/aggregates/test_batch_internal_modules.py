@@ -29,9 +29,8 @@
 """Tests for Batch aggregate internal modules.
 
 This test file provides focused coverage for Batch internal modules:
-- batch.py: BatchRecord / BatchStatus value objects and read-model mixin
-- _batch_mixins.py: State transitions, record mutation, and event emission
-- _batch_aggregate.py: Aggregate root construction and deterministic ID generation
+- batch.py: BatchRecord / BatchStatus value objects, read-model, and record mutation
+- _batch_aggregate.py: Aggregate root construction, deterministic ID, and lifecycle
 
 These tests complement the existing test_batch.py by testing internal
 functions directly rather than only through the public Batch API.
