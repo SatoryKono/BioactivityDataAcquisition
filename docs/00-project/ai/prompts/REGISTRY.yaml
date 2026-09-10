@@ -24,6 +24,7 @@ scenarios:
   - prompt.fragment.git-safety
   - prompt.fragment.debt-budget-ban
   - prompt.fragment.env-guardrail
+  - prompt.fragment.generated-artifact-ci
 - id: audit-cycle
   scenario: One-cycle evidence audit
   role: py-audit-bot
@@ -271,6 +272,12 @@ entries:
   class: fragment
   tags: []
   summary: Finding fields + findings.json contract including requirement_id (REQ-*/DASH-*)
+- id: prompt.fragment.generated-artifact-ci
+  path: fragments/generated-artifact-ci.md
+  status: active
+  class: fragment
+  tags: []
+  summary: Generated-artifact CI families, hasher split, and safe origin/main fetch
 - id: prompt.fragment.gh-powershell
   path: fragments/gh-powershell.md
   status: active
