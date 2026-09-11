@@ -2645,11 +2645,11 @@ dashboards:
         - not_applicable
         render_profiles: *id001
       '9401':
-        title: Monitor Incident Status
+        title: Monitor Selected-Scope Status
         role: indicator
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: current
+        scope_class: current
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
@@ -2766,8 +2766,8 @@ dashboards:
         title: Review Domain Status
         role: evidence_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: current
+        scope_class: current
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
@@ -3980,8 +3980,8 @@ dashboards:
         title: Monitor Selected Provider
         role: indicator
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: current
+        scope_class: current
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
@@ -4980,8 +4980,8 @@ dashboards:
         title: Review Runtime Blockers
         role: evidence_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: current
+        scope_class: current
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:

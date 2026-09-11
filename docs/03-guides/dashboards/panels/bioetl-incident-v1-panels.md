@@ -17,7 +17,7 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
   do not filter ranked suspects; selected-run evidence is separate.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 3. Monitor Incident Status
+### 3. Monitor Selected-Scope Status
 - **Type:** Stat
 - **Purpose:** Worst-of L0 status for selected pipeline/run_type.
 - **Data sources:** `bioetl_l0_status`

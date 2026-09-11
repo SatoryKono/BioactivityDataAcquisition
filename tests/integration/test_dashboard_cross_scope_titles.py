@@ -155,7 +155,7 @@ def test_provider_health_descriptions_separate_global_and_selected_scope() -> No
     assert "all providers" in status_description
 
     provenance_content = str(panels[9400].get("options", {}).get("content", ""))
-    assert "<b>GLOBAL</b> = fleet severity/freshness" in provenance_content
+    assert "<b>GLOBAL</b> = fleet severity/presence" in provenance_content
     assert "<b>SELECTED PROVIDER</b> = provider status" in provenance_content
 
     for panel_id in (9101, 9102):

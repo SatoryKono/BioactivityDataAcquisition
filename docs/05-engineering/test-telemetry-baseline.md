@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `fix/github-copilot-agent-runtime-10371`
-- Source commit: `c3f3acbe87386c59d550c0ac0a4111147b6f2057`
-- Source run id: `34635674309`
-- Source event: `pull_request`
-- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34635674309`
-- Source tree sha256: `9b11cc28cd7eb5b16e8a4a67cfb0082f1e241b740d47690cad2343ca250c0b5d`
+- Source branch: `main`
+- Source commit: `db7cc9283e3fb49b0e5766489b7abacf9a775cd9`
+- Source run id: `34618841349`
+- Source event: `push`
+- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34618841349`
+- Source tree sha256: `afbd216d264a261bc8a848062b944783d547527bed88ced079a08273ba69b281`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-09-11T21:01:54.765923+00:00`
+- Refreshed at (UTC): `2026-09-11T21:34:42.434434+00:00`
 
 ## Branch-accurate provenance (#5729)
 
