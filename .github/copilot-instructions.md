@@ -71,6 +71,30 @@ as the global profile.
 / `.devin/skills/**` bodies into `.github/prompts` unless a measured gap,
 owner, and maintenance cost are documented in the same change.
 
+## GitHub Copilot coding agent (cloud)
+
+This section applies to the hosted coding agent (`dynamic/copilot-swe-agent/copilot`),
+not only in-IDE completions. Operator runbook:
+`docs/05-operations/runbooks/github-copilot-coding-agent.md`.
+
+- Read `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/RULES.md`,
+  `AGENTS.md`, and this file before editing. Do not copy `.codex/skills/**`
+  into `.github/prompts`.
+- Branches MUST use `copilot/<kebab>` only. Squash-merge via a human after
+  `pr-gate-complete`. Do not merge into `main` from the agent.
+- MUST NOT edit, create, or delete `.env`. MUST NOT add secrets to environment
+  `copilot`. MUST NOT use publish environments `ghcr-publish`, `pypi`,
+  `testpypi`, or `observability-render-host`. MUST NOT raise tech-debt budgets
+  or enable GitHub CodeQL default setup / Discussions.
+- Pull request titles follow Conventional Commits. The GitHub review body and
+  all inline review comments produced through `gh pr review` or an
+  equivalent GitHub API **MUST** be written in Russian, regardless of the
+  surrounding conversation language.
+- After `src/bioetl/**` changes, refresh `module-coverage-inventory` per
+  `POST_CHANGE_VALIDATION.md`. Do not invent Make targets.
+- `GITHUB_TOKEN` cannot approve pull request reviews
+  (`can_approve_pull_request_reviews: false`). Do not attempt self-approval.
+
 ## Suggestion Quality Checklist
 
 - Includes type annotations for public interfaces.

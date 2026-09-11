@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: Informational
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-09-01'
+  Last verified: '2026-09-11'
 
 ______________________________________________________________________
 
@@ -93,6 +93,7 @@ ______________________________________________________________________
 | Runbook | Description | Priority |
 | --- | --- | --- |
 | [Quarterly read-only GitHub settings review](github-settings-quarterly-review.md) | Evidence-only review of rulesets, merge/Actions/security settings, environments, CODEOWNERS, labels, Issue Forms, Wiki, and workflow health | P2 |
+| [GitHub Copilot coding agent](github-copilot-coding-agent.md) | Start/review hosted Copilot PRs; `copilot` is agent-runtime (`GH-ENV-003`), not a publish surface | P2 |
 
 ### Control-Plane / Traceability Routing
 
