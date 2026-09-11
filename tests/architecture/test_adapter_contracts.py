@@ -41,7 +41,7 @@ ADAPTER_MIXIN_CANONICAL_FILES = frozenset(
     {
         "chembl/fetch_adapter_mixin.py",
         "openalex/client_helpers_adapter_mixin.py",
-        "uniprot/metadata_adapter_mixin.py",
+        "uniprot/feature_sequence_adapter_mixin.py",
     }
 )
 
@@ -49,6 +49,7 @@ REMOVED_ADAPTER_MIXIN_SHIMS = frozenset(
     {
         "chembl/fetch_mixin.py",
         "openalex/client_helpers_mixin.py",
+        "uniprot/metadata_adapter_mixin.py",
         "uniprot/metadata_mixin.py",
     }
 )
@@ -57,6 +58,7 @@ REMOVED_SHIM_IMPORT_PATHS = frozenset(
     {
         "bioetl.infrastructure.adapters.chembl.fetch_mixin",
         "bioetl.infrastructure.adapters.openalex.client_helpers_mixin",
+        "bioetl.infrastructure.adapters.uniprot.metadata_adapter_mixin",
         "bioetl.infrastructure.adapters.uniprot.metadata_mixin",
     }
 )

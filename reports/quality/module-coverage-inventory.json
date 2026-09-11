@@ -1,7 +1,7 @@
 {
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
-  "coverage_xml_sha256": "28d2e987ddf436fe9369b1a5c63571a13ffcf1c743360d54294b64b6bc1ff150",
+  "coverage_xml_sha256": "7184937818099a4c3d38b8fe4bd91613c81562af068ac278d680b5aba09c99e9",
   "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
   "measurement_mode": "coverage_xml",
   "modules": [
@@ -18776,14 +18776,14 @@
       "source_lines": 84
     },
     {
-      "coverage_percent": 97.14,
-      "coverage_status": "partially_covered",
-      "covered_lines": 68,
-      "executable_lines": 70,
-      "missing_lines": 2,
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 69,
+      "executable_lines": 69,
+      "missing_lines": 0,
       "module": "bioetl.infrastructure.adapters.uniprot.client",
       "path": "src/bioetl/infrastructure/adapters/uniprot/client.py",
-      "source_lines": 224
+      "source_lines": 222
     },
     {
       "coverage_percent": 100.0,
@@ -18828,12 +18828,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 70,
-      "executable_lines": 70,
+      "covered_lines": 89,
+      "executable_lines": 89,
       "missing_lines": 0,
       "module": "bioetl.infrastructure.adapters.uniprot.feature_sequence_adapter_mixin",
       "path": "src/bioetl/infrastructure/adapters/uniprot/feature_sequence_adapter_mixin.py",
-      "source_lines": 159
+      "source_lines": 219
     },
     {
       "coverage_percent": 98.86,
@@ -18864,16 +18864,6 @@
       "module": "bioetl.infrastructure.adapters.uniprot.idmapping_client",
       "path": "src/bioetl/infrastructure/adapters/uniprot/idmapping_client.py",
       "source_lines": 110
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 21,
-      "executable_lines": 21,
-      "missing_lines": 0,
-      "module": "bioetl.infrastructure.adapters.uniprot.metadata_adapter_mixin",
-      "path": "src/bioetl/infrastructure/adapters/uniprot/metadata_adapter_mixin.py",
-      "source_lines": 68
     },
     {
       "coverage_percent": 100.0,
@@ -43438,14 +43428,14 @@
       "source_lines": 84
     },
     {
-      "coverage_percent": 97.14,
-      "coverage_status": "partially_covered",
-      "covered_lines": 68,
-      "executable_lines": 70,
-      "missing_lines": 2,
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 69,
+      "executable_lines": 69,
+      "missing_lines": 0,
       "module": "bioetl.infrastructure.adapters.uniprot.client",
       "path": "src/bioetl/infrastructure/adapters/uniprot/client.py",
-      "source_lines": 224
+      "source_lines": 222
     },
     {
       "coverage_percent": 100.0,
@@ -43490,12 +43480,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 70,
-      "executable_lines": 70,
+      "covered_lines": 89,
+      "executable_lines": 89,
       "missing_lines": 0,
       "module": "bioetl.infrastructure.adapters.uniprot.feature_sequence_adapter_mixin",
       "path": "src/bioetl/infrastructure/adapters/uniprot/feature_sequence_adapter_mixin.py",
-      "source_lines": 159
+      "source_lines": 219
     },
     {
       "coverage_percent": 98.86,
@@ -43526,16 +43516,6 @@
       "module": "bioetl.infrastructure.adapters.uniprot.idmapping_client",
       "path": "src/bioetl/infrastructure/adapters/uniprot/idmapping_client.py",
       "source_lines": 110
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 21,
-      "executable_lines": 21,
-      "missing_lines": 0,
-      "module": "bioetl.infrastructure.adapters.uniprot.metadata_adapter_mixin",
-      "path": "src/bioetl/infrastructure/adapters/uniprot/metadata_adapter_mixin.py",
-      "source_lines": 68
     },
     {
       "coverage_percent": 100.0,
@@ -49330,7 +49310,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-10",
-  "source_tree_sha256": "16694ef76272b11f9c37c8f871bce072d49425edd0fe18927247f0b9321e2c54",
+  "source_tree_sha256": "3c15f12f14bd31f22d1bb5c19b844c463524445131a468097ada5ffe84a3e700",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -49485,12 +49465,12 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2466,
+    "source_module_count": 2465,
     "status_counts": {
       "coverage_xml_missing": 0,
       "fully_covered": 1610,
       "no_executable_lines": 4,
-      "partially_covered": 852,
+      "partially_covered": 851,
       "uncovered": 0,
       "unmeasured": 0
     },

@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `fix/arch-10307-entrypoint-census`
-- Source commit: `3dec4e670a061d8f8071f2d4fb3cc900772e35a0`
-- Source run id: `34605789950`
+- Source branch: `fix/arch-10309-uniprot-mixin`
+- Source commit: `cdf8ec7c24a853249b5edc3b540b4532d650ab39`
+- Source run id: `34609727278`
 - Source event: `pull_request`
-- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34605789950`
-- Source tree sha256: `43e1658b455f8fe8eadbfca2e2db7df55c4ac5abe891bcb5d70c72b90f78a371`
+- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34609727278`
+- Source tree sha256: `29a8a0e7a0a6d2a22434872e3833cdde541b9e42deda304d53f86493b108f63a`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-09-11T14:25:13.830515+00:00`
+- Refreshed at (UTC): `2026-09-11T15:29:17.291106+00:00`
 
 ## Branch-accurate provenance (#5729)
 

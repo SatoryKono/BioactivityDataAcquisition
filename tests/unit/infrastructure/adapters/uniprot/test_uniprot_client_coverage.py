@@ -351,6 +351,22 @@ def test_create_uniprot_adapter_builds_runtime_instance(mock_http_client, mock_l
     assert adapter._fallback_fetch_service is fallback_fetch_service
 
 
+def test_uniprot_adapter_rejects_unexpected_legacy_ports(
+    mock_http_client, mock_logger
+) -> None:
+    with pytest.raises(TypeError, match="unexpected keyword argument"):
+        UniProtAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            mystery_port=object(),
+            **build_http_adapter_runtime_kwargs(
+                "uniprot",
+                logger=mock_logger,
+                include_fallback_service=True,
+            ),
+        )
+
+
 @pytest.mark.asyncio
 async def test_do_fallback_search_and_should_do_fallback(adapter):
     assert adapter._should_do_fallback(["P1"], {"P1"}, {}) == []
