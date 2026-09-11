@@ -2,7 +2,7 @@
   "schema_version": "retained-public-entrypoint-burn-down-plan-v1",
   "linked_issue": "#7461",
   "source_inventory": "configs/quality/compatibility_facade_inventory.yaml#retained_entrypoints",
-  "reviewed_on": "2026-08-04",
+  "reviewed_on": "2026-09-11",
   "owner": "@bioetl-architecture",
   "policy": {
     "silent_removal": "forbidden",
@@ -13,7 +13,7 @@
   "wave": {
     "id": "2026-08-04-plan-baseline",
     "removal_candidates": [],
-    "rationale": "Empty first wave: all 12 surfaces remain sanctioned permanent public API or composition seams. Burn-down requires per-surface deprecation + external impact notes before any path leaves retained_entrypoints."
+    "rationale": "Quarterly keep #10307 (2026-09-11): all 12 surfaces remain sanctioned permanent public API or composition seams. Empty removal wave. Burn-down still requires per-surface deprecation + external impact notes before any path leaves retained_entrypoints."
   },
   "surfaces": [
     {
@@ -22,7 +22,7 @@
       "sunset_status": "permanent",
       "owner": "bioetl.interfaces.cli.commands",
       "consumer_class": "public_cli_entrypoint",
-      "next_review_by": "2026-09-30",
+      "next_review_by": "2026-12-31",
       "removal_blocked_by": "external_breaking_change_required; public CLI patch/import seam"
     },
     {
@@ -31,7 +31,7 @@
       "sunset_status": "permanent",
       "owner": "bioetl.interfaces.cli.commands",
       "consumer_class": "public_cli_entrypoint",
-      "next_review_by": "2026-09-30",
+      "next_review_by": "2026-12-31",
       "removal_blocked_by": "external_breaking_change_required; public CLI patch/import seam"
     },
     {
@@ -40,7 +40,7 @@
       "sunset_status": "permanent",
       "owner": "bioetl.interfaces.cli.commands",
       "consumer_class": "public_cli_entrypoint",
-      "next_review_by": "2026-09-30",
+      "next_review_by": "2026-12-31",
       "removal_blocked_by": "external_breaking_change_required; public CLI patch/import seam"
     },
     {
@@ -49,7 +49,7 @@
       "sunset_status": "permanent",
       "owner": "bioetl.interfaces.cli.commands",
       "consumer_class": "public_cli_entrypoint",
-      "next_review_by": "2026-09-30",
+      "next_review_by": "2026-12-31",
       "removal_blocked_by": "external_breaking_change_required; public CLI patch/import seam"
     },
     {
@@ -58,7 +58,7 @@
       "sunset_status": "permanent",
       "owner": "bioetl.interfaces.cli.commands",
       "consumer_class": "public_cli_entrypoint",
-      "next_review_by": "2026-09-30",
+      "next_review_by": "2026-12-31",
       "removal_blocked_by": "external_breaking_change_required; public CLI patch/import seam"
     },
     {
@@ -67,7 +67,7 @@
       "sunset_status": "permanent",
       "owner": "bioetl.interfaces.cli.commands",
       "consumer_class": "public_cli_entrypoint",
-      "next_review_by": "2026-09-30",
+      "next_review_by": "2026-12-31",
       "removal_blocked_by": "external_breaking_change_required; public CLI patch/import seam"
     },
     {
@@ -76,7 +76,7 @@
       "sunset_status": "permanent",
       "owner": "bioetl.composition",
       "consumer_class": "composition_public_entrypoint",
-      "next_review_by": "2026-09-30",
+      "next_review_by": "2026-12-31",
       "removal_blocked_by": "composition root public wiring seam"
     },
     {
@@ -85,7 +85,7 @@
       "sunset_status": "permanent",
       "owner": "bioetl.composition",
       "consumer_class": "composition_public_entrypoint",
-      "next_review_by": "2026-09-30",
+      "next_review_by": "2026-12-31",
       "removal_blocked_by": "composition health API public seam"
     },
     {
@@ -94,7 +94,7 @@
       "sunset_status": "permanent",
       "owner": "bioetl.composition",
       "consumer_class": "composition_public_entrypoint",
-      "next_review_by": "2026-09-30",
+      "next_review_by": "2026-12-31",
       "removal_blocked_by": "composition maintenance API public seam"
     },
     {
@@ -103,7 +103,7 @@
       "sunset_status": "permanent",
       "owner": "bioetl.infrastructure.config",
       "consumer_class": "public_package_root",
-      "next_review_by": "2026-09-30",
+      "next_review_by": "2026-12-31",
       "removal_blocked_by": "ADR-052 package-root public API; external_breaking_change_required",
       "linked_adr": "ADR-052-infrastructure-config-package-root-public-api.md"
     },
@@ -113,7 +113,7 @@
       "sunset_status": "permanent",
       "owner": "bioetl.domain.composite",
       "consumer_class": "domain_public_config_seam",
-      "next_review_by": "2026-09-30",
+      "next_review_by": "2026-12-31",
       "removal_blocked_by": "composite domain config public contract surface"
     },
     {
@@ -122,7 +122,7 @@
       "sunset_status": "permanent",
       "owner": "bioetl.application.composite",
       "consumer_class": "application_public_merger_seam",
-      "next_review_by": "2026-09-30",
+      "next_review_by": "2026-12-31",
       "removal_blocked_by": "composite merger public application seam"
     }
   ],

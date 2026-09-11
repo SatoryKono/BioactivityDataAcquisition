@@ -1,15 +1,16 @@
 version: 1
 policy_scope: compatibility_facades
 last_hygiene_review:
-  reviewed_on: "2026-08-04"
+  reviewed_on: "2026-09-11"
   linked_issue: "#7461"
   result: retain_permanent_public_api
   summary: >-
-    Burn-down plan published under reports/quality/retained-public-entrypoint-burn-down-plan.json
-    (#7461). Empty first removal wave: all 12 retained public entrypoints kept as
-    permanent public API / composition seams. transition_debt remains empty.
-    Silent removal forbidden; next wave requires deprecation + importer census.
-  next_review_by: "2026-09-30"
+    Quarterly review #10307 (2026-09-11). All 12 retained public entrypoints kept
+    as permanent public API / composition seams. Importer census snapshot
+    2026-09-08 reused (check PASS). Empty removal wave: silent_removal remains
+    forbidden; next wave requires deprecation + importer proof. Closeout freeze
+    still links #7461. Next review by 2026-12-31.
+  next_review_by: "2026-12-31"
 tracked_docstring_prefixes:
   - "Backward-compatible "
   - "Compatibility "
@@ -28,7 +29,7 @@ retained_entrypoints:
     consumer_class: public_cli_entrypoint
     sunset_status: permanent
     introduced_in: 2026-03 RF-024
-    review_date: "2026-09-30"
+    review_date: "2026-12-31"
     external_breaking_change_required: true
     internal_callers_zero: false
     allowed_call_sites:
@@ -48,7 +49,7 @@ retained_entrypoints:
     consumer_class: public_cli_entrypoint
     sunset_status: permanent
     introduced_in: 2026-03 RF-024
-    review_date: "2026-09-30"
+    review_date: "2026-12-31"
     external_breaking_change_required: true
     internal_callers_zero: false
     allowed_call_sites:
@@ -69,7 +70,7 @@ retained_entrypoints:
     consumer_class: public_cli_entrypoint
     sunset_status: permanent
     introduced_in: 2026-03 RF-024
-    review_date: "2026-09-30"
+    review_date: "2026-12-31"
     external_breaking_change_required: true
     internal_callers_zero: true
     allowed_call_sites:
@@ -91,7 +92,7 @@ retained_entrypoints:
     consumer_class: public_cli_entrypoint
     sunset_status: permanent
     introduced_in: 2026-03 RF-024
-    review_date: "2026-09-30"
+    review_date: "2026-12-31"
     external_breaking_change_required: true
     internal_callers_zero: true
     allowed_call_sites:
@@ -113,7 +114,7 @@ retained_entrypoints:
     consumer_class: public_cli_entrypoint
     sunset_status: permanent
     introduced_in: 2026-03 RF-024
-    review_date: "2026-09-30"
+    review_date: "2026-12-31"
     external_breaking_change_required: true
     internal_callers_zero: false
     allowed_call_sites:
@@ -136,7 +137,7 @@ retained_entrypoints:
     consumer_class: public_cli_entrypoint
     sunset_status: permanent
     introduced_in: 2026-03 RF-024
-    review_date: "2026-09-30"
+    review_date: "2026-12-31"
     external_breaking_change_required: true
     internal_callers_zero: false
     allowed_call_sites:
@@ -160,7 +161,7 @@ retained_entrypoints:
     consumer_class: public_composition_entrypoint
     sunset_status: permanent
     introduced_in: 2026-03 entrypoint freeze
-    review_date: "2026-09-30"
+    review_date: "2026-12-31"
     external_breaking_change_required: true
     internal_callers_zero: true
     allowed_call_sites:
@@ -190,7 +191,7 @@ retained_entrypoints:
     consumer_class: public_composition_entrypoint
     sunset_status: permanent
     introduced_in: 2026-05 public export review
-    review_date: "2026-09-30"
+    review_date: "2026-12-31"
     external_breaking_change_required: true
     internal_callers_zero: true
     allowed_call_sites:
@@ -218,7 +219,7 @@ retained_entrypoints:
     consumer_class: public_composition_entrypoint
     sunset_status: permanent
     introduced_in: 2026-05 public export review
-    review_date: "2026-09-30"
+    review_date: "2026-12-31"
     external_breaking_change_required: true
     internal_callers_zero: true
     allowed_call_sites:
@@ -245,7 +246,7 @@ retained_entrypoints:
     consumer_class: public_config_facade
     sunset_status: permanent
     introduced_in: legacy-pre-2026-05
-    review_date: "2026-09-30"
+    review_date: "2026-12-31"
     external_breaking_change_required: true
     internal_callers_zero: true
     allowed_call_sites:
@@ -269,7 +270,7 @@ retained_entrypoints:
     consumer_class: public_domain_facade
     sunset_status: permanent
     introduced_in: legacy-pre-2026-03
-    review_date: "2026-09-30"
+    review_date: "2026-12-31"
     external_breaking_change_required: true
     internal_callers_zero: false
     allowed_call_sites:
@@ -293,7 +294,7 @@ retained_entrypoints:
     consumer_class: public_application_facade
     sunset_status: permanent
     introduced_in: 2026-03 merge collaborator migration
-    review_date: "2026-09-30"
+    review_date: "2026-12-31"
     external_breaking_change_required: true
     internal_callers_zero: true
     allowed_call_sites:
