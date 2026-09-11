@@ -100,7 +100,7 @@ operator_question:
     answer_ids: [9401]
     next_action_id: 9400
     basis_tokens: [CURRENT]
-    next_action_tokens: [highest-severity blocker]
+    next_action_tokens: [active blocker]
   bioetl-provider-health-v2.json:
     answer_ids: [9101]
     next_action_id: 9002

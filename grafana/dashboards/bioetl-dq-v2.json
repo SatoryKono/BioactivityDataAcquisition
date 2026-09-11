@@ -364,7 +364,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Evidence Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">Is data conformant, and what impact needs action? CURRENT = Status/reasons. SELECTED RUN = accounting. TIME RANGE scopes are not peers.</div></div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">Is data conformant, and what impact needs action? CURRENT = Status/reasons (up to 5). SELECTED RUN = accounting. TIME RANGE scopes are not peers.</div></div>"
       },
       "links": []
     },
@@ -587,7 +587,7 @@
       },
       "id": 9101,
       "options": {
-        "colorMode": "background",
+        "colorMode": "value",
         "dataLinks": [
           {
             "targetBlank": true,
@@ -626,7 +626,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Current: Bounded reason and action rows for WARN/CRIT. If a non-OK current status has no active reason series, a fail-safe reason_evidence_unavailable row directs the operator to verify recording rules. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. TELEMETRY MISSING is not a zero and not VALID EMPTY. An OK status adds No active reasons (OK). UNKNOWN or absent status adds Evidence unavailable (UNKNOWN). Query errors remain Grafana errors.",
+      "description": "CURRENT · Current: Bounded reason and action rows for WARN/CRIT (up to 5). If a non-OK current status has no active reason series, a fail-safe reason_evidence_unavailable row directs the operator to verify recording rules. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. TELEMETRY MISSING is not a zero and not VALID EMPTY. An OK status adds No active reasons (OK). UNKNOWN or absent status adds Evidence unavailable (UNKNOWN). Query errors remain Grafana errors.",
       "fieldConfig": {
         "defaults": {
           "color": {

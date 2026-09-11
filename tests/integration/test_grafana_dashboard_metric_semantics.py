@@ -1060,6 +1060,8 @@ def test_dq_current_status_and_reasons_share_one_instant_snapshot() -> None:
             f"DQ current panel {panel_id} must use an instant query"
         )
 
+    assert panels[9401]["options"]["colorMode"] == "background"
+    assert panels[9101]["options"]["colorMode"] == "value"
     reasons = panels[9102]
     expression = str(reasons["targets"][0]["expr"])
     assert "bioetl_dq_first_window_reason" in expression

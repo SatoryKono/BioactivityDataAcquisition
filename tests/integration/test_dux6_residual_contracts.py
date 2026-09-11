@@ -76,8 +76,7 @@ def test_provenance_panels_share_readability_contract() -> None:
     }
     required_css = (
         "padding:6px 10px",
-        "border-left:4px solid #ff9830",
-        "background:rgba(255,152,48,0.08)",
+        "border-left:4px solid #6b7280",
         "font-size:16px",
         "font-size:18px",
         "line-height:1.35",
@@ -99,6 +98,8 @@ def test_provenance_panels_share_readability_contract() -> None:
         if compact_banner:
             assert "font-size:16px" in content, filename
             assert "padding:4px 10px" in content, filename
+            assert "background:" not in content, filename
+            assert "background-color" not in content, filename
         else:
             assert '<div style="font-size:18px;font-weight:700">' in content, filename
             assert all(token in content for token in required_css), filename

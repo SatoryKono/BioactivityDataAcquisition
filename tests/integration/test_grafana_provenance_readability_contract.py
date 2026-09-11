@@ -29,7 +29,8 @@ _SPECS = {
         "Inspect Scope & Evidence",
         (
             "What is broken or degraded right now?",
-            "Status + First Action",
+            "Fleet Health",
+            "First Action",
             "TIME RANGE",
         ),
     ),
@@ -38,7 +39,7 @@ _SPECS = {
         "Understand Pipeline Scope",
         (
             "CURRENT",
-            "highest-severity blocker",
+            "active blocker",
             "SCRAPING",
         ),
     ),
@@ -83,8 +84,7 @@ _SPECS = {
 
 _REQUIRED_CSS = (
     "padding:6px 10px",
-    "border-left:4px solid #ff9830",
-    "background:rgba(255,152,48,0.08)",
+    "border-left:4px solid #6b7280",
     "font-size:16px",
     "font-size:18px",
     "line-height:1.35",
@@ -94,8 +94,7 @@ _REQUIRED_CSS = (
 )
 _REQUIRED_CSS_FIRST_WINDOW_H3 = (
     "padding:4px 10px",
-    "border-left:4px solid #ff9830",
-    "background:rgba(255,152,48,0.08)",
+    "border-left:4px solid #6b7280",
     "font-size:16px",
     "line-height:1.2",
     "white-space:normal",
@@ -139,6 +138,10 @@ def test_provenance_panel_readability_contract(
     )
     assert all(token in content for token in css)
     assert all(token in content for token in required_copy)
+    assert "background:" not in content
+    assert "background-color" not in content
+    assert "#ff9830" not in content
+    assert "rgba(255,152,48" not in content
     assert "white-space:nowrap" not in content
     assert "font-size:12px" not in content
 

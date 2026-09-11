@@ -22,7 +22,7 @@ exact_duplicates:
         semantics so operator drilldown does not diverge by board.
       panel_refs:
         - "bioetl-overview-v2.json :: Monitor Fleet Health"
-        - "bioetl-incident-v1.json :: Monitor Incident Status"
+        - "bioetl-incident-v1.json :: Monitor Selected-Scope Status"
 near_duplicates:
   max_count: 5
   owner: "@bioetl-observability"
