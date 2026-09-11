@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-11T06:18:14.989741+00:00",
+  "generated_at": "2026-09-11T08:08:57.836080+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -14401,7 +14401,7 @@
         },
         {
           "path": "tests/architecture/test_hotspot_fan_in_family_ratchets.py",
-          "line": 17,
+          "line": 19,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.hotspot_family_metrics import ("
         },
