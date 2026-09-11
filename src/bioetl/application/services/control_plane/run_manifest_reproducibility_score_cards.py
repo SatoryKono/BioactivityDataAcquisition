@@ -3,46 +3,40 @@
 from __future__ import annotations
 
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation import (
-    CATEGORY_SCORER_EXPORTS,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation import (
-    PROFILE_SCORE_THRESHOLDS as PROFILE_SCORE_THRESHOLDS,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation import (
-    ScoreCardRecord as ScoreCardRecord,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation import (
     build_supported_boundary_verdict,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation import (
     evaluate_threshold_failures,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation import (
     overall_blockers,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation import (
     overall_evidence_refs,
 )
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation import (
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
+    PROFILE_SCORE_THRESHOLDS as PROFILE_SCORE_THRESHOLDS,
+)
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
+    ScoreCardRecord as ScoreCardRecord,
+)
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
     score_checkpoint_safety as score_checkpoint_safety,
 )
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation import (
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
     score_determinism as score_determinism,
 )
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation import (
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
     score_idempotency as score_idempotency,
 )
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation import (
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
     score_layer_consistency as score_layer_consistency,
 )
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation import (
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
     score_lineage_completeness as score_lineage_completeness,
 )
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation import (
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
     score_replay_readiness as score_replay_readiness,
 )
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation import (
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
     score_run_identity as score_run_identity,
+)
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
+    CATEGORY_SCORER_EXPORTS,
 )
 from bioetl.application.services.control_plane.run_manifest_reproducibility_claims import (
     build_executable_run_contract_claim as build_executable_run_contract_claim,

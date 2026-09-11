@@ -6,10 +6,10 @@ from bioetl.application.services.control_plane.replay.reproducibility_score_card
     CATEGORY_SCORER_EXPORTS as CATEGORY_SCORER_EXPORTS,
 )
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
-    SCORE_CARD_TYPE_EXPORTS as _SCORE_CARD_TYPE_EXPORTS,
+    PROFILE_SCORE_THRESHOLDS as PROFILE_SCORE_THRESHOLDS,
 )
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
-    PROFILE_SCORE_THRESHOLDS as PROFILE_SCORE_THRESHOLDS,
+    SCORE_CARD_TYPE_EXPORTS as _SCORE_CARD_TYPE_EXPORTS,
 )
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
     JsonDict as JsonDict,

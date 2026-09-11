@@ -3,43 +3,10 @@
 from __future__ import annotations
 
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
-    CATEGORY_SCORER_EXPORTS as CATEGORY_SCORER_EXPORTS,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
-    PROFILE_SCORE_THRESHOLDS as PROFILE_SCORE_THRESHOLDS,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
-    JsonDict as JsonDict,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
-    ScoreCardRecord as ScoreCardRecord,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
-    score_checkpoint_safety as score_checkpoint_safety,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
-    score_determinism as score_determinism,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
-    score_idempotency as score_idempotency,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
-    score_layer_consistency as score_layer_consistency,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
-    score_lineage_completeness as score_lineage_completeness,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
-    score_replay_readiness as score_replay_readiness,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
-    score_run_identity as score_run_identity,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
-    string_items as string_items,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
-    supported_boundary_block_reason as supported_boundary_block_reason,
+    JsonDict,
+    ScoreCardRecord,
+    string_items,
+    supported_boundary_block_reason,
 )
 
 _BLOCKER_PRIORITY_ORDER: tuple[str, ...] = (
@@ -188,16 +155,3 @@ def build_supported_boundary_verdict(
         "exact_replay_support_boundary": summary.get("exact_replay_support_boundary"),
         "lineage_closure_supported": lineage_supported,
     }
-
-
-__all__ = [
-    "CATEGORY_SCORER_EXPORTS",
-    "PROFILE_SCORE_THRESHOLDS",
-    "JsonDict",
-    "ScoreCardRecord",
-    "build_supported_boundary_verdict",
-    "evaluate_threshold_failures",
-    "overall_blockers",
-    "overall_evidence_refs",
-    *CATEGORY_SCORER_EXPORTS,
-]

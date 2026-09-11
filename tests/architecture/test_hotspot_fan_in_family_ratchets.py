@@ -124,4 +124,3 @@ def test_issue_10304_control_plane_replay_fan_in_has_headroom() -> None:
         "replay score-card cluster max_internal_fan_in="
         f"{cluster_fan_in} at {cluster_module}; expected a line graph after #10304"
     )
-
