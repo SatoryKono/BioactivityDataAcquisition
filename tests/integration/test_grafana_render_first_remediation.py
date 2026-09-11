@@ -1081,8 +1081,8 @@ def test_run_explorer_recent_runs_bind_run_id_via_data_link() -> None:
     assert any("var-pipeline=${__data.fields.Pipeline}" in url for url in first_links)
     assert any("var-run_type=${__data.fields.run_type}" in url for url in first_links)
     assert all("var-run_type=$run_type" not in url for url in first_links)
-    assert all("viewPanel=" not in url for url in first_links)
-    assert "viewPanel" not in str(first_screen.get("description") or "")
+    assert any("viewPanel=3022" in url for url in first_links)
+    assert "viewPanel=3022" in str(first_screen.get("description") or "")
     hidden = {
         str((item.get("matcher") or {}).get("options"))
         for item in (first_screen.get("fieldConfig") or {}).get("overrides") or []

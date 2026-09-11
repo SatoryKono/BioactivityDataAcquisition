@@ -10,7 +10,7 @@ Reviewers:
 - Release engineering
 Priority: P2
 Runtime profile: Local-Only governance review; GitHub API read-only access.
-Last verified: '2026-09-10'
+  Last verified: '2026-09-11'
 
 ______________________________________________________________________
 
@@ -57,8 +57,11 @@ state.
    `GET .../rules/branches/main` MUST include `pr-gate-complete`. Do not write
    "both active". Closed `#9975`/`#9979` are history; live activation is #10267.
 1. Review every control: rulesets, merge settings, Actions SHA policy,
-   protected environments, Dependabot, CodeQL, secret scanning, workflow
+   protected environments, agent-runtime environment `copilot` (`GH-ENV-003`),
+   unused `staging` (`GH-ENV-002`), Dependabot, CodeQL, secret scanning, workflow
    health, CODEOWNERS, Wiki, Issue Forms, and automation labels.
+   Copilot coding-agent operator steps:
+   [github-copilot-coding-agent.md](github-copilot-coding-agent.md).
 1. For an existing mapped issue, link the evidence there. For new drift, the
    accountable human creates a governance issue containing control ID,
    evidence, owner, risk, decision, due date, and artifact URL.

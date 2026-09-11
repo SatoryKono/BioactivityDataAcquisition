@@ -19,6 +19,26 @@ This runbook is **not** a runtime SSOT. Canonical AI precedence remains
 | Push feature branches only | Protected `main` |
 | `CYCLE_COUNT` default **1**, max **2**/session | Reduce compaction thrash |
 
+### Worktree reuse
+
+1. `git worktree list` (or `--porcelain`).
+2. If `branch refs/heads/<WORK_BRANCH>` is already listed, `cd` that path.
+   Do not `git worktree add` a second copy of a mounted branch.
+3. `git worktree add` only when the branch is not mounted in any tree.
+4. `git worktree prune` / `remove` only for `prunable` entries, and only after
+   the operator explicitly confirms. Do not remove dirty, locked, or
+   foreign WIP.
+
+### Operator parent
+
+Cursor Grok, Grok TUI, and the Codex/root session that owns `gh` are the
+**operator parent** of this work. `git` and `gh` are allowed there under the
+ask/ship profile. `~/.cursor/skills` and `~/.grok/skills` are machine-local
+installs, **not** SSOT (tracked sources stay in-repo). One agent = one
+worktree; do not `git checkout` a foreign dirty branch. Child Task/subagents
+(including Grok `implementer`) must not run `gh`. Do not add `.cursor/**` to
+`AGENTS.md` Canonical Precedence without an ADR.
+
 If `MERGE_HEAD` or `CHERRY_PICK_HEAD` exists and this session did not start it:
 `git merge --abort` or `git cherry-pick --abort`. Do not resolve a foreign
 operation "while here".

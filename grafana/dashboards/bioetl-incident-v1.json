@@ -342,15 +342,15 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Incident Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">GLOBAL fleet triage: Pipeline / Run ID do not filter suspects. Open the row’s domain and object; selected-run evidence is separate.</div></div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">GLOBAL fleet triage: Pipeline / Run ID do not filter suspects. Open the row’s domain and object; selected-run evidence is separate.</div></div>"
       },
       "links": []
     },
     {
       "id": 9401,
       "type": "stat",
-      "title": "Monitor Incident Status",
-      "description": "CURRENT · TIME RANGE · Pair with Provenance reason + action; never read as OK. Not a healthy OK. Ranked suspects may be WORKFLOW/GLOBAL blast radius — check scope labels on tables. Incident header status (labelled only). Map 0=OK,1=WARN,2=CRIT,3/null=UNKNOWN. Never bare numbers. Confidence from missing telemetry / VALID_EMPTY suspects. Read-only workspace",
+      "title": "Monitor Selected-Scope Status",
+      "description": "CURRENT snapshot · Selected pipeline/run_type status at evaluation time. Ranked suspects (2010) are GLOBAL/UNVERIFIED and independent of this card. Pair with Provenance reason + action; never read as OK. Not a healthy OK. Ranked suspects may be WORKFLOW/GLOBAL blast radius — check scope labels on tables. Map 0=OK,1=WARN,2=CRIT,3/null=UNKNOWN. Never bare numbers. Confidence from missing telemetry / VALID_EMPTY suspects. Read-only workspace",
       "gridPos": {
         "h": 3,
         "w": 8,

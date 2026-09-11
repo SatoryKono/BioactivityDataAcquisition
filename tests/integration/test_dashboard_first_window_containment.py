@@ -129,6 +129,9 @@ def test_trust_9418_keeps_verdict_and_reason_count_visible() -> None:
     assert props["processing_status"]["displayName"] == "Processing"
     assert props["trust_status"]["displayName"] == "Trust"
     assert props["reasons_count"]["displayName"] == "Reasons"
+    assert props["evidence_freshness"]["displayName"] == "Freshness"
+    assert props["evidence_freshness"]["custom.hidden"] is False
+    assert props["evidence_freshness"]["custom.width"] == 90
     assert "viewPanel=9414" in props["reasons_count"]["links"][0]["url"]
     assert all(
         not p.get("custom.cellOptions", {}).get("wrapText") for p in props.values()
@@ -312,6 +315,16 @@ def test_first_window_scope_banners_name_current_range_and_selected_run() -> Non
             if token not in blob:
                 missing.append(f"{dashboard_name} missing {token}")
     assert not missing, "first-window scope banners:\n" + "\n".join(missing)
+    overview_blob = "\n".join(
+        f"{panel.get('title', '')}\n{panel.get('description', '')}\n"
+        f"{((panel.get('options') or {}).get('content') or '')}"
+        for panel in select_first_window_panels(
+            _root_panels(by_name["bioetl-overview-v2.json"])
+        )
+        if panel.get("type") == "text"
+    )
+    assert "TIME RANGE = Domain Status" not in overview_blob
+    assert "TIME RANGE = history" in overview_blob
 
 
 def test_overview_215_9002_fit_first_window_without_raising_fold() -> None:

@@ -220,7 +220,9 @@ The following divergence is not acceptable:
 - **GitHub Copilot** -> keep path packs thin; do **not** duplicate Codex/Devin
   skills into `.github/prompts` without a measured gap and owner.
 - **Cursor onboarding** -> after clone run `bash scripts/ai/cursor/setup_cursor.sh`
-  (see `scripts/ai/cursor/README.md`).
+  (see `scripts/ai/cursor/README.md`). Cursor Grok / Grok TUI sessions that
+  run `gh` are **operator parents**, not `AGENTS.md` runtime peers;
+  `~/.cursor/skills` is a machine-local install, not SSOT.
 - Human-readable indexes, mirrors, and onboarding pointers -> `docs/00-project/ai/**`
 
 ## Related Entry Points
