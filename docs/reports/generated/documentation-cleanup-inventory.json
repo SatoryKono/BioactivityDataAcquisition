@@ -45071,7 +45071,7 @@
       "github_issue_url": null,
       "inbound_links": 5,
       "lifecycle": null,
-      "outbound_links": 11,
+      "outbound_links": 13,
       "owner": "BioETL Team",
       "path": "docs/03-guides/dashboards/README.md",
       "recommended_action": "keep",
