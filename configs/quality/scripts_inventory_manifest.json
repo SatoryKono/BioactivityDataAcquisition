@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-11T09:53:13.456539+00:00",
+  "generated_at": "2026-09-11T10:13:09.209982+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -16847,13 +16847,13 @@
         },
         {
           "path": "scripts/engineering/qa/refresh_governance_artifacts.py",
-          "line": 525,
+          "line": 527,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.technical_debt_audit_registry import ("
         },
         {
           "path": "scripts/engineering/qa/refresh_governance_artifacts.py",
-          "line": 552,
+          "line": 554,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.technical_debt_audit_registry import ("
         },

@@ -32,6 +32,8 @@ ROOT = Path(__file__).resolve().parents[3]
 
 _TEST_GOVERNANCE_JSON = "reports/quality/test-governance-current.json"
 _FIXTURE_DUPLICATION_JSON = "reports/quality/test-fixture-asset-duplication.json"
+_QA_MODULE = "scripts.engineering.qa"
+_TEST_GOVERNANCE_MODULE = f"{_QA_MODULE}.report_test_governance_audit"
 
 
 def _write_text_atomically(path: Path, payload: str) -> None:
@@ -220,7 +222,7 @@ def _run_check_only() -> None:
         [
             sys.executable,
             "-m",
-            "scripts.engineering.qa.report_test_governance_audit",
+            _TEST_GOVERNANCE_MODULE,
             "--check",
         ]
     )
@@ -260,7 +262,7 @@ def _run_check_only() -> None:
         [
             sys.executable,
             "-m",
-            "scripts.engineering.qa",
+            _QA_MODULE,
             "report-debt-governance-gates",
             "--check",
         ]
@@ -316,7 +318,7 @@ def _run_refresh() -> None:
         [
             sys.executable,
             "-m",
-            "scripts.engineering.qa.report_test_governance_audit",
+            _TEST_GOVERNANCE_MODULE,
             "--json-out",
             _TEST_GOVERNANCE_JSON,
             "--fixture-duplication-out",
@@ -384,7 +386,7 @@ def _run_refresh() -> None:
         [
             sys.executable,
             "-m",
-            "scripts.engineering.qa",
+            _QA_MODULE,
             "report-debt-governance-gates",
             "--update",
         ]
@@ -462,7 +464,7 @@ _CI_DRIFT_FAMILY_ORDER = (
     "remote-main",
     "dataflow",
 )
-_PIPELINE_NAME_RE = re.compile(r"^[A-Za-z0-9_]+$")
+_PIPELINE_NAME_RE = re.compile(r"^\w+$", re.ASCII)
 _GIT_OBJECT_ID_RE = re.compile(r"^[0-9a-f]{7,40}$")
 _CURRENT_AUDIT_ID_PREFIX = "\n  - id: "
 
@@ -595,7 +597,7 @@ def _cmd_test_gov(*, check_only: bool, **_: object) -> list[str]:
     cmd = [
         sys.executable,
         "-m",
-        "scripts.engineering.qa.report_test_governance_audit",
+        _TEST_GOVERNANCE_MODULE,
     ]
     if check_only:
         cmd.append("--check")
@@ -615,7 +617,7 @@ def _cmd_flaky(*, check_only: bool, **_: object) -> list[str]:
     cmd = [
         sys.executable,
         "-m",
-        "scripts.engineering.qa",
+        _QA_MODULE,
         "report-flaky-test-burndown-review",
     ]
     if check_only:
@@ -627,7 +629,7 @@ def _cmd_remote_main(*, check_only: bool, **_: object) -> list[str]:
     return [
         sys.executable,
         "-m",
-        "scripts.engineering.qa",
+        _QA_MODULE,
         "report-architecture-debt-remote-main-baseline",
         "--check" if check_only else "--update",
     ]
