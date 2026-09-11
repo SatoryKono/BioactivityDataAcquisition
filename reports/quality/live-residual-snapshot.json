@@ -13,10 +13,10 @@
   "hotspot_families": {
     "application_core": {
       "files_ge_250_loc": 0,
-      "max_internal_fan_in": 6,
+      "max_internal_fan_in": 5,
       "helper_function_ratio": 0.374,
       "files": 194,
-      "total_loc": 23418,
+      "total_loc": 23440,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 7
     },
@@ -42,8 +42,8 @@
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.376,
-      "files": 133,
-      "total_loc": 15091,
+      "files": 131,
+      "total_loc": 15077,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 2
     },
