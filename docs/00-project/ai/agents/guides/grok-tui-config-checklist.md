@@ -31,7 +31,7 @@ Daily parent always-on (**≤4 live**, including `github`):
 Optional only if actually connected: `memory` (MCP file, not
 `python -m memory.tooling.workflow`), `fetch`.
 
-**Not** daily parent (named-inherit only on `obs-dashboard` later, #10319):
+**Not** daily parent (named-inherit only on Grok-only `obs-dashboard`, #10319):
 `grafana`, `prometheus`.
 
 Disabled for BioETL daily (all agents except explicit opt-in): `filesystem`,
@@ -83,6 +83,8 @@ Child agents: see [../../grok/agents/](../../grok/agents/). Install with
 
 - [ ] `.\scripts\ai\grok\install_skills.ps1` (user) or `-Project`
 - [ ] Skills present: `bioetl-session`, `bioetl-closeout`, `bioetl-post-change`
+- [ ] Agents include Grok-only `implementer` and `obs-dashboard`
+- [ ] Personas present: `rca-handoff`, `closeout-table`
 - [ ] Prompt render smoke:
   `.\.venv-win\Scripts\python.exe -m scripts.ai.prompts render prompt.session.grok-bootstrap --param TASK=smoke --param MODE=plan-only --param SCOPE=docs`
 
@@ -94,7 +96,8 @@ Child agents: see [../../grok/agents/](../../grok/agents/). Install with
 - [ ] `google_drive` / `tasks` / neo4j / grafana / deepwiki **not** connected
 - [ ] `[skills] disabled` covers the non-BioETL list; `pc-agent-session` does
       not auto-invoke
-- [ ] Child spawn (`explore` / `py-audit-bot`): no MCP `github`; no `gh`
+- [ ] Child spawn (`explore` / `implementer` / `obs-dashboard`): no MCP `github`; no `gh`
+- [ ] `/config-agents` lists `implementer` and `obs-dashboard`; `/personas` has overlays
 - [ ] `python scripts/ai/codex/doctor.py static --no-write`
 - [ ] `python scripts/ai/codex/setup_mcp.py --check`
 - [ ] `bash scripts/ai/junie/check_junie_mirror.sh --check` after `.codex`/`.junie` edits

@@ -9,7 +9,9 @@
     - ~/.grok/skills/          (default, user-wide)
     - <repo>/.grok/skills/     (-Project)
   Agent sources under docs/00-project/ai/grok/agents/*.md copy into
-  ~/.grok/agents/ or <repo>/.grok/agents/ (-Project). Do not git-add .grok/.
+  ~/.grok/agents/ or <repo>/.grok/agents/ (-Project). Persona sources under
+  docs/00-project/ai/grok/personas/*.toml copy into ~/.grok/personas/ or
+  <repo>/.grok/personas/ (-Project). Do not git-add .grok/.
 
 .PARAMETER Project
   Install into the repository .grok/skills/ instead of the user profile.
@@ -32,6 +34,7 @@ $ErrorActionPreference = 'Stop'
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path
 $SourceRoot = Join-Path $RepoRoot 'docs\00-project\ai\grok\skills'
 $AgentSourceRoot = Join-Path $RepoRoot 'docs\00-project\ai\grok\agents'
+$PersonaSourceRoot = Join-Path $RepoRoot 'docs\00-project\ai\grok\personas'
 
 if (-not (Test-Path -LiteralPath $SourceRoot)) {
     throw "Skill source root not found: $SourceRoot"
@@ -40,9 +43,11 @@ if (-not (Test-Path -LiteralPath $SourceRoot)) {
 if ($Project) {
     $DestRoot = Join-Path $RepoRoot '.grok\skills'
     $AgentDestRoot = Join-Path $RepoRoot '.grok\agents'
+    $PersonaDestRoot = Join-Path $RepoRoot '.grok\personas'
 } else {
     $DestRoot = Join-Path $env:USERPROFILE '.grok\skills'
     $AgentDestRoot = Join-Path $env:USERPROFILE '.grok\agents'
+    $PersonaDestRoot = Join-Path $env:USERPROFILE '.grok\personas'
 }
 
 $skillDirs = Get-ChildItem -LiteralPath $SourceRoot -Directory -ErrorAction Stop |
@@ -91,6 +96,24 @@ foreach ($agent in $agentFiles) {
 
 Write-Host ""
 Write-Host ("Installed {0} agent(s). Start a new Grok session to rediscover." -f $installedAgents.Count)
+
+$personaFiles = @()
+if (Test-Path -LiteralPath $PersonaSourceRoot) {
+    $personaFiles = @(Get-ChildItem -LiteralPath $PersonaSourceRoot -File -Filter '*.toml' -ErrorAction Stop)
+}
+$installedPersonas = @()
+foreach ($persona in $personaFiles) {
+    $destPersona = Join-Path $PersonaDestRoot $persona.Name
+    if ($PSCmdlet.ShouldProcess($destPersona, "Install persona $($persona.BaseName)")) {
+        New-Item -ItemType Directory -Force -Path $PersonaDestRoot | Out-Null
+        Copy-Item -LiteralPath $persona.FullName -Destination $destPersona -Force
+        $installedPersonas += $persona.BaseName
+        Write-Host "OK  persona $($persona.BaseName) -> $destPersona"
+    }
+}
+
+Write-Host ""
+Write-Host ("Installed {0} persona(s). Enable via Grok /personas (overlay, not spawn_subagent)." -f $installedPersonas.Count)
 if ($Project) {
     Write-Host "Note: .grok/ is gitignored; project install is machine-local only."
 }
