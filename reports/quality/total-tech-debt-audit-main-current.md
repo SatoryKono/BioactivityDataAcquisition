@@ -10,13 +10,12 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `71dccc5b4e7f17f3ffd66ec0f4102c8489c7035c7ef8d71e67b472354b85e61e`
+Evidence surface SHA-256: `f71770daf5d9c41d741ee935589deb84415879985caada7e2c55caa9d4932d0c`
 
 Evidence metadata refresh (2026-09-11): the canonical registry digest was
-recomputed after the #10308 hotspot/duplication/dead-code inventory regen
-(scorecard `source_artifacts` snapshot dates). The historical audited commit
-above is retained; this metadata refresh does not constitute a new
-repository-wide architecture audit.
+recomputed after the #10308 inventory regen and a follow-up debt-governance
+gates restamp. The historical audited commit above is retained; this metadata
+refresh does not constitute a new repository-wide architecture audit.
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -24,7 +23,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "71dccc5b4e7f17f3ffd66ec0f4102c8489c7035c7ef8d71e67b472354b85e61e",
+  "evidence_surface_sha256": "f71770daf5d9c41d741ee935589deb84415879985caada7e2c55caa9d4932d0c",
   "metrics": {
     "architecture_integral_score": 9.14,
     "architecture_interpretation": "good_targeted_improvements",
