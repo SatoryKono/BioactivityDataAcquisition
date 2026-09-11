@@ -164,6 +164,8 @@ Minimum expectation:
 - `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 - `docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md`
+- `.github/copilot-instructions.md` (in-IDE + hosted Copilot coding agent)
+- `docs/05-operations/runbooks/github-copilot-coding-agent.md`
 
 ## Env File Guardrail
 
