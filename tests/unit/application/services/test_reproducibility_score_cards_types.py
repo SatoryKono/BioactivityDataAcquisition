@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_types import (
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_core import (
     bounded,
     string_items,
     supported_boundary_block_reason,
