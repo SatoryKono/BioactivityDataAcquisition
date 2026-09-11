@@ -10,11 +10,11 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `71dccc5b4e7f17f3ffd66ec0f4102c8489c7035c7ef8d71e67b472354b85e61e`
+Evidence surface SHA-256: `f59530a8c8aedcd5db3fbbbe26edf54f971f0232d792e9df5fdd392133d6acd7`
 
 Evidence metadata refresh (2026-09-11): the canonical registry digest was
-recomputed after the #10308 hotspot/duplication/dead-code inventory regen
-(scorecard `source_artifacts` snapshot dates). The historical audited commit
+recomputed after #10304 folded two control-plane replay score-card modules
+(`source_module_count=2466`). The historical audited commit
 above is retained; this metadata refresh does not constitute a new
 repository-wide architecture audit.
 
@@ -24,7 +24,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "71dccc5b4e7f17f3ffd66ec0f4102c8489c7035c7ef8d71e67b472354b85e61e",
+  "evidence_surface_sha256": "f59530a8c8aedcd5db3fbbbe26edf54f971f0232d792e9df5fdd392133d6acd7",
   "metrics": {
     "architecture_integral_score": 9.14,
     "architecture_interpretation": "good_targeted_improvements",
@@ -35,11 +35,11 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 1612,
+    "fully_covered_module_count": 1610,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 4,
     "partially_covered_module_count": 852,
-    "source_module_count": 2468,
+    "source_module_count": 2466,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
@@ -58,13 +58,13 @@ Refresh reason: Reconcile the current evidence surface and semantic summary with
 1. Release status: **debt-governance gates passing**; no blocking gaps remain.
 1. Architecture quality integral score: **9.14** (`good_targeted_improvements`). Integral score `9.14`.
 1. Module inventory (from module-coverage-inventory.json only):
-   - source_module_count: **2468**
-   - fully_covered: **1612**
+   - source_module_count: **2466**
+   - fully_covered: **1610**
    - partially_covered: **852**
    - no_executable_lines: **4**
    - uncovered: **0**
    - unmeasured: **0**
-   - check: fully + partial + no_exec + uncovered + unmeasured = 2468 == source_module_count
+   - check: fully + partial + no_exec + uncovered + unmeasured = 2466 == source_module_count
 1. Contract coverage matrix schema: **contract-coverage-matrix-v3** (v3: strict Gold required for availability).
 1. Constructor waivers (shrink-only inventory): **1** entries.
 1. Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**.
