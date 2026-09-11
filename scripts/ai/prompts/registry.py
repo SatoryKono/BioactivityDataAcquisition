@@ -156,7 +156,7 @@ def load_card(path: Path) -> PromptCard:
 
 
 def load_scenarios(path: Path | None = None) -> list[dict[str, Any]]:
-    """Load the 15 operator scenarios from REGISTRY.yaml."""
+    """Load the 16 operator scenarios from REGISTRY.yaml."""
     reg_path = path or REGISTRY_PATH
     data = yaml.safe_load(reg_path.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
