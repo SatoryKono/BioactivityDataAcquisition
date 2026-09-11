@@ -45069,6 +45069,62 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
+      "inbound_links": 1,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/03-guides/dashboards/10170-contrast-reflow-pin.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "03-guides",
+      "status": "Active",
+      "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": "published",
+      "declared_status": "active",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 1,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/03-guides/dashboards/10170-static-accompaniment.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "03-guides",
+      "status": "Active",
+      "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": "published",
+      "declared_status": "active",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
       "inbound_links": 5,
       "lifecycle": null,
       "outbound_links": 13,
@@ -102346,7 +102402,7 @@
       "archive-after-github-state-check": 336,
       "archive-after-migration": 987,
       "generate-automatically": 1026,
-      "keep": 1267,
+      "keep": 1269,
       "reconcile-with-github-state": 8,
       "replace-with-link": 2
     },
@@ -102356,7 +102412,7 @@
       "01-requirements": 4,
       "02-architecture": 991,
       "03-data-model": 2,
-      "03-guides": 124,
+      "03-guides": 126,
       "04-reference": 330,
       "05-engineering": 2,
       "05-operations": 89,
@@ -102381,7 +102437,7 @@
       "security": 2
     },
     "by_status": {
-      "Active": 744,
+      "Active": 746,
       "Archived": 291,
       "Canonical": 73,
       "Deprecated": 2,
@@ -102389,7 +102445,7 @@
       "Working": 1490
     },
     "by_surface_family": {
-      "active": 744,
+      "active": 746,
       "archive": 291,
       "canonical": 73,
       "duplicate": 2,
@@ -102397,7 +102453,7 @@
       "working": 1490
     },
     "by_tracking_state": {
-      "tracked": 3626
+      "tracked": 3628
     },
     "docs_reports_local_count": 36,
     "duplicate_group_count": 7,
@@ -102413,8 +102469,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3626,
+    "total_doc_like": 3628,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3626
+    "total_doc_like_tracked": 3628
   }
 }
