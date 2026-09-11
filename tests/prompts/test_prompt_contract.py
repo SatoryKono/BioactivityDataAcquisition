@@ -1,4 +1,4 @@
-"""Contract tests for the 15 Prompt Library scenarios (epic #10081 / #10082)."""
+"""Contract tests for the 16 Prompt Library scenarios (epic #10081 / #10082)."""
 
 from __future__ import annotations
 
@@ -33,7 +33,7 @@ def _jsonschema_validate(instance: dict) -> list[str]:
 
 @pytest.mark.parametrize("scenario", SCENARIOS, ids=lambda item: str(item["id"]))
 def test_scenario_prompt_contract(scenario: dict) -> None:
-    assert len(SCENARIOS) == 15
+    assert len(SCENARIOS) == 16
     assert scenario["scenario"]
     assert scenario["role"]
     assert scenario["schema"] == "_schema/prompt.schema.json" or str(
