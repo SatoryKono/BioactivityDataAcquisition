@@ -540,6 +540,7 @@ nav:
           - "Quarantine Management": 05-operations/runbooks/quarantine-management.md
           - "Retention-Sensitive Cleanup": 05-operations/runbooks/retention-sensitive-cleanup.md
           - "Quarterly GitHub Settings Review": 05-operations/runbooks/github-settings-quarterly-review.md
+          - "GitHub Copilot Coding Agent": 05-operations/runbooks/github-copilot-coding-agent.md
           - "VACUUM Procedures": 05-operations/runbooks/vacuum-procedures.md
           - "Observability Checklist": 05-operations/runbooks/observability-checklist.md
           - "Run Manifest Inspection": 05-operations/runbooks/run-manifest-inspection.md

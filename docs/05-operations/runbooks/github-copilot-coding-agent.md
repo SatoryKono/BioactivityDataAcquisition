@@ -119,3 +119,13 @@ DELETE by exact phrase.
 
 Link the live GET, the settings-review artifact (optional commit), and the
 Copilot PR URL on #10371 / #10376.
+
+## Compliance
+
+- Environment `copilot` is agent-runtime (`GH-ENV-003`), not a publish surface.
+- MUST NOT add environment secrets, attach `pypi` / `ghcr-publish` /
+  `testpypi` / `observability-render-host`, or edit `.env`.
+- MUST NOT increase tech-debt budgets, enable GitHub CodeQL default setup, or
+  enable Discussions.
+- `#10311` DELETE is superseded; do not delete `copilot` to clear drift.
+- Review automation in `github_settings_review.py` MUST remain read-only.

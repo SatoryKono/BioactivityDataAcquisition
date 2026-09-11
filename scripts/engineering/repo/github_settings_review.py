@@ -418,9 +418,7 @@ def collect_snapshot(
                 {
                     "name": item.get("name"),
                     "protection_rules": item.get("protection_rules") or [],
-                    "deployment_branch_policy": item.get(
-                        "deployment_branch_policy"
-                    ),
+                    "deployment_branch_policy": item.get("deployment_branch_policy"),
                 }
                 for item in environments_payload.get("environments", [])
             ],
