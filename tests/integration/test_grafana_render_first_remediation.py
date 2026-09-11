@@ -494,8 +494,9 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
     assert all(panel.get("collapsed") is True for panel in control_rows)
     assert all(panel.get("panels") for panel in control_rows)
     first_row_y = min(panel["gridPos"]["y"] for panel in control_rows)
-    # The row header ends at the logical data fold; expanded children start at 18.
-    assert first_row_y + 1 == FIRST_WINDOW_Y
+    # Nav h=4 (DASH-REFLOW-001) sits on y=0..4. The first collapsed row sits
+    # on the logical fold; expanded children start at FIRST_WINDOW_Y + 1.
+    assert first_row_y == FIRST_WINDOW_Y
     assert [panel["gridPos"]["y"] for panel in control_rows] == list(
         range(first_row_y, first_row_y + len(control_rows))
     )
@@ -568,11 +569,11 @@ def test_audit_followup_action_first_layout_contracts() -> None:
     ]
     assert [panel.get("id") for panel in provider_rows] == [9106, 9105, 91, 9404, 9405]
     assert [panel.get("gridPos", {}).get("y") for panel in provider_rows] == [
-        17,
         18,
         19,
         20,
         21,
+        22,
     ]
     assert all(panel.get("collapsed") is True for panel in provider_rows)
     for panel_id in (9101, 9102, 9103):
@@ -589,10 +590,10 @@ def test_audit_followup_action_first_layout_contracts() -> None:
         "Selected Range · Validation Diagnostics",
     ]
     assert [panel.get("gridPos", {}).get("y") for panel in dq_rows] == [
-        18,
         19,
         20,
         21,
+        22,
     ]
     assert all(panel.get("collapsed") is True for panel in dq_rows)
 
@@ -919,7 +920,7 @@ def test_incident_alert_history_has_readable_full_width_layout() -> None:
     assert impact.get("gridPos", {}).get("y", 0) >= (
         history_grid.get("y", 0) + history_grid.get("h", 0)
     )
-    assert current_alerts.get("gridPos") == {"h": 5, "w": 24, "x": 0, "y": 12}
+    assert current_alerts.get("gridPos") == {"h": 5, "w": 24, "x": 0, "y": 13}
     assert "ALERTS" in str(history.get("targets", [{}])[0].get("expr", ""))
     assert str(history.get("targets", [{}])[0].get("legendFormat", "")).startswith(
         "{{alertname}}"
@@ -1507,7 +1508,7 @@ def test_runtime_first_action_separates_endpoint_from_completeness() -> None:
     runtime = _load("bioetl-runtime.json")
     coverage = _panel(runtime, 9102)
     blockers = _panel(runtime, 9101)
-    assert blockers["gridPos"]["y"] <= 6
+    assert blockers["gridPos"]["y"] <= 7
     assert coverage["options"]["colorMode"] == "value"
     assert {target["legendFormat"] for target in coverage["targets"]} == {
         "Endpoint",

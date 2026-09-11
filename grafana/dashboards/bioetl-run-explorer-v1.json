@@ -217,7 +217,7 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 0
@@ -311,7 +311,7 @@
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 3
+        "y": 4
       },
       "options": {
         "bioetlDisplayTitle": "Understand Run Scope",
@@ -337,7 +337,7 @@
         "h": 11,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "datasource": "BioETL Ops HTTP",
       "fieldConfig": {
@@ -388,8 +388,9 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text",
-                  "wrapText": true
+                  "type": "color-background",
+                  "wrapText": true,
+                  "mode": "basic"
                 }
               },
               {
@@ -412,7 +413,7 @@
                       },
                       "success": {
                         "text": "success",
-                        "color": "green"
+                        "color": "#166534"
                       },
                       "failed": {
                         "text": "failed",
@@ -515,8 +516,9 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text",
-                  "wrapText": true
+                  "type": "color-background",
+                  "wrapText": true,
+                  "mode": "basic"
                 }
               },
               {
@@ -666,7 +668,7 @@
                       },
                       "success": {
                         "text": "success",
-                        "color": "green"
+                        "color": "#166534"
                       },
                       "failed": {
                         "text": "failed",
@@ -695,8 +697,9 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text",
-                  "wrapText": true
+                  "type": "color-background",
+                  "wrapText": true,
+                  "mode": "basic"
                 }
               }
             ]
@@ -815,7 +818,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 18
       },
       "description": "",
       "panels": [
@@ -826,7 +829,7 @@
           "description": "SELECTED RUN · Identity rows for the selected run (control-plane table plus pipeline_run_report_v1 identity/tracking_coverage). Selection required when no run ID is set. VALID EMPTY means the selected run has no identity; backend failure renders as QUERY ERROR.",
           "gridPos": {
             "x": 0,
-            "y": 18,
+            "y": 19,
             "w": 12,
             "h": 20
           },
@@ -963,7 +966,7 @@
           "description": "SELECTED RUN · Complete Bronze/Silver/Gold accounting. Zero-valued outcomes remain evidence. SELECT RUN / VALID EMPTY is not OK. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
           "gridPos": {
             "x": 12,
-            "y": 18,
+            "y": 19,
             "w": 12,
             "h": 20
           },
@@ -1328,7 +1331,7 @@
           "description": "SELECTED RUN · Selected run: Stage counts from pipeline_run_report_v1 for the selected run. This is a stage funnel, not start/end chronology. Removals is a compact reason summary; empty stages show — (not VALID EMPTY). VALID EMPTY is only when the report has no stage rows. Selection required when no run ID is set. Unexpected empty or errors require an Ops HTTP /health/live check. SELECT RUN / VALID EMPTY is not OK.",
           "gridPos": {
             "x": 0,
-            "y": 38,
+            "y": 39,
             "w": 24,
             "h": 10
           },
@@ -1528,7 +1531,7 @@
           "description": "SELECTED RUN · Selected run: Top removal and outcome reason codes recorded in pipeline_run_report_v1 for the selected run. Selection required when no run ID is set. Valid empty means the run recorded no reason rows; unexpected empty or errors require an Ops HTTP /health/live check. SELECT RUN / VALID EMPTY is not OK.",
           "gridPos": {
             "x": 0,
-            "y": 48,
+            "y": 49,
             "w": 24,
             "h": 9
           },
@@ -1755,7 +1758,7 @@
           "description": "SELECTED RUN · Selected run: Artifact references recorded in pipeline_run_report_v1 for the selected run. The ref cell wraps so rows stay distinguishable; Copy still yields the full location. Selection required when no run ID is set. Valid empty means no artifacts were recorded; verify /health/live for unexpected empty or errors. SELECT RUN / VALID EMPTY is not OK.",
           "gridPos": {
             "x": 0,
-            "y": 57,
+            "y": 58,
             "w": 24,
             "h": 10
           },
@@ -1926,7 +1929,7 @@
           "description": "SELECTED RUN · Optional pipeline_run_report_v1 failure and stage_timings blocks. Empty means those optional blocks were not recorded — not zero duration and not proof of success. Selection required when no run ID is set. VALID EMPTY / PARTIAL is not OK. Backend failure renders as QUERY ERROR.",
           "gridPos": {
             "x": 0,
-            "y": 67,
+            "y": 68,
             "w": 24,
             "h": 6
           },
@@ -2035,7 +2038,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 73
+        "y": 74
       },
       "description": "Optional below-fold workflow-run-reports browser. Not first-screen. Does not change panel 3010.",
       "panels": [
@@ -2048,7 +2051,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 74
+            "y": 75
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -2085,7 +2088,8 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text"
+                      "type": "color-background",
+                      "mode": "basic"
                     }
                   },
                   {
@@ -2308,8 +2312,9 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text",
-                      "wrapText": false
+                      "type": "color-background",
+                      "wrapText": false,
+                      "mode": "basic"
                     }
                   }
                 ]

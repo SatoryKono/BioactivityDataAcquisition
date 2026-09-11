@@ -160,14 +160,14 @@ def test_trust_layout_preserves_scalar_area_and_readable_cta() -> None:
     nav_bus._layout_control_plane_first_window(panels)
     nav_bus._normalize_collapsed_row_children(panels)
 
-    assert scope["gridPos"] == {"x": 0, "y": 3, "w": 16, "h": 3}
-    assert status["gridPos"] == {"x": 16, "y": 3, "w": 8, "h": 3}
+    assert scope["gridPos"] == {"x": 0, "y": 4, "w": 16, "h": 3}
+    assert status["gridPos"] == {"x": 16, "y": 4, "w": 8, "h": 3}
     assert status["gridPos"]["w"] * status["gridPos"]["h"] == 24
-    assert trust["gridPos"]["y"] == retention["gridPos"]["y"] == 6
-    assert all(kpi["gridPos"]["y"] == 14 for kpi in kpis)
-    assert recovery["gridPos"] == {"x": 0, "y": 11, "w": 12, "h": 3}
-    assert collapsed_row["gridPos"]["y"] == 17
-    assert nested["gridPos"]["y"] == 18
+    assert trust["gridPos"]["y"] == retention["gridPos"]["y"] == 7
+    assert all(kpi["gridPos"]["y"] == 15 for kpi in kpis)
+    assert recovery["gridPos"] == {"x": 0, "y": 12, "w": 12, "h": 3}
+    assert collapsed_row["gridPos"]["y"] == 18
+    assert nested["gridPos"]["y"] == 19
     assert nav_bus._first_window_overflow(panels) == 0
 
 
@@ -213,7 +213,7 @@ def test_apply_to_dashboard_expands_nav_and_reclaims_first_window(
 
     rendered = json.loads(dashboard.read_text(encoding="utf-8"))
     nav, slack, first_window = rendered["panels"]
-    assert nav["gridPos"] == {"x": 0, "y": 0, "w": 24, "h": 3}
-    assert slack["gridPos"]["h"] == 4
+    assert nav["gridPos"] == {"x": 0, "y": 0, "w": 24, "h": 4}
+    assert slack["gridPos"]["h"] == 3
     assert first_window["gridPos"]["y"] + first_window["gridPos"]["h"] == 18
     assert len(nav["links"]) == 6

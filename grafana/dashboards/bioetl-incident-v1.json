@@ -239,7 +239,7 @@
   "panels": [
     {
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 0
@@ -337,7 +337,7 @@
         "h": 3,
         "w": 16,
         "x": 0,
-        "y": 3
+        "y": 4
       },
       "options": {
         "mode": "html",
@@ -355,7 +355,7 @@
         "h": 3,
         "w": 8,
         "x": 16,
-        "y": 3
+        "y": 4
       },
       "datasource": {
         "type": "prometheus",
@@ -460,7 +460,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "options": {
         "mode": "html",
@@ -485,7 +485,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 8
+        "y": 9
       },
       "datasource": {
         "type": "prometheus",
@@ -1067,7 +1067,7 @@
         "h": 5,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 13
       },
       "datasource": {
         "type": "prometheus",
@@ -1230,7 +1230,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 18
       },
       "collapsed": true,
       "panels": [
@@ -1344,7 +1344,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 19
       },
       "collapsed": true,
       "description": "Selected pipeline may differ from row pipeline (blast radius)",
@@ -1954,7 +1954,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 20
       },
       "description": "SELECTED RUN · Compact pipeline_run_report_v1 projection. Expand after selecting an exact Run ID. Missing run is SELECT RUN / VALID EMPTY, not OK.",
       "panels": [
@@ -1964,7 +1964,7 @@
           "title": "Review Selected Run Summary",
           "gridPos": {
             "x": 0,
-            "y": 20,
+            "y": 21,
             "w": 24,
             "h": 5
           },

@@ -89,7 +89,9 @@ def _validate_action_route_uids() -> None:
 
 
 NAV_DISPLAY_TITLE = "Navigate Dashboards"
-NAV_HEIGHT = 3
+NAV_HEIGHT = 4
+# Native 200% zoom halves the CSS viewport (683x384). h=3 clips wrapped 16px
+# chips (DASH-REFLOW-001). h=4 is already allowed by static fill gates.
 # layout-budgets.yaml first_window_y / viewport_rows. Expanding nav must not
 # push always-visible first-window panels past this fold.
 VIEWPORT_ROWS = 18
@@ -105,17 +107,17 @@ _FALLBACK_COMPACTION_HEIGHTS: dict[str, dict[int, int]] = {
     "bioetl-run-explorer-v1": {3010: 11},
 }
 _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    9400: (0, 3, 16, 3),
-    9401: (16, 3, 8, 3),
-    9418: (0, 6, 12, 5),
-    9416: (12, 6, 12, 8),
-    906: (0, 11, 12, 3),
-    891: (0, 14, 6, 3),
-    892: (6, 14, 6, 3),
-    893: (12, 14, 6, 3),
-    907: (18, 14, 6, 3),
+    9400: (0, 4, 16, 3),
+    9401: (16, 4, 8, 3),
+    9418: (0, 7, 12, 5),
+    9416: (12, 7, 12, 7),
+    906: (0, 12, 12, 3),
+    891: (0, 15, 6, 3),
+    892: (6, 15, 6, 3),
+    893: (12, 15, 6, 3),
+    907: (18, 15, 6, 3),
 }
-_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 17
+_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 18
 NAV_TITLE_STYLE = "font-size:19px;font-weight:600;line-height:1;margin:0 2px"
 CHIP_BASE = (
     "box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;"
@@ -652,9 +654,8 @@ def apply_to_dashboard(path: Path, *, current_uid: str, check: bool = False) -> 
     nav["type"] = "text"
     nav["description"] = NAV_DESCRIPTION
     _expand_nav_height(nav, panels, new_height=NAV_HEIGHT)
-    # The inline 19px title plus the single-row, internally reflowing 16px chips
-    # require three grid units at the normative 1366px viewport. Live geometry
-    # validation guards clipping at 100% and 200% browser zoom.
+    # The inline 19px title plus wrapping 16px chips need four grid units so
+    # native 200% zoom (CSS viewport 683x384) does not clip the bus.
     # Normalize all dashboards so content containment is an executable contract.
     grid_pos = nav["gridPos"]
     if not isinstance(grid_pos, dict):

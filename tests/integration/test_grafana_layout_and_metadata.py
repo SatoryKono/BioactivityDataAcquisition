@@ -327,7 +327,7 @@ def test_control_plane_named_review_surfaces_are_findable() -> None:
     assert lineage_row.get("collapsed") is True
     assert trust.get("gridPos", {}).get("y", 99) < 18
     assert retention.get("gridPos", {}).get("y", 99) < 18
-    assert lineage_row.get("gridPos", {}).get("y") == 17
+    assert lineage_row.get("gridPos", {}).get("y") == 18
     child_ids = [child.get("id") for child in lineage_row.get("panels") or []]
     assert 9415 in child_ids
     lineage = next(
@@ -419,8 +419,8 @@ def test_control_plane_trust_panels_follow_reference_widths() -> None:
     processed = panels["Review Processed Records"]["gridPos"]
     telemetry = panels["Monitor Telemetry"]["gridPos"]
 
-    assert scope == {"x": 0, "y": 3, "w": 16, "h": 3}
-    assert readiness == {"x": 16, "y": 3, "w": 8, "h": 3}
+    assert scope == {"x": 0, "y": 4, "w": 16, "h": 3}
+    assert readiness == {"x": 16, "y": 4, "w": 8, "h": 3}
     assert readiness["w"] * readiness["h"] == 24
     assert run_summary["w"] == 18
     assert processed["w"] == telemetry["w"] == 6

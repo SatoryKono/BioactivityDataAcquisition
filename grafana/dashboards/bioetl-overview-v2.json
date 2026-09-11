@@ -228,7 +228,7 @@
   "panels": [
     {
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 0
@@ -322,7 +322,7 @@
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 3
+        "y": 4
       },
       "id": 99,
       "options": {
@@ -343,7 +343,7 @@
         "h": 5,
         "w": 16,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Compact pipeline_run_report_v1 identity, status, and coverage. Gold out and contract exclusions stay in Run Explorer. This strip is the selected UUID, not CURRENT fleet. Missing run is VALID EMPTY / SELECT RUN, not OK. Do not treat Monitor Fleet Health or Review First Action as this run. Backend unavailable means the query could not be evaluated. Verify /health/live. Coverage chip is IN RANGE / OUT OF RANGE / UNKNOWN from covers_selected_run. Set range to run opens Run Explorer 3022 at from_ms..to_ms. A covered run does not show an outside-range warning.",
@@ -674,7 +674,7 @@
         "h": 5,
         "w": 8,
         "x": 16,
-        "y": 6
+        "y": 7
       },
       "id": 214,
       "options": {
@@ -740,7 +740,7 @@
         "h": 6,
         "w": 16,
         "x": 0,
-        "y": 11
+        "y": 12
       },
       "datasource": {
         "type": "prometheus",
@@ -1172,7 +1172,7 @@
         "h": 6,
         "w": 8,
         "x": 16,
-        "y": 11
+        "y": 12
       },
       "datasource": {
         "type": "prometheus",
@@ -1475,7 +1475,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 18
       },
       "description": "Contains selected-range alert evidence for triage. It supports investigation but does not determine current Fleet Health; expand it after the first-screen verdict points to an alert condition.",
       "panels": [
@@ -1487,7 +1487,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 18
+            "y": 19
           },
           "datasource": {
             "type": "prometheus",
@@ -1741,7 +1741,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 19
       },
       "panels": [
         {
@@ -1752,7 +1752,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 19
+            "y": 20
           },
           "datasource": {
             "type": "prometheus",
@@ -1978,7 +1978,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 25
+            "y": 26
           },
           "datasource": {
             "type": "prometheus",
@@ -2086,7 +2086,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 31
+            "y": 32
           },
           "datasource": {
             "type": "prometheus",
@@ -2194,7 +2194,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 37
+            "y": 38
           },
           "datasource": {
             "type": "prometheus",
@@ -2310,7 +2310,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 20
       },
       "collapsed": true,
       "description": "Contains selected-range run, terminal-state, and reject evidence. Empty history is not proof of current health, and these panels do not determine current Fleet Health.",
@@ -2709,7 +2709,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 21
       },
       "description": "Contains current domain summaries and diagnostic routing. It supports the first-screen verdict and stays collapsed until Domain Status or First Action identifies an affected area.",
       "panels": [
@@ -3855,7 +3855,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 22
       },
       "id": 9602,
       "description": "Expand only for compact HTTP-backed selected-run context. Run Explorer remains the exact-run workspace.",

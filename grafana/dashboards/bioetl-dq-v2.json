@@ -261,7 +261,7 @@
   "panels": [
     {
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 0
@@ -358,7 +358,7 @@
         "h": 3,
         "w": 16,
         "x": 0,
-        "y": 3
+        "y": 4
       },
       "description": "Current panels show the latest DQ verdict and reasons for the selected pipeline. Selected-run panels use HTTP-backed identity and record accounting; run ID never filters Prometheus. Selected-range panels show scores, freshness, rejects, and delivery impact. These scopes answer different questions and must not be compared as equivalent status signals. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: stage=${stage}.",
       "options": {
@@ -376,7 +376,7 @@
         "h": 3,
         "w": 8,
         "x": 16,
-        "y": 3
+        "y": 4
       },
       "datasource": {
         "type": "prometheus",
@@ -492,7 +492,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "options": {
         "content": "<div style=\"font-size:16px;line-height:1.15\">OK: review run accounting. WARN/CRIT: inspect reasons. UNKNOWN: verify <a href=\"https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md\">DQ metrics, freshness and source</a>.</div>",
@@ -583,7 +583,7 @@
         "h": 5,
         "w": 8,
         "x": 0,
-        "y": 8
+        "y": 9
       },
       "id": 9101,
       "options": {
@@ -878,7 +878,7 @@
         "h": 5,
         "w": 16,
         "x": 8,
-        "y": 8
+        "y": 9
       },
       "id": 9102,
       "options": {
@@ -958,7 +958,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 14
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Compact pipeline_run_report_v1 projection (identity, times, gold out, contract exclusions, coverage). Missing run is SELECT RUN, not OK. A selected run with no summary rows is VALID EMPTY, not OK. SELECT RUN is not VALID EMPTY. Set range to run opens 6. Run Explorer at started_at-5m .. <code style='font-size:16px'>completed_at</code>+5m. Do not treat CURRENT Prometheus as this UUID. Backend unavailable means the query could not be evaluated. Verify /health/live. Coverage chip is IN RANGE / OUT OF RANGE / UNKNOWN from covers_selected_run. Set range to run opens Run Explorer 3022 at from_ms..to_ms. A covered run does not show an outside-range warning. Status, coverage and local timestamps precede the UUID. Inspect the Run cell to copy its complete value; range-bound fields remain available to the Set range to run action and panel data inspection.",
@@ -1399,7 +1399,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 19
       },
       "id": 9405,
       "description": "Expand after selecting an exact Run ID for HTTP-backed identity and accounting evidence.",
@@ -1939,7 +1939,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 20
       },
       "id": 9404,
       "description": "Expand for selected-range impact and freshness after resolving the current reason lane.",
@@ -1993,7 +1993,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 20,
+            "y": 21,
             "w": 12,
             "h": 3
           },
@@ -2075,7 +2075,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 20,
+            "y": 21,
             "w": 12,
             "h": 3
           },
@@ -2163,7 +2163,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 23,
+            "y": 24,
             "w": 12,
             "h": 3
           },
@@ -2251,7 +2251,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 23,
+            "y": 24,
             "w": 12,
             "h": 3
           },
@@ -2341,7 +2341,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 26,
+            "y": 27,
             "w": 12,
             "h": 3
           },
@@ -2429,7 +2429,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 26,
+            "y": 27,
             "w": 12,
             "h": 3
           },
@@ -2471,7 +2471,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 21
       },
       "id": 220,
       "title": "Selected Range · Reject Evidence",
@@ -3281,7 +3281,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 22
       },
       "id": 221,
       "title": "Selected Range · Validation Diagnostics",

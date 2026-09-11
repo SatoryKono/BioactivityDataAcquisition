@@ -310,7 +310,7 @@
   "panels": [
     {
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 0
@@ -407,7 +407,7 @@
         "h": 4,
         "w": 16,
         "x": 0,
-        "y": 3
+        "y": 4
       },
       "description": "Scope and evidence: provider health is determined from provider telemetry. Fleet panels cover all providers; selected-provider panels use `$provider`. Pipeline, workflow, run type, run ID, identity, and processed-record data are supporting context and do not determine provider health. Missing current-status telemetry means UNKNOWN, not healthy. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: provider=${provider} · adapter=${adapter} · pipeline_context=${pipeline_context}.",
       "options": {
@@ -425,7 +425,7 @@
         "h": 4,
         "w": 8,
         "x": 16,
-        "y": 3
+        "y": 4
       },
       "datasource": {
         "type": "prometheus",
@@ -569,7 +569,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 8
       },
       "options": {
         "bioetlDisplayTitle": "Start Provider Triage",
@@ -625,7 +625,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             },
@@ -635,7 +635,7 @@
                 "match": "nan",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             }
@@ -734,7 +734,7 @@
                     "options": {
                       "0": {
                         "text": "OK",
-                        "color": "green"
+                        "color": "#166534"
                       },
                       "1": {
                         "text": "WARN",
@@ -746,7 +746,7 @@
                       },
                       "3": {
                         "text": "UNKNOWN",
-                        "color": "gray"
+                        "color": "#555555"
                       }
                     }
                   },
@@ -756,7 +756,7 @@
                       "match": "null",
                       "result": {
                         "text": "UNKNOWN",
-                        "color": "gray"
+                        "color": "#555555"
                       }
                     }
                   },
@@ -766,7 +766,7 @@
                       "match": "nan",
                       "result": {
                         "text": "UNKNOWN",
-                        "color": "gray"
+                        "color": "#555555"
                       }
                     }
                   }
@@ -784,7 +784,7 @@
         "h": 5,
         "w": 12,
         "x": 0,
-        "y": 9
+        "y": 10
       },
       "id": 9101,
       "options": {
@@ -875,7 +875,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             },
@@ -885,7 +885,7 @@
                 "match": "nan",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             }
@@ -952,7 +952,7 @@
                     "options": {
                       "0": {
                         "text": "OK",
-                        "color": "green"
+                        "color": "#166534"
                       },
                       "1": {
                         "text": "WARN",
@@ -964,7 +964,7 @@
                       },
                       "3": {
                         "text": "UNKNOWN",
-                        "color": "gray"
+                        "color": "#555555"
                       }
                     }
                   },
@@ -974,7 +974,7 @@
                       "match": "null",
                       "result": {
                         "text": "UNKNOWN",
-                        "color": "gray"
+                        "color": "#555555"
                       }
                     }
                   },
@@ -984,7 +984,7 @@
                       "match": "nan",
                       "result": {
                         "text": "UNKNOWN",
-                        "color": "gray"
+                        "color": "#555555"
                       }
                     }
                   }
@@ -1072,7 +1072,7 @@
                     "options": {
                       "0": {
                         "text": "OK",
-                        "color": "green"
+                        "color": "#166534"
                       },
                       "1": {
                         "text": "WARN",
@@ -1084,7 +1084,7 @@
                       },
                       "3": {
                         "text": "UNKNOWN",
-                        "color": "gray"
+                        "color": "#555555"
                       }
                     }
                   },
@@ -1094,7 +1094,7 @@
                       "match": "null",
                       "result": {
                         "text": "UNKNOWN",
-                        "color": "gray"
+                        "color": "#555555"
                       }
                     }
                   }
@@ -1138,7 +1138,7 @@
         "h": 5,
         "w": 12,
         "x": 12,
-        "y": 9
+        "y": 10
       },
       "id": 9107,
       "options": {
@@ -1264,7 +1264,7 @@
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 15
       },
       "id": 9104,
       "options": {
@@ -1309,7 +1309,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 18
       },
       "panels": [
         {
@@ -1337,7 +1337,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "#555555"
                     }
                   }
                 }
@@ -1412,7 +1412,7 @@
                         "options": {
                           "0": {
                             "text": "OK",
-                            "color": "green"
+                            "color": "#166534"
                           },
                           "1": {
                             "text": "WARN",
@@ -1424,7 +1424,7 @@
                           },
                           "3": {
                             "text": "UNKNOWN",
-                            "color": "gray"
+                            "color": "#555555"
                           }
                         }
                       },
@@ -1434,7 +1434,7 @@
                           "match": "null",
                           "result": {
                             "text": "UNKNOWN",
-                            "color": "gray"
+                            "color": "#555555"
                           }
                         }
                       },
@@ -1444,7 +1444,7 @@
                           "match": "nan",
                           "result": {
                             "text": "UNKNOWN",
-                            "color": "gray"
+                            "color": "#555555"
                           }
                         }
                       }
@@ -1569,7 +1569,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 18
+            "y": 19
           },
           "id": 9102,
           "options": {
@@ -1863,7 +1863,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 18
+            "y": 19
           },
           "id": 9103,
           "options": {
@@ -1946,7 +1946,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 19
       },
       "id": 9105,
       "title": "Inspect Full Fleet Evidence",
@@ -1962,7 +1962,7 @@
             "h": 8,
             "w": 8,
             "x": 0,
-            "y": 19
+            "y": 20
           },
           "id": 9111,
           "options": {
@@ -2164,7 +2164,7 @@
             "h": 8,
             "w": 6,
             "x": 8,
-            "y": 19
+            "y": 20
           },
           "id": 9112,
           "options": {
@@ -2366,7 +2366,7 @@
             "h": 8,
             "w": 10,
             "x": 14,
-            "y": 19
+            "y": 20
           },
           "id": 9113,
           "options": {
@@ -2509,7 +2509,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 20
       },
       "id": 91,
       "title": "Selected Provider Details",
@@ -2564,7 +2564,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 20
+            "y": 21
           },
           "id": 106,
           "options": {
@@ -2667,7 +2667,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 26
+            "y": 27
           },
           "id": 107,
           "options": {
@@ -2816,7 +2816,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 32
+            "y": 33
           },
           "id": 108,
           "options": {
@@ -2910,7 +2910,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 39
+            "y": 40
           },
           "id": 109,
           "options": {
@@ -2994,7 +2994,7 @@
             "h": 3,
             "w": 12,
             "x": 0,
-            "y": 46
+            "y": 47
           },
           "id": 102,
           "options": {
@@ -3078,7 +3078,7 @@
             "h": 5,
             "w": 12,
             "x": 12,
-            "y": 46
+            "y": 47
           },
           "id": 110,
           "options": {
@@ -3164,7 +3164,7 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 51
+            "y": 52
           },
           "id": 111,
           "options": {
@@ -3242,7 +3242,7 @@
             "h": 5,
             "w": 12,
             "x": 12,
-            "y": 51
+            "y": 52
           },
           "id": 115,
           "options": {
@@ -3331,7 +3331,7 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 56
+            "y": 57
           },
           "id": 112,
           "options": {
@@ -3409,7 +3409,7 @@
             "h": 3,
             "w": 12,
             "x": 12,
-            "y": 56
+            "y": 57
           },
           "id": 113,
           "options": {
@@ -3505,7 +3505,7 @@
             "h": 3,
             "w": 12,
             "x": 0,
-            "y": 61
+            "y": 62
           },
           "id": 31,
           "options": {
@@ -3580,7 +3580,7 @@
             "h": 5,
             "w": 12,
             "x": 12,
-            "y": 61
+            "y": 62
           },
           "id": 32,
           "options": {
@@ -3620,7 +3620,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 21
       },
       "id": 9404,
       "description": "Expand for selected-range and debug evidence after current fleet severity, causes, and telemetry presence have been interpreted together.",
@@ -4170,7 +4170,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 22
       },
       "id": 9405,
       "description": "Expand for compact HTTP-backed run context; Run Explorer is the canonical exact-run workspace.",
