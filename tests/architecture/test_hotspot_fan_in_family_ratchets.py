@@ -12,6 +12,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from scripts.engineering.qa.hotspot_family_metrics import (
@@ -64,3 +66,61 @@ def test_active_hotspot_family_internal_fan_in_budgets_hold_reviewed_baseline() 
             "Keep the family dependency ratchet stable or intentionally refresh "
             "the reviewed hotspot-family baseline under RF-06."
         )
+
+
+def test_issue_10304_control_plane_replay_fan_in_has_headroom() -> None:
+    """#10304: replay types/extended fold must not remain the family fan-in hub."""
+    replay_root = (
+        Path(__file__).resolve().parents[2]
+        / "src"
+        / "bioetl"
+        / "application"
+        / "services"
+        / "control_plane"
+        / "replay"
+    )
+    removed = (
+        replay_root / "reproducibility_score_cards_types.py",
+        replay_root / "reproducibility_score_cards_category_scores_extended.py",
+    )
+    for path in removed:
+        assert not path.exists(), f"expected removed replay leaf: {path.name}"
+
+    scorecard = load_scorecard()
+    hotspot_policy = scorecard.get("hotspot_family_ratchets", {})
+    assert isinstance(hotspot_policy, dict)
+    families = hotspot_policy.get("families", [])
+    assert isinstance(families, list)
+    family = next(
+        row
+        for row in families
+        if isinstance(row, dict)
+        and row.get("name") == "application_services_control_plane"
+    )
+    budgets = family.get("bounded_growth_budgets", {})
+    assert isinstance(budgets, dict)
+    assert budgets.get("max_internal_fan_in") == 2
+
+    files = iter_family_python_files(
+        path_prefixes=["src/bioetl/application/services/control_plane/"]
+    )
+    actual_fan_in, actual_module = count_internal_fan_in(files=files)
+    family_budget = budgets.get("max_internal_fan_in")
+    assert family_budget == 2
+    assert actual_fan_in <= family_budget
+    assert actual_module != (
+        "bioetl.application.services.control_plane.replay."
+        "reproducibility_score_cards_types"
+    )
+
+    score_card_files = [
+        path
+        for path in files
+        if path.parent == replay_root
+        and path.name.startswith("reproducibility_score_cards_")
+    ]
+    cluster_fan_in, cluster_module = count_internal_fan_in(files=score_card_files)
+    assert cluster_fan_in < 2, (
+        "replay score-card cluster max_internal_fan_in="
+        f"{cluster_fan_in} at {cluster_module}; expected a line graph after #10304"
+    )

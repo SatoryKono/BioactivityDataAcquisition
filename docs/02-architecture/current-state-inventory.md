@@ -38,9 +38,9 @@ Current committed quality artifacts agree on the following architecture evidence
 | --- | ---: | --- |
 | Architecture quality score | `9.14` (`good_targeted_improvements`) | `reports/quality/debt-governance-gates.json`, `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2468` | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2466` | `reports/quality/module-coverage-inventory.json` |
 | Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json`, `reports/quality/debt-governance-gates.json` |
-| Coverage inventory status counts | `1612` fully covered, `852` partially covered, `4` with no executable lines | `reports/quality/module-coverage-inventory.json` |
+| Coverage inventory status counts | `1610` fully covered, `852` partially covered, `4` with no executable lines | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
 | Families at fan-in budget | `2` (`application_services_control_plane`, `composition_runtime_builders`) | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
 | Debt-governance gates | `45` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
@@ -309,11 +309,11 @@ by storage technology. Current owner boundaries:
   in `reports/quality/module-coverage-inventory.json`, while `852` modules remain
   partially covered. The inventory is current release evidence for module
   measurement status; do not describe it as complete line/branch coverage.
-- Hotspot family `application_services_control_plane` sits **at**
-  `max_internal_fan_in` budget (2/2) on
-  `replay.reproducibility_score_cards_types`; `application_core` is
-  below budget (6/10). Treat as residual density headroom under RF-023 —
-  reduce fan-in via focused extraction, never by raising budgets.
+- Hotspot family `application_services_control_plane` remains at
+  `max_internal_fan_in` budget (2/2); the #10304 replay types/extended hub
+  is gone, residual fan-in-2 nodes stay under RF-023. `application_core` is
+  below budget (6/10). Reduce fan-in via focused extraction, never by
+  raising budgets.
 - Diagram bundles and rendered artifacts have been refreshed for the known
   `QuarantineEntry` transition wording drift. `PipelineStorageProtocol` remains
   valid only as an application-owned aggregate protocol and must not be listed as

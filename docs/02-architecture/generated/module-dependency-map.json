@@ -1,12 +1,12 @@
 {
   "summary": {
-    "scanned_modules": 2466,
+    "scanned_modules": 2464,
     "total_internal_imports": 7711,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "faf27835ab7927120b7acc1b00f4dcfb202110289bba7f3f53e960c59780ccef"
+    "source_fingerprint": "7a30489212c7fe96adc91782c6557db3142eb7abcb56259557758df3030a4ca0"
   },
   "layer_edges": [
     {
