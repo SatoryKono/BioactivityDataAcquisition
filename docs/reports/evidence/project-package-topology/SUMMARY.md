@@ -5,7 +5,7 @@ score-card modules; inventory is `source_module_count=2466`. Counts and
 the source fingerprint below come from `reports/quality/module-coverage-inventory.json`.
 Historical notes remain historical.
 
-`source_tree_sha256=0aee194b33fb5e762e4e3c91423502ef251cade603ff134e88c59a2b48db9e96`
+`source_tree_sha256=c985acd82232bd709e2245d3e40997a75fa7a76908850850e73e69f22f12a6f3`
 
 `source_module_count=2466`
 

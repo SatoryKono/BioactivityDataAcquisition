@@ -13,12 +13,10 @@ from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.batch_processing_contracts import BatchProcessingOutcome
-from bioetl.application.core.batch_processing_runtime import (
-    build_bronze_refs,
-    execute_with_pipeline_failure_policy,
-)
 from bioetl.application.core.batch_processing_support import (
     BatchProcessingSupportService,
+    build_bronze_refs,
+    execute_with_pipeline_failure_policy,
 )
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.ports import BatchIdGeneratorPort

@@ -10,13 +10,13 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `5f67a7d00d7e7de0f86ef09011813624d3c519f4a2a7ea885c4b02079cb55d8f`
+Evidence surface SHA-256: `7a4366f701d4497491d9e81661a6f2a15a4c931bfe9a3e56ae8e9d82a1b0991f`
 
 Evidence metadata refresh (2026-09-11): the canonical registry digest was
-recomputed after #10304 adopted the SHA-bound coverage-verify inventory for
-folded control-plane replay score-card modules (`source_module_count=2466`).
-The historical audited commit above is retained; this metadata refresh does
-not constitute a new repository-wide architecture audit.
+recomputed after #10306 rerouted application/core fan-in to live 5/7
+(`source_module_count=2466`). The historical audited commit above is retained;
+this metadata refresh does not constitute a new repository-wide architecture
+audit.
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -24,7 +24,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "5f67a7d00d7e7de0f86ef09011813624d3c519f4a2a7ea885c4b02079cb55d8f",
+  "evidence_surface_sha256": "7a4366f701d4497491d9e81661a6f2a15a4c931bfe9a3e56ae8e9d82a1b0991f",
   "metrics": {
     "architecture_integral_score": 9.14,
     "architecture_interpretation": "good_targeted_improvements",

@@ -16,6 +16,9 @@ from typing import TYPE_CHECKING, Protocol
 from bioetl.application.core.batch_execution.contracts import (
     BatchExecutionCountersSnapshot,
 )
+from bioetl.application.core.batch_execution.contracts import (
+    BatchExecutionMemoryState as BatchExecutionMemoryState,
+)
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:

@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 from bioetl.application.core.config import LockConfig
 from bioetl.application.core.lifecycle.heartbeat import HeartbeatTask
 from bioetl.application.core.lifecycle.lock_lifecycle import (
+    ShutdownSignal,
     acquire_lock,
     enter_lock_context,
     release_lock,
@@ -21,7 +22,6 @@ from bioetl.application.core.lifecycle.lock_runtime import (
     build_lock_context,
     validate_lock_ownership,
 )
-from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
 from bioetl.domain.locking import FencingToken, LockContext, LockContextHolder
 from bioetl.domain.types import RunID, RunType
 
