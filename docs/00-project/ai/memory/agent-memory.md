@@ -16,7 +16,9 @@ When memory conflicts with the current checkout, follow the precedence in
 
 ## Minimum task bootstrap
 
-Before planning, auditing, or editing:
+Follow the **context-tier** table in `AGENTS.md`. Hash-only generated-artifact
+rebind, date stamp, and remote-main skip RULES/ADR and full `pre-task` RAG
+(`BIOETL_AI_MEMORY_MODE=off`). V3/V4 keep this package:
 
 1. Read `AGENTS.md`.
 1. Read `docs/00-project/NORMATIVE_SOURCES.md` and select only the rules,

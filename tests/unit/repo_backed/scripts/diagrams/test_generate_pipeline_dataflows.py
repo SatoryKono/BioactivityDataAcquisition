@@ -36,7 +36,10 @@ import pytest
 
 from scripts.diagrams import __main__ as diagrams_router
 from scripts.diagrams.render import pipeline_dataflow_ir
-from scripts.diagrams.render.generate_pipeline_dataflows import main
+from scripts.diagrams.render.generate_pipeline_dataflows import (
+    _normalize_calendar_stamps,
+    main,
+)
 from scripts.diagrams.render.pipeline_dataflow_ir import (
     PipelineDataflowIR,
     build_pipeline_dataflow_ir,
@@ -212,8 +215,35 @@ def test_cli_generation_and_drift_check(tmp_path: Path) -> None:
     ).read_text(encoding="utf-8")
 
     stale_path = diagram_dir / DIAGRAM_FILENAMES[0]
+    original = stale_path.read_text(encoding="utf-8")
+    dated = _normalize_calendar_stamps(original).replace("<stamp>", "1999-01-01")
+    stale_path.write_text(dated, encoding="utf-8")
+    assert main([*args, "--check"]) == 0, "date-only stamp drift must not fail --check"
+
     stale_path.write_text("stale\n", encoding="utf-8")
     assert main([*args, "--check"]) == 1
+
+
+def test_normalize_calendar_stamps_collapses_known_fields() -> None:
+    sample = (
+        "%% @date    2026-09-10\n"
+        '"generated_date": "2026-09-11"\n'
+        "Generated: **2026-09-12**\n"
+        "Last verified: '2026-09-13'\n"
+        "Дата метаданных: `2026-09-14`\n"
+        "real IR token\n"
+    )
+    other_day = (
+        "%% @date    1999-01-01\n"
+        '"generated_date": "1999-01-02"\n'
+        "Generated: **1999-01-03**\n"
+        "Last verified: '1999-01-04'\n"
+        "Дата метаданных: `1999-01-05`\n"
+        "real IR token\n"
+    )
+    drifted = sample.replace("real IR token", "changed IR")
+    assert _normalize_calendar_stamps(sample) == _normalize_calendar_stamps(other_day)
+    assert _normalize_calendar_stamps(sample) != _normalize_calendar_stamps(drifted)
 
 
 def test_router_exposes_module_based_generator() -> None:

@@ -17,11 +17,14 @@ Status: active runtime source. Owner: BioETL Team. Last verified: 2026-09-01.
 
 ## Authority and bootstrap
 
-`AGENTS.md` defines repository-wide runtime behavior and precedence. Before
-planning, auditing, or editing, complete its required context and memory loop.
-Use `docs/00-project/NORMATIVE_SOURCES.md` to select the applicable RULES,
-requirements, ADRs, and policies. This file only defines Codex routing; it does
-not restate project governance.
+`AGENTS.md` defines repository-wide runtime behavior and precedence. Follow
+its **context-tier** table: hash-only generated-artifact rebind, date stamp,
+and remote-main skip RULES/ADR and full `pre-task` RAG
+(`BIOETL_AI_MEMORY_MODE=off`). V3/V4 complete the full context and memory
+loop. Use `docs/00-project/NORMATIVE_SOURCES.md` to select the applicable
+RULES, requirements, ADRs, and policies when the task touches those
+surfaces. This file only defines Codex routing; it does not restate project
+governance.
 
 For a role-specific task, read the matching `.codex/agents/py-*.md`, wrapper
 skill, and `docs/00-project/ai/memory/memory-py-*.md`. Load additional sources
@@ -60,7 +63,9 @@ root agent performs the same responsibilities directly.
 ## Standard task loop
 
 1. Resolve user intent, mutation authority, scope, and risk tier.
-1. Run the canonical memory `pre-task` workflow with runtime/agent identity.
+1. Run the canonical memory `pre-task` workflow with runtime/agent identity
+   unless SCOPE is a generated-artifact rebind, date stamp, or remote-main
+   hash-only change (`BIOETL_AI_MEMORY_MODE=off`).
 1. Inspect current evidence: target files, related tests, contracts, configs,
    docs, mirrors, and debt registries.
 1. For V3/V4, maintain an explicit plan with at most one active step.

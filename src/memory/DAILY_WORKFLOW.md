@@ -14,7 +14,9 @@ Memory remains **source-first**:
 
 ## Standard Loop
 
-Use this sequence for normal task work:
+Use this sequence for normal task work. Generated-artifact rebind, date-stamp,
+and remote-main hash-only tasks MAY set `BIOETL_AI_MEMORY_MODE=off` and skip
+RAG. V3/V4 keep this loop:
 
 1. `pre-task` workflow
 1. inspect retrieved context

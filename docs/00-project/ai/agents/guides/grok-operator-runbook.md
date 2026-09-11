@@ -11,7 +11,9 @@ This runbook is **not** a runtime SSOT. Canonical AI precedence remains
 |------|-----|
 | 1 task = 1 branch | Avoid thrash and mixed commits |
 | 1 agent = 1 worktree | Parallel cherry-pick/merge in a shared checkout corrupts generated YAML |
-| Prefer `git worktree add` | Protect foreign WIP; do not `git checkout` another agent's branch |
+| Reuse the existing worktree of the same branch | Do not `git worktree add` a second copy for CI follow-up |
+| Hash-only / date-stamp / remote-main stay on the parent | No extra `implementer` spawn |
+| Prefer `git worktree add` for a **new** branch | Protect foreign WIP; do not `git checkout` another agent's branch |
 | Never delete others' uncommitted work | Multi-agent safety |
 | No `git reset --hard` / force-push | Irreversible loss |
 | Push feature branches only | Protected `main` |
@@ -69,6 +71,7 @@ Optional if actually live: `memory` (MCP file), `fetch`.
 
 **Off** on daily parent: `grafana`, `prometheus`, `google_drive`, `tasks`,
 `neo4j-*`, `deepwiki`, `brave-search`, `filesystem`, `docker`, `github-actions`.
+FAIL handshake servers stay **off** (do not keep a dead server "just in case").
 `grafana`/`prometheus` stay off here even after Grok-only `obs-dashboard`
 (#10319) — that agent named-inherits them.
 
@@ -96,6 +99,7 @@ Prefer short library cards (render, do not hand-expand RULES/ADR):
 | Id | Card | When |
 | --- | --- | --- |
 | `prompt.session.grok-bootstrap` | [library/session/bootstrap.md](../../prompts/library/session/bootstrap.md) | Daily work start |
+| `prompt.plan.agent-efficiency` | [library/plan/agent-efficiency.md](../../prompts/library/plan/agent-efficiency.md) | CI families / SCOPE bootstrap |
 | `prompt.audit.cycle` | [library/audit/cycle.md](../../prompts/library/audit/cycle.md) | One audit cycle |
 | `prompt.closeout.grok` | [library/closeout/grok-closeout.md](../../prompts/library/closeout/grok-closeout.md) | Issue/PR closeout |
 
@@ -175,8 +179,25 @@ The adapter enforces deterministic/no-upload execution and writes only to its
 report subtree. Vendor results are advisory: confirm them with BioETL-native
 tests and never use them alone to advance lifecycle state or close an issue.
 
+## 9. PR watcher contract
+
+Bundled `watch_pr.py` is host-local (`~/.grok/bundled/skills/long-running-background-tasks/watch_pr.py`),
+not a tracked runtime SSOT. Session wrappers MUST follow this contract:
+
+| Event | Agent action |
+| --- | --- |
+| PR `merged` (`Event.final` kind `merged`) | **DONE** (exit 0). Do not treat as FAILED. |
+| PR closed without merge (`kind` `closed`) | FAILED |
+| HTTP 502 / 503 / 429 from `gh` | retry with backoff; do not fail the watch on a single 503 |
+| Checks / statuses | only for the current `head.sha` / `headRefOid`; ignore stale SHA |
+| `pr-gate-complete` SUCCESS and MERGEABLE | ACTION_REQUIRED (ready to ship); do not exit the watch as FAILED |
+
+Do not raise the poll interval below 30s (rate limit). Prefer the bundled
+script over per-PR copies.
+
 ## Related
 
 - `AGENTS.md`
 - [MEMORY_USAGE.md](MEMORY_USAGE.md)
 - [AI_RUNTIME_MIRROR_OWNERSHIP.md](../policy/AI_RUNTIME_MIRROR_OWNERSHIP.md)
+- [generated-artifact-drift-workflow.md](../../../../05-operations/runbooks/generated-artifact-drift-workflow.md)
