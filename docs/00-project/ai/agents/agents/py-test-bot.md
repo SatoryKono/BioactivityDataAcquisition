@@ -74,3 +74,12 @@ bundle.
 
 Do not create or modify any `.env` file without explicit per-task approval;
 keep credentials and recorded sensitive data out of tests and reports.
+
+## Least-privilege (SUBAGENT-20260910)
+
+Allowed skills: `py-test-bot`, `vcr-record`, `verify-architecture`,
+`bioetl-post-change`.
+Allowed MCP: `ast-grep`; `mutmut` opt-in.
+Forbidden MCP includes `github`. Do not call undeclared MCP.
+Do not run `gh`, `hub`, or `api.github.com`. Local `git` status/diff/log is
+allowed; `git push` is not. Write-scope is `tests/**` only.

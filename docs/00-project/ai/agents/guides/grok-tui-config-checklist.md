@@ -40,6 +40,8 @@ Disabled for BioETL daily (all agents except explicit opt-in): `filesystem`,
 `brave-search`, `deja`, `adr-analysis`, `google_drive`, `tasks`.
 
 - [ ] FAIL handshake servers are **off**, not left enabled
+      (`brave-search`, `grafana`, `memory`, `neo4j-*`, `context7` when dead)
+- [ ] `google_drive` / `tasks` stay **off** on daily parent (not in the core 4)
 - [ ] `startup_timeout_sec` ≤ 45 for local daemons
 - [ ] No API keys in git
 - [ ] Do not commit `~/.grok/config.toml`

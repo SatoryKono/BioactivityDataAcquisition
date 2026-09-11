@@ -45,9 +45,9 @@ Children must not inherit MCP `github`.
 
 | Type | Use when | Not for |
 | --- | --- | --- |
-| parent / `general-purpose` | GitHub write, closeout, `gh`, merge/push | long product patches in the orchestrator context |
+| parent / `general-purpose` | GitHub write, closeout, `gh`, merge/push; hash-only / date-stamp / remote-main rebind in the **existing** worktree | long product patches in the orchestrator context |
 | `py-config-bot` | `configs/**` contracts | product `src/` patches |
-| `implementer` | bounded write in a **worktree**; parent merges | `gh` / `git push` / GitHub MCP |
+| `implementer` | bounded **product/docs** write in a worktree of a **new** branch; parent merges. Reuse the same-branch worktree; do not add a second copy | `gh` / `git push` / GitHub MCP; hash-only SHA rebind; date-stamp-only dataflow |
 | `obs-dashboard` | dashboard JSON / PromQL with grafana+prometheus MCP | daily parent session; starting monitoring compose unless asked |
 | `py-debug-bot` / `explore` | RCA | patches (use `rca-handoff` overlay, then parent or `implementer`) |
 
