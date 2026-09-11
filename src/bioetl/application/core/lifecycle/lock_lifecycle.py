@@ -16,7 +16,13 @@ from bioetl.domain.locking import FencingToken, LockContext, LockContextHolder
 from bioetl.domain.ports import LockPort, LoggerPort
 from bioetl.domain.types import RunID
 
-__all__ = ["acquire_lock", "enter_lock_context", "release_lock", "start_heartbeat"]
+__all__ = [
+    "ShutdownSignal",
+    "acquire_lock",
+    "enter_lock_context",
+    "release_lock",
+    "start_heartbeat",
+]
 
 
 class _LockRuntimeHostProtocol(Protocol):

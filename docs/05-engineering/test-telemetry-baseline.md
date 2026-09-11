@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `main`
-- Source commit: `143a74257a8062a67be536a8cafaea9931d33cb8`
-- Source run id: `34586171697`
-- Source event: `push`
-- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34586171697`
-- Source tree sha256: `d538110ee165da8bca64f85c53c25bcd86f0221700f6066a008759e6465270c0`
+- Source branch: `fix/arch-10306-pipeline-span-fanin`
+- Source commit: `ae6d8a48e81d44fa0c86baee1a08754c35c98c24`
+- Source run id: `34602620473`
+- Source event: `pull_request`
+- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34602620473`
+- Source tree sha256: `61d9d8b02a2ad67cd6bd902b2d1be8dfb76977108006dc3bb80416501e75a2b5`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-09-11T10:33:11.071979+00:00`
+- Refreshed at (UTC): `2026-09-11T13:41:04.554625+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -55,7 +55,7 @@ trend evidence only.
 ## Coverage
 
 - Hard threshold: `85.0%`
-- Actual coverage: `96.73%`
+- Actual coverage: `96.74%`
 - Threshold satisfied: `True`
 
 ## Duration Telemetry

@@ -7,7 +7,7 @@ import traceback
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.application.core.pipeline_span_lifecycle import close_span
+from bioetl.application.core.batch_tracing import close_span
 from bioetl.domain.locking import LockNotHeldError
 from bioetl.domain.types import JsonDict
 

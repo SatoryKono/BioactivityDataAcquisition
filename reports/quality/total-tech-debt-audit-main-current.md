@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `7759b5a7176465cc32738e97305c4c55705d239c2aca983822dc2d39f262d7e8`
+Evidence surface SHA-256: `262032cfb8cc06e665c49bef9758f02281ac8951f94e94936dcf3bd15675c962`
 
 Evidence metadata refresh (2026-09-11): the canonical registry digest was
 recomputed after #10304 adopted the SHA-bound coverage-verify inventory for
@@ -24,7 +24,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "7759b5a7176465cc32738e97305c4c55705d239c2aca983822dc2d39f262d7e8",
+  "evidence_surface_sha256": "262032cfb8cc06e665c49bef9758f02281ac8951f94e94936dcf3bd15675c962",
   "metrics": {
     "architecture_integral_score": 9.14,
     "architecture_interpretation": "good_targeted_improvements",

@@ -3,22 +3,24 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import cast
 
 from bioetl.application.core.base_transformer._structural_policy_evaluation import (
     evaluate_contract,
 )
 from bioetl.application.core.base_transformer._structural_policy_types import (
-    StructuralFieldSpec,
-    StructuralPolicyOutcome,
-    StructuralPolicySignal,
+    StructuralFieldSpec as StructuralFieldSpec,
+)
+from bioetl.application.core.base_transformer._structural_policy_types import (
+    StructuralPolicyOutcome as StructuralPolicyOutcome,
+)
+from bioetl.application.core.base_transformer._structural_policy_types import (
+    StructuralPolicyProtocol as StructuralPolicyProtocol,
+)
+from bioetl.application.core.base_transformer._structural_policy_types import (
+    StructuralPolicySignal as StructuralPolicySignal,
 )
 from bioetl.domain.types import SilverRecord
-
-if TYPE_CHECKING:
-    from bioetl.application.core.base_transformer._structural_policy_types import (
-        StructuralPolicyProtocol,
-    )
 
 
 class NoOpStructuralPolicy:

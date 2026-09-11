@@ -312,7 +312,7 @@ by storage technology. Current owner boundaries:
 - Hotspot family `application_services_control_plane` remains at
   `max_internal_fan_in` budget (2/2); the #10304 replay types/extended hub
   is gone, residual fan-in-2 nodes stay under RF-023. `application_core` is
-  below budget (6/10). Reduce fan-in via focused extraction, never by
+  below budget (5/7). Reduce fan-in via focused extraction, never by
   raising budgets.
 - Diagram bundles and rendered artifacts have been refreshed for the known
   `QuarantineEntry` transition wording drift. `PipelineStorageProtocol` remains
