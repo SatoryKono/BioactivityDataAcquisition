@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-11T21:34:41.621126+00:00",
+  "generated_at": "2026-09-11T23:05:28.033973+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -17989,7 +17989,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/github-copilot-coding-agent.md",
-          "line": 131,
+          "line": 136,
           "source_group": "docs",
           "text": "- Review automation in `github_settings_review.py` MUST remain read-only."
         },
