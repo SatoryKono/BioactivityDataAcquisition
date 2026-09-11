@@ -1,7 +1,10 @@
 export default {
   extends: ['@commitlint/config-conventional'],
   ignores: [
-    (message) => message.startsWith('Merge'),
+    (message) => {
+      const head = (message.trimStart().split(/\r?\n/, 1)[0] ?? '');
+      return /^merge\b/i.test(head);
+    },
   ],
   rules: {
     'type-enum': [
