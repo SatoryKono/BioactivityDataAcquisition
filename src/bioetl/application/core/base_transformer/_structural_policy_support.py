@@ -9,12 +9,16 @@ from bioetl.application.core.base_transformer._structural_policy_evaluation impo
     evaluate_contract,
 )
 from bioetl.application.core.base_transformer._structural_policy_types import (
-    StructuralFieldSpec,
-    StructuralPolicyOutcome,
-    StructuralPolicySignal,
+    StructuralFieldSpec as StructuralFieldSpec,
+)
+from bioetl.application.core.base_transformer._structural_policy_types import (
+    StructuralPolicyOutcome as StructuralPolicyOutcome,
 )
 from bioetl.application.core.base_transformer._structural_policy_types import (
     StructuralPolicyProtocol as StructuralPolicyProtocol,
+)
+from bioetl.application.core.base_transformer._structural_policy_types import (
+    StructuralPolicySignal as StructuralPolicySignal,
 )
 from bioetl.domain.types import SilverRecord
 

@@ -39,7 +39,11 @@ from bioetl.domain.types import BatchID, BronzeRecord, RunID
 # RF-005: keep support surface routed through shared runtime failure policy.
 _SHARED_FAILURE_POLICY = _RF005_SHARED_FAILURE_POLICY
 
-__all__ = ["BatchProcessingSupportService"]
+__all__ = [
+    "BatchProcessingSupportService",
+    "build_bronze_refs",
+    "execute_with_pipeline_failure_policy",
+]
 if TYPE_CHECKING:
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.core.batch_tracing import BatchTracingManagerService

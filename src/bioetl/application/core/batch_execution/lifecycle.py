@@ -4,9 +4,11 @@ from __future__ import annotations
 
 __all__ = [
     "BatchExecutionContext",
+    "BatchExecutionCountersSnapshot",
     "BatchExecutionFinalizationContext",
     "BatchExecutionLifecycleContext",
     "BatchExecutionLifecycleService",
+    "BatchExecutionMemoryState",
     "prepare_execution_context",
 ]
 
@@ -14,7 +16,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.core.batch_execution.contracts import (
-    BatchExecutionCountersSnapshot,
+    BatchExecutionCountersSnapshot as BatchExecutionCountersSnapshot,
 )
 from bioetl.application.core.batch_execution.contracts import (
     BatchExecutionMemoryState as BatchExecutionMemoryState,
