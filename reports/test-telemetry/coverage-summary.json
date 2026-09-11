@@ -1,11 +1,11 @@
 {
-  "source_branch": "fix/arch-10306-pipeline-span-fanin",
-  "source_commit": "ae6d8a48e81d44fa0c86baee1a08754c35c98c24",
-  "source_run_id": "34602620473",
+  "source_branch": "fix/arch-10309-uniprot-mixin",
+  "source_commit": "cdf8ec7c24a853249b5edc3b540b4532d650ab39",
+  "source_run_id": "34609727278",
   "source_event": "pull_request",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34602620473",
-  "source_tree_sha256": "61d9d8b02a2ad67cd6bd902b2d1be8dfb76977108006dc3bb80416501e75a2b5",
-  "refreshed_at_utc": "2026-09-11T13:41:04.554625+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34609727278",
+  "source_tree_sha256": "c7ecc1007bc0a7d4d37fcba1bf11b2769205b6af088fc131056218bf3fde9e37",
+  "refreshed_at_utc": "2026-09-11T14:38:21.673555+00:00",
   "refresh_status": "captured",
   "coverage_percent": 96.74,
   "coverage": {
