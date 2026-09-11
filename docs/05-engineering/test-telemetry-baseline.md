@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `fix/arch-10309-uniprot-mixin`
-- Source commit: `cdf8ec7c24a853249b5edc3b540b4532d650ab39`
-- Source run id: `34609727278`
-- Source event: `pull_request`
-- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34609727278`
+- Source branch: `main`
+- Source commit: `db7cc9283e3fb49b0e5766489b7abacf9a775cd9`
+- Source run id: `34618841349`
+- Source event: `push`
+- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34618841349`
 - Source tree sha256: `29a8a0e7a0a6d2a22434872e3833cdde541b9e42deda304d53f86493b108f63a`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-09-11T15:29:17.291106+00:00`
+- Refreshed at (UTC): `2026-09-11T15:58:47.475045+00:00`
 
 ## Branch-accurate provenance (#5729)
 

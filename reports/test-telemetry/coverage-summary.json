@@ -1,11 +1,11 @@
 {
-  "source_branch": "fix/arch-10309-uniprot-mixin",
-  "source_commit": "cdf8ec7c24a853249b5edc3b540b4532d650ab39",
-  "source_run_id": "34609727278",
-  "source_event": "pull_request",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34609727278",
+  "source_branch": "main",
+  "source_commit": "db7cc9283e3fb49b0e5766489b7abacf9a775cd9",
+  "source_run_id": "34618841349",
+  "source_event": "push",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34618841349",
   "source_tree_sha256": "29a8a0e7a0a6d2a22434872e3833cdde541b9e42deda304d53f86493b108f63a",
-  "refreshed_at_utc": "2026-09-11T15:29:17.291106+00:00",
+  "refreshed_at_utc": "2026-09-11T15:58:47.475045+00:00",
   "refresh_status": "captured",
   "coverage_percent": 96.74,
   "coverage": {
