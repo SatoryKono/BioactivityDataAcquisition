@@ -633,6 +633,54 @@ def _agent_runtime_branch_allowed(env_name: str, policy_name: str) -> bool:
     return policy_name.startswith(f"{env_name}/") and policy_name != env_name
 
 
+def _agent_runtime_custom_branch_policy(item: dict[str, Any]) -> bool:
+    branch_policy = item.get("deployment_branch_policy") or {}
+    return (
+        isinstance(branch_policy, dict)
+        and branch_policy.get("custom_branch_policies") is True
+    )
+
+
+def _agent_runtime_branch_findings(name: str, item: dict[str, Any]) -> list[str]:
+    findings: list[str] = []
+    if not _agent_runtime_custom_branch_policy(item):
+        findings.append(f"{name}:not_custom")
+    policies = item.get("deployment_branch_policies")
+    if not isinstance(policies, list):
+        return findings
+    policy_names = [str(row.get("name") or "") for row in policies]
+    if not policy_names:
+        findings.append(f"{name}:empty")
+        return findings
+    findings.extend(
+        f"{name}:{policy_name}"
+        for policy_name in policy_names
+        if not _agent_runtime_branch_allowed(name, policy_name)
+    )
+    return findings
+
+
+def _agent_runtime_secret_finding(name: str, item: dict[str, Any]) -> str | None:
+    secret_count = item.get("secret_count")
+    if isinstance(secret_count, int) and secret_count != 0:
+        return f"{name}={secret_count}"
+    return None
+
+
+def _agent_runtime_item_findings(
+    name: str, item: dict[str, Any] | None
+) -> tuple[str | None, str | None, list[str], str | None]:
+    if item is None:
+        return name, None, [], None
+    unprotected = None if (item.get("protection_rules") or []) else name
+    return (
+        None,
+        unprotected,
+        _agent_runtime_branch_findings(name, item),
+        _agent_runtime_secret_finding(name, item),
+    )
+
+
 def _enrich_agent_runtime_environments(
     client: ReadOnlyGitHubClient,
     repository: str,
@@ -688,33 +736,23 @@ def _control_agent_runtime_environment_protected(
     bad_branch: list[str] = []
     secrets: list[str] = []
     for name in names:
-        item = by_name.get(name)
-        if item is None:
-            missing.append(name)
+        miss, unprot, branches, secret = _agent_runtime_item_findings(
+            name, by_name.get(name)
+        )
+        if miss is not None:
+            missing.append(miss)
             continue
-        if not (item.get("protection_rules") or []):
-            unprotected.append(name)
-        branch_policy = item.get("deployment_branch_policy") or {}
-        if not isinstance(branch_policy, dict) or (
-            branch_policy.get("custom_branch_policies") is not True
-        ):
-            bad_branch.append(f"{name}:not_custom")
-        policies = item.get("deployment_branch_policies")
-        if isinstance(policies, list):
-            policy_names = [str(row.get("name") or "") for row in policies]
-            if not policy_names:
-                bad_branch.append(f"{name}:empty")
-            for policy_name in policy_names:
-                if not _agent_runtime_branch_allowed(name, policy_name):
-                    bad_branch.append(f"{name}:{policy_name}")
-        secret_count = item.get("secret_count")
-        if isinstance(secret_count, int) and secret_count != 0:
-            secrets.append(f"{name}={secret_count}")
+        if unprot is not None:
+            unprotected.append(unprot)
+        bad_branch.extend(branches)
+        if secret is not None:
+            secrets.append(secret)
     evidence = (
         f"missing={missing or 'none'}; unprotected={unprotected or 'none'}; "
         f"branch={bad_branch or 'ok'}; secrets={secrets or 'none'}"
     )
-    return not (missing or unprotected or bad_branch or secrets), evidence
+    passed = not missing and not unprotected and not bad_branch and not secrets
+    return passed, evidence
 
 
 def _control_codeowners(
