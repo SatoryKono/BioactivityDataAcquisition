@@ -10,7 +10,7 @@ Reviewers:
 - Security lane
 Priority: P2
 Runtime profile: GitHub Copilot coding agent (cloud); local git + read-only `gh`.
-Last verified: '2026-09-11'
+Last verified: '2026-09-12'
 
 ______________________________________________________________________
 
@@ -41,7 +41,9 @@ turn a coding-agent session into a write-capable deploy surface. Policy treats
 - Instructions: [`.github/copilot-instructions.md`](../../../.github/copilot-instructions.md).
   Do not copy `.codex/skills/**` or `.devin/skills/**` into `.github/prompts`.
 - REST `GET /repos/.../copilot` and `/copilot/coding_agent` currently return
-  HTTP 404 with the repo PAT. MCP/firewall confirmation is **GitHub UI**.
+  HTTP 404 with the repo PAT. Start a hosted task with documented
+  `POST /agents/repos/{owner}/{repo}/tasks` or GitHub UI. MCP/firewall
+  confirmation remains **GitHub UI**.
 
 ## Procedure
 
@@ -97,6 +99,8 @@ If the env is missing, recreate it as protected agent-runtime (reviewer +
 
 - `GH-ENV-002` pass (`staging` absent) and `GH-ENV-003` pass on a review from
   this checkout.
+- Prefix-pilot PRs use `copilot/<kebab>` (hygiene allowlist). Do not put
+  `environment: copilot` on tracked workflows.
 - `pytest tests/architecture/test_github_governance_review.py tests/architecture/test_branch_hygiene_workflow.py -q --no-cov`.
 - Quarterly review runbook:
   [github-settings-quarterly-review.md](github-settings-quarterly-review.md).
@@ -107,7 +111,8 @@ If the env is missing, recreate it as protected agent-runtime (reviewer +
   same day; remove secrets; restore reviewer + `copilot/**`.
 - Agent PR touching publish workflows or `.env` → stop merge, tighten T1/T6
   UI, do not raise debt budgets.
-- Copilot product REST 404 → use UI; do not invent API payloads.
+- Repo Copilot product REST 404 → use UI or documented agent-tasks POST;
+  do not invent undocumented payloads.
 
 ## Rollback
 
