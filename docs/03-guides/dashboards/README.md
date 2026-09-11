@@ -24,6 +24,9 @@ shadow review. The seven JSON UIDs remain authoritative and reachable. See
 
 ## Source-bound capture acceptance
 
+#10170 pin (no live capture): [10170-contrast-reflow-pin.md](10170-contrast-reflow-pin.md).
+Static accompaniment: [10170-static-accompaniment.md](10170-static-accompaniment.md).
+
 Keep renderer, validator, and navigation generator integration under one owner.
 Use a clean committed candidate, fixed UTC `--range-from` / `--range-to`, and
 explicit selectors with `python -m scripts.ops render-grafana-matrix`. The matrix
