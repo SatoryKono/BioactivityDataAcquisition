@@ -8,12 +8,14 @@ import asyncio
 from collections.abc import Awaitable
 from typing import Protocol
 
+from bioetl.application.core.batch_execution.contracts import (
+    BatchExecutionCountersSnapshot,
+    BatchExecutionMemoryState,
+)
 from bioetl.application.core.batch_execution.lifecycle import (
     BatchExecutionContext,
-    BatchExecutionCountersSnapshot,
     BatchExecutionLifecycleContext,
     BatchExecutionLifecycleService,
-    BatchExecutionMemoryState,
 )
 from bioetl.application.core.batch_pipeline_execution_errors import (
     PIPELINE_EXECUTION_ERRORS,

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-11T09:30:00.912376+00:00",
+  "generated_at": "2026-09-11T11:35:31.626129+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -13785,7 +13785,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 79,
+      "reference_count": 80,
       "references": [
         {
           "path": "docs/00-project/RULES.md",
@@ -14401,7 +14401,7 @@
         },
         {
           "path": "tests/architecture/test_hotspot_fan_in_family_ratchets.py",
-          "line": 19,
+          "line": 20,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.hotspot_family_metrics import ("
         },

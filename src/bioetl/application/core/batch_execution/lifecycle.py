@@ -9,6 +9,8 @@ __all__ = [
     "BatchExecutionLifecycleContext",
     "BatchExecutionLifecycleService",
     "BatchExecutionMemoryState",
+    "BatchExecutionStateProtocol",
+    "BatchResultBuilderProtocol",
     "prepare_execution_context",
 ]
 
@@ -20,6 +22,12 @@ from bioetl.application.core.batch_execution.contracts import (
 )
 from bioetl.application.core.batch_execution.contracts import (
     BatchExecutionMemoryState as BatchExecutionMemoryState,
+)
+from bioetl.application.core.batch_execution.contracts import (
+    BatchExecutionStateProtocol as BatchExecutionStateProtocol,
+)
+from bioetl.application.core.batch_execution.contracts import (
+    BatchResultBuilderProtocol as BatchResultBuilderProtocol,
 )
 from bioetl.domain.types import JsonDict
 

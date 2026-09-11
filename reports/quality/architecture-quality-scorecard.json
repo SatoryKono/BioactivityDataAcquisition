@@ -256,7 +256,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "5de3da6b2cbb55dfd0ad7530d7cca6120072171e7588535bf9444ab9e8c793d2"
+      "source_fingerprint": "b355d43a8b057ee13faf613d908c5830a3a40911ebf158b66f113c778ac8ad7f"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -275,7 +275,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "14af2d8659a58df5997551512c067a1e8bfa710b8b7a4f31e63062e4b2cad790",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "4b07f84c4122195f41a3bdb718503072d323d51f681422896e2d4387a5913b35"
+      "source_tree_sha256": "16694ef76272b11f9c37c8f871bce072d49425edd0fe18927247f0b9321e2c54"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,
