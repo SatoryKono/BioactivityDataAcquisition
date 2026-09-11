@@ -467,8 +467,7 @@ def _assert_commit_is_ancestor(commit: str) -> None:
     )
     if result.returncode != 0:
         raise SystemExit(
-            "telemetry --source-commit must be an ancestor of HEAD "
-            f"(got {commit!r})"
+            f"telemetry --source-commit must be an ancestor of HEAD (got {commit!r})"
         )
 
 
@@ -522,9 +521,7 @@ def _rebind_evidence_surface(*, check_only: bool) -> int:
         new_block = render_current_audit_semantic_summary(
             build_current_audit_semantic_summary(ROOT, current)
         )
-        report = (
-            report[:start] + new_block + report[end + len(SEMANTIC_SUMMARY_END) :]
-        )
+        report = report[:start] + new_block + report[end + len(SEMANTIC_SUMMARY_END) :]
     if not report.endswith("\n"):
         report += "\n"
     _write_text_atomically(report_path, report)
@@ -695,9 +692,7 @@ def run_ci_drift_families(argv: list[str]) -> int:
     parser.add_argument("--source-run-url", default="")
     args = parser.parse_args(argv)
     selected = [
-        name
-        for name in _CI_DRIFT_FAMILY_ORDER
-        if getattr(args, name.replace("-", "_"))
+        name for name in _CI_DRIFT_FAMILY_ORDER if getattr(args, name.replace("-", "_"))
     ]
     if not selected:
         parser.error(
@@ -741,4 +736,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

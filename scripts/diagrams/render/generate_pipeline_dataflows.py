@@ -86,9 +86,7 @@ def _check_outputs(outputs: dict[Path, str]) -> list[Path]:
             stale.append(path)
             continue
         existing = path.read_text(encoding="utf-8")
-        if _normalize_calendar_stamps(existing) != _normalize_calendar_stamps(
-            expected
-        ):
+        if _normalize_calendar_stamps(existing) != _normalize_calendar_stamps(expected):
             stale.append(path)
     return stale
 

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-11T08:53:46.772097+00:00",
+  "generated_at": "2026-09-11T09:02:50.470748+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -12442,7 +12442,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 357,
+      "reference_count": 358,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -14865,7 +14865,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -14896,6 +14896,12 @@
           "line": 47,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"refresh_governance_artifacts.py\""
+        },
+        {
+          "path": "tests/unit/scripts/qa/test_refresh_ci_drift_families.py",
+          "line": 10,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import refresh_governance_artifacts as refresh"
         },
         {
           "path": "tests/unit/scripts/qa/test_refresh_governance_artifacts.py",
@@ -16841,7 +16847,7 @@
         },
         {
           "path": "scripts/engineering/qa/refresh_governance_artifacts.py",
-          "line": 477,
+          "line": 476,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.technical_debt_audit_registry import ("
         },
