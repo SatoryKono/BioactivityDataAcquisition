@@ -1386,6 +1386,14 @@ def test_main_docker_validation_only_decouples_main_push_from_publish_approval()
     assert "/branches/main" in rendered
     assert "current_sha" in rendered
     assert "SOURCE_SHA" in rendered
+    guard = publish["steps"][0]
+    assert guard["id"] == "head-guard"
+    assert "Skipping GHCR publish" in guard["run"]
+    assert 'echo "stale=true" >> "$GITHUB_OUTPUT"' in guard["run"]
+    for step in publish["steps"][1:]:
+        assert step.get("if") == "steps.head-guard.outputs.stale != 'true'", step.get(
+            "name"
+        )
 
 
 def test_docker_pr_build_reads_main_cache_without_exporting_branch_cache() -> None:
