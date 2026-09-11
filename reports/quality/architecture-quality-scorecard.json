@@ -252,7 +252,7 @@
     },
     "dead_code_inventory": {
       "path": "reports/quality/dead-code-inventory.json",
-      "snapshot_date": "2026-08-01"
+      "snapshot_date": "2026-09-11"
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
@@ -264,13 +264,13 @@
     },
     "duplication_baseline": {
       "path": "reports/quality/full-app-duplication-baseline.json",
-      "snapshot_date": "2026-07-27",
+      "snapshot_date": "2026-09-11",
       "total_duplicate_clusters": 0
     },
     "hotspot_family_baseline": {
       "budget_warnings": 0,
       "path": "reports/quality/hotspot-family-baseline.json",
-      "snapshot_date": "2026-07-27"
+      "snapshot_date": "2026-09-11"
     },
     "module_coverage_inventory": {
       "coverage_xml_sha256": "bf812bf08254ac4662336d0fbc84a2c8b785c8e579b9ba5b00e9f7f4bc255092",
