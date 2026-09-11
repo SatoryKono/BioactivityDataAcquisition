@@ -210,7 +210,7 @@ def test_hotspot_duplication_baseline_is_clean_zero_ratchet() -> None:
     summary = payload.get("summary", {})
     assert isinstance(summary, dict)
 
-    # Hotspot baseline ratchets downward only; 2026-07-27 re-scan is clean at 0.
+    # Hotspot baseline ratchets downward only; 2026-09-11 re-scan is clean at 0.
     # Remaining raw clusters are excluded by family policy (export_facade /
     # composition_runtime_wiring_pattern) and stay out of the zero ratchet.
     assert summary.get("total_duplicate_clusters") == 0
