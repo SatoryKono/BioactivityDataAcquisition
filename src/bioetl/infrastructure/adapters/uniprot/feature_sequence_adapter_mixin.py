@@ -1,19 +1,29 @@
 # mypy: disable-error-code=attr-defined
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
-"""Feature and sequence fetch methods for UniProtAdapter."""
+"""Feature/sequence fetch and metadata helpers for UniProtAdapter."""
 
 from __future__ import annotations
 
 import contextlib
 import time
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.domain.mixin_host import as_mixin_host
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.common.api_request_collector import (
+    APIRequestCollector,
+)
+from bioetl.infrastructure.adapters.common.source_metadata_capability import (
+    clear_source_metadata_collector,
+    consume_source_metadata,
+    get_request_count,
+)
 from bioetl.infrastructure.adapters.uniprot.fasta_parser import FastaParser
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
+
+    from bioetl.domain.models.metadata import SourceMetadata
 
 _UNIPROT_FEATURE_SEQUENCE_ERRORS = (Exception,)
 
@@ -157,3 +167,53 @@ class UniProtFeatureSequenceAdapterMixin:
                 break
             yield seq_record
             fetched += 1
+
+
+class UniProtAdapterMetadataMixin:
+    """Adds request-metadata and repr helpers to UniProt adapter."""
+
+    # Host-class attributes (provided by UniProtAdapter.__init__)
+    api_key: str | None = cast(Any, None)  # Any: host attr default (PD6)
+    base_url: str = cast(Any, None)  # Any: host attr default (PD6)
+    _request_collector: APIRequestCollector = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
+
+    def _get_health_endpoint(self) -> str:
+        """Return health check endpoint.
+
+        Returns:
+            Endpoint path string used for UniProt health probe requests.
+        """
+        return "/uniprotkb/search"
+
+    def __repr__(self) -> str:
+        key_info = "with API key" if self.api_key else "without API key"
+        return f"UniProtAdapter(base_url='{self.base_url}', {key_info})"
+
+    def get_source_metadata(
+        self,
+        api_version: str | None = None,
+    ) -> SourceMetadata:
+        """Get API request metadata and clear collector.
+
+        Returns:
+            SourceMetadata aggregated from all recorded API requests since last clear.
+        """
+        return consume_source_metadata(
+            collector=self._request_collector,
+            url=self.base_url,
+            api_version=api_version,
+        )
+
+    def clear_request_collector(self) -> None:
+        """Clear the request collector without returning metadata."""
+        clear_source_metadata_collector(collector=self._request_collector)
+
+    @property
+    def request_count(self) -> int:
+        """Number of recorded API requests since last clear."""
+        return get_request_count(collector=self._request_collector)
+
+
+__all__ = ["UniProtAdapterMetadataMixin", "UniProtFeatureSequenceAdapterMixin"]

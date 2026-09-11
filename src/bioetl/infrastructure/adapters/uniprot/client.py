@@ -26,15 +26,13 @@ from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 from bioetl.infrastructure.adapters.uniprot.constants import UNIPROT_API_BASE
 from bioetl.infrastructure.adapters.uniprot.feature_sequence_adapter_mixin import (
+    UniProtAdapterMetadataMixin,
     UniProtFeatureSequenceAdapterMixin,
 )
 from bioetl.infrastructure.adapters.uniprot.filtering_adapter_mixin import (
     UniProtFilteringAdapterMixin,
 )
 from bioetl.infrastructure.adapters.uniprot.health_probe import probe_uniprot_health
-from bioetl.infrastructure.adapters.uniprot.metadata_adapter_mixin import (
-    UniProtAdapterMetadataMixin,
-)
 from bioetl.infrastructure.adapters.uniprot.protein_fetch_adapter_mixin import (
     UniProtProteinFetchAdapterMixin,
 )
