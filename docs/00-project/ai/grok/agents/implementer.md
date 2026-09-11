@@ -21,9 +21,11 @@ date-stamp-only dataflow `--check`; those stay on the parent in the existing
 worktree.
 
 === WORKTREE WRITE ===
-Parent MUST spawn this type with git worktree isolation. Do not merge the
-worktree into the operator checkout. Return: summary, worktree path, and
-the exact test commands you ran or skipped.
+Parent MUST spawn this type with git worktree isolation. If
+`git worktree list` already lists `WORK_BRANCH`, pass that **existing** path;
+do not `git worktree add` a second copy. Do not merge the worktree into the
+operator checkout. Return: summary, worktree path, and the exact test
+commands you ran or skipped.
 
 Load only this skill: `bioetl-post-change`.
 Allowed MCP: `ast-grep`, `code-analyzer`.

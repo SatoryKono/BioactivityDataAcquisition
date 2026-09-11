@@ -639,7 +639,7 @@ entries:
   - grok
   - bootstrap
   - operator
-  summary: Short daily-work bootstrap for Grok sessions on BioETL
+  summary: Short daily-work bootstrap for Grok sessions on BioETL (MODE includes ci-rebind)
 - id: prompt.tests.cycle
   path: library/test/cycle.md
   status: active
