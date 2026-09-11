@@ -431,7 +431,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT snapshot · selected provider snapshot; fleet panels below have a different scope. Mapping: `0=OK`, `1=WARN`, `>=2=CRIT`, `null=UNKNOWN`. The verdict uses current status and successful provider activity observed in the selected range; it does not prove that a pipeline run succeeded. TELEMETRY MISSING means status evidence is unavailable—check Monitor Telemetry Presence and Raw Health Status; it is not evidence of a healthy fleet. Fleet panels can disagree because they cover all providers.",
+      "description": "CURRENT snapshot · selected provider snapshot; fleet panels below have a different scope. Mapping: `0=OK`, `1=WARN`, `>=2=CRIT`, `null=UNKNOWN`. The verdict uses current provider status; it does not prove that a pipeline run succeeded. TELEMETRY MISSING means status evidence is unavailable—check Monitor Telemetry Presence and Raw Health Status; it is not evidence of a healthy fleet. Fleet panels can disagree because they cover all providers.",
       "fieldConfig": {
         "defaults": {
           "color": {

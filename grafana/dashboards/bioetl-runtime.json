@@ -390,7 +390,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Pipeline Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">CURRENT · Open the highest-severity blocker (up to 3); empty = none observed. SCRAPING is endpoint access. Full telemetry: UNVERIFIED. Run ID is separate.</div></div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">CURRENT · Open an active blocker (up to 3); empty = none observed. SCRAPING is endpoint access. Full telemetry: UNVERIFIED. Run ID is separate.</div></div>"
       },
       "links": []
     },

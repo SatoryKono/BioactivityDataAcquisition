@@ -39,7 +39,7 @@ _SPECS = {
         "Understand Pipeline Scope",
         (
             "CURRENT",
-            "highest-severity blocker",
+            "active blocker",
             "SCRAPING",
         ),
     ),
@@ -138,6 +138,8 @@ def test_provenance_panel_readability_contract(
     )
     assert all(token in content for token in css)
     assert all(token in content for token in required_copy)
+    assert "background:" not in content
+    assert "background-color" not in content
     assert "#ff9830" not in content
     assert "rgba(255,152,48" not in content
     assert "white-space:nowrap" not in content
