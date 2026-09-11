@@ -67,6 +67,7 @@ Commands:
     report-lazy-import-inventory Generate/check lazy-import inventory
     report-source-tree-manifest Generate/check unified source-tree manifest
     refresh-governance-artifacts Refresh/check committed governance artifacts
+    refresh-ci-drift-families Refresh/check CI drift families without budget ratchet
     validate-technical-debt-audit Validate and resolve the SHA-pinned current technical-debt audit
     run-architecture-audit-read-only Run check-only architecture evidence diagnostics
     analyze-duplicate-functions Analyze duplicate function names across selected code areas
@@ -227,6 +228,10 @@ COMMAND_SPECS.update(
         "run-tests": module_command(TEST_HEALTH_MODULE, "run-tests"),
         "summarize-junit": module_command(TEST_HEALTH_MODULE, "summarize-junit"),
         "test-health": module_command(TEST_HEALTH_MODULE, "test-health"),
+        "refresh-ci-drift-families": module_command(
+            "scripts.engineering.qa.refresh_governance_artifacts",
+            "ci-drift-families",
+        ),
     }
 )
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import sys
 import tempfile
 from pathlib import Path
@@ -42,10 +43,50 @@ def _atomic_write(path: Path, content: str) -> None:
         raise
 
 
+_CALENDAR_STAMP_RES: tuple[tuple[re.Pattern[str], str], ...] = (
+    (re.compile(r"%% @date\s+\d{4}-\d{2}-\d{2}"), "%% @date    <stamp>"),
+    (
+        re.compile(r'"generated_date":\s*"\d{4}-\d{2}-\d{2}"'),
+        '"generated_date": "<stamp>"',
+    ),
+    (
+        re.compile(r"Generated: \*\*\d{4}-\d{2}-\d{2}\*\*"),
+        "Generated: **<stamp>**",
+    ),
+    (
+        re.compile(r"Last verified: '\d{4}-\d{2}-\d{2}'"),
+        "Last verified: '<stamp>'",
+    ),
+    (
+        re.compile(r"Дата метаданных: `\d{4}-\d{2}-\d{2}`"),
+        "Дата метаданных: `<stamp>`",
+    ),
+)
+
+
+def _normalize_calendar_stamps(text: str) -> str:
+    """Replace pipeline dataflow calendar stamps so IR-only drift is visible."""
+    normalized = text
+    for pattern, replacement in _CALENDAR_STAMP_RES:
+        normalized = pattern.sub(replacement, normalized)
+    return normalized
+
+
+def _preserve_existing_calendar_stamps(existing: str, generated: str) -> str:
+    """Keep committed stamps when the IR/graph body is otherwise unchanged."""
+    if _normalize_calendar_stamps(existing) == _normalize_calendar_stamps(generated):
+        return existing
+    return generated
+
+
 def _check_outputs(outputs: dict[Path, str]) -> list[Path]:
     stale: list[Path] = []
     for path, expected in outputs.items():
-        if not path.is_file() or path.read_text(encoding="utf-8") != expected:
+        if not path.is_file():
+            stale.append(path)
+            continue
+        existing = path.read_text(encoding="utf-8")
+        if _normalize_calendar_stamps(existing) != _normalize_calendar_stamps(expected):
             stale.append(path)
     return stale
 
@@ -107,7 +148,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--check",
         action="store_true",
-        help="Fail if committed generated text differs from live inputs.",
+        help=(
+            "Fail if committed generated text differs from live inputs. "
+            "Calendar stamps (@date, generated_date, Last verified) are "
+            "ignored when the IR/graph body matches."
+        ),
     )
     return parser.parse_args(argv)
 
@@ -142,6 +187,11 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     for path, content in outputs.items():
+        if path.is_file():
+            content = _preserve_existing_calendar_stamps(
+                path.read_text(encoding="utf-8"),
+                content,
+            )
         _atomic_write(path, content)
     print(f"Generated {len(outputs)} text artifacts for {args.pipeline}")
     return 0

@@ -12,6 +12,19 @@
 
 Load only the role- and risk-relevant sources selected by those contracts.
 
+## Context tiers
+
+Follow the `AGENTS.md` Required AI Context table. Hash-only rebind, date stamp,
+and remote-main skip RULES/ADR and full `pre-task` RAG
+(`BIOETL_AI_MEMORY_MODE=off`). V3/V4 keep the full package.
+
+| Task class | Read | Memory |
+| --- | --- | --- |
+| hash-only generated-artifact rebind, date stamp, remote-main | drift runbook + touched reporter | `BIOETL_AI_MEMORY_MODE=off`; skip RAG |
+| V1 docs/prompt | `AGENTS.md` guardrails + POST_CHANGE docs slice | read-only optional |
+| V2 focused code | + matching role/skill for SCOPE | `pre-task` |
+| V3/V4 | full package via `AGENTS.md` | `pre-task` required |
+
 ## Purpose
 
 Map logical BioETL `py-*` profiles onto the native Codex runtime roles used in this repository.
@@ -70,6 +83,7 @@ Use the smallest existing skill that matches the request:
 | Review the current diff | read-only | `py-audit-bot` (`review`) | diff inspection; no external writes |
 | Diagnose CI failure | read-only | `py-debug-bot` | reproduction, root cause, remediation guidance |
 | Implement diagnosed CI remediation | write in requested scope | direct parent implementation | failed check plus targeted regression |
+| Hash-only / date-stamp / remote-main rebind | write generated artifacts only | parent in the existing worktree; no extra `implementer` | matching `--check` after `--update` |
 | Prepare a PR | branch/commit/push authorized by request | direct parent workflow | repository quality gates for touched scope |
 | Audit architecture debt | read-only | `py-audit-bot` (`debt`) | architecture/debt gates; budgets MUST NOT increase |
 

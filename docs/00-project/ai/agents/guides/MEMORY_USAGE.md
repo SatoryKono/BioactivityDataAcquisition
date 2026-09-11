@@ -17,6 +17,8 @@ as a replacement for runtime truth.
 ## Required Workflow
 
 1. Select `BIOETL_AI_MEMORY_MODE=off|read-only|read-write` for the task.
+   Hash-only generated-artifact rebind, date stamp, and remote-main MAY use
+   `off` and skip RAG. V3/V4 keep `pre-task`.
 1. Declare actor provenance with non-empty `BIOETL_AI_RUNTIME` and
    `BIOETL_AI_AGENT`; set `BIOETL_AI_MODEL` only when a stable model identifier
    is known. Do not allow durable task records to fall back to an unidentified

@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P2
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-09-10'
+  Last verified: '2026-09-11'
 
 ______________________________________________________________________
 
@@ -76,16 +76,38 @@ into one of the governed artifact families below.
 
 Run the same commands locally and in CI:
 
-For a source/config change that affects multiple governance artifacts, use the
-coupled command instead of invoking rows from the table independently:
+For the CI-family cascade after test/docs-stamp edits (telemetry, test-gov,
+flaky, evidence_surface, remote-main, chembl dataflow), use the slim coupled
+command. It does **not** call `_ratchet_family_budgets` and must not replace
+the full governance refresh:
+
+```bash
+python -m scripts.engineering.qa refresh-ci-drift-families --check \
+  --test-gov --flaky-fingerprint --telemetry --evidence --remote-main --dataflow
+python -m scripts.engineering.qa refresh-ci-drift-families --update \
+  --test-gov --flaky-fingerprint --evidence --remote-main --dataflow
+```
+
+`--update --telemetry` additionally requires `--coverage-percent`,
+`--source-commit` (Tests-run ancestor of HEAD), `--source-run-id`,
+`--source-event`, and `--source-run-url`. Do not copy `source_tree_sha256`
+from `test-governance-current.json`.
+
+Order: test-gov → flaky fingerprint → telemetry → evidence_surface →
+remote-main → dataflow.
+
+For a source/config change that affects coverage, dep-map, or hotspot-family
+baselines, use the full coupled command instead of invoking rows from the
+table independently:
 
 ```bash
 python -m scripts.engineering.qa.refresh_governance_artifacts
 python -m scripts.engineering.qa.refresh_governance_artifacts --check
 ```
 
-The coupled check is fail-closed and propagates the first failing checker exit
-code. Use the individual rows below to diagnose a specific artifact family.
+The full coupled check is fail-closed and propagates the first failing checker
+exit code. It may ratchet hotspot family budgets **down**. Use the individual
+rows below to diagnose a specific artifact family.
 
 | Surface | Check command | Refresh command |
 | --- | --- | --- |
@@ -100,6 +122,7 @@ code. Use the individual rows below to diagnose a specific artifact family.
 | Documentation cleanup inventory | `python -m scripts.docs generate-cleanup-inventory --check` | `python -m scripts.docs generate-cleanup-inventory --update` |
 | Architecture dependency map | `python -m scripts.engineering.qa.generate_architecture_dependency_map --check` | `python -m scripts.engineering.qa.generate_architecture_dependency_map --update` |
 | Committed test telemetry | `pytest tests/architecture/test_test_telemetry_baseline.py tests/architecture/test_test_telemetry_governance.py` | `python -m scripts.engineering.ci.update_test_telemetry_baseline --coverage-percent <percent> --source-branch main --source-commit <reachable-commit> --source-run-id <run-id>` |
+| Chembl pipeline dataflow | `python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check` | `python -m scripts.diagrams generate-dataflows --pipeline chembl_activity` (`--check` ignores calendar stamps when IR matches) |
 | Compatibility importer census | `python -m scripts.engineering.qa report-compatibility-importer-census --check` | `python -m scripts.engineering.qa report-compatibility-importer-census` |
 | Architecture artifact duplication | `python -m scripts.engineering.qa.report_artifact_duplication_audit --check` | `python -m scripts.engineering.qa.report_artifact_duplication_audit --json-out reports/quality/config-contract-registry-artifact-duplication.json` |
 | Flaky-test burndown review | `python -m scripts.engineering.qa.report_flaky_test_burndown_review --check` | `python -m scripts.engineering.qa.report_flaky_test_burndown_review` |

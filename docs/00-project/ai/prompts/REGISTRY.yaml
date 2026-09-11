@@ -86,6 +86,7 @@ scenarios:
   deps:
   - prompt.fragment.git-safety
   - prompt.fragment.debt-budget-ban
+  - prompt.fragment.generated-artifact-ci
 - id: test-cycle
   scenario: Cyclic test run and triage
   role: py-test-bot
@@ -620,7 +621,7 @@ entries:
   - operator
   - agents
   - ci
-  summary: Plan agent-efficiency work (runtime, operator loop, generated CI)
+  summary: Plan agent-efficiency work (CI families, SCOPE bootstrap, hasher split)
 - id: prompt.plan.scoped
   path: library/plan/scoped.md
   status: active

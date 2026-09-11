@@ -35,16 +35,26 @@ MUST be applied to both files.
 
 ## Required AI Context
 
-Before planning, auditing, or editing:
+Guardrails in this file (env, tech-debt budgets, root scratch, post-change,
+response language) always apply. Load the rest by **task class**, not by
+dumping RULES/ADR on every edit.
 
-1. Read `docs/00-project/NORMATIVE_SOURCES.md`.
-1. Read `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`.
-1. Read `docs/00-project/ai/memory/agent-memory.md`.
-1. Read the relevant `docs/00-project/ai/memory/memory-py-*.md` file when a
-   role-specific memory sheet exists.
-1. Use the canonical memory workflow from `src/memory/DAILY_WORKFLOW.md`
-   through `python -m memory.tooling.workflow pre-task ...` and
-   `python -m memory.tooling.workflow post-task ...`.
+| Task class | Read | Memory |
+| --- | --- | --- |
+| generated-artifact rebind, date stamp, remote-main | `docs/05-operations/runbooks/generated-artifact-drift-workflow.md` + the touched reporter | `BIOETL_AI_MEMORY_MODE=off`; skip RAG / full `pre-task` |
+| V1 docs/prompt | this file's guardrails + `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md` docs slice | read-only optional |
+| V2 focused code | + matching role/skill for SCOPE | `pre-task` |
+| V3/V4 | full package: `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`, `docs/00-project/ai/memory/agent-memory.md`, role `memory-py-*.md`, `src/memory/DAILY_WORKFLOW.md` | `pre-task` required |
+
+Hash-only work does **not** require reading `docs/00-project/RULES.md` or the
+ADR tree. V3/V4 keep that package. Select RULES/ADR slices through
+`docs/00-project/NORMATIVE_SOURCES.md` when the task actually touches those
+surfaces.
+
+Coupled CI-family refresh (does **not** call `_ratchet_family_budgets`):
+`python -m scripts.engineering.qa refresh-ci-drift-families`. Do not use
+`python -m scripts.engineering.qa.refresh_governance_artifacts` for
+telemetry/test-gov/flaky/evidence/remote-main/dataflow rebind.
 
 ## Environment Configuration
 
