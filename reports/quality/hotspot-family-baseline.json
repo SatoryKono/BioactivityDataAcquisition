@@ -89,11 +89,11 @@
       ],
       "duplication_clusters": 0,
       "files": 131,
-      "total_loc": 15129,
+      "total_loc": 15077,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.376,
       "max_internal_fan_in": 2,
-      "max_internal_fan_in_module": "bioetl.application.services.control_plane.replay.historical_identity_models",
+      "max_internal_fan_in_module": "bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 2

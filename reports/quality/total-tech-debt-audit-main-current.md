@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `f59530a8c8aedcd5db3fbbbe26edf54f971f0232d792e9df5fdd392133d6acd7`
+Evidence surface SHA-256: `9a8b81aee2c088f5ff3e57a2971053d22fd9bf38e547f8bc416998a0c6c9ab3d`
 
 Evidence metadata refresh (2026-09-11): the canonical registry digest was
 recomputed after #10304 folded two control-plane replay score-card modules
@@ -24,7 +24,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "f59530a8c8aedcd5db3fbbbe26edf54f971f0232d792e9df5fdd392133d6acd7",
+  "evidence_surface_sha256": "9a8b81aee2c088f5ff3e57a2971053d22fd9bf38e547f8bc416998a0c6c9ab3d",
   "metrics": {
     "architecture_integral_score": 9.14,
     "architecture_interpretation": "good_targeted_improvements",
