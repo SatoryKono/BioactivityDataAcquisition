@@ -5,7 +5,9 @@ from __future__ import annotations
 from inspect import isawaitable
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core.batch_transformer_state import RecordTransformOutcome
+from bioetl.application.core.batch_transformer_state import (
+    RecordTransformOutcome as RecordTransformOutcome,
+)
 from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.domain.exceptions import DataQualityError
 from bioetl.domain.filtering import FilterDecision
@@ -203,6 +205,7 @@ async def resolve_transform_result(
 
 
 __all__ = [
+    "RecordTransformOutcome",
     "build_transform_success_outcome",
     "empty_outcome",
     "resolve_transform_result",

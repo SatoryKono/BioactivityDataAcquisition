@@ -15,12 +15,12 @@ from bioetl.application.core.batch_transformer_attempt_failures import (
     handle_transform_processing_error,
 )
 from bioetl.application.core.batch_transformer_attempt_success import (
-    _resolve_gold_filter_details as _resolve_gold_filter_details,
-)
-from bioetl.application.core.batch_transformer_attempt_success import (
+    RecordTransformOutcome,
     build_transform_success_outcome,
 )
-from bioetl.application.core.batch_transformer_state import RecordTransformOutcome
+from bioetl.application.core.batch_transformer_attempt_success import (
+    _resolve_gold_filter_details as _resolve_gold_filter_details,
+)
 from bioetl.domain.types import BronzeRecord
 
 if TYPE_CHECKING:
