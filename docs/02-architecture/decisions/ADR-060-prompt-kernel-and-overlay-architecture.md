@@ -316,4 +316,4 @@ Tracked `generated/`, `compatibility/`, and `overlays/*.yaml` were retired from
 the live tree. Overlay semantics are unchanged: `domains.yaml` holds the 24
 domain mappings; `compile.py` renders them on demand. Frozen materialized-v3
 and campaign megaprompts live under `docs/99-archive/prompts-2026-09/`.
-The 15 operator scenarios are listed in `REGISTRY.yaml`.
+The 16 operator scenarios are listed in `REGISTRY.yaml`.
