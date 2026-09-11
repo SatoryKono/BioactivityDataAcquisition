@@ -10,11 +10,26 @@ This runbook is **not** a runtime SSOT. Canonical AI precedence remains
 | Rule | Why |
 |------|-----|
 | 1 task = 1 branch | Avoid thrash and mixed commits |
-| Prefer worktree when main is dirty | Protect foreign WIP |
+| 1 agent = 1 worktree | Parallel cherry-pick/merge in a shared checkout corrupts generated YAML |
+| Prefer `git worktree add` | Protect foreign WIP; do not `git checkout` another agent's branch |
 | Never delete others' uncommitted work | Multi-agent safety |
 | No `git reset --hard` / force-push | Irreversible loss |
 | Push feature branches only | Protected `main` |
 | `CYCLE_COUNT` default **1**, max **2**/session | Reduce compaction thrash |
+
+If `MERGE_HEAD` or `CHERRY_PICK_HEAD` exists and this session did not start it:
+`git merge --abort` or `git cherry-pick --abort`. Do not resolve a foreign
+operation "while here".
+
+Fetch `origin/main` with `git fetch origin main`. Do **not** copy the CI
+refspec `git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main`
+into a local worktree: it can delete `origin/main` and fail
+`report-architecture-debt-remote-main-baseline` (`local_tracking_ref_matches_remote`).
+See [generated-artifact-drift-workflow.md](../../../../05-operations/runbooks/generated-artifact-drift-workflow.md).
+
+Child Grok agents must not run `gh` or create issues/PR (parent-only GitHub).
+`CYCLE_COUNT` stays 1–2; do not raise it to compensate for generated-artifact
+loops.
 
 ## 2. Permission profiles (local `~/.grok/config.toml`)
 
