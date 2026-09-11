@@ -2,16 +2,30 @@
 
 ## Canonical Sources
 
-Read before planning or editing:
+Available sources; load by **Context tiers** below, not as an always-on dump:
 
+- `AGENTS.md`
+- `.devin/agents/DEVIN-RUNTIME.md`
+- `.codex/agents/CODEX-RUNTIME.md` (reference for logical profile definitions)
 - `docs/00-project/NORMATIVE_SOURCES.md`
 - `docs/00-project/RULES.md`
 - `docs/01-requirements/REQUIREMENTS.md`
 - `docs/02-architecture/decisions/`
 - `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
-- `AGENTS.md`
-- `.codex/agents/CODEX-RUNTIME.md` (reference for logical profile definitions)
+
+## Context tiers
+
+Follow the `AGENTS.md` Required AI Context table. Hash-only rebind, date stamp,
+and remote-main skip RULES/ADR and full `pre-task` RAG
+(`BIOETL_AI_MEMORY_MODE=off`). V3/V4 keep the full package.
+
+| Task class | Read | Memory |
+| --- | --- | --- |
+| hash-only generated-artifact rebind, date stamp, remote-main | drift runbook + touched reporter | `BIOETL_AI_MEMORY_MODE=off`; skip RAG |
+| V1 docs/prompt | `AGENTS.md` guardrails + POST_CHANGE docs slice | read-only optional |
+| V2 focused code | + matching `.devin` profile/skill for SCOPE | `pre-task` |
+| V3/V4 | full package via `AGENTS.md` | `pre-task` required |
 
 ## Purpose
 
