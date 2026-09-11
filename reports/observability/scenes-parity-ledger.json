@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "e2da014d3600a2e6d0bc8ec5478809a1a33493ecbd0b962bbec33880a7623df3",
-    "bioetl-dq-v2": "d8ee5f40df2bcfa1d4cbffe80a909b87f018eadcb628e665c317f2738e4221fa",
-    "bioetl-incident-v1": "01427db950fe12469b7b8ac401c72248f8828747d1f92a8c78d29020834fd710",
-    "bioetl-overview-v2": "5579453c97053861c31c83cc21d805b6e8f3b5b82bfe3a21b16fe60d21d54e76",
-    "bioetl-provider-health-v2": "8470fa235e211acab68d29b7fcd13f49f92b361be7cb0fdfabb01746fba0176f",
-    "bioetl-run-explorer-v1": "c6ce3dbd919b5efb2d75b9e348735bde18dceb78c974812360066f23db80154a",
-    "bioetl-runtime": "e4ed9e7ead235971a8d06a5da353fb2ebdef18dd94f10f2baee31728ecc35de9"
+    "bioetl-control-plane-v1": "48c4384fd622589bccd7b4f27f22d678cb349bbba2fda2a6619ec5e7e073db8a",
+    "bioetl-dq-v2": "b663c50c3342d697bceaeca339cc6d831bf2234df720d6ba7a5ad8cef0e92962",
+    "bioetl-incident-v1": "f90b91dc7f8a063cc9d969d570de2e06541e80684ac3c196fd637d857cd0e017",
+    "bioetl-overview-v2": "5e8ff3d45a926b1463717b5f02ba12d0ddd5cd6bc16e1953d4ca06ab907c5c21",
+    "bioetl-provider-health-v2": "36b0c442677fe14ce119c1cb57e8f339eaae29f2c9d793ca6f37501e6f2b0295",
+    "bioetl-run-explorer-v1": "743aca186cfedf09fb871ef79ab683f20c269cbaf388daefafa7158c37ac997c",
+    "bioetl-runtime": "f9be8be6809178571d23b5b1598f4b50fca2cda6926de19537026433ffde4f29"
   },
   "panels": [
     {
@@ -1789,7 +1789,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-incident-v1",
       "panel_id": 9401,
-      "panel_title": "Monitor Incident Status",
+      "panel_title": "Monitor Selected-Scope Status",
       "route": "incident-console",
       "source": {
         "datasource_type": "prometheus",

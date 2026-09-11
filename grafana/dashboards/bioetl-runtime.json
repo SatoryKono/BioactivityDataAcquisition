@@ -390,7 +390,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Pipeline Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">CURRENT · Open the highest-severity blocker; empty = none observed. SCRAPING is endpoint access. Full telemetry: UNVERIFIED. Run ID is separate.</div></div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">CURRENT · Open the highest-severity blocker (up to 3); empty = none observed. SCRAPING is endpoint access. Full telemetry: UNVERIFIED. Run ID is separate.</div></div>"
       },
       "links": []
     },
@@ -517,7 +517,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "TIME RANGE · SELECTED RUN · Lists current runtime blockers for Pipeline and Run Type. An empty list is healthy only when Pipeline Health is OK and Metrics Coverage is complete; otherwise it is inconclusive. Open the matching detection or localization panel TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+      "description": "CURRENT snapshot · Blockers for the selected Pipeline and Run Type at evaluation time; not a Selected Run ID result. Shows up to 3 reasons. An empty list is healthy only when Pipeline Health is OK and Metrics Coverage is complete; otherwise it is inconclusive. Open the matching detection or localization panel. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
       "fieldConfig": {
         "defaults": {
           "color": {

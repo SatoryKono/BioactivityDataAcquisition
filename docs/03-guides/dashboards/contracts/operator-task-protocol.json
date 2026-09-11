@@ -653,7 +653,7 @@
       "target_panels": [
         {
           "panel_id": 9401,
-          "title": "Monitor Incident Status"
+          "title": "Monitor Selected-Scope Status"
         }
       ],
       "initial_context": {

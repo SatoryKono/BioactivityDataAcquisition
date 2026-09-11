@@ -368,7 +368,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Inspect Scope & Evidence",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">Can this run be replayed safely? SELECTED RUN tables below. CURRENT is replay readiness now, not this run. Lineage = incomplete evidence — not OK.</div></div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">Can this run be replayed safely? SELECTED RUN tables below. CURRENT is replay readiness now, not this run. Lineage = incomplete evidence — not OK.</div></div>"
       },
       "links": []
     },
@@ -498,7 +498,7 @@
         "y": 6
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Processing outcome, fail-closed Trust verdict and total Reasons remain visible together. Select Reasons to inspect the full evidence in panel 9414; full reasons also remain in table inspection. INCOMPLETE / UNKNOWN is not OK. SELECT RUN / VALID EMPTY is not OK. Processing is processing_status; Trust is trust_status. Backend unavailable means QUERY ERROR, never VALID EMPTY.",
+      "description": "SELECTED RUN · Processing outcome, fail-closed Trust verdict, Reasons, and Freshness remain visible together. Select Reasons to inspect the full evidence in panel 9414; full reasons also remain in table inspection. Freshness is the existing frame field evidence_freshness. INCOMPLETE / UNKNOWN is not OK. SELECT RUN / VALID EMPTY is not OK. Processing is processing_status; Trust is trust_status. Backend unavailable means QUERY ERROR, never VALID EMPTY.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -532,8 +532,16 @@
             },
             "properties": [
               {
+                "id": "displayName",
+                "value": "Freshness"
+              },
+              {
+                "id": "custom.width",
+                "value": 90
+              },
+              {
                 "id": "custom.hidden",
-                "value": true
+                "value": false
               }
             ]
           },
@@ -688,15 +696,15 @@
               "Time": true,
               "reasons": true,
               "reasons_truncated": true,
-              "scope_kind": true,
-              "evidence_freshness": true
+              "scope_kind": true
             },
             "indexByName": {
               "processing_status": 0,
               "trust_status": 1,
               "reasons_count": 2,
-              "reasons_text": 3,
-              "evidence_observed_at": 4
+              "evidence_freshness": 3,
+              "reasons_text": 4,
+              "evidence_observed_at": 5
             },
             "renameByName": {}
           }

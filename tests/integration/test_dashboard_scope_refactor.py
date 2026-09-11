@@ -265,3 +265,38 @@ def test_promql_targets_do_not_select_run_id_label() -> None:
                 if isinstance(expr, str) and "run_id=" in expr.replace(" ", ""):
                     offenders.append(f"{path.name}:{panel.get('id')}")
     assert not offenders, "PromQL run_id label:\n" + "\n".join(offenders)
+
+
+def test_run_explorer_3010_opens_identity_panel_3022() -> None:
+    """GMIN-03: primary Run link focuses Inspect Run Identity without hunting the row."""
+    dashboard = _load(DASHBOARD_DIR / "bioetl-run-explorer-v1.json")
+    browse = next(
+        item for item in _root_panels(dashboard) if item.get("id") == 3010
+    )
+    run_override = next(
+        item
+        for item in (browse.get("fieldConfig") or {}).get("overrides", [])
+        if item.get("matcher", {}).get("options") == "Run"
+    )
+    links = next(
+        prop["value"]
+        for prop in run_override["properties"]
+        if prop.get("id") == "links"
+    )
+    primary = links[0]
+    url = str(primary.get("url") or "")
+    assert primary.get("targetBlank") is False
+    assert "viewPanel=3022" in url
+    assert "var-pipeline=${__data.fields.Pipeline}" in url
+    assert "var-run_type=${__data.fields.run_type}" in url
+    assert "var-run_id=${__value.raw}" in url
+    assert "${__url_time_range}" in url
+    details = next(
+        item for item in _root_panels(dashboard) if item.get("title") == "Selected Run Details"
+    )
+    assert details.get("type") == "row"
+    assert details.get("collapsed") is True
+    nested_ids = {
+        item.get("id") for item in details.get("panels") or [] if isinstance(item, dict)
+    }
+    assert 3022 in nested_ids

@@ -226,7 +226,7 @@ def test_review_domain_status_is_deviation_first_and_capped() -> None:
     assert "topk(2" in summary_expr
     assert "bioetl_l0_input_status_selected" in summary_expr
     assert len(summary_expr) <= 200
-    assert "four worst" in str(summary.get("description", "")).lower()
+    assert "up to 2" in str(summary.get("description", "")).lower()
 
     assert full_matrix.get("id") == 9031
     assert "topk(" not in full_expr
