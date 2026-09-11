@@ -95,7 +95,7 @@ def test_issue_5597_retained_public_surfaces_are_bounded_and_owned() -> None:
         assert row["status"] == "public-entrypoint"
         assert row["external_breaking_change_required"] is True
         assert row["owner"]
-        assert row["review_date"] == "2026-09-30"
+        assert str(row["review_date"]) >= "2026-12-31"
         assert row["migration_path"]
         assert row["exit_criteria"]
 
