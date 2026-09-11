@@ -269,9 +269,10 @@ def _run(
             ]
         )
     started = time.monotonic()
-    # Allow headroom above -TimeoutSeconds 10 for diagnostics + last-resort paths.
+    # Headroom above -TimeoutSeconds 10 for diagnostics. Must exceed the
+    # ``elapsed < 45`` assertion so pytest does not TimeoutExpired first.
     result = subprocess.run(
-        command, env=env, text=True, capture_output=True, timeout=25
+        command, env=env, text=True, capture_output=True, timeout=50
     )
     elapsed = time.monotonic() - started
     if not report.is_file():
