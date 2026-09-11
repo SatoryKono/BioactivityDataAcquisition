@@ -1107,7 +1107,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text",
+                  "type": "color-background",
+                  "mode": "basic",
                   "wrapText": false
                 }
               }

@@ -255,28 +255,10 @@ def test_control_plane_root_layout_keeps_range_evidence_and_rows_non_overlapping
         for panel in dashboard.get("panels", [])
         if panel.get("id") not in {1000, 890}
     ]
-
-    overlaps = []
-    for index, left in enumerate(root_panels):
-        left_grid = left.get("gridPos", {})
-        left_x = left_grid.get("x", 0)
-        left_y = left_grid.get("y", 0)
-        left_w = left_grid.get("w", 0)
-        left_h = left_grid.get("h", 0)
-        for right in root_panels[index + 1 :]:
-            right_grid = right.get("gridPos", {})
-            right_x = right_grid.get("x", 0)
-            right_y = right_grid.get("y", 0)
-            right_w = right_grid.get("w", 0)
-            right_h = right_grid.get("h", 0)
-            x_overlap = left_x < right_x + right_w and right_x < left_x + left_w
-            y_overlap = left_y < right_y + right_h and right_y < left_y + left_h
-            if x_overlap and y_overlap:
-                overlaps.append(
-                    f"{left.get('id')}:{left.get('title')} overlaps {right.get('id')}:{right.get('title')}"
-                )
-
-    assert not overlaps, "Control Plane root panels overlap:\n" + "\n".join(overlaps)
+    _assert_panels_stay_in_grid_without_overlap(
+        root_panels,
+        context="bioetl-control-plane-v1.json root layout excluding nav/scope",
+    )
 
 
 def test_control_plane_row_sequence_matches_operator_flow() -> None:

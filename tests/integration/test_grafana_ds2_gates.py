@@ -249,7 +249,7 @@ def test_trust_primary_recovery_ssot_title_and_link() -> None:
     assert "<em>Review Lineage Validation</em>" in content
     assert "<b>INCOMPLETE" not in content
     assert "<strong>Do not replay" not in content
-    assert panels[0].get("gridPos", {}).get("h") == 2
+    assert panels[0].get("gridPos", {}).get("h") == 3
 
 
 def test_operator_status_stats_map_null_unknown() -> None:

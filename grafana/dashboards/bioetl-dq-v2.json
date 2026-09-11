@@ -580,7 +580,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 8,
         "x": 0,
         "y": 9
@@ -875,7 +875,7 @@
         ]
       },
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 16,
         "x": 8,
         "y": 9
@@ -955,10 +955,10 @@
       "type": "table",
       "title": "Review Selected Run Summary",
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 13
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Compact pipeline_run_report_v1 projection (identity, times, gold out, contract exclusions, coverage). Missing run is SELECT RUN, not OK. A selected run with no summary rows is VALID EMPTY, not OK. SELECT RUN is not VALID EMPTY. Set range to run opens 6. Run Explorer at started_at-5m .. <code style='font-size:16px'>completed_at</code>+5m. Do not treat CURRENT Prometheus as this UUID. Backend unavailable means the query could not be evaluated. Verify /health/live. Coverage chip is IN RANGE / OUT OF RANGE / UNKNOWN from covers_selected_run. Set range to run opens Run Explorer 3022 at from_ms..to_ms. A covered run does not show an outside-range warning. Status, coverage and local timestamps precede the UUID. Inspect the Run cell to copy its complete value; range-bound fields remain available to the Set range to run action and panel data inspection.",
@@ -1410,7 +1410,7 @@
           "title": "Inspect Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 100,
+            "y": 99,
             "w": 12,
             "h": 6
           },
@@ -1575,7 +1575,7 @@
           "title": "Inspect Processed Records",
           "gridPos": {
             "x": 12,
-            "y": 100,
+            "y": 99,
             "w": 12,
             "h": 6
           },
@@ -2540,7 +2540,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 38,
+            "y": 37,
             "w": 8,
             "h": 4
           },
@@ -2686,7 +2686,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 43,
+            "y": 42,
             "w": 12,
             "h": 6
           },
@@ -2841,7 +2841,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 43,
+            "y": 42,
             "w": 12,
             "h": 6
           },
@@ -2994,7 +2994,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 49,
+            "y": 48,
             "w": 12,
             "h": 6
           },
@@ -3207,7 +3207,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 49,
+            "y": 48,
             "w": 12,
             "h": 6
           },
@@ -3335,7 +3335,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 56,
+            "y": 55,
             "w": 24,
             "h": 5
           },
@@ -3412,7 +3412,7 @@
           },
           "gridPos": {
             "x": 6,
-            "y": 61,
+            "y": 60,
             "w": 6,
             "h": 4
           },
@@ -3482,7 +3482,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 61,
+            "y": 60,
             "w": 6,
             "h": 4
           },
@@ -3558,7 +3558,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 61,
+            "y": 60,
             "w": 6,
             "h": 4
           },
@@ -3651,7 +3651,7 @@
           },
           "gridPos": {
             "x": 18,
-            "y": 61,
+            "y": 60,
             "w": 6,
             "h": 4
           },
@@ -3739,7 +3739,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 65,
+            "y": 64,
             "w": 6,
             "h": 4
           },
@@ -3823,7 +3823,7 @@
           },
           "gridPos": {
             "x": 6,
-            "y": 65,
+            "y": 64,
             "w": 6,
             "h": 4
           },
@@ -3905,7 +3905,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 69,
+            "y": 68,
             "w": 12,
             "h": 6
           },
@@ -3984,7 +3984,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 69,
+            "y": 68,
             "w": 12,
             "h": 6
           },
@@ -4056,7 +4056,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 75,
+            "y": 74,
             "w": 12,
             "h": 6
           },
@@ -4140,7 +4140,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 75,
+            "y": 74,
             "w": 12,
             "h": 4
           },
@@ -4185,7 +4185,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 81,
+            "y": 80,
             "w": 24,
             "h": 4
           },
@@ -4229,7 +4229,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 85,
+            "y": 84,
             "w": 24,
             "h": 4
           },

@@ -119,7 +119,7 @@ def test_trust_9418_keeps_verdict_and_reason_count_visible() -> None:
         p for p in get_dashboard_files() if p.name == "bioetl-control-plane-v1.json"
     )
     panel = next(p for p in _root_panels(load_dashboard(path)) if p.get("id") == 9418)
-    assert panel["gridPos"] == {"h": 5, "w": 12, "x": 0, "y": 7}
+    assert panel["gridPos"] == {"h": 4, "w": 12, "x": 0, "y": 7}
     props = {
         o["matcher"]["options"]: {p["id"]: p["value"] for p in o["properties"]}
         for o in panel["fieldConfig"]["overrides"]
@@ -151,7 +151,7 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
     dashboard = load_dashboard(dashboard_path)
     panel = next(item for item in _root_panels(dashboard) if item.get("id") == 9416)
 
-    assert panel.get("gridPos") == {"h": 7, "w": 12, "x": 12, "y": 7}
+    assert panel.get("gridPos") == {"h": 4, "w": 12, "x": 12, "y": 7}
     assert panel.get("options", {}).get("cellHeight") == "sm"
     assert panel.get("options", {}).get("sortBy") == [
         {"displayName": "Status", "desc": True}

@@ -492,7 +492,7 @@
       "type": "table",
       "title": "Review Selected-Run Trust",
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 12,
         "x": 0,
         "y": 7
@@ -993,7 +993,7 @@
         ]
       },
       "gridPos": {
-        "h": 7,
+        "h": 4,
         "w": 12,
         "x": 12,
         "y": 7
@@ -1163,14 +1163,14 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 2,
-        "w": 12,
+        "h": 3,
+        "w": 24,
         "x": 0,
-        "y": 12
+        "y": 11
       },
       "options": {
         "bioetlDisplayTitle": "Review Recovery Action",
-        "content": "<div style=\"padding:2px 8px;line-height:1.2;font-size:16px;white-space:normal;overflow-wrap:anywhere\">Do not replay this run if Trust status is INCOMPLETE or UNKNOWN. <em>Review Selected-Run Trust</em> · <em>Review Retention Compliance</em> · then expand <em>Review Lineage Validation</em>.</div>",
+        "content": "<div style=\"padding:0 6px;line-height:1.15;font-size:16px;white-space:normal;overflow-wrap:anywhere\">Do not replay this run if Trust status is INCOMPLETE or UNKNOWN. <em>Review Selected-Run Trust</em> · <em>Review Retention Compliance</em> · then expand <em>Review Lineage Validation</em>.</div>",
         "mode": "html",
         "dataLinks": [
           {
@@ -1199,8 +1199,8 @@
           }
         ]
       },
-      "transparent": false,
-      "description": "Next-step rail kept at readable h=2 on the first screen under the canonical h=4 navigation. Do not replay this run if its Trust status is INCOMPLETE or UNKNOWN. First-screen tables: Review Selected-Run Trust (9418) and Review Retention Compliance (9416). Review Lineage Validation is the first collapsed row (9419) and contains table 9415. Monitor Replay Readiness (9401) is current Prometheus for the pipeline, not this run."
+      "transparent": true,
+      "description": "Next-step rail kept at readable h=3 full width on the first screen under the canonical h=4 navigation. Trust/Retention tables compact to h=4 so the CTA does not share cells with the KPI strip. Do not replay this run if its Trust status is INCOMPLETE or UNKNOWN. First-screen tables: Review Selected-Run Trust (9418) and Review Retention Compliance (9416). Review Lineage Validation is the first collapsed row (9419) and contains table 9415. Monitor Replay Readiness (9401) is current Prometheus for the pipeline, not this run."
     },
     {
       "datasource": {
@@ -3043,7 +3043,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 75,
+            "y": 74,
             "w": 24,
             "h": 6
           },
@@ -3143,7 +3143,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 81,
+            "y": 80,
             "w": 6,
             "h": 3
           },
@@ -3234,7 +3234,7 @@
           },
           "gridPos": {
             "x": 6,
-            "y": 81,
+            "y": 80,
             "w": 6,
             "h": 3
           },
@@ -3297,7 +3297,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 84,
+            "y": 83,
             "w": 24,
             "h": 7
           },
@@ -3351,7 +3351,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 91,
+            "y": 90,
             "w": 24,
             "h": 7
           },
@@ -3433,7 +3433,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 81,
+            "y": 80,
             "w": 6,
             "h": 3
           },
@@ -3524,7 +3524,7 @@
           },
           "gridPos": {
             "x": 18,
-            "y": 81,
+            "y": 80,
             "w": 6,
             "h": 3
           },
@@ -3593,7 +3593,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 110,
+            "y": 109,
             "w": 24,
             "h": 6
           },
@@ -3703,7 +3703,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 120,
+            "y": 119,
             "w": 6,
             "h": 3
           },
@@ -3794,7 +3794,7 @@
           },
           "gridPos": {
             "x": 6,
-            "y": 120,
+            "y": 119,
             "w": 6,
             "h": 3
           },
@@ -3891,7 +3891,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 123,
+            "y": 122,
             "w": 24,
             "h": 6
           },
@@ -3970,7 +3970,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 129,
+            "y": 128,
             "w": 24,
             "h": 8
           },
@@ -4072,7 +4072,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 140,
+            "y": 139,
             "w": 6,
             "h": 3
           },
@@ -4163,7 +4163,7 @@
           },
           "gridPos": {
             "x": 6,
-            "y": 140,
+            "y": 139,
             "w": 6,
             "h": 3
           },
@@ -4311,7 +4311,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 143,
+            "y": 142,
             "w": 24,
             "h": 6
           },
@@ -4383,7 +4383,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 149,
+            "y": 148,
             "w": 24,
             "h": 7
           },
@@ -4437,7 +4437,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 156,
+            "y": 155,
             "w": 24,
             "h": 7
           },
@@ -4508,7 +4508,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 163,
+            "y": 162,
             "w": 24,
             "h": 7
           },
@@ -4589,7 +4589,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 170,
+            "y": 169,
             "w": 24,
             "h": 7
           },
@@ -4653,7 +4653,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 177,
+            "y": 176,
             "w": 24,
             "h": 6
           },
@@ -5011,7 +5011,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 205,
+            "y": 204,
             "w": 24,
             "h": 18
           },
@@ -5400,7 +5400,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 223,
+            "y": 222,
             "w": 24,
             "h": 8
           },
@@ -5485,7 +5485,7 @@
           "description": "Shown when no identity rows are returned. This can mean no matching run, unresolved scope, or an unavailable backend; it is not a critical verdict by itself.",
           "gridPos": {
             "x": 0,
-            "y": 231,
+            "y": 230,
             "w": 12,
             "h": 4
           },
@@ -5514,7 +5514,7 @@
           "description": "Shown when no processed-record rows are returned. This can mean no activity, a run that has not started, unresolved scope, or an unavailable backend.",
           "gridPos": {
             "x": 12,
-            "y": 231,
+            "y": 230,
             "w": 12,
             "h": 4
           },
@@ -5873,7 +5873,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 235,
+            "y": 234,
             "w": 24,
             "h": 8
           },
@@ -6309,7 +6309,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 243,
+            "y": 242,
             "w": 12,
             "h": 4
           },
@@ -6747,7 +6747,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 247,
+            "y": 246,
             "w": 12,
             "h": 4
           },
@@ -7185,7 +7185,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 247,
+            "y": 246,
             "w": 12,
             "h": 4
           },
@@ -7261,7 +7261,7 @@
         {
           "gridPos": {
             "x": 0,
-            "y": 251,
+            "y": 250,
             "w": 24,
             "h": 4
           },
@@ -7295,7 +7295,7 @@
           "title": "Review Run Summary",
           "gridPos": {
             "x": 0,
-            "y": 284,
+            "y": 283,
             "w": 18,
             "h": 6
           },
@@ -7460,7 +7460,7 @@
           "title": "Review Processed Records",
           "gridPos": {
             "x": 18,
-            "y": 284,
+            "y": 283,
             "w": 6,
             "h": 6
           },
@@ -7885,7 +7885,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 290,
+            "y": 289,
             "w": 24,
             "h": 6
           },
