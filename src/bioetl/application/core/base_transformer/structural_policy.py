@@ -5,13 +5,11 @@ from __future__ import annotations
 from bioetl.application.core.base_transformer._structural_policy_support import (
     NoOpStructuralPolicy,
     SchemaAwareStructuralPolicy,
-    build_structural_policy,
-)
-from bioetl.application.core.base_transformer._structural_policy_types import (
     StructuralFieldSpec,
     StructuralPolicyOutcome,
     StructuralPolicyProtocol,
     StructuralPolicySignal,
+    build_structural_policy,
 )
 
 # Backward-compatible aliases retained for existing imports/tests.
