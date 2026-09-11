@@ -12,6 +12,7 @@
 
 from __future__ import annotations
 
+import ast
 from pathlib import Path
 
 import pytest
@@ -124,3 +125,70 @@ def test_issue_10304_control_plane_replay_fan_in_has_headroom() -> None:
         "replay score-card cluster max_internal_fan_in="
         f"{cluster_fan_in} at {cluster_module}; expected a line graph after #10304"
     )
+
+
+_PIPELINE_SPAN_LIFECYCLE = "bioetl.application.core.pipeline_span_lifecycle"
+_PIPELINE_SPAN_LIFECYCLE_RUNTIME_IMPORTERS = (
+    "src/bioetl/application/core/_base_transformer_execution_support.py",
+    "src/bioetl/application/core/_record_processor_span_support.py",
+    "src/bioetl/application/core/batch_tracing.py",
+    "src/bioetl/application/core/postrun/service.py",
+    "src/bioetl/application/core/runner.py",
+)
+
+
+def _is_type_checking_guard(test: ast.AST) -> bool:
+    return (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
+        isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
+    )
+
+
+def _runtime_imported_modules(path: Path) -> set[str]:
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    found: set[str] = set()
+
+    def walk(node: ast.AST) -> None:
+        if isinstance(node, ast.If) and _is_type_checking_guard(node.test):
+            for child in node.orelse:
+                walk(child)
+            return
+        if isinstance(node, ast.ImportFrom) and node.module:
+            found.add(node.module)
+        for child in ast.iter_child_nodes(node):
+            walk(child)
+
+    walk(tree)
+    return found
+
+
+def test_issue_10306_pipeline_span_lifecycle_fan_in_at_most_five() -> None:
+    """#10306: application/core live fan-in must stay ≤5 without new lifecycle importers."""
+    scorecard = load_scorecard()
+    hotspot_policy = scorecard.get("hotspot_family_ratchets", {})
+    assert isinstance(hotspot_policy, dict)
+    families = hotspot_policy.get("families", [])
+    assert isinstance(families, list)
+    family = next(
+        row
+        for row in families
+        if isinstance(row, dict) and row.get("name") == "application_core"
+    )
+    budgets = family.get("bounded_growth_budgets", {})
+    assert isinstance(budgets, dict)
+    assert budgets.get("max_internal_fan_in") == 7
+
+    files = iter_family_python_files(path_prefixes=["src/bioetl/application/core/"])
+    actual_fan_in, actual_module = count_internal_fan_in(files=files)
+    assert actual_fan_in <= 5, (
+        "application_core max_internal_fan_in="
+        f"{actual_fan_in} at {actual_module}; #10306 requires ≤5"
+    )
+
+    repo_root = Path(__file__).resolve().parents[2]
+    importers = sorted(
+        path.relative_to(repo_root).as_posix()
+        for path in files
+        if _PIPELINE_SPAN_LIFECYCLE in _runtime_imported_modules(path)
+    )
+    assert importers == list(_PIPELINE_SPAN_LIFECYCLE_RUNTIME_IMPORTERS)
+    assert len(importers) <= 5
