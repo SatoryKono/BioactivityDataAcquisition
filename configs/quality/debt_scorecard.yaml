@@ -537,12 +537,12 @@ hotspot_family_ratchets:
       max_internal_fan_in: 2
     metrics:
       duplication_clusters: 0
-      files: 133
-      total_loc: 15091
+      files: 131
+      total_loc: 15077
       files_ge_250_loc: 0
       helper_function_ratio: 0.376
       max_internal_fan_in: 2
-      max_internal_fan_in_module: bioetl.application.services.control_plane.replay.reproducibility_score_cards_types
+      max_internal_fan_in_module: bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores
     trend:
       status: reduced_2026-08-25_issue_9618_workflow_rehome
       next_action: '2026-08-25 #9618 moved workflow state-transition orchestration to its workflow owner,
