@@ -327,7 +327,7 @@ def test_control_plane_named_review_surfaces_are_findable() -> None:
     assert lineage_row.get("collapsed") is True
     assert trust.get("gridPos", {}).get("y", 99) < 18
     assert retention.get("gridPos", {}).get("y", 99) < 18
-    assert lineage_row.get("gridPos", {}).get("y") == 18
+    assert lineage_row.get("gridPos", {}).get("y") == 17
     child_ids = [child.get("id") for child in lineage_row.get("panels") or []]
     assert 9415 in child_ids
     lineage = next(

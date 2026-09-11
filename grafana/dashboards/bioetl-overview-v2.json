@@ -737,7 +737,7 @@
       "type": "table",
       "title": "Review First Action",
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 16,
         "x": 0,
         "y": 12
@@ -1169,7 +1169,7 @@
       "type": "table",
       "title": "Review Domain Status",
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 8,
         "x": 16,
         "y": 12
@@ -1475,7 +1475,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 17
       },
       "description": "Contains selected-range alert evidence for triage. It supports investigation but does not determine current Fleet Health; expand it after the first-screen verdict points to an alert condition.",
       "panels": [
@@ -1487,7 +1487,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 19
+            "y": 18
           },
           "datasource": {
             "type": "prometheus",
@@ -1741,7 +1741,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 18
       },
       "panels": [
         {
@@ -1752,7 +1752,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 20
+            "y": 19
           },
           "datasource": {
             "type": "prometheus",
@@ -1978,7 +1978,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 26
+            "y": 25
           },
           "datasource": {
             "type": "prometheus",
@@ -2086,7 +2086,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 32
+            "y": 31
           },
           "datasource": {
             "type": "prometheus",
@@ -2194,7 +2194,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 38
+            "y": 37
           },
           "datasource": {
             "type": "prometheus",
@@ -2310,7 +2310,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 19
       },
       "collapsed": true,
       "description": "Contains selected-range run, terminal-state, and reject evidence. Empty history is not proof of current health, and these panels do not determine current Fleet Health.",
@@ -2709,7 +2709,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 20
       },
       "description": "Contains current domain summaries and diagnostic routing. It supports the first-screen verdict and stays collapsed until Domain Status or First Action identifies an affected area.",
       "panels": [
@@ -3855,7 +3855,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 21
       },
       "id": 9602,
       "description": "Expand only for compact HTTP-backed selected-run context. Run Explorer remains the exact-run workspace.",

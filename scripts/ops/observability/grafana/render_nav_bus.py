@@ -95,29 +95,36 @@ NAV_HEIGHT = 4
 # layout-budgets.yaml first_window_y / viewport_rows. Expanding nav must not
 # push always-visible first-window panels past this fold.
 VIEWPORT_ROWS = 18
+# 1366x768 kiosk pixel fold fits non-row bottoms at y+h <= 17. A panel that
+# ends on 18 is on the grid fold but overflows the measured first viewport.
+FIRST_WINDOW_PANEL_BOTTOM = 17
 # First-window copy that was explicitly designed and tested at h=3 must not be
-# sacrificed when the shared navigation grows to its canonical h=3.
+# sacrificed when the shared navigation grows to its canonical h=4.
 _MINIMUM_FIRST_WINDOW_HEIGHTS: dict[str, dict[int, int]] = {
     "bioetl-run-explorer-v1": {1: 3},
+    "bioetl-incident-v1": {2005: 5},
 }
-# Run Explorer's ten-row browse table has one row of layout slack after the
-# navigation/provenance bands. Keep this explicit instead of turning arbitrary
-# data panels into generic overflow donors.
+# Donors used when the provenance text rail is already at h=3. Values are the
+# minimum height after reclaiming one native-zoom nav row.
 _FALLBACK_COMPACTION_HEIGHTS: dict[str, dict[int, int]] = {
-    "bioetl-run-explorer-v1": {3010: 11},
+    "bioetl-run-explorer-v1": {3010: 10},
+    "bioetl-overview-v2": {215: 5, 9002: 5},
+    "bioetl-dq-v2": {9406: 3},
+    "bioetl-incident-v1": {2010: 3},
+    "bioetl-provider-health-v2": {9101: 4, 9107: 4},
 }
 _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     9400: (0, 4, 16, 3),
     9401: (16, 4, 8, 3),
     9418: (0, 7, 12, 5),
     9416: (12, 7, 12, 7),
-    906: (0, 12, 12, 3),
-    891: (0, 15, 6, 3),
-    892: (6, 15, 6, 3),
-    893: (12, 15, 6, 3),
-    907: (18, 15, 6, 3),
+    906: (0, 12, 12, 2),
+    891: (0, 14, 6, 3),
+    892: (6, 14, 6, 3),
+    893: (12, 14, 6, 3),
+    907: (18, 14, 6, 3),
 }
-_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 18
+_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 17
 NAV_TITLE_STYLE = "font-size:19px;font-weight:600;line-height:1;margin:0 2px"
 CHIP_BASE = (
     "box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;"
@@ -351,7 +358,7 @@ def _first_window_overflow(panels: list[object]) -> int:
             continue
         _, y, height = geometry
         if 0 <= y < VIEWPORT_ROWS:
-            overflow = max(overflow, y + height - VIEWPORT_ROWS)
+            overflow = max(overflow, y + height - FIRST_WINDOW_PANEL_BOTTOM)
     return overflow
 
 
@@ -481,15 +488,37 @@ def _compact_fallback_panel(
         if minimum_height is None or geometry is None:
             continue
         grid, y, height = geometry
-        if y >= VIEWPORT_ROWS or y + height <= VIEWPORT_ROWS:
+        if y >= VIEWPORT_ROWS:
             continue
         if height - overflow < minimum_height:
             continue
         old_bottom = y + height
-        grid["h"] = height - overflow
+        band: list[dict[str, object]] = []
+        for sibling in _root_panels(panels):
+            sibling_geometry = _panel_geometry(sibling)
+            if sibling.get("type") == "row" or sibling_geometry is None:
+                continue
+            _, sibling_y, sibling_height = sibling_geometry
+            if sibling_y == y and sibling_y + sibling_height == old_bottom:
+                sibling_id = sibling.get("id")
+                sibling_min = (
+                    minimums.get(sibling_id) if isinstance(sibling_id, int) else None
+                )
+                if sibling_min is not None and sibling_height - overflow < sibling_min:
+                    continue
+                if sibling_height - overflow < 3 and sibling_min is None:
+                    continue
+                band.append(sibling)
+        if not band:
+            continue
+        for sibling in band:
+            sibling_grid = _panel_grid(sibling)
+            if sibling_grid is None:
+                raise SystemExit("fallback compaction panel is missing gridPos")
+            sibling_grid["h"] = int(sibling_grid["h"]) - overflow
         _shift_root_panels_up(
             panels,
-            excluded_ids=frozenset({id(panel)}),
+            excluded_ids=frozenset({id(sibling) for sibling in band}),
             from_y=old_bottom,
             delta=overflow,
         )
@@ -566,8 +595,8 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
         grid.update({"x": x, "y": y, "w": width, "h": height})
     cta = by_id[906]
     cta["description"] = (
-        "Next-step rail kept at readable h=3 on the first screen under the "
-        "canonical h=3 navigation. Do not replay this run if its Trust status is "
+        "Next-step rail kept at readable h=2 on the first screen under the "
+        "canonical h=4 navigation. Do not replay this run if its Trust status is "
         "INCOMPLETE or UNKNOWN. First-screen tables: Review Selected-Run Trust "
         "(9418) and Review Retention Compliance (9416). Review Lineage Validation "
         "is the first collapsed row (9419) and contains table 9415. Monitor Replay "
@@ -578,7 +607,7 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
 def _reclaim_first_window_overflow(
     nav: dict[str, object], panels: list[object], *, current_uid: str | None = None
 ) -> None:
-    """Compact a safe first-window band so nav h=3 still fits the fold."""
+    """Compact a safe first-window band so nav h=4 still fits the fold."""
     overflow = _first_window_overflow(panels)
     if overflow <= 0:
         return

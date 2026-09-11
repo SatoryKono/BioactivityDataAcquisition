@@ -335,10 +335,9 @@ allowlists:
       id: 2010
       owner: "@bioetl-observability"
       rationale: >-
-        Inspect Ranked Suspects h=4 fits first-window without vertical overflow
-        after pagination was removed; h=5 overflows at 1366x768. Keeps y=8..12
-        inside viewport with 2005 at y=12..17.
-      retire_when: Ranked Suspects can keep h=5 without overflow at 200% or content shrink
+        Inspect Ranked Suspects h=3 fits first-window with nav h=4 without
+        vertical overflow; h=4 pushes Monitor Current Alerts past y+h=17.
+      retire_when: Ranked Suspects can keep h=5 without overflow at 1366x768
     - dashboard: bioetl-dq-v2.json
       id: 153
       owner: "@bioetl-observability"
@@ -350,9 +349,9 @@ allowlists:
       id: 9406
       owner: "@bioetl-observability"
       rationale: >-
-        Review Selected Run Summary h=4 fits first-window bottom 17 without
-        outside; h=5 at y=13 exceeds viewport 768 with kiosk chrome.
-      retire_when: Selected Run Summary can keep h=5 without outside at 200%
+        Review Selected Run Summary h=3 fits first-window bottom 17 with nav
+        h=4; h=4 at y=14 exceeds the measured 1366x768 kiosk fold.
+      retire_when: Selected Run Summary can keep h=5 without outside at 1366x768
   # DASH-DENSITY-002 governed exceptions keyed by (dashboard, row id).
   scalar_density:
     - dashboard: bioetl-provider-health-v2.json

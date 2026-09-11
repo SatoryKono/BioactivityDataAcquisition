@@ -494,9 +494,9 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
     assert all(panel.get("collapsed") is True for panel in control_rows)
     assert all(panel.get("panels") for panel in control_rows)
     first_row_y = min(panel["gridPos"]["y"] for panel in control_rows)
-    # Nav h=4 (DASH-REFLOW-001) sits on y=0..4. The first collapsed row sits
-    # on the logical fold; expanded children start at FIRST_WINDOW_Y + 1.
-    assert first_row_y == FIRST_WINDOW_Y
+    # Nav h=4 occupies y=0..4. The first collapsed row sits on the last first-window
+    # row; expanded children start at FIRST_WINDOW_Y.
+    assert first_row_y + 1 == FIRST_WINDOW_Y
     assert [panel["gridPos"]["y"] for panel in control_rows] == list(
         range(first_row_y, first_row_y + len(control_rows))
     )
@@ -569,11 +569,11 @@ def test_audit_followup_action_first_layout_contracts() -> None:
     ]
     assert [panel.get("id") for panel in provider_rows] == [9106, 9105, 91, 9404, 9405]
     assert [panel.get("gridPos", {}).get("y") for panel in provider_rows] == [
+        17,
         18,
         19,
         20,
         21,
-        22,
     ]
     assert all(panel.get("collapsed") is True for panel in provider_rows)
     for panel_id in (9101, 9102, 9103):
@@ -590,10 +590,10 @@ def test_audit_followup_action_first_layout_contracts() -> None:
         "Selected Range · Validation Diagnostics",
     ]
     assert [panel.get("gridPos", {}).get("y") for panel in dq_rows] == [
+        18,
         19,
         20,
         21,
-        22,
     ]
     assert all(panel.get("collapsed") is True for panel in dq_rows)
 
@@ -920,7 +920,7 @@ def test_incident_alert_history_has_readable_full_width_layout() -> None:
     assert impact.get("gridPos", {}).get("y", 0) >= (
         history_grid.get("y", 0) + history_grid.get("h", 0)
     )
-    assert current_alerts.get("gridPos") == {"h": 5, "w": 24, "x": 0, "y": 13}
+    assert current_alerts.get("gridPos") == {"h": 5, "w": 24, "x": 0, "y": 12}
     assert "ALERTS" in str(history.get("targets", [{}])[0].get("expr", ""))
     assert str(history.get("targets", [{}])[0].get("legendFormat", "")).startswith(
         "{{alertname}}"
@@ -1218,7 +1218,7 @@ def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     assert "run_type" in hidden
     assert "message" in hidden
     grid = recent.get("gridPos") or {}
-    assert int(grid.get("h") or 0) == 11
+    assert int(grid.get("h") or 0) == 10
     assert recent.get("options", {}).get("cellHeight") == "lg"
     assert (recent.get("transformations") or [{}])[0].get("options", {}).get(
         "limitField"

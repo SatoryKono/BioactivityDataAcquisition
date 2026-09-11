@@ -955,7 +955,7 @@
       "type": "table",
       "title": "Review Selected Run Summary",
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 24,
         "x": 0,
         "y": 14
@@ -1399,7 +1399,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 18
       },
       "id": 9405,
       "description": "Expand after selecting an exact Run ID for HTTP-backed identity and accounting evidence.",
@@ -1939,7 +1939,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 19
       },
       "id": 9404,
       "description": "Expand for selected-range impact and freshness after resolving the current reason lane.",
@@ -1993,7 +1993,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 21,
+            "y": 20,
             "w": 12,
             "h": 3
           },
@@ -2075,7 +2075,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 21,
+            "y": 20,
             "w": 12,
             "h": 3
           },
@@ -2163,7 +2163,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 24,
+            "y": 23,
             "w": 12,
             "h": 3
           },
@@ -2251,7 +2251,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 24,
+            "y": 23,
             "w": 12,
             "h": 3
           },
@@ -2341,7 +2341,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 27,
+            "y": 26,
             "w": 12,
             "h": 3
           },
@@ -2429,7 +2429,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 27,
+            "y": 26,
             "w": 12,
             "h": 3
           },
@@ -2471,7 +2471,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 20
       },
       "id": 220,
       "title": "Selected Range · Reject Evidence",
@@ -3281,7 +3281,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 21
       },
       "id": 221,
       "title": "Selected Range · Validation Diagnostics",

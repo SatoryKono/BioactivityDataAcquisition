@@ -331,7 +331,7 @@ def test_overview_215_9002_fit_first_window_without_raising_fold() -> None:
 
     assert action.get("title") == "Review First Action"
     assert action.get("type") == "table"
-    assert action.get("gridPos") == {"h": 6, "w": 16, "x": 0, "y": 12}
+    assert action.get("gridPos") == {"h": 5, "w": 16, "x": 0, "y": 12}
     assert action.get("options", {}).get("cellHeight") == "sm"
     defaults = action.get("fieldConfig", {}).get("defaults", {}).get("custom", {})
     assert defaults.get("cellOptions", {}).get("wrapText") is not True
@@ -340,7 +340,7 @@ def test_overview_215_9002_fit_first_window_without_raising_fold() -> None:
 
     assert domain.get("title") == "Review Domain Status"
     assert domain.get("type") == "table"
-    assert domain.get("gridPos") == {"h": 6, "w": 8, "x": 16, "y": 12}
+    assert domain.get("gridPos") == {"h": 5, "w": 8, "x": 16, "y": 12}
     assert domain.get("options", {}).get("cellHeight") == "sm"
     assert panel_declared_row_cap(domain) == 2
     assert int(domain["gridPos"]["y"]) + int(domain["gridPos"]["h"]) <= FIRST_WINDOW_Y
