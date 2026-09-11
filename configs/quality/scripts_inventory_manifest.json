@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-10T22:08:13.484524+00:00",
+  "generated_at": "2026-09-11T06:18:14.989741+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -99,19 +99,19 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
-          "line": 163,
+          "line": 167,
           "source_group": "docs",
           "text": "python -m scripts.ai.agent_tools doctor"
         },
         {
           "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
-          "line": 164,
+          "line": 168,
           "source_group": "docs",
           "text": "python -m scripts.ai.agent_tools debug --task-id <id> \\"
         },
         {
           "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
-          "line": 166,
+          "line": 170,
           "source_group": "docs",
           "text": "python -m scripts.ai.agent_tools evaluate --task-id <id> \\"
         },
@@ -341,7 +341,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/grok-tui-config-checklist.md",
-          "line": 98,
+          "line": 101,
           "source_group": "docs",
           "text": "- [ ] `python scripts/ai/codex/doctor.py static --no-write`"
         },
@@ -2616,19 +2616,19 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
-          "line": 84,
+          "line": 87,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\grok\\install_skills.ps1"
         },
         {
           "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
-          "line": 116,
+          "line": 119,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\grok\\install_skills.ps1          # user: ~/.grok/skills"
         },
         {
           "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
-          "line": 117,
+          "line": 120,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\grok\\install_skills.ps1 -Project # project: .grok/skills"
         },
@@ -2646,13 +2646,13 @@
         },
         {
           "path": "docs/00-project/ai/grok/README.md",
-          "line": 25,
+          "line": 26,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\grok\\install_skills.ps1"
         },
         {
           "path": "docs/00-project/ai/grok/README.md",
-          "line": 28,
+          "line": 29,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\grok\\install_skills.ps1 -Project"
         }

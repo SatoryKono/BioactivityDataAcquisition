@@ -85,7 +85,7 @@ See [AI Runtime Mirror Ownership](agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
 
 ## Grok operator aids
 
-- [grok/README.md](grok/README.md) — skills sources + install
+- [grok/README.md](grok/README.md) — skills, child agents, personas + install
 - [agents/guides/grok-operator-runbook.md](agents/guides/grok-operator-runbook.md)
 - [agents/guides/grok-tui-config-checklist.md](agents/guides/grok-tui-config-checklist.md)
 - [prompts/library/session/bootstrap.md](prompts/library/session/bootstrap.md)

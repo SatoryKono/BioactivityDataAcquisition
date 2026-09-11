@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `6e3295cb3a1753294737a84e4afd45a44554fe0d3e50266ff87785571e8d9dab`
+Evidence surface SHA-256: `71dccc5b4e7f17f3ffd66ec0f4102c8489c7035c7ef8d71e67b472354b85e61e`
 
 Evidence metadata refresh (2026-09-11): the canonical registry digest was
 recomputed after the #10308 hotspot/duplication/dead-code inventory regen
@@ -24,7 +24,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "6e3295cb3a1753294737a84e4afd45a44554fe0d3e50266ff87785571e8d9dab",
+  "evidence_surface_sha256": "71dccc5b4e7f17f3ffd66ec0f4102c8489c7035c7ef8d71e67b472354b85e61e",
   "metrics": {
     "architecture_integral_score": 9.14,
     "architecture_interpretation": "good_targeted_improvements",

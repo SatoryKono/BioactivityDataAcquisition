@@ -250,6 +250,7 @@
         "docs/00-project/ai/agents/guides/AGENT.md",
         "docs/00-project/ai/agents/guides/CODEX.md",
         "docs/00-project/ai/agents/guides/GEMINI.md",
+        "docs/00-project/ai/grok/agents/obs-dashboard.md",
         "docs/00-project/ai/memory/gh-issues-documentation-update.md",
         "docs/00-project/ai/prompts/domains.yaml",
         "docs/00-project/ai/prompts/library/audit/architecture.md",

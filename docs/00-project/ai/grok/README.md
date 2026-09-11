@@ -11,6 +11,7 @@ paths and host config). Tracked sources for operators live here.
 | --- | --- |
 | `skills/*/SKILL.md` | Project skill sources (install to Grok skill dirs) |
 | `agents/*.md` | Tracked Grok child agents (`mcpInheritance.named`, no `github`) |
+| `personas/*.toml` | Overlay personas (no tools/MCP; enable via `/personas`) |
 | `../agents/guides/grok-operator-runbook.md` | Operator SOP |
 | `../agents/guides/grok-tui-config-checklist.md` | `~/.grok/config.toml` checklist |
 | `../agents/guides/grok-lsp-status.md` | LSP binary status notes |
@@ -31,16 +32,35 @@ paths and host config). Tracked sources for operators live here.
 .\scripts\ai\grok\install_skills.ps1 -WhatIf
 ```
 
-The same script copies `agents/*.md` into `~/.grok/agents/` (or
-`<repo>/.grok/agents/` with `-Project`). Root `.grok/` stays gitignored.
+The same script copies `agents/*.md` into `~/.grok/agents/` and
+`personas/*.toml` into `~/.grok/personas/` (or `<repo>/.grok/` with
+`-Project`). Root `.grok/` stays gitignored.
 
-After install, start a **new** Grok session (or restart TUI) so skills and
-agents are rediscovered. `/config-agents` should list `explore`, `plan`, and
-the six `py-*` types. Children must not inherit MCP `github`.
+After install, start a **new** Grok session (or restart TUI) so skills,
+agents, and personas are rediscovered. `/config-agents` should list `explore`,
+`plan`, the six `py-*` types, plus Grok-only `implementer` and `obs-dashboard`.
+Children must not inherit MCP `github`.
 
-Wave `SUBAGENT-20260910`: parent daily MCP ≤4 live including `github`; child
-agents are the eight files in `agents/` (no `implementer` / `obs-dashboard` in
-this wave — those are #10318 / #10319).
+### When to spawn
+
+| Type | Use when | Not for |
+| --- | --- | --- |
+| parent / `general-purpose` | GitHub write, closeout, `gh`, merge/push | long product patches in the orchestrator context |
+| `py-config-bot` | `configs/**` contracts | product `src/` patches |
+| `implementer` | bounded write in a **worktree**; parent merges | `gh` / `git push` / GitHub MCP |
+| `obs-dashboard` | dashboard JSON / PromQL with grafana+prometheus MCP | daily parent session; starting monitoring compose unless asked |
+| `py-debug-bot` / `explore` | RCA | patches (use `rca-handoff` overlay, then parent or `implementer`) |
+
+Personas are overlays, not `spawn_subagent` types. After install, pick in
+`/personas`:
+
+| Persona | Overlay on | Contract |
+| --- | --- | --- |
+| `rca-handoff` | `py-debug-bot` / `explore` | `DBG-*` table; no patch; no `gh` |
+| `closeout-table` | parent | Issue / Verdict / SHA/PR / Checks; GitHub-write stays parent |
+
+Wave `SUBAGENT-20260910` E–G: Grok-only `implementer` (#10318),
+`obs-dashboard` (#10319), personas (#10320). Governed `py-*` catalog stays **6**.
 
 ## Related
 
