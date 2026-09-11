@@ -58,8 +58,18 @@ def _write_text_atomically(path: Path, payload: str) -> None:
 
 
 def _run(cmd: list[str], *, check: bool = True) -> int:
-    print("+", " ".join(cmd))
-    completed = subprocess.run(cmd, cwd=ROOT, check=False)
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    try:
+        safe_cmd = ensure_safe_cli_argv([str(token) for token in cmd])
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
+    print("+", " ".join(safe_cmd))
+    completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
+        safe_cmd,
+        cwd=ROOT,
+        check=False,
+    )
     if check and completed.returncode != 0:
         raise SystemExit(completed.returncode)
     return completed.returncode
@@ -453,12 +463,26 @@ _CI_DRIFT_FAMILY_ORDER = (
     "dataflow",
 )
 _PIPELINE_NAME_RE = re.compile(r"^[A-Za-z0-9_]+$")
+_GIT_OBJECT_ID_RE = re.compile(r"^[0-9a-f]{7,40}$")
 _CURRENT_AUDIT_ID_PREFIX = "\n  - id: "
 
 
+def _require_git_object_id(commit: str) -> str:
+    if _GIT_OBJECT_ID_RE.fullmatch(commit) is None:
+        raise SystemExit(
+            f"telemetry --source-commit must be a git object id (got {commit!r})"
+        )
+    return commit
+
+
 def _assert_commit_is_ancestor(commit: str) -> None:
-    result = subprocess.run(
-        ["git", "merge-base", "--is-ancestor", commit, "HEAD"],
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    safe_commit = _require_git_object_id(commit)
+    result = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
+        ensure_safe_cli_argv(
+            ["git", "merge-base", "--is-ancestor", safe_commit, "HEAD"]
+        ),
         cwd=ROOT,
         check=False,
         capture_output=True,
@@ -654,7 +678,8 @@ def _run_telemetry(*, check_only: bool, telemetry: argparse.Namespace) -> int:
             + ", ".join(missing)
             + " (Tests-run ancestor of HEAD; do not copy test-governance SHA)"
         )
-    _assert_commit_is_ancestor(str(telemetry.source_commit))
+    source_commit = _require_git_object_id(str(telemetry.source_commit))
+    _assert_commit_is_ancestor(source_commit)
     return _run(
         [
             sys.executable,
@@ -665,7 +690,7 @@ def _run_telemetry(*, check_only: bool, telemetry: argparse.Namespace) -> int:
             "--source-branch",
             str(telemetry.source_branch),
             "--source-commit",
-            str(telemetry.source_commit),
+            source_commit,
             "--source-run-id",
             str(telemetry.source_run_id),
             "--source-event",

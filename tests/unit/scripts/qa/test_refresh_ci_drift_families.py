@@ -160,3 +160,35 @@ def test_telemetry_update_rejects_non_ancestor_commit(
                 "https://example.invalid/run/1",
             ]
         )
+
+
+def test_telemetry_update_rejects_flag_like_source_commit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(refresh, "_run", lambda *args, **kwargs: 0)
+    with pytest.raises(SystemExit, match="git object id"):
+        refresh.run_ci_drift_families(
+            [
+                "--update",
+                "--telemetry",
+                "--coverage-percent",
+                "96.73",
+                "--source-commit=--output=/tmp/x",
+                "--source-run-id",
+                "1",
+                "--source-run-url",
+                "https://example.invalid/run/1",
+            ]
+        )
+
+
+def test_run_rejects_shell_metacharacters_before_subprocess(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        refresh.subprocess,
+        "run",
+        lambda *args, **kwargs: SimpleNamespace(returncode=0),
+    )
+    with pytest.raises(SystemExit, match="shell metacharacters"):
+        refresh._run(["python", "-c", "print(1); rm -rf /"])
