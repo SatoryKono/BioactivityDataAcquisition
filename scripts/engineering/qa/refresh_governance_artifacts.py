@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -443,8 +444,6 @@ def refresh(*, check_only: bool) -> None:
     _refresh_targeted_coverage_closeout()
 
 
-_TEST_GOVERNANCE_JSON_PATH = "reports/quality/test-governance-current.json"
-_FIXTURE_DUPLICATION_JSON_PATH = "reports/quality/test-fixture-asset-duplication.json"
 _CI_DRIFT_FAMILY_ORDER = (
     "test-gov",
     "flaky-fingerprint",
@@ -453,6 +452,8 @@ _CI_DRIFT_FAMILY_ORDER = (
     "remote-main",
     "dataflow",
 )
+_PIPELINE_NAME_RE = re.compile(r"^[A-Za-z0-9_]+$")
+_CURRENT_AUDIT_ID_PREFIX = "\n  - id: "
 
 
 def _assert_commit_is_ancestor(commit: str) -> None:
@@ -471,45 +472,40 @@ def _assert_commit_is_ancestor(commit: str) -> None:
         )
 
 
-def _rebind_evidence_surface(*, check_only: bool) -> int:
-    """Rebind current-audit evidence_surface_sha256 without changing budgets."""
+def _print_issues(prefix: str, issues: list[str]) -> None:
+    print(prefix)
+    for issue in issues:
+        print(f"- {issue}")
+
+
+def _replace_current_evidence_hash(
+    registry_text: str, *, current_id: str, old: str, live: str
+) -> str:
+    """Rewrite evidence_surface_sha256 only inside the current audit record."""
+    marker = f"- id: {current_id}"
+    start = registry_text.find(marker)
+    if start < 0:
+        raise SystemExit(f"current audit id not found in registry: {current_id}")
+    next_id = registry_text.find(_CURRENT_AUDIT_ID_PREFIX, start + len(marker))
+    end = next_id if next_id >= 0 else len(registry_text)
+    block = registry_text[start:end]
+    if block.count(old) != 1:
+        raise SystemExit(
+            "expected exactly one evidence_surface_sha256 in the current audit "
+            f"record, found {block.count(old)}"
+        )
+    return registry_text[:start] + block.replace(old, live, 1) + registry_text[end:]
+
+
+def _rewrite_current_audit_report(*, old: str, live: str, current: object) -> None:
     from scripts.engineering.qa.technical_debt_audit_registry import (
-        DEFAULT_REGISTRY_PATH,
         SEMANTIC_SUMMARY_END,
         SEMANTIC_SUMMARY_START,
         build_current_audit_semantic_summary,
-        compute_evidence_surface_sha256,
-        load_technical_debt_audit_registry,
         render_current_audit_semantic_summary,
-        validate_technical_debt_audit_registry,
     )
 
-    current_id, records = load_technical_debt_audit_registry(ROOT)
-    current = next(record for record in records if record.audit_id == current_id)
-    live = compute_evidence_surface_sha256(ROOT, current.evidence_paths)
-    if check_only:
-        issues = validate_technical_debt_audit_registry(ROOT)
-        if issues:
-            print("Technical-debt audit registry validation failed:")
-            for issue in issues:
-                print(f"- {issue}")
-            return 1
-        print(f"evidence_surface_sha256 current: {live}")
-        return 0
-    old = current.evidence_surface_sha256
-    if old == live:
-        print("evidence_surface_sha256 already aligned")
-        return 0
-    if not isinstance(old, str) or not old:
-        raise SystemExit("current audit is missing evidence_surface_sha256")
-    registry_path = ROOT / DEFAULT_REGISTRY_PATH
-    registry_text = registry_path.read_text(encoding="utf-8")
-    if old not in registry_text:
-        raise SystemExit("current evidence hash not found in registry")
-    _write_text_atomically(registry_path, registry_text.replace(old, live))
-    current_id, records = load_technical_debt_audit_registry(ROOT)
-    current = next(record for record in records if record.audit_id == current_id)
-    report_path = ROOT / current.report_path
+    report_path = ROOT / current.report_path  # type: ignore[attr-defined]
     report = report_path.read_text(encoding="utf-8")
     report = report.replace(
         f"Evidence surface SHA-256: `{old}`",
@@ -525,14 +521,167 @@ def _rebind_evidence_surface(*, check_only: bool) -> int:
     if not report.endswith("\n"):
         report += "\n"
     _write_text_atomically(report_path, report)
+
+
+def _rebind_evidence_surface(*, check_only: bool) -> int:
+    """Rebind current-audit evidence_surface_sha256 without changing budgets."""
+    from scripts.engineering.qa.technical_debt_audit_registry import (
+        DEFAULT_REGISTRY_PATH,
+        compute_evidence_surface_sha256,
+        load_technical_debt_audit_registry,
+        validate_technical_debt_audit_registry,
+    )
+
+    current_id, records = load_technical_debt_audit_registry(ROOT)
+    current = next(record for record in records if record.audit_id == current_id)
+    live = compute_evidence_surface_sha256(ROOT, current.evidence_paths)
+    if check_only:
+        issues = validate_technical_debt_audit_registry(ROOT)
+        if issues:
+            _print_issues("Technical-debt audit registry validation failed:", issues)
+            return 1
+        print(f"evidence_surface_sha256 current: {live}")
+        return 0
+    old = current.evidence_surface_sha256
+    if old == live:
+        print("evidence_surface_sha256 already aligned")
+        return 0
+    if not isinstance(old, str) or not old:
+        raise SystemExit("current audit is missing evidence_surface_sha256")
+    registry_path = ROOT / DEFAULT_REGISTRY_PATH
+    updated = _replace_current_evidence_hash(
+        registry_path.read_text(encoding="utf-8"),
+        current_id=current_id,
+        old=old,
+        live=live,
+    )
+    _write_text_atomically(registry_path, updated)
+    current_id, records = load_technical_debt_audit_registry(ROOT)
+    current = next(record for record in records if record.audit_id == current_id)
+    _rewrite_current_audit_report(old=old, live=live, current=current)
     issues = validate_technical_debt_audit_registry(ROOT)
     if issues:
-        print("evidence rebind left validation issues:")
-        for issue in issues:
-            print(f"- {issue}")
+        _print_issues("evidence rebind left validation issues:", issues)
         return 1
     print(f"evidence_surface_sha256 rebound {old[:12]} -> {live[:12]}")
     return 0
+
+
+def _cmd_test_gov(*, check_only: bool, **_: object) -> list[str]:
+    cmd = [
+        sys.executable,
+        "-m",
+        "scripts.engineering.qa.report_test_governance_audit",
+    ]
+    if check_only:
+        cmd.append("--check")
+        return cmd
+    cmd.extend(
+        [
+            "--json-out",
+            _TEST_GOVERNANCE_JSON,
+            "--fixture-duplication-out",
+            _FIXTURE_DUPLICATION_JSON,
+        ]
+    )
+    return cmd
+
+
+def _cmd_flaky(*, check_only: bool, **_: object) -> list[str]:
+    cmd = [
+        sys.executable,
+        "-m",
+        "scripts.engineering.qa",
+        "report-flaky-test-burndown-review",
+    ]
+    if check_only:
+        cmd.append("--check")
+    return cmd
+
+
+def _cmd_remote_main(*, check_only: bool, **_: object) -> list[str]:
+    return [
+        sys.executable,
+        "-m",
+        "scripts.engineering.qa",
+        "report-architecture-debt-remote-main-baseline",
+        "--check" if check_only else "--update",
+    ]
+
+
+def _cmd_dataflow(*, check_only: bool, pipeline: str, **_: object) -> list[str]:
+    if _PIPELINE_NAME_RE.fullmatch(pipeline) is None:
+        raise SystemExit(f"invalid --pipeline name: {pipeline!r}")
+    cmd = [
+        sys.executable,
+        "-m",
+        "scripts.diagrams",
+        "generate-dataflows",
+        "--pipeline",
+        pipeline,
+    ]
+    if check_only:
+        cmd.append("--check")
+    return cmd
+
+
+def _run_telemetry(*, check_only: bool, telemetry: argparse.Namespace) -> int:
+    if check_only:
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                "pytest",
+                "tests/architecture/test_test_telemetry_baseline.py",
+                "tests/architecture/test_test_telemetry_governance.py",
+                "-q",
+                "--tb=short",
+            ]
+        )
+    missing = [
+        name
+        for name, value in (
+            ("--coverage-percent", telemetry.coverage_percent),
+            ("--source-commit", telemetry.source_commit),
+            ("--source-run-id", telemetry.source_run_id),
+            ("--source-run-url", telemetry.source_run_url),
+        )
+        if value in (None, "")
+    ]
+    if missing:
+        raise SystemExit(
+            "telemetry --update requires "
+            + ", ".join(missing)
+            + " (Tests-run ancestor of HEAD; do not copy test-governance SHA)"
+        )
+    _assert_commit_is_ancestor(str(telemetry.source_commit))
+    return _run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.ci.update_test_telemetry_baseline",
+            "--coverage-percent",
+            str(telemetry.coverage_percent),
+            "--source-branch",
+            str(telemetry.source_branch),
+            "--source-commit",
+            str(telemetry.source_commit),
+            "--source-run-id",
+            str(telemetry.source_run_id),
+            "--source-event",
+            str(telemetry.source_event),
+            "--source-run-url",
+            str(telemetry.source_run_url),
+        ]
+    )
+
+
+_FAMILY_COMMANDS = {
+    "test-gov": _cmd_test_gov,
+    "flaky-fingerprint": _cmd_flaky,
+    "remote-main": _cmd_remote_main,
+    "dataflow": _cmd_dataflow,
+}
 
 
 def _run_ci_drift_family(
@@ -542,107 +691,14 @@ def _run_ci_drift_family(
     telemetry: argparse.Namespace,
     pipeline: str,
 ) -> int:
-    if family == "test-gov":
-        cmd = [
-            sys.executable,
-            "-m",
-            "scripts.engineering.qa.report_test_governance_audit",
-        ]
-        if check_only:
-            cmd.append("--check")
-        else:
-            cmd.extend(
-                [
-                    "--json-out",
-                    _TEST_GOVERNANCE_JSON_PATH,
-                    "--fixture-duplication-out",
-                    _FIXTURE_DUPLICATION_JSON_PATH,
-                ]
-            )
-        return _run(cmd)
-    if family == "flaky-fingerprint":
-        cmd = [
-            sys.executable,
-            "-m",
-            "scripts.engineering.qa",
-            "report-flaky-test-burndown-review",
-        ]
-        if check_only:
-            cmd.append("--check")
-        return _run(cmd)
-    if family == "telemetry":
-        if check_only:
-            return _run(
-                [
-                    sys.executable,
-                    "-m",
-                    "pytest",
-                    "tests/architecture/test_test_telemetry_baseline.py",
-                    "tests/architecture/test_test_telemetry_governance.py",
-                    "-q",
-                    "--tb=short",
-                ]
-            )
-        missing = [
-            name
-            for name, value in (
-                ("--coverage-percent", telemetry.coverage_percent),
-                ("--source-commit", telemetry.source_commit),
-                ("--source-run-id", telemetry.source_run_id),
-                ("--source-run-url", telemetry.source_run_url),
-            )
-            if value in (None, "")
-        ]
-        if missing:
-            raise SystemExit(
-                "telemetry --update requires "
-                + ", ".join(missing)
-                + " (Tests-run ancestor of HEAD; do not copy test-governance SHA)"
-            )
-        _assert_commit_is_ancestor(str(telemetry.source_commit))
-        return _run(
-            [
-                sys.executable,
-                "-m",
-                "scripts.engineering.ci.update_test_telemetry_baseline",
-                "--coverage-percent",
-                str(telemetry.coverage_percent),
-                "--source-branch",
-                str(telemetry.source_branch),
-                "--source-commit",
-                str(telemetry.source_commit),
-                "--source-run-id",
-                str(telemetry.source_run_id),
-                "--source-event",
-                str(telemetry.source_event),
-                "--source-run-url",
-                str(telemetry.source_run_url),
-            ]
-        )
     if family == "evidence":
         return _rebind_evidence_surface(check_only=check_only)
-    if family == "remote-main":
-        cmd = [
-            sys.executable,
-            "-m",
-            "scripts.engineering.qa",
-            "report-architecture-debt-remote-main-baseline",
-            "--check" if check_only else "--update",
-        ]
-        return _run(cmd)
-    if family == "dataflow":
-        cmd = [
-            sys.executable,
-            "-m",
-            "scripts.diagrams",
-            "generate-dataflows",
-            "--pipeline",
-            pipeline,
-        ]
-        if check_only:
-            cmd.append("--check")
-        return _run(cmd)
-    raise SystemExit(f"unknown CI drift family: {family}")
+    if family == "telemetry":
+        return _run_telemetry(check_only=check_only, telemetry=telemetry)
+    builder = _FAMILY_COMMANDS.get(family)
+    if builder is None:
+        raise SystemExit(f"unknown CI drift family: {family}")
+    return _run(builder(check_only=check_only, pipeline=pipeline))
 
 
 def run_ci_drift_families(argv: list[str]) -> int:

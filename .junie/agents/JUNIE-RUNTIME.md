@@ -27,7 +27,7 @@ and remote-main skip RULES/ADR and full `pre-task` RAG
 
 | Task class | Read | Memory |
 | --- | --- | --- |
-| generated-artifact rebind, date stamp, remote-main | drift runbook + touched reporter | `BIOETL_AI_MEMORY_MODE=off`; skip RAG |
+| hash-only generated-artifact rebind, date stamp, remote-main | drift runbook + touched reporter | `BIOETL_AI_MEMORY_MODE=off`; skip RAG |
 | V1 docs/prompt | `AGENTS.md` / `.junie/guidelines.md` guardrails + POST_CHANGE docs slice | read-only optional |
 | V2 focused code | + matching role/skill for SCOPE | `pre-task` |
 | V3/V4 | full package via `AGENTS.md` | `pre-task` required |

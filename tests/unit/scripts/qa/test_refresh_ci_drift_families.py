@@ -111,6 +111,32 @@ def test_telemetry_update_requires_tests_run_fields(
         refresh.run_ci_drift_families(["--update", "--telemetry"])
 
 
+def test_replace_current_evidence_hash_leaves_historical_records() -> None:
+    registry = (
+        "current_audit_id: current-id\n"
+        "audits:\n"
+        "  - id: current-id\n"
+        "    evidence_surface_sha256: aaa111\n"
+        "  - id: old-id\n"
+        "    evidence_surface_sha256: aaa111\n"
+    )
+    updated = refresh._replace_current_evidence_hash(
+        registry, current_id="current-id", old="aaa111", live="bbb222"
+    )
+    assert "  - id: current-id\n    evidence_surface_sha256: bbb222\n" in updated
+    assert "  - id: old-id\n    evidence_surface_sha256: aaa111\n" in updated
+
+
+def test_dataflow_rejects_unsafe_pipeline_name(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(refresh, "_run", lambda *args, **kwargs: 0)
+    with pytest.raises(SystemExit, match="invalid --pipeline"):
+        refresh.run_ci_drift_families(
+            ["--check", "--dataflow", "--pipeline", "chembl; rm -rf /"]
+        )
+
+
 def test_telemetry_update_rejects_non_ancestor_commit(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
