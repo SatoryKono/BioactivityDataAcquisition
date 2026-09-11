@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P2
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-08-27'
+  Last verified: '2026-09-10'
 
 ______________________________________________________________________
 
@@ -39,12 +39,38 @@ ______________________________________________________________________
 - Confirm whether the failure is a true generator mismatch or an intentional
   behavior change that still lacks regenerated evidence.
 
+## CI fail family (S7-d / governance-preflight)
+
+Do **not** copy `source_tree_sha256` between families. Telemetry hashing is
+`compute_test_telemetry_source_tree_sha256()` in
+`scripts/engineering/ci/update_test_telemetry_baseline.py`: LF-normalized
+`tests/**/*.py`, `pyproject.toml`, `configs/quality/test_matrix.yaml`, and
+`.github/workflows/tests.yml`. Test-governance uses a different inventory in
+`reports/quality/test-governance-current.json`.
+
+`source_commit` must be an ancestor of HEAD (`git merge-base --is-ancestor`).
+A non-`main` `source_branch` is valid only with `source_event: pull_request`
+(`tests/architecture/test_test_telemetry_baseline.py`). Do not invent coverage
+percent from a partial local `coverage.xml`.
+
+After `git fetch origin main`, do **not** use
+`git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main` in a
+local worktree (it can delete `origin/main` and fail
+`local_tracking_ref_matches_remote`).
+
+| Symptom | Family | Check | Refresh |
+| --- | --- | --- | --- |
+| S7-d `test_committed_test_telemetry_baseline_is_populated` | telemetry | `pytest tests/architecture/test_test_telemetry_governance.py tests/architecture/test_test_telemetry_baseline.py` | `python -m scripts.engineering.ci.update_test_telemetry_baseline --coverage-percent <committed> --source-branch <branch> --source-commit <ancestor> --source-run-id <id> --source-event pull_request\|push --source-run-url <url>` |
+| `Remote-main debt baseline JSON/md is stale` | remote-main | `python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check` | `python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --update` after `git fetch origin main` |
+| test-governance `--check` | governance snapshot | `python -m scripts.engineering.qa.report_test_governance_audit --check` | `python -m scripts.engineering.qa.report_test_governance_audit --json-out reports/quality/test-governance-current.json --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json` |
+| flaky burndown | flaky | `python -m scripts.engineering.qa report-flaky-test-burndown-review --check` | `python -m scripts.engineering.qa report-flaky-test-burndown-review` |
+
 ## Procedure
 
 ### 1. Identify the drift family
 
-Use the failing test or CI step to place the mismatch into one of the governed
-artifact families below.
+Use the failing test or CI step (and the table above) to place the mismatch
+into one of the governed artifact families below.
 
 ### 2. Run the matching check and refresh commands
 
