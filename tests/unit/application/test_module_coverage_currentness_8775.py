@@ -36,11 +36,11 @@ from bioetl.application.services.control_plane.replay.historical_corpus_models i
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation import (
     evaluate_threshold_failures,
 )
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
+    score_replay_readiness,
+)
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_core import (
     score_checkpoint_safety,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_extended import (
-    score_replay_readiness,
 )
 
 

@@ -6156,26 +6156,6 @@
       "source_lines": 139
     },
     {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 66,
-      "executable_lines": 66,
-      "missing_lines": 0,
-      "module": "bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_extended",
-      "path": "src/bioetl/application/services/control_plane/replay/reproducibility_score_cards_category_scores_extended.py",
-      "source_lines": 114
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 29,
-      "executable_lines": 29,
-      "missing_lines": 0,
-      "module": "bioetl.application.services.control_plane.replay.reproducibility_score_cards_types",
-      "path": "src/bioetl/application/services/control_plane/replay/reproducibility_score_cards_types.py",
-      "source_lines": 88
-    },
-    {
       "coverage_percent": 93.55,
       "coverage_status": "partially_covered",
       "covered_lines": 29,
@@ -30838,26 +30818,6 @@
       "source_lines": 139
     },
     {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 66,
-      "executable_lines": 66,
-      "missing_lines": 0,
-      "module": "bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_extended",
-      "path": "src/bioetl/application/services/control_plane/replay/reproducibility_score_cards_category_scores_extended.py",
-      "source_lines": 114
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 29,
-      "executable_lines": 29,
-      "missing_lines": 0,
-      "module": "bioetl.application.services.control_plane.replay.reproducibility_score_cards_types",
-      "path": "src/bioetl/application/services/control_plane/replay/reproducibility_score_cards_types.py",
-      "source_lines": 88
-    },
-    {
       "coverage_percent": 93.55,
       "coverage_status": "partially_covered",
       "covered_lines": 29,
@@ -49370,7 +49330,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-10",
-  "source_tree_sha256": "c5a7e8f28785b3bbc04f32b5d6c49fc20d4848e7b90db779c7a5ff3feed7e1a8",
+  "source_tree_sha256": "870bd9690af470e498b1d3aba45f143c1fa42940c484be5cf614850281abdb79",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -49407,16 +49367,16 @@
       "application_services_control_plane": {
         "allowlisted_unmeasured_module_count": 0,
         "allowlisted_unmeasured_modules": [],
-        "coverage_percent_avg": 97.92,
+        "coverage_percent_avg": 97.88,
         "coverage_percent_min": 77.78,
-        "covered_line_percent": 97.17,
-        "covered_module_count": 133,
-        "measured_module_count": 133,
+        "covered_line_percent": 97.11,
+        "covered_module_count": 131,
+        "measured_module_count": 131,
         "measured_percent": 100.0,
-        "module_count": 133,
+        "module_count": 131,
         "status_counts": {
           "coverage_xml_missing": 0,
-          "fully_covered": 89,
+          "fully_covered": 87,
           "no_executable_lines": 0,
           "partially_covered": 44,
           "uncovered": 0,
@@ -49525,10 +49485,10 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2468,
+    "source_module_count": 2466,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 1612,
+      "fully_covered": 1610,
       "no_executable_lines": 4,
       "partially_covered": 852,
       "uncovered": 0,

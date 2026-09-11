@@ -1,13 +1,13 @@
 # Сводка evidence: project-package-topology
 
-Refresh note (2026-09-10): `src/bioetl/domain/aggregates/` cohesion shrink 11→8
-modules (#10305) reduced the inventory to `source_module_count=2468`. Counts and
+Refresh note (2026-09-11): #10304 removed two control-plane replay
+score-card modules; inventory is `source_module_count=2466`. Counts and
 the source fingerprint below come from `reports/quality/module-coverage-inventory.json`.
 Historical notes remain historical.
 
-`source_tree_sha256=c5a7e8f28785b3bbc04f32b5d6c49fc20d4848e7b90db779c7a5ff3feed7e1a8`
+`source_tree_sha256=870bd9690af470e498b1d3aba45f143c1fa42940c484be5cf614850281abdb79`
 
-`source_module_count=2468`
+`source_module_count=2466`
 
 Refresh note (2026-09-09): inventory grew to `source_module_count=2471` after the flow3 HTTP display helpers and stream-1 merge. Counts and the source fingerprint below come from `reports/quality/module-coverage-inventory.json`. Historical notes remain historical.
 
