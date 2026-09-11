@@ -413,7 +413,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Evidence Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">Which provider is degraded, and why? Runtime scope: <b>GLOBAL</b> = fleet severity/presence. <b>SELECTED PROVIDER</b> = selected-provider snapshot. UNKNOWN — inspect scrape target.</div></div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">Which provider is degraded, and why? Runtime scope: <b>GLOBAL</b> = fleet severity/presence. <b>SELECTED PROVIDER</b> = provider status. UNKNOWN — inspect scrape target.</div></div>"
       },
       "links": []
     },
@@ -431,7 +431,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT snapshot · Selected-provider snapshot; fleet panels below have a different scope. Mapping: `0=OK`, `1=WARN`, `>=2=CRIT`, `null=UNKNOWN`. The verdict uses current status and successful provider activity observed in the selected range; it does not prove that a pipeline run succeeded. TELEMETRY MISSING means status evidence is unavailable—check Monitor Telemetry Presence and Raw Health Status; it is not evidence of a healthy fleet. Fleet panels can disagree because they cover all providers.",
+      "description": "CURRENT snapshot · selected provider snapshot; fleet panels below have a different scope. Mapping: `0=OK`, `1=WARN`, `>=2=CRIT`, `null=UNKNOWN`. The verdict uses current status and successful provider activity observed in the selected range; it does not prove that a pipeline run succeeded. TELEMETRY MISSING means status evidence is unavailable—check Monitor Telemetry Presence and Raw Health Status; it is not evidence of a healthy fleet. Fleet panels can disagree because they cover all providers.",
       "fieldConfig": {
         "defaults": {
           "color": {

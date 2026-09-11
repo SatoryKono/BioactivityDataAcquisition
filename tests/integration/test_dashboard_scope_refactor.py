@@ -270,9 +270,7 @@ def test_promql_targets_do_not_select_run_id_label() -> None:
 def test_run_explorer_3010_opens_identity_panel_3022() -> None:
     """GMIN-03: primary Run link focuses Inspect Run Identity without hunting the row."""
     dashboard = _load(DASHBOARD_DIR / "bioetl-run-explorer-v1.json")
-    browse = next(
-        item for item in _root_panels(dashboard) if item.get("id") == 3010
-    )
+    browse = next(item for item in _root_panels(dashboard) if item.get("id") == 3010)
     run_override = next(
         item
         for item in (browse.get("fieldConfig") or {}).get("overrides", [])
@@ -292,7 +290,9 @@ def test_run_explorer_3010_opens_identity_panel_3022() -> None:
     assert "var-run_id=${__value.raw}" in url
     assert "${__url_time_range}" in url
     details = next(
-        item for item in _root_panels(dashboard) if item.get("title") == "Selected Run Details"
+        item
+        for item in _root_panels(dashboard)
+        if item.get("title") == "Selected Run Details"
     )
     assert details.get("type") == "row"
     assert details.get("collapsed") is True
