@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.2.16
+Version: 1.2.17
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-09-10'
+  Last verified: '2026-09-11'
 
 ______________________________________________________________________
 
 # GitHub Interaction Policy
 
-*Synced with RULES.md and ADR-047 | Last updated: 2026-09-10*
+*Synced with RULES.md and ADR-047 | Last updated: 2026-09-11*
 
 ______________________________________________________________________
 
@@ -205,10 +205,11 @@ weaken gates, raise tech-debt budgets, or force Grafana npm majors
 | Secret scanning | enabled | Push protection enabled |
 | `secret_scanning_validity_checks` | enabled | Partner-pattern validity. GitHub documents validity checks as GitHub Team/Enterprise **Secret Protection** only. This repo is user-owned public: `PATCH /repos/{owner}/{repo}` returns HTTP 200 and GET stays `disabled` (re-verified `2026-09-10`). Do not git-claim `enabled`. Standing exception #10310. `GH-SECRET-002.known_issue: 10310`. |
 | `secret_scanning_non_provider_patterns` | disabled | Intentionally off (noisy). Do not enable without a dated issue. |
-| Unused environments | absent | `copilot` and `staging` MUST NOT exist. Live GET `2026-09-10` (after DELETE): `copilot` absent; `staging` absent. Publish environments stay `ghcr-publish`, `observability-render-host`, `pypi`, `testpypi` (2 protection rules each). `GH-ENV-002.known_issue: null` (#10311). |
+| Unused environments | absent | `staging` MUST NOT exist. `copilot` is an **agent-runtime** environment (`GH-ENV-003`, #10371), not unused. Live GET `2026-09-11`: `copilot` present with required reviewers + custom branch policy `copilot/**`; `staging` absent. Publish environments stay `ghcr-publish`, `observability-render-host`, `pypi`, `testpypi`. `GH-ENV-002.known_issue: null`. |
+| Agent-runtime environment | protected, non-publish | `copilot`: reviewer `@SatoryKono`, custom refs `copilot/**` only, zero environment secrets, no tracked workflow `environment: copilot`. Must not overlap `protected_environments`. `#10311` DELETE is superseded. |
 | `allow_auto_merge` | `true` | Allowed after #10267: live `GET .../rules/branches/main` applies required context `pr-gate-complete`. Do not treat a disabled companion ruleset as a merge wall. |
 
-Controls live in [`github_governance_policy.json`](../../../configs/quality/github_governance_policy.json): `GH-SECRET-002`, `GH-SECRET-003`, `GH-ACTIONS-002`, `GH-ACTIONS-003`, `GH-ENV-002`.
+Controls live in [`github_governance_policy.json`](../../../configs/quality/github_governance_policy.json): `GH-SECRET-002`, `GH-SECRET-003`, `GH-ACTIONS-002`, `GH-ACTIONS-003`, `GH-ENV-002`, `GH-ENV-003`.
 
 `security.yml` OSV-Scanner still scans `uv.lock` only and fails on HIGH/CRITICAL.
 `pip-audit --strict` no longer ignores `PYSEC-2026-3721` / `CVE-2026-3219`
@@ -707,15 +708,18 @@ Live publishing/deployment environment controls (API-verified 2026-08-30):
 | `observability-render-host` | `@SatoryKono` | branch `main` | reviewed manual execution on the self-hosted render runner |
 | `testpypi` | `@SatoryKono` | branch `main`; tags `v*` | reviewed manual dry-run override or release OIDC publish |
 | `pypi` | `@SatoryKono` | tags `v*` | release-only OIDC publish after `testpypi` |
+| `copilot` | `@SatoryKono` | branch glob `copilot/**` | GitHub Copilot coding agent runtime (#10371). Not a publish surface. |
 
-Each listed environment has a required-reviewer rule and a custom deployment
+Each listed **publish** environment has a required-reviewer rule and a custom deployment
 branch/tag policy. Self-review remains allowed because the repository currently
 has one maintainer; this prevents deployment lockout while retaining an explicit
 approval gate. The environment-secret inventory was empty at verification time;
-PyPI uses OIDC trusted publishing. `copilot` and `staging` were unused
-GitHub environment stubs (no tracked workflow `environment:` refs, no
-environment secrets) and were removed on `2026-09-10` (#10264). They MUST
-NOT be recreated as write-capable deployment surfaces. Environment secrets,
+PyPI uses OIDC trusted publishing. `staging` MUST remain absent. `copilot` is the
+agent-runtime environment (`GH-ENV-003`): required reviewer `@SatoryKono`, custom
+branch policy `copilot/**` only, zero environment secrets, no tracked workflow
+`environment: copilot`. It MUST NOT be added to `protected_environments` and MUST
+NOT receive GHCR/PyPI/OIDC secrets. `#10311` DELETE is superseded; do not recreate
+`copilot` as a write-capable **publish** stub. Environment secrets,
 if later added to the publish environments above, must be scoped/rotated and
 never echoed in logs.
 
@@ -1049,3 +1053,12 @@ Merge-block proof: `PUT /repos/SatoryKono/BioactivityDataAcquisition/pulls/9895/
 - #10310: validity checks remain `disabled`. GitHub Secret Protection /
   Team|Enterprise is required; PATCH stays a no-op on this user-owned public
   repo. Do not git-claim `enabled`. `GH-SECRET-002.known_issue: 10310`.
+
+### Migration notes (1.2.17)
+
+- #10371 / #10373: `copilot` is an agent-runtime environment, not unused.
+  `unused_environments` is only `staging`. New control `GH-ENV-003`
+  (`agent_runtime_environment_protected`): env exists, required reviewers,
+  custom branch policy `copilot/**`, zero environment secrets, disjoint from
+  `protected_environments`. `#10311` DELETE superseded. Live GET `2026-09-11`.
+- Operator runbook: [`github-copilot-coding-agent.md`](../../05-operations/runbooks/github-copilot-coding-agent.md).

@@ -75,12 +75,32 @@ def _passing_snapshot() -> dict:
             },
         },
         "environments": [
-            {
-                "name": name,
-                "protection_rules": [{"type": "required_reviewers"}],
-                "deployment_branch_policy": None,
-            }
-            for name in policy["protected_environments"]
+            *[
+                {
+                    "name": name,
+                    "protection_rules": [{"type": "required_reviewers"}],
+                    "deployment_branch_policy": {
+                        "protected_branches": False,
+                        "custom_branch_policies": True,
+                    },
+                }
+                for name in policy["protected_environments"]
+            ],
+            *[
+                {
+                    "name": name,
+                    "protection_rules": [{"type": "required_reviewers"}],
+                    "deployment_branch_policy": {
+                        "protected_branches": False,
+                        "custom_branch_policies": True,
+                    },
+                    "deployment_branch_policies": [
+                        {"name": f"{name}/**", "type": "branch"}
+                    ],
+                    "secret_count": 0,
+                }
+                for name in policy.get("agent_runtime_environments") or []
+            ],
         ],
         "dependabot": {
             "alerts": {"enabled": True},
@@ -140,10 +160,45 @@ def test_cli_paths_are_confined_but_explicit_runner_temp_is_supported(
 def test_unused_github_environments_are_not_required_protection_surfaces() -> None:
     protected = set(_policy()["protected_environments"])
     unused = set(_policy()["unused_environments"])
+    agent_runtime = set(_policy()["agent_runtime_environments"])
     assert "ghcr-publish" in protected
     assert "observability-render-host" in protected
-    assert unused == {"staging", "copilot"}
+    assert unused == {"staging"}
+    assert agent_runtime == {"copilot"}
     assert protected.isdisjoint(unused)
+    assert protected.isdisjoint(agent_runtime)
+    assert unused.isdisjoint(agent_runtime)
+
+
+def test_agent_runtime_environment_requires_protected_copilot() -> None:
+    now = datetime(2026, 9, 11, tzinfo=UTC)
+    passing = TOOL.evaluate_snapshot(_passing_snapshot(), _policy(), now=now)
+    by_id = {item["id"]: item for item in passing["controls"]}
+    assert by_id["GH-ENV-003"]["status"] == "pass"
+
+    missing = _passing_snapshot()
+    missing["environments"] = [
+        item for item in missing["environments"] if item["name"] != "copilot"
+    ]
+    drifted_missing = TOOL.evaluate_snapshot(missing, _policy(), now=now)
+    by_id = {item["id"]: item for item in drifted_missing["controls"]}
+    assert drifted_missing["overall"] == "drift"
+    assert by_id["GH-ENV-003"]["status"] == "drift"
+    assert "missing=['copilot']" in by_id["GH-ENV-003"]["evidence"]
+
+    unprotected = _passing_snapshot()
+    for item in unprotected["environments"]:
+        if item["name"] == "copilot":
+            item["protection_rules"] = []
+            item["deployment_branch_policy"] = None
+            item["deployment_branch_policies"] = [{"name": "main", "type": "branch"}]
+            item["secret_count"] = 1
+    drifted_unprotected = TOOL.evaluate_snapshot(unprotected, _policy(), now=now)
+    by_id = {item["id"]: item for item in drifted_unprotected["controls"]}
+    assert by_id["GH-ENV-003"]["status"] == "drift"
+    assert "unprotected=['copilot']" in by_id["GH-ENV-003"]["evidence"]
+    assert "copilot:main" in by_id["GH-ENV-003"]["evidence"]
+    assert "secrets=['copilot=1']" in by_id["GH-ENV-003"]["evidence"]
 
 
 def test_unknown_labels_are_retained_by_default() -> None:
@@ -226,6 +281,7 @@ def test_supply_chain_controls_detect_validity_and_allowlist_drift() -> None:
     assert by_id["GH-ACTIONS-002"]["status"] == "pass"
     assert by_id["GH-ACTIONS-003"]["status"] == "pass"
     assert by_id["GH-ENV-002"]["status"] == "pass"
+    assert by_id["GH-ENV-003"]["status"] == "pass"
 
     snapshot = _passing_snapshot()
     snapshot["settings"]["secret_scanning_validity_checks"] = "disabled"
@@ -246,6 +302,7 @@ def test_supply_chain_controls_detect_validity_and_allowlist_drift() -> None:
     assert by_id["GH-ACTIONS-003"]["status"] == "drift"
     assert by_id["GH-ENV-002"]["status"] == "drift"
     assert "present=['staging']" in by_id["GH-ENV-002"]["evidence"]
+    assert by_id["GH-ENV-003"]["status"] == "pass"
 
 
 def test_policy_and_workflow_preserve_read_only_contract() -> None:
@@ -253,6 +310,8 @@ def test_policy_and_workflow_preserve_read_only_contract() -> None:
     by_id = {item["id"]: item for item in policy["controls"]}
     assert by_id["GH-SECRET-002"]["known_issue"] == 10310
     assert by_id["GH-ENV-002"]["known_issue"] is None
+    assert by_id["GH-ENV-003"]["known_issue"] is None
+    assert by_id["GH-ENV-003"]["check"] == "agent_runtime_environment_protected"
     canonical = set(policy["labels"]["canonical"])
     assert set(policy["labels"]["aliases"].values()) <= canonical
     assert policy["migration"]["delete_not_before"] == "2026-11-30"

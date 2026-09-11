@@ -411,14 +411,21 @@ def collect_snapshot(
         "actions_selected": client.api_optional(
             f"repos/{repository}/actions/permissions/selected-actions"
         ),
-        "environments": [
-            {
-                "name": item.get("name"),
-                "protection_rules": item.get("protection_rules") or [],
-                "deployment_branch_policy": item.get("deployment_branch_policy"),
-            }
-            for item in environments_payload.get("environments", [])
-        ],
+        "environments": _enrich_agent_runtime_environments(
+            client,
+            repository,
+            [
+                {
+                    "name": item.get("name"),
+                    "protection_rules": item.get("protection_rules") or [],
+                    "deployment_branch_policy": item.get(
+                        "deployment_branch_policy"
+                    ),
+                }
+                for item in environments_payload.get("environments", [])
+            ],
+            policy,
+        ),
         "dependabot": {
             "alerts": client.api_enabled(f"repos/{repository}/vulnerability-alerts"),
             "security_updates": client.api_enabled(
@@ -622,6 +629,96 @@ def _control_unused_environments_absent(
     return not present, f"present={present or 'none'}"
 
 
+def _agent_runtime_branch_allowed(env_name: str, policy_name: str) -> bool:
+    if policy_name == f"{env_name}/**":
+        return True
+    return policy_name.startswith(f"{env_name}/") and policy_name != env_name
+
+
+def _enrich_agent_runtime_environments(
+    client: ReadOnlyGitHubClient,
+    repository: str,
+    environments: list[dict[str, Any]],
+    policy: dict[str, Any],
+) -> list[dict[str, Any]]:
+    names = {str(name) for name in (policy.get("agent_runtime_environments") or [])}
+    enriched: list[dict[str, Any]] = []
+    for item in environments:
+        name = str(item.get("name") or "")
+        if name not in names:
+            enriched.append(item)
+            continue
+        policies_container = client.api_optional(
+            f"repos/{repository}/environments/{name}/deployment-branch-policies"
+        )
+        secrets_container = client.api_optional(
+            f"repos/{repository}/environments/{name}/secrets"
+        )
+        branch_policies: list[dict[str, Any]] | None = None
+        if policies_container.get("available"):
+            payload = policies_container.get("payload") or {}
+            branch_policies = [
+                {"name": row.get("name"), "type": row.get("type")}
+                for row in (payload.get("branch_policies") or [])
+            ]
+        secret_count: int | None = None
+        if secrets_container.get("available"):
+            payload = secrets_container.get("payload") or {}
+            raw = payload.get("total_count")
+            secret_count = int(raw) if isinstance(raw, int) else None
+        enriched.append(
+            {
+                **item,
+                "deployment_branch_policies": branch_policies,
+                "secret_count": secret_count,
+            }
+        )
+    return enriched
+
+
+def _control_agent_runtime_environment_protected(
+    snapshot: dict[str, Any], policy: dict[str, Any]
+) -> ControlResult:
+    names = [str(name) for name in (policy.get("agent_runtime_environments") or [])]
+    protected = {str(name) for name in (policy.get("protected_environments") or [])}
+    overlap = sorted(set(names) & protected)
+    if overlap:
+        return False, f"overlap_with_publish={overlap}"
+    by_name = {item["name"]: item for item in snapshot["environments"]}
+    missing: list[str] = []
+    unprotected: list[str] = []
+    bad_branch: list[str] = []
+    secrets: list[str] = []
+    for name in names:
+        item = by_name.get(name)
+        if item is None:
+            missing.append(name)
+            continue
+        if not (item.get("protection_rules") or []):
+            unprotected.append(name)
+        branch_policy = item.get("deployment_branch_policy") or {}
+        if not isinstance(branch_policy, dict) or (
+            branch_policy.get("custom_branch_policies") is not True
+        ):
+            bad_branch.append(f"{name}:not_custom")
+        policies = item.get("deployment_branch_policies")
+        if isinstance(policies, list):
+            policy_names = [str(row.get("name") or "") for row in policies]
+            if not policy_names:
+                bad_branch.append(f"{name}:empty")
+            for policy_name in policy_names:
+                if not _agent_runtime_branch_allowed(name, policy_name):
+                    bad_branch.append(f"{name}:{policy_name}")
+        secret_count = item.get("secret_count")
+        if isinstance(secret_count, int) and secret_count != 0:
+            secrets.append(f"{name}={secret_count}")
+    evidence = (
+        f"missing={missing or 'none'}; unprotected={unprotected or 'none'}; "
+        f"branch={bad_branch or 'ok'}; secrets={secrets or 'none'}"
+    )
+    return not (missing or unprotected or bad_branch or secrets), evidence
+
+
 def _control_codeowners(
     snapshot: dict[str, Any], _policy: dict[str, Any]
 ) -> ControlResult:
@@ -692,6 +789,9 @@ _CONTROL_CHECKS: dict[
     "allowed_actions_selected": _control_allowed_actions_selected,
     "selected_actions_cover_allowlist": _control_selected_actions_cover_allowlist,
     "unused_environments_absent": _control_unused_environments_absent,
+    "agent_runtime_environment_protected": (
+        _control_agent_runtime_environment_protected
+    ),
     "codeowners": _control_codeowners,
     "squash_only": _control_squash_only,
     "wiki_disabled": _control_wiki_disabled,

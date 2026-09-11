@@ -129,8 +129,10 @@
     "observability-render-host"
   ],
   "unused_environments": [
-    "copilot",
     "staging"
+  ],
+  "agent_runtime_environments": [
+    "copilot"
   ],
   "controls": [
     {
@@ -234,8 +236,17 @@
     },
     {
       "id": "GH-ENV-002",
-      "title": "Unused copilot and staging environments are absent",
+      "title": "Unused staging environment is absent",
       "check": "unused_environments_absent",
+      "owner": "Release engineering",
+      "risk": "medium",
+      "known_issue": null,
+      "due_days": 14
+    },
+    {
+      "id": "GH-ENV-003",
+      "title": "Copilot agent-runtime environment is protected and is not a publish surface",
+      "check": "agent_runtime_environment_protected",
       "owner": "Release engineering",
       "risk": "medium",
       "known_issue": null,

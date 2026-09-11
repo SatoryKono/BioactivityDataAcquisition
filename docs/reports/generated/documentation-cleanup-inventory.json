@@ -16371,7 +16371,7 @@
       "github_issue_url": null,
       "inbound_links": 6,
       "lifecycle": null,
-      "outbound_links": 9,
+      "outbound_links": 10,
       "owner": "BioETL Team",
       "path": "docs/00-project/governance/05-github-policy.md",
       "recommended_action": "keep",
@@ -58649,9 +58649,37 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 2,
+      "inbound_links": 3,
       "lifecycle": null,
-      "outbound_links": 0,
+      "outbound_links": 2,
+      "owner": "BioETL Team",
+      "path": "docs/05-operations/runbooks/github-copilot-coding-agent.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "05-operations",
+      "status": "Active",
+      "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": "published",
+      "declared_status": "active",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 3,
+      "lifecycle": null,
+      "outbound_links": 1,
       "owner": "BioETL Team",
       "path": "docs/05-operations/runbooks/github-settings-quarterly-review.md",
       "recommended_action": "keep",
@@ -58707,7 +58735,7 @@
       "github_issue_url": null,
       "inbound_links": 7,
       "lifecycle": null,
-      "outbound_links": 47,
+      "outbound_links": 48,
       "owner": "BioETL Team",
       "path": "docs/05-operations/runbooks/index.md",
       "recommended_action": "keep",
@@ -102402,7 +102430,7 @@
       "archive-after-github-state-check": 336,
       "archive-after-migration": 987,
       "generate-automatically": 1026,
-      "keep": 1269,
+      "keep": 1270,
       "reconcile-with-github-state": 8,
       "replace-with-link": 2
     },
@@ -102415,7 +102443,7 @@
       "03-guides": 126,
       "04-reference": 330,
       "05-engineering": 2,
-      "05-operations": 89,
+      "05-operations": 90,
       "99-archive": 291,
       "AGENTS.md": 1,
       "CHANGELOG.md": 1,
@@ -102437,7 +102465,7 @@
       "security": 2
     },
     "by_status": {
-      "Active": 746,
+      "Active": 747,
       "Archived": 291,
       "Canonical": 73,
       "Deprecated": 2,
@@ -102445,7 +102473,7 @@
       "Working": 1490
     },
     "by_surface_family": {
-      "active": 746,
+      "active": 747,
       "archive": 291,
       "canonical": 73,
       "duplicate": 2,
@@ -102453,7 +102481,7 @@
       "working": 1490
     },
     "by_tracking_state": {
-      "tracked": 3628
+      "tracked": 3629
     },
     "docs_reports_local_count": 36,
     "duplicate_group_count": 7,
@@ -102469,8 +102497,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3628,
+    "total_doc_like": 3629,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3628
+    "total_doc_like_tracked": 3629
   }
 }
