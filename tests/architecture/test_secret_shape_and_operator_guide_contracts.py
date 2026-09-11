@@ -53,7 +53,9 @@ def test_gitleaks_does_not_allowlist_live_sk_or_hex_tokens() -> None:
 
 def test_commitlint_does_not_ignore_nonconventional_headers() -> None:
     text = _read("commitlint.config.mjs")
-    assert "message.startsWith('Merge')" in text
+    # Git-style merge subjects only (word-boundary, case-insensitive). Do not
+    # swallow `mergeable` or other nonconventional types.
+    assert "/^merge\\b/i" in text
     assert "historical commits that cannot be rewritten" not in text
     assert (
         "feat|fix|refactor|docs|test|chore|perf|ci|build|style|revert)[(:]" not in text
