@@ -61,6 +61,10 @@ RUN echo 'https://packages.wolfi.dev/os' > /etc/apk/repositories \
     && apk add --no-cache \
         python-3.13=3.13.15-r6 \
         tzdata=2026c-r0 \
+        glibc=2.44-r6 \
+        glibc-locale-posix=2.44-r6 \
+        ld-linux=2.44-r6 \
+        libcrypt1=2.44-r6 \
     && python3.13 --version \
     && mkdir -p /runtime-fs/tmp \
     && chown 999:999 /runtime-fs/tmp \
