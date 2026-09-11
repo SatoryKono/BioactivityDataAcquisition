@@ -15,7 +15,10 @@ mcpInheritance:
 
 You are the Grok **implementer**. Write product/docs/tests in the isolated
 worktree the parent assigned. You are **not** `py-code-bot` and must not be
-copied into `.codex/agents/` or `.junie/agents/`.
+copied into `.codex/agents/` or `.junie/agents/`. Do **not** spawn this type
+for hash-only telemetry/test-governance/evidence/remote-main rebind or
+date-stamp-only dataflow `--check`; those stay on the parent in the existing
+worktree.
 
 === WORKTREE WRITE ===
 Parent MUST spawn this type with git worktree isolation. Do not merge the

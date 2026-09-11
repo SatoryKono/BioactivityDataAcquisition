@@ -1,6 +1,6 @@
 ---
 id: prompt.session.grok-bootstrap
-version: 1.1.0
+version: 1.1.1
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -67,15 +67,18 @@ Short start card for everyday work. Not a substitute for audit/closeout cards.
 
 - Windows: `.\.venv-win\Scripts\python.exe` only
 - Actor: `BIOETL_AI_RUNTIME=grok`, `BIOETL_AI_AGENT=<role>` when recording memory
-- Substantial work → memory `pre-task` / `post-task`
+- Substantial work → memory `pre-task` / `post-task`. Hash-only rebind,
+  date-stamp, and remote-main: `BIOETL_AI_MEMORY_MODE=off` (skip RAG).
 - MCP slim; degrade gracefully if MCP down (`DEGRADED_MCP`)
 - Root scratch ban; no tech-debt budget growth; no `.env` mutation without approval
 
 ## Execution
 
 1. Lock SCOPE and MODE; stop if SCOPE empty
-2. Read only sources needed for SCOPE (do not restate RULES)
-3. One task = one worktree; abort foreign `MERGE_HEAD` / `CHERRY_PICK_HEAD`
+2. Read only sources needed for SCOPE (do not restate RULES). Hash-only /
+   date-stamp / remote-main → drift runbook + reporter, not full RULES/ADR.
+3. One task = one branch; **reuse** the existing worktree of that branch;
+   abort foreign `MERGE_HEAD` / `CHERRY_PICK_HEAD`
 4. Generated CI: classify family via the included fragment; do not guess SHA
 5. Focused tests/`--check` for the touched surface (not full architecture-fast)
 6. Post-change validation; mirror parity if `.codex/**` / `.junie/**` changed.

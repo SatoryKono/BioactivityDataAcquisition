@@ -68,6 +68,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `report-architecture-debt-remote-main-baseline` | `report_architecture_debt_remote_main_baseline.py` | Generate/check clean remote-main architecture debt baseline artifacts                             |
 | `report-debt-governance-gates`   | `report_debt_governance_gates.py`                     | Generate/check normalized debt-reduction fail-fast gate rollup                                    |
 | `validate-technical-debt-audit`  | `technical_debt_audit_registry.py`                    | Validate exact-SHA lifecycle, evidence hash, and report headline semantics                          |
+| `refresh-ci-drift-families` | `refresh_governance_artifacts.py` (`ci-drift-families`) | Coupled `--check`/`--update` for telemetry, test-gov, flaky, evidence, remote-main, dataflow. Does **not** call `_ratchet_family_budgets`. |
 | `run-architecture-audit-read-only` | `run_architecture_audit_read_only.py`                | Run check-only architecture evidence diagnostics without pretest sync or artifact writes          |
 | `report-hotspots`                | `generate_hotspot_degradation_report.py`              | Generate performance hotspot degradation report                                                   |
 | `report-duplication-baseline`    | `report_duplication_baseline.py`                      | Generate report-only duplication baseline for `composition`/`application`                         |

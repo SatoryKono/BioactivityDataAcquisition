@@ -11,6 +11,10 @@ Usage (repo root):
 The command is fail-closed: any generator or checker failure is propagated to
 the caller. It does not raise tech-debt budgets or create new registries.
 Prefer shrink-only scorecard sync after measured improvements.
+
+CI-family rebind (telemetry / test-gov / flaky / evidence / remote-main /
+dataflow) MUST use ``python -m scripts.engineering.qa refresh-ci-drift-families``
+instead. That path does not call ``_ratchet_family_budgets``.
 """
 
 from __future__ import annotations
@@ -18,6 +22,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -27,6 +32,8 @@ ROOT = Path(__file__).resolve().parents[3]
 
 _TEST_GOVERNANCE_JSON = "reports/quality/test-governance-current.json"
 _FIXTURE_DUPLICATION_JSON = "reports/quality/test-fixture-asset-duplication.json"
+_QA_MODULE = "scripts.engineering.qa"
+_TEST_GOVERNANCE_MODULE = f"{_QA_MODULE}.report_test_governance_audit"
 
 
 def _write_text_atomically(path: Path, payload: str) -> None:
@@ -53,8 +60,18 @@ def _write_text_atomically(path: Path, payload: str) -> None:
 
 
 def _run(cmd: list[str], *, check: bool = True) -> int:
-    print("+", " ".join(cmd))
-    completed = subprocess.run(cmd, cwd=ROOT, check=False)
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    try:
+        safe_cmd = ensure_safe_cli_argv([str(token) for token in cmd])
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
+    print("+", " ".join(safe_cmd))
+    completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
+        safe_cmd,
+        cwd=ROOT,
+        check=False,
+    )
     if check and completed.returncode != 0:
         raise SystemExit(completed.returncode)
     return completed.returncode
@@ -205,7 +222,7 @@ def _run_check_only() -> None:
         [
             sys.executable,
             "-m",
-            "scripts.engineering.qa.report_test_governance_audit",
+            _TEST_GOVERNANCE_MODULE,
             "--check",
         ]
     )
@@ -245,7 +262,7 @@ def _run_check_only() -> None:
         [
             sys.executable,
             "-m",
-            "scripts.engineering.qa",
+            _QA_MODULE,
             "report-debt-governance-gates",
             "--check",
         ]
@@ -301,7 +318,7 @@ def _run_refresh() -> None:
         [
             sys.executable,
             "-m",
-            "scripts.engineering.qa.report_test_governance_audit",
+            _TEST_GOVERNANCE_MODULE,
             "--json-out",
             _TEST_GOVERNANCE_JSON,
             "--fixture-duplication-out",
@@ -369,7 +386,7 @@ def _run_refresh() -> None:
         [
             sys.executable,
             "-m",
-            "scripts.engineering.qa",
+            _QA_MODULE,
             "report-debt-governance-gates",
             "--update",
         ]
@@ -439,16 +456,366 @@ def refresh(*, check_only: bool) -> None:
     _refresh_targeted_coverage_closeout()
 
 
-def main(argv: list[str] | None = None) -> None:
+_CI_DRIFT_FAMILY_ORDER = (
+    "test-gov",
+    "flaky-fingerprint",
+    "telemetry",
+    "evidence",
+    "remote-main",
+    "dataflow",
+)
+_PIPELINE_NAME_RE = re.compile(r"^\w+$", re.ASCII)
+_GIT_OBJECT_ID_RE = re.compile(r"^[0-9a-f]{7,40}$")
+_CURRENT_AUDIT_ID_PREFIX = "\n  - id: "
+
+
+def _require_git_object_id(commit: str) -> str:
+    if _GIT_OBJECT_ID_RE.fullmatch(commit) is None:
+        raise SystemExit(
+            f"telemetry --source-commit must be a git object id (got {commit!r})"
+        )
+    return commit
+
+
+def _assert_commit_is_ancestor(commit: str) -> None:
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    safe_commit = _require_git_object_id(commit)
+    result = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
+        ensure_safe_cli_argv(
+            ["git", "merge-base", "--is-ancestor", safe_commit, "HEAD"]
+        ),
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    if result.returncode != 0:
+        raise SystemExit(
+            f"telemetry --source-commit must be an ancestor of HEAD (got {commit!r})"
+        )
+
+
+def _print_issues(prefix: str, issues: list[str]) -> None:
+    print(prefix)
+    for issue in issues:
+        print(f"- {issue}")
+
+
+def _replace_current_evidence_hash(
+    registry_text: str, *, current_id: str, old: str, live: str
+) -> str:
+    """Rewrite evidence_surface_sha256 only inside the current audit record."""
+    marker = f"- id: {current_id}"
+    start = registry_text.find(marker)
+    if start < 0:
+        raise SystemExit(f"current audit id not found in registry: {current_id}")
+    next_id = registry_text.find(_CURRENT_AUDIT_ID_PREFIX, start + len(marker))
+    end = next_id if next_id >= 0 else len(registry_text)
+    block = registry_text[start:end]
+    if block.count(old) != 1:
+        raise SystemExit(
+            "expected exactly one evidence_surface_sha256 in the current audit "
+            f"record, found {block.count(old)}"
+        )
+    return registry_text[:start] + block.replace(old, live, 1) + registry_text[end:]
+
+
+def _rewrite_current_audit_report(*, old: str, live: str, current: object) -> None:
+    from scripts.engineering.qa.technical_debt_audit_registry import (
+        SEMANTIC_SUMMARY_END,
+        SEMANTIC_SUMMARY_START,
+        build_current_audit_semantic_summary,
+        render_current_audit_semantic_summary,
+    )
+
+    report_path = ROOT / current.report_path  # type: ignore[attr-defined]
+    report = report_path.read_text(encoding="utf-8")
+    report = report.replace(
+        f"Evidence surface SHA-256: `{old}`",
+        f"Evidence surface SHA-256: `{live}`",
+    )
+    start = report.find(SEMANTIC_SUMMARY_START)
+    end = report.find(SEMANTIC_SUMMARY_END, start + len(SEMANTIC_SUMMARY_START))
+    if start >= 0 and end >= 0:
+        new_block = render_current_audit_semantic_summary(
+            build_current_audit_semantic_summary(ROOT, current)
+        )
+        report = report[:start] + new_block + report[end + len(SEMANTIC_SUMMARY_END) :]
+    if not report.endswith("\n"):
+        report += "\n"
+    _write_text_atomically(report_path, report)
+
+
+def _rebind_evidence_surface(*, check_only: bool) -> int:
+    """Rebind current-audit evidence_surface_sha256 without changing budgets."""
+    from scripts.engineering.qa.technical_debt_audit_registry import (
+        DEFAULT_REGISTRY_PATH,
+        compute_evidence_surface_sha256,
+        load_technical_debt_audit_registry,
+        validate_technical_debt_audit_registry,
+    )
+
+    current_id, records = load_technical_debt_audit_registry(ROOT)
+    current = next(record for record in records if record.audit_id == current_id)
+    live = compute_evidence_surface_sha256(ROOT, current.evidence_paths)
+    if check_only:
+        issues = validate_technical_debt_audit_registry(ROOT)
+        if issues:
+            _print_issues("Technical-debt audit registry validation failed:", issues)
+            return 1
+        print(f"evidence_surface_sha256 current: {live}")
+        return 0
+    old = current.evidence_surface_sha256
+    if old == live:
+        print("evidence_surface_sha256 already aligned")
+        return 0
+    if not isinstance(old, str) or not old:
+        raise SystemExit("current audit is missing evidence_surface_sha256")
+    registry_path = ROOT / DEFAULT_REGISTRY_PATH
+    updated = _replace_current_evidence_hash(
+        registry_path.read_text(encoding="utf-8"),
+        current_id=current_id,
+        old=old,
+        live=live,
+    )
+    _write_text_atomically(registry_path, updated)
+    current_id, records = load_technical_debt_audit_registry(ROOT)
+    current = next(record for record in records if record.audit_id == current_id)
+    _rewrite_current_audit_report(old=old, live=live, current=current)
+    issues = validate_technical_debt_audit_registry(ROOT)
+    if issues:
+        _print_issues("evidence rebind left validation issues:", issues)
+        return 1
+    print(f"evidence_surface_sha256 rebound {old[:12]} -> {live[:12]}")
+    return 0
+
+
+def _cmd_test_gov(*, check_only: bool, **_: object) -> list[str]:
+    cmd = [
+        sys.executable,
+        "-m",
+        _TEST_GOVERNANCE_MODULE,
+    ]
+    if check_only:
+        cmd.append("--check")
+        return cmd
+    cmd.extend(
+        [
+            "--json-out",
+            _TEST_GOVERNANCE_JSON,
+            "--fixture-duplication-out",
+            _FIXTURE_DUPLICATION_JSON,
+        ]
+    )
+    return cmd
+
+
+def _cmd_flaky(*, check_only: bool, **_: object) -> list[str]:
+    cmd = [
+        sys.executable,
+        "-m",
+        _QA_MODULE,
+        "report-flaky-test-burndown-review",
+    ]
+    if check_only:
+        cmd.append("--check")
+    return cmd
+
+
+def _cmd_remote_main(*, check_only: bool, **_: object) -> list[str]:
+    return [
+        sys.executable,
+        "-m",
+        _QA_MODULE,
+        "report-architecture-debt-remote-main-baseline",
+        "--check" if check_only else "--update",
+    ]
+
+
+def _cmd_dataflow(*, check_only: bool, pipeline: str, **_: object) -> list[str]:
+    if _PIPELINE_NAME_RE.fullmatch(pipeline) is None:
+        raise SystemExit(f"invalid --pipeline name: {pipeline!r}")
+    cmd = [
+        sys.executable,
+        "-m",
+        "scripts.diagrams",
+        "generate-dataflows",
+        "--pipeline",
+        pipeline,
+    ]
+    if check_only:
+        cmd.append("--check")
+    return cmd
+
+
+def _run_telemetry(*, check_only: bool, telemetry: argparse.Namespace) -> int:
+    if check_only:
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                "pytest",
+                "tests/architecture/test_test_telemetry_baseline.py",
+                "tests/architecture/test_test_telemetry_governance.py",
+                "-q",
+                "--tb=short",
+            ]
+        )
+    missing = [
+        name
+        for name, value in (
+            ("--coverage-percent", telemetry.coverage_percent),
+            ("--source-commit", telemetry.source_commit),
+            ("--source-run-id", telemetry.source_run_id),
+            ("--source-run-url", telemetry.source_run_url),
+        )
+        if value in (None, "")
+    ]
+    if missing:
+        raise SystemExit(
+            "telemetry --update requires "
+            + ", ".join(missing)
+            + " (Tests-run ancestor of HEAD; do not copy test-governance SHA)"
+        )
+    source_commit = _require_git_object_id(str(telemetry.source_commit))
+    _assert_commit_is_ancestor(source_commit)
+    return _run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.ci.update_test_telemetry_baseline",
+            "--coverage-percent",
+            str(telemetry.coverage_percent),
+            "--source-branch",
+            str(telemetry.source_branch),
+            "--source-commit",
+            source_commit,
+            "--source-run-id",
+            str(telemetry.source_run_id),
+            "--source-event",
+            str(telemetry.source_event),
+            "--source-run-url",
+            str(telemetry.source_run_url),
+        ]
+    )
+
+
+_FAMILY_COMMANDS = {
+    "test-gov": _cmd_test_gov,
+    "flaky-fingerprint": _cmd_flaky,
+    "remote-main": _cmd_remote_main,
+    "dataflow": _cmd_dataflow,
+}
+
+
+def _run_ci_drift_family(
+    family: str,
+    *,
+    check_only: bool,
+    telemetry: argparse.Namespace,
+    pipeline: str,
+) -> int:
+    if family == "evidence":
+        return _rebind_evidence_surface(check_only=check_only)
+    if family == "telemetry":
+        return _run_telemetry(check_only=check_only, telemetry=telemetry)
+    builder = _FAMILY_COMMANDS.get(family)
+    if builder is None:
+        raise SystemExit(f"unknown CI drift family: {family}")
+    return _run(builder(check_only=check_only, pipeline=pipeline))
+
+
+def run_ci_drift_families(argv: list[str]) -> int:
+    """Refresh or check CI drift families without ratcheting hotspot budgets.
+
+    This path MUST NOT call ``_ratchet_family_budgets`` or the full
+    ``refresh_governance_artifacts`` recipe.
+    """
+    parser = argparse.ArgumentParser(
+        prog="python -m scripts.engineering.qa refresh-ci-drift-families",
+        description=(
+            "Coupled --check/--update for generated CI families. "
+            "Does not call _ratchet_family_budgets or raise max_count/exemptions."
+        ),
+    )
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
+        "--check",
+        action="store_true",
+        help="Verify selected families (default when --update is omitted).",
+    )
+    mode.add_argument(
+        "--update",
+        action="store_true",
+        help="Refresh selected families via canonical reporters.",
+    )
+    parser.add_argument("--test-gov", action="store_true")
+    parser.add_argument("--flaky-fingerprint", action="store_true")
+    parser.add_argument("--telemetry", action="store_true")
+    parser.add_argument("--evidence", action="store_true")
+    parser.add_argument("--remote-main", action="store_true")
+    parser.add_argument("--dataflow", action="store_true")
+    parser.add_argument(
+        "--pipeline",
+        default="chembl_activity",
+        help="Pipeline name for --dataflow (default: chembl_activity).",
+    )
+    parser.add_argument("--coverage-percent", type=float, default=None)
+    parser.add_argument("--source-branch", default="main")
+    parser.add_argument("--source-commit", default="")
+    parser.add_argument("--source-run-id", default="")
+    parser.add_argument(
+        "--source-event",
+        choices=("push", "pull_request"),
+        default="push",
+    )
+    parser.add_argument("--source-run-url", default="")
+    args = parser.parse_args(argv)
+    selected = [
+        name for name in _CI_DRIFT_FAMILY_ORDER if getattr(args, name.replace("-", "_"))
+    ]
+    if not selected:
+        parser.error(
+            "pass at least one family flag: --test-gov --flaky-fingerprint "
+            "--telemetry --evidence --remote-main --dataflow"
+        )
+    check_only = not args.update
+    print(
+        "CI drift families "
+        + ("check" if check_only else "update")
+        + ": "
+        + ", ".join(selected)
+    )
+    for family in selected:
+        code = _run_ci_drift_family(
+            family,
+            check_only=check_only,
+            telemetry=args,
+            pipeline=str(args.pipeline),
+        )
+        if code:
+            return code
+    print("CI drift families complete (no budget ratchet)")
+    return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = list(sys.argv[1:] if argv is None else argv)
+    if args[:1] == ["ci-drift-families"]:
+        return run_ci_drift_families(args[1:])
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--check",
         action="store_true",
         help="Verify key governance artifacts (no write where possible).",
     )
-    args = parser.parse_args(argv)
-    refresh(check_only=args.check)
+    parsed = parser.parse_args(args)
+    refresh(check_only=parsed.check)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
