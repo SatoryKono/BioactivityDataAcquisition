@@ -1,11 +1,11 @@
 {
-  "source_branch": "main",
-  "source_commit": "db7cc9283e3fb49b0e5766489b7abacf9a775cd9",
-  "source_run_id": "34618841349",
-  "source_event": "push",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34618841349",
-  "source_tree_sha256": "29a8a0e7a0a6d2a22434872e3833cdde541b9e42deda304d53f86493b108f63a",
-  "refreshed_at_utc": "2026-09-11T15:58:47.475045+00:00",
+  "source_branch": "fix/github-copilot-agent-runtime-10371",
+  "source_commit": "c3f3acbe87386c59d550c0ac0a4111147b6f2057",
+  "source_run_id": "34635674309",
+  "source_event": "pull_request",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34635674309",
+  "source_tree_sha256": "b81df4664710ad17fcc7b73aae21f13d214de4edde860980d67c485376b79593",
+  "refreshed_at_utc": "2026-09-11T19:02:26.379709+00:00",
   "refresh_status": "captured",
   "coverage_percent": 96.74,
   "coverage": {
