@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-21'
+  Last verified: '2026-09-11'
 
 ______________________________________________________________________
 
@@ -66,9 +66,10 @@ copying these integers forward.
 
 `families_at_budget` on the architecture scorecard (currently
 `application_services_control_plane` fan-in 2/2 and
-`composition_factories_pipeline` `files_ge_250_loc` 2/2) is a tracked residual,
+`composition_runtime_builders` fan-in 3/3) is a tracked residual,
 not a budget-growth event. Do not raise the fan-in or loc caps; keep new
-internal imports and oversized files flat.
+internal imports and oversized files flat. `composition_factories_pipeline`
+`files_ge_250_loc` is 0/2 (budget unchanged).
 
 ## Architecture scorecard semantics
 

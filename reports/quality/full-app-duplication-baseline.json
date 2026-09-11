@@ -1,18 +1,20 @@
 {
   "summary": {
-    "snapshot_date": "2026-07-27",
+    "snapshot_date": "2026-09-11",
     "targets": 4,
     "total_duplicate_clusters": 0,
-    "total_raw_duplicate_clusters": 44,
-    "total_excluded_duplicate_clusters": 44
+    "total_raw_duplicate_clusters": 58,
+    "total_excluded_duplicate_clusters": 58
   },
   "normalization": {
     "exclude_module_patterns": [],
-    "exclude_actionability_categories": []
+    "exclude_actionability_categories": [
+      "export_facade_or_package_barrel"
+    ]
   },
   "trend": {
     "status": "no_prior_snapshot",
-    "snapshot_date": "2026-07-27"
+    "snapshot_date": "2026-09-11"
   },
   "reduction_leverage_ranking": [
     {
@@ -64,8 +66,8 @@
       "target": "src/bioetl/infrastructure/adapters",
       "returncode": 8,
       "duplicate_count": 0,
-      "raw_duplicate_count": 40,
-      "excluded_duplicate_count": 40,
+      "raw_duplicate_count": 51,
+      "excluded_duplicate_count": 51,
       "actionability": [],
       "top_pairs": [],
       "clusters": []
@@ -84,8 +86,8 @@
       "target": "src/bioetl/composition/bootstrap",
       "returncode": 8,
       "duplicate_count": 0,
-      "raw_duplicate_count": 1,
-      "excluded_duplicate_count": 1,
+      "raw_duplicate_count": 3,
+      "excluded_duplicate_count": 3,
       "actionability": [],
       "top_pairs": [],
       "clusters": []
@@ -94,8 +96,8 @@
       "target": "src/bioetl/interfaces/cli",
       "returncode": 8,
       "duplicate_count": 0,
-      "raw_duplicate_count": 2,
-      "excluded_duplicate_count": 2,
+      "raw_duplicate_count": 3,
+      "excluded_duplicate_count": 3,
       "actionability": [
         {
           "category": "cli_command_contract_shell",
