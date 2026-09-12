@@ -48,14 +48,14 @@ bioetl = "bioetl.interfaces.cli:main"
 [project.optional-dependencies]
 agentdebugx = [
     # Optional, subprocess-only diagnostic producer. Keep exact for reproducibility.
-    "agentdebugx==0.3.1",
+    "agentdebugx==0.5.2",
 ]
 proofagent = [
     # Optional, subprocess-only advisory evidence producer. Keep exact for reproducibility.
     "proofagent-harness==0.12.1",
 ]
 agent-tools = [
-    "agentdebugx==0.3.1",
+    "agentdebugx==0.5.2",
     "proofagent-harness==0.12.1",
 ]
 tracing = [
