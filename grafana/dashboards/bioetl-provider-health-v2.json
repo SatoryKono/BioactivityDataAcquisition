@@ -310,7 +310,7 @@
   "panels": [
     {
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 0
@@ -404,10 +404,10 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 16,
         "x": 0,
-        "y": 3
+        "y": 4
       },
       "description": "Scope and evidence: provider health is determined from provider telemetry. Fleet panels cover all providers; selected-provider panels use `$provider`. Pipeline, workflow, run type, run ID, identity, and processed-record data are supporting context and do not determine provider health. Missing current-status telemetry means UNKNOWN, not healthy. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: provider=${provider} · adapter=${adapter} · pipeline_context=${pipeline_context}.",
       "options": {
@@ -422,10 +422,10 @@
       "type": "stat",
       "title": "Monitor Selected Provider",
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 8,
         "x": 16,
-        "y": 3
+        "y": 4
       },
       "datasource": {
         "type": "prometheus",
@@ -625,7 +625,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             },
@@ -635,7 +635,7 @@
                 "match": "nan",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             }
@@ -734,7 +734,7 @@
                     "options": {
                       "0": {
                         "text": "OK",
-                        "color": "green"
+                        "color": "#166534"
                       },
                       "1": {
                         "text": "WARN",
@@ -746,7 +746,7 @@
                       },
                       "3": {
                         "text": "UNKNOWN",
-                        "color": "gray"
+                        "color": "#555555"
                       }
                     }
                   },
@@ -756,7 +756,7 @@
                       "match": "null",
                       "result": {
                         "text": "UNKNOWN",
-                        "color": "gray"
+                        "color": "#555555"
                       }
                     }
                   },
@@ -766,7 +766,7 @@
                       "match": "nan",
                       "result": {
                         "text": "UNKNOWN",
-                        "color": "gray"
+                        "color": "#555555"
                       }
                     }
                   }
@@ -875,7 +875,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             },
@@ -885,7 +885,7 @@
                 "match": "nan",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "#555555"
                 }
               }
             }
@@ -952,7 +952,7 @@
                     "options": {
                       "0": {
                         "text": "OK",
-                        "color": "green"
+                        "color": "#166534"
                       },
                       "1": {
                         "text": "WARN",
@@ -964,7 +964,7 @@
                       },
                       "3": {
                         "text": "UNKNOWN",
-                        "color": "gray"
+                        "color": "#555555"
                       }
                     }
                   },
@@ -974,7 +974,7 @@
                       "match": "null",
                       "result": {
                         "text": "UNKNOWN",
-                        "color": "gray"
+                        "color": "#555555"
                       }
                     }
                   },
@@ -984,7 +984,7 @@
                       "match": "nan",
                       "result": {
                         "text": "UNKNOWN",
-                        "color": "gray"
+                        "color": "#555555"
                       }
                     }
                   }
@@ -1072,7 +1072,7 @@
                     "options": {
                       "0": {
                         "text": "OK",
-                        "color": "green"
+                        "color": "#166534"
                       },
                       "1": {
                         "text": "WARN",
@@ -1084,7 +1084,7 @@
                       },
                       "3": {
                         "text": "UNKNOWN",
-                        "color": "gray"
+                        "color": "#555555"
                       }
                     }
                   },
@@ -1094,7 +1094,7 @@
                       "match": "null",
                       "result": {
                         "text": "UNKNOWN",
-                        "color": "gray"
+                        "color": "#555555"
                       }
                     }
                   }
@@ -1107,7 +1107,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text",
+                  "type": "color-background",
+                  "mode": "basic",
                   "wrapText": false
                 }
               }
@@ -1337,7 +1338,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "#555555"
                     }
                   }
                 }
@@ -1412,7 +1413,7 @@
                         "options": {
                           "0": {
                             "text": "OK",
-                            "color": "green"
+                            "color": "#166534"
                           },
                           "1": {
                             "text": "WARN",
@@ -1424,7 +1425,7 @@
                           },
                           "3": {
                             "text": "UNKNOWN",
-                            "color": "gray"
+                            "color": "#555555"
                           }
                         }
                       },
@@ -1434,7 +1435,7 @@
                           "match": "null",
                           "result": {
                             "text": "UNKNOWN",
-                            "color": "gray"
+                            "color": "#555555"
                           }
                         }
                       },
@@ -1444,7 +1445,7 @@
                           "match": "nan",
                           "result": {
                             "text": "UNKNOWN",
-                            "color": "gray"
+                            "color": "#555555"
                           }
                         }
                       }

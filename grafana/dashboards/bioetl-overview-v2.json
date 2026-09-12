@@ -228,7 +228,7 @@
   "panels": [
     {
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 0
@@ -322,7 +322,7 @@
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 3
+        "y": 4
       },
       "id": 99,
       "options": {
@@ -343,7 +343,7 @@
         "h": 5,
         "w": 16,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Compact pipeline_run_report_v1 identity, status, and coverage. Gold out and contract exclusions stay in Run Explorer. This strip is the selected UUID, not CURRENT fleet. Missing run is VALID EMPTY / SELECT RUN, not OK. Do not treat Monitor Fleet Health or Review First Action as this run. Backend unavailable means the query could not be evaluated. Verify /health/live. Coverage chip is IN RANGE / OUT OF RANGE / UNKNOWN from covers_selected_run. Set range to run opens Run Explorer 3022 at from_ms..to_ms. A covered run does not show an outside-range warning.",
@@ -674,7 +674,7 @@
         "h": 5,
         "w": 8,
         "x": 16,
-        "y": 6
+        "y": 7
       },
       "id": 214,
       "options": {
@@ -737,10 +737,10 @@
       "type": "table",
       "title": "Review First Action",
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 16,
         "x": 0,
-        "y": 11
+        "y": 12
       },
       "datasource": {
         "type": "prometheus",
@@ -1169,10 +1169,10 @@
       "type": "table",
       "title": "Review Domain Status",
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 8,
         "x": 16,
-        "y": 11
+        "y": 12
       },
       "datasource": {
         "type": "prometheus",

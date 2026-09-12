@@ -239,7 +239,7 @@
   "panels": [
     {
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 0
@@ -337,7 +337,7 @@
         "h": 3,
         "w": 16,
         "x": 0,
-        "y": 3
+        "y": 4
       },
       "options": {
         "mode": "html",
@@ -355,7 +355,7 @@
         "h": 3,
         "w": 8,
         "x": 16,
-        "y": 3
+        "y": 4
       },
       "datasource": {
         "type": "prometheus",
@@ -460,7 +460,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "options": {
         "mode": "html",
@@ -485,7 +485,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 8
+        "y": 9
       },
       "datasource": {
         "type": "prometheus",
@@ -1064,10 +1064,10 @@
       "title": "Monitor Current Alerts",
       "description": "CURRENT · Do not put full UUIDs into Prometheus labels. Instant ALERTS snapshot (firing/pending). Pair with Alert State History as one temporal chain. VALID_EMPTY when none VALID EMPTY (no events) is not TELEMETRY MISSING.",
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 13
       },
       "datasource": {
         "type": "prometheus",
@@ -1243,7 +1243,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 24
+            "y": 23
           },
           "datasource": {
             "type": "prometheus",
@@ -1327,7 +1327,7 @@
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 32
+            "y": 31
           },
           "options": {
             "mode": "html",
@@ -1358,7 +1358,7 @@
             "h": 7,
             "w": 8,
             "x": 0,
-            "y": 37
+            "y": 36
           },
           "datasource": {
             "type": "prometheus",
@@ -1547,7 +1547,7 @@
             "h": 7,
             "w": 8,
             "x": 8,
-            "y": 37
+            "y": 36
           },
           "datasource": {
             "type": "prometheus",
@@ -1736,7 +1736,7 @@
             "h": 7,
             "w": 8,
             "x": 16,
-            "y": 37
+            "y": 36
           },
           "datasource": {
             "type": "prometheus",

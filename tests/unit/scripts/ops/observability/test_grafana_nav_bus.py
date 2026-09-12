@@ -96,7 +96,7 @@ def test_nav_tooltips_describe_resets_and_escape_html_attributes() -> None:
 def test_overflow_reclamation_uses_root_panels_and_keeps_minimum_height() -> None:
     nav = _panel(1000, "text", y=0, height=4)
     slack = _panel(1001, "text", y=4, height=4)
-    first_window = _panel(1002, "table", y=12, height=7)
+    first_window = _panel(1002, "table", y=12, height=6)
     nested = _panel(9601, "table", y=15, height=6)
     collapsed_row = _panel(9600, "row", y=18, height=1, nested=[nested])
     panels: list[object] = [nav, slack, first_window, collapsed_row]
@@ -114,7 +114,7 @@ def test_overflow_reclamation_uses_root_panels_and_keeps_minimum_height() -> Non
 def test_overflow_reclamation_fails_when_no_text_rail_has_slack() -> None:
     nav = _panel(1000, "text", y=0, height=4)
     too_short = _panel(1001, "text", y=4, height=3)
-    overflowing = _panel(1002, "table", y=12, height=8)
+    overflowing = _panel(1002, "table", y=12, height=6)
 
     with pytest.raises(SystemExit, match="no protected layout band can reclaim"):
         nav_bus._reclaim_first_window_overflow(nav, [nav, too_short, overflowing])
@@ -160,12 +160,13 @@ def test_trust_layout_preserves_scalar_area_and_readable_cta() -> None:
     nav_bus._layout_control_plane_first_window(panels)
     nav_bus._normalize_collapsed_row_children(panels)
 
-    assert scope["gridPos"] == {"x": 0, "y": 3, "w": 16, "h": 3}
-    assert status["gridPos"] == {"x": 16, "y": 3, "w": 8, "h": 3}
+    assert scope["gridPos"] == {"x": 0, "y": 4, "w": 16, "h": 3}
+    assert status["gridPos"] == {"x": 16, "y": 4, "w": 8, "h": 3}
     assert status["gridPos"]["w"] * status["gridPos"]["h"] == 24
-    assert trust["gridPos"]["y"] == retention["gridPos"]["y"] == 6
+    assert trust["gridPos"]["y"] == retention["gridPos"]["y"] == 7
+    assert trust["gridPos"]["h"] == retention["gridPos"]["h"] == 4
     assert all(kpi["gridPos"]["y"] == 14 for kpi in kpis)
-    assert recovery["gridPos"] == {"x": 0, "y": 11, "w": 12, "h": 3}
+    assert recovery["gridPos"] == {"x": 0, "y": 11, "w": 24, "h": 3}
     assert collapsed_row["gridPos"]["y"] == 17
     assert nested["gridPos"]["y"] == 18
     assert nav_bus._first_window_overflow(panels) == 0
@@ -186,8 +187,8 @@ def test_run_explorer_restores_scope_and_compacts_reviewed_table() -> None:
     )
 
     assert scope["gridPos"] == {"x": 0, "y": 4, "w": 24, "h": 3}
-    assert browse["gridPos"] == {"x": 0, "y": 7, "w": 24, "h": 11}
-    assert collapsed_row["gridPos"]["y"] == 18
+    assert browse["gridPos"] == {"x": 0, "y": 7, "w": 24, "h": 10}
+    assert collapsed_row["gridPos"]["y"] == 17
 
 
 def test_apply_to_dashboard_expands_nav_and_reclaims_first_window(
@@ -199,7 +200,7 @@ def test_apply_to_dashboard_expands_nav_and_reclaims_first_window(
         "templating": {"list": []},
         "panels": [
             _panel(1000, "text", y=0, height=3),
-            _panel(1001, "text", y=3, height=4),
+            _panel(1001, "text", y=3, height=5),
             _panel(1002, "table", y=8, height=10),
         ],
     }
@@ -213,7 +214,7 @@ def test_apply_to_dashboard_expands_nav_and_reclaims_first_window(
 
     rendered = json.loads(dashboard.read_text(encoding="utf-8"))
     nav, slack, first_window = rendered["panels"]
-    assert nav["gridPos"] == {"x": 0, "y": 0, "w": 24, "h": 3}
-    assert slack["gridPos"]["h"] == 4
-    assert first_window["gridPos"]["y"] + first_window["gridPos"]["h"] == 18
+    assert nav["gridPos"] == {"x": 0, "y": 0, "w": 24, "h": 4}
+    assert slack["gridPos"]["h"] == 3
+    assert first_window["gridPos"]["y"] + first_window["gridPos"]["h"] == 17
     assert len(nav["links"]) == 6
