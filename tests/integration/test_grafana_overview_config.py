@@ -149,16 +149,16 @@ def test_run_id_selector_is_control_plane_backed_table_query() -> None:
 def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() -> None:
     """Epic #6570/#6573/DRM-R: Status/First Action/Inputs on first path; shell lazy."""
     panels = _panels_by_title()
-    # Stable panel IDs; coordinates are contractual bands (not frozen DUX pixels).
+    # Stable panel IDs; y-bands sit under the shared nav (h=4), not nav-h=3.
     assert panels["Inspect Scope & Evidence"].get("id") == 99
     assert panels["Monitor Fleet Health"].get("id") == 214
     assert panels["Review First Action"].get("id") == 215
     assert panels["Review Domain Status"].get("id") == 9002
-    assert panels["Inspect Scope & Evidence"].get("gridPos", {}).get("y") == 3
+    assert panels["Inspect Scope & Evidence"].get("gridPos", {}).get("y") == 4
     assert panels["Review Selected Run Summary"].get("id") == 9603
-    assert panels["Review Selected Run Summary"].get("gridPos", {}).get("y") == 6
-    assert panels["Monitor Fleet Health"].get("gridPos", {}).get("y") == 6
-    assert panels["Review First Action"].get("gridPos", {}).get("y") == 11
+    assert panels["Review Selected Run Summary"].get("gridPos", {}).get("y") == 7
+    assert panels["Monitor Fleet Health"].get("gridPos", {}).get("y") == 7
+    assert panels["Review First Action"].get("gridPos", {}).get("y") == 12
     assert panels["Review Domain Status"].get("gridPos", {}).get("y") == panels[
         "Review First Action"
     ].get("gridPos", {}).get("y")

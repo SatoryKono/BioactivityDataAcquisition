@@ -151,16 +151,6 @@ def test_provenance_panel_readability_contract(
         if item.get("gridPos", {}).get("y") == panel["gridPos"]["y"]
         and item.get("id") != panel_id
     ]
-    companion_min_h = (
-        3
-        if filename
-        in {
-            "bioetl-control-plane-v1.json",
-            "bioetl-runtime.json",
-            "bioetl-incident-v1.json",
-            "bioetl-dq-v2.json",
-        }
-        else 4
-    )
+    companion_min_h = 3 if filename in _FIRST_WINDOW_H3 else 4
     for companion in companions:
         assert companion["gridPos"]["h"] >= companion_min_h

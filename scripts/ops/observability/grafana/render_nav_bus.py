@@ -494,50 +494,110 @@ def _compact_shared_band(
     )
 
 
+def _fallback_compaction_anchor(
+    panel: dict[str, object],
+    *,
+    minimums: dict[int, int],
+    overflow: int,
+) -> tuple[int, int] | None:
+    panel_id = panel.get("id")
+    minimum_height = minimums.get(panel_id) if isinstance(panel_id, int) else None
+    geometry = _panel_geometry(panel)
+    if minimum_height is None or geometry is None:
+        return None
+    _, y, height = geometry
+    if y >= VIEWPORT_ROWS or height - overflow < minimum_height:
+        return None
+    return y, y + height
+
+
+def _fallback_sibling_joins_band(
+    sibling: dict[str, object],
+    *,
+    band_y: int,
+    old_bottom: int,
+    overflow: int,
+    minimums: dict[int, int],
+) -> bool:
+    if sibling.get("type") == "row":
+        return False
+    sibling_geometry = _panel_geometry(sibling)
+    if sibling_geometry is None:
+        return False
+    _, sibling_y, sibling_height = sibling_geometry
+    if sibling_y != band_y or sibling_y + sibling_height != old_bottom:
+        return False
+    sibling_id = sibling.get("id")
+    sibling_min = minimums.get(sibling_id) if isinstance(sibling_id, int) else None
+    compacted = sibling_height - overflow
+    if sibling_min is not None:
+        return compacted >= sibling_min
+    return compacted >= 3
+
+
+def _fallback_compaction_band(
+    panels: list[object],
+    *,
+    y: int,
+    old_bottom: int,
+    overflow: int,
+    minimums: dict[int, int],
+) -> list[dict[str, object]]:
+    return [
+        sibling
+        for sibling in _root_panels(panels)
+        if _fallback_sibling_joins_band(
+            sibling,
+            band_y=y,
+            old_bottom=old_bottom,
+            overflow=overflow,
+            minimums=minimums,
+        )
+    ]
+
+
+def _apply_fallback_compaction(
+    panels: list[object],
+    band: list[dict[str, object]],
+    *,
+    old_bottom: int,
+    overflow: int,
+) -> None:
+    for sibling in band:
+        sibling_grid = _panel_grid(sibling)
+        if sibling_grid is None:
+            raise SystemExit("fallback compaction panel is missing gridPos")
+        sibling_grid["h"] = int(sibling_grid["h"]) - overflow
+    _shift_root_panels_up(
+        panels,
+        excluded_ids=frozenset({id(sibling) for sibling in band}),
+        from_y=old_bottom,
+        delta=overflow,
+    )
+
+
 def _compact_fallback_panel(
     panels: list[object], *, current_uid: str, overflow: int
 ) -> bool:
     minimums = _FALLBACK_COMPACTION_HEIGHTS.get(current_uid, {})
     for panel in _root_panels(panels):
-        panel_id = panel.get("id")
-        minimum_height = minimums.get(panel_id) if isinstance(panel_id, int) else None
-        geometry = _panel_geometry(panel)
-        if minimum_height is None or geometry is None:
+        anchor = _fallback_compaction_anchor(
+            panel, minimums=minimums, overflow=overflow
+        )
+        if anchor is None:
             continue
-        grid, y, height = geometry
-        if y >= VIEWPORT_ROWS:
-            continue
-        if height - overflow < minimum_height:
-            continue
-        old_bottom = y + height
-        band: list[dict[str, object]] = []
-        for sibling in _root_panels(panels):
-            sibling_geometry = _panel_geometry(sibling)
-            if sibling.get("type") == "row" or sibling_geometry is None:
-                continue
-            _, sibling_y, sibling_height = sibling_geometry
-            if sibling_y == y and sibling_y + sibling_height == old_bottom:
-                sibling_id = sibling.get("id")
-                sibling_min = (
-                    minimums.get(sibling_id) if isinstance(sibling_id, int) else None
-                )
-                if sibling_min is not None and sibling_height - overflow < sibling_min:
-                    continue
-                if sibling_height - overflow < 3 and sibling_min is None:
-                    continue
-                band.append(sibling)
+        y, old_bottom = anchor
+        band = _fallback_compaction_band(
+            panels,
+            y=y,
+            old_bottom=old_bottom,
+            overflow=overflow,
+            minimums=minimums,
+        )
         if not band:
             continue
-        for sibling in band:
-            sibling_grid = _panel_grid(sibling)
-            if sibling_grid is None:
-                raise SystemExit("fallback compaction panel is missing gridPos")
-            sibling_grid["h"] = int(sibling_grid["h"]) - overflow
-        _shift_root_panels_up(
-            panels,
-            excluded_ids=frozenset({id(sibling) for sibling in band}),
-            from_y=old_bottom,
-            delta=overflow,
+        _apply_fallback_compaction(
+            panels, band, old_bottom=old_bottom, overflow=overflow
         )
         return True
     return False
@@ -575,42 +635,23 @@ def _shift_panel_tree(panel: dict[str, object], *, delta: int) -> None:
             grid["y"] = int(grid["y"]) + delta
 
 
-def _layout_control_plane_first_window(panels: list[object]) -> None:
-    """Keep Trust density/readability while fitting the canonical h=3 nav."""
-    root = _root_panels(panels)
-    by_id = {panel.get("id"): panel for panel in root}
-    missing = set(_CONTROL_PLANE_FIRST_WINDOW_GEOMETRY) - set(by_id)
-    if missing:
-        raise SystemExit(
-            f"bioetl-control-plane-v1: missing layout panels {sorted(missing)}"
-        )
-    rows = [panel for panel in root if panel.get("type") == "row"]
-    row_geometries = [
-        geometry for row in rows if (geometry := _panel_geometry(row)) is not None
-    ]
-    if not row_geometries:
-        raise SystemExit("bioetl-control-plane-v1: missing collapsed detail rows")
-    first_row_y = min(y for _, y, _ in row_geometries)
+def _shift_control_plane_detail_rows(
+    root: list[dict[str, object]], *, first_row_y: int
+) -> None:
     row_delta = _CONTROL_PLANE_FIRST_DETAIL_ROW_Y - first_row_y
-    if row_delta:
-        for panel in root:
-            geometry = _panel_geometry(panel)
-            if (
-                geometry is None
-                or panel.get("id") in _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY
-            ):
-                continue
-            _, y, _ = geometry
-            if y >= first_row_y:
-                _shift_panel_tree(panel, delta=row_delta)
-    for panel_id, (x, y, width, height) in _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY.items():
-        grid = _panel_grid(by_id[panel_id])
-        if grid is None:  # pragma: no cover - required panels have geometry
-            raise SystemExit(
-                f"bioetl-control-plane-v1: panel id={panel_id} missing gridPos"
-            )
-        grid.update({"x": x, "y": y, "w": width, "h": height})
-    cta = by_id[906]
+    if not row_delta:
+        return
+    protected = set(_CONTROL_PLANE_FIRST_WINDOW_GEOMETRY)
+    for panel in root:
+        geometry = _panel_geometry(panel)
+        if geometry is None or panel.get("id") in protected:
+            continue
+        _, y, _ = geometry
+        if y >= first_row_y:
+            _shift_panel_tree(panel, delta=row_delta)
+
+
+def _stamp_control_plane_recovery_cta(cta: dict[str, object]) -> None:
     cta["transparent"] = True
     options = cta.get("options")
     if not isinstance(options, dict):
@@ -622,12 +663,31 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
     cta["description"] = (
         "Next-step rail kept at readable h=3 full width on the first screen under "
         "the canonical h=4 navigation. Trust/Retention tables compact to h=4 so "
-        "the CTA does not share cells with the KPI strip. Do not replay this run if its Trust status is "
+        "the CTA does not share cells with the KPI strip. Do not replay this run "
+        "if its Trust status is "
         "INCOMPLETE or UNKNOWN. First-screen tables: Review Selected-Run Trust "
         "(9418) and Review Retention Compliance (9416). Review Lineage Validation "
         "is the first collapsed row (9419) and contains table 9415. Monitor Replay "
         "Readiness (9401) is current Prometheus for the pipeline, not this run."
     )
+
+
+def _layout_control_plane_first_window(panels: list[object]) -> None:
+    """Keep Trust density/readability while fitting the canonical h=4 nav."""
+    root = _root_panels(panels)
+    rows = [panel for panel in root if panel.get("type") == "row"]
+    row_geometries = [
+        geometry for row in rows if (geometry := _panel_geometry(row)) is not None
+    ]
+    if not row_geometries:
+        raise SystemExit("bioetl-control-plane-v1: missing collapsed detail rows")
+    first_row_y = min(y for _, y, _ in row_geometries)
+    _shift_control_plane_detail_rows(root, first_row_y=first_row_y)
+    _apply_first_window_geometry(
+        panels, _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY, uid="bioetl-control-plane-v1"
+    )
+    by_id = {panel.get("id"): panel for panel in root}
+    _stamp_control_plane_recovery_cta(by_id[906])
 
 
 def _apply_first_window_geometry(
