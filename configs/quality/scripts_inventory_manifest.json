@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-11T23:05:28.033973+00:00",
+  "generated_at": "2026-09-11T23:58:58.054948+00:00",
   "summary": {
     "total_scripts": 616,
     "status_counts": {
@@ -12811,7 +12811,7 @@
         },
         {
           "path": "tests/integration/test_grafana_render_first_remediation.py",
-          "line": 1541,
+          "line": 1542,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         },
@@ -20280,7 +20280,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 633,
+          "line": 763,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },

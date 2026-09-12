@@ -694,9 +694,7 @@ def _layout_uid_first_window(panels: list[object], *, current_uid: str) -> None:
         )
         return
     if current_uid == "bioetl-dq-v2":
-        _apply_first_window_geometry(
-            panels, _DQ_FIRST_WINDOW_GEOMETRY, uid=current_uid
-        )
+        _apply_first_window_geometry(panels, _DQ_FIRST_WINDOW_GEOMETRY, uid=current_uid)
         _pin_collapsed_rows_from(
             panels,
             target_y=18,
