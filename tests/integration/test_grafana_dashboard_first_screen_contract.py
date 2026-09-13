@@ -456,11 +456,12 @@ def test_dashboard_top_level_grid_positions_do_not_overlap() -> None:
         overlaps: list[str] = []
         for index, left in enumerate(panels):
             for right in panels[index + 1 :]:
-                if _panels_overlap(left, right):
-                    overlaps.append(
-                        f"{left.get('id')}:{left.get('title')} overlaps "
-                        f"{right.get('id')}:{right.get('title')}"
-                    )
+                if not _panels_overlap(left, right):
+                    continue
+                overlaps.append(
+                    f"{left.get('id')}:{left.get('title')} overlaps "
+                    f"{right.get('id')}:{right.get('title')}"
+                )
 
         assert not overlaps, (
             f"{dashboard_path.name} has overlapping top-level grid positions: "
@@ -479,7 +480,7 @@ def test_dashboard_top_level_grid_positions_do_not_leave_root_gaps() -> None:
         ]
         gaps = _root_empty_segments(panels)
         # 1fee6a viewport-fit: DQ 9406 h4 y13 bottom17 leaves row 17 empty
-        # before collapsed row at y18; incident keeps bottom17 with y12 h5.
+        # before collapsed row at y18; incident keeps bottom17 with y13 h4.
         # Allow the documented single-row gap for dq-v2.
         if dashboard_path.name == "bioetl-dq-v2.json" and gaps == [(17, 17)]:
             continue
@@ -730,7 +731,7 @@ def test_run_explorer_identity_is_on_the_first_screen() -> None:
     assert 9402 not in panels
     assert 9403 not in panels
     browse_grid = browse.get("gridPos") or {}
-    assert browse_grid.get("h") == 11
+    assert browse_grid.get("h") == 10
     assert int(browse_grid.get("y", 0)) + int(browse_grid.get("h", 0)) <= FIRST_WINDOW_Y
     assert panel_declared_row_cap(browse) == 10
     collapsed_ids = {
@@ -804,7 +805,7 @@ def test_incident_alert_evidence_is_collapsed_below_the_fold() -> None:
     assert 2006 not in root_ids
     assert 2007 not in root_ids
     alerts = next(panel for panel in root if panel.get("id") == 2005)
-    assert alerts.get("gridPos") == {"h": 5, "w": 24, "x": 0, "y": 12}
+    assert alerts.get("gridPos") == {"h": 4, "w": 24, "x": 0, "y": 13}
     row = next(panel for panel in root if panel.get("id") == 2020)
     assert row.get("type") == "row"
     assert row.get("collapsed") is True
