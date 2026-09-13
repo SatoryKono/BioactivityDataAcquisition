@@ -217,7 +217,7 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 0
@@ -311,7 +311,7 @@
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 3
+        "y": 4
       },
       "options": {
         "bioetlDisplayTitle": "Understand Run Scope",
@@ -334,10 +334,10 @@
       "title": "Inspect Recent Runs (last 10)",
       "description": "BROWSE · Last 10 on disk, not time-filtered; this index is not a SELECTED RUN snapshot. Latest ten pipeline-run reports found on disk for the selected pipeline. The dashboard time picker does not filter this table. Started is identity.started_at. Workflow is identity.workflow_id from that pipeline report (not the workflow-run catalog and not $workflow). Workflow run is identity.workflow_run_id (parent occurrence). $pipeline is a pipeline name (chembl_assay, chembl_target, chembl_publication), not a workflow (chembl_baseline). Workflow artifacts live under reports/run-reports/workflow/<name>/ and GET /ops/observability/workflow-run-reports. Click a Run cell to open that row's identity (viewPanel=3022) with pipeline, run_type, and run_id. The matching row is marked when $run_id is set. Pipeline and Workflow belong to each report row. Missing workflow linkage is explicit; full values are available through table inspection. Older runs: pick Run ID from the control-plane catalog (newest first); first screen is last 10 by design (limit=10). An empty table is valid when no matching reports exist for this pipeline (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem — run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. If reports are expected and the table is empty without that row, treat backend unavailable as a distinct failure and verify BioETL Ops HTTP at /health/live. SELECT RUN / VALID EMPTY is not OK.",
       "gridPos": {
-        "h": 11,
+        "h": 10,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "datasource": "BioETL Ops HTTP",
       "fieldConfig": {
@@ -388,8 +388,9 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text",
-                  "wrapText": true
+                  "type": "color-background",
+                  "wrapText": true,
+                  "mode": "basic"
                 }
               },
               {
@@ -412,7 +413,7 @@
                       },
                       "success": {
                         "text": "success",
-                        "color": "green"
+                        "color": "#166534"
                       },
                       "failed": {
                         "text": "failed",
@@ -515,8 +516,9 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text",
-                  "wrapText": true
+                  "type": "color-background",
+                  "wrapText": true,
+                  "mode": "basic"
                 }
               },
               {
@@ -666,7 +668,7 @@
                       },
                       "success": {
                         "text": "success",
-                        "color": "green"
+                        "color": "#166534"
                       },
                       "failed": {
                         "text": "failed",
@@ -695,8 +697,9 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text",
-                  "wrapText": true
+                  "type": "color-background",
+                  "wrapText": true,
+                  "mode": "basic"
                 }
               }
             ]
@@ -2085,7 +2088,8 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text"
+                      "type": "color-text",
+                      "mode": "basic"
                     }
                   },
                   {
@@ -2309,7 +2313,8 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "wrapText": false
+                      "wrapText": false,
+                      "mode": "basic"
                     }
                   }
                 ]
