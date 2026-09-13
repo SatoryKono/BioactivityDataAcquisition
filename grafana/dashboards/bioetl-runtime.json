@@ -287,7 +287,7 @@
   "panels": [
     {
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 0
@@ -384,7 +384,7 @@
         "h": 3,
         "w": 16,
         "x": 0,
-        "y": 3
+        "y": 4
       },
       "description": "Distinguishes CURRENT Prometheus state, SELECTED RUN HTTP evidence, and selected-range history for Pipeline and Run Type. Run ID never filters Prometheus; Stage and collection states are context, not delivery proof. UNKNOWN means evidence is incomplete Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: stage=${stage} · provider_hint=${provider_hint}.",
       "options": {
@@ -402,7 +402,7 @@
         "h": 3,
         "w": 8,
         "x": 16,
-        "y": 3
+        "y": 4
       },
       "datasource": {
         "type": "prometheus",
@@ -760,7 +760,7 @@
         "h": 6,
         "w": 16,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "id": 9101,
       "options": {
@@ -968,7 +968,7 @@
         "h": 6,
         "w": 8,
         "x": 16,
-        "y": 6
+        "y": 7
       },
       "id": 9102,
       "options": {
@@ -1036,7 +1036,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 13
       },
       "description": "Contains current detection evidence and selected-range trends for the active Pipeline scope. These panels support Pipeline Health; Run ID never filters Prometheus",
       "panels": [
@@ -1802,7 +1802,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 14
       },
       "description": "Contains selected-range duration, error, and record evidence used to localize a runtime cause. These panels support but do not independently determine current Pipeline Health",
       "panels": [
@@ -2369,7 +2369,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 15
       },
       "description": "Contains Runtime-owned escalation signals and handoffs to other domain dashboards. Use it after detection and localization identify the likely owner",
       "panels": [
@@ -3298,7 +3298,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 16
       },
       "id": 9992,
       "description": "Contains secondary lag, blocker-count, and failed-run evidence. These panels support the first-screen Pipeline Health verdict and stay collapsed until the primary path requires more context",
@@ -3561,7 +3561,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 17
       },
       "id": 9993,
       "description": "Contains compact HTTP-backed evidence for the selected run. Run Explorer is the canonical exact-run surface; aggregate scope does not guess an exact manifest, and Run ID never becomes a Prometheus label",
@@ -4478,7 +4478,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 18
       },
       "id": 9994,
       "description": "Contains selected-range workflow failure evidence merged into Pipeline Diagnostics. These panels support localization and do not determine current Pipeline Health",
