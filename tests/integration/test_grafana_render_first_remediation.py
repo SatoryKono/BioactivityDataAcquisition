@@ -202,12 +202,12 @@ def test_dq_duplicate_validation_fact_is_removed_and_grid_is_compacted() -> None
     assert "or vector(0)" not in canonical["targets"][0]["expr"]
 
     expected_geometry = {
-        3: {"x": 6, "y": 61, "w": 6, "h": 4},
-        4: {"x": 0, "y": 61, "w": 6, "h": 4},
-        101: {"x": 12, "y": 61, "w": 6, "h": 4},
-        9: {"x": 18, "y": 61, "w": 6, "h": 4},
-        12: {"x": 0, "y": 65, "w": 6, "h": 4},
-        151: {"x": 6, "y": 65, "w": 6, "h": 4},
+        3: {"x": 6, "y": 60, "w": 6, "h": 4},
+        4: {"x": 0, "y": 60, "w": 6, "h": 4},
+        101: {"x": 12, "y": 60, "w": 6, "h": 4},
+        9: {"x": 18, "y": 60, "w": 6, "h": 4},
+        12: {"x": 0, "y": 64, "w": 6, "h": 4},
+        151: {"x": 6, "y": 64, "w": 6, "h": 4},
     }
     for panel_id, geometry in expected_geometry.items():
         assert panels[panel_id]["gridPos"] == geometry
@@ -494,7 +494,8 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
     assert all(panel.get("collapsed") is True for panel in control_rows)
     assert all(panel.get("panels") for panel in control_rows)
     first_row_y = min(panel["gridPos"]["y"] for panel in control_rows)
-    # The row header ends at the logical data fold; expanded children start at 18.
+    # Nav h=4 occupies y=0..4. The first collapsed row sits on the last first-window
+    # row; expanded children start at FIRST_WINDOW_Y.
     assert first_row_y + 1 == FIRST_WINDOW_Y
     assert [panel["gridPos"]["y"] for panel in control_rows] == list(
         range(first_row_y, first_row_y + len(control_rows))
@@ -919,7 +920,7 @@ def test_incident_alert_history_has_readable_full_width_layout() -> None:
     assert impact.get("gridPos", {}).get("y", 0) >= (
         history_grid.get("y", 0) + history_grid.get("h", 0)
     )
-    assert current_alerts.get("gridPos") == {"h": 5, "w": 24, "x": 0, "y": 12}
+    assert current_alerts.get("gridPos") == {"h": 4, "w": 24, "x": 0, "y": 13}
     assert "ALERTS" in str(history.get("targets", [{}])[0].get("expr", ""))
     assert str(history.get("targets", [{}])[0].get("legendFormat", "")).startswith(
         "{{alertname}}"
@@ -1217,7 +1218,7 @@ def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     assert "run_type" in hidden
     assert "message" in hidden
     grid = recent.get("gridPos") or {}
-    assert int(grid.get("h") or 0) == 11
+    assert int(grid.get("h") or 0) == 10
     assert recent.get("options", {}).get("cellHeight") == "lg"
     assert (recent.get("transformations") or [{}])[0].get("options", {}).get(
         "limitField"
@@ -1507,7 +1508,7 @@ def test_runtime_first_action_separates_endpoint_from_completeness() -> None:
     runtime = _load("bioetl-runtime.json")
     coverage = _panel(runtime, 9102)
     blockers = _panel(runtime, 9101)
-    assert blockers["gridPos"]["y"] <= 6
+    assert blockers["gridPos"]["y"] <= 7
     assert coverage["options"]["colorMode"] == "value"
     assert {target["legendFormat"] for target in coverage["targets"]} == {
         "Endpoint",
