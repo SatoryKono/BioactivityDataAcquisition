@@ -134,18 +134,18 @@ let all_ids = [
     "architecture",
 ];
 let all_prompts = [
-    "docs/00-project/ai/prompts/library/audit/docs-content.md",
-    "docs/00-project/ai/prompts/library/audit/tests-system.md",
+    "docs/00-project/ai/prompts/library/doc/audit.md",
+    "docs/00-project/ai/prompts/library/test/system-audit.md",
     "docs/00-project/ai/prompts/library/audit/tech-debt.md",
     "docs/00-project/ai/prompts/library/audit/repo-tree.md",
     "docs/00-project/ai/prompts/library/audit/github-actions.md",
     "docs/00-project/ai/prompts/library/audit/agents-runtime.md",
     "docs/00-project/ai/prompts/library/audit/diagrams.md",
-    "docs/00-project/ai/prompts/library/audit/docs-pipeline.md",
-    "docs/00-project/ai/prompts/library/architecture/review-assessment.md",
+    "docs/00-project/ai/prompts/library/doc/pipeline.md",
+    "docs/00-project/ai/prompts/library/audit/architecture-review.md",
 ];
 let all_prompt_ids = [
-    "prompt.audit.docs-content",
+    "prompt.docs.audit",
     "prompt.audit.tests-system",
     "prompt.audit.tech-debt",
     "prompt.audit.repo-tree",
@@ -238,14 +238,15 @@ while j < selected.len() {
     p += "2) Use grep, read_file, list_dir, and safe run_terminal_command for evidence.\n";
     p += "3) Findings need path-level evidence; status PROVEN or NOT_PROVEN; priority P0-P3.\n";
     p += "4) BioETL facts: Python/pytest/GHA/local-only; root-allowlist; debt budgets must not increase.\n";
-    p += "5) Write " + art + "/report.md and " + art + "/findings.json.\n";
-    p += "6) Return structured output matching the schema.\n";
+    p += "5) Do not write the product tree. Return structured findings only.\n";
+    p += "6) Parent synthesizer persists " + art + "/report.md and " + art + "/findings.json under reports/audit only.\n";
+    p += "7) Return structured output matching the schema.\n";
     p += "Empty findings is valid only after real inventory of SCOPE.\n";
 
     jobs.push(#{
         prompt: p,
         label: "audit:" + domain_id,
-        capability_mode: "read-write",
+        capability_mode: "read-only",
         output_schema: domain_result_schema,
     });
     j += 1;
@@ -282,6 +283,8 @@ let synth_prompt = "";
 synth_prompt += "You synthesize a multi-domain BioETL project audit.\n";
 synth_prompt += "LANGUAGE=" + language + ".\n";
 synth_prompt += "Read domain reports under reports/audit/*/report.md when present.\n";
+synth_prompt += "Write each domain report.md + findings.json under its artifact_dir from structured outputs.\n";
+synth_prompt += "Write only under reports/audit/**. Do not modify product code, configs, or docs.\n";
 synth_prompt += "Domain agent outputs (re-check top P0/P1 paths with tools):\n";
 synth_prompt += json_encode(domain_outputs) + "\n\n";
 synth_prompt += "Failed domains: " + json_encode(failed_domains) + "\n\n";

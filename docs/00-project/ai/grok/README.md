@@ -12,6 +12,7 @@ paths and host config). Tracked sources for operators live here.
 | `skills/*/SKILL.md` | Project skill sources (install to Grok skill dirs) |
 | `agents/*.md` | Tracked Grok child agents (`mcpInheritance.named`, no `github`) |
 | `personas/*.toml` | Overlay personas (no tools/MCP; enable via `/personas`) |
+| `scripts/ai/grok/workflows/*.rhai` | Tracked RHAI workflows; `install_skills.ps1` copies to `.grok/workflows/` |
 | `../agents/guides/grok-operator-runbook.md` | Operator SOP |
 | `../agents/guides/grok-tui-config-checklist.md` | `~/.grok/config.toml` checklist |
 | `../agents/guides/grok-lsp-status.md` | LSP binary status notes |
@@ -32,9 +33,10 @@ paths and host config). Tracked sources for operators live here.
 .\scripts\ai\grok\install_skills.ps1 -WhatIf
 ```
 
-The same script copies `agents/*.md` into `~/.grok/agents/` and
-`personas/*.toml` into `~/.grok/personas/` (or `<repo>/.grok/` with
-`-Project`). Root `.grok/` stays gitignored.
+The same script copies `agents/*.md` into `~/.grok/agents/`,
+`personas/*.toml` into `~/.grok/personas/`, and tracked
+`scripts/ai/grok/workflows/*.rhai` into `.grok/workflows/`
+(or `<repo>/.grok/` with `-Project`). Root `.grok/` stays gitignored.
 
 After install, start a **new** Grok session (or restart TUI) so skills,
 agents, and personas are rediscovered. `/config-agents` should list `explore`,

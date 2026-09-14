@@ -97,7 +97,9 @@ Minimum expectation:
 1. **Runtime mirror parity:** after changes under `.codex/agents/**`,
    `.codex/skills/**`, `.junie/agents/**`, or `.junie/skills/**`, run
    `bash scripts/ai/junie/check_junie_mirror.sh --check` and report the
-   result. Divergences MUST be resolved before submit.
+   result. On native Windows equivalently:
+   `.\.venv-win\Scripts\python.exe scripts/ai/junie/check_junie_mirror.py --check`.
+   Divergences MUST be resolved before submit.
 1. After changes under `src/bioetl/**/*.py`, refresh
    `reports/quality/module-coverage-inventory.json` field `source_tree_sha256`
    via `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml`

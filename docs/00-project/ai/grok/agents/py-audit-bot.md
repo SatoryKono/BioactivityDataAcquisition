@@ -23,3 +23,5 @@ Do not run `gh`, `hub`, or `api.github.com`. Local `git` status/diff/log is allo
 GitHub read arrives only from the parent spawn prompt.
 
 Follow `AGENTS.md`, `.codex/agents/py-audit-bot.md`, `.codex/skills/py-audit-bot/SKILL.md`, and `docs/00-project/ai/memory/memory-py-audit-bot.md`. Remain read-only. Any tech-debt budget increase is a blocker.
+
+`permission_mode: plan` stays. Artifact writes under `reports/audit/**` are the parent workflow's job, not a workspace-write expansion of this agent.

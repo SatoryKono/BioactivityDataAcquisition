@@ -70,7 +70,7 @@
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.factories.pipeline.transformer_builder",
       "bounded_growth_budgets": {
-        "files_ge_250_loc": 2,
+        "files_ge_250_loc": 0,
         "max_internal_fan_in": 3
       },
       "budget_warnings": [],

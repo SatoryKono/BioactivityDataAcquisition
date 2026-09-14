@@ -31,6 +31,38 @@ def test_gitignore_ignores_dotenv_and_keeps_example() -> None:
     assert not_ignored.returncode == 1
 
 
+def test_gitignore_coderabbit_auth_log_stays_ignored() -> None:
+    """TREE-003 / #10415: coderabbit un-ignore must not un-ignore auth dumps."""
+    probe = "reports/quality/coderabbit/setup-20260914/auth.log"
+    ignored = subprocess.check_output(
+        ["git", "check-ignore", "-v", "--no-index", probe],
+        cwd=ROOT,
+        text=True,
+    )
+    last_rule = ignored.strip().split("\t", 1)[0].split(":", 1)[-1]
+    assert not last_rule.startswith("!"), ignored
+    assert "auth.*" in last_rule or last_rule.endswith("*.log")
+
+
+def test_gitignore_grafana_reviewer_zips_are_ignored() -> None:
+    """TREE-002 / #10414: grafana reviewer zip archives stay out of git."""
+    probe = "reports/audit/grafana/grafana-10164-reviewer-evidence.zip"
+    ignored = subprocess.check_output(
+        ["git", "check-ignore", "-v", "--no-index", probe],
+        cwd=ROOT,
+        text=True,
+    )
+    assert ".gitignore:" in ignored
+    last_rule = ignored.strip().split("\t", 1)[0].split(":", 1)[-1]
+    assert not last_rule.startswith("!"), ignored
+    tracked = subprocess.check_output(
+        ["git", "ls-files", "reports/audit/grafana/*.zip"],
+        cwd=ROOT,
+        text=True,
+    )
+    assert tracked.strip() == ""
+
+
 def test_gitignore_last_match_keeps_agents_skill_unignore() -> None:
     gitignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
     marker = "!.agents/skills/*/SKILL.md"

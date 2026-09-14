@@ -145,17 +145,17 @@ fn arg_bool(a, key, default_val) {
 let ALL_DOMAINS = [
     #{
         id: "docs-content",
-        prompt_id: "prompt.audit.docs-content",
+        prompt_id: "prompt.docs.audit",
         report_dir: "reports/audit/docs-content",
         scope: "README.md docs/",
-        card_path: "docs/00-project/ai/prompts/library/audit/docs-content.md",
+        card_path: "docs/00-project/ai/prompts/library/doc/audit.md",
     },
     #{
         id: "tests-system",
         prompt_id: "prompt.audit.tests-system",
         report_dir: "reports/audit/tests",
         scope: "tests/ configs/quality/",
-        card_path: "docs/00-project/ai/prompts/library/audit/tests-system.md",
+        card_path: "docs/00-project/ai/prompts/library/test/system-audit.md",
     },
     #{
         id: "tech-debt",
@@ -197,14 +197,14 @@ let ALL_DOMAINS = [
         prompt_id: "prompt.audit.docs-pipeline",
         report_dir: "reports/audit/docs-pipeline",
         scope: "scripts/docs/ mkdocs.yml docs/",
-        card_path: "docs/00-project/ai/prompts/library/audit/docs-pipeline.md",
+        card_path: "docs/00-project/ai/prompts/library/doc/pipeline.md",
     },
     #{
         id: "architecture-review",
         prompt_id: "prompt.architecture.review",
         report_dir: "reports/audit/architecture",
         scope: "src/bioetl/ docs/02-architecture/",
-        card_path: "docs/00-project/ai/prompts/library/architecture/review-assessment.md",
+        card_path: "docs/00-project/ai/prompts/library/audit/architecture-review.md",
     },
 ];
 
@@ -254,7 +254,8 @@ for d in selected {
     prompt += "Read AGENTS.md precedence, docs/00-project/NORMATIVE_SOURCES.md, and the card includes (evidence-contract, finding-schema, debt-budget-ban, env-guardrail). ";
     prompt += "Use tools (read_file, grep, list_dir, run_terminal_command for read-only diagnostics only). Do not edit product code. ";
     prompt += "Do NOT raise tech-debt budgets. Do NOT touch .env. Do NOT invent findings without path-level evidence (mark NOT_PROVEN). ";
-    prompt += "Write artifacts under " + d.report_dir + "/ as report.md + findings.json (finding-schema). ";
+    prompt += "Do not write the product tree. Return structured findings only. ";
+    prompt += "The parent synthesizer persists report.md + findings.json under " + d.report_dir + "/ (reports/audit only). ";
     prompt += "Return structured output: domain_id=" + d.id + ", prompt_id, surface_score 0-3, artifact_dir, blocked, summary, findings array (max 20 PROVEN preferred), top_remediations. ";
     prompt += "Answer narrative in " + language + "; keep paths/commands in original form.";
     jobs.push(#{
@@ -301,6 +302,8 @@ let syn_prompt = "";
 syn_prompt += "Synthesize BioETL nine-domain audit results. ";
 syn_prompt += "Input JSON (domain agent outputs) is in scratch file domain-outputs.json (also embedded below). ";
 syn_prompt += "Read each domain report_dir if present on disk (report.md / findings.json) and reconcile with agent outputs. ";
+syn_prompt += "Persist each domain report.md + findings.json under its artifact_dir from structured outputs. ";
+syn_prompt += "Write only under reports/audit/** and reports/audit-runs/**. Do not modify product code, configs, or docs. ";
 syn_prompt += "Compute overall_surface_score as the MIN of domain surface_scores (fail-closed). ";
 syn_prompt += "Count p0_p1 across PROVEN findings only. ";
 syn_prompt += "Write rollup to reports/audit-runs/latest-nine-domain/final-summary.md and findings-index.json (create dirs). ";

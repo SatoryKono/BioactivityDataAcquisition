@@ -15,6 +15,9 @@ ______________________________________________________________________
 
 *Reference: [ADR-017](../02-architecture/decisions/ADR-017-observability-architecture.md), [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)*
 
+Optional compose topology (ports, scrape path, networks):
+[monitoring-architecture.md](monitoring-architecture.md).
+
 > Runtime profile: Local-Only single-instance. Мониторинг ориентирован на локальный процесс BioETL и локальные endpoint'ы метрик.
 
 BioETL использует стек **Prometheus + Grafana** для обеспечения полной наблюдаемости за процессом сбора и трансформации данных. Данный документ описывает структуру системы, доступные дашборды и способы интерпретации данных.

@@ -24,6 +24,12 @@ This skill is a checklist, not a second policy.
    bash scripts/ai/junie/check_junie_mirror.sh --check
    ```
 
+   Native Windows:
+
+   ```powershell
+   .\.venv-win\Scripts\python.exe scripts/ai/junie/check_junie_mirror.py --check
+   ```
+
 4. **Module coverage inventory** — if `src/bioetl/**/*.py` changed:
 
    ```powershell

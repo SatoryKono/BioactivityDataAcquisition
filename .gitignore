@@ -176,6 +176,9 @@ log_test.txt
 # CodeRabbit campaign artifacts (CR-FULL)
 !/reports/quality/coderabbit/
 !/reports/quality/coderabbit/**
+# Last-match: logs and auth dumps stay ignored under the coderabbit un-ignore (#10415).
+reports/quality/coderabbit/**/*.log
+reports/quality/coderabbit/**/auth.*
 
 !/reports/quality/docs-open-runs-2-4-closeout-2026-07-28.md
 !/reports/quality/test-sys-2026-07-29-closeout.md
@@ -457,6 +460,8 @@ docs/site/
 docs/exports/*.merged.md
 tests.zip
 configs/pipelines.zip
+# Grafana reviewer bundles are local-only even if previously force-added (#10414).
+reports/audit/**/*.zip
 /all_fixtures.txt
 data/input/chembl_target_component.csv
 # Diagram policy (ADR-040 / DOC-GOV-02): SVG under **/svg/ remains tracked for

@@ -112,8 +112,9 @@ resolved. Full run: N done or allowed early-stop / hard stop with reason.
 
 ## Related cards
 
-- Domain audits: `prompt.audit.docs-content`, `tests-system`, `tech-debt`,
-  `repo-tree`, `github-actions`, `agents-runtime`, `diagrams`, `docs-pipeline`,
+- Domain audits: `prompt.docs.audit`, `prompt.audit.tests-system`, `prompt.audit.tech-debt`,
+  `prompt.audit.repo-tree`, `prompt.audit.github-actions`, `prompt.audit.agents-runtime`,
+  `prompt.audit.diagrams`, `prompt.audit.docs-pipeline`,
   `prompt.architecture.review`
 - Meta one-cycle: `prompt.audit.grok-cycle`
 - **Dual-agent** (A/B, external prompt, CR + peer review, role swap):
