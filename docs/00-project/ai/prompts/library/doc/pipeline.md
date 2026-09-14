@@ -46,7 +46,7 @@ artifact → publication. Generated docs are not correct merely because the
 generator exited 0.
 
 **Disjoint scope:** pipeline/tooling here. Narrative content, Diátaxis IA,
-stale prose → `prompt.audit.docs-content`.
+stale prose → `prompt.docs.audit`.
 
 
 **Machine outputs:** always pair `report.md` + `findings.json` under `reports/audit/docs-pipeline/`. For multi-iteration loops use `prompt.audit.orchestrator` and `reports/audit-runs/<run_id>/`.

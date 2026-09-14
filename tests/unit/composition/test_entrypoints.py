@@ -623,9 +623,15 @@ class TestRunPipelineIntegration:
         mock_runner.execution_metrics["records_silver"] = 45
         mock_runner.run = AsyncMock(side_effect=RuntimeError("Mid-run failure"))
 
-        with patch(
-            "bioetl.composition._pipeline_execution._create_pipeline_runner_from_context",
-            return_value=mock_runner,
+        with (
+            patch(
+                "bioetl.composition._pipeline_execution._create_pipeline_runner_from_context",
+                return_value=mock_runner,
+            ),
+            patch(
+                "bioetl.composition._pipeline_execution.push_metrics_to_gateway",
+                return_value=True,
+            ),
         ):
             result = await run_pipeline("test_pipeline", RunOptions())
 

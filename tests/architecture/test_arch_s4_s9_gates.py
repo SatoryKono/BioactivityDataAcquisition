@@ -206,7 +206,11 @@ def test_s9_assertless_ratchet_and_expiry_dispersion() -> None:
     assertless = yaml.safe_load(
         (ROOT / "configs/quality/assertless_ratchet.yaml").read_text(encoding="utf-8")
     )
-    assert int(assertless["max_assertless_tests"]) <= 102
+    max_assertless = int(assertless["max_assertless_tests"])
+    assert max_assertless <= 102
+    live = load_quality_json("test-governance-current.json")
+    live_count = len(live["assertless_candidates"])
+    assert live_count <= max_assertless
     policy = yaml.safe_load(
         (ROOT / "configs/quality/layered_suffix_policy.yaml").read_text(
             encoding="utf-8"

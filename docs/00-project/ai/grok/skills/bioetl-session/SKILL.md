@@ -60,8 +60,10 @@ Do not commit `~/.grok/skills`.
 - No tech-debt budget / exemption / threshold increases
 - No root scratch (`_tmp_*.py`, `nul`/`NUL`)
 - After markdown link or `Owner:` / `Status:` / `Class:` header changes, run
-  `python -m scripts.docs generate-cleanup-inventory --update` in the same
+  `.\.venv-win\Scripts\python.exe -m scripts.docs generate-cleanup-inventory --update` in the same
   changeset (`--check` reads the working tree, not HEAD)
+- After runtime-tree edits, post-change via
+  `.\.venv-win\Scripts\python.exe scripts/ai/junie/check_junie_mirror.py --check`
 - No `reset --hard`, force-push, or commits to `main`
 - Protect foreign uncommitted WIP; `git worktree list` then reuse; add only if missing
 - Answer in Russian when the operator writes Russian; keep technical literals original

@@ -502,11 +502,11 @@ hotspot_family_ratchets:
     ratchet_stage: active
     ratchet_scope: duplication-non-growth-plus-bounded-growth
     expected_action: Hold duplication at zero, file-growth, and fan-in at the reviewed baseline during
-      pipeline-factory changes. files_ge_250_loc budget stays 2 (closeout
+      pipeline-factory changes. files_ge_250_loc budget is 0 (live 0; leftover-cap ratchet #10419).
     path_prefixes:
     - src/bioetl/composition/factories/pipeline/
     bounded_growth_budgets:
-      files_ge_250_loc: 2
+      files_ge_250_loc: 0
       max_internal_fan_in: 3
     metrics:
       duplication_clusters: 0
@@ -520,8 +520,9 @@ hotspot_family_ratchets:
       status: reduced_2026-07-28_issue_6787_helper_ratio
       next_action: '2026-07-28 issue 6787: helper-heavy modules remain under composition/factories/pipeline_support/
         outside the hotspot family path_prefix so helper_function_ratio measures only pipeline/ owners
-        (0.417 with dual prefixes -> <=0.35 with pipeline/ only). Bounded-growth budgets remain flat at
-        2 files_ge_250_loc and max_internal_fan_in 3; no technical-debt budget is increased.'
+        (0.417 with dual prefixes -> <=0.35 with pipeline/ only). Bounded-growth budgets: 0
+        files_ge_250_loc (ratcheted from 2; live 0) and max_internal_fan_in 3; no technical-debt
+        budget is increased.'
   - name: application_services_control_plane
     owner: '@bioetl-platform'
     linked_rf: RF-023

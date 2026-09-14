@@ -50,7 +50,9 @@ Verify changes against the current normative stack:
   memory policy
 - **MUST** run `bash scripts/ai/junie/check_junie_mirror.sh --check` after any
   change under `.codex/agents/**`, `.codex/skills/**`, `.junie/agents/**`, or
-  `.junie/skills/**`; report exit code and, on drift, either resolve via
+  `.junie/skills/**`; on native Windows equivalently
+  `.\.venv-win\Scripts\python.exe scripts/ai/junie/check_junie_mirror.py --check`.
+  Report exit code and, on drift, either resolve via
   `--sync` (`.codex/** → .junie/**`) or land a coupled Codex-side change in
   the same commit before submit
 - run `python -m scripts.docs check-drift --runtime-mirrors --freshness`

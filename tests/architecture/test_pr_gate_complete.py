@@ -178,7 +178,8 @@ def test_called_owner_workflows_reject_duplicate_yaml_keys() -> None:
     owners.add(".github/workflows/pr-required.yml")
     for relative in sorted(owners):
         path = ROOT / relative
-        yaml.load(path.read_text(encoding="utf-8"), Loader=_UniqueKeyLoader)
+        parsed = yaml.load(path.read_text(encoding="utf-8"), Loader=_UniqueKeyLoader)
+        assert parsed is not None, relative
 
 
 def test_docs_governance_anchors_grafana_reports_and_tests() -> None:

@@ -637,6 +637,7 @@ nav:
           - "Environment Variables": 04-reference/environment-variables.md
       - "Operations Extras":
           - "Monitoring Guide": 05-operations/01-monitoring-guide.md
+          - "Monitoring Architecture": 05-operations/monitoring-architecture.md
           - "Deployment & Tooling Extras":
               - "Overview": 05-operations/deployment/README.md
               - "Experimental Kubernetes":

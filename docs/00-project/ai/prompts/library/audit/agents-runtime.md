@@ -87,7 +87,9 @@ write vs read-only roles).
 2. Validate canonical build/test commands against manifests.
 3. Scripts: idempotency, dry-run for destructive ops, non-zero on failure,
    no `curl|bash` / unquoted sinks / secret-on-stdout.
-4. Permissions: audit/read vs deploy/write separation.
+4. Permissions: audit/read vs deploy/write separation. Domain cards stay
+   read-only; `reports/audit/**` is written by the parent synthesizer, not by
+   widening py-audit-bot to workspace-write.
 5. Mirror parity: if `.codex` or `.junie` changed in remediation path, note
    `scripts/ai/junie/check_junie_mirror.sh --check`.
 

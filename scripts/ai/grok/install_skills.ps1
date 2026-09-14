@@ -114,6 +114,29 @@ foreach ($persona in $personaFiles) {
 
 Write-Host ""
 Write-Host ("Installed {0} persona(s). Enable via Grok /personas (overlay, not spawn_subagent)." -f $installedPersonas.Count)
+
+$WorkflowSourceRoot = Join-Path $RepoRoot 'scripts\ai\grok\workflows'
+if ($Project) {
+    $WorkflowDestRoot = Join-Path $RepoRoot '.grok\workflows'
+} else {
+    $WorkflowDestRoot = Join-Path $env:USERPROFILE '.grok\workflows'
+}
+$installedWorkflows = @()
+if (Test-Path -LiteralPath $WorkflowSourceRoot) {
+    $workflowFiles = @(Get-ChildItem -LiteralPath $WorkflowSourceRoot -File -Filter '*.rhai' -ErrorAction Stop)
+    foreach ($wf in $workflowFiles) {
+        $destWf = Join-Path $WorkflowDestRoot $wf.Name
+        if ($PSCmdlet.ShouldProcess($destWf, "Install workflow $($wf.Name)")) {
+            New-Item -ItemType Directory -Force -Path $WorkflowDestRoot | Out-Null
+            Copy-Item -LiteralPath $wf.FullName -Destination $destWf -Force
+            $installedWorkflows += $wf.Name
+            Write-Host "OK  workflow $($wf.Name) -> $destWf"
+        }
+    }
+}
+
+Write-Host ""
+Write-Host ("Installed {0} workflow(s) into .grok/workflows/ (machine-local)." -f $installedWorkflows.Count)
 if ($Project) {
     Write-Host "Note: .grok/ is gitignored; project install is machine-local only."
 }
