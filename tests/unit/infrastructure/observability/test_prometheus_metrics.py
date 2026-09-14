@@ -658,7 +658,18 @@ class TestPrometheusMetrics:
                 4.0
             )
 
-    def test_stage_lag_gauge_normalizes_unknown_stage_labels(self, prometheus_metrics):
+    @pytest.mark.parametrize(
+        ("stage", "expected"),
+        [
+            ("ingestion", "ingestion"),
+            ("validation", "validation"),
+            ("output", "output"),
+            ("wild_stage", "other"),
+        ],
+    )
+    def test_stage_lag_gauge_normalizes_unknown_stage_labels(
+        self, prometheus_metrics, stage, expected
+    ):
         """Stage lag gauge must stay within the canonical stage vocabulary."""
         with patch.dict(
             GAUGES,
@@ -670,14 +681,14 @@ class TestPrometheusMetrics:
                 labels={
                     "pipeline": "chembl_activity",
                     "run_type": "incremental",
-                    "stage": "wild_stage",
+                    "stage": stage,
                 },
             )
 
             GAUGES["bioetl_stage_lag_seconds"].labels.assert_called_once_with(
                 pipeline="chembl_activity",
                 run_type="incremental",
-                stage="other",
+                stage=expected,
             )
             GAUGES["bioetl_stage_lag_seconds"].labels().set.assert_called_once_with(
                 12.5
