@@ -829,7 +829,7 @@ def test_workflow_run_omits_pipeline_grouping_for_multi_pipeline_workflow(
             "workflow_name": "chembl_core",
             "pipeline_names": ("chembl_activity", "chembl_assay", "chembl_target"),
             "pipeline_name": None,
-            "run_type": None,
+            "run_type": "backfill",
         },
     ]
 
@@ -1057,8 +1057,18 @@ def test_multi_pipeline_push_failure_preserves_success_and_report(
         "push_to_gateway",
         unavailable_gateway,
     )
+    from prometheus_client import CollectorRegistry, Counter
     from bioetl.composition.bootstrap.runtime.logger_bootstrap import bootstrap_logger
 
+    registry = CollectorRegistry()
+    Counter(
+        "bioetl_pipeline_runs_total", "Fixture completed runs", registry=registry
+    ).inc()
+    monkeypatch.setattr(
+        import_module("bioetl.infrastructure.observability.server"),
+        "REGISTRY",
+        registry,
+    )
     bootstrap_logger(pipeline="unknown")
     with capture_logs() as logs:
         result = cli_runner.invoke(
@@ -1075,7 +1085,9 @@ def test_multi_pipeline_push_failure_preserves_success_and_report(
     assert result.exit_code == 0, result.output
     assert json.loads(report.read_text(encoding="utf-8")) == {"status": "success"}
     failures = [entry for entry in logs if entry["event"] == "push_failed"]
-    assert len(failures) == len(attempts) == 2, (logs, result.output)
+    # The stub emits no expected-pipeline series for the initial filtered push.
+    # Only the final process snapshot reaches the gateway.
+    assert len(failures) == len(attempts) == 1, (logs, result.output)
     for entry in failures:
         assert entry["workflow_name"] == "chembl_core"
         assert entry["pipeline_names"] == (
@@ -1083,7 +1095,7 @@ def test_multi_pipeline_push_failure_preserves_success_and_report(
             "chembl_assay",
             "chembl_target",
         )
-        assert entry["run_type"] is None
+        assert entry["run_type"] == "backfill"
         assert entry["gateway_class"] == "http"
         assert entry["error_type"] == "ConnectionRefusedError"
         assert "private gateway exception detail" not in str(entry)

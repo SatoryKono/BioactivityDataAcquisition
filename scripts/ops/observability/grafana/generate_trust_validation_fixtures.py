@@ -44,7 +44,7 @@ PANEL_MAP = {
     9415: "lineage-validation",
     9416: "retention-compliance",
     9417: "failure-reasons",
-    9418: "manifest-validation",
+    9418: "trust-summary",
 }
 
 
@@ -334,6 +334,31 @@ def build_matrix() -> dict[str, dict[str, dict[str, object]]]:
     fr_zero["rows"] = zero_rows
 
     return {
+        "trust-summary": {
+            "populated": _envelope(
+                "trust-summary",
+                tuple(
+                    EvidenceCheckResult(
+                        f"{component['endpoint']}.{row['check']}",
+                        row["status"],
+                        row["reason"],
+                        row.get("detail", ""),
+                    )
+                    for component in (manifest_pop, lineage_pop, retention_pop)
+                    for row in component["rows"]
+                ),
+                manifest=manifest,
+            ),
+            "valid_empty_or_unknown": svc.trust_summary(scope=unresolved, now=NOW),
+            "backend_error": source_error_payload(
+                endpoint="trust-summary",
+                scope=scope,
+                reason="lineage_source_read_error",
+                check="lineage-validation.closure",
+            ),
+            "service_unavailable": _http_503("trust-summary"),
+            "empty_rows": _empty_rows("trust-summary", manifest),
+        },
         "checkpoint-validation": {
             "populated": checkpoint_pop,
             "valid_empty_or_unknown": checkpoint_empty,

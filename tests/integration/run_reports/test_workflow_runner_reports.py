@@ -155,3 +155,57 @@ def test_attach_workflow_run_report_records_completed_at(
     completed_at = identity.get("completed_at")
     assert isinstance(completed_at, str) and completed_at
     assert "T" in completed_at
+
+
+def test_report_unwraps_real_transform_execution_result() -> None:
+    from bioetl.application.services.workflow.workflow_runner_models import (
+        WorkflowStepExecutionResult,
+    )
+    from bioetl.application.services.workflow.workflow_transform_service import (
+        WorkflowTransformExecutionResult,
+    )
+    from bioetl.application.services.workflow.workflow_runner_reports import (
+        _execution_rows_from_result,
+    )
+    from bioetl.domain.run_reports.workflow_builder import build_workflow_run_report
+
+    transform = WorkflowTransformExecutionResult(
+        step_id="reconcile",
+        transform_name="reconcile_foreign_keys",
+        status="success",
+        fingerprint="fp",
+        output={
+            "transform_name": "reconcile_foreign_keys",
+            "source_table": "chembl.assay",
+            "source_layer": "gold",
+            "source_scope": "all_current",
+            "mutation_mode": "gold_scd2_expiry",
+            "orphan_rows_deleted": 1,
+            "retained_rows": 5,
+            "source_snapshot": {"version": 1, "physical_rows": 6, "current_rows": 5},
+        },
+    )
+    result = WorkflowRunExecutionResult(
+        workflow_name="wf",
+        status="success",
+        steps=(
+            WorkflowStepExecutionResult(
+                step_id="reconcile",
+                step_kind="transform",
+                status="success",
+                payload=transform,
+            ),
+        ),
+    )
+    rows = _execution_rows_from_result(
+        result, plan_steps=[], store=FileRunReportStoreAdapter()
+    )
+    report = build_workflow_run_report(
+        identity={"workflow_name": "wf", "status": "success"},
+        plan_steps=[],
+        execution_steps=rows,
+    )
+    assert report.totals["gold_current_after_reconciliation_by_table"] == {
+        "chembl.assay": 5
+    }
+    assert report.execution[0].reconciliation["source_snapshot"]["version"] == 1

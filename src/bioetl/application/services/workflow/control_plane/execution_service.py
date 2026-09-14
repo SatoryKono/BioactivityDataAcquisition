@@ -217,6 +217,8 @@ async def _run_locked_workflow(
         config,
         workflow_run_id=str(prepared_manifest.workflow_run_id),
         manifest_id=prepared_manifest.manifest_id,
+        execution_fingerprint=prepared_manifest.execution_fingerprint,
+        resumed=resumed,
         completed_step_ids=completed_step_ids,
         completed_transform_fingerprints=completed_transform_fingerprints,
         step_started_callback=partial(record_step_started, recorder),

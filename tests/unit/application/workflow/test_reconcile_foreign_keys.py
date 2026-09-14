@@ -444,3 +444,21 @@ async def test_executor_records_destructive_commit_when_mutation_persists() -> N
     assert call["transform_name"] == "reconcile_foreign_keys"
     assert call["fingerprint"] == spec.fingerprint
     assert call["details"] == payload
+
+
+def test_transitive_scope_unwraps_real_transform_result() -> None:
+    from bioetl.application.services.workflow.workflow_transform_service import (
+        WorkflowTransformExecutionResult,
+    )
+
+    result = WorkflowTransformExecutionResult(
+        step_id="previous",
+        transform_name="reconcile_foreign_keys",
+        status="success",
+        fingerprint="fp",
+        output={"source_run_ids": ["child-a"]},
+    )
+    assert _run_ids_from_upstream({"previous": result}, workflow_run_id="workflow") == (
+        "workflow",
+        "child-a",
+    )

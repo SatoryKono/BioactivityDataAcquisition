@@ -178,6 +178,38 @@
         "row_count": 1,
         "status": "UNKNOWN"
       }
+    },
+    "trust-summary": {
+      "backend_error": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/trust-summary/backend_error.json",
+        "row_count": 1,
+        "status": "ERROR"
+      },
+      "empty_rows": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/trust-summary/empty_rows.json",
+        "row_count": 0,
+        "status": "UNKNOWN"
+      },
+      "populated": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/trust-summary/populated.json",
+        "row_count": 12,
+        "status": "OK"
+      },
+      "service_unavailable": {
+        "http_status": 503,
+        "path": "tests/fixtures/grafana/control_plane_validation/trust-summary/service_unavailable.json",
+        "row_count": 1,
+        "status": "ERROR"
+      },
+      "valid_empty_or_unknown": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/trust-summary/valid_empty_or_unknown.json",
+        "row_count": 3,
+        "status": "UNKNOWN"
+      }
     }
   },
   "fixture_pipeline": "chembl_activity",
@@ -190,7 +222,7 @@
     "9415": "lineage-validation",
     "9416": "retention-compliance",
     "9417": "failure-reasons",
-    "9418": "manifest-validation"
+    "9418": "trust-summary"
   },
   "related_issue": "#8578",
   "schema_version": 1,

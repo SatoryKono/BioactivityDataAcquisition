@@ -2372,3 +2372,24 @@ tests:
       exp_samples:
       - labels: '{__name__="bioetl_control_plane_telemetry_missing_5m",pipeline="chembl_assay",run_type="backfill"}'
         value: 0
+
+  - name: provider-current-missing-versus-stale-evidence
+    interval: 1m
+    input_series:
+      - series: 'bioetl_provider_health_status{provider="stale",job="bioetl",instance="test"}'
+        values: "2+0x20"
+      - series: 'bioetl_provider_health_observed_timestamp_seconds{provider="stale",job="bioetl",instance="test"}'
+        values: "1+0x20"
+      - series: 'bioetl_provider_health_check_provider_universe_15m{provider="missing"}'
+        values: "1+0x20"
+    promql_expr_test:
+      - expr: 'bioetl_provider_current_status_info{provider="stale"}'
+        eval_time: 20m
+        exp_samples:
+          - labels: 'bioetl_provider_current_status_info{provider="stale",reason="stale_health_status",source_state="stale",completeness="incomplete",scrape_present="1",health_status_present="1"}'
+            value: 3
+      - expr: 'bioetl_provider_current_status_info{provider="missing"}'
+        eval_time: 20m
+        exp_samples:
+          - labels: 'bioetl_provider_current_status_info{provider="missing",reason="missing_health_status",source_state="missing",completeness="incomplete",scrape_present="1",health_status_present="0"}'
+            value: 3

@@ -31,7 +31,7 @@ PANEL_MAP = {
     9415: "lineage-validation",
     9416: "retention-compliance",
     9417: "failure-reasons",
-    9418: "manifest-validation",
+    9418: "trust-summary",
 }
 REQUIRED_STATES = {
     "populated",

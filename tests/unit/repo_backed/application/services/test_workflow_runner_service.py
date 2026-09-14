@@ -34,6 +34,7 @@ from bioetl.infrastructure.storage.run_report_store_adapter import (
 )
 
 import asyncio
+import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -357,9 +358,14 @@ async def test_workflow_runner_executes_pipeline_then_transform() -> None:
     result = await service.run_workflow(
         config,
         workflow_run_id="workflow-run-42",
+        execution_fingerprint="workflow-fingerprint-42",
+        resumed=True,
     )
 
     assert result.status == "success"
+    report = json.loads(Path(result.run_report_json_path).read_text(encoding="utf-8"))
+    assert report["identity"]["execution_fingerprint"] == "workflow-fingerprint-42"
+    assert report["identity"]["resumed"] is True
     assert [step.step_id for step in result.steps] == ["extract", "normalize"]
     assert result.steps[0].child_run_id == ("00000000-0000-0000-0000-000000000101")
     assert pipeline_runner.calls[0][0] == "chembl_activity"

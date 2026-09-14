@@ -31,6 +31,7 @@ from urllib.parse import parse_qs, urlparse
 
 DEFAULT_ROOT = Path("tests/fixtures/grafana/control_plane_validation")
 ENDPOINTS = {
+    "trust-summary",
     "checkpoint-validation",
     "manifest-validation",
     "lineage-validation",

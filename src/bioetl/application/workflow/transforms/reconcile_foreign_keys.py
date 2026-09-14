@@ -282,6 +282,7 @@ def _run_ids_from_upstream(
     if workflow_run_id:
         collected.append(workflow_run_id)
     for payload in upstream_outputs.values():
+        payload = getattr(payload, "output", payload)
         if isinstance(payload, Mapping):
             inherited = payload.get("source_run_ids", ())
             if isinstance(inherited, (tuple, list)):

@@ -98,6 +98,8 @@ def _execution_rows_from_result(
     execution_rows: list[JsonDict] = []
     for step in result.steps:
         payload = step.payload
+        if step.step_kind == "transform":
+            payload = getattr(payload, "output", payload)
         report_ref = (
             getattr(payload, "run_report_json_path", None)
             if payload is not None
