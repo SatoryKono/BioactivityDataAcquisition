@@ -830,7 +830,7 @@ def apply_to_dashboard(path: Path, *, current_uid: str, check: bool = False) -> 
         raise SystemExit(f"{safe_path.name}: missing panel id=1000")
 
     # The link-only navigation has no visible heading on any dashboard.
-    # Keep its inventory name as metadata; the navigation has an accessible name.
+    # Keep its inventory name as metadata; links retain visible names and tooltips.
     nav["title"] = ""
     nav["type"] = "text"
     nav["description"] = NAV_DESCRIPTION
