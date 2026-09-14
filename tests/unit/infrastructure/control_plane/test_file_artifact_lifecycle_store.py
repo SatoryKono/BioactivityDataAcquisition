@@ -898,3 +898,67 @@ def test_plan_for_manifest_resolves_bronze_uri_and_typed_issues(
     codes = {issue.code for issue in plan.resolution_issues}
     assert ControlPlaneArtifactResolutionIssueCode.SNAPSHOT_URI_NOT_RECORDED in codes
     assert ControlPlaneArtifactResolutionIssueCode.CHECKPOINT_INDEX_MISSING in codes
+
+
+def test_cached_snapshot_producer_paths_resolve_in_retention_plan(
+    tmp_path: Path,
+) -> None:
+    from dataclasses import replace
+    from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
+        build_cached_bronze_input_snapshot_refs,
+    )
+    from bioetl.domain.control_plane import RunSourceRef
+    from tests.unit.application.services.run_manifest_test_support import (
+        make_run_manifest,
+    )
+
+    now = datetime(2026, 9, 14, tzinfo=UTC)
+    bronze = tmp_path / "bronze" / "chembl" / "assay"
+    batch = _write_bytes(
+        bronze / "2026-09-14" / "batch_1.jsonl.zst", b"immutable-batch"
+    )
+    snapshots = build_cached_bronze_input_snapshot_refs(
+        bronze_root=bronze, bronze_date="2026-09-14"
+    )
+    manifest = replace(
+        make_run_manifest(manifest_id="scoped-snapshot"),
+        source_refs=(
+            RunSourceRef(
+                provider="chembl",
+                entity="assay",
+                pipeline_name="chembl_assay",
+                input_snapshots=snapshots,
+            ),
+        ),
+    )
+    plan = FileControlPlaneArtifactLifecycleStore(
+        base_path=tmp_path / "control"
+    ).plan_for_manifest(
+        ControlPlaneArtifactLifecyclePolicy(retention_days=30, now=now),
+        manifest=manifest,
+        dry_run=True,
+    )
+    refs = [ref for ref in plan.artifacts if Path(ref.path) == batch]
+    assert len(refs) == 1
+    assert refs[0].artifact_id == snapshots[0].snapshot_id
+    batch.write_bytes(b"corrupted")
+    changed = FileControlPlaneArtifactLifecycleStore(
+        base_path=tmp_path / "control"
+    ).plan_for_manifest(
+        ControlPlaneArtifactLifecyclePolicy(retention_days=30, now=now),
+        manifest=manifest,
+        dry_run=True,
+    )
+    assert all(ref.artifact_id != snapshots[0].snapshot_id for ref in changed.artifacts)
+
+
+@pytest.mark.parametrize(
+    "uri",
+    ["bronze://../outside.zst", "bronze:///outside.zst", "bronze://C:/outside.zst"],
+)
+def test_bronze_snapshot_uri_cannot_escape_root(tmp_path: Path, uri: str) -> None:
+    from bioetl.infrastructure.control_plane._file_artifact_lifecycle_refs import (
+        resolve_bronze_uri,
+    )
+
+    assert resolve_bronze_uri(tmp_path / "bronze", uri) is None

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import datetime
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 from bioetl.domain.control_plane import (
     ControlPlaneArtifactLifecycleDecision,
@@ -268,6 +268,7 @@ def _append_cached_bronze_candidates(
                 candidates,
                 issues,
                 bronze_root=bronze_root,
+                source_root=bronze_root / source.provider / source.entity,
                 snapshot=snapshot,
                 seen=seen,
             )
@@ -285,6 +286,7 @@ def _append_snapshot_bronze_candidate(
     issues: list[ControlPlaneArtifactResolutionIssue],
     *,
     bronze_root: Path,
+    source_root: Path,
     snapshot: object,
     seen: set[Path],
 ) -> None:
@@ -301,6 +303,14 @@ def _append_snapshot_bronze_candidate(
         )
         return
     path = resolve_bronze_uri(bronze_root, str(uri).strip())
+    # Cached-Bronze launch refs are relative to the provider/entity reader root.
+    # Retain support for older refs rooted at the shared Bronze directory.
+    if path is not None and not path.is_file():
+        scoped_path = resolve_bronze_uri(source_root, str(uri).strip())
+        if scoped_path is not None and scoped_path.is_relative_to(
+            bronze_root.resolve()
+        ):
+            path = scoped_path
     if path is None:
         issues.append(
             _resolution_issue(
@@ -341,12 +351,13 @@ def resolve_bronze_uri(bronze_root: Path, immutable_uri: str) -> Path | None:
     if not immutable_uri.startswith(_BRONZE_URI_PREFIX):
         return None
     relative = immutable_uri[len(_BRONZE_URI_PREFIX) :].strip()
-    if not relative:
+    if not relative or PureWindowsPath(relative).drive or Path(relative).is_absolute():
         return None
     parts = Path(relative.replace("\\", "/")).parts
     if not parts or any(part in {"", ".", ".."} for part in parts):
         return None
-    return bronze_root.joinpath(*parts)
+    path = bronze_root.joinpath(*parts).resolve()
+    return path if path.is_relative_to(bronze_root.resolve()) else None
 
 
 def _resolution_issue(

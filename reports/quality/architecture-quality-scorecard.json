@@ -30,9 +30,9 @@
       },
       "id": "ddd_invariants",
       "name": "DDD / aggregates / invariants",
-      "score": 7.8,
+      "score": 10.0,
       "weight": 0.09,
-      "weighted_score": 0.702
+      "weighted_score": 0.9
     },
     {
       "evidence_metrics": {
@@ -78,25 +78,25 @@
       "evidence_metrics": {
         "compatibility_test_file_count": 0,
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 3
+        "unmeasured_module_count": 0
       },
       "id": "test_strategy_testability",
       "name": "Test strategy / testability",
-      "score": 5.5,
+      "score": 10.0,
       "weight": 0.12,
-      "weighted_score": 0.66
+      "weighted_score": 1.2
     },
     {
       "evidence_metrics": {
-        "adr_enforcement_blocking_gap_count": 1,
+        "adr_enforcement_blocking_gap_count": 0,
         "contract_blocking_issue_count": 0,
         "dq_blocking_issue_count": 0
       },
       "id": "config_contracts_entrypoints",
       "name": "Config / contracts / entrypoints",
-      "score": 8.5,
+      "score": 10.0,
       "weight": 0.09,
-      "weighted_score": 0.765
+      "weighted_score": 0.9
     },
     {
       "evidence_metrics": {
@@ -186,11 +186,11 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 8.27,
-  "interpretation": "satisfactory_system_refactoring_required",
+  "integral_score": 9.14,
+  "interpretation": "good_targeted_improvements",
   "metrics": {
     "accepted_adr_count": 58,
-    "adr_enforcement_blocking_gap_count": 1,
+    "adr_enforcement_blocking_gap_count": 0,
     "adr_enforcement_manual_exception_count": 0,
     "compatibility_test_file_count": 0,
     "composition_module_cap": 300,
@@ -226,13 +226,13 @@
     "transition_compat_count": 0,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 3
+    "unmeasured_module_count": 0
   },
   "schema_version": 2,
   "source_artifacts": {
     "adr_enforcement_matrix": {
       "accepted_adr_count": 58,
-      "blocking_gap_count": 1,
+      "blocking_gap_count": 0,
       "generated_artifact": "reports/quality/adr-enforcement-matrix.json",
       "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload"
     },
@@ -275,7 +275,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "7184937818099a4c3d38b8fe4bd91613c81562af068ac278d680b5aba09c99e9",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "28e8fcb63a7714254474ff117b820f8318afa1a974f5ceb40ff7934de5a2ae74"
+      "source_tree_sha256": "0925841297ccf8218b4c3f19cc527da5ae81edff2ff02ad69ae5ebc97d6f530b"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,
