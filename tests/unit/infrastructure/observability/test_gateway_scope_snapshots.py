@@ -1,10 +1,15 @@
 """Regression coverage for successive process snapshots in Pushgateway."""
 
+from __future__ import annotations
+
+import pytest
 from prometheus_client import CollectorRegistry, Counter, Gauge, generate_latest
 
 from bioetl.infrastructure.observability._metrics_gateway_snapshots import (
     partition_snapshots,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def _registry(run_type: str, *, workflow: bool = False) -> CollectorRegistry:

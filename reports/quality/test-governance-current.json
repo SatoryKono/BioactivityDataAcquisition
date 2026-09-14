@@ -962,14 +962,7 @@
     }
   },
   "assertless_total_candidates": 88,
-  "budget_violations": [
-    {
-      "actual": 4,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1143,13 +1136,8 @@
     ]
   },
   "intentional_no_exception_contract": 86,
-  "markerless_examples": [
-    "tests/unit/infrastructure/observability/test_gateway_scope_snapshots.py:26",
-    "tests/unit/infrastructure/observability/test_gateway_scope_snapshots.py:38",
-    "tests/unit/infrastructure/observability/test_gateway_scope_snapshots.py:51",
-    "tests/unit/infrastructure/observability/test_gateway_scope_snapshots.py:65"
-  ],
-  "markerless_test_functions": 4,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -2019,13 +2007,8 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/unit/infrastructure/observability/test_gateway_scope_snapshots.py:26",
-      "tests/unit/infrastructure/observability/test_gateway_scope_snapshots.py:38",
-      "tests/unit/infrastructure/observability/test_gateway_scope_snapshots.py:51",
-      "tests/unit/infrastructure/observability/test_gateway_scope_snapshots.py:65"
-    ],
-    "markerless_test_functions": 4,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2086,12 +2069,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2441,
-    "total_test_functions": 25667,
+    "total_test_functions": 25672,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "34a3fd10c42a929b9b4c53beb95745b5d8829f6f753763893a720a76e076b248",
+  "source_tree_sha256": "3503bfbe2bfae8fd3b2cf63918baa69c2169e580c4efd7d55ceb1df744d0a5cb",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 88,
@@ -2100,13 +2083,8 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 86,
-    "markerless_examples": [
-      "tests/unit/infrastructure/observability/test_gateway_scope_snapshots.py:26",
-      "tests/unit/infrastructure/observability/test_gateway_scope_snapshots.py:38",
-      "tests/unit/infrastructure/observability/test_gateway_scope_snapshots.py:51",
-      "tests/unit/infrastructure/observability/test_gateway_scope_snapshots.py:65"
-    ],
-    "markerless_test_functions": 4,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
@@ -2159,7 +2137,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2441,
-  "total_test_functions": 25667,
+  "total_test_functions": 25672,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
