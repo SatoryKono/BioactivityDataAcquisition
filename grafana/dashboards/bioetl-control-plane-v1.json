@@ -412,7 +412,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Latest fresh pipeline/run_type telemetry. Run ID does not filter this panel. OK here does not authorize replay of the selected run; Review Selected-Run Trust and retention evidence below must be complete.",
+      "description": "CURRENT · Latest fresh pipeline/run_type telemetry. Run ID does not filter this panel. OK = current checks pass; WARN = degraded; CRIT = failed; UNKNOWN = missing or stale evidence. OK here does not authorize replay: selected-run Trust INCOMPLETE or UNKNOWN still blocks replay.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -787,7 +787,8 @@
       },
       "options": {
         "footer": {
-          "show": false
+          "show": false,
+          "enablePagination": true
         },
         "showHeader": true,
         "cellHeight": "sm"

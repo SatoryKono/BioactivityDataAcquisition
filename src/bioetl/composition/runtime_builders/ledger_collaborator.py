@@ -189,7 +189,8 @@ def _attach_contract_evidence_recorder(
 def attach_control_plane_collaborators(
     runner: PipelineRunnerProtocol,
     run_ledger_service: RunLedgerService,
-    *, launch_context: PipelineRunContext | None = None,
+    *,
+    launch_context: PipelineRunContext | None = None,
 ) -> ArtifactRecorderAttachmentResult:
     """Attach ledger collaborators to the runner and its metadata writers."""
     runner.attach_run_ledger_service(run_ledger_service)

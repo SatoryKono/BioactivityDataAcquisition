@@ -77,7 +77,9 @@ def finalize_contract_evidence(runner: _RunnerFinalizeHost) -> None:
         return
     launch = runner._contract_evidence_context
     if launch is None:
-        raise RuntimeError("Contract evidence requires the manifest-bound launch context")
+        raise RuntimeError(
+            "Contract evidence requires the manifest-bound launch context"
+        )
     from bioetl.application.services.control_plane.manifest.contract_evidence import (
         build_runtime_contract_evidence,
     )

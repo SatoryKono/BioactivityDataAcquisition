@@ -113,8 +113,10 @@ class PipelineRunner(PipelineRunnerSupportMixin):
         self._run_ledger_service = service
 
     def attach_contract_evidence_recorder(
-        self, recorder: ContractEvidenceRecorderPort,
-        *, launch_context: PipelineRunContext | None = None,
+        self,
+        recorder: ContractEvidenceRecorderPort,
+        *,
+        launch_context: PipelineRunContext | None = None,
     ) -> None:
         """Attach the post-lock contract-evidence finalizer."""
         self._contract_evidence_recorder = recorder

@@ -124,6 +124,7 @@ metric_coverage_classes:
   bioetl_runtime_error_rate_30m: event_optional
   bioetl_runtime_pipeline_run_type_universe: required_current
   bioetl_runtime_pipeline_run_type_universe_scoped: required_current
+  bioetl_runtime_required_rule_age_seconds: required_current
   bioetl_runtime_trust_gap_status_10m: required_current
   bioetl_shutdown_completed_total: event_optional
   bioetl_shutdown_initiated_total: event_optional

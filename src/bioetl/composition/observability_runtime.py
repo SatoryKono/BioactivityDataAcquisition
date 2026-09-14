@@ -29,6 +29,9 @@ from bioetl.composition.bootstrap.runtime_public_exports import (
     RunManifestInspectionServiceProtocol,
 )
 from bioetl.composition import _services
+from bioetl.infrastructure.observability.required_publication_series import (
+    ensure_required_control_plane_publication_series,
+)
 from bioetl.infrastructure.storage.run_report_store_adapter import (
     FileRunReportStoreAdapter,
 )
@@ -127,10 +130,6 @@ def push_metrics_to_gateway(
     if grouping_key_extra:
         grouping_key.update(grouping_key_extra)
     if metric_names is None:
-        from bioetl.infrastructure.observability.required_publication_series import (
-            ensure_required_control_plane_publication_series,
-        )
-
         seed_pipelines = tuple(
             name
             for name in ((pipeline_name,) if pipeline_name else pipeline_names)

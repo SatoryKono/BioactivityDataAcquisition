@@ -12,6 +12,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.application.observability.control_plane_integrity_metrics import (
+    ControlPlaneIntegrityMetricsService,
+)
 from bioetl.application.services.ops.metrics_service import MetricsService
 from bioetl.composition.bootstrap.assembly.metrics_service import (
     create_metrics_service,
@@ -19,6 +22,12 @@ from bioetl.composition.bootstrap.assembly.metrics_service import (
 from bioetl.composition.observability_resolution import resolve_tracing_port
 from bioetl.composition.runtime_builders import control_plane_root
 from bioetl.composition.runtime_builders.config_access import get_settings
+from bioetl.domain.exceptions import BioETLError
+from bioetl.infrastructure.control_plane import (
+    FileRunLedgerStore,
+    FileRunManifestStore,
+)
+from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -31,16 +40,6 @@ def refresh_control_plane_integrity_metrics(
     settings: Settings, *, logger: LoggerPort | None = None
 ) -> None:
     """Measure persisted manifest/ledger integrity before a terminal snapshot."""
-    from bioetl.application.observability.control_plane_integrity_metrics import (
-        ControlPlaneIntegrityMetricsService,
-    )
-    from bioetl.domain.exceptions import BioETLError
-    from bioetl.infrastructure.control_plane import (
-        FileRunLedgerStore,
-        FileRunManifestStore,
-    )
-    from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
-
     try:
         if not settings.observability.metrics_enabled:
             return

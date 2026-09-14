@@ -61,6 +61,18 @@ from tests.unit.application.services.run_manifest_test_support import (
 pytestmark = pytest.mark.unit
 
 
+def test_manifest_catalog_does_not_parse_contract_evidence_sidecars(tmp_path) -> None:
+    store = FileRunManifestStore(base_path=tmp_path)
+    manifest = make_run_manifest(manifest_id="with-sidecar")
+    store.save(manifest)
+    (tmp_path / "with-sidecar.contract-evidence.json").write_text(
+        '{"schema_version":"contract_evidence_v1","manifest_id":"with-sidecar"}',
+        encoding="utf-8",
+    )
+    assert store.list_all() == (manifest,)
+    assert store.get_by_run_id(manifest.run_id) == manifest
+
+
 def test_file_store_round_trips_manifest_by_id_and_run_id(tmp_path) -> None:
     store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
     run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))

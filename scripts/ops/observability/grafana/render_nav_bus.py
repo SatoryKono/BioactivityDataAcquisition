@@ -693,9 +693,12 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
         readiness["fieldConfig"]["defaults"]["displayName"] = "Current readiness"
         readiness["description"] = (
             "CURRENT · Latest fresh pipeline/run_type telemetry. Run ID does not filter "
-            "this panel. OK here does not authorize replay of the selected run; "
-            "Review Selected-Run Trust and retention evidence below must be complete."
+            "this panel. OK = current checks pass; WARN = degraded; CRIT = failed; "
+            "UNKNOWN = missing or stale evidence. OK here does not authorize replay: "
+            "selected-run Trust INCOMPLETE or UNKNOWN still blocks replay."
         )
+    if 9418 in by_id:
+        by_id[9418]["options"]["footer"]["enablePagination"] = True
     if 906 in by_id:
         _stamp_control_plane_recovery_cta(by_id[906])
 

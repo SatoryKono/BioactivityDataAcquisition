@@ -320,3 +320,44 @@ class TestBootstrapHealthServerDependencies:
         kwargs = mock_build.call_args.kwargs
         assert kwargs["run_manifest_service_factory"] is None
         assert kwargs["clock_factory"] is SystemClock
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "status,value", [("healthy", 2), ("degraded", 1), ("unhealthy", 0)]
+)
+def test_diagnostic_probe_persists_measured_health_without_recounting(
+    tmp_path, status, value
+):
+    from datetime import UTC, datetime
+    from bioetl.application.services.ops.health_service import HealthResult
+    from bioetl.composition.bootstrap.assembly.health_service import (
+        _HealthCheckDataSourceFactory,
+    )
+    from bioetl.infrastructure.control_plane.file_provider_health_evidence import (
+        FileProviderHealthEvidenceStore,
+    )
+    from tests.fakes.metrics_fake import RecordingMetrics
+
+    now = datetime.now(UTC)
+    metrics = RecordingMetrics()
+    factory = _HealthCheckDataSourceFactory(
+        logger=NoOpLogger(), metrics=metrics, settings=MagicMock()
+    )
+    with patch(
+        "bioetl.composition.bootstrap.assembly.health_service.control_plane_root",
+        return_value=tmp_path,
+    ):
+        factory.record_health_result(
+            HealthResult(
+                provider="chembl", status=status, checked_at=now, endpoint="/status"
+            )
+        )
+    record = FileProviderHealthEvidenceStore(tmp_path).load("chembl")
+    assert record.status == value
+    assert record.observed_at == now.isoformat()
+    assert metrics.counter_names() == []
+    assert any(
+        call.name == "bioetl_provider_health_status" and call.value == value
+        for call in metrics.calls
+    )

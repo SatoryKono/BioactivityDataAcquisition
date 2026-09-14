@@ -16,6 +16,7 @@ __all__ = [
 ]
 
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, cast
@@ -150,6 +151,7 @@ class HealthService:
     logger: LoggerPort
     _factory: DataSourceFactoryPort
     clock: ClockPort
+    result_observer: Callable[[HealthResult], None] | None = None
 
     async def check_providers(
         self,
@@ -174,6 +176,8 @@ class HealthService:
         for provider in providers_to_check:
             result = await self._check_single_provider(provider)
             results[provider] = result
+            if self.result_observer is not None and provider in available_providers:
+                self.result_observer(result)
 
         all_healthy = all(r.is_healthy for r in results.values())
 

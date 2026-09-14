@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "e3382ace4c06db54ede7c6218bf8f59729df876c98fa0417d6a12de57145105d",
-    "bioetl-dq-v2": "01b2cee4be73ee48a346a07dabe74b28a8c01c4655faf4489fba82ec4cf1b595",
-    "bioetl-incident-v1": "368a1fe0d4554ed8165ec09ceae5d106492dd18b9dd14376eca16320c6a0fa96",
-    "bioetl-overview-v2": "3a2dc3d2307a8893fe39320b9bbea6d7e1b6c6f5782c07c759f82db449f268bb",
-    "bioetl-provider-health-v2": "fc43e66a476f3840ef0c9a96b4175689b02d8f2fc4f5eeb9a934d05bb4d57a27",
-    "bioetl-run-explorer-v1": "82f53812a28840296579298d63516edf5e15589798915a485f489a83737ea43d",
-    "bioetl-runtime": "7c23b432914bc8bec2402dbf7b2c1f4b0c08fa128bcca292b8eca00e8cbfcde6"
+    "bioetl-control-plane-v1": "7972a4b0d823827bb52ba2a8946101b369deca3af723c2473412bdaf9489e931",
+    "bioetl-dq-v2": "2b1596a27a0d66a08f245e639e5ed4df74a6ffa0c4505da83fdc99c8348a13a0",
+    "bioetl-incident-v1": "7ae4a424352b594aabb3b6b9e5fb121746f507012c89d4ea8d61c3e7a45dbd76",
+    "bioetl-overview-v2": "7d04c923a7e54ec67db64344bbf129eabb19a94d6871c1c2887b401f33ee6e15",
+    "bioetl-provider-health-v2": "77ef9f50f7238a1a61db6ede09e3baec935fa1e1229a7f5863e773b91cddbd23",
+    "bioetl-run-explorer-v1": "7bcff4013e2a78cd631fcf3f5953d7cfc46c33046d5b72926395606e1c281129",
+    "bioetl-runtime": "619b87724a0b0465196cba59cd5c8383e552734eda17320e02bbffadf2930425"
   },
   "panels": [
     {
@@ -71,7 +71,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 9401,
-      "panel_title": "Monitor Replay Readiness",
+      "panel_title": "Monitor Current Readiness",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
@@ -1814,7 +1814,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "label_join(label_replace((bioetl_incident_ranked_runtime or bioetl_incident_ranked_provider or bioetl_incident_ranked_dq),\"confidence\",\"UNVERIFIED\",\"\",\"\"),\"object\",\" / \",\"pipeline\",\"provider\")"
+          "label_replace(bioetl_incident_ranked_evidence,\"route_pipeline\",\"$pipeline\",\"pipeline\",\"unknown\")"
         ],
         "target_count": 1
       }
@@ -1953,6 +1953,40 @@
     {
       "basis": "preserved-from-json",
       "component": "JSON fallback",
+      "dashboard_uid": "bioetl-incident-v1",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-incident-v1",
+      "panel_id": 22010,
+      "panel_title": "Inspect Full Ranked Suspects",
+      "route": "incident-console",
+      "source": {
+        "datasource_type": "datasource",
+        "datasource_uid": "-- Dashboard --",
+        "expressions": [],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-incident-v1",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-incident-v1",
+      "panel_id": 22005,
+      "panel_title": "Inspect Full Current Alerts",
+      "route": "incident-console",
+      "source": {
+        "datasource_type": "datasource",
+        "datasource_uid": "-- Dashboard --",
+        "expressions": [],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
       "dashboard_uid": "bioetl-overview-v2",
       "disposition": "fallback-only",
       "empty_semantics": "preserved-from-json",
@@ -2036,7 +2070,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "topk(2,max without(run_type)(bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}>0)) or on() bioetl_l0_next_action_no_route"
+          "max without(run_type)(bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}>0) or on() bioetl_l0_next_action_no_route"
         ],
         "target_count": 1
       }
@@ -2379,6 +2413,23 @@
         "expressions": [
           "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
         ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-overview-v2",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-overview-v2",
+      "panel_id": 20215,
+      "panel_title": "Inspect Full First Action",
+      "route": "operations-home",
+      "source": {
+        "datasource_type": "datasource",
+        "datasource_uid": "-- Dashboard --",
+        "expressions": [],
         "target_count": 1
       }
     },
@@ -2803,7 +2854,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-provider-health-v2",
       "panel_id": 31,
-      "panel_title": "Monitor Circuit-Breaker State",
+      "panel_title": "Monitor Global Circuit-Breaker State",
       "route": "dependency-health",
       "source": {
         "datasource_type": "prometheus",
@@ -2822,7 +2873,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-provider-health-v2",
       "panel_id": 32,
-      "panel_title": "Track Circuit-Breaker Trips",
+      "panel_title": "Track Global Circuit-Breaker Trips",
       "route": "dependency-health",
       "source": {
         "datasource_type": "prometheus",
@@ -3126,7 +3177,7 @@
         "expressions": [
           "max(up{job=\"bioetl\"})",
           "min(bioetl_runtime_stage_evidence_present_ratio{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() vector(-1)",
-          "time()-max(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~\".*bioetl.*\"})"
+          "bioetl_runtime_required_rule_age_seconds"
         ],
         "target_count": 3
       }
@@ -3145,7 +3196,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (stage, measure) (bioetl_runtime_stage_progress{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})"
+          "bioetl_runtime_stage_progress_by_scope{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}"
         ],
         "target_count": 1
       }
@@ -3763,6 +3814,42 @@
         ],
         "target_count": 1
       }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-runtime",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-runtime",
+      "panel_id": 22460,
+      "panel_title": "Inspect Full Stage Progress",
+      "route": "pipeline-flow",
+      "source": {
+        "datasource_type": "datasource",
+        "datasource_uid": "-- Dashboard --",
+        "expressions": [],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-runtime",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-runtime",
+      "panel_id": 2461,
+      "panel_title": "Inspect Current Missing Stage Signals",
+      "route": "pipeline-flow",
+      "source": {
+        "datasource_type": "prometheus",
+        "datasource_uid": "prometheus",
+        "expressions": [
+          "bioetl_runtime_stage_evidence_detail{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}"
+        ],
+        "target_count": 1
+      }
     }
   ],
   "route_contract_sha256": "d4f4671c1206105cf16f254eecd4d3f76af61cc7f03f4c36764258dff96ab03e",
@@ -3771,7 +3858,7 @@
     "dashboard_uid_count": 7,
     "hidden_datasources": [],
     "missing_dashboard_uids": [],
-    "panel_disposition_count": 198,
+    "panel_disposition_count": 203,
     "parity_status": "pass",
     "route_count": 6,
     "run_id_prometheus_violations": [],

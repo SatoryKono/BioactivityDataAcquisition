@@ -54,3 +54,49 @@ tests:
         exp_samples:
           - labels: '{__name__="bioetl_workflow_publication_scope_status",workflow="chembl_baseline",pipeline="chembl_assay",run_type="backfill"}'
             value: 3
+  - name: Provider scope uses its measured status and expires independently
+    interval: 1m
+    input_series:
+      - series: 'bioetl_provider_health_status{provider="chembl",job="bioetl_provider_chembl",instance=""}'
+        values: '1+0x30'
+      - series: 'bioetl_provider_observed_universe{provider="chembl",job="bioetl_provider_chembl",instance=""}'
+        values: '1+0x30'
+      - series: 'bioetl_provider_health_observed_timestamp_seconds{provider="chembl",job="bioetl_provider_chembl",instance=""}'
+        values: '1+0x30'
+      - series: 'bioetl_provider_health_status{provider="pubmed"}'
+        values: '2+0x30'
+      - series: 'bioetl_provider_health_observed_timestamp_seconds{provider="pubmed"}'
+        values: '0+60x30'
+      - series: 'bioetl_workflow_pipeline_expected{workflow="chembl_baseline",pipeline="chembl_assay",run_type="backfill",provider="chembl"}'
+        values: '1+0x30'
+    promql_expr_test:
+      - expr: 'bioetl_l0_input_status_selected{input="provider",pipeline="chembl_assay",run_type="backfill"}'
+        eval_time: 5m
+        exp_samples:
+          - labels: '{__name__="bioetl_l0_input_status_selected",input="provider",pipeline="chembl_assay",run_type="backfill"}'
+            value: 1
+      - expr: 'bioetl_provider_current_status{provider="chembl"}'
+        eval_time: 16m
+        exp_samples:
+          - labels: '{__name__="bioetl_provider_current_status",provider="chembl"}'
+            value: 3
+      - expr: 'bioetl_provider_current_status{provider="pubmed"}'
+        eval_time: 16m
+        exp_samples:
+          - labels: '{__name__="bioetl_provider_current_status",provider="pubmed"}'
+            value: 0
+  - name: Future observation cannot grant provider OK
+    interval: 1m
+    input_series:
+      - series: 'bioetl_provider_health_status{provider="chembl",job="bioetl_provider_chembl",instance=""}'
+        values: '2+0x5'
+      - series: 'bioetl_provider_observed_universe{provider="chembl",job="bioetl_provider_chembl",instance=""}'
+        values: '1+0x5'
+      - series: 'bioetl_provider_health_observed_timestamp_seconds{provider="chembl",job="bioetl_provider_chembl",instance=""}'
+        values: '3600+0x5'
+    promql_expr_test:
+      - expr: 'bioetl_provider_current_status{provider="chembl"}'
+        eval_time: 3m
+        exp_samples:
+          - labels: '{__name__="bioetl_provider_current_status",provider="chembl"}'
+            value: 3

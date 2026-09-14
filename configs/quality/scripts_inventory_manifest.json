@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-14T07:00:25.703001+00:00",
+  "generated_at": "2026-09-14T11:39:29.075847+00:00",
   "summary": {
     "total_scripts": 617,
     "status_counts": {
@@ -12811,7 +12811,7 @@
         },
         {
           "path": "tests/integration/test_grafana_render_first_remediation.py",
-          "line": 1412,
+          "line": 1413,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         },
@@ -18013,7 +18013,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_github_actions_runtime_policy.py",
-          "line": 128,
+          "line": 135,
           "source_group": "scripts",
           "text": "vs this list is reviewed by `github_settings_review.py`, not here."
         },
@@ -19926,13 +19926,13 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 825,
+          "line": 840,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._dashboard_state_followup import ("
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_dashboard_state_followup.py",
-          "line": 6,
+          "line": 8,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._dashboard_state_followup import ("
         }
@@ -20305,7 +20305,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 820,
+          "line": 835,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },
