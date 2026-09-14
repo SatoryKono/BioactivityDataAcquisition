@@ -37,7 +37,13 @@ seams:
     category: operator_time_allowed
     replay_critical: false
     rationale: Memory pruning uses injectable current time and defaults only for operator maintenance.
-    - path: src/bioetl/interfaces/http/recent_pipeline_runs.py
+  - path: src/memory/tooling/review_curated.py
+    scope: review_curated_notes
+    call: datetime.now
+    category: operator_time_allowed
+    replay_critical: false
+    rationale: Curated memory review uses injectable current time and defaults only for operator maintenance.
+  - path: src/bioetl/interfaces/http/recent_pipeline_runs.py
     scope: list_recent_pipeline_runs
     call: datetime.now
     category: operator_time_allowed

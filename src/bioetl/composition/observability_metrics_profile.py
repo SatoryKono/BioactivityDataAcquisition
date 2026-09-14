@@ -39,7 +39,7 @@ class MetricsOperatorProfile:
             "metrics_addr": self.metrics_addr,
             "metrics_started_at": (
                 self.metrics_started_at.isoformat()
-                if self.started_at_iso_ready()
+                if self.metrics_started_at is not None
                 else None
             ),
             "metrics_endpoint": self.metrics_endpoint,
@@ -49,10 +49,6 @@ class MetricsOperatorProfile:
             "tracing_enabled": self.tracing_enabled,
             "audit_enabled": self.audit_enabled,
         }
-
-    def started_at_iso_ready(self) -> bool:
-        """True when ``metrics_started_at`` can be serialized."""
-        return self.metrics_started_at is not None
 
 
 def get_metrics_operator_profile() -> MetricsOperatorProfile:
