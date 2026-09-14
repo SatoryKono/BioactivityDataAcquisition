@@ -1122,8 +1122,7 @@ def test_runtime_telemetry_gap_checks_scrape_and_rule_health() -> None:
     )
     assert 'max(up{job="bioetl"})' in expressions
     assert any(
-        "bioetl_runtime_required_rule_age_seconds" in expr
-        for expr in expressions
+        "bioetl_runtime_required_rule_age_seconds" in expr for expr in expressions
     )
 
     rules = yaml.safe_load(RULES_PATH.read_text(encoding="utf-8"))
