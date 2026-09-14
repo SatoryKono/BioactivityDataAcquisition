@@ -505,9 +505,10 @@ class TestPushMetricsToGateway:
         ) as mock_push:
             push_metrics_to_gateway()
 
-        mock_push.assert_called_once()
-        assert mock_push.call_args[0][0] == "localhost:9091"
-        assert mock_push.call_args[1]["timeout"] == pytest.approx(5.0)
+        assert mock_push.call_args_list
+        for call in mock_push.call_args_list:
+            assert call.args[0] == "localhost:9091"
+            assert call.kwargs["timeout"] == pytest.approx(5.0)
 
     def test_push_failure_oserror(self):
         """Should return False on OSError."""
@@ -599,13 +600,13 @@ class TestPushMetricsToGateway:
         assert call_kwargs["job"] == "bioetl"
 
     def test_push_empty_grouping_key_default(self):
-        """Should pass empty dict when grouping_key is None."""
+        """Unscoped samples replace the legacy group before scoped samples."""
         with patch(
             "bioetl.infrastructure.observability.server.push_to_gateway"
         ) as mock_push:
             push_metrics_to_gateway()
 
-        call_kwargs = mock_push.call_args[1]
+        call_kwargs = mock_push.call_args_list[0].kwargs
         assert call_kwargs["grouping_key"] == {}
 
     def test_push_uses_replace_style_gateway_publication(self):

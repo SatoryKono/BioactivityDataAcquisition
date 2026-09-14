@@ -1005,6 +1005,9 @@
             },
             "excludeByName": {
               "Value": true,
+              "json_path": true,
+              "markdown_path": true,
+              "row_kind": true,
               "report_url": false,
               "workflow_scope": false,
               "run_type": false

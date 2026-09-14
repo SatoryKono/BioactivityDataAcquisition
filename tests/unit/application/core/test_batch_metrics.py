@@ -44,6 +44,8 @@ from bioetl.application.core.batch_metrics import (
 )
 from bioetl.domain.types import ErrorType
 
+pytestmark = pytest.mark.unit
+
 
 # ---------------------------------------------------------------------------
 # Fixtures

@@ -136,10 +136,9 @@ _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
 }
 _RECOVERY_ACTION_HTML = (
     '<div style="padding:0 6px;line-height:1.15;font-size:16px;white-space:normal;'
-    'overflow-wrap:anywhere">Do not replay this run if Trust status is INCOMPLETE '
-    "or UNKNOWN. <em>Review Selected-Run Trust</em> · "
-    "<em>Review Retention Compliance</em> · then expand "
-    "<em>Review Lineage Validation</em>.</div>"
+    'overflow-wrap:anywhere">CURRENT · Pipeline / Run Type readiness is shown at right.<br>'
+    "SELECTED RUN · Replay requires complete Trust and retention evidence below. "
+    "INCOMPLETE or UNKNOWN blocks replay.</div>"
 )
 CHIP_BASE = (
     "box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;"
@@ -681,6 +680,22 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
         panels, _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY, uid="bioetl-control-plane-v1"
     )
     by_id = {panel.get("id"): panel for panel in root}
+    if 9400 in by_id:
+        by_id[9400]["options"]["content"] = _RECOVERY_ACTION_HTML
+        by_id[9400]["description"] = (
+            "CURRENT readiness is pipeline/run_type telemetry. SELECTED RUN Trust "
+            "and retention tables are exact-run persisted evidence. An incomplete "
+            "selected run cannot be replayed even when current readiness is OK."
+        )
+    if 9401 in by_id:
+        readiness = by_id[9401]
+        readiness["title"] = "Monitor Current Readiness"
+        readiness["fieldConfig"]["defaults"]["displayName"] = "Current readiness"
+        readiness["description"] = (
+            "CURRENT · Latest fresh pipeline/run_type telemetry. Run ID does not filter "
+            "this panel. OK here does not authorize replay of the selected run; "
+            "Review Selected-Run Trust and retention evidence below must be complete."
+        )
     if 906 in by_id:
         _stamp_control_plane_recovery_cta(by_id[906])
 

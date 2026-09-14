@@ -653,7 +653,7 @@ def test_prometheus_endpoint_and_rule_age_have_required_coverage() -> None:
     }
     for ref_id, metric in (
         ("A", "up"),
-        ("C", "prometheus_rule_group_last_evaluation_timestamp_seconds"),
+        ("C", "bioetl_runtime_required_rule_age_seconds"),
     ):
         assert targets[ref_id]["query_tokens"] == [metric]
         assert targets[ref_id]["coverage_class"] == "required_current"

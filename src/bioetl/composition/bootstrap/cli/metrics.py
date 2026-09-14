@@ -17,6 +17,7 @@ from bioetl.composition.bootstrap.assembly.metrics_service import (
     create_metrics_service,
 )
 from bioetl.composition.observability_resolution import resolve_tracing_port
+from bioetl.composition.runtime_builders import control_plane_root
 from bioetl.composition.runtime_builders.config_access import get_settings
 
 if TYPE_CHECKING:
@@ -32,9 +33,6 @@ def refresh_control_plane_integrity_metrics(
     """Measure persisted manifest/ledger integrity before a terminal snapshot."""
     from bioetl.application.observability.control_plane_integrity_metrics import (
         ControlPlaneIntegrityMetricsService,
-    )
-    from bioetl.composition.runtime_builders._run_manifest_control_plane_paths import (
-        control_plane_root,
     )
     from bioetl.domain.exceptions import BioETLError
     from bioetl.infrastructure.control_plane import (

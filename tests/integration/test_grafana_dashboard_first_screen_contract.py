@@ -688,7 +688,7 @@ def test_current_status_headlines_use_instant_queries() -> None:
     expectations = {
         "bioetl-overview-v2.json": ("Monitor Scope Health",),
         "bioetl-control-plane-v1.json": (
-            "Monitor Replay Readiness",
+            "Monitor Current Readiness",
             "Monitor Checkpoint Age",
         ),
         "bioetl-runtime.json": (
