@@ -13,9 +13,24 @@ from bioetl.infrastructure.observability._metrics_gateway_publication import (
 )
 from bioetl.interfaces.cli.commands._workflow_run_support import (
     _execute_workflow_and_publish_metrics,
+    _workflow_metrics_run_type,
 )
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize(
+    ("run_types", "expected"),
+    [(("backfill", "backfill"), "backfill"), (("backfill", "incremental"), None)],
+)
+def test_workflow_publication_uses_actual_step_run_types(run_types, expected) -> None:
+    config = SimpleNamespace(
+        pipeline_steps=[
+            SimpleNamespace(run_options=SimpleNamespace(run_type=t)) for t in run_types
+        ],
+        defaults=SimpleNamespace(merged_with=lambda options: options),
+    )
+    assert _workflow_metrics_run_type(config) == expected
 
 
 @pytest.mark.parametrize("failure", [None, RuntimeError, asyncio.CancelledError])
@@ -84,14 +99,16 @@ def test_full_snapshot_survives_short_workflow_exit(failure) -> None:
     else:
         with pytest.raises(failure, match="terminal error"):
             execute()
-    assert len(bodies) == 2
+    # Terminal publication partitions both pipeline scopes instead of using
+    # one global replace group. Inspect all emitted bodies on every exit.
+    terminal_snapshot = b"\n".join(bodies)
     assert (
         b'bioetl_control_plane_ledger_appends_total{pipeline="chembl_assay",status="failed"} 0.0'
-        in bodies[-1]
+        in terminal_snapshot
     )
     assert (
         b'bioetl_control_plane_ledger_appends_total{pipeline="chembl_target",status="success"} 1.0'
-        in bodies[-1]
+        in terminal_snapshot
     )
 
 

@@ -152,6 +152,9 @@ workflow. Метрики с label `workflow` используют job
 `bioetl_workflow_<workflow>`; обычный pipeline run не заменяет эту группу.
 Названия workflow берутся из конфигурации; Run ID в job/grouping не добавляется.
 Повторный `incremental` поэтому сохраняет опубликованные серии `backfill`.
+Проверка integrity сохранённых manifest/ledger публикуется в отдельный job
+`bioetl_control_plane`: её сканирование других типов запуска не заменяет
+их runtime-снимки.
 Pushgateway сохраняет последние снимки: наличие серии само по себе не доказывает
 свежесть запуска, для этого проверяются реальные timestamps и артефакты.
 

@@ -6,11 +6,11 @@ import re
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability._metrics_gateway_snapshots import (
     MetricCollector,
     partition_snapshots,
 )
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort

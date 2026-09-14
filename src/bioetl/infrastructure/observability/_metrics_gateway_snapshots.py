@@ -45,10 +45,12 @@ def partition_snapshots(
             labels = sample.labels
             workflow = labels.get("workflow")
             sample_job = f"{job}_workflow_{workflow}" if workflow else job
+            # Integrity refresh scans persisted scopes beyond this process's
+            # executed runs. It must not replace their runtime snapshots.
+            if metric.name == "bioetl_manifest_ledger_integrity_ratio":
+                sample_job = f"{job}_control_plane"
             group = tuple(
-                (key, labels[key])
-                for key in ("pipeline", "run_type")
-                if key in labels
+                (key, labels[key]) for key in ("pipeline", "run_type") if key in labels
             )
             families = partitions.setdefault((sample_job, group), {})
             if metric.name not in families:

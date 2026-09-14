@@ -226,7 +226,7 @@ groups:
               "(.+)"
             )
           )
-          or label_replace(
+          or on (pipeline, run_type) label_replace(
             (
               bioetl_overview_pipeline_run_type_universe
               unless on (pipeline, run_type) max by (pipeline, run_type) (

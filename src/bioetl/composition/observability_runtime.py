@@ -139,9 +139,11 @@ def push_metrics_to_gateway(
         seed_run_type = (
             run_type.strip()
             if isinstance(run_type, str) and run_type.strip()
-            else "incremental"
+            else ("incremental" if workflow_name is None else "")
         )
         for seed_pipeline in seed_pipelines:
+            if not seed_run_type:
+                continue
             ensure_required_control_plane_publication_series(
                 pipeline=seed_pipeline,
                 run_type=seed_run_type,
