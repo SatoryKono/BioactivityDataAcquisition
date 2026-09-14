@@ -78,15 +78,11 @@ class DashboardContext:
 
 
 def _pipeline_value(
-    *, source_uid: str, template: bool, context: DashboardContext | None
+    *, template: bool, context: DashboardContext | None
 ) -> str:
     if template:
-        if source_uid == "bioetl-provider-health-v2":
-            return "$pipeline_context"
         return "$pipeline"
     assert context is not None
-    if source_uid == "bioetl-provider-health-v2":
-        return context.pipeline_context or context.pipeline
     return context.pipeline
 
 
@@ -103,7 +99,7 @@ def build_handoff_url(
         raise ValueError(f"unknown dashboard uid: {target_uid}")
     if not template and context is None:
         raise ValueError("concrete context is required when template=False")
-    pipe = _pipeline_value(source_uid=source_uid, template=template, context=context)
+    pipe = _pipeline_value(template=template, context=context)
     if template:
         workflow = "$workflow"
         run_type = "$run_type"
@@ -381,7 +377,7 @@ def _fix_ranked_links(panel: dict) -> None:
                 "value": [
                     {
                         "title": "Open domain diagnostics",
-                        "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?${workflow:queryparam}&var-pipeline=${__data.fields.Pipeline}&${run_type:queryparam}&var-run_id=-&${__data.fields.action_scope}&${__url_time_range}",
+                        "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?${workflow:queryparam}&var-pipeline=${__data.fields.route_pipeline}&${run_type:queryparam}&var-run_id=-&${__data.fields.action_scope}&${__url_time_range}",
                         "targetBlank": False,
                         "includeVars": False,
                     }

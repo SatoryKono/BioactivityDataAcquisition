@@ -1122,7 +1122,7 @@ def test_runtime_telemetry_gap_checks_scrape_and_rule_health() -> None:
     )
     assert 'max(up{job="bioetl"})' in expressions
     assert any(
-        "time()-max(prometheus_rule_group_last_evaluation" in expr
+        "bioetl_runtime_required_rule_age_seconds" in expr
         for expr in expressions
     )
 
@@ -1446,11 +1446,11 @@ def test_provider_diagnostic_panels_preserve_no_data_for_tokens_and_circuit_brea
             "bioetl_rate_limiter_tokens_available",
             "or vector(0)",
         ),
-        "Monitor Circuit-Breaker State": (
+        "Monitor Global Circuit-Breaker State": (
             "bioetl_circuit_breaker_state",
             "or vector(0)",
         ),
-        "Track Circuit-Breaker Trips": (
+        "Track Global Circuit-Breaker Trips": (
             "bioetl_circuit_breaker_trips_total",
             'label_replace(vector(0), "adapter",',
         ),
@@ -1485,8 +1485,8 @@ def test_provider_optional_telemetry_panels_explain_empty_samples_do_not_refute_
     expectations = {
         "Track Rate-Limiter Wait p95": "optional telemetry can stay empty",
         "Monitor Available Rate-Limit Tokens": "optional telemetry can stay empty",
-        "Monitor Circuit-Breaker State": "adapter-scoped telemetry can stay empty",
-        "Track Circuit-Breaker Trips": "does not refute current provider severity",
+        "Monitor Global Circuit-Breaker State": "adapter-scoped telemetry can stay empty",
+        "Track Global Circuit-Breaker Trips": "does not refute current provider severity",
     }
 
     panels = {

@@ -1,228 +1,289 @@
 {
-  "domain_id": "tests-system",
-  "prompt_id": "prompt.audit.project.new.tests",
-  "run_id": "20260827T101100Z-tests-new-26a28f462a",
-  "cycle_marker": "Cycle-run: 20260827T101100Z-tests-new-26a28f462a",
-  "base_sha": "9933fa425bd537e2ae615c9e29c9bee1c706a638",
-  "audit_date": "2026-08-27",
-  "mode": "full",
-  "lane": "unit-fast",
-  "scope": [
-    "tests/",
-    "configs/quality/",
-    "pyproject.toml"
-  ],
-  "summary": {
-    "proven": 4,
-    "fixed_local": 2,
-    "open_cycle_issues": 4,
-    "new_issues": 2,
-    "reopened_issues": 2,
-    "skip_budget_delta": 0,
-    "xfail_budget_delta": 0,
-    "debt_budget_delta": 0
-  },
   "findings": [
     {
-      "id": "TEST-NEW-001",
+      "id": "TEST-SYS-001",
       "requirement_id": "REQ-TEST-005",
+      "path": "configs/quality/test_matrix.yaml:592-600",
+      "observation": "Lane e2e-smoke declared PR-blocking in test_matrix.yaml, but GitHub required context is only pr-gate-complete and neither github_required_checks.yaml nor pr-required.yml include e2e-matrix-health.yml.",
+      "method": "Inspection of test_matrix.yaml, github_required_checks.yaml, pr-required.yml, e2e-matrix-health.yml, docs/00-project/governance/05-github-policy.md; grep for e2e-matrix-health in catalog/coordinator returned no matches.",
+      "expected": "Advertised PR-blocking e2e-smoke (matrix-smoke-blocking + chembl e2e_smoke) is a merge-required check via pr-gate-complete catalog, matching GitHub ruleset 13643213.",
+      "actual": "e2e-matrix-health.yml still runs on pull_request independently; catalog/coordinator omit it; required context is exactly pr-gate-complete. tests.yml control-plane-e2e (PubChem only) is a different lane.",
+      "impact": "Auto-merge and ruleset can land a PR with a failed advertised e2e-smoke (ChEMBL activity + pipeline matrix). Full-cycle regression for those paths is not merge-gated.",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
       "priority": "P1",
       "severity": "High",
-      "confidence": "high",
-      "confidence_score": 1.0,
-      "status": "PROVEN",
-      "resolution": "external_blocker",
-      "category": "ci-merge-gate",
-      "path": "GitHub ruleset 15730586",
-      "method": "live GitHub REST API query at base SHA",
-      "observation": "Classic protection for main returns 404 and both repository rulesets report enforcement=disabled.",
-      "expected": "Project-defined always-on checks block merge to main.",
-      "actual": "Workflow results are advisory because no live branch rule requires them.",
-      "impact": "A red test or governance workflow does not technically prevent merge.",
-      "root_cause": "The root-hygiene-required-check ruleset exists but is disabled.",
-      "remediation": "Maintainer enables the reviewed ruleset only after its always-on contexts are green.",
-      "effort": "S",
-      "dependencies": [
-        "maintainer GitHub administration"
-      ],
-      "validation": [
-        "GET /repos/SatoryKono/BioactivityDataAcquisition/branches/main/protection",
-        "GET /repos/SatoryKono/BioactivityDataAcquisition/rulesets"
-      ],
-      "automation": "external GitHub policy",
-      "automated_fix_possible": false,
-      "issue": {
-        "number": 9723,
-        "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9723",
-        "state": "OPEN",
-        "action": "reopened"
-      },
-      "evidence": [
-        {
-          "command": "gh api repos/SatoryKono/BioactivityDataAcquisition/branches/main/protection",
-          "observation": "HTTP 404 Branch not protected"
-        },
-        {
-          "command": "gh api repos/SatoryKono/BioactivityDataAcquisition/rulesets",
-          "observation": "rulesets 13643213 and 15730586 have enforcement disabled"
-        }
-      ]
-    },
-    {
-      "id": "TEST-NEW-002",
-      "requirement_id": "REQ-TEST-005",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "confidence_score": 0.98,
-      "status": "PROVEN",
-      "resolution": "open",
-      "category": "test-policy-drift",
-      "path": "configs/quality/test_matrix.yaml:51",
-      "method": "current-source re-attestation plus exact issue deduplication",
-      "observation": "Issue #9729 was closed without satisfying its source acceptance criteria.",
-      "expected": "Serial-or-bounded lanes avoid implicit xdist, E2E skips are owned, and active playback mismatches fail closed.",
-      "actual": "tests.yml still invokes xdist for governed lanes, tests/e2e is outside the skip census, and active non-critical VCR mismatches still call pytest.skip.",
-      "impact": "Isolation failures and cassette regressions can be misclassified or exit green.",
-      "root_cause": "The issue was closed on policy narration rather than a source SHA that met its checklist.",
-      "remediation": "Implement the existing #9729 acceptance criteria without retries, assertion weakening, or budget growth.",
+      "remediation": "Either add e2e-matrix-health/matrix-smoke-blocking as a pr-gate-complete owner (catalog + pr-required.yml reusable call or equivalent fail-closed need) or stop calling the lane PR-blocking in test_matrix.yaml.",
       "effort": "M",
-      "dependencies": [],
-      "validation": [
-        "inspect configs/quality/test_matrix.yaml parallel_execution_policy",
-        "inspect .github/workflows/tests.yml xdist invocations",
-        "run tests/architecture/test_test_skip_inventory.py",
-        "inspect tests/e2e/test_pipeline_matrix_e2e.py mismatch branch"
+      "automation": "Architecture test: catalog/coordinator must reference the declared e2e-smoke CI owner; keep tests/architecture/test_e2e_health_mode_policy.py.",
+      "automated_fix_possible": false,
+      "domain": "tests-system",
+      "root_cause": "e2e-smoke CI owner is an independent workflow while GitHub required context is only pr-gate-complete",
+      "affected_paths": [
+        "configs/quality/test_matrix.yaml",
+        "configs/quality/github_required_checks.yaml",
+        ".github/workflows/pr-required.yml",
+        ".github/workflows/e2e-matrix-health.yml",
+        "docs/00-project/governance/05-github-policy.md"
       ],
-      "automation": "extend architecture policy tests",
-      "automated_fix_possible": true,
-      "issue": {
-        "number": 9729,
-        "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9729",
-        "state": "OPEN",
-        "action": "reopened"
-      },
+      "category": "ci-gate",
+      "evidence_class": "CONTRADICTION",
       "evidence": [
         {
           "path": "configs/quality/test_matrix.yaml",
-          "line": 51,
-          "observation": "unit-fast and integration-replay remain serial_or_bounded"
+          "line": 592,
+          "command": null,
+          "observation": "e2e-smoke description: PR-blocking; canonical CI owner e2e-matrix-health.yml job matrix-smoke-blocking"
+        },
+        {
+          "path": "configs/quality/github_required_checks.yaml",
+          "line": 8,
+          "command": "rg e2e-matrix-health configs/quality/github_required_checks.yaml .github/workflows/pr-required.yml",
+          "observation": "No e2e-matrix-health matches; aggregator pr-gate-complete; tests owner_jobs omit matrix-smoke-blocking"
+        },
+        {
+          "path": "docs/00-project/governance/05-github-policy.md",
+          "line": 273,
+          "command": null,
+          "observation": "Ruleset 13643213 required context is exactly pr-gate-complete; allow_auto_merge true"
+        }
+      ],
+      "fingerprint": "588ff69271377802b5733323253bd2f213adaacd9a3afcdc85e7b6e916132a74",
+      "validation": [
+        "rg e2e-matrix-health configs/quality/github_required_checks.yaml .github/workflows/pr-required.yml",
+        ".\\.venv-win\\Scripts\\python.exe -m pytest tests/architecture/test_pytest_config_single_source.py -q --no-cov -p no:xdist"
+      ],
+      "dependencies": [],
+      "acceptance": "Either add e2e-matrix-health/matrix-smoke-blocking as a pr-gate-complete owner (catalog + pr-required.yml reusable call or equivalent fail-closed need) or stop calling the lane PR-blocking in test_matrix.yaml.",
+      "validation_commands": [
+        "rg e2e-matrix-health configs/quality/github_required_checks.yaml .github/workflows/pr-required.yml",
+        ".\\.venv-win\\Scripts\\python.exe -m pytest tests/architecture/test_pytest_config_single_source.py -q --no-cov -p no:xdist"
+      ],
+      "rollback": "revert catalog/workflow/docs change in the same changeset",
+      "owner_surface": "docs"
+    },
+    {
+      "id": "TEST-SYS-002",
+      "requirement_id": "REQ-TEST-005",
+      "path": "tests/architecture/_platform_skip_support.py:18-30",
+      "observation": "Four architecture modules skip entirely or in part on Windows/WSL via mounted_worktree_skip_reason; local canonical Windows pytest cannot exercise those governance guards.",
+      "method": "Grep mounted_worktree_skip_reason under tests/; read _platform_skip_support.py and pytestmark skip sites.",
+      "expected": "Architecture merge-relevant guards run on the documented Windows local command, or skipif is inventoried with owner/expiry; CI remains the merge authority on ubuntu-latest.",
+      "actual": "Skip reason is filesystem performance on win/WSL. Files: test_public_facade_inventory.py, test_public_surface_importer_census_governance.py, test_domain_composite_config_importer_map.py, test_diagram_drift_and_embed_guards.py. CI Ubuntu still collects them.",
+      "impact": "Windows contributors get a false-local-green on those architecture surfaces; defects there are only caught in Linux CI.",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
+      "remediation": "Keep CI Linux as merge truth; either bound the skip to measured timeouts with skipif in the reviewed census, or provide a Windows-safe subset so local architecture-fast-boundary is not silently thinner.",
+      "effort": "M",
+      "automation": "Extend tests/architecture/test_test_skip_inventory.py to census architecture skipif/pytestmark skip, or document Windows-excluded nodeids in test_matrix.",
+      "automated_fix_possible": false,
+      "domain": "tests-system",
+      "root_cause": "architecture modules apply pytest.mark.skip on Windows/WSL for filesystem performance without a Windows-equivalent local lane",
+      "affected_paths": [
+        "tests/architecture/_platform_skip_support.py",
+        "tests/architecture/test_public_facade_inventory.py",
+        "tests/architecture/test_public_surface_importer_census_governance.py",
+        "tests/architecture/test_domain_composite_config_importer_map.py",
+        "tests/architecture/test_diagram_drift_and_embed_guards.py"
+      ],
+      "category": "isolation",
+      "evidence_class": "FACT",
+      "evidence": [
+        {
+          "path": "tests/architecture/_platform_skip_support.py",
+          "line": 20,
+          "command": null,
+          "observation": "Returns skip reason on sys.platform startswith win and on WSL /proc/version microsoft"
+        },
+        {
+          "path": "tests/architecture/test_public_facade_inventory.py",
+          "line": 29,
+          "command": null,
+          "observation": "pytestmark = pytest.mark.skip(reason=_SKIP_REASON) when reason is not None"
+        }
+      ],
+      "fingerprint": "16fb8558189a4a7555b69b45c39274148f1afb5865df65632d777163c6420f4a",
+      "validation": [
+        "rg e2e-matrix-health configs/quality/github_required_checks.yaml .github/workflows/pr-required.yml",
+        ".\\.venv-win\\Scripts\\python.exe -m pytest tests/architecture/test_pytest_config_single_source.py -q --no-cov -p no:xdist"
+      ],
+      "dependencies": [],
+      "acceptance": "Keep CI Linux as merge truth; either bound the skip to measured timeouts with skipif in the reviewed census, or provide a Windows-safe subset so local architecture-fast-boundary is not silently thinner.",
+      "validation_commands": [
+        "rg e2e-matrix-health configs/quality/github_required_checks.yaml .github/workflows/pr-required.yml",
+        ".\\.venv-win\\Scripts\\python.exe -m pytest tests/architecture/test_pytest_config_single_source.py -q --no-cov -p no:xdist"
+      ],
+      "rollback": "revert catalog/workflow/docs change in the same changeset",
+      "owner_surface": "docs"
+    },
+    {
+      "id": "TEST-SYS-003",
+      "requirement_id": "REQ-TEST-005",
+      "path": "tests/architecture/test_test_skip_inventory.py:185-208",
+      "observation": "Guard test_unit_and_architecture_forbid_unconditional_skip_marker only matches the decorator token @pytest.mark.skip(; pytestmark assignment/append and add_marker are invisible to it.",
+      "method": "Read _unconditional_skip_marker_paths; grep pytestmark skip under tests/architecture.",
+      "expected": "Unconditional skip census for unit/architecture covers decorator, pytestmark assignment, and add_marker forms, matching the skip-inventory AST walker used for contract/integration/e2e.",
+      "actual": "Scanner searches decorator substring. Architecture files use pytestmark assignment/append. Unit HTTP conftest uses item.add_marker(pytest.mark.skip) when local TCP bind fails.",
+      "impact": "New hidden skips can be added without failing the architecture forbid test; skip inventory still does not cover unit/architecture by design.",
+      "confidence": "high",
+      "confidence_score": 0.92,
+      "status": "PROVEN",
+      "priority": "P3",
+      "severity": "Low",
+      "remediation": "Reuse _suppression_count_from_source / AST Call walker for unit+architecture skip census instead of a decorator substring check.",
+      "effort": "S",
+      "automation": "tests/architecture/test_test_skip_inventory.py",
+      "automated_fix_possible": false,
+      "domain": "tests-system",
+      "root_cause": "unconditional skip forbid uses decorator substring not AST Call census",
+      "affected_paths": [
+        "tests/architecture/test_test_skip_inventory.py",
+        "tests/architecture/test_public_facade_inventory.py",
+        "tests/architecture/test_public_surface_importer_census_governance.py",
+        "tests/unit/interfaces/http/conftest.py"
+      ],
+      "category": "governance-gap",
+      "evidence_class": "FACT",
+      "evidence": [
+        {
+          "path": "tests/architecture/test_test_skip_inventory.py",
+          "line": 193,
+          "command": null,
+          "observation": "decorator substring gate: if @pytest.mark.skip( not in source: continue"
+        },
+        {
+          "path": "tests/unit/interfaces/http/conftest.py",
+          "line": 69,
+          "command": null,
+          "observation": "pytest.mark.skip via add_marker when local TCP bind fails"
+        }
+      ],
+      "fingerprint": "adbe1fcf3db52c95750eee44648c13169ac641dccdce2b99010fb8946a087fc4",
+      "validation": [
+        "rg e2e-matrix-health configs/quality/github_required_checks.yaml .github/workflows/pr-required.yml",
+        ".\\.venv-win\\Scripts\\python.exe -m pytest tests/architecture/test_pytest_config_single_source.py -q --no-cov -p no:xdist"
+      ],
+      "dependencies": [],
+      "acceptance": "Reuse _suppression_count_from_source / AST Call walker for unit+architecture skip census instead of a decorator substring check.",
+      "validation_commands": [
+        "rg e2e-matrix-health configs/quality/github_required_checks.yaml .github/workflows/pr-required.yml",
+        ".\\.venv-win\\Scripts\\python.exe -m pytest tests/architecture/test_pytest_config_single_source.py -q --no-cov -p no:xdist"
+      ],
+      "rollback": "revert catalog/workflow/docs change in the same changeset",
+      "owner_surface": "docs"
+    },
+    {
+      "id": "TEST-SYS-004",
+      "requirement_id": "REQ-TEST-005",
+      "path": "configs/quality/github_required_checks.yaml:126-129",
+      "observation": "tests gate owner_jobs lists smoke-check, governance-preflight, test-fast, test-matrix, coverage-verify, but tests.yml fail-closed tests-complete needs additional blocking jobs including control-plane-e2e, memory-tests, coverage-inventory-currentness.",
+      "method": "Read github_required_checks.yaml gates.tests.owner_jobs vs tests.yml tests-complete.needs and job list.",
+      "expected": "Catalog owner_jobs for the tests gate names every fail-closed job that must succeed for merge confidence, including e2e/control-plane and coverage inventory currentness.",
+      "actual": "Reusable tests.yml still fail-closes on those jobs (merge via pr-required is not weakened if the whole workflow must succeed). Catalog is an incomplete map of what CI actually blocks.",
+      "impact": "Operators/audits reading only the catalog under-count merge-blocking test jobs; does not by itself make tests.yml green-fiction.",
+      "confidence": "high",
+      "confidence_score": 0.88,
+      "status": "PROVEN",
+      "priority": "P3",
+      "severity": "Low",
+      "remediation": "Align gates.tests.owner_jobs (and canonical_checks if needed) with tests.yml tests-complete.needs plus coverage-verify producers.",
+      "effort": "S",
+      "automation": "tests/architecture/test_pr_gate_complete.py can assert owner_jobs equals tests-complete needs union coverage-verify.",
+      "automated_fix_possible": false,
+      "domain": "tests-system",
+      "root_cause": "github_required_checks.yaml tests.owner_jobs is a partial subset of tests.yml fail-closed jobs",
+      "affected_paths": [
+        "configs/quality/github_required_checks.yaml",
+        ".github/workflows/tests.yml"
+      ],
+      "category": "ci-catalog-drift",
+      "evidence_class": "FACT",
+      "evidence": [
+        {
+          "path": "configs/quality/github_required_checks.yaml",
+          "line": 129,
+          "command": null,
+          "observation": "owner_jobs: [smoke-check, governance-preflight, test-fast, test-matrix, coverage-verify]"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 844,
-          "observation": "unit-fast still runs -n auto --dist loadscope"
-        },
-        {
-          "path": "tests/architecture/test_test_skip_inventory.py",
-          "line": 24,
-          "observation": "SCAN_ROOTS contains only contract and integration"
-        },
-        {
-          "path": "tests/e2e/test_pipeline_matrix_e2e.py",
-          "line": 547,
-          "observation": "active non-critical cassette mismatch still invokes pytest.skip"
+          "line": 1531,
+          "command": null,
+          "observation": "tests-complete needs include control-plane-e2e, flaky-telemetry, memory-tests, coverage-inventory-currentness, quality-metrics-gate, and others not listed in catalog owner_jobs"
         }
-      ]
+      ],
+      "fingerprint": "0ec1a14dd79fff59eeea46adb93051c4f43b9d30a7aed9f9909920e4255b8b77",
+      "validation": [
+        "rg e2e-matrix-health configs/quality/github_required_checks.yaml .github/workflows/pr-required.yml",
+        ".\\.venv-win\\Scripts\\python.exe -m pytest tests/architecture/test_pytest_config_single_source.py -q --no-cov -p no:xdist"
+      ],
+      "dependencies": [],
+      "acceptance": "Align gates.tests.owner_jobs (and canonical_checks if needed) with tests.yml tests-complete.needs plus coverage-verify producers.",
+      "validation_commands": [
+        "rg e2e-matrix-health configs/quality/github_required_checks.yaml .github/workflows/pr-required.yml",
+        ".\\.venv-win\\Scripts\\python.exe -m pytest tests/architecture/test_pytest_config_single_source.py -q --no-cov -p no:xdist"
+      ],
+      "rollback": "revert catalog/workflow/docs change in the same changeset",
+      "owner_surface": "docs"
     },
     {
-      "id": "TEST-NEW-003",
-      "requirement_id": "REQ-GOV-004",
-      "priority": "P2",
-      "severity": "Medium",
+      "id": "TEST-SYS-005",
+      "requirement_id": "REQ-TEST-005",
+      "path": "configs/quality/test_matrix.yaml:140-141",
+      "observation": "test_matrix execution_defaults.direct_runner is only scripts/engineering/dev/run_pytest.sh; Windows canonical command is .venv-win python -m pytest / run_pytest.ps1.",
+      "method": "Read test_matrix execution_defaults; TEST_LANE_MENTAL_MODEL.md; scripts/engineering/dev/README.md; pyproject addopts.",
+      "expected": "Lane SSOT names both POSIX and Windows runners so local/CI commands stay comparable.",
+      "actual": "Lanes pin runner: run_pytest.sh. Windows path exists (run_pytest.ps1, .venv-win) but is not the matrix direct_runner. pytest addopts remain serial (no global xdist).",
+      "impact": "Low: Windows can still run pytest; matrix wrappers and CI are Linux. Risk is operator drift, not missing gates.",
       "confidence": "high",
-      "confidence_score": 1.0,
+      "confidence_score": 0.85,
       "status": "PROVEN",
-      "resolution": "fixed_local",
-      "category": "false-green-skip",
-      "path": "tests/unit/contracts/test_chembl_contract_helper.py:32",
-      "method": "same-lane baseline, focused reproduction, minimal test correction, same-lane retest",
-      "observation": "A test named does_not_mask_http_500 deterministically skipped because the reviewed helper policy treats HTTP 500 as transient.",
-      "expected": "The unit test explicitly asserts the reviewed transient-500 skip contract and itself passes.",
-      "actual": "Before the fix the node exited as skipped; after the fix the helper file is 3/3 passed and the lane skip count falls by one.",
-      "impact": "The old test name and green exit falsely implied that HTTP 500 was returned rather than suppressed.",
-      "root_cause": "The assertion was stale relative to _CHEMBL_TRANSIENT_STATUS_CODES and the reviewed skip inventory.",
-      "remediation": "Assert pytest.skip.Exception with the HTTP 500 reason.",
+      "priority": "P3",
+      "severity": "Low",
+      "remediation": "Add windows_runner: scripts/engineering/dev/run_pytest.ps1 (and python -m pytest) to execution_defaults without changing lane pytest_args.",
       "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "pytest tests/unit/contracts/test_chembl_contract_helper.py -q -rs",
-        "pytest tests/architecture/test_test_skip_inventory.py -q",
-        "repeat canonical unit-fast selector"
+      "automation": "tests/architecture/test_test_matrix_lane_policy.py already asserts direct_runner == run_pytest.sh; extend to require windows_runner.",
+      "automated_fix_possible": false,
+      "domain": "tests-system",
+      "root_cause": "test_matrix execution_defaults encode only the POSIX run_pytest.sh wrapper",
+      "affected_paths": [
+        "configs/quality/test_matrix.yaml",
+        "scripts/engineering/dev/run_pytest.ps1",
+        "docs/00-project/ai/agents/guides/TEST_LANE_MENTAL_MODEL.md"
       ],
-      "automation": "unit regression test",
-      "automated_fix_possible": true,
-      "issue": {
-        "number": 9751,
-        "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9751",
-        "state": "OPEN",
-        "action": "created"
-      },
+      "category": "local-command",
+      "evidence_class": "FACT",
       "evidence": [
         {
-          "artifact": "iteration-1/unit-baseline.xml",
-          "observation": "21613 tests, 0 failures, 0 errors, 20 skipped"
+          "path": "configs/quality/test_matrix.yaml",
+          "line": 140,
+          "command": null,
+          "observation": "direct_runner: scripts/engineering/dev/run_pytest.sh"
         },
         {
-          "artifact": "iteration-1/unit-retest.xml",
-          "observation": "21613 tests, 0 failures, 0 errors, 19 skipped"
-        },
-        {
-          "artifact": "iteration-1/http500-after.xml",
-          "observation": "3 tests, 0 failures, 0 errors, 0 skipped"
-        },
-        {
-          "artifact": "iteration-1/skip-inventory.xml",
-          "observation": "12 tests, 0 failures, 0 errors, 0 skipped"
-        },
-        {
-          "artifact": "iteration-1/unit-final-sha.xml",
-          "observation": "final rebased SHA: 21616 tests, 0 failures, 0 errors, 19 skipped"
+          "path": "scripts/engineering/dev/run_pytest.ps1",
+          "line": 1,
+          "command": null,
+          "observation": "Windows wrapper exists and is documented in scripts/engineering/dev/README.md"
         }
-      ]
-    },
-    {
-      "id": "TEST-NEW-004",
-      "requirement_id": "REQ-SEC-002",
-      "priority": "P1",
-      "severity": "High",
-      "confidence": "high",
-      "confidence_score": 1.0,
-      "status": "PROVEN",
-      "resolution": "fixed_local",
-      "category": "security-contract-false-positive",
-      "path": "src/bioetl/application/ports/providers.py:46",
-      "method": "CI failure, local reproduction, git blame, source-contract inspection, full security-shard retest",
-      "observation": "The PII scanner classified ProviderSettingsProtocol.default_email as Silver PII because its transport-only semantics were not explicit in the port contract.",
-      "expected": "Provider contact metadata is explicitly non-persistent; any future Silver persistence requires hashing under REQ-SEC-002.",
-      "actual": "The original one-line docstring named an email but did not state its persistence boundary or hashing obligation.",
-      "impact": "The security shard failed and consequently withheld its coverage shard, producing downstream aggregate coverage regressions.",
-      "root_cause": "A source-bound transport contact property lacked the security semantics needed by the repository's fail-closed PII gate.",
-      "remediation": "Document the non-persistent transport boundary and future hashing obligation at the port; do not grow the allowlist.",
-      "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "pytest tests/security -q",
-        "module coverage source-tree hash refresh and clean-tree guard"
       ],
-      "automation": "existing security shard",
-      "automated_fix_possible": true,
-      "issue": {
-        "number": 9768,
-        "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9768",
-        "state": "OPEN",
-        "action": "created"
-      },
-      "evidence": [
-        {
-          "command": "pytest tests/security/test_security.py::TestPIIHandling::test_silver_layer_uses_hashing",
-          "observation": "before: providers.py default_email was the only violation"
-        },
-        {
-          "command": "pytest tests/security -q",
-          "observation": "after: 63 passed"
-        }
-      ]
+      "fingerprint": "19e5ddab8fc347e619a26975722bb651e9bff3acea6f3fb15815aa49dad357ca",
+      "validation": [
+        "rg e2e-matrix-health configs/quality/github_required_checks.yaml .github/workflows/pr-required.yml",
+        ".\\.venv-win\\Scripts\\python.exe -m pytest tests/architecture/test_pytest_config_single_source.py -q --no-cov -p no:xdist"
+      ],
+      "dependencies": [],
+      "acceptance": "Add windows_runner: scripts/engineering/dev/run_pytest.ps1 (and python -m pytest) to execution_defaults without changing lane pytest_args.",
+      "validation_commands": [
+        "rg e2e-matrix-health configs/quality/github_required_checks.yaml .github/workflows/pr-required.yml",
+        ".\\.venv-win\\Scripts\\python.exe -m pytest tests/architecture/test_pytest_config_single_source.py -q --no-cov -p no:xdist"
+      ],
+      "rollback": "revert catalog/workflow/docs change in the same changeset",
+      "owner_surface": "docs"
     }
   ]
 }

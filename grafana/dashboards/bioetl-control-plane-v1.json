@@ -726,6 +726,65 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Processing"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 70
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Trust"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Observed at"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reasons"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
+              },
+              {
+                "id": "links",
+                "value": []
+              }
+            ]
           }
         ]
       },
@@ -734,7 +793,8 @@
           "show": false
         },
         "showHeader": true,
-        "cellHeight": "sm"
+        "cellHeight": "auto",
+        "maxRowHeight": 230
       },
       "targets": [
         {
@@ -4778,7 +4838,7 @@
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · TIME RANGE · Summarizes the selected run’s identity and replay anchors. Full values are shown in the table and remain available for copying through Inspect value. Source metadata remains in table inspection. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "description": "SELECTED RUN · TIME RANGE · Summarizes the selected run’s identity and replay anchors. Full values are shown in the table and remain available for copying through Inspect value. Source metadata remains in table inspection. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Inspect value opens full identifiers as selectable plain text.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -5140,7 +5200,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · TIME RANGE · Provides full run IDs, hashes, artifact references, lineage references, snapshots, and checkpoint values for copying. These values come from BioETL Ops HTTP and are never Prometheus labels. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "description": "SELECTED RUN · TIME RANGE · Provides full run IDs, hashes, artifact references, lineage references, snapshots, and checkpoint values for copying. These values come from BioETL Ops HTTP and are never Prometheus labels. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Inspect value opens full identifiers as selectable plain text.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -5613,7 +5673,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · TIME RANGE · Lists missing run, manifest, configuration, contract, snapshot, replay, composite, and checkpoint anchors. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "description": "SELECTED RUN · TIME RANGE · Lists missing run, manifest, configuration, contract, snapshot, replay, composite, and checkpoint anchors. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Inspect value opens full identifiers as selectable plain text.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -7394,12 +7454,6 @@
               "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity.",
               "links": [
                 {
-                  "title": "Copy/Open full value (plain text)",
-                  "url": "data:text/plain,${__value.raw}",
-                  "targetBlank": true,
-                  "includeVars": false
-                },
-                {
                   "title": "Check BioETL Ops HTTP health",
                   "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
                   "targetBlank": true
@@ -7459,14 +7513,7 @@
                   },
                   {
                     "id": "links",
-                    "value": [
-                      {
-                        "title": "Copy/Open full value (plain text)",
-                        "url": "data:text/plain,${__value.raw}",
-                        "targetBlank": true,
-                        "includeVars": false
-                      }
-                    ]
+                    "value": []
                   }
                 ]
               },
@@ -7539,9 +7586,9 @@
           "type": "table",
           "title": "Review Processed Records",
           "gridPos": {
-            "x": 18,
-            "y": 24,
-            "w": 6,
+            "x": 0,
+            "y": 30,
+            "w": 24,
             "h": 6
           },
           "datasource": "BioETL Ops HTTP",
@@ -7965,7 +8012,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 30,
+            "y": 36,
             "w": 24,
             "h": 6
           },

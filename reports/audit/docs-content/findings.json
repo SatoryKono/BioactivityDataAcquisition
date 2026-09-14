@@ -1,107 +1,506 @@
 {
-  "schema_version": "finding-schema-v1",
-  "prompt_id": "prompt.audit.project.new.docs",
-  "run_id": "20260827T0846Z-docs-new-b9aa36efdd",
-  "marker": "Cycle-run: 20260827T0846Z-docs-new-b9aa36efdd",
-  "audit_mode": "full",
-  "mode": "full",
-  "language": "ru",
-  "scope": [
-    "README.md",
-    "docs/",
-    "mkdocs.yml",
-    "scripts/docs/"
-  ],
-  "audited_on": "2026-08-27",
-  "base_sha": "b9aa36efdd678fb8bb2f12ec4ce5f7dc07260f9b",
-  "surface_score": 2,
-  "content_surface_score": 2,
-  "pipeline_surface_score": 2,
-  "blocked": false,
-  "debt_budget_policy": "forbidden_to_increase",
-  "require_gh_tracking": false,
-  "new_issues": [],
-  "open_cycle_issues": [],
+  "domain_id": "docs-content",
+  "prompt_id": "prompt.docs.audit",
+  "generated_at_utc": "2026-09-14T06:13:32Z",
+  "surface_score": 1,
+  "sampled_markdown_links": {
+    "files": 25,
+    "local_links_checked": 555,
+    "broken_count": 0,
+    "artifact": "reports/audit/docs-content/broken-links.json"
+  },
   "findings": [
     {
-      "id": "AUD-DOC-001",
-      "requirement_id": "REQ-DOC-001",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "confidence_score": 0.97,
-      "status": "PROVEN",
-      "category": "pipeline",
-      "tags": [
-        "pipeline",
-        "content"
-      ],
-      "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md:74",
-      "observation": "Runbook documented python -m scripts.docs.checks.documentation_cleanup_inventory instead of the unified dispatcher python -m scripts.docs generate-cleanup-inventory.",
-      "method": "read runbook vs scripts/docs/__main__.py COMMANDS and scripts/docs/README.md",
-      "expected": "Active entry points use python -m scripts.docs <cmd>.",
-      "actual": "Before paydown: submodule path. After: generate-cleanup-inventory --check|--update.",
-      "impact": "Operators bypass the unified docs CLI; CI/docs-verification examples diverge from the runbook.",
-      "root_cause": "Runbook listed the implementation module instead of the dispatcher alias.",
-      "remediation": "Restore SSOT link to python -m scripts.docs generate-cleanup-inventory.",
-      "effort": "S",
-      "automation": "docs.yml verify includes generate-cleanup-inventory --check",
-      "automated_fix_possible": false,
-      "dependencies": [],
-      "outcome": "remediated_worktree",
-      "validation": [
-        "rg generate-cleanup-inventory docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-        "python -m scripts.docs generate-cleanup-inventory --check"
-      ],
-      "evidence": [
-        {
-          "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 74,
-          "observation": "Table now uses python -m scripts.docs generate-cleanup-inventory --check|--update"
-        }
-      ]
-    },
-    {
-      "id": "AUD-DOC-002",
-      "requirement_id": "REQ-DOC-001",
-      "priority": "P1",
-      "severity": "High",
+      "id": "DOCS-001",
+      "requirement_id": "GAP",
+      "path": ".github/CONTRIBUTING.md:120-126",
+      "observation": "Contributor GitHub docs contradict the live main ruleset: they claim direct merges to main are allowed and treat checks-complete as the merge wall, while governance and CI require pr-gate-complete and block direct pushes.",
+      "method": "Inspection of contributor docs vs docs/00-project/governance/05-github-policy.md and .github/workflows/pr-required.yml",
+      "expected": "Contributor docs MUST match RULES.md §6 (required checks / contributor sync) and the live ruleset: no direct push to main; GitHub-required context is pr-gate-complete.",
+      "actual": ".github/CONTRIBUTING.md:120-122 says direct merges to main are allowed and branch protection is not enforcing checks. github-quick-reference.md:121 instructs git push origin main --tags. github-local-workflow.md:252-261 lists checks-complete as a main blocking check and omits pr-gate-complete.",
+      "impact": "Contributors may attempt forbidden pushes to main or wait on the wrong CI job name; PRs can look 'green' locally against stale check names while pr-gate-complete is the real merge wall.",
       "confidence": "high",
       "confidence_score": 0.95,
       "status": "PROVEN",
-      "category": "content",
-      "tags": [
-        "content"
+      "priority": "P1",
+      "severity": "High",
+      "category": "contributor-governance-drift",
+      "domain": "docs-content",
+      "root_cause": "Contributor GitHub guidance was not re-synced after ruleset 13643213 / #10267 made pr-gate-complete the required context and blocked direct main updates.",
+      "affected_paths": [
+        ".github/CONTRIBUTING.md",
+        "docs/03-guides/github-quick-reference.md",
+        "docs/03-guides/github-local-workflow.md"
       ],
-      "path": "docs/03-guides/docs-verification.md:65",
-      "observation": "Windows/Linux fallback used python3 -m venv .venv only; AGENTS.md and getting-started.md require .venv-win on Windows mixed checkout.",
-      "method": "compare docs-verification.md and quick-start.md vs docs/03-guides/getting-started.md and AGENTS.md",
-      "expected": "Onboarding does not tell Windows operators to share a Linux .venv.",
-      "actual": "Before: only POSIX .venv. After: pointer to getting-started.md and .venv-win PowerShell snippet.",
-      "impact": "Wrong bootstrap on Windows; venv collision in mixed checkout.",
-      "root_cause": "POSIX-only fallback copied without the Windows lane.",
-      "remediation": "Restore SSOT link to getting-started.md / .venv-win.",
+      "remediation": "Rewrite CONTRIBUTING Branch Protection, github-quick-reference CI/Release, and github-local-workflow Required PR checks to match 05-github-policy.md: ruleset 13643213 active, required context pr-gate-complete, no git push origin main. Point release flow to a PR then tag after merge.",
       "effort": "S",
-      "automation": "n/a (semantic; check-links cannot prove OS path)",
-      "automated_fix_possible": false,
-      "dependencies": [],
-      "outcome": "remediated_worktree",
-      "validation": [
-        "python -m scripts.docs check-links --links --specs --configs"
-      ],
+      "automation": "Add a docs assertion that contributor pages mention pr-gate-complete and do not claim direct merges to main are allowed.",
+      "automated_fix_possible": true,
       "evidence": [
         {
-          "path": "docs/03-guides/docs-verification.md",
-          "line": 70,
-          "observation": "Windows .venv-win fallback added"
+          "path": ".github/CONTRIBUTING.md",
+          "line": 120,
+          "observation": "Direct merges to `main` are currently allowed. When you open a PR, keep these checks green even though GitHub branch protection is not currently enforcing them:"
         },
         {
-          "path": "docs/03-guides/quick-start.md",
-          "line": 96,
-          "observation": "Windows pointer to getting-started.md §2.2 / §2.3"
+          "path": "docs/00-project/governance/05-github-policy.md",
+          "line": 405,
+          "observation": "PR merges and direct pushes to main are blocked by repository ruleset main (13643213); required context is pr-gate-complete."
+        },
+        {
+          "path": "docs/03-guides/github-quick-reference.md",
+          "line": 121,
+          "observation": "Release process runs git push origin main --tags."
+        },
+        {
+          "path": ".github/workflows/pr-required.yml",
+          "line": 297,
+          "observation": "Job name: pr-gate-complete is the documented GitHub required context."
         }
-      ]
+      ],
+      "fingerprint": "7eb84df593675019e6210a04c0a5087601c2e8d7688b4798ef558e5b50566e63"
+    },
+    {
+      "id": "DOCS-002",
+      "requirement_id": "GAP",
+      "path": "docs/03-guides/cheatsheets/cli-commands.md:563-595",
+      "observation": "Published CLI cheatsheet documents retired underscore script entrypoints that the current python -m scripts.* routers reject.",
+      "method": "Command reproduction against scripts/*/__main__.py routers",
+      "expected": "Cheatsheet commands match current kebab-case routers (check-naming, check-links, validate-configs, lint, check-inventory) as listed in the same file's later table and TOOLS.md.",
+      "actual": "Unified Script Entry Points still show naming_check, link_check, config_validation, diagram_lint, repo inventory/catalog/versions, ops.data delta/data_dir. Routers return Unknown command (exit 2).",
+      "impact": "Operators copying the published cheatsheet cannot run QA/docs/schema/diagram/repo commands; the same page later shows the correct names, so the page contradicts itself.",
+      "confidence": "high",
+      "confidence_score": 0.98,
+      "status": "PROVEN",
+      "priority": "P1",
+      "severity": "High",
+      "category": "stale-commands",
+      "domain": "docs-content",
+      "root_cause": "Cheatsheet 'Unified Script Entry Points' block was not updated when scripts routers moved to kebab-case public commands.",
+      "affected_paths": [
+        "docs/03-guides/cheatsheets/cli-commands.md"
+      ],
+      "remediation": "Replace the Unified Script Entry Points block with current router names from scripts/*/__main__.py (check-naming, check-terminology, check-c901, check-links, check-drift, check-docstrings, validate-configs, lint, check-inventory). Change make clean-local-artifacts --apply to make clean-local-artifacts (Makefile already passes --apply unless DRY_RUN).",
+      "effort": "S",
+      "automation": "CI snippet or architecture test that extracts fenced python -m scripts.* commands from this cheatsheet and checks them against router COMMANDS.",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/03-guides/cheatsheets/cli-commands.md",
+          "line": 565,
+          "observation": "Documents python -m scripts.engineering.qa naming_check"
+        },
+        {
+          "command": "python -m scripts.engineering.qa naming_check",
+          "scope": "repo root",
+          "timestamp": "2026-09-14T06:13:32Z",
+          "exit_code": 2,
+          "observation": "Unknown command: naming_check; Available includes check-naming, check-c901, check-terminology"
+        },
+        {
+          "command": "python -m scripts.docs link_check",
+          "scope": "repo root",
+          "timestamp": "2026-09-14T06:13:32Z",
+          "exit_code": 2,
+          "observation": "Unknown command: link_check; Available includes check-links"
+        },
+        {
+          "path": "docs/03-guides/cheatsheets/cli-commands.md",
+          "line": 551,
+          "observation": "make clean-local-artifacts --apply; Makefile target already injects --apply unless DRY_RUN is set."
+        }
+      ],
+      "fingerprint": "3a4128ad4d5cb5ec82a1cfabd5ed1bad9e0d6198e76dd454f7517fe7eeef66d5"
+    },
+    {
+      "id": "DOCS-003",
+      "requirement_id": "GAP",
+      "path": "docs/03-guides/cheatsheets/cli-commands.md:600-617",
+      "observation": "Cheatsheet OS wrappers are invoked from repository root (./setup_env_windows.ps1, ./setup_env_wsl.sh) but the real helpers live under scripts/engineering/dev/.",
+      "method": "Path existence vs cheatsheet fenced commands",
+      "expected": "Document .\\scripts\\engineering\\dev\\setup_env_windows.ps1 and bash scripts/engineering/dev/setup_env_wsl.sh as in README.md / getting-started.md.",
+      "actual": "Cheatsheet shows .\\setup_env_windows.ps1 and ./setup_env_wsl.sh at repo root. Those files are not at root.",
+      "impact": "Windows/WSL onboarding copied from the cheatsheet fails immediately; conflicts with the working README mixed-checkout path.",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "priority": "P1",
+      "severity": "High",
+      "category": "stale-commands",
+      "domain": "docs-content",
+      "root_cause": "Cheatsheet shortened wrapper names without the scripts/engineering/dev/ prefix after the helpers were relocated.",
+      "affected_paths": [
+        "docs/03-guides/cheatsheets/cli-commands.md"
+      ],
+      "remediation": "Replace wrapper snippets with the canonical paths from README mixed-checkout section.",
+      "effort": "S",
+      "automation": "Test that documented wrapper paths exist.",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/03-guides/cheatsheets/cli-commands.md",
+          "line": 603,
+          "observation": "Fenced command .\\setup_env_windows.ps1"
+        },
+        {
+          "path": "docs/03-guides/cheatsheets/cli-commands.md",
+          "line": 613,
+          "observation": "Fenced command ./setup_env_wsl.sh"
+        },
+        {
+          "path": "scripts/engineering/dev/setup_env_windows.ps1",
+          "line": 1,
+          "observation": "Canonical Windows helper exists only under scripts/engineering/dev/."
+        }
+      ],
+      "fingerprint": "0a7c8f187350d45cc06117988444722315d38b818558d6bcea4978dd77ddeb3e"
+    },
+    {
+      "id": "DOCS-004",
+      "requirement_id": "GAP",
+      "path": ".github/CONTRIBUTING.md:11-16",
+      "observation": "CONTRIBUTING Quick Start and RULES §4.2.1 tell contributors to uv sync without tests_full then run make test / architecture-capable suites that require import-linter (tests_full extra).",
+      "method": "Compare documented extras to Makefile install target and pyproject.toml tests_full extra",
+      "expected": "Contributor bootstrap that runs make test or architecture tests MUST include tests_full, matching make install (dev,tests,tests_full,export) and README's explicit warning.",
+      "actual": "CONTRIBUTING:11-16 uses uv sync --extra dev --extra tests --extra tracing then make lint && make test. RULES.md:1156-1157 recommends the same extras and never mentions tests_full. Makefile install:100 is uv sync --extra dev --extra tests --extra tests_full --extra export. tests_full provides import-linter/grimp/radon/vulture.",
+      "impact": "Local make test skips or degrades architecture import-linter (CONTRIBUTING itself later warns about skip), so contributors think they matched CI.",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "priority": "P1",
+      "severity": "High",
+      "category": "bootstrap-drift",
+      "domain": "docs-content",
+      "root_cause": "Constitution and CONTRIBUTING Quick Start were not updated when architecture/capability extras split into tests_full.",
+      "affected_paths": [
+        ".github/CONTRIBUTING.md",
+        "docs/00-project/RULES.md",
+        "docs/03-guides/github-quick-reference.md"
+      ],
+      "remediation": "Change CONTRIBUTING Quick Start and RULES §4.2.1 recommended install to include --extra tests_full before make test / make lint architecture-adjacent flows. github-quick-reference.md:35 (make lint && make test) should point at make install extras or README's tests_full note.",
+      "effort": "S",
+      "automation": "Docs test that CONTRIBUTING/RULES install snippets include tests_full when they invoke make test.",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": ".github/CONTRIBUTING.md",
+          "line": 11,
+          "observation": "uv sync --extra dev --extra tests --extra tracing then make lint && make test"
+        },
+        {
+          "path": "Makefile",
+          "line": 99,
+          "observation": "install: uv sync --extra dev --extra tests --extra tests_full --extra export"
+        },
+        {
+          "path": "pyproject.toml",
+          "line": 101,
+          "observation": "tests_full extra: pytest-benchmark, import-linter, grimp, radon, vulture"
+        },
+        {
+          "path": "docs/00-project/RULES.md",
+          "line": 1156,
+          "observation": "Recommended uv sync --extra dev --extra tests --extra tracing; tests_full not mentioned in RULES.md"
+        }
+      ],
+      "fingerprint": "7138f8301d83b91c6da8b59ff878cfbafa2405e981ee2b9383f1b4fb11929610"
+    },
+    {
+      "id": "DOCS-005",
+      "requirement_id": "GAP",
+      "path": "docs/00-project/RULES.md:1474",
+      "observation": "RULES.md and two published policy/reference pages cite docs/05-engineering/normalization_plan_P0_P6.md, which is not on that path; the file lives only in docs/99-archive/engineering/.",
+      "method": "Path existence check plus docs/05-engineering/README.md archive pointer",
+      "expected": "Active constitution/policy either drop the historical plan or cite docs/99-archive/engineering/normalization_plan_P0_P6.md as archive-only.",
+      "actual": "docs/05-engineering/normalization_plan_P0_P6.md is missing. docs/05-engineering/README.md says the directory is a stub and historical plans were archived. Reference docs under docs/04-reference/normalization/ already use the archive path.",
+      "impact": "Readers of RULES/content-hash policy follow a dead path; 05-engineering looks like live SSOT against DOC-GOV-08.",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
+      "category": "broken-path-citation",
+      "domain": "docs-content",
+      "root_cause": "Constitution and content-hash policy were not retargeted when 05-engineering plans were archived (DOC-GOV-08).",
+      "affected_paths": [
+        "docs/00-project/RULES.md",
+        "docs/02-architecture/policies/content-hash-identity-policy.md",
+        "docs/03-data-model/reference-identifier-families.md"
+      ],
+      "remediation": "Replace live citations with docs/99-archive/engineering/normalization_plan_P0_P6.md and label historical, matching docs/04-reference/normalization/*.",
+      "effort": "S",
+      "automation": "docs check-links or a forbidden-path lint for docs/05-engineering/*.md except README and test-telemetry-baseline.md.",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/RULES.md",
+          "line": 1474,
+          "observation": "Cites docs/05-engineering/normalization_plan_P0_P6.md"
+        },
+        {
+          "path": "docs/02-architecture/policies/content-hash-identity-policy.md",
+          "line": 26,
+          "observation": "Cross-reference still lists docs/05-engineering/normalization_plan_P0_P6.md"
+        },
+        {
+          "path": "docs/05-engineering/README.md",
+          "line": 16,
+          "observation": "Closeout/migration plans formerly under docs/05-engineering/ were archived to docs/99-archive/engineering/."
+        }
+      ],
+      "fingerprint": "344020bccb36a400c8a95a1e0f35ff20333c9a0cce4c1b1c62036f96a038aaa3"
+    },
+    {
+      "id": "DOCS-006",
+      "requirement_id": "GAP",
+      "path": "docs/00-project/RULES.md:1474",
+      "observation": "RULES.md points identity hashing to domain/transformations.py:_should_include_field() and RetryConfig.calculate-delay(); the implementation is hashing.py and calculate_delay.",
+      "method": "Path and symbol search in src/bioetl/domain",
+      "expected": "Constitution symbols match src: src/bioetl/domain/transformations/hashing.py::_should_include_field and RetryConfig.calculate_delay.",
+      "actual": "src/bioetl/domain/transformations.py does not exist. hashing.py:42 defines _should_include_field. domain/resilience.py:89 defines calculate_delay. content-hash-identity-policy.md already cites hashing.py.",
+      "impact": "Engineers following RULES look up a removed module path; policy and constitution disagree.",
+      "confidence": "high",
+      "confidence_score": 0.92,
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
+      "category": "docs-code-drift",
+      "domain": "docs-content",
+      "root_cause": "RULES §6.1 still uses the pre-split transformations.py path and hyphenated method name.",
+      "affected_paths": [
+        "docs/00-project/RULES.md"
+      ],
+      "remediation": "Update RULES §6.1 Content Hash and Retry Jitter pointers to hashing.py and calculate_delay; keep policy file as SSOT for field lists.",
+      "effort": "S",
+      "automation": "Optional symbol-existence check for RULES code pointers (high effort); at least retarget these two strings.",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/RULES.md",
+          "line": 1474,
+          "observation": "Реализация: domain/constants.py:META_FIELDS + domain/transformations.py:_should_include_field()"
+        },
+        {
+          "path": "src/bioetl/domain/transformations/hashing.py",
+          "line": 42,
+          "observation": "def _should_include_field exists here, not in transformations.py"
+        },
+        {
+          "path": "docs/00-project/RULES.md",
+          "line": 1472,
+          "observation": "RetryConfig.calculate-delay() uses hyphen; actual method is calculate_delay"
+        }
+      ],
+      "fingerprint": "c4166e5a210bba369cb4ebea82b3a8c9421b981bb71d684b058b93c94a89f1e5"
+    },
+    {
+      "id": "DOCS-007",
+      "requirement_id": "REQ-GOV-006",
+      "path": "CHANGELOG.md:8",
+      "observation": "Keep a Changelog surface is inconsistent: pyproject and README still advertise 6.1.0 (unreleased) while CHANGELOG also has a dated ## [6.1.0] - 2026-03-11 plus a large Unreleased section.",
+      "method": "Compare CHANGELOG headings, README badge, pyproject.toml version",
+      "expected": "REQ-GOV-006 / Keep a Changelog: either bump version for Unreleased work after a dated 6.1.0, or do not keep a dated [6.1.0] section alongside Unreleased on the same version.",
+      "actual": "CHANGELOG.md:8 ## [Unreleased]; CHANGELOG.md:340 ## [6.1.0] - 2026-03-11; pyproject.toml:7 version = 6.1.0; README.md:8 badge version-6.1.0 (unreleased).",
+      "impact": "Release consumers cannot tell whether 6.1.0 already shipped; Unreleased items are not versioned.",
+      "confidence": "high",
+      "confidence_score": 0.88,
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
+      "category": "changelog-version-drift",
+      "domain": "docs-content",
+      "root_cause": "Version was not bumped after the dated 6.1.0 changelog section; Unreleased continued to accumulate on the same number.",
+      "affected_paths": [
+        "CHANGELOG.md",
+        "README.md",
+        "pyproject.toml"
+      ],
+      "remediation": "Decide whether 6.1.0 already shipped. If yes, bump pyproject for current Unreleased (e.g. 6.2.0) and stop labeling README 6.1.0 unreleased. If 6.1.0 never shipped, fold or relabel the dated [6.1.0] section so it does not look released.",
+      "effort": "M",
+      "automation": "Existing version-consistency check (scripts.engineering.repo check-versions) should fail this dual heading if it does not already.",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "CHANGELOG.md",
+          "line": 8,
+          "observation": "## [Unreleased]"
+        },
+        {
+          "path": "CHANGELOG.md",
+          "line": 340,
+          "observation": "## [6.1.0] - 2026-03-11"
+        },
+        {
+          "path": "pyproject.toml",
+          "line": 7,
+          "observation": "version = \"6.1.0\""
+        },
+        {
+          "path": "README.md",
+          "line": 8,
+          "observation": "Badge version-6.1.0 (unreleased)"
+        }
+      ],
+      "fingerprint": "6e40af6b231486ce944c11721813268afb7101f6171e5a75da589278a4b163a3"
+    },
+    {
+      "id": "DOCS-008",
+      "requirement_id": "GAP",
+      "path": "docs/03-guides/index.md:33",
+      "observation": "Guides index still presents github-setup-plan.md as a comprehensive GitHub setup guide, but that file is an archived-pointer (Status: archived-pointer, Class: repo-only).",
+      "method": "Compare index copy with github-setup-plan.md header",
+      "expected": "Index must describe the pointer as archive-only and send readers to github-local-workflow.md / 05-github-policy.md / CONTRIBUTING.",
+      "actual": "index.md:33 and :81-83 call it a comprehensive setup guide covering local Git config, CI/CD, branch strategy, security, and release process.",
+      "impact": "Onboarding from the guides landing page follows a stub and may treat archived material as SSOT.",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
+      "category": "information-architecture",
+      "domain": "docs-content",
+      "root_cause": "guides/index.md role-boundary prose was not updated when github-setup-plan.md was reduced to an archived pointer.",
+      "affected_paths": [
+        "docs/03-guides/index.md",
+        "docs/03-guides/github-setup-plan.md"
+      ],
+      "remediation": "Retarget the Common Entry Points row and Role Boundaries paragraph to github-local-workflow.md; mention the pointer only as archive.",
+      "effort": "S",
+      "automation": "n/a",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/03-guides/index.md",
+          "line": 81,
+          "observation": "Describes GitHub Setup Plan as comprehensive GitHub repository setup guide covering local Git config, CI/CD workflows, branch strategy, security, and release process."
+        },
+        {
+          "path": "docs/03-guides/github-setup-plan.md",
+          "line": 5,
+          "observation": "Status: archived-pointer; Class: repo-only; body says Do not treat this pointer as Class: published SSOT."
+        }
+      ],
+      "fingerprint": "227fdaa3c710af364efddf6b676a669257aca543565c8a375a6361bddbc06fe5"
+    },
+    {
+      "id": "DOCS-009",
+      "requirement_id": "GAP",
+      "path": "docs/03-guides/file-path-audit-report.md:1-18",
+      "observation": "A January 2026 file-path audit report is published as Class: published / Status: active in docs/03-guides/, next to live how-to guides.",
+      "method": "Header inspection vs NORMATIVE_SOURCES documentation ownership (03-guides = guide)",
+      "expected": "Point-in-time audits live under reports/ or docs/99-archive/, not as published active guides.",
+      "actual": "file-path-audit-report.md Status: active, Class: published, Last verified 2026-03-29, Audit Date 2026-01-21, Overall Result PASS. It is not linked from guides/index.md but remains in the published guides tree.",
+      "impact": "Operators may treat a frozen audit as current storage-layout SSOT instead of local-storage-layout.md.",
+      "confidence": "high",
+      "confidence_score": 0.8,
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
+      "category": "information-architecture",
+      "domain": "docs-content",
+      "root_cause": "Historical audit artifact was left in docs/03-guides/ with published/active headers after the audit closed.",
+      "affected_paths": [
+        "docs/03-guides/file-path-audit-report.md"
+      ],
+      "remediation": "Move to docs/99-archive/ or reports/docs-evidence/, add archive banner, or change Status/Class to archived and stop treating it as a guide.",
+      "effort": "S",
+      "automation": "Inventory Class: published files under 03-guides whose titles are *audit report*.",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "docs/03-guides/file-path-audit-report.md",
+          "line": 5,
+          "observation": "Status: active; Class: published"
+        },
+        {
+          "path": "docs/03-guides/file-path-audit-report.md",
+          "line": 16,
+          "observation": "Audit Date: 2026-01-21; Overall Result: PASS (Discrepancies Fixed)"
+        }
+      ],
+      "fingerprint": "33b519c79f64a8382aeb3c0aab102da6ec890afc7b05a0c42daaddb4126ef283"
+    },
+    {
+      "id": "DOCS-010",
+      "requirement_id": "GAP",
+      "path": ".github/CONTRIBUTING.md:26-34",
+      "observation": "CONTRIBUTING markdown tables use a leading extra pipe (||) so Essential Reading, layer-dependency, and testing tables do not render as tables.",
+      "method": "Inspection of table syntax",
+      "expected": "GFM tables start with a single | per row.",
+      "actual": "Lines 26-34, 81-88, and 105-109 begin with || Document / || From / || Type.",
+      "impact": "The most important contributor constraints (layers, coverage ≥85%) are unreadable on GitHub.",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "priority": "P3",
+      "severity": "Low",
+      "category": "editorial",
+      "domain": "docs-content",
+      "root_cause": "Table rows were authored with a doubled leading pipe.",
+      "affected_paths": [
+        ".github/CONTRIBUTING.md"
+      ],
+      "remediation": "Remove the extra leading | on those three tables.",
+      "effort": "S",
+      "automation": "markdown lint MD060/table style on .github/CONTRIBUTING.md",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": ".github/CONTRIBUTING.md",
+          "line": 26,
+          "observation": "|| Document | Purpose |"
+        },
+        {
+          "path": ".github/CONTRIBUTING.md",
+          "line": 81,
+          "observation": "|| From ↓ / To → | domain | ..."
+        },
+        {
+          "path": ".github/CONTRIBUTING.md",
+          "line": 105,
+          "observation": "|| Type | Directory | Requirements |"
+        }
+      ],
+      "fingerprint": "366906c0910294ba6a24fb8a5b71755a8e99e41694464491147839c63dea5fbf"
+    },
+    {
+      "id": "DOCS-011",
+      "requirement_id": "GAP",
+      "path": "docs/00-project/RULES.md:1146",
+      "observation": "RULES §4.2.1 still lists pytest>=8.0 / pytest-asyncio>=0.23 / vcrpy>=6.0 while pyproject.toml pins pytest>=9.0.3, pytest-asyncio>=1.4, vcrpy>=8.2.1.",
+      "method": "Compare RULES extras table to pyproject.toml optional-dependencies.tests",
+      "expected": "Constitution dependency floor matches pyproject.toml or omits version floors and points at pyproject.",
+      "actual": "RULES.md:1146-1149 lists older lower bounds; pyproject.toml:76-96 has newer floors.",
+      "impact": "Contributors using RULES as install SSOT get stale package floors; not a bootstrap break, but constitution drift.",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "priority": "P3",
+      "severity": "Low",
+      "category": "docs-code-drift",
+      "domain": "docs-content",
+      "root_cause": "RULES extras inventory was not re-copied from pyproject.toml after test-stack bumps.",
+      "affected_paths": [
+        "docs/00-project/RULES.md",
+        "pyproject.toml"
+      ],
+      "remediation": "Replace version floors in RULES §4.2.1 with a pointer to pyproject.toml extras, or copy current bounds.",
+      "effort": "S",
+      "automation": "n/a",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/RULES.md",
+          "line": 1146,
+          "observation": "pytest>=8.0, pytest-asyncio>=0.23, vcrpy>=6.0"
+        },
+        {
+          "path": "pyproject.toml",
+          "line": 76,
+          "observation": "pytest>=9.0.3, pytest-asyncio>=1.4, vcrpy>=8.2.1"
+        }
+      ],
+      "fingerprint": "877810b9e522a9b591eb2ba6af9284b87e8abcfb015f5d2609b5900a637c6d92"
     }
-  ],
-  "domain": "docs-content"
+  ]
 }

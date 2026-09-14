@@ -159,12 +159,12 @@ the relevant provider or evidence gap.
 - **Purpose:** Show minimum rate limiter tokens available.
 - **Data sources:** `bioetl_rate_limiter_tokens_available`
 
-### 28. Monitor Circuit-Breaker State
+### 28. Monitor Global Circuit-Breaker State
 - **Type:** Stat
 - **Purpose:** Show cross-scope circuit breaker state.
 - **Data sources:** `bioetl_circuit_breaker_state`
 
-### 29. Track Circuit-Breaker Trips
+### 29. Track Global Circuit-Breaker Trips
 - **Type:** Timeseries
 - **Purpose:** Show circuit breaker trips over time.
 - **Data sources:** `bioetl_circuit_breaker_trips_total`
@@ -211,3 +211,5 @@ Shipped in `bioetl-provider-health-v2.json`.
 ### 37. Inspect Full Provider Causes
 
 Shipped in `bioetl-provider-health-v2.json`.
+
+Circuit-breaker panels are GLOBAL ADAPTER evidence, independent of the Provider selector. Navigation preserves the visible Pipeline selection; legacy pipeline_context is not its authority. Absent health-check series are TELEMETRY MISSING, not a measured zero.

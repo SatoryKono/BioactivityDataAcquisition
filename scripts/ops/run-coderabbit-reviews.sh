@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+if ! command -v coderabbit >/dev/null; then
+  export PATH="$HOME/.local/bin:$PATH"
+fi
 
 BASE_COMMIT="${CODERABBIT_BASE_COMMIT:-}"
 RUN_CODERABBIT_ONLY=0
-LOG_DIR="${CODERABBIT_REVIEW_LOG_DIR:-/tmp/coderabbit-reviews}"
+LOG_DIR="${CODERABBIT_REVIEW_LOG_DIR:-}"
+PREFLIGHT_ONLY=0
+PREFLIGHT_DONE=0
+REVIEW_ARGS=()
 TOPIC="all"
 if [[ $# -gt 0 && "$1" != --* ]]; then
   TOPIC="$1"
@@ -12,11 +18,13 @@ if [[ $# -gt 0 && "$1" != --* ]]; then
 fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
+LOG_DIR="${LOG_DIR:-$ROOT_DIR/reports/quality/coderabbit/local}"
 
 usage() {
   cat <<'EOF'
 Usage:
   run-coderabbit-reviews.sh [topic] [--coderabbit-only] [--base <commit>] [--log-dir <path>]
+                          [--preflight] [--uncommitted] [--dir <directory>]
 
 Topics:
   1) architecture-boundaries
@@ -25,9 +33,13 @@ Topics:
   4) security
   5) contracts-docs-drift
   all) all five reviews in sequence
+  changes) one diff review without additional test commands
 
 Environment:
+  Root .env is read as data (never sourced or changed); its non-empty
+  CODERABBIT_API_KEY takes precedence over the process environment.
   CODERABBIT_API_KEY (optional when `coderabbit auth login` credentials are cached)
+  BIOETL_CODERABBIT_PYTHON (optional Python with python-dotenv installed)
 
 Examples:
   ./scripts/ops/run-coderabbit-reviews.sh 1
@@ -49,6 +61,9 @@ ensure_base() {
     base_ref="$(git -C "$ROOT_DIR" rev-parse -q --verify "$BASE_COMMIT^{commit}" 2>/dev/null || true)"
     if [[ -n "$base_ref" ]]; then
       BASE_COMMIT="$base_ref"
+    else
+      echo "[ERROR] Unknown base commit: $BASE_COMMIT" >&2
+      return 1
     fi
     return
   fi
@@ -68,13 +83,13 @@ ensure_base() {
 
 ensure_coderabbit_auth() {
   if [[ -n "${CODERABBIT_API_KEY:-}" ]]; then
-    run_cmd "CodeRabbit auth/login" coderabbit auth login --api-key "$CODERABBIT_API_KEY"
+    run_cmd "CodeRabbit auth/login" coderabbit auth login --api-key "$CODERABBIT_API_KEY" || return 1
     return 0
   fi
 
   # A prior `coderabbit auth login` persists credentials in ~/.coderabbit/auth.json,
   # so an unset key is not by itself a failure.
-  if run_cmd "CodeRabbit auth/status" coderabbit auth status; then
+  if run_cmd "CodeRabbit auth/status" coderabbit auth status --agent; then
     return 0
   fi
 
@@ -82,18 +97,66 @@ ensure_coderabbit_auth() {
   return 1
 }
 
-run_coderabbit() {
+preflight() {
+  [[ "$PREFLIGHT_DONE" -eq 0 ]] || return 0
+  cd "$ROOT_DIR"
   command -v coderabbit >/dev/null || {
     echo "[ERROR] coderabbit CLI not installed. Install with: curl -fsSL https://cli.coderabbit.ai/install.sh | sh" >&2
     return 1
   }
 
-  ensure_coderabbit_auth || return 1
-
+  if [[ -f "$ROOT_DIR/.env" ]]; then
+    local python_bin="${BIOETL_CODERABBIT_PYTHON:-${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python}"
+    [[ -x "$python_bin" ]] || python_bin=python3
+    local root_key
+    root_key="$("$python_bin" -B -c 'import sys; from dotenv import dotenv_values; print(dotenv_values(sys.argv[1], interpolate=False).get("CODERABBIT_API_KEY") or "", end="")' "$ROOT_DIR/.env")" || return 1
+    if [[ -n "$root_key" ]]; then
+      export CODERABBIT_API_KEY="$root_key"
+    fi
+  fi
   mkdir -p "$LOG_DIR"
-  local log_file="$LOG_DIR/coderabbit-${TOPIC}-$(date +%Y%m%d-%H%M%S).log"
+  run_cmd "CodeRabbit version" coderabbit --version
+  ensure_coderabbit_auth 2>&1 | tee "$LOG_DIR/auth.log" >&2
+  run_cmd "CodeRabbit connectivity" coderabbit doctor 2>&1 | tee "$LOG_DIR/doctor.log"
+  run_cmd "CodeRabbit configuration" coderabbit config validate "$ROOT_DIR/.coderabbit.yaml" 2>&1 | tee "$LOG_DIR/config.log"
+  PREFLIGHT_DONE=1
+}
 
-  run_cmd "CodeRabbit review against $BASE_COMMIT" coderabbit review --base-commit="$BASE_COMMIT" | tee "$log_file"
+run_coderabbit() {
+  preflight
+  local log_file="$LOG_DIR/coderabbit-${TOPIC}-$(date -u +%Y%m%d-%H%M%S)-$$.jsonl"
+  printf '%s\n' "$BASE_COMMIT" > "${log_file%.jsonl}.base"
+  git -C "$ROOT_DIR" rev-parse HEAD > "${log_file%.jsonl}.head"
+  git -C "$ROOT_DIR" status --short > "${log_file%.jsonl}.status"
+  git -C "$ROOT_DIR" diff --binary "$BASE_COMMIT" -- > "${log_file%.jsonl}.diff"
+
+  echo "CodeRabbit diff against $BASE_COMMIT; output: $log_file"
+  coderabbit review --agent --base-commit="$BASE_COMMIT" "${REVIEW_ARGS[@]}" \
+    -c "$ROOT_DIR/AGENTS.md" "$ROOT_DIR/.coderabbit.yaml" \
+    2> >(tee "${log_file%.jsonl}.stderr" >&2) | tee "$log_file"
+  python3 - "$log_file" <<'PY'
+import json
+import sys
+
+complete = False
+count = 0
+with open(sys.argv[1], encoding="utf-8") as stream:
+    for line in stream:
+        if not line.strip():
+            continue
+        event = json.loads(line)
+        if event.get("type") == "error":
+            raise SystemExit("CodeRabbit returned an error; inspect the review log.")
+        if event.get("type") == "finding":
+            count += 1
+        if event.get("type") == "complete":
+            if event.get("status") == "review_skipped":
+                raise SystemExit("CodeRabbit skipped this scope; no audit completed.")
+            complete = True
+if not complete:
+    raise SystemExit("CodeRabbit returned no complete event; review is incomplete.")
+print(f"CodeRabbit raised {count} issues.")
+PY
 }
 
 review_architecture() {
@@ -168,6 +231,20 @@ while [[ $# -gt 0 ]]; do
     --coderabbit-only)
       RUN_CODERABBIT_ONLY=1
       ;;
+    --preflight)
+      PREFLIGHT_ONLY=1
+      ;;
+    --uncommitted)
+      REVIEW_ARGS+=(--uncommitted)
+      ;;
+    --dir)
+      if [[ $# -lt 2 || -z "$2" || "$2" == --* ]]; then
+        echo "[ERROR] --dir requires a directory" >&2
+        exit 1
+      fi
+      REVIEW_ARGS+=(--dir "$2")
+      shift
+      ;;
     --base)
       if [[ $# -lt 2 ]]; then
         echo "[ERROR] --base requires argument" >&2
@@ -221,9 +298,17 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
+if [[ "$PREFLIGHT_ONLY" -eq 1 ]]; then
+  preflight
+  exit 0
+fi
+
 ensure_base
 
 case "$TOPIC" in
+  changes)
+    run_coderabbit
+    ;;
   1|architecture|architecture-boundaries)
     review_architecture
     ;;

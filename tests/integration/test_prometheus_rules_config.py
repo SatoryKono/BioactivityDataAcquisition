@@ -119,7 +119,9 @@ def _build_rule_map(payload: dict) -> dict[str, dict]:
 
 def _build_record_map(payload: dict) -> dict[str, dict]:
     record_map: dict[str, dict] = {}
-    for group in payload.get("groups", []):
+    for group in payload.get(
+        "groups", []
+    ) + _load_control_plane_current_status_rules().get("groups", []):
         for rule in group.get("rules", []):
             record_name = rule.get("record")
             if isinstance(record_name, str):
@@ -176,11 +178,13 @@ def _iter_rule_promql(payload: dict) -> list[tuple[str, str, str]]:
 
 def _infer_recording_rule_labels(expr: str) -> frozenset[str]:
     match = re.search(r"\b(?:sum|max|min|avg|count)\s+by\s*\(([^)]*)\)", expr)
-    if not match:
-        return frozenset()
-    return frozenset(
-        label.strip() for label in match.group(1).split(",") if label.strip()
+    labels = (
+        {label.strip() for label in match.group(1).split(",") if label.strip()}
+        if match
+        else set()
     )
+    labels.update(re.findall(r',\s*"(\w+)"\s*,\s*"[^"\n]*"\s*,', expr))
+    return frozenset(labels)
 
 
 def _extract_selector_labels(selector_body: str) -> set[str]:
@@ -224,7 +228,9 @@ def _build_metric_label_sets(payload: dict) -> dict[str, frozenset[str]]:
         label_sets[f"{name}_sum"] = base_labels
         label_sets[f"{name}_count"] = base_labels
 
-    for group in payload.get("groups", []):
+    for group in payload.get(
+        "groups", []
+    ) + _load_control_plane_current_status_rules().get("groups", []):
         for rule in group.get("rules", []):
             record_name = rule.get("record")
             expr = rule.get("expr")
@@ -1259,7 +1265,7 @@ def test_overview_next_action_route_priority_scores_are_ordered() -> None:
     def _score(rule: dict) -> int:
         expr = str(rule.get("expr", "")).replace(" ", "")
         # Patterns like ") * 50" or "universe * 5"
-        for token in ("*50", "*40", "*35", "*30", "*20", "*10", "*5"):
+        for token in ("*50", "*40", "*35", "*30", "*20", "*15", "*10", "*5"):
             if token in expr:
                 return int(token.removeprefix("*"))
         raise AssertionError(f"No priority score found in expr: {rule.get('expr')}")

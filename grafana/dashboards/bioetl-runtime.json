@@ -831,7 +831,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Endpoint is scrape availability. Expected stage signals is presence of lag/backlog for every expected pipeline/run_type stage. Missing stage definitions remain UNKNOWN. Rule age is evaluation age, not event freshness. Presence alone does not prove a live process. Missing signals make evidence confidence inconclusive.",
+      "description": "CURRENT · Endpoint is scrape availability. Expected stage signals is presence of lag/backlog for every expected pipeline/run_type stage. Missing stage definitions remain UNKNOWN. Rule age is evaluation age, not event freshness. Presence alone does not prove a live process. Missing signals make evidence confidence inconclusive. Rule age is the oldest required group; missing groups return UNKNOWN.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1020,7 +1020,7 @@
           "legendFormat": "Expected stage signals"
         },
         {
-          "expr": "time()-max(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~\".*bioetl.*\"})",
+          "expr": "bioetl_runtime_required_rule_age_seconds",
           "refId": "C",
           "instant": true,
           "legendFormat": "Rule age"
@@ -1103,12 +1103,8 @@
       "options": {
         "cellHeight": "sm",
         "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
+          "show": false,
+          "enablePagination": false
         },
         "showHeader": true
       },
@@ -1116,7 +1112,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "max by (stage, measure) (bioetl_runtime_stage_progress{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
+          "expr": "bioetl_runtime_stage_progress_by_scope{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
           "instant": true,
           "format": "table"
         }
@@ -1127,7 +1123,7 @@
         {
           "id": "groupingToMatrix",
           "options": {
-            "rowField": "stage",
+            "rowField": "scope_stage",
             "columnField": "measure",
             "valueField": "Value"
           }
@@ -1137,6 +1133,14 @@
           "options": {
             "limitField": 3
           }
+        }
+      ],
+      "links": [
+        {
+          "includeVars": false,
+          "title": "Show all rows and total (summary: up to 3)",
+          "url": "/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=22460&${__url_time_range}",
+          "targetBlank": false
         }
       ]
     },
@@ -3702,7 +3706,7 @@
             "h": 6
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · TIME RANGE · Shows HTTP-backed identity for an exact Run ID. Aggregate Pipeline scope does not guess a run. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live and continue in Run Explorer",
+          "description": "SELECTED RUN · TIME RANGE · Shows HTTP-backed identity for an exact Run ID. Aggregate Pipeline scope does not guess a run. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live and continue in Run Explorer Inspect value opens full identifiers as selectable plain text.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3715,12 +3719,6 @@
               "unit": "none",
               "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first.",
               "links": [
-                {
-                  "title": "Copy/Open full value (plain text)",
-                  "url": "data:text/plain,${__value.raw}",
-                  "targetBlank": true,
-                  "includeVars": false
-                },
                 {
                   "title": "Check BioETL Ops HTTP health",
                   "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
@@ -3781,14 +3779,7 @@
                   },
                   {
                     "id": "links",
-                    "value": [
-                      {
-                        "title": "Copy/Open full value (plain text)",
-                        "url": "data:text/plain,${__value.raw}",
-                        "targetBlank": true,
-                        "includeVars": false
-                      }
-                    ]
+                    "value": []
                   }
                 ]
               },
@@ -5019,6 +5010,179 @@
           "title": "Track Failed Workflow Steps",
           "type": "stat",
           "description": "TIME RANGE · Counts failed Workflow pipeline steps in the selected range for Workflow and Pipeline. The metric has no Stage label. Zero means no matching failures in the selected range, including when an empty selected-range result is rendered through noValue; it is neutral range evidence, not stage success or current Pipeline Health. Use runtime localization or Trust evidence when non-zero, and use Metrics Evidence to assess telemetry confidence. TELEMETRY MISSING is not a zero and not VALID EMPTY."
+        }
+      ]
+    },
+    {
+      "id": 32460,
+      "type": "row",
+      "title": "Inspect Full Stage Progress",
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 23,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          },
+          "description": "TIME RANGE · CURRENT stage snapshots and TIME RANGE-independent 5m throughput. Maximum observed value per stage across selected run types; inspect one Run Type for exact values. Missing signals remain UNKNOWN. An active blocker is not established by missing evidence.",
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "UNKNOWN",
+              "custom": {
+                "inspect": true,
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              },
+              "unit": "short"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Backlog"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "short"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Lag"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "s"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Throughput"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "rps"
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 24,
+            "w": 24,
+            "h": 12
+          },
+          "id": 22460,
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "show": false,
+              "enablePagination": true,
+              "countRows": true
+            },
+            "showHeader": true
+          },
+          "pluginVersion": "10.4.0",
+          "targets": [
+            {
+              "panelId": 2460,
+              "refId": "A",
+              "withTransforms": false
+            }
+          ],
+          "title": "Inspect Full Stage Progress",
+          "type": "table",
+          "transformations": [
+            {
+              "id": "groupingToMatrix",
+              "options": {
+                "rowField": "scope_stage",
+                "columnField": "measure",
+                "valueField": "Value"
+              }
+            }
+          ],
+          "links": []
+        },
+        {
+          "id": 2461,
+          "type": "table",
+          "title": "Inspect Missing Stage Signals",
+          "description": "CURRENT · Expected stage coverage for Pipeline / Run Type. Missing lag/backlog signals are listed individually. Undefined expected stages are UNKNOWN. VALID EMPTY requires a recorded complete stage catalog and every expected signal. Query failures are QUERY ERROR.",
+          "gridPos": {
+            "x": 0,
+            "y": 36,
+            "w": 24,
+            "h": 8
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "bioetl_runtime_stage_evidence_detail{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
+              "format": "table",
+              "instant": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "inspect": true,
+                "minWidth": 70,
+                "cellOptions": {
+                  "type": "auto"
+                }
+              },
+              "noValue": "UNKNOWN — stage coverage unavailable",
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {
+              "show": false,
+              "enablePagination": true
+            }
+          },
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "Value": true
+                },
+                "renameByName": {
+                  "pipeline": "Pipeline",
+                  "run_type": "Run type",
+                  "stage": "Stage",
+                  "signal": "Evidence"
+                }
+              }
+            }
+          ]
         }
       ]
     }

@@ -248,21 +248,14 @@ groups:
         labels:
           input: gold
         expr: (bioetl_runtime_alert_condition_gold_write_missing_15m > bool 0) * 2 + ((bioetl_runtime_alert_condition_gold_write_missing_15m == bool 0) * (bioetl_gold_terminal_records_15m > bool 0)) * 0
+      # Runtime uses the same coverage-qualified verdict as diagnostics.
       - record: bioetl_l0_input_status_selected
         labels:
           input: runtime
         expr: >-
-          bioetl_l0_input_status{input="runtime"}
-          or label_replace(
-            (
-              bioetl_overview_pipeline_run_type_universe
-              unless on (pipeline, run_type) bioetl_l0_input_status{input="runtime"}
-            ) * 3,
-            "input",
-            "runtime",
-            "",
-            ""
-          )
+          bioetl_runtime_current_status_trusted
+          or ((bioetl_overview_pipeline_run_type_universe
+            unless on(pipeline, run_type) bioetl_runtime_current_status_trusted) * 3)
       - record: bioetl_l0_input_status_selected
         labels:
           input: dq
@@ -282,17 +275,11 @@ groups:
         labels:
           input: control_plane
         expr: >-
-          bioetl_l0_input_status{input="control_plane"}
-          or label_replace(
-            (
-              bioetl_overview_pipeline_run_type_universe
-              unless on (pipeline, run_type) bioetl_l0_input_status{input="control_plane"}
-            ) * 3,
-            "input",
-            "control_plane",
-            "",
-            ""
-          )
+          (bioetl_l0_input_status{input="control_plane"} == 2)
+          or on(pipeline, run_type) (bioetl_l0_input_status{input="control_plane"}
+            and on(pipeline, run_type) (bioetl_control_plane_telemetry_missing_5m == 0))
+          or on(pipeline, run_type) ((bioetl_overview_pipeline_run_type_universe
+            unless on(pipeline, run_type) (bioetl_control_plane_telemetry_missing_5m == 0)) * 3)
       - record: bioetl_l0_input_status_selected
         labels:
           input: provider
@@ -664,7 +651,7 @@ groups:
           measure: Throughput
         expr: label_replace(sum by (pipeline, run_type, stage) (rate(bioetl_records_processed_total{stage="bronze"}[5m])), "stage", "ingestion", "", "") or label_replace(sum by (pipeline, run_type, stage) (rate(bioetl_records_processed_total{stage="silver"}[5m])), "stage", "validation", "", "") or label_replace(sum by (pipeline, run_type, stage) (rate(bioetl_records_processed_total{stage="gold"}[5m])), "stage", "output", "", "")
       - record: bioetl_incident_alert_priority
-        expr: (count by (alertname, alertstate, severity, pipeline, provider) (ALERTS{severity="critical",alertstate="firing"}) * 0 + 60) or (count by (alertname, alertstate, severity, pipeline, provider) (ALERTS{severity="critical",alertstate="pending"}) * 0 + 50) or (count by (alertname, alertstate, severity, pipeline, provider) (ALERTS{severity="warning",alertstate="firing"}) * 0 + 40) or (count by (alertname, alertstate, severity, pipeline, provider) (ALERTS{severity="warning",alertstate="pending"}) * 0 + 30) or (count by (alertname, alertstate, severity, pipeline, provider) (ALERTS{severity!~"critical|warning",alertstate="firing"}) * 0 + 20) or (count by (alertname, alertstate, severity, pipeline, provider) (ALERTS{severity!~"critical|warning",alertstate="pending"}) * 0 + 10)
+        expr: (count by (alertname, alertstate, severity, pipeline, provider, instance, job) (ALERTS{severity="critical",alertstate="firing"}) * 0 + 60) or (count by (alertname, alertstate, severity, pipeline, provider, instance, job) (ALERTS{severity="critical",alertstate="pending"}) * 0 + 50) or (count by (alertname, alertstate, severity, pipeline, provider, instance, job) (ALERTS{severity="warning",alertstate="firing"}) * 0 + 40) or (count by (alertname, alertstate, severity, pipeline, provider, instance, job) (ALERTS{severity="warning",alertstate="pending"}) * 0 + 30) or (count by (alertname, alertstate, severity, pipeline, provider, instance, job) (ALERTS{severity!~"critical|warning",alertstate="firing"}) * 0 + 20) or (count by (alertname, alertstate, severity, pipeline, provider, instance, job) (ALERTS{severity!~"critical|warning",alertstate="pending"}) * 0 + 10)
 
       - record: bioetl_runtime_current_status_trusted
         expr: >-
@@ -1346,6 +1333,23 @@ groups:
         labels:
           action_dashboard_uid: bioetl-dq-v2
           action_scope: var-stage=$__all
+
+      - record: bioetl_runtime_stage_evidence_detail
+        expr: >-
+          bioetl_runtime_missing_stage_signal
+          or label_replace((bioetl_runtime_stage_evidence_status == 3), "signal", "UNKNOWN - expected stage catalog missing", "", "")
+          or label_replace((bioetl_runtime_stage_evidence_status == 0), "signal", "VALID EMPTY - all expected stage signals present", "", "")
+      - record: bioetl_runtime_required_rule_age_seconds
+        expr: (time()-min(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~".*;(bioetl_runtime_dashboard_recording|bioetl_monitoring_stack_observability|bioetl_optional_docker_runtime_stability|bioetl_pipeline_runtime_observability|bioetl_control_plane_traceability_observability|bioetl_dq_observability|bioetl_provider_health_observability)"})) and on() (count(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~".*;(bioetl_runtime_dashboard_recording|bioetl_monitoring_stack_observability|bioetl_optional_docker_runtime_stability|bioetl_pipeline_runtime_observability|bioetl_control_plane_traceability_observability|bioetl_dq_observability|bioetl_provider_health_observability)"}) == 7)
+      - record: bioetl_runtime_stage_progress_by_scope
+        expr: label_join(bioetl_runtime_stage_progress, "scope_stage", " / ", "pipeline", "run_type", "stage")
+      - record: bioetl_incident_ranked_evidence
+        expr: >-
+          label_replace(label_replace(label_join(label_replace(
+            (bioetl_incident_ranked_runtime or bioetl_incident_ranked_provider or bioetl_incident_ranked_dq),
+            "confidence", "UNVERIFIED", "", ""), "object", " / ", "pipeline", "provider"),
+            "route_pipeline", "$1", "pipeline", "(.+)"),
+            "action_scope", "var-provider=%24__all&viewPanel=9104", "provider", "unknown")
 
   - name: bioetl_monitoring_stack_observability
     interval: 30s

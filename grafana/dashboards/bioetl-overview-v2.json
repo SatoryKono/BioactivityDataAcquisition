@@ -359,7 +359,7 @@
             "minWidth": 50
           },
           "unit": "none",
-          "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no report.",
+          "noValue": "UNKNOWN — summary unavailable; check Ops HTTP. No selection is SELECT RUN; absent report is REPORT MISSING.",
           "links": []
         },
         "overrides": [
@@ -432,15 +432,15 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 90
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
                   "wrapText": false
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 145
               }
             ]
           },
@@ -1198,6 +1198,17 @@
               {
                 "id": "custom.width",
                 "value": 110
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "includeVars": false,
+                    "title": "Show all rows and total (summary: up to 2)",
+                    "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=20215&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
               }
             ]
           },
@@ -1319,7 +1330,7 @@
       },
       "targets": [
         {
-          "expr": "topk(2,max without(run_type)(bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}>0)) or on() bioetl_l0_next_action_no_route",
+          "expr": "max without(run_type)(bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}>0) or on() bioetl_l0_next_action_no_route",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -1328,7 +1339,8 @@
       "options": {
         "showHeader": true,
         "footer": {
-          "show": false
+          "show": false,
+          "enablePagination": false
         },
         "cellHeight": "sm",
         "sortBy": [
@@ -1366,6 +1378,23 @@
       },
       "transformations": [
         {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Value",
+                "desc": true
+              }
+            ]
+          }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 2
+          }
+        },
+        {
           "id": "organize",
           "options": {
             "excludeByName": {
@@ -1391,15 +1420,9 @@
               "run_type": "Run type"
             }
           }
-        },
-        {
-          "id": "limit",
-          "options": {
-            "limitField": 2
-          }
         }
       ],
-      "description": "CURRENT selected-pipeline routes across selected run types; not a SELECTED RUN verdict. One row per pipeline and action/reason, taking the highest urgency across run types before the two-row limit. Open Action on the top row first. Priority is routing urgency: URGENT > HIGH > REVIEW > WATCH, not inferred alert severity. Provider degradation is GLOBAL; confirm the provider in Provider Health. Only positive routes participate. NO_ROUTE is an absence-only fallback when no positive route survives (or on()); it is not a healthy zero or VALID EMPTY. Verify telemetry and selection before a health conclusion. TELEMETRY MISSING is not zero. TIME RANGE sets current evaluation time. UNKNOWN routes are VERIFY, not claims of degradation. Confirmed incidents retain their domain priority.",
+      "description": "CURRENT selected-pipeline routes across selected run types; not a SELECTED RUN verdict. One row per pipeline and action/reason, taking the highest urgency across run types with all routes available through pagination. Open Action on the top row first. Priority is routing urgency: URGENT > HIGH > REVIEW > WATCH, not inferred alert severity. Provider degradation is GLOBAL; confirm the provider in Provider Health. Only positive routes participate. NO_ROUTE is an absence-only fallback when no positive route survives (or on()); it is not a healthy zero or VALID EMPTY. Verify telemetry and selection before a health conclusion. TELEMETRY MISSING is not zero. TIME RANGE sets current evaluation time. UNKNOWN routes are VERIFY, not claims of degradation. Confirmed incidents retain their domain priority.",
       "links": [
         {
           "title": "Open Runtime",
@@ -1757,7 +1780,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows firing and pending BioETL alerts from Prometheus for the active time range. An inactive row means no active alert was observed; an empty result or UNKNOWN means alert evidence is unavailable, not OK. Continue in Pipeline Diagnostics for blocker scope. VALID EMPTY (no events) is not TELEMETRY MISSING.",
+          "description": "TIME RANGE · Shows firing and pending BioETL alerts from Prometheus for the active time range. An inactive row means no active alert was observed; an empty result or UNKNOWN means alert evidence is unavailable, not OK. Continue in Pipeline Diagnostics for blocker scope. A measured zero means no events (VALID EMPTY); absent series mean TELEMETRY MISSING. Query failures remain QUERY ERROR.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1776,9 +1799,8 @@
                   "options": {
                     "match": "null+nan",
                     "result": {
-                      "text": "—",
-                      "color": "transparent",
-                      "index": 0
+                      "text": "UNKNOWN",
+                      "color": "gray"
                     }
                   }
                 }
@@ -1805,7 +1827,7 @@
                 ]
               },
               "unit": "none",
-              "noValue": "VALID EMPTY — no events in the selected range (not missing telemetry)"
+              "noValue": "UNKNOWN — no alert rows; verify rule evaluation and telemetry coverage"
             },
             "overrides": [
               {
@@ -4134,7 +4156,7 @@
             "w": 12,
             "h": 6
           },
-          "description": "SELECTED RUN · Shows HTTP-backed identity for an exact Run ID. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live before treating the result as expected. Open Run Explorer for complete run evidence.",
+          "description": "SELECTED RUN · Shows HTTP-backed identity for an exact Run ID. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live before treating the result as expected. Open Run Explorer for complete run evidence. Inspect value opens full identifiers as selectable plain text.",
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
             "defaults": {
@@ -4148,12 +4170,6 @@
               "unit": "none",
               "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity.",
               "links": [
-                {
-                  "title": "Copy/Open full value (plain text)",
-                  "url": "data:text/plain,${__value.raw}",
-                  "targetBlank": true,
-                  "includeVars": false
-                },
                 {
                   "title": "Check BioETL Ops HTTP health",
                   "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
@@ -4214,14 +4230,7 @@
                   },
                   {
                     "id": "links",
-                    "value": [
-                      {
-                        "title": "Copy/Open full value (plain text)",
-                        "url": "data:text/plain,${__value.raw}",
-                        "targetBlank": true,
-                        "includeVars": false
-                      }
-                    ]
+                    "value": []
                   }
                 ]
               },
@@ -4645,6 +4654,491 @@
                   "Value #C": "Series C"
                 }
               }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 30215,
+      "type": "row",
+      "title": "Inspect Full First Action",
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 22,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "id": 20215,
+          "type": "table",
+          "title": "Inspect Full First Action",
+          "gridPos": {
+            "x": 0,
+            "y": 23,
+            "w": 24,
+            "h": 12
+          },
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": false
+                },
+                "inspect": true
+              },
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "UNKNOWN",
+                      "color": "#555555"
+                    },
+                    "5": {
+                      "text": "WATCH",
+                      "color": "#555555"
+                    },
+                    "10": {
+                      "text": "REVIEW",
+                      "color": "green"
+                    },
+                    "20": {
+                      "text": "HIGH",
+                      "color": "orange"
+                    },
+                    "30": {
+                      "text": "HIGH",
+                      "color": "orange"
+                    },
+                    "35": {
+                      "text": "URGENT",
+                      "color": "orange"
+                    },
+                    "40": {
+                      "text": "URGENT",
+                      "color": "red"
+                    },
+                    "50": {
+                      "text": "URGENT",
+                      "color": "red"
+                    },
+                    "15": {
+                      "text": "VERIFY",
+                      "color": "#8e8e8e"
+                    }
+                  }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "?",
+                      "color": "#555555"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#555555",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 10
+                  },
+                  {
+                    "color": "orange",
+                    "value": 20
+                  },
+                  {
+                    "color": "red",
+                    "value": 40
+                  }
+                ]
+              },
+              "unit": "none",
+              "noValue": "No route for this scope"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "action_target"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Action"
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "control_plane": {
+                            "text": "Control Plane",
+                            "color": "text"
+                          },
+                          "dq": {
+                            "text": "DQ",
+                            "color": "text"
+                          },
+                          "monitor": {
+                            "text": "Monitor",
+                            "color": "text"
+                          },
+                          "no_route": {
+                            "text": "No route",
+                            "color": "text"
+                          },
+                          "provider": {
+                            "text": "Provider",
+                            "color": "text"
+                          },
+                          "runtime": {
+                            "text": "Runtime",
+                            "color": "text"
+                          },
+                          "workflow": {
+                            "text": "Runtime (wf)",
+                            "color": "text"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto"
+                    }
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "thresholds"
+                    }
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Open Runtime",
+                        "url": "/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&var-pipeline=${__data.fields.pipeline}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+                        "targetBlank": false,
+                        "includeVars": false
+                      },
+                      {
+                        "title": "Open Control Plane",
+                        "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&var-pipeline=${__data.fields.pipeline}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+                        "targetBlank": false,
+                        "includeVars": false
+                      },
+                      {
+                        "title": "Open Data Quality",
+                        "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&var-pipeline=${__data.fields.pipeline}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+                        "targetBlank": false,
+                        "includeVars": false
+                      },
+                      {
+                        "title": "Open Provider Health",
+                        "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&var-pipeline=${__data.fields.pipeline}&${run_type:queryparam}&${run_id:queryparam}&var-provider=$__all&var-pipeline_context=${__data.fields.pipeline}&${__url_time_range}",
+                        "targetBlank": false,
+                        "includeVars": false
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 90
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Priority"
+                },
+                "properties": [
+                  {
+                    "id": "custom.align",
+                    "value": "center"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto"
+                    }
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "thresholds"
+                    }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 110
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "includeVars": false,
+                        "title": "Show all rows and total (summary: up to 2)",
+                        "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=20215&${__url_time_range}",
+                        "targetBlank": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "action_reason"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Why"
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "control_plane_guardrail_active": {
+                            "text": "Replay guardrail active"
+                          },
+                          "dq_threshold_or_validation_signal": {
+                            "text": "DQ threshold / validation"
+                          },
+                          "no_recent_activity_or_unknown_state": {
+                            "text": "No recent activity"
+                          },
+                          "selected_scope_not_present": {
+                            "text": "No active route; verify telemetry"
+                          },
+                          "provider_global_degradation": {
+                            "text": "GLOBAL provider degraded"
+                          },
+                          "gold_lifecycle_blocking": {
+                            "text": "Gold lifecycle blocked"
+                          },
+                          "runtime_blockers_active": {
+                            "text": "Runtime blocked"
+                          },
+                          "workflow_scope_requires_review": {
+                            "text": "Workflow review"
+                          },
+                          "runtime_evidence_missing": {
+                            "text": "Runtime: evidence missing; verify source"
+                          },
+                          "control_plane_evidence_missing": {
+                            "text": "Control Plane: evidence missing; verify source"
+                          },
+                          "gold_evidence_missing": {
+                            "text": "Gold: evidence missing; verify source"
+                          },
+                          "dq_evidence_missing": {
+                            "text": "Dq: evidence missing; verify source"
+                          },
+                          "provider_evidence_missing": {
+                            "text": "Provider: evidence missing; verify source"
+                          },
+                          "workflow_evidence_missing": {
+                            "text": "Workflow: evidence missing; verify source"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "action_dashboard_uid"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": ""
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  },
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": false,
+                      "viz": true,
+                      "legend": true
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Pipeline"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 150
+                  }
+                ]
+              }
+            ]
+          },
+          "targets": [
+            {
+              "panelId": 215,
+              "refId": "A",
+              "withTransforms": false
+            }
+          ],
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false,
+              "enablePagination": true,
+              "countRows": true
+            },
+            "cellHeight": "sm",
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Priority"
+              }
+            ],
+            "dataLinks": [
+              {
+                "title": "Open Runtime",
+                "url": "/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+                "targetBlank": false,
+                "includeVars": false
+              },
+              {
+                "title": "Open Control Plane",
+                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+                "targetBlank": false,
+                "includeVars": false
+              },
+              {
+                "title": "Open Data Quality",
+                "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+                "targetBlank": false,
+                "includeVars": false
+              },
+              {
+                "title": "Open Provider Health",
+                "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=$__all&var-pipeline_context=${pipeline:percentencode}&${__url_time_range}",
+                "targetBlank": false,
+                "includeVars": false
+              }
+            ]
+          },
+          "transformations": [
+            {
+              "id": "sortBy",
+              "options": {
+                "sort": [
+                  {
+                    "field": "Value",
+                    "desc": true
+                  }
+                ]
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "bioetl_l0_next_action_route": true,
+                  "input": true,
+                  "run_type": true,
+                  "pipeline": false,
+                  "Pipeline": false
+                },
+                "indexByName": {
+                  "Value": 0,
+                  "pipeline": 1,
+                  "action_reason": 3,
+                  "action_target": 4,
+                  "action_dashboard_uid": 5,
+                  "run_type": 2
+                },
+                "renameByName": {
+                  "Value": "Priority",
+                  "pipeline": "Pipeline",
+                  "run_type": "Run type"
+                }
+              }
+            }
+          ],
+          "description": "TIME RANGE · CURRENT selected-pipeline routes across selected run types; not a SELECTED RUN verdict. One row per pipeline and action/reason, taking the highest urgency across run types with all routes available through pagination. Open Action on the top row first. Priority is routing urgency: URGENT > HIGH > REVIEW > WATCH, not inferred alert severity. Provider degradation is GLOBAL; confirm the provider in Provider Health. Only positive routes participate. NO_ROUTE is an absence-only fallback when no positive route survives (or on()); it is not a healthy zero or VALID EMPTY. Verify telemetry and selection before a health conclusion. TELEMETRY MISSING is not zero. TIME RANGE sets current evaluation time. UNKNOWN routes are VERIFY, not claims of degradation. Confirmed incidents retain their domain priority.",
+          "links": [
+            {
+              "title": "Open Runtime",
+              "url": "/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false
+            },
+            {
+              "title": "Open Control Plane",
+              "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false
+            },
+            {
+              "title": "Open Data Quality",
+              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false
+            },
+            {
+              "title": "Open Provider Health",
+              "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=$__all&var-pipeline_context=${pipeline:percentencode}&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false
             }
           ]
         }

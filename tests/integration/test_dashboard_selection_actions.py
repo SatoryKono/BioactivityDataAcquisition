@@ -87,7 +87,7 @@ def test_ranked_action_overrides_inspect_value_with_domain_link() -> None:
     )
     links = next(p["value"] for p in override["properties"] if p["id"] == "links")
     assert len(links) == 1
-    assert "${__data.fields.Pipeline}" in links[0]["url"]
+    assert "${__data.fields.route_pipeline}" in links[0]["url"]
     assert "var-run_id=-" in links[0]["url"]
     assert "${__data.fields.action_scope}" in links[0]["url"]
     assert {"id": "custom.inspect", "value": False} in override["properties"]

@@ -2657,6 +2657,81 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id001
+      '22005':
+        title: Inspect Full Current Alerts
+        role: forensic_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: &id003
+        - full_dark
+        - full_light
+        - zoom_200
+      '22010':
+        title: Inspect Full Ranked Suspects
+        role: forensic_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id003
+      '32005':
+        title: Inspect Full Current Alerts
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id003
+      '32010':
+        title: Inspect Full Ranked Suspects
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id003
   bioetl-overview-v2:
     panels:
       '99':
@@ -3231,6 +3306,42 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id002
+      '20215':
+        title: Inspect Full First Action
+        role: forensic_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id003
+      '30215':
+        title: Inspect Full First Action
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id003
   bioetl-provider-health-v2:
     panels:
       '1':
@@ -3314,7 +3425,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '31':
-        title: Monitor Circuit-Breaker State
+        title: Monitor Global Circuit-Breaker State
         role: indicator
         tier: 3
         scope: time_range
@@ -3342,7 +3453,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '32':
-        title: Track Circuit-Breaker Trips
+        title: Track Global Circuit-Breaker Trips
         role: trend
         tier: 3
         scope: time_range
@@ -5105,3 +5216,39 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id002
+      '22460':
+        title: Inspect Full Stage Progress
+        role: forensic_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id003
+      '32460':
+        title: Inspect Full Stage Progress
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id003

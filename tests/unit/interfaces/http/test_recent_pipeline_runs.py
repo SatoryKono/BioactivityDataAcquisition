@@ -361,11 +361,13 @@ def test_elapsed_fields_use_event_evidence_only():
     assert _timing_fields(row, NOW) == {
         "duration_seconds": None,
         "last_event_age_seconds": 10,
+        "event_age_display": "10 s",
     }
     row.update(status="success", completed_at=NOW.isoformat())
     assert _timing_fields(row, NOW) == {
         "duration_seconds": 60,
         "last_event_age_seconds": None,
+        "event_age_display": "N/A — completed",
     }
     row.update(
         status="running",
@@ -375,4 +377,5 @@ def test_elapsed_fields_use_event_evidence_only():
     assert _timing_fields(row, NOW) == {
         "duration_seconds": None,
         "last_event_age_seconds": None,
+        "event_age_display": "UNKNOWN",
     }

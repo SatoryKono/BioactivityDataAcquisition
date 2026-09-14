@@ -43,6 +43,11 @@ def _run_launcher(
     *args: str,
     api_key: str | None = "test-api-key",
     auth_status_exit: int = 0,
+    login_exit: int = 0,
+    doctor_exit: int = 0,
+    config_exit: int = 0,
+    review_exit: int = 0,
+    review_event: str = "complete",
 ) -> subprocess.CompletedProcess[str]:
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
@@ -54,8 +59,10 @@ def _run_launcher(
 set -euo pipefail
 if [[ "$*" == *"rev-parse --show-toplevel"* ]]; then
   printf '%s\n' "$FAKE_REPO_ROOT"
-elif [[ "$*" == *"rev-parse -q --verify"* ]]; then
+elif [[ "$*" == *"rev-parse -q --verify"* || "$*" == *"rev-parse HEAD"* ]]; then
   printf '%s\n' "$FAKE_BASE_COMMIT"
+elif [[ "$*" == *"status --short"* || "$*" == *"diff --binary"* ]]; then
+  exit 0
 else
   exit 1
 fi
@@ -69,6 +76,17 @@ printf '%s\n' "$*" >> "$CODERABBIT_CAPTURE"
 if [[ "${1:-}" == "auth" && "${2:-}" == "status" ]]; then
   exit "$CODERABBIT_AUTH_STATUS_EXIT"
 fi
+if [[ "${1:-}" == "auth" && "${2:-}" == "login" ]]; then
+  exit "$CODERABBIT_LOGIN_EXIT"
+fi
+case "${1:-}" in
+  doctor) exit "$CODERABBIT_DOCTOR_EXIT" ;;
+  config) exit "$CODERABBIT_CONFIG_EXIT" ;;
+  review)
+    printf '{"type":"%s","status":"%s"}\n' "$CODERABBIT_REVIEW_EVENT" "$CODERABBIT_REVIEW_EVENT"
+    exit "$CODERABBIT_REVIEW_EXIT"
+    ;;
+esac
 """,
     )
 
@@ -77,7 +95,12 @@ fi
         "PATH": f"{bin_dir}{os.pathsep}{os.environ.get('PATH', '')}",
         "CODERABBIT_CAPTURE": str(capture_path),
         "CODERABBIT_AUTH_STATUS_EXIT": str(auth_status_exit),
-        "FAKE_REPO_ROOT": str(ROOT),
+        "CODERABBIT_LOGIN_EXIT": str(login_exit),
+        "CODERABBIT_DOCTOR_EXIT": str(doctor_exit),
+        "CODERABBIT_CONFIG_EXIT": str(config_exit),
+        "CODERABBIT_REVIEW_EXIT": str(review_exit),
+        "CODERABBIT_REVIEW_EVENT": review_event,
+        "FAKE_REPO_ROOT": str(tmp_path),
         "FAKE_BASE_COMMIT": FAKE_BASE_COMMIT,
     }
     if api_key is None:
@@ -135,8 +158,11 @@ def test_base_ref_is_normalized_in_generated_review_command(tmp_path: Path) -> N
 
     assert result.returncode == 0, result.stderr or result.stdout
     assert _captured_commands(tmp_path) == [
+        "--version",
         "auth login --api-key test-api-key",
-        f"review --base-commit={FAKE_BASE_COMMIT}",
+        "doctor",
+        f"config validate {tmp_path}/.coderabbit.yaml",
+        f"review --agent --base-commit={FAKE_BASE_COMMIT} -c {tmp_path}/AGENTS.md {tmp_path}/.coderabbit.yaml",
     ]
 
 
@@ -153,8 +179,11 @@ def test_cached_credentials_are_accepted_without_api_key(tmp_path: Path) -> None
 
     assert result.returncode == 0, result.stderr or result.stdout
     assert _captured_commands(tmp_path) == [
-        "auth status",
-        f"review --base-commit={FAKE_BASE_COMMIT}",
+        "--version",
+        "auth status --agent",
+        "doctor",
+        f"config validate {tmp_path}/.coderabbit.yaml",
+        f"review --agent --base-commit={FAKE_BASE_COMMIT} -c {tmp_path}/AGENTS.md {tmp_path}/.coderabbit.yaml",
     ]
 
 
@@ -172,7 +201,50 @@ def test_absent_api_key_and_invalid_cache_abort_before_review(tmp_path: Path) ->
 
     assert result.returncode == 1
     assert "No CodeRabbit credentials" in result.stderr
-    assert _captured_commands(tmp_path) == ["auth status"]
+    assert _captured_commands(tmp_path) == ["--version", "auth status --agent"]
+
+
+@pytest.mark.parametrize("failure", ["login_exit", "doctor_exit", "config_exit"])
+def test_failed_preflight_prevents_review(tmp_path: Path, failure: str) -> None:
+    result = _run_launcher(tmp_path, "changes", "--base=HEAD", **{failure: 1})
+    assert result.returncode == 1
+    assert not any(cmd.startswith("review ") for cmd in _captured_commands(tmp_path))
+
+
+def test_preflight_only_does_not_start_review(tmp_path: Path) -> None:
+    result = _run_launcher(tmp_path, "--preflight")
+    assert result.returncode == 0, result.stderr
+    assert not any(cmd.startswith("review ") for cmd in _captured_commands(tmp_path))
+
+
+def test_review_failure_survives_tee_and_preserves_log(tmp_path: Path) -> None:
+    result = _run_launcher(
+        tmp_path,
+        "changes",
+        "--base=HEAD",
+        "--uncommitted",
+        "--dir",
+        "src/bioetl",
+        review_exit=7,
+        review_event="error",
+    )
+    assert result.returncode == 7
+    assert "Done:" not in result.stdout
+    review = _captured_commands(tmp_path)[-1]
+    assert "--uncommitted --dir src/bioetl" in review
+    logs = list((tmp_path / "reports/quality/coderabbit/local").glob("*.jsonl"))
+    assert len(logs) == 1
+    assert '"type":"error"' in logs[0].read_text()
+
+
+@pytest.mark.parametrize("event", ["error", "heartbeat"])
+def test_zero_exit_without_completed_review_is_not_success(
+    tmp_path: Path,
+    event: str,
+) -> None:
+    result = _run_launcher(tmp_path, "changes", "--base=HEAD", review_event=event)
+    assert result.returncode != 0
+    assert "Done:" not in result.stdout
 
 
 @pytest.mark.parametrize(

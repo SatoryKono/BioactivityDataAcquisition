@@ -10,8 +10,8 @@ dashboards:
     navigation_id: 1
     data_sources:
       - Prometheus
-      - BioETL Ops HTTP
       - Grafana
+      - BioETL Ops HTTP
     panel_count: 64
     key_panels:
       - id: 891
@@ -50,9 +50,9 @@ dashboards:
     navigation_id: 2
     data_sources:
       - Prometheus
-      - BioETL Ops HTTP
       - Grafana
-    panel_count: 28
+      - BioETL Ops HTTP
+    panel_count: 30
     key_panels:
       - id: 214
         title: Monitor Scope Health
@@ -79,9 +79,9 @@ dashboards:
     navigation_id: 3
     data_sources:
       - Prometheus
-      - BioETL Ops HTTP
       - Grafana
-    panel_count: 44
+      - BioETL Ops HTTP
+    panel_count: 46
     key_panels:
       - id: 9401
         title: Monitor Pipeline Status
@@ -114,8 +114,8 @@ dashboards:
     navigation_id: 4
     data_sources:
       - Prometheus
-      - BioETL Ops HTTP
       - Grafana
+      - BioETL Ops HTTP
     panel_count: 37
     key_panels:
       - id: 9101
@@ -144,8 +144,8 @@ dashboards:
     ux_phase: dux-06
     data_sources:
       - Prometheus
-      - BioETL Ops HTTP
       - Grafana
+      - BioETL Ops HTTP
     panel_count: 37
     key_panels:
       - id: 9401
@@ -181,8 +181,9 @@ dashboards:
     ux_phase: drm-04
     data_sources:
       - Prometheus
+      - Grafana
       - BioETL Ops HTTP
-    panel_count: 15
+    panel_count: 19
     key_panels:
       - id: 2010
         title: "Inspect Ranked Suspects"

@@ -284,6 +284,22 @@ def _summary_rows_pipeline_run_report(
     identity, run_id, status, started_at, completed_at = _identity_summary_fields(
         payload
     )
+    if status in {"unresolved_scope", "not_found"}:
+        state = "SELECT RUN" if status == "unresolved_scope" else "REPORT MISSING"
+        row = {
+            "run_id": run_id,
+            "status": state,
+            "coverage_chip": "N/A",
+            "range_action_status": "Choose a run in Run Explorer"
+            if status == "unresolved_scope"
+            else "No persisted report for this run",
+        }
+        return {
+            **payload,
+            "view": "summary",
+            "summary": [row],
+            "rows": [{"parameter": key, "value": value} for key, value in row.items()],
+        }
     gold_out, excluded = _funnel_gold_and_excluded(payload.get("funnel"))
     started_ms = _parse_iso_to_ms(started_at)
     completed_ms = _parse_iso_to_ms(completed_at)

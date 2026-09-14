@@ -53,13 +53,14 @@ def test_rewrite_trims_concrete_run_id() -> None:
     assert "var-run_id=68c11d41-1d2f-5dc9-b041-9265bc485046" in url
 
 
-def test_template_handoff_uses_pipeline_context_from_provider_board() -> None:
+def test_template_handoff_preserves_visible_pipeline_from_provider_board() -> None:
     url = build_handoff_url(
         "bioetl-overview-v2",
         source_uid="bioetl-provider-health-v2",
         template=True,
     )
-    assert "var-pipeline=${pipeline_context:percentencode}" in url
+    assert "${pipeline:queryparam}" in url
+    assert "pipeline_context" not in url
     assert "${run_id:queryparam}" in url
 
 

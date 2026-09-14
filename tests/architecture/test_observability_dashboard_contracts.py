@@ -248,7 +248,10 @@ def test_provider_health_provenance_documents_provider_global_scope() -> None:
     assert provenance is not None
     content = str(provenance.get("options", {}).get("content", ""))
     assert "GLOBAL" in content or "global" in content.lower()
-    assert "Runtime" in content
+    assert "every provider" in content
+    assert "SELECTED PROVIDER" in content
+    assert "${provider:text}" in content
+    assert "UNKNOWN" in content
 
 
 def test_workflow_overview_exposes_failed_pipeline_run_handoff() -> None:

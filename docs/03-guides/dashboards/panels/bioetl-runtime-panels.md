@@ -267,3 +267,11 @@ Shipped in `bioetl-runtime.json`.
 ### 99. Review Stage Progress
 
 CURRENT maximum backlog, lag and 5-minute throughput per stage across the selected Run Types. Select one Run Type for its exact values. Missing stage signals remain UNKNOWN.
+
+### 100. Inspect Full Stage Progress
+
+Complete evidence is available in the collapsed detail group. The table reuses the source panel response before transformations, keeps all rows, and shows the total through native pagination. It issues no duplicate backend query.
+
+### 101. Inspect Full Stage Progress
+
+Complete evidence is available in the collapsed detail group. The table reuses the source panel response before transformations, keeps all rows, and shows the total through native pagination. It issues no duplicate backend query.

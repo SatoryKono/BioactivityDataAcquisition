@@ -756,7 +756,8 @@ def _assert_cross_dashboard_link_policy(
         if row_action:
             assert _extract_link_var_values(url)["run_id"] == "-"
             assert (
-                _extract_link_var_values(url)["pipeline"] == "${__data.fields.Pipeline}"
+                _extract_link_var_values(url)["pipeline"]
+                == "${__data.fields.route_pipeline}"
             )
         else:
             _assert_preserved_identity_handoff(
@@ -809,6 +810,21 @@ def _assert_cross_scope_matched_links(
 def _collect_cross_dashboard_target_locations(
     dashboard: dict[str, object], *, source_uid: str
 ) -> dict[str, list[str]]:
+    # A native Dashboard datasource reuses the source frame and its row actions.
+    # Validate those links elsewhere, but count navigation ownership at the source.
+    def source_panels(panels):
+        result = []
+        for panel in panels:
+            datasource = panel.get("datasource")
+            if (
+                isinstance(datasource, dict)
+                and datasource.get("uid") == "-- Dashboard --"
+            ):
+                continue
+            result.append({**panel, "panels": source_panels(panel.get("panels", []))})
+        return result
+
+    dashboard = {**dashboard, "panels": source_panels(dashboard.get("panels", []))}
     target_locations: dict[str, list[str]] = {}
     for link in _collect_dashboard_links(dashboard):
         url = str(link.get("url", ""))

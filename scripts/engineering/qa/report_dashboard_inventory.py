@@ -190,7 +190,7 @@ def _normalize_datasource_dict(ref: dict[str, object]) -> str | None:
         return "Loki"
     if kind == "tempo" or uid == "tempo":
         return "Tempo"
-    if kind == "grafana" or uid in {"grafana", "-- grafana --"}:
+    if kind == "grafana" or uid in {"grafana", "-- grafana --", "-- dashboard --"}:
         return "Grafana"
     return name or uid or kind or None
 

@@ -1,6 +1,6 @@
 ---
 status: active-non-canonical
-last_verified: "2026-09-05"
+last_verified: "2026-09-14"
 freshness_window_days: 7
 owner: quality
 canonical_sources:
@@ -15,11 +15,11 @@ verification_scope: tracked_test_module_inventory
 
 ## Current status
 
-The repository maintains unit, architecture, integration, security, and
-reproducibility test suites. Phase 1 remediation has restored fail-closed
-validation and defensive identity snapshots. Phase 2–3 remediation is being
-validated incrementally; this summary is intentionally evidence-oriented and
-must be refreshed after each full test campaign.
+The tracked inventory contains 2436 test modules. The 2026-09-14 dashboard and
+Grafana campaign passed 1199 tests, with 11 explicit skips, across unit,
+integration, and architecture surfaces. Five stale contract expectations were
+repaired. This scoped run does not establish the health or coverage of the
+complete repository suite; a full campaign remains outstanding.
 
 ## Required evidence refresh
 
@@ -36,10 +36,14 @@ must be refreshed after each full test campaign.
 
 ## Freshness note
 
-Re-verified on 2026-09-05 on `fix/ci-linux-gov-artifacts`: all canonical source
-paths still exist, and the tracked test-module inventory contains 2414 files.
-Interpretation remains backlog signal only pending the complete full-pytest
-telemetry receipt. Recurrence of #7419.
+Re-verified on 2026-09-14 against source HEAD
+`5c4243c9adad87f4a8eb4a6b0228e4b65841810e` plus the local test repairs:
+all three canonical source paths exist, and `git ls-files tests` contains 2436
+Python modules named `test_*.py`. The scoped campaign selected tracked test
+paths containing `dashboard` or `grafana`; its local JUnit receipt is
+`reports/local/nav-tests-20260914/final-tests.xml` (1199 passed, 11 skipped).
+Interpretation remains backlog signal only. No full-suite or new coverage
+measurement is claimed. Recurrence of #7419.
 
 This is a non-canonical repo-only evidence layer. The canonical sources of truth are:
 - `configs/quality/test_matrix.yaml`

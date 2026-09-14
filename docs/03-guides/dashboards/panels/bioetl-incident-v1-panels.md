@@ -107,3 +107,19 @@ Shipped in `bioetl-incident-v1.json`.
 ### 12. Review Selected Run Summary
 
 Shipped in `bioetl-incident-v1.json`.
+
+### 100. Inspect Full Ranked Suspects
+
+Complete evidence is available in the collapsed detail group. The table reuses the source panel response before transformations, keeps all rows, and shows the total through native pagination. It issues no duplicate backend query.
+
+### 101. Inspect Full Ranked Suspects
+
+Complete evidence is available in the collapsed detail group. The table reuses the source panel response before transformations, keeps all rows, and shows the total through native pagination. It issues no duplicate backend query.
+
+### 102. Inspect Full Current Alerts
+
+Complete evidence is available in the collapsed detail group. The table reuses the source panel response before transformations, keeps all rows, and shows the total through native pagination. It issues no duplicate backend query.
+
+### 103. Inspect Full Current Alerts
+
+Complete evidence is available in the collapsed detail group. The table reuses the source panel response before transformations, keeps all rows, and shows the total through native pagination. It issues no duplicate backend query.

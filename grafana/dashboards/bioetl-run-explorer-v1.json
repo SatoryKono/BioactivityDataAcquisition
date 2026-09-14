@@ -145,7 +145,7 @@
         "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
         "hide": 0,
         "includeAll": false,
-        "label": "Run ID",
+        "label": "Selected Run",
         "multi": false,
         "name": "run_id",
         "options": [
@@ -195,7 +195,7 @@
       },
       {
         "name": "lookup_run_id",
-        "label": "Find Run ID",
+        "label": "Find exact Run ID",
         "type": "textbox",
         "current": {
           "text": "",
@@ -324,7 +324,7 @@
       "options": {
         "bioetlDisplayTitle": "Understand Run Scope",
         "mode": "html",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">BROWSE last 10 launches, newest start first; not this time range.<br>Pipeline: ${pipeline:text}. SELECTED RUN: $run_id. Find Run ID: ${lookup_run_id}.<br><a href=\"/d/bioetl-run-explorer-v1/6-run-explorer?var-workflow=$__all&amp;var-pipeline=$__all&amp;var-run_type=$__all&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">All pipelines · clear search</a> · Open Report for persisted evidence.</div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">BROWSE last 10 launches, newest start first; not this time range.<br>Pipeline: ${pipeline:text}. SELECTED RUN: $run_id.<br><a href=\"/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=$__all&amp;var-pipeline=$__all&amp;var-run_type=$__all&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">All pipelines · clear search</a> · Open Report for persisted evidence.</div>"
       },
       "description": "Browse the latest 10 launches across All pipelines by start time. Workflow and Run Type filter the list. The dashboard time picker does not filter this table. Running means a recorded start without a terminal event, not a live health probe. REPORT MISSING means no final report is available. Defaults All / All / All and run_id=- select no exact run. Effective refresh: 60s; timezone: browser.",
       "links": [
@@ -889,6 +889,26 @@
                 "value": true
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Event age"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "custom.width",
+                "value": 140
+              },
+              {
+                "id": "noValue",
+                "value": "UNKNOWN"
+              }
+            ]
           }
         ]
       },
@@ -943,7 +963,7 @@
                 "workflow_id",
                 "run_id",
                 "duration_seconds",
-                "last_event_age_seconds",
+                "event_age_display",
                 "status",
                 "report_label",
                 "report_url",
@@ -964,13 +984,13 @@
               "workflow_id": 3,
               "run_id": 4,
               "duration_seconds": 5,
-              "last_event_age_seconds": 6,
               "status": 7,
               "report_label": 8,
               "report_url": 9,
               "workflow_scope": 10,
               "run_type": 11,
-              "completed_at": 12
+              "completed_at": 12,
+              "event_age_display": 6
             },
             "renameByName": {
               "selected": "",
@@ -979,9 +999,9 @@
               "workflow_id": "Workflow",
               "run_id": "Run",
               "duration_seconds": "Duration",
-              "last_event_age_seconds": "Event age",
               "status": "Status",
-              "report_label": "Report"
+              "report_label": "Report",
+              "event_age_display": "Event age"
             },
             "excludeByName": {
               "Value": true,

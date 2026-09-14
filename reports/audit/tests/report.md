@@ -1,68 +1,89 @@
-# Test-system audit — 2026-08-27
+# Аудит тестовой системы (tests-system)
 
-- Run: `20260827T101100Z-tests-new-26a28f462a`
-- Base: `origin/main@9933fa425bd537e2ae615c9e29c9bee1c706a638`
-- Scope: `tests/ configs/quality/ pyproject.toml`
-- Audit mode: full; execution lane: canonical `unit-fast`
-- Outcome: 4 PROVEN findings; 2 fixed locally; 4 cycle issues remain open.
+- **prompt_id:** `prompt.audit.tests-system`
+- **AUDIT_MODE:** full
+- **SCOPE:** `tests/` + `configs/quality/`
+- **Дата (UTC):** 2026-09-14T06:23:37Z
+- **surface_score:** 2 (ядро merge-gate работает; заявленный e2e-smoke не в required context)
+- **REQUIRE_GH_TRACKING:** false (live GitHub ruleset не опрашивался; использован docs SSOT)
 
-## Executive result
+## Резюме
 
-The bounded lane is green before and after the fix: 21,613 tests, zero failures
-and zero errors. The local correction converts one deterministic false-green
-skip into an asserted pass, reducing skips from 20 to 19 without changing any
-skip, xfail, coverage, or technical-debt budget.
+Тестовая система BioETL — pytest + именованные lane из `configs/quality/test_matrix.yaml` (ADR-042). Merge-истина — агрегатор `pr-gate-complete` (ruleset 13643213). Coverage line/branch 85% задан проектом (`coverage report --fail-under=85` + `check-branch-coverage`), не выдуман аудитом. Полный pytest не запускался.
 
-The repository still has no enforced merge-blocking ruleset on `main`.
-Ruleset 15730586 is disabled and classic branch protection is absent, so CI
-workflow presence is not merge enforcement. Issue #9723 was reopened with
-current live-API evidence.
+Главный разрыв: lane `e2e-smoke` в матрице назван PR-blocking, но не входит в каталог/координатор required checks. `tests.yml` всё же блокирует PubChem `control-plane-e2e` и coverage 85%.
 
-Issue #9729 was also reopened after source re-attestation. Its acceptance
-criteria remain unmet: serial-or-bounded lanes are invoked with xdist,
-`tests/e2e` remains outside the reviewed skip census, and active non-critical
-VCR mismatches still skip instead of failing closed.
+## Инвентарь
+
+| Поверхность | Наблюдение |
+| --- | --- |
+| Конфиг pytest | Единственный SSOT: `pyproject.toml` `[tool.pytest.ini_options]`. `pytest.ini`/`tox.ini` отсутствуют. `--strict-markers`, `--strict-config`, timeout=60, `timeout_method=thread`, `filterwarnings=error`, addopts без xdist. |
+| Модули `test_*.py` | 2437: unit 1595, architecture 515, integration 220, contract 43, e2e 27, security 13, smoke 7, prompts 8, benchmarks 5, performance 4 |
+| Lane | 24 канонических lane в test_matrix.yaml |
+| Уровни | unit, integration (VCR), contract, e2e, smoke, architecture, security, performance/benchmark, memory, prompts. Отдельной migration-lane нет. `docker_integration` — opt-in. |
+| Маркеры | strict list в pyproject; `contract`/`contracts` — совместимый alias. |
+| Skip | `test_skip_inventory.yaml`: 31 entry, suites contract/integration/e2e, все `permanent_policy`, без `temporary_debt`/`expires_on`. 10 grafana/dashboard. 16 pipeline в `e2e_matrix_replay_deferred`. |
+| xfail / `*.disabled` | 0 product xfail; 0 `*.disabled` |
+| Flaky | `flaky_test_inventory.yaml` `reviewed_flaky_tests: []`. `pytest-rerunfailures` не в pyproject. Retries: e2e-matrix 3× diagnostic + flaky-telemetry 3 seed на 2 файла. |
+| Isolation | Local serial default; VCR default `none`; `BIOETL_RANDOM_ORDER_SEED` opt-in shuffle; Windows xdist cap 1 в conftest; uuid4/date.today budgets 0 в test-governance. |
+| Coverage | CI `coverage-verify` `--fail-under=85`; pyproject `fail_under` намеренно не задан (partial shards). `LOCAL_COV_FAIL_UNDER?=80` только для `make test-cov-fast-stable`. |
+| CI tests.yml | `on: workflow_call` + push (не pull_request). PR вызывает reusable через `pr-required.yml`. |
+| Required checks | Каталог: lint-arch, tests, type-checking, security, codeql, docker (path), duplication, root-hygiene, generated-artifacts (path), compiled-artifacts, commit-governance, docs-governance. |
+
+## Канонические команды (Windows)
+
+```powershell
+.\scripts\engineering\dev\run_pytest.ps1 tests\unit --narrow --timeout=120 --lf
+.\.venv-win\Scripts\python.exe -m pytest tests/unit -m "not fs_contract and not repo_backed and not subprocess_backed and not slow and not benchmark and not memory" --ignore=tests/unit/scripts --ignore=tests/unit/repo_backed
+```
+
+Unit-fast / architecture-fast-boundary — как в `TEST_LANE_MENTAL_MODEL.md`. Clean checkout: `setup_env_windows.ps1` затем wrapper.
+
+## CI: что реально блокирует merge
+
+- **Ruleset:** только `pr-gate-complete` (docs SSOT, 2026-09-10).
+- **Через tests.yml (вызывается координатором):** smoke, governance-preflight, test-fast, repo-backed, scripts-tooling, fs-contracts, subprocess-backed, test-matrix (unit shards + integration serial + security), memory-tests, coverage-verify 85%, coverage-inventory-currentness, control-plane-e2e (PubChem), contract-confidence, flaky-telemetry, tests-complete fail-closed.
+- **Не в агрегаторе:** `.github/workflows/e2e-matrix-health.yml` `matrix-smoke-blocking` (заявленный e2e-smoke). Workflow всё ещё триггерится на `pull_request`, но не required.
+- **Architecture PR:** `import-linter.yml` `arch-tests` с `-m not slow/benchmark/memory` (fast-boundary). Slow-governance — не обязательный PR default.
+- **Live contracts:** scheduled `contract-tests.yml` (REQ-TEST-006), не PR.
+
+## Checklist
+
+- [x] Путь с clean checkout задокументирован (dev README + mental model)
+- [x] Unit по умолчанию без сети (`mark.network` в tests/unit не найден; VCR default none)
+- [x] Isolation temp/time/random в целом есть; Windows architecture skip — gap (TEST-SYS-002)
+- [x] Quarantine: curated flaky inventory пуст; skip census без temporary_debt (expiry N/A)
+- [x] `.only` не применим (нет pytest-only plugin; `--strict-markers`)
+
+## Working-tree noise (не finding)
+
+Checkout на `main` с незакоммиченным Grafana/HTTP WIP: dashboard JSON, prometheus-rules, grafana tests (`tests/architecture/test_grafana_*`, `tests/unit/scripts/ops/observability/*`, HTTP recent_pipeline_runs). Не трактовать как дефект тестовой системы, пока это не ломает collect/config. Аудит читал tracked configs, не WIP-дифф как SSOT.
 
 ## Findings
 
-| ID | Requirement | P | State | Owner issue |
-| --- | --- | --- | --- | --- |
-| TEST-NEW-001 | REQ-TEST-005 | P1 | PROVEN, external blocker | #9723 |
-| TEST-NEW-002 | REQ-TEST-005 | P2 | PROVEN, source drift | #9729 |
-| TEST-NEW-003 | REQ-GOV-004 | P2 | PROVEN, fixed locally | #9751 |
-| TEST-NEW-004 | REQ-SEC-002 | P1 | PROVEN, fixed locally | #9768 |
+См. `findings.json`. 5 PROVEN, P0=0, P1=1.
 
-## Command evidence
+## Residual / critical gaps (не отдельные дефекты системы)
 
-Baseline and retest used the same selector:
+- 16 pipeline вне PR e2e-smoke через `MATRIX_REPLAY_DEFERRED_PIPELINES` (#9729) — reviewed policy, не silent skip.
+- Empirical flaky telemetry — 3 seed × 2 файла, не suite-wide; не маркировать flaky без N-rerun.
+- `test_governance_audit.yaml` `audit_date: 2026-05-26` / shards `refreshed_at_utc: 2026-07-13` — метаданные старше текущего дерева; budgets всё ещё enforced architecture-тестами.
 
-`python -m pytest tests/unit --ignore=tests/unit/scripts --ignore=tests/unit/repo_backed -m "not fs_contract and not repo_backed and not subprocess_backed and not slow and not benchmark and not memory" -q --tb=short`
+## Проверки
 
-| Evidence | Tests | Failures | Errors | Skipped |
-| --- | ---: | ---: | ---: | ---: |
-| Baseline JUnit | 21613 | 0 | 0 | 20 |
-| Retest JUnit | 21613 | 0 | 0 | 19 |
-| Final rebased-SHA unit-fast | 21616 | 0 | 0 | 19 |
-| ChEMBL helper file | 3 | 0 | 0 | 0 |
-| Skip inventory governance | 12 | 0 | 0 | 0 |
+| Проверка | Результат |
+| --- | --- |
+| `pytest tests/architecture/test_pytest_config_single_source.py --collect-only` | 3 collected, exit 0 |
+| `pytest tests/architecture/test_pytest_config_single_source.py -q --no-cov -p no:xdist` | passed, exit 0 @ 2026-09-14T06:23:37Z |
+| Full pytest | **не запускался** (запрет unbounded) |
+| Live GitHub ruleset API | **пропущен** (`REQUIRE_GH_TRACKING=false`); сверка по `05-github-policy.md` |
+| N-rerun flaky | не выполнялся (нет кандидатов с repeat counts) |
+| `.env` | не трогался |
+| Debt budgets | не менялись |
 
-Run-local XML and execution evidence live under
-`reports/audit-runs/20260827T101100Z-tests-new-26a28f462a/` and are ignored
-machine artifacts by repository policy.
+## Top remediations
 
-## Residual risks and stop reason
-
-- #9723 requires maintainer GitHub ruleset enablement. The audit did not mutate
-  repository rules because the requested SCOPE does not authorize GitHub
-  settings changes.
-- #9729 spans CI/E2E surfaces outside the bounded unit fix and remains open.
-- #9768 binds provider contact metadata to non-persistent transport semantics;
-  the security shard passes without adding an allowlist entry.
-- Optional dependency and OS-specific skips were observed but not classified as
-  defects without CI/environment proof.
-- No flaky test was claimed: the reviewed flaky inventory is empty and this run
-  found a deterministic policy mismatch, not intermittent behavior.
-
-The loop stops after one non-empty iteration because all in-scope bounded fixes
-were exhausted and the remaining open cycle issues require external or broader
-scope. Empty form cycles are not emitted.
+1. Включить e2e-smoke owner в pr-gate-complete **или** убрать формулировку PR-blocking из test_matrix.
+2. Зафиксировать Windows/WSL architecture skip в census и/или дать Windows-safe subset.
+3. Расширить skip forbid до AST Call walker.
+4. Синхронизировать `gates.tests.owner_jobs` с `tests-complete.needs`.

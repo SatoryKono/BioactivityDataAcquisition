@@ -48,6 +48,25 @@ from bioetl.interfaces.http._processed_records_value_support import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize(
+    "status, expected",
+    [("unresolved_scope", "SELECT RUN"), ("not_found", "REPORT MISSING")],
+)
+def test_summary_empty_states_are_explicit_without_invented_accounting(
+    status, expected
+):
+    from bioetl.interfaces.http._pipeline_run_report_table import (
+        _summary_rows_pipeline_run_report,
+    )
+
+    result = _summary_rows_pipeline_run_report({"status": status, "run_id": "-"})
+    row = result["summary"][0]
+    assert row["status"] == expected
+    assert row["coverage_chip"] == "N/A"
+    assert "gold_records_out" not in row
+    assert "set_range_to_run" not in row
+
+
 def test_parse_iso_to_ms_rejects_blank_and_invalid_tokens() -> None:
     assert _parse_iso_to_ms(None) is None
     assert _parse_iso_to_ms("") is None

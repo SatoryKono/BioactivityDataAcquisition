@@ -27,11 +27,13 @@ def _panels(d):
 
 
 def test_overview_v2_semantics_contract():
-    d = json.loads(Path("grafana/dashboards/bioetl-overview-v2.json").read_text())
+    d = json.loads(
+        Path("grafana/dashboards/bioetl-overview-v2.json").read_text(encoding="utf-8")
+    )
     panels = _panels(d)
     titles = [p.get("title") for p in panels]
-    assert titles.count("Monitor Fleet Health") == 1
-    system = next(p for p in panels if p.get("title") == "Monitor Fleet Health")
+    assert titles.count("Monitor Scope Health") == 1
+    system = next(p for p in panels if p.get("title") == "Monitor Scope Health")
     expr = "\n".join(t.get("expr", "") for t in system.get("targets", []))
     assert "bioetl_l0_status" in expr
     assert "$__range" not in expr
@@ -56,7 +58,7 @@ def test_overview_v2_semantics_contract():
         if panel.get("id") == 1000:
             nav_links.extend(panel.get("links", []))
     links = " ".join(link.get("title", "") for link in nav_links)
-    # Full portfolio bus 0–6 (Provider on-bus; Incident + Run Explorer adjuncts).
+    # Full portfolio bus 0–6, with Run Explorer first.
     for token in [
         "Trust",
         "Pipeline Diagnostics",
@@ -68,7 +70,7 @@ def test_overview_v2_semantics_contract():
         assert token in links
 
     for current_title in [
-        "Monitor Fleet Health",
+        "Monitor Scope Health",
         "Review First Action",
         "Review Control Plane Status",
         "Review Runtime Status",

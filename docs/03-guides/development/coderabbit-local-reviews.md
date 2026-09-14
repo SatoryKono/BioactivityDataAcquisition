@@ -1,80 +1,78 @@
-﻿# Local CodeRabbit review launcher
+# Local CodeRabbit review launcher
 
-Manual multi-topic CodeRabbit reviews for local engineering work.
+Use `scripts/ops/run-coderabbit-reviews.sh changes` for one local diff review.
+CodeRabbit CLI 0.7.5 reviews Git changes; a successful run does not establish
+coverage of unchanged project files. PR reviews use the CodeRabbit GitHub App
+and `.coderabbit.yaml` separately.
 
-## Launcher
+## Windows / WSL
 
-- `scripts/ops/run-coderabbit-reviews.sh` — bounded manual launcher for sequential
-  CodeRabbit review topics (`architecture-boundaries`, `adapters-resilience`,
-  `pipelines-determinism`, `security`, `contracts-docs-drift`).
+Run from PowerShell, with the repository visible in Ubuntu:
 
-Requires CodeRabbit credentials: either `CODERABBIT_API_KEY` in the environment or a
-cached `coderabbit auth login` (`~/.coderabbit/auth.json`). Prefer CI CodeRabbit
-workflow for merge gates.
+```powershell
+# Validate credentials, backend/WebSocket connectivity, and configuration.
+wsl -d Ubuntu --cd /mnt/e/github/BioactivityDataAcquisition --exec bash scripts/ops/run-coderabbit-reviews.sh --preflight
 
+# Review staged and unstaged tracked changes once.
+wsl -d Ubuntu --cd /mnt/e/github/BioactivityDataAcquisition --exec bash scripts/ops/run-coderabbit-reviews.sh changes --uncommitted
 
-## WSL residual waves (env / API auth)
-
-Use this path for **scoped residual CLI campaigns** (epic #7688, issue #7716).
-PR reviews still use the CodeRabbit **GitHub App** + `.coderabbit.yaml`.
-
-### Prerequisites
-
-1. WSL with CodeRabbit CLI (`coderabbit --version`, currently 0.7.x).
-2. API key available as env var **or** prior login cache:
-   - Env: `export CODERABBIT_API_KEY=...` (from secret store; never commit).
-   - Cache: `~/.coderabbit/auth.json` after `coderabbit auth login`.
-3. Repository checkout visible from WSL with clean git status.
-4. Leaf scopes from `reports/quality/coderabbit/YYYYMMDD/01-scope-matrix.md` (≤300 files).
-
-### Auth from host env into WSL
-
-```bash
-# Host has CODERABBIT_API_KEY exported (do not echo the value)
-wsl -e bash -lc 'export PATH="$HOME/.local/bin:$PATH"
-  export CODERABBIT_API_KEY="$CODERABBIT_API_KEY"
-  coderabbit auth login --api-key "$CODERABBIT_API_KEY"
-  coderabbit auth status'
+# Review changes against an explicit baseline within one directory.
+wsl -d Ubuntu --cd /mnt/e/github/BioactivityDataAcquisition --exec bash scripts/ops/run-coderabbit-reviews.sh changes --base origin/main --dir src/bioetl/interfaces
 ```
 
-If `coderabbit auth status` already shows `Account: API key`, re-login is optional.
+The same Bash commands work directly in Linux. CodeRabbit must be on `PATH`.
+The launcher changes to the repository root before invoking the CLI.
 
-### Scoped review examples
+## Credentials
 
-```bash
-wsl -e bash -lc 'export PATH="$HOME/.local/bin:$PATH"
-  repo_root="$(git rev-parse --show-toplevel)"
-  cd "$repo_root"
-  coderabbit review --base main --dir src/bioetl/composition --plain     | tee reports/quality/coderabbit/$(date -u +%Y%m%d)/review_S09-composition.log'
-```
+The launcher reads only `CODERABBIT_API_KEY` from the root `.env` using
+`python-dotenv` with interpolation disabled. It never sources or changes the
+file. A non-empty root key takes precedence over the process environment;
+otherwise an existing process key or cached CodeRabbit login is used.
+Do not enable shell tracing for a credential-bearing invocation.
 
-Half/residual scopes (S12 halves, residual domain): filter `git ls-files` and use
-sparse-checkout, or review with `--dir` only when the leaf is a real directory.
+The parser uses `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python`, falling
+back to `python3`. Set `BIOETL_CODERABBIT_PYTHON` to an executable Python with
+`python-dotenv` installed when needed. Standard `python3` is also required for
+NDJSON result validation. Missing parser dependencies fail the preflight.
+Root `.env` changes require explicit per-task approval.
 
-### Multi-topic launcher
+## Evidence and failure handling
 
-```bash
-export CODERABBIT_API_KEY=...   # if not using auth cache
-./scripts/ops/run-coderabbit-reviews.sh architecture-boundaries --base origin/main
-./scripts/ops/run-coderabbit-reviews.sh all --coderabbit-only --base origin/main
-```
+Default output: `reports/quality/coderabbit/local/`; override with `--log-dir`.
+The launcher saves doctor/config logs and a unique review NDJSON stream, stderr,
+HEAD, initial Git status, and baseline diff. The snapshot describes the working
+tree before submission; concurrent edits can invalidate source correspondence.
+New untracked files are excluded. Stop concurrent editing or use an isolated
+checkout when an immutable audit snapshot is required.
 
-### CI note
+Every review receives `AGENTS.md` and `.coderabbit.yaml` through `-c` and uses
+`--agent` output. Authentication, connectivity, schema, or CLI failures exit
+non-zero. An error event, a skipped scope, or missing completion also fails;
+these outcomes must not be reported as zero issues. Findings require separate
+triage; this launcher does not apply suggested fixes or publish issues.
 
-`.github/workflows/coderabbit.yml` runs only on trusted `push` / `workflow_dispatch`.
-If Actions secret `CODERABBIT_API_KEY` is unset, the job **succeeds but skips** CLI.
-Track repo secret setup under #7698.
+`--preflight` stops before review submission. On `WebSocket closed`, inspect
+`doctor.log` and check access to `https://app.coderabbit.ai` and
+`wss://ide.coderabbit.ai/ws`. Successful authentication alone does not prove
+review-service connectivity. Configuration validation additionally needs
+`https://www.coderabbit.ai/integrations/schema.v2.json`.
 
-### Artifacts
+## Legacy topics and CI
 
-Write logs under allowlisted `reports/quality/coderabbit/**` (see `.gitignore`).
-Do not raise tech-debt budgets to silence findings.
+Explicit topics `architecture-boundaries`, `adapters-resilience`,
+`pipelines-determinism`, `security`, and `contracts-docs-drift` retain their
+additional local quality commands. `--coderabbit-only` skips those commands.
+The legacy default `all` runs five reviews of the same selected diff; it is not
+a full-project partition. Prefer explicit `changes` and one real `--dir` scope
+per run. Count scope files and split reviews within the server's limit.
 
-## Campaign closeout decision (#7698)
+The legacy comprehensive launcher and historical playbook examples still need
+migration from `--plain` and historical scope assumptions. Use the commands
+above for CLI 0.7.5.
 
-For the 2026-08 CR-FULL residual epic (#7688), repository Actions had no
-CODERABBIT_API_KEY secret. Trusted workflow remains skip-safe (exit 0 with
-warning). Continuous residual is the CodeRabbit **GitHub App** + .coderabbit.yaml.
-Optional CLI enablement remains an owner-only secret step (never commit keys).
-Evidence: reports/quality/coderabbit/20260806/CR_CLI_SECRET_AND_WORKFLOW.md.
-
+`.github/workflows/coderabbit.yml` is separately classified `keep-disabled` in
+the repository CI map. Its tracked definition targets trusted push/manual
+events and skips review when its API secret is absent. Local setup does not
+enable the workflow or make it a merge gate. Do not raise debt budgets to
+silence review issues.

@@ -319,7 +319,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"0. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&amp;var-pipeline=${pipeline_context:percentencode}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"1. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;var-pipeline=${pipeline_context:percentencode}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"2. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;var-pipeline=${pipeline_context:percentencode}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">2. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"3. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range, pipeline via pipeline_context.\" href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;var-pipeline=${pipeline_context:percentencode}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">3. Pipeline Diagnostics</a><a class=\"bioetl-nav-current\" href=\"#bioetl-provider-health-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"4. Provider Health (Provider Health)\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">4. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"5. Data Quality (Data Quality). Scope reset: stage=All; preserves time range, pipeline via pipeline_context.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;var-pipeline=${pipeline_context:percentencode}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">5. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&amp;var-pipeline=${pipeline_context:percentencode}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"0. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"1. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"2. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">2. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"3. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range, visible pipeline selection.\" href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">3. Pipeline Diagnostics</a><a class=\"bioetl-nav-current\" href=\"#bioetl-provider-health-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"4. Provider Health (Provider Health)\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">4. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"5. Data Quality (Data Quality). Scope reset: stage=All; preserves time range, visible pipeline selection.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">5. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
       },
       "title": "",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus 0–6: Run Explorer / Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality / Incident Workspace. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
@@ -327,7 +327,7 @@
       "links": [
         {
           "title": "0. Run Explorer",
-          "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&var-pipeline=${pipeline_context:percentencode}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
           "tooltip": "0. Run Explorer (Run Explorer). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
@@ -339,7 +339,7 @@
         },
         {
           "title": "1. Trust",
-          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&var-pipeline=${pipeline_context:percentencode}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
           "tooltip": "1. Trust (Trust). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
@@ -351,7 +351,7 @@
         },
         {
           "title": "2. Overview",
-          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&var-pipeline=${pipeline_context:percentencode}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
           "tooltip": "2. Overview (Overview). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
@@ -363,8 +363,8 @@
         },
         {
           "title": "3. Pipeline Diagnostics",
-          "url": "/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&var-pipeline=${pipeline_context:percentencode}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
-          "tooltip": "3. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range, pipeline via pipeline_context.",
+          "url": "/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+          "tooltip": "3. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range, visible pipeline selection.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -375,8 +375,8 @@
         },
         {
           "title": "5. Data Quality",
-          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&var-pipeline=${pipeline_context:percentencode}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
-          "tooltip": "5. Data Quality (Data Quality). Scope reset: stage=All; preserves time range, pipeline via pipeline_context.",
+          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+          "tooltip": "5. Data Quality (Data Quality). Scope reset: stage=All; preserves time range, visible pipeline selection.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -387,7 +387,7 @@
         },
         {
           "title": "6. Incident Workspace",
-          "url": "/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&var-pipeline=${pipeline_context:percentencode}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "url": "/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
           "tooltip": "6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
@@ -1685,9 +1685,8 @@
               "unit": "short",
               "links": [
                 {
-                  "title": "Open selected provider context",
-                  "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=${__data.fields.provider:percentencode}&${__url_time_range}",
-                  "targetBlank": false,
+                  "title": "Inspect fleet telemetry coverage",
+                  "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=$__all&viewPanel=9104&${__url_time_range}",
                   "includeVars": false
                 }
               ]
@@ -2546,7 +2545,18 @@
                   "mode": "off"
                 }
               },
-              "mappings": [],
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -2557,7 +2567,7 @@
                 ]
               },
               "unit": "short",
-              "noValue": "VALID EMPTY — no events in the selected range (not missing telemetry)"
+              "noValue": "TELEMETRY MISSING — no series for this scope; not a zero"
             },
             "overrides": []
           },
@@ -2602,7 +2612,7 @@
           ],
           "title": "Track Health Failures & Degradation",
           "type": "timeseries",
-          "description": "TIME RANGE · Selected-range evidence: failure/degraded probe trend over the active Grafana interval VALID EMPTY (no events) is not TELEMETRY MISSING.",
+          "description": "TIME RANGE · Selected-range evidence: failure/degraded probe trend over the active Grafana interval A measured zero means no events (VALID EMPTY); absent series mean TELEMETRY MISSING. Query failures remain QUERY ERROR.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
@@ -2623,9 +2633,8 @@
                   "options": {
                     "match": "null+nan",
                     "result": {
-                      "text": "—",
-                      "color": "transparent",
-                      "index": 0
+                      "text": "UNKNOWN",
+                      "color": "gray"
                     }
                   }
                 }
@@ -2660,7 +2669,7 @@
                 },
                 "inspect": true
               },
-              "noValue": "VALID EMPTY — no events in the selected range (not missing telemetry)"
+              "noValue": "TELEMETRY MISSING — no series for this scope; not a zero"
             },
             "overrides": []
           },
@@ -2708,7 +2717,7 @@
           ],
           "title": "Track Failure Share",
           "type": "table",
-          "description": "TIME RANGE · Selected-range evidence: provider share of failed probes in the active Grafana range. The full share chart is collapsed by default and should be expanded only when total failures are non-zero VALID EMPTY (no events) is not TELEMETRY MISSING."
+          "description": "TIME RANGE · Selected-range evidence: provider share of failed probes in the active Grafana range. The full share chart is collapsed by default and should be expanded only when total failures are non-zero A measured zero means no events (VALID EMPTY); absent series mean TELEMETRY MISSING. Query failures remain QUERY ERROR."
         },
         {
           "datasource": {
@@ -3531,9 +3540,9 @@
               "refId": "A"
             }
           ],
-          "title": "Monitor Circuit-Breaker State",
+          "title": "Monitor Global Circuit-Breaker State",
           "type": "stat",
-          "description": "TIME RANGE · Compact cross-scope adapter diagnostics over the active Grafana range: 0=CLOSED, 1=HALF_OPEN, 2=OPEN. Uses the adapter selector because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not imply a synthetic CLOSED state. This adapter-scoped telemetry can stay empty even when current provider severity is non-OK TELEMETRY MISSING is not a zero and not VALID EMPTY."
+          "description": "TIME RANGE · Compact cross-scope adapter diagnostics over the active Grafana range: 0=CLOSED, 1=HALF_OPEN, 2=OPEN. Uses the adapter selector because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not imply a synthetic CLOSED state. This adapter-scoped telemetry can stay empty even when current provider severity is non-OK TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL ADAPTER evidence: covers all adapters, independent of Provider and Pipeline."
         },
         {
           "datasource": {
@@ -3607,9 +3616,9 @@
               "refId": "A"
             }
           ],
-          "title": "Track Circuit-Breaker Trips",
+          "title": "Track Global Circuit-Breaker Trips",
           "type": "timeseries",
-          "description": "TIME RANGE · Compact cross-scope adapter diagnostics: selected-range circuit-breaker trip count by adapter over the active Grafana interval. This panel is intentionally adapter-scoped because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not create synthetic adapter rows. Empty adapter telemetry does not refute current provider severity on its own TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Compact cross-scope adapter diagnostics: selected-range circuit-breaker trip count by adapter over the active Grafana interval. This panel is intentionally adapter-scoped because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not create synthetic adapter rows. Empty adapter telemetry does not refute current provider severity on its own TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL ADAPTER evidence: covers all adapters, independent of Provider and Pipeline.",
           "maxDataPoints": 400,
           "interval": "1m"
         }
@@ -4193,7 +4202,7 @@
             "y": 22
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Do not put full UUIDs into Prometheus labels. Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. This card is bounded pipeline/run context evidence only and does not prove current provider health. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero",
+          "description": "SELECTED RUN · Do not put full UUIDs into Prometheus labels. Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. This card is bounded pipeline/run context evidence only and does not prove current provider health. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero Inspect value opens full identifiers as selectable plain text.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4206,12 +4215,6 @@
               "unit": "none",
               "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity.",
               "links": [
-                {
-                  "title": "Copy/Open full value (plain text)",
-                  "url": "data:text/plain,${__value.raw}",
-                  "targetBlank": true,
-                  "includeVars": false
-                },
                 {
                   "title": "Check BioETL Ops HTTP health",
                   "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
@@ -4272,14 +4275,7 @@
                   },
                   {
                     "id": "links",
-                    "value": [
-                      {
-                        "title": "Copy/Open full value (plain text)",
-                        "url": "data:text/plain,${__value.raw}",
-                        "targetBlank": true,
-                        "includeVars": false
-                      }
-                    ]
+                    "value": []
                   }
                 ]
               },

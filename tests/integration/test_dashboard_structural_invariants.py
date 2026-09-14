@@ -338,6 +338,21 @@ def test_internal_dashboard_links_resolve_to_shipped_uids() -> None:
                         encoding="utf-8"
                     )
                 )
+                # Resolve transitive recording-rule dependencies, not only inline expressions.
+                for _ in range(10):
+                    expanded = set(sources)
+                    for group in rules["groups"]:
+                        for rule in group["rules"]:
+                            if rule.get("record") in sources:
+                                expanded.update(
+                                    re.findall(
+                                        r"\bbioetl_incident_ranked_[a-z_]+\b",
+                                        rule["expr"],
+                                    )
+                                )
+                    if expanded == set(sources):
+                        break
+                    sources = list(expanded)
                 resolved = {
                     target
                     for group in rules["groups"]

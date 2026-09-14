@@ -4,7 +4,7 @@
 # Target profile: Python, pytest, external providers, ETL/scientific pipelines
 
 # Language
-language: "en-US"
+language: "ru-RU"
 
 # Language and tone
 tone_instructions: "Be concise, neutral, and evidence-based. Prioritize correctness, security, data integrity, backward compatibility, and maintainability. Avoid praise, repetition, style-only comments, and claims not supported by the diff."

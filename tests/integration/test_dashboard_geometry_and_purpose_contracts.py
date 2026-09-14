@@ -70,6 +70,12 @@ def _has_live_target(panel: dict[str, Any]) -> bool:
     for target in panel.get("targets", []) or []:
         if not isinstance(target, dict) or target.get("hide") is True:
             continue
+        if (
+            isinstance(panel.get("datasource"), dict)
+            and panel["datasource"].get("uid") == "-- Dashboard --"
+            and isinstance(target.get("panelId"), int)
+        ):
+            return True
         for key in ("expr", "url", "rawSql"):
             value = target.get(key)
             if isinstance(value, str) and value.strip():
@@ -192,6 +198,7 @@ def test_content_panels_have_meaningful_titles() -> None:
 def test_data_panels_declare_a_live_target() -> None:
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
+        panel_map = {p["id"]: p for p in get_dashboard_panels(dashboard)}
         for panel in get_dashboard_panels(dashboard):
             if panel.get("type") not in DATA_PANEL_TYPES:
                 continue
@@ -200,6 +207,15 @@ def test_data_panels_declare_a_live_target() -> None:
                 f"type={panel.get('type')}) must declare >=1 live target "
                 "(non-empty expr or Infinity url, hide != true)"
             )
+            if (
+                isinstance(panel.get("datasource"), dict)
+                and panel["datasource"].get("uid") == "-- Dashboard --"
+            ):
+                source_id = panel["targets"][0]["panelId"]
+                assert source_id != panel["id"]
+                assert source_id in panel_map
+                assert _has_live_target(panel_map[source_id])
+                assert panel_map[source_id].get("datasource") != panel["datasource"]
 
 
 # --- DASH-FIT-002: no root panel straddles the first-window fold ------------

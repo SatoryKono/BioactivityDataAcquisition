@@ -210,7 +210,7 @@ def nav_link_tooltip(*, source_uid: str, target: dict[str, str]) -> str:
     if source_uid == "bioetl-provider-health-v2" and target_uid != (
         "bioetl-provider-health-v2"
     ):
-        preserved.append("pipeline via pipeline_context")
+        preserved.append("visible pipeline selection")
     if not resets:
         return f"{base}. {_PRESERVE_SCOPE_TOOLTIP}"
     preserve_clause = "; preserves " + ", ".join(dict.fromkeys(preserved)) + "."

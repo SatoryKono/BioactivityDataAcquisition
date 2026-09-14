@@ -974,7 +974,8 @@ def test_provider_health_handoff_fail_closes_and_remembers_return_context() -> N
             if _extract_dashboard_uid(str(item.get("url", ""))) == target_uid
         )
         url = str(link.get("url", ""))
-        assert "var-pipeline=${pipeline_context:percentencode}" in url
+        assert "${pipeline:queryparam}" in url
+        assert "pipeline_context:percentencode" not in url
         assert "var-pipeline=All" not in url
 
 

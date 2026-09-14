@@ -27,7 +27,7 @@ multiple runs; use RunLedger for exact reconciliation.
 - **Purpose:** Rank up to two urgency-ordered next actions for the current
   selectors/fleet and hand off to the recommended board.
 - **Data sources:** Positive `bioetl_l0_next_action_route` rows, deduplicated
-  across run types before `topk(2)`. `bioetl_l0_next_action_no_route` supplies
+  across run types before the two-row display limit; the full list reuses the untruncated response. `bioetl_l0_next_action_no_route` supplies
   an absence-only UNKNOWN fallback.
 - **Layout:** First Action `w=16`, Domain Status `w=8`; two visible bounded rows.
 - **Columns:** Priority, Pipeline, Why, Action. Priority describes routing
@@ -229,3 +229,11 @@ Shipped in `bioetl-overview-v2.json`.
 ### 28. Review Selected Run Summary
 
 Shipped in `bioetl-overview-v2.json`.
+
+### 100. Inspect Full First Action
+
+Complete evidence is available in the collapsed detail group. The table reuses the source panel response before transformations, keeps all rows, and shows the total through native pagination. It issues no duplicate backend query.
+
+### 101. Inspect Full First Action
+
+Complete evidence is available in the collapsed detail group. The table reuses the source panel response before transformations, keeps all rows, and shows the total through native pagination. It issues no duplicate backend query.

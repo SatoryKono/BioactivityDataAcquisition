@@ -963,7 +963,7 @@
         "y": 12
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Persisted layer counts. Contract exclusion percentage uses Silver accepted as denominator; quarantine counts remain separate by layer. Missing counts or zero denominator remain UNKNOWN. Report opens this exact run. SELECTED RUN only. Empty means SELECT RUN or no persisted report; backend unavailable is QUERY ERROR, never a zero balance.",
+      "description": "SELECTED RUN · Persisted layer counts. Contract exclusion percentage uses Silver accepted as denominator; quarantine counts remain separate by layer. Missing counts or zero denominator remain UNKNOWN. Report opens this exact run. SELECTED RUN only. Empty means SELECT RUN or no persisted report; backend unavailable is QUERY ERROR, never a zero balance. Silver Q means Silver quarantine; Gold Q means Gold quarantine. Excl % = contract exclusions / Silver accepted records × 100. Started and Coverage describe persisted history, not current health.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1366,6 +1366,34 @@
                 "value": true
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Started"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "time:YYYY-MM-DD HH:mm"
+              },
+              {
+                "id": "custom.width",
+                "value": 155
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Coverage"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 130
+              }
+            ]
           }
         ]
       },
@@ -1408,10 +1436,23 @@
       ],
       "transformations": [
         {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "targetField": "started_at",
+                "destinationType": "time"
+              }
+            ]
+          }
+        },
+        {
           "id": "filterFieldsByName",
           "options": {
             "include": {
               "names": [
+                "coverage_chip",
+                "started_at",
                 "bronze_records",
                 "silver_valid",
                 "silver_quarantined",
@@ -1429,15 +1470,17 @@
           "id": "organize",
           "options": {
             "indexByName": {
-              "bronze_records": 0,
-              "silver_valid": 1,
-              "silver_quarantined": 2,
-              "gold_excluded_by_contract": 3,
-              "contract_excluded_percent": 4,
-              "gold_quarantined": 5,
-              "gold_written": 6,
-              "report_label": 7,
-              "report_url": 8
+              "started_at": 0,
+              "coverage_chip": 1,
+              "bronze_records": 2,
+              "silver_valid": 3,
+              "silver_quarantined": 4,
+              "gold_excluded_by_contract": 5,
+              "contract_excluded_percent": 6,
+              "gold_quarantined": 7,
+              "gold_written": 8,
+              "report_label": 9,
+              "report_url": 10
             },
             "renameByName": {
               "bronze_records": "Input",
@@ -1447,10 +1490,12 @@
               "contract_excluded_percent": "Excl %",
               "gold_quarantined": "Gold Q",
               "gold_written": "Gold",
-              "report_label": "Report"
+              "report_label": "Report",
+              "started_at": "Started",
+              "coverage_chip": "Coverage"
             },
             "excludeByName": {
-              "started_at": true,
+              "started_at": false,
               "completed_at": true,
               "report_url": false
             }
@@ -1496,7 +1541,7 @@
             "h": 6
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Selected run: Compact identity table showing Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, Replay [Capability.Mode], Checkpoint [Anchors], and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity. No data/datasource errors mean the BioETL Ops HTTP backend may be unavailable; verify /health/live before interpreting as expected empty. Fail-closed: timeout, empty, or unresolved identity must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero.",
+          "description": "SELECTED RUN · Selected run: Compact identity table showing Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, Replay [Capability.Mode], Checkpoint [Anchors], and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity. No data/datasource errors mean the BioETL Ops HTTP backend may be unavailable; verify /health/live before interpreting as expected empty. Fail-closed: timeout, empty, or unresolved identity must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. Inspect value opens full identifiers as selectable plain text.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -1509,12 +1554,6 @@
               "unit": "none",
               "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first.",
               "links": [
-                {
-                  "title": "Copy/Open full value (plain text)",
-                  "url": "data:text/plain,${__value.raw}",
-                  "targetBlank": true,
-                  "includeVars": false
-                },
                 {
                   "title": "Check BioETL Ops HTTP health",
                   "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
@@ -1575,14 +1614,7 @@
                   },
                   {
                     "id": "links",
-                    "value": [
-                      {
-                        "title": "Copy/Open full value (plain text)",
-                        "url": "data:text/plain,${__value.raw}",
-                        "targetBlank": true,
-                        "includeVars": false
-                      }
-                    ]
+                    "value": []
                   }
                 ]
               },
@@ -4114,7 +4146,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Selected-range trend of domain-emitted DQ threshold events. Uses bioetl_dq_soft_threshold_exceeded_total and hard_fail validation counters only; Grafana does not recompute entity YAML thresholds here. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row VALID EMPTY (no events) is not TELEMETRY MISSING.",
+          "description": "TIME RANGE · Selected-range trend of domain-emitted DQ threshold events. Uses bioetl_dq_soft_threshold_exceeded_total and hard_fail validation counters only; Grafana does not recompute entity YAML thresholds here. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row A measured zero means no events (VALID EMPTY); absent series mean TELEMETRY MISSING. Query failures remain QUERY ERROR.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -4135,7 +4167,7 @@
                 {
                   "type": "special",
                   "options": {
-                    "match": "null",
+                    "match": "null+nan",
                     "result": {
                       "text": "UNKNOWN",
                       "color": "gray"
@@ -4143,7 +4175,7 @@
                   }
                 }
               ],
-              "noValue": "VALID EMPTY — no events in the selected range (not missing telemetry)"
+              "noValue": "TELEMETRY MISSING — no series for this scope; not a zero"
             },
             "overrides": []
           },

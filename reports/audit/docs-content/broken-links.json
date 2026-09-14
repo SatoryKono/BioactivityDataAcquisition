@@ -1,5 +1,33 @@
 {
-  "broken_relative_links": [],
-  "check": "python -m scripts.docs check-links --links --specs --configs",
-  "exit": 0
+  "sampled_at_utc": "2026-09-14T06:11:00Z",
+  "sampled_files": [
+    "README.md",
+    "CONTRIBUTING.md",
+    ".github/CONTRIBUTING.md",
+    "docs/00-project/00-map.md",
+    "docs/00-project/NORMATIVE_SOURCES.md",
+    "docs/00-project/TOOLS.md",
+    "docs/00-project/RULES.md",
+    "docs/03-guides/getting-started.md",
+    "docs/03-guides/quick-start.md",
+    "docs/03-guides/index.md",
+    "docs/03-guides/docs-verification.md",
+    "docs/03-guides/github-quick-reference.md",
+    "docs/03-guides/github-local-workflow.md",
+    "docs/03-guides/github-setup-plan.md",
+    "docs/03-guides/running-pipelines.md",
+    "docs/03-guides/docs-parity-gate.md",
+    "docs/05-operations/runbooks/index.md",
+    "docs/05-operations/runbooks/data-recovery.md",
+    "docs/05-operations/runbooks/vacuum-procedures.md",
+    "docs/04-reference/cli.md",
+    "docs/04-reference/pipeline-catalog.md",
+    "docs/02-architecture/policies/content-hash-identity-policy.md",
+    "docs/03-guides/cheatsheets/cli-commands.md",
+    "docs/03-data-model/reference-identifier-families.md"
+  ],
+  "local_links_checked": 555,
+  "external_links_skipped": 13,
+  "broken_count": 0,
+  "broken": []
 }

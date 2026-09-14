@@ -204,6 +204,16 @@ def _timing_fields(row: dict[str, object], now: datetime) -> dict[str, object]:
         "last_event_age_seconds": (now - last).total_seconds()
         if row.get("status") == "running" and minimum < last <= now
         else None,
+        "event_age_display": (
+            f"{(now - last).total_seconds():.0f} s"
+            if minimum < last <= now
+            else "UNKNOWN"
+        )
+        if row.get("status") == "running"
+        else "N/A — completed"
+        if row.get("status")
+        in {"success", "failed", "fail", "partial", "shutdown", "dry_run"}
+        else "UNKNOWN",
     }
 
 

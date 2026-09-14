@@ -330,5 +330,5 @@ def test_overview_215_9002_fit_first_window_without_raising_fold() -> None:
         assert panel_declared_row_cap(panel) == cap
         assert panel["gridPos"]["y"] + panel["gridPos"]["h"] <= FIRST_WINDOW_Y
         assert panel["options"]["cellHeight"] == "sm"
-    assert "topk(2," in panels[215]["targets"][0]["expr"]
+    assert "bioetl_l0_next_action_route" in panels[215]["targets"][0]["expr"]
     assert "topk" not in panels[9002]["targets"][0]["expr"]
