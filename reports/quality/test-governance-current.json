@@ -962,7 +962,14 @@
     }
   },
   "assertless_total_candidates": 88,
-  "budget_violations": [],
+  "budget_violations": [
+    {
+      "actual": 1,
+      "budget": "markerless_test_functions_max",
+      "expected_max": 0,
+      "metric": "markerless_test_functions"
+    }
+  ],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1124,11 +1131,11 @@
     "max_group_size": 0,
     "scan_root": "tests/fixtures",
     "scope_file_counts": {
-      "fixture": 79,
+      "fixture": 84,
       "golden": 30,
       "vcr": 356
     },
-    "total_files": 465,
+    "total_files": 470,
     "tracked_extensions": [
       ".json",
       ".yaml",
@@ -1136,8 +1143,10 @@
     ]
   },
   "intentional_no_exception_contract": 86,
-  "markerless_examples": [],
-  "markerless_test_functions": 0,
+  "markerless_examples": [
+    "tests/unit/application/core/test_batch_transformer_attempts.py:523"
+  ],
+  "markerless_test_functions": 1,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -1996,19 +2005,21 @@
       "max_group_size": 0,
       "scan_root": "tests/fixtures",
       "scope_file_counts": {
-        "fixture": 79,
+        "fixture": 84,
         "golden": 30,
         "vcr": 356
       },
-      "total_files": 465,
+      "total_files": 470,
       "tracked_extensions": [
         ".json",
         ".yaml",
         ".yml"
       ]
     },
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/unit/application/core/test_batch_transformer_attempts.py:523"
+    ],
+    "markerless_test_functions": 1,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2069,12 +2080,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2441,
-    "total_test_functions": 25672,
+    "total_test_functions": 25684,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "ad0093da802e2415a5b0e69a10633a0cd38eedf945882a49ce20c5ffb6687aca",
+  "source_tree_sha256": "ca46672ba1b81e3fe5eaa7b792afbb0ff989d661fb863200de6ffaa1c8611b42",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 88,
@@ -2083,8 +2094,10 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 86,
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/unit/application/core/test_batch_transformer_attempts.py:523"
+    ],
+    "markerless_test_functions": 1,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
@@ -2137,7 +2150,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2441,
-  "total_test_functions": 25672,
+  "total_test_functions": 25684,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

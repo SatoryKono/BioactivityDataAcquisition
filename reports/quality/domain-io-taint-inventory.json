@@ -234,14 +234,14 @@
     },
     {
       "kind": "attribute_call:resolve",
-      "line": 121,
+      "line": 126,
       "path": "src/bioetl/domain/run_reports/reason_catalog.py",
       "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
       "symbol": "ReasonCatalog.family_for"
     },
     {
       "kind": "attribute_call:resolve",
-      "line": 124,
+      "line": 129,
       "path": "src/bioetl/domain/run_reports/reason_catalog.py",
       "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
       "symbol": "ReasonCatalog.default_outcome_for"
@@ -837,7 +837,7 @@
   ],
   "domain_root": "src/bioetl/domain",
   "generated_by": "scripts.engineering.qa.report_domain_io_taint_inventory",
-  "scanned_file_count": 605,
+  "scanned_file_count": 606,
   "schema_version": 1,
   "violation_count": 0,
   "violations": []

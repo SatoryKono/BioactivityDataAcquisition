@@ -699,6 +699,9 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
             "selected-run Trust INCOMPLETE or UNKNOWN still blocks replay."
         )
     if 9418 in by_id:
+        for link in by_id[9418].get("links", []):
+            if "viewPanel=9414" in str(link.get("url", "")):
+                link["title"] = "Inspect manifest checks"
         for target in by_id[9418].get("targets", []):
             url = target.get("url")
             if isinstance(url, str):

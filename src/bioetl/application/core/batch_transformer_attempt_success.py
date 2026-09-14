@@ -9,8 +9,10 @@ from bioetl.application.core.batch_transformer_state import (
     RecordTransformOutcome as RecordTransformOutcome,
 )
 from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.services.dq.gold_filter_diagnostics import (
+    resolve_gold_filter_details as _resolve_gold_filter_details,
+)
 from bioetl.domain.exceptions import DataQualityError
-from bioetl.domain.filtering import FilterDecision
 
 if TYPE_CHECKING:
     from bioetl.application.core.protocols import (
@@ -72,43 +74,12 @@ def _build_gold_record(
 ) -> tuple[dict[str, object] | None, bool, object | None]:
     """Create a Gold record and report contract-based exclusion."""
     if not gold_filter(context, silver_record):
-        from bioetl.domain.run_reports.context import get_stage_accounting
-
-        details = _resolve_gold_filter_details(gold_filter, silver_record)
-        accounting = get_stage_accounting()
-        if accounting is not None:
-            accounting.record_gold_filter_rejection(details or {})
-        return None, True, details
+        return None, True, _resolve_gold_filter_details(gold_filter, silver_record)
     gold_record = cast(
         dict[str, object] | None,
         gold_transform(context, silver_record),
     )
     return gold_record, False, None
-
-
-def _resolve_gold_filter_details(
-    gold_filter: GoldFilterCallback,
-    record: dict[str, object],
-) -> dict[str, object] | None:
-    """Resolve structured Gold-filter exclusion details when available.
-
-    Prefers a bound-method owner that exposes a public ``gold_filters``
-    evaluator (``evaluate`` → ``FilterDecision``). Falls back to the
-    historical ``_gold_filters`` attribute for reverse compatibility.
-    """
-    owner = getattr(gold_filter, "__self__", None)
-    if owner is None:
-        return None
-    gold_filters = getattr(owner, "gold_filters", None)
-    if gold_filters is None:
-        gold_filters = getattr(owner, "_gold_filters", None)
-    evaluate = getattr(gold_filters, "evaluate", None)
-    if not callable(evaluate):
-        return None
-    decision = evaluate(record)
-    if isinstance(decision, FilterDecision) and not decision.include:
-        return decision.to_dict()
-    return None
 
 
 def _apply_runtime_dq_outcomes(

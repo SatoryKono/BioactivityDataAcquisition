@@ -273,32 +273,25 @@ def _source_scope(config: Mapping[str, object]) -> str:
     )
 
 
+def _payload_run_ids(payload: object) -> tuple[object, ...]:
+    payload = getattr(payload, "output", payload)
+    if isinstance(payload, Mapping):
+        inherited = payload.get("source_run_ids", ())
+        refs = tuple(inherited) if isinstance(inherited, (tuple, list)) else ()
+        return (*refs, payload.get("run_id"))
+    return (getattr(payload, "run_id", None),)
+
+
 def _run_ids_from_upstream(
     upstream_outputs: Mapping[str, object],
     *,
     workflow_run_id: str | None,
 ) -> tuple[str, ...]:
-    collected: list[str] = []
-    if workflow_run_id:
-        collected.append(workflow_run_id)
+    candidates: list[object] = [workflow_run_id]
     for payload in upstream_outputs.values():
-        payload = getattr(payload, "output", payload)
-        if isinstance(payload, Mapping):
-            inherited = payload.get("source_run_ids", ())
-            if isinstance(inherited, (tuple, list)):
-                for item in inherited:
-                    value = str(item).strip()
-                    if value and value not in collected:
-                        collected.append(value)
-        raw = getattr(payload, "run_id", None)
-        if raw is None and isinstance(payload, Mapping):
-            raw = payload.get("run_id")
-        if raw is None:
-            continue
-        value = str(raw).strip()
-        if value and value not in collected:
-            collected.append(value)
-    return tuple(collected)
+        candidates.extend(_payload_run_ids(payload))
+    normalized = [str(value).strip() for value in candidates if value]
+    return tuple(dict.fromkeys(value for value in normalized if value))
 
 
 def _require_delete_orphans_action(config: Mapping[str, object]) -> None:

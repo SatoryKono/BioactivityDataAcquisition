@@ -5,13 +5,13 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable
 
-from bioetl.interfaces.http._health_server_observability_protocols import (
-    _HealthObservabilityRoutingHost,
-)
 from bioetl.interfaces.http._forensic_request_budget import (
     ForensicEndpointUnavailable,
     forensic_unavailable_payload,
     run_bounded_forensic_operation,
+)
+from bioetl.interfaces.http._health_server_observability_protocols import (
+    _HealthObservabilityRoutingHost,
 )
 from bioetl.interfaces.http._pipeline_run_report_sections import (
     _is_unresolved_run_scope,

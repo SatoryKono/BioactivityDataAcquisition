@@ -98,10 +98,7 @@ def build_pipeline_run_report(
     resolved_contract = _resolve_contract_summary(
         blocks.contract_summary, reasons, layers
     )
-    rejection_details = acc.snapshot_gold_filter_rejections()
-    if rejection_details:
-        resolved_contract = dict(resolved_contract or {})
-        resolved_contract["rejection_details"] = rejection_details
+    resolved_contract = _with_rejection_details(resolved_contract, acc)
     resolved_performance = _resolve_performance(
         performance=blocks.performance,
         identity=identity,
@@ -131,6 +128,17 @@ def build_pipeline_run_report(
         http_summary=_optional_mapping(blocks.http_summary),
         performance=resolved_performance,
     )
+
+
+def _with_rejection_details(
+    contract: dict[str, Any] | None,  # Any: contract report payload
+    accounting: StageAccountingAccumulator,
+) -> dict[str, Any] | None:  # Any: contract report payload
+    """Attach bounded filter diagnostics without exposing record values."""
+    details = accounting.snapshot_gold_filter_rejections()
+    if not details:
+        return contract
+    return {**(contract or {}), "rejection_details": details}
 
 
 def _resolve_contract_summary(

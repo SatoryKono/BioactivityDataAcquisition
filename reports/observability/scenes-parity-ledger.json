@@ -20,11 +20,11 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "7972a4b0d823827bb52ba2a8946101b369deca3af723c2473412bdaf9489e931",
+    "bioetl-control-plane-v1": "0c01abae3007d024986b145471899c585080fa84f57dd10116c8185e89073f74",
     "bioetl-dq-v2": "2b1596a27a0d66a08f245e639e5ed4df74a6ffa0c4505da83fdc99c8348a13a0",
     "bioetl-incident-v1": "7ae4a424352b594aabb3b6b9e5fb121746f507012c89d4ea8d61c3e7a45dbd76",
     "bioetl-overview-v2": "7d04c923a7e54ec67db64344bbf129eabb19a94d6871c1c2887b401f33ee6e15",
-    "bioetl-provider-health-v2": "77ef9f50f7238a1a61db6ede09e3baec935fa1e1229a7f5863e773b91cddbd23",
+    "bioetl-provider-health-v2": "928b6fb15c09f3cf1844015895f5a3f5e4f32baa24fb2c03c78df6fdc88a74e1",
     "bioetl-run-explorer-v1": "7bcff4013e2a78cd631fcf3f5953d7cfc46c33046d5b72926395606e1c281129",
     "bioetl-runtime": "619b87724a0b0465196cba59cd5c8383e552734eda17320e02bbffadf2930425"
   },
@@ -96,7 +96,7 @@
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/control-plane/manifest-validation?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+          "/ops/control-plane/trust-summary?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
         ],
         "target_count": 1
       }

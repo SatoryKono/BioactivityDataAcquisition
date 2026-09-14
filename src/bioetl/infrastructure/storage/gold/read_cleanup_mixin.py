@@ -68,9 +68,7 @@ class GoldWriterReadCleanupMixin:
             dataset = table.to_pyarrow_dataset()
             flag = _current_flag_column(list(dataset.schema.names))
             physical = dataset.count_rows()
-            current = (
-                dataset.count_rows(filter=ds.field(flag) == True) if flag else physical
-            )  # noqa: E712
+            current = dataset.count_rows(filter=ds.field(flag)) if flag else physical
             return {
                 "version": table.version(),
                 "physical_rows": physical,

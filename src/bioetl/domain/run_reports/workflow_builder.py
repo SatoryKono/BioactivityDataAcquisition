@@ -4,13 +4,14 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, SupportsIndex, SupportsInt
+from typing import Any
 
 from bioetl.domain.run_reports.models import WorkflowExecutionRow, WorkflowRunReport
 from bioetl.domain.run_reports.workflow_reasons import (
     build_reasons_rollup,
     normalize_top_reasons,
 )
+from bioetl.domain.run_reports.workflow_totals import _as_int, _build_totals
 
 _COUNT_FIELDS = (
     "records_extracted",
@@ -19,29 +20,12 @@ _COUNT_FIELDS = (
     "records_silver",
     "records_gold",
 )
-_SUCCESS = frozenset({"success", "completed", "ok"})
-_FAILED = frozenset({"failed", "error", "timeout"})
-_SKIPPED = frozenset({"skipped", "skip"})
 
 
 @dataclass(frozen=True, slots=True)
 class _NormalizedExecution:
     row: WorkflowExecutionRow
     pipeline_name: str | None
-
-
-def _as_int(value: object, default: int = 0) -> int:
-    if value is None:
-        return default
-    if not isinstance(
-        value,
-        (str, bytes, bytearray, SupportsInt, SupportsIndex),
-    ):
-        return default
-    try:
-        return int(value)
-    except (TypeError, ValueError, OverflowError):
-        return default
 
 
 def _optional_int(source: Mapping[str, object], name: str) -> int | None:
@@ -253,71 +237,6 @@ def _normalize_plan_step(
         "pipeline_name": step.get("pipeline_name"),
         "transform_name": step.get("transform_name"),
         "depends_on": list(step.get("depends_on") or ()),
-    }
-
-
-def _status_count(
-    rows: Sequence[WorkflowExecutionRow], statuses: frozenset[str]
-) -> int:
-    return sum(row.status.lower() in statuses for row in rows)
-
-
-def _optional_sum(rows: Sequence[WorkflowExecutionRow], field_name: str) -> int | None:
-    values = [getattr(row, field_name) for row in rows]
-    present = [int(value) for value in values if value is not None]
-    return sum(present) if present else None
-
-
-def _build_totals(
-    rows: Sequence[WorkflowExecutionRow],
-    *,
-    planned: int,
-) -> dict[str, Any]:  # Any: report/json payload shape is dynamic
-    return {
-        "steps_planned": planned,
-        "steps_succeeded": _status_count(rows, _SUCCESS),
-        "steps_failed": _status_count(rows, _FAILED),
-        "steps_skipped": _status_count(rows, _SKIPPED),
-        "records_extracted_sum": sum(row.records_extracted for row in rows),
-        "records_silver_sum": _optional_sum(rows, "records_silver"),
-        "records_gold_sum": _optional_sum(rows, "records_gold"),
-        **_reconciliation_totals(rows),
-    }
-
-
-def _reconciliation_totals(
-    rows: Sequence[WorkflowExecutionRow],
-) -> dict[str, object]:
-    outcomes = [row for row in rows if row.reconciliation is not None]
-    if not outcomes:
-        return {}
-    final_by_table: dict[str, int | None] = {}
-    expired = 0
-    for row in outcomes:
-        details = row.reconciliation or {}
-        if details.get("source_layer") != "gold":
-            continue
-        table = str(details.get("source_table") or "unknown")
-        snapshot = details.get("source_snapshot")
-        measured = (
-            row.status.lower() in _SUCCESS
-            and not details.get("dry_run")
-            and details.get("source_scope") == "all_current"
-            and isinstance(snapshot, dict)
-            and isinstance(snapshot.get("current_rows"), int)
-            and details.get("mutation_mode") in {"gold_scd2_expiry", "no_op"}
-        )
-        final_by_table[table] = (
-            _as_int(snapshot["current_rows"])
-            if measured and isinstance(snapshot, dict)
-            else None
-        )
-        if details.get("mutation_mode") == "gold_scd2_expiry":
-            expired += _as_int(details.get("orphan_rows_deleted"))
-    return {
-        "records_gold_loaded_sum": _optional_sum(rows, "records_gold"),
-        "records_gold_expired_sum": expired,
-        "gold_current_after_reconciliation_by_table": final_by_table,
     }
 
 
