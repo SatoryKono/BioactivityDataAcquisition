@@ -134,4 +134,4 @@ def test_action_normalization_preserves_rank_query_and_visible_column() -> None:
     assert {"id": "custom.hidden", "value": False} in properties
     assert {"id": "custom.width", "value": 105} in properties
     link = next(prop["value"][0] for prop in properties if prop["id"] == "links")
-    assert "${__data.fields.Pipeline}" in link["url"]
+    assert "${__data.fields.route_pipeline}" in link["url"]

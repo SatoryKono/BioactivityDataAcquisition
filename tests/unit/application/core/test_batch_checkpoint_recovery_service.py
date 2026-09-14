@@ -95,6 +95,7 @@ def service(
 async def test_save_periodic_checkpoint_skips_when_interval_not_reached(
     service: BatchCheckpointRecoveryService,
     checkpoint_manager: AsyncMock,
+    metrics: MagicMock,
 ) -> None:
     await service.save_periodic_checkpoint(
         records_fetched=3,
@@ -103,6 +104,11 @@ async def test_save_periodic_checkpoint_skips_when_interval_not_reached(
     )
 
     checkpoint_manager.save_checkpoint.assert_not_called()
+    metrics.increment_counter.assert_called_once_with(
+        "bioetl_checkpoint_save_events_total",
+        1,
+        {"pipeline": "chembl_activity", "operation": "periodic", "status": "skipped"},
+    )
 
 
 @pytest.mark.asyncio

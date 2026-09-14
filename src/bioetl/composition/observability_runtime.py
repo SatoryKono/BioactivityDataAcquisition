@@ -12,7 +12,10 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from urllib.parse import urlunsplit
 
-from bioetl.composition.bootstrap.cli.metrics import bootstrap_metrics_service
+from bioetl.composition.bootstrap.cli.metrics import (
+    bootstrap_metrics_service,
+    refresh_control_plane_integrity_metrics,
+)
 from bioetl.composition.bootstrap.runtime.logger_bootstrap import bootstrap_logger
 from bioetl.composition.bootstrap.runtime_public_exports import (
     AuditInspectionServiceProtocol,
@@ -160,6 +163,12 @@ def push_metrics_to_gateway(
         grouping_key["run_type"] = run_type
     if grouping_key_extra:
         grouping_key.update(grouping_key_extra)
+    if metric_names is None:
+        refresh_control_plane_integrity_metrics(settings, logger=logger)
+        # Full process snapshots share one replace group. Publishing the same
+        # raw pipeline labels under both workflow and pipeline groups causes
+        # Pushgateway duplicate-series rejection on the next invocation.
+        grouping_key = {}
     if workflow_name is not None:
         publication_logger = logger or bootstrap_logger(
             pipeline=pipeline_name or "unknown"

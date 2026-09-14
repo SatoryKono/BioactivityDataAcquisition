@@ -82,6 +82,10 @@ class Settings(StoragePathSettingsMixin, BaseSettings):
         validation_alias="BIOETL_PROMETHEUS_URL",
         description="Optional Prometheus base URL for local HTTP probes (BIOETL_PROMETHEUS_URL)",
     )
+    pushgateway_url: str | None = Field(
+        default=None,
+        description="Pushgateway address for terminal metrics publication (BIOETL_PUSHGATEWAY_URL)",
+    )
     silver_dedup_timeout_seconds: float = Field(
         default=60.0,
         validation_alias="BIOETL_SILVER_DEDUP_TIMEOUT_SECONDS",

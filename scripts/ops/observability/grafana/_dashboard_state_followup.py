@@ -1,12 +1,12 @@
 """Apply the September dashboard audit follow-up to the shipped JSON models.
 
-Run before render_nav_bus; changes are idempotent. No live services are mutated.
+Internal transformations for render_nav_bus --state-followup. No live services
+are mutated; this module is not a standalone command.
 """
 
 from __future__ import annotations
 
 import copy
-import json
 from pathlib import Path
 from typing import Any
 
@@ -98,6 +98,12 @@ def full_list(dashboard: dict[str, Any], panel: dict[str, Any], limit: int) -> N
 
     def neutral(value):
         if isinstance(value, dict):
+            if value.get("id") == "links":
+                value["value"] = [
+                    link
+                    for link in value["value"]
+                    if not link.get("title", "").startswith("Show all rows")
+                ]
             if value.get("type") == "color-background":
                 value["type"] = "color-text"
             for child in value.values():
@@ -107,9 +113,9 @@ def full_list(dashboard: dict[str, Any], panel: dict[str, Any], limit: int) -> N
                 neutral(child)
 
     neutral(clone)
-    clone["description"] = "TIME RANGE · " + clone.get("description", "").removeprefix(
+    clone["description"] = "CURRENT · " + clone.get("description", "").removeprefix(
         "TIME RANGE · "
-    )
+    ).removeprefix("CURRENT · ")
     row_id = 30000 + panel["id"]
     dashboard["panels"] = [p for p in dashboard["panels"] if p["id"] != row_id]
     y = max(p["gridPos"]["y"] + p["gridPos"]["h"] for p in dashboard["panels"])
@@ -215,19 +221,32 @@ def apply_dashboard(dashboard: dict[str, Any]) -> None:
 
     if uid == "bioetl-control-plane-v1":
         p = panels[9418]
-        p["options"]["cellHeight"] = "auto"
-        p["options"]["maxRowHeight"] = 230
-        for name, width in (("Processing", 70), ("Trust", 110), ("Observed at", 120)):
+        p["options"]["cellHeight"] = "sm"
+        p["options"].pop("maxRowHeight", None)
+        # Grafana 12 can measure only one wrapped field per row. Let its
+        # longest-field measurement select Reasons instead of the timestamp.
+        p["fieldConfig"]["defaults"]["custom"]["cellOptions"] = {
+            "type": "auto",
+            "wrapText": True,
+        }
+        for item in p["fieldConfig"]["overrides"]:
+            for prop in item["properties"]:
+                if prop["id"] == "custom.cellOptions":
+                    prop["value"].pop("wrapText", None)
+        for name, width in (("Processing", 85), ("Trust", 100), ("Observed at", 115)):
             override(p, name, **{"custom.width": width})
-        override(
-            p,
-            "Reasons",
-            **{
-                "custom.cellOptions": {"type": "auto", "wrapText": True},
-                "custom.inspect": True,
-                "links": [],
-            },
+        override(p, "Reasons", **{"custom.inspect": True, "links": []})
+        p["description"] = p["description"].replace(
+            "Select Reasons to inspect", "Use the panel link to inspect"
         )
+        p["links"] = [
+            {
+                "title": "Inspect all trust reasons",
+                "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9414&${__url_time_range}",
+                "includeVars": False,
+                "targetBlank": False,
+            }
+        ]
         # Give detailed accounting the full width of its own row.
         p = panels[9403]
         p["gridPos"].update(x=0, w=24)
@@ -279,17 +298,70 @@ def apply_dashboard(dashboard: dict[str, Any]) -> None:
                     t["options"].setdefault("excludeByName", {})[key] = False
         full_list(dashboard, p, 3)
         detail_row = next(row for row in dashboard["panels"] if row["id"] == 32460)
-        detail_row["panels"].append({
-            "id": 2461, "type": "table", "title": "Inspect Missing Stage Signals",
-            "description": "CURRENT · Expected stage coverage for Pipeline / Run Type. Missing lag/backlog signals are listed individually. Undefined expected stages are UNKNOWN. VALID EMPTY requires a recorded complete stage catalog and every expected signal. Query failures are QUERY ERROR.",
-            "gridPos": {"x": 0, "y": detail_row["gridPos"]["y"] + 13, "w": 24, "h": 8},
-            "datasource": {"type": "prometheus", "uid": "prometheus"},
-            "targets": [{"refId": "A", "expr": 'bioetl_runtime_stage_evidence_detail{pipeline=~"$pipeline",run_type=~"$run_type"}', "format": "table", "instant": True}],
-            "fieldConfig": {"defaults": {"custom": {"inspect": True, "minWidth": 70, "cellOptions": {"type": "auto"}}, "noValue": "UNKNOWN — stage coverage unavailable", "unit": "none"}, "overrides": []},
-            "options": {"showHeader": True, "cellHeight": "sm", "footer": {"show": False, "enablePagination": True}},
-            "transformations": [{"id": "organize", "options": {"excludeByName": {"Time": True, "__name__": True, "Value": True}, "renameByName": {"pipeline": "Pipeline", "run_type": "Run type", "stage": "Stage", "signal": "Evidence"}}}],
-        })
-        coverage_link = {"title": "Inspect missing stage signals", "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&viewPanel=2461&${__url_time_range}", "includeVars": False, "targetBlank": False}
+        detail_row["panels"].append(
+            {
+                "id": 2461,
+                "type": "table",
+                "title": "Inspect Current Missing Stage Signals",
+                "description": "CURRENT · Expected stage coverage for Pipeline / Run Type. Missing lag/backlog signals are listed individually. Undefined expected stages are UNKNOWN. VALID EMPTY requires a recorded complete stage catalog and every expected signal. Query failures are QUERY ERROR.",
+                "gridPos": {
+                    "x": 0,
+                    "y": detail_row["gridPos"]["y"] + 13,
+                    "w": 24,
+                    "h": 8,
+                },
+                "datasource": {"type": "prometheus", "uid": "prometheus"},
+                "targets": [
+                    {
+                        "refId": "A",
+                        "expr": 'bioetl_runtime_stage_evidence_detail{pipeline=~"$pipeline",run_type=~"$run_type"}',
+                        "format": "table",
+                        "instant": True,
+                    }
+                ],
+                "fieldConfig": {
+                    "defaults": {
+                        "custom": {
+                            "inspect": True,
+                            "minWidth": 70,
+                            "cellOptions": {"type": "auto"},
+                        },
+                        "noValue": "UNKNOWN — stage coverage unavailable",
+                        "unit": "none",
+                    },
+                    "overrides": [],
+                },
+                "options": {
+                    "showHeader": True,
+                    "cellHeight": "sm",
+                    "footer": {"show": False, "enablePagination": True},
+                },
+                "transformations": [
+                    {
+                        "id": "organize",
+                        "options": {
+                            "excludeByName": {
+                                "Time": True,
+                                "__name__": True,
+                                "Value": True,
+                            },
+                            "renameByName": {
+                                "pipeline": "Pipeline",
+                                "run_type": "Run type",
+                                "stage": "Stage",
+                                "signal": "Evidence",
+                            },
+                        },
+                    }
+                ],
+            }
+        )
+        coverage_link = {
+            "title": "Inspect missing stage signals",
+            "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&viewPanel=2461&${__url_time_range}",
+            "includeVars": False,
+            "targetBlank": False,
+        }
         links = panels[9102].setdefault("links", [])
         if coverage_link not in links:
             links.append(coverage_link)
@@ -357,7 +429,7 @@ def apply_dashboard(dashboard: dict[str, Any]) -> None:
                 },
             )
         override(p, "Started", **{"unit": "time:YYYY-MM-DD HH:mm", "custom.width": 155})
-        override(p, "Coverage", **{"custom.width": 130})
+        override(p, "Coverage", **{"custom.width": 150})
         p["description"] += (
             ""
             if "Silver Q means" in p["description"]
@@ -414,20 +486,3 @@ def apply_dashboard(dashboard: dict[str, Any]) -> None:
         route_links(p)
         for pid in (2010, 2005):
             full_list(dashboard, panels[pid], 4 if pid == 2010 else 3)
-
-
-def main() -> None:
-    for path in DASH.glob("*.json"):
-        original = json.loads(path.read_text(encoding="utf-8"))
-        dashboard = copy.deepcopy(original)
-        apply_dashboard(dashboard)
-        clean_links(dashboard)
-        if dashboard != original:
-            path.write_text(
-                json.dumps(dashboard, ensure_ascii=False, indent=2) + "\n",
-                encoding="utf-8",
-            )
-
-
-if __name__ == "__main__":
-    main()

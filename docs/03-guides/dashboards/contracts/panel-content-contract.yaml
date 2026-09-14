@@ -2661,8 +2661,8 @@ dashboards:
         title: Inspect Full Current Alerts
         role: forensic_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: current
+        scope_class: current
         evidence_source: grafana_builtin
         empty_state_class: unsupported
         state_model:
@@ -2685,8 +2685,8 @@ dashboards:
         title: Inspect Full Ranked Suspects
         role: forensic_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: current
+        scope_class: current
         evidence_source: grafana_builtin
         empty_state_class: unsupported
         state_model:
@@ -3310,8 +3310,8 @@ dashboards:
         title: Inspect Full First Action
         role: forensic_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: current
+        scope_class: current
         evidence_source: grafana_builtin
         empty_state_class: unsupported
         state_model:
@@ -4872,6 +4872,30 @@ dashboards:
         - full_dark
         - full_light
         - zoom_200
+      '2461':
+        title: Inspect Current Missing Stage Signals
+        role: forensic_table
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
       '2541':
         title: Review Runtime Escalation
         role: guidance
@@ -5220,8 +5244,8 @@ dashboards:
         title: Inspect Full Stage Progress
         role: forensic_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: current
+        scope_class: current
         evidence_source: grafana_builtin
         empty_state_class: unsupported
         state_model:

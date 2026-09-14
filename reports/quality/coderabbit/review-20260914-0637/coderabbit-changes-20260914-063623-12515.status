@@ -1,0 +1,17 @@
+ M docs/03-guides/dashboards/contracts/dashboard-inventory.yaml
+ M docs/03-guides/dashboards/contracts/panel-content-contract.yaml
+ M docs/03-guides/dashboards/panels/bioetl-runtime-panels.md
+ M grafana/dashboards/bioetl-control-plane-v1.json
+ M grafana/dashboards/bioetl-runtime.json
+ M grafana/prometheus-rules/bioetl_observability.yml
+ M reports/audit/docs-pipeline/docs-build.log
+ M reports/audit/docs-pipeline/generated-files.csv
+ M reports/audit/docs-pipeline/kpi.json
+ M reports/audit/docs-pipeline/link-report.json
+ M reports/audit/docs-pipeline/report.md
+ M scripts/ops/observability/grafana/apply_state_followup.py
+ M tests/unit/scripts/ops/observability/test_dashboard_context_links.py
+ M tests/unit/scripts/ops/observability/test_dashboard_state_followup.py
+?? reports/quality/coderabbit/network-recovery-20260914/
+?? reports/quality/coderabbit/review-20260914-0630/
+?? reports/quality/coderabbit/review-20260914-0637/

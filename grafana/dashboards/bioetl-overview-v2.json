@@ -4899,14 +4899,7 @@
                   },
                   {
                     "id": "links",
-                    "value": [
-                      {
-                        "includeVars": false,
-                        "title": "Show all rows and total (summary: up to 2)",
-                        "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=20215&${__url_time_range}",
-                        "targetBlank": false
-                      }
-                    ]
+                    "value": []
                   }
                 ]
               },
@@ -5114,7 +5107,7 @@
               }
             }
           ],
-          "description": "TIME RANGE · CURRENT selected-pipeline routes across selected run types; not a SELECTED RUN verdict. One row per pipeline and action/reason, taking the highest urgency across run types with all routes available through pagination. Open Action on the top row first. Priority is routing urgency: URGENT > HIGH > REVIEW > WATCH, not inferred alert severity. Provider degradation is GLOBAL; confirm the provider in Provider Health. Only positive routes participate. NO_ROUTE is an absence-only fallback when no positive route survives (or on()); it is not a healthy zero or VALID EMPTY. Verify telemetry and selection before a health conclusion. TELEMETRY MISSING is not zero. TIME RANGE sets current evaluation time. UNKNOWN routes are VERIFY, not claims of degradation. Confirmed incidents retain their domain priority.",
+          "description": "CURRENT · CURRENT selected-pipeline routes across selected run types; not a SELECTED RUN verdict. One row per pipeline and action/reason, taking the highest urgency across run types with all routes available through pagination. Open Action on the top row first. Priority is routing urgency: URGENT > HIGH > REVIEW > WATCH, not inferred alert severity. Provider degradation is GLOBAL; confirm the provider in Provider Health. Only positive routes participate. NO_ROUTE is an absence-only fallback when no positive route survives (or on()); it is not a healthy zero or VALID EMPTY. Verify telemetry and selection before a health conclusion. TELEMETRY MISSING is not zero. TIME RANGE sets current evaluation time. UNKNOWN routes are VERIFY, not claims of degradation. Confirmed incidents retain their domain priority.",
           "links": [
             {
               "title": "Open Runtime",

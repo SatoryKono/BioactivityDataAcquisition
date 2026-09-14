@@ -525,13 +525,14 @@
         "y": 6
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Processing outcome, fail-closed Trust verdict, Reasons, and Freshness remain visible together. Select Reasons to inspect the full evidence in panel 9414; full reasons also remain in table inspection. Freshness is the existing frame field evidence_freshness. INCOMPLETE / UNKNOWN is not OK. SELECT RUN / VALID EMPTY is not OK. Processing is processing_status; Trust is trust_status. Backend unavailable means QUERY ERROR, never VALID EMPTY.",
+      "description": "SELECTED RUN · Processing outcome, fail-closed Trust verdict, Reasons, and Freshness remain visible together. Use the panel link to inspect the full evidence in panel 9414; full reasons also remain in table inspection. Freshness is the existing frame field evidence_freshness. INCOMPLETE / UNKNOWN is not OK. SELECT RUN / VALID EMPTY is not OK. Processing is processing_status; Trust is trust_status. Backend unavailable means QUERY ERROR, never VALID EMPTY.",
       "fieldConfig": {
         "defaults": {
           "custom": {
             "align": "left",
             "cellOptions": {
-              "type": "auto"
+              "type": "auto",
+              "wrapText": true
             },
             "inspect": true
           },
@@ -597,8 +598,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto",
-                  "wrapText": true
+                  "type": "auto"
                 }
               },
               {
@@ -624,8 +624,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto",
-                  "wrapText": true
+                  "type": "auto"
                 }
               },
               {
@@ -651,8 +650,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto",
-                  "wrapText": true
+                  "type": "auto"
                 }
               },
               {
@@ -676,15 +674,14 @@
                 "value": false
               },
               {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
-              },
-              {
                 "id": "noValue",
                 "value": "UNKNOWN"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto"
+                }
               }
             ]
           },
@@ -735,7 +732,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 70
+                "value": 85
               }
             ]
           },
@@ -747,7 +744,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 110
+                "value": 100
               }
             ]
           },
@@ -759,7 +756,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 120
+                "value": 115
               }
             ]
           },
@@ -772,8 +769,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto",
-                  "wrapText": true
+                  "type": "auto"
                 }
               },
               {
@@ -793,8 +789,7 @@
           "show": false
         },
         "showHeader": true,
-        "cellHeight": "auto",
-        "maxRowHeight": 230
+        "cellHeight": "sm"
       },
       "targets": [
         {
@@ -863,6 +858,14 @@
           "options": {
             "limitField": 1
           }
+        }
+      ],
+      "links": [
+        {
+          "title": "Inspect all trust reasons",
+          "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9414&${__url_time_range}",
+          "includeVars": false,
+          "targetBlank": false
         }
       ]
     },

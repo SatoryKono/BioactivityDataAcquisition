@@ -2,6 +2,14 @@ ______________________________________________________________________
 
 ## UX report artifact requirement
 
+## State and navigation follow-up — 2026-09-14
+
+All seven dashboards now distinguish missing evidence from measured empty
+results. The change corrects selected verdicts, Provider handoffs, Trust reason
+wrapping, full evidence tables, stage coverage, terminal event age and DQ history.
+See [docs/reports/dashboard-ux-checks/2026-09-14.md](../../reports/dashboard-ux-checks/2026-09-14.md)
+for the browser observations and the limits of this validation pass.
+
 ## Run Explorer simplification — 2026-09-13
 
 Run Explorer now contains navigation, a scope banner and the last ten launches

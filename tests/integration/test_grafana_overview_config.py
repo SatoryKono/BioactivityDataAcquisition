@@ -195,8 +195,13 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
     description = str(next_action.get("description", ""))
     assert next_action.get("type") == "table"
     assert "bioetl_l0_next_action_route" in next_action_expr
-    # RFA-00: up to four urgency-ordered routes; single-pipeline still ranks via topk.
-    assert "topk(2" in next_action_expr
+    # Keep the full response for the detail table; bound only the sorted summary.
+    assert "topk(" not in next_action_expr
+    transformations = next_action["transformations"]
+    order = [item["id"] for item in transformations]
+    assert order.index("sortBy") < order.index("limit")
+    limit = next(item for item in transformations if item["id"] == "limit")
+    assert limit["options"]["limitField"] == 2
     assert 'pipeline=~"$pipeline"' in next_action_expr
     assert 'run_type=~"$run_type"' in next_action_expr
     assert "$__range" not in next_action_expr

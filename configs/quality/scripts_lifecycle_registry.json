@@ -1668,6 +1668,12 @@
       "next_step": "Retain as the imported RF-005 receipt verifier behind run_grafana_dashboard_audit_cycle.py; it has no main function or standalone CLI. Keep operator invocation through the existing scripts.ops run-grafana-audit-cycle command.",
       "owner": "@bioetl-observability",
       "review_by": "2026-11-30"
+    },
+    "scripts/ops/observability/grafana/_dashboard_state_followup.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Internal transformations invoked by render_nav_bus --state-followup; no standalone CLI. Keep the public command in render_nav_bus.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-12-14"
     }
   },
   "schema_version": "1.0"

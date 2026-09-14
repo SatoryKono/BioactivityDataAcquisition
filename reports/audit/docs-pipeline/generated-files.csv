@@ -1,3 +1,9 @@
-path,type,audience,owner,last_change,status,score,priority,evidence
-docs/reports/generated/documentation-cleanup-inventory.json,generated,eng,BioETL Team,2026-08-27,synced,2,P2,python -m scripts.docs generate-cleanup-inventory --update
-docs/reports/generated/documentation-cleanup-inventory.md,generated,eng,BioETL Team,2026-08-27,synced,2,P2,same command
+path,sot,generator,check_in_verify,tracked,notes
+docs/reports/generated/documentation-cleanup-inventory.json,git+routing yaml,scripts.docs generate-cleanup-inventory,yes,yes,check passed 2026-09-14
+docs/reports/generated/documentation-cleanup-inventory.md,git+routing yaml,scripts.docs generate-cleanup-inventory,yes,yes,paired md
+docs/02-architecture/adr-registry/registry.json,decisions/,scripts/generate_adr_registry.py,no,yes,wall-clock generated field
+docs/02-architecture/adr-registry.md,decisions/,scripts/generate_adr_registry.py,no,yes,published nav
+docs/reports/generated/pipeline_normalization_field_matrix/,schemas/profiles,scripts.docs generate-pipeline-normalization-matrix,no,yes,--check only in provider-contract-drift.yml
+docs/04-reference/api/,curated markdown,none (not autogen),n/a,yes,facade tests in docs-governance
+docs/site/,mkdocs.yml,scripts.docs build-site,n/a,no,gitignored helper; dual with root site/
+site/,mkdocs.yml site_dir,bare mkdocs build,n/a,no,gitignored; disagrees with build-site

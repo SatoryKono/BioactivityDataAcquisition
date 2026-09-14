@@ -131,10 +131,7 @@ def test_push_metrics_to_gateway_uses_metrics_service_push() -> None:
     metrics_service.push_to_gateway.assert_called_once_with(
         gateway=mock.ANY,
         run_label="bioetl",
-        grouping_key={
-            "pipeline": "chembl_activity",
-            "run_type": "incremental",
-        },
+        grouping_key={},
         metric_names=None,
     )
 

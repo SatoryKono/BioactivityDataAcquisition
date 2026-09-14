@@ -1,26 +1,22 @@
 {
-  "timestamp": "2026-08-27T08:46:15.546120+00:00",
-  "status": "pass",
-  "total_violations": 0,
+  "timestamp": "2026-09-14T06:13:47Z",
+  "status": "skipped_full_check_links",
+  "reason": "This audit ran generate-cleanup-inventory --check and check-docstrings. Full check-links was not re-run locally; CI owner is docs.yml validate-mkdocs. The 2026-08-27 pass snapshot was not reused as current evidence.",
   "checks_run": [
     {
-      "check": "links",
+      "check": "generate-cleanup-inventory --check",
       "status": "pass",
-      "violations": 0
+      "exit_code": 0
     },
     {
-      "check": "specs",
+      "check": "check-docstrings --summary",
       "status": "pass",
-      "violations": 0
+      "exit_code": 0
     },
     {
-      "check": "configs",
-      "status": "pass",
-      "violations": 0
+      "check": "check-links",
+      "status": "not_run_this_audit",
+      "violations": null
     }
-  ],
-  "failure_policy": {
-    "exit_code_0": "All selected checks passed",
-    "exit_code_1": "One or more selected checks reported violations"
-  }
+  ]
 }

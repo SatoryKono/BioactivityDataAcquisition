@@ -50,6 +50,7 @@ backrefs, **и неиспользуемый mermaid2**).
 | Check | Result |
 | --- | --- |
 | `python -m scripts.docs generate-cleanup-inventory --check` | exit 0, `inventory is synchronized` @ 2026-09-14T06:13:47Z |
+| `python -m scripts.docs check-docstrings --summary` | exit 0, functions 90.3% (thresholds passed) |
 | `.venv-win` `import mkdocs` | exit 1, ModuleNotFoundError |
 | inspection `mkdocs.yml`, `scripts/docs/__main__.py`, `verify.py`, `docs.yml` | completed |
 | live GitHub Actions API state | skipped (`REQUIRE_GH_TRACKING=false`); inventory snapshot 2026-09-10 |

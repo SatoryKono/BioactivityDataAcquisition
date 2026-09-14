@@ -1336,9 +1336,10 @@ groups:
 
       - record: bioetl_runtime_stage_evidence_detail
         expr: >-
+          max by (pipeline, run_type, stage, signal) (
           bioetl_runtime_missing_stage_signal
           or label_replace((bioetl_runtime_stage_evidence_status == 3), "signal", "UNKNOWN - expected stage catalog missing", "", "")
-          or label_replace((bioetl_runtime_stage_evidence_status == 0), "signal", "VALID EMPTY - all expected stage signals present", "", "")
+          or label_replace((bioetl_runtime_stage_evidence_status == 0), "signal", "VALID EMPTY - all expected stage signals present", "", ""))
       - record: bioetl_runtime_required_rule_age_seconds
         expr: (time()-min(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~".*;(bioetl_runtime_dashboard_recording|bioetl_monitoring_stack_observability|bioetl_optional_docker_runtime_stability|bioetl_pipeline_runtime_observability|bioetl_control_plane_traceability_observability|bioetl_dq_observability|bioetl_provider_health_observability)"})) and on() (count(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~".*;(bioetl_runtime_dashboard_recording|bioetl_monitoring_stack_observability|bioetl_optional_docker_runtime_stability|bioetl_pipeline_runtime_observability|bioetl_control_plane_traceability_observability|bioetl_dq_observability|bioetl_provider_health_observability)"}) == 7)
       - record: bioetl_runtime_stage_progress_by_scope
@@ -1349,7 +1350,7 @@ groups:
             (bioetl_incident_ranked_runtime or bioetl_incident_ranked_provider or bioetl_incident_ranked_dq),
             "confidence", "UNVERIFIED", "", ""), "object", " / ", "pipeline", "provider"),
             "route_pipeline", "$1", "pipeline", "(.+)"),
-            "action_scope", "var-provider=%24__all&viewPanel=9104", "provider", "unknown")
+            "action_scope", "var-provider=$$__all&viewPanel=9104", "provider", "unknown")
 
   - name: bioetl_monitoring_stack_observability
     interval: 30s

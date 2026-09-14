@@ -1,27 +1,22 @@
-[docs-verify] check-links: E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.docs.checks.check_links
-Links: OK (no broken relative links found)
-Nav docs: OK (all mkdocs nav files exist)
-Nav link scope: OK (all nav docs are included in link checks)
-Local skill nav classification: OK (all local skill pages are in nav or not_in_nav)
-Specs: OK (all referenced spec files exist)
-Configs: OK (all convention-based config files exist)
-Gold contracts index: OK (docs list matches exported JSON files)
-Workflow inventory: OK (published workflow doc matches .github/workflows)
-ChEMBL provider overview: OK (README links match active entity-config inventory)
-Provider spec governance: OK
-Runbook governance: OK
-Control-plane contract governance: OK
-Not-in-nav growth: OK (current 223 <= baseline 223)
-Doc drift: OK (no guardrail violations in mkdocs nav docs)
+# docs-pipeline audit command log
+# checked_at_utc: 2026-09-14T06:13:47Z
 
-All checks passed.
-[docs-verify] check-drift: E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.docs.checks.check_drift --ports --classes --runtime-mirrors --freshness --modules
-Documentation Drift Report
-============================================================
-No drift detected. Documentation is in sync with code.
+# Ran (read-only):
+.venv-win/Scripts/python.exe -m scripts.docs generate-cleanup-inventory --check
+exit 0
+[documentation-cleanup-inventory] inventory is synchronized
 
-Summary: 0 errors, 0 warnings
-[docs-verify] check-docstrings: E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.docs.checks.check_docstrings --summary
-Docstrings: modules=100.0% classes=97.6% functions=88.7% (missing=795)
-THRESHOLD VIOLATIONS:
-  FAIL: functions: 88.7% < 90% threshold
+.venv-win/Scripts/python.exe -c "import mkdocs"
+exit 1
+ModuleNotFoundError: No module named 'mkdocs'
+
+.venv-win/Scripts/python.exe -m scripts.docs check-docstrings --summary
+exit 0
+Docstrings: modules=100.0% classes=97.4% functions=90.3% (missing=691)
+All thresholds passed.
+
+# Skipped:
+# - python -m scripts.docs verify (strict mkdocs build requires extra docs)
+# - mkdocs build --strict
+# - generate-cleanup-inventory --update
+# - publish / push

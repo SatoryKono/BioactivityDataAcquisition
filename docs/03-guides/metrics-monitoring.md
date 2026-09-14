@@ -144,6 +144,14 @@ export BIOETL_OBSERVABILITY__METRICS_ENABLED=false
 > `delete_metrics_from_gateway` / `delete_from_gateway`. `run_id`,
 > `record_id`, `payload_hash`, raw paths/URLs и другие forensic anchors
 > остаются в manifest/ledger/CLI/explorer surfaces.
+>
+> Адрес задаётся через `BIOETL_PUSHGATEWAY_URL`: для процесса на хосте
+> `http://localhost:9091`, в общей Docker-сети — `http://pushgateway:9091`.
+> Workflow публикует полный registry в `finally` после успеха, ошибки или
+> отмены; это включает многопайплайновый workflow. Нулевые исходы операций
+> manifest/ledger измеряются в процессе, а отсутствие raw ledger-серии
+> повышает `bioetl_control_plane_telemetry_missing_5m` даже при наличии
+> других метрик pipeline.
 
 ______________________________________________________________________
 

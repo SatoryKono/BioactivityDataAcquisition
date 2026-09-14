@@ -266,7 +266,7 @@ Shipped in `bioetl-runtime.json`.
 
 ### 99. Review Stage Progress
 
-CURRENT maximum backlog, lag and 5-minute throughput per stage across the selected Run Types. Select one Run Type for its exact values. Missing stage signals remain UNKNOWN.
+CURRENT backlog, lag and 5-minute throughput retain pipeline, Run Type and stage in each row. The summary shows up to three rows; open the full table for all selected scopes. Missing stage signals remain UNKNOWN.
 
 ### 100. Inspect Full Stage Progress
 
@@ -275,3 +275,7 @@ Complete evidence is available in the collapsed detail group. The table reuses t
 ### 101. Inspect Full Stage Progress
 
 Complete evidence is available in the collapsed detail group. The table reuses the source panel response before transformations, keeps all rows, and shows the total through native pagination. It issues no duplicate backend query.
+
+### 102. Inspect Current Missing Stage Signals
+
+CURRENT missing signals by pipeline, Run Type and stage. UNKNOWN means the expected-stage catalog is absent; VALID EMPTY means the expected stages have all required signals. An absent query result is UNKNOWN, never evidence of completeness.

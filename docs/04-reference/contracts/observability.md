@@ -452,6 +452,19 @@ metrics/admin behavior:
   replace-style bounded aggregate snapshots (`push_to_gateway`), supports
   cleanup through `delete_metrics_from_gateway` / `delete_from_gateway`, and
   does not require a separate operator command for normal execution.
+- Workflow completion flushes the full process registry synchronously in a
+  `finally` block, including multi-pipeline workflows and raised exceptions.
+  A workflow-only terminal snapshot would omit checkpoint, manifest/ledger,
+  replay risk, record/stage, provider health and DQ observations. Counters with
+  measured zero remain present; unobserved gauges must remain absent.
+- Full process snapshots use the single ungrouped job replacement slot; pipeline
+  and run_type remain sample labels. Restricted diagnostic publications may use
+  the bounded grouping keys. This avoids duplicate-series rejection when ordinary
+  runs and workflows alternate. Full-snapshot cleanup uses no grouping key.
+- Ledger telemetry coverage tests the presence of the raw append counter per
+  pipeline. A zero-valued fallback must not appear on the right of `unless`:
+  PromQL set membership includes zero-valued series. Risk and integrity coverage
+  counts distinct label values, independent of the number of scrape sources.
 - Pushgateway grouping labels are limited to `pipeline` and `run_type`;
   `run_id`, `record_id`, `payload_hash`, raw paths/URLs, and other forensic
   anchors remain in manifest/ledger/CLI/explorer surfaces.

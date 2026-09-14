@@ -808,7 +808,9 @@ def _expand_nav_height(
             grid["y"] += delta
 
 
-def apply_to_dashboard(path: Path, *, current_uid: str, check: bool = False) -> bool:
+def apply_to_dashboard(
+    path: Path, *, current_uid: str, check: bool = False, state_followup: bool = False
+) -> bool:
     from scripts.engineering.common.repo_paths import ensure_path_within_root
 
     safe_path = ensure_path_within_root(path, DASH_DIR)
@@ -819,6 +821,14 @@ def apply_to_dashboard(path: Path, *, current_uid: str, check: bool = False) -> 
         normalize_dashboard_actions,
     )
 
+    if state_followup:
+        from scripts.ops.observability.grafana._dashboard_state_followup import (
+            apply_dashboard,
+            clean_links,
+        )
+
+        apply_dashboard(payload)
+        clean_links(payload)
     normalize_dashboard_actions(payload)
     _remove_obsolete_provider_handoff_variable(payload)
     _fail_closed_provider_handoffs(
@@ -888,6 +898,11 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Exit non-zero when generated navigation differs without writing files",
     )
+    parser.add_argument(
+        "--state-followup",
+        action="store_true",
+        help="Apply the state, evidence-table and navigation follow-up before rendering; combine with --check to verify without writing",
+    )
     args = parser.parse_args(argv)
     ok = True
     for item in BUS:
@@ -896,7 +911,9 @@ def main(argv: list[str] | None = None) -> int:
         path = ensure_path_within_root(DASH_DIR / filename, DASH_DIR)
         if not path.exists():
             raise SystemExit(f"missing dashboard file: {path}")
-        current_ok = apply_to_dashboard(path, current_uid=uid, check=args.check)
+        current_ok = apply_to_dashboard(
+            path, current_uid=uid, check=args.check, state_followup=args.state_followup
+        )
         ok = current_ok and ok
         if not args.check:
             print(f"updated {filename} current={item['title']!r}")

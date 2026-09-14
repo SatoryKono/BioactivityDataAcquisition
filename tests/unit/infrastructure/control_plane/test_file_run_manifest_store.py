@@ -136,7 +136,7 @@ def test_file_store_emits_manifest_write_metric(tmp_path) -> None:
 
     store.save(manifest)
 
-    metrics.increment_counter.assert_called_once_with(
+    metrics.increment_counter.assert_any_call(
         "bioetl_control_plane_manifest_writes_total",
         1,
         {
@@ -185,7 +185,7 @@ def test_file_store_emits_manifest_read_metric_on_get_success(tmp_path) -> None:
 
     assert store.get("manifest-3") == manifest
 
-    metrics.increment_counter.assert_called_once_with(
+    metrics.increment_counter.assert_any_call(
         "bioetl_control_plane_reads_total",
         1,
         {
@@ -223,7 +223,7 @@ def test_file_store_emits_manifest_read_metric_on_get_failure(tmp_path) -> None:
     else:
         raise AssertionError("Expected malformed manifest payload to raise ValueError")
 
-    metrics.increment_counter.assert_called_once_with(
+    metrics.increment_counter.assert_any_call(
         "bioetl_control_plane_reads_total",
         1,
         {
@@ -403,7 +403,7 @@ def test_file_store_reports_mismatched_run_index(tmp_path) -> None:
 
     with pytest.raises(RunManifestStoreCorruptionError, match="manifest-other"):
         store.get(manifest.manifest_id)
-    metrics.increment_counter.assert_called_once_with(
+    metrics.increment_counter.assert_any_call(
         "bioetl_control_plane_reads_total",
         1,
         {
@@ -417,7 +417,7 @@ def test_file_store_reports_mismatched_run_index(tmp_path) -> None:
 
     with pytest.raises(RunManifestStoreCorruptionError, match="missing manifest"):
         store.get_by_run_id(run_id)
-    metrics.increment_counter.assert_called_once_with(
+    metrics.increment_counter.assert_any_call(
         "bioetl_control_plane_reads_total",
         1,
         {

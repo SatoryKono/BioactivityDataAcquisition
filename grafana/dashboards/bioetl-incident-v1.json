@@ -2701,7 +2701,7 @@
           "id": 22010,
           "type": "table",
           "title": "Inspect Full Ranked Suspects",
-          "description": "TIME RANGE · GLOBAL · CURRENT at query evaluation time (range end), not SELECTED RUN. Rank is severity order: CRIT=2, WARN=1, UNKNOWN=0; ties have equal urgency, not higher confidence. Confidence is UNVERIFIED: a rule signal alone does not establish cause or impact. Pipeline/provider identifies potential impact scope; confirm with domain evidence. Only active (>0) signals are ranked; telemetry_gap stays UNKNOWN. VALID EMPTY means no active suspects with available evidence; TELEMETRY MISSING is not a zero and not VALID EMPTY. Domain details use the same GLOBAL scope and evaluation time. Rule sample time is not the underlying event time. Inspect retains source labels; Action preserves row scope. TIME RANGE selects evaluation time, not an event-history rank. First screen shows four rows; complete domain evidence remains below. Rank is ordering only, never confidence. Telemetry gaps are observation problems, not confirmed incidents.",
+          "description": "CURRENT · GLOBAL · CURRENT at query evaluation time (range end), not SELECTED RUN. Rank is severity order: CRIT=2, WARN=1, UNKNOWN=0; ties have equal urgency, not higher confidence. Confidence is UNVERIFIED: a rule signal alone does not establish cause or impact. Pipeline/provider identifies potential impact scope; confirm with domain evidence. Only active (>0) signals are ranked; telemetry_gap stays UNKNOWN. VALID EMPTY means no active suspects with available evidence; TELEMETRY MISSING is not a zero and not VALID EMPTY. Domain details use the same GLOBAL scope and evaluation time. Rule sample time is not the underlying event time. Inspect retains source labels; Action preserves row scope. TIME RANGE selects evaluation time, not an event-history rank. First screen shows four rows; complete domain evidence remains below. Rank is ordering only, never confidence. Telemetry gaps are observation problems, not confirmed incidents.",
           "gridPos": {
             "x": 0,
             "y": 21,
@@ -3304,7 +3304,7 @@
           "id": 22005,
           "type": "table",
           "title": "Inspect Full Current Alerts",
-          "description": "TIME RANGE · GLOBAL · CURRENT firing/pending alerts ranked critical before warning before other/unknown severity, then firing before pending, before the three-row limit. Object labels retain alert instance scope. Open the incident response runbook; full evidence remains below.",
+          "description": "CURRENT · GLOBAL · CURRENT firing/pending alerts ranked critical before warning before other/unknown severity, then firing before pending, before the three-row limit. Object labels retain alert instance scope. Open the incident response runbook; full evidence remains below.",
           "gridPos": {
             "x": 0,
             "y": 22,

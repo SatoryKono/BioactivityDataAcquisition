@@ -5030,7 +5030,7 @@
             "type": "datasource",
             "uid": "-- Dashboard --"
           },
-          "description": "TIME RANGE · CURRENT stage snapshots and TIME RANGE-independent 5m throughput. Maximum observed value per stage across selected run types; inspect one Run Type for exact values. Missing signals remain UNKNOWN. An active blocker is not established by missing evidence.",
+          "description": "CURRENT · CURRENT stage snapshots and TIME RANGE-independent 5m throughput. Maximum observed value per stage across selected run types; inspect one Run Type for exact values. Missing signals remain UNKNOWN. An active blocker is not established by missing evidence.",
           "fieldConfig": {
             "defaults": {
               "noValue": "UNKNOWN",
@@ -5123,7 +5123,7 @@
         {
           "id": 2461,
           "type": "table",
-          "title": "Inspect Missing Stage Signals",
+          "title": "Inspect Current Missing Stage Signals",
           "description": "CURRENT · Expected stage coverage for Pipeline / Run Type. Missing lag/backlog signals are listed individually. Undefined expected stages are UNKNOWN. VALID EMPTY requires a recorded complete stage catalog and every expected signal. Query failures are QUERY ERROR.",
           "gridPos": {
             "x": 0,

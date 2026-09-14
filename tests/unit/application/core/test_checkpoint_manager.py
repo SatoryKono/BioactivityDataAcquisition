@@ -375,7 +375,7 @@ class TestCheckpointManagerLoadCheckpoint:
         )
 
     async def test_load_checkpoint_when_resume_false(
-        self, mock_checkpoint_port, mock_logger
+        self, mock_checkpoint_port, mock_logger, mock_metrics
     ):
         """Test load_checkpoint when not resuming."""
         run_id = deterministic_uuid_from_callsite("replay-sensitive")
@@ -385,12 +385,18 @@ class TestCheckpointManagerLoadCheckpoint:
             pipeline_name="test_pipeline",
             run_id=run_id,
             resume=False,
+            metrics=mock_metrics,
         )
 
         result = await manager.load_checkpoint()
 
         assert result is None
         mock_checkpoint_port.load.assert_not_called()
+        mock_metrics.increment_counter.assert_called_once_with(
+            "bioetl_checkpoint_load_events_total",
+            1,
+            {"pipeline": "test_pipeline", "status": "skipped"},
+        )
 
 
 @pytest.mark.unit

@@ -21,8 +21,52 @@ from bioetl.composition.runtime_builders.config_access import get_settings
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
+    from bioetl.infrastructure.config.settings_api import Settings
 
 __all__ = ["bootstrap_metrics_service"]
+
+
+def refresh_control_plane_integrity_metrics(
+    settings: Settings, *, logger: LoggerPort | None = None
+) -> None:
+    """Measure persisted manifest/ledger integrity before a terminal snapshot."""
+    from bioetl.application.observability.control_plane_integrity_metrics import (
+        ControlPlaneIntegrityMetricsService,
+    )
+    from bioetl.composition.runtime_builders._run_manifest_control_plane_paths import (
+        control_plane_root,
+    )
+    from bioetl.domain.exceptions import BioETLError
+    from bioetl.infrastructure.control_plane import (
+        FileRunLedgerStore,
+        FileRunManifestStore,
+    )
+    from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
+
+    try:
+        if not settings.observability.metrics_enabled:
+            return
+        ControlPlaneIntegrityMetricsService(
+            manifest_port=FileRunManifestStore(
+                base_path=control_plane_root(settings, "run_manifest")
+            ),
+            ledger_port=FileRunLedgerStore(
+                base_path=control_plane_root(settings, "run_ledger")
+            ),
+            metrics=PrometheusMetrics(),
+        ).refresh()
+    except (
+        BioETLError,
+        OSError,
+        RuntimeError,
+        TypeError,
+        ValueError,
+        AttributeError,
+    ) as exc:
+        if logger is not None:
+            logger.warning(
+                "integrity_metrics_refresh_failed", error_type=type(exc).__name__
+            )
 
 
 def bootstrap_metrics_service(

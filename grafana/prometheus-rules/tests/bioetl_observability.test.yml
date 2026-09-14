@@ -2145,3 +2145,224 @@ tests:
         exp_samples:
           - labels: 'bioetl_l0_next_action_no_route{action_dashboard_uid="bioetl-overview-v2",action_reason="selected_scope_not_present",action_target="no_route"}'
             value: 0
+
+  - name: measured-zero-is-present
+    interval: 1m
+    input_series:
+    - series: bioetl_workflow_pipeline_expected{pipeline="chembl_assay",run_type="backfill"}
+      values: 1+0x20
+    - series: bioetl_control_plane_manifest_writes_total{pipeline="chembl_assay",run_type="backfill",status="success"}
+      values: 0+0x20
+    - series: bioetl_control_plane_ledger_appends_total{pipeline="chembl_assay",event_type="run_finished",status="success"}
+      values: 0+0x20
+    - series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="chembl_assay",run_type="backfill",risk_type="duplicate"}
+      values: 0+0x20
+    - series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="chembl_assay",run_type="backfill",risk_type="overwrite"}
+      values: 0+0x20
+    - series: bioetl_manifest_ledger_integrity_ratio{pipeline="chembl_assay",run_type="backfill",integrity_type="consistent"}
+      values: 1+0x20
+    - series: bioetl_manifest_ledger_integrity_ratio{pipeline="chembl_assay",run_type="backfill",integrity_type="inconsistent"}
+      values: 0+0x20
+    promql_expr_test:
+    - expr: bioetl_control_plane_telemetry_missing_5m
+      eval_time: 10m
+      exp_samples:
+      - labels: '{__name__="bioetl_control_plane_telemetry_missing_5m",pipeline="chembl_assay",run_type="backfill"}'
+        value: 0
+  - name: missing-manifest_writes
+    interval: 1m
+    input_series:
+    - series: bioetl_workflow_pipeline_expected{pipeline="chembl_assay",run_type="backfill"}
+      values: 1+0x20
+    - series: bioetl_control_plane_ledger_appends_total{pipeline="chembl_assay",event_type="run_finished",status="success"}
+      values: 0+0x20
+    - series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="chembl_assay",run_type="backfill",risk_type="duplicate"}
+      values: 0+0x20
+    - series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="chembl_assay",run_type="backfill",risk_type="overwrite"}
+      values: 0+0x20
+    - series: bioetl_manifest_ledger_integrity_ratio{pipeline="chembl_assay",run_type="backfill",integrity_type="consistent"}
+      values: 1+0x20
+    - series: bioetl_manifest_ledger_integrity_ratio{pipeline="chembl_assay",run_type="backfill",integrity_type="inconsistent"}
+      values: 0+0x20
+    promql_expr_test:
+    - expr: bioetl_control_plane_telemetry_missing_5m
+      eval_time: 10m
+      exp_samples:
+      - labels: '{__name__="bioetl_control_plane_telemetry_missing_5m",pipeline="chembl_assay",run_type="backfill"}'
+        value: 1
+  - name: missing-ledger_appends
+    interval: 1m
+    input_series:
+    - series: bioetl_workflow_pipeline_expected{pipeline="chembl_assay",run_type="backfill"}
+      values: 1+0x20
+    - series: bioetl_control_plane_manifest_writes_total{pipeline="chembl_assay",run_type="backfill",status="success"}
+      values: 0+0x20
+    - series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="chembl_assay",run_type="backfill",risk_type="duplicate"}
+      values: 0+0x20
+    - series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="chembl_assay",run_type="backfill",risk_type="overwrite"}
+      values: 0+0x20
+    - series: bioetl_manifest_ledger_integrity_ratio{pipeline="chembl_assay",run_type="backfill",integrity_type="consistent"}
+      values: 1+0x20
+    - series: bioetl_manifest_ledger_integrity_ratio{pipeline="chembl_assay",run_type="backfill",integrity_type="inconsistent"}
+      values: 0+0x20
+    promql_expr_test:
+    - expr: bioetl_control_plane_telemetry_missing_5m
+      eval_time: 10m
+      exp_samples:
+      - labels: '{__name__="bioetl_control_plane_telemetry_missing_5m",pipeline="chembl_assay",run_type="backfill"}'
+        value: 1
+  - name: missing-risk_type="duplicate"
+    interval: 1m
+    input_series:
+    - series: bioetl_workflow_pipeline_expected{pipeline="chembl_assay",run_type="backfill"}
+      values: 1+0x20
+    - series: bioetl_control_plane_manifest_writes_total{pipeline="chembl_assay",run_type="backfill",status="success"}
+      values: 0+0x20
+    - series: bioetl_control_plane_ledger_appends_total{pipeline="chembl_assay",event_type="run_finished",status="success"}
+      values: 0+0x20
+    - series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="chembl_assay",run_type="backfill",risk_type="overwrite"}
+      values: 0+0x20
+    - series: bioetl_manifest_ledger_integrity_ratio{pipeline="chembl_assay",run_type="backfill",integrity_type="consistent"}
+      values: 1+0x20
+    - series: bioetl_manifest_ledger_integrity_ratio{pipeline="chembl_assay",run_type="backfill",integrity_type="inconsistent"}
+      values: 0+0x20
+    promql_expr_test:
+    - expr: bioetl_control_plane_telemetry_missing_5m
+      eval_time: 10m
+      exp_samples:
+      - labels: '{__name__="bioetl_control_plane_telemetry_missing_5m",pipeline="chembl_assay",run_type="backfill"}'
+        value: 1
+  - name: missing-risk_type="overwrite"
+    interval: 1m
+    input_series:
+    - series: bioetl_workflow_pipeline_expected{pipeline="chembl_assay",run_type="backfill"}
+      values: 1+0x20
+    - series: bioetl_control_plane_manifest_writes_total{pipeline="chembl_assay",run_type="backfill",status="success"}
+      values: 0+0x20
+    - series: bioetl_control_plane_ledger_appends_total{pipeline="chembl_assay",event_type="run_finished",status="success"}
+      values: 0+0x20
+    - series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="chembl_assay",run_type="backfill",risk_type="duplicate"}
+      values: 0+0x20
+    - series: bioetl_manifest_ledger_integrity_ratio{pipeline="chembl_assay",run_type="backfill",integrity_type="consistent"}
+      values: 1+0x20
+    - series: bioetl_manifest_ledger_integrity_ratio{pipeline="chembl_assay",run_type="backfill",integrity_type="inconsistent"}
+      values: 0+0x20
+    promql_expr_test:
+    - expr: bioetl_control_plane_telemetry_missing_5m
+      eval_time: 10m
+      exp_samples:
+      - labels: '{__name__="bioetl_control_plane_telemetry_missing_5m",pipeline="chembl_assay",run_type="backfill"}'
+        value: 1
+  - name: missing-integrity_type="consistent"
+    interval: 1m
+    input_series:
+    - series: bioetl_workflow_pipeline_expected{pipeline="chembl_assay",run_type="backfill"}
+      values: 1+0x20
+    - series: bioetl_control_plane_manifest_writes_total{pipeline="chembl_assay",run_type="backfill",status="success"}
+      values: 0+0x20
+    - series: bioetl_control_plane_ledger_appends_total{pipeline="chembl_assay",event_type="run_finished",status="success"}
+      values: 0+0x20
+    - series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="chembl_assay",run_type="backfill",risk_type="duplicate"}
+      values: 0+0x20
+    - series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="chembl_assay",run_type="backfill",risk_type="overwrite"}
+      values: 0+0x20
+    - series: bioetl_manifest_ledger_integrity_ratio{pipeline="chembl_assay",run_type="backfill",integrity_type="inconsistent"}
+      values: 0+0x20
+    promql_expr_test:
+    - expr: bioetl_control_plane_telemetry_missing_5m
+      eval_time: 10m
+      exp_samples:
+      - labels: '{__name__="bioetl_control_plane_telemetry_missing_5m",pipeline="chembl_assay",run_type="backfill"}'
+        value: 1
+  - name: missing-integrity_type="inconsistent"
+    interval: 1m
+    input_series:
+    - series: bioetl_workflow_pipeline_expected{pipeline="chembl_assay",run_type="backfill"}
+      values: 1+0x20
+    - series: bioetl_control_plane_manifest_writes_total{pipeline="chembl_assay",run_type="backfill",status="success"}
+      values: 0+0x20
+    - series: bioetl_control_plane_ledger_appends_total{pipeline="chembl_assay",event_type="run_finished",status="success"}
+      values: 0+0x20
+    - series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="chembl_assay",run_type="backfill",risk_type="duplicate"}
+      values: 0+0x20
+    - series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="chembl_assay",run_type="backfill",risk_type="overwrite"}
+      values: 0+0x20
+    - series: bioetl_manifest_ledger_integrity_ratio{pipeline="chembl_assay",run_type="backfill",integrity_type="consistent"}
+      values: 1+0x20
+    promql_expr_test:
+    - expr: bioetl_control_plane_telemetry_missing_5m
+      eval_time: 10m
+      exp_samples:
+      - labels: '{__name__="bioetl_control_plane_telemetry_missing_5m",pipeline="chembl_assay",run_type="backfill"}'
+        value: 1
+  - name: ledger-disappears-after-valid-zero
+    interval: 1m
+    input_series:
+    - series: bioetl_workflow_pipeline_expected{pipeline="chembl_assay",run_type="backfill"}
+      values: 1+0x20
+    - series: bioetl_control_plane_manifest_writes_total{pipeline="chembl_assay",run_type="backfill",status="success"}
+      values: 0+0x20
+    - series: bioetl_control_plane_ledger_appends_total{pipeline="chembl_assay",event_type="run_finished",status="success"}
+      values: 0+0x3 stale _x16
+    - series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="chembl_assay",run_type="backfill",risk_type="duplicate"}
+      values: 0+0x20
+    - series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="chembl_assay",run_type="backfill",risk_type="overwrite"}
+      values: 0+0x20
+    - series: bioetl_manifest_ledger_integrity_ratio{pipeline="chembl_assay",run_type="backfill",integrity_type="consistent"}
+      values: 1+0x20
+    - series: bioetl_manifest_ledger_integrity_ratio{pipeline="chembl_assay",run_type="backfill",integrity_type="inconsistent"}
+      values: 0+0x20
+    promql_expr_test:
+    - expr: bioetl_control_plane_telemetry_missing_5m
+      eval_time: 10m
+      exp_samples:
+      - labels: '{__name__="bioetl_control_plane_telemetry_missing_5m",pipeline="chembl_assay",run_type="backfill"}'
+        value: 1
+  - name: all-publication-lost-expectation-remains
+    interval: 1m
+    input_series:
+    - series: bioetl_workflow_pipeline_expected{pipeline="chembl_assay",run_type="backfill"}
+      values: 1+0x20
+    promql_expr_test:
+    - expr: bioetl_control_plane_telemetry_missing_5m
+      eval_time: 10m
+      exp_samples:
+      - labels: '{__name__="bioetl_control_plane_telemetry_missing_5m",pipeline="chembl_assay",run_type="backfill"}'
+        value: 4
+  - name: duplicate-scrape-sources-do-not-count-as-missing
+    interval: 1m
+    input_series:
+    - series: bioetl_workflow_pipeline_expected{pipeline="chembl_assay",run_type="backfill",job="bioetl"}
+      values: 1+0x20
+    - series: bioetl_workflow_pipeline_expected{pipeline="chembl_assay",run_type="backfill",job="pushgateway"}
+      values: 1+0x20
+    - series: bioetl_control_plane_manifest_writes_total{pipeline="chembl_assay",run_type="backfill",status="success",job="bioetl"}
+      values: 0+0x20
+    - series: bioetl_control_plane_manifest_writes_total{pipeline="chembl_assay",run_type="backfill",status="success",job="pushgateway"}
+      values: 0+0x20
+    - series: bioetl_control_plane_ledger_appends_total{pipeline="chembl_assay",event_type="run_finished",status="success",job="bioetl"}
+      values: 0+0x20
+    - series: bioetl_control_plane_ledger_appends_total{pipeline="chembl_assay",event_type="run_finished",status="success",job="pushgateway"}
+      values: 0+0x20
+    - series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="chembl_assay",run_type="backfill",risk_type="duplicate",job="bioetl"}
+      values: 0+0x20
+    - series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="chembl_assay",run_type="backfill",risk_type="duplicate",job="pushgateway"}
+      values: 0+0x20
+    - series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="chembl_assay",run_type="backfill",risk_type="overwrite",job="bioetl"}
+      values: 0+0x20
+    - series: bioetl_replay_duplicate_overwrite_risk_total{pipeline="chembl_assay",run_type="backfill",risk_type="overwrite",job="pushgateway"}
+      values: 0+0x20
+    - series: bioetl_manifest_ledger_integrity_ratio{pipeline="chembl_assay",run_type="backfill",integrity_type="consistent",job="bioetl"}
+      values: 1+0x20
+    - series: bioetl_manifest_ledger_integrity_ratio{pipeline="chembl_assay",run_type="backfill",integrity_type="consistent",job="pushgateway"}
+      values: 1+0x20
+    - series: bioetl_manifest_ledger_integrity_ratio{pipeline="chembl_assay",run_type="backfill",integrity_type="inconsistent",job="bioetl"}
+      values: 0+0x20
+    - series: bioetl_manifest_ledger_integrity_ratio{pipeline="chembl_assay",run_type="backfill",integrity_type="inconsistent",job="pushgateway"}
+      values: 0+0x20
+    promql_expr_test:
+    - expr: bioetl_control_plane_telemetry_missing_5m
+      eval_time: 10m
+      exp_samples:
+      - labels: '{__name__="bioetl_control_plane_telemetry_missing_5m",pipeline="chembl_assay",run_type="backfill"}'
+        value: 0

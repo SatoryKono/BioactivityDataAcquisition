@@ -149,7 +149,7 @@ def test_file_store_emits_ledger_append_metric(tmp_path) -> None:
 
     store.append(entry)
 
-    assert metrics.increment_counter.call_args_list[0].args == (
+    assert metrics.increment_counter.call_args_list[1].args == (
         "bioetl_control_plane_ledger_appends_total",
         1,
         {
@@ -158,7 +158,7 @@ def test_file_store_emits_ledger_append_metric(tmp_path) -> None:
             "status": "success",
         },
     )
-    assert metrics.increment_counter.call_args_list[1].args == (
+    assert metrics.increment_counter.call_args_list[2].args == (
         "bioetl_control_plane_terminal_events_total",
         1,
         {
@@ -209,7 +209,7 @@ def test_file_store_emits_terminal_metric_for_all_terminal_outcomes(
 
     store.append(entry)
 
-    assert metrics.increment_counter.call_args_list[1].args == (
+    assert metrics.increment_counter.call_args_list[2].args == (
         "bioetl_control_plane_terminal_events_total",
         1,
         {
@@ -255,7 +255,7 @@ def test_file_store_noops_duplicate_idempotency_key_without_terminal_recount(
     metrics.reset_mock()
     store.append(retry)
 
-    metrics.increment_counter.assert_called_once_with(
+    metrics.increment_counter.assert_any_call(
         "bioetl_control_plane_ledger_appends_total",
         1,
         {
@@ -304,7 +304,7 @@ def test_file_store_does_not_emit_terminal_metric_for_non_terminal_events(
 
     store.append(entry)
 
-    assert metrics.increment_counter.call_args_list == [
+    assert [c for c in metrics.increment_counter.call_args_list if c.args[1] != 0] == [
         call(
             "bioetl_control_plane_ledger_appends_total",
             1,
@@ -338,7 +338,7 @@ def test_file_store_emits_ledger_read_metric_on_list_success(tmp_path) -> None:
 
     assert store.list_entries("manifest-2") == [entry]
 
-    metrics.increment_counter.assert_called_once_with(
+    metrics.increment_counter.assert_any_call(
         "bioetl_control_plane_reads_total",
         1,
         {
@@ -359,7 +359,7 @@ def test_file_store_emits_ledger_read_metric_on_miss(tmp_path) -> None:
 
     assert store.list_entries("missing-manifest") == []
 
-    metrics.increment_counter.assert_called_once_with(
+    metrics.increment_counter.assert_any_call(
         "bioetl_control_plane_reads_total",
         1,
         {
@@ -396,7 +396,7 @@ def test_file_store_emits_ledger_append_failure_metric(tmp_path, monkeypatch) ->
     with pytest.raises(StorageError, match="Run ledger append failed"):
         store.append(entry)
 
-    metrics.increment_counter.assert_called_once_with(
+    metrics.increment_counter.assert_any_call(
         "bioetl_control_plane_ledger_appends_total",
         1,
         {

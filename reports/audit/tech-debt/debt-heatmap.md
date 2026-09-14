@@ -1,10 +1,12 @@
-# Debt heatmap
+# Debt heatmap (2026-09-14)
 
-Cycle-run: `20260827T0815Z-debt-new-1a46a2e394`. Дата: 2026-08-27.
-
-| Surface | Integrity | Freeze | Notes |
+| Zone | Signal | vs budget | Priority |
 | --- | --- | --- | --- |
-| gates | **OK** 45/45 after re-pin | — | was stale vs `1a46a2e394` |
-| supporting-scripts | **OK** max=0 | — | leftover 15 removed |
-| lazy/private/config | FREEZE at cap | P2 | no live drop this cycle |
-| hotspot fan-in | OK after #9741 | runtime_builders 3/3; core 6/7 | hold `#6032` headroom |
+| generated quality SSOT | remote-main pin lag | stale vs origin/main | P2 |
+| freeze cluster | lazy/private/config/fan-in | at cap | P2 |
+| hotspot leftover | factories/core/bootstrap slack | under (leftover) | P2 |
+| assertless yaml | 88 live vs 87 max | over yaml | P2 |
+| constructor / exemptions | 1 waiver; 0 metric exemptions | at | P3 |
+| typing suppressions | 83 type:ignore | unmanaged cluster | P3 |
+| xenon paths | 15 exemptions to 2026-12-31 | hold | P3 |
+| review calendar | shim 2026-10-21; lazy 2026-10-27 | upcoming | P3 |

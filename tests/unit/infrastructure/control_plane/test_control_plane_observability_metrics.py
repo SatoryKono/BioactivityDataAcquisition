@@ -49,6 +49,45 @@ from tests.helpers.deterministic_ids import deterministic_uuid_value
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize("with_ledger", [False, True])
+def test_terminal_publication_measures_persisted_integrity(tmp_path, with_ledger):
+    from types import SimpleNamespace
+
+    from prometheus_client import REGISTRY
+
+    from bioetl.composition.bootstrap.cli.metrics import (
+        refresh_control_plane_integrity_metrics,
+    )
+
+    root = tmp_path / "output" / "control"
+    manifest = _make_manifest()
+    FileRunManifestStore(base_path=root / "run_manifest").save(manifest)
+    if with_ledger:
+        FileRunLedgerStore(base_path=root / "run_ledger").append(
+            _make_ledger_entry(manifest)
+        )
+    refresh_control_plane_integrity_metrics(
+        SimpleNamespace(
+            data_dir=tmp_path, observability=SimpleNamespace(metrics_enabled=True)
+        )
+    )
+    for kind, expected in (
+        ("consistent", int(with_ledger)),
+        ("inconsistent", int(not with_ledger)),
+    ):
+        assert (
+            REGISTRY.get_sample_value(
+                "bioetl_manifest_ledger_integrity_ratio",
+                {
+                    "pipeline": manifest.pipeline_name,
+                    "run_type": "incremental",
+                    "integrity_type": kind,
+                },
+            )
+            == expected
+        )
+
+
 def _make_manifest(pipeline: str = "chembl_activity") -> RunManifest:
     now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
     return RunManifest(
@@ -104,8 +143,13 @@ def test_manifest_and_ledger_emit_control_plane_counters(tmp_path: Path) -> None
     ledger_entry = _make_ledger_entry(manifest)
     ledger_store.append(ledger_entry)
 
-    assert metrics.increment_counter.call_count == 2
-    manifest_call, ledger_call = metrics.increment_counter.call_args_list
+    assert metrics.increment_counter.call_count == 4
+    manifest_zero, manifest_call, ledger_zero, ledger_call = (
+        metrics.increment_counter.call_args_list
+    )
+    for measured_zero in (manifest_zero, ledger_zero):
+        assert measured_zero.args[1] == 0
+        assert measured_zero.args[2]["status"] == "failed"
 
     manifest_labels = manifest_call.args[2]
     assert manifest_call.args[0] == "bioetl_control_plane_manifest_writes_total"

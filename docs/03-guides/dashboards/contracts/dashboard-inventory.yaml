@@ -81,7 +81,7 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 46
+    panel_count: 47
     key_panels:
       - id: 9401
         title: Monitor Pipeline Status

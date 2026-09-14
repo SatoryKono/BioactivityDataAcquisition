@@ -1,4 +1,11 @@
 id,path,line,type,evidence,age,risk,blast_radius,effort,owner,priority
-AUD-TD-N-001,reports/quality/architecture-debt-remote-main-baseline.json,108,ci,remote-main pin 2caccbe446 -> 1a46a2e394 after #9741,2026-08-27,stale_release_gate,debt-governance-gates,S,@bioetl-architecture,P2
-AUD-TD-N-002,configs/quality/debt_scorecard.yaml,639,architecture,zero-ref supporting-scripts max_count 15->0 (live 0),2026-08-27,leftover_cap,scripts inventory gate,S,@bioetl-platform,P2
-AUD-TD-N-003,configs/quality/lazy_import_ratchet.yaml,5,architecture,freeze cluster lazy 97 private 15 config 27/419 assertless 87,linked_9727,change_cost,composition/application,L,@bioetl-architecture,P2
+AUD-TD-001,reports/quality/architecture-debt-remote-main-baseline.json,108,ci,remote-main pin 4aa9f5e7 vs origin/main 5c4243c9; gates 2465 vs inventory 2466,2026-09-14,stale_release_gate,debt-governance-gates,S,@bioetl-architecture,P2
+AUD-TD-002,configs/quality/lazy_import_ratchet.yaml,5,architecture,freeze lazy 77/77 private 15/15 config 27/419 fan-in 2+3 facades 4,linked_10303,change_cost,composition/application,L,@bioetl-architecture,P2
+AUD-TD-003,configs/quality/debt_scorecard.yaml,509,architecture,leftover factories files_ge_250_loc 2 vs live 0; core fan-in 7 vs 5,2026-09-14,leftover_cap,hotspot families,S,@bioetl-platform,P2
+AUD-TD-004,configs/quality/assertless_ratchet.yaml,5,tests,yaml max 87 vs live candidates 88; S9 max<=102 only,linked_9605,ratchet_gap,test-governance,M,@bioetl-architecture,P2
+AUD-TD-005,configs/quality/constructor_waivers.yaml,7,architecture,QuarantineEntry max_args=9 expiry 2026-12-31,ADR-051,local_freeze,domain aggregate,M,@bioetl-domain,P3
+AUD-TD-006,configs/quality/technical_debt_audit_registry.yaml,2,documentation,current audit SHA 09ab9ac vs origin/main 5c4243c9,2026-08-20,stale_register,total-tech-debt-audit,S,@bioetl-architecture,P3
+AUD-TD-007,reports/quality/debt-governance-gates.json,40,ci,budget_increase_count not_evaluated_without_changed_from_ref,2026-09-14,no_growth_proof_gap,scorecard freeze,S,@bioetl-architecture,P3
+AUD-TD-008,src/bioetl/interfaces/cli/commands/domains/health/_observability_backend_startup.py,124,code,83 type:ignore / 11 in health startup; 0 TODO/FIXME,2026-09-14,typing_suppression,CLI health,M,@bioetl-cli,P3
+AUD-TD-009,configs/quality/duplication_complexity_exemptions.yaml,14,architecture,15 xenon path exemptions expiry 2026-12-31,#5815,complexity_exemption,hot packages,L,@bioetl-architecture,P3
+AUD-TD-010,configs/quality/public_lazy_facade_inventory.yaml,5,architecture,lazy facades 52 review_by 2026-10-27; shims 2026-10-21,#6624,review_window,public API,S,@bioetl-architecture,P3

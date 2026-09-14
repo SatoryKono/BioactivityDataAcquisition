@@ -3,7 +3,7 @@
 import copy
 import json
 
-from scripts.ops.observability.grafana.apply_state_followup import (
+from scripts.ops.observability.grafana._dashboard_state_followup import (
     DASH,
     apply_dashboard,
     walk,
@@ -35,3 +35,20 @@ def test_full_evidence_tables_do_not_truncate_ranked_results():
             assert panels[full]["targets"][0]["withTransforms"] is False
             assert not any(t["id"] == "limit" for t in panels[full]["transformations"])
             assert panels[full]["options"]["footer"]["enablePagination"]
+
+
+def test_trust_measures_only_reasons_for_multiline_row_height():
+    dashboard = json.loads(
+        (DASH / "bioetl-control-plane-v1.json").read_text(encoding="utf-8")
+    )
+    panel = next(p for p in dashboard["panels"] if p["id"] == 9418)
+    wrapped = [
+        o["matcher"]["options"]
+        for o in panel["fieldConfig"]["overrides"]
+        if any(
+            p["id"] == "custom.cellOptions" and p["value"].get("wrapText")
+            for p in o["properties"]
+        )
+    ]
+    assert not wrapped
+    assert panel["fieldConfig"]["defaults"]["custom"]["cellOptions"]["wrapText"]

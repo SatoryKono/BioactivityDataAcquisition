@@ -81,3 +81,11 @@ tests:
     exp_samples:
     - labels: '{}'
       value: 2
+- name: provider-gap-link-preserves-literal-all
+  interval: 1m
+  promql_expr_test:
+  - expr: count(bioetl_incident_ranked_evidence{provider="unknown",action_scope="var-provider=$__all&viewPanel=9104"})
+    eval_time: 1m
+    exp_samples:
+    - labels: '{}'
+      value: 1

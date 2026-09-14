@@ -54,6 +54,7 @@ class BatchCheckpointRecoveryService:
         if checkpoint_interval <= 0 or records_fetched <= 0:
             return
         if records_fetched % checkpoint_interval != 0:
+            self._emit_checkpoint_save_event(operation="periodic", status="skipped")
             return
         total = self._total_processed(records_fetched, resume_offset)
         await self._save_checkpoint(total, operation="periodic")

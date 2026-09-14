@@ -751,3 +751,42 @@ class TestNoOpWithNoneMetrics:
 
         assert recorder._metrics is None
         assert results == (None, None, None, None, None)
+
+
+def test_batch_start_publishes_measured_quarantine_zero_without_reset(monkeypatch):
+    from prometheus_client import CollectorRegistry, Counter
+    from bioetl.infrastructure.observability.prometheus_metrics import (
+        COUNTERS,
+        PrometheusMetrics,
+    )
+
+    registry = CollectorRegistry()
+    metric = Counter(
+        "bioetl_dq_records_quarantined_total",
+        "Quarantine observations",
+        ["pipeline", "error_type", "run_type"],
+        registry=registry,
+    )
+    monkeypatch.setitem(COUNTERS, "bioetl_dq_records_quarantined_total", metric)
+    recorder = BatchMetricsRecorderService(
+        PrometheusMetrics(), "chembl_assay", "incremental"
+    )
+    recorder.begin_batch()
+    values = [
+        s.value
+        for family in registry.collect()
+        for s in family.samples
+        if s.name.endswith("_total")
+    ]
+    assert values and sum(values) == 0
+    recorder.track_quarantined_records(ErrorType.DATA_QUALITY, 3)
+    recorder.begin_batch()
+    assert (
+        sum(
+            s.value
+            for family in registry.collect()
+            for s in family.samples
+            if s.name.endswith("_total")
+        )
+        == 3
+    )

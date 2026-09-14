@@ -161,18 +161,9 @@ groups:
               (
                 (
                   bioetl_control_plane_run_type_universe
-                  unless on (pipeline, run_type)
-                  (
-                    bioetl_control_plane_run_type_universe
-                    * on (pipeline) group_left()
-                    (
-                      (
-                        sum by (pipeline) (
-                          count_over_time(bioetl_control_plane_ledger_appends_total[5m])
-                        ) > bool 0
-                      )
-                      or (max by (pipeline) (bioetl_control_plane_run_type_universe) * 0)
-                    )
+                  unless on (pipeline)
+                  sum by (pipeline) (
+                    count_over_time(bioetl_control_plane_ledger_appends_total[5m])
                   )
                 )
                 or (bioetl_control_plane_run_type_universe * 0)
@@ -184,8 +175,10 @@ groups:
                   unless on (pipeline, run_type)
                   (
                     count by (pipeline, run_type) (
-                      count_over_time(
-                        bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m]
+                      group by (pipeline, run_type, risk_type) (
+                        count_over_time(
+                          bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m]
+                        )
                       )
                     ) == 2
                   )
@@ -199,8 +192,10 @@ groups:
                   unless on (pipeline, run_type)
                   (
                     count by (pipeline, run_type) (
-                      count_over_time(
-                        bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m]
+                      group by (pipeline, run_type, integrity_type) (
+                        count_over_time(
+                          bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m]
+                        )
                       )
                     ) == 2
                   )
@@ -439,4 +434,3 @@ groups:
               )
             ) > bool 0.1
           )
-

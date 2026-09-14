@@ -141,6 +141,7 @@ class CheckpointRuntimeService:
             return None
 
         if not self._resume:
+            self._emit_checkpoint_load_status("skipped")
             return None
 
         checkpoint_data = await self._load_checkpoint_data()

@@ -67,6 +67,15 @@ def emit_ledger_append_metric(
         return
     metrics.increment_counter(
         "bioetl_control_plane_ledger_appends_total",
+        0,
+        {
+            "pipeline": pipeline,
+            "event_type": event_type,
+            "status": "failed" if status == "success" else "success",
+        },
+    )
+    metrics.increment_counter(
+        "bioetl_control_plane_ledger_appends_total",
         1,
         {
             "pipeline": pipeline,

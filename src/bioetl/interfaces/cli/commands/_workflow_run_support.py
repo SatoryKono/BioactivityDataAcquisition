@@ -32,23 +32,6 @@ from bioetl.interfaces.cli.formatters import echo_error
 _INVALID_OPTIONS_MSG = "Invalid options"
 
 
-_WORKFLOW_PUBLICATION_METRIC_NAMES = (
-    "bioetl_workflow_expected",
-    "bioetl_workflow_pipeline_expected",
-    "bioetl_workflow_runs",
-    "bioetl_workflow_runs_total",
-    "bioetl_workflow_runs_created",
-    "bioetl_workflow_current_status",
-    "bioetl_workflow_step_events",
-    "bioetl_workflow_step_events_total",
-    "bioetl_workflow_step_events_created",
-    "bioetl_workflow_step_duration_seconds",
-    "bioetl_workflow_step_duration_seconds_bucket",
-    "bioetl_workflow_step_duration_seconds_count",
-    "bioetl_workflow_step_duration_seconds_sum",
-    "bioetl_workflow_step_duration_seconds_created",
-)
-
 _WORKFLOW_PLANNED_PUBLICATION_METRIC_NAMES = (
     "bioetl_workflow_expected",
     "bioetl_workflow_pipeline_expected",
@@ -205,38 +188,31 @@ def _execute_workflow_and_publish_metrics(
             run_label="bioetl",
             metric_names=_WORKFLOW_PLANNED_PUBLICATION_METRIC_NAMES,
         )
-    result = asyncio.run(
-        workflow_execution_service.run_workflow(
-            config,
-            launch_context={"only_steps": list(parse_only_steps(only_steps) or ())},
-            resume_last=resume_last,
-            resume_manifest_id=resume_manifest_id,
-            resume_run_id=RunID(resume_run_id) if resume_run_id is not None else None,
-            force_steps=parsed_force_steps,
-            repair_steps=parsed_repair_steps,
-            incremental=incremental,
+    try:
+        return asyncio.run(
+            workflow_execution_service.run_workflow(
+                config,
+                launch_context={"only_steps": list(parse_only_steps(only_steps) or ())},
+                resume_last=resume_last,
+                resume_manifest_id=resume_manifest_id,
+                resume_run_id=RunID(resume_run_id)
+                if resume_run_id is not None
+                else None,
+                force_steps=parsed_force_steps,
+                repair_steps=parsed_repair_steps,
+                incremental=incremental,
+            )
         )
-    )
-    if not dry_run:
-        pipeline_name = _workflow_metrics_pipeline_name(config)
-        run_type = _workflow_metrics_run_type(config)
-        # Always publish the bounded workflow metric set (no high-cardinality
-        # workflow_run_id grouping — Pushgateway only allows pipeline/run_type).
-        publish_metrics_safely_fn(
-            run_label="bioetl",
-            pipeline_name=pipeline_name,
-            run_type=run_type,
-            metric_names=_WORKFLOW_PUBLICATION_METRIC_NAMES,
-        )
-        # Second push: full registry snapshot for pipeline-scoped run metrics when
-        # the workflow maps to a single pipeline (pipeline_runs_total, etc.).
-        if pipeline_name is not None:
+    finally:
+        if not dry_run:
+            # Workflow steps share this process registry. A restricted terminal
+            # PUT discards pipeline, control-plane, provider and DQ telemetry.
+            # Flush synchronously even on exceptions/cancellation before exit.
             publish_metrics_safely_fn(
                 run_label="bioetl",
-                pipeline_name=pipeline_name,
-                run_type=run_type,
+                pipeline_name=_workflow_metrics_pipeline_name(config),
+                run_type=_workflow_metrics_run_type(config),
             )
-    return result
 
 
 def _record_expected_pipeline_metrics(

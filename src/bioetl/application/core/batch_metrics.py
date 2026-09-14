@@ -16,10 +16,11 @@ from bioetl.application.core.batch_metrics_accounting import (
 from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
 from bioetl.domain.run_reports.context import get_stage_accounting
 from bioetl.domain.run_reports.models import StageId
+from bioetl.domain.types import ErrorType
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
-    from bioetl.domain.types import ErrorType, JsonDict
+    from bioetl.domain.types import JsonDict
 
 
 class BatchMetricsRecorderService:
@@ -59,6 +60,9 @@ class BatchMetricsRecorderService:
     def begin_batch(self) -> None:
         """Reset per-batch error accounting before transform/finalize."""
         self._batch_error_count = 0
+        for error_type in ErrorType:
+            if error_type.is_data_quality:
+                self.track_quarantined_records(error_type, 0)
 
     def track_batch_size(self, stage: str, size: int) -> None:
         """Record a batch-size histogram sample for one processing stage."""
