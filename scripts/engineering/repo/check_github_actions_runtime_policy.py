@@ -82,32 +82,39 @@ ALLOWED_USES: dict[str, set[str]] = {
     "github/codeql-action/init": {
         "db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28",  # v4.37.8
         "cdf488f595d80d6e07e03d4674febd5ab45fa938",  # v4.37.9
+        "b96794f015dfd88f77b49b1c93e0fa7110f94c63",  # v4.38.0
     },
     "github/codeql-action/analyze": {
         "db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28",  # v4.37.8
         "cdf488f595d80d6e07e03d4674febd5ab45fa938",  # v4.37.9
+        "b96794f015dfd88f77b49b1c93e0fa7110f94c63",  # v4.38.0
     },
     "github/codeql-action/upload-sarif": {
         "8dca8a82e2fa1a2c8908956f711300f9c4a4f4f6",  # v2 (docker.yml Trivy)
         "db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28",  # v4.37.8
         "cdf488f595d80d6e07e03d4674febd5ab45fa938",  # v4.37.9
+        "b96794f015dfd88f77b49b1c93e0fa7110f94c63",  # v4.38.0
     },
     "google/osv-scanner-action/osv-scanner-action": {
         "6e4298ebc4db23e847df9b2e2de2939d6f066c67",  # v2.5.1
     },
-    "hadolint/hadolint-action": {"2a66e89f53d0771bb131a7fa31f3136336094aa6"},
+    "hadolint/hadolint-action": {
+        "06be81baf89a55ffd0e24b8f04a4185738dd3387",  # v3.5.0
+    },
     "ossf/scorecard-action": {
         "2d1146689b8cda280b9bc96326124645441f03bc",  # v2.4.4
     },
     "pypa/gh-action-pypi-publish": {
         "dc37677b2e1c63e2034f94d8a5b11f265b73ba33",
     },
-    "softprops/action-gh-release": {"3d0d9888cb7fd7b750713d6e236d1fcb99157228"},
+    "softprops/action-gh-release": {
+        "efb35369e0ad2afab669f228072c1b0d510eae64",  # v3.0.3
+    },
     "wagoid/commitlint-github-action": {
         "f133a0d95090ef2609192b4a21f54e20af819ea9",
     },
     "zizmorcore/zizmor-action": {
-        "3dc1ecc9bcb9e94e9b2c709687979e1298497054",  # v0.6.2
+        "cc914d7f3750a2d13d75c7f184a1060aa0e9d482",  # v0.6.4
     },
 }
 
