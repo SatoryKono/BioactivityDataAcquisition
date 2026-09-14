@@ -1332,9 +1332,11 @@ def _write_if_changed(path: Path, content: str) -> bool:
     ):  # NOSONAR
         return False
     safe_path.parent.mkdir(parents=True, exist_ok=True)
-    safe_path.write_text(
+    tmp_path = safe_path.with_name(f"{safe_path.name}.tmp")
+    tmp_path.write_text(
         content, encoding="utf-8", newline="\n"
     )  # NOSONAR - confined by resolve_output_path
+    os.replace(tmp_path, safe_path)
     return True
 
 

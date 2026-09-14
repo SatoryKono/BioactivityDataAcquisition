@@ -7,9 +7,60 @@ source_of_truth:
   contract_root: tests/contract/
   integration_root: tests/integration/
   e2e_root: tests/e2e/
-  # Unit and architecture suppressions are not in this census.
-  # Unconditional @pytest.mark.skip is forbidden there by
+  # Unit suppressions are not in this census.
+  # Architecture Windows/WSL filesystem skips are inventoried in
+  # architecture_platform_skips (#10418). They use runtime skip/skipif, not
+  # unconditional @pytest.mark.skip. Unconditional skip remains forbidden by
   # tests/architecture/test_test_skip_inventory.py (#9130).
+architecture_platform_skips:
+  - path: tests/architecture/test_public_surface_importer_census_governance.py
+    suite: architecture
+    category: conditional_environment_guard
+    owner: "@bioetl-platform"
+    linked_issue: "#10418"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-09-14"
+    rationale: >
+      NTFS/WSL mounted-worktree git census times out locally. CI Linux remains
+      merge-truth; do not expand this skip.
+  - path: tests/architecture/test_public_facade_inventory.py
+    suite: architecture
+    category: conditional_environment_guard
+    owner: "@bioetl-platform"
+    linked_issue: "#10418"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-09-14"
+    rationale: >
+      NTFS/WSL mounted-worktree facade inventory times out locally. CI Linux
+      remains merge-truth; do not expand this skip.
+  - path: tests/architecture/test_domain_composite_config_importer_map.py
+    suite: architecture
+    category: conditional_environment_guard
+    owner: "@bioetl-platform"
+    linked_issue: "#10418"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-09-14"
+    rationale: >
+      NTFS/WSL mounted-worktree importer map times out locally. CI Linux remains
+      merge-truth; do not expand this skip.
+  - path: tests/architecture/test_diagram_drift_and_embed_guards.py
+    suite: architecture
+    category: conditional_environment_guard
+    owner: "@bioetl-platform"
+    linked_issue: "#10418"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-09-14"
+    rationale: >
+      NTFS/WSL mermaid/docs scan times out locally. CI Linux remains
+      merge-truth; do not expand this skip.
 allowed_categories:
   - conditional_environment_guard
   - git_diff_scope_guard

@@ -506,6 +506,7 @@ def test_file_artifact_lifecycle_uri_and_planned_bronze(tmp_path: Any) -> None:
         candidates,  # type: ignore[arg-type]
         issues,  # type: ignore[arg-type]
         bronze_root=bronze_root,
+        source_root=bronze_root,
         snapshot=SimpleNamespace(immutable_uri=None, snapshot_id="s1"),
         seen=set(),
     )
@@ -513,6 +514,7 @@ def test_file_artifact_lifecycle_uri_and_planned_bronze(tmp_path: Any) -> None:
         candidates,  # type: ignore[arg-type]
         issues,  # type: ignore[arg-type]
         bronze_root=bronze_root,
+        source_root=bronze_root,
         snapshot=SimpleNamespace(immutable_uri="s3://bucket/key", snapshot_id="s2"),
         seen=set(),
     )

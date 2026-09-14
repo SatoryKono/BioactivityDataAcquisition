@@ -1153,7 +1153,7 @@ class LegacyAdapter(BaseSyncAdapter):
 
 ```bash
 # Для разработки (полный набор)
-uv sync --extra dev --extra tests --extra tracing
+uv sync --extra dev --extra tests --extra tests_full --extra tracing
 uv run python -m scripts.ops setup-plugins
 
 # Только для запуска тестов (CI/lightweight)
@@ -1469,9 +1469,9 @@ async with services:  # --aenter-- инициализирует ресурсы
 
 1. **Randomness**: Модуль `random` **MUST NOT** использоваться в `infrastructure/storage` и других критических узлах записи. Используйте хэш-функции от входных данных или фиксированные константы.
 1. **Time Source**: `datetime.now()` **MUST NOT** вызываться в `domain` business-path и `infrastructure` слое по умолчанию. Канонический source-of-time seam для pipeline runtime — `domain/context.py` (`PipelineContext.started_at` / `_now_utc`). Все runtime timestamps (`_ingestion_ts`, `_processing_ts`, lifecycle timestamps aggregate'ов) **MUST** генерироваться в sanctioned seam/Application слое и передаваться вниз явными параметрами. Read-model вычисления длительности/возраста **MUST** использовать сохранённый terminal timestamp или explicit reference time, а не скрытый `now`. Реальные monitoring/audit exceptions допускаются только через явный allowlist в architecture tests.
-1. **Retry Jitter**: При `deterministic=True`, jitter **MUST** вычисляться детерминистично (на основе хэша попытки и URL). Реализация: `domain/resilience.py:RetryConfig.calculate-delay()` использует MD5-based jitter.
+1. **Retry Jitter**: При `deterministic=True`, jitter **MUST** вычисляться детерминистично (на основе хэша попытки и URL). Реализация: `src/bioetl/domain/resilience.py` (`RetryConfig.calculate_delay`) использует MD5-based jitter.
 1. **Ordering**: Запись в Delta Lake **MUST** происходить после сортировки данных по Primary Keys (Silver) или Business Keys (Gold).
-1. **Content Hash**: Исключать из расчёта хэша технические мета-поля. Canonical policy: см. `docs/02-architecture/policies/content-hash-identity-policy.md`; поля с префиксом `_` исключаются из identity/hash (включая `_ingestion_ts`, `_run_id`, `_run_type`, `_source_batch_id`, `_index`, `_dq_*`, `_lookup_method`, `_original_id`, `_source`). Реализация: `domain/constants.py:META_FIELDS` + `domain/transformations.py:_should_include_field()`. Для общей программы нормализации RunManifest / RunLedger / runtime anchors / ChemBL Activity см. `docs/05-engineering/normalization_plan_P0_P6.md`.
+1. **Content Hash**: Исключать из расчёта хэша технические мета-поля. Canonical policy: см. `docs/02-architecture/policies/content-hash-identity-policy.md`; поля с префиксом `_` исключаются из identity/hash (включая `_ingestion_ts`, `_run_id`, `_run_type`, `_source_batch_id`, `_index`, `_dq_*`, `_lookup_method`, `_original_id`, `_source`). Реализация: `domain/constants.py:META_FIELDS` + `src/bioetl/domain/transformations/hashing.py` (`_should_include_field`). Для общей программы нормализации RunManifest / RunLedger / runtime anchors / ChemBL Activity см. archived `docs/99-archive/engineering/normalization_plan_P0_P6.md`.
 
 #### Архитектурные Тесты Детерминизма
 
@@ -1808,7 +1808,7 @@ Silent breaking changes запрещены. Qodo repository configuration так
 ### 9.1. Локальная настройка
 
 ```bash
-uv sync --extra dev --extra tests --extra tracing
+uv sync --extra dev --extra tests --extra tests_full --extra tracing
 uv run python -m scripts.ops setup-plugins
 uv run python -m scripts.engineering.dev run-tests cov
 uv run ruff check .

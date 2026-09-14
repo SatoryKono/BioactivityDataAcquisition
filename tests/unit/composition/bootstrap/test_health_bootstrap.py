@@ -329,7 +329,6 @@ class TestBootstrapHealthServerDependencies:
 def test_diagnostic_probe_persists_measured_health_without_recounting(
     tmp_path, status, value
 ):
-    from datetime import UTC, datetime
     from bioetl.application.services.ops.health_service import HealthResult
     from bioetl.composition.bootstrap.assembly.health_service import (
         _HealthCheckDataSourceFactory,
@@ -338,15 +337,22 @@ def test_diagnostic_probe_persists_measured_health_without_recounting(
         FileProviderHealthEvidenceStore,
     )
     from tests.fakes.metrics_fake import RecordingMetrics
+    from tests.helpers.clock import FIXED_TEST_TIME, FixedClock
 
-    now = datetime.now(UTC)
+    now = FIXED_TEST_TIME
     metrics = RecordingMetrics()
     factory = _HealthCheckDataSourceFactory(
         logger=NoOpLogger(), metrics=metrics, settings=MagicMock()
     )
-    with patch(
-        "bioetl.composition.bootstrap.assembly.health_service.control_plane_root",
-        return_value=tmp_path,
+    with (
+        patch(
+            "bioetl.composition.bootstrap.assembly.health_service.control_plane_root",
+            return_value=tmp_path,
+        ),
+        patch(
+            "bioetl.composition.bootstrap.assembly.health_service.SystemClock",
+            return_value=FixedClock(now),
+        ),
     ):
         factory.record_health_result(
             HealthResult(

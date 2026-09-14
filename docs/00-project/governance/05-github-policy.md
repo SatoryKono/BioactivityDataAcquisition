@@ -276,6 +276,23 @@ The GitHub-required context for repository ruleset `main` (13643213) is exactly:
 | --- | --- | --- |
 | `pr-gate-complete` | pr-required.yml job `name: pr-gate-complete` | Always-materialized fail-closed aggregator; docs-only PRs emit SHA-bound N/A for path-scoped owners instead of Pending |
 
+### PR satellites (GHA-017)
+
+These workflows may still run on `pull_request` but are **not** GitHub-required
+and are **not** `pr-gate-complete` owners. Do not add them to ruleset 13643213
+or `configs/quality/github_required_checks.yaml`.
+
+| Workflow | Why it stays a satellite |
+| --- | --- |
+| `branch-hygiene.yml` | Advisory branch-name / hygiene; coordinator does not require it |
+| `dashboard-first-window-noscroll.yml` | DASH-FIT-004 first-window no-scroll; path-unfiltered, not merge wall |
+| `e2e-matrix-health.yml` | Advisory/nightly `e2e-smoke` and matrix health (#10412 variant B) |
+| `dependency-review.yml` | GitHub Dependency review; keep enabled, not a required context |
+| `zizmor.yml` | Static Actions audit; keep enabled, not a required context |
+
+`e2e-smoke` remains a serial test-matrix lane. It is not PR-blocking and must
+not be added to the merge wall.
+
 Legacy contexts `checks-complete` and `root-hygiene` remain saved only on disabled
 ruleset `15730586`. Leaf workflows no longer own direct PR triggers after the
 atomic #9975 owner cutover. Every PR targeting `main` materializes
@@ -339,7 +356,7 @@ independent unconditional GitHub required checks; their results are consumed by 
 | Surface | Name | Markers / command | GitHub required? |
 | --- | --- | --- | --- |
 | Pre-commit hook (manual) | `architecture-full` | `pytest tests/architecture/ -m "not slow and not benchmark and not memory"` | No (local `stages: [manual]`) |
-| CI job | `arch-tests` in `import-linter.yml` | same markers | Yes, as part of `checks-complete` in the active ruleset |
+| CI job | `arch-tests` in `import-linter.yml` | same markers | Yes, via `pr-gate-complete` (not a leaf required context) |
 | `test_matrix` lane | `architecture` | same `marker_expression` | No |
 | IDE daily | `pytest-architecture` | `architecture and not slow and not benchmark and not memory` | No |
 | IDE / local slow | `pytest-architecture-slow-governance` | `architecture and not benchmark and not memory` (includes slow) | No |
@@ -698,7 +715,8 @@ current `main` branch SHA and fails closed if the approved run no longer matches
 `main`, preventing stale `:${{ github.ref_name }}` publication.
 | `id-token: write` | release.yml build provenance and PyPI trusted publishing; docker.yml protected `docker-push` provenance |
 | `attestations: write` | release.yml `build` for `dist/*`; docker.yml `docker-push` for the published manifest digest |
-| `issues: write`          | contract-tests.yml (auto-create issue on failure) |
+| `issues: write`          | contract-tests.yml (auto-create issue on failure); memory-freshness.yml `open-review-issue`; diagram-nightly.yml `nightly-phase2`; stale.yml; pr-hygiene.yml |
+| `pull-requests: write`   | stale.yml; pr-hygiene.yml; labeler.yml |
 
 Live publishing/deployment environment controls (API-verified 2026-08-30):
 
@@ -732,8 +750,8 @@ All PR-triggered workflows use concurrency groups to cancel outdated runs:
 
 ```yaml
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 ```
 
 Required push workflows on `main` (Tests, Lint and Architecture Gates, CodeQL)

@@ -23,15 +23,15 @@ This document is the single canonical policy for determining which fields affect
 Cross-reference:
 
 - RULES.md §2.8.1, §6.1
-- `docs/05-engineering/normalization_plan_P0_P6.md`
+- `docs/02-architecture/policies/content-hash-identity-policy.md`
 - ADR-014 (determinism context)
 - `src/bioetl/domain/constants.py` (`META_FIELDS`)
 - `src/bioetl/domain/transformations/hashing.py` (`_should_include_field`)
 
 This policy remains the canonical contract for `content_hash` field inclusion.
 The broader normalization rollout across RunManifest, RunLedger, runtime
-anchors, and ChemBL Activity is coordinated by
-`docs/05-engineering/normalization_plan_P0_P6.md`.
+anchors, and ChemBL Activity is coordinated by archived
+`docs/99-archive/engineering/normalization_plan_P0_P6.md`.
 
 ## Canonical Rule
 

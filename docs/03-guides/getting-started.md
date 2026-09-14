@@ -126,7 +126,7 @@ On Windows without `make` or `uv`, use the repository Python 3.12 baseline:
 ```powershell
 py -3.12 -m venv .venv-win
 .\.venv-win\Scripts\Activate.ps1
-pip install -e ".[dev,tests,tests_full,export]"
+pip install -e ".[dev,tests,tests_full,export,docs]"
 ```
 
 For the supported aggregate setup flow, use `make install`, `make test-deps`,

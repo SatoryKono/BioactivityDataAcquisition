@@ -11,7 +11,7 @@ shape versus where profile/domain canonicalization is the primary guardrail.
 Related:
 - `src/bioetl/domain/normalization/reference_ids.py`
 - `src/bioetl/domain/normalization/_reference_id_registry.py`
-- `docs/05-engineering/normalization_plan_P0_P6.md`
+- `docs/99-archive/engineering/normalization_plan_P0_P6.md` (archived)
 
 DQ alignment:
 - scalar identifiers like `doi`, `pmid`, `pmcid`, `mesh`, `ncbi_taxonomy`,

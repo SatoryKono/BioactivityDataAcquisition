@@ -594,7 +594,7 @@ class TestPushMetricsToGateway:
         with patch(
             "bioetl.infrastructure.observability.server.push_to_gateway"
         ) as mock_push:
-            push_metrics_to_gateway()
+            push_metrics_to_gateway(grouping_key={"pipeline": "chembl_activity"})
 
         call_kwargs = mock_push.call_args[1]
         assert call_kwargs["job"] == "bioetl"

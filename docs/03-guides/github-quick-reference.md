@@ -57,23 +57,27 @@ gh run list --limit 10
 
 ## CI Checks - Критичные
 
+GitHub-required merge wall is exactly `pr-gate-complete`. Leaf jobs below are
+aggregator inputs, not independent required contexts.
+
 | Check | Что проверяет |
 |-------|--------------|
-| `checks-complete` | lint + C901 + arch tests |
-| `coverage-verify` | 85% coverage |
-| `type-check` | mypy strict |
-| `schema-governance-status` | schema parity |
-| `detect-secrets` | no credentials |
-| `commit-lint` | Conventional Commits |
+| `pr-gate-complete` | fail-closed aggregator (GitHub required) |
+| `checks-complete` | lint + C901 + arch tests (leaf) |
+| `coverage-verify` | 85% coverage (leaf) |
+| `type-check` | mypy strict (leaf) |
+| `schema-governance-status` | schema parity (leaf) |
+| `detect-secrets` | no credentials (leaf) |
+| `commit-lint` | Conventional Commits (leaf) |
 
 ## CI Troubleshooting
 
-**Падает `checks-complete`?**
+**Падает `pr-gate-complete`?**
 ```bash
 # Смотрим в порядке:
-1. lint job logs
-2. c901-governance logs
-3. arch-tests logs
+1. coordinator classification / owner N/A evidence
+2. lint / c901-governance / arch-tests (checks-complete leaf)
+3. coverage-verify, type-check, schema, secrets, root-hygiene
 ```
 
 **Падает много jobs сразу?**
@@ -118,7 +122,9 @@ docs: update github workflow guide
 # 2. Update CHANGELOG.md
 git commit -m "chore(release): bump version to 6.2.0"
 git tag -a v6.2.0 -m "Release v6.2.0"
-git push origin main --tags
+git push origin HEAD
+# After the release PR merges to main, push the annotated tag only:
+git push origin v6.2.0
 gh release create v6.2.0 --title "v6.2.0" --notes-file CHANGELOG.md
 ```
 

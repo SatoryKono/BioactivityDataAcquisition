@@ -303,6 +303,7 @@
         "docs/05-operations/deployment/mcp-neo4j-memory-summary.md",
         "docs/05-operations/deployment/neo4j-memory-setup.md",
         "docs/05-operations/lock-contention-resolution.md",
+        "docs/05-operations/monitoring-architecture.md",
         "docs/05-operations/performance-baselines.md",
         "docs/05-operations/performance-tuning.md",
         "docs/05-operations/runbooks/backfill-rebuild.md",

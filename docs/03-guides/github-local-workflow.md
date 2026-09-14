@@ -251,7 +251,9 @@ Examples:
 
 ## Required PR checks
 
-The main blocking checks called out by repository policy are:
+GitHub-required merge wall is exactly `pr-gate-complete`
+(`.github/workflows/pr-required.yml`). Leaf jobs consumed by the aggregator
+include:
 
 - `checks-complete`
 - `coverage-verify`
@@ -259,6 +261,8 @@ The main blocking checks called out by repository policy are:
 - `detect-secrets`
 - `commit-lint`
 - `type-check`
+
+Do not treat those leaf names as independent GitHub required contexts.
 
 ## Cleanup workflow
 

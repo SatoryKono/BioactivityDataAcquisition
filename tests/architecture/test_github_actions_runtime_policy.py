@@ -698,6 +698,8 @@ _WRITE_PERMISSION_KEYS = (
     "contents",
     "id-token",
     "security-events",
+    "issues",
+    "pull-requests",
 )
 
 

@@ -8,9 +8,9 @@
 git clone <repo-url>
 cd BioactivityDataAcquisition
 git remote -v
-uv sync --extra dev --extra tests --extra tracing
+uv sync --extra dev --extra tests --extra tests_full --extra tracing
 # Windows/.venv-win fallback (see scripts/engineering/dev/setup_env_windows.ps1):
-# .venv-win/Scripts/python.exe -m pip install -e ".[dev,tests,tracing]"
+# .venv-win/Scripts/python.exe -m pip install -e ".[dev,tests,tests_full,tracing]"
 
 # 2. Run checks before any changes
 make lint && make test
@@ -23,15 +23,15 @@ make lint && make test && git commit
 
 Before contributing, read these documents:
 
-|| Document                                                           | Purpose                           |
-|| ------------------------------------------------------------------ | --------------------------------- |
-|| [docs/00-project/NORMATIVE_SOURCES.md](../docs/00-project/NORMATIVE_SOURCES.md) | Normative stack index (start here) |
-|| [docs/00-project/RULES.md](../docs/00-project/RULES.md)            | Project constitution (MUST read)  |
-|| [docs/01-requirements/REQUIREMENTS.md](../docs/01-requirements/REQUIREMENTS.md) | Testable requirements (MUST read) |
-|| [AGENTS.md](../AGENTS.md)                                          | Development workflow and patterns |
-|| [docs/00-project/00-map.md](../docs/00-project/00-map.md)          | Documentation navigator           |
-|| [GitHub Policy](../docs/00-project/governance/05-github-policy.md) | CI/CD, branch protection, reviews |
-|| [GitHub Label Taxonomy](../docs/00-project/governance/github-label-taxonomy.md) | Labels, issue intake, Wiki ownership |
+| Document                                                           | Purpose                           |
+| ------------------------------------------------------------------ | --------------------------------- |
+| [docs/00-project/NORMATIVE_SOURCES.md](../docs/00-project/NORMATIVE_SOURCES.md) | Normative stack index (start here) |
+| [docs/00-project/RULES.md](../docs/00-project/RULES.md)            | Project constitution (MUST read)  |
+| [docs/01-requirements/REQUIREMENTS.md](../docs/01-requirements/REQUIREMENTS.md) | Testable requirements (MUST read) |
+| [AGENTS.md](../AGENTS.md)                                          | Development workflow and patterns |
+| [docs/00-project/00-map.md](../docs/00-project/00-map.md)          | Documentation navigator           |
+| [GitHub Policy](../docs/00-project/governance/05-github-policy.md) | CI/CD, branch protection, reviews |
+| [GitHub Label Taxonomy](../docs/00-project/governance/github-label-taxonomy.md) | Labels, issue intake, Wiki ownership |
 
 ## Workflow
 
@@ -79,13 +79,13 @@ For the full local GitHub workflow, including worktrees, sync/rebase, PR creatio
 
 ### Layer Dependencies (MUST follow)
 
-|| From ↓ / To →      | domain | application | composition | infrastructure | interfaces |
-|| ------------------ | ------ | ----------- | ----------- | -------------- | ---------- |
-|| **domain**         | ✅     | ❌          | ❌          | ❌             | ❌         |
-|| **application**    | ✅     | ✅          | ❌          | ❌             | ❌         |
-|| **composition**    | ✅     | ✅          | ✅          | ✅             | ❌         |
-|| **infrastructure** | ✅     | ❌          | ❌          | ✅             | ❌         |
-|| **interfaces**     | ✅     | ✅          | ✅          | ❌             | ✅         |
+| From ↓ / To →      | domain | application | composition | infrastructure | interfaces |
+| ------------------ | ------ | ----------- | ----------- | -------------- | ---------- |
+| **domain**         | ✅     | ❌          | ❌          | ❌             | ❌         |
+| **application**    | ✅     | ✅          | ❌          | ❌             | ❌         |
+| **composition**    | ✅     | ✅          | ✅          | ✅             | ❌         |
+| **infrastructure** | ✅     | ❌          | ❌          | ✅             | ❌         |
+| **interfaces**     | ✅     | ✅          | ✅          | ❌             | ✅         |
 
 ### Key Rules
 
@@ -102,11 +102,11 @@ instead of importing infrastructure modules directly.
 
 ## Testing Requirements
 
-|| Type         | Directory             | Requirements                                           |
-|| ------------ | --------------------- | ------------------------------------------------------ |
-|| Unit         | `tests/unit/`         | No mocking domain entities, mock ports only            |
-|| Integration  | `tests/integration/`  | VCR.py for HTTP, sanitize secrets from cassettes       |
-|| Architecture | `tests/architecture/` | Validates layer imports, contracts, naming, governance |
+| Type         | Directory             | Requirements                                           |
+| ------------ | --------------------- | ------------------------------------------------------ |
+| Unit         | `tests/unit/`         | No mocking domain entities, mock ports only            |
+| Integration  | `tests/integration/`  | VCR.py for HTTP, sanitize secrets from cassettes       |
+| Architecture | `tests/architecture/` | Validates layer imports, contracts, naming, governance |
 
 **Coverage target:** ≥85% line coverage
 
@@ -117,23 +117,20 @@ rules and local/CI command paths, is documented in
 
 ## Branch Protection / PR Validation
 
-Direct merges to `main` are currently allowed. When you open a PR, keep these
-checks green even though GitHub branch protection is not currently enforcing
-them:
+Do not push or merge directly to `main`. GitHub ruleset `main` (13643213)
+enforces exactly one required status context:
 
-- `checks-complete` (from `.github/workflows/import-linter.yml` — lint, C901 governance, import-linter + architecture gates)
-- `coverage-verify` (from `.github/workflows/tests.yml` — 85% coverage threshold)
-- `type-check` (from `.github/workflows/type-checking.yml` — mypy strict compliance)
-- `Schema Governance Status` (from `.github/workflows/schema-governance.yml`)
-- `detect-secrets` (from `.github/workflows/security.yml`)
-- `root-hygiene` (from `.github/workflows/root-hygiene.yml` — root allowlist, docs/plans catalog, and generated artifact bans)
+- `pr-gate-complete` (from `.github/workflows/pr-required.yml`) — fail-closed
+  aggregator. Keep this green before merge.
 
-These checks still reduce the risk of merging failing tests, lint errors, or
-secret leaks.
+Leaf jobs such as `checks-complete`, `coverage-verify`, `type-check`,
+schema governance, `detect-secrets`, and `root-hygiene` are consumed by the
+aggregator. They are not independent GitHub-required contexts. Docs-only PRs
+still materialize `pr-gate-complete`; path-scoped owners emit SHA-bound N/A
+instead of leaving extra required checks Pending.
 
-`checks-complete` is intentionally non-skippable: `.github/workflows/import-linter.yml`
-must materialize on every PR and push, including docs-only or markdown-only
-changesets.
+`import-linter.yml` still emits `checks-complete` on coordinator-owned runs;
+that leaf name is not the merge wall.
 
 ### Import-linter local repro
 

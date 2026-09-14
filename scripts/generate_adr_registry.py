@@ -36,14 +36,42 @@ Raises:
 """
 
 import json
+import os
 import re
+import subprocess
 import sys
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TypedDict
 
 import yaml
+
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+
+
+def _registry_now() -> datetime:
+    """Deterministic stamp for tracked ADR registry output (#10422)."""
+    raw = os.environ.get("SOURCE_DATE_EPOCH")
+    if raw:
+        return datetime.fromtimestamp(int(raw), tz=UTC)
+    result = subprocess.run(
+        [
+            "git",
+            "log",
+            "-1",
+            "--format=%ct",
+            "--",
+            "docs/02-architecture/decisions",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        cwd=_REPO_ROOT,
+    )
+    if result.returncode == 0 and result.stdout.strip().isdigit():
+        return datetime.fromtimestamp(int(result.stdout.strip()), tz=UTC)
+    return datetime.fromtimestamp(0, tz=UTC)
 
 
 class ADRJsonRegistryEntry(TypedDict):
@@ -541,7 +569,7 @@ class ADRRegistryGenerator:
         )
         lines.append("")
         lines.append(f"**Total ADRs**: {len(self.adrs)}")
-        lines.append(f"**Last Updated**: {datetime.now().strftime('%Y-%m-%d')}")
+        lines.append(f"**Last Updated**: {_registry_now().strftime('%Y-%m-%d')}")
         lines.append("")
         self._append_status_summary(lines, status_groups)
         self._append_status_sections(
@@ -695,7 +723,7 @@ class ADRRegistryGenerator:
         lines.append("Quick overview of ADR status and distribution.")
         lines.append("")
         lines.append(
-            f"**Last Updated**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            f"**Last Updated**: {_registry_now().strftime('%Y-%m-%d %H:%M:%S')}"
         )
         lines.append("")
 
@@ -798,7 +826,7 @@ class ADRRegistryGenerator:
             category_counts[adr.category] = category_counts.get(adr.category, 0) + 1
 
         return {
-            "generated": datetime.now().isoformat(),
+            "generated": _registry_now().isoformat(),
             "total_adrs": len(self.adrs),
             "adrs": adrs,
             "stats": {

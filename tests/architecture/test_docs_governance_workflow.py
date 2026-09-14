@@ -66,7 +66,7 @@ def test_docs_workflow_runs_lightweight_docs_governance_profile() -> None:
 
     assert "docs-governance:" in workflow
     assert "fetch-depth: 0" in workflow
-    assert "generate_package_family_class_diagrams.py --check" in workflow
+    assert "generate_package_family_class_diagrams.py --check" not in workflow
     assert "Run docs-governance architecture tests" in workflow
     assert "validate-mkdocs:\n    needs: docs-governance" in workflow
     assert "'grafana/README.md'" in workflow
