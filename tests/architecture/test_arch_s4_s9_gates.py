@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import json
 from collections import Counter
 from pathlib import Path
 
@@ -208,8 +209,12 @@ def test_s9_assertless_ratchet_and_expiry_dispersion() -> None:
     )
     max_assertless = int(assertless["max_assertless_tests"])
     assert max_assertless <= 102
-    live = load_quality_json("test-governance-current.json")
-    live_count = len(live["assertless_candidates"])
+    live_payload = json.loads(
+        (ROOT / "reports/quality/test-governance-current.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    live_count = len(live_payload["assertless_candidates"])
     assert live_count <= max_assertless
     policy = yaml.safe_load(
         (ROOT / "configs/quality/layered_suffix_policy.yaml").read_text(
