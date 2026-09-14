@@ -25,18 +25,18 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2466,
+        "source_module_count": 2471,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
       "name": "DDD / aggregates / invariants",
-      "score": 10.0,
+      "score": 7.8,
       "weight": 0.09,
-      "weighted_score": 0.9
+      "weighted_score": 0.702
     },
     {
       "evidence_metrics": {
-        "composition_util": 0.9833,
+        "composition_util": 0.9867,
         "layer_violations": 0,
         "lazy_util": 1.0649,
         "public_entrypoint_growth_count": 0,
@@ -78,25 +78,25 @@
       "evidence_metrics": {
         "compatibility_test_file_count": 0,
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 0
+        "unmeasured_module_count": 3
       },
       "id": "test_strategy_testability",
       "name": "Test strategy / testability",
-      "score": 10.0,
+      "score": 5.5,
       "weight": 0.12,
-      "weighted_score": 1.2
+      "weighted_score": 0.66
     },
     {
       "evidence_metrics": {
-        "adr_enforcement_blocking_gap_count": 0,
+        "adr_enforcement_blocking_gap_count": 1,
         "contract_blocking_issue_count": 0,
         "dq_blocking_issue_count": 0
       },
       "id": "config_contracts_entrypoints",
       "name": "Config / contracts / entrypoints",
-      "score": 10.0,
+      "score": 8.5,
       "weight": 0.09,
-      "weighted_score": 0.9
+      "weighted_score": 0.765
     },
     {
       "evidence_metrics": {
@@ -115,7 +115,7 @@
     },
     {
       "evidence_metrics": {
-        "composition_util": 0.9833,
+        "composition_util": 0.9867,
         "expired_compat_count": 0,
         "hotspot_budget_warning_count": 0,
         "public_entrypoint_growth_count": 0,
@@ -168,8 +168,8 @@
   },
   "diagnostics": {
     "composition_module_cap": 300,
-    "composition_module_count": 295,
-    "composition_util": 0.9833,
+    "composition_module_count": 296,
+    "composition_util": 0.9867,
     "families_at_budget": [
       "application_services_control_plane",
       "composition_runtime_builders"
@@ -186,16 +186,16 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.14,
-  "interpretation": "good_targeted_improvements",
+  "integral_score": 8.27,
+  "interpretation": "satisfactory_system_refactoring_required",
   "metrics": {
     "accepted_adr_count": 58,
-    "adr_enforcement_blocking_gap_count": 0,
+    "adr_enforcement_blocking_gap_count": 1,
     "adr_enforcement_manual_exception_count": 0,
     "compatibility_test_file_count": 0,
     "composition_module_cap": 300,
-    "composition_module_count": 295,
-    "composition_util": 0.9833,
+    "composition_module_count": 296,
+    "composition_util": 0.9867,
     "contract_blocking_issue_count": 0,
     "dashboarded_without_declaration_count": 0,
     "dashboarded_without_emission_count": 0,
@@ -220,19 +220,19 @@
     "retained_public_export_facade_count": 4,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2466,
+    "source_module_count": 2471,
     "sunset_compat_count": 0,
     "total_duplicate_clusters": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 0
+    "unmeasured_module_count": 3
   },
   "schema_version": 2,
   "source_artifacts": {
     "adr_enforcement_matrix": {
       "accepted_adr_count": 58,
-      "blocking_gap_count": 0,
+      "blocking_gap_count": 1,
       "generated_artifact": "reports/quality/adr-enforcement-matrix.json",
       "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload"
     },
@@ -275,7 +275,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "7184937818099a4c3d38b8fe4bd91613c81562af068ac278d680b5aba09c99e9",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "03313339de088cdf66307a44dc01b899ac1e59461beb709442a84bbae9cbcbd3"
+      "source_tree_sha256": "28e8fcb63a7714254474ff117b820f8318afa1a974f5ceb40ff7934de5a2ae74"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

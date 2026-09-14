@@ -79,3 +79,24 @@ def test_integrity_refresh_cannot_erase_an_unexecuted_scope() -> None:
         job == "bioetl_control_plane" and group.get("run_type") == "backfill"
         for job, group, _ in snapshots
     )
+
+
+def test_provider_observations_survive_unrelated_pipeline_publication() -> None:
+    groups = {}
+    for provider, status in (("chembl", 1), ("pubmed", 2)):
+        registry = CollectorRegistry()
+        Gauge(
+            "bioetl_provider_health_status",
+            "Measured health",
+            ["provider"],
+            registry=registry,
+        ).labels(provider).set(status)
+        for job, group, snapshot in partition_snapshots(registry, job="bioetl"):
+            groups[(job, tuple(group.items()))] = snapshot
+    for job, group, snapshot in partition_snapshots(
+        _registry("backfill"), job="bioetl"
+    ):
+        groups[(job, tuple(group.items()))] = snapshot
+    text = b"".join(generate_latest(snapshot) for snapshot in groups.values())
+    assert b'bioetl_provider_health_status{provider="chembl"} 1.0' in text
+    assert b'bioetl_provider_health_status{provider="pubmed"} 2.0' in text

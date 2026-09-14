@@ -428,9 +428,8 @@ def test_get_metrics_operator_profile_reports_enabled_and_disabled_modes() -> No
             "bioetl.composition.runtime_builders.config_access.get_settings",
             return_value=enabled_settings,
         ),
-        mock.patch.object(
-            observability_api,
-            "get_metrics_service",
+        mock.patch(
+            "bioetl.composition._services.get_metrics_service",
             return_value=metrics_service,
         ),
     ):
@@ -464,9 +463,8 @@ def test_get_metrics_operator_profile_reports_enabled_and_disabled_modes() -> No
             "bioetl.composition.runtime_builders.config_access.get_settings",
             return_value=disabled_settings,
         ),
-        mock.patch.object(
-            observability_api,
-            "get_metrics_service",
+        mock.patch(
+            "bioetl.composition._services.get_metrics_service",
             return_value=metrics_service,
         ),
     ):

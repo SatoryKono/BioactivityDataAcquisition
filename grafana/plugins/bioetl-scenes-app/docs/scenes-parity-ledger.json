@@ -71,7 +71,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 9401,
-      "panel_title": "Monitor Replay Readiness",
+      "panel_title": "Monitor Current Readiness",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",

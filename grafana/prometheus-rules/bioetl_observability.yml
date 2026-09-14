@@ -200,7 +200,7 @@ groups:
       - record: bioetl_l0_input_status
         labels:
           input: provider
-        expr: (bioetl_runtime_alert_condition_provider_failure_rate_high_15m > bool 0) * 2 + ((bioetl_runtime_alert_condition_provider_failure_rate_high_15m == bool 0) * (bioetl_provider_health_check_total_15m > bool 0)) * 0
+        expr: bioetl_provider_current_status
       - record: bioetl_l0_input_status
         labels:
           input: workflow
@@ -259,75 +259,92 @@ groups:
         labels:
           input: runtime
         expr: >-
-          bioetl_runtime_current_status_trusted
-          or ((bioetl_overview_pipeline_run_type_universe
-            unless on(pipeline, run_type) bioetl_runtime_current_status_trusted) * 3)
+          max by (pipeline, run_type) (
+            label_replace((bioetl_runtime_current_status_trusted
+                    or ((bioetl_overview_pipeline_run_type_universe
+                      unless on(pipeline, run_type) bioetl_runtime_current_status_trusted) * 3)), "verdict_source", "measured", "", "")
+            or label_replace((bioetl_scope_publication_status), "verdict_source", "publication", "", "")
+          )
+
       - record: bioetl_l0_input_status_selected
         labels:
           input: dq
         expr: >-
-          bioetl_l0_input_status{input="dq"}
-          or label_replace(
-            (
-              bioetl_overview_pipeline_run_type_universe
-              unless on (pipeline, run_type) bioetl_l0_input_status{input="dq"}
-            ) * 3,
-            "input",
-            "dq",
-            "",
-            ""
+          max by (pipeline, run_type) (
+            label_replace((bioetl_l0_input_status{input="dq"}
+                    or label_replace(
+                      (
+                        bioetl_overview_pipeline_run_type_universe
+                        unless on (pipeline, run_type) bioetl_l0_input_status{input="dq"}
+                      ) * 3,
+                      "input",
+                      "dq",
+                      "",
+                      ""
+                    )), "verdict_source", "measured", "", "")
+            or label_replace((bioetl_scope_publication_status), "verdict_source", "publication", "", "")
           )
+
       - record: bioetl_l0_input_status_selected
         labels:
           input: control_plane
         expr: >-
-          (bioetl_l0_input_status{input="control_plane"} == 2)
-          or on(pipeline, run_type) (bioetl_l0_input_status{input="control_plane"}
-            and on(pipeline, run_type) (bioetl_control_plane_telemetry_missing_5m == 0))
-          or on(pipeline, run_type) ((bioetl_overview_pipeline_run_type_universe
-            unless on(pipeline, run_type) (bioetl_control_plane_telemetry_missing_5m == 0)) * 3)
+          max by (pipeline, run_type) (
+            label_replace(((bioetl_l0_input_status{input="control_plane"} == 2)
+                    or on(pipeline, run_type) (bioetl_l0_input_status{input="control_plane"}
+                      and on(pipeline, run_type) (bioetl_control_plane_telemetry_missing_5m == 0))
+                    or on(pipeline, run_type) ((bioetl_overview_pipeline_run_type_universe
+                      unless on(pipeline, run_type) (bioetl_control_plane_telemetry_missing_5m == 0)) * 3)), "verdict_source", "measured", "", "")
+            or label_replace((bioetl_scope_publication_status), "verdict_source", "publication", "", "")
+          )
+
       - record: bioetl_l0_input_status_selected
         labels:
           input: provider
         expr: >-
-          label_replace(
-            bioetl_overview_pipeline_run_type_universe
-            * scalar(max(bioetl_l0_input_status{input="provider"}) or vector(3)),
-            "input",
-            "provider",
-            "",
-            ""
+          max by (pipeline, run_type) (
+            group by (pipeline, run_type, provider) (bioetl_workflow_pipeline_expected)
+            * on (provider) group_left() bioetl_provider_current_status
           )
+          or on (pipeline, run_type) (bioetl_overview_pipeline_run_type_universe * 3)
       - record: bioetl_l0_input_status_selected
         labels:
           input: workflow
         expr: >-
-          bioetl_l0_input_status{input="workflow"}
-          or label_replace(
-            (
-              bioetl_overview_pipeline_run_type_universe
-              unless on (pipeline, run_type) bioetl_l0_input_status{input="workflow"}
-            ) * 3,
-            "input",
-            "workflow",
-            "",
-            ""
+          max by (pipeline, run_type) (
+            label_replace((bioetl_l0_input_status{input="workflow"}
+                    or label_replace(
+                      (
+                        bioetl_overview_pipeline_run_type_universe
+                        unless on (pipeline, run_type) bioetl_l0_input_status{input="workflow"}
+                      ) * 3,
+                      "input",
+                      "workflow",
+                      "",
+                      ""
+                    )), "verdict_source", "measured", "", "")
+            or label_replace((bioetl_scope_publication_status or bioetl_workflow_publication_scope_status), "verdict_source", "publication", "", "")
           )
+
       - record: bioetl_l0_input_status_selected
         labels:
           input: gold
         expr: >-
-          bioetl_l0_input_status{input="gold"}
-          or label_replace(
-            (
-              bioetl_overview_pipeline_run_type_universe
-              unless on (pipeline, run_type) bioetl_l0_input_status{input="gold"}
-            ) * 3,
-            "input",
-            "gold",
-            "",
-            ""
+          max by (pipeline, run_type) (
+            label_replace((bioetl_l0_input_status{input="gold"}
+                    or label_replace(
+                      (
+                        bioetl_overview_pipeline_run_type_universe
+                        unless on (pipeline, run_type) bioetl_l0_input_status{input="gold"}
+                      ) * 3,
+                      "input",
+                      "gold",
+                      "",
+                      ""
+                    )), "verdict_source", "measured", "", "")
+            or label_replace((bioetl_scope_publication_status), "verdict_source", "publication", "", "")
           )
+
       - record: bioetl_l0_next_action_route
         labels:
           action_target: runtime
@@ -664,6 +681,10 @@ groups:
           max by (pipeline, run_type) (
             bioetl_runtime_current_status_scoped
             or label_replace(
+              bioetl_scope_publication_status,
+              "runtime_status_source", "publication_stale_or_missing", "", ""
+            )
+            or label_replace(
               (bioetl_runtime_stage_evidence_status > bool 0) * 3,
               "runtime_status_source", "stage_evidence_incomplete", "", ""
             )
@@ -753,16 +774,29 @@ groups:
       - record: bioetl_runtime_current_blocker_reason_scoped
         expr: bioetl_runtime_current_blocker_reason
 
+      - record: bioetl_provider_health_status_fresh
+        expr: >-
+          min by (provider) (
+            bioetl_provider_health_status
+            and on (provider, job, instance) (
+              bioetl_provider_health_observed_timestamp_seconds > 0
+              and bioetl_provider_health_observed_timestamp_seconds <= time()
+              and time() - bioetl_provider_health_observed_timestamp_seconds <= 900
+              and bioetl_provider_health_observed_timestamp_seconds
+                == on (provider) group_left()
+                max by (provider) (bioetl_provider_health_observed_timestamp_seconds)
+            )
+          )
       - record: bioetl_provider_current_status
-        expr: ((max by (provider) (bioetl_provider_health_status == bool 0) * 2) + max by (provider) (bioetl_provider_health_status == bool 1) + (max by (provider) (bioetl_provider_health_status == bool 2) * 0)) or (bioetl_provider_observed_universe * 0 + 3) or (bioetl_provider_health_check_provider_universe_15m * 0 + 3)
+        expr: ((max by (provider) (bioetl_provider_health_status_fresh == bool 0) * 2) + max by (provider) (bioetl_provider_health_status_fresh == bool 1) + (max by (provider) (bioetl_provider_health_status_fresh == bool 2) * 0)) or (max by (provider) (bioetl_provider_observed_universe) * 0 + 3) or (bioetl_provider_health_check_provider_universe_15m * 0 + 3)
       - record: bioetl_provider_current_status_info
         labels:
-          reason: missing_health_status
+          reason: missing_or_stale_health_status
           source_state: unknown
           completeness: incomplete
           scrape_present: "1"
           health_status_present: "0"
-        expr: ((bioetl_provider_observed_universe * 0 + 3) or (bioetl_provider_health_check_provider_universe_15m * 0 + 3)) unless on (provider) bioetl_provider_health_status
+        expr: ((max by (provider) (bioetl_provider_observed_universe) * 0 + 3) or (bioetl_provider_health_check_provider_universe_15m * 0 + 3)) unless on (provider) bioetl_provider_health_status_fresh
       - record: bioetl_provider_current_status_info
         labels:
           reason: observed_health_status
@@ -770,18 +804,18 @@ groups:
           completeness: complete
           scrape_present: "1"
           health_status_present: "1"
-        expr: bioetl_provider_current_status and on (provider) bioetl_provider_health_status
+        expr: bioetl_provider_current_status and on (provider) bioetl_provider_health_status_fresh
 
       - record: bioetl_provider_current_cause
         labels:
           cause: health_status_unhealthy
           severity: failing
-        expr: max by (provider) (bioetl_provider_health_status == bool 0)
+        expr: max by (provider) (bioetl_provider_health_status_fresh == bool 0)
       - record: bioetl_provider_current_cause
         labels:
           cause: health_status_degraded
           severity: degraded
-        expr: max by (provider) (bioetl_provider_health_status == bool 1)
+        expr: max by (provider) (bioetl_provider_health_status_fresh == bool 1)
       - record: bioetl_provider_current_cause
         labels:
           cause: failure_rate_high

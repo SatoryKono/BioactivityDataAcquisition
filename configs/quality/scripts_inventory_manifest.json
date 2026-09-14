@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-14T07:00:25.703001+00:00",
+  "generated_at": "2026-09-14T12:03:27.632043+00:00",
   "summary": {
     "total_scripts": 617,
     "status_counts": {
@@ -1648,7 +1648,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 69,
+      "reference_count": 70,
       "references": [
         {
           "path": ".github/ISSUES/AI-AGENT-CONFIG-AUDIT-2026-07-14-ISSUE-PACK.md",
@@ -5526,7 +5526,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
         {
           "path": "Makefile",
@@ -5536,6 +5536,18 @@
         },
         {
           "path": "Makefile",
+          "line": 265,
+          "source_group": "build",
+          "text": "@PYTHONDONTWRITEBYTECODE=1 python3 scripts/ai/update_deepwiki.py --validate"
+        },
+        {
+          "path": "makefile",
+          "line": 261,
+          "source_group": "build",
+          "text": "@echo \"Or use: python scripts/ai/update_deepwiki.py --check\""
+        },
+        {
+          "path": "makefile",
           "line": 265,
           "source_group": "build",
           "text": "@PYTHONDONTWRITEBYTECODE=1 python3 scripts/ai/update_deepwiki.py --validate"
@@ -7301,10 +7313,16 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 12,
       "references": [
         {
           "path": "Makefile",
+          "line": 405,
+          "source_group": "build",
+          "text": "$(RUN) python scripts/diagrams/generate_all_bundles.py"
+        },
+        {
+          "path": "makefile",
           "line": 405,
           "source_group": "build",
           "text": "$(RUN) python scripts/diagrams/generate_all_bundles.py"
@@ -7344,12 +7362,6 @@
           "line": 97,
           "source_group": "scripts",
           "text": "\"render/generate_all_bundles.py\", \"--collection\", \"architecture\""
-        },
-        {
-          "path": "scripts/diagrams/__main__.py",
-          "line": 102,
-          "source_group": "scripts",
-          "text": "\"render/generate_all_bundles.py\", \"--collection\", \"views\""
         }
       ]
     },
@@ -7663,7 +7675,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 22,
       "references": [
         {
           "path": "Makefile",
@@ -9632,7 +9644,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 19,
+      "reference_count": 20,
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
@@ -11350,7 +11362,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 26,
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
@@ -12159,7 +12171,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 16,
       "references": [
         {
           "path": ".github/workflows/root-hygiene.yml",
@@ -12811,7 +12823,7 @@
         },
         {
           "path": "tests/integration/test_grafana_render_first_remediation.py",
-          "line": 1412,
+          "line": 1408,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         },
@@ -17281,7 +17293,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 82,
+      "reference_count": 85,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -18013,7 +18025,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_github_actions_runtime_policy.py",
-          "line": 128,
+          "line": 135,
           "source_group": "scripts",
           "text": "vs this list is reviewed by `github_settings_review.py`, not here."
         },
@@ -18489,7 +18501,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 68,
+      "reference_count": 69,
       "references": [
         {
           "path": ".github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md",
@@ -19047,7 +19059,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 35,
+      "reference_count": 45,
       "references": [
         {
           "path": "Makefile",
@@ -19410,7 +19422,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 18,
       "references": [
         {
           "path": "Makefile",
@@ -19429,6 +19441,12 @@
           "line": 323,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
+        },
+        {
+          "path": "makefile",
+          "line": 349,
+          "source_group": "build",
+          "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only"
         },
         {
           "path": "scripts/engineering/dev/README.md",
@@ -19453,12 +19471,6 @@
           "line": 570,
           "source_group": "scripts",
           "text": "# setup_plugins.sh may provision a temporary pytest runtime under /tmp when"
-        },
-        {
-          "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
-          "line": 107,
-          "source_group": "scripts",
-          "text": "Candidate(\"scripts/ops/launchers/codex/setup_plugins.sh\", BOOTSTRAP_HELPER_ROLE),"
         }
       ]
     },
@@ -19926,13 +19938,13 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 825,
+          "line": 843,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._dashboard_state_followup import ("
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_dashboard_state_followup.py",
-          "line": 6,
+          "line": 8,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._dashboard_state_followup import ("
         }
@@ -20305,7 +20317,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 820,
+          "line": 838,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },
@@ -21700,7 +21712,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 95,
+      "reference_count": 97,
       "references": [
         {
           "path": "Makefile",
@@ -21874,7 +21886,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "Makefile",
@@ -21887,6 +21899,12 @@
           "line": 127,
           "source_group": "docs",
           "text": "- `scripts/ops/runtime/mcp/apply-shared-to-devin.py`"
+        },
+        {
+          "path": "makefile",
+          "line": 156,
+          "source_group": "build",
+          "text": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/ops/runtime/mcp/apply-shared-to-devin.py"
         },
         {
           "path": "scripts/ops/runtime/mcp/OPERATOR.md",
@@ -21995,7 +22013,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 15,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -22034,16 +22052,16 @@
           "text": "@PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh daily"
         },
         {
-          "path": "scripts/ai/codex/helper/ensure-mcp.sh",
-          "line": 318,
-          "source_group": "scripts",
-          "text": "local health=\"${REPO_ROOT}/scripts/ops/runtime/mcp/health-shared.sh\""
+          "path": "makefile",
+          "line": 171,
+          "source_group": "build",
+          "text": "PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh daily"
         },
         {
-          "path": "scripts/ai/gemini/helper/ensure-mcp.sh",
-          "line": 153,
-          "source_group": "scripts",
-          "text": "local health=\"${REPO_ROOT}/scripts/ops/runtime/mcp/health-shared.sh\""
+          "path": "makefile",
+          "line": 237,
+          "source_group": "build",
+          "text": "@PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh minimal"
         }
       ],
       "owner": "@bioetl-platform",
@@ -22113,7 +22131,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 20,
       "references": [
         {
           "path": "Makefile",
@@ -22146,22 +22164,22 @@
           "text": "bounds `start-shared.sh`; callers must not wrap ensure with a smaller"
         },
         {
-          "path": "scripts/ai/codex/helper/ensure-mcp.sh",
-          "line": 317,
-          "source_group": "scripts",
-          "text": "local launcher=\"${REPO_ROOT}/scripts/ops/runtime/mcp/start-shared.sh\""
+          "path": "makefile",
+          "line": 170,
+          "source_group": "build",
+          "text": "XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --daily"
         },
         {
-          "path": "scripts/ai/gemini/helper/ensure-mcp.sh",
-          "line": 152,
-          "source_group": "scripts",
-          "text": "local launcher=\"${REPO_ROOT}/scripts/ops/runtime/mcp/start-shared.sh\""
+          "path": "makefile",
+          "line": 236,
+          "source_group": "build",
+          "text": "@XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --minimal"
         },
         {
-          "path": "scripts/ops/runtime/mcp/OPERATOR.md",
-          "line": 18,
-          "source_group": "scripts",
-          "text": "./scripts/ops/runtime/mcp/start-shared.sh"
+          "path": "makefile",
+          "line": 241,
+          "source_group": "build",
+          "text": "@XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --standard"
         }
       ],
       "owner": "@bioetl-platform",

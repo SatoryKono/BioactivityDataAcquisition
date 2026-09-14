@@ -396,7 +396,7 @@ def test_control_plane_trust_panels_follow_reference_widths() -> None:
     panels = index_panels_by_base_title(get_dashboard_panels(dashboard))
 
     scope = panels["Inspect Scope & Evidence"]["gridPos"]
-    readiness = panels["Monitor Replay Readiness"]["gridPos"]
+    readiness = panels["Monitor Current Readiness"]["gridPos"]
     run_summary = panels["Review Run Summary"]["gridPos"]
     processed = panels["Review Processed Records"]["gridPos"]
     telemetry = panels["Monitor Telemetry"]["gridPos"]

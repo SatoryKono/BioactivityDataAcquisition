@@ -35,7 +35,7 @@ if TYPE_CHECKING:
         RunLedgerService,
     )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
-    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.context import PipelineContext, PipelineRunContext
     from bioetl.domain.ports import (
         ContractEvidenceRecorderPort,
         LoggerPort,
@@ -83,6 +83,7 @@ class PipelineRunner(PipelineRunnerSupportMixin):
         self._observer = dependencies.observer
         self._run_ledger_service: RunLedgerService | None = None
         self._contract_evidence_recorder: ContractEvidenceRecorderPort | None = None
+        self._contract_evidence_context: PipelineRunContext | None = None
 
     @property
     def logger(self) -> LoggerPort:
@@ -98,6 +99,8 @@ class PipelineRunner(PipelineRunnerSupportMixin):
 
     @property
     def manifest_id(self) -> str | None:
+        if self._contract_evidence_context is not None:
+            return self._contract_evidence_context.manifest_id
         manifest_id = getattr(self._context, "manifest_id", None)
         return None if manifest_id is None else str(manifest_id)
 
@@ -110,10 +113,14 @@ class PipelineRunner(PipelineRunnerSupportMixin):
         self._run_ledger_service = service
 
     def attach_contract_evidence_recorder(
-        self, recorder: ContractEvidenceRecorderPort
+        self,
+        recorder: ContractEvidenceRecorderPort,
+        *,
+        launch_context: PipelineRunContext | None = None,
     ) -> None:
         """Attach the post-lock contract-evidence finalizer."""
         self._contract_evidence_recorder = recorder
+        self._contract_evidence_context = launch_context
 
     @property
     def execution_metrics(self) -> dict[str, int]:

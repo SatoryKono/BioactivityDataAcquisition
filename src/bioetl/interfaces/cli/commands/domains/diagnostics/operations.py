@@ -66,6 +66,15 @@ def run_health_diagnostics(
     async def _run() -> JsonDict:
         providers_list = list(provider) if provider else None
         summary = await bundle.health_service.check_providers(providers=providers_list)
+        from bioetl.composition.observability_runtime import push_metrics_to_gateway
+
+        push_metrics_to_gateway(
+            metric_names=(
+                "bioetl_provider_health_status",
+                "bioetl_provider_health_observed_timestamp_seconds",
+                "bioetl_provider_observed_universe",
+            )
+        )
         return summary.to_dict()
 
     results = asyncio.run(_run())

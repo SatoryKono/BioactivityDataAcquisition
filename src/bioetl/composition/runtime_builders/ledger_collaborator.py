@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineRunContext
     from bioetl.application.ports.pipeline import PipelineRunnerProtocol
     from bioetl.application.services.control_plane.ledger.service import (
         RunLedgerService,
@@ -166,6 +167,7 @@ def _attach_candidate_artifact_recorder(
 def _attach_contract_evidence_recorder(
     runner: PipelineRunnerProtocol,
     run_ledger_service: RunLedgerService,
+    launch_context: PipelineRunContext | None = None,
 ) -> None:
     attach = getattr(runner, "attach_contract_evidence_recorder", None)
     if not callable(attach):
@@ -177,16 +179,22 @@ def _attach_contract_evidence_recorder(
     from pathlib import Path
 
     manifest_root = Path(base_path).parent / "run_manifest"
-    attach(FileContractEvidenceRecorder(base_path=manifest_root))
+    recorder = FileContractEvidenceRecorder(base_path=manifest_root)
+    if launch_context is None:
+        attach(recorder)
+    else:
+        attach(recorder, launch_context=launch_context)
 
 
 def attach_control_plane_collaborators(
     runner: PipelineRunnerProtocol,
     run_ledger_service: RunLedgerService,
+    *,
+    launch_context: PipelineRunContext | None = None,
 ) -> ArtifactRecorderAttachmentResult:
     """Attach ledger collaborators to the runner and its metadata writers."""
     runner.attach_run_ledger_service(run_ledger_service)
-    _attach_contract_evidence_recorder(runner, run_ledger_service)
+    _attach_contract_evidence_recorder(runner, run_ledger_service, launch_context)
 
     services = getattr(runner, "services", None)
     if services is None:

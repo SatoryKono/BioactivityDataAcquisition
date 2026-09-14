@@ -145,68 +145,71 @@ groups:
 
       - record: bioetl_control_plane_telemetry_missing_5m
         expr: |
-          clamp_max(
-            sum by (pipeline, run_type) (
-              (
-                (
-                  bioetl_control_plane_run_type_universe
-                  unless on (pipeline, run_type)
-                  sum by (pipeline, run_type) (
-                    count_over_time(bioetl_control_plane_manifest_writes_total[5m])
-                  )
-                )
-                or (bioetl_control_plane_run_type_universe * 0)
-              )
-              +
-              (
-                (
-                  # Measured 0 on ledger_appends_total is coverage; missing child
-                  # is a publication fault. Do not treat `or universe*0` as a
-                  # substitute for the source series.
-                  bioetl_control_plane_run_type_universe
-                  unless on (pipeline)
-                  sum by (pipeline) (
-                    count_over_time(bioetl_control_plane_ledger_appends_total[5m])
-                  )
-                )
-                or (bioetl_control_plane_run_type_universe * 0)
-              )
-              +
-              (
-                (
-                  bioetl_control_plane_run_type_universe
-                  unless on (pipeline, run_type)
-                  (
-                    count by (pipeline, run_type) (
-                      group by (pipeline, run_type, risk_type) (
-                        count_over_time(
-                          bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m]
+          max by (pipeline, run_type) (
+           label_replace((clamp_max(
+                      sum by (pipeline, run_type) (
+                        (
+                          (
+                            bioetl_control_plane_run_type_universe
+                            unless on (pipeline, run_type)
+                            sum by (pipeline, run_type) (
+                              count_over_time(bioetl_control_plane_manifest_writes_total[5m])
+                            )
+                          )
+                          or (bioetl_control_plane_run_type_universe * 0)
                         )
-                      )
-                    ) == 2
-                  )
-                )
-                or (bioetl_control_plane_run_type_universe * 0)
-              )
-              +
-              (
-                (
-                  bioetl_control_plane_run_type_universe
-                  unless on (pipeline, run_type)
-                  (
-                    count by (pipeline, run_type) (
-                      group by (pipeline, run_type, integrity_type) (
-                        count_over_time(
-                          bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m]
+                        +
+                        (
+                          (
+                            # Measured 0 on ledger_appends_total is coverage; missing child
+                            # is a publication fault. Do not treat `or universe*0` as a
+                            # substitute for the source series.
+                            bioetl_control_plane_run_type_universe
+                            unless on (pipeline)
+                            sum by (pipeline) (
+                              count_over_time(bioetl_control_plane_ledger_appends_total[5m])
+                            )
+                          )
+                          or (bioetl_control_plane_run_type_universe * 0)
                         )
-                      )
-                    ) == 2
-                  )
-                )
-                or (bioetl_control_plane_run_type_universe * 0)
-              )
-            ),
-            4
+                        +
+                        (
+                          (
+                            bioetl_control_plane_run_type_universe
+                            unless on (pipeline, run_type)
+                            (
+                              count by (pipeline, run_type) (
+                                group by (pipeline, run_type, risk_type) (
+                                  count_over_time(
+                                    bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m]
+                                  )
+                                )
+                              ) == 2
+                            )
+                          )
+                          or (bioetl_control_plane_run_type_universe * 0)
+                        )
+                        +
+                        (
+                          (
+                            bioetl_control_plane_run_type_universe
+                            unless on (pipeline, run_type)
+                            (
+                              count by (pipeline, run_type) (
+                                group by (pipeline, run_type, integrity_type) (
+                                  count_over_time(
+                                    bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m]
+                                  )
+                                )
+                              ) == 2
+                            )
+                          )
+                          or (bioetl_control_plane_run_type_universe * 0)
+                        )
+                      ),
+                      4
+                    )), "evidence_source", "series", "", "")
+           or label_replace((bioetl_scope_publication_status > bool 0), "evidence_source", "publication", "", "")
           )
 
       - record: bioetl_checkpoint_age_seconds

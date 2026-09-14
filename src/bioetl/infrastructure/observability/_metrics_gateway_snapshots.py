@@ -45,6 +45,13 @@ def partition_snapshots(
             labels = sample.labels
             workflow = labels.get("workflow")
             sample_job = f"{job}_workflow_{workflow}" if workflow else job
+            provider = labels.get("provider")
+            if provider and metric.name in {
+                "bioetl_provider_health_status",
+                "bioetl_provider_health_observed_timestamp_seconds",
+                "bioetl_provider_observed_universe",
+            }:
+                sample_job = f"{job}_provider_{provider}"
             # Integrity refresh scans persisted scopes beyond this process's
             # executed runs. It must not replace their runtime snapshots.
             if metric.name == "bioetl_manifest_ledger_integrity_ratio":

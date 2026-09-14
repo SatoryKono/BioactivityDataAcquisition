@@ -5,7 +5,15 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.services.ops.health_service import HealthService
+from bioetl.application.services.ops.health_service import HealthResult, HealthService
+from bioetl.composition.runtime_builders import control_plane_root
+from bioetl.infrastructure.control_plane.file_provider_health_evidence import (
+    FileProviderHealthEvidenceStore,
+    ProviderHealthEvidenceRecord,
+)
+from bioetl.infrastructure.control_plane.provider_health_evidence import (
+    rehydrate_provider_health_evidence,
+)
 from bioetl.composition.bootstrap.assembly.health_server import (
     HealthServerDependencies,
     create_health_server_dependencies,
@@ -49,6 +57,26 @@ class _HealthCheckDataSourceFactory:
     logger: LoggerPort
     metrics: MetricsPort
     settings: Settings
+
+    def record_health_result(self, result: HealthResult) -> None:
+        """Persist the measured probe once; rehydration never increments counters."""
+        statuses = {"unhealthy": 0, "degraded": 1, "healthy": 2}
+        status = statuses.get(result.status)
+        if status is None or result.checked_at is None:
+            return
+        store = FileProviderHealthEvidenceStore(
+            base_path=control_plane_root(self.settings, "provider_health")
+        )
+        store.persist(
+            ProviderHealthEvidenceRecord(
+                provider=result.provider,
+                status=status,
+                observed_at=result.checked_at.isoformat(),
+                endpoint=(result.endpoint or "")[:128],
+                reason="probe_error" if result.error else None,
+            )
+        )
+        rehydrate_provider_health_evidence(self.metrics, store, now=SystemClock().now())
 
     @staticmethod
     def list_providers() -> list[str]:
@@ -97,12 +125,12 @@ def create_health_service(
 ) -> HealthService:
     """Build a HealthService through the canonical composition assembly path."""
     resolved_metrics = metrics or PrometheusMetrics()
+    factory = _HealthCheckDataSourceFactory(
+        logger=logger, metrics=resolved_metrics, settings=settings
+    )
     return HealthService(
         logger=logger,
-        _factory=_HealthCheckDataSourceFactory(
-            logger=logger,
-            metrics=resolved_metrics,
-            settings=settings,
-        ),
+        _factory=factory,
         clock=SystemClock(),
+        result_observer=factory.record_health_result,
     )

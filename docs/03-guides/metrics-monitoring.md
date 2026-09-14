@@ -157,6 +157,17 @@ workflow. Метрики с label `workflow` используют job
 их runtime-снимки.
 Pushgateway сохраняет последние снимки: наличие серии само по себе не доказывает
 свежесть запуска, для этого проверяются реальные timestamps и артефакты.
+Для CURRENT verdict срок свежести gateway-публикации составляет 15 минут, как
+у операционного окна правил. Отсутствующий, будущий или устаревший
+`push_time_seconds` переводит соответствующий scope в `UNKNOWN`. Отдельные
+`pipeline` / `run_type` и workflow не обновляют свежесть друг друга. Исторические
+таблицы выбранного Run ID сохраняют собственные оценки evidence.
+
+Contract-evidence sidecar записывается после получения lock из контекста запуска,
+содержащего manifest и контрактные anchors. Контекст обработки записей этих
+полей не содержит. `resume_requested` и lock owner берутся из реального запуска;
+неприменимость lock явно фиксируется. Отсутствующие sidecars старых запусков
+не восстанавливаются выдуманными значениями.
 
 Overview связывает общий статус многопайплайнового workflow с его pipeline
 через `bioetl_workflow_pipeline_expected`, поскольку его `pipeline_context`
@@ -904,3 +915,10 @@ ______________________________________________________________________
 - [Observability Checklist](../05-operations/runbooks/observability-checklist.md) — чек-лист для адаптеров
 - [ADR-017: Observability Architecture](../02-architecture/decisions/ADR-017-observability-architecture.md)
 - [ADR-019: Observability Port Enforcement](../02-architecture/decisions/ADR-019-observability-port-enforcement.md)
+
+Provider diagnostics persist the measured health observation and publish CURRENT gauges
+in a provider-owned Pushgateway group. `bioetl diagnostics health --provider chembl`
+refreshes this evidence without fabricating request traffic or incrementing probe
+counters during rehydration. Provider CURRENT uses the latest observation timestamp
+and expires after 15 minutes. Overview joins provider status through the explicit
+workflow pipeline/provider membership; missing membership remains UNKNOWN.
