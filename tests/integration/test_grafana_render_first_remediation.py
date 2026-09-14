@@ -880,7 +880,11 @@ def test_incident_ranked_suspects_limit_requires_comparable_rank() -> None:
         str(rule.get("record")): str(rule.get("expr") or "")
         for group in rules.get("groups", [])
         for rule in group.get("rules", [])
-        if str(rule.get("record") or "").startswith("bioetl_incident_ranked_")
+        if str(rule.get("record") or "") in {
+            "bioetl_incident_ranked_runtime",
+            "bioetl_incident_ranked_provider",
+            "bioetl_incident_ranked_dq",
+        }
     }
     sources = [
         "bioetl_incident_ranked_runtime",

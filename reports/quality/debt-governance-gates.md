@@ -38,7 +38,7 @@
 | `full_app_duplication_total_clusters` | `pass` | `total_duplicate_clusters` | `0` | `0` | `reports/quality/full-app-duplication-baseline.json` |
 | `supporting_scripts_zero_reference_count` | `pass` | `zero_reference_supporting_script_count` | `0` | `0` | `configs/quality/scripts_inventory_manifest.json` |
 | `supporting_scripts_untriaged_zero_reference_count` | `pass` | `untriaged_zero_reference_supporting_script_count` | `0` | `0` | `configs/quality/scripts_inventory_manifest.json` |
-| `test_governance_budget_violations` | `fail` | `budget_violations` | `1` | `0` | `reports/quality/test-governance-current.json` |
+| `test_governance_budget_violations` | `pass` | `budget_violations` | `0` | `0` | `reports/quality/test-governance-current.json` |
 | `test_governance_uuid4_call_sites` | `pass` | `uuid4_call_sites` | `0` | `0` | `reports/quality/test-governance-current.json` |
 | `flaky_test_total_count` | `pass` | `total_flaky` | `0` | `0` | `reports/quality/flaky-test-burndown-review.json` |
 | `flaky_test_untriaged_count` | `pass` | `untriaged_flaky_tests` | `0` | `0` | `reports/quality/flaky-test-burndown-review.json` |
@@ -56,4 +56,4 @@
 | `observability_touched_metric_review_freshness` | `pass` | `changed_metric_surface_count` | `0` | `0` | `reports/observability/runtime_cardinality_review.json` |
 | `adr_enforcement_blocking_gaps` | `pass` | `blocking_gap_count` | `0` | `0` | `reports/quality/adr-enforcement-matrix.json` |
 | `remote_main_architecture_debt_baseline` | `pass` | `baseline_artifact_fingerprint` | `d49ef224052535d5954539894bf35655552174a37976b6ce40735704b8a45a11` | `clean remote-main artifact blobs` | `reports/quality/architecture-debt-remote-main-baseline.json` |
-| `generated_artifact_drift` | `pass` | `stale_artifact_count` | `{'count': 0, 'artifacts': []}` | `0` | `reports/quality/*.json` |
+| `generated_artifact_drift` | `fail` | `stale_artifact_count` | `{'count': 1, 'artifacts': ['remote_main_baseline']}` | `0` | `reports/quality/*.json` |
