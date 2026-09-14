@@ -1,5 +1,15 @@
 # Сводка evidence: project-package-topology
 
+Refresh note (2026-09-14): hash-only reconcile after Grafana domain-readiness
+recording-rule coverage and control-plane artifact inventory refresh.
+Counts and the source fingerprint below come from
+`reports/quality/module-coverage-inventory.json`. Historical notes remain
+historical.
+
+`source_tree_sha256=99e35c293ab9ca002641d5c04c88cc424e98832410e0399c16a03011e6795c3f`
+
+`source_module_count=2466`
+
 Refresh note (2026-09-11): merge origin/main `#10367` with UniProt mixin fold
 `#10309`; inventory is `source_module_count=2465`. Counts and
 the source fingerprint below come from `reports/quality/module-coverage-inventory.json`.

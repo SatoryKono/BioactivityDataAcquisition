@@ -135,10 +135,11 @@ _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     9406: (0, 12, 24, 5),
 }
 _RECOVERY_ACTION_HTML = (
-    '<div style="padding:0 6px;line-height:1.15;font-size:16px;white-space:normal;'
-    'overflow-wrap:anywhere">CURRENT · Pipeline / Run Type readiness is shown at right.<br>'
-    "SELECTED RUN · Replay requires complete Trust and retention evidence below. "
-    "INCOMPLETE or UNKNOWN blocks replay.</div>"
+    '<div style="padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;'
+    'font-size:16px;white-space:normal;overflow-wrap:anywhere;max-width:96ch">'
+    "CURRENT · Pipeline / Run Type readiness is shown at right.<br>"
+    "SELECTED RUN · Do not replay while Trust is INCOMPLETE or UNKNOWN. "
+    "Check retention below.</div>"
 )
 CHIP_BASE = (
     "box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;"
@@ -699,6 +700,11 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
         )
     if 9418 in by_id:
         by_id[9418]["options"]["footer"]["enablePagination"] = True
+        for override in by_id[9418]["fieldConfig"]["overrides"]:
+            if override.get("matcher", {}).get("options") == "reasons_text":
+                for prop in override.get("properties", []):
+                    if prop.get("id") == "noValue":
+                        prop["value"] = "—"
     if 906 in by_id:
         _stamp_control_plane_recovery_cta(by_id[906])
 
