@@ -242,6 +242,7 @@ class FileRunManifestStore(RawRunManifestInspectionMixin, RunManifestPort):
                         manifest
                         for path in sorted(self.base_path.glob("*.json"))
                         if path.is_file()
+                        if not path.name.endswith(".contract-evidence.json")
                         for manifest in (self._load_manifest(path.stem),)
                         if manifest is not None
                     ),
