@@ -3,11 +3,15 @@
 import copy
 import json
 
+import pytest
+
 from scripts.ops.observability.grafana._dashboard_state_followup import (
     DASH,
     apply_dashboard,
     walk,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_followup_is_idempotent_and_preserves_unique_panel_ids():

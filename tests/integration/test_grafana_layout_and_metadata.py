@@ -405,9 +405,11 @@ def test_control_plane_trust_panels_follow_reference_widths() -> None:
     assert readiness == {"x": 16, "y": 3, "w": 8, "h": 3}
     assert readiness["w"] * readiness["h"] == 24
     assert run_summary["w"] == 18
-    assert processed["w"] == telemetry["w"] == 6
+    assert processed["w"] == 24
+    assert telemetry["w"] == 6
     assert run_summary["x"] == 0
-    assert processed["x"] == telemetry["x"] == 18
+    assert processed["x"] == 0
+    assert telemetry["x"] == 18
 
     quarter_width = 24 // 4
     quarter_panels = [

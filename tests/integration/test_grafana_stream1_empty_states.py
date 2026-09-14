@@ -248,8 +248,8 @@ def test_dq_10253_selected_run_summary_is_first_window() -> None:
         if item.get("id") == "organize"
     )
     exclude = (organize.get("options") or {}).get("excludeByName") or {}
-    assert exclude.get("started_at") is True
-    assert exclude.get("completed_at") is True
+    assert exclude.get("started_at") is False
+    assert exclude.get("completed_at") is False
     no_value = str(summary.get("fieldConfig", {}).get("defaults", {}).get("noValue"))
     assert no_value.startswith("SELECT RUN")
     assert "VALID EMPTY if" not in no_value

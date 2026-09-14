@@ -7,7 +7,7 @@ ______________________________________________________________________
 All seven dashboards now distinguish missing evidence from measured empty
 results. The change corrects selected verdicts, Provider handoffs, Trust reason
 wrapping, full evidence tables, stage coverage, terminal event age and DQ history.
-See [docs/reports/dashboard-ux-checks/2026-09-14.md](../../reports/dashboard-ux-checks/2026-09-14.md)
+See `docs/reports/dashboard-ux-checks/2026-09-14.md`
 for the browser observations and the limits of this validation pass.
 
 ## Run Explorer simplification — 2026-09-13
@@ -18,8 +18,7 @@ were removed with their nested panels. The banner starts Pipeline on a new line;
 incoming run links select a row without targeting a removed panel. Report links
 continue to open the exact row's report.
 
-Current UX artifact:
-[docs/reports/dashboard-ux-checks/2026-09-13.md](../../reports/dashboard-ux-checks/2026-09-13.md).
+Current UX artifact: `docs/reports/dashboard-ux-checks/2026-09-13.md`.
 
 ## Earlier changes
 

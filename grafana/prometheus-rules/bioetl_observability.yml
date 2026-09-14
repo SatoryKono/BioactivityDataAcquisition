@@ -206,6 +206,12 @@ groups:
           input: workflow
         expr: >-
           max by (pipeline, run_type) (
+            group by (workflow, pipeline, run_type) (bioetl_workflow_pipeline_expected)
+            * on (workflow) group_left()
+            max by (workflow) (bioetl_workflow_current_status)
+          )
+          or on (pipeline, run_type)
+          max by (pipeline, run_type) (
             label_replace(
               label_replace(
                 bioetl_workflow_current_status,

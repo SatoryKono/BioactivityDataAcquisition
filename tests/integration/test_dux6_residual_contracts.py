@@ -146,7 +146,7 @@ def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None
     description = str(browse.get("description") or "")
     target = (browse.get("targets") or [])[0]
 
-    assert no_value.startswith("VALID EMPTY — no pipeline-run-report artifacts")
+    assert no_value.startswith("VALID EMPTY — no matching launches")
     assert "selected pipeline" in no_value
     assert "$pipeline" not in no_value
     assert "reports/run-reports/pipeline/<name>/" in no_value
@@ -182,39 +182,11 @@ def test_pfill_12_workflow_browser_is_not_panel_3010() -> None:
     data = json.loads(
         (DASH / "bioetl-run-explorer-v1.json").read_text(encoding="utf-8")
     )
-    workflow = next(
-        panel for panel in _walk(data.get("panels")) if panel.get("id") == 3020
-    )
-    defaults = (workflow.get("fieldConfig") or {}).get("defaults") or {}
-    no_value = str(defaults.get("noValue") or "")
-    target = (workflow.get("targets") or [])[0]
-    assert workflow.get("title") == "Inspect Recent Workflow Runs (last 20)"
-    assert no_value.startswith("VALID EMPTY — no workflow-run-report artifacts")
-    assert "selected workflow" in no_value
-    assert "$workflow" not in no_value
-    completed_no_value = next(
-        (
-            str(prop.get("value") or "")
-            for item in (workflow.get("fieldConfig") or {}).get("overrides") or []
-            if isinstance(item, dict)
-            and str((item.get("matcher") or {}).get("options") or "").startswith(
-                "^(completed_at"
-            )
-            for prop in item.get("properties") or []
-            if isinstance(prop, dict) and prop.get("id") == "noValue"
-        ),
-        "",
-    )
-    assert completed_no_value == "—"
-    assert "VALID EMPTY" not in completed_no_value
-    assert target.get("url") == (
-        "/ops/observability/workflow-run-reports?workflow=${workflow}&limit=20"
-    )
-    assert "tree_missing" in str(workflow.get("description") or "").lower()
-    # 3010 must stay pipeline-only.
-    browse = next(
-        panel for panel in _walk(data.get("panels")) if panel.get("id") == 3010
-    )
+    panels = {panel.get("id"): panel for panel in _walk(data.get("panels"))}
+    assert 3010 in panels
+    assert 3020 not in panels
+    browse = panels[3010]
+    assert browse.get("title") == "Inspect Recent Runs (last 10)"
     browse_url = ((browse.get("targets") or [])[0]).get("url")
     assert "pipeline-run-reports" in str(browse_url)
     assert "workflow-run-reports" not in str(browse_url)

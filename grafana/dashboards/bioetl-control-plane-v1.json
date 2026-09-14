@@ -532,9 +532,10 @@
             "align": "left",
             "cellOptions": {
               "type": "auto",
-              "wrapText": true
+              "wrapText": false
             },
-            "inspect": true
+            "inspect": true,
+            "minWidth": 50
           },
           "unit": "none",
           "noValue": "No selected-run trust payload. Select an exact run; UNAVAILABLE/INCOMPLETE is not OK.",
