@@ -242,6 +242,7 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
             return await self._build_bronze_write_result(
                 prepared=prepared,
                 batch_id=request.batch_id,
+                table_identity=(request.provider, request.entity),
                 record_count=write_artifacts.record_count,
                 uncompressed_size=write_artifacts.uncompressed_size,
                 compressed_size=write_artifacts.compressed_size,

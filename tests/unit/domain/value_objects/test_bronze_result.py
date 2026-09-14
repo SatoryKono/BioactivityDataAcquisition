@@ -144,3 +144,20 @@ class TestBronzeWriteResultProperties:
         """BronzeWriteResult must not perform filesystem I/O in domain layer."""
         result = _make_valid_result(absolute_path="/nonexistent/path/to/file.jsonl.zst")
         assert not hasattr(result, "exists")
+
+
+@pytest.mark.unit
+def test_entity_rooted_bronze_result_preserves_explicit_table_identity() -> None:
+    result = _make_valid_result(
+        relative_path="2026-09-14/batch_abc.jsonl.zst",
+        table_identity=("chembl", "publication"),
+    )
+    assert result.provider_entity == ("chembl", "publication")
+    assert result.table_name == "chembl.publication"
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("identity", [("", "publication"), ("chembl", " ")])
+def test_bronze_result_rejects_empty_explicit_identity(identity) -> None:
+    with pytest.raises(ValueError, match="table_identity"):
+        _make_valid_result(table_identity=identity)

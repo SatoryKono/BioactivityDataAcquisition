@@ -81,6 +81,7 @@ class BronzeWriteResult:
         compressed_size: Size of compressed file in bytes.
         uncompressed_size: Size of uncompressed data in bytes.
         checksum_blake2: BLAKE2b checksum of compressed file for integrity verification.
+        table_identity: Explicit provider/entity for writers rooted at an entity path.
 
     Example:
         >>> from uuid import UUID
@@ -104,11 +105,19 @@ class BronzeWriteResult:
     compressed_size: int
     uncompressed_size: int
     checksum_blake2: str
+    table_identity: tuple[str, str] | None = None
 
     def __post_init__(self) -> None:
         """Validate fields after initialization."""
         self._validate_non_negative_fields()
         self._validate_required_strings()
+        if self.table_identity is not None and (
+            len(self.table_identity) != 2
+            or any(not value.strip() for value in self.table_identity)
+        ):
+            raise ValueError(
+                "table_identity must contain non-empty provider and entity"
+            )
 
     def _validate_non_negative_fields(self) -> None:
         """Validate that numeric fields are non-negative."""
@@ -163,4 +172,4 @@ class BronzeWriteResult:
     @property
     def provider_entity(self) -> tuple[str, str]:
         """Extract provider/entity from Bronze relative path."""
-        return _parse_provider_entity(self.relative_path)
+        return self.table_identity or _parse_provider_entity(self.relative_path)

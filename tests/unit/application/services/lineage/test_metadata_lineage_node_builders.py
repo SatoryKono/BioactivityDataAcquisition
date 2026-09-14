@@ -480,6 +480,34 @@ class TestBronzeBatchNodeFromInput:
         assert result.attributes["provider"] == "chembl"
         assert result.attributes["entity"] == "activity"
 
+        from bioetl.application.services.lineage.metadata_lineage_dataset_nodes import (
+            _bronze_batch_node_from_result,
+        )
+        from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+        from bioetl.domain.types import BatchID
+
+        reference = BronzeWriteResult(
+            batch_id=BatchID("batch-123"),
+            relative_path="2026-09-14/batch-123.jsonl.zst",
+            absolute_path="/data/bronze/chembl/activity/2026-09-14/batch-123.jsonl.zst",
+            record_count=1000,
+            compressed_size=1024,
+            uncompressed_size=2048,
+            checksum_blake2="checksum",
+            table_identity=("chembl", "activity"),
+        )
+        downstream = _bronze_batch_node_from_result(reference)
+        assert downstream.node_id == result.node_id
+        assert downstream.label == result.label
+        for key in (
+            "provider",
+            "entity",
+            "batch_id",
+            "record_count",
+            "compressed_size",
+        ):
+            assert downstream.attributes[key] == result.attributes[key]
+
 
 class TestSilverDatasetNode:
     """Tests for silver_dataset_node function."""

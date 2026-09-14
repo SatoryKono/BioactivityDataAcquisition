@@ -156,6 +156,7 @@ class BronzeWriterSideEffectsMixin:
         uncompressed_size: int,
         compressed_size: int,
         span: Any,  # Any: OpenTelemetry span interface is runtime-dependent
+        table_identity: tuple[str, str] | None = None,
     ) -> BronzeWriteResult:
         """Build write result payload and include checksum."""
         host = cast("_BronzeWriterSideEffectsHost", self)  # pyright: ignore[reportInvalidCast]
@@ -170,6 +171,7 @@ class BronzeWriterSideEffectsMixin:
             compressed_size=compressed_size,
             uncompressed_size=uncompressed_size,
             checksum_blake2=checksum,
+            table_identity=table_identity,
         )
 
 

@@ -112,12 +112,13 @@ class TestBronzeWriterSideEffectsMixin:
         host = _Host(tmp_path)
         prepared = MagicMock()
         prepared.full_path = tmp_path / "data.jsonl.zst"
-        prepared.relative_path = "chembl/activity/2025-01-15/data.jsonl.zst"
+        prepared.relative_path = "2025-01-15/data.jsonl.zst"
         span = MagicMock()
 
         result = await host._build_bronze_write_result(
             prepared=prepared,
             batch_id=BatchID("b-res"),
+            table_identity=("chembl", "activity"),
             record_count=10,
             uncompressed_size=500,
             compressed_size=250,
@@ -126,6 +127,7 @@ class TestBronzeWriterSideEffectsMixin:
         assert isinstance(result, BronzeWriteResult)
         assert result.checksum_blake2 == "abc123checksum"
         assert result.record_count == 10
+        assert result.table_name == "chembl.activity"
         span.set_attribute.assert_any_call("record_count", 10)
         span.set_attribute.assert_any_call("compressed_size", 250)
 
