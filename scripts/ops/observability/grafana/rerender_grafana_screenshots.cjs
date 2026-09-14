@@ -839,11 +839,16 @@ function dashboardEntryFromPayload(payload) {
     url: `/d/${uid}/${slug}`,
     file: `${uid}.png`,
     requiredPanels,
-    firstWindowPanels: selectFirstWindowPanels(panels).map(summarizeFirstWindowPanel),
+    firstWindowPanels: selectContainmentPanels(panels, CONFIG.navigationOnly).map(summarizeFirstWindowPanel),
     requiredTerminalPanelIds:
       uid === "bioetl-silver-reject-explorer" ? [13] : [],
     collapsedRowTitles,
   };
+}
+
+function selectContainmentPanels(panels, navigationOnly) {
+  const firstWindow = selectFirstWindowPanels(panels);
+  return navigationOnly ? firstWindow.filter(panel => panel.id === 1000) : firstWindow;
 }
 
 function listDashboardsFromRepo() {
@@ -2685,6 +2690,7 @@ module.exports = {
   pngEvidence,
   scrollerDelta,
   selectFirstWindowPanels,
+  selectContainmentPanels,
   summarizeFirstWindowPanel,
   validateContainmentManifest,
   CONTAINMENT_TOLERANCE_PX,

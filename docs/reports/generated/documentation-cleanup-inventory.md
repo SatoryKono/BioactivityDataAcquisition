@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3629 |
-| Tracked doc-like files | 3629 |
+| Doc-like files | 3630 |
+| Tracked doc-like files | 3630 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 7 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3629 |
+| tracked | 3630 |
 
 ## Lifecycle Counts
 
@@ -29,7 +29,7 @@
 | active_quality_baseline | 70 |
 | closeout_evidence | 89 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 6 |
+| docs_reports_curated_or_historical_report | 7 |
 | docs_reports_generated_or_route_owned | 7 |
 | docs_reports_retention_sensitive_evidence | 21 |
 | generated_skill_reference_mirror | 2 |
@@ -62,7 +62,7 @@
 | Canonical | 73 |
 | Deprecated | 2 |
 | Generated | 1026 |
-| Working | 1490 |
+| Working | 1491 |
 
 ## Surface Families
 
@@ -73,14 +73,14 @@
 | canonical | 73 |
 | duplicate | 2 |
 | generated | 1026 |
-| working | 1490 |
+| working | 1491 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 336 |
-| archive-after-migration | 987 |
+| archive-after-migration | 988 |
 | generate-automatically | 1026 |
 | keep | 1270 |
 | reconcile-with-github-state | 8 |
@@ -110,6 +110,7 @@
 | `docs/reports/dashboard-ux-checks/2026-08-16.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-17.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-09-07.md` | Working | 0 | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-09-13.md` | Working | 1 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
 | `reports/ai/agent-tools/RF005-CLOSEOUT-2026-08-09.md` | Working | 0 | archive-after-migration |
 | `reports/ai/agent-tools/compatibility/rf005-platform-matrix-2026-08-09.json` | Working | 0 | archive-after-migration |
@@ -169,7 +170,6 @@
 | `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-10/audit.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-10/findings.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-10/plan.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-10/report.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -311,6 +311,7 @@
 | `docs/reports/dashboard-ux-checks/2026-08-16.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-17.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-09-07.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-09-13.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/evidence/INDEX.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/README.md` | tracked | docs_reports_retention_sensitive_evidence | keep |

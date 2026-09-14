@@ -48,6 +48,22 @@ def _node_eval(program: str) -> str:
     return result.stdout.strip()
 
 
+def test_navigation_capture_scopes_containment_without_weakening_full_capture() -> None:
+    output = _node_eval("""
+const {selectContainmentPanels} = require(process.argv[1]);
+const panels = [
+  {id:1000,type:'text',gridPos:{y:0,h:3,w:24,x:0}},
+  {id:42,type:'table',gridPos:{y:3,h:11,w:24,x:0}},
+  {id:43,type:'table',gridPos:{y:20,h:5,w:24,x:0}},
+];
+console.log(JSON.stringify({
+  navigation:selectContainmentPanels(panels,true).map(p=>p.id),
+  full:selectContainmentPanels(panels,false).map(p=>p.id),
+}));
+""")
+    assert json.loads(output) == {"navigation": [1000], "full": [1000, 42]}
+
+
 def test_browser_cleanup_preserves_ownership_and_disposal_order() -> None:
     output = _node_eval("""
 const {closeCaptureBrowser} = require(process.argv[1]);
