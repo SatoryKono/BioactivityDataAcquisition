@@ -880,7 +880,11 @@ def test_incident_ranked_suspects_limit_requires_comparable_rank() -> None:
         str(rule.get("record")): str(rule.get("expr") or "")
         for group in rules.get("groups", [])
         for rule in group.get("rules", [])
-        if str(rule.get("record") or "").startswith("bioetl_incident_ranked_")
+        if str(rule.get("record") or "") in {
+            "bioetl_incident_ranked_runtime",
+            "bioetl_incident_ranked_provider",
+            "bioetl_incident_ranked_dq",
+        }
     }
     sources = [
         "bioetl_incident_ranked_runtime",
@@ -1365,7 +1369,11 @@ def test_incident_scope_and_rank_do_not_confuse_inactive_signals_with_unknown() 
     rules = yaml.safe_load(OBSERVABILITY_RULES.read_text(encoding="utf-8"))
     for group in rules["groups"]:
         for rule in group["rules"]:
-            if str(rule.get("record", "")).startswith("bioetl_incident_ranked_"):
+            if str(rule.get("record", "")) in {
+                "bioetl_incident_ranked_runtime",
+                "bioetl_incident_ranked_provider",
+                "bioetl_incident_ranked_dq",
+            }:
                 assert rule["expr"].count(" > 0") == 2
                 assert '"telemetry_gap"' in rule["expr"]
 

@@ -368,7 +368,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Inspect Scope & Evidence",
-        "content": "<div style=\"padding:0 6px;line-height:1.15;font-size:16px;white-space:normal;overflow-wrap:anywhere\">CURRENT · Pipeline / Run Type readiness is shown at right.<br>SELECTED RUN · Replay requires complete Trust and retention evidence below. INCOMPLETE or UNKNOWN blocks replay.</div>",
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;font-size:16px;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">CURRENT · Pipeline / Run Type readiness is shown at right.<br>SELECTED RUN · Do not replay while Trust is INCOMPLETE or UNKNOWN. Check retention below.</div>",
         "dataLinks": [
           {
             "title": "Open Replay Safety Diagnostics",
@@ -676,7 +676,7 @@
               },
               {
                 "id": "noValue",
-                "value": "UNKNOWN"
+                "value": "—"
               },
               {
                 "id": "custom.cellOptions",
