@@ -86,6 +86,33 @@ def test_ensure_required_series_exports_measured_zeros() -> None:
         )
         == 0.0
     )
+    assert (
+        _sample_value(
+            "bioetl_control_plane_checkpoint_present",
+            {"pipeline": _PIPELINE, "run_type": _RUN_TYPE},
+        )
+        == 0.0
+    )
+
+
+def test_ensure_required_series_skips_unknown_and_blank_pipeline() -> None:
+    ensure_required_control_plane_publication_series(
+        pipeline="unknown",
+        run_type=_RUN_TYPE,
+    )
+    ensure_required_control_plane_publication_series(
+        pipeline="   ",
+        run_type=_RUN_TYPE,
+    )
+    with pytest.raises(AssertionError, match="missing sample"):
+        _sample_value(
+            "bioetl_control_plane_ledger_appends_total",
+            {
+                "pipeline": "unknown",
+                "event_type": "run_finished",
+                "status": "success",
+            },
+        )
 
 
 def test_ensure_required_series_does_not_clobber_integrity_ratio() -> None:

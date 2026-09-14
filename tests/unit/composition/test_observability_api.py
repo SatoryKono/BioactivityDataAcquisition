@@ -173,6 +173,50 @@ def test_push_metrics_to_gateway_seeds_required_series_before_integrity_refresh(
     refresh.assert_called_once()
 
 
+def test_push_metrics_to_gateway_seeds_pipeline_names_with_incremental_default() -> (
+    None
+):
+    metrics_service = mock.Mock()
+    metrics_service.push_to_gateway.return_value = mock.Mock(success=True)
+    seeded: list[tuple[str, str]] = []
+    order: list[str] = []
+
+    def _seed(*, pipeline: str, run_type: str) -> None:
+        seeded.append((pipeline, run_type))
+        order.append("seed")
+
+    def _refresh(*_args: object, **_kwargs: object) -> None:
+        order.append("refresh")
+
+    with (
+        mock.patch.object(
+            observability_api,
+            "get_metrics_service",
+            return_value=metrics_service,
+        ),
+        mock.patch.object(
+            observability_api,
+            "refresh_control_plane_integrity_metrics",
+            side_effect=_refresh,
+        ),
+        mock.patch(
+            "bioetl.infrastructure.observability.required_publication_series."
+            "ensure_required_control_plane_publication_series",
+            _seed,
+        ),
+    ):
+        observability_api.push_metrics_to_gateway(
+            run_label="bioetl",
+            pipeline_names=("chembl_activity", "chembl_assay"),
+        )
+
+    assert seeded == [
+        ("chembl_activity", "incremental"),
+        ("chembl_assay", "incremental"),
+    ]
+    assert order == ["seed", "seed", "refresh"]
+
+
 def test_push_metrics_to_gateway_does_not_bootstrap_fallback_logger() -> None:
     metrics_service = mock.Mock()
     metrics_service.logger = mock.sentinel.logger

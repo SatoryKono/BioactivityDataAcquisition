@@ -174,7 +174,9 @@ def push_metrics_to_gateway(
             if isinstance(name, str) and name.strip()
         )
         seed_run_type = (
-            run_type if isinstance(run_type, str) and run_type.strip() else "unknown"
+            run_type.strip()
+            if isinstance(run_type, str) and run_type.strip()
+            else "incremental"
         )
         for seed_pipeline in seed_pipelines:
             ensure_required_control_plane_publication_series(
