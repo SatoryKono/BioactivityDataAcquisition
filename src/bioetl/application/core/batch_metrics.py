@@ -42,9 +42,7 @@ class BatchMetricsRecorderService:
             if pipeline_metrics is not None
             else PipelineMetricsRecorder(metrics, pipeline_label)
         )
-        # Run-scoped total (observability / diagnostics only).
         self._error_count = 0
-        # Per-batch total used by DQ hard/soft threshold evaluation.
         self._batch_error_count = 0
 
     @property
@@ -248,5 +246,4 @@ class BatchMetricsRecorderService:
 
 # Compatibility alias retained for legacy imports.
 BatchMetricsRecorder = BatchMetricsRecorderService
-
 __all__ = ["BatchMetricsRecorder", "BatchMetricsRecorderService"]

@@ -85,7 +85,7 @@ def get_imports_from_file(file_path: Path) -> list[str]:
     Returns:
         List of imported module paths.
     """
-    with open(file_path) as f:
+    with open(file_path, encoding="utf-8") as f:
         try:
             tree = ast.parse(f.read(), filename=str(file_path))
         except SyntaxError:
@@ -104,7 +104,7 @@ def get_imports_from_file(file_path: Path) -> list[str]:
 
 
 def _parsed_import_tree(file_path: Path) -> ast.AST | None:
-    with open(file_path) as f:
+    with open(file_path, encoding="utf-8") as f:
         try:
             return ast.parse(f.read(), filename=str(file_path))
         except SyntaxError:

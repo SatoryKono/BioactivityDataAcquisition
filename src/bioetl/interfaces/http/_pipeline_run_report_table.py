@@ -290,6 +290,9 @@ def _summary_rows_pipeline_run_report(
             "run_id": run_id,
             "status": state,
             "coverage_chip": "N/A",
+            "covers_selected_run": (
+                "select_run" if status == "unresolved_scope" else "not_found"
+            ),
             "range_action_status": "Choose a run in Run Explorer"
             if status == "unresolved_scope"
             else "No persisted report for this run",

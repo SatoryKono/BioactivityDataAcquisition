@@ -19,7 +19,7 @@ if TYPE_CHECKING:
         RunLedgerService,
     )
     from bioetl.domain.config import PipelineConfig
-    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.context import PipelineContext, PipelineRunContext
     from bioetl.domain.ports import ContractEvidenceRecorderPort, LoggerPort
 
 _RUN_FAILURE_EXCEPTIONS = (
@@ -48,6 +48,9 @@ class _RunnerFinalizeHost(Protocol):
     def _contract_evidence_recorder(self) -> ContractEvidenceRecorderPort | None: ...
 
     @property
+    def _contract_evidence_context(self) -> PipelineRunContext | None: ...
+
+    @property
     def _lock_runtime_service(self) -> LockRuntimeService: ...
 
     @property
@@ -72,6 +75,9 @@ def finalize_contract_evidence(runner: _RunnerFinalizeHost) -> None:
     manifest_id = runner.manifest_id
     if recorder is None or not manifest_id:
         return
+    launch = runner._contract_evidence_context
+    if launch is None:
+        raise RuntimeError("Contract evidence requires the manifest-bound launch context")
     from bioetl.application.services.control_plane.manifest.contract_evidence import (
         build_runtime_contract_evidence,
     )
@@ -84,9 +90,9 @@ def finalize_contract_evidence(runner: _RunnerFinalizeHost) -> None:
         manifest_id,
         build_runtime_contract_evidence(
             manifest_id=manifest_id,
-            contract_ref=getattr(runner._context, "contract_ref", None),
-            contract_schema_hash=getattr(runner._context, "contract_schema_hash", None),
-            resume_requested=bool(getattr(runner._context, "resume", False)),
+            contract_ref=launch.contract_ref,
+            contract_schema_hash=launch.contract_schema_hash,
+            resume_requested=launch.resume,
             lock_owner_id=lock_owner_id,
         ),
     )

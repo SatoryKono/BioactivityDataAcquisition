@@ -6,6 +6,10 @@ import re
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Protocol
 
+from bioetl.infrastructure.observability._metrics_gateway_snapshots import (
+    MetricCollector,
+    partition_snapshots,
+)
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 if TYPE_CHECKING:
@@ -32,8 +36,8 @@ class _PublicationMetric(Protocol):
     def labels(self, **labels: str) -> _BoundPublicationMetric: ...
 
 
-class _RestrictableRegistry(Protocol):
-    def restricted_registry(self, metric_names: tuple[str, ...]) -> object: ...
+class _RestrictableRegistry(MetricCollector, Protocol):
+    def restricted_registry(self, metric_names: tuple[str, ...]) -> MetricCollector: ...
 
 
 def _emit_metrics_publication_event(
@@ -114,13 +118,19 @@ def publish_metrics_to_gateway(
     )
 
     try:
-        push_gateway(
-            gateway,
-            job=effective_run_label,
-            registry=selected_registry,
-            grouping_key=safe_grouping_key,
-            timeout=_PUSHGATEWAY_PUBLICATION_TIMEOUT_SECONDS,
+        snapshots = (
+            [(effective_run_label, safe_grouping_key, selected_registry)]
+            if safe_grouping_key
+            else partition_snapshots(selected_registry, job=effective_run_label)
         )
+        for snapshot_job, snapshot_group, snapshot in snapshots:
+            push_gateway(
+                gateway,
+                job=snapshot_job,
+                registry=snapshot,
+                grouping_key=snapshot_group,
+                timeout=_PUSHGATEWAY_PUBLICATION_TIMEOUT_SECONDS,
+            )
         logger.info(
             "Metrics pushed to gateway",
             gateway_class="https" if gateway.startswith("https://") else "http",

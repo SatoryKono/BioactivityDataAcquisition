@@ -144,6 +144,24 @@ export BIOETL_OBSERVABILITY__METRICS_ENABLED=false
 > `delete_metrics_from_gateway` / `delete_from_gateway`. `run_id`,
 > `record_id`, `payload_hash`, raw paths/URLs и другие forensic anchors
 > остаются в manifest/ledger/CLI/explorer surfaces.
+
+Полный process registry публикуется отдельными заменяемыми снимками для
+каждой пары `pipeline` / `run_type`. Метрики только с `pipeline` (например,
+ledger) имеют одну отдельную группу, чтобы не дублироваться при публикации
+workflow. Метрики с label `workflow` используют job
+`bioetl_workflow_<workflow>`; обычный pipeline run не заменяет эту группу.
+Названия workflow берутся из конфигурации; Run ID в job/grouping не добавляется.
+Повторный `incremental` поэтому сохраняет опубликованные серии `backfill`.
+Проверка integrity сохранённых manifest/ledger публикуется в отдельный job
+`bioetl_control_plane`: её сканирование других типов запуска не заменяет
+их runtime-снимки.
+Pushgateway сохраняет последние снимки: наличие серии само по себе не доказывает
+свежесть запуска, для этого проверяются реальные timestamps и артефакты.
+
+Overview связывает общий статус многопайплайнового workflow с его pipeline
+через `bioetl_workflow_pipeline_expected`, поскольку его `pipeline_context`
+равен `unknown`. Без опубликованного результата workflow статус остаётся
+`UNKNOWN`; успешный самостоятельный pipeline не подменяет результат workflow.
 >
 > Адрес задаётся через `BIOETL_PUSHGATEWAY_URL`: для процесса на хосте
 > `http://localhost:9091`, в общей Docker-сети — `http://pushgateway:9091`.

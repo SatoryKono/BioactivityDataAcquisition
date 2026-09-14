@@ -337,8 +337,8 @@ def test_provider_circuit_breaker_panels_use_adapter_variable() -> None:
     )
 
     for panel_title in (
-        "Monitor Circuit-Breaker State",
-        "Track Circuit-Breaker Trips",
+        "Monitor Global Circuit-Breaker State",
+        "Track Global Circuit-Breaker Trips",
     ):
         panel = next(
             (

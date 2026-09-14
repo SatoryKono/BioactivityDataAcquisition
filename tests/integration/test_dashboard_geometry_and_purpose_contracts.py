@@ -453,7 +453,7 @@ def test_first_screen_budget_excludes_nav_and_named_shell() -> None:
     data = {
         "id": 9401,
         "type": "stat",
-        "title": "Monitor Replay Readiness",
+        "title": "Monitor Current Readiness",
         "gridPos": {"x": 18, "y": 4, "w": 6, "h": 4},
     }
     assert (

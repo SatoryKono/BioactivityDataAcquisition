@@ -32,7 +32,7 @@ anti_patterns:
 - Starting implement mode without SCOPE
 - Skipping post-change validation after writes
 - One SHA copied between telemetry and test-governance
-- lowercase git-style `merge origin/main` (use `merge(main): include #<n> <topic>`)
+- 'lowercase git-style `merge origin/main` (use `merge(main): include #<n> <topic>`)'
 - python -m scripts.engineering.qa.refresh_governance_artifacts for ci-rebind
 - Extra worktree add for a branch already listed by `git worktree list`
 tags:

@@ -206,6 +206,12 @@ groups:
           input: workflow
         expr: >-
           max by (pipeline, run_type) (
+            group by (workflow, pipeline, run_type) (bioetl_workflow_pipeline_expected)
+            * on (workflow) group_left()
+            max by (workflow) (bioetl_workflow_current_status)
+          )
+          or on (pipeline, run_type)
+          max by (pipeline, run_type) (
             label_replace(
               label_replace(
                 bioetl_workflow_current_status,
@@ -220,7 +226,7 @@ groups:
               "(.+)"
             )
           )
-          or label_replace(
+          or on (pipeline, run_type) label_replace(
             (
               bioetl_overview_pipeline_run_type_universe
               unless on (pipeline, run_type) max by (pipeline, run_type) (
@@ -253,33 +259,45 @@ groups:
         labels:
           input: runtime
         expr: >-
-          bioetl_runtime_current_status_trusted
-          or ((bioetl_overview_pipeline_run_type_universe
-            unless on(pipeline, run_type) bioetl_runtime_current_status_trusted) * 3)
+          max by (pipeline, run_type) (
+            label_replace((bioetl_runtime_current_status_trusted
+                    or ((bioetl_overview_pipeline_run_type_universe
+                      unless on(pipeline, run_type) bioetl_runtime_current_status_trusted) * 3)), "verdict_source", "measured", "", "")
+            or label_replace((bioetl_scope_publication_status), "verdict_source", "publication", "", "")
+          )
+
       - record: bioetl_l0_input_status_selected
         labels:
           input: dq
         expr: >-
-          bioetl_l0_input_status{input="dq"}
-          or label_replace(
-            (
-              bioetl_overview_pipeline_run_type_universe
-              unless on (pipeline, run_type) bioetl_l0_input_status{input="dq"}
-            ) * 3,
-            "input",
-            "dq",
-            "",
-            ""
+          max by (pipeline, run_type) (
+            label_replace((bioetl_l0_input_status{input="dq"}
+                    or label_replace(
+                      (
+                        bioetl_overview_pipeline_run_type_universe
+                        unless on (pipeline, run_type) bioetl_l0_input_status{input="dq"}
+                      ) * 3,
+                      "input",
+                      "dq",
+                      "",
+                      ""
+                    )), "verdict_source", "measured", "", "")
+            or label_replace((bioetl_scope_publication_status), "verdict_source", "publication", "", "")
           )
+
       - record: bioetl_l0_input_status_selected
         labels:
           input: control_plane
         expr: >-
-          (bioetl_l0_input_status{input="control_plane"} == 2)
-          or on(pipeline, run_type) (bioetl_l0_input_status{input="control_plane"}
-            and on(pipeline, run_type) (bioetl_control_plane_telemetry_missing_5m == 0))
-          or on(pipeline, run_type) ((bioetl_overview_pipeline_run_type_universe
-            unless on(pipeline, run_type) (bioetl_control_plane_telemetry_missing_5m == 0)) * 3)
+          max by (pipeline, run_type) (
+            label_replace(((bioetl_l0_input_status{input="control_plane"} == 2)
+                    or on(pipeline, run_type) (bioetl_l0_input_status{input="control_plane"}
+                      and on(pipeline, run_type) (bioetl_control_plane_telemetry_missing_5m == 0))
+                    or on(pipeline, run_type) ((bioetl_overview_pipeline_run_type_universe
+                      unless on(pipeline, run_type) (bioetl_control_plane_telemetry_missing_5m == 0)) * 3)), "verdict_source", "measured", "", "")
+            or label_replace((bioetl_scope_publication_status), "verdict_source", "publication", "", "")
+          )
+
       - record: bioetl_l0_input_status_selected
         labels:
           input: provider
@@ -296,32 +314,40 @@ groups:
         labels:
           input: workflow
         expr: >-
-          bioetl_l0_input_status{input="workflow"}
-          or label_replace(
-            (
-              bioetl_overview_pipeline_run_type_universe
-              unless on (pipeline, run_type) bioetl_l0_input_status{input="workflow"}
-            ) * 3,
-            "input",
-            "workflow",
-            "",
-            ""
+          max by (pipeline, run_type) (
+            label_replace((bioetl_l0_input_status{input="workflow"}
+                    or label_replace(
+                      (
+                        bioetl_overview_pipeline_run_type_universe
+                        unless on (pipeline, run_type) bioetl_l0_input_status{input="workflow"}
+                      ) * 3,
+                      "input",
+                      "workflow",
+                      "",
+                      ""
+                    )), "verdict_source", "measured", "", "")
+            or label_replace((bioetl_scope_publication_status or bioetl_workflow_publication_scope_status), "verdict_source", "publication", "", "")
           )
+
       - record: bioetl_l0_input_status_selected
         labels:
           input: gold
         expr: >-
-          bioetl_l0_input_status{input="gold"}
-          or label_replace(
-            (
-              bioetl_overview_pipeline_run_type_universe
-              unless on (pipeline, run_type) bioetl_l0_input_status{input="gold"}
-            ) * 3,
-            "input",
-            "gold",
-            "",
-            ""
+          max by (pipeline, run_type) (
+            label_replace((bioetl_l0_input_status{input="gold"}
+                    or label_replace(
+                      (
+                        bioetl_overview_pipeline_run_type_universe
+                        unless on (pipeline, run_type) bioetl_l0_input_status{input="gold"}
+                      ) * 3,
+                      "input",
+                      "gold",
+                      "",
+                      ""
+                    )), "verdict_source", "measured", "", "")
+            or label_replace((bioetl_scope_publication_status), "verdict_source", "publication", "", "")
           )
+
       - record: bioetl_l0_next_action_route
         labels:
           action_target: runtime
@@ -657,6 +683,10 @@ groups:
         expr: >-
           max by (pipeline, run_type) (
             bioetl_runtime_current_status_scoped
+            or label_replace(
+              bioetl_scope_publication_status,
+              "runtime_status_source", "publication_stale_or_missing", "", ""
+            )
             or label_replace(
               (bioetl_runtime_stage_evidence_status > bool 0) * 3,
               "runtime_status_source", "stage_evidence_incomplete", "", ""

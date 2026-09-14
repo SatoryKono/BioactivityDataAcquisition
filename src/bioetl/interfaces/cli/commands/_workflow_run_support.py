@@ -242,6 +242,13 @@ def _workflow_metrics_pipeline_name(config: WorkflowConfig) -> str | None:
 
 def _workflow_metrics_run_type(config: WorkflowConfig) -> str | None:
     """Resolve the effective workflow run_type for metrics publication."""
+    pipeline_steps = getattr(config, "pipeline_steps", ())
+    if pipeline_steps:
+        run_types = {
+            config.defaults.merged_with(step.run_options).run_type or "incremental"
+            for step in pipeline_steps
+        }
+        return next(iter(run_types)) if len(run_types) == 1 else None
     single_pipeline_name = getattr(config, "single_pipeline_name", None)
     if not isinstance(single_pipeline_name, str) or not single_pipeline_name:
         return None

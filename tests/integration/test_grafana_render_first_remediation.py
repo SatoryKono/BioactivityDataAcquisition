@@ -829,11 +829,7 @@ def test_incident_ranked_suspects_uses_one_comparable_value_column() -> None:
         str(target.get("expr") or "").strip() for target in suspects.get("targets", [])
     ]
     assert len(exprs) == 1
-    assert exprs[0].split("(", 3)[3].split(")", 1)[0].split(" or ") == [
-        "bioetl_incident_ranked_runtime",
-        "bioetl_incident_ranked_provider",
-        "bioetl_incident_ranked_dq",
-    ]
+    assert "bioetl_incident_ranked_evidence" in exprs[0]
     assert "merge" not in transform_ids
     assert suspects["targets"][0]["format"] == "table"
     assert suspects["targets"][0]["instant"] is True
@@ -878,27 +874,28 @@ def test_incident_ranked_suspects_limit_requires_comparable_rank() -> None:
         str(target.get("expr") or "").strip() for target in suspects.get("targets", [])
     ]
     assert len(exprs) == 1
-    sources = exprs[0].split("(", 3)[3].split(")", 1)[0].split(" or ")
-    assert sources == [
-        "bioetl_incident_ranked_runtime",
-        "bioetl_incident_ranked_provider",
-        "bioetl_incident_ranked_dq",
-    ]
+    assert "bioetl_incident_ranked_evidence" in exprs[0]
     rules = yaml.safe_load(OBSERVABILITY_RULES.read_text(encoding="utf-8"))
     recorded = {
         str(rule.get("record")): str(rule.get("expr") or "")
         for group in rules.get("groups", [])
         for rule in group.get("rules", [])
-        if rule.get("record") in set(sources)
+        if str(rule.get("record") or "").startswith("bioetl_incident_ranked_")
     }
-    assert set(recorded) == set(sources)
-    assert any("* 2" in expr for expr in recorded.values())
+    sources = [
+        "bioetl_incident_ranked_runtime",
+        "bioetl_incident_ranked_provider",
+        "bioetl_incident_ranked_dq",
+    ]
+    assert set(sources) <= set(recorded)
+    domain = {name: recorded[name] for name in sources}
+    assert any("* 2" in expr for expr in domain.values())
     assert all(
         'severity="failing"' in expr or 'severity="crit"' in expr
-        for expr in recorded.values()
+        for expr in domain.values()
     )
-    assert all("telemetry_gap" in expr for expr in recorded.values())
-    assert all(" > 0" not in expr.split("topk", 1)[0] for expr in recorded.values())
+    assert all("telemetry_gap" in expr for expr in domain.values())
+    assert all(" > 0" not in expr.split("topk", 1)[0] for expr in domain.values())
 
 
 def test_incident_alert_history_has_readable_full_width_layout() -> None:
@@ -1364,12 +1361,16 @@ def test_incident_scope_and_rank_do_not_confuse_inactive_signals_with_unknown() 
         },
     ]
     assert "GLOBAL" in _panel(incident, 9400)["options"]["content"]
-    assert "UNVERIFIED" in panel["targets"][0]["expr"]
+    assert "UNVERIFIED" in panel["description"]
     assert "same GLOBAL scope" in panel["description"]
     rules = yaml.safe_load(OBSERVABILITY_RULES.read_text(encoding="utf-8"))
     for group in rules["groups"]:
         for rule in group["rules"]:
-            if str(rule.get("record", "")).startswith("bioetl_incident_ranked_"):
+            if str(rule.get("record", "")) in {
+                "bioetl_incident_ranked_runtime",
+                "bioetl_incident_ranked_provider",
+                "bioetl_incident_ranked_dq",
+            }:
                 assert rule["expr"].count(" > 0") == 2
                 assert '"telemetry_gap"' in rule["expr"]
 

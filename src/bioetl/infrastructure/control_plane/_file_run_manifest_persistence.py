@@ -48,15 +48,6 @@ def emit_manifest_write_metric(
         return
     metrics.increment_counter(
         "bioetl_control_plane_manifest_writes_total",
-        0,
-        {
-            "pipeline": pipeline,
-            "run_type": run_type,
-            "status": "failed" if status == "success" else "success",
-        },
-    )
-    metrics.increment_counter(
-        "bioetl_control_plane_manifest_writes_total",
         1,
         {"pipeline": pipeline, "run_type": run_type, "status": status},
     )
