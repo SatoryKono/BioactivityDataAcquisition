@@ -97,6 +97,26 @@ class TestCreateBronzeWriter:
         assert call_kwargs["runtime_services"].save_metadata is True
         assert call_kwargs["runtime_services"].lineage_store is not None
 
+    def test_nested_bronze_path_uses_explicit_control_plane_root(
+        self, tmp_path: Path
+    ) -> None:
+        writer_cls = MagicMock()
+        control_path = tmp_path / "output" / "control" / "lineage"
+        create_bronze_writer(
+            writer_cls=writer_cls,
+            base_path=tmp_path / "output" / "bronze" / "chembl" / "target",
+            config=SimpleNamespace(save_json=False, save_metadata=True),
+            logger=MagicMock(),
+            metrics=MagicMock(),
+            tracing=NoOpTracing(),
+            metadata_coordinator=MagicMock(),
+            audit=NoOpAudit(),
+            flat_structure=True,
+            lineage_base_path=control_path,
+        )
+        store = writer_cls.call_args.kwargs["runtime_services"].lineage_store
+        assert store.base_path == control_path
+
     def test_uses_provided_tracing(self) -> None:
         """Uses provided TracingPort instead of NoOpTracing."""
         writer_cls = MagicMock()

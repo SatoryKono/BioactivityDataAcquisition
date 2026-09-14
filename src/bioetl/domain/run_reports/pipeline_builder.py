@@ -98,6 +98,10 @@ def build_pipeline_run_report(
     resolved_contract = _resolve_contract_summary(
         blocks.contract_summary, reasons, layers
     )
+    rejection_details = acc.snapshot_gold_filter_rejections()
+    if rejection_details:
+        resolved_contract = dict(resolved_contract or {})
+        resolved_contract["rejection_details"] = rejection_details
     resolved_performance = _resolve_performance(
         performance=blocks.performance,
         identity=identity,
@@ -261,9 +265,9 @@ def _resolve_top_reasons(
         ),
         (
             layers.gold_excluded_by_contract,
-            "gold_contract_schema_failure",
+            "gold_filter_exclusion",
             "excluded_by_contract",
-            "contract",
+            "semantic",
         ),
     )
     return tuple(

@@ -481,12 +481,12 @@ def test_workflow_run_accepts_pipeline_style_runtime_overrides(
     )
 
 
-def test_workflow_run_scopes_delete_orphans_when_limit_follows_extracts(
+def test_workflow_run_rejects_delete_orphans_when_limit_follows_extracts(
     cli_runner: CliRunner,
     monkeypatch: Any,
     tmp_path: Path,
 ) -> None:
-    """CLI limits must scope delete_orphans to this run before execution."""
+    """CLI limits cannot prove referential completeness, even within one run."""
     import bioetl.interfaces.cli.commands.workflow as workflow_cmd
 
     fake_service = _FakeWorkflowRunnerService()
@@ -514,16 +514,9 @@ def test_workflow_run_scopes_delete_orphans_when_limit_follows_extracts(
         ],
     )
 
-    assert result.exit_code == 0, result.output
-    received = fake_service.received_config
-    assert isinstance(received, WorkflowConfig)
-    steps = {step.step_id: step for step in received.steps}
-    assert steps["chembl_assay_ingest"].run_options.limit == 1000
-    assert steps["chembl_target_ingest"].run_options.limit == 1000
-    reconcile = steps["reconcile_assay_target_orphans"]
-    assert reconcile.config is not None
-    assert reconcile.config["action"] == "delete_orphans"
-    assert reconcile.config["source_scope"] == "current_run"
+    assert result.exit_code != 0
+    assert "independently bounded extracts" in result.output
+    assert fake_service.received_config is None
 
 
 def test_workflow_run_forwards_baseline_resume_repair_steps(

@@ -117,6 +117,7 @@ def _mapping_execution(raw: Mapping[str, object]) -> _NormalizedExecution:
         error_message=raw.get("error_message"),
         top_reasons=raw.get("top_reasons") or (),
         skip_reason=raw.get("skip_reason"),
+        reconciliation=_reconciliation_details(raw.get("payload")),
     )
 
 
@@ -143,11 +144,38 @@ def _object_execution(raw: object) -> _NormalizedExecution:
         error_message=getattr(raw, "error_message", None),
         top_reasons=getattr(raw, "top_reasons", ()) or (),
         skip_reason=getattr(raw, "skip_reason", None),
+        reconciliation=_reconciliation_details(getattr(raw, "payload", None)),
     )
 
 
 def _optional_text(value: object) -> str | None:
     return None if value in (None, "") else str(value)
+
+
+def _reconciliation_details(payload: object) -> dict[str, object] | None:
+    if not isinstance(payload, Mapping):
+        return None
+    if payload.get("transform_name") != "reconcile_foreign_keys":
+        return None
+    fields = (
+        "source_table",
+        "reference_table",
+        "source_layer",
+        "mutation_layer",
+        "source_scope",
+        "source_snapshot",
+        "source_run_ids",
+        "scanned_rows",
+        "retained_rows",
+        "orphan_rows_deleted",
+        "mutation_mode",
+        "mutated",
+        "dry_run",
+        "would_mutate",
+        "quarantine_rows_written",
+        "quarantine_batch_id",
+    )
+    return {key: payload[key] for key in fields if key in payload}
 
 
 def _default_report_ref(
@@ -177,6 +205,7 @@ def _normalized_row(
     error_message: object,
     top_reasons: object = (),
     skip_reason: object = None,
+    reconciliation: dict[str, object] | None = None,
 ) -> _NormalizedExecution:
     name = _optional_text(pipeline_name)
     run_id = _optional_text(pipeline_run_id)
@@ -202,6 +231,7 @@ def _normalized_row(
         error_message=_optional_text(error_message),
         top_reasons=reasons,
         skip_reason=_optional_text(skip_reason),
+        reconciliation=reconciliation,
     )
     return _NormalizedExecution(row=row, pipeline_name=name)
 
@@ -251,6 +281,43 @@ def _build_totals(
         "records_extracted_sum": sum(row.records_extracted for row in rows),
         "records_silver_sum": _optional_sum(rows, "records_silver"),
         "records_gold_sum": _optional_sum(rows, "records_gold"),
+        **_reconciliation_totals(rows),
+    }
+
+
+def _reconciliation_totals(
+    rows: Sequence[WorkflowExecutionRow],
+) -> dict[str, object]:
+    outcomes = [row for row in rows if row.reconciliation is not None]
+    if not outcomes:
+        return {}
+    final_by_table: dict[str, int | None] = {}
+    expired = 0
+    for row in outcomes:
+        details = row.reconciliation or {}
+        if details.get("source_layer") != "gold":
+            continue
+        table = str(details.get("source_table") or "unknown")
+        snapshot = details.get("source_snapshot")
+        measured = (
+            row.status.lower() in _SUCCESS
+            and not details.get("dry_run")
+            and details.get("source_scope") == "all_current"
+            and isinstance(snapshot, dict)
+            and isinstance(snapshot.get("current_rows"), int)
+            and details.get("mutation_mode") in {"gold_scd2_expiry", "no_op"}
+        )
+        final_by_table[table] = (
+            _as_int(snapshot["current_rows"])
+            if measured and isinstance(snapshot, dict)
+            else None
+        )
+        if details.get("mutation_mode") == "gold_scd2_expiry":
+            expired += _as_int(details.get("orphan_rows_deleted"))
+    return {
+        "records_gold_loaded_sum": _optional_sum(rows, "records_gold"),
+        "records_gold_expired_sum": expired,
+        "gold_current_after_reconciliation_by_table": final_by_table,
     }
 
 

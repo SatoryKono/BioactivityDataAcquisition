@@ -35,6 +35,7 @@ import pytest
 
 from bioetl.application.workflow.transforms.reconcile_foreign_keys import (
     _build_request,
+    _run_ids_from_upstream,
     build_reconcile_foreign_keys_executor,
 )
 from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
@@ -45,6 +46,16 @@ from bioetl.domain.workflow import TransformStepConfig, WorkflowTransformSpec
 
 
 pytestmark = pytest.mark.unit
+
+
+def test_source_run_ids_survive_intermediate_transforms() -> None:
+    assert _run_ids_from_upstream(
+        {
+            "transform": {"source_run_ids": ["child-a", "child-b", "child-a"]},
+            "pipeline": {"run_id": "child-b"},
+        },
+        workflow_run_id="workflow",
+    ) == ("workflow", "child-a", "child-b")
 
 
 @dataclass
@@ -235,6 +246,8 @@ def test_build_request_requires_source_and_reference_key_lists_together() -> Non
                 "source_table": "chembl_assay",
                 "reference_table": "chembl_target",
                 "source_keys": ["target_id"],
+                "source_run_ids": [],
+                "source_scope": "all_current",
                 "primary_keys": ["assay_id"],
                 "action": "delete_orphans",
             },
@@ -282,6 +295,8 @@ async def test_executor_returns_serializable_metadata_only() -> None:
         "reference_layer": "silver",
         "mutation_layer": "silver",
         "source_keys": ["target_id"],
+        "source_run_ids": [],
+        "source_scope": "all_current",
         "reference_keys": ["target_id"],
         "action": "delete_orphans",
         "nulls_equal": False,

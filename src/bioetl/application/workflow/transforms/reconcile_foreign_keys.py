@@ -57,6 +57,8 @@ def _build_reconcile_payload(
         "reference_layer": r.reference_layer,
         "mutation_layer": r.mutation_layer,
         "source_keys": list(request.source_keys or (request.source_key,)),
+        "source_run_ids": list(request.source_run_ids),
+        "source_scope": request.source_scope,
         "reference_keys": list(request.reference_keys or (request.reference_key,)),
         "action": r.action,
         "nulls_equal": request.nulls_equal,
@@ -73,6 +75,8 @@ def _build_reconcile_payload(
     }
     if r.dry_run and r.would_mutate:
         payload["mutation_blocked_reason"] = "workflow_dry_run"
+    if getattr(r, "source_snapshot", None) is not None:
+        payload["source_snapshot"] = dict(r.source_snapshot)
     return payload
 
 
@@ -278,6 +282,13 @@ def _run_ids_from_upstream(
     if workflow_run_id:
         collected.append(workflow_run_id)
     for payload in upstream_outputs.values():
+        if isinstance(payload, Mapping):
+            inherited = payload.get("source_run_ids", ())
+            if isinstance(inherited, (tuple, list)):
+                for item in inherited:
+                    value = str(item).strip()
+                    if value and value not in collected:
+                        collected.append(value)
         raw = getattr(payload, "run_id", None)
         if raw is None and isinstance(payload, Mapping):
             raw = payload.get("run_id")

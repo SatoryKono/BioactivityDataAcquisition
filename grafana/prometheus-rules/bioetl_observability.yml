@@ -791,12 +791,20 @@ groups:
         expr: ((max by (provider) (bioetl_provider_health_status_fresh == bool 0) * 2) + max by (provider) (bioetl_provider_health_status_fresh == bool 1) + (max by (provider) (bioetl_provider_health_status_fresh == bool 2) * 0)) or (max by (provider) (bioetl_provider_observed_universe) * 0 + 3) or (bioetl_provider_health_check_provider_universe_15m * 0 + 3)
       - record: bioetl_provider_current_status_info
         labels:
-          reason: missing_or_stale_health_status
-          source_state: unknown
+          reason: missing_health_status
+          source_state: missing
           completeness: incomplete
           scrape_present: "1"
           health_status_present: "0"
-        expr: ((max by (provider) (bioetl_provider_observed_universe) * 0 + 3) or (bioetl_provider_health_check_provider_universe_15m * 0 + 3)) unless on (provider) bioetl_provider_health_status_fresh
+        expr: ((max by (provider) (bioetl_provider_observed_universe) * 0 + 3) or (bioetl_provider_health_check_provider_universe_15m * 0 + 3)) unless on (provider) bioetl_provider_health_status
+      - record: bioetl_provider_current_status_info
+        labels:
+          reason: stale_health_status
+          source_state: stale
+          completeness: incomplete
+          scrape_present: "1"
+          health_status_present: "1"
+        expr: (max by (provider) (bioetl_provider_health_status) * 0 + 3) unless on (provider) bioetl_provider_health_status_fresh
       - record: bioetl_provider_current_status_info
         labels:
           reason: observed_health_status

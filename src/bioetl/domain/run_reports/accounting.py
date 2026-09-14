@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from collections.abc import Mapping
 from typing import TypeGuard, override
 
 from bioetl.domain.ports import StageAccountingPort
@@ -46,6 +47,32 @@ class StageAccountingAccumulator(StageAccountingSnapshotsMixin, StageAccountingP
         self._unmapped_reasons = 0
         self._instrumented_stages = instrumented_stages or _DEFAULT_INSTRUMENTED_STAGES
         self._touched_instrumented = False
+        self._gold_filter_rejections: dict[tuple[str, ...], int] = {}
+
+    def record_gold_filter_rejection(self, details: Mapping[str, object]) -> None:
+        """Count rule identities without persisting record values or raw errors."""
+        key = tuple(
+            str(details.get(field) or "unknown")[:128]
+            for field in ("reason_code", "rule_type", "field", "operator")
+        )
+        if (
+            key not in self._gold_filter_rejections
+            and len(self._gold_filter_rejections) >= 64
+        ):
+            key = ("other", "other", "other", "other")
+        self._gold_filter_rejections[key] = self._gold_filter_rejections.get(key, 0) + 1
+
+    def snapshot_gold_filter_rejections(self) -> list[dict[str, object]]:
+        """Return deterministic bounded diagnostic counts, independent of totals."""
+        return [
+            dict(
+                zip(
+                    ("reason_code", "rule_type", "field", "operator"), key, strict=True
+                ),
+                count=count,
+            )
+            for key, count in sorted(self._gold_filter_rejections.items())
+        ]
 
     @property
     @override

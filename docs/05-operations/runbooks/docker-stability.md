@@ -146,3 +146,14 @@ partial sample.
 
 Docker remains optional under ADR-010; no secret-bearing file or technical-debt
 budget is changed by incident response.
+
+
+## Missing probe publication
+
+For a running local monitoring stack, publish an actual host observation with
+`python -m scripts.ops.runtime.docker.docker_runtime_probe --stack main --pushgateway-url http://127.0.0.1:9091`.
+Verify `bioetl_docker_runtime_probe_success` in Prometheus and the disappearance
+of `ALERTS{alertname="BioETLDockerRuntimeProbeMissing"}` after rule evaluation.
+A sample proves the probe ran at its recorded timestamp. Pushgateway retains
+samples, so sample presence alone does not establish continuing host health.
+Do not suppress the alert or alter its threshold to simulate recovery.

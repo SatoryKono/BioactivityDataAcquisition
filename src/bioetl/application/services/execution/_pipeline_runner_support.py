@@ -84,7 +84,7 @@ def _seed_gold_removals_from_metrics(
         accounting.record_removal(
             StageId.GOLD.value,
             outcome="excluded_by_contract",
-            reason_code="gold_contract_schema_failure",
+            reason_code="gold_filter_exclusion",
             count=excluded,
         )
 

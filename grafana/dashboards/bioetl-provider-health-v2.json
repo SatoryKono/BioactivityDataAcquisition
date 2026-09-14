@@ -854,7 +854,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Status reason and source_state for the selected provider (or worst three when provider=All). Enum 0=OK, 1=WARN, 2=CRIT, 3=UNKNOWN. missing_health_status means no health_status series — not a healthy fleet. Adapter filter is hidden; adapter=All unless a chip says otherwise. TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
+      "description": "CURRENT · Remote API evidence. Cached Bronze replay does not exercise the API and proves neither outage nor health. missing_health_status = no observation; stale_health_status = observation is not fresh. Both are UNKNOWN, never healthy. GLOBAL: independent of selected run.",
       "fieldConfig": {
         "defaults": {
           "color": {

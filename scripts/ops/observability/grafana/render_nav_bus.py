@@ -699,6 +699,16 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
             "selected-run Trust INCOMPLETE or UNKNOWN still blocks replay."
         )
     if 9418 in by_id:
+        for target in by_id[9418].get("targets", []):
+            url = target.get("url")
+            if isinstance(url, str):
+                target["url"] = url.replace("/manifest-validation?", "/trust-summary?")
+        by_id[9418]["description"] = (
+            "SELECTED RUN · Aggregate Trust includes manifest, lineage and retention "
+            "evidence for this run. ERROR wins; missing evidence is INCOMPLETE. "
+            "Processing success does not imply Trust OK. Inspect each validation "
+            "table for details. Backend unavailable means QUERY ERROR."
+        )
         by_id[9418]["options"]["footer"]["enablePagination"] = True
         for override in by_id[9418]["fieldConfig"]["overrides"]:
             if override.get("matcher", {}).get("options") == "reasons_text":
@@ -758,6 +768,16 @@ def _pin_collapsed_rows_from(
 
 
 def _layout_uid_first_window(panels: list[object], *, current_uid: str) -> None:
+    if current_uid == "bioetl-provider-health-v2":
+        for panel in _root_panels(panels):
+            if panel.get("id") == 9107:
+                panel["description"] = (
+                    "CURRENT · Remote API evidence. Cached Bronze replay does not "
+                    "exercise the API and proves neither outage nor health. "
+                    "missing_health_status = no observation; stale_health_status = "
+                    "observation is not fresh. Both are UNKNOWN, never healthy. "
+                    "GLOBAL: independent of selected run."
+                )
     if current_uid == "bioetl-control-plane-v1":
         _layout_control_plane_first_window(panels)
         return

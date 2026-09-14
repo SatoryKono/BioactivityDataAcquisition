@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import inspect
 from collections.abc import Awaitable, Iterable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, Protocol, cast, runtime_checkable
+
+from deltalake.exceptions import DeltaError
 
 from bioetl.domain.ports import (
     ClockPort,
@@ -64,6 +66,11 @@ class GoldReconciliationReaderProtocol(Protocol):
     ) -> Sequence[Mapping[str, object]] | Awaitable[Sequence[Mapping[str, object]]]:
         """Read Gold rows, optionally restricted to current SCD2 versions."""
         ...
+
+
+@runtime_checkable
+class GoldSnapshotReaderProtocol(Protocol):
+    async def read_reconciliation_snapshot(self, table_name: str) -> dict[str, int]: ...
 
 
 @runtime_checkable
@@ -170,16 +177,11 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             source_run_ids=request.source_run_ids,
         )
         if scope_disposition == "blocked":
-            self._log(
-                "warning",
+            raise ValueError(
                 "workflow foreign-key reconciliation current_run scope unbound; "
-                "falling back to all current source rows",
-                source_table=request.source_table,
-                reference_table=request.reference_table,
-                source_scope=request.source_scope,
+                "mutation blocked"
             )
-        else:
-            source_rows = scoped_rows
+        source_rows = scoped_rows
         if not source_rows:
             self._record_metrics(scanned=0, retained=0, deleted=0)
             self._log(
@@ -202,11 +204,26 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             )
 
         reference_rows = await self._read_reference_rows(request)
-        return await self._reconcile_loaded_rows(
+        result = await self._reconcile_loaded_rows(
             request,
             source_rows=source_rows,
             reference_rows=reference_rows,
         )
+        if request.source_layer == "gold" and isinstance(
+            self.gold_writer, GoldSnapshotReaderProtocol
+        ):
+            try:
+                snapshot = await self.gold_writer.read_reconciliation_snapshot(
+                    request.source_table
+                )
+                result = replace(result, source_snapshot=snapshot)
+            except (DeltaError, OSError, ValueError, TypeError) as exc:
+                self._log(
+                    "warning",
+                    "Reconciliation snapshot unavailable",
+                    error_type=type(exc).__name__,
+                )
+        return result
 
     def _record_metrics(self, *, scanned: int, retained: int, deleted: int) -> None:
         record_reconciliation_metrics(

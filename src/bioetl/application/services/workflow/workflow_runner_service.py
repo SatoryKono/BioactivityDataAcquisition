@@ -8,6 +8,7 @@ from datetime import datetime
 from time import perf_counter
 from typing import TYPE_CHECKING
 
+from bioetl.application.runtime_clock import current_utc_time
 from bioetl.application.services.execution.workflow_runner_step_execution import (
     TransformStepRuntimeOptions,
     apply_workflow_step_transition,
@@ -101,6 +102,8 @@ class WorkflowRunnerService:
         created_at_factory: Callable[[], datetime] | None = None,
     ) -> WorkflowRunExecutionResult:
         """Run a workflow config and stop on first failed step."""
+        started_at = current_utc_time()
+        started_monotonic = perf_counter()
         self.record_expected_pipeline_metrics(config)
         state = WorkflowExecutionState(step_results=[], step_outputs={})
         workflow_context_labels = config.workflow_context_labels
@@ -146,6 +149,9 @@ class WorkflowRunnerService:
                 result,
                 workflow_run_id=workflow_run_id,
                 manifest_id=manifest_id,
+                started_at=started_at.isoformat(),
+                completed_at=current_utc_time().isoformat(),
+                duration_seconds=perf_counter() - started_monotonic,
             )
         )
         return attach_workflow_run_report(

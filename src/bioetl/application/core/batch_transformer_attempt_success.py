@@ -72,7 +72,13 @@ def _build_gold_record(
 ) -> tuple[dict[str, object] | None, bool, object | None]:
     """Create a Gold record and report contract-based exclusion."""
     if not gold_filter(context, silver_record):
-        return None, True, _resolve_gold_filter_details(gold_filter, silver_record)
+        from bioetl.domain.run_reports.context import get_stage_accounting
+
+        details = _resolve_gold_filter_details(gold_filter, silver_record)
+        accounting = get_stage_accounting()
+        if accounting is not None:
+            accounting.record_gold_filter_rejection(details or {})
+        return None, True, details
     gold_record = cast(
         dict[str, object] | None,
         gold_transform(context, silver_record),

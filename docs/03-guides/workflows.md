@@ -693,3 +693,27 @@ The most accurate short definition today is:
 - Workflow runner MVP in `src/bioetl/application/services/workflow_runner_service.py`
 - [ADR-047: Workflow Control Plane for Declarative Workflows](../02-architecture/decisions/ADR-047-workflow-control-plane.md)
 - [Workflow Control-Plane Recovery](../05-operations/runbooks/workflow-control-plane.md)
+
+
+## Reconciliation safety and reporting
+
+Effective workflow configuration rejects `delete_orphans` when any upstream
+pipeline has `limit`, including CLI overrides and indirect dependencies.
+Independently truncated reference extracts cannot prove that an unmatched key
+is an orphan. A requested `current_run` scope without resolvable row provenance
+fails before quarantine or storage mutation; it never falls back to all rows.
+Silver and Gold do not acquire occurrence columns to bypass this guard.
+
+Workflow reports preserve ingestion counts separately from reconciliation.
+`records_gold_loaded_sum` describes pipeline output, `records_gold_expired_sum`
+counts SCD2 expiry, and `gold_current_after_reconciliation_by_table` keeps the
+last successful all-current Delta snapshot for each source table. Dry-run,
+missing snapshots and unproven scope yield an unknown count. The transform
+source_snapshot binds Delta version, physical rows and current rows. Each
+transform retains its source scope, row counts, mutation mode and quarantine
+reference. Timing fields describe the current workflow execution attempt.
+
+Gold eligibility rejections use `gold_filter_exclusion`. The pipeline report
+`contract_summary.rejection_details` groups bounded counts by reason, rule,
+field and operator; it omits record values and exception text. Legacy reports
+retain their original reason codes. Rules are unchanged by this diagnostic fix.

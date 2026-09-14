@@ -518,3 +518,34 @@ async def test_transform_attempt_returns_empty_outcome_for_none_result() -> None
 
     assert outcome.silver_record is None
     assert outcome.gold_record is None
+
+
+def test_gold_exclusion_records_bounded_rule_details_without_record_values() -> None:
+    from bioetl.application.core.batch_transformer_attempt_success import (
+        _build_gold_record,
+    )
+    from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
+    from bioetl.domain.run_reports.context import (
+        bind_stage_accounting,
+        reset_stage_accounting,
+    )
+
+    owner = _GoldFilterOwner(GoldFilterConfig(required_fields=("organism_class",)))
+    accounting = StageAccountingAccumulator()
+    token = bind_stage_accounting(accounting)
+    try:
+        for _ in range(3):
+            result = _build_gold_record(
+                context=MagicMock(),
+                silver_record={"private_value": "must-not-leak"},
+                gold_filter=owner.should_write_gold,
+                gold_transform=MagicMock(),
+            )
+            assert result[0] is None and result[1] is True
+    finally:
+        reset_stage_accounting(token)
+    rows = accounting.snapshot_gold_filter_rejections()
+    assert len(rows) == 1 and rows[0]["count"] == 3
+    assert rows[0]["field"] == "organism_class"
+    assert "must-not-leak" not in str(rows)
+    assert "actual" not in rows[0]

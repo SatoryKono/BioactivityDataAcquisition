@@ -356,6 +356,34 @@ def test_lineage_validation_detects_directed_cycle() -> None:
     assert "lineage_identity_consistent" in _reasons(payload)
 
 
+@pytest.mark.parametrize("reverse", [False, True])
+@pytest.mark.parametrize("reference_version", [None, "1", "2"])
+def test_lineage_partial_references_preserve_real_conflicts(
+    reverse: bool, reference_version: str | None
+) -> None:
+    from bioetl.application.observability.control_plane_evidence.lineage_graph_validation import (
+        conflicting_node_ids,
+    )
+
+    full = LineageNodeRef(
+        LineageNodeType.DATASET,
+        "dataset:shared",
+        attributes={"version": "1", "path": "gold/target"},
+    )
+    reference = LineageNodeRef(
+        LineageNodeType.DATASET,
+        "dataset:shared",
+        attributes={"version": reference_version},
+    )
+    fragments = tuple(
+        LineageGraphFragment(fragment_id=f"fragment-{i}", nodes=(node,))
+        for i, node in enumerate((reference, full) if reverse else (full, reference))
+    )
+    assert conflicting_node_ids(fragments) == (
+        ["dataset:shared"] if reference_version == "2" else []
+    )
+
+
 def test_lineage_validation_detects_conflicting_node_definitions() -> None:
     manifest = _manifest(created_at=_NOW - timedelta(days=90))
     fragment_a = LineageGraphFragment(
@@ -810,3 +838,77 @@ def test_retention_prefers_plan_for_manifest_over_full_plan() -> None:
 
     assert planner.manifest_plan_calls == 1
     assert planner.full_plan_calls == 0
+
+
+@pytest.mark.parametrize(
+    ("lineage", "retention", "expected"),
+    [
+        ("OK", "OK", "OK"),
+        ("ERROR", "OK", "ERROR"),
+        ("OK", "UNKNOWN", "INCOMPLETE"),
+        ("WARNING", "OK", "WARNING"),
+        ("ERROR", "UNKNOWN", "ERROR"),
+    ],
+)
+def test_trust_summary_folds_all_components(
+    monkeypatch: pytest.MonkeyPatch, lineage: str, retention: str, expected: str
+) -> None:
+    def component(endpoint: str, status: str) -> dict[str, object]:
+        return {
+            "endpoint": endpoint,
+            "rows": [
+                {
+                    "check": "proof",
+                    "status": status,
+                    "reason": endpoint + "_reason",
+                    "detail": "bounded proof",
+                }
+            ],
+        }
+
+    monkeypatch.setattr(
+        ControlPlaneEvidenceService,
+        "manifest_validation",
+        lambda self, **kwargs: component("manifest-validation", "OK"),
+    )
+    monkeypatch.setattr(
+        ControlPlaneEvidenceService,
+        "lineage_validation",
+        lambda self, **kwargs: component("lineage-validation", lineage),
+    )
+    monkeypatch.setattr(
+        ControlPlaneEvidenceService,
+        "retention_compliance",
+        lambda self, **kwargs: component("retention-compliance", retention),
+    )
+    payload = ControlPlaneEvidenceService().trust_summary(scope=_scope(), now=_NOW)
+    assert payload["trust_status"] == expected
+    assert len(payload["rows"]) == 3
+    assert payload["run_id"] == str(_RUN_ID)
+
+
+@pytest.mark.parametrize(
+    ("policy", "expected"),
+    [
+        ({"required": False, "policy_ref": "local-policy-v1"}, "OK"),
+        ({"required": True, "policy_ref": "archive-policy-v1"}, "UNKNOWN"),
+        ({"required": False}, "UNKNOWN"),
+        ({"required": "false", "policy_ref": "policy"}, "UNKNOWN"),
+        ({}, "UNKNOWN"),
+    ],
+)
+def test_archive_requires_explicit_referenced_applicability_policy(
+    policy: dict[str, object], expected: str
+) -> None:
+    from bioetl.application.observability.control_plane_evidence.retention_checks import (
+        _archive_applicability_check,
+    )
+
+    manifest = _manifest(launch_context={"archive_policy": policy})
+    result = _archive_applicability_check(manifest)
+    assert result.status == expected
+    assert result.reason == (
+        "archive_not_applicable"
+        if expected == "OK"
+        else "archive_evidence_not_recorded"
+    )

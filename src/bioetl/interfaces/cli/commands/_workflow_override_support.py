@@ -10,7 +10,7 @@ from bioetl.domain.workflow import (
     WorkflowRunOptionsConfig,
     WorkflowStep,
     WorkflowStepConfig,
-    mark_delete_orphans_current_run_scope,
+    reject_delete_orphans_after_limited_extracts,
 )
 
 __all__ = [
@@ -165,7 +165,8 @@ def apply_cli_override_config(
         defaults=config.defaults.merged_with(override),
         steps=tuple(updated_steps),
     )
-    return mark_delete_orphans_current_run_scope(updated)
+    reject_delete_orphans_after_limited_extracts(updated)
+    return updated
 
 
 def apply_cli_overrides(

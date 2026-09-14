@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 _REASON_OPERATOR_LABELS: dict[str, str] = {
+    "gold_filter_exclusion": "Excluded by Gold eligibility filter",
     "gold_contract_schema_failure": "Excluded by Gold schema contract",
     "gold_contract_required_failure": "Excluded by Gold required-field contract",
     "gold_contract_reference_failure": "Excluded by Gold reference contract",

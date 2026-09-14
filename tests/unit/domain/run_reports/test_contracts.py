@@ -85,3 +85,55 @@ def test_golden_json_is_canonically_ordered() -> None:
             + "\n"
         )
         assert json.loads(canonical) == payload
+
+
+@pytest.mark.parametrize("dry_run", [False, True])
+def test_reconciliation_report_keeps_last_table_count_and_expiry(dry_run: bool) -> None:
+    from bioetl.domain.run_reports.workflow_builder import build_workflow_run_report
+
+    execution = [
+        {
+            "step_id": "load",
+            "kind": "pipeline",
+            "status": "success",
+            "payload": {"records_gold": 983},
+        },
+    ]
+    for index, (scanned, retained) in enumerate(((983, 550), (550, 5))):
+        execution.append(
+            {
+                "step_id": f"reconcile-{index}",
+                "kind": "transform",
+                "status": "success",
+                "payload": {
+                    "transform_name": "reconcile_foreign_keys",
+                    "source_table": "chembl.assay",
+                    "source_layer": "gold",
+                    "source_scope": "all_current",
+                    "scanned_rows": scanned,
+                    "retained_rows": retained,
+                    "source_snapshot": {
+                        "version": index + 1,
+                        "physical_rows": 983,
+                        "current_rows": retained,
+                    },
+                    "orphan_rows_deleted": scanned - retained,
+                    "mutation_mode": "dry_run" if dry_run else "gold_scd2_expiry",
+                    "dry_run": dry_run,
+                },
+            }
+        )
+    payload = build_workflow_run_report(
+        identity={"workflow_name": "baseline", "status": "success"},
+        plan_steps=[],
+        execution_steps=execution,
+    ).to_dict()
+    totals = payload["totals"]
+    assert totals["records_gold_loaded_sum"] == 983
+    assert totals["records_gold_expired_sum"] == (0 if dry_run else 978)
+    assert totals["gold_current_after_reconciliation_by_table"] == {
+        "chembl.assay": None if dry_run else 5,
+    }
+    assert payload["execution"][1]["reconciliation"]["scanned_rows"] == 983
+    schema = json.loads((CONTRACT_ROOT / "workflow_run_report.v1.json").read_text())
+    validator_for(schema)(schema).validate(payload)

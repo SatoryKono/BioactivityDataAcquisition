@@ -8,7 +8,7 @@ from bioetl.domain.lineage import LineageGraphFragment, LineageNodeRef
 def conflicting_node_ids(
     fragments: tuple[LineageGraphFragment, ...],
 ) -> list[str]:
-    """Return node ids that have more than one persisted definition."""
+    """Reject contradictory definitions while allowing partial node references."""
     definitions: dict[str, dict[str, object]] = {}
     conflicts: set[str] = set()
     for fragment in fragments:
@@ -17,10 +17,28 @@ def conflicting_node_ids(
             nodes.extend((edge.source, edge.target))
         for node in nodes:
             definition = node.to_dict()
-            previous = definitions.setdefault(node.node_id, definition)
-            if previous != definition:
+            previous = definitions.setdefault(node.node_id, {})
+            if _merge_definition(previous, definition):
                 conflicts.add(node.node_id)
     return sorted(conflicts)
+
+
+def _merge_definition(previous: dict[str, object], incoming: dict[str, object]) -> bool:
+    """Merge known fields; absent and null reference fields carry no assertion."""
+    conflict = False
+    for key, value in incoming.items():
+        if value is None:
+            continue
+        old = previous.get(key)
+        if isinstance(value, dict) and (old is None or isinstance(old, dict)):
+            nested = dict(old or {})
+            conflict = _merge_definition(nested, value) or conflict
+            previous[key] = nested
+        elif old is not None and old != value:
+            conflict = True
+        else:
+            previous[key] = value
+    return conflict
 
 
 def cycle_nodes(fragments: tuple[LineageGraphFragment, ...]) -> list[str]:

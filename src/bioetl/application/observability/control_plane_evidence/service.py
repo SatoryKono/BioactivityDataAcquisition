@@ -11,6 +11,7 @@ from bioetl.application.observability.control_plane_evidence.checkpoint_validati
 )
 from bioetl.application.observability.control_plane_evidence.checks import (
     EvidenceCheckResult,
+    EvidenceStatus,
 )
 from bioetl.application.observability.control_plane_evidence.failure_reasons import (
     FAILURE_REASON_CATEGORIES,
@@ -61,6 +62,47 @@ class ControlPlaneEvidenceService:
     lifecycle_planner: ControlPlaneLifecyclePlanner | None = None
     manifest_inspector: RawRunManifestInspectionPort | None = None
     retention_days: int = DEFAULT_CONTROL_PLANE_RETENTION_DAYS
+
+    def trust_summary(
+        self, *, scope: EvidenceScopeContext, now: datetime
+    ) -> dict[str, object]:
+        """Aggregate manifest, lineage and retention evidence for one exact scope."""
+        components = (
+            self.manifest_validation(scope=scope),
+            self.lineage_validation(scope=scope),
+            self.retention_compliance(scope=scope, now=now),
+        )
+        checks: list[EvidenceCheckResult] = []
+        for component in components:
+            name = str(component["endpoint"])
+            rows = component.get("rows")
+            if not isinstance(rows, list) or not rows:
+                checks.append(
+                    EvidenceCheckResult(name, "UNKNOWN", "evidence_missing", name)
+                )
+                continue
+            for row in rows:
+                if not isinstance(row, dict):
+                    continue
+                status = row.get("status", "UNKNOWN")
+                checks.append(
+                    EvidenceCheckResult(
+                        f"{name}.{row.get('check', 'unknown')}",
+                        cast(EvidenceStatus, status)
+                        if status in {"OK", "WARNING", "ERROR", "UNKNOWN"}
+                        else "UNKNOWN",
+                        str(row.get("reason", "evidence_missing")),
+                        str(row.get("detail", "")),
+                    )
+                )
+        return service_payload(
+            endpoint="trust-summary",
+            scope=scope,
+            checks=tuple(checks),
+            ledger_entries=ledger_entries(self.ledger_port, scope.manifest)
+            if scope.manifest
+            else (),
+        )
 
     def checkpoint_validation(
         self,

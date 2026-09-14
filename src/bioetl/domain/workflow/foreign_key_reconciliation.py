@@ -258,6 +258,7 @@ class ForeignKeyReconciliationResult:
     quarantine_batch_id: str | None = None
     quarantine_rows_written: int = 0
     quarantine_error_code: str | None = None
+    source_snapshot: dict[str, int] | None = None
     _: KW_ONLY
     source_layer: ForeignKeyReconciliationLayer = "silver"
     reference_layer: ForeignKeyReconciliationLayer = "silver"

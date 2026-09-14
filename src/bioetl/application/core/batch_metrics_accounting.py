@@ -19,7 +19,7 @@ _SILVER_REMOVAL_REASONS = {
     "deduplicated": "DEDUP_KEY_COLLISION",
 }
 _GOLD_REMOVAL_REASONS = {
-    "excluded_by_contract": "gold_contract_schema_failure",
+    "excluded_by_contract": "gold_filter_exclusion",
     "quarantined": "gold_semantic_business_exclusion",
     "skipped": "UNKNOWN_REASON",
     "deduplicated": "DEDUP_KEY_COLLISION",

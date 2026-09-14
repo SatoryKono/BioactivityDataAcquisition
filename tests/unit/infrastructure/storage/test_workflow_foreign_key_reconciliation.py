@@ -32,6 +32,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from unittest.mock import AsyncMock
 
 import pytest
 from deltalake.exceptions import CommitFailedError
@@ -48,6 +49,43 @@ from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_quarantin
 )
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("run_ids", [(), ("selected-run",)])
+async def test_unbound_current_run_blocks_before_mutation(
+    run_ids: tuple[str, ...], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Missing provenance must never widen a destructive request to all rows."""
+    mutation = AsyncMock()
+    monkeypatch.setattr(
+        "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation.apply_reconciliation_mutation",
+        mutation,
+    )
+    quarantine = _Quarantine()
+    adapter = SilverForeignKeyReconciliationAdapter(
+        silver_writer=_SilverWriter(),
+        gold_writer=_GoldReader(
+            {"chembl.assay": [{"assay_id": "a", "target_id": "t"}]}
+        ),
+        logger=_Logger(),
+        quarantine=quarantine,
+    )
+    request = ForeignKeyReconciliationRequest(
+        source_table="chembl.assay",
+        reference_table="chembl.target",
+        source_key="target_id",
+        reference_key="target_id",
+        primary_keys=("assay_id",),
+        source_layer="gold",
+        reference_layer="gold",
+        source_scope="current_run",
+        source_run_ids=run_ids,
+    )
+    with pytest.raises(ValueError, match="scope unbound; mutation blocked"):
+        await adapter.reconcile_foreign_keys(request)
+    mutation.assert_not_awaited()
+    assert quarantine.writes == []
 
 
 @dataclass
@@ -394,3 +432,34 @@ async def test_silver_reference_table_missing_fails_closed() -> None:
         )
 
     assert isinstance(exc_info.value.__cause__, FileNotFoundError)
+
+
+@pytest.mark.asyncio
+async def test_gold_snapshot_pins_version_and_distinguishes_physical_rows(
+    tmp_path,
+) -> None:
+    import asyncio
+    import pyarrow as pa
+    from deltalake import DeltaTable, write_deltalake
+    from bioetl.infrastructure.storage.gold.read_cleanup_mixin import (
+        GoldWriterReadCleanupMixin,
+    )
+
+    path = tmp_path / "gold"
+    write_deltalake(
+        str(path), pa.table({"id": [1, 2, 3], "_is_current": [True, True, False]})
+    )
+
+    class Reader(GoldWriterReadCleanupMixin):
+        _run_in_executor = staticmethod(asyncio.to_thread)
+
+        def _resolve_table_path(self, name: str) -> str:
+            return str(path)
+
+    reader = Reader()
+    first = await reader.read_reconciliation_snapshot("fixture")
+    assert first == {"version": 0, "physical_rows": 3, "current_rows": 2}
+    DeltaTable(str(path)).update(updates={"_is_current": "false"}, predicate="id = 1")
+    second = await reader.read_reconciliation_snapshot("fixture")
+    assert second == {"version": 1, "physical_rows": 3, "current_rows": 1}
+    assert first["current_rows"] == 2

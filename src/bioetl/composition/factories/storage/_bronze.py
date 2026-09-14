@@ -30,6 +30,7 @@ def create_bronze_writer(
     metadata_coordinator: MetadataCoordinator | None,
     audit: AuditPort,
     flat_structure: bool,
+    lineage_base_path: Path | None = None,
 ) -> BronzeWriter:
     """Create configured Bronze writer.
 
@@ -54,7 +55,9 @@ def create_bronze_writer(
             "save_metadata is enabled."
         )
     lineage_store = (
-        FileLineageStore(base_path=base_path.parent / "control" / "lineage")
+        FileLineageStore(
+            base_path=lineage_base_path or base_path.parent / "control" / "lineage"
+        )
         if save_metadata
         else None
     )

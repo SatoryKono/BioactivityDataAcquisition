@@ -213,6 +213,7 @@ def create_storage_adapter(
         metadata_coordinator=metadata_coordinator,
         audit=audit,
         flat_structure=ctx.bronze_flat,
+        lineage_base_path=Path(settings.data_dir) / "output" / "control" / "lineage",
     )
     return StorageBundle(
         bronze_writer=bronze_writer,

@@ -56,6 +56,12 @@ reasons:
     layer: silver
     description: Duplicate primary key dropped
 
+  - code: gold_filter_exclusion
+    family: semantic
+    default_outcome: excluded_by_contract
+    layer: gold
+    description: Record excluded by configured Gold eligibility filter
+
   - code: gold_contract_schema_failure
     family: contract
     default_outcome: excluded_by_contract

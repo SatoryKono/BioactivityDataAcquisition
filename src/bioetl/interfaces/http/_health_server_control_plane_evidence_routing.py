@@ -78,6 +78,9 @@ async def dispatch_control_plane_evidence_request(
             [], Coroutine[object, object, dict[str, object]]
         ],  # Any: async function signatures
     ] = {
+        "/ops/control-plane/trust-summary": lambda: _service_payload(
+            host, query, endpoint="trust-summary"
+        ),
         "/ops/control-plane/checkpoint-validation": lambda: _checkpoint_payload(
             host, query
         ),
@@ -180,6 +183,7 @@ async def _service_payload(
 ) -> dict[str, object]:
     service = _require_service(host)
     source_reason, source_check = {
+        "trust-summary": ("trust_evidence_read_error", "aggregate"),
         "manifest-validation": ("manifest_parse_error", "parse"),
         "lineage-validation": ("lineage_source_read_error", "closure"),
         "retention-compliance": ("retention_plan_read_error", "retention_policy"),
@@ -197,6 +201,10 @@ async def _service_payload(
     assert scope is not None
     evidence_scope = to_evidence_scope(scope)
     try:
+        if endpoint == "trust-summary":
+            return await asyncio.to_thread(
+                service.trust_summary, scope=evidence_scope, now=current_utc_time()
+            )
         if endpoint == "retention-compliance":
             started = perf_counter()
             payload = await asyncio.to_thread(

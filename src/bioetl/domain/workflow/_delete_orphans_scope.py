@@ -100,9 +100,9 @@ def _scope_delete_orphans_step(
 def mark_delete_orphans_current_run_scope(config: WorkflowConfig) -> WorkflowConfig:
     """Scope delete_orphans to the current run when an extract is limited.
 
-    CLI ``--limit`` is allowed together with ``delete_orphans``. Mutations then
-    apply only to source rows from this workflow run, so independently bounded
-    extracts cannot delete historical Gold as false-positive orphans.
+    This compatibility helper only narrows source scope. It does not establish
+    reference completeness; callers must still reject limited extracts before
+    executing destructive reconciliation.
     """
     updated_steps: list[WorkflowStep] = []
     changed = False
@@ -120,12 +120,11 @@ def mark_delete_orphans_current_run_scope(config: WorkflowConfig) -> WorkflowCon
 
 
 def reject_delete_orphans_after_limited_extracts(config: WorkflowConfig) -> None:
-    """Reject committed YAML that bakes delete_orphans onto limited extracts.
+    """Reject effective configuration with delete_orphans on limited extracts.
 
     Independently bounded extracts make Gold FK orphans false positives.
     Walks the full upstream DAG so an intermediary transform cannot hide a
-    limited producer. CLI ``--limit`` does not use this reject; it scopes
-    mutations to the current run instead.
+    limited producer. Apply this after CLI overrides as well as YAML loading.
     """
     steps_by_id = {step.step_id: step for step in config.steps}
     for step in config.steps:

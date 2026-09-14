@@ -48,6 +48,11 @@ _BUILTIN_REASONS: dict[str, dict[str, str]] = {
         "default_outcome": "deduplicated",
         "layer": "silver",
     },
+    "gold_filter_exclusion": {
+        "family": "semantic",
+        "default_outcome": "excluded_by_contract",
+        "layer": "gold",
+    },
     "gold_contract_schema_failure": {
         "family": "contract",
         "default_outcome": "excluded_by_contract",

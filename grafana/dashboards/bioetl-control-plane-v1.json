@@ -525,7 +525,7 @@
         "y": 6
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Processing outcome, fail-closed Trust verdict, Reasons, and Freshness remain visible together. Use the panel link to inspect the full evidence in panel 9414; full reasons also remain in table inspection. Freshness is the existing frame field evidence_freshness. INCOMPLETE / UNKNOWN is not OK. SELECT RUN / VALID EMPTY is not OK. Processing is processing_status; Trust is trust_status. Backend unavailable means QUERY ERROR, never VALID EMPTY.",
+      "description": "SELECTED RUN · Aggregate Trust includes manifest, lineage and retention evidence for this run. ERROR wins; missing evidence is INCOMPLETE. Processing success does not imply Trust OK. Inspect each validation table for details. Backend unavailable means QUERY ERROR.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -802,7 +802,7 @@
           "root_selector": "trust",
           "source": "url",
           "type": "json",
-          "url": "/ops/control-plane/manifest-validation?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+          "url": "/ops/control-plane/trust-summary?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
           "url_options": {
             "data": "",
             "method": "GET"

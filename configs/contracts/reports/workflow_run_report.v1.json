@@ -81,6 +81,7 @@
           "error_type": { "type": ["string", "null"] },
           "error_message": { "type": ["string", "null"] },
           "skip_reason": { "type": ["string", "null"] },
+          "reconciliation": { "type": "object" },
           "top_reasons": {
             "type": "array",
             "items": {
@@ -108,7 +109,13 @@
         "steps_skipped": { "type": "integer", "minimum": 0 },
         "records_extracted_sum": { "type": "integer", "minimum": 0 },
         "records_silver_sum": { "type": ["integer", "null"], "minimum": 0 },
-        "records_gold_sum": { "type": ["integer", "null"], "minimum": 0 }
+        "records_gold_sum": { "type": ["integer", "null"], "minimum": 0 },
+        "records_gold_loaded_sum": { "type": ["integer", "null"], "minimum": 0 },
+        "records_gold_expired_sum": { "type": "integer", "minimum": 0 },
+        "gold_current_after_reconciliation_by_table": {
+          "type": "object",
+          "additionalProperties": { "type": ["integer", "null"], "minimum": 0 }
+        }
       }
     },
     "index": {

@@ -50,12 +50,32 @@ def retention_evidence_checks(
             required_profile=required_profile,
             profile_valid=profile_valid,
         ),
-        EvidenceCheckResult(
-            "archive",
-            "UNKNOWN",
-            "archive_evidence_not_recorded",
-            "The local lifecycle plan does not attest external archive availability.",
-        ),
+        _archive_applicability_check(manifest),
+    )
+
+
+def _archive_applicability_check(manifest: RunManifest) -> EvidenceCheckResult:
+    """Require an explicit referenced policy before declaring archive N/A."""
+    policy = manifest.launch_context.get("archive_policy")
+    if isinstance(policy, dict):
+        reference = policy.get("policy_ref")
+        if (
+            policy.get("required") is False
+            and isinstance(reference, str)
+            and reference.strip()
+        ):
+            return EvidenceCheckResult(
+                "archive",
+                "OK",
+                "archive_not_applicable",
+                "N/A: the manifest records a referenced policy with archive not required.",
+            )
+    return EvidenceCheckResult(
+        "archive",
+        "UNKNOWN",
+        "archive_evidence_not_recorded",
+        "The local lifecycle plan does not attest external archive availability; "
+        "no referenced not-required policy was recorded.",
     )
 
 

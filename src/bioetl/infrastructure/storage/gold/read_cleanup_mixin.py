@@ -56,6 +56,29 @@ class GoldWriterReadCleanupMixin:
         ..., Awaitable[Any]  # Any: executor returns untyped Delta/Arrow runtime objects
     ]
 
+    async def read_reconciliation_snapshot(self, table_name: str) -> dict[str, int]:
+        """Count physical and current rows from one pinned Delta snapshot."""
+        import pyarrow.dataset as ds
+
+        table_path = self._resolve_table_path(table_name)
+        module = _load_gold_writer_module()
+
+        def inspect_snapshot() -> dict[str, int]:
+            table = module.DeltaTable(table_path)
+            dataset = table.to_pyarrow_dataset()
+            flag = _current_flag_column(list(dataset.schema.names))
+            physical = dataset.count_rows()
+            current = (
+                dataset.count_rows(filter=ds.field(flag) == True) if flag else physical
+            )  # noqa: E712
+            return {
+                "version": table.version(),
+                "physical_rows": physical,
+                "current_rows": current,
+            }
+
+        return await self._run_in_executor(inspect_snapshot)
+
     async def read_gold(
         self,
         table_name: str,

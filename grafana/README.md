@@ -2878,3 +2878,24 @@ ______________________________________________________________________
 **Конец документа.**
 
 *Версия 2.0.0. Обновлена 2026-07-03. Синхронизирована с RULES.md v6.1.4 и текущим состоянием shipped dashboards.*
+
+
+## Selected-run evidence
+
+The selected-run Trust summary combines manifest, lineage and retention checks
+through `/ops/control-plane/trust-summary`. An error in any component produces
+ERROR; missing evidence produces INCOMPLETE. Processing success is separate.
+Bronze, Silver and Gold lineage must be discoverable under the control-plane
+root used by Ops. Partial node references may omit attributes; contradictory
+known attributes remain errors.
+
+Provider health describes CURRENT API observations. Cached Bronze replay does
+not exercise the remote API and proves neither outage nor health. Missing raw
+health status is `missing_health_status`; present but non-fresh observations
+are `stale_health_status`. Both retain UNKNOWN until fresh health evidence.
+
+Archive remains UNKNOWN unless availability is evidenced or the manifest has
+an explicit `launch_context.archive_policy` with boolean `required: false`
+and a nonempty `policy_ref`. Only that referenced policy permits N/A. A local
+retention plan or successful cached run cannot establish external archive
+availability, and historical manifests must not be rewritten for a green UI.

@@ -40,6 +40,9 @@ class WorkflowRunExecutionResult:
     run_report_json_path: str | None = None
     run_report_markdown_path: str | None = None
     run_report_error: str | None = None
+    started_at: str | None = None
+    completed_at: str | None = None
+    duration_seconds: float | None = None
 
     @property
     def is_success(self) -> bool:
