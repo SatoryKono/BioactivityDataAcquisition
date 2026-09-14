@@ -99,9 +99,7 @@ def test_provenance_panels_share_readability_contract() -> None:
         assert provenance.get("options", {}).get("mode") == "html", filename
         if compact_banner:
             assert "font-size:16px" in content, filename
-            assert (
-                "padding:4px 10px" in content or "padding:0 6px" in content
-            ), filename
+            assert "padding:4px 10px" in content or "padding:0 6px" in content, filename
             assert "background:" not in content, filename
             assert "background-color" not in content, filename
         else:

@@ -82,9 +82,7 @@ class TestSilverStatisticsUniqueness:
             }
         )
 
-        result = check_uniqueness_stats(
-            df, ["entity_id", "source"], (RuntimeError,)
-        )
+        result = check_uniqueness_stats(df, ["entity_id", "source"], (RuntimeError,))
 
         assert result.status == DQCheckStatus.PASS
         assert result.unique_count == 3
