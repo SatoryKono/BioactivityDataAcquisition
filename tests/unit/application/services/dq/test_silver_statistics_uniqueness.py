@@ -74,6 +74,23 @@ class TestSilverStatisticsUniqueness:
             0.0
         )
 
+    def test_composite_key_uses_n_unique_subset(self) -> None:
+        df = pl.DataFrame(
+            {
+                "entity_id": ["e1", "e1", "e2"],
+                "source": ["a", "b", "a"],
+            }
+        )
+
+        result = check_uniqueness_stats(
+            df, ["entity_id", "source"], (RuntimeError,)
+        )
+
+        assert result.status == DQCheckStatus.PASS
+        assert result.unique_count == 3
+        assert result.total_count == 3
+        assert result.duplicate_rate == pytest.approx(0.0)
+
     def test_profile_column_cardinality_empty_column_list(self) -> None:
         df = pl.DataFrame({"entity_id": ["e1"]})
         assert _profile_column_cardinality(df, [], 1, (RuntimeError,)) == {}

@@ -100,7 +100,8 @@ def check_uniqueness_stats(
         )
 
     total_count = len(df)
-    unique_count = df.select(existing_keys).unique(maintain_order=False).height
+    # n_unique(subset=) avoids materializing a projected unique DataFrame.
+    unique_count = df.n_unique(subset=existing_keys)
     duplicate_count = total_count - unique_count
     duplicate_rate = duplicate_count / total_count if total_count > 0 else 0.0
     column_stats = _profile_column_cardinality(
