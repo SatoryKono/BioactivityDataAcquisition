@@ -164,6 +164,23 @@ def push_metrics_to_gateway(
     if grouping_key_extra:
         grouping_key.update(grouping_key_extra)
     if metric_names is None:
+        from bioetl.infrastructure.observability.required_publication_series import (
+            ensure_required_control_plane_publication_series,
+        )
+
+        seed_pipelines = tuple(
+            name
+            for name in ((pipeline_name,) if pipeline_name else pipeline_names)
+            if isinstance(name, str) and name.strip()
+        )
+        seed_run_type = (
+            run_type if isinstance(run_type, str) and run_type.strip() else "unknown"
+        )
+        for seed_pipeline in seed_pipelines:
+            ensure_required_control_plane_publication_series(
+                pipeline=seed_pipeline,
+                run_type=seed_run_type,
+            )
         refresh_control_plane_integrity_metrics(settings, logger=logger)
         # Full process snapshots share one replace group. Publishing the same
         # raw pipeline labels under both workflow and pipeline groups causes

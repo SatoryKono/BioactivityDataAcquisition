@@ -160,6 +160,9 @@ groups:
               +
               (
                 (
+                  # Measured 0 on ledger_appends_total is coverage; missing child
+                  # is a publication fault. Do not treat `or universe*0` as a
+                  # substitute for the source series.
                   bioetl_control_plane_run_type_universe
                   unless on (pipeline)
                   sum by (pipeline) (
