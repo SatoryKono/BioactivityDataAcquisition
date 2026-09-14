@@ -61,10 +61,10 @@ def _write_canonical_test_layout(tmp_path: Path) -> tuple[Path, Path, Path, Path
                 "links": [
                     {"title": "2. Runtime", "url": "/d/bioetl-runtime/bioetl-runtime"},
                     {
-                        "title": "3. Provider Health",
+                        "title": "4. Provider Health",
                         "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2",
                     },
-                    {"title": "4. Data Quality", "url": "/d/bioetl-dq-v2/bioetl-dq-v2"},
+                    {"title": "5. Data Quality", "url": "/d/bioetl-dq-v2/bioetl-dq-v2"},
                     {
                         "title": "0. Control Plane",
                         "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1",
@@ -220,11 +220,11 @@ def test_compare_deployed_dashboards_ignores_benign_export_noise(
                             "url": "/d/bioetl-runtime/bioetl-runtime",
                         },
                         {
-                            "title": "3. Provider Health",
+                            "title": "4. Provider Health",
                             "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2",
                         },
                         {
-                            "title": "4. Data Quality",
+                            "title": "5. Data Quality",
                             "url": "/d/bioetl-dq-v2/bioetl-dq-v2",
                         },
                         {

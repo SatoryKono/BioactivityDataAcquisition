@@ -255,13 +255,13 @@
     ]
   },
   "timezone": "browser",
-  "title": "4. Data Quality",
+  "title": "5. Data Quality",
   "uid": "bioetl-dq-v2",
   "version": 4,
   "panels": [
     {
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 24,
         "x": 0,
         "y": 0
@@ -270,76 +270,76 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1;margin:0 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health). Scope reset: provider=unknown; preserves time range, pipeline context.\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-provider=unknown&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">3. Provider Health</a><a class=\"bioetl-nav-current\" href=\"#bioetl-dq-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"4. Data Quality (Data Quality)\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">4. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Run Explorer</a></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"0. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"1. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"2. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">2. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"3. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">3. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"4. Provider Health (Provider Health). Scope reset: provider=All; preserves time range, pipeline context.\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-provider=$__all&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">4. Provider Health</a><a class=\"bioetl-nav-current\" href=\"#bioetl-dq-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"5. Data Quality (Data Quality)\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">5. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
       },
       "title": "",
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus 0–6: Run Explorer / Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality / Incident Workspace. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
       "type": "text",
       "links": [
         {
-          "title": "0. Trust",
-          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "0. Trust (Trust). Preserves selected scope and time range.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
-        },
-        {
-          "title": "1. Overview",
-          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "1. Overview (Overview). Preserves selected scope and time range.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
-        },
-        {
-          "title": "2. Pipeline Diagnostics",
-          "url": "/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
-          "tooltip": "2. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
-        },
-        {
-          "title": "3. Provider Health",
-          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=unknown&var-pipeline_context=${pipeline:percentencode}&${__url_time_range}",
-          "tooltip": "3. Provider Health (Provider Health). Scope reset: provider=unknown; preserves time range, pipeline context.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
-        },
-        {
-          "title": "5. Incident Workspace",
-          "url": "/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
-        },
-        {
-          "title": "6. Run Explorer",
+          "title": "0. Run Explorer",
           "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "6. Run Explorer (Run Explorer). Preserves selected scope and time range.",
+          "tooltip": "0. Run Explorer (Run Explorer). Preserves selected scope and time range.",
+          "type": "link",
+          "icon": "dashboard",
+          "targetBlank": false,
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
+        },
+        {
+          "title": "1. Trust",
+          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "tooltip": "1. Trust (Trust). Preserves selected scope and time range.",
+          "type": "link",
+          "icon": "dashboard",
+          "targetBlank": false,
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
+        },
+        {
+          "title": "2. Overview",
+          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "tooltip": "2. Overview (Overview). Preserves selected scope and time range.",
+          "type": "link",
+          "icon": "dashboard",
+          "targetBlank": false,
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
+        },
+        {
+          "title": "3. Pipeline Diagnostics",
+          "url": "/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+          "tooltip": "3. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.",
+          "type": "link",
+          "icon": "dashboard",
+          "targetBlank": false,
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
+        },
+        {
+          "title": "4. Provider Health",
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=$__all&var-pipeline_context=${pipeline:percentencode}&${__url_time_range}",
+          "tooltip": "4. Provider Health (Provider Health). Scope reset: provider=All; preserves time range, pipeline context.",
+          "type": "link",
+          "icon": "dashboard",
+          "targetBlank": false,
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
+        },
+        {
+          "title": "6. Incident Workspace",
+          "url": "/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "tooltip": "6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -358,7 +358,7 @@
         "h": 3,
         "w": 16,
         "x": 0,
-        "y": 4
+        "y": 3
       },
       "description": "Current panels show the latest DQ verdict and reasons for the selected pipeline. Selected-run panels use HTTP-backed identity and record accounting; run ID never filters Prometheus. Selected-range panels show scores, freshness, rejects, and delivery impact. These scopes answer different questions and must not be compared as equivalent status signals. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: stage=${stage}.",
       "options": {
@@ -376,7 +376,7 @@
         "h": 3,
         "w": 8,
         "x": 16,
-        "y": 4
+        "y": 3
       },
       "datasource": {
         "type": "prometheus",
@@ -440,7 +440,8 @@
               }
             ]
           },
-          "unit": "none"
+          "unit": "none",
+          "displayName": "Monitor Current DQ Status"
         },
         "overrides": []
       },
@@ -470,7 +471,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value_and_name",
+        "textMode": "value",
         "text": {
           "titleSize": 14,
           "valueSize": 20
@@ -492,7 +493,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 6
       },
       "options": {
         "content": "<div style=\"font-size:16px;line-height:1.15\">OK: review run accounting. WARN/CRIT: inspect reasons. UNKNOWN: verify <a href=\"https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md\">DQ metrics, freshness and source</a>.</div>",
@@ -575,7 +576,8 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "displayName": "Monitor DQ Threshold State"
         },
         "overrides": []
       },
@@ -583,7 +585,7 @@
         "h": 4,
         "w": 8,
         "x": 0,
-        "y": 9
+        "y": 8
       },
       "id": 9101,
       "options": {
@@ -605,7 +607,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value_and_name",
+        "textMode": "value",
         "text": {
           "titleSize": 14,
           "valueSize": 20
@@ -878,7 +880,7 @@
         "h": 4,
         "w": 16,
         "x": 8,
-        "y": 9
+        "y": 8
       },
       "id": 9102,
       "options": {
@@ -955,19 +957,20 @@
       "type": "table",
       "title": "Review Selected Run Summary",
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 12
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Compact pipeline_run_report_v1 projection (identity, times, gold out, contract exclusions, coverage). Missing run is SELECT RUN, not OK. A selected run with no summary rows is VALID EMPTY, not OK. SELECT RUN is not VALID EMPTY. Set range to run opens 6. Run Explorer at started_at-5m .. <code style='font-size:16px'>completed_at</code>+5m. Do not treat CURRENT Prometheus as this UUID. Backend unavailable means the query could not be evaluated. Verify /health/live. Coverage chip is IN RANGE / OUT OF RANGE / UNKNOWN from covers_selected_run. Set range to run opens Run Explorer 3022 at from_ms..to_ms. A covered run does not show an outside-range warning. Status, coverage and local timestamps precede the UUID. Inspect the Run cell to copy its complete value; range-bound fields remain available to the Set range to run action and panel data inspection.",
+      "description": "SELECTED RUN · Persisted layer counts. Contract exclusion percentage uses Silver accepted as denominator; quarantine counts remain separate by layer. Missing counts or zero denominator remain UNKNOWN. Report opens this exact run. SELECTED RUN only. Empty means SELECT RUN or no persisted report; backend unavailable is QUERY ERROR, never a zero balance.",
       "fieldConfig": {
         "defaults": {
           "custom": {
             "align": "left",
             "cellOptions": {
-              "type": "color-text"
+              "type": "auto",
+              "wrapText": false
             },
             "inspect": true,
             "minWidth": 50
@@ -976,8 +979,8 @@
           "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first.",
           "links": [
             {
-              "title": "Open run in Run Explorer",
-              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=3022&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
+              "title": "Set range to this run",
+              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}&timezone=${__timezone}",
               "targetBlank": false,
               "includeVars": false
             },
@@ -997,268 +1000,346 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "set_range_to_run"
-            },
-            "properties": [
-              {
-                "id": "links",
-                "value": [
-                  {
-                    "title": "Open run in Run Explorer",
-                    "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=3022&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
-                    "targetBlank": false,
-                    "includeVars": false
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "run_id"
-            },
-            "properties": [
-              {
-                "id": "links",
-                "value": []
-              },
-              {
-                "id": "custom.hidden",
-                "value": true
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "coverage_chip"
+              "options": "bronze_records"
             },
             "properties": [
               {
                 "id": "displayName",
-                "value": "coverage"
+                "value": "Input"
               },
               {
                 "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "IN RANGE": {
-                        "text": "IN RANGE",
-                        "color": "green"
-                      },
-                      "OUT OF RANGE": {
-                        "text": "OUT OF RANGE",
-                        "color": "orange"
-                      },
-                      "UNKNOWN": {
-                        "text": "UNKNOWN",
-                        "color": "text"
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "status"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 110
-              },
-              {
-                "id": "custom.hidden",
-                "value": true
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Started"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "time:YYYY-MM-DD HH:mm"
-              },
-              {
-                "id": "custom.width",
-                "value": 152
-              },
-              {
-                "id": "noValue",
-                "value": "—"
-              },
-              {
-                "id": "custom.hidden",
-                "value": true
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Completed"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "time:YYYY-MM-DD HH:mm"
-              },
-              {
-                "id": "custom.width",
-                "value": 152
-              },
-              {
-                "id": "noValue",
-                "value": "—"
-              },
-              {
-                "id": "custom.hidden",
-                "value": true
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Status"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 90
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text",
-                  "wrapText": false
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Coverage"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 125
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text",
-                  "wrapText": false
-                }
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "IN RANGE": {
-                        "text": "IN RANGE",
-                        "color": "green"
-                      },
-                      "OUT OF RANGE": {
-                        "text": "OUT OF RANGE",
-                        "color": "orange"
-                      },
-                      "UNKNOWN": {
-                        "text": "UNKNOWN",
-                        "color": "text"
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Gold"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 76
-              },
-              {
-                "id": "custom.align",
-                "value": "right"
-              },
-              {
-                "id": "unit",
-                "value": "locale"
-              },
-              {
-                "id": "decimals",
-                "value": 0
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Excluded"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 76
-              },
-              {
-                "id": "custom.align",
-                "value": "right"
-              },
-              {
-                "id": "unit",
-                "value": "locale"
-              },
-              {
-                "id": "decimals",
-                "value": 0
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Run"
-            },
-            "properties": [
-              {
-                "id": "custom.inspect",
-                "value": true
-              },
-              {
-                "id": "links",
                 "value": []
               },
               {
-                "id": "custom.cellOptions",
+                "id": "custom.hideFrom",
                 "value": {
-                  "type": "auto",
-                  "wrapText": true
+                  "viz": false,
+                  "legend": false,
+                  "tooltip": false
                 }
               },
               {
                 "id": "custom.hidden",
+                "value": false
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "noValue",
+                "value": "UNKNOWN"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "silver_valid"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Accepted"
+              },
+              {
+                "id": "mappings",
+                "value": []
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": false,
+                  "legend": false,
+                  "tooltip": false
+                }
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "noValue",
+                "value": "UNKNOWN"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "silver_quarantined"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Silver Q"
+              },
+              {
+                "id": "mappings",
+                "value": []
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": false,
+                  "legend": false,
+                  "tooltip": false
+                }
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "noValue",
+                "value": "UNKNOWN"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "gold_excluded_by_contract"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Excluded"
+              },
+              {
+                "id": "mappings",
+                "value": []
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": false,
+                  "legend": false,
+                  "tooltip": false
+                }
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "noValue",
+                "value": "UNKNOWN"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "contract_excluded_percent"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Excl %"
+              },
+              {
+                "id": "mappings",
+                "value": []
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": false,
+                  "legend": false,
+                  "tooltip": false
+                }
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              },
+              {
+                "id": "noValue",
+                "value": "UNKNOWN"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "gold_quarantined"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Gold Q"
+              },
+              {
+                "id": "mappings",
+                "value": []
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": false,
+                  "legend": false,
+                  "tooltip": false
+                }
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "noValue",
+                "value": "UNKNOWN"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "gold_written"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Gold"
+              },
+              {
+                "id": "mappings",
+                "value": []
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": false,
+                  "legend": false,
+                  "tooltip": false
+                }
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "noValue",
+                "value": "UNKNOWN"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "report_label"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Report"
+              },
+              {
+                "id": "mappings",
+                "value": []
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": false,
+                  "legend": false,
+                  "tooltip": false
+                }
+              },
+              {
+                "id": "custom.hidden",
+                "value": false
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open report",
+                    "url": "${__data.fields.report_url:raw}",
+                    "targetBlank": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "report_url"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
                 "value": true
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": true,
+                  "legend": true,
+                  "tooltip": false
+                }
               }
             ]
           },
@@ -1296,8 +1377,8 @@
         "cellHeight": "sm",
         "dataLinks": [
           {
-            "title": "Open run in Run Explorer",
-            "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=3022&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
+            "title": "Set range to this run",
+            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}&timezone=${__timezone}",
             "targetBlank": false,
             "includeVars": false
           },
@@ -1327,51 +1408,51 @@
       ],
       "transformations": [
         {
-          "id": "convertFieldType",
+          "id": "filterFieldsByName",
           "options": {
-            "conversions": [
-              {
-                "targetField": "started_at",
-                "destinationType": "time"
-              },
-              {
-                "targetField": "completed_at",
-                "destinationType": "time"
-              }
-            ]
+            "include": {
+              "names": [
+                "bronze_records",
+                "silver_valid",
+                "silver_quarantined",
+                "gold_excluded_by_contract",
+                "contract_excluded_percent",
+                "gold_quarantined",
+                "gold_written",
+                "report_label",
+                "report_url"
+              ]
+            }
           }
         },
         {
           "id": "organize",
           "options": {
-            "excludeByName": {
-              "Time": true,
-              "__name__": true,
-              "Value": true,
-              "covers_selected_run": true,
-              "coverage_offset": true,
-              "set_range_to_run": true,
-              "started_at": true,
-              "completed_at": true,
-              "run_id": true
-            },
             "indexByName": {
-              "status": 0,
-              "coverage_chip": 1,
-              "gold_records_out": 2,
-              "excluded_by_contract": 3,
-              "from_ms": 4,
-              "to_ms": 5
+              "bronze_records": 0,
+              "silver_valid": 1,
+              "silver_quarantined": 2,
+              "gold_excluded_by_contract": 3,
+              "contract_excluded_percent": 4,
+              "gold_quarantined": 5,
+              "gold_written": 6,
+              "report_label": 7,
+              "report_url": 8
             },
             "renameByName": {
-              "coverage_chip": "Coverage",
-              "covers_selected_run": "covers_selected_run",
-              "status": "Status",
-              "started_at": "Started",
-              "completed_at": "Completed",
-              "gold_records_out": "Gold",
-              "excluded_by_contract": "Excluded",
-              "run_id": "Run"
+              "bronze_records": "Input",
+              "silver_valid": "Accepted",
+              "silver_quarantined": "Silver Q",
+              "gold_excluded_by_contract": "Excluded",
+              "contract_excluded_percent": "Excl %",
+              "gold_quarantined": "Gold Q",
+              "gold_written": "Gold",
+              "report_label": "Report"
+            },
+            "excludeByName": {
+              "started_at": true,
+              "completed_at": true,
+              "report_url": false
             }
           }
         },
@@ -1410,7 +1491,7 @@
           "title": "Inspect Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 99,
+            "y": 19,
             "w": 12,
             "h": 6
           },
@@ -1575,7 +1656,7 @@
           "title": "Inspect Processed Records",
           "gridPos": {
             "x": 12,
-            "y": 99,
+            "y": 19,
             "w": 12,
             "h": 6
           },
@@ -1987,7 +2068,8 @@
                     }
                   }
                 }
-              ]
+              ],
+              "displayName": "Monitor Volume-Weighted DQ Score"
             },
             "overrides": []
           },
@@ -2069,7 +2151,8 @@
                     }
                   }
                 }
-              ]
+              ],
+              "displayName": "Monitor Worst-Entity DQ Score"
             },
             "overrides": []
           },
@@ -2157,7 +2240,8 @@
                   }
                 ]
               },
-              "unit": "h"
+              "unit": "h",
+              "displayName": "Monitor Worst Freshness Age"
             },
             "overrides": []
           },
@@ -2245,7 +2329,8 @@
                   }
                 }
               ],
-              "noValue": "None observed"
+              "noValue": "None observed",
+              "displayName": "Monitor Blocked Records"
             },
             "overrides": []
           },
@@ -2335,7 +2420,8 @@
                 ]
               },
               "unit": "short",
-              "noValue": "None observed"
+              "noValue": "None observed",
+              "displayName": "Monitor Quarantined Records"
             },
             "overrides": []
           },
@@ -2423,7 +2509,8 @@
               },
               "unit": "short",
               "links": [],
-              "noValue": "None observed"
+              "noValue": "None observed",
+              "displayName": "Monitor Silver Filter Rejects"
             },
             "overrides": []
           },
@@ -2534,13 +2621,14 @@
               },
               "unit": "short",
               "links": [],
-              "noValue": "None observed"
+              "noValue": "None observed",
+              "displayName": "Monitor Silver Reject Mismatch"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 0,
-            "y": 37,
+            "y": 21,
             "w": 8,
             "h": 4
           },
@@ -2686,7 +2774,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 42,
+            "y": 26,
             "w": 12,
             "h": 6
           },
@@ -2841,7 +2929,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 42,
+            "y": 26,
             "w": 12,
             "h": 6
           },
@@ -2994,7 +3082,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 48,
+            "y": 32,
             "w": 12,
             "h": 6
           },
@@ -3207,7 +3295,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 48,
+            "y": 32,
             "w": 12,
             "h": 6
           },
@@ -3335,7 +3423,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 55,
+            "y": 22,
             "w": 24,
             "h": 5
           },
@@ -3406,13 +3494,14 @@
                 ]
               },
               "unit": "short",
-              "noValue": "None observed"
+              "noValue": "None observed",
+              "displayName": "Monitor Bronze Records"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 6,
-            "y": 60,
+            "y": 27,
             "w": 6,
             "h": 4
           },
@@ -3429,7 +3518,7 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "value"
           },
           "targets": [
             {
@@ -3476,13 +3565,14 @@
                 ]
               },
               "unit": "short",
-              "noValue": "None observed"
+              "noValue": "None observed",
+              "displayName": "Monitor Gold Records"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 0,
-            "y": 60,
+            "y": 27,
             "w": 6,
             "h": 4
           },
@@ -3499,7 +3589,7 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "value"
           },
           "targets": [
             {
@@ -3552,13 +3642,14 @@
                     "value": null
                   }
                 ]
-              }
+              },
+              "displayName": "Inspect Latest Successful Data"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 12,
-            "y": 60,
+            "y": 27,
             "w": 6,
             "h": 4
           },
@@ -3588,7 +3679,7 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "value"
           },
           "targets": [
             {
@@ -3651,7 +3742,7 @@
           },
           "gridPos": {
             "x": 18,
-            "y": 60,
+            "y": 27,
             "w": 6,
             "h": 4
           },
@@ -3733,13 +3824,14 @@
                 ]
               },
               "unit": "short",
-              "noValue": "None observed"
+              "noValue": "None observed",
+              "displayName": "Monitor Silver Validation Failures"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 0,
-            "y": 64,
+            "y": 31,
             "w": 6,
             "h": 4
           },
@@ -3817,13 +3909,14 @@
                 ]
               },
               "unit": "short",
-              "noValue": "None observed"
+              "noValue": "None observed",
+              "displayName": "Monitor Gold Validation Failures"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 6,
-            "y": 64,
+            "y": 31,
             "w": 6,
             "h": 4
           },
@@ -3840,7 +3933,7 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto",
+            "textMode": "value",
             "dataLinks": [
               {
                 "targetBlank": true,
@@ -3905,7 +3998,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 68,
+            "y": 35,
             "w": 12,
             "h": 6
           },
@@ -3984,7 +4077,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 68,
+            "y": 35,
             "w": 12,
             "h": 6
           },
@@ -4056,7 +4149,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 74,
+            "y": 41,
             "w": 12,
             "h": 6
           },
@@ -4140,7 +4233,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 74,
+            "y": 41,
             "w": 12,
             "h": 4
           },
@@ -4185,7 +4278,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 80,
+            "y": 47,
             "w": 24,
             "h": 4
           },
@@ -4229,7 +4322,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 84,
+            "y": 51,
             "w": 24,
             "h": 4
           },

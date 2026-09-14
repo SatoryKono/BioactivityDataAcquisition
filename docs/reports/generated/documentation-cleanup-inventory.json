@@ -45995,7 +45995,7 @@
       "github_issue_url": null,
       "inbound_links": 0,
       "lifecycle": null,
-      "outbound_links": 1,
+      "outbound_links": 2,
       "owner": "BioETL Team",
       "path": "docs/03-guides/dashboards/dashboard-v2-updates.md",
       "recommended_action": "keep",

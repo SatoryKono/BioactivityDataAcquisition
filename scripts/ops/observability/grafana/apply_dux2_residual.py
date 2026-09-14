@@ -464,9 +464,9 @@ def run_explorer_depth() -> None:
         p[PANEL_CONTROL_PLANE_DQ_HANDOFFS]["options"] = {
             "mode": "markdown",
             "content": (
-                "1. **0. Trust** — resume/replay safety for this family.\n"
-                "2. **4. Data Quality** — quarantine aggregates (not record forensics).\n"
-                "3. **5. Incident Workspace** — multi-domain suspects.\n"
+                "1. **1. Trust** — resume/replay safety for this family.\n"
+                "2. **5. Data Quality** — quarantine aggregates (not record forensics).\n"
+                "3. **6. Incident Workspace** — multi-domain suspects.\n"
                 "4. **CLI** — `bioetl run-manifest show <run-id>` · "
                 "`bioetl quarantine inspect --pipeline <pipeline>`.\n"
             ),

@@ -28,11 +28,11 @@ ______________________________________________________________________
 
 Dashboard System 2.0 checklist: [operator-ux-v2.md](operator-ux-v2.md).
 
-- `0. Trust` (`bioetl-control-plane-v1`) — Control Plane Explorer / resume safety.
-- `1. Overview` (`bioetl-overview-v2`) — Fleet Command Center / L0 answer-first hub.
-- `2. Pipeline Diagnostics` (`bioetl-runtime`) — Pipeline Explorer.
-- `3. Provider Health` (`bioetl-provider-health-v2`) — Provider Explorer (population-first).
-- `4. Data Quality` (`bioetl-dq-v2`) — Data Trust Explorer (Now/Run/Range lanes).
+- `1. Trust` (`bioetl-control-plane-v1`) — Control Plane Explorer / resume safety.
+- `2. Overview` (`bioetl-overview-v2`) — Fleet Command Center / L0 answer-first hub.
+- `3. Pipeline Diagnostics` (`bioetl-runtime`) — Pipeline Explorer.
+- `4. Provider Health` (`bioetl-provider-health-v2`) — Provider Explorer (population-first).
+- `5. Data Quality` (`bioetl-dq-v2`) — Data Trust Explorer (Now/Run/Range lanes).
 - `Incident Workspace` (`bioetl-incident-v1`) — thin suspects + alert entry.
 - `Run Explorer` (`bioetl-run-explorer-v1`) — single-run identity (HTTP only).
 
@@ -54,7 +54,7 @@ Dashboard System 2.0 checklist: [operator-ux-v2.md](operator-ux-v2.md).
 
 ### Навигация
 
-- Top-level шина: `0. Trust` / `1. Overview` / `2. Pipeline Diagnostics` / `3. Provider Health` / `4. Data Quality` / `5. Incident Workspace` / `6. Run Explorer`.
+- Top-level шина: `1. Trust` / `2. Overview` / `3. Pipeline Diagnostics` / `4. Provider Health` / `5. Data Quality` / `6. Incident Workspace` / `0. Run Explorer`.
 - На текущей странице текущий dashboard остаётся видимым в navigation panel
   `id=1000` как disabled theme-safe item; machine-readable `panel.links`
   по-прежнему не содержат self-link. Полная навигация читаема в dark/light

@@ -4,7 +4,7 @@
 
 ## Overview
 
-Dashboard `1. Overview` is the primary entry point for incident triage. It uses shared shell/status/ID/provenance contracts and provides a unified view across runtime, DQ, control plane, provider, and workflow surfaces. Shipped dashboard JSON is the source of truth.
+Dashboard `2. Overview` is the primary entry point for incident triage. It uses shared shell/status/ID/provenance contracts and provides a unified view across runtime, DQ, control plane, provider, and workflow surfaces. Shipped dashboard JSON is the source of truth.
 
 Counter panels that use `max_over_time()` show a Pushgateway final snapshot or
 a ratio derived from such snapshots. They do not claim an exact total across
@@ -17,7 +17,7 @@ multiple runs; use RunLedger for exact reconciliation.
 - **Purpose:** Show run ID, manifest ID, and replay provenance anchors.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 3. Monitor Fleet Health
+### 3. Monitor Scope Health
 - **Type:** Stat
 - **Purpose:** Current severity for the selected scope.
 - **Data sources:** `bioetl_l0_status` (recording rule with label_replace for workflow pipeline mapping)

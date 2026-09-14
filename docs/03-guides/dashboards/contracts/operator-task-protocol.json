@@ -165,7 +165,7 @@
       "target_panels": [
         {
           "panel_id": 214,
-          "title": "Monitor Fleet Health"
+          "title": "Monitor Scope Health"
         }
       ],
       "initial_context": {

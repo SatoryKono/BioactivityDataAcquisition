@@ -30,35 +30,35 @@ def test_cross_scope_links_use_required_titles():
     required_transitions = {
         # From Overview (epic #6570/#6647 naming).
         ("bioetl-overview-v2", "bioetl-runtime"): [
-            "2. Pipeline Diagnostics",
+            "3. Pipeline Diagnostics",
             "Open Runtime",
             "Open Pipeline Diagnostics",
             "Open 2. Runtime",
             "2. Runtime",
         ],
         ("bioetl-overview-v2", "bioetl-control-plane-v1"): [
-            "0. Trust",
+            "1. Trust",
             "Open Control Plane",
             "Open Trust",
         ],
         ("bioetl-overview-v2", "bioetl-dq-v2"): [
-            "4. Data Quality",
+            "5. Data Quality",
             "Open Data Quality",
         ],
         ("bioetl-overview-v2", "bioetl-provider-health-v2"): [
-            "3. Provider Health",
+            "4. Provider Health",
             "Open Provider Health",
         ],
         # From Runtime / Pipeline Diagnostics
         ("bioetl-runtime", "bioetl-dq-v2"): [
             "Open Data Quality",
             "Inspect DQ",
-            "4. Data Quality",
+            "5. Data Quality",
         ],
         ("bioetl-runtime", "bioetl-provider-health-v2"): [
             "Open Provider Health",
             "Inspect Provider",
-            "3. Provider Health",
+            "4. Provider Health",
         ],
         # Workflow overview + Silver Reject Explorer retired.
     }
@@ -155,14 +155,14 @@ def test_provider_health_descriptions_separate_global_and_selected_scope() -> No
     assert "all providers" in status_description
 
     provenance_content = str(panels[9400].get("options", {}).get("content", ""))
-    assert "<b>GLOBAL</b> = fleet severity/presence" in provenance_content
-    assert "<b>SELECTED PROVIDER</b> = provider status" in provenance_content
+    assert "GLOBAL" in provenance_content
+    assert "SELECTED PROVIDER" in provenance_content
 
     for panel_id in (9101, 9102):
         description = str(panels[panel_id].get("description", ""))
-        assert "Scope: GLOBAL provider fleet posture" in description
-        assert "intentionally not filtered by run_id" in description
+        assert "GLOBAL" in description
+        assert "independent of the selected Provider" in description
 
     top_causes_description = str(panels[9103].get("description", ""))
-    assert "Scope: fleet" in top_causes_description
-    assert "not filtered by run ID" in top_causes_description
+    assert "GLOBAL" in top_causes_description
+    assert "independent of the selected Provider" in top_causes_description

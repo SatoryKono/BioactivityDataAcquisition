@@ -26,6 +26,7 @@ from bioetl.interfaces.http._processed_records_value_support import (
     _parse_grafana_ms,
     _parse_iso_to_ms,
 )
+from bioetl.interfaces.http._run_summary_accounting import summary_accounting
 
 
 def _empty_pipeline_run_report_shell(
@@ -295,12 +296,13 @@ def _summary_rows_pipeline_run_report(
         status=status,
     )
     set_range = (
-        "Open run in Run Explorer (started_at-5m .. completed_at+5m)"
+        "Set range to this run"
         if started_ms is not None and completed_ms is not None
         else None
     )
     coverage_chip = _coverage_chip(covers)
     summary_row = {
+        **summary_accounting(payload),
         "run_id": run_id,
         "status": status,
         "started_at": started_at,

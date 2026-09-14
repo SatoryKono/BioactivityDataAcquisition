@@ -88,7 +88,7 @@ def test_incident_current_alerts_share_first_window_with_runbook() -> None:
     assert int(grid.get("y") or 0) + int(grid.get("h") or 0) <= FIRST_WINDOW_Y
     assert int(grid.get("w") or 0) == 24
     assert int((suspects.get("gridPos") or {}).get("w") or 0) == 24
-    assert int((suspects.get("gridPos") or {}).get("h") or 0) == 4
+    assert int((suspects.get("gridPos") or {}).get("h") or 0) == 5
     assert (suspects.get("options") or {}).get("cellHeight") == "sm"
     links = ((alert.get("fieldConfig") or {}).get("defaults") or {}).get("links") or []
     assert any("runbook" in str(item.get("title", "")).lower() for item in links)
@@ -108,38 +108,6 @@ def test_incident_current_alerts_share_first_window_with_runbook() -> None:
     assert 2005 not in nested
     assert 2006 in nested
     assert 2007 in nested
-
-
-def test_run_identity_reasons_and_artifacts_use_operator_columns() -> None:
-    """#10255 R1-R3: local clocks, readable reasons, named artifact actions."""
-    dashboard = load_dashboard(_RUNS)
-    identity = _panel(dashboard, 3022)
-    target = next(
-        item
-        for item in (identity.get("targets") or [])
-        if "identity-table" in str(item.get("url") or "")
-    )
-    assert target.get("root_selector") == "display_rows"
-    assert "timezone=${__timezone}" in str(target.get("url") or "")
-    reasons = _panel(dashboard, 3012)
-    names = {
-        str((item.get("matcher") or {}).get("options") or "")
-        for item in (reasons.get("fieldConfig") or {}).get("overrides") or []
-    }
-    assert "reason_label" in names
-    assert "explain" in names
-    artifacts = _panel(dashboard, 3013)
-    organize = next(
-        item
-        for item in (artifacts.get("transformations") or [])
-        if item.get("id") == "organize"
-    )
-    exclude = (organize.get("options") or {}).get("excludeByName") or {}
-    assert exclude.get("ref") is True
-    assert exclude.get("Value") is True
-    blob = str(artifacts)
-    assert '"value": "Count"' not in blob
-    assert "pipeline-run-report-artifact?" in blob
 
 
 def test_run_id_selector_and_recent_runs_do_not_label_uuid_as_count() -> None:

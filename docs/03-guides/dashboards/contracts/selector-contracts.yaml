@@ -525,6 +525,7 @@ shipped_selector_registry:
   bioetl-run-explorer-v1:
     family: exact_run_explorer
     visible_selectors:
+      - lookup_run_id
       - workflow
       - pipeline
       - run_type
@@ -536,11 +537,13 @@ shipped_selector_registry:
       - pipeline
       - run_type
       - run_id
+      - lookup_run_id
     query_source_families:
       workflow: prometheus_workflow_runs_total
       pipeline: control_plane_filter_options_api
       run_type: control_plane_filter_options_api
       run_id: control_plane_filter_options_api
+      lookup_run_id: textbox_exact_run_lookup
 ship_now_selector_contract_by_uid:
   bioetl-control-plane-v1:
     visible_selectors:
@@ -595,6 +598,7 @@ ship_now_selector_contract_by_uid:
     time_range: grafana_builtin
   bioetl-run-explorer-v1:
     visible_selectors:
+      - lookup_run_id
       - workflow
       - pipeline
       - run_type
@@ -624,12 +628,14 @@ default_selection_policy:
   epic: "#7550"
   decisions:
     overview_landing: fleet_all
+    run_explorer_landing: fleet_all_recent_launches
+    run_explorer_native_defaults: {workflow: All, pipeline: All, run_type: All, run_id: "-"}
     overview_landing_detail:
       "O2: bioetl-overview-v2 keeps native defaults workflow=All, pipeline=All,
 
       run_type=All, run_id=- for fleet L0 landing. Last-run auto-defaults are
 
-      for boards 0,2–6 via selector-shell plugin / operator action, not Overview
+      for boards 0,2–5 via selector-shell plugin / operator action, not Overview
 
       native JSON defaults.
 

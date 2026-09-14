@@ -73,6 +73,17 @@ def test_all_dashboard_variables_have_non_empty_descriptions() -> None:
             )
 
 
+def test_run_explorer_defaults_browse_all_without_selecting_an_exact_run() -> None:
+    variables = _variables("bioetl-run-explorer-v1.json")
+    for name in ("workflow", "pipeline", "run_type"):
+        assert variables[name]["includeAll"] is True
+        assert variables[name]["current"]["value"] == "$__all"
+        assert variables[name]["allValue"] == ".*"
+        assert variables[name]["skipUrlSync"] is False
+    assert variables["pipeline"]["multi"] is False
+    assert variables["run_id"]["current"]["value"] == "-"
+
+
 def test_variable_defaults_follow_repo_aligned_contract() -> None:
     overview = _variables("bioetl-overview-v2.json")
     assert set(overview) == {"workflow", "pipeline", "run_type", "run_id"}
@@ -94,7 +105,6 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
         "bioetl-runtime.json",
         "bioetl-dq-v2.json",
         "bioetl-incident-v1.json",
-        "bioetl-run-explorer-v1.json",
     ):
         variables = _variables(dashboard_name)
         pipeline = variables["pipeline"]
@@ -123,11 +133,11 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
     assert provider["run_id"].get("current", {}).get("value") == "-"
     assert provider["run_id"].get("sort") == 0
     assert provider["provider"].get("multi") is False
-    assert provider["provider"].get("includeAll") is False
-    assert provider["provider"].get("current", {}).get("value") == "unknown"
+    assert provider["provider"].get("includeAll") is True
+    assert provider["provider"].get("current", {}).get("value") == "$__all"
     provider_query = str(provider["provider"].get("definition") or "")
-    assert "query_result(" in provider_query
-    assert "${pipeline}" in provider_query and "${workflow}" in provider_query
+    assert provider_query == "label_values(bioetl_provider_current_status, provider)"
+    assert "${pipeline}" not in provider_query and "${workflow}" not in provider_query
     assert provider["pipeline_context"].get("hide") == 2
     assert provider["pipeline_context"].get("current", {}).get("value") == "unknown"
 

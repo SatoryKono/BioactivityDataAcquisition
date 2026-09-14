@@ -48,70 +48,70 @@ selection_serialization:
       dq: [stage]
 required_top_level_links_by_uid:
   bioetl-control-plane-v1:
-  - 1. Overview
-  - 2. Pipeline Diagnostics
-  - 3. Provider Health
-  - 4. Data Quality
-  - 5. Incident Workspace
-  - 6. Run Explorer
+  - 2. Overview
+  - 3. Pipeline Diagnostics
+  - 4. Provider Health
+  - 5. Data Quality
+  - 6. Incident Workspace
+  - 0. Run Explorer
   bioetl-overview-v2:
-  - 0. Trust
-  - 2. Pipeline Diagnostics
-  - 3. Provider Health
-  - 4. Data Quality
-  - 5. Incident Workspace
-  - 6. Run Explorer
+  - 1. Trust
+  - 3. Pipeline Diagnostics
+  - 4. Provider Health
+  - 5. Data Quality
+  - 6. Incident Workspace
+  - 0. Run Explorer
   bioetl-runtime:
-  - 0. Trust
-  - 1. Overview
-  - 3. Provider Health
-  - 4. Data Quality
-  - 5. Incident Workspace
-  - 6. Run Explorer
+  - 1. Trust
+  - 2. Overview
+  - 4. Provider Health
+  - 5. Data Quality
+  - 6. Incident Workspace
+  - 0. Run Explorer
   bioetl-provider-health-v2:
-  - 0. Trust
-  - 1. Overview
-  - 2. Pipeline Diagnostics
-  - 4. Data Quality
-  - 5. Incident Workspace
-  - 6. Run Explorer
+  - 1. Trust
+  - 2. Overview
+  - 3. Pipeline Diagnostics
+  - 5. Data Quality
+  - 6. Incident Workspace
+  - 0. Run Explorer
   bioetl-dq-v2:
-  - 0. Trust
-  - 1. Overview
-  - 2. Pipeline Diagnostics
-  - 3. Provider Health
-  - 5. Incident Workspace
-  - 6. Run Explorer
+  - 1. Trust
+  - 2. Overview
+  - 3. Pipeline Diagnostics
+  - 4. Provider Health
+  - 6. Incident Workspace
+  - 0. Run Explorer
   bioetl-incident-v1:
-  - 0. Trust
-  - 1. Overview
-  - 2. Pipeline Diagnostics
-  - 3. Provider Health
-  - 4. Data Quality
-  - 6. Run Explorer
+  - 1. Trust
+  - 2. Overview
+  - 3. Pipeline Diagnostics
+  - 4. Provider Health
+  - 5. Data Quality
+  - 0. Run Explorer
   bioetl-run-explorer-v1:
-  - 0. Trust
-  - 1. Overview
-  - 2. Pipeline Diagnostics
-  - 3. Provider Health
-  - 4. Data Quality
-  - 5. Incident Workspace
+  - 1. Trust
+  - 2. Overview
+  - 3. Pipeline Diagnostics
+  - 4. Provider Health
+  - 5. Data Quality
+  - 6. Incident Workspace
 top_level_link_priority_by_uid:
   bioetl-overview-v2:
-  - title: 2. Pipeline Diagnostics
+  - title: 3. Pipeline Diagnostics
     target_uid: bioetl-runtime
     priority: primary
     semantics: scoped_runtime_handoff
-  - title: 0. Trust
+  - title: 1. Trust
     target_uid: bioetl-control-plane-v1
     priority: secondary
     semantics: scoped_control_plane_handoff
-  - title: 4. Data Quality
+  - title: 5. Data Quality
     target_uid: bioetl-dq-v2
     priority: contextual
     semantics: scoped_dq_handoff
   bioetl-provider-health-v2:
-  - title: 2. Pipeline Diagnostics
+  - title: 3. Pipeline Diagnostics
     target_uid: bioetl-runtime
     priority: primary
     semantics: runtime_cross_scope_all_defaults
@@ -369,15 +369,15 @@ required_panel_links_by_uid:
   - panel_id: 4
     target_uid: bioetl-dq-v2
     link_titles:
-    - Open 4. Data Quality
+    - Open 5. Data Quality
   - panel_id: 6
     target_uid: bioetl-provider-health-v2
     link_titles:
-    - Open 3. Provider Health
+    - Open 4. Provider Health
   - panel_id: 7
     target_uid: bioetl-dq-v2
     link_titles:
-    - Open 4. Data Quality
+    - Open 5. Data Quality
   - panel_id: 236
     target_uid: bioetl-runtime
     link_titles:
@@ -432,11 +432,7 @@ required_panel_links_by_uid:
     target_uid: bioetl-run-explorer-v1
     link_titles:
     - Open Run Explorer
-  bioetl-run-explorer-v1:
-  - panel_id: 3012
-    target_uid: bioetl-dq-v2
-    link_titles:
-    - Open Data Quality
+  bioetl-run-explorer-v1: []
 default_time_refresh_policy:
   L0:
     dashboards:
@@ -638,13 +634,13 @@ navigation_transition_contract:
       canonical_uid: bioetl-overview-v2
       mirror_panels: []
 visual_bus_titles_ordered:
-- 0. Trust
-- 1. Overview
-- 2. Pipeline Diagnostics
-- 3. Provider Health
-- 4. Data Quality
-- 5. Incident Workspace
-- 6. Run Explorer
+- 1. Trust
+- 2. Overview
+- 3. Pipeline Diagnostics
+- 4. Provider Health
+- 5. Data Quality
+- 6. Incident Workspace
+- 0. Run Explorer
 visual_bus_uids_ordered:
 - bioetl-control-plane-v1
 - bioetl-overview-v2

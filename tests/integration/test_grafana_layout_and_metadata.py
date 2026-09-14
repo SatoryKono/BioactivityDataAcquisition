@@ -380,7 +380,7 @@ def test_control_plane_long_first_screen_titles_keep_extra_width() -> None:
     for panel_title in (
         "Monitor Manifest/Ledger",
         "Monitor Telemetry",
-        "Review Recovery Action",
+        "Inspect Scope & Evidence",
     ):
         panel = panels.get(panel_title)
         assert panel is not None
@@ -401,8 +401,8 @@ def test_control_plane_trust_panels_follow_reference_widths() -> None:
     processed = panels["Review Processed Records"]["gridPos"]
     telemetry = panels["Monitor Telemetry"]["gridPos"]
 
-    assert scope == {"x": 0, "y": 4, "w": 16, "h": 3}
-    assert readiness == {"x": 16, "y": 4, "w": 8, "h": 3}
+    assert scope == {"x": 0, "y": 3, "w": 16, "h": 3}
+    assert readiness == {"x": 16, "y": 3, "w": 8, "h": 3}
     assert readiness["w"] * readiness["h"] == 24
     assert run_summary["w"] == 18
     assert processed["w"] == telemetry["w"] == 6
@@ -551,7 +551,7 @@ def test_overview_current_panels_stay_out_of_selected_range_semantics() -> None:
     }
 
     for panel_title in (
-        "Monitor Fleet Health",
+        "Monitor Scope Health",
         "Review First Action",
         "Review Domain Status",
         "Review Runtime Status",

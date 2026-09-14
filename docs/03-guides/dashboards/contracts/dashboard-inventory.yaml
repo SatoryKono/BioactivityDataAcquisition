@@ -3,16 +3,16 @@
 
 dashboards:
   - uid: bioetl-control-plane-v1
-    title: 0. Trust
+    title: 1. Trust
     owner: "@bioetl-observability"
     owner_route: docs/05-operations/runbooks/run-manifest-inspection.md
     family: primary
-    navigation_id: 0
+    navigation_id: 1
     data_sources:
       - Prometheus
       - BioETL Ops HTTP
       - Grafana
-    panel_count: 65
+    panel_count: 64
     key_panels:
       - id: 891
         title: "Monitor Replay Safety"
@@ -43,11 +43,11 @@ dashboards:
       - run_type
       - read_latency_quantile
   - uid: bioetl-overview-v2
-    title: 1. Overview
+    title: 2. Overview
     owner: "@bioetl-observability"
     owner_route: docs/05-operations/runbooks/observability-checklist.md
     family: primary
-    navigation_id: 1
+    navigation_id: 2
     data_sources:
       - Prometheus
       - BioETL Ops HTTP
@@ -55,7 +55,7 @@ dashboards:
     panel_count: 28
     key_panels:
       - id: 214
-        title: Monitor Fleet Health
+        title: Monitor Scope Health
         type: stat
         description: Current system status summary
       - id: 215
@@ -72,16 +72,16 @@ dashboards:
       - run_id
       - run_type
   - uid: bioetl-runtime
-    title: 2. Pipeline Diagnostics
+    title: 3. Pipeline Diagnostics
     owner: "@bioetl-observability"
     owner_route: docs/05-operations/runbooks/pipeline-failure-critical.md
     family: primary
-    navigation_id: 2
+    navigation_id: 3
     data_sources:
       - Prometheus
       - BioETL Ops HTTP
       - Grafana
-    panel_count: 43
+    panel_count: 44
     key_panels:
       - id: 9401
         title: Monitor Pipeline Status
@@ -107,11 +107,11 @@ dashboards:
       - run_type
       - stage
   - uid: bioetl-provider-health-v2
-    title: 3. Provider Health
+    title: 4. Provider Health
     owner: "@bioetl-observability"
     owner_route: docs/05-operations/runbooks/incident-response.md
     family: primary
-    navigation_id: 3
+    navigation_id: 4
     data_sources:
       - Prometheus
       - BioETL Ops HTTP
@@ -135,11 +135,11 @@ dashboards:
       - pipeline_context
       - adapter
   - uid: bioetl-dq-v2
-    title: 4. Data Quality
+    title: 5. Data Quality
     owner: "@bioetl-observability"
     owner_route: docs/05-operations/runbooks/pipeline-failure-dq.md
     family: primary
-    navigation_id: 4
+    navigation_id: 5
     target_workspace: Data Trust Explorer
     ux_phase: dux-06
     data_sources:
@@ -176,7 +176,7 @@ dashboards:
     owner: "@bioetl-observability"
     owner_route: docs/05-operations/runbooks/incident-response.md
     family: adjunct
-    navigation_id: 5
+    navigation_id: 6
     target_workspace: Incident Workspace
     ux_phase: drm-04
     data_sources:
@@ -207,35 +207,20 @@ dashboards:
     owner: "@bioetl-observability"
     owner_route: docs/05-operations/runbooks/run-manifest-inspection.md
     family: adjunct
-    navigation_id: 6
+    navigation_id: 0
     target_workspace: Run Explorer
     ux_phase: drm-05
     data_sources:
       - Prometheus
       - BioETL Ops HTTP
-    panel_count: 12
+    panel_count: 3
     key_panels:
-      - id: 3022
-        title: Inspect Run Identity
-        type: table
-        description: HTTP identity hub in collapsed Selected Run Details; run_id never a Prometheus label
-      - id: 3023
-        title: Inspect Processed Records
-        type: table
-        description: Bronze/Silver/Gold accounting hub via Ops HTTP (collapsed row)
       - id: 3010
         title: Inspect Recent Runs (last 10)
         type: table
-        description: pipeline-run-reports first-screen index; VALID EMPTY vs TREE_MISSING bind gap
-      - id: 3020
-        title: Inspect Recent Workflow Runs (last 20)
-        type: table
-        description: below-fold workflow-run-reports index (not first-screen)
-      - id: 3011
-        title: Inspect Stage Funnel
-        type: table
-        description: pipeline-run-report funnel
+        description: Ten recent launches with row-scoped report links and explicit missing-report state
     selector_variables:
+      - lookup_run_id
       - workflow
       - pipeline
       - run_type

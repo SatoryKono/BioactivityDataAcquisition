@@ -1345,23 +1345,23 @@ def _assert_silver_explorer_html_bus_forensic_boundary(
 
 
 _EXPECTED_CURRENT_NAV_TITLE = {
-    "bioetl-control-plane-v1": "0. Trust",
-    "bioetl-overview-v2": "1. Overview",
-    "bioetl-runtime": "2. Pipeline Diagnostics",
-    "bioetl-provider-health-v2": "3. Provider Health",
-    "bioetl-dq-v2": "4. Data Quality",
-    "bioetl-incident-v1": "5. Incident Workspace",
-    "bioetl-run-explorer-v1": "6. Run Explorer",
+    "bioetl-control-plane-v1": "1. Trust",
+    "bioetl-overview-v2": "2. Overview",
+    "bioetl-runtime": "3. Pipeline Diagnostics",
+    "bioetl-provider-health-v2": "4. Provider Health",
+    "bioetl-dq-v2": "5. Data Quality",
+    "bioetl-incident-v1": "6. Incident Workspace",
+    "bioetl-run-explorer-v1": "0. Run Explorer",
 }
 
 _BASE_VISUAL_NAV_TITLES = (
-    "0. Trust",
-    "1. Overview",
-    "2. Pipeline Diagnostics",
-    "3. Provider Health",
-    "4. Data Quality",
-    "5. Incident Workspace",
-    "6. Run Explorer",
+    "0. Run Explorer",
+    "1. Trust",
+    "2. Overview",
+    "3. Pipeline Diagnostics",
+    "4. Provider Health",
+    "5. Data Quality",
+    "6. Incident Workspace",
 )
 
 _OPTIONAL_VISUAL_NAV_TITLES = (
@@ -1371,8 +1371,9 @@ _OPTIONAL_VISUAL_NAV_TITLES = (
 )
 
 _SANITIZER_SAFE_NAV_TOKENS = (
-    'data-bioetl-panel-title="Navigate Dashboards"',
-    "font-size:19px",
+    'role="navigation"',
+    'aria-label="BioETL dashboards"',
+    "font-size:16px",
     "display:flex",
     "flex-wrap:wrap",
     "overflow:visible",
@@ -1382,7 +1383,7 @@ _SANITIZER_SAFE_NAV_TOKENS = (
     "text-align:center",
     "color:#f8fafc",
     "background:#334155",
-    "border:1px solid #94a3b8",
+    "border:2px solid #94a3b8",
     "background:#1d4ed8",
     "border:2px solid #7dd3fc",
 )
@@ -1419,10 +1420,12 @@ def _assert_visual_bus_base_content(
     assert isinstance(options, dict)
     assert options.get("bioetlDisplayTitle") == "Navigate Dashboards"
     assert panel.get("title") == ""
+    assert "bioetl-panel-title" not in content
+    assert panel["gridPos"]["h"] == 3
     description = str(panel.get("description", ""))
     assert "Sanitizer-compatible" in description
     assert "native keyboard focus" in description
-    assert "3. Provider Health" in description or "Provider Health" in description
+    assert "4. Provider Health" in description or "Provider Health" in description
     assert "Incident Workspace" in description
     assert "Run Explorer" in description
 

@@ -207,29 +207,29 @@
         "useTags": false
       },
       {
-        "allValue": null,
+        "allValue": ".*",
         "current": {
-          "selected": false,
-          "text": "unknown",
-          "value": "unknown"
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": {
           "type": "prometheus",
           "uid": "prometheus"
         },
-        "definition": "query_result(label_replace(label_replace(label_replace(label_replace(label_replace(vector(1), \"src\", \"${pipeline}|${workflow}\", \"\", \"\"), \"hint\", \"unknown\", \"src\", \".*\"), \"hint\", \"$1\", \"src\", \"^(?:workflow_)?([^_|]+)(?:_[^|]*)?[|].*$\"), \"hint\", \"$1\", \"src\", \"^(?:unknown|[$]__all|All|[.][*]|)[|](?:workflow_)?([^_|]+)(?:_[^|]*)?$\"), \"hint\", \"unknown\", \"hint\", \"^(?:unknown|[$]|[$]__all|All|[.][*]|)$\"))",
+        "definition": "label_values(bioetl_provider_current_status, provider)",
         "hide": 0,
-        "includeAll": false,
+        "includeAll": true,
         "label": "Provider",
         "multi": false,
         "name": "provider",
         "options": [],
         "query": {
-          "query": "query_result(label_replace(label_replace(label_replace(label_replace(label_replace(vector(1), \"src\", \"${pipeline}|${workflow}\", \"\", \"\"), \"hint\", \"unknown\", \"src\", \".*\"), \"hint\", \"$1\", \"src\", \"^(?:workflow_)?([^_|]+)(?:_[^|]*)?[|].*$\"), \"hint\", \"$1\", \"src\", \"^(?:unknown|[$]__all|All|[.][*]|)[|](?:workflow_)?([^_|]+)(?:_[^|]*)?$\"), \"hint\", \"unknown\", \"hint\", \"^(?:unknown|[$]|[$]__all|All|[.][*]|)$\"))",
+          "query": "label_values(bioetl_provider_current_status, provider)",
           "refId": "StandardVariableQuery"
         },
-        "refresh": 2,
-        "regex": "/.*hint=\"([^\"]+)\".*/",
+        "refresh": 1,
+        "regex": "",
         "skipUrlSync": false,
         "sort": 1,
         "tagValuesQuery": "",
@@ -304,13 +304,13 @@
     ]
   },
   "timezone": "browser",
-  "title": "3. Provider Health",
+  "title": "4. Provider Health",
   "uid": "bioetl-provider-health-v2",
   "version": 8,
   "panels": [
     {
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 24,
         "x": 0,
         "y": 0
@@ -319,76 +319,76 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1;margin:0 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;var-pipeline=${pipeline_context:percentencode}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;var-pipeline=${pipeline_context:percentencode}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range, pipeline via pipeline_context.\" href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;var-pipeline=${pipeline_context:percentencode}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-current\" href=\"#bioetl-provider-health-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"3. Provider Health (Provider Health)\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality). Scope reset: stage=All; preserves time range, pipeline via pipeline_context.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;var-pipeline=${pipeline_context:percentencode}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">4. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&amp;var-pipeline=${pipeline_context:percentencode}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&amp;var-pipeline=${pipeline_context:percentencode}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Run Explorer</a></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"0. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&amp;var-pipeline=${pipeline_context:percentencode}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"1. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;var-pipeline=${pipeline_context:percentencode}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"2. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;var-pipeline=${pipeline_context:percentencode}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">2. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"3. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range, pipeline via pipeline_context.\" href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;var-pipeline=${pipeline_context:percentencode}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">3. Pipeline Diagnostics</a><a class=\"bioetl-nav-current\" href=\"#bioetl-provider-health-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"4. Provider Health (Provider Health)\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">4. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"5. Data Quality (Data Quality). Scope reset: stage=All; preserves time range, pipeline via pipeline_context.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;var-pipeline=${pipeline_context:percentencode}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">5. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&amp;var-pipeline=${pipeline_context:percentencode}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
       },
       "title": "",
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus 0–6: Run Explorer / Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality / Incident Workspace. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
       "type": "text",
       "links": [
         {
-          "title": "0. Trust",
-          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&var-pipeline=${pipeline_context:percentencode}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "0. Trust (Trust). Preserves selected scope and time range.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
-        },
-        {
-          "title": "1. Overview",
-          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&var-pipeline=${pipeline_context:percentencode}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "1. Overview (Overview). Preserves selected scope and time range.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
-        },
-        {
-          "title": "2. Pipeline Diagnostics",
-          "url": "/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&var-pipeline=${pipeline_context:percentencode}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
-          "tooltip": "2. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range, pipeline via pipeline_context.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
-        },
-        {
-          "title": "4. Data Quality",
-          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&var-pipeline=${pipeline_context:percentencode}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
-          "tooltip": "4. Data Quality (Data Quality). Scope reset: stage=All; preserves time range, pipeline via pipeline_context.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
-        },
-        {
-          "title": "5. Incident Workspace",
-          "url": "/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&var-pipeline=${pipeline_context:percentencode}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.",
-          "type": "link",
-          "icon": "dashboard",
-          "targetBlank": false,
-          "keepTime": false,
-          "includeVars": false,
-          "asDropdown": false,
-          "tags": []
-        },
-        {
-          "title": "6. Run Explorer",
+          "title": "0. Run Explorer",
           "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&var-pipeline=${pipeline_context:percentencode}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "6. Run Explorer (Run Explorer). Preserves selected scope and time range.",
+          "tooltip": "0. Run Explorer (Run Explorer). Preserves selected scope and time range.",
+          "type": "link",
+          "icon": "dashboard",
+          "targetBlank": false,
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
+        },
+        {
+          "title": "1. Trust",
+          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&var-pipeline=${pipeline_context:percentencode}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "tooltip": "1. Trust (Trust). Preserves selected scope and time range.",
+          "type": "link",
+          "icon": "dashboard",
+          "targetBlank": false,
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
+        },
+        {
+          "title": "2. Overview",
+          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&var-pipeline=${pipeline_context:percentencode}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "tooltip": "2. Overview (Overview). Preserves selected scope and time range.",
+          "type": "link",
+          "icon": "dashboard",
+          "targetBlank": false,
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
+        },
+        {
+          "title": "3. Pipeline Diagnostics",
+          "url": "/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&var-pipeline=${pipeline_context:percentencode}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+          "tooltip": "3. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range, pipeline via pipeline_context.",
+          "type": "link",
+          "icon": "dashboard",
+          "targetBlank": false,
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
+        },
+        {
+          "title": "5. Data Quality",
+          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&var-pipeline=${pipeline_context:percentencode}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+          "tooltip": "5. Data Quality (Data Quality). Scope reset: stage=All; preserves time range, pipeline via pipeline_context.",
+          "type": "link",
+          "icon": "dashboard",
+          "targetBlank": false,
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
+        },
+        {
+          "title": "6. Incident Workspace",
+          "url": "/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&var-pipeline=${pipeline_context:percentencode}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "tooltip": "6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -407,13 +407,13 @@
         "h": 3,
         "w": 16,
         "x": 0,
-        "y": 4
+        "y": 3
       },
       "description": "Scope and evidence: provider health is determined from provider telemetry. Fleet panels cover all providers; selected-provider panels use `$provider`. Pipeline, workflow, run type, run ID, identity, and processed-record data are supporting context and do not determine provider health. Missing current-status telemetry means UNKNOWN, not healthy. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: provider=${provider} · adapter=${adapter} · pipeline_context=${pipeline_context}.",
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Evidence Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">Which provider is degraded, and why? Runtime scope: <b>GLOBAL</b> = fleet severity/presence. <b>SELECTED PROVIDER</b> = provider status. UNKNOWN — inspect scrape target.</div></div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">GLOBAL · Fleet tables cover every provider.<br>SELECTED PROVIDER · Status and request diagnostics use ${provider:text}. Missing health telemetry is UNKNOWN.</div>"
       },
       "links": []
     },
@@ -425,7 +425,7 @@
         "h": 3,
         "w": 8,
         "x": 16,
-        "y": 4
+        "y": 3
       },
       "datasource": {
         "type": "prometheus",
@@ -438,7 +438,7 @@
             "mode": "thresholds"
           },
           "decimals": 0,
-          "displayName": "Selected Provider Verdict",
+          "displayName": "Monitor Selected Provider",
           "mappings": [
             {
               "type": "value",
@@ -546,7 +546,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value_and_name",
+        "textMode": "value",
         "text": {
           "titleSize": 14,
           "valueSize": 20
@@ -569,7 +569,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 6
       },
       "options": {
         "bioetlDisplayTitle": "Start Provider Triage",
@@ -604,7 +604,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Do not put full UUIDs into Prometheus labels. First-screen worst four providers by current status. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id. Interpret with freshness: critical -> degraded -> unknown/stale -> healthy. TELEMETRY MISSING or no data with UNKNOWN Status is a blind spot, not evidence of a healthy fleet. Complete fleet rows remain in Inspect Full Fleet Evidence.",
+      "description": "CURRENT · Do not put full UUIDs into Prometheus labels. First-screen worst three providers by current status. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id. Interpret with freshness: critical -> degraded -> unknown/stale -> healthy. TELEMETRY MISSING or no data with UNKNOWN Status is a blind spot, not evidence of a healthy fleet. Complete fleet rows remain in Inspect Full Fleet Evidence. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -784,7 +784,7 @@
         "h": 5,
         "w": 12,
         "x": 0,
-        "y": 9
+        "y": 8
       },
       "id": 9101,
       "options": {
@@ -815,7 +815,7 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "topk(3, max by (provider) (bioetl_provider_current_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}))",
+          "expr": "topk(3, max by (provider) (bioetl_provider_current_status{provider!~\"^(test|synthetic)$\"}))",
           "format": "table",
           "instant": true,
           "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
@@ -854,7 +854,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Status reason and source_state for the selected provider (or worst four when provider=All). Enum 0=OK, 1=WARN, 2=CRIT, 3=UNKNOWN. missing_health_status means no health_status series — not a healthy fleet. Adapter filter is hidden; adapter=All unless a chip says otherwise. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+      "description": "CURRENT · Status reason and source_state for the selected provider (or worst three when provider=All). Enum 0=OK, 1=WARN, 2=CRIT, 3=UNKNOWN. missing_health_status means no health_status series — not a healthy fleet. Adapter filter is hidden; adapter=All unless a chip says otherwise. TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1139,7 +1139,7 @@
         "h": 5,
         "w": 12,
         "x": 12,
-        "y": 9
+        "y": 8
       },
       "id": 9107,
       "options": {
@@ -1163,7 +1163,7 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "topk(3, max by (provider, reason, source_state) (bioetl_provider_current_status_info{provider=~\"$provider\"}))",
+          "expr": "topk(3, max by (provider, reason, source_state) (bioetl_provider_current_status_info))",
           "format": "table",
           "instant": true,
           "legendFormat": "{{provider}} {{reason}} {{source_state}}",
@@ -1210,14 +1210,14 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "TIME RANGE · CURRENT · Telemetry presence of bioetl_provider_current_status for the selected provider (excluding synthetic test). 0=PRESENT means the current_status series exists. Alias mapping: PRESENT=OK (presence color only; PRESENT≠OK for fleet health). Fail-closed UNKNOWN/gray when the series is missing. MISSING_HEALTH_STATUS on Inspect Status Reason is INCOMPLETE/CRIT completeness, never PRESENT-healthy.",
+      "description": "TIME RANGE · CURRENT · Telemetry presence of bioetl_provider_current_status for the selected provider (excluding synthetic test). 0=PRESENT means the current_status series exists. Alias mapping: PRESENT=OK (presence color only; PRESENT≠OK for fleet health). Fail-closed UNKNOWN/gray when the series is missing. MISSING_HEALTH_STATUS on Inspect Status Reason is INCOMPLETE/CRIT completeness, never PRESENT-healthy. SELECTED PROVIDER only; it does not summarize the fleet.",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
           "decimals": 0,
-          "displayName": "Telemetry Freshness",
+          "displayName": "Monitor Telemetry Presence",
           "mappings": [
             {
               "type": "value",
@@ -1262,10 +1262,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 13
       },
       "id": 9104,
       "options": {
@@ -1281,7 +1281,7 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value_and_name",
+        "textMode": "value",
         "wideLayout": false,
         "text": {
           "titleSize": 14,
@@ -1318,7 +1318,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Do not put full UUIDs into Prometheus labels. Only providers currently observed as DEGRADED or FAILING on the first-screen provider-status recording rule (instant/current semantics, not selected-range history). Empty table means no provider is currently above OK in the active trust window. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id. Fleet-first matrix: answer without forcing a provider selector; select row to deep-dive TELEMETRY MISSING is not a zero and not VALID EMPTY. First-screen Monitor Fleet Severity is the compact summary; this table is the Non-OK expander (status>=1), not a second copy of OK rows.",
+          "description": "TIME RANGE · Do not put full UUIDs into Prometheus labels. Only providers currently observed as DEGRADED or FAILING on the first-screen provider-status recording rule (instant/current semantics, not selected-range history). Empty table means no provider is currently above OK in the active trust window. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id. Fleet-first matrix: answer without forcing a provider selector; select row to deep-dive TELEMETRY MISSING is not a zero and not VALID EMPTY. First-screen Monitor Fleet Severity is the compact summary; this table is the Non-OK expander (status>=1), not a second copy of OK rows. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1635,7 +1635,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · CURRENT · Top current causes of provider degradation, bounded to the worst four rows, such as raw health, failures, retry exhaustion, latency, HTTP errors, or rate limiting. Scope: fleet; not filtered by run ID. This table renders exactly one state: active-cause rows, or a single FLEET verdict row. VALID EMPTY needs proven coverage — recorded status for every provider, no provider above OK, present health telemetry, present cause series, and no active cause. Unproven coverage stays UNKNOWN and means restore provider telemetry; it is never a healthy empty. Datasource or query failure is QUERY ERROR, never an empty table. Complete cause evidence remains in Inspect Full Fleet Evidence. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · CURRENT · Top current causes of provider degradation, bounded to the worst three rows, such as raw health, failures, retry exhaustion, latency, HTTP errors, or rate limiting. Scope: fleet; not filtered by run ID. This table renders exactly one state: active-cause rows, or a single FLEET verdict row. VALID EMPTY needs proven coverage — recorded status for every provider, no provider above OK, present health telemetry, present cause series, and no active cause. Unproven coverage stays UNKNOWN and means restore provider telemetry; it is never a healthy empty. Datasource or query failure is QUERY ERROR, never an empty table. Complete cause evidence remains in Inspect Full Fleet Evidence. TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1958,7 +1958,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "CURRENT · TIME RANGE · Complete GLOBAL provider severity matrix. First-screen Monitor Fleet Severity is the four-row summary. TELEMETRY MISSING is a blind spot, not a healthy fleet. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "CURRENT · TIME RANGE · Complete GLOBAL provider severity matrix. First-screen Monitor Fleet Severity is the four-row summary. TELEMETRY MISSING is a blind spot, not a healthy fleet. TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
           "gridPos": {
             "h": 8,
             "w": 8,
@@ -2160,7 +2160,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Complete DEGRADED or FAILING provider list. First-screen Inspect Non-OK Providers is the four-row summary. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Complete DEGRADED or FAILING provider list. First-screen Inspect Non-OK Providers is the four-row summary. TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
           "gridPos": {
             "h": 8,
             "w": 6,
@@ -2362,7 +2362,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Complete current cause evidence, unbounded copy of Inspect Top Provider Causes. Same one-state rule: active-cause rows, or a single FLEET verdict row. VALID EMPTY needs proven coverage — recorded status for every provider, no provider above OK, present health telemetry, present cause series, and no active cause. Unproven coverage stays UNKNOWN and means restore provider telemetry. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Complete current cause evidence, unbounded copy of Inspect Top Provider Causes. Same one-state rule: active-cause rows, or a single FLEET verdict row. VALID EMPTY needs proven coverage — recorded status for every provider, no provider above OK, present health telemetry, present cause series, and no active cause. Unproven coverage stays UNKNOWN and means restore provider telemetry. TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
           "gridPos": {
             "h": 8,
             "w": 10,
@@ -2987,7 +2987,8 @@
                     }
                   }
                 }
-              ]
+              ],
+              "displayName": "Inspect Health-Check Latency p95"
             },
             "overrides": []
           },
@@ -3498,7 +3499,8 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "short",
+              "displayName": "Monitor Circuit-Breaker State"
             },
             "overrides": []
           },
@@ -3521,7 +3523,7 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "value"
           },
           "targets": [
             {
@@ -3746,7 +3748,7 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 67
+            "y": 21
           },
           "id": 114,
           "options": {
@@ -3839,7 +3841,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 67
+            "y": 21
           },
           "id": 1,
           "options": {
@@ -3902,7 +3904,8 @@
                 ]
               },
               "unit": "short",
-              "noValue": "N/A"
+              "noValue": "N/A",
+              "displayName": "Monitor Healthy Checks"
             },
             "overrides": []
           },
@@ -3910,7 +3913,7 @@
             "h": 3,
             "w": 12,
             "x": 0,
-            "y": 73
+            "y": 27
           },
           "id": 2,
           "options": {
@@ -3925,7 +3928,7 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "value"
           },
           "targets": [
             {
@@ -3971,7 +3974,8 @@
                   }
                 }
               ],
-              "noValue": "None observed"
+              "noValue": "None observed",
+              "displayName": "Monitor Degraded Checks"
             },
             "overrides": []
           },
@@ -3979,7 +3983,7 @@
             "h": 3,
             "w": 12,
             "x": 12,
-            "y": 73
+            "y": 27
           },
           "id": 105,
           "options": {
@@ -3994,7 +3998,7 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "value"
           },
           "targets": [
             {
@@ -4050,7 +4054,8 @@
                   }
                 }
               ],
-              "noValue": "N/A"
+              "noValue": "N/A",
+              "displayName": "Track Failure Rate"
             },
             "overrides": []
           },
@@ -4058,7 +4063,7 @@
             "h": 3,
             "w": 12,
             "x": 0,
-            "y": 79
+            "y": 33
           },
           "id": 104,
           "options": {
@@ -4079,7 +4084,7 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "value"
           },
           "targets": [
             {
@@ -4125,7 +4130,8 @@
                   }
                 }
               ],
-              "noValue": "N/A"
+              "noValue": "N/A",
+              "displayName": "Monitor Health Checks"
             },
             "overrides": []
           },
@@ -4133,7 +4139,7 @@
             "h": 3,
             "w": 12,
             "x": 0,
-            "y": 84
+            "y": 38
           },
           "id": 7,
           "options": {
@@ -4148,7 +4154,7 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "value"
           },
           "targets": [
             {
@@ -4184,7 +4190,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 89
+            "y": 22
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Do not put full UUIDs into Prometheus labels. Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. This card is bounded pipeline/run context evidence only and does not prove current provider health. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero",
@@ -4349,7 +4355,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 89
+            "y": 22
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · TIME RANGE · Do not put full UUIDs into Prometheus labels. Current stage/outcome accounting evidence for the shared pipeline/run_type context. Provider remains the primary health selector; this table is bounded pipeline/run_type accounting evidence and does not prove current provider health by itself. Missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status, Monitor Provider Telemetry Freshness, and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",

@@ -157,6 +157,7 @@ def test_nav_chips_use_eight_px_gap_and_status_stats_stay_compact() -> None:
             if options.get("colorMode") != "background":
                 continue
             text = options.get("text") or {}
-            assert options.get("textMode") == "value_and_name"
+            assert options.get("textMode") == "value"
+            assert panel["fieldConfig"]["defaults"]["displayName"] == panel["title"]
             assert text.get("valueSize") == 20
             assert text.get("titleSize") == 14

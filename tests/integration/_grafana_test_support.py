@@ -648,29 +648,16 @@ def _assert_provider_health_pipeline_run_type(
     assert "bioetl_overview_pipeline_run_type_universe" in _query_text(run_type_var)
 
 
-def _assert_provider_health_provider_var(
-    dashboard_path: Path, variable_map: dict[str, dict[str, object]]
-) -> None:
-    provider_var = variable_map.get("provider")
-    assert provider_var is not None, (
-        f"Dashboard {dashboard_path.name} must define 'provider' variable"
+def _assert_provider_health_provider_var(dashboard_path, variable_map):
+    provider = variable_map["provider"]
+    assert (
+        _query_text(provider)
+        == "label_values(bioetl_provider_current_status, provider)"
     )
-    _assert_prom_datasource_object(dashboard_path, "provider", provider_var)
-    query_text = _query_text(provider_var)
-    assert "query_result(" in query_text, (
-        f"Dashboard {dashboard_path.name} 'provider' query must derive from "
-        "pipeline/workflow via query_result(label_replace(...))"
-    )
-    assert "${pipeline}" in query_text and "${workflow}" in query_text, (
-        f"Dashboard {dashboard_path.name} 'provider' derivation must read "
-        "pipeline and workflow template vars"
-    )
-    assert provider_var.get("current", {}).get("value") == "unknown", (
-        f"Dashboard {dashboard_path.name} 'provider' default must be fail-closed "
-        "unknown when pipeline/workflow are unset"
-    )
-    assert provider_var.get("includeAll") is False
-    assert provider_var.get("multi") is False
+    assert provider["includeAll"] is True
+    assert provider["allValue"] == ".*"
+    assert provider["current"]["value"] == "$__all"
+    assert provider["multi"] is False
 
 
 def _assert_provider_health_adapter_var(

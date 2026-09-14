@@ -249,8 +249,8 @@ def test_navigation_bus_uses_full_width_short_band() -> None:
         assert grid.get("w") == 24, (
             f"{path.name}:id=1000 must use w=24, got {grid.get('w')}"
         )
-        assert grid.get("h") in {3, 4}, (
-            f"{path.name}:id=1000 must use h=3 or h=4 for title + reflow-safe bus, "
+        assert grid.get("h") == 3, (
+            f"{path.name}:id=1000 must use the shared h=3 link-only bus, "
             f"got {grid.get('h')}"
         )
         options = buses[0].get("options") or {}
@@ -259,8 +259,9 @@ def test_navigation_bus_uses_full_width_short_band() -> None:
         )
         assert options.get("bioetlDisplayTitle") == "Navigate Dashboards"
         content = str(options.get("content", ""))
-        assert 'data-bioetl-panel-title="Navigate Dashboards"' in content
-        assert "font-size:19px" in content
+        assert 'role="navigation"' in content
+        assert 'aria-label="BioETL dashboards"' in content
+        assert "bioetl-panel-title" not in content
         assert "font-size:16px" in content
         assert "flex-wrap:wrap" in content
         assert "flex:1 1 auto" in content

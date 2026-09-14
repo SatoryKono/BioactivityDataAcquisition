@@ -284,6 +284,28 @@ def test_link_urls_use_allowlisted_schemes() -> None:
             url = str(link.get("url") or "")
             if not url:
                 continue
+            if url == "${__data.fields.report_url:raw}":
+                # This field is produced by the bounded Ops report index, whose
+                # unit contract fixes the proxy endpoint and encodes row identity.
+                assert dashboard_path.name in {
+                    "bioetl-run-explorer-v1.json",
+                    "bioetl-dq-v2.json",
+                }
+                report_table = next(
+                    p
+                    for p in dashboard["panels"]
+                    if p["id"]
+                    == (
+                        3010
+                        if dashboard_path.name == "bioetl-run-explorer-v1.json"
+                        else 9406
+                    )
+                )
+                assert report_table["datasource"] == "BioETL Ops HTTP"
+                assert report_table["targets"][0]["url"].startswith(
+                    "/ops/observability/pipeline-run-report"
+                )
+                continue
             assert url.startswith(_ALLOWED_URL_PREFIXES), (
                 f"{dashboard_path.name} link {link.get('title')!r} uses a "
                 f"non-allowlisted URL: {url!r}"

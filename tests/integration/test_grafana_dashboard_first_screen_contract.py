@@ -20,7 +20,6 @@ from tests.integration._dashboard_layout_budgets import (
     panel_declared_row_cap,
 )
 from tests.integration._grafana_test_support import (
-    get_row_child_panels,
     get_dashboard_files,
     get_dashboard_navigation_links,
     get_dashboard_panels,
@@ -320,7 +319,7 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
     """Overview/Control Plane answer rows must stay on projected current-state or fixed-window evidence."""
     expectations = {
         "bioetl-overview-v2.json": {
-            "Monitor Fleet Health": "bioetl_l0_status",
+            "Monitor Scope Health": "bioetl_l0_status",
             "Review First Action": "bioetl_l0_next_action_route",
             "Review Domain Status": "bioetl_l0_input_status_selected",
         },
@@ -343,7 +342,7 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
             assert panel is not None, (
                 f"{dashboard_name} must expose first-screen panel {panel_title!r}"
             )
-            # Overview answer cards sit at y<=10. Trust keeps Prom KPI cards on
+            # Overview answer cards sit at y<=11. Trust keeps Prom KPI cards on
             # the first window (y<18) below the named Review* tables at y=8.
             max_answer_y = (
                 15 if dashboard_name == "bioetl-control-plane-v1.json" else 12
@@ -687,7 +686,7 @@ def test_navigation_bus_panels_document_handoff_policy() -> None:
 def test_current_status_headlines_use_instant_queries() -> None:
     """#8746: fail-closed headlines must not lastNotNull a dashboard range."""
     expectations = {
-        "bioetl-overview-v2.json": ("Monitor Fleet Health",),
+        "bioetl-overview-v2.json": ("Monitor Scope Health",),
         "bioetl-control-plane-v1.json": (
             "Monitor Replay Readiness",
             "Monitor Checkpoint Age",
@@ -717,41 +716,18 @@ def test_current_status_headlines_use_instant_queries() -> None:
             )
 
 
-def test_run_explorer_identity_is_on_the_first_screen() -> None:
-    """#8747/#9147: browse stays on the fold; identity/accounting are collapsed."""
+def test_run_explorer_shows_ten_rows_and_only_the_browse_surface() -> None:
     dashboard = load_dashboard(_DASHBOARD_DIR / "bioetl-run-explorer-v1.json")
-    panels = {
-        panel.get("id"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if isinstance(panel.get("id"), int)
-    }
+    panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+    assert len(panels) == 3
+    assert not ({3098, 3099, 3011, 3012, 3013, 3014, 3020, 3022, 3023} & panels.keys())
     browse = panels[3010]
-    identity = panels[3022]
-    records = panels[3023]
-    assert 9402 not in panels
-    assert 9403 not in panels
-    browse_grid = browse.get("gridPos") or {}
-    assert browse_grid.get("h") == 10
-    assert int(browse_grid.get("y", 0)) + int(browse_grid.get("h", 0)) <= FIRST_WINDOW_Y
+    grid = browse["gridPos"]
+    assert grid["y"] + grid["h"] <= FIRST_WINDOW_Y
     assert panel_declared_row_cap(browse) == 10
-    collapsed_ids = {
-        panel.get("id")
-        for panel in get_row_child_panels(dashboard, "Selected Run Details")
-    }
-    assert 9402 not in collapsed_ids
-    assert 9403 not in collapsed_ids, (
-        "compact processed-records teaser 9403 must not ship (same-row-subset of 3023)"
-    )
-    assert 3022 in collapsed_ids, (
-        "Inspect Run Identity must ship inside collapsed Selected Run Details"
-    )
-    assert 3023 in collapsed_ids, (
-        "Inspect Processed Records must ship inside collapsed Selected Run Details "
-        "so first-paint Ops HTTP stays within budget (#9147/#9191)"
-    )
-    assert identity.get("gridPos", {}).get("y", 0) >= FIRST_WINDOW_Y
-    assert records.get("gridPos", {}).get("y", 0) >= FIRST_WINDOW_Y
-    assert "last 10" in str(browse.get("title", "")).lower()
+    assert browse["options"]["footer"]["enablePagination"] is False
+    assert browse["options"]["cellHeight"] == "sm"
+    assert "last 10" in browse["title"]
 
 
 def test_run_explorer_first_screen_empty_copy_has_no_selector_dollars() -> None:
@@ -762,7 +738,7 @@ def test_run_explorer_first_screen_empty_copy_has_no_selector_dollars() -> None:
         for panel in get_dashboard_panels(dashboard)
         if isinstance(panel.get("id"), int)
     }
-    for panel_id in (3010, 3022):
+    for panel_id in (3010,):
         no_value = str(
             panels[panel_id]
             .get("fieldConfig", {})

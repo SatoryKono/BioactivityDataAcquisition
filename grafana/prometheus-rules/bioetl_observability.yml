@@ -340,25 +340,25 @@ groups:
           action_target: runtime
           action_reason: runtime_blockers_active
           action_dashboard_uid: bioetl-runtime
-        expr: (bioetl_l0_input_status_selected{input="runtime"} >= bool 2) * 50
+        expr: (bioetl_l0_input_status_selected{input="runtime"} == bool 2) * 50
       - record: bioetl_l0_next_action_route
         labels:
           action_target: control_plane
           action_reason: control_plane_guardrail_active
           action_dashboard_uid: bioetl-control-plane-v1
-        expr: (bioetl_l0_input_status_selected{input="control_plane"} >= bool 2) * 40
+        expr: (bioetl_l0_input_status_selected{input="control_plane"} == bool 2) * 40
       - record: bioetl_l0_next_action_route
         labels:
           action_target: runtime
           action_reason: gold_lifecycle_blocking
           action_dashboard_uid: bioetl-runtime
-        expr: (bioetl_l0_input_status_selected{input="gold"} >= bool 2) * 35
+        expr: (bioetl_l0_input_status_selected{input="gold"} == bool 2) * 35
       - record: bioetl_l0_next_action_route
         labels:
           action_target: dq
           action_reason: dq_threshold_or_validation_signal
           action_dashboard_uid: bioetl-dq-v2
-        expr: (bioetl_l0_input_status_selected{input="dq"} >= bool 1) * 30
+        expr: ((bioetl_l0_input_status_selected{input="dq"} >= bool 1) * (bioetl_l0_input_status_selected{input="dq"} < bool 3)) * 30
       - record: bioetl_l0_next_action_route
         labels:
           action_target: provider
@@ -366,19 +366,55 @@ groups:
           action_dashboard_uid: bioetl-provider-health-v2
         expr: >-
           (bioetl_overview_pipeline_run_type_universe
-          * scalar((max(bioetl_l0_input_status_selected{input="provider"} >= bool 2)) or vector(0))) * 20
+          * scalar((max(bioetl_l0_input_status_selected{input="provider"} == bool 2)) or vector(0))) * 20
       - record: bioetl_l0_next_action_route
         labels:
           action_target: workflow
           action_reason: workflow_scope_requires_review
           action_dashboard_uid: bioetl-runtime
-        expr: (bioetl_l0_input_status_selected{input="workflow"} >= bool 1) * 10
+        expr: ((bioetl_l0_input_status_selected{input="workflow"} >= bool 1) * (bioetl_l0_input_status_selected{input="workflow"} < bool 3)) * 10
       - record: bioetl_l0_next_action_route
         labels:
           action_target: monitor
           action_reason: no_recent_activity_or_unknown_state
           action_dashboard_uid: bioetl-overview-v2
         expr: bioetl_overview_pipeline_run_type_universe * 5
+      - record: bioetl_l0_next_action_route
+        labels:
+          action_target: runtime
+          action_reason: runtime_evidence_missing
+          action_dashboard_uid: bioetl-runtime
+        expr: (bioetl_l0_input_status_selected{input="runtime"} == bool 3) * 15
+      - record: bioetl_l0_next_action_route
+        labels:
+          action_target: control_plane
+          action_reason: control_plane_evidence_missing
+          action_dashboard_uid: bioetl-control-plane-v1
+        expr: (bioetl_l0_input_status_selected{input="control_plane"} == bool 3) * 15
+      - record: bioetl_l0_next_action_route
+        labels:
+          action_target: runtime
+          action_reason: gold_evidence_missing
+          action_dashboard_uid: bioetl-runtime
+        expr: (bioetl_l0_input_status_selected{input="gold"} == bool 3) * 15
+      - record: bioetl_l0_next_action_route
+        labels:
+          action_target: dq
+          action_reason: dq_evidence_missing
+          action_dashboard_uid: bioetl-dq-v2
+        expr: (bioetl_l0_input_status_selected{input="dq"} == bool 3) * 15
+      - record: bioetl_l0_next_action_route
+        labels:
+          action_target: provider
+          action_reason: provider_evidence_missing
+          action_dashboard_uid: bioetl-provider-health-v2
+        expr: (bioetl_l0_input_status_selected{input="provider"} == bool 3) * 15
+      - record: bioetl_l0_next_action_route
+        labels:
+          action_target: workflow
+          action_reason: workflow_evidence_missing
+          action_dashboard_uid: bioetl-runtime
+        expr: (bioetl_l0_input_status_selected{input="workflow"} == bool 3) * 15
       # Compact NO_ROUTE fallback for Overview First Action (#6574) — keeps
       # first-screen PromQL under the 200-char diet without multi-label_replace.
       - record: bioetl_l0_next_action_no_route
@@ -586,10 +622,58 @@ groups:
       - record: bioetl_runtime_current_status_scoped
         expr: bioetl_runtime_current_status
 
+      # Stage presence is scoped to expected stages, pipeline and run type.
+      # Presence does not prove event freshness or that a process is running.
+      - record: bioetl_runtime_expected_signal_stage
+        expr: label_replace(bioetl_pipeline_stage_expected{stage="bronze"} == 1, "stage", "ingestion", "", "") or label_replace(bioetl_pipeline_stage_expected{stage="silver"} == 1, "stage", "validation", "", "") or label_replace(bioetl_pipeline_stage_expected{stage="gold"} == 1, "stage", "output", "", "")
+      - record: bioetl_runtime_expected_stage_scope
+        labels:
+          stage: ingestion
+        expr: bioetl_runtime_pipeline_run_type_universe_scoped * on (pipeline) group_left() max by (pipeline) (bioetl_runtime_expected_signal_stage{stage="ingestion"})
+      - record: bioetl_runtime_expected_stage_scope
+        labels:
+          stage: validation
+        expr: bioetl_runtime_pipeline_run_type_universe_scoped * on (pipeline) group_left() max by (pipeline) (bioetl_runtime_expected_signal_stage{stage="validation"})
+      - record: bioetl_runtime_expected_stage_scope
+        labels:
+          stage: output
+        expr: bioetl_runtime_pipeline_run_type_universe_scoped * on (pipeline) group_left() max by (pipeline) (bioetl_runtime_expected_signal_stage{stage="output"})
+      - record: bioetl_runtime_missing_stage_signal
+        labels:
+          signal: lag
+        expr: bioetl_runtime_expected_stage_scope unless on (pipeline, run_type, stage) bioetl_stage_lag_seconds
+      - record: bioetl_runtime_missing_stage_signal
+        labels:
+          signal: backlog
+        expr: bioetl_runtime_expected_stage_scope unless on (pipeline, run_type, stage) bioetl_stage_backlog_records
+      - record: bioetl_runtime_stage_evidence_status
+        expr: (count by (pipeline, run_type) (bioetl_runtime_missing_stage_signal) > bool 0) or (count by (pipeline, run_type) (bioetl_runtime_expected_stage_scope) * 0) or (bioetl_runtime_pipeline_run_type_universe_scoped * 0 + 3)
+      - record: bioetl_runtime_stage_evidence_present_ratio
+        expr: 1 - ((count by (pipeline, run_type) (bioetl_runtime_missing_stage_signal) or (count by (pipeline, run_type) (bioetl_runtime_expected_stage_scope) * 0)) / (count by (pipeline, run_type) (bioetl_runtime_expected_stage_scope) * 2))
+
+      - record: bioetl_runtime_stage_progress
+        labels:
+          measure: Backlog
+        expr: max by (pipeline, run_type, stage) (bioetl_stage_backlog_records)
+      - record: bioetl_runtime_stage_progress
+        labels:
+          measure: Lag
+        expr: max by (pipeline, run_type, stage) (bioetl_stage_lag_seconds)
+      - record: bioetl_runtime_stage_progress
+        labels:
+          measure: Throughput
+        expr: label_replace(sum by (pipeline, run_type, stage) (rate(bioetl_records_processed_total{stage="bronze"}[5m])), "stage", "ingestion", "", "") or label_replace(sum by (pipeline, run_type, stage) (rate(bioetl_records_processed_total{stage="silver"}[5m])), "stage", "validation", "", "") or label_replace(sum by (pipeline, run_type, stage) (rate(bioetl_records_processed_total{stage="gold"}[5m])), "stage", "output", "", "")
+      - record: bioetl_incident_alert_priority
+        expr: (count by (alertname, alertstate, severity, pipeline, provider) (ALERTS{severity="critical",alertstate="firing"}) * 0 + 60) or (count by (alertname, alertstate, severity, pipeline, provider) (ALERTS{severity="critical",alertstate="pending"}) * 0 + 50) or (count by (alertname, alertstate, severity, pipeline, provider) (ALERTS{severity="warning",alertstate="firing"}) * 0 + 40) or (count by (alertname, alertstate, severity, pipeline, provider) (ALERTS{severity="warning",alertstate="pending"}) * 0 + 30) or (count by (alertname, alertstate, severity, pipeline, provider) (ALERTS{severity!~"critical|warning",alertstate="firing"}) * 0 + 20) or (count by (alertname, alertstate, severity, pipeline, provider) (ALERTS{severity!~"critical|warning",alertstate="pending"}) * 0 + 10)
+
       - record: bioetl_runtime_current_status_trusted
         expr: >-
           max by (pipeline, run_type) (
             bioetl_runtime_current_status_scoped
+            or label_replace(
+              (bioetl_runtime_stage_evidence_status > bool 0) * 3,
+              "runtime_status_source", "stage_evidence_incomplete", "", ""
+            )
             or label_replace(
               (
                 (bioetl_runtime_pipeline_run_type_universe_scoped > bool 0)

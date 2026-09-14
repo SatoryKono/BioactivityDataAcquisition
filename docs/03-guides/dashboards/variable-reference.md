@@ -35,9 +35,9 @@ Human family guide: [selector-architecture.md](selector-architecture.md)
 - `$workflow` is context/evidence unless a dashboard explicitly documents a
   truthful current-status intersection.
 - `$workflow` is Single-select with Include All. It remains single-select with Include All across primary dashboards.
-- `$pipeline` is single-select; Overview landing default is `All`; other boards
+- `$pipeline` is single-select; Overview and Run Explorer landing default is `All`; other boards
   fail-close to `unknown`.
-- `$run_type` uses Include All. Overview landing default is `All`. Non-Overview
+- `$run_type` uses Include All. Overview and Run Explorer landing default is `All`. Other
   primary boards default to `backfill`.
 - `$run_id` is HTTP-backed control-plane identity context for Ops HTTP `ID` /
   Processed Records tables. It is preserved between primary dashboards and
@@ -55,8 +55,8 @@ Human family guide: [selector-architecture.md](selector-architecture.md)
 | Variable | Dashboards | Datasource / query family | Selection | Default | Notes |
 | --- | --- | --- | --- | --- | --- |
 | `$workflow` | all 7 shipped | Prometheus `label_values(bioetl_workflow_universe, workflow)` | Single + Include All | `All` / `$__all` | Shared shell context |
-| `$pipeline` | all 7 shipped | Universe per board (see `selector-contracts.yaml#pipeline_universe_contract`) | Single | Overview: `All`; else `unknown` | Canonical pipeline scope |
-| `$run_type` | all 7 shipped | Same universe as `$pipeline` | Multi + Include All | Overview: `All`; else `backfill` | Never hand off `run_type=unknown` |
+| `$pipeline` | all 7 shipped | Universe per board (see `selector-contracts.yaml#pipeline_universe_contract`) | Single | Overview / Run Explorer: `All`; else `unknown` | Canonical pipeline scope |
+| `$run_type` | all 7 shipped | Same universe as `$pipeline` | Multi + Include All | Overview / Run Explorer: `All`; else `backfill` | Never hand off `run_type=unknown` |
 | `$run_id` | all 7 shipped | BioETL Ops HTTP filter-options | Single, no Include All | `-` | Identity only; not PromQL |
 | `$stage` | `bioetl-runtime`, `bioetl-dq-v2` | Runtime expected-stage / DQ processed totals | Multi + Include All | `All` / `$__all` | Bounded stage filter |
 

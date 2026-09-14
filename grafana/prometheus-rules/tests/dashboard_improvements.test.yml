@@ -1,0 +1,93 @@
+rule_files:
+  - ../bioetl_observability.yml
+evaluation_interval: 1m
+tests:
+  - name: unknown-routes-request-evidence-not-incident-repair
+    interval: 1m
+    input_series:
+      - series: 'bioetl_l0_input_status_selected{pipeline="audit",run_type="backfill",input="provider"}'
+        values: '3+0x3'
+      - series: 'bioetl_l0_input_status_selected{pipeline="audit",run_type="backfill",input="dq"}'
+        values: '3+0x3'
+    promql_expr_test:
+      - expr: count(bioetl_l0_next_action_route{pipeline="audit",action_reason=~"provider_evidence_missing|dq_evidence_missing"} == 15)
+        eval_time: 1m
+        exp_samples:
+          - labels: '{}'
+            value: 2
+      - expr: count(bioetl_l0_next_action_route{pipeline="audit",action_reason=~"provider_global_degradation|dq_threshold_or_validation_signal"} > 0) or vector(0)
+        eval_time: 1m
+        exp_samples:
+          - labels: '{}'
+            value: 0
+  - name: zero-stage-gauges-are-present-not-missing
+    interval: 1m
+    input_series:
+      - series: 'bioetl_runtime_pipeline_run_type_universe_scoped{pipeline="audit",run_type="backfill"}'
+        values: '1+0x3'
+      - series: 'bioetl_pipeline_stage_expected{pipeline="audit",stage="bronze"}'
+        values: '1+0x3'
+      - series: 'bioetl_stage_backlog_records{pipeline="audit",run_type="backfill",stage="ingestion"}'
+        values: '0+0x3'
+      - series: 'bioetl_stage_lag_seconds{pipeline="audit",run_type="backfill",stage="ingestion"}'
+        values: '0+0x3'
+    promql_expr_test:
+      - expr: bioetl_runtime_stage_evidence_present_ratio{pipeline="audit",run_type="backfill"}
+        eval_time: 1m
+        exp_samples:
+          - labels: '{__name__="bioetl_runtime_stage_evidence_present_ratio",pipeline="audit",run_type="backfill"}'
+            value: 1
+      - expr: bioetl_runtime_stage_evidence_status{pipeline="audit",run_type="backfill"}
+        eval_time: 1m
+        exp_samples:
+          - labels: '{__name__="bioetl_runtime_stage_evidence_status",pipeline="audit",run_type="backfill"}'
+            value: 0
+  - name: another-run-type-cannot-fill-missing-stage-signal
+    interval: 1m
+    input_series:
+      - series: 'bioetl_runtime_pipeline_run_type_universe_scoped{pipeline="audit",run_type="backfill"}'
+        values: '1+0x3'
+      - series: 'bioetl_pipeline_stage_expected{pipeline="audit",stage="bronze"}'
+        values: '1+0x3'
+      - series: 'bioetl_stage_backlog_records{pipeline="audit",run_type="backfill",stage="ingestion"}'
+        values: '0+0x3'
+      - series: 'bioetl_stage_lag_seconds{pipeline="audit",run_type="incremental",stage="ingestion"}'
+        values: '0+0x3'
+    promql_expr_test:
+      - expr: bioetl_runtime_stage_evidence_present_ratio{pipeline="audit",run_type="backfill"}
+        eval_time: 1m
+        exp_samples:
+          - labels: '{__name__="bioetl_runtime_stage_evidence_present_ratio",pipeline="audit",run_type="backfill"}'
+            value: 0.5
+      - expr: bioetl_runtime_stage_evidence_status{pipeline="audit",run_type="backfill"}
+        eval_time: 1m
+        exp_samples:
+          - labels: '{__name__="bioetl_runtime_stage_evidence_status",pipeline="audit",run_type="backfill"}'
+            value: 1
+  - name: undefined-expected-stages-remain-unknown
+    interval: 1m
+    input_series:
+      - series: 'bioetl_runtime_pipeline_run_type_universe_scoped{pipeline="audit",run_type="backfill"}'
+        values: '1+0x3'
+    promql_expr_test:
+      - expr: bioetl_runtime_stage_evidence_status{pipeline="audit",run_type="backfill"}
+        eval_time: 1m
+        exp_samples:
+          - labels: '{__name__="bioetl_runtime_stage_evidence_status",pipeline="audit",run_type="backfill"}'
+            value: 3
+      - expr: bioetl_runtime_stage_evidence_present_ratio{pipeline="audit",run_type="backfill"}
+        eval_time: 1m
+        exp_samples: []
+  - name: critical-pending-precedes-warning-firing
+    interval: 1m
+    input_series:
+      - series: 'ALERTS{alertname="AuditCritical",alertstate="pending",severity="critical",pipeline="audit"}'
+        values: '1+0x3'
+      - series: 'ALERTS{alertname="AuditWarning",alertstate="firing",severity="warning",pipeline="audit"}'
+        values: '1+0x3'
+    promql_expr_test:
+      - expr: topk(1,bioetl_incident_alert_priority{alertname=~"Audit.*"})
+        eval_time: 1m
+        exp_samples:
+          - labels: '{__name__="bioetl_incident_alert_priority",alertname="AuditCritical",alertstate="pending",severity="critical",pipeline="audit"}'
+            value: 50

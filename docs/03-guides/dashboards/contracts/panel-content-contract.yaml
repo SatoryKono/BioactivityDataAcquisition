@@ -1045,21 +1045,6 @@ dashboards:
         fixture_cases:
         - not_applicable
         render_profiles: *id001
-      '906':
-        title: ''
-        role: guidance
-        tier: 4
-        scope: global
-        scope_class: global
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
-        render_profiles: *id001
       '907':
         title: Monitor Telemetry
         role: indicator
@@ -2690,7 +2675,7 @@ dashboards:
         - not_applicable
         render_profiles: *id001
       '214':
-        title: Monitor Fleet Health
+        title: Monitor Scope Health
         role: verdict
         tier: 1
         scope: current
@@ -4130,185 +4115,6 @@ dashboards:
         render_profiles:
         - first_window_dark
         - first_window_light
-      '3011':
-        title: Inspect Stage Funnel
-        role: forensic_table
-        tier: 3
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - backend_error
-        render_profiles:
-        - full_dark
-      '3012':
-        title: Inspect Top Run Reasons
-        role: forensic_table
-        tier: 3
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id001
-      '3013':
-        title: Inspect Run Artifacts
-        role: forensic_table
-        tier: 3
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id001
-      '3014':
-        title: Inspect Timings & Failure
-        role: forensic_table
-        tier: 3
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - backend_error
-        render_profiles: *id001
-      '3020':
-        title: Inspect Recent Workflow Runs (last 20)
-        role: forensic_table
-        tier: 3
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - backend_error
-        render_profiles:
-        - full_dark
-      '3022':
-        title: Inspect Run Identity
-        role: forensic_table
-        tier: 3
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id001
-      '3023':
-        title: Inspect Processed Records
-        role: accounting_table
-        tier: 3
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id001
-        required_columns:
-        - parameter
-        - value
-        - percentage
-        hidden_columns:
-        - row_status
-      '3098':
-        title: Browse Workflow Runs
-        role: row_group
-        tier: 4
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
-        render_profiles: *id001
-      '3099':
-        title: Selected Run Details
-        role: row_group
-        tier: 4
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
-        render_profiles: *id001
   bioetl-runtime:
     panels:
       '4':
@@ -4931,6 +4737,30 @@ dashboards:
         fixture_cases:
         - not_applicable
         render_profiles: *id001
+      '2460':
+        title: Review Stage Progress
+        role: evidence_table
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
       '2541':
         title: Review Runtime Escalation
         role: guidance

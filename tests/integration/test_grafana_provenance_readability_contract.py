@@ -17,40 +17,22 @@ _SPECS = {
     "bioetl-control-plane-v1.json": (
         9400,
         "Inspect Scope & Evidence",
-        (
-            "Can this run be replayed safely?",
-            "SELECTED RUN",
-            "not this run",
-            "incomplete evidence — not OK",
-        ),
+        ("SELECTED RUN", "CURRENT", "Do not replay", "INCOMPLETE", "UNKNOWN"),
     ),
     "bioetl-overview-v2.json": (
         99,
         "Inspect Scope & Evidence",
-        (
-            "What is broken or degraded right now?",
-            "Fleet Health",
-            "First Action",
-            "TIME RANGE",
-        ),
+        ("CURRENT", "first action", "VERIFY", "SELECTED RUN"),
     ),
     "bioetl-runtime.json": (
         9400,
         "Understand Pipeline Scope",
-        (
-            "CURRENT",
-            "active blocker",
-            "SCRAPING",
-        ),
+        ("CURRENT", "active blocker", "SCRAPING", "UNKNOWN"),
     ),
     "bioetl-provider-health-v2.json": (
         9400,
         "Understand Evidence Scope",
-        (
-            "Which provider is degraded, and why?",
-            "SELECTED PROVIDER",
-            "inspect scrape target",
-        ),
+        ("GLOBAL", "every provider", "SELECTED PROVIDER", "UNKNOWN"),
     ),
     "bioetl-dq-v2.json": (
         9400,
@@ -64,21 +46,12 @@ _SPECS = {
     "bioetl-incident-v1.json": (
         9400,
         "Understand Incident Scope",
-        (
-            "GLOBAL fleet triage",
-            "do not filter suspects",
-            "selected-run evidence is separate",
-        ),
+        ("GLOBAL", "not verified causes", "Telemetry gaps", "UNKNOWN"),
     ),
     "bioetl-run-explorer-v1.json": (
         1,
         "Understand Run Scope",
-        (
-            "Which exact run should be inspected?",
-            "BROWSE",
-            "not this time range",
-            "report artifacts, not triage bodies",
-        ),
+        ("Open Report", "BROWSE", "not this time range", "SELECTED RUN"),
     ),
 }
 

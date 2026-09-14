@@ -94,7 +94,7 @@ def _runtime_data_panels() -> list[dict]:
 def test_pipeline_runtime_dashboard_json_is_valid() -> None:
     dashboard = _dashboard()
     assert isinstance(dashboard, dict)
-    assert dashboard.get("title") == "2. Pipeline Diagnostics"
+    assert dashboard.get("title") == "3. Pipeline Diagnostics"
 
 
 def test_pipeline_runtime_dashboard_uid_is_bioetl_runtime() -> None:

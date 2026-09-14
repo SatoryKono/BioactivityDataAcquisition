@@ -101,8 +101,9 @@ def test_overview_selected_run_summary_is_in_first_window() -> None:
     assert y < FIRST_WINDOW_Y, f"9603 must sit in first window, got y={y}"
     fleet_y = int(next(item for item in root if item.get("id") == 214)["gridPos"]["y"])
     action_y = int(next(item for item in root if item.get("id") == 215)["gridPos"]["y"])
-    assert y <= fleet_y, "SELECTED RUN summary must sit above or beside Fleet Health"
-    assert y < action_y, "SELECTED RUN summary must sit above Review First Action"
+    assert fleet_y < action_y < y, (
+        "CURRENT health and action precede historical run evidence"
+    )
     blob = f"{panel.get('title') or ''}\n{panel.get('description') or ''}"
     assert "SELECTED RUN" in blob
     urls = [
@@ -172,10 +173,15 @@ def test_first_window_coverage_set_range_and_refresh_copy() -> None:
     for path in get_dashboard_files():
         dashboard = _load(path)
         blob = _first_window_blob(dashboard)
-        for token in required:
+        for token in (
+            required[:3] if path.name == "bioetl-run-explorer-v1.json" else required
+        ):
             if token not in blob:
                 missing.append(f"{path.name} missing {token}")
-        if "Set range to run" not in blob and "Open run in Run Explorer" not in blob:
+        if path.name == "bioetl-run-explorer-v1.json":
+            assert "not this time range" in blob
+            assert "Open Report" in blob
+        elif "Set range to run" not in blob and "Open run in Run Explorer" not in blob:
             missing.append(f"{path.name} missing run-range action copy")
         assert dashboard.get("refresh") == "60s", path.name
         assert dashboard.get("timezone") == "browser", path.name
@@ -221,8 +227,8 @@ def test_compact_selected_run_summary_uses_shared_projection() -> None:
         ):
             missing.append(f"{name}:{panel_id} missing view=summary")
         blob = json.dumps(panel)
-        if "viewPanel=3022" not in blob:
-            missing.append(f"{name}:{panel_id} missing D6 viewPanel=3022")
+        if "viewPanel=3022" in blob:
+            missing.append(f"{name}:{panel_id} targets retired D6 panel 3022")
         if "from=${__data.fields.from_ms}" not in blob:
             missing.append(f"{name}:{panel_id} missing Set range from_ms")
         no_value = str(
@@ -267,36 +273,28 @@ def test_promql_targets_do_not_select_run_id_label() -> None:
     assert not offenders, "PromQL run_id label:\n" + "\n".join(offenders)
 
 
-def test_run_explorer_3010_opens_identity_panel_3022() -> None:
-    """GMIN-03: primary Run link focuses Inspect Run Identity without hunting the row."""
+def test_run_explorer_selects_rows_without_removed_detail_groups() -> None:
     dashboard = _load(DASHBOARD_DIR / "bioetl-run-explorer-v1.json")
-    browse = next(item for item in _root_panels(dashboard) if item.get("id") == 3010)
-    run_override = next(
-        item
-        for item in (browse.get("fieldConfig") or {}).get("overrides", [])
-        if item.get("matcher", {}).get("options") == "Run"
+    roots = _root_panels(dashboard)
+    assert len(roots) == 3
+    assert all(p.get("type") != "row" for p in roots)
+    browse = next(p for p in roots if p["id"] == 3010)
+    override = next(
+        o
+        for o in browse["fieldConfig"]["overrides"]
+        if o["matcher"]["options"] == "Run"
     )
-    links = next(
-        prop["value"]
-        for prop in run_override["properties"]
-        if prop.get("id") == "links"
-    )
-    primary = links[0]
-    url = str(primary.get("url") or "")
-    assert primary.get("targetBlank") is False
-    assert "viewPanel=3022" in url
-    assert "var-pipeline=${__data.fields.Pipeline}" in url
-    assert "var-run_type=${__data.fields.run_type}" in url
-    assert "var-run_id=${__value.raw}" in url
-    assert "${__url_time_range}" in url
-    details = next(
-        item
-        for item in _root_panels(dashboard)
-        if item.get("title") == "Selected Run Details"
-    )
-    assert details.get("type") == "row"
-    assert details.get("collapsed") is True
-    nested_ids = {
-        item.get("id") for item in details.get("panels") or [] if isinstance(item, dict)
-    }
-    assert 3022 in nested_ids
+    link = next(p["value"][0] for p in override["properties"] if p["id"] == "links")
+    assert link["targetBlank"] is False
+    assert "viewPanel" not in link["url"]
+    for token in (
+        "var-pipeline=${__data.fields.Pipeline}",
+        "var-run_type=${__data.fields.run_type}",
+        "var-run_id=${__value.raw}",
+        "${__url_time_range}",
+    ):
+        assert token in link["url"]
+    assert browse["options"]["footer"]["enablePagination"] is False
+    assert browse["options"]["cellHeight"] == "sm"
+    banner = next(p for p in roots if p["id"] == 1)
+    assert "<br>Pipeline:" in banner["options"]["content"]

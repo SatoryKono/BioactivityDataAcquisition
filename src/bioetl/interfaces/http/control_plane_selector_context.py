@@ -159,7 +159,10 @@ def _run_option_label(value: str, record: SelectorRecord | None) -> str:
         return "SELECT RUN"
     if record is None:
         return f"UNKNOWN · {value}"
-    started = record.started_at.astimezone(UTC).strftime("%Y-%m-%d %H:%M")
+    timestamp = record.started_at
+    if timestamp.tzinfo is None:
+        timestamp = timestamp.replace(tzinfo=UTC)
+    started = timestamp.astimezone(UTC).strftime("%Y-%m-%d %H:%M")
     return f"{started} UTC · {record.pipeline} · {record.run_status} · {record.run_id}"
 
 

@@ -19,8 +19,15 @@ endpoints:
   pipeline_run_reports:
     path: /ops/observability/pipeline-run-reports
     required_query: [pipeline]
+    # view=recent merges manifest/ledger launches and report previews, filters
+    # Workflow/Run Type, and ranks started_at before a global limit.
     # List items include identity peeks started_at, run_type, workflow_id,
     # workflow_run_id so panel 3010 can bind var-run_type from the row.
+    # Recent rows also expose report_url (Grafana Ops proxy, exact row identity),
+    # report_format (md/json artifact token, null when absent), and report_label.
+    # Open report prefers an existing Markdown file, falling back to JSON.
+    # REPORT MISSING links to the exact lookup with explicit 404 feedback:
+    # Grafana 12 applies native data links to the entire Report column.
   identity_table:
     path: /ops/control-plane/identity-table
     required_query: [pipeline, run_type, run_id]
@@ -38,56 +45,7 @@ panels:
   - id: 3010
     title: Inspect Recent Runs (last 10)
     endpoint: pipeline_run_reports
-    url: /ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}
-    root_selector: items
-    no_value_tokens: [VALID EMPTY]
-    copy_tokens: [TREE_MISSING, LAYOUT_UNHEALTHY]
-  - id: 3022
-    title: Inspect Run Identity
-    endpoint: identity_table
-    url: /ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}
-    root_selector: display_rows
-    no_value_tokens: [SELECT RUN, VALID EMPTY]
-    copy_tokens: []
-  - id: 3023
-    title: Inspect Processed Records
-    endpoint: processed_records
-    url: /ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}
-    root_selector: rows
-    no_value_tokens: [VALID EMPTY, QUERY ERROR]
-    copy_tokens: []
-  - id: 3011
-    title: Inspect Stage Funnel
-    endpoint: pipeline_run_report
-    url: /ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}
-    root_selector: funnel_display
-    no_value_tokens: [VALID EMPTY, QUERY ERROR]
-    copy_tokens: []
-  - id: 3012
-    title: Inspect Top Run Reasons
-    endpoint: pipeline_run_report
-    url: /ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}
-    root_selector: reasons_top_n_display
-    no_value_tokens: [VALID EMPTY, QUERY ERROR]
-    copy_tokens: []
-  - id: 3013
-    title: Inspect Run Artifacts
-    endpoint: pipeline_run_report
-    url: /ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}
-    root_selector: artifacts_display
-    no_value_tokens: [VALID EMPTY, QUERY ERROR]
-    copy_tokens: []
-  - id: 3014
-    title: Inspect Timings & Failure
-    endpoint: pipeline_run_report
-    url: /ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}
-    root_selector: timings_and_failure
-    no_value_tokens: [VALID EMPTY, QUERY ERROR]
-    copy_tokens: []
-  - id: 3020
-    title: Inspect Recent Workflow Runs (last 20)
-    endpoint: workflow_run_reports
-    url: /ops/observability/workflow-run-reports?workflow=${workflow}&limit=20
+    url: /ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}
     root_selector: items
     no_value_tokens: [VALID EMPTY]
     copy_tokens: [TREE_MISSING, LAYOUT_UNHEALTHY]

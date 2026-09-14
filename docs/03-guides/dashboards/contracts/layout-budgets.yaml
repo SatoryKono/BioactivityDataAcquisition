@@ -198,6 +198,13 @@ first_window_containment_types:
 # bioetl-provider-health-v2 9102/9103 moved under row 9106
 # (Inspect Fleet Non-OK and Causes). First-window reason replacement: 9107.
 first_window_summary_tables:
+  - dashboard: bioetl-runtime.json
+    id: 2460
+    bind: limit
+    max_rows: 3
+    owner: "@bioetl-observability"
+    rationale: Three stage snapshots, one aggregate row per stage.
+
   - dashboard: bioetl-overview-v2.json
     id: 9603
     max_rows: 1
@@ -210,9 +217,9 @@ first_window_summary_tables:
     bind: topk
   - dashboard: bioetl-overview-v2.json
     id: 9002
-    max_rows: 2
+    max_rows: 6
     owner: "@bioetl-observability"
-    bind: topk
+    bind: limit
   - dashboard: bioetl-runtime.json
     id: 9101
     max_rows: 3
@@ -289,7 +296,7 @@ answer_panels:
       title: Monitor Replay Readiness
   bioetl-overview-v2.json:
     - id: 214
-      title: Monitor Fleet Health
+      title: Monitor Scope Health
     - id: 215
       title: Review First Action
   bioetl-runtime.json:

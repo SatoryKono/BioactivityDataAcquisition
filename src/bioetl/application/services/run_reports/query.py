@@ -121,7 +121,7 @@ def _load_json_dict(
 def list_pipeline_reports(
     *,
     pipeline_name: str | None = None,
-    limit: int = 20,
+    limit: int | None = 20,
     root: Path | None = None,
     store: RunReportStorePort,
 ) -> list[ReportIndexEntry]:

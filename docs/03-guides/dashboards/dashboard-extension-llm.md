@@ -38,7 +38,7 @@ Grafana dashboards в BioETL.
 
 ## 2. Текущая модель shipped dashboards
 
-- `0. Trust`, `1. Overview`, `2. Pipeline Diagnostics`, `3. Provider Health`, `4. Data Quality`, `5. Incident Workspace`, `6. Run Explorer` — единая top-level
+- `1. Trust`, `2. Overview`, `3. Pipeline Diagnostics`, `4. Provider Health`, `5. Data Quality`, `6. Incident Workspace`, `0. Run Explorer` — единая top-level
   шина.
 - На каждой из восьми shipped страниц navigation panel `id=1000` визуально
   показывает полный bus `0..6`; текущий dashboard рендерится как disabled
@@ -70,14 +70,14 @@ Grafana dashboards в BioETL.
   extensions. `run_id` remains HTTP-backed identity context for the `ID` panel,
   is preserved between primary dashboards, and MUST NOT leak into Prometheus
   queries or Silver forensic selectors.
-- `1. Overview` intentionally ships with `Workflow=All`, `Pipeline=All`,
+- `2. Overview` intentionally ships with `Workflow=All`, `Pipeline=All`,
   `Run Type=All`, and `Run ID=-` as its default entry scope.
 - Во всех остальных pipeline/provider dashboards `$pipeline` и `$provider`
   остаются single-select where they are primary selectors; explicit fallback
   для неизвестного контекста — `unknown`.
 - `$run_type` всегда использует include-all fallback; cross-dashboard links MUST
   default missing run-type context to `All`, not `unknown`.
-- Переходы в `3. Provider Health` из pipeline-scoped dashboards сохраняют
+- Переходы в `4. Provider Health` из pipeline-scoped dashboards сохраняют
   hidden `pipeline_context=$pipeline` для обратного перехода и fail-close'ятся
   к `provider=unknown`, если source dashboard не может доказать валидный
   provider value для target contract.

@@ -28,7 +28,7 @@ For the authoritative shipped dashboard mapping
 
 | Question / symptom | Open first | Then use | Owner doc |
 | ------------------ | ---------- | -------- | --------- |
-| What is currently broken or degraded? | `bioetl-overview-v2` (Fleet) | `Status`, `Inputs` matrix, compact `First Action`, then `0. Trust`, `2. Pipeline Diagnostics`, `3. Provider Health`, `4. Data Quality`, Incident Workspace, Run Explorer | [Operator UX v2](operator-ux-v2.md) / [Dashboard v2 Usage](dashboard-v2-usage.md) |
+| What is currently broken or degraded? | `bioetl-overview-v2` (Fleet) | `Status`, `Inputs` matrix, compact `First Action`, then `1. Trust`, `3. Pipeline Diagnostics`, `4. Provider Health`, `5. Data Quality`, Incident Workspace, Run Explorer | [Operator UX v2](operator-ux-v2.md) / [Dashboard v2 Usage](dashboard-v2-usage.md) |
 | Unified incident suspects / alert entry | `bioetl-incident-v1` | Ranked Suspects → domain explorers | [migration-map-v2](migration-map-v2.md) |
 | Single-run identity / processed records | `bioetl-run-explorer-v1` | ID + Processed Records (HTTP); Trust for resume | [Run Explorer panels](panels/bioetl-run-explorer-v1-panels.md) |
 | Is a Prometheus alert actually firing or pending? | `bioetl-overview-v2` | first-screen `Alert/SLO Triage` -> `Triage Alert State`, then `Alert/SLO Triage (Overview collapsed row)` | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
@@ -53,7 +53,7 @@ Primary dashboards `0..5` share the Overview-derived context shell
 `Inspect Scope & Evidence` / `Status` / `ID` / `Processed Records` panels. `run_id` remains
 HTTP identity context, is preserved between primary dashboards, and must not
 become a Prometheus label.
-The shipped question/scope/evidence readability contract uses the `4. Data Quality` visual
+The shipped question/scope/evidence readability contract uses the `5. Data Quality` visual
 pattern across all seven dashboards: 16px body, 18px question, orange accent,
 normal wrapping, and a four-grid-row first-screen panel. Run Explorer maps its
 stable `id=1` panel to `Inspect Run Selection & Evidence`.
@@ -75,7 +75,7 @@ The shared `ID` and `Processed Records` cards are HTTP-backed via
 be interpreted only after `/health/live` (and control-plane readiness) respond;
 backend-down, invalid scope, and true zero/absent run are distinct operator states.
 
-For `0. Trust`, exact identity graph evidence is available by expanding
+For `1. Trust`, exact identity graph evidence is available by expanding
 the collapsed-by-default `Inspect Run Identity Evidence` row. Those
 tables call `/ops/control-plane/identity-evidence` for P0/P1/P2 anchors,
 identity gaps, checkpoint anchor comparison, and copy-friendly full values;

@@ -58,8 +58,6 @@ def test_selected_and_sentinel_urls_follow_live_catalog_templates() -> None:
     payloads: dict[str, dict[str, object]] = matrix["payloads"]
     for name in (
         "selected_recent_runs",
-        "selected_identity",
-        "selected_processed_records",
         "empty_selection",
     ):
         snapshot = payloads[name]

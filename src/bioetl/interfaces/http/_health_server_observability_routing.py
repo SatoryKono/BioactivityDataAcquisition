@@ -7,6 +7,7 @@ from collections.abc import Callable
 from typing import Protocol
 
 from bioetl.domain.control_plane import RunLedgerEntry
+from bioetl.domain.ports.control_plane.run_manifest import RunManifestPort
 from bioetl.domain.types import RunID
 from bioetl.interfaces.http._forensic_request_budget import (
     ForensicEndpointUnavailable,
@@ -26,6 +27,10 @@ from bioetl.interfaces.http.processed_records_table import (
     build_processed_records_table_payload_from_ledger,
     build_processed_records_table_payload_from_prometheus,
     read_processed_records_run_id,
+)
+from bioetl.interfaces.http.recent_pipeline_runs import (
+    _report_link,
+    list_recent_pipeline_runs,
 )
 from bioetl.interfaces.http.run_report_ops import (
     list_pipeline_run_report_payloads,
@@ -73,6 +78,9 @@ class _HealthResponseSupport(Protocol):
 
 
 class _HealthObservabilityRoutingHost(_HealthResponseSupport, Protocol):
+    @property
+    def _run_manifest_port(self) -> RunManifestPort | None: ...
+
     @property
     def _forensic_endpoint_limiter(self) -> asyncio.Semaphore: ...
 
@@ -155,7 +163,14 @@ async def handle_pipeline_run_report_artifact(
         )
         return
     if body is None:
-        await host._send_response(writer, 404, "Selected run report artifact not found")
+        await host._send_text_response(
+            writer,
+            404,
+            "Report not found / Отчёт отсутствует\n\n"
+            "The report may not have been generated yet or may have been removed.\n"
+            "Refresh Run Explorer to check availability.\n",
+            content_type="text/plain; charset=utf-8",
+        )
         return
     content_type = (
         "application/json; charset=utf-8"
@@ -177,11 +192,21 @@ async def handle_pipeline_run_report(
 
     def _present(payload: dict[str, object]) -> dict[str, object]:
         if view_summary:
-            return _summary_rows_pipeline_run_report(
+            summary = _summary_rows_pipeline_run_report(
                 payload,
                 grafana_from=query.get("from"),
                 grafana_to=query.get("to"),
             )
+            if isinstance(payload.get("identity"), dict):
+                rows = summary.get("summary")
+                if isinstance(rows, list) and rows and isinstance(rows[0], dict):
+                    rows[0].update(
+                        _report_link(
+                            {"pipeline": pipeline, "run_id": run_id, "json_path": True},
+                            None,
+                        )
+                    )
+            return summary
         return _table_shape_pipeline_run_report(payload)
 
     if _is_unresolved_run_scope(run_id):
@@ -287,6 +312,20 @@ async def handle_pipeline_run_reports_list(
         limit = max(1, min(100, int(limit_raw)))
     except ValueError as exc:
         raise ValueError("limit must be an integer") from exc
+    if query.get("view") == "recent":
+        payload = await asyncio.to_thread(
+            list_recent_pipeline_runs,
+            pipeline=pipeline,
+            workflow=host._read_optional_param(query, "workflow"),
+            run_type=host._read_optional_param(query, "run_type"),
+            selected_run_id=selected_run_id,
+            lookup_run_id=host._read_optional_param(query, "lookup_run_id"),
+            limit=limit,
+            manifest_port=host._run_manifest_port,
+            ledger_port=host._run_ledger_port,
+        )
+        await host._send_payload_response(writer, 200, payload)
+        return
     payload = await asyncio.to_thread(
         list_pipeline_run_report_payloads,
         pipeline_name=pipeline,

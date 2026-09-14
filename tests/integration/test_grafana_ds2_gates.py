@@ -26,7 +26,6 @@ import pytest
 from tests.integration._grafana_test_support import (
     get_dashboard_panels,
     load_dashboard,
-    panel_display_title,
 )
 
 pytestmark = pytest.mark.integration
@@ -221,35 +220,15 @@ def test_incident_operator_tables_no_default_color_background() -> None:
 
 def test_trust_primary_recovery_ssot_title_and_link() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    panels = [
-        panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel_display_title(panel) == "Review Recovery Action"
-    ]
-    assert len(panels) == 1
-    assert not any(
-        panel.get("title") == "Next Action: Replay Diagnostics"
-        for panel in get_dashboard_panels(dashboard)
-    )
-    links = (panels[0].get("options") or {}).get("dataLinks") or []
-    assert links
-    url = str(links[0].get("url") or "")
-    assert "bioetl-control-plane-v1" in url
-    assert "viewPanel=130" in url
-    assert panels[0].get("title") in {"", None}
-    content = str((panels[0].get("options") or {}).get("content") or "")
-    assert "overflow:hidden" not in content
-    assert "overflow-wrap:anywhere" in content
-    assert "Do not replay this run" in content
-    assert "Trust status" in content
-    assert "INCOMPLETE" in content
-    assert "UNKNOWN" in content
-    assert "<em>Review Selected-Run Trust</em>" in content
-    assert "<em>Review Retention Compliance</em>" in content
-    assert "<em>Review Lineage Validation</em>" in content
-    assert "<b>INCOMPLETE" not in content
-    assert "<strong>Do not replay" not in content
-    assert panels[0].get("gridPos", {}).get("h") == 3
+    panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+    assert 906 not in panels
+    scope = panels[9400]
+    content = scope["options"]["content"]
+    assert "Do not replay" in content
+    assert "INCOMPLETE" in content and "UNKNOWN" in content
+    urls = [item["url"] for item in scope["options"]["dataLinks"]]
+    for pid in (130, 9418, 9415, 9416):
+        assert any(f"viewPanel={pid}" in url for url in urls)
 
 
 def test_operator_status_stats_map_null_unknown() -> None:

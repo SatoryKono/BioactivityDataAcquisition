@@ -2,6 +2,19 @@ ______________________________________________________________________
 
 ## UX report artifact requirement
 
+## Run Explorer simplification — 2026-09-13
+
+Run Explorer now contains navigation, a scope banner and the last ten launches
+in one table without pagination. Selected Run Details and Browse Workflow Runs
+were removed with their nested panels. The banner starts Pipeline on a new line;
+incoming run links select a row without targeting a removed panel. Report links
+continue to open the exact row's report.
+
+Current UX artifact:
+[docs/reports/dashboard-ux-checks/2026-09-13.md](../../reports/dashboard-ux-checks/2026-09-13.md).
+
+## Earlier changes
+
 Tables and accounting presentation (#10178, #10179, #10180, #10192, #10183):
 selected-run summaries put status, coverage and local timestamps before the
 UUID. Recent-run timestamps use reserved widths; workflow runs have direct
@@ -17,7 +30,7 @@ consistently, preserving small exclusions and UNKNOWN denominators.
 содержать ссылку на UX artifact:
 `docs/reports/dashboard-ux-checks/YYYY-MM-DD.md`.
 
-Latest dashboard UX artifact for current shipped JSON changes:
+Previous dashboard UX artifact:
 `docs/reports/dashboard-ux-checks/2026-09-07.md`. The Overview, Runtime and
 Incident follow-up (#10176, #10177, #10181, #10193, #10194) adds readable
 routing priorities, a first-screen blocker action, explicit global incident
@@ -173,13 +186,13 @@ notes. Если prose ниже расходится с JSON, править ну
 
 ## Проверенные дашборды
 
-- `bioetl-control-plane-v1` (0. Trust)
-- `bioetl-overview-v2` (1. Overview)
-- `bioetl-runtime` (2. Pipeline Diagnostics)
-- `bioetl-provider-health-v2` (3. Provider Health)
-- `bioetl-dq-v2` (4. Data Quality)
-- `bioetl-incident-v1` (5. Incident Workspace)
-- `bioetl-run-explorer-v1` (6. Run Explorer)
+- `bioetl-control-plane-v1` (1. Trust)
+- `bioetl-overview-v2` (2. Overview)
+- `bioetl-runtime` (3. Pipeline Diagnostics)
+- `bioetl-provider-health-v2` (4. Provider Health)
+- `bioetl-dq-v2` (5. Data Quality)
+- `bioetl-incident-v1` (6. Incident Workspace)
+- `bioetl-run-explorer-v1` (0. Run Explorer)
 
 **Retired (not shipped JSON):** `bioetl-workflow-overview`, `bioetl-alerts-slo`,
 `bioetl-silver-reject-explorer` — use Runtime workflow band, Overview Alert/SLO

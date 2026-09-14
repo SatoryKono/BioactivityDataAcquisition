@@ -2,7 +2,7 @@
   "annotations": {
     "list": []
   },
-  "description": "Run Explorer 2.0 narrative. Exact completed run via Ops HTTP pipeline_run_report_v1. run_id never a Prometheus label. First screen: browse last-10 pipeline-run reports (3010). Identity, processed records, and selected-run forensics live under collapsed Selected Run Details. Older runs: pick Run ID from the control-plane catalog.",
+  "description": "Run Explorer: latest 10 launches across all pipelines by start time, from reports and the control-plane catalog. Defaults Workflow/Pipeline/Run Type=All, Run ID=-. Details use exact Ops HTTP evidence; run_id never a Prometheus label.",
   "editable": true,
   "graphTooltip": 1,
   "id": null,
@@ -50,26 +50,20 @@
         "useTags": false
       },
       {
-        "allValue": null,
+        "allValue": ".*",
         "current": {
-          "selected": false,
-          "text": "unknown",
-          "value": "unknown"
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "BioETL Ops HTTP",
         "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list&workflow=${workflow}",
         "hide": 0,
-        "includeAll": false,
+        "includeAll": true,
         "label": "Pipeline",
         "multi": false,
         "name": "pipeline",
-        "options": [
-          {
-            "selected": true,
-            "text": "unknown",
-            "value": "unknown"
-          }
-        ],
+        "options": [],
         "query": {
           "queryType": "infinity",
           "refId": "variable",
@@ -95,14 +89,14 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Core scope: pipeline option list from the local control-plane catalog (/ops/control-plane/filter-options?dimension=pipeline), not the Prometheus universe. PromQL current-state panels still match $pipeline against the shared universe metrics. Single-select unless this board documents All. Unknown is the fail-closed default until a source dashboard or the operator selects a concrete pipeline. A pasted var-pipeline value that exists in the catalog remains selectable even when Prometheus has no series."
+        "description": "Browse scope from the local control-plane catalog. Default All includes every pipeline. Explicit URL selections take precedence. Select a table row to inspect its exact pipeline and Run ID."
       },
       {
         "allValue": ".*",
         "current": {
           "selected": true,
-          "text": "backfill",
-          "value": "backfill"
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "BioETL Ops HTTP",
         "definition": "/ops/control-plane/filter-options?dimension=run_type&response_shape=list&workflow=${workflow}&pipeline=${pipeline}",
@@ -137,7 +131,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Core scope: run_type option list from the local control-plane catalog (/ops/control-plane/filter-options?dimension=run_type), not the Prometheus universe. Default is backfill. Include All remains available for aggregate HTTP identity queries (csv). A catalog run_type stays selectable even when Prometheus has no series."
+        "description": "Browse scope from the local control-plane catalog. Default All includes every run type. Explicit URL selections take precedence. Select a table row to inspect its exact pipeline and Run ID."
       },
       {
         "allValue": null,
@@ -198,6 +192,20 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
+      },
+      {
+        "name": "lookup_run_id",
+        "label": "Find Run ID",
+        "type": "textbox",
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "options": [],
+        "query": "",
+        "hide": 0,
+        "skipUrlSync": false,
+        "description": "Exact UUID lookup within Workflow/Pipeline/Run Type, including launches older than the latest ten. Clear to browse recent launches."
       }
     ]
   },
@@ -207,7 +215,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "6. Run Explorer",
+  "title": "0. Run Explorer",
   "uid": "bioetl-run-explorer-v1",
   "version": 2,
   "style": "dark",
@@ -217,7 +225,7 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 24,
         "x": 0,
         "y": 0
@@ -225,13 +233,13 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1;margin:0 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health). Scope reset: provider=unknown; preserves time range, pipeline context.\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-provider=unknown&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">4. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">5. Incident Workspace</a><a class=\"bioetl-nav-current\" href=\"#bioetl-run-explorer-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"6. Run Explorer (Run Explorer)\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">6. Run Explorer</a></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-current\" href=\"#bioetl-run-explorer-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"0. Run Explorer (Run Explorer)\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">0. Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"1. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"2. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">2. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"3. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">3. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"4. Provider Health (Provider Health). Scope reset: provider=All; preserves time range, pipeline context.\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-provider=$__all&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">4. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"5. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">5. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
       },
       "links": [
         {
-          "title": "0. Trust",
+          "title": "1. Trust",
           "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "0. Trust (Trust). Preserves selected scope and time range.",
+          "tooltip": "1. Trust (Trust). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -241,9 +249,9 @@
           "tags": []
         },
         {
-          "title": "1. Overview",
+          "title": "2. Overview",
           "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "1. Overview (Overview). Preserves selected scope and time range.",
+          "tooltip": "2. Overview (Overview). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -253,9 +261,9 @@
           "tags": []
         },
         {
-          "title": "2. Pipeline Diagnostics",
+          "title": "3. Pipeline Diagnostics",
           "url": "/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
-          "tooltip": "2. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.",
+          "tooltip": "3. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -265,9 +273,9 @@
           "tags": []
         },
         {
-          "title": "3. Provider Health",
-          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=unknown&var-pipeline_context=${pipeline:percentencode}&${__url_time_range}",
-          "tooltip": "3. Provider Health (Provider Health). Scope reset: provider=unknown; preserves time range, pipeline context.",
+          "title": "4. Provider Health",
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=$__all&var-pipeline_context=${pipeline:percentencode}&${__url_time_range}",
+          "tooltip": "4. Provider Health (Provider Health). Scope reset: provider=All; preserves time range, pipeline context.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -277,9 +285,9 @@
           "tags": []
         },
         {
-          "title": "4. Data Quality",
+          "title": "5. Data Quality",
           "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
-          "tooltip": "4. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.",
+          "tooltip": "5. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -289,9 +297,9 @@
           "tags": []
         },
         {
-          "title": "5. Incident Workspace",
+          "title": "6. Incident Workspace",
           "url": "/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-          "tooltip": "5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.",
+          "tooltip": "6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -301,7 +309,7 @@
           "tags": []
         }
       ],
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light."
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus 0–6: Run Explorer / Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality / Incident Workspace. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light."
     },
     {
       "id": 1,
@@ -311,14 +319,14 @@
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 4
+        "y": 3
       },
       "options": {
         "bioetlDisplayTitle": "Understand Run Scope",
         "mode": "html",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">Which exact run should be inspected? BROWSE last 10, not this time range. Selected: $run_id. SELECTED RUN identity opens from the Run cell. Paths are report artifacts, not triage bodies.</div></div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">BROWSE last 10 launches, newest start first; not this time range.<br>Pipeline: ${pipeline:text}. SELECTED RUN: $run_id. Find Run ID: ${lookup_run_id}.<br><a href=\"/d/bioetl-run-explorer-v1/6-run-explorer?var-workflow=$__all&amp;var-pipeline=$__all&amp;var-run_type=$__all&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}\">All pipelines · clear search</a> · Open Report for persisted evidence.</div>"
       },
-      "description": "Run Explorer has two modes. Browse mode lists the last 10 run-report artifacts for the selected pipeline (disk index, not the dashboard time picker). Selected-run mode uses BioETL Ops HTTP under Selected Run Details to show identity, accounting, layers, timings/failure, reasons, and artifacts for one exact run. The time picker is for Identity coverage IN RANGE / OUT OF RANGE only. Default pipeline=unknown and run_id=- intentionally show no runs (not a missing data store and not a healthy run). Older than last 10: pick a concrete run_id from the catalog (not -). Then open Trust for recovery/replay safety. Run Explorer is evidence-only. Run ID is never a Prometheus label. Full filesystem paths belong to report-artifact Open/Copy actions. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser.",
+      "description": "Browse the latest 10 launches across All pipelines by start time. Workflow and Run Type filter the list. The dashboard time picker does not filter this table. Running means a recorded start without a terminal event, not a live health probe. REPORT MISSING means no final report is available. Defaults All / All / All and run_id=- select no exact run. Effective refresh: 60s; timezone: browser.",
       "links": [
         {
           "title": "Run-manifest inspection runbook",
@@ -332,12 +340,12 @@
       "id": 3010,
       "type": "table",
       "title": "Inspect Recent Runs (last 10)",
-      "description": "BROWSE · Last 10 on disk, not time-filtered; this index is not a SELECTED RUN snapshot. Latest ten pipeline-run reports found on disk for the selected pipeline. The dashboard time picker does not filter this table. Started is identity.started_at. Workflow is identity.workflow_id from that pipeline report (not the workflow-run catalog and not $workflow). Workflow run is identity.workflow_run_id (parent occurrence). $pipeline is a pipeline name (chembl_assay, chembl_target, chembl_publication), not a workflow (chembl_baseline). Workflow artifacts live under reports/run-reports/workflow/<name>/ and GET /ops/observability/workflow-run-reports. Click a Run cell to open that row's identity (viewPanel=3022) with pipeline, run_type, and run_id. The matching row is marked when $run_id is set. Pipeline and Workflow belong to each report row. Missing workflow linkage is explicit; full values are available through table inspection. Older runs: pick Run ID from the control-plane catalog (newest first); first screen is last 10 by design (limit=10). An empty table is valid when no matching reports exist for this pipeline (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem — run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. If reports are expected and the table is empty without that row, treat backend unavailable as a distinct failure and verify BioETL Ops HTTP at /health/live. SELECT RUN / VALID EMPTY is not OK.",
+      "description": "BROWSE — Last 10 launches by started_at across the selected pipeline scope, after Workflow and Run Type filters. The dashboard time picker does not filter this table. Start time comes from ledger/report identity, with explicitly recorded manifest-created fallback; never file mtime. One row is one launch. Running is the last recorded lifecycle state, not live-process proof. REPORT MISSING distinguishes launches without a persisted report. Click a Run cell to select and mark that run, binding Workflow, Pipeline, Run Type and Run ID from that row. Pipeline and Workflow belong to each row. Older runs: use the Run ID catalog. limit=10 shows all ten rows together without pagination. VALID EMPTY means no matching launches; TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY means a report bind failure. Backend failures are QUERY ERROR, not empty data. Run python scripts/ops/runtime/docker/verify_report_bind.py to diagnose the report bind. The matching SELECTED RUN row is marked; browse is not an exact-run snapshot. Report opens the row file in a new tab: Markdown when present, otherwise JSON. REPORT MISSING opens an explicit not-found response; it does not imply a persisted file. Find Run ID searches exact UUID before the ten-row limit. Duration needs valid start/end. Event age is the last ledger event for unfinished runs, not a heartbeat. Inspect a Run cell to copy its full UUID.",
       "gridPos": {
-        "h": 10,
+        "h": 11,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 6
       },
       "datasource": "BioETL Ops HTTP",
       "fieldConfig": {
@@ -348,10 +356,10 @@
             "minWidth": 50,
             "cellOptions": {
               "type": "auto",
-              "wrapText": true
+              "wrapText": false
             }
           },
-          "noValue": "VALID EMPTY — no pipeline-run-report artifacts for the selected pipeline under reports/run-reports/pipeline/<name>/ (first screen is last 10).",
+          "noValue": "VALID EMPTY — no matching launches in the report and control-plane catalogs.",
           "links": []
         },
         "overrides": [
@@ -389,7 +397,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-background",
-                  "wrapText": true,
+                  "wrapText": false,
                   "mode": "basic"
                 }
               },
@@ -434,6 +442,14 @@
                       "fail": {
                         "text": "fail",
                         "color": "red"
+                      },
+                      "running": {
+                        "text": "running",
+                        "color": "blue"
+                      },
+                      "unknown": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
                       }
                     }
                   }
@@ -451,8 +467,8 @@
                 "id": "links",
                 "value": [
                   {
-                    "title": "Open this run identity",
-                    "url": "/d/bioetl-run-explorer-v1/6-run-explorer?${workflow:queryparam}&var-pipeline=${__data.fields.Pipeline}&var-run_type=${__data.fields.run_type}&var-run_id=${__value.raw}&viewPanel=3022&${__url_time_range}",
+                    "title": "Select this run",
+                    "url": "/d/bioetl-run-explorer-v1/6-run-explorer?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline}&var-run_type=${__data.fields.run_type}&var-run_id=${__value.raw}&${__url_time_range}",
                     "targetBlank": false,
                     "includeVars": false
                   }
@@ -462,7 +478,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -480,6 +496,14 @@
               {
                 "id": "custom.hidden",
                 "value": true
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": true,
+                  "legend": true,
+                  "tooltip": false
+                }
               }
             ]
           },
@@ -517,7 +541,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-background",
-                  "wrapText": true,
+                  "wrapText": false,
                   "mode": "basic"
                 }
               },
@@ -689,6 +713,14 @@
                       "fail": {
                         "text": "fail",
                         "color": "red"
+                      },
+                      "running": {
+                        "text": "running",
+                        "color": "blue"
+                      },
+                      "unknown": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
                       }
                     }
                   }
@@ -698,9 +730,163 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-background",
-                  "wrapText": true,
+                  "wrapText": false,
                   "mode": "basic"
                 }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "workflow_scope"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": true,
+                  "legend": true,
+                  "tooltip": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "report_url"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": true,
+                  "legend": true,
+                  "tooltip": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Report"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "${__data.fields.Report}",
+                    "url": "${__data.fields.report_url:raw}",
+                    "targetBlank": true
+                  }
+                ]
+              },
+              {
+                "id": "custom.inspect",
+                "value": false
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "completed_at"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": true,
+                  "legend": true,
+                  "tooltip": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "last_event_at"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": true,
+                  "legend": true,
+                  "tooltip": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "duration_seconds"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              },
+              {
+                "id": "custom.width",
+                "value": 85
+              },
+              {
+                "id": "noValue",
+                "value": "UNKNOWN"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "last_event_age_seconds"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              },
+              {
+                "id": "custom.width",
+                "value": 85
+              },
+              {
+                "id": "noValue",
+                "value": "UNKNOWN"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "run_id"
+            },
+            "properties": [
+              {
+                "id": "custom.inspect",
+                "value": true
               }
             ]
           }
@@ -710,9 +896,9 @@
         "showHeader": true,
         "footer": {
           "show": false,
-          "enablePagination": true
+          "enablePagination": false
         },
-        "cellHeight": "lg"
+        "cellHeight": "sm"
       },
       "targets": [
         {
@@ -722,7 +908,7 @@
           "root_selector": "items",
           "source": "url",
           "type": "json",
-          "url": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}",
+          "url": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -731,12 +917,6 @@
         }
       ],
       "transformations": [
-        {
-          "id": "limit",
-          "options": {
-            "limitField": 10
-          }
-        },
         {
           "id": "convertFieldType",
           "options": {
@@ -753,51 +933,75 @@
           }
         },
         {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "selected",
+                "started_at",
+                "pipeline",
+                "workflow_id",
+                "run_id",
+                "duration_seconds",
+                "last_event_age_seconds",
+                "status",
+                "report_label",
+                "report_url",
+                "workflow_scope",
+                "run_type",
+                "completed_at"
+              ]
+            }
+          }
+        },
+        {
           "id": "organize",
           "options": {
-            "excludeByName": {
-              "json_path": true,
-              "markdown_path": true,
-              "path": true,
-              "report_path": true,
-              "artifact_path": true,
-              "row_kind": true,
-              "workflow_run_id": true,
-              "Workflow run": true,
-              "Time": true,
-              "Value": true,
-              "#Value": true
-            },
             "indexByName": {
               "selected": 0,
               "started_at": 1,
-              "completed_at": 2,
-              "pipeline": 3,
-              "workflow_id": 4,
-              "run_id": 5,
-              "status": 6,
-              "workflow_run_id": 7,
-              "message": 8
+              "pipeline": 2,
+              "workflow_id": 3,
+              "run_id": 4,
+              "duration_seconds": 5,
+              "last_event_age_seconds": 6,
+              "status": 7,
+              "report_label": 8,
+              "report_url": 9,
+              "workflow_scope": 10,
+              "run_type": 11,
+              "completed_at": 12
             },
             "renameByName": {
+              "selected": "",
               "started_at": "Started",
-              "completed_at": "Completed",
-              "run_id": "Run",
-              "workflow_id": "Workflow",
-              "workflow_run_id": "Workflow run",
               "pipeline": "Pipeline",
+              "workflow_id": "Workflow",
+              "run_id": "Run",
+              "duration_seconds": "Duration",
+              "last_event_age_seconds": "Event age",
               "status": "Status",
-              "message": "Message",
-              "kind": "Artifact",
-              "name": "Artifact"
+              "report_label": "Report"
+            },
+            "excludeByName": {
+              "Value": true,
+              "report_url": false,
+              "workflow_scope": false,
+              "run_type": false
             }
+          }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 10
           }
         }
       ],
       "links": [
         {
-          "title": "Expand Selected Run Details below",
-          "url": "/d/bioetl-run-explorer-v1/6-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&var-run_type=${run_type:csv}&${run_id:queryparam}&${__url_time_range}",
+          "title": "Browse all pipelines",
+          "url": "/d/bioetl-run-explorer-v1/6-run-explorer?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
         },
@@ -806,1608 +1010,6 @@
           "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md",
           "targetBlank": true,
           "includeVars": false
-        }
-      ]
-    },
-    {
-      "id": 3099,
-      "type": "row",
-      "title": "Selected Run Details",
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 17
-      },
-      "description": "",
-      "panels": [
-        {
-          "id": 3022,
-          "type": "table",
-          "title": "Inspect Run Identity",
-          "description": "SELECTED RUN · Identity rows for the selected run (control-plane table plus pipeline_run_report_v1 identity/tracking_coverage). Selection required when no run ID is set. VALID EMPTY means the selected run has no identity; backend failure renders as QUERY ERROR.",
-          "gridPos": {
-            "x": 0,
-            "y": 18,
-            "w": 12,
-            "h": 20
-          },
-          "datasource": "BioETL Ops HTTP",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "align": "left",
-                "inspect": true,
-                "cellOptions": {
-                  "type": "auto"
-                }
-              },
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity."
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "parameter"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Parameter"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 210
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "left"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "value"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Value"
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "left"
-                  },
-                  {
-                    "id": "custom.inspect",
-                    "value": true
-                  },
-                  {
-                    "id": "links",
-                    "value": [
-                      {
-                        "title": "Copy/Open full value (plain text)",
-                        "url": "data:text/plain,${__value.raw}",
-                        "targetBlank": true,
-                        "includeVars": false
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "raw_value"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              }
-            ]
-          },
-          "options": {
-            "showHeader": true,
-            "footer": {
-              "show": false
-            },
-            "cellHeight": "sm"
-          },
-          "targets": [
-            {
-              "format": "table",
-              "parser": "backend",
-              "refId": "A",
-              "root_selector": "display_rows",
-              "source": "url",
-              "type": "json",
-              "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&timezone=${__timezone}",
-              "url_options": {
-                "data": "",
-                "method": "GET"
-              },
-              "expr": ""
-            }
-          ],
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": true,
-                  "__name__": true,
-                  "Value": true,
-                  "raw_value": true
-                },
-                "renameByName": {
-                  "parameter": "Parameter",
-                  "value": "Value"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "id": 3023,
-          "type": "table",
-          "title": "Inspect Processed Records",
-          "description": "SELECTED RUN · Complete Bronze/Silver/Gold accounting. Zero-valued outcomes remain evidence. SELECT RUN / VALID EMPTY is not OK. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
-          "gridPos": {
-            "x": 12,
-            "y": 18,
-            "w": 12,
-            "h": 20
-          },
-          "datasource": "BioETL Ops HTTP",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "align": "left",
-                "cellOptions": {
-                  "type": "auto"
-                },
-                "inspect": true,
-                "minWidth": 50
-              },
-              "decimals": 0,
-              "unit": "none",
-              "noValue": "VALID EMPTY — selected run has no accounting rows. Select a Run ID first; backend failure renders as QUERY ERROR.",
-              "links": [
-                {
-                  "title": "Check BioETL Ops HTTP health",
-                  "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
-                  "targetBlank": true
-                },
-                {
-                  "title": "Open monitoring backend setup docs",
-                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
-                  "targetBlank": true
-                }
-              ],
-              "color": {
-                "mode": "fixed",
-                "fixedColor": "text"
-              }
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "parameter"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "01 bronze_records": {
-                            "text": "bronze [total]",
-                            "color": "#cd7f32"
-                          },
-                          "02 silver_valid_records": {
-                            "text": "silver [valid]",
-                            "color": "#c0c0c0"
-                          },
-                          "03 silver_filtered_out_records": {
-                            "text": "silver [filtered out]"
-                          },
-                          "04 silver_quarantined_records": {
-                            "text": "silver [quarantined]"
-                          },
-                          "05 silver_skipped_records": {
-                            "text": "silver [skipped]"
-                          },
-                          "06 silver_deduplicated_records": {
-                            "text": "silver [deduplicated]"
-                          },
-                          "07 gold_written_records": {
-                            "text": "gold [valid]",
-                            "color": "#d4af37"
-                          },
-                          "08 gold_excluded_by_contract_records": {
-                            "text": "gold [excluded]"
-                          },
-                          "09 gold_quarantined_records": {
-                            "text": "gold [quarantined]"
-                          },
-                          "10 gold_skipped_records": {
-                            "text": "gold [skipped]"
-                          },
-                          "11 gold_deduplicated_records": {
-                            "text": "gold [deduplicated]"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "left"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text",
-                      "wrapText": false
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "value"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "count"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 70
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "right"
-                  },
-                  {
-                    "id": "noValue",
-                    "value": "UNKNOWN"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text"
-                    }
-                  },
-                  {
-                    "id": "color",
-                    "value": {
-                      "mode": "fixed",
-                      "fixedColor": "text"
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "percentage"
-                },
-                "properties": [
-                  {
-                    "id": "custom.align",
-                    "value": "right"
-                  },
-                  {
-                    "id": "noValue",
-                    "value": "UNKNOWN"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text"
-                    }
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 80
-                  },
-                  {
-                    "id": "displayName",
-                    "value": "percent"
-                  },
-                  {
-                    "id": "color",
-                    "value": {
-                      "mode": "fixed",
-                      "fixedColor": "text"
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "row_status"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": ""
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 1
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "center"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text",
-                      "applyToRow": true
-                    }
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "silver_deficit": {
-                            "text": "",
-                            "color": "red"
-                          },
-                          "gold_deficit": {
-                            "text": "",
-                            "color": "red"
-                          },
-                          "": {
-                            "text": "",
-                            "color": "rgba(0,0,0,0)"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "count"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "count"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 70
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "right"
-                  },
-                  {
-                    "id": "noValue",
-                    "value": "UNKNOWN"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text"
-                    }
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "No data": {
-                            "text": "UNKNOWN",
-                            "color": "gray"
-                          },
-                          "UNKNOWN": {
-                            "text": "UNKNOWN",
-                            "color": "gray"
-                          }
-                        }
-                      },
-                      {
-                        "type": "special",
-                        "options": {
-                          "match": "null",
-                          "result": {
-                            "text": "UNKNOWN",
-                            "color": "gray"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "id": "color",
-                    "value": {
-                      "mode": "fixed",
-                      "fixedColor": "text"
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          "options": {
-            "showHeader": true,
-            "footer": {
-              "show": false
-            },
-            "cellHeight": "sm",
-            "sortBy": [
-              {
-                "desc": false,
-                "displayName": "parameter"
-              }
-            ]
-          },
-          "targets": [
-            {
-              "format": "table",
-              "parser": "backend",
-              "refId": "A",
-              "root_selector": "rows",
-              "source": "url",
-              "type": "json",
-              "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
-              "url_options": {
-                "data": "",
-                "method": "GET"
-              },
-              "expr": ""
-            }
-          ],
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": true,
-                  "row_status": true,
-                  "percintage": true
-                },
-                "indexByName": {
-                  "parameter": 0,
-                  "value": 1,
-                  "count": 1,
-                  "percentage": 2,
-                  "row_status": 3
-                },
-                "renameByName": {
-                  "parameter": "parameter",
-                  "value": "count",
-                  "percentage": "percentage",
-                  "row_status": "",
-                  "Value": "count",
-                  "Value #A": "Series A",
-                  "Value #B": "Series B",
-                  "Value #C": "Series C"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "id": 3011,
-          "type": "table",
-          "title": "Inspect Stage Funnel",
-          "description": "SELECTED RUN · Selected run: Stage counts from pipeline_run_report_v1 for the selected run. This is a stage funnel, not start/end chronology. Removals is a compact reason summary; empty stages show — (not VALID EMPTY). VALID EMPTY is only when the report has no stage rows. Selection required when no run ID is set. Unexpected empty or errors require an Ops HTTP /health/live check. SELECT RUN / VALID EMPTY is not OK.",
-          "gridPos": {
-            "x": 0,
-            "y": 38,
-            "w": 24,
-            "h": 10
-          },
-          "datasource": "BioETL Ops HTTP",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "align": "left",
-                "inspect": true,
-                "cellOptions": {
-                  "type": "auto"
-                }
-              },
-              "noValue": "UNKNOWN — inspect the state row. SELECT RUN before choosing an exact run; VALID EMPTY only for a loaded report. Backend failure renders as QUERY ERROR."
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Count"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(removals_summary|Removals)$"
-                },
-                "properties": [
-                  {
-                    "id": "noValue",
-                    "value": "—"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 280
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "tracking"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "unaccounted"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "balance_status"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Stage"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 110
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "In"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 80
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Out"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 80
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Removed"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 90
-                  }
-                ]
-              }
-            ]
-          },
-          "options": {
-            "showHeader": true,
-            "footer": {
-              "show": false
-            },
-            "cellHeight": "sm"
-          },
-          "targets": [
-            {
-              "format": "table",
-              "parser": "backend",
-              "refId": "A",
-              "root_selector": "funnel_display",
-              "source": "url",
-              "type": "json",
-              "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
-              "url_options": {
-                "data": "",
-                "method": "GET"
-              },
-              "expr": ""
-            }
-          ],
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "removals": true,
-                  "Time": true
-                },
-                "indexByName": {
-                  "stage_id": 0,
-                  "records_in": 1,
-                  "records_out": 2,
-                  "removed_total": 3,
-                  "removals_summary": 4,
-                  "balance_status": 5,
-                  "tracking": 6,
-                  "unaccounted": 7
-                },
-                "renameByName": {
-                  "stage_id": "Stage",
-                  "records_in": "In",
-                  "records_out": "Out",
-                  "removed_total": "Removed",
-                  "removals_summary": "Removals",
-                  "balance_status": "Balance",
-                  "tracking": "Tracking",
-                  "unaccounted": "Unaccounted"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "id": 3012,
-          "type": "table",
-          "title": "Inspect Top Run Reasons",
-          "description": "SELECTED RUN · Selected run: Top removal and outcome reason codes recorded in pipeline_run_report_v1 for the selected run. Selection required when no run ID is set. Valid empty means the run recorded no reason rows; unexpected empty or errors require an Ops HTTP /health/live check. SELECT RUN / VALID EMPTY is not OK.",
-          "gridPos": {
-            "x": 0,
-            "y": 48,
-            "w": 24,
-            "h": 9
-          },
-          "datasource": "BioETL Ops HTTP",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "align": "left",
-                "inspect": true,
-                "cellOptions": {
-                  "type": "auto"
-                }
-              },
-              "noValue": "UNKNOWN — inspect the state row. SELECT RUN before choosing an exact run; VALID EMPTY only for a loaded report. Backend failure renders as QUERY ERROR.",
-              "links": [
-                {
-                  "title": "Open Data Quality",
-                  "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
-                  "targetBlank": false,
-                  "includeVars": false
-                }
-              ]
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Count"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "reason"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 160
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Value"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 70
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "reason_code"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Reason"
-                  },
-                  {
-                    "id": "custom.inspect",
-                    "value": true
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "reason_label"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Reason"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 280
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "explain"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Next step"
-                  },
-                  {
-                    "id": "links",
-                    "value": [
-                      {
-                        "title": "Open Data Quality",
-                        "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
-                        "targetBlank": false,
-                        "includeVars": false
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "reason_label"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Reason"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 280
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "explain"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Next step"
-                  },
-                  {
-                    "id": "links",
-                    "value": [
-                      {
-                        "title": "Open Data Quality",
-                        "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
-                        "targetBlank": false,
-                        "includeVars": false
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          "options": {
-            "showHeader": true,
-            "footer": {
-              "show": false
-            },
-            "cellHeight": "sm",
-            "dataLinks": [
-              {
-                "title": "Open Data Quality",
-                "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
-                "targetBlank": false,
-                "includeVars": false
-              }
-            ]
-          },
-          "targets": [
-            {
-              "format": "table",
-              "parser": "backend",
-              "refId": "A",
-              "root_selector": "reasons_top_n_display",
-              "source": "url",
-              "type": "json",
-              "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
-              "url_options": {
-                "data": "",
-                "method": "GET"
-              },
-              "expr": ""
-            }
-          ],
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": true
-                }
-              }
-            }
-          ]
-        },
-        {
-          "id": 3013,
-          "type": "table",
-          "title": "Inspect Run Artifacts",
-          "description": "SELECTED RUN · Selected run: Artifact references recorded in pipeline_run_report_v1 for the selected run. The ref cell wraps so rows stay distinguishable; Copy still yields the full location. Selection required when no run ID is set. Valid empty means no artifacts were recorded; verify /health/live for unexpected empty or errors. SELECT RUN / VALID EMPTY is not OK.",
-          "gridPos": {
-            "x": 0,
-            "y": 57,
-            "w": 24,
-            "h": 10
-          },
-          "datasource": "BioETL Ops HTTP",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "align": "left",
-                "inspect": true
-              },
-              "noValue": "UNKNOWN — inspect the state row. SELECT RUN before choosing an exact run; VALID EMPTY only for a loaded report. Backend failure renders as QUERY ERROR."
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "ref"
-                },
-                "properties": [
-                  {
-                    "id": "links",
-                    "value": [
-                      {
-                        "title": "Open report artifact",
-                        "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=${__data.fields.Artifact}",
-                        "targetBlank": true
-                      }
-                    ]
-                  },
-                  {
-                    "id": "custom.inspect",
-                    "value": true
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 640
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Artifact"
-                },
-                "properties": [
-                  {
-                    "id": "links",
-                    "value": [
-                      {
-                        "title": "Open report artifact",
-                        "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=${__data.fields.Artifact}",
-                        "targetBlank": true
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "title"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Artifact"
-                  },
-                  {
-                    "id": "links",
-                    "value": [
-                      {
-                        "title": "${__data.fields.action} ${__data.fields.title}",
-                        "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=${__data.fields.format}",
-                        "targetBlank": true
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "title"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Artifact"
-                  },
-                  {
-                    "id": "links",
-                    "value": [
-                      {
-                        "title": "${__data.fields.action} ${__data.fields.title}",
-                        "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=${__data.fields.format}",
-                        "targetBlank": true
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          "options": {
-            "showHeader": true,
-            "footer": {
-              "show": false
-            },
-            "cellHeight": "sm"
-          },
-          "targets": [
-            {
-              "format": "table",
-              "parser": "backend",
-              "refId": "A",
-              "root_selector": "artifacts_display",
-              "source": "url",
-              "type": "json",
-              "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
-              "url_options": {
-                "data": "",
-                "method": "GET"
-              },
-              "expr": ""
-            }
-          ],
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": true,
-                  "json_path": true,
-                  "markdown_path": true,
-                  "path": true,
-                  "report_path": true,
-                  "artifact_path": true,
-                  "ref": true,
-                  "Value": true,
-                  "#Value": true
-                },
-                "renameByName": {
-                  "completed_at": "Completed",
-                  "run_id": "Run",
-                  "pipeline": "Pipeline",
-                  "status": "Status",
-                  "kind": "Format",
-                  "name": "Artifact",
-                  "title": "Artifact",
-                  "action": "Action",
-                  "format": "Format"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "id": 3014,
-          "type": "table",
-          "title": "Inspect Timings & Failure",
-          "description": "SELECTED RUN · Optional pipeline_run_report_v1 failure and stage_timings blocks. Empty means those optional blocks were not recorded — not zero duration and not proof of success. Selection required when no run ID is set. VALID EMPTY / PARTIAL is not OK. Backend failure renders as QUERY ERROR.",
-          "gridPos": {
-            "x": 0,
-            "y": 67,
-            "w": 24,
-            "h": 6
-          },
-          "datasource": "BioETL Ops HTTP",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "align": "left",
-                "inspect": true
-              },
-              "noValue": "VALID EMPTY — selected run report has no failure or stage_timings rows (optional blocks not recorded; not zero duration and not proof of success). Backend failure renders as QUERY ERROR."
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "section"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Section"
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "left"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 160
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "value"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Value"
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "left"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 480
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          "options": {
-            "showHeader": true,
-            "footer": {
-              "show": false
-            },
-            "cellHeight": "sm"
-          },
-          "targets": [
-            {
-              "format": "table",
-              "parser": "backend",
-              "refId": "A",
-              "root_selector": "timings_and_failure",
-              "source": "url",
-              "type": "json",
-              "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
-              "url_options": {
-                "data": "",
-                "method": "GET"
-              },
-              "expr": ""
-            }
-          ],
-          "links": [],
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": true
-                }
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": 3098,
-      "type": "row",
-      "title": "Browse Workflow Runs",
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 73
-      },
-      "description": "Optional below-fold workflow-run-reports browser. Not first-screen. Does not change panel 3010.",
-      "panels": [
-        {
-          "id": 3020,
-          "type": "table",
-          "title": "Inspect Recent Workflow Runs (last 20)",
-          "description": "SELECTED RUN · Browse mode for workflow-run reports. $workflow is a workflow name (e.g. chembl_baseline), not a pipeline. This panel calls GET /ops/observability/workflow-run-reports?workflow=${workflow}&limit=20. Panel 3010 remains pipeline-only. An empty table is valid when no matching workflow reports exist (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem — run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. Backend unavailable is a distinct failure — verify BioETL Ops HTTP at /health/live. Null completed_at renders as — in the Completed cell; VALID EMPTY is the empty-table state only. SELECT RUN / VALID EMPTY is not OK.",
-          "gridPos": {
-            "h": 8,
-            "w": 24,
-            "x": 0,
-            "y": 74
-          },
-          "datasource": "BioETL Ops HTTP",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "align": "left",
-                "inspect": true
-              },
-              "noValue": "VALID EMPTY — no workflow-run-report artifacts for the selected workflow under reports/run-reports/workflow/<name>/ (index is last 20)."
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(completed_at|Completed)$"
-                },
-                "properties": [
-                  {
-                    "id": "unit",
-                    "value": "time:YYYY-MM-DD HH:mm"
-                  },
-                  {
-                    "id": "noValue",
-                    "value": "—"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "status"
-                },
-                "properties": [
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text",
-                      "mode": "basic"
-                    }
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "TREE_MISSING": {
-                            "text": "TREE_MISSING",
-                            "color": "red"
-                          },
-                          "LAYOUT_UNHEALTHY": {
-                            "text": "LAYOUT_UNHEALTHY",
-                            "color": "orange"
-                          },
-                          "IDENTITY_UNHEALTHY": {
-                            "text": "IDENTITY_UNHEALTHY",
-                            "color": "orange"
-                          },
-                          "success": {
-                            "text": "success",
-                            "color": "text"
-                          },
-                          "failed": {
-                            "text": "failed",
-                            "color": "red"
-                          },
-                          "partial": {
-                            "text": "partial",
-                            "color": "orange"
-                          },
-                          "shutdown": {
-                            "text": "shutdown",
-                            "color": "orange"
-                          },
-                          "dry_run": {
-                            "text": "dry_run",
-                            "color": "blue"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": ".+",
-                          "result": {
-                            "text": "UNKNOWN",
-                            "color": "text"
-                          }
-                        }
-                      },
-                      {
-                        "type": "special",
-                        "options": {
-                          "match": "null",
-                          "result": {
-                            "text": "UNKNOWN",
-                            "color": "text"
-                          }
-                        }
-                      },
-                      {
-                        "type": "special",
-                        "options": {
-                          "match": "nan",
-                          "result": {
-                            "text": "UNKNOWN",
-                            "color": "text"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Completed"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 160
-                  },
-                  {
-                    "id": "unit",
-                    "value": "time:YYYY-MM-DD HH:mm"
-                  },
-                  {
-                    "id": "noValue",
-                    "value": "—"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Run"
-                },
-                "properties": [
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
-                    }
-                  },
-                  {
-                    "id": "custom.inspect",
-                    "value": true
-                  },
-                  {
-                    "id": "links",
-                    "value": [
-                      {
-                        "title": "Open workflow run report",
-                        "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/workflow-run-report?workflow=${__data.fields.Workflow}&workflow_run_id=${__value.raw}",
-                        "targetBlank": true
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Workflow"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 150
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Status"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "TREE_MISSING": {
-                            "text": "TREE_MISSING",
-                            "color": "red"
-                          },
-                          "LAYOUT_UNHEALTHY": {
-                            "text": "LAYOUT_UNHEALTHY",
-                            "color": "orange"
-                          },
-                          "IDENTITY_UNHEALTHY": {
-                            "text": "IDENTITY_UNHEALTHY",
-                            "color": "orange"
-                          },
-                          "success": {
-                            "text": "success",
-                            "color": "text"
-                          },
-                          "failed": {
-                            "text": "failed",
-                            "color": "red"
-                          },
-                          "partial": {
-                            "text": "partial",
-                            "color": "orange"
-                          },
-                          "shutdown": {
-                            "text": "shutdown",
-                            "color": "orange"
-                          },
-                          "dry_run": {
-                            "text": "dry_run",
-                            "color": "blue"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": ".+",
-                          "result": {
-                            "text": "UNKNOWN",
-                            "color": "text"
-                          }
-                        }
-                      },
-                      {
-                        "type": "special",
-                        "options": {
-                          "match": "null",
-                          "result": {
-                            "text": "UNKNOWN",
-                            "color": "text"
-                          }
-                        }
-                      },
-                      {
-                        "type": "special",
-                        "options": {
-                          "match": "nan",
-                          "result": {
-                            "text": "UNKNOWN",
-                            "color": "text"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 100
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text",
-                      "wrapText": false,
-                      "mode": "basic"
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Started"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 160
-                  },
-                  {
-                    "id": "unit",
-                    "value": "time:YYYY-MM-DD HH:mm"
-                  },
-                  {
-                    "id": "noValue",
-                    "value": "—"
-                  }
-                ]
-              }
-            ]
-          },
-          "options": {
-            "showHeader": true,
-            "footer": {
-              "show": false
-            },
-            "cellHeight": "sm"
-          },
-          "targets": [
-            {
-              "format": "table",
-              "parser": "backend",
-              "refId": "A",
-              "root_selector": "items",
-              "source": "url",
-              "type": "json",
-              "url": "/ops/observability/workflow-run-reports?workflow=${workflow}&limit=20",
-              "url_options": {
-                "data": "",
-                "method": "GET"
-              },
-              "expr": ""
-            }
-          ],
-          "transformations": [
-            {
-              "id": "convertFieldType",
-              "options": {
-                "conversions": [
-                  {
-                    "targetField": "completed_at",
-                    "destinationType": "time"
-                  }
-                ]
-              }
-            },
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "json_path": true,
-                  "markdown_path": true,
-                  "path": true,
-                  "report_path": true,
-                  "artifact_path": true,
-                  "row_kind": true,
-                  "Time": true,
-                  "__name__": true,
-                  "selected": true
-                },
-                "renameByName": {
-                  "completed_at": "Completed",
-                  "run_id": "Run",
-                  "workflow_run_id": "Run",
-                  "workflow": "Workflow",
-                  "status": "Status",
-                  "message": "Message"
-                },
-                "indexByName": {
-                  "completed_at": 1,
-                  "status": 2,
-                  "workflow": 3,
-                  "run_id": 4,
-                  "workflow_run_id": 5
-                }
-              }
-            }
-          ]
         }
       ]
     }

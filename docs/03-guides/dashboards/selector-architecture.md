@@ -59,9 +59,9 @@ Shipped portfolio is **exactly 7 dashboards** (`0..6`). Machine inventory:
 
 Dashboards:
 
-- `0. Trust` (`bioetl-control-plane-v1`)
-- `2. Pipeline Diagnostics` (`bioetl-runtime`)
-- `4. Data Quality` (`bioetl-dq-v2`)
+- `1. Trust` (`bioetl-control-plane-v1`)
+- `3. Pipeline Diagnostics` (`bioetl-runtime`)
+- `5. Data Quality` (`bioetl-dq-v2`)
 
 These surfaces answer pipeline-scoped operator questions and remain
 Prometheus-first for Status/diagnostic panels. Their shipped top-level
@@ -78,7 +78,7 @@ selectors include the shared context shell and optional role-specific filters:
 
 Dashboard:
 
-- `1. Overview` (`bioetl-overview-v2`)
+- `2. Overview` (`bioetl-overview-v2`)
 
 Hybrid Overview keeps pipeline-summary current-status semantics, exposes the
 shared context shell, and uses `run_id` for Ops HTTP identity / processed-record
@@ -88,7 +88,7 @@ tables without claiming exact-run PromQL filtering for aggregate Status.
 
 Dashboard:
 
-- `3. Provider Health` (`bioetl-provider-health-v2`)
+- `4. Provider Health` (`bioetl-provider-health-v2`)
 
 This surface is intentionally provider-first, while still exposing the shared
 context shell for provenance, identity, and processed-record evidence:
@@ -108,7 +108,7 @@ provider business selector.
 
 Dashboard:
 
-- `5. Incident Workspace` (`bioetl-incident-v1`)
+- `6. Incident Workspace` (`bioetl-incident-v1`)
 
 Read-only triage board with the shared context shell plus visible `provider`
 (same derivation defaults as Provider Health).
@@ -117,7 +117,7 @@ Read-only triage board with the shared context shell plus visible `provider`
 
 Dashboard:
 
-- `6. Run Explorer` (`bioetl-run-explorer-v1`)
+- `0. Run Explorer` (`bioetl-run-explorer-v1`)
 
 Canonical hub for Ops HTTP `ID` / `Inspect Processed Records` KPIs under the
 shared context shell. No provider/stage business selectors on the top bar.
@@ -128,7 +128,7 @@ Do **not** document these as active families:
 
 | Retired board | Replacement |
 | --- | --- |
-| `bioetl-workflow-overview` (`5. Workflow`) | Workflow band inside `2. Pipeline Diagnostics` |
+| `bioetl-workflow-overview` (`5. Workflow`) | Workflow band inside `3. Pipeline Diagnostics` |
 | `bioetl-alerts-slo` | Overview Alert/SLO triage row |
 | `bioetl-silver-reject-explorer` (Silver Reject Explorer) | CLI `bioetl quarantine inspect` + DQ reject panels |
 
@@ -213,17 +213,17 @@ Use `bioetl quarantine inspect` for exact reject forensics.
 
 The current shipped selector model (7 dashboards only):
 
-- `0. Trust`: `workflow`, `pipeline`, `run_type`, `run_id`, time range
-- `1. Overview`: `workflow`, `pipeline`, `run_type`, `run_id`, time range
-- `2. Pipeline Diagnostics`: `workflow`, `pipeline`, `run_type`, `run_id`,
+- `1. Trust`: `workflow`, `pipeline`, `run_type`, `run_id`, time range
+- `2. Overview`: `workflow`, `pipeline`, `run_type`, `run_id`, time range
+- `3. Pipeline Diagnostics`: `workflow`, `pipeline`, `run_type`, `run_id`,
   `stage` (default All), hidden `provider_hint`, time range
-- `3. Provider Health`: `workflow`, `pipeline`, `run_type`, `run_id`,
+- `4. Provider Health`: `workflow`, `pipeline`, `run_type`, `run_id`,
   `provider`, hidden `pipeline_context`, hidden detail-only `adapter`, time range
-- `4. Data Quality`: `workflow`, `pipeline`, `run_type`, `run_id`, `stage`
+- `5. Data Quality`: `workflow`, `pipeline`, `run_type`, `run_id`, `stage`
   (default All), time range
-- `5. Incident Workspace`: `workflow`, `pipeline`, `run_type`, `run_id`,
+- `6. Incident Workspace`: `workflow`, `pipeline`, `run_type`, `run_id`,
   `provider`, time range
-- `6. Run Explorer`: `workflow`, `pipeline`, `run_type`, `run_id`, time range
+- `0. Run Explorer`: `workflow`, `pipeline`, `run_type`, `run_id`, time range
 
 This contract is unified by the shared context shell, taxonomy, and family
 rules. It does not force every Status panel to consume every visible selector.
@@ -355,13 +355,13 @@ prove:
 Candidate dashboards:
 
 - `2. Runtime`
-- `4. Data Quality`
+- `5. Data Quality`
 - `0. Control Plane`
-- maybe `1. Overview`
+- maybe `2. Overview`
 
 Excluded by default:
 
-- `3. Provider Health`
+- `4. Provider Health`
 - `5. Workflow`
 - `Silver Reject Explorer`
 

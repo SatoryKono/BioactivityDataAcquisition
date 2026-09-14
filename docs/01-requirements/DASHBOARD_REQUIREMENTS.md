@@ -178,7 +178,7 @@ one oversized chart from masking a prose-heavy group.
   "100% data" under `DASH-DENSITY-001` yet very sparse here (`ρ ≈ 0.007`).
 - Enforcement is opt-in per UID via `scalar_density_enforced_uids`
   (`layout-budgets.yaml`); a dashboard is enrolled only after its scalar groups
-  out-densify its first screen. Baseline survey 2026-08-14: `0. Trust` groups
+  out-densify its first screen. Baseline survey 2026-08-14: `1. Trust` groups
   `902/901/903/904` were all below the first screen and await remediation.
 
 ## 6. P2 — consistency and maintainability
@@ -220,7 +220,7 @@ Derived from the geometry-grounded proposal
 | `DASH-COPY-003` | Every non-row, non-`text`, non-shell content-panel title MUST start with a canonical action verb (design-system §3.1); parsing is colon-tolerant. | enforced |
 | `DASH-COPY-004` | First-window `Monitor*` panels MUST NOT use `$__range` (`Inspect + $__range` forensic panels remain allowed; `$__interval`/fixed windows are not range). | enforced |
 | `DASH-COPY-005` | Non-row content-panel titles MUST be unique within a dashboard and MUST NOT be generic placeholders. | enforced |
-| `DASH-COPY-006` | First-window verdict cards (background `stat` whose mappings encode `OK` plus `WARN`/`CRIT`) MUST state `OK`/`WARN`/`CRIT`/`UNKNOWN` in the description. Documented trust gates (`0. Trust`/`2. Pipeline Diagnostics` `9401`) MUST also state `INCOMPLETE`. Presence/coverage gates without that palette are out of scope. | enforced |
+| `DASH-COPY-006` | First-window verdict cards (background `stat` whose mappings encode `OK` plus `WARN`/`CRIT`) MUST state `OK`/`WARN`/`CRIT`/`UNKNOWN` in the description. Documented trust gates (`1. Trust`/`3. Pipeline Diagnostics` `9401`) MUST also state `INCOMPLETE`. Presence/coverage gates without that palette are out of scope. | enforced |
 | `DASH-COPY-007` | Data-typed panels MUST declare ≥1 live target (non-empty PromQL `expr` or Infinity `url`, `hide != true`). | enforced |
 | `DASH-PERF-003` | The answer fold (`FIRST_WINDOW_Y=18`) and the first-load budget window (`FIRST_LOAD_Y_MAX=28`) MUST stay distinct, named constants. | enforced |
 | `DASH-DENSITY-002` | Every additional panel group with ≥1 scalar panel MUST have scalar density (values / `w×h`, `stat`/`gauge`/`bargauge` only) greater than the dashboard's first-screen scalar density (§5.4). | enforced (all 7 uids in scalar_density_enforced_uids) |
@@ -239,7 +239,7 @@ and are loaded by `tests/integration/_dashboard_layout_budgets.py`.
 | `bioetl-provider-health-v2` | Which provider is degraded/failing, and why? |
 | `bioetl-dq-v2` | What is the current DQ state, its evidence scope, and first action? |
 | `bioetl-incident-v1` | What is the highest-confidence active suspect? |
-| `bioetl-run-explorer-v1` | Which exact run is selected, and what does its immutable evidence show? |
+| `bioetl-run-explorer-v1` | Which pipelines ran most recently, and where are their reports? |
 
 ### 7.1 Canonical answer-panel map (`DASH-FIT-003` input)
 

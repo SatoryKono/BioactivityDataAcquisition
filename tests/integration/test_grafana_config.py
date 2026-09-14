@@ -110,6 +110,7 @@ EXPECTED_VARS_BY_DASHBOARD = {
         "provider",
     },
     "bioetl-run-explorer-v1.json": {
+        "lookup_run_id",
         "workflow",
         "pipeline",
         "run_type",
@@ -745,10 +746,10 @@ def _assert_workflow_step_diagnostics_layout(dashboard: dict) -> None:
 
 _WORKFLOW_FIRST_ACTION_LINK_TITLES = {
     "Open 2. Runtime",
-    "Open 4. Data Quality",
-    "Open 3. Provider Health",
+    "Open 5. Data Quality",
+    "Open 4. Provider Health",
     "Open 0. Control Plane",
-    "Open 1. Overview",
+    "Open 2. Overview",
 }
 
 
@@ -1161,7 +1162,7 @@ def test_control_plane_l1_triage_row_has_3_to_5_kpis_and_one_next_step() -> None
         "Monitor Manifest/Ledger",
         "Monitor Telemetry",
     }
-    next_step_title = "Review Recovery Action"
+    next_step_title = "Inspect Scope & Evidence"
     first_screen_titles = {
         panel_display_title(panel)
         for panel in panels
@@ -1176,23 +1177,15 @@ def test_control_plane_l1_triage_row_has_3_to_5_kpis_and_one_next_step() -> None
 
 def test_control_plane_l1_has_single_next_step_panel_with_expected_target() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    panels = [
-        panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel_display_title(panel) == "Review Recovery Action"
-    ]
-    assert len(panels) == 1
-
-    links = panels[0].get("options", {}).get("dataLinks", [])
-    urls = [str(link.get("url", "")) for link in links]
-    assert urls
-    assert any("viewPanel=130" in url for url in urls)
-    assert any("viewPanel=9418" in url for url in urls)
-    assert any("viewPanel=9415" in url for url in urls)
-    assert any("viewPanel=9416" in url for url in urls)
-    assert all(
-        "/d/bioetl-control-plane-v1/bioetl-control-plane-v1" in url for url in urls
-    )
+    panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
+    assert 906 not in panels
+    scope = panels[9400]
+    content = scope["options"]["content"]
+    assert "Do not replay" in content
+    assert "INCOMPLETE" in content and "UNKNOWN" in content
+    urls = [item["url"] for item in scope["options"]["dataLinks"]]
+    for pid in (130, 9418, 9415, 9416):
+        assert any(f"viewPanel={pid}" in url for url in urls)
 
 
 def test_control_plane_has_replay_resume_blockers_panel() -> None:
@@ -1401,7 +1394,7 @@ def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
     assert overview_panels[9002]["options"]["cellHeight"] == "sm"
     assert overview_panels[9002]["gridPos"]["h"] >= 5
     assert overview_panels[215]["gridPos"]["h"] >= 5
-    assert overview_panels[9603]["gridPos"]["y"] < overview_panels[215]["gridPos"]["y"]
+    assert overview_panels[215]["gridPos"]["y"] < overview_panels[9603]["gridPos"]["y"]
 
     run_explorer = load_dashboard(
         Path("grafana/dashboards/bioetl-run-explorer-v1.json")
@@ -1409,23 +1402,11 @@ def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
     run_panels = {
         int(panel["id"]): panel for panel in get_dashboard_panels(run_explorer)
     }
-    assert 3016 not in run_panels
-    assert run_panels[3014]["type"] == "table"
-    assert run_panels[3014]["title"] == "Inspect Timings & Failure"
-    timings_targets = run_panels[3014].get("targets") or []
-    assert len(timings_targets) == 1
-    assert timings_targets[0].get("root_selector") == "timings_and_failure"
-    transforms = run_panels[3014].get("transformations") or []
-    assert transforms in (
-        [],
-        [{"id": "organize", "options": {"excludeByName": {"Time": True}}}],
+    assert len(run_panels) == 3
+    assert run_panels[3010]["type"] == "table"
+    assert (
+        not {3011, 3012, 3013, 3014, 3020, 3022, 3023, 3098, 3099} & run_panels.keys()
     )
-
-    assert 9403 not in run_panels
-    assert 3021 not in run_panels
-    assert 3001 not in run_panels
-    assert run_panels[3022]["title"] == "Inspect Run Identity"
-    assert run_panels[3023]["title"] == "Inspect Processed Records"
 
 
 def test_control_plane_dashboard_links_are_scoped() -> None:
@@ -1441,8 +1422,8 @@ def test_control_plane_dashboard_links_are_scoped() -> None:
     assert "includeVars=true" not in json.dumps(links)
     assert "Back to Overview" not in links
     assert "0. Control Plane" not in links
-    assert "0. Trust" not in links  # self-link omitted from machine-readable bus
-    for title in ("1. Overview", "2. Pipeline Diagnostics", "4. Data Quality"):
+    assert "1. Trust" not in links  # self-link omitted from machine-readable bus
+    for title in ("2. Overview", "3. Pipeline Diagnostics", "5. Data Quality"):
         _assert_scoped_control_plane_nav_link(title, links[title])
 
 

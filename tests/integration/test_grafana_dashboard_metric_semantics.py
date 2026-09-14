@@ -53,7 +53,6 @@ _PROCESSED_RECORDS_DASHBOARDS = (
     "bioetl-dq-v2.json",
     "bioetl-overview-v2.json",
     "bioetl-provider-health-v2.json",
-    "bioetl-run-explorer-v1.json",
     "bioetl-runtime.json",
 )
 
@@ -251,7 +250,7 @@ def test_workflow_selected_range_counters_use_zero_valid_empty_state() -> None:
 def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> None:
     """Historical evidence must stay behind disclosure below the L0 answer path."""
     first_answer_titles = {
-        "Monitor Fleet Health",
+        "Monitor Scope Health",
         "Review First Action",
         "Review Domain Status",
     }
@@ -350,7 +349,7 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
                 str(link.get("title", "")).startswith("Open ") for link in data_links
             )
 
-        for panel_title in ("Monitor Fleet Health", "Review First Action"):
+        for panel_title in ("Monitor Scope Health", "Review First Action"):
             assert "$__range" not in "\n".join(
                 get_panel_expressions(panels[panel_title])
             )
@@ -1117,7 +1116,10 @@ def test_runtime_telemetry_gap_checks_scrape_and_rule_health() -> None:
     assert panel is not None, "Panel 'Monitor Metrics Coverage' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert "max(bioetl_runtime_trust_gap_status_10m)" in expressions
+    assert (
+        'min(bioetl_runtime_stage_evidence_present_ratio{pipeline=~"$pipeline",run_type=~"$run_type"}) or on() vector(-1)'
+        in expressions
+    )
     assert 'max(up{job="bioetl"})' in expressions
     assert any(
         "time()-max(prometheus_rule_group_last_evaluation" in expr
@@ -1835,39 +1837,29 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     }
     identity_id, processed_id = {
         "bioetl-overview-v2.json": (9300, 9301),
-        "bioetl-run-explorer-v1.json": (3022, 3023),
     }.get(dashboard_name, (9402, 9403))
     identity = panels[identity_id]
     processed = panels[processed_id]
-    if dashboard_name == "bioetl-run-explorer-v1.json":
-        assert identity.get("gridPos", {}).get("h") == 20
-        assert processed.get("gridPos", {}).get("h") == 20
-        assert identity.get("gridPos", {}).get("w") == 12
-        assert processed.get("gridPos", {}).get("w") == 12
-        assert identity["gridPos"]["x"] == 0
-        assert processed["gridPos"]["x"] == 12
-        assert processed["gridPos"]["y"] == identity["gridPos"]["y"]
+    expected_height = 6
+    assert (
+        identity.get("gridPos", {}).get("h")
+        == processed.get("gridPos", {}).get("h")
+        == expected_height
+    )
+    identity_no_value = str(
+        identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
+    )
+    processed_no_value = str(
+        processed.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
+    )
+    if dashboard_name in {"bioetl-runtime.json", "bioetl-dq-v2.json"}:
+        assert identity_no_value.startswith("SELECT RUN")
+        assert processed_no_value.startswith("SELECT RUN")
+        assert "valid empty" not in identity_no_value.lower()
+        assert "query error" not in processed_no_value.lower()
     else:
-        expected_height = 6
-        assert (
-            identity.get("gridPos", {}).get("h")
-            == processed.get("gridPos", {}).get("h")
-            == expected_height
-        )
-        identity_no_value = str(
-            identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
-        )
-        processed_no_value = str(
-            processed.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
-        )
-        if dashboard_name in {"bioetl-runtime.json", "bioetl-dq-v2.json"}:
-            assert identity_no_value.startswith("SELECT RUN")
-            assert processed_no_value.startswith("SELECT RUN")
-            assert "valid empty" not in identity_no_value.lower()
-            assert "query error" not in processed_no_value.lower()
-        else:
-            assert "valid empty" in identity_no_value.lower()
-            assert "query error" in processed_no_value.lower()
+        assert "valid empty" in identity_no_value.lower()
+        assert "query error" in processed_no_value.lower()
     assert (
         identity.get("options", {}).get("cellHeight")
         == processed.get("options", {}).get("cellHeight")

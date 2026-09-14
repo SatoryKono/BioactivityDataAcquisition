@@ -4,7 +4,7 @@
 
 ## Overview
 
-Dashboard `4. Data Quality` monitors DQ current status, validation score, freshness, quarantine, Silver structural rejects, and Gold contract-semantic reject outcomes. Shipped dashboard JSON is the source of truth.
+Dashboard `5. Data Quality` monitors DQ current status, validation score, freshness, quarantine, Silver structural rejects, and Gold contract-semantic reject outcomes. Shipped dashboard JSON is the source of truth.
 
 Counter panels that use `max_over_time()` show the maximum Pushgateway final
 snapshot observed in the selected window. They are bounded range evidence, not
@@ -21,6 +21,10 @@ into a synthetic healthy zero.
 The canonical selected-range Silver validation count is panel `id=12`. The
 former `id=7` range-composite copy was removed because it repeated the same
 query, links, and operator fact.
+
+Selected-run accounting includes input, accepted, Silver/Gold quarantine,
+contract exclusions, Gold output and the exact Report link. Excl % uses Silver
+accepted as the denominator; zero/missing denominator remains unknown.
 
 ## Key Panels
 

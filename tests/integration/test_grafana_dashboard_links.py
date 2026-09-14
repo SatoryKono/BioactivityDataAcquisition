@@ -83,8 +83,8 @@ def test_ops_http_health_links_use_same_origin_grafana_proxy() -> None:
             if _FORBIDDEN_OPS_HTTP_BROWSER_HOST_RE.match(url):
                 forbidden.append(f"{dashboard_path.name}:{title!r} -> {url}")
 
-    assert len(health_links) == 12, (
-        "Shipped dashboards must expose exactly twelve Ops HTTP health CTAs; "
+    assert len(health_links) == 11, (
+        "Shipped dashboards must expose exactly eleven Ops HTTP health CTAs; "
         f"found {len(health_links)}"
     )
     assert not forbidden, (
@@ -126,7 +126,7 @@ def test_dashboards_do_not_ship_empty_options_data_links_arrays() -> None:
 def test_top_level_handoff_fails_closed_when_required_link_is_removed() -> None:
     """The real policy path must reject a removed required dashboard link."""
     link: dict[str, object] = {
-        "title": "2. Pipeline Diagnostics",
+        "title": "3. Pipeline Diagnostics",
         "url": (
             "/d/bioetl-runtime?var-workflow=$workflow&var-pipeline=$pipeline"
             "&var-run_type=$run_type&var-run_id=$run_id&from=$__from&to=$__to"
@@ -437,13 +437,13 @@ def test_critical_top_level_links_follow_title_allowlist_and_scope_reset_suffix(
 def test_dashboard_titles_match_home_dashboard_navigation_names() -> None:
     """Grafana Home > Dashboards uses dashboard.title, so titles must match the navigation map."""
     expected_titles_by_uid = {
-        "bioetl-control-plane-v1": "0. Trust",
-        "bioetl-overview-v2": "1. Overview",
-        "bioetl-runtime": "2. Pipeline Diagnostics",
-        "bioetl-provider-health-v2": "3. Provider Health",
-        "bioetl-dq-v2": "4. Data Quality",
-        "bioetl-incident-v1": "5. Incident Workspace",
-        "bioetl-run-explorer-v1": "6. Run Explorer",
+        "bioetl-control-plane-v1": "1. Trust",
+        "bioetl-overview-v2": "2. Overview",
+        "bioetl-runtime": "3. Pipeline Diagnostics",
+        "bioetl-provider-health-v2": "4. Provider Health",
+        "bioetl-dq-v2": "5. Data Quality",
+        "bioetl-incident-v1": "6. Incident Workspace",
+        "bioetl-run-explorer-v1": "0. Run Explorer",
     }
 
     for dashboard_path in get_dashboard_files():
@@ -623,7 +623,7 @@ def test_overview_and_runtime_dashboards_expose_data_quality_handoff() -> None:
     for dashboard_name in ("bioetl-overview-v2.json", "bioetl-runtime.json"):
         _assert_named_dashboard_handoff(
             dashboard_name=dashboard_name,
-            expected_title="4. Data Quality",
+            expected_title="5. Data Quality",
             url_prefix="/d/bioetl-dq-v2",
         )
 
@@ -633,7 +633,7 @@ def test_runtime_and_dq_dashboards_expose_control_plane_handoff() -> None:
     for dashboard_name in ("bioetl-runtime.json", "bioetl-dq-v2.json"):
         _assert_named_dashboard_handoff(
             dashboard_name=dashboard_name,
-            expected_title="0. Trust",
+            expected_title="1. Trust",
             url_prefix="/d/bioetl-control-plane-v1/bioetl-control-plane-v1",
         )
 

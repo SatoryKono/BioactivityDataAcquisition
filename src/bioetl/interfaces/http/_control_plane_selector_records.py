@@ -46,6 +46,7 @@ class SelectorRecord:
     completed_at_source: str
     run_status: str
     terminal_event_type: str | None
+    last_event_at: datetime | None = None
 
 
 def build_selector_records(
@@ -192,6 +193,9 @@ def _build_selector_record(
         if terminal_entry and terminal_entry.status
         else "unknown",
         terminal_event_type=terminal_entry.event_type if terminal_entry else None,
+        last_event_at=max(
+            (entry.occurred_at for entry in ledger_entries), default=None
+        ),
     )
 
 

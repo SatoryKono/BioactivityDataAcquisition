@@ -79,7 +79,7 @@ def test_rerender_playwright_fallback_splits_and_merges_multi_dashboard_runs(
             rerender_subject.DashboardRecord(
                 uid="bioetl-provider-health-v2",
                 url="/d/bioetl-provider-health-v2/3-provider-health",
-                title="3. Provider Health",
+                title="4. Provider Health",
             ),
             rerender_subject.DashboardRecord(
                 uid="bioetl-runtime",

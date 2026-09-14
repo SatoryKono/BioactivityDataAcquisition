@@ -73,7 +73,11 @@ def test_every_dashboard_has_at_least_one_row() -> None:
             for panel in get_dashboard_panels(dashboard)
             if panel.get("type") == "row"
         ]
-        assert rows, f"{dashboard_path.name} must declare at least one row group"
+        if dashboard_path.name == "bioetl-run-explorer-v1.json":
+            assert not rows
+            assert len(get_dashboard_panels(dashboard)) == 3
+        else:
+            assert rows, f"{dashboard_path.name} must declare at least one row group"
         observed += len(rows)
     assert observed >= 20
 
@@ -93,7 +97,10 @@ def test_row_groups_materialize_expanded_for_test_stage() -> None:
         materialized = materialize_expanded(shipped)
         root_panels = materialized["panels"]
         rows = [panel for panel in root_panels if panel.get("type") == "row"]
-        assert rows, f"{dashboard_path.name}: expected at least one row group"
+        if dashboard_path.name == "bioetl-run-explorer-v1.json":
+            assert not rows
+        else:
+            assert rows, f"{dashboard_path.name}: expected at least one row group"
         for row in rows:
             assert row.get("collapsed") is False, (
                 f"{dashboard_path.name}: row {row.get('title')!r} must be "

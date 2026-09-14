@@ -330,7 +330,7 @@ def _list_report_payload(
 def list_pipeline_run_report_payloads(
     *,
     pipeline_name: str | None = None,
-    limit: int = 20,
+    limit: int | None = 20,
     root: Path | None = None,
     selected_run_id: str | None = None,
 ) -> JsonDict:

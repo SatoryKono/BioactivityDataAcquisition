@@ -1,128 +1,79 @@
 # BioETL Run Explorer - Panels Documentation
 
-**Dashboard file:** `grafana/dashboards/bioetl-run-explorer-v1.json`  
+**Dashboard file:** `grafana/dashboards/bioetl-run-explorer-v1.json`
 **UID:** `bioetl-run-explorer-v1`
 
 ## Overview
 
-Run-centric workspace. First paint is the last-10 browse index (`3010`) only
-(Ops HTTP performance budget). Identity (`3022`) and processed-records
-accounting (`3023`) live with the other `pipeline_run_report_v1` slices under a
-collapsed progressive-disclosure row. Older runs are selected from the
-control-plane Run ID catalog. `run_id` is never a Prometheus label.
+Run Explorer is a recent-launch list with direct report access. Defaults are
+Workflow=All, Pipeline=All, Run Type=All, Run ID=-. Explicit URL selections win.
+The page contains navigation, a scope banner, and Inspect Recent Runs (last 10).
+Selected Run Details and Browse Workflow Runs, including their nested panels,
+were removed at the operator's request. Report and control-plane APIs remain
+available independently of the dashboard.
 
-## Key Panels
+## Navigate Dashboards
 
-### 2. Understand Run Scope
-- **Type:** Text
-- **Purpose:** Explain browse and selected-run modes, the HTTP-only run_id contract, artifact Open/Copy, and the Trust handoff. Browse is last 10 on disk, not the dashboard time range.
-- **Data sources:** Dashboard variables and operator copy.
+The navigation bus preserves scope and time range. Incoming links from other
+workspaces open the Run Explorer list without targeting a removed panel.
 
-### 5. Inspect Recent Runs (last 10)
-- **Type:** Table (compact first-screen index)
-- **Purpose:** Last 10 pipeline-run reports for the selected pipeline. The
-  dashboard time picker does not filter this table. The Run column data link
-  writes `var-run_id`, `var-pipeline`, and `var-run_type` from that row and
-  stays on this dashboard so the operator can expand Selected Run Details
-  (panel header link). Pipeline and Workflow remain visible for each report; `run_type` and
-  Workflow Run ID remain available in Inspect. The
-  matching `$run_id` row is marked via Ops HTTP `selected`. Started is
-  `identity.started_at`. Workflow is `identity.workflow_id` from that
-  pipeline report (not the workflow-run catalog). Workflow run is
-  `identity.workflow_run_id`. Column widths keep the selected marker, UUID,
-  timestamps, and workflow identifiers inside the first-window fold. Older
-  runs: pick Run ID from the catalog.
-- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
-- **Layout:** First-window table at `y=6,h=11` with `limitField=10`,
-  wrapped columns and native `footer.enablePagination=true`. The `lg` cell
-  height lets Grafana calculate pages that fit the wrapped rows at 200% zoom.
-  All ten runs remain available through the page controls. Identity
-  (`3022`) and processed records (`3023`) stay collapsed under Selected Run
-  Details.
-- **Empty states:** Valid empty (`noValue` starts with `VALID EMPTY` and must
-  not embed `$pipeline` — Grafana does not interpolate `noValue`) when
-  Ops HTTP `index_state=valid_empty` — no matching reports for this pipeline.
-  A visible `TREE_MISSING` / `LAYOUT_UNHEALTHY` / `IDENTITY_UNHEALTHY` row is
-  bind or origin failure, not a selector problem; run
-  `python scripts/ops/runtime/docker/verify_report_bind.py` from the checkout
-  you are viewing. Backend unavailable when Ops HTTP cannot load the index —
-  verify `/health/live`.
+### 1. Understand Run Scope
 
-### 14. Browse Workflow Runs
-- **Type:** Row (**collapsed by default**, `id=3098`)
-- **Purpose:** Optional below-fold browser for workflow-run reports; it does not
-  replace the pipeline-run index or add a competing first-screen path.
-- **Data sources:** Nested Ops HTTP table below.
+The first line explains that the list shows the last ten launches by start time,
+independently of the time picker. A line break before Pipeline separates this
+explanation from Pipeline and SELECTED RUN context. Open Report inspects the
+persisted run evidence.
 
-### 15. Inspect Recent Workflow Runs (last 20)
-- **Type:** Table
-- **Purpose:** Last 20 workflow-run reports for the selected workflow, with the
-  same valid-empty and bind/origin failure distinctions as the pipeline index.
-  Null `completed_at` is `—` in the Completed cell; `VALID EMPTY` is only the
-  empty-table state.
-- **Data sources:** BioETL Ops HTTP
-  `/ops/observability/workflow-run-reports?workflow=${workflow}&limit=20`.
+### 2. Inspect Recent Runs (last 10)
 
-### 6. Selected Run Details
-- **Type:** Row (**collapsed by default**, `id=3099`)
-- **Purpose:** Progressive disclosure for identity, processed-records
-  accounting, funnel, reasons, artifacts, and timings/failure.
+- **Type:** Table, panel 3010; the only data panel on this dashboard.
+- **Data source:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
+  with `view=recent`; one request per refresh.
+- **Rows:** Last ten launches, all shown together without pagination. Compact
+  single-line cells retain full values through Inspect and full UUID links.
+- **Layout:** Link-only navigation h=2, scope banner y=2/h=3, table y=5/h=12. The table
+  uses the existing ten-row limit and small native cell height.
+- **Selection:** Clicking Run sets that row's Workflow, Pipeline, Run Type and
+  Run ID, preserving the time range and marking the matching row. It does not
+  target a detail panel. Browse all pipelines restores All scopes and Run ID=-.
+- **Reports:** Open report opens the exact row's Markdown file in a new tab,
+  falling back to JSON. Markdown is displayed as text. Report URLs use the
+  Grafana Ops HTTP proxy, independent of the selected dashboard Run ID.
+  REPORT MISSING opens an explicit bilingual not-found response. A deleted
+  file returns not found rather than another run's report.
 
-- **Data sources:** Nested panels below (expand row to load).
+## Ordering and evidence
 
-Nested titles (must match JSON):
+Workflow, Pipeline and Run Type filters apply before the global ten-row limit.
+Start time comes from persisted report identity or ledger start events; manifest
+creation is an explicit fallback. File modification time never ranks this view.
+Repeated pipelines remain separate rows. The time picker does not filter the
+list. Run ID selects and marks a row rather than limiting the list to one run.
 
-### 7. Inspect Stage Funnel
-- **Type:** Table
-- **Purpose:** Stage funnel (records_in/out, balance) for exact run.
-- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `funnel_display`
-- **Presentation:** Stage first; `removals` JSON is hidden in favor of
-  `removals_summary`. Empty stage removals render as `—`, not table-level
-  VALID EMPTY. A full-width panel shows all four stages, including Gold,
-  with wrapped full removal reasons and Inspect access.
+Final reports supply immutable start/status evidence. A recorded start without
+a terminal event displays running as its last known lifecycle state, not proof
+of a live process. Manifest-only entries remain unknown. A missing report does
+not imply zero accounting.
 
-### 8. Inspect Top Run Reasons
-- **Type:** Table
-- **Purpose:** Top removal/reason codes for exact run.
-- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `reasons_top_n_display`
-- **Presentation:** Full-width panel below Stage Funnel; complete reason codes
-  wrap and remain available through Inspect. Before selection, report sections
-  show `SELECT RUN`; missing reports show `TELEMETRY MISSING`; successfully
-  loaded empty sections show `VALID EMPTY`.
+## Exact lookup and timing
 
-### 11. Inspect Run Artifacts
-- **Type:** Table
-- **Purpose:** Artifact refs (report paths, exports) for exact run. The `ref`
-  cell wraps so rows stay distinguishable; Copy still yields the full `ref`.
-- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `artifacts_display`
+Find Run ID filters by exact UUID before the ten-row limit, within the selected
+Workflow/Pipeline/Run Type. Clearing it restores the recent list. Duration uses
+persisted start/completion timestamps. Event age uses the last ledger event
+only for running launches; missing or future timestamps stay UNKNOWN. Neither
+file mtime nor scrape time can substitute for event evidence.
 
-### 12. Inspect Timings & Failure
-- **Type:** Table (`id=3014`)
-- **Purpose:** Optional `failure` and `stage_timings` blocks. Empty means not
-  recorded — not zero duration and not proof of success. Compact height on
-  the success path; duration lives on Inspect Run Identity.
-- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `timings_and_failure` (HTTP projection of optional `failure` + `stage_timings`; empty array is VALID EMPTY, not QUERY ERROR)
+## Empty and failure states
 
+VALID EMPTY means no matching launches. TREE_MISSING, LAYOUT_UNHEALTHY and
+IDENTITY_UNHEALTHY indicate report bind/origin failures, not selector problems.
+Run `python scripts/ops/runtime/docker/verify_report_bind.py` from the canonical
+checkout to diagnose the report bind. Backend failures remain QUERY ERROR.
 
-## Additional shipped panels
-### 17. Inspect Run Identity
-- **Type:** Table (`id=3022`)
-- **Purpose:** Run/manifest identity for the selected run (collapsed Selected
-  Run Details), including status, time bounds, duration, and tracking_coverage.
-  Before a concrete selection the returned rows request an exact Run ID; after
-  selection an empty section is `VALID EMPTY`, while datasource/backend failure
-  renders as `QUERY ERROR`. This is the only identity table on Run Explorer.
-- **Data sources:** One BioETL Ops HTTP `/ops/control-plane/identity-table`
-  target, enriched from the report matching both Run ID and Pipeline.
-- **Presentation:** Parameter is 280 px; Value fills the remaining width and
-  wraps full IDs. Status, Started, Completed, duration, tracking coverage, and
-  available Workflow fields come from that report. Slow report I/O cannot
-  discard completed control-plane evidence.
-### 18. Inspect Processed Records
-- **Type:** Table (`id=3023`)
-- **Purpose:** Bronze/Silver/Gold count and denominator-explicit percentage
-  accounting for the selected run (collapsed Selected Run Details). Recorded
-  zero, `VALID EMPTY`, and `QUERY ERROR` are distinct operator states. Exact
-  layer counts also exist on `pipeline_run_report_v1.layers`. This is the only
-  processed-records table on Run Explorer.
-- **Data sources:** BioETL Ops HTTP `/ops/observability/processed-records` (not Prometheus).
+## Verification
+
+Dashboard HTTP and semantic contracts cover the three remaining panels.
+Regression checks require both removed groups to stay absent, ten rows without
+pagination, a line break before Pipeline, and no links to retired detail panels.
+Run dashboard readability and first-window containment tests and verify the
+actual browser table with ten populated rows and working Report links.

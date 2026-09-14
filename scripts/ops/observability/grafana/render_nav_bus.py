@@ -32,39 +32,39 @@ DASH_DIR = ROOT / "grafana" / "dashboards"
 # Full portfolio bus (order is normative).
 BUS: list[dict[str, str]] = [
     {
+        "uid": "bioetl-run-explorer-v1",
+        "title": "0. Run Explorer",
+        "path": "bioetl-run-explorer-v1",
+    },
+    {
         "uid": "bioetl-control-plane-v1",
-        "title": "0. Trust",
+        "title": "1. Trust",
         "path": "bioetl-control-plane-v1",
     },
     {
         "uid": "bioetl-overview-v2",
-        "title": "1. Overview",
+        "title": "2. Overview",
         "path": "bioetl-overview-v2",
     },
     {
         "uid": "bioetl-runtime",
-        "title": "2. Pipeline Diagnostics",
+        "title": "3. Pipeline Diagnostics",
         "path": "bioetl-runtime",
     },
     {
         "uid": "bioetl-provider-health-v2",
-        "title": "3. Provider Health",
+        "title": "4. Provider Health",
         "path": "bioetl-provider-health-v2",
     },
     {
         "uid": "bioetl-dq-v2",
-        "title": "4. Data Quality",
+        "title": "5. Data Quality",
         "path": "bioetl-dq-v2",
     },
     {
         "uid": "bioetl-incident-v1",
-        "title": "5. Incident Workspace",
+        "title": "6. Incident Workspace",
         "path": "bioetl-incident-v1",
-    },
-    {
-        "uid": "bioetl-run-explorer-v1",
-        "title": "6. Run Explorer",
-        "path": "bioetl-run-explorer-v1",
     },
 ]
 
@@ -89,9 +89,9 @@ def _validate_action_route_uids() -> None:
 
 
 NAV_DISPLAY_TITLE = "Navigate Dashboards"
-NAV_HEIGHT = 4
-# Native 200% zoom halves the CSS viewport (683x384). h=3 clips wrapped 16px
-# chips (DASH-REFLOW-001). h=4 is already allowed by static fill gates.
+NAV_HEIGHT = 3
+# Shared link-only band reserves two wrapped rows with native 16px links.
+# Verify narrow/200% reflow in the browser after Grafana sanitization.
 # layout-budgets.yaml first_window_y / viewport_rows. Expanding nav must not
 # push always-visible first-window panels past this fold.
 VIEWPORT_ROWS = 18
@@ -101,10 +101,10 @@ FIRST_WINDOW_PANEL_BOTTOM = 17
 # First-window copy that was explicitly designed and tested at h=3 must not be
 # sacrificed when the shared navigation grows to its canonical h=4.
 _MINIMUM_FIRST_WINDOW_HEIGHTS: dict[str, dict[int, int]] = {
-    "bioetl-run-explorer-v1": {1: 3},
+    "bioetl-run-explorer-v1": {1: 3, 3010: 12},
     "bioetl-incident-v1": {2005: 4, 2010: 4},
     "bioetl-dq-v2": {9102: 4, 9406: 4},
-    "bioetl-control-plane-v1": {906: 3, 9418: 4, 9416: 4},
+    "bioetl-control-plane-v1": {9418: 7, 9416: 7},
 }
 # Donors used when the provenance text rail is already at h=3. Values are the
 # minimum height after reclaiming one native-zoom nav row.
@@ -114,26 +114,25 @@ _FALLBACK_COMPACTION_HEIGHTS: dict[str, dict[int, int]] = {
     "bioetl-provider-health-v2": {9101: 4, 9107: 4},
 }
 _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    9400: (0, 4, 16, 3),
-    9401: (16, 4, 8, 3),
-    9418: (0, 7, 12, 4),
-    9416: (12, 7, 12, 4),
-    906: (0, 11, 24, 3),
-    891: (0, 14, 6, 3),
-    892: (6, 14, 6, 3),
-    893: (12, 14, 6, 3),
-    907: (18, 14, 6, 3),
+    9400: (0, 3, 16, 3),
+    9401: (16, 3, 8, 3),
+    9418: (0, 6, 12, 7),
+    9416: (12, 6, 12, 7),
+    891: (0, 13, 6, 4),
+    892: (6, 13, 6, 4),
+    893: (12, 13, 6, 4),
+    907: (18, 13, 6, 4),
 }
 _CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 17
 _INCIDENT_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    2001: (0, 7, 24, 2),
-    2010: (0, 9, 24, 4),
+    2001: (0, 6, 24, 2),
+    2010: (0, 8, 24, 5),
     2005: (0, 13, 24, 4),
 }
 _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    9101: (0, 9, 8, 4),
-    9102: (8, 9, 16, 4),
-    9406: (0, 13, 24, 4),
+    9101: (0, 8, 8, 4),
+    9102: (8, 8, 16, 4),
+    9406: (0, 12, 24, 5),
 }
 _RECOVERY_ACTION_HTML = (
     '<div style="padding:0 6px;line-height:1.15;font-size:16px;white-space:normal;'
@@ -142,7 +141,6 @@ _RECOVERY_ACTION_HTML = (
     "<em>Review Retention Compliance</em> · then expand "
     "<em>Review Lineage Validation</em>.</div>"
 )
-NAV_TITLE_STYLE = "font-size:19px;font-weight:600;line-height:1;margin:0 2px"
 CHIP_BASE = (
     "box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;"
     "border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere"
@@ -150,7 +148,7 @@ CHIP_BASE = (
 # Theme-safe chips: slate link surface works on dark and light Grafana themes.
 LINK_STYLE = (
     f"{CHIP_BASE};color:#f8fafc;background:#334155;"
-    "border:1px solid #94a3b8;text-decoration:none"
+    "border:2px solid #94a3b8;text-decoration:none"
 )
 # Current chip: blue fill + cyan border + underline (not color-only).
 # Rendered as <a aria-disabled> so Grafana HTML sanitizer keeps styles
@@ -169,8 +167,8 @@ _PRESERVE_SCOPE_TOOLTIP = "Preserves selected scope and time range."
 
 NAV_DESCRIPTION = (
     "Sanitizer-compatible navigation bus with native keyboard focus. "
-    "Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / "
-    "Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. "
+    "Shared link-only bus 0–6: Run Explorer / Trust / Overview / "
+    "Pipeline Diagnostics / Provider Health / Data Quality / Incident Workspace. "
     "Current workspace is a non-interactive chip (aria-disabled + data-current=page, "
     "underlined) so active state is not color-only. Handoffs open same-tab, "
     "preserve current time range, and document scope reset or context mapping "
@@ -205,7 +203,7 @@ def nav_link_tooltip(*, source_uid: str, target: dict[str, str]) -> str:
         if source_uid in _PROVIDER_VARIABLE_UIDS:
             preserved.append("provider")
         else:
-            resets.append("provider=unknown")
+            resets.append("provider=All")
         preserved.append("pipeline context")
     if target_uid in _STAGE_TARGET_UIDS:
         resets.append("stage=All")
@@ -241,16 +239,12 @@ def _chip_html(item: dict[str, str], *, current_uid: str, source_uid: str) -> st
 
 def render_html(*, current_uid: str) -> str:
     """Render the full seven-destination bus as reflowing flex rows."""
-    primary = BUS[:5]
-    adjunct = BUS[5:]
     parts: list[str] = [
-        f'<div class="bioetl-panel-title" role="heading" aria-level="2" '
-        f'data-bioetl-panel-title="{NAV_DISPLAY_TITLE}" '
-        f'style="{NAV_TITLE_STYLE}">{NAV_DISPLAY_TITLE}</div>',
         f'<div class="bioetl-nav" role="navigation" '
-        f'aria-label="BioETL dashboards" style="{CONTAINER_STYLE}">',
+        f'aria-label="BioETL dashboards" '
+        f'style="{CONTAINER_STYLE}">',
     ]
-    for item in primary + adjunct:
+    for item in BUS:
         parts.append(_chip_html(item, current_uid=current_uid, source_uid=current_uid))
     parts.append("</div>")
     return "".join(parts)
@@ -311,7 +305,7 @@ def _remove_obsolete_provider_handoff_variable(payload: dict[str, object]) -> No
 
 
 _PROVIDER_HANDOFF_NEEDLE = "var-provider=$provider"
-_PROVIDER_HANDOFF_UNKNOWN = "var-provider=unknown"
+_PROVIDER_HANDOFF_UNKNOWN = "var-provider=All"
 
 
 def _rewrite_provider_handoff_text(text: str) -> str:
@@ -622,7 +616,7 @@ def _normalize_collapsed_row_children(panels: list[object]) -> None:
             continue
         _, row_y, _ = row_geometry
         offset = min(y for _, y, _ in child_geometries) - (row_y + 1)
-        if offset not in {-1, 1}:
+        if offset == 0:
             continue
         for child_grid, child_y, _ in child_geometries:
             child_grid["y"] = child_y - offset
@@ -687,7 +681,8 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
         panels, _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY, uid="bioetl-control-plane-v1"
     )
     by_id = {panel.get("id"): panel for panel in root}
-    _stamp_control_plane_recovery_cta(by_id[906])
+    if 906 in by_id:
+        _stamp_control_plane_recovery_cta(by_id[906])
 
 
 def _apply_first_window_geometry(
@@ -834,17 +829,13 @@ def apply_to_dashboard(path: Path, *, current_uid: str, check: bool = False) -> 
     if nav is None:
         raise SystemExit(f"{safe_path.name}: missing panel id=1000")
 
-    # Grafana 12 renders native panel headers at 14px and exposes no dashboard
-    # JSON option for overriding that typography. Keep the native title empty
-    # and render the operator-visible, accessible 19px title inside the
-    # sanitizer-safe Text panel. Tooling reads bioetlDisplayTitle as metadata.
+    # The link-only navigation has no visible heading on any dashboard.
+    # Keep its inventory name as metadata; the navigation has an accessible name.
     nav["title"] = ""
     nav["type"] = "text"
     nav["description"] = NAV_DESCRIPTION
     _expand_nav_height(nav, panels, new_height=NAV_HEIGHT)
-    # The inline 19px title plus wrapping 16px chips need four grid units so
-    # native 200% zoom (CSS viewport 683x384) does not clip the bus.
-    # Normalize all dashboards so content containment is an executable contract.
+    # Use identical geometry, including Run Explorer, so wrapped links fit.
     grid_pos = nav["gridPos"]
     if not isinstance(grid_pos, dict):
         raise SystemExit("navigation panel gridPos must be an object")

@@ -76,7 +76,7 @@ first_window_inspect_tables:
   - dashboard: bioetl-run-explorer-v1.json
     id: 3010
     owner: "@bioetl-observability"
-    rationale: DASH-FIT-003 browse index (last 10); identity/accounting stay collapsed.
+    rationale: DASH-FIT-003 browse index showing all ten launches with report links.
     retire_when: browse index moves behind a collapsed row
   - dashboard: bioetl-dq-v2.json
     id: 9102

@@ -49,13 +49,13 @@ MONITORING_COMPOSE = Path("docker-compose.monitoring.yml")
 COPY_ROLE_ENFORCED_DASHBOARDS = frozenset({"bioetl-control-plane-v1.json"})
 
 NUMBERED_DASHBOARDS = (
-    "0. Trust",
-    "1. Overview",
-    "2. Pipeline Diagnostics",
-    "3. Provider Health",
-    "4. Data Quality",
-    "5. Incident Workspace",
-    "6. Run Explorer",
+    "1. Trust",
+    "2. Overview",
+    "3. Pipeline Diagnostics",
+    "4. Provider Health",
+    "5. Data Quality",
+    "6. Incident Workspace",
+    "0. Run Explorer",
 )
 STATUS_SCOPE_TOKENS = (
     "INCOMPLETE",
@@ -208,7 +208,7 @@ def _long_panel_titles(dashboard: dict[str, Any]) -> list[str]:
 def test_design_system_documents_inline_copy_roles() -> None:
     text = DESIGN_SYSTEM.read_text(encoding="utf-8")
     assert "### 9.1 Inline copy roles in authored HTML" in text
-    assert "<b>0. Trust</b>" in text
+    assert "<b>1. Trust</b>" in text
     assert "<em>Review Selected-Run Trust</em>" in text
     assert "plain `INCOMPLETE`" in text
     assert '<code style="font-size:16px">trust_status</code>' in text

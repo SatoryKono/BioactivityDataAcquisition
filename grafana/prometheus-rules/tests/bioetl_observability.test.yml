@@ -844,6 +844,8 @@ tests:
         values: "0+0x20"
       - series: 'prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group="grafana/prometheus-rules/bioetl_observability.yml;bioetl_runtime_dashboard_recording"}'
         values: "0+60x20"
+      - series: 'bioetl_stage_lag_seconds{pipeline="chembl_assay",run_type="backfill",stage="output"}'
+        values: "0+0x20"
     promql_expr_test:
       - expr: bioetl_gold_terminal_records_15m{pipeline="chembl_assay",run_type="backfill"}
         eval_time: 19m
@@ -925,6 +927,12 @@ tests:
         values: "0+0x20"
       - series: 'prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group="grafana/prometheus-rules/bioetl_observability.yml;bioetl_runtime_dashboard_recording"}'
         values: "0+60x20"
+      - series: 'bioetl_pipeline_stage_expected{pipeline="chembl_assay",stage="bronze"}'
+        values: "1+0x20"
+      - series: 'bioetl_stage_lag_seconds{pipeline="chembl_assay",run_type="backfill",stage="ingestion"}'
+        values: "0+0x20"
+      - series: 'bioetl_stage_backlog_records{pipeline="chembl_assay",run_type="backfill",stage="ingestion"}'
+        values: "0+0x20"
     promql_expr_test:
       - expr: bioetl_runtime_trust_gap_status_10m
         eval_time: 19m

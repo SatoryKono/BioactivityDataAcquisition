@@ -21,7 +21,7 @@ exact_duplicates:
         as a deliberate cross-dashboard first-action status hop; keep identical
         semantics so operator drilldown does not diverge by board.
       panel_refs:
-        - "bioetl-overview-v2.json :: Monitor Fleet Health"
+        - "bioetl-overview-v2.json :: Monitor Scope Health"
         - "bioetl-incident-v1.json :: Monitor Selected-Scope Status"
 near_duplicates:
   max_count: 5

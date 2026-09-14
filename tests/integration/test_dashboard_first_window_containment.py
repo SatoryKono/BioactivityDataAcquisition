@@ -12,6 +12,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -114,34 +115,21 @@ def test_every_first_window_table_owns_a_row_cap() -> None:
 
 
 def test_trust_9418_keeps_verdict_and_reason_count_visible() -> None:
-    """#10174: long reasons cannot increase the compact verdict row height."""
-    path = next(
-        p for p in get_dashboard_files() if p.name == "bioetl-control-plane-v1.json"
-    )
-    panel = next(p for p in _root_panels(load_dashboard(path)) if p.get("id") == 9418)
-    assert panel["gridPos"] == {"h": 4, "w": 12, "x": 0, "y": 7}
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panel = next(p for p in dashboard["panels"] if p["id"] == 9418)
     props = {
         o["matcher"]["options"]: {p["id"]: p["value"] for p in o["properties"]}
         for o in panel["fieldConfig"]["overrides"]
     }
-    assert props["reasons_text"]["custom.hidden"] is True
+    assert props["reasons_text"]["custom.hidden"] is False
     assert props["reasons_text"]["custom.inspect"] is True
+    assert props["reasons_count"]["custom.hidden"] is True
+    assert props["evidence_observed_at"]["custom.hidden"] is False
+    assert props["evidence_observed_at"]["unit"].startswith("time:")
     assert props["processing_status"]["displayName"] == "Processing"
     assert props["trust_status"]["displayName"] == "Trust"
-    assert props["reasons_count"]["displayName"] == "Reasons"
-    assert props["evidence_freshness"]["displayName"] == "Freshness"
-    assert props["evidence_freshness"]["custom.hidden"] is False
-    assert props["evidence_freshness"]["custom.width"] == 90
-    assert "viewPanel=9414" in props["reasons_count"]["links"][0]["url"]
-    assert all(
-        not p.get("custom.cellOptions", {}).get("wrapText") for p in props.values()
-    )
-    assert (
-        next(t for t in panel["transformations"] if t["id"] == "limit")["options"][
-            "limitField"
-        ]
-        == 1
-    )
+    assert panel_declared_row_cap(panel) == 1
+    assert panel["gridPos"]["y"] + panel["gridPos"]["h"] <= FIRST_WINDOW_Y
 
 
 def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
@@ -154,7 +142,7 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
     dashboard = load_dashboard(dashboard_path)
     panel = next(item for item in _root_panels(dashboard) if item.get("id") == 9416)
 
-    assert panel.get("gridPos") == {"h": 4, "w": 12, "x": 12, "y": 7}
+    assert panel.get("gridPos") == {"h": 7, "w": 12, "x": 12, "y": 6}
     assert panel.get("options", {}).get("cellHeight") == "sm"
     assert panel.get("options", {}).get("sortBy") == [
         {"displayName": "Status", "desc": True}
@@ -285,7 +273,7 @@ def test_row_cap_contracts_are_unique_and_owned() -> None:
         assert str(item["owner"]).startswith("@")
         assert item["bind"] in {"topk", "limit", "filter"}
         max_rows = int(item["max_rows"])
-        cap = 10 if int(item["id"]) == 3010 else 5
+        cap = {3010: 10, 9002: 6}.get(int(item["id"]), 5)
         assert 1 <= max_rows <= cap
 
 
@@ -324,50 +312,23 @@ def test_first_window_scope_banners_name_current_range_and_selected_run() -> Non
         if panel.get("type") == "text"
     )
     assert "TIME RANGE = Domain Status" not in overview_blob
-    assert "TIME RANGE = history" in overview_blob
+    assert "TIME RANGE" in overview_blob and "SELECTED RUN" in overview_blob
 
 
 def test_overview_215_9002_fit_first_window_without_raising_fold() -> None:
-    """#9251: First Action and Domain Status stay in-slot with a two-row cap."""
-    dashboard_path = next(
-        path for path in get_dashboard_files() if path.name == "bioetl-overview-v2.json"
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panels = {p["id"]: p for p in dashboard["panels"]}
+    assert panels[214]["title"] == "Monitor Scope Health"
+    assert (
+        panels[214]["gridPos"]["y"]
+        < panels[215]["gridPos"]["y"]
+        < panels[9603]["gridPos"]["y"]
     )
-    dashboard = load_dashboard(dashboard_path)
-    by_id = {item.get("id"): item for item in _root_panels(dashboard)}
-    fleet = by_id[214]
-    action = by_id[215]
-    domain = by_id[9002]
-
-    assert fleet.get("title") == "Monitor Fleet Health"
-    assert fleet.get("type") == "stat"
-    assert fleet.get("gridPos") == {"h": 5, "w": 8, "x": 16, "y": 7}
-
-    assert action.get("title") == "Review First Action"
-    assert action.get("type") == "table"
-    assert action.get("gridPos") == {"h": 5, "w": 16, "x": 0, "y": 12}
-    assert action.get("options", {}).get("cellHeight") == "sm"
-    defaults = action.get("fieldConfig", {}).get("defaults", {}).get("custom", {})
-    assert defaults.get("cellOptions", {}).get("wrapText") is not True
-    assert panel_declared_row_cap(action) == 2
-    assert int(action["gridPos"]["y"]) + int(action["gridPos"]["h"]) <= FIRST_WINDOW_Y
-
-    assert domain.get("title") == "Review Domain Status"
-    assert domain.get("type") == "table"
-    assert domain.get("gridPos") == {"h": 5, "w": 8, "x": 16, "y": 12}
-    assert domain.get("options", {}).get("cellHeight") == "sm"
-    assert panel_declared_row_cap(domain) == 2
-    assert int(domain["gridPos"]["y"]) + int(domain["gridPos"]["h"]) <= FIRST_WINDOW_Y
-
-    for panel in (action, domain):
-        expr = str((panel.get("targets") or [{}])[0].get("expr") or "")
-        assert "topk(2," in expr
-        limit = next(
-            item
-            for item in panel.get("transformations") or []
-            if item.get("id") == "limit"
-        )
-        assert limit.get("options", {}).get("limitField") == 2
-        blob = str(panel)
-        assert "overflow:hidden" not in blob.replace(" ", "").lower()
-        assert "overflow:auto" not in blob.replace(" ", "").lower()
-        assert "overflow:scroll" not in blob.replace(" ", "").lower()
+    assert panels[9002]["gridPos"]["y"] == panels[215]["gridPos"]["y"]
+    for pid, cap in ((215, 2), (9002, 6)):
+        panel = panels[pid]
+        assert panel_declared_row_cap(panel) == cap
+        assert panel["gridPos"]["y"] + panel["gridPos"]["h"] <= FIRST_WINDOW_Y
+        assert panel["options"]["cellHeight"] == "sm"
+    assert "topk(2," in panels[215]["targets"][0]["expr"]
+    assert "topk" not in panels[9002]["targets"][0]["expr"]

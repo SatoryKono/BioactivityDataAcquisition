@@ -187,7 +187,13 @@ async def test_artifact_http_route(monkeypatch, fmt, body, status) -> None:
         query={"pipeline": "chembl_assay", "run_id": "run-1", "format": fmt},
     )
     if status == 404:
-        assert host._send_response.await_args.args[1] == 404
+        assert host._send_text_response.await_args.args[1] == 404
+        assert "Report not found" in host._send_text_response.await_args.args[2]
+        assert "Отчёт отсутствует" in host._send_text_response.await_args.args[2]
+        assert (
+            host._send_text_response.await_args.kwargs["content_type"]
+            == "text/plain; charset=utf-8"
+        )
     else:
         assert host._send_text_response.await_args.args == (None, 200, body)
         expected = "application/json" if fmt.endswith("json") else "text/plain"

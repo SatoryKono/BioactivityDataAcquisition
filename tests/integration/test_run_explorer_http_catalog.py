@@ -34,6 +34,26 @@ def _load_catalog() -> dict[str, object]:
     return payload
 
 
+def test_recent_report_link_preserves_row_url_through_transforms() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-run-explorer-v1.json"))
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 3010)
+    overrides = {
+        item["matcher"]["options"]: {
+            prop["id"]: prop["value"] for prop in item["properties"]
+        }
+        for item in panel["fieldConfig"]["overrides"]
+    }
+    link = overrides["Report"]["links"][0]
+    assert link["url"] == "${__data.fields.report_url:raw}"
+    assert link["targetBlank"] is True
+    assert overrides["report_url"]["custom.hidden"] is True
+    organize = next(
+        t["options"] for t in panel["transformations"] if t["id"] == "organize"
+    )
+    assert organize["excludeByName"]["report_url"] is False
+    assert organize["renameByName"]["report_label"] == "Report"
+
+
 def _http_targets(panel: dict[str, object]) -> list[dict[str, object]]:
     targets = panel.get("targets")
     if not isinstance(targets, list):
@@ -179,3 +199,15 @@ def test_run_explorer_duplicate_http_targets_share_endpoint_id() -> None:
     assert drifted == {}, (
         f"Duplicate Run Explorer URLs must share one endpoint_id: {drifted}"
     )
+
+
+def test_recent_timing_null_does_not_inherit_empty_catalog_message() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-run-explorer-v1.json"))
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 3010)
+    properties = {
+        o["matcher"]["options"]: {v["id"]: v["value"] for v in o["properties"]}
+        for o in panel["fieldConfig"]["overrides"]
+    }
+    for field in ("duration_seconds", "last_event_age_seconds"):
+        assert properties[field]["noValue"] == "UNKNOWN"
+    assert panel["fieldConfig"]["defaults"]["noValue"].startswith("VALID EMPTY")

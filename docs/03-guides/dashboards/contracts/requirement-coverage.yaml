@@ -68,7 +68,7 @@ dashboards:
       - TIME RANGE
       - VALID_EMPTY
   bioetl-run-explorer-v1:
-    question: Which exact run is selected, and what does its immutable evidence show?
+    question: Which pipelines ran most recently, and where are their reports?
     answer_panel_ids:
       - 3010
     next_action_tokens:
@@ -112,6 +112,6 @@ allowlists:
       id: 3010
       owner: "@bioetl-observability"
       rationale: >-
-        Browse/select is the action: choosing a row sets run_id. Identity and
-        processed-record CTAs live in collapsed Selected Run Details.
+        Browse/select is the action: choosing a row sets run_id; Report opens
+        the persisted file or an explicit report-not-found response.
       retire_when: 3010 grows a unique primary /d/ or runbook CTA

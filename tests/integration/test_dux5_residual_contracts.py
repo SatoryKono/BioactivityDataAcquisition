@@ -44,13 +44,13 @@ def test_nav_bus_complete_without_truncation() -> None:
         assert "DUX4-22: truncated" not in content
         assert "bioetl-nav" in content
         for chip in (
-            "0. Trust",
-            "1. Overview",
-            "2. Pipeline Diagnostics",
-            "3. Provider Health",
-            "4. Data Quality",
-            "5. Incident Workspace",
-            "6. Run Explorer",
+            "1. Trust",
+            "2. Overview",
+            "3. Pipeline Diagnostics",
+            "4. Provider Health",
+            "5. Data Quality",
+            "6. Incident Workspace",
+            "0. Run Explorer",
         ):
             assert chip in content, f"{path.name} missing chip {chip}"
         assert "aria-current" in content

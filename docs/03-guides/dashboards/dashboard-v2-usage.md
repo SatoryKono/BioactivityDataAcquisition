@@ -99,13 +99,13 @@ HTTP identity backend contract:
 
 | Dashboard                 | UID                             | Для чего                                                                                   |
 | ------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------ |
-| 0. Trust          | `bioetl-control-plane-v1`       | Replay/resume safety: manifest, ledger, checkpoint, telemetry confidence |
-| 1. Overview (Fleet)       | `bioetl-overview-v2`            | L0 answer-first Fleet: Status + Inputs evidence + First Action routes |
-| 2. Pipeline Diagnostics                | `bioetl-runtime`                | Blockers, latency, telemetry gap; workflow band merged in |
-| 3. Provider Health        | `bioetl-provider-health-v2`     | Population-first fleet severity + top causes |
-| 4. Data Quality           | `bioetl-dq-v2`                  | Now / Run / Range lanes; quarantine aggregates |
-| 5. Incident Workspace     | `bioetl-incident-v1`            | Domain-separated suspects + ALERTS timeline |
-| 6. Run Explorer           | `bioetl-run-explorer-v1`        | HTTP identity + processed records (`run_id` not Prom) |
+| 1. Trust          | `bioetl-control-plane-v1`       | Replay/resume safety: manifest, ledger, checkpoint, telemetry confidence |
+| 2. Overview (Fleet)       | `bioetl-overview-v2`            | L0 answer-first Fleet: Status + Inputs evidence + First Action routes |
+| 3. Pipeline Diagnostics                | `bioetl-runtime`                | Blockers, latency, telemetry gap; workflow band merged in |
+| 4. Provider Health        | `bioetl-provider-health-v2`     | Population-first fleet severity + top causes |
+| 5. Data Quality           | `bioetl-dq-v2`                  | Now / Run / Range lanes; quarantine aggregates |
+| 6. Incident Workspace     | `bioetl-incident-v1`            | Domain-separated suspects + ALERTS timeline |
+| 0. Run Explorer           | `bioetl-run-explorer-v1`        | HTTP identity + processed records (`run_id` not Prom) |
 | Record forensics (CLI)    | `bioetl quarantine inspect`     | Silver structural rejects; not a Grafana board |
 
 **Retired (not shipped):** `bioetl-workflow-overview` (→ Runtime workflow band),
@@ -117,13 +117,13 @@ mention `6. Alerts & SLO` / Explore Logs / Explore Traces as removed surfaces.
 
 | Target dashboard | 1-click entry source |
 | --- | --- |
-| `bioetl-control-plane-v1` | Navigation bus `0. Trust` on every other board |
-| `bioetl-overview-v2` | Navigation bus `1. Overview` |
-| `bioetl-runtime` | Navigation bus `2. Pipeline Diagnostics` |
-| `bioetl-provider-health-v2` | Navigation bus `3. Provider Health` |
-| `bioetl-dq-v2` | Navigation bus `4. Data Quality` |
-| `bioetl-incident-v1` | Navigation bus `5. Incident Workspace` (or alert entry hop) |
-| `bioetl-run-explorer-v1` | Navigation bus `6. Run Explorer` |
+| `bioetl-control-plane-v1` | Navigation bus `1. Trust` on every other board |
+| `bioetl-overview-v2` | Navigation bus `2. Overview` |
+| `bioetl-runtime` | Navigation bus `3. Pipeline Diagnostics` |
+| `bioetl-provider-health-v2` | Navigation bus `4. Provider Health` |
+| `bioetl-dq-v2` | Navigation bus `5. Data Quality` |
+| `bioetl-incident-v1` | Navigation bus `6. Incident Workspace` (or alert entry hop) |
+| `bioetl-run-explorer-v1` | Navigation bus `0. Run Explorer` |
 | CLI forensics | `bioetl quarantine inspect` / `bioetl run-manifest show` |
 
 ## Фильтрация
@@ -169,7 +169,7 @@ mention `6. Alerts & SLO` / Explore Logs / Explore Traces as removed surfaces.
   fallback `unknown`.
 - `$run_type` всегда имеет include-all fallback; если исходного run-type
   контекста нет, используйте `Run Type=All`, а не `unknown`.
-- Переходы в `3. Provider Health` из pipeline-scoped dashboards сохраняют
+- Переходы в `4. Provider Health` из pipeline-scoped dashboards сохраняют
   `$pipeline_context` для обратного перехода и fail-close'ятся к
   `$provider=unknown`, если source scope не доказывает валидный provider label
   для target dashboard.
@@ -381,9 +381,9 @@ Explorer health probe and monitoring setup docs for that reason.
 
 ## Incident first steps (Runtime top navigation)
 
-В `2. Pipeline Diagnostics` cross-dashboard routing выполняется через полный top-level bus:
-`0. Trust`, `1. Overview`, `2. Pipeline Diagnostics`, `3. Provider Health`,
-`4. Data Quality`, `5. Incident Workspace`, `6. Run Explorer`, затем
+В `3. Pipeline Diagnostics` cross-dashboard routing выполняется через полный top-level bus:
+`1. Trust`, `2. Overview`, `3. Pipeline Diagnostics`, `4. Provider Health`,
+`5. Data Quality`, `6. Incident Workspace`, `0. Run Explorer`, затем
 `0..6` bus only (adjuncts removed); текущий Runtime item
 остаётся видимым disabled.
 
@@ -453,7 +453,7 @@ Compact evidence ниже первого экрана:
   intentionally не показывает standalone green reject-rate gauge: rate
   интерпретируется только рядом с Bronze denominator / activity context.
 - `bioetl-overview-v2` и `bioetl-runtime` содержат явный handoff в
-  `4. Data Quality`, но runtime dashboard больше не тащит в себя DQ internals:
+  `5. Data Quality`, но runtime dashboard больше не тащит в себя DQ internals:
   он показывает только compact handoff conditions.
 - Для current-state narrowing используйте `Now · DQ Current Reasons`; для
   bounded cause summary используйте `Inspect: Top Silver Reject Reasons (Pareto)` и
@@ -462,11 +462,11 @@ Compact evidence ниже первого экрана:
   `Inspect: Silver Filter Rejects by Pipeline` остаётся scope/distribution panel
   по stage-total `filtered_out`, а не reason drilldown.
 - Маршрут triage: **L1 summary -> L2 explorer**.
-  1. **L1 summary:** начните с `4. Data Quality` (first-screen current status,
+  1. **L1 summary:** начните с `5. Data Quality` (first-screen current status,
      threshold state, reasons, invalid-record-policy note), чтобы определить
      severity и первое действие.
   1. **L1 cause narrowing:** раскройте collapsed-by-default rows `Silver Structural / Gold Contract-Semantic Rejects` и `Validation Failures / Runtime Diagnostics / Trends`. В reject row сначала проверьте trust guard `Monitor: Silver Filter Reject Accounting Mismatch`, затем `Inspect: Top Silver Reject Reasons (Pareto)` / `Inspect: Top Silver Reject Fields`, и только после этого переходите к pipeline distribution через `Inspect: Silver Filter Rejects by Pipeline`.
-  1. **L2 forensics (CLI):** record-level Silver structural list is **not** a Grafana board (Explorer removed 2026-07-23). Use `bioetl quarantine inspect` with `reason_code` / `field` / `quarantine_run_id` / `payload_hash` filters. For Gold contract/semantic rejects use Gold reject panels in `4. Data Quality`; `FILTERED_OUT_SILVER` is a legacy alias for Silver structural rejects only.
+  1. **L2 forensics (CLI):** record-level Silver structural list is **not** a Grafana board (Explorer removed 2026-07-23). Use `bioetl quarantine inspect` with `reason_code` / `field` / `quarantine_run_id` / `payload_hash` filters. For Gold contract/semantic rejects use Gold reject panels in `5. Data Quality`; `FILTERED_OUT_SILVER` is a legacy alias for Silver structural rejects only.
   1. **L2 no-data gate:** считайте `0` rejects нормой только когда `Review: First Action / No-Data Semantics` подтверждает конкретный pipeline, доступный BioETL Ops HTTP и ненулевой Bronze denominator; zero-reject workflow run is a valid empty explorer state only after those checks pass. Zero matching rows остаются empty-result состоянием, а plugin errors, unsupported filter chains, `unknown` pipeline или `bronze_records=0` остаются UNKNOWN/error.
   1. Используйте quarantine CLI для action-операций (`replay/resolve/purge`) и финального подтверждения remediation.
 - Эти панели отвечают на вопросы:
@@ -492,8 +492,8 @@ Primary dashboards MUST follow the canonical navigation contract in
 `contracts/navigation-links.yaml`.
 
 The top-level dashboard bus is:
-`0. Trust`, `1. Overview`, `2. Pipeline Diagnostics`, `3. Provider Health`,
-`4. Data Quality`, `5. Incident Workspace`, `6. Run Explorer`. Each page renders the full
+`1. Trust`, `2. Overview`, `3. Pipeline Diagnostics`, `4. Provider Health`,
+`5. Data Quality`, `6. Incident Workspace`, `0. Run Explorer`. Each page renders the full
 visual bus in navigation panel `id=1000`; the current dashboard stays visible
 as a disabled high-contrast item, while machine-readable `panel.links` still
 omit self-links.
@@ -551,19 +551,19 @@ Variable handoff policy for dashboard links remains strict and bounded:
 ## First 2 clicks scenario (operator)
 
 1. **Click #1:** открыть `bioetl-overview-v2`, прочитать `Status` + `First Action`.
-2. **Click #2:** открыть рекомендуемый dashboard из top-level bus (`0. Trust`, `2. Pipeline Diagnostics`, `3. Provider Health`, `4. Data Quality`, `5. Incident Workspace`, `6. Run Explorer`).
+2. **Click #2:** открыть рекомендуемый dashboard из top-level bus (`1. Trust`, `3. Pipeline Diagnostics`, `4. Provider Health`, `5. Data Quality`, `6. Incident Workspace`, `0. Run Explorer`).
 
 Цель сценария: root-cause направление должно быть определено максимум за 2 клика без обязательной прокрутки по нечастым CTA.
-- `bioetl-runtime`: top-level links `0. Trust`, `1. Overview`,
-  `3. Provider Health`, `4. Data Quality`, `5. Incident Workspace`, `6. Run Explorer`,
+- `bioetl-runtime`: top-level links `1. Trust`, `2. Overview`,
+  `4. Provider Health`, `5. Data Quality`, `6. Incident Workspace`, `0. Run Explorer`,
   `0..6` bus only (adjuncts removed) дают явный
   routing path из L2 runtime triage. Cross-dashboard handoffs передают только
   target-scoped variables; forensic IDs в runtime dashboard запрещены.
-- `bioetl-control-plane-v1`: `0. Trust` отвечает на один
+- `bioetl-control-plane-v1`: `1. Trust` отвечает на один
   primary question: can we trust manifest/ledger/checkpoint/lineage state and
   safely replay/resume? Cross-dashboard routing is handled only by the top-level
   bus; panel-level dashboard handoffs are intentionally absent.
-  Переход в `3. Provider Health` передаёт `provider=unknown` и
+  Переход в `4. Provider Health` передаёт `provider=unknown` и
   `pipeline_context=$pipeline`; `adapter` не передаётся, чтобы target dashboard
   использовал собственный fallback `All adapters`.
   First-screen current-status cards normalize a manually selected
@@ -573,7 +573,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
 
   **First 2 clicks (L1):**
   1. Click #1: открыть `bioetl-control-plane-v1`, проверить `Monitor Replay Safety` (`id=891`), `Monitor Telemetry` (`id=907`) и `Review First Recovery Action` (`id=906`).
-  2. Click #2: перейти через top-level bus в `2. Pipeline Diagnostics` (если есть активный blocker) или `4. Data Quality` (если blocker связан с downstream quality symptoms). На первом экране оставлены current-status Trust KPI: `id=891..893`, `id=907`, copyable identity anchors and единый CTA `id=906`; `Track Replay Blockers in Range` (`id=130`) живёт внутри первого collapsed replay/checkpoint row, а `Review Terminal Run Outcomes` (`id=908`) остаётся manifest/ledger range evidence.
+  2. Click #2: перейти через top-level bus в `3. Pipeline Diagnostics` (если есть активный blocker) или `5. Data Quality` (если blocker связан с downstream quality symptoms). На первом экране оставлены current-status Trust KPI: `id=891..893`, `id=907`, copyable identity anchors and replay-предупреждение в `id=9400`; `Track Replay Blockers in Range` (`id=130`) живёт внутри первого collapsed replay/checkpoint row, а `Review Terminal Run Outcomes` (`id=908`) остаётся manifest/ledger range evidence.
   Все остальные control-plane метрики перенесены в collapsed incident rows.
   Рекомендованный operator path: сначала проверить blocker cards, затем открыть
   ровно один collapsed diagnostic row под конкретный incident-pattern.
@@ -584,8 +584,8 @@ Variable handoff policy for dashboard links remains strict and bounded:
   `bioetl_control_plane_reads_total` и
   `bioetl_control_plane_read_duration_seconds_bucket` глобальны по
   `store/operation/status`.
-- `bioetl-provider-health-v2`: dashboard links `0. Trust`,
-  `1. Overview`, `2. Pipeline Diagnostics`, `4. Data Quality`, `5. Incident Workspace` дают быстрый
+- `bioetl-provider-health-v2`: dashboard links `1. Trust`,
+  `2. Overview`, `3. Pipeline Diagnostics`, `5. Data Quality`, `6. Incident Workspace` дают быстрый
   переход из provider health surface без дублирования Runtime variants.
   Panel `id=114` (`Review Raw Provider Health Enum`) показывает явный enum
   raw-source mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY` as below-fold
@@ -601,11 +601,11 @@ Variable handoff policy for dashboard links remains strict and bounded:
 
   **First 2 clicks (L1):**
   1. Click #1: открыть `bioetl-provider-health-v2`, проверить `Monitor GLOBAL Provider Severity Matrix` (`id=9101`), `Inspect Critical Providers` (`id=9102`), `Inspect Provider Top Causes` (`id=9103`) и `Monitor Provider Telemetry Freshness` (`id=9104`).
-  2. Click #2: перейти в `2. Pipeline Diagnostics` при active degradation/failure trend или
-     в `0. Trust` при симптомах retry exhaustion/state inconsistency.
-- `bioetl-dq-v2`: dashboard bus links `0. Trust`, `1. Overview`,
-  `2. Pipeline Diagnostics`, `3. Provider Health`, `5. Incident Workspace`,
-  `6. Run Explorer`. Record-level forensics are **CLI**
+  2. Click #2: перейти в `3. Pipeline Diagnostics` при active degradation/failure trend или
+     в `1. Trust` при симптомах retry exhaustion/state inconsistency.
+- `bioetl-dq-v2`: dashboard bus links `1. Trust`, `2. Overview`,
+  `3. Pipeline Diagnostics`, `4. Provider Health`, `6. Incident Workspace`,
+  `0. Run Explorer`. Record-level forensics are **CLI**
   (`bioetl quarantine inspect`), not Grafana Explore/SRE adjuncts
   (removed 2026-07-23). Keep handoff scope bounded to `$pipeline/$run_type`
   (no generic `includeVars` leakage into forensic CLI filters).
@@ -625,8 +625,8 @@ Variable handoff policy for dashboard links remains strict and bounded:
   honest empty-state semantics (no synthetic `no_events` / `none` buckets).
 - `Inspect: Quarantine by Error Type` ships as horizontal `bargauge`, not
   `piechart` (category comparison over slice composition).
-- `bioetl-workflow-overview`: dashboard links `0. Trust`,
-  `1. Overview`, `2. Pipeline Diagnostics`, `3. Provider Health`, `4. Data Quality`;
+- `bioetl-workflow-overview`: dashboard links `1. Trust`,
+  `2. Overview`, `3. Pipeline Diagnostics`, `4. Provider Health`, `5. Data Quality`;
   cross-dashboard handoffs preserve primary `$run_id` but do not leak
   `$status/$step_status/$step_kind` into non-workflow targets.
 - `bioetl-runtime`: workflow band (merged from bioetl-workflow-overview) keeps
@@ -648,8 +648,8 @@ Variable handoff policy for dashboard links remains strict and bounded:
   blank/loading and error + `No data` contradictions fail render evidence.
 
   **First 2 clicks (L1):**
-  1. Click #1: открыть `2. Pipeline Diagnostics` (bioetl-runtime), проверить workflow band panels `Track Failed Workflow Runs` и `Track Failed Workflow Steps`.
-  2. Click #2: перейти в `4. Data Quality` для transform/filtering fallout, или в `0. Trust` для replay/resume trust verification. Workflow Prometheus evidence uses bounded workflow labels and never requires `run_id`/`step_id` labels; shared `$pipeline/$run_type/$run_id` context feeds only context/identity surfaces unless a panel documents otherwise.
+  1. Click #1: открыть `3. Pipeline Diagnostics` (bioetl-runtime), проверить workflow band panels `Track Failed Workflow Runs` и `Track Failed Workflow Steps`.
+  2. Click #2: перейти в `5. Data Quality` для transform/filtering fallout, или в `1. Trust` для replay/resume trust verification. Workflow Prometheus evidence uses bounded workflow labels and never requires `run_id`/`step_id` labels; shared `$pipeline/$run_type/$run_id` context feeds only context/identity surfaces unless a panel documents otherwise.
 - Loki drilldown использует безопасный low-cardinality entrypoint `{job="bioetl"}` без dashboard-variable interpolation внутри encoded Explore payload. Это сознательный baseline: Grafana надёжно не подставляет `$pipeline/$provider` в `left=...`, поэтому дополнительное сужение оператор делает уже в самом Explore. Tempo drilldown открывает trace search в том же временном окне; детальная correlation идёт через `trace_id` / `span_id`, а не через Prometheus labels.
 - Tempo drilldown теперь тоже открывается contextual: pipeline-scoped
   dashboards предварительно фильтруют TraceQL по `span."bioetl.pipeline"`, а
@@ -800,18 +800,36 @@ Variable handoff policy for dashboard links remains strict and bounded:
 
 ## Частые проблемы
 
-В Selected-Run Trust столбцы Processing, Trust и Reasons показывают результат
-обработки, вердикт доверия и общее число причин. Ссылка в Reasons открывает
-полный список проверок. Identity evidence без Run ID показывает SELECT RUN;
-если выбранный манифест недоступен, отображается TELEMETRY MISSING.
+В Selected-Run Trust показаны Processing, Trust, текст причин и время
+наблюдения evidence. Все пять проверок retention видны рядом. INCOMPLETE
+и UNKNOWN запрещают делать вывод о безопасности replay; числовые карточки
+Replay Safety и Manifest/Ledger также сохраняют UNKNOWN при пробеле телеметрии.
 
-Run Explorer выводит Pipeline и Workflow из каждой записи отчёта. Отсутствующая
-связь с workflow обозначается явно; фильтр Workflow не заменяет эту связь.
-Status и даты в сводке берутся из отчёта того же Run ID. Таблицы деталей
-занимают полную ширину; полные значения доступны через Inspect. Stage Funnel,
-Top Run Reasons и Run Artifacts различают отсутствие выбора (SELECT RUN),
-недоступный отчёт (TELEMETRY MISSING), успешно загруженный пустой раздел
-(VALID EMPTY) и ошибку запроса (QUERY ERROR).
+Run Explorer показывает последние десять запусков с длительностью и ссылками
+Report. Find Run ID ищет точный UUID, включая более старые запуски, внутри
+выбранных Workflow/Pipeline/Run Type. Пустое поле возвращает обычный список.
+Event age — возраст последнего события ledger для running; время scrape и
+mtime файла не используются. Отсутствующее время остаётся UNKNOWN.
+
+Overview сначала показывает CURRENT health и First Action, затем SELECTED RUN.
+Все шесть доменов видны в матрице; VERIFY означает проверку отсутствующего
+источника evidence. UNKNOWN не превращается в подтверждённый инцидент.
+Set range to this run применяет период запуска к текущему дашборду.
+
+Provider Health открывает Provider=All и предлагает каталог наблюдаемых
+провайдеров. GLOBAL таблицы не зависят от выбранного Provider; выбранный
+провайдер влияет на его статус и детальную диагностику запросов.
+
+Data Quality показывает Input, Accepted, Silver Q, Excluded, Excl %, Gold Q,
+Gold и Report из одного сохранённого отчёта. Q означает quarantine. Excl % =
+100 × Gold contract exclusions / Silver accepted. При неизвестном или нулевом
+знаменателе процент неизвестен; контрактные исключения не считаются ошибками
+обработки. Для деталей используйте Report.
+
+Incident Workspace сортирует алерты до ограничения списка: critical/firing,
+critical/pending, warning/firing, warning/pending, остальные firing/pending.
+Severity и объект pipeline/provider сохраняются. Отсутствие телеметрии
+требует проверки источника и не подтверждает причину инцидента.
 
 Легенда Global Read Latency обозначает store / operation и квантиль p50, p95
 или p99. Каждая линия относится к указанной паре хранилища и операции;

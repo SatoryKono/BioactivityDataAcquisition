@@ -210,19 +210,19 @@ def test_runtime_alert_condition_panels_expose_dashboard_handoffs() -> None:
             "bioetl-runtime",
         ),
         "Inspect DQ Alert Conditions": (
-            "Open 4. Data Quality",
+            "Open 5. Data Quality",
             "bioetl-dq-v2",
         ),
         "Inspect Provider Alert Conditions": (
-            "Open 3. Provider Health",
+            "Open 4. Provider Health",
             "bioetl-provider-health-v2",
         ),
         "Inspect Global Provider Alert Conditions": (
-            "Open 3. Provider Health",
+            "Open 4. Provider Health",
             "bioetl-provider-health-v2",
         ),
         "Inspect Entities Stale Over 24h": (
-            "Open 4. Data Quality",
+            "Open 5. Data Quality",
             "bioetl-dq-v2",
         ),
         "Monitor No-Records Runs": (
@@ -436,14 +436,14 @@ def test_control_plane_provider_health_handoff_omits_adapter_fallback() -> None:
     control_titles = {
         str(item.get("title", "")) for item in get_dashboard_navigation_links(control)
     }
-    assert "3. Provider Health" in control_titles
+    assert "4. Provider Health" in control_titles
     provider_nav = next(
         item
         for item in get_dashboard_navigation_links(control)
-        if item.get("title") == "3. Provider Health"
+        if item.get("title") == "4. Provider Health"
     )
     provider_nav_url = str(provider_nav.get("url", ""))
-    assert "var-provider=unknown" in provider_nav_url
+    assert "var-provider=$__all" in provider_nav_url
     assert "var-pipeline_context=" in provider_nav_url
     assert "var-adapter=" not in provider_nav_url
 
@@ -467,7 +467,7 @@ def test_control_plane_provider_health_handoff_omits_adapter_fallback() -> None:
     )
     assert link is not None, "Overview First Action must hand off to Provider Health"
     url = str(link.get("url", ""))
-    assert "var-provider=unknown" in url
+    assert "var-provider=$__all" in url
     assert "var-pipeline_context=${pipeline:percentencode}" in url
     assert "var-adapter=" not in url
 
@@ -569,9 +569,9 @@ def test_runtime_contextual_handoffs_do_not_duplicate_top_level_dq_provider_link
     """Runtime panel CTAs to DQ/Provider must be contextual, not duplicate nav labels."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     forbidden_panel_titles_by_target = {
-        "bioetl-dq-v2": {"4. Data Quality", "Open Data Quality", "Open DQ"},
+        "bioetl-dq-v2": {"5. Data Quality", "Open Data Quality", "Open DQ"},
         "bioetl-provider-health-v2": {
-            "3. Provider Health",
+            "4. Provider Health",
             "Open Provider Health",
             "Check Provider Health",
         },
@@ -867,7 +867,10 @@ def test_run_type_variables_default_to_all_not_unknown() -> None:
             assert text != "unknown" and value != "unknown", (
                 f"{dashboard_path.name} run_type must not default to unknown"
             )
-            if dashboard_path.name == "bioetl-overview-v2.json":
+            if dashboard_path.name in {
+                "bioetl-overview-v2.json",
+                "bioetl-run-explorer-v1.json",
+            }:
                 assert text == "All", (
                     f"{dashboard_path.name} run_type current text must be All"
                 )
@@ -902,8 +905,12 @@ def test_pipeline_and_provider_variables_are_single_select_unknown_default() -> 
             current = variable.get("current", {})
             assert isinstance(current, dict)
             if (
-                dashboard_path.name == "bioetl-overview-v2.json"
+                dashboard_path.name
+                in {"bioetl-overview-v2.json", "bioetl-run-explorer-v1.json"}
                 and variable_name == "pipeline"
+            ) or (
+                dashboard_path.name == "bioetl-provider-health-v2.json"
+                and variable_name == "provider"
             ):
                 assert variable.get("includeAll") is True, (
                     f"{dashboard_path.name} 'pipeline' must default to All so "
@@ -936,7 +943,7 @@ def test_provider_health_handoff_fail_closes_and_remembers_return_context() -> N
     )
     url = str(link.get("url", ""))
     tooltip = str(link.get("tooltip", ""))
-    assert "var-provider=unknown" in url
+    assert "var-provider=$__all" in url
     assert "var-pipeline_context=${pipeline:percentencode}" in url
     assert "var-provider=All" not in url
     # Tooltip is optional on dataLinks; URL fail-closed vars are mandatory.

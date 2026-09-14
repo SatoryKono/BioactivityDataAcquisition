@@ -263,3 +263,7 @@ used.
 ### 43. Review Selected Run Summary
 
 Shipped in `bioetl-runtime.json`.
+
+### 99. Review Stage Progress
+
+CURRENT maximum backlog, lag and 5-minute throughput per stage across the selected Run Types. Select one Run Type for its exact values. Missing stage signals remain UNKNOWN.

@@ -111,7 +111,7 @@ def build_handoff_url(
         provider = (
             "$provider"
             if source_uid in {"bioetl-provider-health-v2", "bioetl-incident-v1"}
-            else "unknown"
+            else "$__all"
         )
         stage = "$__all"
         pipeline_context = pipe
@@ -400,7 +400,7 @@ def _separate_action_inspector(panel: dict) -> None:
         {
             "id": "extractFields",
             "options": {
-                "source": "action",
+                "source": "signal",
                 "format": "regexp",
                 "regExp": "/(?<action_detail>.*)/",
                 "replace": False,
@@ -430,11 +430,8 @@ def _separate_action_inspector(panel: dict) -> None:
                     "id": "mappings",
                     "value": [
                         {
-                            "type": "regex",
-                            "options": {
-                                "pattern": ".*",
-                                "result": {"text": "Inspect value"},
-                            },
+                            "type": "value",
+                            "options": {"telemetry_gap": {"text": "Check telemetry"}},
                         }
                     ],
                 },

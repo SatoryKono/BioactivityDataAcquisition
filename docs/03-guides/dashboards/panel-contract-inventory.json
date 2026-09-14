@@ -3021,7 +3021,7 @@
       "formula": "max(bioetl_l0_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
       "kind": "promql",
       "panel_id": 214,
-      "panel_title": "Monitor Fleet Health",
+      "panel_title": "Monitor Scope Health",
       "query": "max(bioetl_l0_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
       "query_tokens": [
         "bioetl_l0_status"

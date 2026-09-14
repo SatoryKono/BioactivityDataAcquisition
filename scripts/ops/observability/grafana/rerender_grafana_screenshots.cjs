@@ -1766,7 +1766,6 @@ function navigationValidationFromDom() {
       : [];
     const panelRect = panel?.getBoundingClientRect() || null;
     const navRect = nav?.getBoundingClientRect() || null;
-    const titleRect = title?.getBoundingClientRect() || null;
     const linkRects = links.map((link) => link.getBoundingClientRect());
     const tolerance = 1;
     const rectInside = (inner, outer) =>
@@ -1783,7 +1782,7 @@ function navigationValidationFromDom() {
       rectInside(rect, panelRect),
     );
     const contentInsidePanel =
-      rectInside(navRect, panelRect) && rectInside(titleRect, panelRect);
+      rectInside(navRect, panelRect);
     const focusTarget = nav?.querySelector('a.bioetl-nav-link[href*="/d/"]') || null;
     focusTarget?.focus();
     const focusStyle = focusTarget ? getComputedStyle(focusTarget) : null;
@@ -1814,6 +1813,7 @@ function navigationValidationFromDom() {
       panelFound: Boolean(panel),
       navigationFound: Boolean(nav),
       titleFound: Boolean(title),
+      linkNamesPresent: links.every(link => Boolean(link.textContent?.trim()) && Boolean(link.getAttribute('title'))),
       linkCount: links.length,
       contentInsidePanel,
       linksInsidePanel,
@@ -1833,7 +1833,8 @@ function navigationValidationFromDom() {
       status:
         evidence.panelFound &&
         evidence.navigationFound &&
-        evidence.titleFound &&
+        !evidence.titleFound &&
+        evidence.linkNamesPresent &&
         evidence.linkCount === 7 &&
         evidence.contentInsidePanel &&
         evidence.linksInsidePanel &&
@@ -1907,6 +1908,10 @@ function typographyValidationFromDom({
 
     const titleEvidence = (panel, container) => {
       const element = panelTitleElement(container);
+      // The shared navigation is deliberately link-only on every dashboard.
+      if (panel.id === 1000 && container.querySelector('.bioetl-nav') && !element) {
+        return { element: null, authored: true, minimumPx: null, fontPx: null, violation: null };
+      }
       const authored = Boolean(
         element?.matches("[data-bioetl-panel-title], .bioetl-panel-title"),
       );

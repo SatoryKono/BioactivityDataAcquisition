@@ -51,23 +51,22 @@ def test_range_action_keeps_its_frame_fields(path: Path) -> None:
             assert {"id": "custom.hidden", "value": True} in override["properties"]
 
 
-def test_artifact_both_columns_use_safe_http_route() -> None:
+def test_recent_report_column_uses_the_row_http_link() -> None:
     dashboard = json.loads(
         Path("grafana/dashboards/bioetl-run-explorer-v1.json").read_text(
             encoding="utf-8"
         )
     )
-    panel = next(p for p in panels(dashboard) if p["id"] == 3013)
-    for name in ("Artifact", "ref"):
-        override = next(
-            o
-            for o in panel["fieldConfig"]["overrides"]
-            if o["matcher"]["options"] == name
-        )
-        links = next(p["value"] for p in override["properties"] if p["id"] == "links")
-        assert len(links) == 1
-        assert "pipeline-run-report-artifact?" in links[0]["url"]
-        assert "format=${__data.fields.Artifact}" in links[0]["url"]
+    panel = next(p for p in panels(dashboard) if p["id"] == 3010)
+    override = next(
+        o
+        for o in panel["fieldConfig"]["overrides"]
+        if o["matcher"]["options"] == "Report"
+    )
+    links = next(p["value"] for p in override["properties"] if p["id"] == "links")
+    assert len(links) == 1
+    assert links[0]["url"] == "${__data.fields.report_url:raw}"
+    assert links[0]["targetBlank"] is True
 
 
 def test_concrete_context_values_are_not_grafana_globs() -> None:
@@ -101,6 +100,6 @@ def test_ranked_action_overrides_inspect_value_with_domain_link() -> None:
     assert {"id": "custom.hidden", "value": False} in details["properties"]
     assert {"id": "links", "value": []} in details["properties"]
     extractor = next(t for t in panel["transformations"] if t["id"] == "extractFields")
-    assert extractor["options"]["source"] == "action"
+    assert extractor["options"]["source"] == "signal"
     assert extractor["options"]["regExp"] == "/(?<action_detail>.*)/"
     assert extractor["options"]["replace"] is False

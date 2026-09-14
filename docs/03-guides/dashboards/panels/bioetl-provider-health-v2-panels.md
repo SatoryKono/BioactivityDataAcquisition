@@ -4,11 +4,15 @@
 
 ## Overview
 
-Dashboard `3. Provider Health` monitors provider current status, health-check latency/outcomes, adapter retry exhaustion, HTTP errors, rate limiting, and circuit breaker state. Shipped dashboard JSON is the source of truth.
+Dashboard `4. Provider Health` monitors provider current status, health-check latency/outcomes, adapter retry exhaustion, HTTP errors, rate limiting, and circuit breaker state. Shipped dashboard JSON is the source of truth.
 
 Failure-rate, degraded-check, network/timeout, and rate-limit diagnostics retain
 empty Prometheus results as `No data`/`UNKNOWN`; metric absence is never rendered
 as a synthetic green zero.
+
+Provider defaults to All and lists observed provider identities. GLOBAL fleet
+tables ignore the Provider selector; selected-provider status and request
+diagnostics use it. Navigation without provider context resets Provider=All.
 
 ## Key Panels
 

@@ -30,7 +30,7 @@ CATALOG_PATH = Path(
 )
 DEFAULT_OUT = Path("tests/fixtures/grafana/run_explorer")
 FIRST_SCREEN_IDS = (3010,)
-_VAR_RE = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)(?::csv)?\}")
+_VAR_RE = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)(?::(?:csv|percentencode))?\}")
 
 SELECTED = {
     "workflow": "chembl_baseline",
@@ -38,6 +38,7 @@ SELECTED = {
     "run_type": "backfill",
     "run_id": "00000000-0000-4000-8000-000000000942",
     "__timezone": "utc",
+    "lookup_run_id": "",
 }
 EMPTY_SELECTION = {
     **SELECTED,
@@ -105,8 +106,6 @@ def _snapshot(
 def build_matrix(catalog: dict[str, Any] | None = None) -> dict[str, Any]:
     catalog = catalog or load_catalog()
     browse = _panel_by_id(catalog, 3010)
-    identity = _panel_by_id(catalog, 3022)
-    records = _panel_by_id(catalog, 3023)
     scenarios = {
         "selected_recent_runs": _snapshot(
             scenario="selected_recent_runs",
@@ -114,23 +113,11 @@ def build_matrix(catalog: dict[str, Any] | None = None) -> dict[str, Any]:
             selectors=SELECTED,
             response_state="ok",
         ),
-        "selected_identity": _snapshot(
-            scenario="selected_identity",
-            panel=identity,
-            selectors=SELECTED,
-            response_state="ok",
-        ),
-        "selected_processed_records": _snapshot(
-            scenario="selected_processed_records",
-            panel=records,
-            selectors=SELECTED,
-            response_state="ok",
-        ),
         "empty_selection": _snapshot(
             scenario="empty_selection",
-            panel=identity,
+            panel=browse,
             selectors=EMPTY_SELECTION,
-            response_state="select_run",
+            response_state="ok",
         ),
         "valid_empty": _snapshot(
             scenario="valid_empty",
@@ -140,7 +127,7 @@ def build_matrix(catalog: dict[str, Any] | None = None) -> dict[str, Any]:
         ),
         "backend_error": _snapshot(
             scenario="backend_error",
-            panel=records,
+            panel=browse,
             selectors=SELECTED,
             response_state="query_error",
         ),

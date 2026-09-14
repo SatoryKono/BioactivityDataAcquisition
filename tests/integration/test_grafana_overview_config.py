@@ -71,10 +71,10 @@ def test_overview_dashboard_identity_and_primary_question() -> None:
     content = str(provenance.get("options", {}).get("content", ""))
     description = str(dashboard.get("description", ""))
 
-    assert dashboard.get("title") in {"1. Overview", "1. Overview (Fleet)"}
+    assert dashboard.get("title") in {"2. Overview", "2. Overview (Fleet)"}
     assert dashboard.get("uid") == "bioetl-overview-v2"
     assert "Hybrid L0 overview" in description
-    assert "what is broken or degraded right now" in content.lower()
+    assert "current" in content.lower() and "verify" in content.lower()
     assert "first action" in content.lower()
 
 
@@ -151,14 +151,14 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
     panels = _panels_by_title()
     # Stable panel IDs; y-bands sit under the shared nav (h=4), not nav-h=3.
     assert panels["Inspect Scope & Evidence"].get("id") == 99
-    assert panels["Monitor Fleet Health"].get("id") == 214
+    assert panels["Monitor Scope Health"].get("id") == 214
     assert panels["Review First Action"].get("id") == 215
     assert panels["Review Domain Status"].get("id") == 9002
-    assert panels["Inspect Scope & Evidence"].get("gridPos", {}).get("y") == 4
+    assert panels["Inspect Scope & Evidence"].get("gridPos", {}).get("y") == 3
     assert panels["Review Selected Run Summary"].get("id") == 9603
-    assert panels["Review Selected Run Summary"].get("gridPos", {}).get("y") == 7
-    assert panels["Monitor Fleet Health"].get("gridPos", {}).get("y") == 7
-    assert panels["Review First Action"].get("gridPos", {}).get("y") == 12
+    assert panels["Review Selected Run Summary"].get("gridPos", {}).get("y") == 11
+    assert panels["Monitor Scope Health"].get("gridPos", {}).get("y") == 3
+    assert panels["Review First Action"].get("gridPos", {}).get("y") == 6
     assert panels["Review Domain Status"].get("gridPos", {}).get("y") == panels[
         "Review First Action"
     ].get("gridPos", {}).get("y")
@@ -180,14 +180,14 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
 
 def test_status_and_next_action_preserve_current_status_semantics() -> None:
     panels = _panels_by_title()
-    status = panels["Monitor Fleet Health"]
+    status = panels["Monitor Scope Health"]
     next_action = panels["Review First Action"]
 
     assert status.get("type") == "stat"
     assert "bioetl_l0_status" in _panel_expr(status)
     assert "$__range" not in _panel_expr(status)
     assert status.get("options", {}).get("colorMode") == "background"
-    assert status.get("options", {}).get("textMode") == "value_and_name"
+    assert status.get("options", {}).get("textMode") == "value"
     assert status.get("fieldConfig", {}).get("defaults", {}).get("noValue") == "UNKNOWN"
     _assert_status_mapping(status)
 
@@ -223,10 +223,11 @@ def test_review_domain_status_is_deviation_first_and_capped() -> None:
     full_expr = _panel_expr(full_matrix)
 
     assert summary.get("id") == 9002
-    assert "topk(2" in summary_expr
+    assert "topk" not in summary_expr
+    assert "sort_desc" in summary_expr
     assert "bioetl_l0_input_status_selected" in summary_expr
     assert len(summary_expr) <= 200
-    assert "up to 2" in str(summary.get("description", "")).lower()
+    assert "six" in str(summary.get("description", "")).lower()
 
     assert full_matrix.get("id") == 9031
     assert "topk(" not in full_expr
@@ -236,7 +237,7 @@ def test_review_domain_status_is_deviation_first_and_capped() -> None:
         panels["Inspect Scope & Evidence"].get("options", {}).get("content", "")
     )
     assert "set a concrete" not in content
-    assert "What is broken or degraded right now?" in content
+    assert "VERIFY" in content
 
     # #10170: theme text keeps Priority and Action readable without colored fills.
     overrides = next_action.get("fieldConfig", {}).get("overrides", [])
@@ -270,6 +271,7 @@ def test_review_domain_status_is_deviation_first_and_capped() -> None:
         "0": "UNKNOWN",
         "5": "WATCH",
         "10": "REVIEW",
+        "15": "VERIFY",
         "20": "HIGH",
         "30": "HIGH",
         "35": "URGENT",
@@ -323,7 +325,7 @@ def test_review_domain_status_is_deviation_first_and_capped() -> None:
         and "${__data.fields.pipeline}" in str(link.get("url", ""))
         for link in links
     ), "Action links must pass the row pipeline into target dashboards"
-    assert any("var-provider=unknown" in str(link.get("url", "")) for link in links), (
+    assert any("var-provider=$__all" in str(link.get("url", "")) for link in links), (
         "Provider Action link must fail-close provider=unknown"
     )
 
@@ -402,7 +404,7 @@ def test_l1_cards_have_operator_mappings_and_targeted_links() -> None:
 def test_selected_scope_cards_normalize_workflow_pipeline_aliases() -> None:
     """Epic #6574: first-screen cards use thin pipeline selectors (no mega-expr glue)."""
     for title in (
-        "Monitor Fleet Health",
+        "Monitor Scope Health",
         "Review First Action",
         "Review Domain Status",
     ):
@@ -424,7 +426,7 @@ def test_provider_and_workflow_scope_are_explicit() -> None:
     assert "filters do not affect this panel" in provider_description
     provider_links = provider.get("options", {}).get("dataLinks", [])
     assert any(
-        "var-provider=unknown" in str(link.get("url", "")) for link in provider_links
+        "var-provider=$__all" in str(link.get("url", "")) for link in provider_links
     )
     assert any(
         "var-pipeline_context=${pipeline:percentencode}" in str(link.get("url", ""))
@@ -451,7 +453,7 @@ def test_provider_and_workflow_scope_are_explicit() -> None:
 def test_range_evidence_and_trend_rows_are_retained() -> None:
     panels = _panels_by_title()
     current_verdict_titles = {
-        "Monitor Fleet Health",
+        "Monitor Scope Health",
         "Review First Action",
         "Review Domain Status",
         *_L1_CARD_TITLES,

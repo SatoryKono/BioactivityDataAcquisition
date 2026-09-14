@@ -501,11 +501,6 @@ def _telemetry_evidence_errors(panel: JsonObject) -> list[str]:
             "1": {"text": "SCRAPING", "color": "text"},
             "0": {"text": "UNAVAILABLE", "color": "text"},
         },
-        "Baseline": {
-            "0": {"text": "PRESENT", "color": "text"},
-            "1": {"text": "RULE/SERIES GAP", "color": "text"},
-            "2": {"text": "RULE+SERIES GAP", "color": "red"},
-        },
     }
     for name, values in expected.items():
         if fields.get(name, {}).get("mappings") != [
@@ -514,6 +509,12 @@ def _telemetry_evidence_errors(panel: JsonObject) -> list[str]:
             errors.append(
                 f"Metrics Coverage {name} must use explicit evidence mappings"
             )
+    coverage = fields.get("Expected stage signals", {})
+    if coverage.get("unit") != "percentunit" or coverage.get("color") != {
+        "mode": "fixed",
+        "fixedColor": "text",
+    }:
+        errors.append("Metrics Coverage stage presence must be a neutral percentage")
     if fields.get("Rule age", {}).get("unit") != "s":
         errors.append("Metrics Coverage must show rule evaluation age in seconds")
     return errors

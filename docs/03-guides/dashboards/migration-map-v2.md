@@ -18,11 +18,11 @@ Epic #6800. UIDs stay stable for primary boards unless noted.
 
 | Current uid | Current title | Target workspace | Phase | Deprecation |
 | --- | --- | --- | --- | --- |
-| `bioetl-control-plane-v1` | 0. Trust | Control Plane Explorer | DUX-03 | none — uid stable |
-| `bioetl-overview-v2` | 1. Overview | Fleet Command Center | DUX-02 | title may gain Fleet alias; uid stable |
-| `bioetl-runtime` | 2. Pipeline Diagnostics | Pipeline Explorer | DUX-05 | none — uid stable |
-| `bioetl-provider-health-v2` | 3. Provider Health | Provider Explorer | DUX-04/09 | none — uid stable |
-| `bioetl-dq-v2` | 4. Data Quality | Data Trust Explorer | DUX-06 | none — uid stable |
+| `bioetl-control-plane-v1` | 1. Trust | Control Plane Explorer | DUX-03 | none — uid stable |
+| `bioetl-overview-v2` | 2. Overview | Fleet Command Center | DUX-02 | title may gain Fleet alias; uid stable |
+| `bioetl-runtime` | 3. Pipeline Diagnostics | Pipeline Explorer | DUX-05 | none — uid stable |
+| `bioetl-provider-health-v2` | 4. Provider Health | Provider Explorer | DUX-04/09 | none — uid stable |
+| `bioetl-dq-v2` | 5. Data Quality | Data Trust Explorer | DUX-06 | none — uid stable |
 | _(new)_ `bioetl-incident-v1` | Incident Workspace | Incident Workspace | DUX-08 | new |
 | _(new)_ `bioetl-run-explorer-v1` | Run Explorer | Run Explorer | DUX-10 | new; thins duplicated run-context rows |
 

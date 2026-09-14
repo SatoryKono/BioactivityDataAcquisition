@@ -109,9 +109,9 @@ def test_provider_health_variable_dependencies():
     )
     provider = variables["provider"]
     query = str(provider.get("definition") or "")
-    assert "query_result(" in query
-    assert "${pipeline}" in query and "${workflow}" in query
-    assert provider.get("current", {}).get("value") == "unknown"
+    assert query == "label_values(bioetl_provider_current_status, provider)"
+    assert "${pipeline}" not in query and "${workflow}" not in query
+    assert provider.get("current", {}).get("value") == "$__all"
 
     assert "pipeline_context" in variables, (
         "bioetl-provider-health-v2 must have $pipeline_context variable"
@@ -135,10 +135,7 @@ def test_incident_provider_derives_from_pipeline_or_workflow():
 
 def test_provider_derivation_queries_are_re2_compatible_and_in_sync():
     """Shared provider derivation must parse without Grafana selector errors."""
-    paths = (
-        "grafana/dashboards/bioetl-provider-health-v2.json",
-        "grafana/dashboards/bioetl-incident-v1.json",
-    )
+    paths = ("grafana/dashboards/bioetl-incident-v1.json",)
     definitions = [
         str(_templating_map(path)["provider"].get("definition") or "") for path in paths
     ]

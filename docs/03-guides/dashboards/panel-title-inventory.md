@@ -19,7 +19,6 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 9401 | Monitor Replay Readiness |
 | bioetl-control-plane-v1.json | 9418 | Review Selected-Run Trust |
 | bioetl-control-plane-v1.json | 9416 | Review Retention Compliance |
-| bioetl-control-plane-v1.json | 906 | Review Recovery Action |
 | bioetl-control-plane-v1.json | 891 | Monitor Replay Safety |
 | bioetl-control-plane-v1.json | 892 | Monitor Checkpoint Age |
 | bioetl-control-plane-v1.json | 893 | Monitor Manifest/Ledger |
@@ -134,7 +133,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-overview-v2.json | 1000 | Navigate Dashboards |
 | bioetl-overview-v2.json | 99 | Inspect Scope & Evidence |
 | bioetl-overview-v2.json | 9603 | Review Selected Run Summary |
-| bioetl-overview-v2.json | 214 | Monitor Fleet Health |
+| bioetl-overview-v2.json | 214 | Monitor Scope Health |
 | bioetl-overview-v2.json | 215 | Review First Action |
 | bioetl-overview-v2.json | 9002 | Review Domain Status |
 | bioetl-overview-v2.json | 9600 | Inspect Alerts |
@@ -199,20 +198,12 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-run-explorer-v1.json | 1000 | Navigate Dashboards |
 | bioetl-run-explorer-v1.json | 1 | Understand Run Scope |
 | bioetl-run-explorer-v1.json | 3010 | Inspect Recent Runs (last 10) |
-| bioetl-run-explorer-v1.json | 3099 | Selected Run Details |
-| bioetl-run-explorer-v1.json | 3022 | Inspect Run Identity |
-| bioetl-run-explorer-v1.json | 3023 | Inspect Processed Records |
-| bioetl-run-explorer-v1.json | 3011 | Inspect Stage Funnel |
-| bioetl-run-explorer-v1.json | 3012 | Inspect Top Run Reasons |
-| bioetl-run-explorer-v1.json | 3013 | Inspect Run Artifacts |
-| bioetl-run-explorer-v1.json | 3014 | Inspect Timings & Failure |
-| bioetl-run-explorer-v1.json | 3098 | Browse Workflow Runs |
-| bioetl-run-explorer-v1.json | 3020 | Inspect Recent Workflow Runs (last 20) |
 | bioetl-runtime.json | 1000 | Navigate Dashboards |
 | bioetl-runtime.json | 9400 | Understand Pipeline Scope |
 | bioetl-runtime.json | 9401 | Monitor Pipeline Status |
 | bioetl-runtime.json | 9101 | Review Runtime Blockers |
 | bioetl-runtime.json | 9102 | Monitor Metrics Coverage |
+| bioetl-runtime.json | 2460 | Review Stage Progress |
 | bioetl-runtime.json | 252 | Inspect Detection Signals |
 | bioetl-runtime.json | 238 | Track Stage Backlog Trend |
 | bioetl-runtime.json | 240 | Track Records by Stage / Interval |
