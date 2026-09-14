@@ -195,7 +195,7 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     # Includes bioetl_l0_next_action_no_route (#6574 First Action diet fallback)
     # and the 2026-08-25 promql-diet additions (fail-severity, first-window,
     # runtime alert counts, trust replay blockers).
-    assert len(report["recording_rule_outputs"]) == 132
+    assert len(report["recording_rule_outputs"]) == 133
     assert len(report["policy_alias_metrics"]) == 15
     assert report["recording_outputs_without_declaration"] == []
     assert report["recording_declarations_without_output"] == []
@@ -213,7 +213,7 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     assert report["direct_alert_inputs"]
 
     http_targets = report["http_targets"]
-    assert len(http_targets) == 35
+    assert len(http_targets) == 28
     assert any(
         target["dashboard_uid"] == "bioetl-control-plane-v1"
         and target["panel_id"] == 9418
@@ -224,8 +224,8 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
         str(target["url"]).startswith(("/ops/", "/health/")) for target in http_targets
     )
     assert report["typed_target_counts"] == {
-        "promql": 171,  # Trust read-latency uses one $read_latency_quantile target.
-        "http": 35,
+        "promql": 173,  # Trust read-latency uses one $read_latency_quantile target.
+        "http": 28,
         "loki": 0,
         "tempo": 0,
         "unknown": 0,

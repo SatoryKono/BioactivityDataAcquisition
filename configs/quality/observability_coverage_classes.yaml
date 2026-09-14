@@ -51,7 +51,9 @@ metric_coverage_classes:
   bioetl_health_check_latency_seconds_bucket: event_optional
   bioetl_health_check_success_total: event_optional
   bioetl_http_request_errors_total: event_optional
+  bioetl_incident_alert_priority: required_current
   bioetl_incident_ranked_dq: required_current
+  bioetl_incident_ranked_evidence: required_current
   bioetl_incident_ranked_provider: required_current
   bioetl_incident_ranked_runtime: required_current
   bioetl_l0_input_status_selected: required_when_active
@@ -82,6 +84,7 @@ metric_coverage_classes:
   bioetl_provider_health_check_provider_universe_15m: event_optional
   bioetl_provider_health_observed_timestamp_seconds: required_current
   bioetl_provider_health_status: required_current
+  bioetl_provider_health_status_fresh: required_current
   bioetl_provider_observed_universe: required_current
   bioetl_rate_limiter_tokens_available: required_current
   bioetl_rate_limiter_wait_seconds_bucket: event_optional
@@ -122,9 +125,17 @@ metric_coverage_classes:
   bioetl_runtime_current_blocker_reason_scoped: required_current
   bioetl_runtime_current_status_trusted: required_current
   bioetl_runtime_error_rate_30m: event_optional
+  bioetl_runtime_expected_signal_stage: required_current
+  bioetl_runtime_expected_stage_scope: required_current
+  bioetl_runtime_missing_stage_signal: required_current
   bioetl_runtime_pipeline_run_type_universe: required_current
   bioetl_runtime_pipeline_run_type_universe_scoped: required_current
   bioetl_runtime_required_rule_age_seconds: required_current
+  bioetl_runtime_stage_evidence_detail: required_current
+  bioetl_runtime_stage_evidence_present_ratio: required_current
+  bioetl_runtime_stage_evidence_status: required_current
+  bioetl_runtime_stage_progress: required_current
+  bioetl_runtime_stage_progress_by_scope: required_current
   bioetl_runtime_trust_gap_status_10m: required_current
   bioetl_shutdown_completed_total: event_optional
   bioetl_shutdown_initiated_total: event_optional

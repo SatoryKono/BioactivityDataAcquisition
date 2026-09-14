@@ -17,7 +17,9 @@ recording_rule_metrics:
   - bioetl_dq_first_window_reason
   - bioetl_dq_monitor_disabled_current
   - bioetl_gold_terminal_records_15m
+  - bioetl_incident_alert_priority
   - bioetl_incident_ranked_dq
+  - bioetl_incident_ranked_evidence
   - bioetl_incident_ranked_provider
   - bioetl_incident_ranked_runtime
   - bioetl_l0_input_status
@@ -69,6 +71,7 @@ recording_rule_metrics:
   - bioetl_provider_health_check_success_15m
   - bioetl_provider_health_check_total_12h
   - bioetl_provider_health_check_total_15m
+  - bioetl_provider_health_status_fresh
   - bioetl_provider_range_operational_ok
   - bioetl_replay_safety_blockers_15m
   - bioetl_runtime_alert_condition_checkpoint_incompatible_30m
@@ -108,10 +111,19 @@ recording_rule_metrics:
   - bioetl_runtime_current_status_scoped
   - bioetl_runtime_current_status_trusted
   - bioetl_runtime_error_rate_30m
+  - bioetl_runtime_expected_signal_stage
+  - bioetl_runtime_expected_stage_scope
+  - bioetl_runtime_missing_stage_signal
   - bioetl_runtime_pipeline_alert_count
   - bioetl_runtime_pipeline_run_type_universe
   - bioetl_runtime_pipeline_run_type_universe_scoped
   - bioetl_runtime_provider_alert_count
+  - bioetl_runtime_required_rule_age_seconds
+  - bioetl_runtime_stage_evidence_detail
+  - bioetl_runtime_stage_evidence_present_ratio
+  - bioetl_runtime_stage_evidence_status
+  - bioetl_runtime_stage_progress
+  - bioetl_runtime_stage_progress_by_scope
   - bioetl_runtime_trust_gap_active_10m
   - bioetl_runtime_trust_gap_status_10m
   - bioetl_silver_filter_reject_total_mismatch_15m
