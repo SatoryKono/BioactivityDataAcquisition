@@ -22,7 +22,9 @@ _RHAI_DOMAIN = re.compile(
     r"card_path:\s*\"(?P<card_path>[^\"]+)\"",
     re.DOTALL,
 )
-_STRING_LIST = re.compile(r"let (?P<name>all_prompts|all_prompt_ids) = \[(?P<body>.*?)\];", re.DOTALL)
+_STRING_LIST = re.compile(
+    r"let (?P<name>all_prompts|all_prompt_ids) = \[(?P<body>.*?)\];", re.DOTALL
+)
 
 
 def _parse_string_list(source: str, name: str) -> list[str]:
