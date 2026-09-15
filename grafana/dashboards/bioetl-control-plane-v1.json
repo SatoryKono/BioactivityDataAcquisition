@@ -8109,7 +8109,8 @@
                 "cellOptions": {
                   "type": "auto",
                   "wrapText": false
-                }
+                },
+                "inspect": true
               }
             },
             "overrides": [

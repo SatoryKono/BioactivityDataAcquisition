@@ -640,6 +640,35 @@ def _layout_control_plane_detail_panels(panels: list[object]) -> None:
         children.sort(key=lambda child: (child["gridPos"]["y"], child["gridPos"]["x"]))
 
 
+def _normalize_overview_domain_snapshots(panels: list[object]) -> None:
+    """Keep CURRENT detail verdicts aligned with the evidence-qualified summary."""
+    domains = {9003: "runtime", 9004: "dq", 9005: "gold", 9006: "control_plane", 9013: "workflow"}
+    for panel in _walk_panels(panels):
+        domain = domains.get(panel.get("id"))
+        if domain is None:
+            continue
+        panel["targets"] = [{
+            "expr": (
+                'max by (pipeline) (bioetl_l0_input_status_selected{'
+                f'input="{domain}",pipeline=~"$pipeline",run_type=~"$run_type"'
+                '}) or label_replace(vector(3), "pipeline", "$pipeline", "", "")'
+            ),
+            "refId": "A", "format": "table", "instant": True,
+        }]
+        panel["description"] = (
+            "CURRENT snapshot · Same evidence-qualified domain verdict as Review Domain Status "
+            "for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, 2=CRIT, "
+            "and null/3=UNKNOWN. Missing coverage cannot be replaced by an unqualified "
+            "L1 OK. Run ID does not filter CURRENT. Historical lifecycle tracks remain "
+            "separate; this is not selected-run trust."
+        )
+    for panel in _walk_panels(panels):
+        if panel.get("id") == 9031:
+            panel["description"] = str(panel.get("description", "")).replace(
+                "four-row Review Domain Status", "six-domain Review Domain Status"
+            )
+
+
 def _layout_overview_detail_panels(panels: list[object]) -> None:
     """Keep small status tables compact while retaining all rows in scroll views."""
     layouts = {
@@ -1235,6 +1264,7 @@ def apply_to_dashboard(
         stamp_latest_complete_run_panel(panels)
     if current_uid == "bioetl-overview-v2":
         _layout_overview_detail_panels(panels)
+        _normalize_overview_domain_snapshots(panels)
     if current_uid == "bioetl-runtime":
         _layout_runtime_detail_panels(panels)
     if current_uid == "bioetl-dq-v2":

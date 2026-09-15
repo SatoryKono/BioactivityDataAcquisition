@@ -2254,7 +2254,7 @@
               }
             }
           ],
-          "description": "CURRENT · TIME RANGE · Complete current Control Plane, Runtime, Provider, Data Quality, Data Validation, and Workflow matrix for the selected scope. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN means incomplete evidence, not OK. This is the full first-screen companion to the four-row Review Domain Status summary. TELEMETRY MISSING is not a zero and not VALID EMPTY."
+          "description": "CURRENT · TIME RANGE · Complete current Control Plane, Runtime, Provider, Data Quality, Data Validation, and Workflow matrix for the selected scope. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN means incomplete evidence, not OK. This is the full first-screen companion to the six-domain Review Domain Status summary. TELEMETRY MISSING is not a zero and not VALID EMPTY."
         },
         {
           "id": 9018,
@@ -3135,7 +3135,7 @@
           },
           "targets": [
             {
-              "expr": "max by (pipeline) (bioetl_l1_control_plane_current_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_control_plane_current_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
+              "expr": "max by (pipeline) (bioetl_l0_input_status_selected{input=\"control_plane\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
               "refId": "A",
               "format": "table",
               "instant": true
@@ -3180,7 +3180,7 @@
               }
             }
           ],
-          "description": "CURRENT · TIME RANGE · Shows current Control Plane status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN is incomplete evidence. Open Trust for the failing manifest, ledger, checkpoint, or lineage contract. TELEMETRY MISSING is not a zero and not VALID EMPTY."
+          "description": "CURRENT snapshot · Same evidence-qualified domain verdict as Review Domain Status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, 2=CRIT, and null/3=UNKNOWN. Missing coverage cannot be replaced by an unqualified L1 OK. Run ID does not filter CURRENT. Historical lifecycle tracks remain separate; this is not selected-run trust."
         },
         {
           "id": 9003,
@@ -3318,7 +3318,7 @@
           },
           "targets": [
             {
-              "expr": "max by (pipeline) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_runtime_blocker_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
+              "expr": "max by (pipeline) (bioetl_l0_input_status_selected{input=\"runtime\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
               "refId": "A",
               "format": "table",
               "instant": true
@@ -3363,7 +3363,7 @@
               }
             }
           ],
-          "description": "TIME RANGE · CURRENT · SELECTED RUN · Shows current Runtime status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN is incomplete evidence. Open Pipeline Diagnostics for blocker detail. TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: snapshot table of current L1 runtime; history is Track Runtime Blockers (9018)."
+          "description": "CURRENT snapshot · Same evidence-qualified domain verdict as Review Domain Status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, 2=CRIT, and null/3=UNKNOWN. Missing coverage cannot be replaced by an unqualified L1 OK. Run ID does not filter CURRENT. Historical lifecycle tracks remain separate; this is not selected-run trust."
         },
         {
           "id": 9004,
@@ -3501,7 +3501,7 @@
           },
           "targets": [
             {
-              "expr": "max by (pipeline) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_dq_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
+              "expr": "max by (pipeline) (bioetl_l0_input_status_selected{input=\"dq\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
               "refId": "A",
               "format": "table",
               "instant": true
@@ -3546,7 +3546,7 @@
               }
             }
           ],
-          "description": "CURRENT · TIME RANGE · Shows current Data Quality status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN is incomplete evidence. Open Data Quality for rule and accounting detail. TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: snapshot table of current L1 data-quality; history is Track Data Quality Status (9019)."
+          "description": "CURRENT snapshot · Same evidence-qualified domain verdict as Review Domain Status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, 2=CRIT, and null/3=UNKNOWN. Missing coverage cannot be replaced by an unqualified L1 OK. Run ID does not filter CURRENT. Historical lifecycle tracks remain separate; this is not selected-run trust."
         },
         {
           "id": 9007,
@@ -3867,7 +3867,7 @@
           },
           "targets": [
             {
-              "expr": "max by (pipeline) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_gold_lifecycle_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
+              "expr": "max by (pipeline) (bioetl_l0_input_status_selected{input=\"gold\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
               "refId": "A",
               "format": "table",
               "instant": true
@@ -3912,7 +3912,7 @@
               }
             }
           ],
-          "description": "CURRENT · TIME RANGE · Shows current Data Validation lifecycle status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN is incomplete evidence. Open Pipeline Diagnostics for lifecycle detail. TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: snapshot table of current L1 gold lifecycle; history is Track Gold Lifecycle (9020)."
+          "description": "CURRENT snapshot · Same evidence-qualified domain verdict as Review Domain Status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, 2=CRIT, and null/3=UNKNOWN. Missing coverage cannot be replaced by an unqualified L1 OK. Run ID does not filter CURRENT. Historical lifecycle tracks remain separate; this is not selected-run trust."
         },
         {
           "id": 9013,
@@ -4066,7 +4066,7 @@
           },
           "targets": [
             {
-              "expr": "max by (pipeline) (bioetl_l1_workflow_global_status{pipeline=~\"$pipeline\",pipeline!=\"test_pipe\"} or ((bioetl_l1_workflow_global_status{pipeline!=\"test_pipe\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
+              "expr": "max by (pipeline) (bioetl_l0_input_status_selected{input=\"workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
               "refId": "A",
               "format": "table",
               "instant": true
@@ -4111,7 +4111,7 @@
               }
             }
           ],
-          "description": "CURRENT · TIME RANGE · Shows current Workflow status for the selected Workflow and Pipeline. Run Type and Run ID are navigation context only and do not affect this panel. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; use workflow evidence in Pipeline Diagnostics. TELEMETRY MISSING is not a zero and not VALID EMPTY."
+          "description": "CURRENT snapshot · Same evidence-qualified domain verdict as Review Domain Status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, 2=CRIT, and null/3=UNKNOWN. Missing coverage cannot be replaced by an unqualified L1 OK. Run ID does not filter CURRENT. Historical lifecycle tracks remain separate; this is not selected-run trust."
         },
         {
           "description": "Compact operator navigation after workflow and domain status review; links preserve only bounded selectors.",

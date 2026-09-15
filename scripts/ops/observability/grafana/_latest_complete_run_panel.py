@@ -34,7 +34,10 @@ def stamp_latest_complete_run_panel(panels: list[object]) -> None:
                 # Grafana's table auto-height reads the first string cell's
                 # .length without a null guard when default wrapText is true.
                 # Empty candidate identity must remain null, never a fake ID.
-                "custom": {"cellOptions": {"type": "auto", "wrapText": False}},
+                "custom": {
+                    "cellOptions": {"type": "auto", "wrapText": False},
+                    "inspect": True,
+                },
             },
             "overrides": [
                 {

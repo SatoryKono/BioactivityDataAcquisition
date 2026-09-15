@@ -353,6 +353,13 @@ evaluation; neither a successful scrape nor cached Bronze replay is sufficient.
 
 ### 6d. Forensic panel capacity and error rows
 
+Overview CURRENT detail tables for Runtime, Data Quality, Control Plane, Data
+Validation, and Workflow use the same evidence-qualified domain verdict as the
+six-domain summary, with the selected Pipeline and Run Type. Run ID selects
+persisted evidence separately. An unqualified L1 lifecycle zero cannot override
+missing coverage in these CURRENT tables. Historical lifecycle tracks and the
+explicitly global Provider table retain their distinct scopes.
+
 Expensive forensic endpoints admit at most four simultaneous operations. Opening
 several detail groups or refreshing multiple dashboards can exhaust that capacity.
 `capacity_exhausted` is an unavailable response; retry the affected panel after
