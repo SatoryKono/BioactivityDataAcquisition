@@ -733,7 +733,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 110
+                "value": 80
               }
             ]
           },
@@ -745,7 +745,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 125
+                "value": 90
               }
             ]
           },
@@ -757,7 +757,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 180
+                "value": 130
               }
             ]
           },
@@ -3119,7 +3119,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected range: last observed terminal counter by status, summed across matching series. Pipeline applies; Run ID and Run Type do not. This is a counter snapshot, not an exact-run verdict or a count of events within the range. A first sample of 1 followed by 1 has observed value 1 but measured increase 0.",
+          "description": "TIME RANGE · Selected range: last observed terminal counter by status, summed across matching series. Pipeline applies; Run ID and Run Type do not. This is a counter snapshot, not an exact-run verdict or a count of events within the range. A first sample of 1 followed by 1 has observed value 1 but measured increase 0. No matching series is a valid empty state (UNKNOWN), not a zero. TELEMETRY MISSING is not a zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3568,7 +3568,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Sampled counter increase per interval, by run type and status. Pipeline and Run Type apply; Run ID does not. Zero means no increase between available samples, not no manifest writes. An event already included in the first sample cannot be counted by increase(). Inspect persisted run evidence for exact-run outcomes. Missing telemetry is not zero.",
+          "description": "TIME RANGE · Sampled counter increase per interval, by run type and status. Pipeline and Run Type apply; Run ID does not. Zero means no increase between available samples, not no manifest writes. An event already included in the first sample cannot be counted by increase(). Inspect persisted run evidence for exact-run outcomes. Empty chart is UNKNOWN telemetry, not a healthy zero. TELEMETRY MISSING is not a zero.",
           "fieldConfig": {
             "defaults": {
               "color": {

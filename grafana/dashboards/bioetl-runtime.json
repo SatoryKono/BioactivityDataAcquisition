@@ -1929,7 +1929,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Duration quantiles require observed histogram increments within the rate interval. No plotted samples means no computable quantile, not zero duration or a failed run. NaN quantiles are omitted; isolated valid observations are shown as points.",
+          "description": "TIME RANGE · Duration quantiles require observed histogram increments within the rate interval. Empty chart is UNKNOWN, not zero duration or a failed run. NaN quantiles are omitted; isolated valid observations are shown as points.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2013,7 +2013,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Duration quantiles require observed histogram increments within the rate interval. No plotted samples means no computable quantile, not zero duration or a failed run. NaN quantiles are omitted; isolated valid observations are shown as points.",
+          "description": "TIME RANGE · Duration quantiles require observed histogram increments within the rate interval. Empty chart is UNKNOWN, not zero duration or a failed run. NaN quantiles are omitted; isolated valid observations are shown as points.",
           "fieldConfig": {
             "defaults": {
               "color": {

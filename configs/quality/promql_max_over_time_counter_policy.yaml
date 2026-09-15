@@ -1,10 +1,5 @@
 schema_version: 1
 reviewed_on: '2026-08-18'
-
-# reviewed_expression_count MUST equal len(reviewed_expressions).
-# Do not raise the count to make CI green; add a reviewed ID
-# for each new max_over_time(Counter) expression.
-# These are the only Counter families allowed inside max_over_time().
 reviewed_expression_count: 41
 reviewed_expressions:
 - id: bioetl-dq-v2.json:panel=154:target=A
@@ -23,10 +18,10 @@ reviewed_expressions:
 - id: bioetl-dq-v2.json:panel=1:target=A
   metrics:
   - bioetl_records_processed_total
-- id: bioetl-dq-v2.json:panel=3:target=A
+- id: bioetl-dq-v2.json:panel=4:target=A
   metrics:
   - bioetl_records_processed_total
-- id: bioetl-dq-v2.json:panel=4:target=A
+- id: bioetl-dq-v2.json:panel=3:target=A
   metrics:
   - bioetl_records_processed_total
 - id: bioetl-dq-v2.json:panel=9:target=A
@@ -62,62 +57,62 @@ reviewed_expressions:
 - id: bioetl_runtime_dashboard_recording:bioetl_l1_gold_lifecycle_status:rule_index=62
   metrics:
   - bioetl_stage_records_total
-- id: bioetl_runtime_dashboard_recording:bioetl_dq_current_activity_15m:rule_index=114
+- id: bioetl_runtime_dashboard_recording:bioetl_dq_current_activity_15m:rule_index=116
   metrics:
   - bioetl_records_processed_total
-- id: bioetl_runtime_dashboard_recording:bioetl_dq_current_degraded_signals_15m:rule_index=117
+- id: bioetl_runtime_dashboard_recording:bioetl_dq_current_degraded_signals_15m:rule_index=119
   metrics:
   - bioetl_dq_records_quarantined_total
-  - bioetl_silver_filter_rejections_total
-- id: bioetl_runtime_dashboard_recording:bioetl_dq_current_reason:rule_index=123
-  metrics:
-  - bioetl_dq_records_quarantined_total
-- id: bioetl_runtime_dashboard_recording:bioetl_dq_current_reason:rule_index=124
-  metrics:
   - bioetl_silver_filter_rejections_total
 - id: bioetl_runtime_dashboard_recording:bioetl_dq_current_reason:rule_index=125
   metrics:
+  - bioetl_dq_records_quarantined_total
+- id: bioetl_runtime_dashboard_recording:bioetl_dq_current_reason:rule_index=126
+  metrics:
+  - bioetl_silver_filter_rejections_total
+- id: bioetl_runtime_dashboard_recording:bioetl_dq_current_reason:rule_index=127
+  metrics:
   - bioetl_stage_records_total
-- id: bioetl_runtime_dashboard_recording:bioetl_silver_filter_rejects_stage_total_15m:rule_index=145
+- id: bioetl_runtime_dashboard_recording:bioetl_silver_filter_rejects_stage_total_15m:rule_index=147
   metrics:
   - bioetl_records_processed_total
-- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_bronze_current:rule_index=148
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_bronze_current:rule_index=150
   metrics:
   - bioetl_stage_records_total
-- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_silver_valid_current:rule_index=149
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_silver_valid_current:rule_index=151
   metrics:
   - bioetl_stage_records_total
-- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_silver_quarantined_current:rule_index=150
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_silver_quarantined_current:rule_index=152
   metrics:
   - bioetl_stage_records_total
-- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_silver_skipped_current:rule_index=151
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_silver_skipped_current:rule_index=153
   metrics:
   - bioetl_stage_records_total
-- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_silver_filtered_out_current:rule_index=152
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_silver_filtered_out_current:rule_index=154
   metrics:
   - bioetl_stage_records_total
-- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_silver_deduplicated_current:rule_index=153
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_silver_deduplicated_current:rule_index=155
   metrics:
   - bioetl_stage_records_total
-- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_silver_accounted_current:rule_index=154
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_silver_accounted_current:rule_index=156
   metrics:
   - bioetl_stage_records_total
-- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_gold_written_current:rule_index=156
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_gold_written_current:rule_index=158
   metrics:
   - bioetl_stage_records_total
-- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_gold_quarantined_current:rule_index=157
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_gold_quarantined_current:rule_index=159
   metrics:
   - bioetl_stage_records_total
-- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_gold_skipped_current:rule_index=158
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_gold_skipped_current:rule_index=160
   metrics:
   - bioetl_stage_records_total
-- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_gold_excluded_by_contract_current:rule_index=159
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_gold_excluded_by_contract_current:rule_index=161
   metrics:
   - bioetl_stage_records_total
-- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_gold_deduplicated_current:rule_index=160
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_gold_deduplicated_current:rule_index=162
   metrics:
   - bioetl_stage_records_total
-- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_gold_accounted_current:rule_index=161
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_gold_accounted_current:rule_index=163
   metrics:
   - bioetl_stage_records_total
 - id: bioetl_pipeline_runtime_observability:BioETLNoRecordsProcessed:rule_index=3

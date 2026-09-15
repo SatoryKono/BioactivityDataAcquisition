@@ -84,6 +84,12 @@ internal imports and oversized files flat. `composition_factories_pipeline`
 `files_ge_250_loc` is 0/2 (budget unchanged). `application_core` live LOC is
 23444 with `files=194` (budget unchanged).
 
+Named-hub reductions (2026-09-15) do not create family headroom: W2 `#10448`
+left `run_manifest_support` at 2 intra-family importers while family max stays
+`inputs_runtime_helpers` 3/3; W3 `#10444` left
+`reproducibility_score_cards_category_scores` at 1 importer while family max
+stays `reproducibility_score_cards_categories` 2/2.
+
 ## Architecture scorecard semantics
 
 `reports/quality/architecture-quality-scorecard.json` is a diagnostic grade,

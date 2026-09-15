@@ -68,10 +68,10 @@ absence.
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
 | 901 | Inspect Manifest & Ledger Evidence | row | Static | Collapsed-by-default manifest/ledger incident section. | shared shell | Groups integrity panels; no direct metric. |
-| 908 | Review Terminal Run Outcomes | table | Prometheus | Terminal run-event totals by `terminal_status`. | shared shell | Forensic table; status breakdown is the key mapping. |
+| 908 | Review Observed Terminal Counters | table | Prometheus | Terminal run-event totals by `terminal_status`. | shared shell | Forensic table; status breakdown is the key mapping. |
 | 1 | Track Manifest Write Failures | stat | Prometheus | Failed manifest writes over the selected range. | shared shell | Count panel. |
 | 2 | Track Ledger Append Failures | stat | Prometheus | Failed ledger appends over the selected range. | shared shell | Count panel. |
-| 131 | Compare Manifest Writes by Status | timeseries | Prometheus | Manifest writes by `status` and `run_type` over time. | shared shell | Series legend maps status/run type. |
+| 131 | Track Observed Manifest Write Increments | timeseries | Prometheus | Manifest writes by `status` and `run_type` over time. | shared shell | Series legend maps status/run type. |
 | 7 | Compare Ledger Appends by Type & Status | timeseries | Prometheus | Ledger appends by `event_type` and `status`. | shared shell | Series legend maps event/status breakdown. |
 | 132 | Monitor Manifest Failures (30m) | stat | Prometheus | 30-minute manifest write failure ratio severity from `bioetl_control_plane_manifest_fail_severity_30m`. | shared shell | Threshold/value mapping encodes ratio severity. |
 | 133 | Monitor Ledger Failures (30m) | stat | Prometheus | 30-minute ledger append failure ratio severity from `bioetl_control_plane_ledger_fail_severity_30m`. | shared shell | Threshold/value mapping encodes ratio severity. |

@@ -706,7 +706,10 @@ def _layout_runtime_detail_panels(panels: list[object]) -> None:
                     expr = target.get("expr", "")
                     if expr and not expr.endswith(" >= 0"):
                         target["expr"] = f"({expr}) >= 0"
-                child["fieldConfig"]["defaults"]["custom"]["showPoints"] = "always"
+                field_config = child.setdefault("fieldConfig", {})
+                defaults = field_config.setdefault("defaults", {})
+                custom = defaults.setdefault("custom", {})
+                custom["showPoints"] = "always"
                 child["description"] = (
                     "TIME RANGE · Duration quantiles require observed histogram increments "
                     "within the rate interval. An empty chart is UNKNOWN, not zero duration "
@@ -790,10 +793,12 @@ def _clarify_manifest_counter_evidence(panels: list[object]) -> None:
             if ident == 908:
                 child["title"] = "Review Observed Terminal Counters"
                 child["description"] = (
-                    "Selected range: last observed terminal counter by status, summed across matching series. "
-                    "Pipeline applies; Run ID and Run Type do not. This is a counter snapshot, "
-                    "not an exact-run verdict or a count of events within the range. "
-                    "A first sample of 1 followed by 1 has observed value 1 but measured increase 0."
+                    "TIME RANGE · Selected range: last observed terminal counter by status, "
+                    "summed across matching series. Pipeline applies; Run ID and Run Type do "
+                    "not. This is a counter snapshot, not an exact-run verdict or a count of "
+                    "events within the range. A first sample of 1 followed by 1 has observed "
+                    "value 1 but measured increase 0. No matching series is a valid empty "
+                    "state (UNKNOWN), not a zero. TELEMETRY MISSING is not a zero."
                 )
                 child["targets"][0].update(
                     expr='sum by (terminal_status) (last_over_time(bioetl_control_plane_terminal_events_total{pipeline=~"$pipeline"}[$__range]))',
@@ -817,10 +822,12 @@ def _clarify_manifest_counter_evidence(panels: list[object]) -> None:
             if ident == 131:
                 child["title"] = "Track Observed Manifest Write Increments"
                 child["description"] = (
-                    "Sampled counter increase per interval, by run type and status. Pipeline and Run Type apply; "
-                    "Run ID does not. Zero means no increase between available samples, not no manifest writes. "
-                    "An event already included in the first sample cannot be counted by increase(). "
-                    "Inspect persisted run evidence for exact-run outcomes. Missing telemetry is not zero."
+                    "TIME RANGE · Sampled counter increase per interval, by run type and status. "
+                    "Pipeline and Run Type apply; Run ID does not. Zero means no increase "
+                    "between available samples, not no manifest writes. An event already "
+                    "included in the first sample cannot be counted by increase(). Inspect "
+                    "persisted run evidence for exact-run outcomes. Empty chart is UNKNOWN "
+                    "telemetry, not a healthy zero. TELEMETRY MISSING is not a zero."
                 )
                 defaults = child["fieldConfig"]["defaults"]
                 defaults.update(min=0, decimals=0)

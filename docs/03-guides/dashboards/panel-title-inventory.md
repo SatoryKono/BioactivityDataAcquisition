@@ -42,13 +42,13 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 106 | Track Global Checkpoint Admin Latency |
 | bioetl-control-plane-v1.json | 9413 | Review Checkpoint Validation |
 | bioetl-control-plane-v1.json | 901 | Inspect Manifest & Ledger Evidence |
-| bioetl-control-plane-v1.json | 908 | Review Terminal Run Outcomes |
+| bioetl-control-plane-v1.json | 908 | Review Observed Terminal Counters |
 | bioetl-control-plane-v1.json | 2 | Track Ledger Append Failures |
 | bioetl-control-plane-v1.json | 1 | Track Manifest Write Failures |
-| bioetl-control-plane-v1.json | 131 | Compare Manifest Writes by Status |
-| bioetl-control-plane-v1.json | 7 | Compare Ledger Appends by Type & Status |
 | bioetl-control-plane-v1.json | 132 | Monitor Manifest Failures (30m) |
 | bioetl-control-plane-v1.json | 133 | Monitor Ledger Failures (30m) |
+| bioetl-control-plane-v1.json | 131 | Track Observed Manifest Write Increments |
+| bioetl-control-plane-v1.json | 7 | Compare Ledger Appends by Type & Status |
 | bioetl-control-plane-v1.json | 9414 | Review Manifest Validation |
 | bioetl-control-plane-v1.json | 903 | Inspect Global Store Reliability |
 | bioetl-control-plane-v1.json | 4 | Track Global Read Failures |

@@ -650,7 +650,7 @@ dashboards:
         render_profiles:
         - full_dark
       '131':
-        title: Compare Manifest Writes by Status
+        title: Track Observed Manifest Write Increments
         role: trend
         tier: 3
         scope: time_range
@@ -1074,7 +1074,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '908':
-        title: Review Terminal Run Outcomes
+        title: Review Observed Terminal Counters
         role: evidence_table
         tier: 3
         scope: time_range

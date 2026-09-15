@@ -433,7 +433,7 @@ def test_control_plane_terminal_events_table_has_readable_width() -> None:
         for panel in get_dashboard_panels(dashboard)
         if panel.get("title")
     }
-    panel = panels.get("Review Terminal Run Outcomes")
+    panel = panels.get("Review Observed Terminal Counters")
     assert panel is not None
     grid_pos = panel.get("gridPos", {})
     assert grid_pos.get("w", 0) >= 12
@@ -450,9 +450,9 @@ def test_control_plane_manifest_evidence_top_band_uses_full_row_width() -> None:
     assert row.get("collapsed") is True
     child_panels = get_row_child_panels(dashboard, "Inspect Manifest & Ledger Evidence")
     panels = {panel.get("title"): panel for panel in child_panels if panel.get("title")}
-    terminal = panels["Review Terminal Run Outcomes"]
+    terminal = panels["Review Observed Terminal Counters"]
     terminal_grid = terminal.get("gridPos", {})
-    assert terminal_grid.get("h") == 6
+    assert terminal_grid.get("h") == 4
     assert terminal_grid.get("w") == 24
     assert terminal_grid.get("x") == 0
     assert terminal_grid.get("y", 0) > row.get("gridPos", {}).get("y", 0)
@@ -729,7 +729,7 @@ def test_control_plane_exposes_terminal_events_and_telemetry_gap() -> None:
 
     expected = {
         "Monitor Telemetry": ("bioetl_control_plane_telemetry_missing_5m",),
-        "Review Terminal Run Outcomes": ("bioetl_control_plane_terminal_events_total",),
+        "Review Observed Terminal Counters": ("bioetl_control_plane_terminal_events_total",),
     }
     for title, tokens in expected.items():
         panel = panels.get(title)
