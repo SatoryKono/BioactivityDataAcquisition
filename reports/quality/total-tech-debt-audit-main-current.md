@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `31a405d7a073c92321bb00d4bafe547b25be2abc6b44eee6bd1cbf589009319b`
+Evidence surface SHA-256: `fb1679a2cd44b77567f53578bfb1d114a20ded63f93ddc4ee4aecb1dc40b6e6b`
 
 Evidence metadata refresh (2026-09-11): the canonical registry digest was
 recomputed after #10304 adopted the SHA-bound coverage-verify inventory for
@@ -32,15 +32,15 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "31a405d7a073c92321bb00d4bafe547b25be2abc6b44eee6bd1cbf589009319b",
+  "evidence_surface_sha256": "fb1679a2cd44b77567f53578bfb1d114a20ded63f93ddc4ee4aecb1dc40b6e6b",
   "metrics": {
     "architecture_integral_score": 9.14,
     "architecture_interpretation": "good_targeted_improvements",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 45,
-    "debt_gate_fail_count": 1,
-    "debt_gate_pass_count": 44,
+    "debt_gate_fail_count": 0,
+    "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
     "fully_covered_module_count": 1616,
