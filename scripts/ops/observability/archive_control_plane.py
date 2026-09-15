@@ -42,7 +42,12 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     print(
         json.dumps(
-            {"verified": verified, "reason": reason, "files": len(plan.artifacts)}
+            {
+                "verified": verified,
+                "reason": reason,
+                "artifact_refs": len(plan.artifacts),
+                "files": len({artifact.path for artifact in plan.artifacts}),
+            }
         )
     )
     return 0 if verified is True else 1

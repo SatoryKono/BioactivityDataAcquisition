@@ -1176,14 +1176,18 @@ def test_provider_current_status_preserves_provider_health_status_mapping() -> N
     record_map = _build_record_map(payload)
     expr = record_map["bioetl_provider_current_status"].get("expr", "")
 
-    assert "bioetl_provider_health_status == bool 0" in expr
+    assert "bioetl_provider_health_status_fresh == bool 0" in expr
     assert "* 2" in expr
-    assert "bioetl_provider_health_status == bool 1" in expr
-    assert "bioetl_provider_health_status == bool 2" in expr
+    assert "bioetl_provider_health_status_fresh == bool 1" in expr
+    assert "bioetl_provider_health_status_fresh == bool 2" in expr
     assert "* 0" in expr
     assert "max by (provider)" in expr
-    assert "bioetl_provider_health_check_provider_universe_15m * 0 + 3" in expr
-    assert "bioetl_provider_observed_universe * 0 + 3" in expr
+    assert (
+        "max by (provider) (bioetl_provider_health_check_provider_universe_15m) * 0 + 3"
+        in expr
+    )
+    assert "max by (provider) (bioetl_provider_observed_universe) * 0 + 3" in expr
+    assert "bioetl_provider_health_status == bool" not in expr
     assert "/" not in expr
     assert " or " in expr
     info_rules = [
@@ -1195,6 +1199,7 @@ def test_provider_current_status_preserves_provider_health_status_mapping() -> N
     assert info_rules
     reasons = {rule.get("labels", {}).get("reason") for rule in info_rules}
     assert "missing_health_status" in reasons
+    assert "stale_health_status" in reasons
     assert "observed_health_status" in reasons
     completeness = {rule.get("labels", {}).get("completeness") for rule in info_rules}
     assert completeness == {"incomplete", "complete"}
@@ -1210,9 +1215,12 @@ def test_provider_current_status_fails_closed_on_missing_raw_status_series() -> 
     expr = record_map["bioetl_provider_current_status"].get("expr", "")
 
     assert "bioetl_provider_health_check_provider_universe_15m" in expr
-    assert "bioetl_provider_health_check_provider_universe_15m * 0 + 3" in expr
-    assert "bioetl_provider_observed_universe * 0 + 3" in expr
-    assert "bioetl_provider_health_status" in expr
+    assert (
+        "max by (provider) (bioetl_provider_health_check_provider_universe_15m) * 0 + 3"
+        in expr
+    )
+    assert "max by (provider) (bioetl_provider_observed_universe) * 0 + 3" in expr
+    assert "max by (provider) (bioetl_provider_health_status) * 0 + 3" in expr
     assert "/" not in expr
 
 

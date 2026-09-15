@@ -28,6 +28,8 @@ from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
+DEFAULT_HEALTH_SERVER_PORT = 8000
+
 if TYPE_CHECKING:
     from pathlib import Path
 

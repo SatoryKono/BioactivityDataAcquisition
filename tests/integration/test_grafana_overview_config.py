@@ -386,6 +386,30 @@ def test_identity_panel_uses_run_id_without_leaking_to_prometheus_queries() -> N
     assert "${run_id}" not in prometheus_expressions
 
 
+@pytest.mark.parametrize(
+    ("title", "domain"),
+    [
+        ("Review Runtime Status", "runtime"),
+        ("Review Data Quality Status", "dq"),
+        ("Review Control Plane Status", "control_plane"),
+        ("Review Data Validation Status", "gold"),
+        ("Review Workflow Status", "workflow"),
+    ],
+)
+def test_current_domain_detail_uses_same_qualified_verdict_as_summary(
+    title: str, domain: str,
+) -> None:
+    panel = _panels_by_title()[title]
+    expr = _panel_expr(panel)
+    assert "bioetl_l0_input_status_selected" in expr
+    assert f'input="{domain}"' in expr
+    assert 'pipeline=~"$pipeline"' in expr
+    assert 'run_type=~"$run_type"' in expr
+    assert "bioetl_l1_" not in expr
+    assert "vector(3)" in expr
+    assert "evidence-qualified" in str(panel.get("description", ""))
+
+
 def test_l1_cards_have_operator_mappings_and_targeted_links() -> None:
     expected_links = {
         "Review Runtime Status": {"Open Runtime"},
@@ -438,15 +462,11 @@ def test_provider_and_workflow_scope_are_explicit() -> None:
         for link in provider_links
     )
 
-    assert "bioetl_l1_workflow_global_status" in _panel_expr(workflow)
-    assert 'pipeline!="test_pipe"' in _panel_expr(workflow)
+    assert "bioetl_l0_input_status_selected" in _panel_expr(workflow)
+    assert 'input="workflow"' in _panel_expr(workflow)
     assert 'pipeline=~"$pipeline"' in _panel_expr(workflow)
-    assert 'label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline"' in (
-        _panel_expr(workflow)
-    )
-    assert (
-        "selected workflow and pipeline" in str(workflow.get("description", "")).lower()
-    )
+    assert 'run_type=~"$run_type"' in _panel_expr(workflow)
+    assert "selected pipeline" in str(workflow.get("description", "")).lower()
     assert "run type" in str(workflow.get("description", "")).lower()
     assert "run id" in str(workflow.get("description", "")).lower()
     workflow_links = workflow.get("options", {}).get("dataLinks", [])
@@ -555,9 +575,7 @@ def test_overview_queries_are_backed_by_expected_records_and_metrics() -> None:
         "bioetl_l0_next_action_route",
         "bioetl_l0_input_status_selected",
         "bioetl_l1_gold_lifecycle_status",
-        "bioetl_l1_control_plane_current_status",
         "bioetl_pipeline_runs_total",
-        "bioetl_l1_workflow_global_status",
         "bioetl_records_processed_total",
     ):
         assert required_token in all_expressions

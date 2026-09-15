@@ -205,8 +205,8 @@ def test_dq_duplicate_validation_fact_is_removed_and_grid_is_compacted() -> None
         4: {"x": 0, "y": 27, "w": 6, "h": 4},
         101: {"x": 12, "y": 27, "w": 6, "h": 4},
         9: {"x": 18, "y": 27, "w": 6, "h": 4},
-        12: {"x": 0, "y": 31, "w": 6, "h": 4},
-        151: {"x": 6, "y": 31, "w": 6, "h": 4},
+        12: {"x": 0, "y": 31, "w": 12, "h": 4},
+        151: {"x": 12, "y": 31, "w": 12, "h": 4},
     }
     for panel_id, geometry in expected_geometry.items():
         assert panels[panel_id]["gridPos"] == geometry

@@ -42,6 +42,17 @@ from bioetl.composition import _workflow_services
 pytestmark = pytest.mark.unit
 
 
+def test_workflow_composition_passes_configured_report_root(monkeypatch, tmp_path):
+    settings = SimpleNamespace(data_dir=tmp_path / "data", report_root=tmp_path / "reports")
+    monkeypatch.setattr(_workflow_services, "get_settings", lambda: settings)
+    monkeypatch.setattr(_workflow_services, "_create_workflow_metrics", lambda _: sentinel.metrics)
+    monkeypatch.setattr(_workflow_services, "build_workflow_transform_registry", lambda *_args: {})
+    service = _workflow_services.get_workflow_runner_service(
+        pipeline_runner_service_factory=lambda _: sentinel.pipeline_runner,
+    )
+    assert service.report_root == settings.report_root
+
+
 def test_get_workflow_execution_service_injects_real_manifest_clock(
     monkeypatch,
     tmp_path: Path,

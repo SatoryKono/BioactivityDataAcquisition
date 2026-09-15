@@ -7,7 +7,7 @@ import base64
 import json
 import math
 import os
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from time import monotonic, sleep
@@ -97,6 +97,7 @@ class AuditConfig:
     range_from: str = ""
     range_to: str = ""
     read_latency_quantile: float = 0.95
+    prometheus_step_seconds: float = 300.0
 
 
 @dataclass(frozen=True)
@@ -115,16 +116,21 @@ class AuditResult:
     # Full exact requests/responses are evidence; query_preview remains display-only.
     request_url: str | None = None
     response: object = None
+    query_requests: list[dict[str, Any]] | None = None
 
 
 SEMANTIC_CLASSIFICATION_POLICY: dict[str, str] = {
     "query_invalid": "block",
+    "endpoint_execution_error": "block",
     "timeout_budget_exceeded": "block_when_required",
     "datasource_unavailable": "block_when_required",
     "blocked_backend_unavailable": "block_when_required",
     "empty_result": "review_required",
     "zero_result": "pass",
     "nonzero_result": "pass",
+    "nonfinite_result": "review_required",
+    "annotated_result": "review_required",
+    "mixed_query_results": "review_required",
     "nonempty_result": "pass",
     "nonempty_table": "pass",
     "resolved_identity": "pass",
@@ -412,8 +418,21 @@ def _parse_args(argv: list[str] | None) -> AuditConfig:
     )
     parser.add_argument("--range-from", default="")
     parser.add_argument("--range-to", default="")
-    parser.add_argument("--read-latency-quantile", type=float, choices=(0.5, 0.95, 0.99), default=0.95)
+    parser.add_argument(
+        "--read-latency-quantile", type=float, choices=(0.5, 0.95, 0.99), default=0.95
+    )
+    parser.add_argument(
+        "--prometheus-step-seconds",
+        type=float,
+        default=300.0,
+        help="Explicit query_range sampling step; match Grafana Query options for render parity.",
+    )
     args = parser.parse_args(argv)
+    if (
+        not math.isfinite(args.prometheus_step_seconds)
+        or args.prometheus_step_seconds <= 0
+    ):
+        parser.error("--prometheus-step-seconds must be finite and positive")
     if bool(args.range_from) != bool(args.range_to) or (
         args.range_from
         and (
@@ -446,6 +465,7 @@ def _parse_args(argv: list[str] | None) -> AuditConfig:
         range_from=args.range_from,
         range_to=args.range_to,
         read_latency_quantile=args.read_latency_quantile,
+        prometheus_step_seconds=args.prometheus_step_seconds,
     )
 
 
@@ -604,9 +624,34 @@ def _classify_prometheus_vector(result: object) -> tuple[str, str]:
                 "invalid_shape",
                 "Prometheus vector sample value is not numeric",
             )
+    if any(not math.isfinite(value) for value in values):
+        return (
+            "nonfinite_result",
+            "Prometheus vector contains non-finite values; review observations and denominator",
+        )
     if all(abs(value) <= 1e-12 for value in values):
         return ("zero_result", "Prometheus vector returned only zero values")
     return ("nonzero_result", "Prometheus vector returned non-zero values")
+
+
+def _classify_prometheus_matrix(result: object) -> tuple[str, str]:
+    """Validate every historical sample, preserving missing and non-finite data."""
+    if not isinstance(result, list):
+        return "invalid_shape", "Prometheus matrix result must be a list"
+    samples = []
+    for series in result:
+        if (
+            not isinstance(series, dict)
+            or not isinstance(series.get("values"), list)
+            or series.get("histograms")
+        ):
+            return (
+                "invalid_shape",
+                "Prometheus matrix series requires float values; native histograms are unsupported",
+            )
+        samples.extend({"value": pair} for pair in series["values"])
+    classification, detail = _classify_prometheus_vector(samples)
+    return classification, detail.replace("vector", "matrix")
 
 
 def _classify_prometheus_scalar(result: object) -> tuple[str, str]:
@@ -616,6 +661,11 @@ def _classify_prometheus_scalar(result: object) -> tuple[str, str]:
         value = float(result[1])
     except (TypeError, ValueError):
         return ("invalid_shape", "Prometheus scalar value is not numeric")
+    if not math.isfinite(value):
+        return (
+            "nonfinite_result",
+            "Prometheus scalar is non-finite; review observations and denominator",
+        )
     if abs(value) <= 1e-12:
         return ("zero_result", "Prometheus scalar returned zero")
     return ("nonzero_result", "Prometheus scalar returned non-zero value")
@@ -1041,10 +1091,20 @@ def _classify_prometheus_payload(payload: object) -> tuple[str, str]:
     result = data.get("result")
     result_type = data.get("resultType")
     if result_type == "vector":
-        return _classify_prometheus_vector(result)
-    if result_type == "scalar":
-        return _classify_prometheus_scalar(result)
-    return ("invalid_shape", f"Unsupported Prometheus resultType={result_type!r}")
+        classification, detail = _classify_prometheus_vector(result)
+    elif result_type == "scalar":
+        classification, detail = _classify_prometheus_scalar(result)
+    elif result_type == "matrix":
+        classification, detail = _classify_prometheus_matrix(result)
+    else:
+        return ("invalid_shape", f"Unsupported Prometheus resultType={result_type!r}")
+    annotations = [name for name in ("infos", "warnings") if payload.get(name)]
+    if annotations and classification in {"zero_result", "nonzero_result"}:
+        return (
+            "annotated_result",
+            f"{detail}; Prometheus {'/'.join(annotations)} require review; see full response",
+        )
+    return classification, detail
 
 
 def _classify_http_payload(payload: object) -> tuple[str, str]:
@@ -1438,6 +1498,65 @@ def _select_target(
     return None
 
 
+def _prometheus_query_urls(
+    target: dict[str, Any],
+    expr: str,
+    config: AuditConfig,
+) -> list[tuple[str, str]]:
+    """Honor shipped Grafana target flags; legacy unspecified targets are range queries."""
+    start, end = _time_window(config)
+    start_seconds = datetime.fromisoformat(start).timestamp()
+    end_seconds = datetime.fromisoformat(end).timestamp()
+    requests = []
+    if target.get("instant") is True:
+        requests.append(
+            (
+                "instant",
+                f"{config.prometheus_base_url}/api/v1/query?"
+                + urlencode(
+                    {"query": expr, "time": str(end_seconds)},
+                ),
+            )
+        )
+    if target.get("range") is True or target.get("instant") is not True:
+        requests.append(
+            (
+                "range",
+                f"{config.prometheus_base_url}/api/v1/query_range?"
+                + urlencode(
+                    {
+                        "query": expr,
+                        "start": str(start_seconds),
+                        "end": str(end_seconds),
+                        "step": str(config.prometheus_step_seconds),
+                    },
+                ),
+            )
+        )
+    return requests
+
+
+def _combine_prometheus_outcomes(requests: list[dict[str, Any]]) -> tuple[str, str]:
+    """Do not hide an empty CURRENT result behind populated historical data."""
+    classes = {request["classification"] for request in requests}
+    detail = "; ".join(
+        f"{request['mode']}: {request['detail']}" for request in requests
+    )
+    for failure in (
+        "invalid_shape",
+        "query_error",
+        "nonfinite_result",
+        "annotated_result",
+    ):
+        if failure in classes:
+            return failure, detail
+    if len(classes) == 1:
+        return next(iter(classes)), detail
+    if classes <= {"zero_result", "nonzero_result"}:
+        return "nonzero_result", detail
+    return "mixed_query_results", detail
+
+
 def _audit_prometheus_panel(
     spec: PanelAuditSpec,
     panel: dict[str, Any],
@@ -1459,14 +1578,40 @@ def _audit_prometheus_panel(
             target_ref_id=spec.target_ref_id,
         )
     rendered_expr = _substitute_dashboard_tokens(expr, config)
-    query_url = f"{config.prometheus_base_url}/api/v1/query?" + urlencode(
-        {
-            "query": rendered_expr,
-            **({"time": str(int(config.range_to) / 1000)} if config.range_to else {}),
-        }
-    )
-    payload = _fetch_json(query_url, timeout_seconds=config.request_timeout_seconds)
-    classification, detail = _classify_prometheus_payload(payload)
+    requests = []
+    for mode, query_url in _prometheus_query_urls(target or {}, rendered_expr, config):
+        try:
+            payload = _fetch_json(
+                query_url, timeout_seconds=config.request_timeout_seconds
+            )
+        except (
+            HTTPError,
+            URLError,
+            OSError,
+            TimeoutError,
+            json.JSONDecodeError,
+        ) as exc:
+            failure = _panel_audit_exception_result(spec, exc)
+            requests.append(
+                {
+                    "mode": mode,
+                    "request_url": _redact_url(query_url),
+                    "classification": failure.classification,
+                    "detail": failure.detail,
+                }
+            )
+            return replace(failure, query_requests=requests)
+        classification, detail = _classify_prometheus_payload(payload)
+        requests.append(
+            {
+                "mode": mode,
+                "request_url": _redact_url(query_url),
+                "response": payload,
+                "classification": classification,
+                "detail": detail,
+            }
+        )
+    classification, detail = _combine_prometheus_outcomes(requests)
     if classification == "empty_result" and spec.semantic_kind == "freshness":
         classification = "telemetry_missing"
         detail = (
@@ -1487,8 +1632,11 @@ def _audit_prometheus_panel(
         detail=detail,
         query_preview=rendered_expr[:400],
         target_ref_id=spec.target_ref_id,
-        request_url=_redact_url(query_url),
-        response=payload,
+        request_url=requests[0]["request_url"],
+        response=requests[0]["response"]
+        if len(requests) == 1
+        else {request["mode"]: request["response"] for request in requests},
+        query_requests=requests,
     )
 
 
@@ -1507,6 +1655,16 @@ def _classify_http_panel_payload(
     spec: PanelAuditSpec, payload: object
 ) -> tuple[str, str, str]:
     """Return (status, classification, detail) for an HTTP panel payload."""
+    if (
+        isinstance(payload, dict)
+        and payload.get("contract") == "forensic_endpoint_error_v1"
+    ):
+        return (
+            "error",
+            "endpoint_execution_error",
+            "Forensic endpoint returned an error envelope despite HTTP success: "
+            f"{payload.get('reason', 'unspecified')}",
+        )
     if spec.semantic_kind == "freshness":
         classification, detail = _classify_http_freshness_payload(payload)
         status = (
@@ -2058,6 +2216,7 @@ def _write_report(
             "run_id": config.run_id,
             "range_hours": config.range_hours,
             "read_latency_quantile": config.read_latency_quantile,
+            "prometheus_step_seconds": config.prometheus_step_seconds,
             "time_range": {
                 "from": config.range_from,
                 "to": config.range_to,

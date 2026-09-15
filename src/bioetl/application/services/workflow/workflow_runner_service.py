@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
 from datetime import datetime
+from pathlib import Path
 from time import perf_counter
 from typing import TYPE_CHECKING
 
@@ -84,6 +85,7 @@ class WorkflowRunnerService:
     workflow_transform_artifact_sink: WorkflowTransformArtifactSinkProtocol | None = (
         None
     )
+    report_root: Path | None = None
 
     async def run_workflow(
         self,
@@ -163,6 +165,7 @@ class WorkflowRunnerService:
             result=identified_result,
             logger=getattr(self.pipeline_runner, "logger", None),
             store=self.report_store,
+            report_root=self.report_root,
         )
 
     def record_expected_pipeline_metrics(self, config: WorkflowConfig) -> None:

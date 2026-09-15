@@ -145,6 +145,7 @@ def get_workflow_runner_service(
         "WorkflowRunnerService",
         workflow_runner_service.WorkflowRunnerService(
             report_store=FileRunReportStoreAdapter(),
+            report_root=settings.report_root,
             pipeline_runner=pipeline_runner_factory(registry),
             transform_service=workflow_transform_service.WorkflowTransformService(
                 registry=transform_registry,

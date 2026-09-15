@@ -22,6 +22,7 @@ __all__ = [
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
@@ -32,6 +33,7 @@ from bioetl.application.services.execution._pipeline_runner_support import (
     build_pipeline_run_result,
     complete_pipeline_dry_run,
     create_execution_runner_audited,
+    finalize_pipeline_run_report,
 )
 from bioetl.application.services.execution.pipeline_run_context_service import (
     PipelineRunContextService,
@@ -126,6 +128,7 @@ class PipelineRunnerService:
     _execution_service: PipelineRunExecutionService
     report_store: RunReportStorePort
     run_id_factory: Callable[[], RunID | UUID | str] = _missing_run_id_factory
+    report_root: Path | None = None
 
     async def run(
         self,
@@ -189,15 +192,15 @@ class PipelineRunnerService:
             run_logger=run_logger,
         )
         if dry_run_result is not None:
-            return await complete_pipeline_dry_run(
+            completed_dry_run = await complete_pipeline_dry_run(
                 audit=self.audit,
                 pipeline_name=pipeline_name,
                 run_id=effective_run_id,
                 options=effective_options,
                 dry_run_result=dry_run_result,
                 record_event=_record_pipeline_audit_event,
-                store=self.report_store,
             )
+            return self._finalize_report(completed_dry_run, effective_options)
 
         async def _record_constructor_failure(exc: Exception) -> None:
             await _record_pipeline_audit_event(
@@ -396,7 +399,7 @@ class PipelineRunnerService:
         options: RunOptions | None = None,
     ) -> RunResult:
         """Convert execution outcome to public RunResult contract."""
-        return build_pipeline_run_result(
+        result = build_pipeline_run_result(
             outcome=outcome,
             runner=runner,
             pipeline_name=pipeline_name,
@@ -404,5 +407,16 @@ class PipelineRunnerService:
             run_type=run_type,
             started_at=started_at,
             options=options,
+            write_report=False,
+            store=self.report_store,
+        )
+        return self._finalize_report(result, options)
+
+    def _finalize_report(self, result: RunResult, options: RunOptions | None) -> RunResult:
+        """Use the configured report destination for every execution outcome."""
+        return finalize_pipeline_run_report(
+            result=result,
+            options=options,
+            report_root=self.report_root,
             store=self.report_store,
         )
