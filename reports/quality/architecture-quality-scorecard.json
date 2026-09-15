@@ -176,8 +176,8 @@
     ],
     "families_at_budget_count": 2,
     "grade_kind": "diagnostic_proxy",
-    "lazy_import_cap": 77,
-    "lazy_import_observed_count": 77,
+    "lazy_import_cap": 69,
+    "lazy_import_observed_count": 69,
     "lazy_util": 1.0,
     "program_gate_policy": "external_unchanged",
     "proxy_notes": {
@@ -209,8 +209,8 @@
     "hotspot_budget_warning_count": 0,
     "hotspot_family_count": 5,
     "layer_violations": 0,
-    "lazy_import_cap": 77,
-    "lazy_import_observed_count": 77,
+    "lazy_import_cap": 69,
+    "lazy_import_observed_count": 69,
     "lazy_util": 1.0,
     "public_entrypoint_growth_count": 0,
     "public_export_facade_conflict_count": 0,
@@ -275,7 +275,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "7184937818099a4c3d38b8fe4bd91613c81562af068ac278d680b5aba09c99e9",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "5813dc1c1ee6392f9b158dc0d325623b06f0dcf20b0aec436dbdf9deb803a9da"
+      "source_tree_sha256": "38392ab8b231f5125ab355d93903b451b3380ec366a2169e2270e852c66b2fa3"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

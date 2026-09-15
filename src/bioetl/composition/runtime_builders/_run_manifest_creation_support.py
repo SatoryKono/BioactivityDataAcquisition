@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
-import bioetl.composition.runtime_builders.run_manifest_support as _manifest_support
 from bioetl.application.services.control_plane.manifest import RunManifestCreateSpec
 from bioetl.composition.runtime_builders._run_manifest_attr_support import (
     read_attr as _read_attr,
@@ -25,16 +24,14 @@ from bioetl.composition.runtime_builders._run_manifest_replay_support import (
     apply_replay_assessment as _apply_replay_assessment,
     build_manifest_launch_context as _build_manifest_launch_context,
     build_replay_assessment as _build_replay_assessment,
+    resolve_replay_parentage,
     validate_exact_replay_boundary as _validate_exact_replay_boundary,
-)
-from bioetl.composition.contracts.runtime import (
-    ManifestLaunchContextBuilder as _ManifestLaunchContextBuilder,
-    ManifestSourceRefBuilder as _ManifestSourceRefBuilder,
 )
 from bioetl.domain.control_plane import ReplayCapability
 from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     STRICT_PERSISTENCE_PROFILES,
+    resolve_replay_capability,
 )
 from bioetl.domain.ports import MetricsPort
 
@@ -55,7 +52,6 @@ def build_manifest_create_request(
     reproducibility_context = request_inputs.reproducibility_context
     _validate_exact_replay_boundary(ctx, reproducibility_context)
     source_refs = _build_manifest_source_refs(
-        manifest_support=cast("_ManifestSourceRefBuilder", _manifest_support),
         ctx=ctx,
         inputs=inputs,
         provider=request_inputs.provider,
@@ -65,17 +61,16 @@ def build_manifest_create_request(
         ),
     )
     replay_of_run_id, replay_of_manifest_id = (
-        _manifest_support.resolve_replay_parentage(
+        resolve_replay_parentage(
             ctx=ctx,
             runtime_config=inputs.runtime_config,
         )
     )
-    replay_capability = _manifest_support.resolve_replay_capability(
+    replay_capability = resolve_replay_capability(
         source_refs=source_refs,
         resume_requested=bool(_read_attr(ctx, "resume", False)),
     )
     launch_context = _build_manifest_launch_context(
-        manifest_support=cast("_ManifestLaunchContextBuilder", _manifest_support),
         request_inputs=request_inputs,
         reproducibility_context=reproducibility_context,
     )

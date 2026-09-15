@@ -126,6 +126,7 @@ recording_rule_metrics:
   - bioetl_runtime_stage_progress_by_scope
   - bioetl_runtime_trust_gap_active_10m
   - bioetl_runtime_trust_gap_status_10m
+  - bioetl_scope_publication_status
   - bioetl_silver_filter_reject_total_mismatch_15m
   - bioetl_silver_filter_rejections_breakdown_total_15m
   - bioetl_silver_filter_rejects_stage_total_15m
@@ -133,6 +134,7 @@ recording_rule_metrics:
   - bioetl_trust_replay_blocker_events_total
   - bioetl_trust_replay_blocker_integrity
   - bioetl_workflow_pipeline_verdict_status
+  - bioetl_workflow_publication_scope_status
   - bioetl_workflow_universe
 policy_alias_metrics:
   - bioetl_alerts_active_total

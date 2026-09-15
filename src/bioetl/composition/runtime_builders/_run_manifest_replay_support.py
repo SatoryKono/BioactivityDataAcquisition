@@ -4,6 +4,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.composition.runtime_builders._run_manifest_snapshot_resolution import (
+    as_runtime_config_mapping,
+    coerce_optional_text,
+    resolve_replay_parentage_mapping_value,
+)
+from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
+    build_launch_context_snapshot,
+)
 from bioetl.domain.control_plane import ReplayCapability
 from bioetl.domain.control_plane.reproducibility_policy import (
     assess_reproducibility_policy,
@@ -22,11 +30,6 @@ if TYPE_CHECKING:
         ReproducibilityPolicyAssessment,
     )
 
-from bioetl.composition.contracts.runtime import (
-    ManifestLaunchContextBuilder as _ManifestLaunchContextBuilder,
-)
-
-
 def validate_exact_replay_boundary(
     ctx: PipelineRunContext,
     context: ManifestReproducibilityContext,
@@ -44,12 +47,11 @@ def validate_exact_replay_boundary(
 
 def build_manifest_launch_context(
     *,
-    manifest_support: _ManifestLaunchContextBuilder,
     request_inputs: RunManifestCreateRequestInputs,
     reproducibility_context: ManifestReproducibilityContext,
 ) -> dict[str, object]:
     """Build the launch-context payload recorded on the run manifest."""
-    snapshot = manifest_support.build_launch_context_snapshot(
+    snapshot = build_launch_context_snapshot(
         request_inputs.ctx,
         run_type_value=request_inputs.run_type_value,
         execution_context_value=request_inputs.execution_context_value,
@@ -75,6 +77,35 @@ def build_manifest_launch_context(
         getattr(request_inputs, "ledger_enabled", True)
     )
     return snapshot
+
+
+def resolve_replay_parentage(
+    *,
+    ctx: PipelineRunContext,
+    runtime_config: object,
+) -> tuple[str | None, str | None]:
+    """Resolve replay parent identifiers from context or runtime config."""
+    runtime_config_mapping = as_runtime_config_mapping(runtime_config)
+    return (
+        _resolve_replay_id(ctx, "replay_of_run_id", runtime_config_mapping),
+        _resolve_replay_id(ctx, "replay_of_manifest_id", runtime_config_mapping),
+    )
+
+
+def _resolve_replay_id(
+    ctx: PipelineRunContext,
+    attr_name: str,
+    runtime_config_mapping: object,
+) -> str | None:
+    """Resolve one replay identifier from context before runtime config."""
+    ctx_value = coerce_optional_text(getattr(ctx, attr_name, None))
+    if ctx_value is not None:
+        return ctx_value
+    keys = (attr_name, f"exact_replay_parent_{attr_name}")
+    return resolve_replay_parentage_mapping_value(
+        as_runtime_config_mapping(runtime_config_mapping),
+        *keys,
+    )
 
 
 def build_replay_assessment(

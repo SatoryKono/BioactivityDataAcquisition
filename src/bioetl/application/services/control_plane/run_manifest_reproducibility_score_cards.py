@@ -35,7 +35,7 @@ from bioetl.application.services.control_plane.replay.reproducibility_score_card
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
     score_run_identity as score_run_identity,
 )
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
     CATEGORY_SCORER_EXPORTS,
 )
 from bioetl.application.services.control_plane.run_manifest_reproducibility_claims import (
