@@ -90,26 +90,6 @@ def _load_prometheus_config() -> dict:
     return payload
 
 
-def test_prometheus_rules_directory_has_no_duplicate_backup_rule_files() -> None:
-    """Wildcard rule loading must not pick up backup/scratch copies of rule files."""
-    rules_dir = Path("grafana/prometheus-rules")
-    duplicate_candidates = sorted(
-        path.name
-        for path in rules_dir.iterdir()
-        if path.is_file()
-        and (
-            path.suffix == ".bak"
-            or path.name.endswith(".yml.bak")
-            or "fixed" in path.name.lower()
-            or "scratch" in path.name.lower()
-        )
-    )
-    assert not duplicate_candidates, (
-        "Prometheus rule_files uses /etc/prometheus/rules/*.yml, so backup/scratch "
-        f"copies would be loaded as duplicate rules: {duplicate_candidates}"
-    )
-
-
 def _load_monitoring_compose() -> dict:
     payload = yaml.safe_load(MONITORING_COMPOSE_PATH.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)

@@ -757,6 +757,7 @@ class TestInterfacesBootstrapIsolation:
             "bioetl.composition.health_service_access",
             "bioetl.composition.maintenance_api",
             "bioetl.composition.observability_runtime",
+            "bioetl.composition.observability_backend",
             "bioetl.composition.registry_api",
             "bioetl.composition.contracts",
             # Internal composition modules used by interfaces for runtime access
@@ -784,6 +785,7 @@ class TestInterfacesBootstrapIsolation:
             "  - bioetl.composition.health_service_access\n"
             "  - bioetl.composition.maintenance_api\n"
             "  - bioetl.composition.observability_runtime\n"
+            "  - bioetl.composition.observability_backend\n"
             "  - bioetl.composition.registry_api\n"
             "  - bioetl.composition.contracts\n"
             "  - bioetl.composition._service_protocols (internal runtime access)\n"
