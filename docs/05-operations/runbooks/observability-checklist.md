@@ -310,6 +310,47 @@ Prometheus, dashboard render, workflow and online-run checks remain the
 producers of those typed artifacts; this command is their final aggregation
 and immutable-root gate.
 
+### 6c. Provider CURRENT and ChEMBL latency
+
+Run `bioetl health check --provider chembl --json` from the writable producer
+checkout. The read-only Ops container rehydrates persisted observations; it does
+not perform a new provider request on each scrape. Record the complete result and
+UTC time for each attempt, including failures. A bounded diagnostic series can
+use three attempts with a 30-second gap after each completed attempt. This is not
+a persistent monitoring schedule or an ETL backfill.
+
+Compare the persisted `provider_health` observation with these live series:
+
+- `bioetl_provider_health_observed_timestamp_seconds{provider="chembl"}`
+- `bioetl_provider_health_status_fresh{provider="chembl"}`
+- `bioetl_provider_current_status{provider="chembl"}`
+- `bioetl_provider_current_status_info{provider="chembl"}`
+
+The first timestamp must identify the measured observation, not the scrape time.
+The fresh health scale is unhealthy=0, degraded=1, healthy=2; CURRENT uses
+OK=0, WARN=1, CRIT=2, UNKNOWN=3. Do not compare the numeric scales directly.
+Confirm that **Monitor Selected Provider** and **Inspect Status Reason** agree
+with the latest observation. Missing, future or older-than-900-second evidence
+cannot confirm OK. An old raw healthy value is insufficient. A later degraded
+observation must supersede an earlier healthy one.
+
+For slow probes, separate the CLI process duration from its reported
+`latency_ms`: startup and persistence are outside the timed provider check.
+An additional curl request can measure cumulative DNS, connection, TLS,
+first-byte and total times. Subtract adjacent cumulative values to estimate
+phase durations. It is a separate request/client, not a trace of the CLI probe.
+Keep certificate verification enabled and retain curl failures as evidence.
+On Windows, `SEC_E_NO_CREDENTIALS` from Schannel before HTTP is a local client
+failure; it does not establish a ChEMBL outage. Check the execution account before
+repeating the diagnostic from the normal operator environment.
+
+A slow first byte alone cannot distinguish server processing from the network
+path. State that uncertainty until same-client traces or independent network
+measurements isolate the cause. Do not increase the existing five-second ChEMBL
+probe deadline or the 900-second freshness window to obtain OK. New OK evidence
+requires a completed real healthy probe, persistence, rehydration and rule
+evaluation; neither a successful scrape nor cached Bronze replay is sufficient.
+
 ### 7. Operator Sign-off
 
 - [ ] Metrics endpoint is reachable
