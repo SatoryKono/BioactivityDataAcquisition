@@ -2135,7 +2135,6 @@
         "src/bioetl/application/ports/storage.py",
         "src/bioetl/composition/contracts/factories.py",
         "src/bioetl/composition/contracts/providers.py",
-        "src/bioetl/composition/contracts/runtime.py",
         "src/bioetl/composition/entrypoints.py",
         "src/bioetl/domain/workflow/foreign_key_reconciliation.py",
         "tests/architecture/test_adr_registry_governance_sync.py",

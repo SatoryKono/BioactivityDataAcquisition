@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Any, cast
 import bioetl
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Mapping
 
 _PROCESS_PROBE_TIMEOUT_SECONDS = 5.0
 DEFAULT_HEALTH_SERVER_PORT = 8000
@@ -245,10 +245,10 @@ def _build_detached_backend_popen_kwargs(
 
 def _build_detached_backend_env(
     *,
-    current_env: Mapping[str, str] | None = None,
+    current_env: Mapping[str, str],
 ) -> dict[str, str]:
     """Ensure detached backend subprocess can import the src-layout package."""
-    env = dict(current_env or {})
+    env = dict(current_env)
     existing_pythonpath = env.get("PYTHONPATH", "").strip()
     pythonpath_parts = [str(_BIOETL_SRC_ROOT)]
     if existing_pythonpath:
@@ -273,7 +273,7 @@ def start_detached_ops_http_backend(
     port: int = DEFAULT_HEALTH_SERVER_PORT,
     python_executable: str | None = None,
     data_root: Path | None = None,
-    current_env: Mapping[str, str] | None = None,
+    current_env: Mapping[str, str],
     popen_factory: Callable[..., subprocess.Popen[bytes]] = subprocess.Popen,
 ) -> subprocess.Popen[bytes]:
     """Launch ``bioetl health server`` as a detached Ops HTTP backend process.
@@ -317,7 +317,7 @@ def start_detached_quarantine_backend(
     port: int = DEFAULT_HEALTH_SERVER_PORT,
     python_executable: str | None = None,
     data_root: Path | None = None,
-    current_env: Mapping[str, str] | None = None,
+    current_env: Mapping[str, str],
     popen_factory: Callable[..., subprocess.Popen[bytes]] = subprocess.Popen,
 ) -> subprocess.Popen[bytes]:
     """Compatibility alias for :func:`start_detached_ops_http_backend`.

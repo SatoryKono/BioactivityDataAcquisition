@@ -956,7 +956,8 @@ Local archive verification is opt-in through `BIOETL_ARCHIVE_ROOT`, pointing to 
 separate directory readable by the Ops process. Set it in the process environment
 or deployment configuration; no `.env` edit is required. The default is no archive
 reader and an honest UNKNOWN. Produce a new pack with
-`python -m scripts.ops.observability.archive_control_plane --data-root <data> --archive-root <archive> --manifest <manifest.json>`;
+Implementation: `scripts/ops/observability/archive_control_plane.py`. Invoke it as
+`python -m scripts.ops archive-control-plane --data-root <data> --archive-root <archive> --manifest <manifest.json>`;
 use the same command with `--verify-only` to recheck it. An existing pack is never
 overwritten, and the producer never removes source files. Interrupted packs remain
 unverified and require inspection. Each pack contains the selected lifecycle

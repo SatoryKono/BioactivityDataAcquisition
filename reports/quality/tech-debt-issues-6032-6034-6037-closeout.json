@@ -27,10 +27,10 @@
         "composition_bootstrap_runtime_budget": 3,
         "composition_runtime_builders_current_max_internal_fan_in": 4,
         "composition_runtime_builders_budget": 5,
-        "run_manifest_support_internal_importers": 3,
+        "run_manifest_support_internal_importers": 2,
         "di_guard": "tests/architecture/test_di_runtime_inline_construction.py::test_application_runtime_inline_dependency_construction_is_zero"
       },
-      "closeout_rationale": "composition_bootstrap_runtime gained actual fan-in headroom below budget, and the opening run_manifest_support builder hotspot dropped to three direct internal importers without growing composition_runtime_builders overall fan-in."
+      "closeout_rationale": "composition_bootstrap_runtime gained actual fan-in headroom below budget, and the opening run_manifest_support builder hotspot dropped to two direct internal importers without growing composition_runtime_builders overall fan-in."
     },
     {
       "number": 6037,

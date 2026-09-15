@@ -1,5 +1,3 @@
-"""Retention and reproducibility evidence-floor compliance helpers."""
-
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -38,9 +36,7 @@ class ControlPlaneLifecyclePlanner(Protocol):
     ) -> ControlPlaneArtifactLifecyclePlan: ...
 
 
-class ArchiveVerifierPort(Protocol):
-    """Inspect real archived and restored copies for the selected manifest."""
-
+class ArchiveVerifierProtocol(Protocol):
     def verify(
         self, *, manifest: RunManifest, plan: ControlPlaneArtifactLifecyclePlan
     ) -> tuple[bool | None, str]: ...
@@ -50,9 +46,8 @@ def build_retention_checks(
     *,
     manifest: RunManifest,
     plan: ControlPlaneArtifactLifecyclePlan,
-    archive_verifier: ArchiveVerifierPort | None = None,
+    archive_verifier: ArchiveVerifierProtocol | None = None,
 ) -> tuple[tuple[EvidenceCheckResult, ...], tuple[ControlPlaneArtifactRef, ...]]:
-    """Classify lifecycle-plan evidence for one manifest without applying it."""
     relevant = tuple(
         artifact
         for artifact in plan.artifacts
@@ -102,7 +97,6 @@ def _manifest_snapshot_ids(manifest: RunManifest) -> set[str]:
 def serialize_resolution_issues(
     plan: ControlPlaneArtifactLifecyclePlan,
 ) -> list[dict[str, object]]:
-    """Return typed selected-run resolution issues without invented paths."""
     issues = getattr(plan, "resolution_issues", ())
     return [
         {
@@ -138,7 +132,7 @@ def summarize_retention_artifacts(
 
 
 __all__ = [
-    "ArchiveVerifierPort",
+    "ArchiveVerifierProtocol",
     "ControlPlaneLifecyclePlanner",
     "build_retention_checks",
     "serialize_resolution_issues",

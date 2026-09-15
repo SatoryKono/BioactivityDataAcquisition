@@ -50,9 +50,8 @@ _BREAKPOINT_CHOICES = (
 
 def _load_stage_breakpoint() -> type[StageBreakpoint]:
     """Resolve StageBreakpoint lazily to avoid command import fan-out."""
-    from bioetl.domain.ports import StageBreakpoint
-
-    return StageBreakpoint
+    implementation = import_module("bioetl.domain.ports").StageBreakpoint
+    return cast("type[StageBreakpoint]", implementation)
 
 
 def _load_run_options_type() -> type[RunOptions]:
