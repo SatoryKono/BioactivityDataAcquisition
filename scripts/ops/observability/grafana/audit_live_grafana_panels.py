@@ -119,6 +119,7 @@ class AuditResult:
 
 SEMANTIC_CLASSIFICATION_POLICY: dict[str, str] = {
     "query_invalid": "block",
+    "endpoint_execution_error": "block",
     "timeout_budget_exceeded": "block_when_required",
     "datasource_unavailable": "block_when_required",
     "blocked_backend_unavailable": "block_when_required",
@@ -1507,6 +1508,13 @@ def _classify_http_panel_payload(
     spec: PanelAuditSpec, payload: object
 ) -> tuple[str, str, str]:
     """Return (status, classification, detail) for an HTTP panel payload."""
+    if isinstance(payload, dict) and payload.get("contract") == "forensic_endpoint_error_v1":
+        return (
+            "error",
+            "endpoint_execution_error",
+            "Forensic endpoint returned an error envelope despite HTTP success: "
+            f"{payload.get('reason', 'unspecified')}",
+        )
     if spec.semantic_kind == "freshness":
         classification, detail = _classify_http_freshness_payload(payload)
         status = (

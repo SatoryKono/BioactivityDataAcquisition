@@ -351,6 +351,23 @@ probe deadline or the 900-second freshness window to obtain OK. New OK evidence
 requires a completed real healthy probe, persistence, rehydration and rule
 evaluation; neither a successful scrape nor cached Bronze replay is sufficient.
 
+### 6d. Forensic panel capacity and error rows
+
+Expensive forensic endpoints admit at most four simultaneous operations. Opening
+several detail groups or refreshing multiple dashboards can exhaust that capacity.
+`capacity_exhausted` is an unavailable response; retry the affected panel after
+the active requests finish. `deadline_exceeded` means the operation exceeded its
+existing twelve-second execution budget. Record both the HTTP status and the
+payload contract when diagnosing either result.
+
+Grafana can request `error_as_row=1`, which returns HTTP 200 with a
+`forensic_endpoint_error_v1` error envelope and an ERROR table row. HTTP 200 and a
+nonempty rows array do not establish successful evidence retrieval. The live
+panel auditor reports this envelope as `endpoint_execution_error` and blocks
+acceptance for required and optional panels alike. This is distinct from valid
+empty evidence and from an invalid query. Keep admission and timeout limits
+unchanged; confirm the error reason before retrying individual panels.
+
 ### 7. Operator Sign-off
 
 - [ ] Metrics endpoint is reachable
