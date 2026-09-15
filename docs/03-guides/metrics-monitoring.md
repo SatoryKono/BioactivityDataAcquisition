@@ -970,3 +970,8 @@ the run's original referenced `archive_policy.required=false`; it contributes OK
 to applicability but does not attest copies. Do not rewrite old manifests to add
 this policy. A real archive can provide current copy evidence for a historical
 manifest without changing its original contents or overriding other Trust errors.
+
+For a live panel audit, pass the selected `--read-latency-quantile` (0.5, 0.95 or
+0.99; default 0.95). Audit timestamps use UTC. A rejected query (HTTP 400/422)
+blocks acceptance even for an optional panel; datasource unavailability is a
+separate outcome. Review empty results individually before declaring panel health.
