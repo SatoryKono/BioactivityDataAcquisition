@@ -886,7 +886,6 @@
         "docs/00-project/governance/03-file-policy.md",
         "docs/03-guides/cheatsheets/adr-matrix.md",
         "docs/03-guides/cheatsheets/pipeline-config.md",
-        "docs/03-guides/file-path-audit-report.md",
         "docs/03-guides/local-storage-layout.md",
         "docs/03-guides/pipeline-configuration.md",
         "docs/04-reference/pipelines/README.md",
