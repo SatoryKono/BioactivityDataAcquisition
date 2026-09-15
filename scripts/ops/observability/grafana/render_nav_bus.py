@@ -749,6 +749,22 @@ def _layout_dq_detail_panels(panels: list[object]) -> None:
         children.sort(key=lambda child: (child["gridPos"]["y"], child["gridPos"]["x"]))
 
 
+def _layout_incident_detail_panels(panels: list[object]) -> None:
+    """Keep incident detail tables compact and the run column flexible."""
+    for row in _root_panels(panels):
+        for child in row.get("panels", []):
+            if child.get("id") in {22005, 22010}:
+                child["gridPos"]["h"] = 6
+            if child.get("id") == 2101:
+                for override in child["fieldConfig"]["overrides"]:
+                    if override.get("matcher", {}).get("options") in {"Run", "run_id"}:
+                        override["properties"] = [
+                            prop
+                            for prop in override["properties"]
+                            if prop["id"] != "custom.width"
+                        ]
+
+
 def _normalize_collapsed_row_children(panels: list[object]) -> None:
     """Repair the one-row child drift left by legacy recursive nav shifts."""
     for row in _root_panels(panels):
@@ -1071,6 +1087,8 @@ def apply_to_dashboard(
         _layout_runtime_detail_panels(panels)
     if current_uid == "bioetl-dq-v2":
         _layout_dq_detail_panels(panels)
+    if current_uid == "bioetl-incident-v1":
+        _layout_incident_detail_panels(panels)
     nav["options"] = {
         "mode": "html",
         "bioetlDisplayTitle": NAV_DISPLAY_TITLE,

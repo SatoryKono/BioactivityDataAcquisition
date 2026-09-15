@@ -2092,10 +2092,6 @@
                   {
                     "id": "links",
                     "value": []
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 220
                   }
                 ]
               },
@@ -2706,7 +2702,7 @@
             "x": 0,
             "y": 21,
             "w": 24,
-            "h": 12
+            "h": 6
           },
           "datasource": {
             "type": "datasource",
@@ -3309,7 +3305,7 @@
             "x": 0,
             "y": 22,
             "w": 24,
-            "h": 12
+            "h": 6
           },
           "datasource": {
             "type": "datasource",
