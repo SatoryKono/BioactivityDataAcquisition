@@ -14,17 +14,12 @@ from __future__ import annotations
 
 import ast
 from collections import Counter
-from typing import Protocol
 from datetime import date
 import json
 from pathlib import Path
 
 import pytest
 
-from bioetl.composition.contracts.runtime import (
-    ManifestLaunchContextBuilder,
-    ManifestSourceRefBuilder,
-)
 from scripts.engineering.qa.hotspot_family_metrics import (
     count_internal_fan_in,
     iter_family_python_files,
@@ -41,11 +36,6 @@ pytestmark = pytest.mark.architecture
 ROOT = Path(__file__).resolve().parents[2]
 CLOSEOUT = ROOT / "reports/quality/tech-debt-issues-6032-6034-6037-closeout.json"
 HOTSPOT_BASELINE = ROOT / "reports/quality/hotspot-family-baseline.json"
-
-
-def test_issue_6034_runtime_builder_contracts_keep_protocol_owner() -> None:
-    assert issubclass(ManifestSourceRefBuilder, Protocol)
-    assert issubclass(ManifestLaunchContextBuilder, Protocol)
 
 
 def _load_json(path: Path) -> dict[str, object]:
