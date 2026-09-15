@@ -105,6 +105,8 @@ test-deps:
 setup-plugins:
 	$(RUN) python -m scripts.ops setup-plugins
 
+# Contributor SSOT / fast subset. CI type-checking is stricter:
+# mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
 lint:
 	$(RUN) ruff check src tests scripts
 	$(RUN) mypy src/bioetl

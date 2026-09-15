@@ -1,3 +1,7 @@
+> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
+> Canonical runtime source: `.codex/skills/gh-fix-ci/SKILL.md`
+> Governance: AI_RUNTIME_MIRROR_OWNERSHIP.md
+> Edit the runtime source first, then refresh this mirror.
 ______________________________________________________________________
 
 ## name: "gh-fix-ci" description: "Use when a user asks to debug or fix failing GitHub PR checks that run in GitHub Actions; use `gh` to inspect checks and logs, summarize failure context, draft a fix plan, and implement only after explicit approval. Treat external providers (for example Buildkite) as out of scope and report only the details URL."
@@ -8,11 +12,6 @@ ______________________________________________________________________
 
 ## Repository governance
 
-- Normative index: `../../../../NORMATIVE_SOURCES.md`
-- Root runtime contract: `../../../../../../AGENTS.md`
-- Project rules: `../../../../RULES.md`
-- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../../../02-architecture/decisions/`
 
 ## Overview
 
@@ -33,6 +32,16 @@ Prereq: authenticate with the standard GitHub CLI once (for example, run `gh aut
 - `python docs/00-project/ai/skills/local/gh-fix-ci/scripts/inspect_pr_checks.py --repo "." --pr "<number-or-url>"`
 - Add `--json` if you want machine-friendly output for summarization.
 - PowerShell `gh` bodies: `--body-file` only. Never `--body @...` and never here-string `--body @"..."@` (#10300). See `docs/00-project/ai/prompts/fragments/gh-powershell.md`.
+
+## Source Of Truth
+
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
+- Root runtime contract: `../../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../../../02-architecture/decisions/`
+- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
 
 ## Workflow
 

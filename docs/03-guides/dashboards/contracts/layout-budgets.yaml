@@ -422,3 +422,48 @@ allowlists:
         Collapsed Selected Range · Reject Evidence row (h=1, y=20) is
         below-fold range evidence, not a first-screen scalar group.
       retire_when: selected-range reject evidence is represented by first-window scalar cards
+    - dashboard: bioetl-control-plane-v1.json
+      id: 903
+      owner: "@bioetl-observability"
+      rationale: >-
+        Collapsed Inspect Global Store Reliability row (h=1, y=20) is
+        below-fold store-reliability diagnostics after the first-screen
+        trust verdict. Density cannot exceed the first-screen floor without
+        adding first-window scalar cards.
+      retire_when: store-reliability diagnostics move into first-window scalar cards
+    - dashboard: bioetl-dq-v2.json
+      id: 221
+      owner: "@bioetl-observability"
+      rationale: >-
+        Collapsed Selected Range · Validation Diagnostics row (h=1, y=21) is
+        below-fold range evidence after current/impact lanes. Density cannot
+        exceed the first-screen floor without adding first-window scalar cards.
+      retire_when: selected-range validation diagnostics move into first-window scalar cards
+    - dashboard: bioetl-overview-v2.json
+      id: 9009
+      owner: "@bioetl-observability"
+      rationale: >-
+        Collapsed Inspect Range Evidence row (h=1, y=19) is below-fold
+        selected-range run/reject evidence, not a first-screen scalar group.
+      retire_when: range evidence is represented by first-window scalar cards
+    - dashboard: bioetl-runtime.json
+      id: 252
+      owner: "@bioetl-observability"
+      rationale: >-
+        Collapsed Inspect Detection Signals row holds selected-range detection
+        trends. Nested scalars are forensic expanders, not first-screen cards.
+      retire_when: detection-signal scalars move into first-window cards denser than the fold
+    - dashboard: bioetl-runtime.json
+      id: 254
+      owner: "@bioetl-observability"
+      rationale: >-
+        Collapsed Review Escalation Paths row (h=1, y=19) is a below-fold
+        handoff strip; group rho equals first-screen rho (gate is strictly >).
+      retire_when: escalation-path scalars densify above first-screen rho without leaving the fold
+    - dashboard: bioetl-runtime.json
+      id: 9994
+      owner: "@bioetl-observability"
+      rationale: >-
+        Collapsed Inspect Workflow Evidence row (h=1, y=22) is below-fold
+        workflow-failure evidence merged into Pipeline Diagnostics.
+      retire_when: workflow-failure evidence is represented by first-window scalar cards

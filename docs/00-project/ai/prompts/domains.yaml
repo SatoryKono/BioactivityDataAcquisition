@@ -50,9 +50,9 @@ domains:
     - tests/architecture/
     SSOT:
     - docs/00-project/RULES.md
-    - docs/02-architecture/decisions/ADR-005.md
-    - docs/02-architecture/decisions/ADR-048.md
-    - configs/quality/architecture-quality-scorecard.json
+    - docs/02-architecture/decisions/ADR-005-composition-layer-separation.md
+    - docs/02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md
+    - reports/quality/architecture-quality-scorecard.json
     AUDIT_CONTOURS:
     - exactly 10 canonical category scoring with baseline and live evidence
     - import direction, cycles, injection, and runtime minimum scenarios
@@ -82,7 +82,7 @@ domains:
     SSOT:
     - src/bioetl/interfaces/cli/main.py
     - docs/04-reference/cli.md
-    - configs/config_compatibility_registry.yaml
+    - configs/quality/config_compatibility_registry.yaml
     - docs/00-project/RULES.md
     AUDIT_CONTOURS:
     - public command, flag, argument, exit code, and HTTP endpoint inventory vs docs
@@ -182,9 +182,9 @@ domains:
     - src/bioetl/application/services/control_plane/
     - src/bioetl/composition/control_plane_runtime.py
     SSOT:
-    - docs/02-architecture/decisions/ADR-044.md
-    - docs/02-architecture/decisions/ADR-046.md
-    - docs/02-architecture/decisions/ADR-047.md
+    - docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md
+    - docs/02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md
+    - docs/02-architecture/decisions/ADR-047-workflow-control-plane.md
     - docs/03-guides/workflows.md
     AUDIT_CONTOURS:
     - manifest, ledger, inspection, replay/resume, and force/repair verb surfaces
@@ -212,10 +212,10 @@ domains:
     SCOPE:
     - grafana/dashboards/
     SSOT:
-    - grafana/DASHBOARD_REQUIREMENTS.md
-    - grafana/design-system.md
-    - grafana/verdict-ontology.md
-    - grafana/layout-budgets.yaml
+    - docs/01-requirements/DASHBOARD_REQUIREMENTS.md
+    - docs/03-guides/dashboards/design-system.md
+    - docs/03-guides/dashboards/verdict-ontology.md
+    - docs/03-guides/dashboards/contracts/layout-budgets.yaml
     AUDIT_CONTOURS:
     - render and density area/scalar with viewport 1366x768 and theme variants
     - fill, fit, reflow, visual, layout, data, copy, and safety contours
@@ -244,8 +244,8 @@ domains:
     - scripts/diagrams/
     SSOT:
     - docs/00-project/RULES.md
-    - docs/02-architecture/decisions/ADR-040.md
-    - docs/00-project/DOC-GOV-02.md
+    - docs/02-architecture/decisions/ADR-040-diagram-governance.md
+    - docs/02-architecture/diagrams/governance/render-retention.md
     AUDIT_CONTOURS:
     - text source existence and VCS tracking for .mmd/.mermaid and embedded Mermaid
     - renderer pinning and lint/budget gates
@@ -305,9 +305,9 @@ domains:
     - src/bioetl/infrastructure/validation/
     - docs/04-reference/contracts/
     SSOT:
-    - docs/02-architecture/decisions/ADR-027.md
-    - docs/02-architecture/decisions/ADR-045.md
-    - docs/02-architecture/decisions/ADR-018.md
+    - docs/02-architecture/decisions/ADR-027-dq-rules-externalization.md
+    - docs/02-architecture/decisions/ADR-045-dq-contract-system.md
+    - docs/02-architecture/decisions/ADR-018-gold-strict-validation.md
     - docs/04-reference/contracts/dq-contracts.md
     AUDIT_CONTOURS:
     - schema vs published Gold JSON vs docs drift with missing PK and fields
@@ -367,7 +367,7 @@ domains:
     - src/bioetl/infrastructure/adapters/
     SSOT:
     - docs/00-project/RULES.md
-    - docs/02-architecture/decisions/ADR-032.md
+    - docs/02-architecture/decisions/ADR-032-unified-http-client.md
     - src/bioetl/infrastructure/adapters/http/client.py
     AUDIT_CONTOURS:
     - shared HTTP stack vs provider-specific duplicate inventory
@@ -396,9 +396,9 @@ domains:
     - src/bioetl/domain/medallion.py
     - src/bioetl/infrastructure/storage/
     SSOT:
-    - docs/02-architecture/decisions/ADR-002.md
-    - docs/02-architecture/decisions/ADR-014.md
-    - docs/02-architecture/decisions/ADR-018.md
+    - docs/02-architecture/decisions/ADR-002-medallion-architecture.md
+    - docs/02-architecture/decisions/ADR-014-deterministic-writes.md
+    - docs/02-architecture/decisions/ADR-018-gold-strict-validation.md
     - src/bioetl/domain/medallion.py
     AUDIT_CONTOURS:
     - write mode vs policy mapping and silent overwrite detection
@@ -460,7 +460,7 @@ domains:
     - docs/05-operations/runbooks/index.md
     - docs/03-guides/workflows.md
     - docs/00-project/RULES.md
-    - docs/02-architecture/decisions/ADR-010.md
+    - docs/02-architecture/decisions/ADR-010-local-only-deployment.md
     AUDIT_CONTOURS:
     - runbook inventory DR, rollback, shutdown, Game Day, and control-plane triage
     - procedure step vs CLI/script/help existence with preconditions and rollback
@@ -490,7 +490,7 @@ domains:
     - src/bioetl/infrastructure/adapters/
     SSOT:
     - docs/00-project/RULES.md
-    - docs/03-guides/extending-bioetl.md
+    - docs/00-project/governance/04-extending-bioetl.md
     - configs/_schema/
     AUDIT_CONTOURS:
     - YAML providers vs adapters vs entity files vs registry parity
@@ -520,8 +520,8 @@ domains:
     - reports/quality/
     SSOT:
     - scripts/engineering/qa/README.md
-    - configs/quality/architecture-quality-scorecard.json
-    - configs/quality/debt-governance-gates.json
+    - reports/quality/architecture-quality-scorecard.json
+    - reports/quality/debt-governance-gates.json
     AUDIT_CONTOURS:
     - QA entrypoint vs README vs CI wiring inventory
     - committed JSON freshness vs canonical generators and source-tree hashes
@@ -551,7 +551,7 @@ domains:
     - src/bioetl/
     SSOT:
     - docs/01-requirements/REQUIREMENTS.md
-    - docs/01-requirements/traceability.csv
+    - docs/01-requirements/traceability/requirements-traceability-crosswalk.csv
     - docs/00-project/RULES.md
     AUDIT_CONTOURS:
     - REQ ID catalog vs CSV inventory with duplicate/missing/status drift
@@ -644,7 +644,7 @@ domains:
     - configs/quality/
     SSOT:
     - configs/quality/debt_scorecard.yaml
-    - configs/quality/debt-governance-gates.json
+    - reports/quality/debt-governance-gates.json
     - docs/00-project/RULES.md
     AUDIT_CONTOURS:
     - TODO/FIXME/HACK, suppression, shim, and disabled-gate inventory
@@ -678,9 +678,9 @@ domains:
     - docs/04-reference/observability/
     - reports/observability/
     SSOT:
-    - docs/02-architecture/decisions/ADR-017.md
-    - docs/02-architecture/decisions/ADR-019.md
-    - docs/02-architecture/decisions/ADR-022.md
+    - docs/02-architecture/decisions/ADR-017-observability-architecture.md
+    - docs/02-architecture/decisions/ADR-019-observability-port-enforcement.md
+    - docs/02-architecture/decisions/ADR-022-tracing-noop.md
     - docs/04-reference/observability/metrics-catalog.md
     AUDIT_CONTOURS:
     - metric name registry vs catalog/rules/dashboard queries
@@ -711,7 +711,7 @@ domains:
     SSOT:
     - docs/00-project/RULES.md
     - configs/quality/test_matrix.yaml
-    - docs/00-project/TEST_LANE_MENTAL_MODEL.md
+    - docs/00-project/ai/agents/guides/TEST_LANE_MENTAL_MODEL.md
     AUDIT_CONTOURS:
     - pytest and CI lane inventory, markers, quarantine, and isolation
     - critical-path to positive/negative/contract test mapping
@@ -741,7 +741,7 @@ domains:
     SSOT:
     - configs/quality/integration_vcr_policy.yaml
     - docs/00-project/RULES.md
-    - docs/00-project/ai/agents/skills/vcr-record/
+    - .codex/skills/vcr-record/
     AUDIT_CONTOURS:
     - cassette tree vs policy parity with orphan/missing meta and owner detection
     - secret header and body redaction without value echo
