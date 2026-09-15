@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-09-15'
 
 ______________________________________________________________________
 
@@ -271,7 +271,7 @@ else:  # pragma: no cover
 
 **Possible Causes**:
 
-1. Different Python versions (3.11 vs 3.12) — conditional code paths differ
+1. Different Python versions (3.12 vs 3.13) — conditional code paths differ
 1. Partial test runs in parallel CI — coverage is cumulative across all jobs
 1. Missing test dependencies — some tests skipped
 

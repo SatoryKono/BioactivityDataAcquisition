@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-27'
+  Last verified: '2026-09-15'
 
 ______________________________________________________________________
 
@@ -48,7 +48,12 @@ uv sync --extra dev --extra tests --extra tracing
 uv run python -m scripts.ops setup-plugins
 ```
 
-Canonical bootstrap uses `uv sync` / `make install` / `python -m scripts.ops setup-plugins`. `scripts/engineering/dev/dev_setup.sh` was **removed** and is not a supported path.
+The extra-set above is the **minimal local-dev** set (`dev,tests,tracing`).
+It is not the same as `make install` (`dev,tests,tests_full,export`).
+Use `make install` when you need architecture / benchmark extras (`tests_full`)
+and export tooling; then run `make setup-plugins` or
+`python -m scripts.ops setup-plugins`.
+`scripts/engineering/dev/dev_setup.sh` was **removed** and is not a supported path.
 
 `uv` is the preferred package/environment manager for supported bootstrap and
 docs verification flows. `pip` remains the fallback only when `uv` is

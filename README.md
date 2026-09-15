@@ -311,9 +311,8 @@ pip install -e ".[dev,tests,tracing,docs]"
    Run tests to ensure everything works.
 
    ```bash
-   uv run ruff check .
+   make lint
    uv run ruff format --check .
-   uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
    uv run python -m scripts.engineering.dev run-tests cov
    ```
 
@@ -620,10 +619,12 @@ Strict quality standards are enforced using `ruff`, `mypy`, and other tools.
 
 - **Linting & Formatting**:
 
+  Contributor SSOT is `make lint` (`ruff check src tests scripts` and
+  `mypy src/bioetl`). Optional format check is not a Makefile target:
+
   ```bash
-  uv run ruff check .
+  make lint
   uv run ruff format --check .
-  uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
   ```
 
 - **Debt and complexity guardrails**:
@@ -632,16 +633,18 @@ Strict quality standards are enforced using `ruff`, `mypy`, and other tools.
   uv run python -m scripts.engineering.qa report-debt-governance-gates --check
   ```
 
-  The lint path uses the live Ruff + mypy toolchain directly; the debt command
-  runs the published fail-fast debt-governance rollup.
+  The lint path matches the Makefile recipes; the debt command runs the
+  published fail-fast debt-governance rollup.
 
 ### Documentation
 
-Validate published documentation surfaces:
+Canonical published recipe: [Docs Verification Guide](docs/03-guides/docs-verification.md).
+Minimum local commands:
 
 ```bash
 python -m scripts.docs check-links --links --specs --configs
 python -m scripts.docs check-drift --ports --classes
+python -m scripts.docs check-drift --runtime-mirrors --freshness
 python -m scripts.docs check-docstrings --summary
 ```
 
@@ -756,7 +759,7 @@ Please review our **[Security Policy](.github/SECURITY.md)** for:
 Please read **[RULES.md](docs/00-project/RULES.md)** and **[REQUIREMENTS.md](docs/01-requirements/REQUIREMENTS.md)** before contributing.
 
 1. Ensure tests pass: `uv run python -m scripts.engineering.dev run-tests cov`
-1. Check types and linting: `uv run ruff check . && uv run ruff format --check . && uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl`
+1. Check types and linting: `make lint && uv run ruff format --check .`
 1. Follow the **RFC 2119** keywords in requirements.
 
 ## License

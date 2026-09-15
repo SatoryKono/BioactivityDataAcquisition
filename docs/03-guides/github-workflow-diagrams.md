@@ -138,7 +138,7 @@ sequenceDiagram
     Dev->>GH: gh release create v6.2.0
     GH->>CI: Trigger release.yml
     CI->>CI: Build wheel + sdist
-    CI->>CI: Test on Py 3.11, 3.12, 3.13
+    CI->>CI: Test on Python 3.13 (release.yml; tests.yml baseline is 3.12)
     CI->>PyPI: Publish to TestPyPI
     CI-->>CI: Test install from TestPyPI
     CI->>PyPI: Publish to PyPI

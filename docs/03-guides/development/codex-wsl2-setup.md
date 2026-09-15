@@ -24,7 +24,7 @@ with VPN proxy workaround.
 | Debian (WSL)       | any     | `wsl --install -d Debian`      |
 | Node.js (in WSL)   | 22.x    | Installed to `/usr/local/`     |
 | Codex CLI (in WSL) | 0.112+  | `npm install -g @openai/codex` |
-| Python (Windows)   | 3.11+   | For proxy server               |
+| Python (Windows)   | 3.12+   | Proxy helper only (`wsl_proxy.py`); not the BioETL runtime baseline |
 
 > **Why WSL2?** Codex CLI is a Rust binary that doesn't run natively on
 > Windows. WSL2 provides a Linux environment where it works correctly.
