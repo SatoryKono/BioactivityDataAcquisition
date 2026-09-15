@@ -7,6 +7,22 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 
+from bioetl.application.services.ops.observability_backend_startup import (
+    ensure_observability_backend_started_impl,
+)
+from bioetl.application.services.ops.observability_backend_startup_types import (
+    _DropStaleBackendFn,
+    _ListenerPidFn,
+    _MessagePrinter,
+    _ObservabilityBackendFailureHandlers,
+    _ObservabilityBackendRuntimeHooks,
+    _ObservabilityBackendStartupKwargs,
+    _ProbeFn,
+    _RequiredProbeFn,
+    _StartFn,
+    _WaitFn,
+    _WaitRequiredPathsFn,
+)
 from bioetl.composition.observability_backend import (
     DEFAULT_OBSERVABILITY_BACKEND_POLL_SECONDS,
     DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS,
@@ -24,22 +40,6 @@ from bioetl.composition.observability_backend import (
     start_detached_quarantine_backend,
     wait_for_observability_backend_ready,
     wait_for_observability_backend_required_paths_ready,
-)
-from bioetl.application.services.ops.observability_backend_startup import (
-    ensure_observability_backend_started_impl,
-)
-from bioetl.application.services.ops.observability_backend_startup_types import (
-    _DropStaleBackendFn,
-    _ListenerPidFn,
-    _MessagePrinter,
-    _ObservabilityBackendFailureHandlers,
-    _ObservabilityBackendRuntimeHooks,
-    _ObservabilityBackendStartupKwargs,
-    _ProbeFn,
-    _RequiredProbeFn,
-    _StartFn,
-    _WaitFn,
-    _WaitRequiredPathsFn,
 )
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details import (
     _append_backend_startup_diagnostic,

@@ -11,8 +11,6 @@ from typing import TYPE_CHECKING
 import click
 
 from bioetl.domain.exceptions import BioETLError
-
-DEFAULT_HEALTH_SERVER_PORT = 8000
 from bioetl.interfaces.cli.commands.domains.health import (
     server_integration_deps as _deps,
 )
@@ -29,6 +27,8 @@ from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
+
+DEFAULT_HEALTH_SERVER_PORT = 8000
 
 if TYPE_CHECKING:
     from pathlib import Path
