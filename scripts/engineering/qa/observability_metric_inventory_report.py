@@ -353,6 +353,7 @@ _RUN_ID_SELECTOR_RE = re.compile(r"\{[^{}]*\brun_id\s*(?:=|!=|=~|!~)")
 _TYPED_RULE_RELATIVE_PATHS = (
     Path("grafana/prometheus-rules/bioetl_observability.yml"),
     Path("grafana/prometheus-rules/bioetl_control_plane_current_status.yml"),
+    Path("grafana/prometheus-rules/bioetl_publication_freshness.yml"),
 )
 
 

@@ -427,12 +427,10 @@ def _allowed_env_var_files(src_dir: Path) -> set[Path]:
         src_dir / "bioetl" / "infrastructure" / "observability" / "tracing.py",
         src_dir
         / "bioetl"
-        / "interfaces"
-        / "cli"
-        / "commands"
-        / "domains"
-        / "health"
-        / "observability_backend_runtime.py",
+        / "application"
+        / "services"
+        / "ops"
+        / "observability_backend_process.py",
         src_dir
         / "bioetl"
         / "interfaces"
@@ -440,7 +438,7 @@ def _allowed_env_var_files(src_dir: Path) -> set[Path]:
         / "commands"
         / "domains"
         / "health"
-        / "observability_backend_process.py",
+        / "observability_backend_runtime.py",
     }
 
 

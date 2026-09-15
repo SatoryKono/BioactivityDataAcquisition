@@ -276,7 +276,7 @@ def start_detached_ops_http_backend(
 ) -> subprocess.Popen[bytes]:
     """Launch ``bioetl health server`` as a detached Ops HTTP backend process.
 
-    This is the shipping identity surface for Grafana BioETL Ops HTTP panels.
+    This is the shipping identity surface for BioETL Ops HTTP dashboard panels.
     ``data_root`` is accepted for call-site compatibility but is not used by
     the health-server command line.
     """

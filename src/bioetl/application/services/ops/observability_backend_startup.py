@@ -127,7 +127,7 @@ def _start_observability_backend_detached[ResultT](
         warning_printer(  # type: ignore[operator]  # pyright: ignore[reportCallIssue]
             "Observability backend: failed to start detached BioETL Ops HTTP "
             f"(health server) backend on port {port} ({exc}). {startup_detail} "
-            "Grafana ID panels may remain empty."
+            "Ops HTTP ID panels may remain empty."
         )
         return result_factory(
             status="failed",
@@ -233,7 +233,7 @@ def _build_backend_capability_failure_result[ResultT](
         "Observability backend: detached BioETL Ops HTTP (health server) process "
         "did not become ready with required audit capabilities at "
         f"{health_url}. {startup_detail} "
-        f"{capability_failure_detail or ''} Grafana ID panels may remain empty."
+        f"{capability_failure_detail or ''} Ops HTTP ID panels may remain empty."
     )
     return result_factory(
         status="failed",

@@ -22,12 +22,8 @@ import yaml
 
 RULES_PATH = Path("grafana/prometheus-rules/bioetl_observability.yml")
 DASHBOARDS_DIR = Path("grafana/dashboards")
-CONTROL_PLANE_CURRENT_STATUS_RULES_PATH = Path(
-    "grafana/prometheus-rules/bioetl_control_plane_current_status.yml"
-)
-PUBLICATION_FRESHNESS_RULES_PATH = Path(
-    "grafana/prometheus-rules/bioetl_publication_freshness.yml"
-)
+CONTROL_PLANE_CURRENT_STATUS_RULES_PATH = Path("grafana/prometheus-rules/bioetl_control_plane_current_status.yml")
+PUBLICATION_FRESHNESS_RULES_PATH = Path("grafana/prometheus-rules/bioetl_publication_freshness.yml")
 SLO_ALERT_CONTRACT_PATH = Path("configs/quality/observability_slo_alert_contract.yaml")
 PROMETHEUS_CONFIG_PATH = Path("grafana/prometheus.yml")
 MONITORING_COMPOSE_PATH = Path("docker-compose.monitoring.yml")
@@ -72,18 +68,12 @@ def _load_control_plane_current_status_rules() -> dict:
     return payload
 
 
-def _load_publication_freshness_rules() -> dict:
-    payload = yaml.safe_load(
-        PUBLICATION_FRESHNESS_RULES_PATH.read_text(encoding="utf-8")
-    )
-    assert isinstance(payload, dict)
-    return payload
-
-
 def _extra_recording_rule_groups() -> list:
-    return list(_load_control_plane_current_status_rules().get("groups", [])) + list(
-        _load_publication_freshness_rules().get("groups", [])
+    extra = list(_load_control_plane_current_status_rules().get("groups", []))
+    extra.extend(
+        yaml.safe_load(PUBLICATION_FRESHNESS_RULES_PATH.read_text(encoding="utf-8")).get("groups", [])
     )
+    return extra
 
 
 def _load_slo_alert_contract() -> dict:
