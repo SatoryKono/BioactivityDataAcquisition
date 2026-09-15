@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3633 |
-| Tracked doc-like files | 3633 |
+| Doc-like files | 3651 |
+| Tracked doc-like files | 3651 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 7 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3633 |
+| tracked | 3651 |
 
 ## Lifecycle Counts
 
@@ -32,7 +32,7 @@
 | docs_reports_curated_or_historical_report | 8 |
 | docs_reports_generated_or_route_owned | 7 |
 | docs_reports_retention_sensitive_evidence | 21 |
-| generated_skill_reference_mirror | 2 |
+| generated_skill_reference_mirror | 19 |
 | generated_test_run_evidence | 4 |
 | guide | 4 |
 | index | 4 |
@@ -61,7 +61,7 @@
 | Archived | 292 |
 | Canonical | 73 |
 | Deprecated | 2 |
-| Generated | 1026 |
+| Generated | 1044 |
 | Working | 1493 |
 
 ## Surface Families
@@ -72,7 +72,7 @@
 | archive | 292 |
 | canonical | 73 |
 | duplicate | 2 |
-| generated | 1026 |
+| generated | 1044 |
 | working | 1493 |
 
 ## Recommended Actions
@@ -81,7 +81,7 @@
 | --- | --- |
 | archive-after-github-state-check | 336 |
 | archive-after-migration | 990 |
-| generate-automatically | 1026 |
+| generate-automatically | 1044 |
 | keep | 1271 |
 | reconcile-with-github-state | 8 |
 | replace-with-link | 2 |
