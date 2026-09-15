@@ -285,6 +285,7 @@ def apply_dashboard(dashboard: dict[str, Any]) -> None:
         ]
 
     if uid == "bioetl-runtime":
+        panels[9401]["options"]["colorMode"] = "value"
         p = panels[2460]
         p["targets"][0]["expr"] = (
             'bioetl_runtime_stage_progress_by_scope{pipeline=~"$pipeline",run_type=~"$run_type"}'

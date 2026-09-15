@@ -2054,7 +2054,8 @@
       "grafana/dashboards/bioetl-provider-health-v2.json"
     ],
     "bioetl_provider_observed_universe": [
-      "docs/04-reference/observability/metrics-catalog.md"
+      "docs/04-reference/observability/metrics-catalog.md",
+      "docs/05-operations/monitoring-architecture.md"
     ],
     "bioetl_provider_range_operational_ok": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
@@ -2122,6 +2123,7 @@
       "docs/03-guides/running-pipelines.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
+      "docs/05-operations/monitoring-architecture.md",
       "docs/05-operations/sli-slo-baseline.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-dq-v2.json",

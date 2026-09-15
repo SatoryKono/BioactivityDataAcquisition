@@ -1829,9 +1829,9 @@
       "kind": "http",
       "panel_id": 9418,
       "panel_title": "Review Selected-Run Trust",
-      "query": "/ops/control-plane/manifest-validation?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+      "query": "/ops/control-plane/trust-summary?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
       "query_tokens": [
-        "/ops/control-plane/manifest-validation",
+        "/ops/control-plane/trust-summary",
         "pipeline",
         "run_type",
         "run_id"
@@ -4424,7 +4424,7 @@
       "dashboard_uid": "bioetl-provider-health-v2",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
-      "documents_valid_empty": true,
+      "documents_valid_empty": false,
       "empty_state": "coverage_gap",
       "formula": "topk(3, max by (provider, reason, source_state) (bioetl_provider_current_status_info))",
       "kind": "promql",

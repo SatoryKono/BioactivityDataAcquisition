@@ -520,6 +520,7 @@ async def test_transform_attempt_returns_empty_outcome_for_none_result() -> None
     assert outcome.gold_record is None
 
 
+@pytest.mark.unit
 def test_gold_exclusion_records_bounded_rule_details_without_record_values() -> None:
     from bioetl.application.core.batch_transformer_attempt_success import (
         _build_gold_record,

@@ -472,7 +472,7 @@
         "overrides": []
       },
       "options": {
-        "colorMode": "none",
+        "colorMode": "value",
         "dataLinks": [
           {
             "title": "Open Runtime Blockers",

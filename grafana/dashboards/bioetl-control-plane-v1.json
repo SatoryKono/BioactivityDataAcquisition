@@ -525,7 +525,7 @@
         "y": 6
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Aggregate Trust includes manifest, lineage and retention evidence for this run. ERROR wins; missing evidence is INCOMPLETE. Processing success does not imply Trust OK. Inspect each validation table for details. Backend unavailable means QUERY ERROR.",
+      "description": "SELECTED RUN · Aggregate Trust includes manifest, lineage and retention evidence for this run. ERROR wins; missing evidence is INCOMPLETE. Processing success does not imply Trust OK. Inspect each validation table for details. No selected run is a valid empty state (UNKNOWN). Backend unavailable means QUERY ERROR.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -733,7 +733,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 85
+                "value": 110
               }
             ]
           },
@@ -745,7 +745,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 100
+                "value": 125
               }
             ]
           },
@@ -757,7 +757,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 115
+                "value": 180
               }
             ]
           },

@@ -47,7 +47,6 @@ def create_bronze_writer(
     Returns:
         Configured BronzeWriter instance for the Bronze storage layer.
     """
-    save_json = config.save_json if config else False
     save_metadata = config.save_metadata if config else False
     if save_metadata and metadata_coordinator is None:
         raise RuntimeError(
@@ -73,7 +72,7 @@ def create_bronze_writer(
         base_path=base_path,
         logger=logger,
         metrics=metrics,
-        json_export=(save_json, None),
+        json_export=(config.save_json if config else False, None),
         runtime_services=BronzeWriterRuntimeServices(
             tracing=tracing,
             audit=audit,

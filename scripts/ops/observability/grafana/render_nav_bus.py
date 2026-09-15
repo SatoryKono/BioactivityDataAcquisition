@@ -710,11 +710,18 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
             "SELECTED RUN · Aggregate Trust includes manifest, lineage and retention "
             "evidence for this run. ERROR wins; missing evidence is INCOMPLETE. "
             "Processing success does not imply Trust OK. Inspect each validation "
-            "table for details. Backend unavailable means QUERY ERROR."
+            "table for details. No selected run is a valid empty state (UNKNOWN). "
+            "Backend unavailable means QUERY ERROR."
         )
         by_id[9418]["options"]["footer"]["enablePagination"] = True
         for override in by_id[9418]["fieldConfig"]["overrides"]:
-            if override.get("matcher", {}).get("options") == "reasons_text":
+            field = override.get("matcher", {}).get("options")
+            width = {"Processing": 110, "Trust": 125, "Observed at": 180}.get(field)
+            if width is not None:
+                for prop in override.get("properties", []):
+                    if prop.get("id") == "custom.width":
+                        prop["value"] = width
+            if field == "reasons_text":
                 for prop in override.get("properties", []):
                     if prop.get("id") == "noValue":
                         prop["value"] = "—"
