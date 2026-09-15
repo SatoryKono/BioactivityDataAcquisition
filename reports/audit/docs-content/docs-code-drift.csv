@@ -1,4 +1,6 @@
 path,type,audience,owner,last_change,status,score,priority,evidence
-docs/05-operations/runbooks/generated-artifact-drift-workflow.md,runbook,ops,BioETL Team,2026-08-27,remediated,2,P2,cleanup-inventory dispatcher vs submodule
-docs/03-guides/docs-verification.md,how-to,eng,BioETL Team,2026-08-27,remediated,2,P1,.venv vs .venv-win
-docs/03-guides/quick-start.md,tutorial,eng,BioETL Team,2026-08-27,remediated,2,P1,.venv vs .venv-win
+docs/03-guides/quick-start.md,tutorial,new contributor,BioETL Team,2026-09-03,drift,1,P2,uv sync tracing extras equated with Makefile install extras (tests_full+export)
+docs/03-guides/github-workflow-diagrams.md,explanation,contributor,BioETL Team,2026-09-03,drift,1,P2,Release diagram Python 3.11 vs .github/workflows/release.yml 3.13 and tests.yml 3.12
+README.md,reference,contributor,BioETL Team,2026-09-14,drift,2,P3,ruff check . vs Makefile ruff check src tests scripts; check-drift flags subset vs docs-verification.md
+docs/04-reference/pipeline-catalog.md,reference,engineer,BioETL Team,2026-09-03,aligned,3,P3,22+5 entity yaml counts match glob configs/entities
+pyproject.toml,manifest,all,BioETL Team,n/a,aligned,3,P3,version 6.1.0 and requires-python >=3.12 match README badge and runtime policy
