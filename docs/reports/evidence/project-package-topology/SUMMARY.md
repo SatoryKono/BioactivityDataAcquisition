@@ -1,5 +1,15 @@
 # Сводка evidence: project-package-topology
 
+Refresh note (2026-09-15): hash-only reconcile after full local pytest closeout
+on `fix/full-suite-51` (removed orphan junit helper, refreshed coverage
+inventory). Counts and the source fingerprint below come from
+`reports/quality/module-coverage-inventory.json`. Historical notes remain
+historical.
+
+`source_tree_sha256=5813dc1c1ee6392f9b158dc0d325623b06f0dcf20b0aec436dbdf9deb803a9da`
+
+`source_module_count=2473`
+
 Refresh note (2026-09-14): hash-only reconcile after Grafana domain-readiness
 recording-rule coverage and control-plane artifact inventory refresh.
 Counts and the source fingerprint below come from

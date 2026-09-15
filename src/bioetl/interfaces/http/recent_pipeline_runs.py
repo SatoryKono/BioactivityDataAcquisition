@@ -6,6 +6,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import urlencode
 
+from bioetl.application.runtime_clock import current_utc_time
+
 from bioetl.domain.ports import RunManifestPort
 from bioetl.interfaces.http._control_plane_selector_records import (
     RunLedgerLookup,
@@ -171,7 +173,7 @@ def list_recent_pipeline_runs(
         reverse=True,
     )
     items = items[:limit]
-    observed_at = now or datetime.now(UTC)
+    observed_at = now or current_utc_time()
     for item in items:
         item.update(_report_link(item, root))
         item.update(_timing_fields(item, observed_at))

@@ -31,7 +31,7 @@ dashboards:
         type: table
         description: Shared shell panel for Bronze/Silver/Gold accounting
       - id: 9401
-        title: Monitor Replay Readiness
+        title: Monitor Current Readiness
         type: stat
         description:
           Evidence-aware replay/resume verdict; required evidence gaps render

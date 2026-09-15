@@ -43,12 +43,6 @@ seams:
     category: operator_time_allowed
     replay_critical: false
     rationale: Curated memory review uses injectable current time and defaults only for operator maintenance.
-  - path: src/bioetl/interfaces/http/recent_pipeline_runs.py
-    scope: list_recent_pipeline_runs
-    call: datetime.now
-    category: operator_time_allowed
-    replay_critical: false
-    rationale: Operator browse index uses injectable now and defaults only for elapsed display.
   - path: src/bioetl/infrastructure/quality/debt_scorecard.py
     scope: validate_scorecard_registry_sync
     call: date.today

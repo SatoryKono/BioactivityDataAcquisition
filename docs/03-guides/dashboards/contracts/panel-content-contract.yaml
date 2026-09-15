@@ -1125,7 +1125,7 @@ dashboards:
         - not_applicable
         render_profiles: *id001
       '9401':
-        title: Monitor Replay Readiness
+        title: Monitor Current Readiness
         role: confidence
         tier: 1
         scope: current
