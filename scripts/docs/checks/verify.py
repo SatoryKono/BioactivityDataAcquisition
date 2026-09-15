@@ -4,15 +4,31 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import subprocess
 import sys
 import tempfile
+
+
+_MISSING_DOCS_EXTRA = (
+    "[docs-verify] ERROR: mkdocs is not installed. "
+    "Install extra `docs`: `uv sync --extra docs` "
+    r"(Windows: .\.venv-win\Scripts\python.exe -m uv sync --extra docs). "
+    "A missing extra produces this error instead of a cryptic mkdocs traceback."
+)
 
 
 def _run_step(label: str, argv: list[str]) -> int:
     print(f"[docs-verify] {label}: {' '.join(argv)}", flush=True)
     result = subprocess.run(argv, check=False)
     return result.returncode
+
+
+def _require_docs_extra() -> int:
+    if importlib.util.find_spec("mkdocs") is not None:
+        return 0
+    print(_MISSING_DOCS_EXTRA, file=sys.stderr)
+    return 2
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -30,6 +46,11 @@ def main(argv: list[str] | None = None) -> int:
         "--skip-cleanup-inventory",
         action="store_true",
         help="Skip documentation cleanup inventory drift check",
+    )
+    parser.add_argument(
+        "--skip-normalization-matrix",
+        action="store_true",
+        help="Skip pipeline normalization field-matrix --check",
     )
     parser.add_argument(
         "--skip-build", action="store_true", help="Skip strict MkDocs build"
@@ -90,6 +111,19 @@ def main(argv: list[str] | None = None) -> int:
                 ],
             )
         )
+    if not args.skip_normalization_matrix:
+        steps.append(
+            (
+                "generate-pipeline-normalization-matrix",
+                [
+                    sys.executable,
+                    "-m",
+                    "scripts.docs",
+                    "generate-pipeline-normalization-matrix",
+                    "--check",
+                ],
+            )
+        )
 
     for label, argv in steps:
         exit_code = _run_step(label, argv)
@@ -97,6 +131,9 @@ def main(argv: list[str] | None = None) -> int:
             return exit_code
 
     if not args.skip_build:
+        extra_status = _require_docs_extra()
+        if extra_status != 0:
+            return extra_status
         with tempfile.TemporaryDirectory(prefix="bioetl-mkdocs-site-") as site_dir:
             exit_code = _run_step(
                 "strict-build",

@@ -78,7 +78,7 @@ Select the smallest applicable gates; a final V3/V4 audit includes the
 post-change checks required by the touched surfaces.
 
 Do not widen this role to workspace-write. Writes under `reports/audit/**`
-belong to the parent nine-domain-audit synthesizer (reports-only). The
+belong to the parent nine_domain_audit synthesizer (reports-only). The
 product tree stays read-only.
 
 The `.env` and secret guardrails in `AGENTS.md` always apply. Never expose

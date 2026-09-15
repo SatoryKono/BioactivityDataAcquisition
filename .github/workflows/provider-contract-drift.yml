@@ -60,7 +60,6 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           uv-extras: "tests"
-          uv-sync-args: ""
 
       - name: Run replay contract suites
         run: |

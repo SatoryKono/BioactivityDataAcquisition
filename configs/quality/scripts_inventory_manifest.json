@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-14T18:37:53.381424+00:00",
+  "generated_at": "2026-09-15T07:38:37.437887+00:00",
   "summary": {
-    "total_scripts": 617,
+    "total_scripts": 618,
     "status_counts": {
       "active": 338,
-      "supporting": 279
+      "supporting": 280
     },
     "reference_group_coverage": {
-      "agents": 8,
+      "agents": 9,
       "build": 17,
       "ci": 83,
-      "docs": 256,
+      "docs": 258,
       "other": 75,
       "scripts": 516,
       "skills": 12,
-      "tests": 431
+      "tests": 432
     }
   },
   "scripts": [
@@ -2587,13 +2587,19 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "docs/00-project/ai/prompts/README.md",
           "line": 84,
           "source_group": "docs",
           "text": "- Grok project-domain audit workflow: scripts/ai/generate_project_domain_audit_workflow.py -- generates .grok/workflows/project-domain-audit.rhai"
+        },
+        {
+          "path": "tests/architecture/test_nine_domain_audit_rhai_registry.py",
+          "line": 16,
+          "source_group": "tests",
+          "text": "GENERATOR_PATH = ROOT / \"scripts\" / \"ai\" / \"generate_project_domain_audit_workflow.py\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -2606,7 +2612,7 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 12,
       "references": [
         {
           "path": "docs/00-project/ai/README.md",
@@ -2646,15 +2652,15 @@
         },
         {
           "path": "docs/00-project/ai/grok/README.md",
-          "line": 26,
+          "line": 15,
           "source_group": "docs",
-          "text": ".\\scripts\\ai\\grok\\install_skills.ps1"
+          "text": "| `scripts/ai/grok/workflows/*.rhai` | Tracked RHAI workflows; `install_skills.ps1` copies to `.grok/workflows/` |"
         },
         {
           "path": "docs/00-project/ai/grok/README.md",
-          "line": 29,
+          "line": 27,
           "source_group": "docs",
-          "text": ".\\scripts\\ai\\grok\\install_skills.ps1 -Project"
+          "text": ".\\scripts\\ai\\grok\\install_skills.ps1"
         }
       ],
       "owner": "@bioetl-platform",
@@ -2667,7 +2673,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 9,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -2682,6 +2688,30 @@
           "text": "- \"scripts/ai/junie/check_junie_mirror.py\""
         },
         {
+          "path": "AGENTS.md",
+          "line": 101,
+          "source_group": "agents",
+          "text": "`.\\.venv-win\\Scripts\\python.exe scripts/ai/junie/check_junie_mirror.py --check`."
+        },
+        {
+          "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+          "line": 54,
+          "source_group": "docs",
+          "text": "`.\\.venv-win\\Scripts\\python.exe scripts/ai/junie/check_junie_mirror.py --check`."
+        },
+        {
+          "path": "docs/00-project/ai/grok/skills/bioetl-post-change/SKILL.md",
+          "line": 30,
+          "source_group": "docs",
+          "text": ".\\.venv-win\\Scripts\\python.exe scripts/ai/junie/check_junie_mirror.py --check"
+        },
+        {
+          "path": "docs/00-project/ai/grok/skills/bioetl-session/SKILL.md",
+          "line": 66,
+          "source_group": "docs",
+          "text": "`.\\.venv-win\\Scripts\\python.exe scripts/ai/junie/check_junie_mirror.py --check`"
+        },
+        {
           "path": "docs/00-project/governance/script-naming-conventions.md",
           "line": 118,
           "source_group": "docs",
@@ -2692,12 +2722,6 @@
           "line": 43,
           "source_group": "scripts",
           "text": "exec \"$PYTHON_BIN\" \"$SCRIPT_DIR/check_junie_mirror.py\" \"$MODE\""
-        },
-        {
-          "path": "tests/architecture/test_junie_runtime_ci_contract.py",
-          "line": 36,
-          "source_group": "tests",
-          "text": "\"scripts/ai/junie/check_junie_mirror.py\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -5253,7 +5277,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 41,
+      "reference_count": 42,
       "references": [
         {
           "path": "docs/00-project/ai/memory/MEMORY_ARCHITECTURE.md",
@@ -5788,7 +5812,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 179,
+          "line": 174,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.data_quality"
         },
@@ -6028,7 +6052,7 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 108,
+          "line": 110,
           "source_group": "ci",
           "text": "python3 -c 'import json,sys; payload=json.load(open(sys.argv[1], encoding=\"utf-8\")); rows=[item for item in payload.get(\"issues\", []) if item.get(\"rule\") == \"STALE-001\"]; print(\"Scheduled diagram fres"
         },
@@ -6142,19 +6166,19 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 44,
+          "line": 46,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 292,
+          "line": 287,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 412,
+          "line": 407,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
@@ -6199,13 +6223,13 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 76,
+          "line": 78,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_quality_gates.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 434,
+          "line": 429,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_quality_gates.py \\"
         },
@@ -6264,25 +6288,25 @@
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 56,
+          "line": 58,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_visual_smoke.py \\"
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 62,
+          "line": 64,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_visual_smoke.py \\"
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 69,
+          "line": 71,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_visual_smoke.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 423,
+          "line": 418,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_visual_smoke.py \\"
         },
@@ -6348,25 +6372,25 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 50,
+          "line": 52,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 231,
+          "line": 233,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py --manifest \"$manifest_tmp\""
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 295,
+          "line": 290,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 417,
+          "line": 412,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
@@ -6796,7 +6820,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 429,
+          "line": 424,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/fix/harmonize_link_styles.py --dry-run --fail-on-errors"
         },
@@ -7033,7 +7057,7 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 130,
+          "line": 132,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/enforce_diagram_quality_budget.py \\"
         },
@@ -7086,13 +7110,13 @@
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 83,
+          "line": 85,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams --json \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 367,
+          "line": 362,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/lint_diagrams.py \"${lint_targets[@]}\" --json > /tmp/diagram-lint.json"
         },
@@ -7137,7 +7161,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 370,
+          "line": 365,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -7403,19 +7427,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/workflows/architecture-docs-nightly.yml",
           "line": 39,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/diagrams/render/generate_package_family_class_diagrams.py --check"
-        },
-        {
-          "path": ".github/workflows/docs.yml",
-          "line": 90,
-          "source_group": "ci",
-          "text": "scripts/diagrams/render/generate_package_family_class_diagrams.py --check"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
@@ -7451,7 +7469,7 @@
           "path": "tests/architecture/test_docs_governance_workflow.py",
           "line": 69,
           "source_group": "tests",
-          "text": "assert \"generate_package_family_class_diagrams.py --check\" in workflow"
+          "text": "assert \"generate_package_family_class_diagrams.py --check\" not in workflow"
         }
       ]
     },
@@ -7769,7 +7787,7 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 121,
+          "line": 123,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/run_diagram_nightly_suite.py \\"
         },
@@ -7879,13 +7897,13 @@
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 207,
+          "line": 209,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 326,
+          "line": 321,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -7991,7 +8009,7 @@
         "ORCHESTRATION",
         "py-doc-bot"
       ],
-      "reference_count": 216,
+      "reference_count": 215,
       "references": [
         {
           "path": ".codex/agents/ORCHESTRATION.md",
@@ -8251,7 +8269,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 168,
+          "line": 163,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.docs check-links --report-json reports/docs-link-check-report.json"
         },
@@ -11102,7 +11120,7 @@
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
           "line": 607,
           "source_group": "docs",
-          "text": ".\\run_mypy.ps1"
+          "text": ".\\scripts\\engineering\\dev\\run_mypy.ps1"
         },
         {
           "path": "docs/03-guides/development/pycharm-setup.md",
@@ -11167,7 +11185,7 @@
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
           "line": 617,
           "source_group": "docs",
-          "text": "./run_mypy.sh"
+          "text": "bash scripts/engineering/dev/run_mypy.sh"
         }
       ]
     },
@@ -11611,7 +11629,7 @@
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
           "line": 603,
           "source_group": "docs",
-          "text": ".\\setup_env_windows.ps1"
+          "text": ".\\scripts\\engineering\\dev\\setup_env_windows.ps1"
         }
       ]
     },
@@ -11662,7 +11680,7 @@
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
           "line": 613,
           "source_group": "docs",
-          "text": "./setup_env_wsl.sh"
+          "text": "bash scripts/engineering/dev/setup_env_wsl.sh"
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -12520,6 +12538,18 @@
       "next_step": "Retain as a bounded generator of zero-arg Grok workflow cards; keep it supporting until the workflow catalog is owned by a governed scripts.engineering.qa command."
     },
     {
+      "path": "scripts/engineering/qa/_parse_junit_failures.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-11-17",
+      "next_step": "Retain as a bounded junitxml failure parser for local pytest triage; keep it supporting until failure summarization is owned by a governed scripts.engineering.qa command."
+    },
+    {
       "path": "scripts/engineering/qa/analyze_duplicate_functions.py",
       "type": "py",
       "status": "supporting",
@@ -12678,7 +12708,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
@@ -12691,6 +12721,12 @@
           "line": 91,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.qa check-c901 --target src/bioetl"
+        },
+        {
+          "path": "docs/03-guides/cheatsheets/cli-commands.md",
+          "line": 567,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.qa check-c901              # Проверка сложности C901"
         },
         {
           "path": "scripts/engineering/qa/README.md",
@@ -14134,13 +14170,13 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 186,
+          "line": 181,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 190,
+          "line": 185,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --update"
         },
@@ -15997,7 +16033,7 @@
         },
         {
           "path": "tests/architecture/test_arch_s4_s9_gates.py",
-          "line": 12,
+          "line": 13,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_lazy_import_inventory import ("
         },
@@ -16049,7 +16085,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
-          "line": 95,
+          "line": 97,
           "source_group": "docs",
           "text": "generator from `scripts/engineering/qa/report_module_coverage_inventory.py`"
         },
@@ -16384,7 +16420,7 @@
         },
         {
           "path": "tests/architecture/test_arch_s4_s9_gates.py",
-          "line": 33,
+          "line": 34,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_source_tree_manifest import ("
         }
@@ -17315,7 +17351,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 165,
+          "line": 160,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo check-versions"
         },
@@ -17589,7 +17625,7 @@
         },
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 532,
+          "line": 549,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -17705,7 +17741,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 11,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -17718,6 +17754,12 @@
           "line": 290,
           "source_group": "ci",
           "text": "check-catalog --catalog scripts/engineering/repo/catalog.yaml"
+        },
+        {
+          "path": "docs/03-guides/cheatsheets/cli-commands.md",
+          "line": 594,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.repo check-catalog         # Каталог"
         },
         {
           "path": "scripts/engineering/README.md",
@@ -17748,12 +17790,6 @@
           "line": 51,
           "source_group": "scripts",
           "text": "\"check-catalog\": \"check_scripts_catalog.py\","
-        },
-        {
-          "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 152,
-          "source_group": "scripts",
-          "text": "\"check-catalog\": \"scripts/engineering/repo/check_scripts_catalog.py\","
         }
       ]
     },
@@ -17762,7 +17798,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 23,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -17789,6 +17825,12 @@
           "text": "- `scripts/engineering/repo/check_scripts_inventory.py` - Script inventory"
         },
         {
+          "path": "docs/03-guides/cheatsheets/cli-commands.md",
+          "line": 593,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.repo check-inventory       # Инвентарь репозитория"
+        },
+        {
           "path": "docs/03-guides/script-management/README.md",
           "line": 67,
           "source_group": "docs",
@@ -17805,12 +17847,6 @@
           "line": 585,
           "source_group": "scripts",
           "text": "\"$PYTHON_BIN\" -m scripts.engineering.repo check-inventory \\"
-        },
-        {
-          "path": "scripts/engineering/repo/README.md",
-          "line": 18,
-          "source_group": "scripts",
-          "text": "| `check-inventory`       | `check_scripts_inventory.py`     | Check scripts inventory drift against manifest                        |"
         }
       ]
     },
@@ -17907,7 +17943,7 @@
       "references": [
         {
           "path": "AGENTS.md",
-          "line": 120,
+          "line": 122,
           "source_group": "agents",
           "text": "`scripts/engineering/repo/cleanup_root_local_clutter.py`. See"
         },
@@ -18734,13 +18770,13 @@
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
           "line": 589,
           "source_group": "docs",
-          "text": "python -m scripts.ops.data delta                         # Delta operations"
+          "text": "python -m scripts.ops.data check-delta                   # Delta operations"
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
           "line": 590,
           "source_group": "docs",
-          "text": "python -m scripts.ops.data data_dir                      # Data directory operations"
+          "text": "python -m scripts.ops.data check-data-dir                # Data directory operations"
         },
         {
           "path": "docs/04-reference/templates/pipeline-review-checklist.md",
@@ -19542,7 +19578,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 452,
+          "line": 469,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }
@@ -19926,7 +19962,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 869,
+          "line": 880,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._dashboard_state_followup import ("
         },
@@ -20305,7 +20341,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 864,
+          "line": 875,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },
@@ -20612,7 +20648,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 14,
       "references": [
         {
           "path": ".github/ISSUES/DS2-2026-07-28-DASHBOARD-SYSTEM-2-REFACTOR-ISSUE-PACK.md",
@@ -20980,8 +21016,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "docs/05-operations/monitoring-architecture.md",
+          "line": 403,
+          "source_group": "docs",
+          "text": "python scripts/ops/observability/start_read_only_audit_stack.py \\"
+        },
         {
           "path": "tests/unit/scripts/ops/observability/test_start_read_only_audit_stack.py",
           "line": 27,
@@ -21700,7 +21742,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 95,
+      "reference_count": 98,
       "references": [
         {
           "path": "Makefile",
@@ -21728,27 +21770,27 @@
         },
         {
           "path": "docs/05-operations/01-monitoring-guide.md",
-          "line": 274,
+          "line": 277,
           "source_group": "docs",
           "text": "`python scripts/ops/runtime/docker/runtime_manager.py status --stack main`"
         },
         {
-          "path": "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
-          "line": 138,
+          "path": "docs/05-operations/monitoring-architecture.md",
+          "line": 448,
           "source_group": "docs",
-          "text": "python scripts/ops/runtime/docker/runtime_manager.py check --stack main"
+          "text": "python scripts/ops/runtime/docker/runtime_manager.py ensure-networks --stack main"
         },
         {
-          "path": "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
-          "line": 139,
+          "path": "docs/05-operations/monitoring-architecture.md",
+          "line": 451,
           "source_group": "docs",
-          "text": "python scripts/ops/runtime/docker/runtime_manager.py status --stack main"
+          "text": "python scripts/ops/runtime/docker/runtime_manager.py start --stack main"
         },
         {
-          "path": "docs/05-operations/runbooks/docker-compose-project-migration.md",
-          "line": 68,
+          "path": "docs/05-operations/monitoring-architecture.md",
+          "line": 456,
           "source_group": "docs",
-          "text": "| `monitoring` | `bioetl-monitoring` | `bioetl-main`, `bioetl-monitoring` | `runtime_manager.py` |"
+          "text": "python scripts/ops/runtime/docker/runtime_manager.py start --stack monitoring"
         }
       ],
       "owner": "@bioetl-platform",
@@ -23643,7 +23685,7 @@
         },
         {
           "path": "tests/architecture/test_gitignore_secret_and_agents_policy.py",
-          "line": 45,
+          "line": 77,
           "source_group": "tests",
           "text": "ps1 = (ROOT / \"scripts\" / \"startup.ps1\").read_text(encoding=\"utf-8\")"
         },
@@ -23680,7 +23722,7 @@
         },
         {
           "path": "tests/architecture/test_gitignore_secret_and_agents_policy.py",
-          "line": 44,
+          "line": 76,
           "source_group": "tests",
           "text": "sh = (ROOT / \"scripts\" / \"startup.sh\").read_text(encoding=\"utf-8\")"
         },

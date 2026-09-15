@@ -547,8 +547,8 @@ make test-fast && make qa-arch-fast
 # Запуск конкретного пайплайна
 make run-local PIPELINE=chembl_target
 
-# Cleanup с применением
-make clean-local-artifacts --apply
+# Cleanup локальных артефактов
+make clean-local-artifacts
 
 # Рендер диаграмм для документации
 make render-diagrams-all
@@ -562,37 +562,37 @@ ______________________________________________________________________
 
 ```bash
 # QA скрипты (scripts/engineering/qa)
-python -m scripts.engineering.qa naming_check           # Проверка именования C901
-python -m scripts.engineering.qa terminology_check      # Проверка терминологии
-python -m scripts.engineering.qa c901_complexity_check  # Проверка сложности C901
+python -m scripts.engineering.qa check-naming            # Проверка именования
+python -m scripts.engineering.qa check-terminology       # Проверка терминологии
+python -m scripts.engineering.qa check-c901              # Проверка сложности C901
 
 # CI скрипты (scripts/engineering/ci)
 python -m scripts.engineering.ci quality-gate            # Quality gates
-python -m scripts.engineering.ci test_runner             # Test runner
+python -m scripts.engineering.ci run-tests               # Test runner
 
 # Schema скрипты (scripts/schema)
-python -m scripts.schema config_validation              # Валидация конфигурации
-python -m scripts.schema config_generation               # Генерация конфигурации
+python -m scripts.schema validate-configs                # Валидация конфигурации
+python -m scripts.schema generate-pipeline               # Генерация pipeline JSON schema
 
 # Docs скрипты (scripts/docs)
-python -m scripts.docs link_check                        # Проверка ссылок
-python -m scripts.docs drift_check                       # Проверка drift
-python -m scripts.docs docstring_check                   # Проверка docstrings
+python -m scripts.docs check-links                       # Проверка ссылок
+python -m scripts.docs check-drift                       # Проверка drift
+python -m scripts.docs check-docstrings                  # Проверка docstrings
 
 # Diagrams скрипты (scripts/diagrams)
-python -m scripts.diagrams diagram_lint                  # Lint диаграмм
-python -m scripts.diagrams diagram_check                 # Проверка диаграмм
-python -m scripts.diagrams diagram_render                # Рендер диаграмм
+python -m scripts.diagrams lint                          # Lint диаграмм
+python -m scripts.diagrams checks                        # Проверка диаграмм
+python -m scripts.diagrams docs-agent                    # Рендер/docs pipeline диаграмм
 
 # Data operations (scripts/ops/data)
 python -m scripts.ops.data checksums                     # Checksums
-python -m scripts.ops.data delta                         # Delta operations
-python -m scripts.ops.data data_dir                      # Data directory operations
+python -m scripts.ops.data check-delta                   # Delta operations
+python -m scripts.ops.data check-data-dir                # Data directory operations
 
 # Repo operations (scripts/engineering/repo)
-python -m scripts.engineering.repo inventory             # Инвентарь репозитория
-python -m scripts.engineering.repo catalog               # Каталог
-python -m scripts.engineering.repo versions              # Версии
+python -m scripts.engineering.repo check-inventory       # Инвентарь репозитория
+python -m scripts.engineering.repo check-catalog         # Каталог
+python -m scripts.engineering.repo check-versions        # Версии
 ```
 
 ### OS-Specific Wrappers
@@ -600,21 +600,21 @@ python -m scripts.engineering.repo versions              # Версии
 #### Windows PowerShell
 ```powershell
 # Setup
-.\setup_env_windows.ps1
+.\scripts\engineering\dev\setup_env_windows.ps1
 
 # Testing
-.\run_pytest.ps1
-.\run_mypy.ps1
+.\scripts\engineering\dev\run_pytest.ps1
+.\scripts\engineering\dev\run_mypy.ps1
 ```
 
 #### WSL/Linux
 ```bash
 # Setup
-./setup_env_wsl.sh
+bash scripts/engineering/dev/setup_env_wsl.sh
 
 # Testing
-./run_pytest.sh
-./run_mypy.sh
+bash scripts/engineering/dev/run_pytest.sh
+bash scripts/engineering/dev/run_mypy.sh
 ```
 
 ### Memory Workflow Commands

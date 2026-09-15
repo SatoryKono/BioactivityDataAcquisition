@@ -208,6 +208,30 @@ def test_unit_and_architecture_forbid_unconditional_skip_marker() -> None:
     )
 
 
+def test_architecture_platform_skips_are_reviewed() -> None:
+    """Windows/WSL FS-heavy architecture skips stay inventoried (#10418)."""
+    payload = _load_inventory()
+    entries = payload["architecture_platform_skips"]
+    expected = {
+        "tests/architecture/test_public_surface_importer_census_governance.py",
+        "tests/architecture/test_public_facade_inventory.py",
+        "tests/architecture/test_domain_composite_config_importer_map.py",
+        "tests/architecture/test_diagram_drift_and_embed_guards.py",
+    }
+    tracked = {entry["path"]: entry for entry in entries}
+    assert set(tracked) == expected
+    allowed_categories = set(payload["allowed_categories"])
+    for path, entry in tracked.items():
+        source = (ROOT / path).read_text(encoding="utf-8")
+        assert "mounted_worktree_skip_reason" in source, path
+        assert entry["suite"] == "architecture", path
+        assert entry["category"] in allowed_categories, path
+        assert entry["lifecycle"] == "permanent_policy", path
+        assert str(entry["owner"]).startswith("@bioetl-"), path
+        assert str(entry["linked_issue"]) == "#10418", path
+        assert entry["reviewed_skip_calls"] == _skip_call_count(ROOT / path), path
+
+
 def test_e2e_matrix_replay_deferred_matches_inventory() -> None:
     """PR e2e-smoke exclusions are reviewed, not silent pytest.skip sites (#9729)."""
     payload = _load_inventory()

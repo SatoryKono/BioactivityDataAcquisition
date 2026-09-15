@@ -682,7 +682,8 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
     )
     by_id = {panel.get("id"): panel for panel in root}
     if 9400 in by_id:
-        by_id[9400]["options"]["content"] = _RECOVERY_ACTION_HTML
+        options = by_id[9400].setdefault("options", {})
+        options["content"] = _RECOVERY_ACTION_HTML
         by_id[9400]["description"] = (
             "CURRENT readiness is pipeline/run_type telemetry. SELECTED RUN Trust "
             "and retention tables are exact-run persisted evidence. An incomplete "

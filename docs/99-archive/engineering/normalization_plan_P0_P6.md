@@ -1,8 +1,8 @@
 ______________________________________________________________________
 
 Version: 1.1.0
-Status: active
-Class: published
+Status: archived
+Class: archive
 Owner: Architecture / Domain
 Reviewers:
 

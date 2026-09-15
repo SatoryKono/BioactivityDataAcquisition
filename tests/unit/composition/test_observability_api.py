@@ -157,7 +157,7 @@ def test_push_metrics_to_gateway_seeds_required_series_before_integrity_refresh(
             "refresh_control_plane_integrity_metrics",
         ) as refresh,
         mock.patch(
-            "bioetl.infrastructure.observability.required_publication_series."
+            "bioetl.composition.observability_runtime."
             "ensure_required_control_plane_publication_series",
             _seed,
         ),
@@ -200,7 +200,7 @@ def test_push_metrics_to_gateway_seeds_pipeline_names_with_incremental_default()
             side_effect=_refresh,
         ),
         mock.patch(
-            "bioetl.infrastructure.observability.required_publication_series."
+            "bioetl.composition.observability_runtime."
             "ensure_required_control_plane_publication_series",
             _seed,
         ),
@@ -429,7 +429,7 @@ def test_get_metrics_operator_profile_reports_enabled_and_disabled_modes() -> No
             return_value=enabled_settings,
         ),
         mock.patch(
-            "bioetl.composition._services.get_metrics_service",
+            "bioetl.composition.observability_metrics_profile._services.get_metrics_service",
             return_value=metrics_service,
         ),
     ):
@@ -464,7 +464,7 @@ def test_get_metrics_operator_profile_reports_enabled_and_disabled_modes() -> No
             return_value=disabled_settings,
         ),
         mock.patch(
-            "bioetl.composition._services.get_metrics_service",
+            "bioetl.composition.observability_metrics_profile._services.get_metrics_service",
             return_value=metrics_service,
         ),
     ):

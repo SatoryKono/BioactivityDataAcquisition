@@ -5,8 +5,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: docs-governance-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 on:
   workflow_call:
@@ -83,11 +83,6 @@ jobs:
           uv run --frozen --no-build python -m scripts.diagrams generate-dataflows \
             --pipeline chembl_activity \
             --check
-
-      - if: ${{ false }} # Full-corpus package-family generation is disabled.
-        run: |
-          uv run --frozen --no-build python \
-            scripts/diagrams/render/generate_package_family_class_diagrams.py --check
 
       - name: Check pipeline and workflow passport drift
         run: uv run --frozen --no-build python -m scripts.docs passports check
