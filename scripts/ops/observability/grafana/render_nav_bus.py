@@ -715,6 +715,40 @@ def _layout_runtime_detail_panels(panels: list[object]) -> None:
         children.sort(key=lambda child: (child["gridPos"]["y"], child["gridPos"]["x"]))
 
 
+def _layout_dq_detail_panels(panels: list[object]) -> None:
+    """Keep paired DQ evidence panels aligned during Grafana grid compaction."""
+    layouts = {
+        220: {
+            152: (0, 0, 24, 3),
+            121: (0, 3, 12, 6),
+            122: (12, 3, 12, 6),
+            118: (0, 9, 12, 6),
+            156: (12, 9, 12, 6),
+        },
+        221: {
+            12: (0, 9, 12, 4),
+            151: (12, 9, 12, 4),
+            10: (0, 13, 12, 6),
+            11: (12, 13, 12, 6),
+            155: (0, 19, 12, 6),
+            153: (12, 19, 12, 6),
+            116: (0, 25, 24, 4),
+            150: (0, 29, 24, 4),
+        },
+    }
+    for row in _root_panels(panels):
+        layout = layouts.get(row.get("id"))
+        if layout is None:
+            continue
+        base_y = row["gridPos"]["y"] + 1
+        children = row.get("panels", [])
+        for child in children:
+            if position := layout.get(child.get("id")):
+                x, offset, width, height = position
+                child["gridPos"].update(x=x, y=base_y + offset, w=width, h=height)
+        children.sort(key=lambda child: (child["gridPos"]["y"], child["gridPos"]["x"]))
+
+
 def _normalize_collapsed_row_children(panels: list[object]) -> None:
     """Repair the one-row child drift left by legacy recursive nav shifts."""
     for row in _root_panels(panels):
@@ -1035,6 +1069,8 @@ def apply_to_dashboard(
         _layout_overview_detail_panels(panels)
     if current_uid == "bioetl-runtime":
         _layout_runtime_detail_panels(panels)
+    if current_uid == "bioetl-dq-v2":
+        _layout_dq_detail_panels(panels)
     nav["options"] = {
         "mode": "html",
         "bioetlDisplayTitle": NAV_DISPLAY_TITLE,

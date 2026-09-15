@@ -21,7 +21,7 @@
   },
   "dashboard_sha256": {
     "bioetl-control-plane-v1": "ede74e8a3c6d5596ef0093c3981ad91c7a6f5e5a164d83f0d26fec8e122f09af",
-    "bioetl-dq-v2": "2b1596a27a0d66a08f245e639e5ed4df74a6ffa0c4505da83fdc99c8348a13a0",
+    "bioetl-dq-v2": "617c948eaad0a362dd8703102fc1a9b979533970addedb1f9d6c455febae9d75",
     "bioetl-incident-v1": "7ae4a424352b594aabb3b6b9e5fb121746f507012c89d4ea8d61c3e7a45dbd76",
     "bioetl-overview-v2": "909776b7e056fdef55cc4dde2a4d9e677aec8d5ae2e17fbc3027961bc685de6d",
     "bioetl-provider-health-v2": "928b6fb15c09f3cf1844015895f5a3f5e4f32baa24fb2c03c78df6fdc88a74e1",
@@ -1513,14 +1513,14 @@
       "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-dq-v2",
-      "panel_id": 3,
-      "panel_title": "Monitor Bronze Records",
+      "panel_id": 4,
+      "panel_title": "Monitor Gold Records",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])))"
+          "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}[$__range])))"
         ],
         "target_count": 1
       }
@@ -1532,14 +1532,14 @@
       "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-dq-v2",
-      "panel_id": 4,
-      "panel_title": "Monitor Gold Records",
+      "panel_id": 3,
+      "panel_title": "Monitor Bronze Records",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}[$__range])))"
+          "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])))"
         ],
         "target_count": 1
       }
