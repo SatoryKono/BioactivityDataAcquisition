@@ -1,5 +1,15 @@
 # Сводка evidence: project-package-topology
 
+Refresh note (2026-09-15): hash-only reconcile after pytest-zero loop
+(source-tree rebind, archive operator test, Grafana copy). Counts and the
+source fingerprint below come from
+`reports/quality/module-coverage-inventory.json`. Historical notes remain
+historical.
+
+`source_tree_sha256=1936abd45a122c8d10e54283cf87f468df626c9c7715a9059e17317d692217ef`
+
+`source_module_count=2475`
+
 Refresh note (2026-09-15): hash-only reconcile after architecture closeout
 rebind (logger port facade, publication recording rules, hotspot inventories).
 Counts and the source fingerprint below come from
