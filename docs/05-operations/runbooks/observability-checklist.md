@@ -396,6 +396,20 @@ their spaces and hash characters. This check does not prove algebraic equivalenc
 and does not replace promtool syntax and rule-vector validation. A parity check
 skipped because Prometheus is unreachable is not a pass.
 
+The live panel auditor follows each target's instant/range flags. Legacy targets
+without flags use range queries, matching the inspected shipped Grafana panels.
+Range evidence includes every returned matrix sample; an empty instant response
+does not establish an empty historical chart. Targets requesting both modes keep
+both responses; differing empty/populated results require review. Unsupported
+native histogram samples fail shape validation instead of being silently omitted.
+
+The explicit audit range step defaults to 300 seconds and can be set with
+`--prometheus-step-seconds` to match the panel's inspected Query options. This
+does not reproduce Grafana's viewport-dependent resolution or time alignment.
+The auditor's interval and rate-interval macro substitutions remain fixed at five
+minutes; changing the range step changes evaluation spacing only. Record these
+settings and inspect the rendered panel before claiming browser parity.
+
 ### 7. Operator Sign-off
 
 - [ ] Metrics endpoint is reachable
