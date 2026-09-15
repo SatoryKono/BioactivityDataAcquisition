@@ -848,7 +848,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Scope health for the selected pipeline. Palette includes UNKNOWN when evidence is missing. UNKNOWN means evidence incomplete, not healthy.",
+      "description": "CURRENT · Scope health for the selected pipeline. Palette: 0=OK, 1=WARN, 2=CRIT, 3/null=UNKNOWN. UNKNOWN means evidence incomplete, not OK.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3180,7 +3180,7 @@
               }
             }
           ],
-          "description": "CURRENT snapshot · Same evidence-qualified domain verdict as Review Domain Status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, 2=CRIT, and null/3=UNKNOWN. Missing coverage cannot be replaced by an unqualified L1 OK. Run ID does not filter CURRENT. Historical lifecycle tracks remain separate; this is not selected-run trust."
+          "description": "TIME RANGE · CURRENT snapshot · Same evidence-qualified domain verdict as Review Domain Status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, 2=CRIT, and null/3=UNKNOWN. Missing coverage cannot be replaced by an unqualified L1 OK. Run ID does not filter CURRENT. Historical lifecycle tracks remain separate; this is not selected-run trust."
         },
         {
           "id": 9003,
@@ -3363,7 +3363,7 @@
               }
             }
           ],
-          "description": "CURRENT snapshot · Same evidence-qualified domain verdict as Review Domain Status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, 2=CRIT, and null/3=UNKNOWN. Missing coverage cannot be replaced by an unqualified L1 OK. Run ID does not filter CURRENT. Historical lifecycle tracks remain separate; this is not selected-run trust."
+          "description": "TIME RANGE · CURRENT snapshot · Same evidence-qualified domain verdict as Review Domain Status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, 2=CRIT, and null/3=UNKNOWN. Missing coverage cannot be replaced by an unqualified L1 OK. Run ID does not filter CURRENT. Historical lifecycle tracks remain separate; this is not selected-run trust."
         },
         {
           "id": 9004,
@@ -3546,7 +3546,7 @@
               }
             }
           ],
-          "description": "CURRENT snapshot · Same evidence-qualified domain verdict as Review Domain Status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, 2=CRIT, and null/3=UNKNOWN. Missing coverage cannot be replaced by an unqualified L1 OK. Run ID does not filter CURRENT. Historical lifecycle tracks remain separate; this is not selected-run trust."
+          "description": "TIME RANGE · CURRENT snapshot · Same evidence-qualified domain verdict as Review Domain Status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, 2=CRIT, and null/3=UNKNOWN. Missing coverage cannot be replaced by an unqualified L1 OK. Run ID does not filter CURRENT. Historical lifecycle tracks remain separate; this is not selected-run trust."
         },
         {
           "id": 9007,
@@ -3912,7 +3912,7 @@
               }
             }
           ],
-          "description": "CURRENT snapshot · Same evidence-qualified domain verdict as Review Domain Status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, 2=CRIT, and null/3=UNKNOWN. Missing coverage cannot be replaced by an unqualified L1 OK. Run ID does not filter CURRENT. Historical lifecycle tracks remain separate; this is not selected-run trust."
+          "description": "TIME RANGE · CURRENT snapshot · Same evidence-qualified domain verdict as Review Domain Status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, 2=CRIT, and null/3=UNKNOWN. Missing coverage cannot be replaced by an unqualified L1 OK. Run ID does not filter CURRENT. Historical lifecycle tracks remain separate; this is not selected-run trust."
         },
         {
           "id": 9013,
@@ -4111,7 +4111,7 @@
               }
             }
           ],
-          "description": "CURRENT snapshot · Same evidence-qualified domain verdict as Review Domain Status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, 2=CRIT, and null/3=UNKNOWN. Missing coverage cannot be replaced by an unqualified L1 OK. Run ID does not filter CURRENT. Historical lifecycle tracks remain separate; this is not selected-run trust."
+          "description": "TIME RANGE · CURRENT snapshot · Same evidence-qualified domain verdict as Review Domain Status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, 2=CRIT, and null/3=UNKNOWN. Missing coverage cannot be replaced by an unqualified L1 OK. Run ID does not filter CURRENT. Historical lifecycle tracks remain separate; this is not selected-run trust."
         },
         {
           "description": "Compact operator navigation after workflow and domain status review; links preserve only bounded selectors.",
