@@ -121,7 +121,7 @@ ______________________________________________________________________
 - **Максимальная простота:** Этот слой должен быть как можно более "глупым". Его задача — делегировать работу другим слоям, а не выполнять её самому.
 - **Единственная ответственность:** Единственная ответственность этого слоя — запуск приложения и управление его жизненным циклом на самом верхнем уровне.
 - **Без прямого Infrastructure coupling:** `interfaces` может импортировать `domain`, `application` и `composition`, но не должен напрямую импортировать `infrastructure`; конкретные adapters и storage implementations подключаются только через Composition layer.
-- **CLI-local process lifecycle:** detached helper processes that exist only to support a CLI command may stay in `interfaces` when they are isolated from `infrastructure` imports and expose injectable start/probe seams. Current approved case: `src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py` owns the local observability backend startup/probe lifecycle for health diagnostics; Composition remains responsible for concrete runtime service wiring.
+- **CLI-local process lifecycle:** CLI façades must not own subprocess/HTTP I/O. Current case: `src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py` remains the CLI entry; `src/bioetl/composition/observability_backend.py` wires the infrastructure adapters `observability_backend_process.py` and `observability_backend_probes.py`; application `observability_backend_startup.py` orchestrates injected start/probe/wait seams.
 
 ______________________________________________________________________
 
