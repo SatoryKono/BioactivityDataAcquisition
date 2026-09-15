@@ -1435,7 +1435,7 @@
       "dashboard_uid": "bioetl-control-plane-v1",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
-      "documents_valid_empty": false,
+      "documents_valid_empty": true,
       "empty_state": "valid_empty",
       "formula": "sum by (terminal_status) (last_over_time(bioetl_control_plane_terminal_events_total{pipeline=~\"$pipeline\"}[$__range]))",
       "kind": "promql",
