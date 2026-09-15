@@ -75,7 +75,7 @@ the composition wiring seam.
 | --- | --- | --- |
 | Coverage inventory | `reports/quality/module-coverage-inventory.json` | Coverage-fact rows for `src/bioetl/**/*.py` that still exist in the tree (currently 2474 rows; live tree 2474 files). `report-module-coverage --check --allow-missing-coverage-xml` refreshes `source_tree_sha256` and drops deleted paths; new modules are added only from a coverage XML refresh (`--refresh-nonregressing-from-coverage-xml` or the coverage-verify lane). |
 | Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Live modules with a resolvable hexagonal layer + group (currently 2472). Excludes package-root `bioetl` and `bioetl.__main__` (no hexagonal layer tag). |
-| import-linter | `lint-imports --no-cache` (`.importlinter`) | Importable files in the `bioetl` package graph (last recorded 2398 files; not re-measured in the 2026-09-15 W0 pass). Excludes stubs / non-imported modules |
+| import-linter | `lint-imports --no-cache` (`.importlinter`) | Importable files in the `bioetl` package graph (2423 files in the 2026-09-15 W0 closeout pass). Excludes stubs / non-imported modules |
 
 `families_at_budget` on the architecture scorecard (currently
 `application_services_control_plane` fan-in 2/2 and

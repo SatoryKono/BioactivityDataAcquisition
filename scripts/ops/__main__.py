@@ -22,7 +22,7 @@ Stable commands:
     check-bioetl-prometheus-scrape
                        Fail-closed smoke: BioETL Prometheus scrape target must be UP
     archive-control-plane
-                       Archive or verify isolated local control-plane evidence
+                       Create or verify a local control-plane archive copy
     ensure-quarantine-explorer
                        REMOVED stub (exit 2): Quarantine Explorer UI no longer shipped
     run-grafana-audit-cycle

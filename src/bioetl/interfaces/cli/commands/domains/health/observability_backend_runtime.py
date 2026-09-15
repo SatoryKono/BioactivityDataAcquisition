@@ -29,7 +29,6 @@ from bioetl.composition.observability_backend import (
     DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS,
     DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PATHS_READY_TIMEOUT_SECONDS,
     DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PROBE_TIMEOUT_SECONDS,
-    _build_detached_backend_env as _composition_build_detached_backend_env,
     _build_detached_backend_popen_kwargs,
     _build_observability_backend_probe_urls,
     build_detached_backend_log_path,
@@ -38,14 +37,21 @@ from bioetl.composition.observability_backend import (
     probe_observability_backend,
     probe_observability_backend_required_paths,
     python_executable_to_tuple,
-    start_detached_quarantine_backend as _composition_start_detached_quarantine_backend,
     wait_for_observability_backend_ready,
     wait_for_observability_backend_required_paths_ready,
+)
+from bioetl.composition.observability_backend import (
+    _build_detached_backend_env as _composition_build_detached_backend_env,
+)
+from bioetl.composition.observability_backend import (
+    start_detached_quarantine_backend as _composition_start_detached_quarantine_backend,
 )
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details import (
     _append_backend_startup_diagnostic,
     _build_startup_failure_detail,
     _describe_required_probe_failure,
+)
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details import (
     _read_backend_startup_log_excerpt as _read_backend_startup_log_excerpt,
 )
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (

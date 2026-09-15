@@ -1,8 +1,4 @@
-"""Composition-owned wiring for the detached observability backend.
-
-Infrastructure process/HTTP adapters are assembled here so interface adapters
-and application use-cases do not import concrete I/O modules.
-"""
+"""Wire detached observability backend infrastructure adapters."""
 
 from __future__ import annotations
 
@@ -37,7 +33,7 @@ from bioetl.infrastructure.observability.observability_backend_probes import (
 
 def _build_detached_backend_env(
     *,
-    current_env: Mapping[str, str] | None = None,
+    current_env: Mapping[str, str],
 ) -> dict[str, str]:
     return _infra_build_detached_backend_env(current_env=current_env)
 
@@ -48,7 +44,7 @@ def start_detached_ops_http_backend(
     port: int = DEFAULT_HEALTH_SERVER_PORT,
     python_executable: str | None = None,
     data_root: Path | None = None,
-    current_env: Mapping[str, str] | None = None,
+    current_env: Mapping[str, str],
     popen_factory: Callable[..., subprocess.Popen[bytes]] = subprocess.Popen,
 ) -> subprocess.Popen[bytes]:
     return _infra_start_detached_ops_http_backend(
@@ -67,7 +63,7 @@ def start_detached_quarantine_backend(
     port: int = DEFAULT_HEALTH_SERVER_PORT,
     python_executable: str | None = None,
     data_root: Path | None = None,
-    current_env: Mapping[str, str] | None = None,
+    current_env: Mapping[str, str],
     popen_factory: Callable[..., subprocess.Popen[bytes]] = subprocess.Popen,
 ) -> subprocess.Popen[bytes]:
     return _infra_start_detached_quarantine_backend(

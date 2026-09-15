@@ -1,5 +1,3 @@
-"""Support helpers for constructing run manifest payloads."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -41,7 +39,7 @@ from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
 )
 from bioetl.domain.control_plane import ReplayCapability, RunSourceRef
 from bioetl.domain.control_plane.reproducibility_policy import (
-    resolve_replay_capability as _resolve_policy_replay_capability,
+    resolve_replay_capability as _resolve_replay,
 )
 
 __all__ = [
@@ -106,7 +104,4 @@ def resolve_replay_capability(
     source_refs: tuple[RunSourceRef, ...],
     resume_requested: bool,
 ) -> ReplayCapability:
-    return _resolve_policy_replay_capability(
-        source_refs=source_refs,
-        resume_requested=resume_requested,
-    )
+    return _resolve_replay(source_refs=source_refs, resume_requested=resume_requested)

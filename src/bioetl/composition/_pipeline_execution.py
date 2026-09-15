@@ -22,6 +22,9 @@ from bioetl.composition.bootstrap.runtime.pipeline_context_builder import (
     capture_runtime_timing_anchor,
     derive_completion_timestamp,
 )
+from bioetl.composition.bootstrap.runtime.observability import (
+    maybe_start_metrics_server as _maybe_start_metrics_server,
+)
 from bioetl.composition.factories.pipeline.runner import create_metrics_extractor
 from bioetl.composition.runtime_builders.config_access import (
     get_settings as _get_settings_impl,
@@ -56,12 +59,8 @@ def get_settings() -> Settings:
 
 
 def maybe_start_metrics_server(settings: Settings) -> bool:
-    """Resolve metrics-server startup lazily while keeping a patchable seam."""
-    from bioetl.composition.bootstrap.runtime.observability import (
-        maybe_start_metrics_server as impl,
-    )
-
-    return impl(settings)
+    """Start metrics through the patchable composition-owned runtime seam."""
+    return _maybe_start_metrics_server(settings)
 
 
 def build_pipeline_context(
