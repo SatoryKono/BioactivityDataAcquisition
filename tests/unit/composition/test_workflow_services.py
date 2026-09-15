@@ -43,10 +43,18 @@ pytestmark = pytest.mark.unit
 
 
 def test_workflow_composition_passes_configured_report_root(monkeypatch, tmp_path):
-    settings = SimpleNamespace(data_dir=tmp_path / "data", report_root=tmp_path / "reports")
+    settings = SimpleNamespace(
+        data_dir=tmp_path / "data", report_root=tmp_path / "reports"
+    )
     monkeypatch.setattr(_workflow_services, "get_settings", lambda: settings)
-    monkeypatch.setattr(_workflow_services, "_create_workflow_metrics", lambda _: sentinel.metrics)
-    monkeypatch.setattr(_workflow_services, "build_workflow_transform_registry", lambda *_args: {})
+    monkeypatch.setattr(
+        _workflow_services, "_create_workflow_metrics", lambda _: sentinel.metrics
+    )
+    monkeypatch.setattr(
+        _workflow_services,
+        "build_workflow_transform_registry",
+        lambda *_args, **_kwargs: {},
+    )
     service = _workflow_services.get_workflow_runner_service(
         pipeline_runner_service_factory=lambda _: sentinel.pipeline_runner,
     )
