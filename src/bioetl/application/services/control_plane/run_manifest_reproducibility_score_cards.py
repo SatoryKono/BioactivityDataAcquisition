@@ -9,6 +9,9 @@ from bioetl.application.services.control_plane.replay.reproducibility_score_card
     overall_evidence_refs,
 )
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
+    CATEGORY_SCORER_EXPORTS,
+)
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
     PROFILE_SCORE_THRESHOLDS as PROFILE_SCORE_THRESHOLDS,
 )
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
@@ -34,9 +37,6 @@ from bioetl.application.services.control_plane.replay.reproducibility_score_card
 )
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
     score_run_identity as score_run_identity,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
-    CATEGORY_SCORER_EXPORTS,
 )
 from bioetl.application.services.control_plane.run_manifest_reproducibility_claims import (
     build_executable_run_contract_claim as build_executable_run_contract_claim,

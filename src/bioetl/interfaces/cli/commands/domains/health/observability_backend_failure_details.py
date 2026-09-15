@@ -8,11 +8,11 @@ from typing import Protocol
 from urllib.error import HTTPError, URLError
 from urllib.request import build_opener
 
-from bioetl.domain.exceptions import redact_string
 from bioetl.application.services.ops.observability_backend_probes import (
     _HttpProbeResponse,
     _UrlOpenFn,
 )
+from bioetl.domain.exceptions import redact_string
 
 
 class _SupportsPoll(Protocol):

@@ -7,6 +7,9 @@ import os
 from collections.abc import Mapping
 from pathlib import Path
 
+from bioetl.application.services.ops.observability_backend_probes import (
+    DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PATHS_READY_TIMEOUT_SECONDS,
+)
 from bioetl.application.services.ops.observability_backend_startup_types import (
     _AppendBackendStartupDiagnosticFn,
     _BackendResultConstructor,
@@ -21,9 +24,6 @@ from bioetl.application.services.ops.observability_backend_startup_types import 
     _ProbeFn,
     _RequiredProbeFn,
     _StartedBackendProcess,
-)
-from bioetl.application.services.ops.observability_backend_probes import (
-    DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PATHS_READY_TIMEOUT_SECONDS,
 )
 
 DEFAULT_OBSERVABILITY_BACKEND_PROBE_HOST = "127.0.0.1"

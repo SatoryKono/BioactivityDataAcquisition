@@ -7,6 +7,26 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 
+from bioetl.application.services.ops.observability_backend_probes import (
+    DEFAULT_OBSERVABILITY_BACKEND_POLL_SECONDS,
+    DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS,
+    DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PATHS_READY_TIMEOUT_SECONDS,
+    DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PROBE_TIMEOUT_SECONDS,
+    _build_observability_backend_probe_urls,
+    probe_observability_backend,
+    probe_observability_backend_required_paths,
+    wait_for_observability_backend_ready,
+    wait_for_observability_backend_required_paths_ready,
+)
+from bioetl.application.services.ops.observability_backend_process import (
+    _build_detached_backend_env,
+    _build_detached_backend_popen_kwargs,
+    build_detached_backend_log_path,
+    drop_listening_backend_on_port,
+    find_listening_backend_pid_by_port,
+    python_executable_to_tuple,
+    start_detached_quarantine_backend,
+)
 from bioetl.application.services.ops.observability_backend_startup import (
     ensure_observability_backend_started_impl,
 )
@@ -30,26 +50,6 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_failure
 )
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details import (
     _read_backend_startup_log_excerpt as _read_backend_startup_log_excerpt,
-)
-from bioetl.application.services.ops.observability_backend_probes import (
-    DEFAULT_OBSERVABILITY_BACKEND_POLL_SECONDS,
-    DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS,
-    DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PATHS_READY_TIMEOUT_SECONDS,
-    DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PROBE_TIMEOUT_SECONDS,
-    _build_observability_backend_probe_urls,
-    probe_observability_backend,
-    probe_observability_backend_required_paths,
-    wait_for_observability_backend_ready,
-    wait_for_observability_backend_required_paths_ready,
-)
-from bioetl.application.services.ops.observability_backend_process import (
-    _build_detached_backend_env,
-    _build_detached_backend_popen_kwargs,
-    build_detached_backend_log_path,
-    drop_listening_backend_on_port,
-    find_listening_backend_pid_by_port,
-    python_executable_to_tuple,
-    start_detached_quarantine_backend,
 )
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,

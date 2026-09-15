@@ -8,11 +8,11 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING
 
+import click
+
 from bioetl.application.services.ops.observability_backend_process import (
     DEFAULT_HEALTH_SERVER_PORT,
 )
-import click
-
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.domains.health import (
     server_integration_deps as _deps,
