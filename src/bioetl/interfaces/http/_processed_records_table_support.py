@@ -209,8 +209,13 @@ def latest_metrics_snapshot(
 def published_layer_artifact_counts(
     ledger_entries: tuple[RunLedgerEntry, ...],
 ) -> dict[str, int]:
-    """Aggregate published bronze/silver/gold artifact record counts from ledger entries."""
+    """Sum batch publications once per ledger identity, not per dataset path.
+
+    Gold may reuse a dataset reference across batches. These are publication
+    volumes for the selected run, not the unique row count of the current table.
+    """
     counts: dict[str, int] = {}
+    seen: dict[tuple[str, str, str, str], int] = {}
     for entry in ledger_entries:
         if entry.event_type != ARTIFACT_PUBLISHED_EVENT:
             continue
@@ -218,7 +223,20 @@ def published_layer_artifact_counts(
         stage = _optional_text(details.get("stage") or entry.stage)
         record_count = _optional_int(details.get("record_count"))
         if stage in {"bronze", "silver", "gold"} and record_count is not None:
-            counts[stage] = record_count
+            identity = (
+                str(entry.run_id),
+                entry.manifest_id,
+                stage,
+                entry.idempotency_key or entry.entry_id,
+            )
+            if identity in seen:
+                if seen[identity] != record_count:
+                    raise RuntimeError(
+                        "Conflicting record counts for one ledger publication"
+                    )
+                continue
+            seen[identity] = record_count
+            counts[stage] = counts.get(stage, 0) + record_count
     return counts
 
 
