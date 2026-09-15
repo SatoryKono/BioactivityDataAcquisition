@@ -26,6 +26,7 @@ if TYPE_CHECKING:
 
 __all__ = ["FileControlPlaneArtifactLifecycleStore"]
 
+
 @dataclass(slots=True)
 class FileControlPlaneArtifactLifecycleStore:
     """Plan and apply lifecycle decisions for file-backed control-plane artifacts."""

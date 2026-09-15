@@ -203,19 +203,7 @@ class Settings(StoragePathSettingsMixin, BaseSettings):
         dotenv_settings: PydanticBaseSettingsSource,
         file_secret_settings: PydanticBaseSettingsSource,
     ) -> tuple[PydanticBaseSettingsSource, ...]:
-        """Use deterministic init, environment, and rooted-dotenv precedence.
-
-        Args:
-            settings_cls: Settings class.
-            init_settings: Init settings source.
-            env_settings: Env settings source.
-            dotenv_settings: Dotenv settings source.
-            file_secret_settings: File secret settings source.
-
-        Returns:
-            Tuple ordered from highest to lowest precedence.
-
-        """
+        """Use deterministic init, environment, and rooted-dotenv precedence."""
         del settings_cls
         return (
             init_settings,

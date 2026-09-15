@@ -4,12 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.composition.runtime_builders._run_manifest_refs import (
-    ManifestControlPlaneRefs,
-    build_planned_artifacts,
-    build_run_source_refs,
-    control_plane_root,
-    create_control_plane_refs,
+from bioetl.composition.runtime_builders._run_context_values import (
+    resolve_run_context_values,
 )
 from bioetl.composition.runtime_builders._run_manifest_context_updates import (
     apply_manifest_updates_to_mutable_context,
@@ -18,8 +14,15 @@ from bioetl.composition.runtime_builders._run_manifest_context_updates import (
     iter_optional_control_plane_updates,
     iter_optional_control_plane_updates_from_mapping,
 )
-from bioetl.composition.runtime_builders._run_context_values import (
-    resolve_run_context_values,
+from bioetl.composition.runtime_builders._run_manifest_refs import (
+    ManifestControlPlaneRefs,
+    build_planned_artifacts,
+    build_run_source_refs,
+    control_plane_root,
+    create_control_plane_refs,
+)
+from bioetl.composition.runtime_builders._run_manifest_replay_support import (
+    resolve_replay_parentage,
 )
 from bioetl.composition.runtime_builders._run_manifest_sink_policy import (
     validate_reproducible_sink_modes,
@@ -29,8 +32,8 @@ from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
     resolve_provider_entity,
     to_serializable_mapping,
 )
-from bioetl.composition.runtime_builders._run_manifest_replay_support import (
-    resolve_replay_parentage,
+from bioetl.composition.runtime_builders.input_snapshot_resolution import (
+    resolve_pipeline_input_snapshot_refs,
 )
 from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
     RunManifestContractIdentity,
@@ -57,6 +60,7 @@ __all__ = [
     "iter_optional_control_plane_updates",
     "iter_optional_control_plane_updates_from_mapping",
     "resolve_contract_identity",
+    "resolve_pipeline_input_snapshot_refs",
     "resolve_provider_entity",
     "resolve_replay_capability",
     "resolve_replay_parentage",

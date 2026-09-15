@@ -6,7 +6,6 @@ and application use-cases do not import concrete I/O modules.
 
 from __future__ import annotations
 
-import os
 from collections.abc import Callable, Mapping
 from pathlib import Path
 
@@ -40,9 +39,7 @@ def _build_detached_backend_env(
     *,
     current_env: Mapping[str, str] | None = None,
 ) -> dict[str, str]:
-    return _infra_build_detached_backend_env(
-        current_env=current_env if current_env is not None else os.environ,
-    )
+    return _infra_build_detached_backend_env(current_env=current_env)
 
 
 def start_detached_ops_http_backend(
@@ -59,7 +56,7 @@ def start_detached_ops_http_backend(
         port=port,
         python_executable=python_executable,
         data_root=data_root,
-        current_env=current_env if current_env is not None else os.environ,
+        current_env=current_env,
         popen_factory=popen_factory,
     )
 
@@ -78,7 +75,7 @@ def start_detached_quarantine_backend(
         port=port,
         python_executable=python_executable,
         data_root=data_root,
-        current_env=current_env if current_env is not None else os.environ,
+        current_env=current_env,
         popen_factory=popen_factory,
     )
 

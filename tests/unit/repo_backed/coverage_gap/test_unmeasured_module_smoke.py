@@ -133,9 +133,11 @@ def test_observability_backend_startup_types_are_importable() -> None:
     from bioetl.application.services.ops import (
         observability_backend_startup_types as types,
     )
+    from bioetl.composition.contracts.runtime import ManifestSourceRefBuilder
 
     assert types._MessagePrinter is not None
     assert types._StartFn is not None
+    assert ManifestSourceRefBuilder is not None
 
 
 def test_pipeline_bootstrap_lazy_dependencies_delegate() -> None:

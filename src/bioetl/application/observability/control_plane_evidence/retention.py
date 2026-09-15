@@ -38,7 +38,7 @@ class ControlPlaneLifecyclePlanner(Protocol):
     ) -> ControlPlaneArtifactLifecyclePlan: ...
 
 
-class ArchiveVerifier(Protocol):
+class ArchiveVerifierPort(Protocol):
     """Inspect real archived and restored copies for the selected manifest."""
 
     def verify(
@@ -50,7 +50,7 @@ def build_retention_checks(
     *,
     manifest: RunManifest,
     plan: ControlPlaneArtifactLifecyclePlan,
-    archive_verifier: ArchiveVerifier | None = None,
+    archive_verifier: ArchiveVerifierPort | None = None,
 ) -> tuple[tuple[EvidenceCheckResult, ...], tuple[ControlPlaneArtifactRef, ...]]:
     """Classify lifecycle-plan evidence for one manifest without applying it."""
     relevant = tuple(
@@ -138,7 +138,7 @@ def summarize_retention_artifacts(
 
 
 __all__ = [
-    "ArchiveVerifier",
+    "ArchiveVerifierPort",
     "ControlPlaneLifecyclePlanner",
     "build_retention_checks",
     "serialize_resolution_issues",

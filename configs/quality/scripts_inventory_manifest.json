@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-15T14:12:03.381999+00:00",
+  "generated_at": "2026-09-15T14:32:18.948928+00:00",
   "summary": {
     "total_scripts": 618,
     "status_counts": {
@@ -14469,7 +14469,7 @@
         },
         {
           "path": "scripts/engineering/qa/report_dead_code_inventory.py",
-          "line": 807,
+          "line": 801,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.import_graph_inventory import ("
         },

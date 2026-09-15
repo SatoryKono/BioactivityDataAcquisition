@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, call
 
 import pytest
 
@@ -247,14 +247,27 @@ def test_scope_index_write_failure_restores_manifest_and_run_index(
         manifest.pipeline_name,
         manifest.run_type,
     ).exists()
-    metrics.increment_counter.assert_called_once_with(
-        "bioetl_control_plane_manifest_writes_total",
-        1,
-        {
-            "pipeline": "chembl_activity",
-            "run_type": "incremental",
-            "status": "failed",
-        },
+    metrics.increment_counter.assert_has_calls(
+        [
+            call(
+                "bioetl_control_plane_manifest_writes_total",
+                0,
+                {
+                    "pipeline": "chembl_activity",
+                    "run_type": "incremental",
+                    "status": "success",
+                },
+            ),
+            call(
+                "bioetl_control_plane_manifest_writes_total",
+                1,
+                {
+                    "pipeline": "chembl_activity",
+                    "run_type": "incremental",
+                    "status": "failed",
+                },
+            ),
+        ]
     )
 
 
