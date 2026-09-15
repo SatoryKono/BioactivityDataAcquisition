@@ -1,10 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-15T12:36:01.812026+00:00",
+  "generated_at": "2026-09-15T14:12:03.381999+00:00",
   "summary": {
-    "total_scripts": 617,
+    "total_scripts": 618,
     "status_counts": {
       "active": 338,
+      "orphan": 1,
       "supporting": 279
     },
     "reference_group_coverage": {
@@ -9215,7 +9216,7 @@
         },
         {
           "path": "tests/architecture/test_strict_architecture_contracts.py",
-          "line": 883,
+          "line": 882,
           "source_group": "tests",
           "text": "\"cli.py\","
         }
@@ -14468,7 +14469,7 @@
         },
         {
           "path": "scripts/engineering/qa/report_dead_code_inventory.py",
-          "line": 801,
+          "line": 807,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.import_graph_inventory import ("
         },
@@ -19819,6 +19820,14 @@
       ]
     },
     {
+      "path": "scripts/ops/observability/archive_control_plane.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/ops/observability/check_bioetl_prometheus_scrape.py",
       "type": "py",
       "status": "active",
@@ -19950,7 +19959,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1132,
+          "line": 1168,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._dashboard_state_followup import ("
         },
@@ -20329,7 +20338,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1127,
+          "line": 1163,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },

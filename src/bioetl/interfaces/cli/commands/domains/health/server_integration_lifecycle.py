@@ -11,8 +11,6 @@ from typing import TYPE_CHECKING
 import click
 
 from bioetl.domain.exceptions import BioETLError
-
-DEFAULT_HEALTH_SERVER_PORT = 8000
 from bioetl.interfaces.cli.commands.domains.health import (
     server_integration_deps as _deps,
 )
@@ -39,6 +37,7 @@ if TYPE_CHECKING:
     )
     from bioetl.interfaces.http.health_server import HealthServer
 
+DEFAULT_HEALTH_SERVER_PORT = 8000
 _HEALTH_SERVER_DOMAIN_ERROR_TITLE = "Health server failed with domain error"
 _HEALTH_SERVER_UNEXPECTED_ERROR_TITLE = "Unexpected error in health server command"
 _HEALTH_SERVER_INTERRUPTED_MESSAGE = "Health server interrupted by user (Ctrl+C)"

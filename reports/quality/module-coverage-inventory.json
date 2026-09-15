@@ -1,5 +1,5 @@
 {
-  "additive_coverage_xml_path": "reports/local/archive-coverage.xml",
+  "additive_coverage_xml_path": "reports/coverage/archive-store-closeout.xml",
   "additive_coverage_xml_sha256": "03393981c6baf6d2daa24bb6a2eea17d270b0fa623d497fc157f51bcf513ac77",
   "additive_measured_module_count": 1,
   "canonical_coverage_lane": "coverage-verify",
@@ -49513,7 +49513,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-10",
-  "source_tree_sha256": "38939dcd9b4f7ef665b0cea830ddb1c9a2793995115d006ea894ba0376c54bc9",
+  "source_tree_sha256": "3d4b5318a4b90908ccfb492b5fb2ddab9e0ff7fd4c45be909238418967427a51",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

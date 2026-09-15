@@ -9,9 +9,9 @@ import subprocess  # nosec B404
 import sys
 import tempfile
 import time
+from collections.abc import Mapping
 from pathlib import Path
 from shutil import which
-from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, cast
 
 import bioetl

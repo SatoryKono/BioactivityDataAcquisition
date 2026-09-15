@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "522d17353efb718dbc3313ab464942e5575630ec59dc076be6124e40e650d76c",
+    "bioetl-control-plane-v1": "0c064829ac76634d5af4b88a6029b19a84c4b29d3e97a99c68ecf512d4ed49a3",
     "bioetl-dq-v2": "617c948eaad0a362dd8703102fc1a9b979533970addedb1f9d6c455febae9d75",
     "bioetl-incident-v1": "3f880d07e0de5f2cb681ca2203ab05160212c6d7e033a7aa214e102a0a307915",
     "bioetl-overview-v2": "f5fb7bbbe358fb7b662688ad850a2ac0e0f774338e846e12ab2067c403b6fb11",
     "bioetl-provider-health-v2": "928b6fb15c09f3cf1844015895f5a3f5e4f32baa24fb2c03c78df6fdc88a74e1",
     "bioetl-run-explorer-v1": "7bcff4013e2a78cd631fcf3f5953d7cfc46c33046d5b72926395606e1c281129",
-    "bioetl-runtime": "49cd389f277d373ef9dfb8ff0ec9f0cc3f31e7ae3d6911a1ec924b2ccdf54463"
+    "bioetl-runtime": "2f8243306cd8bc6ae0cd429bb99563e01392cff5be68b3513ca4e61eed85374a"
   },
   "panels": [
     {
@@ -135,7 +135,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max(bioetl_replay_safety_blockers_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} and on(pipeline,run_type) (bioetl_control_plane_telemetry_missing_5m == 0))"
+          "clamp_max(max(bioetl_replay_safety_blockers_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} and on(pipeline,run_type) (bioetl_control_plane_telemetry_missing_5m == 0)), 2)"
         ],
         "target_count": 1
       }
@@ -173,7 +173,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max(bioetl_manifest_ledger_failures_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} and on(pipeline,run_type) (bioetl_control_plane_telemetry_missing_5m == 0))"
+          "clamp_max(max(bioetl_manifest_ledger_failures_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} and on(pipeline,run_type) (bioetl_control_plane_telemetry_missing_5m == 0)), 2)"
         ],
         "target_count": 1
       }
@@ -192,7 +192,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max(bioetl_control_plane_telemetry_missing_5m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})"
+          "clamp_max(max(bioetl_control_plane_telemetry_missing_5m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}), 2)"
         ],
         "target_count": 1
       }

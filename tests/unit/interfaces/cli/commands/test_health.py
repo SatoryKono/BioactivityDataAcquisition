@@ -42,6 +42,7 @@ import pytest
 from click.testing import CliRunner
 
 from bioetl.interfaces.cli import cli
+import bioetl.interfaces.cli.commands.health as health_public_cli
 from bioetl.interfaces.cli.commands.domains.health import server_integration_deps
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from tests.unit.interfaces.cli.commands.conftest import mock_asyncio_run
@@ -63,6 +64,7 @@ class TestHealthGroup:
         result = cli_runner.invoke(cli, ["health", "--help"])
 
         assert result.exit_code == 0
+        assert health_public_cli.health.name == "health"
         assert "server" in result.output
         assert "check" in result.output
         assert "Health check and monitoring operations" in result.output
