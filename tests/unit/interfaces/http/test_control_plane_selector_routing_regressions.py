@@ -344,7 +344,7 @@ async def test_readiness_offloads_report_root_filesystem_io(
     ready = await host._handle_readiness()
 
     assert ready.status == "healthy"
-    assert offloaded == [fake_check]
+    assert offloaded == [fake_check, readiness_module._current_metrics_check]
 
 
 def test_routing_mixin_base_uptime_contract_is_abstract_by_behavior() -> None:
