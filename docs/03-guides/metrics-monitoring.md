@@ -942,3 +942,12 @@ when selecting a persistent schedule. For an infrequent batch pipeline, a curren
 UNKNOWN between runs is expected; use selected-run evidence to inspect the completed
 batch. Do not repeat a backfill merely to keep CURRENT green. These instructions do
 not install a scheduler or change the freshness window.
+
+Run provider probes from the writable producer environment. The read-only Ops
+container serves persisted health evidence and cannot persist a CLI probe into its
+read-only data mount. A successful scrape does not replace a provider probe.
+
+Selected-run retention re-reads its bounded artifact set for every request. It does
+not reuse a verdict solely by manifest ID: snapshots can be corrupted or removed,
+and the retention cutoff changes with time. Keep the existing forensic endpoint
+deadline; measure cold and repeated requests separately when diagnosing latency.

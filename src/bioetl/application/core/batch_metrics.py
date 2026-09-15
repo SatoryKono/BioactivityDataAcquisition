@@ -59,7 +59,7 @@ class BatchMetricsRecorderService:
         """Reset per-batch error accounting before transform/finalize."""
         self._batch_error_count = 0
         for error_type in ErrorType:
-            if error_type.is_data_quality:
+            if error_type.is_data_quality():
                 self.track_quarantined_records(error_type, 0)
 
     def track_batch_size(self, stage: str, size: int) -> None:

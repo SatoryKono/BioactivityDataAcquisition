@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import timedelta
 from pathlib import Path
-from time import monotonic
 from typing import TYPE_CHECKING
 
 from bioetl.domain.control_plane import (
@@ -27,11 +26,6 @@ if TYPE_CHECKING:
 
 __all__ = ["FileControlPlaneArtifactLifecycleStore"]
 
-# Warm GET of the same manifest must stay well under FORENSIC_ENDPOINT_TIMEOUT_SECONDS.
-# Do not raise the 12s forensic deadline; reuse a short-lived plan instead.
-_MANIFEST_PLAN_CACHE_TTL_SECONDS = 30.0
-
-
 @dataclass(slots=True)
 class FileControlPlaneArtifactLifecycleStore:
     """Plan and apply lifecycle decisions for file-backed control-plane artifacts."""
@@ -39,9 +33,6 @@ class FileControlPlaneArtifactLifecycleStore:
     base_path: Path
     logger: LoggerPort | None = None
     metrics: MetricsPort | None = None
-    _manifest_plan_cache: dict[
-        tuple[str, int, bool], tuple[float, ControlPlaneArtifactLifecyclePlan]
-    ] = field(default_factory=dict, repr=False, compare=False)
 
     def plan(
         self,
@@ -81,12 +72,8 @@ class FileControlPlaneArtifactLifecycleStore:
         dry_run: bool = True,
     ) -> ControlPlaneArtifactLifecyclePlan:
         """Build a deterministic retention plan for one manifest/run only."""
-        cache_key = (manifest.manifest_id, policy.retention_days, dry_run)
-        cached = self._manifest_plan_cache.get(cache_key)
-        if cached is not None:
-            expires_at, plan = cached
-            if monotonic() < expires_at:
-                return plan
+        # Re-read the selected evidence on every request. A manifest identity
+        # does not prove that its files, hashes or retention cutoff are unchanged.
         cutoff = policy.now - timedelta(days=policy.retention_days)
         protected_refs = _resolve_protected_refs_for_manifest(
             manifest=manifest,
@@ -104,10 +91,6 @@ class FileControlPlaneArtifactLifecycleStore:
             dry_run=dry_run,
             artifacts=artifacts,
             resolution_issues=issues,
-        )
-        self._manifest_plan_cache[cache_key] = (
-            monotonic() + _MANIFEST_PLAN_CACHE_TTL_SECONDS,
-            plan,
         )
         return plan
 

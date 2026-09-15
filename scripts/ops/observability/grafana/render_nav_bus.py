@@ -644,8 +644,8 @@ def _layout_overview_detail_panels(panels: list[object]) -> None:
             9004: (0, 4, 12, 4),
             9007: (12, 4, 12, 4),
             9005: (0, 8, 12, 4),
-            9013: (12, 8, 12, 4),
-            9021: (0, 12, 24, 3),
+            9013: (0, 12, 24, 4),
+            9021: (0, 16, 24, 3),
         },
         30215: {20215: (0, 0, 24, 6)},
     }
@@ -924,6 +924,17 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
         panels, _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY, uid="bioetl-control-plane-v1"
     )
     by_id = {panel.get("id"): panel for panel in root}
+    for panel_id in (891, 893, 907):
+        if (count_panel := by_id.get(panel_id)) is None:
+            continue
+        for target in count_panel.get("targets", []):
+            expression = target.get("expr", "")
+            if expression and not expression.startswith("clamp_max("):
+                target["expr"] = f"clamp_max({expression}, 2)"
+        count_note = " Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN."
+        description = count_panel.get("description", "")
+        if count_note not in description:
+            count_panel["description"] = description + count_note
     if 9400 in by_id:
         options = by_id[9400].setdefault("options", {})
         options["content"] = _RECOVERY_ACTION_HTML
@@ -942,7 +953,8 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
         defaults["displayName"] = "Monitor Current Readiness"
         readiness["description"] = (
             "CURRENT · Latest fresh pipeline/run_type telemetry. Run ID does not filter "
-            "this panel. Palette: 0=OK, 1=WARN, 2=CRIT, null=UNKNOWN. This CURRENT "
+            "this panel. Palette: 0=OK, 1=WARN, 2=CRIT, 3=INCOMPLETE, "
+            "null=UNKNOWN. This CURRENT "
             "verdict is not exact-run processing_status or trust_status. OK here does "
             "not authorize replay: selected-run trust_status INCOMPLETE or UNKNOWN "
             "still blocks replay."
@@ -969,7 +981,7 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
         overrides = field_config.setdefault("overrides", [])
         for override in overrides:
             field = override.get("matcher", {}).get("options")
-            width = {"Processing": 80, "Trust": 90, "Observed at": 130}.get(field)
+            width = {"Processing": 80, "Trust": 130, "Observed at": 130}.get(field)
             if width is not None:
                 for prop in override.get("properties", []):
                     if prop.get("id") == "custom.width":

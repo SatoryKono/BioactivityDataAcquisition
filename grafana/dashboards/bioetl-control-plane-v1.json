@@ -412,7 +412,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Latest fresh pipeline/run_type telemetry. Run ID does not filter this panel. Palette: 0=OK, 1=WARN, 2=CRIT, null=UNKNOWN. This CURRENT verdict is not exact-run processing_status or trust_status. OK here does not authorize replay: selected-run trust_status INCOMPLETE or UNKNOWN still blocks replay.",
+      "description": "CURRENT · Latest fresh pipeline/run_type telemetry. Run ID does not filter this panel. Palette: 0=OK, 1=WARN, 2=CRIT, 3=INCOMPLETE, null=UNKNOWN. This CURRENT verdict is not exact-run processing_status or trust_status. OK here does not authorize replay: selected-run trust_status INCOMPLETE or UNKNOWN still blocks replay.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -745,7 +745,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 90
+                "value": 130
               }
             ]
           },
@@ -1332,7 +1332,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "TIME RANGE · CURRENT · Shows current replay/resume blockers from the last 15 minutes. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Do not trust zero when telemetry coverage is missing. Missing required telemetry suppresses a misleading OK; UNKNOWN requires evidence inspection.",
+      "description": "TIME RANGE · CURRENT · Shows current replay/resume blockers from the last 15 minutes. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Do not trust zero when telemetry coverage is missing. Missing required telemetry suppresses a misleading OK; UNKNOWN requires evidence inspection. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1425,7 +1425,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "max(bioetl_replay_safety_blockers_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} and on(pipeline,run_type) (bioetl_control_plane_telemetry_missing_5m == 0))",
+          "expr": "clamp_max(max(bioetl_replay_safety_blockers_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} and on(pipeline,run_type) (bioetl_control_plane_telemetry_missing_5m == 0)), 2)",
           "instant": true,
           "refId": "A"
         }
@@ -1553,7 +1553,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "TIME RANGE · SELECTED RUN · Shows manifest-write and ledger-append failures from the last 15 minutes. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Use run evidence to verify integrity for an exact run. Missing required telemetry suppresses a misleading OK; UNKNOWN requires evidence inspection.",
+      "description": "TIME RANGE · SELECTED RUN · Shows manifest-write and ledger-append failures from the last 15 minutes. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Use run evidence to verify integrity for an exact run. Missing required telemetry suppresses a misleading OK; UNKNOWN requires evidence inspection. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1646,7 +1646,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "max(bioetl_manifest_ledger_failures_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} and on(pipeline,run_type) (bioetl_control_plane_telemetry_missing_5m == 0))",
+          "expr": "clamp_max(max(bioetl_manifest_ledger_failures_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} and on(pipeline,run_type) (bioetl_control_plane_telemetry_missing_5m == 0)), 2)",
           "instant": true,
           "refId": "A"
         }
@@ -1659,7 +1659,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "TIME RANGE · Shows whether required manifest and ledger telemetry is available. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Do not trust zero blocker cards when this panel is not OK; validate Prometheus scrape/rules.",
+      "description": "TIME RANGE · Shows whether required manifest and ledger telemetry is available. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Do not trust zero blocker cards when this panel is not OK; validate Prometheus scrape/rules. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1752,7 +1752,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "max(bioetl_control_plane_telemetry_missing_5m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
+          "expr": "clamp_max(max(bioetl_control_plane_telemetry_missing_5m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}), 2)",
           "instant": true,
           "refId": "A"
         }

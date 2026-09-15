@@ -75,7 +75,7 @@ class GoldWriterReadCleanupMixin:
                 "current_rows": current,
             }
 
-        return await self._run_in_executor(inspect_snapshot)
+        return cast(dict[str, int], await self._run_in_executor(inspect_snapshot))
 
     async def read_gold(
         self,
