@@ -60,11 +60,9 @@ def build_manifest_create_request(
             reproducibility_context.required_persistence_profile
         ),
     )
-    replay_of_run_id, replay_of_manifest_id = (
-        resolve_replay_parentage(
-            ctx=ctx,
-            runtime_config=inputs.runtime_config,
-        )
+    replay_of_run_id, replay_of_manifest_id = resolve_replay_parentage(
+        ctx=ctx,
+        runtime_config=inputs.runtime_config,
     )
     replay_capability = resolve_replay_capability(
         source_refs=source_refs,

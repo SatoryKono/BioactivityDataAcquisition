@@ -94,6 +94,4 @@ def test_logger_port_has_one_canonical_protocol_definition() -> None:
         if "class LoggerPort(" in path.read_text(encoding="utf-8")
     ]
 
-    assert definitions == [
-        Path("src/bioetl/domain/ports/observability/logging.py")
-    ]
+    assert definitions == [Path("src/bioetl/domain/ports/observability/logging.py")]

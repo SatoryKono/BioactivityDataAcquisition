@@ -45,6 +45,9 @@ from bioetl.application.services.control_plane.manifest.inspection_service impor
 from bioetl.application.services.control_plane.workflow.inspection_service import (
     WorkflowInspectionResult,
 )
+from bioetl.application.services.ops import (
+    observability_backend_process as backend_process,
+)
 from bioetl.application.services.workflow.workflow_runner_models import (
     WorkflowRunExecutionResult,
     WorkflowStepExecutionResult,
@@ -62,9 +65,6 @@ from bioetl.interfaces.cli.commands import config_dq
 from bioetl.interfaces.cli.commands import lineage as lineage_cmd
 from bioetl.interfaces.cli.commands import run_manifest as run_manifest_cmd
 from bioetl.interfaces.cli.commands.domains.diagnostics import contract_checks
-from bioetl.interfaces.cli.commands.domains.health import (
-    observability_backend_process as backend_process,
-)
 from bioetl.interfaces.cli.commands.domains.health import (
     observability_backend_runtime as backend_runtime,
 )
@@ -806,7 +806,7 @@ def test_backend_process_helpers_cover_env_kwargs_and_argument_normalization(
         current_env={"PYTHONPATH": "existing"}
     )
     assert env["PYTHONPATH"].endswith("existing")
-    assert str(Path(backend_process.__file__).resolve().parents[6]) in env["PYTHONPATH"]
+    assert str(Path(backend_process.__file__).resolve().parents[4]) in env["PYTHONPATH"]
 
     monkeypatch.setattr(
         backend_process,

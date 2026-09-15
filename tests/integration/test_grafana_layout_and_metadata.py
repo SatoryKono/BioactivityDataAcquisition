@@ -729,7 +729,9 @@ def test_control_plane_exposes_terminal_events_and_telemetry_gap() -> None:
 
     expected = {
         "Monitor Telemetry": ("bioetl_control_plane_telemetry_missing_5m",),
-        "Review Observed Terminal Counters": ("bioetl_control_plane_terminal_events_total",),
+        "Review Observed Terminal Counters": (
+            "bioetl_control_plane_terminal_events_total",
+        ),
     }
     for title, tokens in expected.items():
         panel = panels.get(title)

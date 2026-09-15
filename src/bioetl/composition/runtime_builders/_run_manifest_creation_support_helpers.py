@@ -41,6 +41,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.context import PipelineRunContext
 
+
 @dataclass(frozen=True, slots=True)
 class RunManifestCreateRequestInputs:
     ctx: PipelineRunContext
