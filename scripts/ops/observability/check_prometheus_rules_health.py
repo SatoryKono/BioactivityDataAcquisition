@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
 from collections.abc import Iterator, Mapping
 from dataclasses import asdict, dataclass, field
@@ -171,8 +172,20 @@ def _rule_issue_from_payload(
 
 
 def normalize_promql(expr: str) -> str:
-    """Collapse whitespace so git YAML and live API text can be compared."""
-    return " ".join(expr.split())
+    """Compare lexical tokens, ignoring layout/comments but preserving strings.
+
+    This is not algebraic equivalence or syntax validation; promtool retains
+    responsibility for syntax. Quoted and raw strings must keep their whitespace
+    and hash characters because they can change label matching.
+    """
+    tokens = re.findall(
+        r'''"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`[^`]*`'''
+        r"|#[^\r\n]*|\s+|[A-Za-z_][A-Za-z_0-9]*"
+        r"|(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?"
+        r"|==|!=|=~|!~|>=|<=|\S",
+        expr,
+    )
+    return " ".join(token for token in tokens if not token.isspace() and not token.startswith("#"))
 
 
 def tracked_rules_bundle_sha256(rules_dir: Path) -> str:

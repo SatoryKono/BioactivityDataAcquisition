@@ -185,6 +185,35 @@ def test_main_json_exit_code(
     assert payload["issues"][0]["last_error"] == "boom"
 
 
+@pytest.mark.parametrize(
+    ("tracked", "live"),
+    [
+        ("max by (pipeline) ( x )", "max by (pipeline) (x)"),
+        ("sum(\n # keep measured zeros\n x\n)", "sum(x)"),
+        ('metric{label="# literal"} # comment\n + 1', 'metric{label="# literal"}+1'),
+        (r'metric{label="a\"# b"} # trailing comment', r'metric{label="a\"# b"}'),
+        ("rate(namespace:metric[5m:1m])", "rate( namespace:metric[5m:1m] )"),
+    ],
+)
+def test_promql_parity_ignores_layout_and_comments(tracked: str, live: str) -> None:
+    assert mod.normalize_promql(tracked) == mod.normalize_promql(live)
+
+
+@pytest.mark.parametrize(
+    ("left", "right"),
+    [
+        ('metric{label="a  b"}', 'metric{label="a b"}'),
+        ("metric{label='a  b'}", "metric{label='a b'}"),
+        ('metric{label=`a  b`}', 'metric{label=`a b`}'),
+        ('metric{label="#first"}', 'metric{label="#second"}'),
+        ('metric > 0', 'metric >= 0'),
+        ('sum_metric', 'sum metric'),
+    ],
+)
+def test_promql_parity_preserves_meaningful_tokens(left: str, right: str) -> None:
+    assert mod.normalize_promql(left) != mod.normalize_promql(right)
+
+
 def test_compare_expr_parity_accepts_matching_live_rules() -> None:
     tracked = {
         "bioetl_provider_current_status": (

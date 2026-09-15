@@ -368,6 +368,12 @@ acceptance for required and optional panels alike. This is distinct from valid
 empty evidence and from an invalid query. Keep admission and timeout limits
 unchanged; confirm the error reason before retrying individual panels.
 
+Expression parity compares PromQL tokens from tracked YAML and the live Rules
+API. Layout and comments outside strings are ignored; quoted label values retain
+their spaces and hash characters. This check does not prove algebraic equivalence
+and does not replace promtool syntax and rule-vector validation. A parity check
+skipped because Prometheus is unreachable is not a pass.
+
 ### 7. Operator Sign-off
 
 - [ ] Metrics endpoint is reachable
