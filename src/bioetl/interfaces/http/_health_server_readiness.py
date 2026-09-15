@@ -37,10 +37,7 @@ async def build_readiness_response(host: _ReadinessHost) -> HealthResponse:
     report_root_check = await asyncio.to_thread(report_root_readiness_check)
     checks: JsonDict = {
         "report_root": report_root_check,
-        "current_metrics": current_metrics_reconciliation_check(
-            exposition=host._metrics_exposition.build_exposition(),
-            store=create_run_report_store(),
-        ),
+        "current_metrics": await asyncio.to_thread(_current_metrics_check, host),
     }
     status = "healthy"
     if enforce_report_root_marker() and report_root_check.get("status") != "healthy":
@@ -63,4 +60,12 @@ async def build_readiness_response(host: _ReadinessHost) -> HealthResponse:
         status=status,
         timestamp=host._response_timestamp(),
         checks=checks,
+    )
+
+
+def _current_metrics_check(host: _ReadinessHost) -> dict[str, object]:
+    """Read durable run history without blocking other HTTP requests."""
+    return current_metrics_reconciliation_check(
+        exposition=host._metrics_exposition.build_exposition(),
+        store=create_run_report_store(),
     )
