@@ -353,6 +353,22 @@ evaluation; neither a successful scrape nor cached Bronze replay is sufficient.
 
 ### 6d. Forensic panel capacity and error rows
 
+The optional main-container archive reader accepts `BIOETL_ARCHIVE_ROOT` from
+the invoking process. Use a container-visible path inside an existing read-only
+bind, for example `/app/reports/local/gf14-archive/verified`, before the canonical
+`scripts/ops/docker-setup.ps1 start main` invocation. An unset variable leaves the
+reader disabled; do not pass an empty string or change `.env` to enable it
+implicitly. The archive must already have been created and restore-verified by
+`scripts/ops/observability/archive_control_plane.py` using the corresponding host
+data/archive paths. Setting the variable alone does not establish Archive OK.
+
+Archive verification checks the source, archived and restored bytes on each
+request, with at most sixteen filesystem readers per archive operation. A
+contract-evidence sidecar is included in the archive and checked against its
+manifest identity; it cannot replace the full manifest. Keep missing, corrupt or
+mismatched evidence visible. Test the actual file count and mounted filesystem
+against the twelve-second endpoint budget before accepting a deployment.
+
 Overview CURRENT detail tables for Runtime, Data Quality, Control Plane, Data
 Validation, and Workflow use the same evidence-qualified domain verdict as the
 six-domain summary, with the selected Pipeline and Run Type. Run ID selects

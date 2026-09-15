@@ -5,16 +5,20 @@ from __future__ import annotations
 import hashlib
 import json
 import shutil
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+from functools import partial
 from pathlib import Path
 
 from bioetl.domain.control_plane import (
     ControlPlaneArtifactLifecyclePlan,
+    ControlPlaneArtifactRef,
     ControlPlaneArtifactSurface,
     RunManifest,
 )
 
 _SCHEMA = "bioetl_local_archive_v1"
+_ARCHIVE_READ_WORKERS = 16
 
 
 def _index_error(payload: object, manifest: RunManifest) -> str | None:
@@ -74,6 +78,39 @@ def _contained_file(base: Path, relative: str) -> Path:
     return resolved
 
 
+def _validate_manifest_source(path: Path, manifest: RunManifest) -> bool:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if path.name.endswith(".contract-evidence.json"):
+        if (
+            not isinstance(payload, dict)
+            or payload.get("schema_version") != "contract_evidence_v1"
+            or payload.get("manifest_id") != manifest.manifest_id
+        ):
+            raise ValueError("archive_contract_evidence_mismatch")
+        return False  # A copied sidecar cannot replace the full manifest.
+    try:
+        persisted = RunManifest.from_dict(payload)
+    except (KeyError, TypeError) as exc:
+        raise ValueError("archive_manifest_invalid") from exc
+    if _manifest_digest(persisted) != _manifest_digest(manifest):
+        raise ValueError("archive_manifest_mismatch")
+    return True
+
+
+def _source_entry(
+    artifact: ControlPlaneArtifactRef, *, root: Path, manifest: RunManifest
+) -> tuple[str, Path, bool]:
+    path = Path(artifact.path)
+    relative = path.absolute().relative_to(root).as_posix()
+    resolved = _contained_file(root, relative)
+    is_manifest = (
+        _validate_manifest_source(path, manifest)
+        if artifact.surface is ControlPlaneArtifactSurface.RUN_MANIFEST
+        else False
+    )
+    return relative, resolved, is_manifest
+
+
 @dataclass(frozen=True, slots=True)
 class FileArchiveStore:
     """Verify local archive and restored copies without trusting a stored OK flag."""
@@ -90,23 +127,14 @@ class FileArchiveStore:
     ) -> dict[str, Path]:
         if plan.resolution_issues or not plan.artifacts:
             raise ValueError("archive_source_evidence_incomplete")
-        root = self.data_root.resolve()
-        sources: dict[str, Path] = {}
-        manifest_found = False
-        for artifact in plan.artifacts:
-            path = Path(artifact.path)
-            relative = path.absolute().relative_to(root).as_posix()
-            sources[relative] = _contained_file(root, relative)
-            if artifact.surface is ControlPlaneArtifactSurface.RUN_MANIFEST:
-                persisted = RunManifest.from_dict(
-                    json.loads(path.read_text(encoding="utf-8"))
-                )
-                if _manifest_digest(persisted) != _manifest_digest(manifest):
-                    raise ValueError("archive_manifest_mismatch")
-                manifest_found = True
-        if not manifest_found:
+        read_source = partial(
+            _source_entry, root=self.data_root.resolve(), manifest=manifest
+        )
+        with ThreadPoolExecutor(max_workers=_ARCHIVE_READ_WORKERS) as executor:
+            entries = list(executor.map(read_source, plan.artifacts))
+        if not any(found for _, _, found in entries):
             raise ValueError("archive_manifest_missing")
-        return sources
+        return {relative: path for relative, path, _ in entries}
 
     def create(
         self, *, manifest: RunManifest, plan: ControlPlaneArtifactLifecyclePlan
@@ -172,11 +200,29 @@ class FileArchiveStore:
             sources = self._sources(plan, manifest)
             seen: set[str] = set()
             for entry in entries:
-                entry_error = _entry_error(entry, sources=sources, seen=seen, pack=pack)
-                if entry_error is not None:
-                    return False, entry_error
+                if not isinstance(entry, dict):
+                    return False, "archive_index_invalid"
+                relative = entry.get("path")
+                if (
+                    not isinstance(relative, str)
+                    or relative not in sources
+                    or relative in seen
+                ):
+                    return False, "archive_inventory_mismatch"
+                seen.add(relative)
             if seen != set(sources):
                 return False, "archive_inventory_mismatch"
+
+            def verify_entry(entry: object) -> str | None:
+                return _entry_error(entry, sources=sources, seen=set(), pack=pack)
+
+            # Keep all source/path/checksum checks, without cross-request cache.
+            # Validate inventory serially before independent filesystem reads.
+            with ThreadPoolExecutor(max_workers=_ARCHIVE_READ_WORKERS) as executor:
+                errors = list(executor.map(verify_entry, entries))
+            for error in errors:
+                if error is not None:
+                    return False, error
         except (OSError, ValueError, TypeError, KeyError):
             return False, "archive_evidence_invalid"
         return True, "archive_restore_verified"
