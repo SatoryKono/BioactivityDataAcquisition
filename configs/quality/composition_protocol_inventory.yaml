@@ -1,7 +1,7 @@
 schema_version: 1
 owner: '@bioetl-architecture'
 linked_issue: '9599'
-expected_total: 79
+expected_total: 77
 max_composition_declarations_outside_contracts: 0
 protocols:
 - name: ObservabilityApiModule
@@ -79,14 +79,6 @@ protocols:
 - name: CleanupServiceProtocol
   path: src/bioetl/composition/contracts/resources.py
   line: 75
-  target_tier: composition_contracts
-- name: ManifestSourceRefBuilder
-  path: src/bioetl/composition/contracts/runtime.py
-  line: 14
-  target_tier: composition_contracts
-- name: ManifestLaunchContextBuilder
-  path: src/bioetl/composition/contracts/runtime.py
-  line: 27
   target_tier: composition_contracts
 - name: ModelDumpable
   path: src/bioetl/composition/contracts/structural.py

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from importlib import import_module
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.composition.observability_runtime import create_run_report_store
@@ -122,9 +123,9 @@ def _start_health_observability(logger: LoggerPort | None = None) -> None:
 
 def _rehydrate_current_metrics(*, logger: LoggerPort | None = None) -> None:
     """Seed scraped contract samples from durable run reports."""
-    from bioetl.application.observability.current_metrics_rehydrate import (
-        rehydrate_current_pipeline_run_metrics,
-    )
+    rehydrate_current_pipeline_run_metrics = import_module(
+        "bioetl.application.observability.current_metrics_rehydrate"
+    ).rehydrate_current_pipeline_run_metrics
     from bioetl.composition.health_service_access import get_health_server_dependencies
 
     try:

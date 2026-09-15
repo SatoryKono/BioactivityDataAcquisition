@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-15T15:30:44.903544+00:00",
+  "generated_at": "2026-09-15T16:02:25.866138+00:00",
   "summary": {
     "total_scripts": 618,
     "status_counts": {
@@ -11,9 +11,9 @@
       "agents": 9,
       "build": 17,
       "ci": 83,
-      "docs": 258,
+      "docs": 259,
       "other": 75,
-      "scripts": 516,
+      "scripts": 517,
       "skills": 12,
       "tests": 433
     }
@@ -276,7 +276,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 83,
+          "line": 86,
           "source_group": "scripts",
           "text": "\"diagnose-codex-wsl\": \"../ai/codex/diagnose_wsl.sh\","
         },
@@ -1615,7 +1615,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 84,
+          "line": 87,
           "source_group": "scripts",
           "text": "\"setup-agents\": \"../ai/codex/setup_agents.sh\","
         },
@@ -18513,7 +18513,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 68,
+      "reference_count": 69,
       "references": [
         {
           "path": ".github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md",
@@ -19616,7 +19616,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 52,
+          "line": 54,
           "source_group": "scripts",
           "text": "\"salt-rotate\": \"maintenance/security/salt_rotate.py\","
         },
@@ -19823,11 +19823,23 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
         {
+          "path": "docs/03-guides/metrics-monitoring.md",
+          "line": 959,
+          "source_group": "docs",
+          "text": "Implementation: `scripts/ops/observability/archive_control_plane.py`. Invoke it as"
+        },
+        {
+          "path": "scripts/ops/__main__.py",
+          "line": 69,
+          "source_group": "scripts",
+          "text": "\"archive-control-plane\": \"observability/archive_control_plane.py\","
+        },
+        {
           "path": "tests/unit/scripts/ops/observability/test_archive_control_plane.py",
-          "line": 6,
+          "line": 8,
           "source_group": "tests",
           "text": "from scripts.ops.observability.archive_control_plane import main"
         }
@@ -19846,7 +19858,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 65,
+          "line": 67,
           "source_group": "scripts",
           "text": "\"observability/check_bioetl_prometheus_scrape.py\""
         },
@@ -19904,7 +19916,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 53,
+          "line": 55,
           "source_group": "scripts",
           "text": "\"check-observability-ports\": \"observability/check_published_observability_endpoints.py\","
         },
@@ -20080,7 +20092,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 57,
+          "line": 59,
           "source_group": "scripts",
           "text": "\"audit-live-grafana\": \"observability/grafana/audit_live_grafana_panels.py\","
         },
@@ -20125,7 +20137,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 56,
+          "line": 58,
           "source_group": "scripts",
           "text": "\"assess-grafana-captures\": \"observability/grafana/capture_acceptance.py\","
         },
@@ -20236,7 +20248,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 59,
+          "line": 61,
           "source_group": "scripts",
           "text": "\"observability/grafana/check_dashboard_panel_fill.py\""
         },
@@ -20291,7 +20303,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 62,
+          "line": 64,
           "source_group": "scripts",
           "text": "\"observability/grafana/check_grafana_dashboard_audit_preflight.py\""
         },
@@ -20416,7 +20428,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 68,
+          "line": 71,
           "source_group": "scripts",
           "text": "\"observability/grafana/ensure_quarantine_explorer.py\""
         }
@@ -20732,7 +20744,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 54,
+          "line": 56,
           "source_group": "scripts",
           "text": "\"rerender-grafana\": \"observability/grafana/rerender_grafana_screenshots.py\","
         },
@@ -20777,7 +20789,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 71,
+          "line": 74,
           "source_group": "scripts",
           "text": "\"observability/grafana/run_grafana_dashboard_audit_cycle.py\""
         },
@@ -20822,7 +20834,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 55,
+          "line": 57,
           "source_group": "scripts",
           "text": "\"render-grafana-matrix\": (\"observability/grafana/run_grafana_render_matrix.py\"),"
         },
@@ -21254,7 +21266,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 89,
+          "line": 92,
           "source_group": "scripts",
           "text": "\"deploy\": \"runtime/deploy/deploy-bioetl.sh\","
         }
@@ -22786,7 +22798,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 87,
+          "line": 90,
           "source_group": "scripts",
           "text": "\"check-skills\": \"support/skills/check_ai_skills_layout.sh\","
         }

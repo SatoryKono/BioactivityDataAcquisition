@@ -6,9 +6,9 @@ source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=1936abd45a122c8d10e54283cf87f468df626c9c7715a9059e17317d692217ef`
+`source_tree_sha256=d9b4c12db5529b696af936620e467c61b63c58491be928b0d882b2791581e4f6`
 
-`source_module_count=2475`
+`source_module_count=2474`
 
 Refresh note (2026-09-15): hash-only reconcile after architecture closeout
 rebind (logger port facade, publication recording rules, hotspot inventories).
@@ -16,9 +16,9 @@ Counts and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=feccfb8f1143cc07b30abb555cec45a826aea78925550195a9a7987640bdb8cd`
+`source_tree_sha256=02358f050d0c78c5b18a3c0fb59f7a55f0cda7a80591fb7db505405466c11625`
 
-`source_module_count=2473`
+`source_module_count=2474`
 
 Refresh note (2026-09-15): hash-only reconcile after merge WIP inventory
 rebind. Counts and the source fingerprint below come from

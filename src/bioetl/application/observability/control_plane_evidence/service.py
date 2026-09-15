@@ -28,7 +28,7 @@ from bioetl.application.observability.control_plane_evidence.models import (
     unresolved_scope_check,
 )
 from bioetl.application.observability.control_plane_evidence.retention import (
-    ArchiveVerifierPort,
+    ArchiveVerifierProtocol,
     ControlPlaneLifecyclePlanner,
     build_retention_checks,
     serialize_resolution_issues,
@@ -63,7 +63,7 @@ class ControlPlaneEvidenceService:
     lifecycle_planner: ControlPlaneLifecyclePlanner | None = None
     manifest_inspector: RawRunManifestInspectionPort | None = None
     retention_days: int = DEFAULT_CONTROL_PLANE_RETENTION_DAYS
-    archive_verifier: ArchiveVerifierPort | None = None
+    archive_verifier: ArchiveVerifierProtocol | None = None
 
     def trust_summary(
         self, *, scope: EvidenceScopeContext, now: datetime
