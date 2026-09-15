@@ -623,6 +623,44 @@ def _layout_control_plane_detail_panels(panels: list[object]) -> None:
         children.sort(key=lambda child: (child["gridPos"]["y"], child["gridPos"]["x"]))
 
 
+def _layout_overview_detail_panels(panels: list[object]) -> None:
+    """Keep small status tables compact while retaining all rows in scroll views."""
+    layouts = {
+        9600: {9601: (0, 0, 24, 4)},
+        9030: {
+            9031: (0, 0, 12, 7),
+            9018: (12, 0, 12, 7),
+            9019: (0, 7, 24, 6),
+            9020: (0, 13, 24, 6),
+        },
+        9009: {
+            9010: (0, 0, 12, 4),
+            9011: (12, 0, 12, 4),
+            9015: (0, 4, 24, 3),
+        },
+        9012: {
+            9006: (0, 0, 12, 4),
+            9003: (12, 0, 12, 4),
+            9004: (0, 4, 12, 4),
+            9007: (12, 4, 12, 4),
+            9005: (0, 8, 12, 4),
+            9013: (12, 8, 12, 4),
+            9021: (0, 12, 24, 3),
+        },
+        30215: {20215: (0, 0, 24, 6)},
+    }
+    for row in _root_panels(panels):
+        if (layout := layouts.get(row.get("id"))) is None:
+            continue
+        base_y = row["gridPos"]["y"] + 1
+        children = row.get("panels", [])
+        for child in children:
+            if (position := layout.get(child.get("id"))) is not None:
+                x, offset, width, height = position
+                child["gridPos"].update(x=x, y=base_y + offset, w=width, h=height)
+        children.sort(key=lambda child: (child["gridPos"]["y"], child["gridPos"]["x"]))
+
+
 def _normalize_collapsed_row_children(panels: list[object]) -> None:
     """Repair the one-row child drift left by legacy recursive nav shifts."""
     for row in _root_panels(panels):
@@ -939,6 +977,8 @@ def apply_to_dashboard(
     _normalize_collapsed_row_children(panels)
     if current_uid == "bioetl-control-plane-v1":
         _layout_control_plane_detail_panels(panels)
+    if current_uid == "bioetl-overview-v2":
+        _layout_overview_detail_panels(panels)
     nav["options"] = {
         "mode": "html",
         "bioetlDisplayTitle": NAV_DISPLAY_TITLE,
