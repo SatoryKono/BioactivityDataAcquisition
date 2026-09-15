@@ -708,9 +708,10 @@ def _layout_runtime_detail_panels(panels: list[object]) -> None:
                         target["expr"] = f"({expr}) >= 0"
                 child["fieldConfig"]["defaults"]["custom"]["showPoints"] = "always"
                 child["description"] = (
-                    "Duration quantiles require observed histogram increments within the rate interval. "
-                    "No plotted samples means no computable quantile, not zero duration or a failed run. "
-                    "NaN quantiles are omitted; isolated valid observations are shown as points."
+                    "TIME RANGE · Duration quantiles require observed histogram increments "
+                    "within the rate interval. An empty chart is UNKNOWN, not zero duration "
+                    "or a failed run. NaN quantiles are omitted; isolated valid observations "
+                    "are shown as points."
                 )
         children.sort(key=lambda child: (child["gridPos"]["y"], child["gridPos"]["x"]))
 
@@ -954,10 +955,14 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
             "validation table for details. No selected run is a valid empty state "
             "(UNKNOWN). Backend unavailable means QUERY ERROR."
         )
-        by_id[9418]["options"]["footer"]["enablePagination"] = True
-        for override in by_id[9418]["fieldConfig"]["overrides"]:
+        options = by_id[9418].setdefault("options", {})
+        footer = options.setdefault("footer", {})
+        footer["enablePagination"] = True
+        field_config = by_id[9418].setdefault("fieldConfig", {})
+        overrides = field_config.setdefault("overrides", [])
+        for override in overrides:
             field = override.get("matcher", {}).get("options")
-            width = {"Processing": 110, "Trust": 125, "Observed at": 180}.get(field)
+            width = {"Processing": 80, "Trust": 90, "Observed at": 130}.get(field)
             if width is not None:
                 for prop in override.get("properties", []):
                     if prop.get("id") == "custom.width":

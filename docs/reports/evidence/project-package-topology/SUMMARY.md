@@ -1,5 +1,14 @@
 # Сводка evidence: project-package-topology
 
+Refresh note (2026-09-15): hash-only reconcile after merge WIP inventory
+rebind. Counts and the source fingerprint below come from
+`reports/quality/module-coverage-inventory.json`. Historical notes remain
+historical.
+
+`source_tree_sha256=54049305075ccc3e44a24c65a2c6250e5f1265ad4af28065fe3a86bcc63e1029`
+
+`source_module_count=2469`
+
 Refresh note (2026-09-15): hash-only reconcile after full local pytest closeout
 on `fix/full-suite-51` (removed orphan junit helper, refreshed coverage
 inventory). Counts and the source fingerprint below come from

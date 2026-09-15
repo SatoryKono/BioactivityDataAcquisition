@@ -25,6 +25,9 @@ DASHBOARDS_DIR = Path("grafana/dashboards")
 CONTROL_PLANE_CURRENT_STATUS_RULES_PATH = Path(
     "grafana/prometheus-rules/bioetl_control_plane_current_status.yml"
 )
+PUBLICATION_FRESHNESS_RULES_PATH = Path(
+    "grafana/prometheus-rules/bioetl_publication_freshness.yml"
+)
 SLO_ALERT_CONTRACT_PATH = Path("configs/quality/observability_slo_alert_contract.yaml")
 PROMETHEUS_CONFIG_PATH = Path("grafana/prometheus.yml")
 MONITORING_COMPOSE_PATH = Path("docker-compose.monitoring.yml")
@@ -67,6 +70,20 @@ def _load_control_plane_current_status_rules() -> dict:
     )
     assert isinstance(payload, dict)
     return payload
+
+
+def _load_publication_freshness_rules() -> dict:
+    payload = yaml.safe_load(
+        PUBLICATION_FRESHNESS_RULES_PATH.read_text(encoding="utf-8")
+    )
+    assert isinstance(payload, dict)
+    return payload
+
+
+def _extra_recording_rule_groups() -> list:
+    return list(_load_control_plane_current_status_rules().get("groups", [])) + list(
+        _load_publication_freshness_rules().get("groups", [])
+    )
 
 
 def _load_slo_alert_contract() -> dict:
@@ -119,9 +136,7 @@ def _build_rule_map(payload: dict) -> dict[str, dict]:
 
 def _build_record_map(payload: dict) -> dict[str, dict]:
     record_map: dict[str, dict] = {}
-    for group in payload.get(
-        "groups", []
-    ) + _load_control_plane_current_status_rules().get("groups", []):
+    for group in payload.get("groups", []) + _extra_recording_rule_groups():
         for rule in group.get("rules", []):
             record_name = rule.get("record")
             if isinstance(record_name, str):
@@ -228,9 +243,7 @@ def _build_metric_label_sets(payload: dict) -> dict[str, frozenset[str]]:
         label_sets[f"{name}_sum"] = base_labels
         label_sets[f"{name}_count"] = base_labels
 
-    for group in payload.get(
-        "groups", []
-    ) + _load_control_plane_current_status_rules().get("groups", []):
+    for group in payload.get("groups", []) + _extra_recording_rule_groups():
         for rule in group.get("rules", []):
             record_name = rule.get("record")
             expr = rule.get("expr")
