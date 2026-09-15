@@ -167,6 +167,10 @@ def test_pipeline_runtime_localization_empty_states_are_explicit() -> None:
 
     records_panel = panels["Compare Records by Stage & Run Type"]
     records_description = records_panel.get("description", "")
+    assert records_description.startswith("TIME RANGE")
+    assert "SELECTED RUN" not in records_description
+    assert "Run ID does not filter" in records_description
+    assert "initial counter value is not an observed increase" in records_description.replace("\n", " ")
     records_defaults = records_panel.get("fieldConfig", {}).get("defaults", {})
     no_value = str(records_defaults.get("noValue") or "")
     assert no_value.startswith("TELEMETRY MISSING")

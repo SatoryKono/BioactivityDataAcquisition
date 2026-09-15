@@ -669,6 +669,21 @@ def _normalize_overview_domain_snapshots(panels: list[object]) -> None:
             )
 
 
+def _normalize_runtime_record_delta_scope(panels: list[object]) -> None:
+    """Distinguish observed counter increases from persisted selected-run totals."""
+    for panel in _walk_panels(panels):
+        if panel.get("id") == 241:
+            panel["description"] = (
+                "TIME RANGE · Observed selected-range processed-record counter increases by Stage and Run Type "
+                "for the selected Pipeline and Stage. Run ID does not filter this query. "
+                "Prometheus increase estimates changes between scraped samples; the initial "
+                "counter value is not an observed increase. These values can differ from "
+                "persisted selected-run totals. Use Run Explorer for exact-run counts. "
+                "An empty chart means no matching samples or unavailable telemetry, not "
+                "successful processing. TELEMETRY MISSING is not a zero and not VALID EMPTY."
+            )
+
+
 def _layout_overview_detail_panels(panels: list[object]) -> None:
     """Keep small status tables compact while retaining all rows in scroll views."""
     layouts = {
@@ -1258,6 +1273,8 @@ def apply_to_dashboard(
     _reclaim_first_window_overflow(nav, panels, current_uid=current_uid)
     _layout_uid_first_window(panels, current_uid=current_uid)
     _normalize_collapsed_row_children(panels)
+    if current_uid == "bioetl-runtime":
+        _normalize_runtime_record_delta_scope(panels)
     if current_uid == "bioetl-control-plane-v1":
         _layout_control_plane_detail_panels(panels)
         _clarify_manifest_counter_evidence(panels)

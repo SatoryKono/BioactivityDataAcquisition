@@ -2289,7 +2289,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · SELECTED RUN · Compares selected-range processed-record totals by Stage and Run Type for the selected Pipeline. An empty chart means no matching samples or unavailable telemetry, not successful processing. Use Run Explorer for exact-run counts TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Observed selected-range processed-record counter increases by Stage and Run Type for the selected Pipeline and Stage. Run ID does not filter this query. Prometheus increase estimates changes between scraped samples; the initial counter value is not an observed increase. These values can differ from persisted selected-run totals. Use Run Explorer for exact-run counts. An empty chart means no matching samples or unavailable telemetry, not successful processing. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "fieldConfig": {
             "defaults": {
               "color": {
