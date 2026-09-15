@@ -715,6 +715,40 @@ def _layout_runtime_detail_panels(panels: list[object]) -> None:
         children.sort(key=lambda child: (child["gridPos"]["y"], child["gridPos"]["x"]))
 
 
+def _layout_dq_detail_panels(panels: list[object]) -> None:
+    """Keep paired DQ evidence panels aligned during Grafana grid compaction."""
+    layouts = {
+        220: {
+            152: (0, 0, 24, 3),
+            121: (0, 3, 12, 6),
+            122: (12, 3, 12, 6),
+            118: (0, 9, 12, 6),
+            156: (12, 9, 12, 6),
+        },
+        221: {
+            12: (0, 9, 12, 4),
+            151: (12, 9, 12, 4),
+            10: (0, 13, 12, 6),
+            11: (12, 13, 12, 6),
+            155: (0, 19, 12, 6),
+            153: (12, 19, 12, 6),
+            116: (0, 25, 24, 4),
+            150: (0, 29, 24, 4),
+        },
+    }
+    for row in _root_panels(panels):
+        layout = layouts.get(row.get("id"))
+        if layout is None:
+            continue
+        base_y = row["gridPos"]["y"] + 1
+        children = row.get("panels", [])
+        for child in children:
+            if position := layout.get(child.get("id")):
+                x, offset, width, height = position
+                child["gridPos"].update(x=x, y=base_y + offset, w=width, h=height)
+        children.sort(key=lambda child: (child["gridPos"]["y"], child["gridPos"]["x"]))
+
+
 def _normalize_collapsed_row_children(panels: list[object]) -> None:
     """Repair the one-row child drift left by legacy recursive nav shifts."""
     for row in _root_panels(panels):
@@ -779,7 +813,7 @@ def _stamp_control_plane_recovery_cta(cta: dict[str, object]) -> None:
         "if its Trust status is "
         "INCOMPLETE or UNKNOWN. First-screen tables: Review Selected-Run Trust "
         "(9418) and Review Retention Compliance (9416). Review Lineage Validation "
-        "is the first collapsed row (9419) and contains table 9415. Monitor Replay "
+        "is the first collapsed row (9419) and contains table 9415. Monitor Current "
         "Readiness (9401) is current Prometheus for the pipeline, not this run."
     )
 
@@ -805,17 +839,22 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
         by_id[9400]["description"] = (
             "CURRENT readiness is pipeline/run_type telemetry. SELECTED RUN Trust "
             "and retention tables are exact-run persisted evidence. An incomplete "
-            "selected run cannot be replayed even when current readiness is OK."
+            "selected run cannot be replayed even when current readiness is OK. "
+            "Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when "
+            "OUT OF RANGE. Effective refresh: 60s · timezone: browser."
         )
     if 9401 in by_id:
         readiness = by_id[9401]
         readiness["title"] = "Monitor Current Readiness"
-        readiness["fieldConfig"]["defaults"]["displayName"] = "Current readiness"
+        field_config = readiness.setdefault("fieldConfig", {})
+        defaults = field_config.setdefault("defaults", {})
+        defaults["displayName"] = "Monitor Current Readiness"
         readiness["description"] = (
             "CURRENT · Latest fresh pipeline/run_type telemetry. Run ID does not filter "
-            "this panel. OK = current checks pass; WARN = degraded; CRIT = failed; "
-            "UNKNOWN = missing or stale evidence. OK here does not authorize replay: "
-            "selected-run Trust INCOMPLETE or UNKNOWN still blocks replay."
+            "this panel. Palette: 0=OK, 1=WARN, 2=CRIT, null=UNKNOWN. This CURRENT "
+            "verdict is not exact-run processing_status or trust_status. OK here does "
+            "not authorize replay: selected-run trust_status INCOMPLETE or UNKNOWN "
+            "still blocks replay."
         )
     if 9418 in by_id:
         for link in by_id[9418].get("links", []):
@@ -828,9 +867,9 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
         by_id[9418]["description"] = (
             "SELECTED RUN · Aggregate Trust includes manifest, lineage and retention "
             "evidence for this run. ERROR wins; missing evidence is INCOMPLETE. "
-            "Processing success does not imply Trust OK. Inspect each validation "
-            "table for details. No selected run is a valid empty state (UNKNOWN). "
-            "Backend unavailable means QUERY ERROR."
+            "processing_status success does not imply trust_status OK. Inspect each "
+            "validation table for details. No selected run is a valid empty state "
+            "(UNKNOWN). Backend unavailable means QUERY ERROR."
         )
         by_id[9418]["options"]["footer"]["enablePagination"] = True
         for override in by_id[9418]["fieldConfig"]["overrides"]:
@@ -1035,6 +1074,8 @@ def apply_to_dashboard(
         _layout_overview_detail_panels(panels)
     if current_uid == "bioetl-runtime":
         _layout_runtime_detail_panels(panels)
+    if current_uid == "bioetl-dq-v2":
+        _layout_dq_detail_panels(panels)
     nav["options"] = {
         "mode": "html",
         "bioetlDisplayTitle": NAV_DISPLAY_TITLE,

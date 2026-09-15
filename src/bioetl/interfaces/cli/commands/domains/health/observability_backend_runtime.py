@@ -7,10 +7,10 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 
-from bioetl.interfaces.cli.commands.domains.health._observability_backend_startup import (
+from bioetl.application.services.ops.observability_backend_startup import (
     ensure_observability_backend_started_impl,
 )
-from bioetl.interfaces.cli.commands.domains.health._observability_backend_startup_types import (
+from bioetl.application.services.ops.observability_backend_startup_types import (
     _DropStaleBackendFn,
     _ListenerPidFn,
     _MessagePrinter,
@@ -31,7 +31,7 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_failure
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details import (
     _read_backend_startup_log_excerpt as _read_backend_startup_log_excerpt,
 )
-from bioetl.interfaces.cli.commands.domains.health.observability_backend_probes import (
+from bioetl.application.services.ops.observability_backend_probes import (
     DEFAULT_OBSERVABILITY_BACKEND_POLL_SECONDS,
     DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS,
     DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PATHS_READY_TIMEOUT_SECONDS,
@@ -42,7 +42,7 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_probes 
     wait_for_observability_backend_ready,
     wait_for_observability_backend_required_paths_ready,
 )
-from bioetl.interfaces.cli.commands.domains.health.observability_backend_process import (
+from bioetl.application.services.ops.observability_backend_process import (
     _build_detached_backend_env,
     _build_detached_backend_popen_kwargs,
     build_detached_backend_log_path,

@@ -137,6 +137,7 @@ metric_coverage_classes:
   bioetl_runtime_stage_progress: required_current
   bioetl_runtime_stage_progress_by_scope: required_current
   bioetl_runtime_trust_gap_status_10m: required_current
+  bioetl_scope_publication_status: required_current
   bioetl_shutdown_completed_total: event_optional
   bioetl_shutdown_initiated_total: event_optional
   bioetl_silver_filter_reject_total_mismatch_15m: event_optional
@@ -147,6 +148,7 @@ metric_coverage_classes:
   bioetl_stage_records_total: event_optional
   bioetl_trust_replay_blocker_events_total: event_optional
   bioetl_trust_replay_blocker_integrity: required_current
+  bioetl_workflow_publication_scope_status: required_current
   bioetl_workflow_runs_total: event_optional
   bioetl_workflow_step_events_total: event_optional
   bioetl_workflow_universe: required_current

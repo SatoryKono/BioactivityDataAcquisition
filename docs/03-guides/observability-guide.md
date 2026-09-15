@@ -21,7 +21,7 @@ infrastructure, and operator dashboards are shipped as repository JSON.
 
 | Surface | File(s) |
 | --- | --- |
-| Observability ports | `src/bioetl/domain/ports/observability/*.py`, `src/bioetl/domain/ports/logger_port.py` |
+| Observability ports | `src/bioetl/domain/ports/observability/*.py`; `logger_port.py` is a compatibility re-export of `observability/logging.py` |
 | Application observer | `src/bioetl/application/observability/observer.py` |
 | Metrics service | `src/bioetl/application/services/metrics_service.py` |
 | Infrastructure metrics/tracing/logging | `src/bioetl/infrastructure/observability/**` |

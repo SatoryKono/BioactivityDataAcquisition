@@ -52,11 +52,11 @@ ______________________________________________________________________
 
 `src/bioetl/domain/ports/` содержит `Protocol`-контракты для Ports & Adapters:
 
-Сейчас пакет включает **82** Python files (**73** port modules + **9** package
+Сейчас пакет включает **81** Python files (**72** port modules + **9** package
 `__init__.py` facades) во вложенной структуре
-(`reports/quality/domain-ports-inventory.json`: `port_module_files=73`,
-`scanned_python_files=82`, `port_protocol_classes=89`). На корневом уровне
-пакета — **25** `*.py` files (23 public port modules + `__init__.py` +
+(`reports/quality/domain-ports-inventory.json`: `port_module_files=72`,
+`scanned_python_files=81`, `port_protocol_classes=88`). На корневом уровне
+пакета — **24** `*.py` files (22 public port modules + `__init__.py` +
 `_facade_support.py`). Полный module catalog:
 [Domain Ports](../04-reference/domain/ports.md).
 
@@ -72,7 +72,7 @@ ______________________________________________________________________
   `data_normalization.py`, `data_source.py`,
   `delta_reader.py`, `entity_type.py`, `export.py`, `filtering.py`,
   `health_check.py`, `idmapping.py`,
-  `logger_port.py`, `pii.py`, `pipeline_callbacks.py`,
+  `logger_port.py` (compatibility re-export), `pii.py`, `pipeline_callbacks.py`,
   `protein_classification.py`, `publication_strategy.py`,
   `resilience.py`, `serialization.py`, `source_config.py`, `stage_accounting.py`,
   `storage_maintenance.py`,

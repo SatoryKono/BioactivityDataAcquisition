@@ -28,7 +28,7 @@ truth; existing documentation is evidence only when it matches those sources.
 | Error catalog | 1 | `configs/contracts/errors/error_catalog.yaml` | Canonical error-code taxonomy; not counted as an entity data contract. |
 | Provider configs | 7 | `configs/providers/*.yaml` | ChEMBL, CrossRef, OpenAlex, PubChem, PubMed, Semantic Scholar, UniProt. |
 | Grafana dashboards | 7 | `grafana/dashboards/*.json` | Trust/control-plane, overview, runtime, provider health, DQ, incident, run-explorer (Silver Reject Explorer removed 2026-07-23). |
-| Domain port files | 82 | `src/bioetl/domain/ports/**/*.py` | 73 port modules + 9 package `__init__.py` (inventory: `reports/quality/domain-ports-inventory.json`); 25 top-level `*.py` including `__init__.py` and `_facade_support.py`. |
+| Domain port files | 81 | `src/bioetl/domain/ports/**/*.py` | 72 port modules + 9 package `__init__.py` (inventory: `reports/quality/domain-ports-inventory.json`); 24 top-level `*.py` including `__init__.py` and `_facade_support.py`. |
 
 ## Architecture Quality Evidence
 
@@ -56,7 +56,7 @@ drift is currently clear (`stale_artifacts` are all false in
 release-gate failures rather than hidden warning-only coverage drift. Module
 coverage currently reports `0` unmeasured and `0` uncovered source modules
 from the committed coverage inventory (debt-governance gates). That is a module-inventory fact, not
-a blanket line/branch coverage guarantee: `851` modules
+a blanket line/branch coverage guarantee: `853` modules
 remain partially covered and line/branch coverage must be read from the
 `coverage-verify` artifacts. Read-only
 audit evidence should use
@@ -142,7 +142,7 @@ Full pipeline catalog: [Pipeline Catalog](../04-reference/pipeline-catalog.md).
 | Data source and filtering | `src/bioetl/domain/ports/data_source.py`, `filtering.py` | Fetch/filter contracts for provider adapters. | `src/bioetl/infrastructure/adapters/**` |
 | Storage | `src/bioetl/domain/ports/storage/*.py`, `storage_maintenance.py` | Narrow Bronze/Silver/Gold/Merged/lifecycle storage contracts. | `src/bioetl/infrastructure/storage/**` |
 | Runtime control | `src/bioetl/domain/ports/runtime/*.py` | Lock, checkpoint, clock, runner, registry, shutdown, debug, memory. | Application/composition/infrastructure runtime services. |
-| Observability | `src/bioetl/domain/ports/observability/*.py`, `logger_port.py` | Logger, metrics, tracing, DQ monitor contracts. | `src/bioetl/infrastructure/observability/**` and NoOp ports. |
+| Observability | `src/bioetl/domain/ports/observability/*.py`; `logger_port.py` compatibility re-export | Logger, metrics, tracing, DQ monitor contracts. | `src/bioetl/infrastructure/observability/**` and NoOp ports. |
 | Quality | `src/bioetl/domain/ports/quality/*.py` | DQ config, analyzers, reports, quarantine, validation, fallback/error policy. | `src/bioetl/application/services/dq/**`, `src/bioetl/infrastructure/quality/**`. |
 | Control plane | `src/bioetl/domain/ports/control_plane/*.py` | Run/workflow manifest, ledger, effective config, lineage, artifact comparison stores. | `src/bioetl/infrastructure/control_plane/**`. |
 | Config/metadata/export | `src/bioetl/domain/ports/config/*.py`, `metadata/*.py`, `export.py` | Config loading, metadata writing/coordinating, export catalog/writer. | Infrastructure config, metadata, and export adapters. |

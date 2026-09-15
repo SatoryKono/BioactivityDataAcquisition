@@ -58,18 +58,24 @@ Three architecture scanners count different populations. They are not interchang
 and a numeric gap is not a layer violation. Re-measure with the live commands before
 copying these integers forward.
 
+Live counts below were re-measured 2026-09-15 (W0 `#10442`). Grafana/ops Python
+under `scripts/ops/observability/grafana/` stays outside RF-06 hotspot families
+(decision C / `#10447`); do not fold those files into `debt_scorecard.yaml`
+without a separate ADR.
+
 | Scanner | Artifact / command | What it counts |
 | --- | --- | --- |
-| Coverage inventory | `reports/quality/module-coverage-inventory.json` | Coverage-fact rows for `src/bioetl/**/*.py` that still exist in the tree (currently 2450). `report-module-coverage --check --allow-missing-coverage-xml` refreshes `source_tree_sha256` and drops deleted paths; it does not add rows for new modules until the coverage-verify lane rebuilds from coverage XML. |
-| Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Live modules with a resolvable hexagonal layer + group (currently 2448). Excludes package-root `bioetl` and `bioetl.__main__` (no hexagonal layer tag). |
-| import-linter | `lint-imports --no-cache` (`.importlinter`) | Importable files in the `bioetl` package graph (currently 2398 files). Excludes stubs / non-imported modules |
+| Coverage inventory | `reports/quality/module-coverage-inventory.json` | Coverage-fact rows for `src/bioetl/**/*.py` that still exist in the tree (currently 2473). `report-module-coverage --check --allow-missing-coverage-xml` refreshes `source_tree_sha256` and drops deleted paths; it does not add rows for new modules until the coverage-verify lane rebuilds from coverage XML. |
+| Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Live modules with a resolvable hexagonal layer + group (currently 2463). Excludes package-root `bioetl` and `bioetl.__main__` (no hexagonal layer tag). |
+| import-linter | `lint-imports --no-cache` (`.importlinter`) | Importable files in the `bioetl` package graph (last recorded 2398 files; not re-measured in the 2026-09-15 W0 pass). Excludes stubs / non-imported modules |
 
 `families_at_budget` on the architecture scorecard (currently
 `application_services_control_plane` fan-in 2/2 and
 `composition_runtime_builders` fan-in 3/3) is a tracked residual,
 not a budget-growth event. Do not raise the fan-in or loc caps; keep new
 internal imports and oversized files flat. `composition_factories_pipeline`
-`files_ge_250_loc` is 0/2 (budget unchanged).
+`files_ge_250_loc` is 0/2 (budget unchanged). `application_core` live LOC is
+23444 with `files=194` (budget unchanged).
 
 ## Architecture scorecard semantics
 

@@ -23441,26 +23441,6 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 67,
-      "executable_lines": 67,
-      "missing_lines": 0,
-      "module": "bioetl.interfaces.cli.commands.domains.health._observability_backend_startup",
-      "path": "src/bioetl/interfaces/cli/commands/domains/health/_observability_backend_startup.py",
-      "source_lines": 307
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 61,
-      "executable_lines": 61,
-      "missing_lines": 0,
-      "module": "bioetl.interfaces.cli.commands.domains.health._observability_backend_startup_types",
-      "path": "src/bioetl/interfaces/cli/commands/domains/health/_observability_backend_startup_types.py",
-      "source_lines": 154
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
       "covered_lines": 4,
       "executable_lines": 4,
       "missing_lines": 0,
@@ -23507,26 +23487,6 @@
       "module": "bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details",
       "path": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_failure_details.py",
       "source_lines": 182
-    },
-    {
-      "coverage_percent": 88.14,
-      "coverage_status": "partially_covered",
-      "covered_lines": 52,
-      "executable_lines": 59,
-      "missing_lines": 7,
-      "module": "bioetl.interfaces.cli.commands.domains.health.observability_backend_probes",
-      "path": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_probes.py",
-      "source_lines": 153
-    },
-    {
-      "coverage_percent": 96.51,
-      "coverage_status": "partially_covered",
-      "covered_lines": 166,
-      "executable_lines": 172,
-      "missing_lines": 6,
-      "module": "bioetl.interfaces.cli.commands.domains.health.observability_backend_process",
-      "path": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_process.py",
-      "source_lines": 350
     },
     {
       "coverage_percent": 98.86,
@@ -48173,26 +48133,6 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 67,
-      "executable_lines": 67,
-      "missing_lines": 0,
-      "module": "bioetl.interfaces.cli.commands.domains.health._observability_backend_startup",
-      "path": "src/bioetl/interfaces/cli/commands/domains/health/_observability_backend_startup.py",
-      "source_lines": 307
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 61,
-      "executable_lines": 61,
-      "missing_lines": 0,
-      "module": "bioetl.interfaces.cli.commands.domains.health._observability_backend_startup_types",
-      "path": "src/bioetl/interfaces/cli/commands/domains/health/_observability_backend_startup_types.py",
-      "source_lines": 154
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
       "covered_lines": 4,
       "executable_lines": 4,
       "missing_lines": 0,
@@ -48239,26 +48179,6 @@
       "module": "bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details",
       "path": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_failure_details.py",
       "source_lines": 182
-    },
-    {
-      "coverage_percent": 88.14,
-      "coverage_status": "partially_covered",
-      "covered_lines": 52,
-      "executable_lines": 59,
-      "missing_lines": 7,
-      "module": "bioetl.interfaces.cli.commands.domains.health.observability_backend_probes",
-      "path": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_probes.py",
-      "source_lines": 153
-    },
-    {
-      "coverage_percent": 96.51,
-      "coverage_status": "partially_covered",
-      "covered_lines": 166,
-      "executable_lines": 172,
-      "missing_lines": 6,
-      "module": "bioetl.interfaces.cli.commands.domains.health.observability_backend_process",
-      "path": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_process.py",
-      "source_lines": 350
     },
     {
       "coverage_percent": 98.86,
@@ -49473,7 +49393,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-10",
-  "source_tree_sha256": "d551fae8e9775857f41dfbc167dcd5f250dc6504a238a4aacbbfc6b72e6de72e",
+  "source_tree_sha256": "54049305075ccc3e44a24c65a2c6250e5f1265ad4af28065fe3a86bcc63e1029",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -49628,12 +49548,12 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2473,
+    "source_module_count": 2469,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 1616,
+      "fully_covered": 1614,
       "no_executable_lines": 4,
-      "partially_covered": 853,
+      "partially_covered": 851,
       "uncovered": 0,
       "unmeasured": 0
     },

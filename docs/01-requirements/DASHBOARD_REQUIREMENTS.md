@@ -248,7 +248,7 @@ The §7 answers map to these root first-window panels. Ids are locked by
 
 | UID | Answer panel (title / id) | Notes |
 | --- | --- | --- |
-| `bioetl-control-plane-v1` | `Monitor Replay Readiness` (`9401`) | evidence-aware trust verdict |
+| `bioetl-control-plane-v1` | `Monitor Current Readiness` (`9401`) | evidence-aware trust verdict |
 | `bioetl-overview-v2` | `Monitor Fleet Health` (`214`) + `Review First Action` (`215`) | CURRENT verdict + next route. `Review Selected Run Summary` (`9603`) MUST occupy the first window as SELECTED RUN context and MUST NOT replace 214/215. |
 | `bioetl-runtime` | `Monitor Pipeline Status` (`9401`) | trust-gated runtime verdict |
 | `bioetl-provider-health-v2` | `Monitor Fleet Severity` (`9101`) | GLOBAL provider matrix |

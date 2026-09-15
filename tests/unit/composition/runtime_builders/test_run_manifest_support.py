@@ -209,11 +209,11 @@ def test_build_manifest_create_request_uses_supplied_reproducibility_context(
         lambda **_: "rev-1",
     )
     monkeypatch.setattr(
-        "bioetl.composition.runtime_builders._run_manifest_creation_support._manifest_support.resolve_replay_parentage",
+        "bioetl.composition.runtime_builders._run_manifest_creation_support.resolve_replay_parentage",
         lambda **_: (None, None),
     )
     monkeypatch.setattr(
-        "bioetl.composition.runtime_builders._run_manifest_creation_support._manifest_support.resolve_replay_capability",
+        "bioetl.composition.runtime_builders._run_manifest_creation_support.resolve_replay_capability",
         lambda **_: ReplayCapability.REBUILD_ONLY,
     )
 
@@ -273,9 +273,15 @@ def test_build_manifest_create_request_uses_supplied_reproducibility_context(
 
 
 @pytest.mark.unit
-def test_creation_helper_build_manifest_source_refs_forwards_runtime_profile() -> None:
-    manifest_support = MagicMock()
-    manifest_support.build_run_source_refs.return_value = ("source-ref",)
+def test_creation_helper_build_manifest_source_refs_forwards_runtime_profile(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    source_ref_builder = MagicMock(return_value=("source-ref",))
+    monkeypatch.setattr(
+        creation_helper_module,
+        "build_run_source_refs",
+        source_ref_builder,
+    )
     ctx = _make_run_context()
     inputs = SimpleNamespace(
         cached_bronze="cached-bronze",
@@ -283,7 +289,6 @@ def test_creation_helper_build_manifest_source_refs_forwards_runtime_profile() -
     )
 
     result = creation_helper_module.build_manifest_source_refs(
-        manifest_support=manifest_support,
         ctx=ctx,
         inputs=inputs,
         provider="chembl",
@@ -292,7 +297,7 @@ def test_creation_helper_build_manifest_source_refs_forwards_runtime_profile() -
     )
 
     assert result == ("source-ref",)
-    manifest_support.build_run_source_refs.assert_called_once_with(
+    source_ref_builder.assert_called_once_with(
         ctx=ctx,
         cached_bronze="cached-bronze",
         settings=inputs.settings,
@@ -403,7 +408,8 @@ def test_creation_helper_create_ledger_service_uses_runtime_factories(
         lambda **kwargs: sentinel_store,
     )
     monkeypatch.setattr(
-        "bioetl.composition.occurrence_identity.create_runtime_occurrence_id",
+        creation_helper_module,
+        "create_runtime_occurrence_id",
         lambda prefix: f"{prefix}-001",
     )
     inputs = SimpleNamespace(
@@ -439,8 +445,12 @@ def test_replay_support_helpers_cover_boundary_launch_context_and_assessment(
             SimpleNamespace(strict_exact_replay_supported=False),
         )
 
-    manifest_support = MagicMock()
-    manifest_support.build_launch_context_snapshot.return_value = {"seed": "value"}
+    launch_context_builder = MagicMock(return_value={"seed": "value"})
+    monkeypatch.setattr(
+        replay_helper_module,
+        "build_launch_context_snapshot",
+        launch_context_builder,
+    )
     request_inputs = SimpleNamespace(
         ctx=SimpleNamespace(),
         run_type_value="incremental",
@@ -459,12 +469,11 @@ def test_replay_support_helpers_cover_boundary_launch_context_and_assessment(
         reason="fixture",
     )
     launch_context = replay_helper_module.build_manifest_launch_context(
-        manifest_support=manifest_support,
         request_inputs=request_inputs,
         reproducibility_context=reproducibility_context,
     )
 
-    manifest_support.build_launch_context_snapshot.assert_called_once()
+    launch_context_builder.assert_called_once()
     assert launch_context == {"seed": "value", "run_ledger_enabled": True}
 
     captured: dict[str, object] = {}
@@ -742,7 +751,7 @@ def test_build_run_source_refs_accepts_manifest_backed_snapshot_refs(
         immutable_uri="bronze://chembl/activity/manifest.jsonl.zst",
     )
     monkeypatch.setattr(
-        "bioetl.composition.runtime_builders.run_manifest_support.resolve_pipeline_input_snapshot_refs",
+        "bioetl.composition.runtime_builders._run_manifest_refs.resolve_pipeline_input_snapshot_refs",
         lambda **_: (manifest_snapshot,),
     )
 

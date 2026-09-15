@@ -207,12 +207,6 @@
       "runtime_checkable": true
     },
     {
-      "line": 17,
-      "name": "LoggerPort",
-      "path": "src/bioetl/domain/ports/logger_port.py",
-      "runtime_checkable": true
-    },
-    {
       "line": 211,
       "name": "MetadataCoordinatorPort",
       "path": "src/bioetl/domain/ports/metadata/coordinator.py",
@@ -547,10 +541,10 @@
   "schema_version": 1,
   "summary": {
     "port_module_files": 72,
-    "port_protocol_classes": 89,
+    "port_protocol_classes": 88,
     "runtime_checkable_coverage_pct": 100.0,
-    "runtime_checkable_decorator_count": 101,
-    "runtime_checkable_port_count": 89,
+    "runtime_checkable_decorator_count": 100,
+    "runtime_checkable_port_count": 88,
     "scanned_python_files": 81
   }
 }

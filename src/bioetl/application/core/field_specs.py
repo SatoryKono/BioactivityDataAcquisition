@@ -13,12 +13,8 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
 
 # Type aliases for common converters
-INT: Callable[[object], int | None] = (
-    safe_int  # object: raw field value from Bronze record
-)
-FLOAT: Callable[[object], float | None] = (
-    safe_float  # object: raw field value from Bronze record
-)
+INT: Callable[[object], int | None] = safe_int
+FLOAT: Callable[[object], float | None] = safe_float
 STR: Callable[[object], str] = str  # object: raw field value from Bronze record
 
 

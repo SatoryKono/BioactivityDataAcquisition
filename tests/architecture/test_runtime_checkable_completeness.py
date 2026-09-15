@@ -42,7 +42,7 @@ def _discover_all_port_classes() -> list[str]:
 
 ALL_PORT_NAMES = _discover_all_port_classes()
 EXPECTED_PORT_COUNT = 88
-EXPECTED_PROTOCOL_CLASS_COUNT = 89
+EXPECTED_PROTOCOL_CLASS_COUNT = 88
 RULES_PATH = Path("docs/00-project/RULES.md")
 
 
@@ -84,3 +84,16 @@ class TestAllPortsRuntimeCheckable:
             f"{port_name} MUST be decorated with @runtime_checkable. "
             f"Add `@runtime_checkable` before `class {port_name}(Protocol):`."
         )
+
+
+def test_logger_port_has_one_canonical_protocol_definition() -> None:
+    """Compatibility modules must re-export the sole LoggerPort protocol."""
+    definitions = [
+        path
+        for path in Path("src/bioetl/domain/ports").rglob("*.py")
+        if "class LoggerPort(" in path.read_text(encoding="utf-8")
+    ]
+
+    assert definitions == [
+        Path("src/bioetl/domain/ports/observability/logging.py")
+    ]

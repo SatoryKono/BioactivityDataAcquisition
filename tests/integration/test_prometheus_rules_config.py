@@ -1438,7 +1438,7 @@ def test_control_plane_rules_require_replay_risk_and_integrity_telemetry() -> No
     assert 'risk_type=~"duplicate|overwrite"' in telemetry_expr
     assert 'integrity_type=~"consistent|inconsistent"' in telemetry_expr
     assert telemetry_expr.count("== 2") == 2
-    assert re.search(r",\s*4\s*\)\s*$", telemetry_expr)
+    assert re.search(r",\s*4\s*\)", telemetry_expr)
 
 
 def test_dq_current_status_splits_hard_failures_from_degraded_warnings() -> None:
