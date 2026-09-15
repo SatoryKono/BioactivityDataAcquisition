@@ -46,8 +46,6 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_failure
     _append_backend_startup_diagnostic,
     _build_startup_failure_detail,
     _describe_required_probe_failure,
-)
-from bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details import (
     _read_backend_startup_log_excerpt as _read_backend_startup_log_excerpt,
 )
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (

@@ -14,6 +14,9 @@ from bioetl.domain.control_plane import (
     RunManifest,
 )
 
+_SCHEMA = "bioetl_local_archive_v1"
+
+
 def _index_error(payload: object, manifest: RunManifest) -> str | None:
     if not isinstance(payload, dict) or payload.get("schema") != _SCHEMA:
         return "archive_index_invalid"
