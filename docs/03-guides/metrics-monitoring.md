@@ -942,3 +942,36 @@ when selecting a persistent schedule. For an infrequent batch pipeline, a curren
 UNKNOWN between runs is expected; use selected-run evidence to inspect the completed
 batch. Do not repeat a backfill merely to keep CURRENT green. These instructions do
 not install a scheduler or change the freshness window.
+
+Run provider probes from the writable producer environment. The read-only Ops
+container serves persisted health evidence and cannot persist a CLI probe into its
+read-only data mount. A successful scrape does not replace a provider probe.
+
+Selected-run retention re-reads its bounded artifact set for every request. It does
+not reuse a verdict solely by manifest ID: snapshots can be corrupted or removed,
+and the retention cutoff changes with time. Keep the existing forensic endpoint
+deadline; measure cold and repeated requests separately when diagnosing latency.
+
+Local archive verification is opt-in through `BIOETL_ARCHIVE_ROOT`, pointing to a
+separate directory readable by the Ops process. Set it in the process environment
+or deployment configuration; no `.env` edit is required. The default is no archive
+reader and an honest UNKNOWN. Produce a new pack with
+`python -m scripts.ops.observability.archive_control_plane --data-root <data> --archive-root <archive> --manifest <manifest.json>`;
+use the same command with `--verify-only` to recheck it. An existing pack is never
+overwritten, and the producer never removes source files. Interrupted packs remain
+unverified and require inspection. Each pack contains the selected lifecycle
+inventory, manifest identity, hashes, archive copies and restored copies. Ops
+rechecks inventory, identity, both copies and the retained source on every read.
+Missing evidence stays UNKNOWN; corruption or identity/inventory mismatch is ERROR.
+This proves a local restore, not off-host durability or replay safety.
+
+The Archive row distinguishes `N/A: policy` from `Archive verified`. N/A requires
+the run's original referenced `archive_policy.required=false`; it contributes OK
+to applicability but does not attest copies. Do not rewrite old manifests to add
+this policy. A real archive can provide current copy evidence for a historical
+manifest without changing its original contents or overriding other Trust errors.
+
+For a live panel audit, pass the selected `--read-latency-quantile` (0.5, 0.95 or
+0.99; default 0.95). Audit timestamps use UTC. A rejected query (HTTP 400/422)
+blocks acceptance even for an optional panel; datasource unavailability is a
+separate outcome. Review empty results individually before declaring panel health.

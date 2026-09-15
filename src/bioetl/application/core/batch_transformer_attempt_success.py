@@ -183,6 +183,7 @@ async def resolve_transform_result(
 
 __all__ = [
     "RecordTransformOutcome",
+    "_resolve_gold_filter_details",
     "build_transform_success_outcome",
     "empty_outcome",
     "resolve_transform_result",

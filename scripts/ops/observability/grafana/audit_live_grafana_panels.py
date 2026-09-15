@@ -96,6 +96,7 @@ class AuditConfig:
     occurrence_id: str = ""
     range_from: str = ""
     range_to: str = ""
+    read_latency_quantile: float = 0.95
 
 
 @dataclass(frozen=True)
@@ -411,6 +412,7 @@ def _parse_args(argv: list[str] | None) -> AuditConfig:
     )
     parser.add_argument("--range-from", default="")
     parser.add_argument("--range-to", default="")
+    parser.add_argument("--read-latency-quantile", type=float, choices=(0.5, 0.95, 0.99), default=0.95)
     args = parser.parse_args(argv)
     if bool(args.range_from) != bool(args.range_to) or (
         args.range_from
@@ -443,6 +445,7 @@ def _parse_args(argv: list[str] | None) -> AuditConfig:
         occurrence_id=str(args.occurrence_id).strip(),
         range_from=args.range_from,
         range_to=args.range_to,
+        read_latency_quantile=args.read_latency_quantile,
     )
 
 
@@ -747,6 +750,9 @@ def _substitute_dashboard_tokens(
         range_literal = f"{range_millis}ms"
     quarantine_run_id = "" if config.run_id in {"", "-"} else config.run_id
     replacements = {
+        "$read_latency_quantile": str(config.read_latency_quantile),
+        "${read_latency_quantile}": str(config.read_latency_quantile),
+        "${__timezone}": "UTC",
         "$workflow": config.workflow,
         "$pipeline": config.pipeline,
         "$run_type": config.run_type,
@@ -1942,17 +1948,19 @@ def _panel_audit_exception_result(
     spec: PanelAuditSpec,
     exc: Exception,
 ) -> AuditResult:
+    invalid_query = isinstance(exc, HTTPError) and exc.code in {400, 422}
     return AuditResult(
         dashboard_uid=spec.dashboard_uid,
         panel_id=spec.panel_id,
         title=spec.title,
         source_kind=spec.source_kind,
         semantic_kind=spec.semantic_kind,
-        status="error" if spec.required else "ok",
-        classification="blocked_unavailable",
+        status="error" if spec.required or invalid_query else "ok",
+        classification="query_invalid" if invalid_query else "blocked_unavailable",
         detail=f"Panel audit target could not be executed: {exc}",
         query_preview="",
         target_ref_id=spec.target_ref_id,
+        request_url=_redact_url(str(exc.url)) if isinstance(exc, HTTPError) else None,
     )
 
 
@@ -2049,6 +2057,7 @@ def _write_report(
             "run_type": config.run_type,
             "run_id": config.run_id,
             "range_hours": config.range_hours,
+            "read_latency_quantile": config.read_latency_quantile,
             "time_range": {
                 "from": config.range_from,
                 "to": config.range_to,

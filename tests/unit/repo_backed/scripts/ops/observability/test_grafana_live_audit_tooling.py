@@ -41,6 +41,33 @@ from tests.helpers import assert_router_python_command
 pytestmark = pytest.mark.repo_backed
 
 
+def test_live_audit_resolves_read_latency_quantile_and_timezone() -> None:
+    config = audit_subject._parse_args(["--read-latency-quantile", "0.99"])
+    rendered = audit_subject._substitute_dashboard_tokens(
+        "histogram_quantile($read_latency_quantile, buckets) / ${read_latency_quantile} ${__timezone}",
+        config,
+    )
+    assert rendered == "histogram_quantile(0.99, buckets) / 0.99 UTC"
+
+
+@pytest.mark.parametrize("http_status", [400, 422])
+def test_invalid_optional_query_blocks_audit(http_status, monkeypatch) -> None:
+    from urllib.error import HTTPError
+
+    spec = audit_subject.PanelAuditSpec(
+        dashboard_uid="bioetl-control-plane-v1", panel_id=111,
+        title="Read latency", source_kind="prometheus",
+        semantic_kind="prometheus_query", target_ref_id="A", required=False,
+    )
+    error = HTTPError("http://localhost:9090/api/v1/query?query=invalid", http_status, "Bad query", {}, None)
+    result = audit_subject._panel_audit_exception_result(spec, error)
+    monkeypatch.setattr(audit_subject, "effective_panel_specs", lambda: (spec,))
+    assert result.status == "error"
+    assert result.classification == "query_invalid"
+    assert result.request_url == error.url
+    assert audit_subject.semantic_gate_evidence([result])["blocking_count"] == 1
+
+
 def test_live_audit_router_exposes_command() -> None:
     assert_router_python_command(
         ops_router,

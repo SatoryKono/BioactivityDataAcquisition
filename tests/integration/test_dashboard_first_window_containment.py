@@ -222,6 +222,8 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
         "Snapshot incomplete"
     )
     assert reason_maps["archive_evidence_not_recorded"]["text"] == "Archive missing"
+    assert reason_maps["archive_not_applicable"]["text"] == "N/A: policy"
+    assert reason_maps["archive_restore_verified"]["text"] == "Archive verified"
     for hidden in ("detail", "endpoint", "retryable", "observed_at"):
         assert override_properties[hidden]["custom.hidden"] is True
     y = int((panel.get("gridPos") or {})["y"])

@@ -757,7 +757,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 130
+                "value": 90
               }
             ]
           },
@@ -873,7 +873,7 @@
     },
     {
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Retention policy, evidence floor, required evidence, snapshot evidence, and archive (five structured rows). Check column header is the live summary from payload summary.ok_count / summary.unknown_count (not a hardcoded title). Non-OK statuses sort before OK. UNKNOWN is not a healthy zero. HTTP 504 deadline_exceeded is backend unavailable — refresh; datasource error must not be treated as OK. TIME RANGE · SELECTED RUN retention policy, reproducibility evidence floor, required evidence, and archive support. First-screen table — not inside a collapsed row. UNKNOWN is not a healthy zero. No matching rows are a valid empty result; HTTP 504 deadline_exceeded is backend unavailable — refresh the panel; datasource error must not be treated as OK. SELECT RUN / VALID EMPTY is not OK. These rows are trust_status / retention evidence, not processing_status success.",
+      "description": "SELECTED RUN · Retention policy, evidence floor, required evidence, snapshot evidence, and archive (five structured rows). Check column header is the live summary from payload summary.ok_count / summary.unknown_count (not a hardcoded title). Non-OK statuses sort before OK. UNKNOWN is not a healthy zero. HTTP 504 deadline_exceeded is backend unavailable — refresh; datasource error must not be treated as OK. TIME RANGE · SELECTED RUN retention policy, reproducibility evidence floor, required evidence, and archive support. First-screen table — not inside a collapsed row. UNKNOWN is not a healthy zero. No matching rows are a valid empty result; HTTP 504 deadline_exceeded is backend unavailable — refresh the panel; datasource error must not be treated as OK. SELECT RUN / VALID EMPTY is not OK. These rows are trust_status / retention evidence, not processing_status success. Archive N/A means a referenced policy does not require archiving; it is not proof of an archive. Archive verified means local copies and restore evidence passed current hash and identity checks.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1008,6 +1008,30 @@
                       },
                       "archive_evidence_not_recorded": {
                         "text": "Archive missing"
+                      },
+                      "archive_not_applicable": {
+                        "text": "N/A: policy"
+                      },
+                      "archive_restore_verified": {
+                        "text": "Archive verified"
+                      },
+                      "archive_identity_mismatch": {
+                        "text": "Identity mismatch"
+                      },
+                      "archive_checksum_mismatch": {
+                        "text": "Checksum mismatch"
+                      },
+                      "archive_inventory_mismatch": {
+                        "text": "Files mismatch"
+                      },
+                      "archive_source_mismatch": {
+                        "text": "Source changed"
+                      },
+                      "archive_evidence_invalid": {
+                        "text": "Archive invalid"
+                      },
+                      "archive_index_invalid": {
+                        "text": "Index invalid"
                       }
                     }
                   }
@@ -1332,7 +1356,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "TIME RANGE · CURRENT · Shows current replay/resume blockers from the last 15 minutes. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Do not trust zero when telemetry coverage is missing. Missing required telemetry suppresses a misleading OK; UNKNOWN requires evidence inspection.",
+      "description": "TIME RANGE · CURRENT · Shows current replay/resume blockers from the last 15 minutes. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Do not trust zero when telemetry coverage is missing. Missing required telemetry suppresses a misleading OK; UNKNOWN requires evidence inspection. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1425,7 +1449,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "max(bioetl_replay_safety_blockers_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} and on(pipeline,run_type) (bioetl_control_plane_telemetry_missing_5m == 0))",
+          "expr": "clamp_max(max(bioetl_replay_safety_blockers_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} and on(pipeline,run_type) (bioetl_control_plane_telemetry_missing_5m == 0)), 2)",
           "instant": true,
           "refId": "A"
         }
@@ -1553,7 +1577,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "TIME RANGE · SELECTED RUN · Shows manifest-write and ledger-append failures from the last 15 minutes. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Use run evidence to verify integrity for an exact run. Missing required telemetry suppresses a misleading OK; UNKNOWN requires evidence inspection.",
+      "description": "TIME RANGE · SELECTED RUN · Shows manifest-write and ledger-append failures from the last 15 minutes. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Use run evidence to verify integrity for an exact run. Missing required telemetry suppresses a misleading OK; UNKNOWN requires evidence inspection. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1646,7 +1670,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "max(bioetl_manifest_ledger_failures_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} and on(pipeline,run_type) (bioetl_control_plane_telemetry_missing_5m == 0))",
+          "expr": "clamp_max(max(bioetl_manifest_ledger_failures_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} and on(pipeline,run_type) (bioetl_control_plane_telemetry_missing_5m == 0)), 2)",
           "instant": true,
           "refId": "A"
         }
@@ -1659,7 +1683,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "TIME RANGE · Shows whether required manifest and ledger telemetry is available. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Do not trust zero blocker cards when this panel is not OK; validate Prometheus scrape/rules.",
+      "description": "TIME RANGE · Shows whether required manifest and ledger telemetry is available. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Do not trust zero blocker cards when this panel is not OK; validate Prometheus scrape/rules. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1752,7 +1776,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "max(bioetl_control_plane_telemetry_missing_5m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
+          "expr": "clamp_max(max(bioetl_control_plane_telemetry_missing_5m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}), 2)",
           "instant": true,
           "refId": "A"
         }

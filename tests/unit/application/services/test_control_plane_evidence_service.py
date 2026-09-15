@@ -520,6 +520,52 @@ def test_retention_compliance_uses_dry_run_evidence_floor() -> None:
     assert all("path" not in row for row in _payload_row_list(payload, "artifacts"))
 
 
+@pytest.mark.parametrize(
+    ("verified", "reason", "expected"),
+    [
+        (True, "archive_restore_verified", "OK"),
+        (False, "archive_checksum_mismatch", "ERROR"),
+        (None, "archive_evidence_not_recorded", "UNKNOWN"),
+    ],
+)
+def test_retention_uses_current_archive_verdict(verified, reason, expected) -> None:
+    from unittest.mock import Mock
+
+    manifest = _manifest()
+    plan = ControlPlaneArtifactLifecyclePlan(
+        generated_at=_NOW, cutoff=_NOW, dry_run=True, artifacts=(),
+    )
+    verifier = Mock()
+    verifier.verify.return_value = (verified, reason)
+    service = ControlPlaneEvidenceService(
+        lifecycle_planner=_LifecyclePlanner(plan), archive_verifier=verifier,
+    )
+    payload = service.retention_compliance(scope=_scope(manifest), now=_NOW)
+    archive = next(row for row in _payload_rows(payload) if row["check"] == "archive")
+    assert archive["status"] == expected
+    assert archive["reason"] == reason
+    verifier.verify.assert_called_once_with(manifest=manifest, plan=plan)
+
+
+def test_not_required_archive_does_not_claim_verified_copies() -> None:
+    from unittest.mock import Mock
+
+    manifest = _manifest(launch_context={
+        "archive_policy": {"required": False, "policy_ref": "archive-policy-v1"},
+    })
+    plan = ControlPlaneArtifactLifecyclePlan(
+        generated_at=_NOW, cutoff=_NOW, dry_run=True, artifacts=(),
+    )
+    verifier = Mock()
+    service = ControlPlaneEvidenceService(
+        lifecycle_planner=_LifecyclePlanner(plan), archive_verifier=verifier,
+    )
+    payload = service.retention_compliance(scope=_scope(manifest), now=_NOW)
+    assert "archive_not_applicable" in _reasons(payload)
+    assert "archive_restore_verified" not in _reasons(payload)
+    verifier.verify.assert_not_called()
+
+
 def test_retention_compliance_reports_delete_and_evidence_floor_violations() -> None:
     manifest = _manifest(created_at=_NOW - timedelta(days=90))
     plan = ControlPlaneArtifactLifecyclePlan(

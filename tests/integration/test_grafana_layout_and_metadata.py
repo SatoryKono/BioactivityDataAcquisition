@@ -391,7 +391,7 @@ def test_control_plane_long_first_screen_titles_keep_extra_width() -> None:
 
 
 def test_control_plane_trust_panels_follow_reference_widths() -> None:
-    """Trust top band preserves scalar area; disclosure rows keep 18/6 columns."""
+    """Trust top band preserves scalar area; evidence tables use full width."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     panels = index_panels_by_base_title(get_dashboard_panels(dashboard))
 
@@ -404,7 +404,7 @@ def test_control_plane_trust_panels_follow_reference_widths() -> None:
     assert scope == {"x": 0, "y": 3, "w": 16, "h": 3}
     assert readiness == {"x": 16, "y": 3, "w": 8, "h": 3}
     assert readiness["w"] * readiness["h"] == 24
-    assert run_summary["w"] == 18
+    assert run_summary["w"] == 24
     assert processed["w"] == 24
     assert telemetry["w"] == 6
     assert run_summary["x"] == 0
@@ -1120,8 +1120,8 @@ def test_table_panels_fill_panel_width() -> None:
     )
 
 
-def test_dq_ultra_short_timeseries_hides_legend() -> None:
-    """Ultra-short timeseries (h≤4) free vertical chrome by hiding the legend.
+def test_dq_score_chart_keeps_readable_height_without_legend() -> None:
+    """The score chart retains drawing room without redundant legend chrome.
 
     Issue #8530: DQ panel 153 Track Volume-Weighted DQ Score.
     """
@@ -1132,7 +1132,7 @@ def test_dq_ultra_short_timeseries_hides_legend() -> None:
     )
     assert panel is not None, "DQ panel 153 must exist"
     assert panel.get("type") == "timeseries"
-    assert panel.get("gridPos", {}).get("h") == 4
+    assert panel.get("gridPos", {}).get("h") == 6
     assert panel.get("options", {}).get("legend", {}).get("showLegend") is False
 
 

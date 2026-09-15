@@ -781,6 +781,12 @@ def test_batch_start_publishes_measured_quarantine_zero_without_reset(monkeypatc
         if s.name.endswith("_total")
     ]
     assert values and sum(values) == 0
+    assert {
+        sample.labels["error_type"]
+        for family in registry.collect()
+        for sample in family.samples
+        if sample.name.endswith("_total")
+    } == {error.value for error in ErrorType if error.is_data_quality()}
     recorder.track_quarantined_records(ErrorType.DATA_QUALITY, 3)
     recorder.begin_batch()
     assert (
