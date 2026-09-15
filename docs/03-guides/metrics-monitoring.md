@@ -922,3 +922,23 @@ refreshes this evidence without fabricating request traffic or incrementing prob
 counters during rehydration. Provider CURRENT uses the latest observation timestamp
 and expires after 15 minutes. Overview joins provider status through the explicit
 workflow pipeline/provider membership; missing membership remains UNKNOWN.
+
+The provider verdict and its explanation use the same freshness decision. A raw
+healthy gauge without a matching observation timestamp, with a future timestamp,
+or older than 900 seconds is UNKNOWN. Repeated scrapes do not renew the observation.
+When several exporters report a provider, the newest timestamp wins; conflicting
+observations with the same timestamp use the worse health result. A provider with
+no evidence at all remains absent rather than receiving a fabricated zero.
+
+| Evidence | Producer and operating cadence | Behaviour when publication stops |
+| --- | --- | --- |
+| Provider CURRENT | Real provider health probe; for continuous coverage, complete successful observations within the existing 15-minute window, leaving time for retries | Last observation expires; probe failure must remain visible |
+| Pipeline/workflow CURRENT | The actual ETL run and its final publication; cadence follows the data acquisition schedule | Current evidence expires; persisted selected-run evidence remains available |
+| Selected-run Trust | Manifest, lineage and retention evidence for the exact selected run | Evaluate retained evidence independently of the age of CURRENT metrics |
+
+The workflow operator owns the acquisition schedule and the monitoring operator
+owns provider probes. Configure overlap protection and record failed probe attempts
+when selecting a persistent schedule. For an infrequent batch pipeline, a current
+UNKNOWN between runs is expected; use selected-run evidence to inspect the completed
+batch. Do not repeat a backfill merely to keep CURRENT green. These instructions do
+not install a scheduler or change the freshness window.

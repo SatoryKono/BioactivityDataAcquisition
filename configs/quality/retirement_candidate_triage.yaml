@@ -57,6 +57,16 @@ repo_wide_zero_import_classification:
       rationale:
         Loaded via importlib from diagnostics/__init__.py for ARCH-REF fan-in
         control; static import scans stay at zero by design.
+    - module_path: src/bioetl/composition/contracts/runtime.py
+      module_name: bioetl.composition.contracts.runtime
+      disposition: retain_canonical_owner_module
+      reviewed_on: "2026-09-15"
+      review_by: "2026-12-14"
+      linked_issue: "#4541"
+      rationale:
+        ADR-058 runtime-builder Protocol contracts. First-party builders should
+        import the canonical owner; static src importers remain zero until that
+        wiring lands, so the module stays classified rather than untriaged.
     - module_path: src/bioetl/interfaces/cli/commands/maintenance.py
       module_name: bioetl.interfaces.cli.commands.maintenance
       disposition: retain_public_facade
