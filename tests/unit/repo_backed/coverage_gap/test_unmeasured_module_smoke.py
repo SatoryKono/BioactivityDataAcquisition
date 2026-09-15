@@ -130,8 +130,8 @@ def test_health_failure_handling_delegates_to_boundary_policy() -> None:
 
 def test_observability_backend_startup_types_are_importable() -> None:
     # Protocol/TypedDict module: exercise import-time definitions.
-    from bioetl.interfaces.cli.commands.domains.health import (
-        _observability_backend_startup_types as types,
+    from bioetl.application.services.ops import (
+        observability_backend_startup_types as types,
     )
 
     assert types._MessagePrinter is not None
