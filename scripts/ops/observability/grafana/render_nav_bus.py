@@ -765,6 +765,73 @@ def _layout_incident_detail_panels(panels: list[object]) -> None:
                         ]
 
 
+def _clarify_manifest_counter_evidence(panels: list[object]) -> None:
+    """Distinguish observed counter snapshots from sampled counter increments."""
+    for row in _root_panels(panels):
+        if row.get("id") != 901:
+            continue
+        base = row["gridPos"]["y"] + 1
+        positions = {
+            908: (0, 4),
+            2: (4, 3),
+            1: (4, 3),
+            132: (4, 3),
+            133: (4, 3),
+            131: (7, 7),
+            7: (14, 7),
+            9414: (21, 6),
+        }
+        for child in row.get("panels", []):
+            ident = child.get("id")
+            if ident in positions:
+                offset, height = positions[ident]
+                child["gridPos"].update(y=base + offset, h=height)
+            if ident == 908:
+                child["title"] = "Review Observed Terminal Counters"
+                child["description"] = (
+                    "Selected range: last observed terminal counter by status, summed across matching series. "
+                    "Pipeline applies; Run ID and Run Type do not. This is a counter snapshot, "
+                    "not an exact-run verdict or a count of events within the range. "
+                    "A first sample of 1 followed by 1 has observed value 1 but measured increase 0."
+                )
+                child["targets"][0].update(
+                    expr='sum by (terminal_status) (last_over_time(bioetl_control_plane_terminal_events_total{pipeline=~"$pipeline"}[$__range]))',
+                    format="table",
+                    instant=True,
+                )
+                child["transformations"] = [
+                    {
+                        "id": "organize",
+                        "options": {
+                            "excludeByName": {"Time": True, "__name__": True},
+                            "renameByName": {
+                                "terminal_status": "Terminal status",
+                                "Value": "Observed counter",
+                            },
+                        },
+                    }
+                ]
+                child["fieldConfig"]["overrides"] = []
+                child["fieldConfig"]["defaults"]["decimals"] = 0
+            if ident == 131:
+                child["title"] = "Track Observed Manifest Write Increments"
+                child["description"] = (
+                    "Sampled counter increase per interval, by run type and status. Pipeline and Run Type apply; "
+                    "Run ID does not. Zero means no increase between available samples, not no manifest writes. "
+                    "An event already included in the first sample cannot be counted by increase(). "
+                    "Inspect persisted run evidence for exact-run outcomes. Missing telemetry is not zero."
+                )
+                defaults = child["fieldConfig"]["defaults"]
+                defaults.update(min=0, decimals=0)
+                defaults.setdefault("custom", {}).update(
+                    axisSoftMax=1, showPoints="always"
+                )
+                child["options"]["legend"]["calcs"] = ["lastNotNull", "max"]
+        row["panels"].sort(
+            key=lambda child: (child["gridPos"]["y"], child["gridPos"]["x"])
+        )
+
+
 def _normalize_collapsed_row_children(panels: list[object]) -> None:
     """Repair the one-row child drift left by legacy recursive nav shifts."""
     for row in _root_panels(panels):
@@ -1081,6 +1148,7 @@ def apply_to_dashboard(
     _normalize_collapsed_row_children(panels)
     if current_uid == "bioetl-control-plane-v1":
         _layout_control_plane_detail_panels(panels)
+        _clarify_manifest_counter_evidence(panels)
     if current_uid == "bioetl-overview-v2":
         _layout_overview_detail_panels(panels)
     if current_uid == "bioetl-runtime":
