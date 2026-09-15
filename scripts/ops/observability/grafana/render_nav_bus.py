@@ -602,6 +602,20 @@ def _compact_fallback_panel(
 
 def _layout_control_plane_detail_panels(panels: list[object]) -> None:
     """Fill the operator-reviewed gaps using row-relative, repeatable geometry."""
+    for panel in _walk_panels(panels):
+        panel_id = panel.get("id")
+        if panel_id not in {9405, 9406, 9407, 9408, 9409}:
+            continue
+        for transform in panel.get("transformations", []):
+            if transform.get("id") != "organize":
+                continue
+            options = transform.setdefault("options", {})
+            # Keep one result column; checkpoint Result retains MISMATCH/MISSING/N/A.
+            duplicate = "status" if panel_id in {9405, 9407} else "ui_status"
+            options.setdefault("excludeByName", {})[duplicate] = True
+            if panel_id in {9405, 9407}:
+                options.setdefault("renameByName", {})["drilldown_label"] = "Action"
+                options.setdefault("indexByName", {})["drilldown_label"] = 3
     layouts = {
         902: {134: (0, 11, 12), 5: (12, 11, 12), 135: (0, 17, 24)},
         903: {4: (0, 0, 12), 136: (12, 0, 12)},
@@ -985,6 +999,7 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
                         "archive_source_mismatch": {"text": "Source changed"},
                         "archive_evidence_invalid": {"text": "Archive invalid"},
                         "archive_index_invalid": {"text": "Index invalid"},
+                        "snapshot_lifecycle_evidence_present": {"text": "Snapshots present"},
                     })
     if 9418 in by_id:
         for link in by_id[9418].get("links", []):
@@ -999,8 +1014,14 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
             "evidence for this run. ERROR wins; missing evidence is INCOMPLETE. "
             "processing_status success does not imply trust_status OK. Inspect each "
             "validation table for details. No selected run is a valid empty state "
-            "(UNKNOWN). Backend unavailable means QUERY ERROR."
+            "(UNKNOWN). Backend unavailable means QUERY ERROR. Result is the ETL "
+            "processing outcome; Observed is the manifest creation time."
         )
+        for transform in by_id[9418].get("transformations", []):
+            if transform.get("id") == "organize":
+                transform.setdefault("options", {}).setdefault("renameByName", {}).update(
+                    {"processing_status": "Result", "evidence_observed_at": "Observed"}
+                )
         options = by_id[9418].setdefault("options", {})
         footer = options.setdefault("footer", {})
         footer["enablePagination"] = True
@@ -1008,7 +1029,13 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
         overrides = field_config.setdefault("overrides", [])
         for override in overrides:
             field = override.get("matcher", {}).get("options")
-            width = {"Processing": 80, "Trust": 130, "Observed at": 90}.get(field)
+            field = {"Processing": "Result", "Observed at": "Observed"}.get(field, field)
+            override["matcher"]["options"] = field
+            if field == "processing_status":
+                for prop in override.get("properties", []):
+                    if prop.get("id") == "displayName":
+                        prop["value"] = "Result"
+            width = {"Result": 80, "Trust": 130, "Observed": 90}.get(field)
             if width is not None:
                 for prop in override.get("properties", []):
                     if prop.get("id") == "custom.width":

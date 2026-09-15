@@ -525,7 +525,7 @@
         "y": 6
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Aggregate Trust includes manifest, lineage and retention evidence for this run. ERROR wins; missing evidence is INCOMPLETE. processing_status success does not imply trust_status OK. Inspect each validation table for details. No selected run is a valid empty state (UNKNOWN). Backend unavailable means QUERY ERROR.",
+      "description": "SELECTED RUN · Aggregate Trust includes manifest, lineage and retention evidence for this run. ERROR wins; missing evidence is INCOMPLETE. processing_status success does not imply trust_status OK. Inspect each validation table for details. No selected run is a valid empty state (UNKNOWN). Backend unavailable means QUERY ERROR. Result is the ETL processing outcome; Observed is the manifest creation time.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -616,7 +616,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "Processing"
+                "value": "Result"
               },
               {
                 "id": "custom.hidden",
@@ -728,7 +728,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Processing"
+              "options": "Result"
             },
             "properties": [
               {
@@ -752,7 +752,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Observed at"
+              "options": "Observed"
             },
             "properties": [
               {
@@ -848,10 +848,10 @@
               "evidence_freshness": 5
             },
             "renameByName": {
-              "processing_status": "Processing",
+              "processing_status": "Result",
               "trust_status": "Trust",
               "reasons_text": "Reasons",
-              "evidence_observed_at": "Observed at"
+              "evidence_observed_at": "Observed"
             }
           }
         },
@@ -1032,6 +1032,9 @@
                       },
                       "archive_index_invalid": {
                         "text": "Index invalid"
+                      },
+                      "snapshot_lifecycle_evidence_present": {
+                        "text": "Snapshots present"
                       }
                     }
                   }
@@ -5602,17 +5605,20 @@
                   "name": true,
                   "value_full": true,
                   "current_value_full": true,
-                  "checkpoint_value_full": true
+                  "checkpoint_value_full": true,
+                  "status": true
                 },
                 "indexByName": {
                   "label": 0,
                   "value_short": 1,
-                  "ui_status": 2
+                  "ui_status": 2,
+                  "drilldown_label": 3
                 },
                 "renameByName": {
                   "label": "Parameter",
                   "value_short": "Current",
-                  "ui_status": "Result"
+                  "ui_status": "Result",
+                  "drilldown_label": "Action"
                 }
               }
             }
@@ -6075,17 +6081,20 @@
                   "name": true,
                   "value_full": true,
                   "current_value_full": true,
-                  "checkpoint_value_full": true
+                  "checkpoint_value_full": true,
+                  "status": true
                 },
                 "indexByName": {
                   "label": 0,
                   "value_short": 1,
-                  "ui_status": 2
+                  "ui_status": 2,
+                  "drilldown_label": 3
                 },
                 "renameByName": {
                   "label": "Parameter",
                   "value_short": "Current",
-                  "ui_status": "Result"
+                  "ui_status": "Result",
+                  "drilldown_label": "Action"
                 }
               }
             }
@@ -6511,7 +6520,8 @@
                   "name": true,
                   "value_full": true,
                   "current_value_full": true,
-                  "checkpoint_value_full": true
+                  "checkpoint_value_full": true,
+                  "ui_status": true
                 },
                 "indexByName": {
                   "label": 0,
@@ -6949,7 +6959,8 @@
                   "name": true,
                   "value_full": true,
                   "current_value_full": true,
-                  "checkpoint_value_full": true
+                  "checkpoint_value_full": true,
+                  "ui_status": true
                 },
                 "indexByName": {
                   "anchor": 0,
@@ -7387,7 +7398,8 @@
                   "name": true,
                   "value_full": true,
                   "current_value_full": true,
-                  "checkpoint_value_full": true
+                  "checkpoint_value_full": true,
+                  "ui_status": true
                 },
                 "indexByName": {
                   "label": 0,
