@@ -1,12 +1,12 @@
 {
   "artifacts": [
     {
-      "blob_sha256": "0cab9a458c45bf9989d5b77c68a46dfe487457e9d812de0aa81522f73b3d797a",
+      "blob_sha256": "a7b76a7cab61cf8b3dff81fd7edd03f03528b8be63b96048fbc088d0020e5710",
       "introduced_after_remote_main": false,
       "path": "reports/quality/architecture-quality-scorecard.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "ea86cbc3a7794326f9fd0c7dbf3ea5072d78fb17",
+      "source_revision": "fd94ae853cd80648bc06250d40f5dcc069c23e0a",
       "summary": {
         "available": true,
         "integral_score": 9.14,
@@ -15,19 +15,19 @@
       }
     },
     {
-      "blob_sha256": "177c576ba4f0002eda80bf4cb109d07831f06e659cce26fdc9d756da8833660e",
+      "blob_sha256": "e2e770dc4e48aaba1f17a769716f3d792d9aa2b86411b9a7f0f1e2abad737fd4",
       "introduced_after_remote_main": false,
       "path": "reports/quality/module-coverage-inventory.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "ea86cbc3a7794326f9fd0c7dbf3ea5072d78fb17",
+      "source_revision": "fd94ae853cd80648bc06250d40f5dcc069c23e0a",
       "summary": {
         "available": true,
         "coverage_xml_sha256": "7184937818099a4c3d38b8fe4bd91613c81562af068ac278d680b5aba09c99e9",
         "schema_version": 1,
         "snapshot_date": "2026-09-10",
-        "source_module_count": 2474,
-        "source_tree_sha256": "02689c2078788598ccbfcfa47476ac0ef123e18cc396cb3b37969e28822bbfbb",
+        "source_module_count": 2475,
+        "source_tree_sha256": "620b9597b401ff219bbdc01952f6351352fce27da2ef10055e805d81f01ac80a",
         "unmeasured_module_count": 0
       }
     },
@@ -37,7 +37,7 @@
       "path": "reports/quality/compatibility-importer-census.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "ea86cbc3a7794326f9fd0c7dbf3ea5072d78fb17",
+      "source_revision": "fd94ae853cd80648bc06250d40f5dcc069c23e0a",
       "summary": {
         "available": true,
         "retained_entrypoint_count": 12,
@@ -45,12 +45,12 @@
       }
     },
     {
-      "blob_sha256": "84b25d20ce68f20e712721183985b40b03314cca8224d9710307d295368f4076",
+      "blob_sha256": "d959203101c56fbce8f0905e85e6f77a214a37ee6eb0bafa6886c30fcef2ecbf",
       "introduced_after_remote_main": false,
       "path": "reports/quality/dead-code-inventory.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "ea86cbc3a7794326f9fd0c7dbf3ea5072d78fb17",
+      "source_revision": "fd94ae853cd80648bc06250d40f5dcc069c23e0a",
       "summary": {
         "available": true,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
@@ -63,7 +63,7 @@
       "path": "reports/quality/contract-registry-diagnostics.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "ea86cbc3a7794326f9fd0c7dbf3ea5072d78fb17",
+      "source_revision": "fd94ae853cd80648bc06250d40f5dcc069c23e0a",
       "summary": {
         "available": true,
         "blocking_issue_count": 0,
@@ -76,13 +76,13 @@
       "path": "reports/observability/runtime_cardinality_inventory.json",
       "required": false,
       "required_on_remote": false,
-      "source_revision": "ea86cbc3a7794326f9fd0c7dbf3ea5072d78fb17",
+      "source_revision": "fd94ae853cd80648bc06250d40f5dcc069c23e0a",
       "summary": {
         "available": true
       }
     }
   ],
-  "baseline_artifact_fingerprint": "6c3ef99fab1625acfdadaacac5574cc15b15d08236ee655aea06b198d67d0d25",
+  "baseline_artifact_fingerprint": "3411970eb1762f08d84ca396b10f05b3397a354ad4d55710c581f9d093dc18d4",
   "branch": "main",
   "dirty_closeout_guard": {
     "command": "git status --porcelain --untracked-files=no",
@@ -102,9 +102,9 @@
   ],
   "local_tracking_ref": "origin/main",
   "local_tracking_ref_matches_remote": true,
-  "local_tracking_ref_sha": "ea86cbc3a7794326f9fd0c7dbf3ea5072d78fb17",
+  "local_tracking_ref_sha": "fd94ae853cd80648bc06250d40f5dcc069c23e0a",
   "remote": "origin",
   "remote_main_ref": "refs/heads/main",
-  "remote_main_sha": "ea86cbc3a7794326f9fd0c7dbf3ea5072d78fb17",
+  "remote_main_sha": "fd94ae853cd80648bc06250d40f5dcc069c23e0a",
   "schema_version": 1
 }

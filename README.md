@@ -620,7 +620,11 @@ Strict quality standards are enforced using `ruff`, `mypy`, and other tools.
 - **Linting & Formatting**:
 
   Contributor SSOT is `make lint` (`ruff check src tests scripts` and
-  `mypy src/bioetl`). Optional format check is not a Makefile target:
+  `mypy src/bioetl`). That target is a **fast subset**. CI type-checking
+  (`.github/workflows/type-checking.yml`) runs
+  `mypy --config-file pyproject.toml --strict --no-incremental src/bioetl`
+  and is stricter than the Makefile. Optional format check is not a
+  Makefile target:
 
   ```bash
   make lint

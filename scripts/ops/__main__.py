@@ -21,6 +21,8 @@ Stable commands:
                        Check local stack readiness for a full Grafana dashboard audit
     check-bioetl-prometheus-scrape
                        Fail-closed smoke: BioETL Prometheus scrape target must be UP
+    archive-control-plane
+                       Archive or verify isolated local control-plane evidence
     ensure-quarantine-explorer
                        REMOVED stub (exit 2): Quarantine Explorer UI no longer shipped
     run-grafana-audit-cycle
@@ -64,6 +66,7 @@ _PYTHON_COMMAND_PATHS = {
     "check-bioetl-prometheus-scrape": (
         "observability/check_bioetl_prometheus_scrape.py"
     ),
+    "archive-control-plane": "observability/archive_control_plane.py",
     "ensure-quarantine-explorer": (
         "observability/grafana/ensure_quarantine_explorer.py"
     ),

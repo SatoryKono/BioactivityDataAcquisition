@@ -33,6 +33,9 @@ FIRST_WINDOW_Y = 18
 DEFAULT_DASHBOARD_DIR = Path("grafana/dashboards")
 DEFAULT_OUT_JSON = Path("reports/quality/dashboard-scalar-density.json")
 DEFAULT_OUT_MD = Path("reports/quality/dashboard-scalar-density.md")
+DEFAULT_LAYOUT_BUDGETS = Path(
+    "docs/03-guides/dashboards/contracts/layout-budgets.yaml"
+)
 
 
 def panel_area(panel: dict[str, Any]) -> int:
@@ -133,17 +136,42 @@ def _atomic_write(path: Path, payload: str) -> None:
     os.replace(tmp, path)
 
 
-def _load_allowlist(path: Path | None) -> set[tuple[str, Any]]:
+def _load_density_contract(
+    path: Path | None,
+) -> tuple[set[tuple[str, Any]], set[str] | None]:
+    """Load DASH-DENSITY-002 allowlist and enforced UIDs from layout-budgets.yaml.
+
+    Allowlist keys match pytest: ``(dashboard filename, row id)``.
+    ``enforced_uids is None`` means every surveyed dashboard is gated (no
+    contract file). An empty ``scalar_density_enforced_uids`` list gates none.
+    """
     if path is None or not path.exists():
-        return set()
+        return set(), None
     import yaml  # local import keeps the module import-light for pure tests
 
     payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    entries = payload.get("scalar_density_exceptions", {}).get("entries", [])
+    if not isinstance(payload, dict):
+        return set(), None
     allow: set[tuple[str, Any]] = set()
-    for entry in entries:
-        if isinstance(entry, dict):
-            allow.add((str(entry.get("uid")), entry.get("row_id")))
+    allowlists = payload.get("allowlists")
+    if isinstance(allowlists, dict):
+        entries = allowlists.get("scalar_density")
+        if isinstance(entries, list):
+            for entry in entries:
+                if isinstance(entry, dict) and "dashboard" in entry and "id" in entry:
+                    allow.add((str(entry.get("dashboard")), entry.get("id")))
+    raw_uids = payload.get("scalar_density_enforced_uids")
+    enforced: set[str] | None
+    if isinstance(raw_uids, list):
+        enforced = {str(item) for item in raw_uids}
+    else:
+        enforced = None
+    return allow, enforced
+
+
+def _load_allowlist(path: Path | None) -> set[tuple[str, Any]]:
+    """Compatibility wrapper: layout-budgets allowlist keys only."""
+    allow, _enforced = _load_density_contract(path)
     return allow
 
 
@@ -183,14 +211,25 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dashboard-dir", type=Path, default=None)
     parser.add_argument("--out-json", type=Path, default=DEFAULT_OUT_JSON)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
-    parser.add_argument("--allowlist", type=Path, default=None)
+    parser.add_argument(
+        "--allowlist",
+        type=Path,
+        default=None,
+        help=(
+            "YAML contract with allowlists.scalar_density and "
+            "scalar_density_enforced_uids. Defaults to layout-budgets.yaml."
+        ),
+    )
     parser.add_argument("--check", action="store_true", help="exit 1 on FAIL groups")
     parser.add_argument("--json", action="store_true", help="print JSON to stdout")
     args = parser.parse_args(argv)
 
     dashboard_dir = args.dashboard_dir or (args.repo_root / DEFAULT_DASHBOARD_DIR)
     results = survey_repo(dashboard_dir)
-    allow = _load_allowlist(args.allowlist)
+    allowlist_path = args.allowlist
+    if allowlist_path is None:
+        allowlist_path = args.repo_root / DEFAULT_LAYOUT_BUDGETS
+    allow, enforced = _load_density_contract(allowlist_path)
 
     _atomic_write(
         args.out_json, json.dumps(results, indent=2, ensure_ascii=False) + "\n"
@@ -202,7 +241,8 @@ def main(argv: list[str] | None = None) -> int:
         for result in results
         for group in result["groups"]
         if group["passes"] is False
-        and (str(result["uid"]), group["row_id"]) not in allow
+        and (enforced is None or result["uid"] in enforced)
+        and (result["file"], group["row_id"]) not in allow
     ]
     if args.json:
         print(json.dumps(results, indent=2, ensure_ascii=False))

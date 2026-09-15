@@ -1811,11 +1811,16 @@ Silent breaking changes запрещены. Qodo repository configuration так
 uv sync --extra dev --extra tests --extra tests_full --extra tracing
 uv run python -m scripts.ops setup-plugins
 uv run python -m scripts.engineering.dev run-tests cov
-uv run ruff check .
+make lint
 uv run ruff format --check .
-uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
 uv run python -m bioetl run --pipeline chembl_activity --limit 10 --no-cached-bronze
 ```
+
+Contributor lint/types SSOT is `make lint` (`ruff check src tests scripts` and
+`mypy src/bioetl`). This is a **fast subset**. CI type-checking runs
+`mypy --config-file pyproject.toml --strict --no-incremental src/bioetl`
+and is stricter than the local Makefile target. Optional format check is not
+a Makefile target: `uv run ruff format --check .`.
 
 ### 9.2. Окружение
 

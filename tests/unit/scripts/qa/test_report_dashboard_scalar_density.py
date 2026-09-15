@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -145,3 +146,28 @@ def test_survey_group_without_scalars_is_exempt() -> None:
         ],
     }
     assert density.survey_dashboard(dashboard)["groups"][0]["passes"] is None
+
+
+def test_load_density_contract_reads_layout_budgets_keys(tmp_path: Path) -> None:
+    contract = tmp_path / "layout-budgets.yaml"
+    contract.write_text(
+        "\n".join(
+            [
+                "scalar_density_enforced_uids:",
+                "  - bioetl-runtime",
+                "allowlists:",
+                "  scalar_density:",
+                "    - dashboard: bioetl-runtime.json",
+                "      id: 254",
+                "      owner: '@bioetl-observability'",
+                "      rationale: test",
+                "      retire_when: test",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    allow, enforced = density._load_density_contract(contract)
+    assert allow == {("bioetl-runtime.json", 254)}
+    assert enforced == {"bioetl-runtime"}
+    assert density._load_allowlist(contract) == allow

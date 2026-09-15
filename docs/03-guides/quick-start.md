@@ -140,10 +140,9 @@ uv run python -m scripts.engineering.dev run-tests cov
 bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n auto --lf
 bash scripts/engineering/dev/run_mypy.sh
 
-# Check linting / typing
-uv run ruff check .
+# Check linting / typing (contributor SSOT; CI mypy is stricter)
+make lint
 uv run ruff format --check .
-uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
 ```
 
 ```powershell
@@ -162,7 +161,7 @@ uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
 | Verify dependencies      | `uv run python -m scripts.engineering.dev run-tests smoke`            |
 | Run tests via wrappers   | `run_pytest.ps1` / `run_pytest.sh`                                    |
 | Run all tests            | `uv run python -m scripts.engineering.dev run-tests cov`              |
-| Run linting              | `uv run ruff check . && uv run ruff format --check . && uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl` |
+| Run linting              | `make lint` (`ruff check src tests scripts` + `mypy src/bioetl`; CI mypy is `--strict --no-incremental`) |
 | Verify docs surface      | `uv run python -m scripts.docs check-links --links --specs --configs` |
 | Run sample pipeline      | `uv run python -m bioetl run --pipeline chembl_activity --limit 10 --no-cached-bronze` |
 | List pipelines           | `bioetl config list-pipelines`                                        |
