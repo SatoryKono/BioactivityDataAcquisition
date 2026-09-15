@@ -11,6 +11,7 @@ import tempfile
 import time
 from pathlib import Path
 from shutil import which
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, cast
 
 import bioetl
@@ -244,10 +245,10 @@ def _build_detached_backend_popen_kwargs(
 
 def _build_detached_backend_env(
     *,
-    current_env: dict[str, str] | None = None,
+    current_env: Mapping[str, str] | None = None,
 ) -> dict[str, str]:
     """Ensure detached backend subprocess can import the src-layout package."""
-    env = dict(current_env if current_env is not None else os.environ)
+    env = dict(current_env or {})
     existing_pythonpath = env.get("PYTHONPATH", "").strip()
     pythonpath_parts = [str(_BIOETL_SRC_ROOT)]
     if existing_pythonpath:
@@ -272,6 +273,7 @@ def start_detached_ops_http_backend(
     port: int = DEFAULT_HEALTH_SERVER_PORT,
     python_executable: str | None = None,
     data_root: Path | None = None,
+    current_env: Mapping[str, str] | None = None,
     popen_factory: Callable[..., subprocess.Popen[bytes]] = subprocess.Popen,
 ) -> subprocess.Popen[bytes]:
     """Launch ``bioetl health server`` as a detached Ops HTTP backend process.
@@ -296,7 +298,7 @@ def start_detached_ops_http_backend(
     kwargs.pop("stdout", None)
     kwargs.pop("stderr", None)
     kwargs["cwd"] = str(_BIOETL_REPOSITORY_ROOT)
-    kwargs["env"] = _build_detached_backend_env()
+    kwargs["env"] = _build_detached_backend_env(current_env=current_env)
     log_path = build_detached_backend_log_path(port)
     log_path.parent.mkdir(parents=True, exist_ok=True)
     log_path.write_text("", encoding="utf-8")
@@ -315,6 +317,7 @@ def start_detached_quarantine_backend(
     port: int = DEFAULT_HEALTH_SERVER_PORT,
     python_executable: str | None = None,
     data_root: Path | None = None,
+    current_env: Mapping[str, str] | None = None,
     popen_factory: Callable[..., subprocess.Popen[bytes]] = subprocess.Popen,
 ) -> subprocess.Popen[bytes]:
     """Compatibility alias for :func:`start_detached_ops_http_backend`.
@@ -327,6 +330,7 @@ def start_detached_quarantine_backend(
         port=port,
         python_executable=python_executable,
         data_root=data_root,
+        current_env=current_env,
         popen_factory=popen_factory,
     )
 
