@@ -8709,16 +8709,6 @@
       "source_lines": 84
     },
     {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 6,
-      "executable_lines": 6,
-      "missing_lines": 0,
-      "module": "bioetl.composition.contracts.runtime",
-      "path": "src/bioetl/composition/contracts/runtime.py",
-      "source_lines": 43
-    },
-    {
       "coverage_percent": null,
       "coverage_status": "no_executable_lines",
       "covered_lines": 0,
@@ -33471,16 +33461,6 @@
       "source_lines": 84
     },
     {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 6,
-      "executable_lines": 6,
-      "missing_lines": 0,
-      "module": "bioetl.composition.contracts.runtime",
-      "path": "src/bioetl/composition/contracts/runtime.py",
-      "source_lines": 43
-    },
-    {
       "coverage_percent": null,
       "coverage_status": "no_executable_lines",
       "covered_lines": 0,
@@ -49533,7 +49513,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-10",
-  "source_tree_sha256": "a2cab85131225e52931327a5032e3b5f76a6a76677decce5da7557d324cc84ce",
+  "source_tree_sha256": "c1f9325afeb27650ec800ea77f6828d6edc7684c8977143294fd0be603f2990f",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -49688,10 +49668,10 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2476,
+    "source_module_count": 2475,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 1618,
+      "fully_covered": 1617,
       "no_executable_lines": 4,
       "partially_covered": 854,
       "uncovered": 0,
