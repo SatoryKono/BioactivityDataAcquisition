@@ -1,12 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-15T14:32:18.948928+00:00",
+  "generated_at": "2026-09-15T15:30:44.903544+00:00",
   "summary": {
     "total_scripts": 618,
     "status_counts": {
       "active": 338,
-      "orphan": 1,
-      "supporting": 279
+      "supporting": 280
     },
     "reference_group_coverage": {
       "agents": 9,
@@ -16,7 +15,7 @@
       "other": 75,
       "scripts": 516,
       "skills": 12,
-      "tests": 432
+      "tests": 433
     }
   },
   "scripts": [
@@ -19822,10 +19821,21 @@
     {
       "path": "scripts/ops/observability/archive_control_plane.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/unit/scripts/ops/observability/test_archive_control_plane.py",
+          "line": 6,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.archive_control_plane import main"
+        }
+      ],
+      "owner": "@bioetl-observability",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the local control-plane archive/verify operator entry; keep it supporting unless a reviewed canonical CI workflow owns it."
     },
     {
       "path": "scripts/ops/observability/check_bioetl_prometheus_scrape.py",
@@ -20054,7 +20064,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 16,
       "references": [
         {
           "path": ".github/ISSUES/AUD-OBS-20260714-002-Add-Truthful-Observability-Validation-Gates.md",

@@ -848,6 +848,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
+      "description": "CURRENT · Scope health for the selected pipeline. Palette includes UNKNOWN when evidence is missing. UNKNOWN means evidence incomplete, not healthy.",
       "fieldConfig": {
         "defaults": {
           "color": {
