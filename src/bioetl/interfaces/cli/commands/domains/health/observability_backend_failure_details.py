@@ -4,15 +4,34 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Protocol
+from types import TracebackType
+from typing import Protocol, Self
 from urllib.error import HTTPError, URLError
 from urllib.request import build_opener
 
-from bioetl.application.services.ops.observability_backend_probes import (
-    _HttpProbeResponse,
-    _UrlOpenFn,
-)
 from bioetl.domain.exceptions import redact_string
+
+
+class _HttpProbeResponse(Protocol):
+    """HTTP response surface consumed by capability-probe diagnostics."""
+
+    @property
+    def status(self) -> int: ...
+
+    def __enter__(self) -> Self: ...
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> bool | None: ...
+
+
+class _UrlOpenFn(Protocol):
+    """Callable contract for opening one observability probe URL."""
+
+    def __call__(self, url: str, *, timeout: float) -> _HttpProbeResponse: ...
 
 
 class _SupportsPoll(Protocol):

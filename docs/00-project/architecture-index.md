@@ -64,16 +64,17 @@ under `scripts/ops/observability/grafana/` stays outside RF-06 hotspot families
 without a separate ADR.
 
 Hash-only coverage refresh (`--allow-missing-coverage-xml`) hashes all
-`src/bioetl/**/*.py` (live 2473 files) and drops deleted inventory paths. It
-does not add rows for renamed modules until coverage-verify rebuilds from
-XML; inventory `source_module_count` is therefore 2469 after four
-`observability_backend*` files moved from `interfaces/cli` into
-`application/services/ops`.
+`src/bioetl/**/*.py` and drops deleted inventory paths. It does not add rows
+for renamed modules until a coverage XML refresh. After `#10450`/`#10451`
+the committed inventory matches the live tree (`source_module_count=2474`)
+because the additive nonregressing coverage refresh added the observability
+backend process/probe adapters, remaining application startup modules, and
+the composition wiring seam.
 
 | Scanner | Artifact / command | What it counts |
 | --- | --- | --- |
-| Coverage inventory | `reports/quality/module-coverage-inventory.json` | Coverage-fact rows for `src/bioetl/**/*.py` that still exist in the tree (currently 2469 rows; live tree 2473 files). `report-module-coverage --check --allow-missing-coverage-xml` refreshes `source_tree_sha256` and drops deleted paths; it does not add rows for new modules until the coverage-verify lane rebuilds from coverage XML. |
-| Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Live modules with a resolvable hexagonal layer + group (currently 2463). Excludes package-root `bioetl` and `bioetl.__main__` (no hexagonal layer tag). |
+| Coverage inventory | `reports/quality/module-coverage-inventory.json` | Coverage-fact rows for `src/bioetl/**/*.py` that still exist in the tree (currently 2474 rows; live tree 2474 files). `report-module-coverage --check --allow-missing-coverage-xml` refreshes `source_tree_sha256` and drops deleted paths; new modules are added only from a coverage XML refresh (`--refresh-nonregressing-from-coverage-xml` or the coverage-verify lane). |
+| Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Live modules with a resolvable hexagonal layer + group (currently 2472). Excludes package-root `bioetl` and `bioetl.__main__` (no hexagonal layer tag). |
 | import-linter | `lint-imports --no-cache` (`.importlinter`) | Importable files in the `bioetl` package graph (last recorded 2398 files; not re-measured in the 2026-09-15 W0 pass). Excludes stubs / non-imported modules |
 
 `families_at_budget` on the architecture scorecard (currently

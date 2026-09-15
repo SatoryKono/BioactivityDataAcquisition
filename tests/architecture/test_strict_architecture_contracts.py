@@ -427,9 +427,8 @@ def _allowed_env_var_files(src_dir: Path) -> set[Path]:
         src_dir / "bioetl" / "infrastructure" / "observability" / "tracing.py",
         src_dir
         / "bioetl"
-        / "application"
-        / "services"
-        / "ops"
+        / "infrastructure"
+        / "observability"
         / "observability_backend_process.py",
         src_dir
         / "bioetl"
