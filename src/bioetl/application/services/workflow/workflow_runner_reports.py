@@ -131,6 +131,7 @@ def attach_workflow_run_report(
     result: WorkflowRunExecutionResult,
     logger: LoggerPort | None = None,
     store: RunReportStorePort,
+    report_root: Path | None = None,
 ) -> WorkflowRunExecutionResult:
     """Build and persist workflow_run_report_v1 (best-effort)."""
     try:
@@ -161,7 +162,7 @@ def attach_workflow_run_report(
             plan_steps=plan_steps,
             execution_steps=execution_rows,
         )
-        written = write_workflow_run_report(report, store=store)
+        written = write_workflow_run_report(report, root=report_root, store=store)
         return _require_workflow_result(
             replace(
                 result,

@@ -101,6 +101,13 @@ def bootstrap_with_light_observability(light_observability: SimpleNamespace):
 _LIST_SERVICE_CACHE: PipelineRunnerService | None = None
 
 
+def test_bootstrap_passes_configured_report_root(bootstrap_with_light_observability, tmp_path):
+    settings, _observability, _bundle = bootstrap_with_light_observability
+    settings.return_value.report_root = tmp_path / "configured-reports"
+    service = bootstrap_pipeline_runner_service()
+    assert service.report_root == settings.return_value.report_root
+
+
 def _cached_bootstrapped_service() -> PipelineRunnerService:
     """Amortize full DI bootstrap for list-only integration checks (#8329)."""
     global _LIST_SERVICE_CACHE

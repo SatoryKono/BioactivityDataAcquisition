@@ -310,6 +310,106 @@ Prometheus, dashboard render, workflow and online-run checks remain the
 producers of those typed artifacts; this command is their final aggregation
 and immutable-root gate.
 
+### 6c. Provider CURRENT and ChEMBL latency
+
+Run `bioetl health check --provider chembl --json` from the writable producer
+checkout. The read-only Ops container rehydrates persisted observations; it does
+not perform a new provider request on each scrape. Record the complete result and
+UTC time for each attempt, including failures. A bounded diagnostic series can
+use three attempts with a 30-second gap after each completed attempt. This is not
+a persistent monitoring schedule or an ETL backfill.
+
+Compare the persisted `provider_health` observation with these live series:
+
+- `bioetl_provider_health_observed_timestamp_seconds{provider="chembl"}`
+- `bioetl_provider_health_status_fresh{provider="chembl"}`
+- `bioetl_provider_current_status{provider="chembl"}`
+- `bioetl_provider_current_status_info{provider="chembl"}`
+
+The first timestamp must identify the measured observation, not the scrape time.
+The fresh health scale is unhealthy=0, degraded=1, healthy=2; CURRENT uses
+OK=0, WARN=1, CRIT=2, UNKNOWN=3. Do not compare the numeric scales directly.
+Confirm that **Monitor Selected Provider** and **Inspect Status Reason** agree
+with the latest observation. Missing, future or older-than-900-second evidence
+cannot confirm OK. An old raw healthy value is insufficient. A later degraded
+observation must supersede an earlier healthy one.
+
+For slow probes, separate the CLI process duration from its reported
+`latency_ms`: startup and persistence are outside the timed provider check.
+An additional curl request can measure cumulative DNS, connection, TLS,
+first-byte and total times. Subtract adjacent cumulative values to estimate
+phase durations. It is a separate request/client, not a trace of the CLI probe.
+Keep certificate verification enabled and retain curl failures as evidence.
+On Windows, `SEC_E_NO_CREDENTIALS` from Schannel before HTTP is a local client
+failure; it does not establish a ChEMBL outage. Check the execution account before
+repeating the diagnostic from the normal operator environment.
+
+A slow first byte alone cannot distinguish server processing from the network
+path. State that uncertainty until same-client traces or independent network
+measurements isolate the cause. Do not increase the existing five-second ChEMBL
+probe deadline or the 900-second freshness window to obtain OK. New OK evidence
+requires a completed real healthy probe, persistence, rehydration and rule
+evaluation; neither a successful scrape nor cached Bronze replay is sufficient.
+
+### 6d. Forensic panel capacity and error rows
+
+Overview CURRENT detail tables for Runtime, Data Quality, Control Plane, Data
+Validation, and Workflow use the same evidence-qualified domain verdict as the
+six-domain summary, with the selected Pipeline and Run Type. Run ID selects
+persisted evidence separately. An unqualified L1 lifecycle zero cannot override
+missing coverage in these CURRENT tables. Historical lifecycle tracks and the
+explicitly global Provider table retain their distinct scopes.
+
+Expensive forensic endpoints admit at most four simultaneous operations. Opening
+several detail groups or refreshing multiple dashboards can exhaust that capacity.
+`capacity_exhausted` is an unavailable response; retry the affected panel after
+the active requests finish. `deadline_exceeded` means the operation exceeded its
+existing twelve-second execution budget. Record both the HTTP status and the
+payload contract when diagnosing either result.
+
+Grafana can request `error_as_row=1`, which returns HTTP 200 with a
+`forensic_endpoint_error_v1` error envelope and an ERROR table row. HTTP 200 and a
+nonempty rows array do not establish successful evidence retrieval. The live
+panel auditor reports this envelope as `endpoint_execution_error` and blocks
+acceptance for required and optional panels alike. This is distinct from valid
+empty evidence and from an invalid query. Keep admission and timeout limits
+unchanged; confirm the error reason before retrying individual panels.
+
+A successful Prometheus query can return `NaN`, `+Inf`, or `-Inf`, including
+histogram quantiles without observed increments or a ratio with a zero
+denominator. The live panel auditor preserves these responses as
+`nonfinite_result` and requires review, even when other samples are finite or the
+panel is optional. Check the underlying observations and denominator before
+deciding whether the result is expected; it is not a measured zero or a confirmed
+nonzero value.
+
+Prometheus `infos` or `warnings` can qualify a finite result, for example when
+`histogram_quantile` repairs non-monotonic buckets. The auditor classifies an
+otherwise numeric success as `annotated_result` and requires review; the complete
+annotation remains in the response evidence. Trace the buckets and their
+producer before accepting the quantile. A repaired finite result is not proof
+that the original histogram observations were valid.
+
+Expression parity compares PromQL tokens from tracked YAML and the live Rules
+API. Layout and comments outside strings are ignored; quoted label values retain
+their spaces and hash characters. This check does not prove algebraic equivalence
+and does not replace promtool syntax and rule-vector validation. A parity check
+skipped because Prometheus is unreachable is not a pass.
+
+The live panel auditor follows each target's instant/range flags. Legacy targets
+without flags use range queries, matching the inspected shipped Grafana panels.
+Range evidence includes every returned matrix sample; an empty instant response
+does not establish an empty historical chart. Targets requesting both modes keep
+both responses; differing empty/populated results require review. Unsupported
+native histogram samples fail shape validation instead of being silently omitted.
+
+The explicit audit range step defaults to 300 seconds and can be set with
+`--prometheus-step-seconds` to match the panel's inspected Query options. This
+does not reproduce Grafana's viewport-dependent resolution or time alignment.
+The auditor's interval and rate-interval macro substitutions remain fixed at five
+minutes; changing the range step changes evaluation spacing only. Record these
+settings and inspect the rendered panel before claiming browser parity.
+
 ### 7. Operator Sign-off
 
 - [ ] Metrics endpoint is reachable

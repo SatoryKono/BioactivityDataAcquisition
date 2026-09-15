@@ -266,6 +266,22 @@ def _build_chembl_baseline_metrics_config() -> WorkflowConfig:
     )
 
 
+@pytest.mark.asyncio
+async def test_workflow_report_uses_configured_root(tmp_path) -> None:
+    root = tmp_path / "configured-reports"
+    service = WorkflowRunnerService(
+        pipeline_runner=_PipelineRunner(),
+        transform_service=_RecordingTransformService(),
+        metrics=_RecordingMetrics(),
+        report_store=FileRunReportStoreAdapter(),
+        report_root=root,
+    )
+    result = await service.run_workflow(_build_chembl_baseline_metrics_config())
+    assert result.run_report_error is None
+    assert Path(result.run_report_json_path).is_relative_to(root)
+    assert Path(result.run_report_json_path).is_file()
+
+
 def test_workflow_runner_records_expected_pipeline_universe_for_baseline() -> None:
     metrics = _RecordingMetrics()
     service = WorkflowRunnerService(

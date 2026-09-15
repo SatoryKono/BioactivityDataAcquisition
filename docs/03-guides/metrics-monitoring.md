@@ -976,3 +976,24 @@ For a live panel audit, pass the selected `--read-latency-quantile` (0.5, 0.95 o
 0.99; default 0.95). Audit timestamps use UTC. A rejected query (HTTP 400/422)
 blocks acceptance even for an optional panel; datasource unavailability is a
 separate outcome. Review empty results individually before declaring panel health.
+
+### Finding a complete run without replacing history
+
+Trust includes a collapsed **Inspect Complete Run Discovery** row. Select one
+pipeline and run type, then expand it to search the same workflow scope. The
+search considers manifests from newest to oldest by creation time; a candidate
+must have processing `success` and aggregate Trust `OK` across manifest,
+lineage and retention checks. A successful ETL status alone does not qualify.
+
+`GET /ops/control-plane/latest-complete-run` accepts the dashboard workflow,
+pipeline, run_type and selected run_id. The selected historical ID is retained
+separately from candidate_run_id. Search evaluates at most 20 candidates within
+a 9-second cooperative scan budget and the existing 12-second HTTP deadline.
+`INCOMPLETE` means the search limit was reached; `NOT FOUND` means the matching
+catalog was exhausted. Backend failures remain errors. Neither state supplies
+a candidate link or asserts replay safety.
+
+Open a candidate in a new tab to preserve the historical view. The link keeps
+workflow, pipeline, run type, time range and timezone; the candidate may therefore
+show `OUT OF RANGE`. Use its existing range-to-run action when needed. This search
+does not repair historical evidence, renew CURRENT telemetry or authorize replay.

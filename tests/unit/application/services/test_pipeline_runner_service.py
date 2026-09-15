@@ -35,7 +35,9 @@ from __future__ import annotations
 from tests.helpers.run_report_store import MemoryReportStore
 
 import asyncio
+import json
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 from unittest.mock import ANY, AsyncMock, MagicMock
 from uuid import UUID
 
@@ -62,6 +64,28 @@ from bioetl.application.services.execution.pipeline_runner_models import (
 from bioetl.application.services.execution.pipeline_runner_service import (
     PipelineRunnerService,
 )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("mode", ["success", "failure", "dry_run"])
+async def test_configured_report_root_is_used_for_every_outcome(
+    service, mock_runner, tmp_path, mode
+):
+    from bioetl.infrastructure.storage.run_report_store_adapter import FileRunReportStoreAdapter
+
+    service.report_root = tmp_path / "configured-reports"
+    service.report_store = FileRunReportStoreAdapter()
+    mock_runner.debug_export_uri = None
+    mock_runner.debug_export_hash = None
+    if mode == "failure":
+        mock_runner.run.side_effect = ValueError("bounded test failure")
+    result = await service.run("test_pipeline", options=RunOptions(dry_run=mode == "dry_run"))
+    assert result.run_report_error is None
+    target = Path(result.run_report_json_path)
+    assert target.is_relative_to(service.report_root)
+    assert target.is_file()
+    assert Path(result.run_report_markdown_path).is_relative_to(service.report_root)
+    assert json.loads(target.read_text())["identity"]["run_id"] == result.run_id
 
 
 @pytest.mark.unit

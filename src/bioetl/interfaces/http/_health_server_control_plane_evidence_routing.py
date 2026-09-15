@@ -14,7 +14,10 @@ from bioetl.application.observability.control_plane_evidence.service_support imp
     source_error_payload,
 )
 from bioetl.application.runtime_clock import current_utc_time
-from bioetl.domain.ports import CheckpointPort
+from bioetl.domain.ports import CheckpointPort, WorkflowManifestPort
+from bioetl.interfaces.http._control_plane_latest_complete import (
+    build_latest_complete_run_payload,
+)
 from bioetl.interfaces.http._forensic_request_budget import (
     FORENSIC_ENDPOINT_TIMEOUT_SECONDS,
     ForensicEndpointUnavailable,
@@ -32,9 +35,15 @@ from bioetl.interfaces.http._health_server_control_plane_evidence_scope import (
     resolve_evidence_scope,
     to_evidence_scope,
 )
+from bioetl.interfaces.http._health_server_control_plane_scope import (
+    read_selected_run_id,
+)
 
 
 class _EvidenceRoutingHost(EvidenceScopeHost, Protocol):
+    @property
+    def _workflow_manifest_port(self) -> WorkflowManifestPort | None: ...
+
     @property
     def _checkpoint_port(self) -> CheckpointPort | None: ...
 
@@ -78,6 +87,9 @@ async def dispatch_control_plane_evidence_request(
             [], Coroutine[object, object, dict[str, object]]
         ],  # Any: async function signatures
     ] = {
+        "/ops/control-plane/latest-complete-run": lambda: _latest_complete_payload(
+            host, query
+        ),
         "/ops/control-plane/trust-summary": lambda: _service_payload(
             host, query, endpoint="trust-summary"
         ),
@@ -126,6 +138,38 @@ async def dispatch_control_plane_evidence_request(
         return True
     await host._send_payload_response(writer, 200, payload)
     return True
+
+
+async def _latest_complete_payload(
+    host: _EvidenceRoutingHost, query: dict[str, str]
+) -> dict[str, object]:
+    pipeline = host._read_required_param(query, "pipeline")
+    run_types = host._read_scope_csv_param(query, "run_type")
+    if (
+        host._is_all_scope_token(pipeline)
+        or "," in pipeline
+        or (len(run_types) != 1 or host._is_all_scope_token(run_types[0]))
+    ):
+        raise ValueError("latest-complete-run requires one pipeline and one run_type")
+    if host._run_manifest_port is None:
+        raise ForensicEndpointUnavailable(reason="catalog_unavailable", status_code=503)
+    manifests = await asyncio.to_thread(host._run_manifest_port.list_all)
+    workflow_manifests = (
+        await asyncio.to_thread(host._workflow_manifest_port.list_all)
+        if host._workflow_manifest_port is not None
+        else ()
+    )
+    return await asyncio.to_thread(
+        build_latest_complete_run_payload,
+        manifests=tuple(manifests),
+        workflow_manifests=tuple(workflow_manifests),
+        service=_require_service(host),
+        pipeline=pipeline,
+        run_type=run_types[0],
+        workflows=host._read_scope_csv_param(query, "workflow"),
+        selected_run_id=read_selected_run_id(host, query),
+        now=current_utc_time(),
+    )
 
 
 async def _checkpoint_payload(

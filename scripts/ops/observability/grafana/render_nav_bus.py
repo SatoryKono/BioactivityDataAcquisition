@@ -15,6 +15,9 @@ import json
 import sys
 from pathlib import Path
 
+from scripts.ops.observability.grafana._latest_complete_run_panel import (
+    stamp_latest_complete_run_panel,
+)
 from scripts.ops.observability.grafana.action_target_routes import (
     ACTION_DASHBOARD_UID_BY_TARGET,
 )
@@ -599,6 +602,20 @@ def _compact_fallback_panel(
 
 def _layout_control_plane_detail_panels(panels: list[object]) -> None:
     """Fill the operator-reviewed gaps using row-relative, repeatable geometry."""
+    for panel in _walk_panels(panels):
+        panel_id = panel.get("id")
+        if panel_id not in {9405, 9406, 9407, 9408, 9409}:
+            continue
+        for transform in panel.get("transformations", []):
+            if transform.get("id") != "organize":
+                continue
+            options = transform.setdefault("options", {})
+            # Keep one result column; checkpoint Result retains MISMATCH/MISSING/N/A.
+            duplicate = "status" if panel_id in {9405, 9407} else "ui_status"
+            options.setdefault("excludeByName", {})[duplicate] = True
+            if panel_id in {9405, 9407}:
+                options.setdefault("renameByName", {})["drilldown_label"] = "Action"
+                options.setdefault("indexByName", {})["drilldown_label"] = 3
     layouts = {
         902: {134: (0, 11, 12), 5: (12, 11, 12), 135: (0, 17, 24)},
         903: {4: (0, 0, 12), 136: (12, 0, 12)},
@@ -621,6 +638,50 @@ def _layout_control_plane_detail_panels(panels: list[object]) -> None:
                 x, offset, width = position
                 child["gridPos"].update(x=x, y=base_y + offset, w=width)
         children.sort(key=lambda child: (child["gridPos"]["y"], child["gridPos"]["x"]))
+
+
+def _normalize_overview_domain_snapshots(panels: list[object]) -> None:
+    """Keep CURRENT detail verdicts aligned with the evidence-qualified summary."""
+    domains = {9003: "runtime", 9004: "dq", 9005: "gold", 9006: "control_plane", 9013: "workflow"}
+    for panel in _walk_panels(panels):
+        domain = domains.get(panel.get("id"))
+        if domain is None:
+            continue
+        panel["targets"] = [{
+            "expr": (
+                'max by (pipeline) (bioetl_l0_input_status_selected{'
+                f'input="{domain}",pipeline=~"$pipeline",run_type=~"$run_type"'
+                '}) or label_replace(vector(3), "pipeline", "$pipeline", "", "")'
+            ),
+            "refId": "A", "format": "table", "instant": True,
+        }]
+        panel["description"] = (
+            "CURRENT snapshot · Same evidence-qualified domain verdict as Review Domain Status "
+            "for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, 2=CRIT, "
+            "and null/3=UNKNOWN. Missing coverage cannot be replaced by an unqualified "
+            "L1 OK. Run ID does not filter CURRENT. Historical lifecycle tracks remain "
+            "separate; this is not selected-run trust."
+        )
+    for panel in _walk_panels(panels):
+        if panel.get("id") == 9031:
+            panel["description"] = str(panel.get("description", "")).replace(
+                "four-row Review Domain Status", "six-domain Review Domain Status"
+            )
+
+
+def _normalize_runtime_record_delta_scope(panels: list[object]) -> None:
+    """Distinguish observed counter increases from persisted selected-run totals."""
+    for panel in _walk_panels(panels):
+        if panel.get("id") == 241:
+            panel["description"] = (
+                "TIME RANGE · Observed selected-range processed-record counter increases by Stage and Run Type "
+                "for the selected Pipeline and Stage. Run ID does not filter this query. "
+                "Prometheus increase estimates changes between scraped samples; the initial "
+                "counter value is not an observed increase. These values can differ from "
+                "persisted selected-run totals. Use Run Explorer for exact-run counts. "
+                "An empty chart means no matching samples or unavailable telemetry, not "
+                "successful processing. TELEMETRY MISSING is not a zero and not VALID EMPTY."
+            )
 
 
 def _layout_overview_detail_panels(panels: list[object]) -> None:
@@ -982,6 +1043,7 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
                         "archive_source_mismatch": {"text": "Source changed"},
                         "archive_evidence_invalid": {"text": "Archive invalid"},
                         "archive_index_invalid": {"text": "Index invalid"},
+                        "snapshot_lifecycle_evidence_present": {"text": "Snapshots present"},
                     })
     if 9418 in by_id:
         for link in by_id[9418].get("links", []):
@@ -996,8 +1058,14 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
             "evidence for this run. ERROR wins; missing evidence is INCOMPLETE. "
             "processing_status success does not imply trust_status OK. Inspect each "
             "validation table for details. No selected run is a valid empty state "
-            "(UNKNOWN). Backend unavailable means QUERY ERROR."
+            "(UNKNOWN). Backend unavailable means QUERY ERROR. Result is the ETL "
+            "processing outcome; Observed is the manifest creation time."
         )
+        for transform in by_id[9418].get("transformations", []):
+            if transform.get("id") == "organize":
+                transform.setdefault("options", {}).setdefault("renameByName", {}).update(
+                    {"processing_status": "Result", "evidence_observed_at": "Observed"}
+                )
         options = by_id[9418].setdefault("options", {})
         footer = options.setdefault("footer", {})
         footer["enablePagination"] = True
@@ -1005,7 +1073,13 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
         overrides = field_config.setdefault("overrides", [])
         for override in overrides:
             field = override.get("matcher", {}).get("options")
-            width = {"Processing": 80, "Trust": 130, "Observed at": 90}.get(field)
+            field = {"Processing": "Result", "Observed at": "Observed"}.get(field, field)
+            override["matcher"]["options"] = field
+            if field == "processing_status":
+                for prop in override.get("properties", []):
+                    if prop.get("id") == "displayName":
+                        prop["value"] = "Result"
+            width = {"Result": 80, "Trust": 130, "Observed": 90}.get(field)
             if width is not None:
                 for prop in override.get("properties", []):
                     if prop.get("id") == "custom.width":
@@ -1199,11 +1273,15 @@ def apply_to_dashboard(
     _reclaim_first_window_overflow(nav, panels, current_uid=current_uid)
     _layout_uid_first_window(panels, current_uid=current_uid)
     _normalize_collapsed_row_children(panels)
+    if current_uid == "bioetl-runtime":
+        _normalize_runtime_record_delta_scope(panels)
     if current_uid == "bioetl-control-plane-v1":
         _layout_control_plane_detail_panels(panels)
         _clarify_manifest_counter_evidence(panels)
+        stamp_latest_complete_run_panel(panels)
     if current_uid == "bioetl-overview-v2":
         _layout_overview_detail_panels(panels)
+        _normalize_overview_domain_snapshots(panels)
     if current_uid == "bioetl-runtime":
         _layout_runtime_detail_panels(panels)
     if current_uid == "bioetl-dq-v2":

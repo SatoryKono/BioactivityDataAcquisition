@@ -74,6 +74,7 @@ def bootstrap_pipeline_runner_service(
 
     return PipelineRunnerService(
         report_store=FileRunReportStoreAdapter(),
+        report_root=settings.report_root,
         runner_factory=runner_factory,
         metrics_extractor=metrics_extractor,
         logger=observability.logger,

@@ -270,9 +270,8 @@ async def complete_pipeline_dry_run(
     options: RunOptions,
     dry_run_result: RunResult,
     record_event: Callable[..., Awaitable[None]],
-    store: RunReportStorePort,
 ) -> RunResult:
-    """Record dry-run completion and finalize the pipeline run report."""
+    """Record dry-run completion before the service finalizes its report."""
     await record_event(
         audit,
         event_name="PipelineRunCompleted",
@@ -282,9 +281,7 @@ async def complete_pipeline_dry_run(
         status=dry_run_result.status.value,
         timestamp=dry_run_result.completed_at,
     )
-    return finalize_pipeline_run_report(
-        result=dry_run_result, options=options, store=store
-    )
+    return dry_run_result
 
 
 async def create_execution_runner_audited(

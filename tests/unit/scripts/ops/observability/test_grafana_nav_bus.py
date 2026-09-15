@@ -16,6 +16,37 @@ from scripts.ops.observability.grafana import render_nav_bus as nav_bus
 pytestmark = pytest.mark.unit
 
 
+def test_complete_run_discovery_preserves_scope_and_avoids_null_auto_height() -> None:
+    from scripts.ops.observability.grafana._latest_complete_run_panel import (
+        stamp_latest_complete_run_panel,
+    )
+
+    panels: list[object] = []
+    stamp_latest_complete_run_panel(panels)
+    stamp_latest_complete_run_panel(panels)
+    assert len(panels) == 1
+    row = panels[0]
+    assert isinstance(row, dict)
+    assert row["collapsed"] is True
+    panel = row["panels"][0]
+    assert (
+        panel["fieldConfig"]["defaults"]["custom"]["cellOptions"]["wrapText"] is False
+    )
+    overrides = panel["fieldConfig"]["overrides"]
+    candidate = next(x for x in overrides if x["matcher"]["options"] == "Candidate run")
+    link = candidate["properties"][0]["value"][0]
+    assert link["targetBlank"] is True
+    assert "${run_id:queryparam}" not in link["url"]
+    for token in (
+        "${workflow:queryparam}",
+        "${pipeline:queryparam}",
+        "${run_type:queryparam}",
+        "${__url_time_range}",
+    ):
+        assert token in link["url"]
+    assert "var-run_id=${__value.raw}" in link["url"]
+
+
 def _panel(
     panel_id: int,
     panel_type: str,
