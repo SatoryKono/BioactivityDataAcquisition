@@ -661,6 +661,60 @@ def _layout_overview_detail_panels(panels: list[object]) -> None:
         children.sort(key=lambda child: (child["gridPos"]["y"], child["gridPos"]["x"]))
 
 
+def _layout_runtime_detail_panels(panels: list[object]) -> None:
+    """Fill detail rows and preserve explicit absence of duration observations."""
+    layouts = {
+        252: {220: (0, 22, 24, 3)},
+        253: {9991: (0, 12, 24, 2)},
+        254: {
+            230: (0, 3, 8, 4),
+            236: (8, 3, 8, 4),
+            21: (16, 3, 8, 4),
+            4: (0, 10, 8, 4),
+            5: (8, 10, 8, 4),
+            6: (16, 10, 8, 4),
+            259: (0, 14, 12, 4),
+            7: (12, 14, 12, 4),
+        },
+        9992: {237: (0, 0, 8, 4), 16: (8, 0, 8, 4), 205: (16, 0, 8, 4)},
+        9993: {9998: (0, 6, 24, 4)},
+        9994: {9996: (0, 0, 12, 4), 9997: (12, 0, 12, 4)},
+        32460: {22460: (0, 0, 24, 6), 2461: (0, 6, 24, 6)},
+    }
+    for row in _root_panels(panels):
+        layout = layouts.get(row.get("id"))
+        if layout is None:
+            continue
+        base_y = row["gridPos"]["y"] + 1
+        children = row.get("panels", [])
+        for child in children:
+            if position := layout.get(child.get("id")):
+                x, offset, width, height = position
+                child["gridPos"].update(x=x, y=base_y + offset, w=width, h=height)
+            if child.get("id") == 9998:
+                # Grafana applies widths before/after display-name transforms.
+                # Keep both possible Run field names flexible.
+                for override in child["fieldConfig"]["overrides"]:
+                    if override.get("matcher", {}).get("options") in {"Run", "run_id"}:
+                        override["properties"] = [
+                            prop
+                            for prop in override["properties"]
+                            if prop["id"] != "custom.width"
+                        ]
+            if child.get("id") in {207, 239}:
+                for target in child.get("targets", []):
+                    expr = target.get("expr", "")
+                    if expr and not expr.endswith(" >= 0"):
+                        target["expr"] = f"({expr}) >= 0"
+                child["fieldConfig"]["defaults"]["custom"]["showPoints"] = "always"
+                child["description"] = (
+                    "Duration quantiles require observed histogram increments within the rate interval. "
+                    "No plotted samples means no computable quantile, not zero duration or a failed run. "
+                    "NaN quantiles are omitted; isolated valid observations are shown as points."
+                )
+        children.sort(key=lambda child: (child["gridPos"]["y"], child["gridPos"]["x"]))
+
+
 def _normalize_collapsed_row_children(panels: list[object]) -> None:
     """Repair the one-row child drift left by legacy recursive nav shifts."""
     for row in _root_panels(panels):
@@ -979,6 +1033,8 @@ def apply_to_dashboard(
         _layout_control_plane_detail_panels(panels)
     if current_uid == "bioetl-overview-v2":
         _layout_overview_detail_panels(panels)
+    if current_uid == "bioetl-runtime":
+        _layout_runtime_detail_panels(panels)
     nav["options"] = {
         "mode": "html",
         "bioetlDisplayTitle": NAV_DISPLAY_TITLE,

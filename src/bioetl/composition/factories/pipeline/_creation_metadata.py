@@ -16,6 +16,10 @@ from bioetl.composition.factories.pipeline.construction_types import (
 from bioetl.composition.factories.pipeline.run_context_factory import (
     RunContextFactory,
 )
+from bioetl.composition.services.versioning import (
+    get_git_commit,
+    get_pipeline_version,
+)
 from bioetl.domain.config import DQConfig
 from bioetl.domain.ports import SilverValidatorPort
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -36,11 +40,6 @@ def _build_metadata_coordinator(
     extract_entity_type: Callable[[str], str | None],
 ) -> MetadataCoordinator:
     """Build the metadata coordinator from the canonical run context factory."""
-    from bioetl.composition.services.versioning import (
-        get_git_commit,
-        get_pipeline_version,
-    )
-
     request = inputs.request
     run_context_factory = RunContextFactory(
         pipeline_name=inputs.pipeline_name,

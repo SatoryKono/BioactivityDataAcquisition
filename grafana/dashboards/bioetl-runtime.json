@@ -1882,8 +1882,8 @@
           "gridPos": {
             "x": 0,
             "y": 40,
-            "w": 8,
-            "h": 4
+            "w": 24,
+            "h": 3
           },
           "id": 220,
           "options": {
@@ -1929,7 +1929,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows p50, p95, and p99 phase duration for the selected Pipeline and range. Run Type does not affect this panel. No data can mean an active run, no emitted samples, or a label mismatch; it is not zero duration TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "Duration quantiles require observed histogram increments within the rate interval. No plotted samples means no computable quantile, not zero duration or a failed run. NaN quantiles are omitted; isolated valid observations are shown as points.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1945,7 +1945,7 @@
                 "lineInterpolation": "linear",
                 "lineWidth": 2,
                 "pointSize": 3,
-                "showPoints": "never",
+                "showPoints": "always",
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1988,17 +1988,17 @@
           },
           "targets": [
             {
-              "expr": "histogram_quantile(0.50, sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])))",
+              "expr": "(histogram_quantile(0.50, sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])))) >= 0",
               "legendFormat": "{{phase}} / {{status}} p50",
               "refId": "A"
             },
             {
-              "expr": "histogram_quantile(0.95, sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])))",
+              "expr": "(histogram_quantile(0.95, sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])))) >= 0",
               "legendFormat": "{{phase}} / {{status}} p95",
               "refId": "B"
             },
             {
-              "expr": "histogram_quantile(0.99, sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])))",
+              "expr": "(histogram_quantile(0.99, sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])))) >= 0",
               "legendFormat": "{{phase}} / {{status}} p99",
               "refId": "C"
             }
@@ -2013,7 +2013,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows p50, p95, and p99 completed pipeline duration by Stage for Pipeline and Run Type over the selected range. No data can mean an active run, no terminal samples, unavailable telemetry, or a label mismatch; it is not zero duration TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "Duration quantiles require observed histogram increments within the rate interval. No plotted samples means no computable quantile, not zero duration or a failed run. NaN quantiles are omitted; isolated valid observations are shown as points.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2029,7 +2029,7 @@
                 "lineInterpolation": "linear",
                 "lineWidth": 2,
                 "pointSize": 3,
-                "showPoints": "never",
+                "showPoints": "always",
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -2072,17 +2072,17 @@
           },
           "targets": [
             {
-              "expr": "histogram_quantile(0.50, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))",
+              "expr": "(histogram_quantile(0.50, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))) >= 0",
               "legendFormat": "{{stage}} / {{status}} / {{run_type}} p50",
               "refId": "A"
             },
             {
-              "expr": "histogram_quantile(0.95, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))",
+              "expr": "(histogram_quantile(0.95, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))) >= 0",
               "legendFormat": "{{stage}} / {{status}} / {{run_type}} p95",
               "refId": "B"
             },
             {
-              "expr": "histogram_quantile(0.99, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))",
+              "expr": "(histogram_quantile(0.99, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))) >= 0",
               "legendFormat": "{{stage}} / {{status}} / {{run_type}} p99",
               "refId": "C"
             }
@@ -2437,7 +2437,7 @@
           "title": "",
           "description": "States the current verdict and neutral outcome explicitly, then routes non-OK states through runtime blockers, DQ evidence, and Run Explorer. SCRAPING is telemetry confidence, not proof of delivery health. Verify coverage before trusting an empty blocker table.",
           "gridPos": {
-            "h": 3,
+            "h": 2,
             "w": 24,
             "x": 0,
             "y": 31
@@ -2557,7 +2557,7 @@
           "gridPos": {
             "x": 0,
             "y": 23,
-            "w": 6,
+            "w": 8,
             "h": 4
           },
           "id": 230,
@@ -2643,9 +2643,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 6,
+            "x": 8,
             "y": 23,
-            "w": 6,
+            "w": 8,
             "h": 4
           },
           "id": 236,
@@ -2747,9 +2747,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 12,
+            "x": 16,
             "y": 23,
-            "w": 6,
+            "w": 8,
             "h": 4
           },
           "id": 21,
@@ -2849,7 +2849,7 @@
           "gridPos": {
             "x": 0,
             "y": 30,
-            "w": 6,
+            "w": 8,
             "h": 4
           },
           "id": 4,
@@ -2935,9 +2935,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 6,
+            "x": 8,
             "y": 30,
-            "w": 6,
+            "w": 8,
             "h": 4
           },
           "id": 5,
@@ -3017,9 +3017,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 12,
+            "x": 16,
             "y": 30,
-            "w": 6,
+            "w": 8,
             "h": 4
           },
           "id": 6,
@@ -3106,9 +3106,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 18,
-            "y": 30,
-            "w": 6,
+            "x": 0,
+            "y": 34,
+            "w": 12,
             "h": 4
           },
           "id": 259,
@@ -3196,9 +3196,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 0,
+            "x": 12,
             "y": 34,
-            "w": 6,
+            "w": 12,
             "h": 4
           },
           "id": 7,
@@ -3478,7 +3478,7 @@
           "gridPos": {
             "x": 0,
             "y": 21,
-            "w": 6,
+            "w": 8,
             "h": 4
           },
           "id": 237,
@@ -3561,9 +3561,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 6,
+            "x": 8,
             "y": 21,
-            "w": 6,
+            "w": 8,
             "h": 4
           },
           "id": 16,
@@ -3643,9 +3643,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 12,
+            "x": 16,
             "y": 21,
-            "w": 6,
+            "w": 8,
             "h": 4
           },
           "id": 205,
@@ -4165,7 +4165,7 @@
             "x": 0,
             "y": 28,
             "w": 24,
-            "h": 5
+            "h": 4
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Compact pipeline_run_report_v1 projection (identity, times, gold out, contract exclusions, coverage). Missing run is SELECT RUN, not OK. A selected run with no summary rows is VALID EMPTY, not OK. SELECT RUN is not VALID EMPTY. Set range to run updates this dashboard at started_at-5m .. <code style='font-size:16px'>completed_at</code>+5m. Do not treat CURRENT Prometheus as this UUID. Backend unavailable means the query could not be evaluated. Verify /health/live. Coverage chip is IN RANGE / OUT OF RANGE / UNKNOWN from covers_selected_run. Set range to run applies from_ms..to_ms to this dashboard. A covered run does not show an outside-range warning. Status, coverage and local timestamps precede the UUID. Inspect the Run cell to copy its complete value; range-bound fields remain available to the Set range to run action and panel data inspection.",
@@ -4233,10 +4233,6 @@
                   {
                     "id": "links",
                     "value": []
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 220
                   }
                 ]
               },
@@ -4897,7 +4893,7 @@
           "gridPos": {
             "x": 0,
             "y": 23,
-            "w": 6,
+            "w": 12,
             "h": 4
           },
           "id": 9996,
@@ -4981,9 +4977,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 6,
+            "x": 12,
             "y": 23,
-            "w": 6,
+            "w": 12,
             "h": 4
           },
           "id": 9997,
@@ -5086,7 +5082,7 @@
             "x": 0,
             "y": 24,
             "w": 24,
-            "h": 12
+            "h": 6
           },
           "id": 22460,
           "options": {
@@ -5127,9 +5123,9 @@
           "description": "CURRENT · Expected stage coverage for Pipeline / Run Type. Missing lag/backlog signals are listed individually. Undefined expected stages are UNKNOWN. VALID EMPTY requires a recorded complete stage catalog and every expected signal. Query failures are QUERY ERROR.",
           "gridPos": {
             "x": 0,
-            "y": 36,
+            "y": 30,
             "w": 24,
-            "h": 8
+            "h": 6
           },
           "datasource": {
             "type": "prometheus",

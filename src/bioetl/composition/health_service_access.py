@@ -8,6 +8,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 from bioetl.composition import _resource_management, _services
+from bioetl.composition.factories.pipeline._preflight_health_monitor import (
+    rehydrate_provider_health_gauges as _rehydrate_provider_health_gauges,
+)
 
 if TYPE_CHECKING:
     from bioetl.composition.contracts.health import BronzeCleanupServiceProtocol
@@ -70,11 +73,7 @@ def get_quarantine_service(*, data_root: Path | None = None) -> QuarantineServic
 
 def rehydrate_provider_health_gauges(metrics: MetricsPort) -> int:
     """Publish CURRENT provider-health gauges through one composition owner seam."""
-    from bioetl.composition.factories.pipeline._preflight_health_monitor import (
-        rehydrate_provider_health_gauges as _impl,
-    )
-
-    return _impl(metrics)
+    return _rehydrate_provider_health_gauges(metrics)
 
 
 def get_bronze_cleanup_service() -> BronzeCleanupServiceProtocol:

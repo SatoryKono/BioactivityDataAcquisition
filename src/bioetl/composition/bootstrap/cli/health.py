@@ -15,6 +15,9 @@ from bioetl.composition.bootstrap.assembly.health_server import (
     HealthServerDependencies,
     create_health_server_dependencies,
 )
+from bioetl.composition.bootstrap.assembly.health_service import (
+    create_health_service as _create_health_service,
+)
 from bioetl.composition.bootstrap.assembly.checkpoint import (
     bootstrap_checkpoint_adapter,
     bootstrap_quarantine_adapter,
@@ -51,10 +54,6 @@ def create_health_service(
     metrics: MetricsPort | None = None,
 ) -> HealthService:
     """Delegate health-service assembly lazily to avoid server startup fan-out."""
-    from bioetl.composition.bootstrap.assembly.health_service import (
-        create_health_service as _create_health_service,
-    )
-
     return _create_health_service(
         logger=logger,
         settings=settings,

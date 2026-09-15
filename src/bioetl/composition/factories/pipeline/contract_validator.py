@@ -8,6 +8,9 @@ from bioetl.application.core.wiring.registry import GenericPipeline
 from bioetl.composition.factories.datasource.data_source_factory import (
     get_data_source_creator,
 )
+from bioetl.composition.factories.pipeline._assembler_factory import (
+    GenericPipelineFactory,
+)
 from bioetl.composition.factories.pipeline_support.contract_validation_helpers import (
     _resolve_silver_columns,
     _resolve_transformer_class_ref,
@@ -20,9 +23,6 @@ from bioetl.composition.providers.provider_registry import (
 from bioetl.domain.types import GoldSchemaType
 
 if TYPE_CHECKING:
-    from bioetl.composition.factories.pipeline._assembler_factory import (
-        GenericPipelineFactory,
-    )
     from bioetl.composition.factories.pipeline.config_types import (
         PipelineFactoryConfig,
     )
@@ -42,10 +42,6 @@ def create_factory(
         Configured GenericPipelineFactory instance
     """
     _validate_contract_policy(config)
-    from bioetl.composition.factories.pipeline._assembler_factory import (
-        GenericPipelineFactory,
-    )
-
     transformer_class = _resolve_transformer_class_ref(config.transformer_class)
 
     # Resolve data source creator: use data_source_provider override if set

@@ -11,6 +11,7 @@ from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import cast
 
+from bioetl.composition.factories.pipeline.registry import PIPELINE_CONFIGS
 from bioetl.composition.factories.pipeline_support.registry_validation_helpers import (
     RegistryEntryProtocol,
     _iter_entity_files,
@@ -36,12 +37,6 @@ def validate_registry_manifest(
     resolved_configs_root = resolve_configs_root(configs_root)
     repo_root = resolved_configs_root.parent
     if pipeline_configs is None:
-        # Import via public registry facade to keep family fan-in of
-        # ``registry_manifest`` under the hotspot budget (ARCH-RES-01).
-        from bioetl.composition.factories.pipeline.registry import (
-            PIPELINE_CONFIGS,
-        )
-
         # NamedTuple registry entries are structurally RegistryEntryProtocol;
         # cast keeps basedpyright from union-widening against the concrete type.
         registry_entries: Sequence[RegistryEntryProtocol] = cast(

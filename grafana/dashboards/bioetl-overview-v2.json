@@ -3920,9 +3920,9 @@
           "title": "Review Workflow Status",
           "gridPos": {
             "h": 4,
-            "w": 12,
-            "x": 12,
-            "y": 29
+            "w": 24,
+            "x": 0,
+            "y": 33
           },
           "datasource": {
             "type": "prometheus",
@@ -4122,7 +4122,7 @@
             "h": 3,
             "w": 24,
             "x": 0,
-            "y": 33
+            "y": 37
           },
           "options": {
             "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:16px;white-space:normal\"><strong>Next dashboard:</strong> <a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Trust</a> for evidence · <a href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">Pipeline Diagnostics</a> for runtime blockers · <a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">Data Quality</a> for DQ reasons · <a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${provider:queryparam}&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">Provider Health</a> for provider causes. <a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Back to top</a>.</div>",

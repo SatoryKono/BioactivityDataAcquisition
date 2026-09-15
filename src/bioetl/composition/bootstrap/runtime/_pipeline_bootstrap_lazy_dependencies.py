@@ -5,6 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.composition.factories.pipeline.registry import (
+    register_all_pipelines as _register_all_pipelines,
+)
+
 if TYPE_CHECKING:
     from bioetl.application.ports import PipelineRegistryProtocol
     from bioetl.composition.factories.pipeline.registry import (
@@ -54,10 +58,6 @@ def register_all_pipelines(
     registration_state: PipelineFactoryRegistrationState | None = None,
 ) -> None:
     """Register all pipeline factories without importing them at module load."""
-    from bioetl.composition.factories.pipeline.registry import (
-        register_all_pipelines as _register_all_pipelines,
-    )
-
     _register_all_pipelines(
         registry=registry,
         registration_state=registration_state,

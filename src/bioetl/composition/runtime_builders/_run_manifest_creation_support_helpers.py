@@ -15,6 +15,7 @@ from bioetl.application.services.control_plane.manifest.service import (
 from bioetl.composition.runtime_builders._run_manifest_planned_artifacts import (
     build_planned_artifacts,
 )
+from bioetl.composition.occurrence_identity import create_runtime_occurrence_id
 from bioetl.composition.services.versioning import (
     CodeRevisionProvenance,
     get_pipeline_version,
@@ -166,7 +167,6 @@ def create_ledger_service(
     from bioetl.composition.bootstrap.control_plane_store_builders import (
         create_run_ledger_store,
     )
-    from bioetl.composition.occurrence_identity import create_runtime_occurrence_id
 
     return RunLedgerService(
         ledger_port=create_run_ledger_store(

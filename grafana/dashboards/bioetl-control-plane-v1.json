@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Answers whether manifest, ledger, checkpoint, replay, and lineage state are trustworthy enough to allow replay/resume for the selected pipeline/run_type/time range. Primary question: Can we trust manifest/ledger/checkpoint/lineage state and safely replay/resume? GLOBAL read-path panels are not pipeline-scoped and must not use $pipeline or $run_type filtering. First screen shows Monitor Replay Readiness plus Review Selected-Run Trust and Review Retention Compliance. Review Lineage Validation is the first collapsed row.",
+  "description": "Answers whether manifest, ledger, checkpoint, replay, and lineage state are trustworthy enough to allow replay/resume for the selected pipeline/run_type/time range. Primary question: Can we trust manifest/ledger/checkpoint/lineage state and safely replay/resume? GLOBAL read-path panels are not pipeline-scoped and must not use $pipeline or $run_type filtering. First screen shows Monitor Current Readiness plus Review Selected-Run Trust and Review Retention Compliance. Review Lineage Validation is the first collapsed row.",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
@@ -364,7 +364,7 @@
         "x": 0,
         "y": 3
       },
-      "description": "CURRENT readiness is pipeline/run_type telemetry. SELECTED RUN Trust and retention tables are exact-run persisted evidence. An incomplete selected run cannot be replayed even when current readiness is OK.",
+      "description": "CURRENT readiness is pipeline/run_type telemetry. SELECTED RUN Trust and retention tables are exact-run persisted evidence. An incomplete selected run cannot be replayed even when current readiness is OK. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser.",
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Inspect Scope & Evidence",
@@ -412,7 +412,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Latest fresh pipeline/run_type telemetry. Run ID does not filter this panel. OK = current checks pass; WARN = degraded; CRIT = failed; UNKNOWN = missing or stale evidence. OK here does not authorize replay: selected-run Trust INCOMPLETE or UNKNOWN still blocks replay.",
+      "description": "CURRENT · Latest fresh pipeline/run_type telemetry. Run ID does not filter this panel. Palette: 0=OK, 1=WARN, 2=CRIT, null=UNKNOWN. This CURRENT verdict is not exact-run processing_status or trust_status. OK here does not authorize replay: selected-run trust_status INCOMPLETE or UNKNOWN still blocks replay.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -471,7 +471,7 @@
           },
           "unit": "none",
           "noValue": "UNKNOWN",
-          "displayName": "Current readiness"
+          "displayName": "Monitor Current Readiness"
         },
         "overrides": []
       },
@@ -525,7 +525,7 @@
         "y": 6
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Aggregate Trust includes manifest, lineage and retention evidence for this run. ERROR wins; missing evidence is INCOMPLETE. Processing success does not imply Trust OK. Inspect each validation table for details. No selected run is a valid empty state (UNKNOWN). Backend unavailable means QUERY ERROR.",
+      "description": "SELECTED RUN · Aggregate Trust includes manifest, lineage and retention evidence for this run. ERROR wins; missing evidence is INCOMPLETE. processing_status success does not imply trust_status OK. Inspect each validation table for details. No selected run is a valid empty state (UNKNOWN). Backend unavailable means QUERY ERROR.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -733,7 +733,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 110
+                "value": 80
               }
             ]
           },
@@ -745,7 +745,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 125
+                "value": 90
               }
             ]
           },
@@ -757,7 +757,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 180
+                "value": 130
               }
             ]
           },
