@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-15T08:36:47.909934+00:00",
+  "generated_at": "2026-09-15T12:13:21.027541+00:00",
   "summary": {
     "total_scripts": 617,
     "status_counts": {
@@ -9215,7 +9215,7 @@
         },
         {
           "path": "tests/architecture/test_strict_architecture_contracts.py",
-          "line": 885,
+          "line": 883,
           "source_group": "tests",
           "text": "\"cli.py\","
         }
@@ -14468,7 +14468,7 @@
         },
         {
           "path": "scripts/engineering/qa/report_dead_code_inventory.py",
-          "line": 801,
+          "line": 807,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.import_graph_inventory import ("
         },
@@ -19950,7 +19950,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 944,
+          "line": 1132,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._dashboard_state_followup import ("
         },
@@ -20329,7 +20329,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 939,
+          "line": 1127,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },
@@ -22570,13 +22570,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 17,
       "references": [
         {
           "path": "docs/03-guides/development/codex-paths.md",
           "line": 46,
           "source_group": "docs",
           "text": "| WSL proxy server | `scripts/ops/runtime/wsl/wsl_proxy.py` | Minimal proxy implementation used by the WSL launcher flow. |"
+        },
+        {
+          "path": "docs/03-guides/development/codex-wsl2-setup.md",
+          "line": 27,
+          "source_group": "docs",
+          "text": "| Python (Windows)   | 3.12+   | Proxy helper only (`wsl_proxy.py`); not the BioETL runtime baseline |"
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -22613,12 +22619,6 @@
           "line": 125,
           "source_group": "docs",
           "text": "python .\\scripts\\ops\\wsl_proxy.py"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md",
-          "line": 220,
-          "source_group": "docs",
-          "text": "| `wsl_proxy.py`                     | HTTP proxy bridge            | Windows (Python)   |"
         }
       ]
     },

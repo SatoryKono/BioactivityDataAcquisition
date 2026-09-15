@@ -1,5 +1,15 @@
 # Сводка evidence: project-package-topology
 
+Refresh note (2026-09-15): hash-only reconcile after architecture closeout
+rebind (logger port facade, publication recording rules, hotspot inventories).
+Counts and the source fingerprint below come from
+`reports/quality/module-coverage-inventory.json`. Historical notes remain
+historical.
+
+`source_tree_sha256=feccfb8f1143cc07b30abb555cec45a826aea78925550195a9a7987640bdb8cd`
+
+`source_module_count=2469`
+
 Refresh note (2026-09-15): hash-only reconcile after merge WIP inventory
 rebind. Counts and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
