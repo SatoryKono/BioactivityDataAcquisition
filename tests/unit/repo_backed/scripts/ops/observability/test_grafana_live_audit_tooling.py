@@ -106,6 +106,74 @@ def test_live_audit_reviewed_specs_cover_semantically_sensitive_panels() -> None
     assert ("bioetl-workflow-overview", 9403) not in covered
 
 
+@pytest.mark.parametrize("value", ["NaN", "+Inf", "-Inf"])
+@pytest.mark.parametrize("shape", ["scalar", "vector", "mixed_vector"])
+@pytest.mark.parametrize("required", [True, False])
+def test_nonfinite_prometheus_samples_require_review(
+    monkeypatch: Any, value: str, shape: str, required: bool,
+) -> None:
+    samples = [{"value": [1, value]}]
+    if shape == "mixed_vector":
+        samples.insert(0, {"value": [1, "7"]})
+    payload = {
+        "status": "success",
+        "data": {
+            "resultType": "scalar" if shape == "scalar" else "vector",
+            "result": [1, value] if shape == "scalar" else samples,
+        },
+    }
+    spec = audit_subject.PanelAuditSpec(
+        dashboard_uid="bioetl-control-plane-v1", panel_id=105,
+        title="Checkpoint latency", source_kind="prometheus",
+        semantic_kind="prometheus_query", target_ref_id="A", required=required,
+    )
+    monkeypatch.setattr(audit_subject, "_fetch_json", lambda *_args, **_kwargs: payload)
+    monkeypatch.setattr(audit_subject, "effective_panel_specs", lambda: (spec,))
+    result = audit_subject._audit_prometheus_panel(
+        spec, {"targets": [{"refId": "A", "expr": "checkpoint_latency"}]},
+        audit_subject._parse_args([]),
+    )
+    assert result.status == "ok"  # Successful query, unresolved numeric evidence.
+    assert result.classification == "nonfinite_result"
+    assert "non-finite" in result.detail
+    assert result.response == payload
+    gate = audit_subject.semantic_gate_evidence([result])
+    assert gate["status"] == "review_required"
+    assert gate["review_count"] == 1
+    assert gate["blocking_count"] == 0
+
+
+@pytest.mark.parametrize("annotation", ["infos", "warnings"])
+@pytest.mark.parametrize("shape", ["vector", "scalar"])
+@pytest.mark.parametrize("required", [True, False])
+def test_prometheus_annotations_prevent_unqualified_pass(
+    monkeypatch: Any, annotation: str, shape: str, required: bool,
+) -> None:
+    message = "input to histogram_quantile needed to be fixed for monotonicity"
+    payload = {
+        "status": "success", annotation: [message],
+        "data": {
+            "resultType": shape,
+            "result": [1, "0.0095"] if shape == "scalar" else [{"value": [1, "0.0095"]}],
+        },
+    }
+    spec = audit_subject.PanelAuditSpec(
+        dashboard_uid="bioetl-provider-health-v2", panel_id=102,
+        title="Health latency", source_kind="prometheus",
+        semantic_kind="prometheus_query", target_ref_id="A", required=required,
+    )
+    monkeypatch.setattr(audit_subject, "_fetch_json", lambda *_args, **_kwargs: payload)
+    monkeypatch.setattr(audit_subject, "effective_panel_specs", lambda: (spec,))
+    result = audit_subject._audit_prometheus_panel(
+        spec, {"targets": [{"refId": "A", "expr": "health_latency"}]},
+        audit_subject._parse_args([]),
+    )
+    assert result.classification == "annotated_result"
+    assert annotation in result.detail
+    assert result.response == payload
+    assert audit_subject.semantic_gate_evidence([result])["status"] == "review_required"
+
+
 def test_live_audit_classifies_prometheus_zero_and_nonzero_results() -> None:
     zero_payload = {
         "status": "success",

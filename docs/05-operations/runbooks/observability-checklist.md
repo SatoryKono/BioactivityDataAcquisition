@@ -368,6 +368,21 @@ acceptance for required and optional panels alike. This is distinct from valid
 empty evidence and from an invalid query. Keep admission and timeout limits
 unchanged; confirm the error reason before retrying individual panels.
 
+A successful Prometheus query can return `NaN`, `+Inf`, or `-Inf`, including
+histogram quantiles without observed increments or a ratio with a zero
+denominator. The live panel auditor preserves these responses as
+`nonfinite_result` and requires review, even when other samples are finite or the
+panel is optional. Check the underlying observations and denominator before
+deciding whether the result is expected; it is not a measured zero or a confirmed
+nonzero value.
+
+Prometheus `infos` or `warnings` can qualify a finite result, for example when
+`histogram_quantile` repairs non-monotonic buckets. The auditor classifies an
+otherwise numeric success as `annotated_result` and requires review; the complete
+annotation remains in the response evidence. Trace the buckets and their
+producer before accepting the quantile. A repaired finite result is not proof
+that the original histogram observations were valid.
+
 Expression parity compares PromQL tokens from tracked YAML and the live Rules
 API. Layout and comments outside strings are ignored; quoted label values retain
 their spaces and hash characters. This check does not prove algebraic equivalence

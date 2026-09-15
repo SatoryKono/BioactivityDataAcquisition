@@ -126,6 +126,8 @@ SEMANTIC_CLASSIFICATION_POLICY: dict[str, str] = {
     "empty_result": "review_required",
     "zero_result": "pass",
     "nonzero_result": "pass",
+    "nonfinite_result": "review_required",
+    "annotated_result": "review_required",
     "nonempty_result": "pass",
     "nonempty_table": "pass",
     "resolved_identity": "pass",
@@ -605,6 +607,11 @@ def _classify_prometheus_vector(result: object) -> tuple[str, str]:
                 "invalid_shape",
                 "Prometheus vector sample value is not numeric",
             )
+    if any(not math.isfinite(value) for value in values):
+        return (
+            "nonfinite_result",
+            "Prometheus vector contains non-finite values; review observations and denominator",
+        )
     if all(abs(value) <= 1e-12 for value in values):
         return ("zero_result", "Prometheus vector returned only zero values")
     return ("nonzero_result", "Prometheus vector returned non-zero values")
@@ -617,6 +624,11 @@ def _classify_prometheus_scalar(result: object) -> tuple[str, str]:
         value = float(result[1])
     except (TypeError, ValueError):
         return ("invalid_shape", "Prometheus scalar value is not numeric")
+    if not math.isfinite(value):
+        return (
+            "nonfinite_result",
+            "Prometheus scalar is non-finite; review observations and denominator",
+        )
     if abs(value) <= 1e-12:
         return ("zero_result", "Prometheus scalar returned zero")
     return ("nonzero_result", "Prometheus scalar returned non-zero value")
@@ -1042,10 +1054,18 @@ def _classify_prometheus_payload(payload: object) -> tuple[str, str]:
     result = data.get("result")
     result_type = data.get("resultType")
     if result_type == "vector":
-        return _classify_prometheus_vector(result)
-    if result_type == "scalar":
-        return _classify_prometheus_scalar(result)
-    return ("invalid_shape", f"Unsupported Prometheus resultType={result_type!r}")
+        classification, detail = _classify_prometheus_vector(result)
+    elif result_type == "scalar":
+        classification, detail = _classify_prometheus_scalar(result)
+    else:
+        return ("invalid_shape", f"Unsupported Prometheus resultType={result_type!r}")
+    annotations = [name for name in ("infos", "warnings") if payload.get(name)]
+    if annotations and classification in {"zero_result", "nonzero_result"}:
+        return (
+            "annotated_result",
+            f"{detail}; Prometheus {'/'.join(annotations)} require review; see full response",
+        )
+    return classification, detail
 
 
 def _classify_http_payload(payload: object) -> tuple[str, str]:
