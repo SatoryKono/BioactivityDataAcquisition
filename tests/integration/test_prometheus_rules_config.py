@@ -22,14 +22,17 @@ import yaml
 
 RULES_PATH = Path("grafana/prometheus-rules/bioetl_observability.yml")
 DASHBOARDS_DIR = Path("grafana/dashboards")
-CONTROL_PLANE_CURRENT_STATUS_RULES_PATH = Path("grafana/prometheus-rules/bioetl_control_plane_current_status.yml")
-PUBLICATION_FRESHNESS_RULES_PATH = Path("grafana/prometheus-rules/bioetl_publication_freshness.yml")
+CONTROL_PLANE_CURRENT_STATUS_RULES_PATH = Path(
+    "grafana/prometheus-rules/bioetl_control_plane_current_status.yml"
+)
+PUBLICATION_FRESHNESS_RULES_PATH = Path(
+    "grafana/prometheus-rules/bioetl_publication_freshness.yml"
+)
 SLO_ALERT_CONTRACT_PATH = Path("configs/quality/observability_slo_alert_contract.yaml")
 PROMETHEUS_CONFIG_PATH = Path("grafana/prometheus.yml")
 MONITORING_COMPOSE_PATH = Path("docker-compose.monitoring.yml")
 PUSHGATEWAY_RUNTIME_PATH = Path("src/bioetl/infrastructure/observability/server.py")
 pytestmark = pytest.mark.integration
-
 _PROMQL_METRIC_SELECTOR_RE = re.compile(r"([a-zA-Z_:][a-zA-Z0-9_:]*)\{([^{}]*)\}")
 _PROMQL_LABEL_MATCHER_RE = re.compile(r'([a-zA-Z_]\w*)\s*(=~|=|!=|!~)\s*"')
 _PROMQL_BIOETL_METRIC_TOKEN_RE = re.compile(r"\b(bioetl_[a-z0-9_]+)\b")
@@ -70,9 +73,8 @@ def _load_control_plane_current_status_rules() -> dict:
 
 def _extra_recording_rule_groups() -> list:
     extra = list(_load_control_plane_current_status_rules().get("groups", []))
-    extra.extend(
-        yaml.safe_load(PUBLICATION_FRESHNESS_RULES_PATH.read_text(encoding="utf-8")).get("groups", [])
-    )
+    text = PUBLICATION_FRESHNESS_RULES_PATH.read_text(encoding="utf-8")
+    extra.extend(yaml.safe_load(text).get("groups", []))
     return extra
 
 
@@ -1196,7 +1198,10 @@ def test_provider_current_status_preserves_provider_health_status_mapping() -> N
     assert "bioetl_provider_health_status_fresh == bool 2" in expr
     assert "* 0" in expr
     assert "max by (provider)" in expr
-    assert "max by (provider) (bioetl_provider_health_check_provider_universe_15m) * 0 + 3" in expr
+    assert (
+        "max by (provider) (bioetl_provider_health_check_provider_universe_15m) * 0 + 3"
+        in expr
+    )
     assert "max by (provider) (bioetl_provider_observed_universe) * 0 + 3" in expr
     assert "bioetl_provider_health_status == bool" not in expr
     assert "/" not in expr
@@ -1226,7 +1231,10 @@ def test_provider_current_status_fails_closed_on_missing_raw_status_series() -> 
     expr = record_map["bioetl_provider_current_status"].get("expr", "")
 
     assert "bioetl_provider_health_check_provider_universe_15m" in expr
-    assert "max by (provider) (bioetl_provider_health_check_provider_universe_15m) * 0 + 3" in expr
+    assert (
+        "max by (provider) (bioetl_provider_health_check_provider_universe_15m) * 0 + 3"
+        in expr
+    )
     assert "max by (provider) (bioetl_provider_observed_universe) * 0 + 3" in expr
     assert "max by (provider) (bioetl_provider_health_status) * 0 + 3" in expr
     assert "/" not in expr

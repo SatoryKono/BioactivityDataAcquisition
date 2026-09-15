@@ -15,19 +15,19 @@
   "summary": {
     "triaged_entry_count": 18,
     "triaged_entries_below_min_importers": 0,
-    "repo_wide_zero_import_candidate_count": 3,
-    "repo_wide_classified_zero_import_candidate_count": 3,
+    "repo_wide_zero_import_candidate_count": 4,
+    "repo_wide_classified_zero_import_candidate_count": 4,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
-    "repo_wide_owner_test_anchored_candidate_count": 3,
+    "repo_wide_owner_test_anchored_candidate_count": 4,
     "repo_wide_candidates_without_owner_tests_count": 0,
     "repo_wide_non_static_reachability_candidate_count": 2,
     "repo_wide_disposition_counts": {
-      "retain_canonical_owner_module": 1,
+      "retain_canonical_owner_module": 2,
       "retain_dynamic_entrypoint": 1,
       "retain_public_facade": 1
     },
     "repo_wide_evidence_lane_counts": {
-      "canonical_owner_contract": 1,
+      "canonical_owner_contract": 2,
       "compatibility_facade_contract": 1,
       "dynamic_runtime_entrypoint": 1
     },
@@ -362,6 +362,26 @@
       "evidence_lane": "dynamic_runtime_entrypoint",
       "owner_tests": [
         "tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py"
+      ],
+      "owner_test_count": 1,
+      "owner_test_paths_exist_count": 1
+    },
+    {
+      "module_name": "bioetl.composition.contracts.runtime",
+      "path": "src/bioetl/composition/contracts/runtime.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_canonical_owner_module",
+      "reviewed_on": "2026-09-15",
+      "review_by": "2026-12-14",
+      "linked_issue": "#4541",
+      "rationale": "ADR-058 runtime-builder Protocol contracts. First-party builders should import the canonical owner; static src importers remain zero until that wiring lands, so the module stays classified rather than untriaged.",
+      "owner": "@bioetl-architecture",
+      "evidence_lane": "canonical_owner_contract",
+      "owner_tests": [
+        "tests/architecture/test_tech_debt_issues_6032_6034_6037_closeout.py"
       ],
       "owner_test_count": 1,
       "owner_test_paths_exist_count": 1
