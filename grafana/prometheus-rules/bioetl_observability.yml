@@ -788,7 +788,15 @@ groups:
             )
           )
       - record: bioetl_provider_current_status
-        expr: ((max by (provider) (bioetl_provider_health_status == bool 0) * 2) + max by (provider) (bioetl_provider_health_status == bool 1) + (max by (provider) (bioetl_provider_health_status == bool 2) * 0)) or (bioetl_provider_observed_universe * 0 + 3) or (bioetl_provider_health_check_provider_universe_15m * 0 + 3)
+        # Only the newest valid observation can establish a current verdict.
+        # Retain one UNKNOWN per known provider when its evidence is not fresh.
+        expr: >-
+          ((bioetl_provider_health_status_fresh == bool 0) * 2
+            + (bioetl_provider_health_status_fresh == bool 1)
+            + (bioetl_provider_health_status_fresh == bool 2) * 0)
+          or (max by (provider) (bioetl_provider_health_status) * 0 + 3)
+          or (max by (provider) (bioetl_provider_observed_universe) * 0 + 3)
+          or (max by (provider) (bioetl_provider_health_check_provider_universe_15m) * 0 + 3)
       - record: bioetl_provider_current_status_info
         labels:
           reason: missing_health_status
@@ -796,7 +804,7 @@ groups:
           completeness: incomplete
           scrape_present: "1"
           health_status_present: "0"
-        expr: ((max by (provider) (bioetl_provider_observed_universe) * 0 + 3) or (bioetl_provider_health_check_provider_universe_15m * 0 + 3)) unless on (provider) bioetl_provider_health_status
+        expr: ((max by (provider) (bioetl_provider_observed_universe) * 0 + 3) or (max by (provider) (bioetl_provider_health_check_provider_universe_15m) * 0 + 3)) unless on (provider) bioetl_provider_health_status
       - record: bioetl_provider_current_status_info
         labels:
           reason: stale_health_status

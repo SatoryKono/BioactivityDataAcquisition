@@ -412,7 +412,7 @@ tests:
           - labels: '{__name__="bioetl_provider_current_status",provider="chembl"}'
             value: 3
 
-  - name: provider-current-status-projects-healthy-raw-status
+  - name: provider-current-status-projects-fresh-healthy-status
     interval: 1m
     input_series:
       - series: 'bioetl_provider_health_status{provider="chembl"}'
@@ -2393,3 +2393,149 @@ tests:
         exp_samples:
           - labels: 'bioetl_provider_current_status_info{provider="missing",reason="missing_health_status",source_state="missing",completeness="incomplete",scrape_present="1",health_status_present="0"}'
             value: 3
+
+  - name: provider-verdict-expires-observation-not-scrape
+    interval: 1m
+    input_series:
+    - series: bioetl_provider_health_status{provider="chembl",job="probe",instance="one"}
+      values: 2+0x25
+    - series: bioetl_provider_health_observed_timestamp_seconds{provider="chembl",job="probe",instance="one"}
+      values: 300+0x25
+    promql_expr_test:
+    - expr: bioetl_provider_current_status{provider="chembl"}
+      eval_time: 20m
+      exp_samples:
+      - labels: bioetl_provider_current_status{provider="chembl"}
+        value: 0
+    - expr: bioetl_provider_current_status{provider="chembl"}
+      eval_time: 21m
+      exp_samples:
+      - labels: bioetl_provider_current_status{provider="chembl"}
+        value: 3
+  - name: provider-verdict-missing-zero-future-and-stale-timestamps
+    interval: 1m
+    input_series:
+    - series: bioetl_provider_health_status{provider="missing_timestamp",job="probe",instance="one"}
+      values: 2+0x25
+    - series: bioetl_provider_health_status{provider="zero_timestamp",job="probe",instance="one"}
+      values: 2+0x25
+    - series: bioetl_provider_health_observed_timestamp_seconds{provider="zero_timestamp",job="probe",instance="one"}
+      values: 0+0x25
+    - series: bioetl_provider_health_status{provider="future_timestamp",job="probe",instance="one"}
+      values: 2+0x25
+    - series: bioetl_provider_health_observed_timestamp_seconds{provider="future_timestamp",job="probe",instance="one"}
+      values: 1801+0x25
+    - series: bioetl_provider_health_status{provider="stale_timestamp",job="probe",instance="one"}
+      values: 2+0x25
+    - series: bioetl_provider_health_observed_timestamp_seconds{provider="stale_timestamp",job="probe",instance="one"}
+      values: 1+0x25
+    promql_expr_test:
+    - expr: bioetl_provider_current_status{provider="missing_timestamp"}
+      eval_time: 20m
+      exp_samples:
+      - labels: bioetl_provider_current_status{provider="missing_timestamp"}
+        value: 3
+    - expr: bioetl_provider_current_status{provider="zero_timestamp"}
+      eval_time: 20m
+      exp_samples:
+      - labels: bioetl_provider_current_status{provider="zero_timestamp"}
+        value: 3
+    - expr: bioetl_provider_current_status{provider="future_timestamp"}
+      eval_time: 20m
+      exp_samples:
+      - labels: bioetl_provider_current_status{provider="future_timestamp"}
+        value: 3
+    - expr: bioetl_provider_current_status{provider="stale_timestamp"}
+      eval_time: 20m
+      exp_samples:
+      - labels: bioetl_provider_current_status{provider="stale_timestamp"}
+        value: 3
+  - name: provider-verdict-latest-observation-wins
+    interval: 1m
+    input_series:
+    - series: bioetl_provider_health_status{provider="latest_degraded",job="old",instance="one"}
+      values: 2+0x25
+    - series: bioetl_provider_health_observed_timestamp_seconds{provider="latest_degraded",job="old",instance="one"}
+      values: 400+0x25
+    - series: bioetl_provider_health_status{provider="latest_degraded",job="new",instance="one"}
+      values: 1+0x25
+    - series: bioetl_provider_health_observed_timestamp_seconds{provider="latest_degraded",job="new",instance="one"}
+      values: 1000+0x25
+    - series: bioetl_provider_health_status{provider="latest_healthy",job="old",instance="one"}
+      values: 0+0x25
+    - series: bioetl_provider_health_observed_timestamp_seconds{provider="latest_healthy",job="old",instance="one"}
+      values: 400+0x25
+    - series: bioetl_provider_health_status{provider="latest_healthy",job="new",instance="one"}
+      values: 2+0x25
+    - series: bioetl_provider_health_observed_timestamp_seconds{provider="latest_healthy",job="new",instance="one"}
+      values: 1000+0x25
+    - series: bioetl_provider_health_status{provider="tie_worst",job="a",instance="one"}
+      values: 2+0x25
+    - series: bioetl_provider_health_observed_timestamp_seconds{provider="tie_worst",job="a",instance="one"}
+      values: 1000+0x25
+    - series: bioetl_provider_health_status{provider="tie_worst",job="b",instance="one"}
+      values: 0+0x25
+    - series: bioetl_provider_health_observed_timestamp_seconds{provider="tie_worst",job="b",instance="one"}
+      values: 1000+0x25
+    promql_expr_test:
+    - expr: bioetl_provider_current_status{provider="latest_degraded"}
+      eval_time: 20m
+      exp_samples:
+      - labels: bioetl_provider_current_status{provider="latest_degraded"}
+        value: 1
+    - expr: bioetl_provider_current_status{provider="latest_healthy"}
+      eval_time: 20m
+      exp_samples:
+      - labels: bioetl_provider_current_status{provider="latest_healthy"}
+        value: 0
+    - expr: bioetl_provider_current_status{provider="tie_worst"}
+      eval_time: 20m
+      exp_samples:
+      - labels: bioetl_provider_current_status{provider="tie_worst"}
+        value: 2
+  - name: provider-verdict-single-provider-fallback-with-exporter-labels
+    interval: 1m
+    input_series:
+    - series: bioetl_provider_observed_universe{provider="missing",job="a",instance="one"}
+      values: 1+0x25
+    - series: bioetl_provider_observed_universe{provider="missing",job="b",instance="one"}
+      values: 1+0x25
+    - series: bioetl_provider_health_check_provider_universe_15m{provider="missing",job="c",instance="one"}
+      values: 1+0x25
+    promql_expr_test:
+    - expr: bioetl_provider_current_status{provider="missing"}
+      eval_time: 20m
+      exp_samples:
+      - labels: bioetl_provider_current_status{provider="missing"}
+        value: 3
+  - name: provider-verdict-known-raw-status-without-universe
+    interval: 1m
+    input_series:
+    - series: bioetl_provider_health_status{provider="raw_only",job="probe",instance="one"}
+      values: 0+0x25
+    promql_expr_test:
+    - expr: bioetl_provider_current_status{provider="raw_only"}
+      eval_time: 20m
+      exp_samples:
+      - labels: bioetl_provider_current_status{provider="raw_only"}
+        value: 3
+  - name: provider-verdict-missing-timestamp-is-not-fresh-from-another-exporter
+    interval: 1m
+    input_series:
+    - series: bioetl_provider_health_status{provider="mismatched",job="a",instance="one"}
+      values: 2+0x25
+    - series: bioetl_provider_health_observed_timestamp_seconds{provider="mismatched",job="b",instance="one"}
+      values: 1000+0x25
+    promql_expr_test:
+    - expr: bioetl_provider_current_status{provider="mismatched"}
+      eval_time: 20m
+      exp_samples:
+      - labels: bioetl_provider_current_status{provider="mismatched"}
+        value: 3
+  - name: provider-verdict-no-evidence-stays-absent
+    interval: 1m
+    input_series: []
+    promql_expr_test:
+    - expr: bioetl_provider_current_status
+      eval_time: 20m
+      exp_samples: []
