@@ -5,11 +5,11 @@
 
 ## Summary
 
-- Scanned modules: `2472`
-- Internal import edges (raw): `7745`
+- Scanned modules: `2473`
+- Internal import edges (raw): `7744`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
-- Cross-layer module-group edges (total): `334`
+- Cross-layer module-group edges (total): `330`
 - Cross-layer module-group edges (top 55): `55`
 
 ## Layer Dependency Graph
@@ -23,17 +23,17 @@ flowchart LR
     interfaces[interfaces]
     application -->|1558 OK| application
     application -->|989 OK| domain
-    composition -->|196 OK| application
-    composition -->|679 OK| composition
-    composition -->|286 OK| domain
-    composition -->|249 OK| infrastructure
+    composition -->|194 OK| application
+    composition -->|680 OK| composition
+    composition -->|285 OK| domain
+    composition -->|250 OK| infrastructure
     domain -->|1242 OK| domain
-    infrastructure -->|763 OK| domain
+    infrastructure -->|764 OK| domain
     infrastructure -->|1202 OK| infrastructure
     interfaces -->|54 OK| application
     interfaces -->|54 OK| composition
     interfaces -->|71 OK| domain
-    interfaces -->|402 OK| interfaces
+    interfaces -->|401 OK| interfaces
 ```
 
 ## Layer Edge Table
@@ -42,17 +42,17 @@ flowchart LR
 | ---------------- | ---------------- | ------: | ------- |
 | `application`    | `application`    |    1558 | allowed |
 | `application`    | `domain`         |     989 | allowed |
-| `composition`    | `application`    |     196 | allowed |
-| `composition`    | `composition`    |     679 | allowed |
-| `composition`    | `domain`         |     286 | allowed |
-| `composition`    | `infrastructure` |     249 | allowed |
+| `composition`    | `application`    |     194 | allowed |
+| `composition`    | `composition`    |     680 | allowed |
+| `composition`    | `domain`         |     285 | allowed |
+| `composition`    | `infrastructure` |     250 | allowed |
 | `domain`         | `domain`         |    1242 | allowed |
-| `infrastructure` | `domain`         |     763 | allowed |
+| `infrastructure` | `domain`         |     764 | allowed |
 | `infrastructure` | `infrastructure` |    1202 | allowed |
 | `interfaces`     | `application`    |      54 | allowed |
 | `interfaces`     | `composition`    |      54 | allowed |
 | `interfaces`     | `domain`         |      71 | allowed |
-| `interfaces`     | `interfaces`     |     402 | allowed |
+| `interfaces`     | `interfaces`     |     401 | allowed |
 
 ## Cross-Layer Module-Group Edges (Compact)
 
@@ -81,8 +81,8 @@ flowchart LR
 | `composition.runtime_builders` | `domain.control_plane`                     |      28 |
 | `composition.factories`        | `infrastructure.adapters`                  |      27 |
 | `composition.factories`        | `infrastructure.config`                    |      26 |
+| `infrastructure.control_plane` | `domain.control_plane`                     |      26 |
 | `infrastructure.config`        | `domain.types`                             |      25 |
-| `infrastructure.control_plane` | `domain.control_plane`                     |      25 |
 | `application.services`         | `domain.value_objects`                     |      24 |
 | `infrastructure.adapters`      | `domain.ports`                             |      23 |
 | `application.pipelines`        | `domain.entities`                          |      22 |
@@ -101,8 +101,8 @@ flowchart LR
 | `application.services`         | `domain.lineage`                           |      17 |
 | `composition.bootstrap`        | `infrastructure.config`                    |      17 |
 | `infrastructure.schemas`       | `domain.config`                            |      17 |
+| `composition.bootstrap`        | `infrastructure.control_plane`             |      16 |
 | `composition.factories`        | `application.ports`                        |      16 |
-| `composition.bootstrap`        | `infrastructure.control_plane`             |      15 |
 | `composition.bootstrap`        | `infrastructure.observability`             |      15 |
 | `composition.factories`        | `infrastructure.storage`                   |      15 |
 | `infrastructure.control_plane` | `domain.types`                             |      15 |
