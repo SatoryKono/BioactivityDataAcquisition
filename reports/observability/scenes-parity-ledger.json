@@ -20,10 +20,10 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "e51a4a612d5dcd0337b272fd12087dfacfb8e8e3370cba69cf39d62a5d02763e",
+    "bioetl-control-plane-v1": "ede74e8a3c6d5596ef0093c3981ad91c7a6f5e5a164d83f0d26fec8e122f09af",
     "bioetl-dq-v2": "2b1596a27a0d66a08f245e639e5ed4df74a6ffa0c4505da83fdc99c8348a13a0",
     "bioetl-incident-v1": "7ae4a424352b594aabb3b6b9e5fb121746f507012c89d4ea8d61c3e7a45dbd76",
-    "bioetl-overview-v2": "7d04c923a7e54ec67db64344bbf129eabb19a94d6871c1c2887b401f33ee6e15",
+    "bioetl-overview-v2": "909776b7e056fdef55cc4dde2a4d9e677aec8d5ae2e17fbc3027961bc685de6d",
     "bioetl-provider-health-v2": "928b6fb15c09f3cf1844015895f5a3f5e4f32baa24fb2c03c78df6fdc88a74e1",
     "bioetl-run-explorer-v1": "7bcff4013e2a78cd631fcf3f5953d7cfc46c33046d5b72926395606e1c281129",
     "bioetl-runtime": "3147e0a3bd6c40e7e81ff40019744cba47f13b6193b3bee3311fcc9994512b9f"
@@ -392,14 +392,14 @@
       "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
-      "panel_id": 5,
-      "panel_title": "Compare Checkpoint Outcomes",
+      "panel_id": 134,
+      "panel_title": "Track Replay Drift by Type",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "sum by (disposition) (increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\"}[$__interval])) or label_replace(vector(0), \"disposition\", \"no_events\", \"\", \"\")"
+          "sum by (replay_capability, drift_type, status) (increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))"
         ],
         "target_count": 1
       }
@@ -411,14 +411,14 @@
       "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
-      "panel_id": 134,
-      "panel_title": "Track Replay Drift by Type",
+      "panel_id": 5,
+      "panel_title": "Compare Checkpoint Outcomes",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "sum by (replay_capability, drift_type, status) (increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))"
+          "sum by (disposition) (increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\"}[$__interval])) or label_replace(vector(0), \"disposition\", \"no_events\", \"\", \"\")"
         ],
         "target_count": 1
       }
@@ -985,14 +985,14 @@
       "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
-      "panel_id": 9406,
-      "panel_title": "Compare Checkpoint Anchors",
+      "panel_id": 9408,
+      "panel_title": "Review Required Replay Anchors",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/control-plane/identity-evidence?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&view=checkpoint_compare"
+          "/ops/control-plane/identity-evidence?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&view=anchors&priority=P1"
         ],
         "target_count": 1
       }
@@ -1004,14 +1004,14 @@
       "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
-      "panel_id": 9408,
-      "panel_title": "Review Required Replay Anchors",
+      "panel_id": 9406,
+      "panel_title": "Compare Checkpoint Anchors",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/control-plane/identity-evidence?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&view=anchors&priority=P1"
+          "/ops/control-plane/identity-evidence?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&view=checkpoint_compare"
         ],
         "target_count": 1
       }

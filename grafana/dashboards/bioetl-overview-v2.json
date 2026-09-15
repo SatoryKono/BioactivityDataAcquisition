@@ -1771,7 +1771,7 @@
           "type": "table",
           "title": "Review Active Alerts",
           "gridPos": {
-            "h": 6,
+            "h": 4,
             "w": 24,
             "x": 0,
             "y": 18
@@ -2035,8 +2035,8 @@
           "type": "table",
           "title": "Review All Domain Status",
           "gridPos": {
-            "h": 6,
-            "w": 24,
+            "h": 7,
+            "w": 12,
             "x": 0,
             "y": 19
           },
@@ -2261,10 +2261,10 @@
           "type": "state-timeline",
           "title": "Track Runtime Blockers",
           "gridPos": {
-            "h": 6,
-            "w": 24,
-            "x": 0,
-            "y": 25
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 19
           },
           "datasource": {
             "type": "prometheus",
@@ -2372,7 +2372,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 31
+            "y": 26
           },
           "datasource": {
             "type": "prometheus",
@@ -2480,7 +2480,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 37
+            "y": 32
           },
           "datasource": {
             "type": "prometheus",
@@ -2608,8 +2608,8 @@
           "gridPos": {
             "x": 0,
             "y": 20,
-            "w": 8,
-            "h": 6
+            "w": 12,
+            "h": 4
           },
           "datasource": {
             "type": "prometheus",
@@ -2734,10 +2734,10 @@
           "type": "table",
           "title": "Review Recent Non-success Terminal Runs",
           "gridPos": {
-            "x": 8,
+            "x": 12,
             "y": 20,
-            "w": 8,
-            "h": 6
+            "w": 12,
+            "h": 4
           },
           "datasource": {
             "type": "prometheus",
@@ -2869,9 +2869,9 @@
           "type": "stat",
           "title": "Track Silver Rejects",
           "gridPos": {
-            "x": 16,
-            "y": 20,
-            "w": 8,
+            "x": 0,
+            "y": 24,
+            "w": 24,
             "h": 3
           },
           "datasource": {
@@ -3004,8 +3004,8 @@
           "type": "table",
           "title": "Review Control Plane Status",
           "gridPos": {
-            "h": 5,
-            "w": 24,
+            "h": 4,
+            "w": 12,
             "x": 0,
             "y": 21
           },
@@ -3187,10 +3187,10 @@
           "type": "table",
           "title": "Review Runtime Status",
           "gridPos": {
-            "h": 5,
-            "w": 24,
-            "x": 0,
-            "y": 26
+            "h": 4,
+            "w": 12,
+            "x": 12,
+            "y": 21
           },
           "datasource": {
             "type": "prometheus",
@@ -3370,10 +3370,10 @@
           "type": "table",
           "title": "Review Data Quality Status",
           "gridPos": {
-            "h": 5,
-            "w": 24,
+            "h": 4,
+            "w": 12,
             "x": 0,
-            "y": 31
+            "y": 25
           },
           "datasource": {
             "type": "prometheus",
@@ -3553,10 +3553,10 @@
           "type": "table",
           "title": "Review Global Provider Status",
           "gridPos": {
-            "h": 5,
-            "w": 24,
-            "x": 0,
-            "y": 36
+            "h": 4,
+            "w": 12,
+            "x": 12,
+            "y": 25
           },
           "datasource": {
             "type": "prometheus",
@@ -3736,10 +3736,10 @@
           "type": "table",
           "title": "Review Data Validation Status",
           "gridPos": {
-            "h": 5,
-            "w": 24,
+            "h": 4,
+            "w": 12,
             "x": 0,
-            "y": 41
+            "y": 29
           },
           "datasource": {
             "type": "prometheus",
@@ -3919,10 +3919,10 @@
           "type": "table",
           "title": "Review Workflow Status",
           "gridPos": {
-            "h": 5,
-            "w": 24,
-            "x": 0,
-            "y": 46
+            "h": 4,
+            "w": 12,
+            "x": 12,
+            "y": 29
           },
           "datasource": {
             "type": "prometheus",
@@ -4122,7 +4122,7 @@
             "h": 3,
             "w": 24,
             "x": 0,
-            "y": 51
+            "y": 33
           },
           "options": {
             "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:16px;white-space:normal\"><strong>Next dashboard:</strong> <a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Trust</a> for evidence · <a href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">Pipeline Diagnostics</a> for runtime blockers · <a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">Data Quality</a> for DQ reasons · <a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${provider:queryparam}&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">Provider Health</a> for provider causes. <a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Back to top</a>.</div>",
@@ -4679,7 +4679,7 @@
             "x": 0,
             "y": 23,
             "w": 24,
-            "h": 12
+            "h": 6
           },
           "datasource": {
             "type": "datasource",
