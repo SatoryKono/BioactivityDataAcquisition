@@ -207,12 +207,6 @@ ZERO_IMPORT_OWNER_TEST_EVIDENCE: dict[str, dict[str, object]] = {
         "evidence_lane": "dynamic_runtime_entrypoint",
         "owner_tests": (OWNER_TEST_CONTROL_PLANE_DIAGNOSTICS,),
     },
-    "src/bioetl/composition/contracts/runtime.py": {
-        "evidence_lane": "canonical_owner_contract",
-        "owner_tests": (
-            "tests/architecture/test_tech_debt_issues_6032_6034_6037_closeout.py",
-        ),
-    },
     "src/bioetl/interfaces/cli/commands/maintenance.py": {
         "evidence_lane": "compatibility_facade_contract",
         "owner_tests": (
