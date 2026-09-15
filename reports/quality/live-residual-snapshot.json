@@ -3,7 +3,7 @@
   "linked_issue": "#6891",
   "follow_up_issue": "#7464",
   "parent_epic": "#6890",
-  "snapshot_date": "2026-09-14",
+  "snapshot_date": "2026-09-15",
   "generated_by": "scripts.engineering.qa.report_live_residual_snapshot",
   "policy": {
     "direction": "shrink_only",
@@ -16,7 +16,7 @@
       "max_internal_fan_in": 5,
       "helper_function_ratio": 0.374,
       "files": 194,
-      "total_loc": 23467,
+      "total_loc": 23445,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 7
     },
@@ -25,7 +25,7 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.33,
       "files": 51,
-      "total_loc": 6175,
+      "total_loc": 6191,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
@@ -34,8 +34,8 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.358,
       "files": 35,
-      "total_loc": 3945,
-      "budget_files_ge_250_loc": 2,
+      "total_loc": 3935,
+      "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
     "application_services_control_plane": {
@@ -52,7 +52,7 @@
       "max_internal_fan_in": 3,
       "helper_function_ratio": 0.375,
       "files": 57,
-      "total_loc": 7234,
+      "total_loc": 7220,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     }

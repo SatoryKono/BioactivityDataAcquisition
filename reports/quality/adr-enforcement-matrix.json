@@ -2115,7 +2115,6 @@
       "decision_date": "2026-08-25",
       "decision_path": "docs/02-architecture/decisions/ADR-058-layered-port-registries.md",
       "enforcement_owner_paths": [
-        "configs/quality/retirement_candidate_triage.yaml",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_arch_s4_s9_gates.py",
         "tests/architecture/test_documentation_audit_remediation.py",
@@ -2124,7 +2123,6 @@
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
-        "configs/quality/retirement_candidate_triage.yaml",
         "docs/00-project/RULES.md",
         "src/bioetl/application/README.md",
         "src/bioetl/application/ports/__init__.py",
@@ -2137,7 +2135,6 @@
         "src/bioetl/application/ports/storage.py",
         "src/bioetl/composition/contracts/factories.py",
         "src/bioetl/composition/contracts/providers.py",
-        "src/bioetl/composition/contracts/runtime.py",
         "src/bioetl/composition/entrypoints.py",
         "src/bioetl/domain/workflow/foreign_key_reconciliation.py",
         "tests/architecture/test_adr_registry_governance_sync.py",

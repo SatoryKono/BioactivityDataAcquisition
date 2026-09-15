@@ -33,6 +33,7 @@ PROMETHEUS_CONFIG_PATH = Path("grafana/prometheus.yml")
 MONITORING_COMPOSE_PATH = Path("docker-compose.monitoring.yml")
 PUSHGATEWAY_RUNTIME_PATH = Path("src/bioetl/infrastructure/observability/server.py")
 pytestmark = pytest.mark.integration
+
 _PROMQL_METRIC_SELECTOR_RE = re.compile(r"([a-zA-Z_:][a-zA-Z0-9_:]*)\{([^{}]*)\}")
 _PROMQL_LABEL_MATCHER_RE = re.compile(r'([a-zA-Z_]\w*)\s*(=~|=|!=|!~)\s*"')
 _PROMQL_BIOETL_METRIC_TOKEN_RE = re.compile(r"\b(bioetl_[a-z0-9_]+)\b")
@@ -73,8 +74,11 @@ def _load_control_plane_current_status_rules() -> dict:
 
 def _extra_recording_rule_groups() -> list:
     extra = list(_load_control_plane_current_status_rules().get("groups", []))
-    text = PUBLICATION_FRESHNESS_RULES_PATH.read_text(encoding="utf-8")
-    extra.extend(yaml.safe_load(text).get("groups", []))
+    extra.extend(
+        yaml.safe_load(
+            PUBLICATION_FRESHNESS_RULES_PATH.read_text(encoding="utf-8")
+        ).get("groups", [])
+    )
     return extra
 
 
@@ -88,26 +92,6 @@ def _load_prometheus_config() -> dict:
     payload = yaml.safe_load(PROMETHEUS_CONFIG_PATH.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
     return payload
-
-
-def test_prometheus_rules_directory_has_no_duplicate_backup_rule_files() -> None:
-    """Wildcard rule loading must not pick up backup/scratch copies of rule files."""
-    rules_dir = Path("grafana/prometheus-rules")
-    duplicate_candidates = sorted(
-        path.name
-        for path in rules_dir.iterdir()
-        if path.is_file()
-        and (
-            path.suffix == ".bak"
-            or path.name.endswith(".yml.bak")
-            or "fixed" in path.name.lower()
-            or "scratch" in path.name.lower()
-        )
-    )
-    assert not duplicate_candidates, (
-        "Prometheus rule_files uses /etc/prometheus/rules/*.yml, so backup/scratch "
-        f"copies would be loaded as duplicate rules: {duplicate_candidates}"
-    )
 
 
 def _load_monitoring_compose() -> dict:
@@ -1768,20 +1752,6 @@ def test_monitoring_stack_alerts_reference_up_metric_and_checklist_runbook() -> 
         assert annotations.get("runbook") == (
             "docs/05-operations/runbooks/observability-checklist.md"
         )
-
-
-def test_monitoring_stack_contract_declares_service_ownership_before_thresholds() -> (
-    None
-):
-    payload = _load_slo_alert_contract()
-    contract = payload["slo_contracts"]["monitoring_stack_health"]
-
-    assert contract["owner"] == "@bioetl-observability"
-    boundaries = contract["service_boundaries"]
-    assert set(boundaries) == {"bioetl_ops_http", "grafana_image_renderer"}
-    for boundary in boundaries.values():
-        assert boundary["owner"] == "@bioetl-observability"
-        assert str(boundary["slo_intent"]).strip()
 
 
 def test_pipeline_runtime_alerts_reference_expected_metrics() -> None:

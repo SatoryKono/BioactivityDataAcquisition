@@ -412,7 +412,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Latest fresh pipeline/run_type telemetry. Run ID does not filter this panel. Palette: 0=OK, 1=WARN, 2=CRIT, 3=INCOMPLETE, null=UNKNOWN. This CURRENT verdict is not exact-run processing_status or trust_status. OK here does not authorize replay: selected-run trust_status INCOMPLETE or UNKNOWN still blocks replay.",
+      "description": "CURRENT · Latest fresh pipeline/run_type telemetry. Run ID does not filter this panel. Palette: 0=OK, 1=WARN, 2=CRIT, 3=INCOMPLETE, null=UNKNOWN (missing). This CURRENT verdict is not exact-run processing_status or trust_status. OK here does not authorize replay: selected-run trust_status INCOMPLETE or UNKNOWN still blocks replay. UNKNOWN is evidence incomplete.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3851,7 +3851,7 @@
           "gridPos": {
             "x": 0,
             "y": 21,
-            "w": 12,
+            "w": 6,
             "h": 3
           },
           "id": 4,
@@ -3941,9 +3941,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 12,
+            "x": 6,
             "y": 21,
-            "w": 12,
+            "w": 6,
             "h": 3
           },
           "id": 136,

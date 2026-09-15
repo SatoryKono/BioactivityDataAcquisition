@@ -533,12 +533,16 @@ def test_retention_uses_current_archive_verdict(verified, reason, expected) -> N
 
     manifest = _manifest()
     plan = ControlPlaneArtifactLifecyclePlan(
-        generated_at=_NOW, cutoff=_NOW, dry_run=True, artifacts=(),
+        generated_at=_NOW,
+        cutoff=_NOW,
+        dry_run=True,
+        artifacts=(),
     )
     verifier = Mock()
     verifier.verify.return_value = (verified, reason)
     service = ControlPlaneEvidenceService(
-        lifecycle_planner=_LifecyclePlanner(plan), archive_verifier=verifier,
+        lifecycle_planner=_LifecyclePlanner(plan),
+        archive_verifier=verifier,
     )
     payload = service.retention_compliance(scope=_scope(manifest), now=_NOW)
     archive = next(row for row in _payload_rows(payload) if row["check"] == "archive")
@@ -550,15 +554,21 @@ def test_retention_uses_current_archive_verdict(verified, reason, expected) -> N
 def test_not_required_archive_does_not_claim_verified_copies() -> None:
     from unittest.mock import Mock
 
-    manifest = _manifest(launch_context={
-        "archive_policy": {"required": False, "policy_ref": "archive-policy-v1"},
-    })
+    manifest = _manifest(
+        launch_context={
+            "archive_policy": {"required": False, "policy_ref": "archive-policy-v1"},
+        }
+    )
     plan = ControlPlaneArtifactLifecyclePlan(
-        generated_at=_NOW, cutoff=_NOW, dry_run=True, artifacts=(),
+        generated_at=_NOW,
+        cutoff=_NOW,
+        dry_run=True,
+        artifacts=(),
     )
     verifier = Mock()
     service = ControlPlaneEvidenceService(
-        lifecycle_planner=_LifecyclePlanner(plan), archive_verifier=verifier,
+        lifecycle_planner=_LifecyclePlanner(plan),
+        archive_verifier=verifier,
     )
     payload = service.retention_compliance(scope=_scope(manifest), now=_NOW)
     assert "archive_not_applicable" in _reasons(payload)

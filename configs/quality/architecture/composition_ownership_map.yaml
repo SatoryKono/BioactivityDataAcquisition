@@ -52,6 +52,8 @@ packages:
   responsibility: wiring/DI only
 - package: observability.py
   responsibility: wiring/DI only
+- package: observability_backend.py
+  responsibility: detached Ops HTTP backend wiring only
 - package: observability_runtime.py
   responsibility: wiring/DI only
 - package: observability_resolution.py

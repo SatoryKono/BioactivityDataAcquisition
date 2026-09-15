@@ -17,6 +17,39 @@ from bioetl.domain.control_plane import (
 _SCHEMA = "bioetl_local_archive_v1"
 
 
+def _index_error(payload: object, manifest: RunManifest) -> str | None:
+    if not isinstance(payload, dict) or payload.get("schema") != _SCHEMA:
+        return "archive_index_invalid"
+    if (
+        payload.get("manifest_id") != manifest.manifest_id
+        or payload.get("run_id") != str(manifest.run_id)
+        or payload.get("manifest_sha256") != _manifest_digest(manifest)
+    ):
+        return "archive_identity_mismatch"
+    return None
+
+
+def _entry_error(
+    entry: object,
+    *,
+    sources: dict[str, Path],
+    seen: set[str],
+    pack: Path,
+) -> str | None:
+    if not isinstance(entry, dict):
+        return "archive_index_invalid"
+    relative, digest = entry.get("path"), entry.get("sha256")
+    if not isinstance(relative, str) or relative not in sources or relative in seen:
+        return "archive_inventory_mismatch"
+    seen.add(relative)
+    for area in ("files", "restored"):
+        if _digest(_contained_file(pack / area, relative)) != digest:
+            return "archive_checksum_mismatch"
+    if _digest(sources[relative]) != digest:
+        return "archive_source_mismatch"
+    return None
+
+
 def _digest(path: Path) -> str:
     with path.open("rb") as stream:
         return hashlib.file_digest(stream, "sha256").hexdigest()
@@ -130,35 +163,18 @@ class FileArchiveStore:
                 self.archive_root.resolve(), f"{pack.name}/index.json"
             )
             payload = json.loads(index_path.read_text(encoding="utf-8"))
-            if not isinstance(payload, dict) or payload.get("schema") != _SCHEMA:
-                return False, "archive_index_invalid"
-            if (
-                payload.get("manifest_id") != manifest.manifest_id
-                or payload.get("run_id") != str(manifest.run_id)
-                or payload.get("manifest_sha256") != _manifest_digest(manifest)
-            ):
-                return False, "archive_identity_mismatch"
-            entries = payload.get("files")
+            identity_error = _index_error(payload, manifest)
+            if identity_error is not None:
+                return False, identity_error
+            entries = payload.get("files") if isinstance(payload, dict) else None
             if not isinstance(entries, list) or not entries:
                 return False, "archive_index_invalid"
             sources = self._sources(plan, manifest)
             seen: set[str] = set()
             for entry in entries:
-                if not isinstance(entry, dict):
-                    return False, "archive_index_invalid"
-                relative, digest = entry.get("path"), entry.get("sha256")
-                if (
-                    not isinstance(relative, str)
-                    or relative not in sources
-                    or relative in seen
-                ):
-                    return False, "archive_inventory_mismatch"
-                seen.add(relative)
-                for area in ("files", "restored"):
-                    if _digest(_contained_file(pack / area, relative)) != digest:
-                        return False, "archive_checksum_mismatch"
-                if _digest(sources[relative]) != digest:
-                    return False, "archive_source_mismatch"
+                entry_error = _entry_error(entry, sources=sources, seen=seen, pack=pack)
+                if entry_error is not None:
+                    return False, entry_error
             if seen != set(sources):
                 return False, "archive_inventory_mismatch"
         except (OSError, ValueError, TypeError, KeyError):

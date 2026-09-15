@@ -1,15 +1,9 @@
-"""Support helpers for constructing run manifest payloads."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.composition.runtime_builders._run_manifest_refs import (
-    ManifestControlPlaneRefs,
-    build_planned_artifacts,
-    build_run_source_refs,
-    control_plane_root,
-    create_control_plane_refs,
+from bioetl.composition.runtime_builders._run_context_values import (
+    resolve_run_context_values,
 )
 from bioetl.composition.runtime_builders._run_manifest_context_updates import (
     apply_manifest_updates_to_mutable_context,
@@ -18,8 +12,15 @@ from bioetl.composition.runtime_builders._run_manifest_context_updates import (
     iter_optional_control_plane_updates,
     iter_optional_control_plane_updates_from_mapping,
 )
-from bioetl.composition.runtime_builders._run_context_values import (
-    resolve_run_context_values,
+from bioetl.composition.runtime_builders._run_manifest_refs import (
+    ManifestControlPlaneRefs,
+    build_planned_artifacts,
+    build_run_source_refs,
+    control_plane_root,
+    create_control_plane_refs,
+)
+from bioetl.composition.runtime_builders._run_manifest_replay_support import (
+    resolve_replay_parentage,
 )
 from bioetl.composition.runtime_builders._run_manifest_sink_policy import (
     validate_reproducible_sink_modes,
@@ -29,8 +30,8 @@ from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
     resolve_provider_entity,
     to_serializable_mapping,
 )
-from bioetl.composition.runtime_builders._run_manifest_replay_support import (
-    resolve_replay_parentage,
+from bioetl.composition.runtime_builders.input_snapshot_resolution import (
+    resolve_pipeline_input_snapshot_refs,
 )
 from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
     RunManifestContractIdentity,
@@ -38,7 +39,7 @@ from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
 )
 from bioetl.domain.control_plane import ReplayCapability, RunSourceRef
 from bioetl.domain.control_plane.reproducibility_policy import (
-    resolve_replay_capability as _resolve_policy_replay_capability,
+    resolve_replay_capability as _resolve_replay,
 )
 
 __all__ = [
@@ -57,6 +58,7 @@ __all__ = [
     "iter_optional_control_plane_updates",
     "iter_optional_control_plane_updates_from_mapping",
     "resolve_contract_identity",
+    "resolve_pipeline_input_snapshot_refs",
     "resolve_provider_entity",
     "resolve_replay_capability",
     "resolve_replay_parentage",
@@ -102,7 +104,4 @@ def resolve_replay_capability(
     source_refs: tuple[RunSourceRef, ...],
     resume_requested: bool,
 ) -> ReplayCapability:
-    return _resolve_policy_replay_capability(
-        source_refs=source_refs,
-        resume_requested=resume_requested,
-    )
+    return _resolve_replay(source_refs=source_refs, resume_requested=resume_requested)

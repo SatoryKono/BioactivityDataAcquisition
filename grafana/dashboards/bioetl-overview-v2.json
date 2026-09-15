@@ -848,6 +848,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
+      "description": "CURRENT · Scope health for the selected pipeline. Palette includes UNKNOWN when evidence is missing. UNKNOWN means evidence incomplete, not healthy.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -970,8 +971,7 @@
         }
       ],
       "title": "Monitor Scope Health",
-      "type": "stat",
-      "description": "CURRENT · Sole current Fleet Health verdict for pipeline x run_type. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. UNKNOWN means evidence is incomplete or missing. This is not the selected UUID; use Review Selected Run Summary above for that run."
+      "type": "stat"
     },
     {
       "id": 215,
@@ -2871,7 +2871,7 @@
           "gridPos": {
             "x": 0,
             "y": 24,
-            "w": 24,
+            "w": 8,
             "h": 3
           },
           "datasource": {

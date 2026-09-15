@@ -22,9 +22,24 @@ from tests.integration.test_prometheus_rules_config import (
     _classify_quarantine_rate,
     _classify_retry_exhaustions,
     _load_rules,
+    _load_slo_alert_contract,
 )
 
 pytestmark = pytest.mark.integration
+
+
+def test_monitoring_stack_contract_declares_service_ownership_before_thresholds() -> (
+    None
+):
+    payload = _load_slo_alert_contract()
+    contract = payload["slo_contracts"]["monitoring_stack_health"]
+
+    assert contract["owner"] == "@bioetl-observability"
+    boundaries = contract["service_boundaries"]
+    assert set(boundaries) == {"bioetl_ops_http", "grafana_image_renderer"}
+    for boundary in boundaries.values():
+        assert boundary["owner"] == "@bioetl-observability"
+        assert str(boundary["slo_intent"]).strip()
 
 
 def test_tuned_alerts_use_expected_severities_and_threshold_windows() -> None:

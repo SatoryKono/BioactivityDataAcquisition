@@ -4,9 +4,9 @@
     "total_internal_imports": 7745,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 334,
+    "cross_layer_group_edges_total": 326,
     "violations": 0,
-    "source_fingerprint": "9da59bd3c1aeaaac02f3a7f99ba31a90dfe0e80f9b011311c7467e7d7e1fc9d3"
+    "source_fingerprint": "36d053822c6c4bf7d6caab730f313b82b6e939eca0ee21d6815e6bbea7cd3e50"
   },
   "layer_edges": [
     {
@@ -24,25 +24,25 @@
     {
       "source": "composition",
       "target": "application",
-      "imports": 196,
+      "imports": 194,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 679,
+      "imports": 680,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 286,
+      "imports": 285,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 249,
+      "imports": 250,
       "allowed": true
     },
     {
@@ -54,7 +54,7 @@
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 763,
+      "imports": 764,
       "allowed": true
     },
     {
@@ -66,19 +66,19 @@
     {
       "source": "interfaces",
       "target": "application",
-      "imports": 54,
+      "imports": 53,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "composition",
-      "imports": 54,
+      "imports": 56,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "domain",
-      "imports": 71,
+      "imports": 70,
       "allowed": true
     },
     {
@@ -205,13 +205,13 @@
       "imports": 26
     },
     {
-      "source": "infrastructure.config",
-      "target": "domain.types",
-      "imports": 25
-    },
-    {
       "source": "infrastructure.control_plane",
       "target": "domain.control_plane",
+      "imports": 26
+    },
+    {
+      "source": "infrastructure.config",
+      "target": "domain.types",
       "imports": 25
     },
     {
@@ -305,14 +305,14 @@
       "imports": 17
     },
     {
-      "source": "composition.factories",
-      "target": "application.ports",
+      "source": "composition.bootstrap",
+      "target": "infrastructure.control_plane",
       "imports": 16
     },
     {
-      "source": "composition.bootstrap",
-      "target": "infrastructure.control_plane",
-      "imports": 15
+      "source": "composition.factories",
+      "target": "application.ports",
+      "imports": 16
     },
     {
       "source": "composition.bootstrap",

@@ -1303,6 +1303,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/ops/observability/archive_control_plane.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the local control-plane archive/verify operator entry; keep it supporting unless a reviewed canonical CI workflow owns it.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-11-30"
+    },
     "scripts/ops/observability/check_prometheus_rules_health.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the Prometheus rule-health implementation used by validate_live_observability.py; keep the canonical operator workflow routed through the aggregate live validator.",

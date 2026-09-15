@@ -8,21 +8,22 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from bioetl.application.runtime_timestamps import (
-    capture_runtime_timing_anchor,
-    derive_completion_timestamp,
-)
-from bioetl.application.services.execution.pipeline_runner_models import (
-    PipelineRunResult,
-    RunOptions,
-    RunResult,
-)
 from bioetl.composition.registry_api import PipelineRegistry
 
 from bioetl.composition._registration import ensure_runtime_registrations
 from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 from bioetl.composition.bootstrap.runtime.pipeline_context_builder import (
+    ExecutionMetricsRunnerPort,
+    PipelineRunResult,
+    RunOptions,
+    RunResult,
+    SystemClock,
     build_pipeline_context as build_pipeline_context_impl,
+    capture_runtime_timing_anchor,
+    derive_completion_timestamp,
+)
+from bioetl.composition.bootstrap.runtime.observability import (
+    maybe_start_metrics_server as _maybe_start_metrics_server,
 )
 from bioetl.composition.factories.pipeline.runner import create_metrics_extractor
 from bioetl.composition.runtime_builders.config_access import (
@@ -33,8 +34,6 @@ from bioetl.composition.observability_runtime import (
 )
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
-from bioetl.domain.ports import ExecutionMetricsRunnerPort
-from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
@@ -60,12 +59,8 @@ def get_settings() -> Settings:
 
 
 def maybe_start_metrics_server(settings: Settings) -> bool:
-    """Resolve metrics-server startup lazily while keeping a patchable seam."""
-    from bioetl.composition.bootstrap.runtime.observability import (
-        maybe_start_metrics_server as impl,
-    )
-
-    return impl(settings)
+    """Start metrics through the patchable composition-owned runtime seam."""
+    return _maybe_start_metrics_server(settings)
 
 
 def build_pipeline_context(

@@ -253,6 +253,7 @@ tracked_suite_inventory:
       - tests/integration/test_pipeline_runtime_dashboard.py
       prometheus:
       - tests/integration/test_observability_emission_integration.py
+      - tests/integration/test_prometheus_rules_backup_files.py
       - tests/integration/test_prometheus_rules_config.py
       - tests/integration/test_prometheus_rules_config_status.py
       - tests/integration/test_prometheus_scrape_topology.py

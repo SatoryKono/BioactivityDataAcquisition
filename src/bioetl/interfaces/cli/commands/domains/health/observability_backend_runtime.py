@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
+from os import environ as os_environ
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.ops.observability_backend_startup import (
@@ -28,7 +29,6 @@ from bioetl.composition.observability_backend import (
     DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS,
     DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PATHS_READY_TIMEOUT_SECONDS,
     DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PROBE_TIMEOUT_SECONDS,
-    _build_detached_backend_env,
     _build_detached_backend_popen_kwargs,
     _build_observability_backend_probe_urls,
     build_detached_backend_log_path,
@@ -37,9 +37,14 @@ from bioetl.composition.observability_backend import (
     probe_observability_backend,
     probe_observability_backend_required_paths,
     python_executable_to_tuple,
-    start_detached_quarantine_backend,
     wait_for_observability_backend_ready,
     wait_for_observability_backend_required_paths_ready,
+)
+from bioetl.composition.observability_backend import (
+    _build_detached_backend_env as _composition_build_detached_backend_env,
+)
+from bioetl.composition.observability_backend import (
+    start_detached_quarantine_backend as _composition_start_detached_quarantine_backend,
 )
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details import (
     _append_backend_startup_diagnostic,
@@ -69,6 +74,30 @@ _CONTROL_PLANE_READY_PROBE_PATH = "/ops/control-plane/ready"
 _NUMERIC_PORT_ERROR = "observability_backend_port must be a numeric CLI value"
 
 _DETACHED_STATUS = frozenset({"reused", "started"})
+
+
+def _build_detached_backend_env(
+    *,
+    current_env: Mapping[str, str] | None = None,
+) -> dict[str, str]:
+    return _composition_build_detached_backend_env(
+        current_env=current_env if current_env is not None else os_environ,
+    )
+
+
+def start_detached_quarantine_backend(
+    *,
+    bind_host: str = "0.0.0.0",
+    port: int = DEFAULT_HEALTH_SERVER_PORT,
+    **kwargs: object,
+) -> object:
+    if kwargs.get("current_env") is None:
+        kwargs["current_env"] = os_environ
+    return _composition_start_detached_quarantine_backend(
+        bind_host=bind_host,
+        port=port,
+        **kwargs,  # type: ignore[arg-type]
+    )
 
 
 @dataclass(frozen=True, slots=True)

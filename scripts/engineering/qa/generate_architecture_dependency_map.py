@@ -52,6 +52,11 @@ LAYER_IMPORT_MATRIX: dict[str, frozenset[str]] = {
 
 LAYER_ORDER = tuple(LAYER_IMPORT_MATRIX.keys())
 GROUP_EDGE_LIMIT = 55
+MODULE_GROUP_OVERRIDES = {
+    # The detached backend is part of the canonical observability runtime
+    # composition family even though it keeps a focused import surface for CLI.
+    "bioetl.composition.observability_backend": "composition.observability_runtime",
+}
 TYPE_CHECKING_NAME = "TYPE_CHECKING"
 _FRONTMATTER_DELIMITER = "---"
 MAX_SOURCE_TREE_STABILIZATION_ATTEMPTS = 8
@@ -240,6 +245,9 @@ def _layer_of(module_name: str) -> str | None:
 
 
 def _group_of(module_name: str) -> str | None:
+    override = MODULE_GROUP_OVERRIDES.get(module_name)
+    if override is not None:
+        return override
     parts = module_name.split(".")
     layer = _layer_of(module_name)
     if layer is None:

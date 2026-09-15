@@ -456,7 +456,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 194
-      total_loc: 23444
+      total_loc: 23445
       files_ge_250_loc: 0
       helper_function_ratio: 0.374
       max_internal_fan_in: 5
@@ -484,7 +484,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 51
-      total_loc: 6174
+      total_loc: 6191
       files_ge_250_loc: 0
       helper_function_ratio: 0.33
       max_internal_fan_in: 2
@@ -567,7 +567,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 57
-      total_loc: 7221
+      total_loc: 7220
       files_ge_250_loc: 0
       helper_function_ratio: 0.375
       max_internal_fan_in: 3
@@ -660,7 +660,7 @@ oversized_source_module_inventory:
     target_split: 'remaining: further split checkpoint policy evaluation paths only; diagnostic payload
       assembly already extracted under #5031 (checkpoint_compatibility_results.py)'
   - path: src/bioetl/infrastructure/config/_base.py
-    lines: 238
+    lines: 228
     owner: '@bioetl-config'
     target_split: separate config discovery, validation, and environment resolution helpers
   - path: src/bioetl/infrastructure/control_plane/file_run_ledger_store.py

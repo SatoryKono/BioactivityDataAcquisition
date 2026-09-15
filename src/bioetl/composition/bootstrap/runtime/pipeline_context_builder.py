@@ -7,8 +7,15 @@ from datetime import datetime
 from typing import cast
 from uuid import UUID
 
-from bioetl.application.runtime_timestamps import capture_runtime_timing_anchor
-from bioetl.application.services.execution.pipeline_runner_models import RunOptions
+from bioetl.application.runtime_timestamps import (
+    capture_runtime_timing_anchor,
+    derive_completion_timestamp,
+)
+from bioetl.application.services.execution.pipeline_runner_models import (
+    PipelineRunResult,
+    RunOptions,
+    RunResult,
+)
 from bioetl.composition.occurrence_identity import create_runtime_occurrence_run_id
 from bioetl.domain.context import (
     CachedBronzeContext,
@@ -16,10 +23,20 @@ from bioetl.domain.context import (
     PipelineRunContext,
     VacuumSettings,
 )
-from bioetl.domain.ports import ClockPort
+from bioetl.domain.ports import ClockPort, ExecutionMetricsRunnerPort
 from bioetl.domain.types import ExecutionContext, RunID, RunType
+from bioetl.infrastructure.time import SystemClock
 
-__all__ = ["build_pipeline_context"]
+__all__ = [
+    "ExecutionMetricsRunnerPort",
+    "PipelineRunResult",
+    "RunOptions",
+    "RunResult",
+    "SystemClock",
+    "build_pipeline_context",
+    "capture_runtime_timing_anchor",
+    "derive_completion_timestamp",
+]
 
 
 def _build_input_filter_context(options: RunOptions) -> InputFilterContext:
