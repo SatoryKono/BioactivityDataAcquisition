@@ -8061,6 +8061,157 @@
           ]
         }
       ]
+    },
+    {
+      "id": 9420,
+      "type": "row",
+      "title": "Inspect Complete Run Discovery",
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 24,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "id": 9421,
+          "type": "table",
+          "title": "Inspect Latest Complete Run",
+          "gridPos": {
+            "x": 0,
+            "y": 25,
+            "w": 24,
+            "h": 6
+          },
+          "datasource": "BioETL Ops HTTP",
+          "description": "Search the same workflow/pipeline/run_type, newest manifest first. Only processing success plus aggregate Trust OK qualifies. Search is bounded: INCOMPLETE means the scan limit, not no complete runs. Open a candidate in a new tab; this historical selection and time range remain unchanged. The link preserves the time range, so the candidate may be OUT OF RANGE. This is not replay authorization.",
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "—",
+              "custom": {
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Candidate run"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Open aggregate-complete run",
+                        "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&var-run_id=${__value.raw}&${__url_time_range}",
+                        "targetBlank": true,
+                        "includeVars": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Created at"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Reason"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "complete_run_scan_limit": {
+                            "text": "Search limit reached"
+                          },
+                          "no_complete_run_in_scope": {
+                            "text": "No complete run in scope"
+                          },
+                          "aggregate_complete_run_found": {
+                            "text": "Aggregate evidence complete"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "type": "json",
+              "source": "url",
+              "parser": "backend",
+              "format": "table",
+              "root_selector": "rows",
+              "url": "/ops/control-plane/latest-complete-run?workflow=${workflow:csv}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&error_as_row=1",
+              "url_options": {
+                "method": "GET",
+                "data": ""
+              }
+            }
+          ],
+          "transformations": [
+            {
+              "id": "convertFieldType",
+              "options": {
+                "conversions": [
+                  {
+                    "targetField": "observed_at",
+                    "destinationType": "time"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "indexByName": {
+                  "status": 0,
+                  "reason": 1,
+                  "candidate_run_id": 2,
+                  "observed_at": 3,
+                  "pipeline": 4,
+                  "run_type": 5
+                },
+                "renameByName": {
+                  "status": "Search",
+                  "reason": "Reason",
+                  "candidate_run_id": "Candidate run",
+                  "observed_at": "Created at",
+                  "pipeline": "Pipeline",
+                  "run_type": "Run type"
+                }
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }

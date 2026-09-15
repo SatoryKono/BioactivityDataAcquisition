@@ -281,8 +281,10 @@ async def test_missing_evidence_service_returns_unknown_table_contract() -> None
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("endpoint", ["retention-compliance", "latest-complete-run"])
 async def test_retention_deadline_returns_table_row_and_keeps_504(
     monkeypatch: pytest.MonkeyPatch,
+    endpoint: str,
 ) -> None:
     from bioetl.interfaces.http import (
         _health_server_control_plane_evidence_routing as routing,
@@ -309,7 +311,7 @@ async def test_retention_deadline_returns_table_row_and_keeps_504(
     try:
         status, payload = await _get_json(
             server,
-            "/ops/control-plane/retention-compliance?pipeline=chembl_activity"
+            f"/ops/control-plane/{endpoint}?pipeline=chembl_activity"
             f"&run_id={manifest.run_id}",
         )
         assert status == 504
@@ -321,11 +323,41 @@ async def test_retention_deadline_returns_table_row_and_keeps_504(
 
         status_ok, payload_ok = await _get_json(
             server,
-            "/ops/control-plane/retention-compliance?pipeline=chembl_activity"
+            f"/ops/control-plane/{endpoint}?pipeline=chembl_activity"
             f"&run_id={manifest.run_id}&error_as_row=1",
         )
         assert status_ok == 200
         assert payload_ok["contract"] == "forensic_endpoint_error_v1"
         assert _payload_rows(payload_ok)[0]["check"] == "endpoint_availability"
+    finally:
+        await server.stop()
+
+
+@pytest.mark.asyncio
+async def test_latest_complete_route_preserves_selection_and_returns_no_false_ok() -> (
+    None
+):
+    manifest = _manifest()
+    manifests = InMemoryRunManifestStore()
+    manifests.save(manifest)
+    server = HealthServer(
+        host="127.0.0.1",
+        port=0,
+        run_manifest_port=manifests,
+        control_plane_evidence_service=ControlPlaneEvidenceService(),
+    )
+    await server.start()
+    try:
+        status, payload = await _get_json(
+            server,
+            "/ops/control-plane/latest-complete-run?pipeline=chembl_activity"
+            f"&run_type=incremental&run_id={manifest.run_id}",
+        )
+        assert status == 200
+        assert payload["contract"] == "control_plane_latest_complete_run_v1"
+        assert payload["selected_run_id"] == str(manifest.run_id)
+        assert payload["scanned"] == 1
+        assert "candidate_run_id" not in _payload_rows(payload)[0]
+        assert payload["replay_authorized"] is False
     finally:
         await server.stop()

@@ -15,6 +15,9 @@ import json
 import sys
 from pathlib import Path
 
+from scripts.ops.observability.grafana._latest_complete_run_panel import (
+    stamp_latest_complete_run_panel,
+)
 from scripts.ops.observability.grafana.action_target_routes import (
     ACTION_DASHBOARD_UID_BY_TARGET,
 )
@@ -1202,6 +1205,7 @@ def apply_to_dashboard(
     if current_uid == "bioetl-control-plane-v1":
         _layout_control_plane_detail_panels(panels)
         _clarify_manifest_counter_evidence(panels)
+        stamp_latest_complete_run_panel(panels)
     if current_uid == "bioetl-overview-v2":
         _layout_overview_detail_panels(panels)
     if current_uid == "bioetl-runtime":
