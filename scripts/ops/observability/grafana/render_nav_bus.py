@@ -597,6 +597,32 @@ def _compact_fallback_panel(
     return False
 
 
+def _layout_control_plane_detail_panels(panels: list[object]) -> None:
+    """Fill the operator-reviewed gaps using row-relative, repeatable geometry."""
+    layouts = {
+        902: {134: (0, 11, 12), 5: (12, 11, 12), 135: (0, 17, 24)},
+        903: {4: (0, 0, 12), 136: (12, 0, 12)},
+        905: {
+            9408: (0, 38, 24),
+            9406: (0, 42, 24),
+            9409: (0, 46, 24),
+            139: (0, 50, 24),
+        },
+        9412: {9402: (0, 0, 24)},
+    }
+    for row in _root_panels(panels):
+        layout = layouts.get(row.get("id"))
+        if layout is None:
+            continue
+        base_y = row["gridPos"]["y"] + 1
+        children = row.get("panels", [])
+        for child in children:
+            if (position := layout.get(child.get("id"))) is not None:
+                x, offset, width = position
+                child["gridPos"].update(x=x, y=base_y + offset, w=width)
+        children.sort(key=lambda child: (child["gridPos"]["y"], child["gridPos"]["x"]))
+
+
 def _normalize_collapsed_row_children(panels: list[object]) -> None:
     """Repair the one-row child drift left by legacy recursive nav shifts."""
     for row in _root_panels(panels):
@@ -911,6 +937,8 @@ def apply_to_dashboard(
     _reclaim_first_window_overflow(nav, panels, current_uid=current_uid)
     _layout_uid_first_window(panels, current_uid=current_uid)
     _normalize_collapsed_row_children(panels)
+    if current_uid == "bioetl-control-plane-v1":
+        _layout_control_plane_detail_panels(panels)
     nav["options"] = {
         "mode": "html",
         "bioetlDisplayTitle": NAV_DISPLAY_TITLE,
