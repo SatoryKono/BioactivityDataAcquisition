@@ -2661,8 +2661,8 @@
           "gridPos": {
             "x": 0,
             "y": 21,
-            "w": 8,
-            "h": 4
+            "w": 24,
+            "h": 3
           },
           "id": 152,
           "options": {
@@ -2806,7 +2806,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 26,
+            "y": 24,
             "w": 12,
             "h": 6
           },
@@ -2961,7 +2961,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 26,
+            "y": 24,
             "w": 12,
             "h": 6
           },
@@ -3114,7 +3114,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 32,
+            "y": 30,
             "w": 12,
             "h": 6
           },
@@ -3327,7 +3327,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 32,
+            "y": 30,
             "w": 12,
             "h": 6
           },
@@ -3497,77 +3497,6 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Selected-range Bronze denominator for DQ triage. 0 means no Bronze records were observed inside the active window; it does not prove DQ metrics are missing. Compare with Gold output and blocked-share panels below TELEMETRY MISSING is not a zero and not VALID EMPTY.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short",
-              "noValue": "None observed",
-              "displayName": "Monitor Bronze Records"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "x": 6,
-            "y": 27,
-            "w": 6,
-            "h": 4
-          },
-          "id": 3,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value"
-          },
-          "targets": [
-            {
-              "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])))",
-              "instant": true,
-              "legendFormat": "Bronze",
-              "refId": "A"
-            }
-          ],
-          "title": "Monitor Bronze Records",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
           "description": "TIME RANGE · Selected-range Gold output count for DQ deliverability triage. 0 means no Gold records were observed inside the active window; it does not prove the current DQ verdict is OK or UNKNOWN. Compare with Bronze denominator, blocked-share, and the shared Processed Records table before interpreting data loss TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "fieldConfig": {
             "defaults": {
@@ -3632,6 +3561,77 @@
             }
           ],
           "title": "Monitor Gold Records",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "TIME RANGE · Selected-range Bronze denominator for DQ triage. 0 means no Bronze records were observed inside the active window; it does not prove DQ metrics are missing. Compare with Gold output and blocked-share panels below TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0,
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "gray",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short",
+              "noValue": "None observed",
+              "displayName": "Monitor Bronze Records"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "x": 6,
+            "y": 27,
+            "w": 6,
+            "h": 4
+          },
+          "id": 3,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value"
+          },
+          "targets": [
+            {
+              "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])))",
+              "instant": true,
+              "legendFormat": "Bronze",
+              "refId": "A"
+            }
+          ],
+          "title": "Monitor Bronze Records",
           "type": "stat"
         },
         {
@@ -3864,7 +3864,7 @@
           "gridPos": {
             "x": 0,
             "y": 31,
-            "w": 6,
+            "w": 12,
             "h": 4
           },
           "id": 12,
@@ -3947,9 +3947,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 6,
+            "x": 12,
             "y": 31,
-            "w": 6,
+            "w": 12,
             "h": 4
           },
           "id": 151,
@@ -4267,7 +4267,7 @@
             "x": 12,
             "y": 41,
             "w": 12,
-            "h": 4
+            "h": 6
           },
           "id": 153,
           "options": {

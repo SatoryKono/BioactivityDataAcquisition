@@ -31,11 +31,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Self
 
 import pytest
 
 from bioetl.domain.ports.logger_port import LoggerPort
+from bioetl.domain.ports.observability.logging import (
+    LoggerPort as CanonicalLoggerPort,
+)
 from bioetl.domain.ports.publication_strategy import (
     DataExtractorStrategy,
     IdentifierResolverStrategy,
@@ -50,17 +53,24 @@ pytestmark = pytest.mark.unit
 class _Logger:
     events: list[tuple[str, str, dict[str, Any]]]
 
-    def error(self, message: str, **kwargs: Any) -> None:
-        self.events.append(("error", message, dict(kwargs)))
+    def bind(self, **kwargs: Any) -> Self:
+        self.events.append(("bind", "", dict(kwargs)))
+        return self
 
-    def warning(self, message: str, **kwargs: Any) -> None:
-        self.events.append(("warning", message, dict(kwargs)))
+    def error(self, _event: str, **kwargs: Any) -> Any:
+        self.events.append(("error", _event, dict(kwargs)))
 
-    def info(self, message: str, **kwargs: Any) -> None:
-        self.events.append(("info", message, dict(kwargs)))
+    def warning(self, _event: str, **kwargs: Any) -> Any:
+        self.events.append(("warning", _event, dict(kwargs)))
 
-    def debug(self, message: str, **kwargs: Any) -> None:
-        self.events.append(("debug", message, dict(kwargs)))
+    def info(self, _event: str, **kwargs: Any) -> Any:
+        self.events.append(("info", _event, dict(kwargs)))
+
+    def debug(self, _event: str, **kwargs: Any) -> Any:
+        self.events.append(("debug", _event, dict(kwargs)))
+
+    def exception(self, _event: str, **kwargs: Any) -> Any:
+        self.events.append(("exception", _event, dict(kwargs)))
 
 
 class _PublicationStrategy:
@@ -103,18 +113,23 @@ class _PublicationStrategy:
 def test_logger_port_runtime_check_and_methods() -> None:
     logger = _Logger(events=[])
 
+    assert LoggerPort is CanonicalLoggerPort
     assert isinstance(logger, LoggerPort)
 
+    assert logger.bind(run_id="run-1") is logger
     logger.error("failed", code="E")
     logger.warning("warning", retry=True)
     logger.info("started", run_id="run-1")
     logger.debug("debug", payload={"x": 1})
+    logger.exception("exception", exc_info=True)
 
     assert logger.events == [
+        ("bind", "", {"run_id": "run-1"}),
         ("error", "failed", {"code": "E"}),
         ("warning", "warning", {"retry": True}),
         ("info", "started", {"run_id": "run-1"}),
         ("debug", "debug", {"payload": {"x": 1}}),
+        ("exception", "exception", {"exc_info": True}),
     ]
 
 

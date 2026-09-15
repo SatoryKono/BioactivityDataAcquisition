@@ -39,7 +39,7 @@ from unittest.mock import MagicMock
 from urllib.error import HTTPError
 
 import bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details as failure_details_subject
-import bioetl.interfaces.cli.commands.domains.health.observability_backend_process as process_subject
+import bioetl.application.services.ops.observability_backend_process as process_subject
 import bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime as runtime_subject
 import pytest
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (

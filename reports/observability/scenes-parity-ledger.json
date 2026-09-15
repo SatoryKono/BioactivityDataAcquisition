@@ -20,10 +20,10 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "ede74e8a3c6d5596ef0093c3981ad91c7a6f5e5a164d83f0d26fec8e122f09af",
-    "bioetl-dq-v2": "2b1596a27a0d66a08f245e639e5ed4df74a6ffa0c4505da83fdc99c8348a13a0",
-    "bioetl-incident-v1": "7ae4a424352b594aabb3b6b9e5fb121746f507012c89d4ea8d61c3e7a45dbd76",
-    "bioetl-overview-v2": "909776b7e056fdef55cc4dde2a4d9e677aec8d5ae2e17fbc3027961bc685de6d",
+    "bioetl-control-plane-v1": "fe9b0e168ce8c7af25cf71028af02ee5f3b53354939808f37262120fb07d0737",
+    "bioetl-dq-v2": "617c948eaad0a362dd8703102fc1a9b979533970addedb1f9d6c455febae9d75",
+    "bioetl-incident-v1": "3f880d07e0de5f2cb681ca2203ab05160212c6d7e033a7aa214e102a0a307915",
+    "bioetl-overview-v2": "f5fb7bbbe358fb7b662688ad850a2ac0e0f774338e846e12ab2067c403b6fb11",
     "bioetl-provider-health-v2": "928b6fb15c09f3cf1844015895f5a3f5e4f32baa24fb2c03c78df6fdc88a74e1",
     "bioetl-run-explorer-v1": "7bcff4013e2a78cd631fcf3f5953d7cfc46c33046d5b72926395606e1c281129",
     "bioetl-runtime": "fd1b7cf529a0c4a1a30aba438f2034f634bc349cbb2feb0c2ef7428835bc2eca"
@@ -511,13 +511,13 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 908,
-      "panel_title": "Review Terminal Run Outcomes",
+      "panel_title": "Review Observed Terminal Counters",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "sum by (terminal_status) (increase(bioetl_control_plane_terminal_events_total{pipeline=~\"$pipeline\"}[$__range]))"
+          "sum by (terminal_status) (last_over_time(bioetl_control_plane_terminal_events_total{pipeline=~\"$pipeline\"}[$__range]))"
         ],
         "target_count": 1
       }
@@ -567,44 +567,6 @@
       "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
-      "panel_id": 131,
-      "panel_title": "Compare Manifest Writes by Status",
-      "route": "data-trust-recovery",
-      "source": {
-        "datasource_type": "prometheus",
-        "datasource_uid": "prometheus",
-        "expressions": [
-          "sum by (status, run_type) (increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))"
-        ],
-        "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-control-plane-v1",
-      "disposition": "advanced-evidence",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-control-plane-v1",
-      "panel_id": 7,
-      "panel_title": "Compare Ledger Appends by Type & Status",
-      "route": "data-trust-recovery",
-      "source": {
-        "datasource_type": "prometheus",
-        "datasource_uid": "prometheus",
-        "expressions": [
-          "sum by (event_type, status) (increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[$__interval]))"
-        ],
-        "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-control-plane-v1",
-      "disposition": "advanced-evidence",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 132,
       "panel_title": "Monitor Manifest Failures (30m)",
       "route": "data-trust-recovery",
@@ -632,6 +594,44 @@
         "datasource_uid": "prometheus",
         "expressions": [
           "sum(bioetl_control_plane_ledger_fail_severity_30m{pipeline=~\"$pipeline\"})"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-control-plane-v1",
+      "panel_id": 131,
+      "panel_title": "Track Observed Manifest Write Increments",
+      "route": "data-trust-recovery",
+      "source": {
+        "datasource_type": "prometheus",
+        "datasource_uid": "prometheus",
+        "expressions": [
+          "sum by (status, run_type) (increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-control-plane-v1",
+      "panel_id": 7,
+      "panel_title": "Compare Ledger Appends by Type & Status",
+      "route": "data-trust-recovery",
+      "source": {
+        "datasource_type": "prometheus",
+        "datasource_uid": "prometheus",
+        "expressions": [
+          "sum by (event_type, status) (increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[$__interval]))"
         ],
         "target_count": 1
       }
@@ -1513,14 +1513,14 @@
       "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-dq-v2",
-      "panel_id": 3,
-      "panel_title": "Monitor Bronze Records",
+      "panel_id": 4,
+      "panel_title": "Monitor Gold Records",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])))"
+          "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}[$__range])))"
         ],
         "target_count": 1
       }
@@ -1532,14 +1532,14 @@
       "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-dq-v2",
-      "panel_id": 4,
-      "panel_title": "Monitor Gold Records",
+      "panel_id": 3,
+      "panel_title": "Monitor Bronze Records",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}[$__range])))"
+          "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])))"
         ],
         "target_count": 1
       }

@@ -16,7 +16,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | --- | ---: | --- |
 | bioetl-control-plane-v1.json | 1000 | Navigate Dashboards |
 | bioetl-control-plane-v1.json | 9400 | Inspect Scope & Evidence |
-| bioetl-control-plane-v1.json | 9401 | Monitor Replay Readiness |
+| bioetl-control-plane-v1.json | 9401 | Monitor Current Readiness |
 | bioetl-control-plane-v1.json | 9418 | Review Selected-Run Trust |
 | bioetl-control-plane-v1.json | 9416 | Review Retention Compliance |
 | bioetl-control-plane-v1.json | 891 | Monitor Replay Safety |
@@ -35,8 +35,8 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 102 | Track Checkpoint Save Failures |
 | bioetl-control-plane-v1.json | 103 | Track Global Checkpoint Admin Failures |
 | bioetl-control-plane-v1.json | 121 | Track Peak Replay Lag |
-| bioetl-control-plane-v1.json | 5 | Compare Checkpoint Outcomes |
 | bioetl-control-plane-v1.json | 134 | Track Replay Drift by Type |
+| bioetl-control-plane-v1.json | 5 | Compare Checkpoint Outcomes |
 | bioetl-control-plane-v1.json | 135 | Track Replay Lag |
 | bioetl-control-plane-v1.json | 105 | Track Checkpoint Save Latency |
 | bioetl-control-plane-v1.json | 106 | Track Global Checkpoint Admin Latency |
@@ -70,8 +70,8 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 9410 | Explain Missing Identity Data |
 | bioetl-control-plane-v1.json | 9411 | Explain Missing Record Counts |
 | bioetl-control-plane-v1.json | 9405 | Review Identity Gaps |
-| bioetl-control-plane-v1.json | 9406 | Compare Checkpoint Anchors |
 | bioetl-control-plane-v1.json | 9408 | Review Required Replay Anchors |
+| bioetl-control-plane-v1.json | 9406 | Compare Checkpoint Anchors |
 | bioetl-control-plane-v1.json | 9409 | Review Additional Forensic Anchors |
 | bioetl-control-plane-v1.json | 139 | Review Uncovered Replay Signals |
 | bioetl-control-plane-v1.json | 9412 | Inspect Run Details |
@@ -103,8 +103,8 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 156 | Inspect Gold Reject Outcomes by Pipeline |
 | bioetl-dq-v2.json | 221 | Selected Range · Validation Diagnostics |
 | bioetl-dq-v2.json | 1 | Track Record Flow by Stage |
-| bioetl-dq-v2.json | 3 | Monitor Bronze Records |
 | bioetl-dq-v2.json | 4 | Monitor Gold Records |
+| bioetl-dq-v2.json | 3 | Monitor Bronze Records |
 | bioetl-dq-v2.json | 101 | Inspect Latest Successful Data |
 | bioetl-dq-v2.json | 9 | Inspect Quarantine Error Types |
 | bioetl-dq-v2.json | 12 | Monitor Silver Validation Failures |
@@ -130,6 +130,10 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-incident-v1.json | 2004 | Inspect DQ Suspects |
 | bioetl-incident-v1.json | 2100 | Inspect Selected Run Summary |
 | bioetl-incident-v1.json | 2101 | Review Selected Run Summary |
+| bioetl-incident-v1.json | 32010 | Inspect Full Ranked Suspects |
+| bioetl-incident-v1.json | 22010 | Inspect Full Ranked Suspects |
+| bioetl-incident-v1.json | 32005 | Inspect Full Current Alerts |
+| bioetl-incident-v1.json | 22005 | Inspect Full Current Alerts |
 | bioetl-overview-v2.json | 1000 | Navigate Dashboards |
 | bioetl-overview-v2.json | 99 | Inspect Scope & Evidence |
 | bioetl-overview-v2.json | 9603 | Review Selected Run Summary |
@@ -158,6 +162,8 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-overview-v2.json | 9602 | Inspect Run Context |
 | bioetl-overview-v2.json | 9300 | Review Run Identity |
 | bioetl-overview-v2.json | 9301 | Review Processed Records |
+| bioetl-overview-v2.json | 30215 | Inspect Full First Action |
+| bioetl-overview-v2.json | 20215 | Inspect Full First Action |
 | bioetl-provider-health-v2.json | 1000 | Navigate Dashboards |
 | bioetl-provider-health-v2.json | 9400 | Understand Evidence Scope |
 | bioetl-provider-health-v2.json | 9401 | Monitor Selected Provider |
@@ -183,8 +189,8 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-provider-health-v2.json | 115 | Track Network & Timeout Errors |
 | bioetl-provider-health-v2.json | 112 | Track Rate-Limiter Wait p95 |
 | bioetl-provider-health-v2.json | 113 | Monitor Available Rate-Limit Tokens |
-| bioetl-provider-health-v2.json | 31 | Monitor Circuit-Breaker State |
-| bioetl-provider-health-v2.json | 32 | Track Circuit-Breaker Trips |
+| bioetl-provider-health-v2.json | 31 | Monitor Global Circuit-Breaker State |
+| bioetl-provider-health-v2.json | 32 | Track Global Circuit-Breaker Trips |
 | bioetl-provider-health-v2.json | 9404 | Range & Debug Evidence |
 | bioetl-provider-health-v2.json | 114 | Inspect Raw Health Status |
 | bioetl-provider-health-v2.json | 1 | Track Health-Check Latency p95 |
@@ -242,3 +248,6 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-runtime.json | 9994 | Inspect Workflow Evidence |
 | bioetl-runtime.json | 9996 | Track Failed Workflow Runs |
 | bioetl-runtime.json | 9997 | Track Failed Workflow Steps |
+| bioetl-runtime.json | 32460 | Inspect Full Stage Progress |
+| bioetl-runtime.json | 22460 | Inspect Full Stage Progress |
+| bioetl-runtime.json | 2461 | Inspect Current Missing Stage Signals |

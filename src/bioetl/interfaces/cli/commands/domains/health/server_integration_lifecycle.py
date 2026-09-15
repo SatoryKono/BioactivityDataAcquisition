@@ -8,6 +8,9 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING
 
+from bioetl.application.services.ops.observability_backend_process import (
+    DEFAULT_HEALTH_SERVER_PORT,
+)
 import click
 
 from bioetl.domain.exceptions import BioETLError
@@ -36,8 +39,6 @@ if TYPE_CHECKING:
         HealthServerDependenciesProtocol,
     )
     from bioetl.interfaces.http.health_server import HealthServer
-
-DEFAULT_HEALTH_SERVER_PORT = 8000
 
 _HEALTH_SERVER_DOMAIN_ERROR_TITLE = "Health server failed with domain error"
 _HEALTH_SERVER_UNEXPECTED_ERROR_TITLE = "Unexpected error in health server command"

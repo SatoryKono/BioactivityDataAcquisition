@@ -15,6 +15,7 @@ from bioetl.application.services.control_plane.replay.bundle_descriptor_service 
 )
 from bioetl.interfaces.cli.commands._run_manifest_historical_support import (
     _coerce_bulk_certification_specs,
+    _has_required_universal_exact_replay_claim,
     _load_residual_dispositions,
     _load_universe_external_records,
 )
@@ -66,14 +67,6 @@ def _emit_payload(payload: dict[str, object], output_format: str) -> None:
         output_format,
         text_renderer=render_text_payload,
     )
-
-
-def _has_required_universal_exact_replay_claim(report: object) -> bool:
-    """Return whether the report may back universal exact-replay wording."""
-    gate = getattr(report, "governed_full_corpus_gate", {})
-    if not isinstance(gate, dict):
-        return False
-    return bool(gate.get("satisfied", False))
 
 
 @typed_click_group()

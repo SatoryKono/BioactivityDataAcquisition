@@ -8,10 +8,7 @@ from bioetl.composition.runtime_builders._runtime_launch_context_fields import (
     build_runtime_launch_field_snapshot,
 )
 from bioetl.composition.runtime_builders._run_manifest_snapshot_resolution import (
-    as_runtime_config_mapping,
-    coerce_optional_text,
     resolve_name_component,
-    resolve_replay_parentage_mapping_value,
 )
 from bioetl.composition.runtime_builders._snapshot_mapping_support import (
     to_serializable_mapping as to_serializable_mapping,
@@ -114,39 +111,6 @@ def _add_optional_fields(snapshot: dict[str, object], ctx: PipelineRunContext) -
     )
     snapshot["cached_bronze"] = to_serializable_mapping(
         getattr(ctx, "cached_bronze", None)
-    )
-
-
-def resolve_replay_parentage(
-    *,
-    ctx: PipelineRunContext,
-    runtime_config: object,
-) -> tuple[str | None, str | None]:
-    """Resolve the replay parentage."""
-    runtime_config_mapping = as_runtime_config_mapping(runtime_config)
-    replay_of_run_id = _resolve_replay_id(
-        ctx, "replay_of_run_id", runtime_config_mapping
-    )
-    replay_of_manifest_id = _resolve_replay_id(
-        ctx, "replay_of_manifest_id", runtime_config_mapping
-    )
-    return replay_of_run_id, replay_of_manifest_id
-
-
-def _resolve_replay_id(
-    ctx: PipelineRunContext,
-    attr_name: str,
-    runtime_config_mapping: object,
-) -> str | None:
-    """Resolve the replay ID from context or runtime config."""
-    ctx_value = coerce_optional_text(getattr(ctx, attr_name, None))
-    if ctx_value is not None:
-        return ctx_value
-
-    keys = (attr_name, f"exact_replay_parent_{attr_name}")
-    return resolve_replay_parentage_mapping_value(
-        as_runtime_config_mapping(runtime_config_mapping),
-        *keys,
     )
 
 

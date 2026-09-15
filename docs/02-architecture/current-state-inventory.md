@@ -28,7 +28,7 @@ truth; existing documentation is evidence only when it matches those sources.
 | Error catalog | 1 | `configs/contracts/errors/error_catalog.yaml` | Canonical error-code taxonomy; not counted as an entity data contract. |
 | Provider configs | 7 | `configs/providers/*.yaml` | ChEMBL, CrossRef, OpenAlex, PubChem, PubMed, Semantic Scholar, UniProt. |
 | Grafana dashboards | 7 | `grafana/dashboards/*.json` | Trust/control-plane, overview, runtime, provider health, DQ, incident, run-explorer (Silver Reject Explorer removed 2026-07-23). |
-| Domain port files | 82 | `src/bioetl/domain/ports/**/*.py` | 73 port modules + 9 package `__init__.py` (inventory: `reports/quality/domain-ports-inventory.json`); 25 top-level `*.py` including `__init__.py` and `_facade_support.py`. |
+| Domain port files | 81 | `src/bioetl/domain/ports/**/*.py` | 72 port modules + 9 package `__init__.py` (inventory: `reports/quality/domain-ports-inventory.json`); 24 top-level `*.py` including `__init__.py` and `_facade_support.py`. |
 
 ## Architecture Quality Evidence
 
@@ -38,9 +38,9 @@ Current committed quality artifacts agree on the following architecture evidence
 | --- | ---: | --- |
 | Architecture quality score | `9.14` (`good_targeted_improvements`) | `reports/quality/debt-governance-gates.json`, `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2473` | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2469` | `reports/quality/module-coverage-inventory.json` |
 | Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json`, `reports/quality/debt-governance-gates.json` |
-| Coverage inventory status counts | `1616` fully covered, `853` partially covered, `4` with no executable lines | `reports/quality/module-coverage-inventory.json` |
+| Coverage inventory status counts | `1614` fully covered, `851` partially covered, `4` with no executable lines | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
 | Families at fan-in budget | `2` (`application_services_control_plane`, `composition_runtime_builders`) | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
 | Debt-governance gates | `45` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
@@ -142,7 +142,7 @@ Full pipeline catalog: [Pipeline Catalog](../04-reference/pipeline-catalog.md).
 | Data source and filtering | `src/bioetl/domain/ports/data_source.py`, `filtering.py` | Fetch/filter contracts for provider adapters. | `src/bioetl/infrastructure/adapters/**` |
 | Storage | `src/bioetl/domain/ports/storage/*.py`, `storage_maintenance.py` | Narrow Bronze/Silver/Gold/Merged/lifecycle storage contracts. | `src/bioetl/infrastructure/storage/**` |
 | Runtime control | `src/bioetl/domain/ports/runtime/*.py` | Lock, checkpoint, clock, runner, registry, shutdown, debug, memory. | Application/composition/infrastructure runtime services. |
-| Observability | `src/bioetl/domain/ports/observability/*.py`, `logger_port.py` | Logger, metrics, tracing, DQ monitor contracts. | `src/bioetl/infrastructure/observability/**` and NoOp ports. |
+| Observability | `src/bioetl/domain/ports/observability/*.py`; `logger_port.py` compatibility re-export | Logger, metrics, tracing, DQ monitor contracts. | `src/bioetl/infrastructure/observability/**` and NoOp ports. |
 | Quality | `src/bioetl/domain/ports/quality/*.py` | DQ config, analyzers, reports, quarantine, validation, fallback/error policy. | `src/bioetl/application/services/dq/**`, `src/bioetl/infrastructure/quality/**`. |
 | Control plane | `src/bioetl/domain/ports/control_plane/*.py` | Run/workflow manifest, ledger, effective config, lineage, artifact comparison stores. | `src/bioetl/infrastructure/control_plane/**`. |
 | Config/metadata/export | `src/bioetl/domain/ports/config/*.py`, `metadata/*.py`, `export.py` | Config loading, metadata writing/coordinating, export catalog/writer. | Infrastructure config, metadata, and export adapters. |
@@ -300,7 +300,7 @@ by storage technology. Current owner boundaries:
 | Domain context exposed direct wall-clock creation | `src/bioetl/domain/context.py` no longer defines `current_utc_time`; effective-config domain artifacts use deterministic sentinel defaults. | `src/bioetl/application/runtime_clock.py`, `src/bioetl/infrastructure/time/system_clock.py`, `tests/architecture/test_time_seam_normalization.py`. | Moved runtime clock helpers to application/infrastructure seams and guarded domain defaults against wall-clock regressions. |
 | Runtime Gold Pandera strictness had no production-path non-strict guard | `tests/architecture/test_gold_validator_strict_runtime_paths.py` scans `src/bioetl` for `PanderaGoldValidator(..., strict=False)` and `ContractAwareGoldValidator(..., strict=False)`. | `src/bioetl/infrastructure/storage/silver/merged_operations.py`; `src/bioetl/infrastructure/validation/pandera_validator.py`. | Replaced the Silver merged-write non-strict Gold validator with `PanderaSilverValidator(strict=False)` and added the runtime guard. |
 | Quarantine payload immutability evidence stopped at aggregate/mock level | `tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineUpdateStatus::test_update_status_preserves_persisted_payload_and_hash` writes a real Delta table, updates status, and checks persisted `payload`, `payload_hash`, and `metadata`. | `src/bioetl/infrastructure/quarantine/unified.py`. | Added persisted immutability coverage and a read fallback for Delta string-view filter failures after status updates. |
-| Test governance refined assertless residuals are now fully eliminated while compatibility coverage stays bounded | `reports/quality/test-governance-current.json` now reports `assertless_total_candidates=88`, `refined_assertless_tests=0`, `compatibility_test_files=0`, and zero budget violations. | Contract schema tests under `tests/contract/**` plus governance inventory under `tests/architecture/**`. | Tightened observable assertions and governance classification so the refined assertless residual count is zero without regrowing compatibility-test scope. |
+| Test governance refined assertless residuals are now fully eliminated while compatibility coverage stays bounded | `reports/quality/test-governance-current.json` now reports `assertless_total_candidates=87`, `refined_assertless_tests=0`, `compatibility_test_files=0`, and zero budget violations. | Contract schema tests under `tests/contract/**` plus governance inventory under `tests/architecture/**`. | Tightened observable assertions and governance classification so the refined assertless residual count is zero without regrowing compatibility-test scope. |
 | Current-state architecture evidence table lagged live quality reports | `reports/quality/debt-governance-gates.json` reports score `9.14`, `45` passing gates, and zero failing gates; `reports/quality/module-coverage-inventory.json` reports `2468` source modules with `0` unmeasured, `0` uncovered, and `852` partially covered modules; `reports/quality/full-app-duplication-baseline.json` reports `0` actionable / `58` raw excluded clusters. | Current committed `reports/quality/*.json` artifacts and `reports/quality/total-tech-debt-audit-main-current.md`. | Refreshed the current-state table while keeping module inventory distinct from full line/branch coverage and preserving shrink-only budgets. |
 
 ## Open Questions

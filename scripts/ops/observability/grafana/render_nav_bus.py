@@ -715,6 +715,123 @@ def _layout_runtime_detail_panels(panels: list[object]) -> None:
         children.sort(key=lambda child: (child["gridPos"]["y"], child["gridPos"]["x"]))
 
 
+def _layout_dq_detail_panels(panels: list[object]) -> None:
+    """Keep paired DQ evidence panels aligned during Grafana grid compaction."""
+    layouts = {
+        220: {
+            152: (0, 0, 24, 3),
+            121: (0, 3, 12, 6),
+            122: (12, 3, 12, 6),
+            118: (0, 9, 12, 6),
+            156: (12, 9, 12, 6),
+        },
+        221: {
+            12: (0, 9, 12, 4),
+            151: (12, 9, 12, 4),
+            10: (0, 13, 12, 6),
+            11: (12, 13, 12, 6),
+            155: (0, 19, 12, 6),
+            153: (12, 19, 12, 6),
+            116: (0, 25, 24, 4),
+            150: (0, 29, 24, 4),
+        },
+    }
+    for row in _root_panels(panels):
+        layout = layouts.get(row.get("id"))
+        if layout is None:
+            continue
+        base_y = row["gridPos"]["y"] + 1
+        children = row.get("panels", [])
+        for child in children:
+            if position := layout.get(child.get("id")):
+                x, offset, width, height = position
+                child["gridPos"].update(x=x, y=base_y + offset, w=width, h=height)
+        children.sort(key=lambda child: (child["gridPos"]["y"], child["gridPos"]["x"]))
+
+
+def _layout_incident_detail_panels(panels: list[object]) -> None:
+    """Keep incident detail tables compact and the run column flexible."""
+    for row in _root_panels(panels):
+        for child in row.get("panels", []):
+            if child.get("id") in {22005, 22010}:
+                child["gridPos"]["h"] = 6
+            if child.get("id") == 2101:
+                for override in child["fieldConfig"]["overrides"]:
+                    if override.get("matcher", {}).get("options") in {"Run", "run_id"}:
+                        override["properties"] = [
+                            prop
+                            for prop in override["properties"]
+                            if prop["id"] != "custom.width"
+                        ]
+
+
+def _clarify_manifest_counter_evidence(panels: list[object]) -> None:
+    """Distinguish observed counter snapshots from sampled counter increments."""
+    for row in _root_panels(panels):
+        if row.get("id") != 901:
+            continue
+        base = row["gridPos"]["y"] + 1
+        positions = {
+            908: (0, 4),
+            2: (4, 3),
+            1: (4, 3),
+            132: (4, 3),
+            133: (4, 3),
+            131: (7, 7),
+            7: (14, 7),
+            9414: (21, 6),
+        }
+        for child in row.get("panels", []):
+            ident = child.get("id")
+            if ident in positions:
+                offset, height = positions[ident]
+                child["gridPos"].update(y=base + offset, h=height)
+            if ident == 908:
+                child["title"] = "Review Observed Terminal Counters"
+                child["description"] = (
+                    "Selected range: last observed terminal counter by status, summed across matching series. "
+                    "Pipeline applies; Run ID and Run Type do not. This is a counter snapshot, "
+                    "not an exact-run verdict or a count of events within the range. "
+                    "A first sample of 1 followed by 1 has observed value 1 but measured increase 0."
+                )
+                child["targets"][0].update(
+                    expr='sum by (terminal_status) (last_over_time(bioetl_control_plane_terminal_events_total{pipeline=~"$pipeline"}[$__range]))',
+                    format="table",
+                    instant=True,
+                )
+                child["transformations"] = [
+                    {
+                        "id": "organize",
+                        "options": {
+                            "excludeByName": {"Time": True, "__name__": True},
+                            "renameByName": {
+                                "terminal_status": "Terminal status",
+                                "Value": "Observed counter",
+                            },
+                        },
+                    }
+                ]
+                child["fieldConfig"]["overrides"] = []
+                child["fieldConfig"]["defaults"]["decimals"] = 0
+            if ident == 131:
+                child["title"] = "Track Observed Manifest Write Increments"
+                child["description"] = (
+                    "Sampled counter increase per interval, by run type and status. Pipeline and Run Type apply; "
+                    "Run ID does not. Zero means no increase between available samples, not no manifest writes. "
+                    "An event already included in the first sample cannot be counted by increase(). "
+                    "Inspect persisted run evidence for exact-run outcomes. Missing telemetry is not zero."
+                )
+                defaults = child["fieldConfig"]["defaults"]
+                defaults.update(min=0, decimals=0)
+                defaults.setdefault("custom", {}).update(
+                    axisSoftMax=1, showPoints="always"
+                )
+                child["options"]["legend"]["calcs"] = ["lastNotNull", "max"]
+        row["panels"].sort(
+            key=lambda child: (child["gridPos"]["y"], child["gridPos"]["x"])
+        )
+
+
 def _normalize_collapsed_row_children(panels: list[object]) -> None:
     """Repair the one-row child drift left by legacy recursive nav shifts."""
     for row in _root_panels(panels):
@@ -779,7 +896,7 @@ def _stamp_control_plane_recovery_cta(cta: dict[str, object]) -> None:
         "if its Trust status is "
         "INCOMPLETE or UNKNOWN. First-screen tables: Review Selected-Run Trust "
         "(9418) and Review Retention Compliance (9416). Review Lineage Validation "
-        "is the first collapsed row (9419) and contains table 9415. Monitor Replay "
+        "is the first collapsed row (9419) and contains table 9415. Monitor Current "
         "Readiness (9401) is current Prometheus for the pipeline, not this run."
     )
 
@@ -805,17 +922,22 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
         by_id[9400]["description"] = (
             "CURRENT readiness is pipeline/run_type telemetry. SELECTED RUN Trust "
             "and retention tables are exact-run persisted evidence. An incomplete "
-            "selected run cannot be replayed even when current readiness is OK."
+            "selected run cannot be replayed even when current readiness is OK. "
+            "Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when "
+            "OUT OF RANGE. Effective refresh: 60s · timezone: browser."
         )
     if 9401 in by_id:
         readiness = by_id[9401]
         readiness["title"] = "Monitor Current Readiness"
-        readiness["fieldConfig"]["defaults"]["displayName"] = "Current readiness"
+        field_config = readiness.setdefault("fieldConfig", {})
+        defaults = field_config.setdefault("defaults", {})
+        defaults["displayName"] = "Monitor Current Readiness"
         readiness["description"] = (
             "CURRENT · Latest fresh pipeline/run_type telemetry. Run ID does not filter "
-            "this panel. OK = current checks pass; WARN = degraded; CRIT = failed; "
-            "UNKNOWN = missing or stale evidence. OK here does not authorize replay: "
-            "selected-run Trust INCOMPLETE or UNKNOWN still blocks replay."
+            "this panel. Palette: 0=OK, 1=WARN, 2=CRIT, null=UNKNOWN. This CURRENT "
+            "verdict is not exact-run processing_status or trust_status. OK here does "
+            "not authorize replay: selected-run trust_status INCOMPLETE or UNKNOWN "
+            "still blocks replay."
         )
     if 9418 in by_id:
         for link in by_id[9418].get("links", []):
@@ -828,9 +950,9 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
         by_id[9418]["description"] = (
             "SELECTED RUN · Aggregate Trust includes manifest, lineage and retention "
             "evidence for this run. ERROR wins; missing evidence is INCOMPLETE. "
-            "Processing success does not imply Trust OK. Inspect each validation "
-            "table for details. No selected run is a valid empty state (UNKNOWN). "
-            "Backend unavailable means QUERY ERROR."
+            "processing_status success does not imply trust_status OK. Inspect each "
+            "validation table for details. No selected run is a valid empty state "
+            "(UNKNOWN). Backend unavailable means QUERY ERROR."
         )
         by_id[9418]["options"]["footer"]["enablePagination"] = True
         for override in by_id[9418]["fieldConfig"]["overrides"]:
@@ -1031,10 +1153,15 @@ def apply_to_dashboard(
     _normalize_collapsed_row_children(panels)
     if current_uid == "bioetl-control-plane-v1":
         _layout_control_plane_detail_panels(panels)
+        _clarify_manifest_counter_evidence(panels)
     if current_uid == "bioetl-overview-v2":
         _layout_overview_detail_panels(panels)
     if current_uid == "bioetl-runtime":
         _layout_runtime_detail_panels(panels)
+    if current_uid == "bioetl-dq-v2":
+        _layout_dq_detail_panels(panels)
+    if current_uid == "bioetl-incident-v1":
+        _layout_incident_detail_panels(panels)
     nav["options"] = {
         "mode": "html",
         "bioetlDisplayTitle": NAV_DISPLAY_TITLE,

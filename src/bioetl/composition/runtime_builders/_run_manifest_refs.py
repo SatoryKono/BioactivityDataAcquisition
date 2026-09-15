@@ -7,12 +7,22 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
+from bioetl.composition.runtime_builders.input_snapshot_resolution import (
+    resolve_pipeline_input_snapshot_refs,
+)
 from bioetl.composition.runtime_builders._run_manifest_identity_ref_values import (
     build_contract_identity_field_values,
     build_control_plane_identity_ref_values,
 )
+from bioetl.domain.control_plane import RunSourceRef
+from bioetl.domain.control_plane.reproducibility_policy import (
+    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+    STRICT_PERSISTENCE_PROFILES,
+    normalize_required_persistence_profile,
+)
 
 if TYPE_CHECKING:
+    from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
     from bioetl.domain.control_plane import RunArtifactRef
     from bioetl.infrastructure.config.settings_api import Settings
 
@@ -59,6 +69,46 @@ def build_planned_artifacts(
         pipeline_name=pipeline_name,
         workflow_id=workflow_id,
         debug_export_root=debug_export_root,
+    )
+
+
+def build_run_source_refs(
+    *,
+    ctx: PipelineRunContext,
+    cached_bronze: CachedBronzeContext | None,
+    settings: Settings,
+    provider: str,
+    entity: str,
+    required_persistence_profile: object = DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+) -> tuple[RunSourceRef, ...]:
+    """Build source references and enforce strict snapshot persistence."""
+    input_snapshots = resolve_pipeline_input_snapshot_refs(
+        ctx=ctx,
+        cached_bronze=cached_bronze,
+        settings=settings,
+        provider=provider,
+        entity=entity,
+    )
+    required_profile = normalize_required_persistence_profile(
+        required_persistence_profile
+    )
+    strict_snapshot_required = bool(getattr(ctx, "exact_replay", False)) or (
+        required_profile in STRICT_PERSISTENCE_PROFILES
+    )
+    if strict_snapshot_required and not input_snapshots:
+        raise RuntimeError(
+            "Exact replay and strict persistence profiles require immutable "
+            "input snapshots; no snapshot-backed source refs were resolved "
+            f"for required persistence profile '{required_profile}'"
+        )
+    return (
+        RunSourceRef(
+            provider=provider,
+            entity=entity,
+            pipeline_name=ctx.pipeline_name,
+            query=getattr(ctx, "query", None),
+            input_snapshots=input_snapshots,
+        ),
     )
 
 

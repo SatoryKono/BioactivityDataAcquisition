@@ -9,7 +9,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import build_opener
 
 from bioetl.domain.exceptions import redact_string
-from bioetl.interfaces.cli.commands.domains.health.observability_backend_probes import (
+from bioetl.application.services.ops.observability_backend_probes import (
     _HttpProbeResponse,
     _UrlOpenFn,
 )

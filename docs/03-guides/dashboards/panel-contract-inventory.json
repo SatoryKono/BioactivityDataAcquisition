@@ -1032,12 +1032,12 @@
       "dashboard_uid": "bioetl-control-plane-v1",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
-      "documents_valid_empty": true,
+      "documents_valid_empty": false,
       "empty_state": "valid_empty",
       "formula": "sum by (status, run_type) (increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
       "kind": "promql",
       "panel_id": 131,
-      "panel_title": "Compare Manifest Writes by Status",
+      "panel_title": "Track Observed Manifest Write Increments",
       "query": "sum by (status, run_type) (increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
       "query_tokens": [
         "bioetl_control_plane_manifest_writes_total"
@@ -1435,13 +1435,13 @@
       "dashboard_uid": "bioetl-control-plane-v1",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
-      "documents_valid_empty": true,
+      "documents_valid_empty": false,
       "empty_state": "valid_empty",
-      "formula": "sum by (terminal_status) (increase(bioetl_control_plane_terminal_events_total{pipeline=~\"$pipeline\"}[$__range]))",
+      "formula": "sum by (terminal_status) (last_over_time(bioetl_control_plane_terminal_events_total{pipeline=~\"$pipeline\"}[$__range]))",
       "kind": "promql",
       "panel_id": 908,
-      "panel_title": "Review Terminal Run Outcomes",
-      "query": "sum by (terminal_status) (increase(bioetl_control_plane_terminal_events_total{pipeline=~\"$pipeline\"}[$__range]))",
+      "panel_title": "Review Observed Terminal Counters",
+      "query": "sum by (terminal_status) (last_over_time(bioetl_control_plane_terminal_events_total{pipeline=~\"$pipeline\"}[$__range]))",
       "query_tokens": [
         "bioetl_control_plane_terminal_events_total"
       ],

@@ -63,7 +63,7 @@ named modules below.
 | `filtering.py` | Cross-cutting | Record-filter and predicate contracts. |
 | `health_check.py` | Cross-cutting | Health/readiness probe contracts. |
 | `idmapping.py` | Cross-cutting | Identifier mapping and cross-reference contracts. |
-| `logger_port.py` | Cross-cutting | Structured logging port used outside observability package. |
+| `logger_port.py` | Cross-cutting | Compatibility re-export of the canonical `observability/logging.py` port. |
 | `pii.py` | Cross-cutting | PII redaction and audit-safe logging contracts. |
 | `protein_classification.py` | Cross-cutting | Protein classification vocabulary contracts. |
 | `publication_strategy.py` | Cross-cutting | Publication routing and strategy selection contracts. |

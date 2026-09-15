@@ -14,14 +14,12 @@ from shutil import which
 from typing import TYPE_CHECKING, Any, cast
 
 import bioetl
-from bioetl.interfaces.cli.commands.domains.health.server_integration import (
-    DEFAULT_HEALTH_SERVER_PORT,
-)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
 _PROCESS_PROBE_TIMEOUT_SECONDS = 5.0
+DEFAULT_HEALTH_SERVER_PORT = 8000
 _BIOETL_PACKAGE_ROOT = Path(bioetl.__file__).resolve().parent
 _BIOETL_SRC_ROOT = _BIOETL_PACKAGE_ROOT.parent
 _BIOETL_REPOSITORY_ROOT = _BIOETL_SRC_ROOT.parent
@@ -341,6 +339,7 @@ def python_executable_to_tuple(args: object) -> tuple[str, ...]:
 
 
 __all__ = [
+    "DEFAULT_HEALTH_SERVER_PORT",
     "build_detached_backend_log_path",
     "drop_listening_backend_on_port",
     "find_listening_backend_pid_by_port",
