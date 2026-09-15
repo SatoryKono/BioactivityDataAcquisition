@@ -112,7 +112,13 @@
       ],
       "duplication_clusters": 0,
       "files": 57,
+<<<<<<< HEAD
       "total_loc": 7220,
+||||||| fd94ae853cd
+      "total_loc": 7225,
+=======
+      "total_loc": 7221,
+>>>>>>> master20260915-2
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.375,
       "max_internal_fan_in": 3,

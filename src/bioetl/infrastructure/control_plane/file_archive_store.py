@@ -172,9 +172,7 @@ class FileArchiveStore:
             sources = self._sources(plan, manifest)
             seen: set[str] = set()
             for entry in entries:
-                entry_error = _entry_error(
-                    entry, sources=sources, seen=seen, pack=pack
-                )
+                entry_error = _entry_error(entry, sources=sources, seen=seen, pack=pack)
                 if entry_error is not None:
                     return False, entry_error
             if seen != set(sources):
