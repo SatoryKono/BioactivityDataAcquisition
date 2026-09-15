@@ -31,6 +31,18 @@ near_duplicates:
     Current cross-panel audited baseline is five reviewed near-duplicate
     families. Growth beyond five or a panel-set change requires review.
   reviewed_groups:
+    - id: overview-l0-domain-status-input-variants
+      disposition: retain_semantic_variants
+      recording_rule_decision: rejected_distinct_input_selectors
+      rationale: >
+        Overview domain-status tables share the same L0 fail-closed shape after
+        selector stripping, but each panel binds a different input domain.
+      panel_refs:
+        - "bioetl-overview-v2.json :: Review Control Plane Status"
+        - "bioetl-overview-v2.json :: Review Data Quality Status"
+        - "bioetl-overview-v2.json :: Review Data Validation Status"
+        - "bioetl-overview-v2.json :: Review Runtime Status"
+        - "bioetl-overview-v2.json :: Review Workflow Status"
     - id: processed-record-stage-range-variants
       disposition: retain_semantic_variants
       recording_rule_decision: rejected_distinct_stage_and_range_binding
@@ -64,13 +76,3 @@ near_duplicates:
       panel_refs:
         - "bioetl-runtime.json :: Inspect Active Runtime Blocker Detail"
         - "bioetl-runtime.json :: Review Runtime Blockers"
-    - id: provider-cause-topk-depth-variants
-      disposition: retain_presentation_variants
-      recording_rule_decision: rejected_topk_is_consumer_specific
-      rationale: >
-        Incident suspect strip uses topk(10) for broader triage while Provider
-        Health keeps topk(5) as the board-first summary; recording either depth
-        would make the other consumer semantically wrong.
-      panel_refs:
-        - "bioetl-incident-v1.json :: Inspect Provider Suspects"
-        - "bioetl-provider-health-v2.json :: Inspect Top Provider Causes"

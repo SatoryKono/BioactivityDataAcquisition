@@ -12,7 +12,7 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 64
+    panel_count: 66
     key_panels:
       - id: 891
         title: "Monitor Replay Safety"

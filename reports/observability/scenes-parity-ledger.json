@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "9e45de59e607402da729824553f30cf04cc5b488cc3cfb955bd2e1f43f47524a",
+    "bioetl-control-plane-v1": "688814424ffdfa57d1f9912ca164607618facd662be010d2302d5d13d2fb9eb6",
     "bioetl-dq-v2": "eb3f91a3a5af80fa070c22017c5ebb4522f24ce95a9121d90538f66626a53ee9",
     "bioetl-incident-v1": "3f880d07e0de5f2cb681ca2203ab05160212c6d7e033a7aa214e102a0a307915",
-    "bioetl-overview-v2": "5a79f3b666bdd3e599ccfe3726e17afe2ee8c94d6db582906bef47b26a8a76f8",
+    "bioetl-overview-v2": "b8a15994619927ca1a9ad36a7128096ec39068e1e64efd253eaf11270688b800",
     "bioetl-provider-health-v2": "928b6fb15c09f3cf1844015895f5a3f5e4f32baa24fb2c03c78df6fdc88a74e1",
     "bioetl-run-explorer-v1": "7bcff4013e2a78cd631fcf3f5953d7cfc46c33046d5b72926395606e1c281129",
-    "bioetl-runtime": "7e7bdae460927fd1055b99b6fbab80abb57207e8118fdf8fe6fa06235d8c8c9f"
+    "bioetl-runtime": "9a98731388da14d6aad53df01601dda78c63653109194b3509712163f5f6ff4e"
   },
   "panels": [
     {
@@ -1105,6 +1105,25 @@
         "datasource_uid": null,
         "expressions": [
           "/ops/control-plane/failure-reasons?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-control-plane-v1",
+      "panel_id": 9421,
+      "panel_title": "Inspect Latest Complete Run",
+      "route": "data-trust-recovery",
+      "source": {
+        "datasource_type": null,
+        "datasource_uid": null,
+        "expressions": [
+          "/ops/control-plane/latest-complete-run?workflow=${workflow:csv}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&error_as_row=1"
         ],
         "target_count": 1
       }
@@ -2261,7 +2280,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (pipeline) (bioetl_l1_control_plane_current_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_control_plane_current_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")"
+          "max by (pipeline) (bioetl_l0_input_status_selected{input=\"control_plane\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")"
         ],
         "target_count": 1
       }
@@ -2280,7 +2299,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (pipeline) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_runtime_blocker_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")"
+          "max by (pipeline) (bioetl_l0_input_status_selected{input=\"runtime\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")"
         ],
         "target_count": 1
       }
@@ -2299,7 +2318,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (pipeline) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_dq_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")"
+          "max by (pipeline) (bioetl_l0_input_status_selected{input=\"dq\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")"
         ],
         "target_count": 1
       }
@@ -2337,7 +2356,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (pipeline) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_gold_lifecycle_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")"
+          "max by (pipeline) (bioetl_l0_input_status_selected{input=\"gold\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")"
         ],
         "target_count": 1
       }
@@ -2356,7 +2375,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (pipeline) (bioetl_l1_workflow_global_status{pipeline=~\"$pipeline\",pipeline!=\"test_pipe\"} or ((bioetl_l1_workflow_global_status{pipeline!=\"test_pipe\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")"
+          "max by (pipeline) (bioetl_l0_input_status_selected{input=\"workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")"
         ],
         "target_count": 1
       }
@@ -3858,7 +3877,7 @@
     "dashboard_uid_count": 7,
     "hidden_datasources": [],
     "missing_dashboard_uids": [],
-    "panel_disposition_count": 203,
+    "panel_disposition_count": 204,
     "parity_status": "pass",
     "route_count": 6,
     "run_id_prometheus_violations": [],
