@@ -110,6 +110,8 @@ class Settings(StoragePathSettingsMixin, BaseSettings):
     # Local storage paths
     data_dir: Path = Field(default=Path("data"))
     """Base directory for all data storage (bronze, silver, gold, checkpoints)."""
+    archive_root: Path | None = Field(default=None)
+    """Optional separate local archive root; no archive availability is assumed."""
 
     pipeline: PipelineSettings = Field(default_factory=PipelineSettings)
     observability: ObservabilitySettings = Field(default_factory=ObservabilitySettings)

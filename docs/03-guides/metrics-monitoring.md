@@ -951,3 +951,22 @@ Selected-run retention re-reads its bounded artifact set for every request. It d
 not reuse a verdict solely by manifest ID: snapshots can be corrupted or removed,
 and the retention cutoff changes with time. Keep the existing forensic endpoint
 deadline; measure cold and repeated requests separately when diagnosing latency.
+
+Local archive verification is opt-in through `BIOETL_ARCHIVE_ROOT`, pointing to a
+separate directory readable by the Ops process. Set it in the process environment
+or deployment configuration; no `.env` edit is required. The default is no archive
+reader and an honest UNKNOWN. Produce a new pack with
+`python -m scripts.ops.observability.archive_control_plane --data-root <data> --archive-root <archive> --manifest <manifest.json>`;
+use the same command with `--verify-only` to recheck it. An existing pack is never
+overwritten, and the producer never removes source files. Interrupted packs remain
+unverified and require inspection. Each pack contains the selected lifecycle
+inventory, manifest identity, hashes, archive copies and restored copies. Ops
+rechecks inventory, identity, both copies and the retained source on every read.
+Missing evidence stays UNKNOWN; corruption or identity/inventory mismatch is ERROR.
+This proves a local restore, not off-host durability or replay safety.
+
+The Archive row distinguishes `N/A: policy` from `Archive verified`. N/A requires
+the run's original referenced `archive_policy.required=false`; it contributes OK
+to applicability but does not attest copies. Do not rewrite old manifests to add
+this policy. A real archive can provide current copy evidence for a historical
+manifest without changing its original contents or overriding other Trust errors.

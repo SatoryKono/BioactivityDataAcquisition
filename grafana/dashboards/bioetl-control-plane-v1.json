@@ -757,7 +757,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 130
+                "value": 90
               }
             ]
           },
@@ -873,7 +873,7 @@
     },
     {
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Retention policy, evidence floor, required evidence, snapshot evidence, and archive (five structured rows). Check column header is the live summary from payload summary.ok_count / summary.unknown_count (not a hardcoded title). Non-OK statuses sort before OK. UNKNOWN is not a healthy zero. HTTP 504 deadline_exceeded is backend unavailable — refresh; datasource error must not be treated as OK. TIME RANGE · SELECTED RUN retention policy, reproducibility evidence floor, required evidence, and archive support. First-screen table — not inside a collapsed row. UNKNOWN is not a healthy zero. No matching rows are a valid empty result; HTTP 504 deadline_exceeded is backend unavailable — refresh the panel; datasource error must not be treated as OK. SELECT RUN / VALID EMPTY is not OK. These rows are trust_status / retention evidence, not processing_status success.",
+      "description": "SELECTED RUN · Retention policy, evidence floor, required evidence, snapshot evidence, and archive (five structured rows). Check column header is the live summary from payload summary.ok_count / summary.unknown_count (not a hardcoded title). Non-OK statuses sort before OK. UNKNOWN is not a healthy zero. HTTP 504 deadline_exceeded is backend unavailable — refresh; datasource error must not be treated as OK. TIME RANGE · SELECTED RUN retention policy, reproducibility evidence floor, required evidence, and archive support. First-screen table — not inside a collapsed row. UNKNOWN is not a healthy zero. No matching rows are a valid empty result; HTTP 504 deadline_exceeded is backend unavailable — refresh the panel; datasource error must not be treated as OK. SELECT RUN / VALID EMPTY is not OK. These rows are trust_status / retention evidence, not processing_status success. Archive N/A means a referenced policy does not require archiving; it is not proof of an archive. Archive verified means local copies and restore evidence passed current hash and identity checks.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1008,6 +1008,30 @@
                       },
                       "archive_evidence_not_recorded": {
                         "text": "Archive missing"
+                      },
+                      "archive_not_applicable": {
+                        "text": "N/A: policy"
+                      },
+                      "archive_restore_verified": {
+                        "text": "Archive verified"
+                      },
+                      "archive_identity_mismatch": {
+                        "text": "Identity mismatch"
+                      },
+                      "archive_checksum_mismatch": {
+                        "text": "Checksum mismatch"
+                      },
+                      "archive_inventory_mismatch": {
+                        "text": "Files mismatch"
+                      },
+                      "archive_source_mismatch": {
+                        "text": "Source changed"
+                      },
+                      "archive_evidence_invalid": {
+                        "text": "Archive invalid"
+                      },
+                      "archive_index_invalid": {
+                        "text": "Index invalid"
                       }
                     }
                   }

@@ -959,6 +959,30 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
             "not authorize replay: selected-run trust_status INCOMPLETE or UNKNOWN "
             "still blocks replay."
         )
+    if 9416 in by_id:
+        retention = by_id[9416]
+        note = (
+            " Archive N/A means a referenced policy does not require archiving; "
+            "it is not proof of an archive. Archive verified means local copies "
+            "and restore evidence passed current hash and identity checks."
+        )
+        if note not in retention.get("description", ""):
+            retention["description"] = retention.get("description", "") + note
+        for override in retention.get("fieldConfig", {}).get("overrides", []):
+            if override.get("matcher", {}).get("options") != "reason":
+                continue
+            for prop in override.get("properties", []):
+                if prop.get("id") == "mappings":
+                    prop["value"][0]["options"].update({
+                        "archive_not_applicable": {"text": "N/A: policy"},
+                        "archive_restore_verified": {"text": "Archive verified"},
+                        "archive_identity_mismatch": {"text": "Identity mismatch"},
+                        "archive_checksum_mismatch": {"text": "Checksum mismatch"},
+                        "archive_inventory_mismatch": {"text": "Files mismatch"},
+                        "archive_source_mismatch": {"text": "Source changed"},
+                        "archive_evidence_invalid": {"text": "Archive invalid"},
+                        "archive_index_invalid": {"text": "Index invalid"},
+                    })
     if 9418 in by_id:
         for link in by_id[9418].get("links", []):
             if "viewPanel=9414" in str(link.get("url", "")):
@@ -981,7 +1005,7 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
         overrides = field_config.setdefault("overrides", [])
         for override in overrides:
             field = override.get("matcher", {}).get("options")
-            width = {"Processing": 80, "Trust": 130, "Observed at": 130}.get(field)
+            width = {"Processing": 80, "Trust": 130, "Observed at": 90}.get(field)
             if width is not None:
                 for prop in override.get("properties", []):
                     if prop.get("id") == "custom.width":

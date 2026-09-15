@@ -38,10 +38,19 @@ class ControlPlaneLifecyclePlanner(Protocol):
     ) -> ControlPlaneArtifactLifecyclePlan: ...
 
 
+class ArchiveVerifier(Protocol):
+    """Inspect real archived and restored copies for the selected manifest."""
+
+    def verify(
+        self, *, manifest: RunManifest, plan: ControlPlaneArtifactLifecyclePlan
+    ) -> tuple[bool | None, str]: ...
+
+
 def build_retention_checks(
     *,
     manifest: RunManifest,
     plan: ControlPlaneArtifactLifecyclePlan,
+    archive_verifier: ArchiveVerifier | None = None,
 ) -> tuple[tuple[EvidenceCheckResult, ...], tuple[ControlPlaneArtifactRef, ...]]:
     """Classify lifecycle-plan evidence for one manifest without applying it."""
     relevant = tuple(
@@ -49,7 +58,18 @@ def build_retention_checks(
         for artifact in plan.artifacts
         if _artifact_matches_manifest(artifact, manifest)
     )
-    return retention_evidence_checks(manifest, relevant, cutoff=plan.cutoff), relevant
+    checks = retention_evidence_checks(manifest, relevant, cutoff=plan.cutoff)
+    if archive_verifier is not None and checks[-1].reason != "archive_not_applicable":
+        verified, reason = archive_verifier.verify(manifest=manifest, plan=plan)
+        archive = EvidenceCheckResult(
+            "archive",
+            "OK" if verified is True else "ERROR" if verified is False else "UNKNOWN",
+            reason,
+            "Local archive and restored copies are hash-checked against selected-run "
+            "evidence on every read. This is not an off-host durability guarantee.",
+        )
+        checks = (*checks[:-1], archive)
+    return checks, relevant
 
 
 def _artifact_matches_manifest(
@@ -118,6 +138,7 @@ def summarize_retention_artifacts(
 
 
 __all__ = [
+    "ArchiveVerifier",
     "ControlPlaneLifecyclePlanner",
     "build_retention_checks",
     "serialize_resolution_issues",
