@@ -52,6 +52,20 @@ from tests.unit.application.services.run_manifest_test_support import (
 pytestmark = pytest.mark.unit
 
 
+def _resolver_callables(**overrides: object) -> dict[str, object]:
+    payload: dict[str, object] = {
+        "assemble_vacuum_settings_fn": _assembly.assemble_vacuum_settings,
+        "assemble_runtime_config_fn": _assembly.assemble_runtime_config,
+        "assemble_filter_config_fn": _assembly.assemble_filter_config,
+        "assemble_cached_bronze_context_fn": _assembly.assemble_cached_bronze_context,
+        "load_source_config_fn": lambda *_args, **_kwargs: SimpleNamespace(),
+        "validate_pk_contract_fn": _assembly.validate_pk_contract,
+        "adjust_batch_size_for_filter_fn": _assembly.adjust_batch_size_for_filter,
+    }
+    payload.update(overrides)
+    return payload
+
+
 def _make_context(**overrides: object) -> SimpleNamespace:
     base = {
         "pipeline_name": "chembl_activity",
@@ -139,10 +153,7 @@ def test_prepare_runner_inputs_projects_probe_mode_and_sink_disabled_skip_gold()
         get_settings_fn=lambda: settings,
         load_pipeline_config_fn=lambda _pipeline: yaml_config,
         build_observability_bundle_fn=lambda **_: SimpleNamespace(logger=logger),
-        assemble_vacuum_settings_fn=inputs_resolver.assemble_vacuum_settings,
-        assemble_runtime_config_fn=inputs_resolver.assemble_runtime_config,
-        assemble_filter_config_fn=inputs_resolver.assemble_filter_config,
-        assemble_cached_bronze_context_fn=inputs_resolver.assemble_cached_bronze_context,
+        **_resolver_callables(),
     )
 
     assert result.runtime_config.health_check_mode == "probe"
@@ -170,10 +181,7 @@ def test_prepare_runner_inputs_applies_tracing_override_before_bundle_build() ->
         get_settings_fn=lambda: settings,
         load_pipeline_config_fn=lambda _pipeline: yaml_config,
         build_observability_bundle_fn=_build_observability_bundle,
-        assemble_vacuum_settings_fn=inputs_resolver.assemble_vacuum_settings,
-        assemble_runtime_config_fn=inputs_resolver.assemble_runtime_config,
-        assemble_filter_config_fn=inputs_resolver.assemble_filter_config,
-        assemble_cached_bronze_context_fn=inputs_resolver.assemble_cached_bronze_context,
+        **_resolver_callables(),
     )
 
     assert observed["tracing_enabled"] is True
@@ -235,10 +243,7 @@ def test_prepare_runner_inputs_auto_resolves_cached_bronze_for_exact_replay_pare
         get_settings_fn=lambda: settings,
         load_pipeline_config_fn=lambda _pipeline: yaml_config,
         build_observability_bundle_fn=lambda **_: SimpleNamespace(logger=logger),
-        assemble_vacuum_settings_fn=inputs_resolver.assemble_vacuum_settings,
-        assemble_runtime_config_fn=inputs_resolver.assemble_runtime_config,
-        assemble_filter_config_fn=inputs_resolver.assemble_filter_config,
-        assemble_cached_bronze_context_fn=inputs_resolver.assemble_cached_bronze_context,
+        **_resolver_callables(),
     )
 
     assert result.cached_bronze.enabled is True
@@ -251,7 +256,7 @@ def test_prepare_runner_inputs_auto_resolves_cached_bronze_for_exact_replay_pare
 def test_assemble_runtime_config_propagates_replay_anchor_date_for_exact_replay() -> (
     None
 ):
-    result = inputs_resolver.assemble_runtime_config(
+    result = _assembly.assemble_runtime_config(
         ctx=_make_context(
             exact_replay=True,
             cached_bronze=SimpleNamespace(
@@ -282,7 +287,7 @@ def test_resolve_health_check_mode_defaults_to_strict_when_pipeline_mode_missing
         pipeline=SimpleNamespace(),
     )
 
-    result = inputs_resolver.resolve_health_check_mode(settings=settings)
+    result = _assembly.resolve_health_check_mode(settings=settings)
 
     assert result == "strict"
 
@@ -292,7 +297,7 @@ def test_resolve_filter_batch_size_falls_back_to_source_config_pagination() -> N
     calls: list[str] = []
     yaml_config = _make_yaml_config()
 
-    result = inputs_resolver.resolve_filter_batch_size(
+    result = _assembly.resolve_filter_batch_size(
         yaml_config,
         load_source_config_fn=lambda provider: (
             calls.append(provider)
@@ -314,7 +319,7 @@ def test_resolve_filter_batch_size_returns_none_on_loader_error_or_invalid_value
 ) -> None:
     yaml_config = _make_yaml_config()
 
-    result = inputs_resolver.resolve_filter_batch_size(
+    result = _assembly.resolve_filter_batch_size(
         yaml_config,
         load_source_config_fn=loader,
     )
@@ -334,7 +339,7 @@ def test_adjust_batch_size_for_filter_mutates_yaml_and_logs_when_filter_is_activ
         )
     )
 
-    inputs_resolver.adjust_batch_size_for_filter(
+    _assembly.adjust_batch_size_for_filter(
         yaml_config=yaml_config,
         filter_config=SimpleNamespace(source_path="ids.csv"),
         observability=observability,
@@ -387,7 +392,7 @@ def test_adjust_batch_size_for_filter_noops_without_active_filter_or_resolved_si
         )
     )
 
-    inputs_resolver.adjust_batch_size_for_filter(
+    _assembly.adjust_batch_size_for_filter(
         yaml_config=yaml_config,
         filter_config=filter_config,
         observability=observability,
@@ -435,12 +440,11 @@ def test_prepare_runner_inputs_adjusts_batch_size_from_source_config_when_filter
         get_settings_fn=lambda: settings,
         load_pipeline_config_fn=lambda _pipeline: yaml_config,
         build_observability_bundle_fn=lambda **_: SimpleNamespace(logger=logger),
-        assemble_vacuum_settings_fn=inputs_resolver.assemble_vacuum_settings,
-        assemble_runtime_config_fn=inputs_resolver.assemble_runtime_config,
-        assemble_filter_config_fn=lambda **_: filter_config,
-        assemble_cached_bronze_context_fn=inputs_resolver.assemble_cached_bronze_context,
-        load_source_config_fn=lambda _provider: SimpleNamespace(
-            pagination=SimpleNamespace(id_batch_size=25)
+        **_resolver_callables(
+            assemble_filter_config_fn=lambda **_: filter_config,
+            load_source_config_fn=lambda _provider: SimpleNamespace(
+                pagination=SimpleNamespace(id_batch_size=25)
+            ),
         ),
     )
 
@@ -469,7 +473,7 @@ def test_validate_pk_contract_requires_business_primary_keys() -> None:
     )
 
     with pytest.raises(ValueError, match="business_primary_keys must be non-empty"):
-        inputs_resolver.validate_pk_contract(config)
+        _assembly.validate_pk_contract(config)
 
 
 def test_validate_pk_contract_ignores_legacy_attribute_when_present() -> None:
@@ -479,7 +483,7 @@ def test_validate_pk_contract_ignores_legacy_attribute_when_present() -> None:
         technical_primary_key="entity_id",
     )
 
-    inputs_resolver.validate_pk_contract(config)
+    _assembly.validate_pk_contract(config)
 
 
 def test_validate_pk_contract_requires_technical_primary_key() -> None:
@@ -489,4 +493,4 @@ def test_validate_pk_contract_requires_technical_primary_key() -> None:
     )
 
     with pytest.raises(ValueError, match="technical_primary_key must be non-empty"):
-        inputs_resolver.validate_pk_contract(config)
+        _assembly.validate_pk_contract(config)
