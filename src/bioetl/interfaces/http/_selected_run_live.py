@@ -10,6 +10,19 @@ from bioetl.domain.types import RunID
 from bioetl.interfaces.http._health_server_observability_protocols import (
     _HealthObservabilityRoutingHost,
 )
+from bioetl.interfaces.http.run_report_ops import _normalize_list_owner, _safe_segment
+
+
+def pipeline_owners(selection: str) -> set[str] | None:
+    """Parse Grafana All, glob-list and CSV selectors without widening their scope."""
+    if _normalize_list_owner(selection) is None:
+        return None
+    if selection.startswith("{") and selection.endswith("}"):
+        selection = selection[1:-1]
+    owners = set(selection.split(","))
+    if any(not owner or _safe_segment(owner) != owner for owner in owners):
+        raise ValueError("invalid_pipeline_selector")
+    return owners
 
 
 def active_run_diagnostics(
@@ -22,15 +35,8 @@ def active_run_diagnostics(
     manifest = host._run_manifest_port.get_by_run_id(selected_id)
     if manifest is None:
         return None
-    if pipeline not in {
-        manifest.pipeline_name,
-        ".*",
-        "All",
-        "all",
-        "*",
-        "$__all",
-        "__all",
-    }:
+    owners = pipeline_owners(pipeline)
+    if owners is not None and manifest.pipeline_name not in owners:
         return {"verdict": "ERROR", "reason": "identity_mismatch"}
     entries = (
         host._run_ledger_port.list_entries_by_run_id(selected_id)

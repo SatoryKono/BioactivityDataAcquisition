@@ -294,7 +294,13 @@ def test_workflow_completion_creates_explicit_child_revision(tmp_path):
 @pytest.mark.parametrize(
     "event,expected", [("run_started", "RUNNING"), ("run_finished", "INCOMPLETE")]
 )
-def test_active_and_unfinalized_run_do_not_expire(monkeypatch, event, expected):
+@pytest.mark.parametrize(
+    "pipeline",
+    ["chembl_activity", "{unknown,chembl_activity}", "unknown,chembl_activity"],
+)
+def test_active_and_unfinalized_run_do_not_expire(
+    monkeypatch, event, expected, pipeline
+):
     from types import SimpleNamespace
     from bioetl.interfaces.http._selected_run_live import active_run_diagnostics
 
@@ -313,7 +319,7 @@ def test_active_and_unfinalized_run_do_not_expire(monkeypatch, event, expected):
         )
     ]
     value = active_run_diagnostics(
-        host, "chembl_activity", "00000000-0000-0000-0000-000000000001"
+        host, pipeline, "00000000-0000-0000-0000-000000000001"
     )
     assert value["verdict"] == expected
     assert value["heartbeat_now"] == "STALE"
@@ -615,7 +621,17 @@ def test_preflight_observations_retain_actual_probe_status(status, verdict):
         reset_run_observations(token)
 
 
-@pytest.mark.parametrize("pipeline", [".*", "All", "$__all", "*"])
+@pytest.mark.parametrize(
+    "pipeline",
+    [
+        ".*",
+        "All",
+        "$__all",
+        "*",
+        "{unknown,chembl_activity}",
+        "unknown,chembl_activity",
+    ],
+)
 def test_all_pipeline_selector_resolves_exact_saved_run(tmp_path, pipeline):
     persist(tmp_path)
     result = load_selected_run_status(pipeline=pipeline, run_id="run-a", root=tmp_path)
@@ -811,5 +827,79 @@ async def test_delegated_gold_rejection_distinguishes_storage_failure(
             await observe_gold_write(write(), 1)
         observation = run_observations().get("Data Validation")
         assert (observation["verdict"] if observation else None) == expected
+    finally:
+        reset_run_observations(token)
+
+
+@pytest.mark.parametrize(
+    "pipeline", ["{unknown,pubmed_publication}", "unknown,pubmed_publication"]
+)
+def test_pipeline_list_does_not_retain_foreign_run(tmp_path, pipeline):
+    persist(tmp_path)
+    result = load_selected_run_status(pipeline=pipeline, run_id="run-a", root=tmp_path)
+    assert result["reason"] == "run_not_found"
+
+
+def test_pipeline_list_rejects_ambiguous_run(tmp_path):
+    persist(tmp_path)
+    other = report()
+    other.identity["pipeline_name"] = "pubmed_publication"
+    persist(tmp_path, other)
+    result = load_selected_run_status(
+        pipeline="{chembl_activity,pubmed_publication}", run_id="run-a", root=tmp_path
+    )
+    assert result["reason"] == "run_id_ambiguous"
+
+
+@pytest.mark.parametrize("location", ["report", "revision"])
+def test_archive_rejects_replay_evidence_from_previous_manifest(tmp_path, location):
+    from types import SimpleNamespace
+    from bioetl.infrastructure.control_plane.archive_run_reports import (
+        selected_report_sources,
+    )
+
+    current = report()
+    current.identity["manifest_id"] = "current-manifest"
+    path = persist(tmp_path, current).json_path
+    manifest = SimpleNamespace(
+        run_id="run-a", pipeline_name="chembl_activity", manifest_id="current-manifest"
+    )
+    assert selected_report_sources(tmp_path, manifest)
+    previous = report()
+    previous.identity["manifest_id"] = "previous-manifest"
+    if location == "report":
+        persist(tmp_path, previous)
+    else:
+        old = build_snapshot(previous.to_dict())
+        (path.parent / "status-revisions" / (old["revision"] + ".json")).write_text(
+            json.dumps(old), encoding="utf-8"
+        )
+    with pytest.raises(ValueError, match="archive_.*identity_mismatch"):
+        selected_report_sources(tmp_path, manifest)
+
+
+@pytest.mark.parametrize("reason", [None, "status_downgrade", "exception"])
+def test_provider_observation_preserves_probe_fallback(reason):
+    from bioetl.application.services.run_reports.observations import (
+        observed_health_report,
+    )
+    from bioetl.domain.types import ComponentHealthResult, HealthStatus
+
+    token = bind_run_observations()
+    try:
+        observed_health_report(
+            [
+                ComponentHealthResult(
+                    component="data_source",
+                    status=HealthStatus.DEGRADED,
+                    duration_seconds=0,
+                    probe_fallback_reason=reason,
+                )
+            ],
+            datetime(2026, 1, 1, tzinfo=UTC),
+        )
+        provider = run_observations()["Provider"]
+        assert provider["verdict"] == "WARN"
+        assert provider["facts"]["probe_fallback_reason"] == reason
     finally:
         reset_run_observations(token)

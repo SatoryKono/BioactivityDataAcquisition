@@ -100,15 +100,8 @@ def test_write_pipeline_run_report(tmp_path: Path) -> None:
     assert written.latest_path is not None and written.latest_path.is_file()
     payload = json.loads(written.json_path.read_text(encoding="utf-8"))
     assert payload["schema_version"] == "pipeline_run_report_v2"
-    from jsonschema import Draft202012Validator
 
-    schema = json.loads(
-        (
-            Path(__file__).resolve().parents[3]
-            / "configs/contracts/reports/pipeline_run_report.v2.json"
-        ).read_text(encoding="utf-8")
-    )
-    assert list(Draft202012Validator(schema).iter_errors(payload)) == []
+    assert list(_report_validator().iter_errors(payload)) == []
     kinds = {item["kind"] for item in payload["artifacts"]}
     assert "pipeline_run_report_json" in kinds
     assert "pipeline_run_report_md" in kinds
@@ -247,7 +240,6 @@ def test_atomic_write_uses_injected_store(tmp_path: Path) -> None:
 
 
 def test_v2_schema_rejects_unstructured_domain_rows(tmp_path: Path) -> None:
-    from jsonschema import Draft202012Validator
 
     report = build_pipeline_run_report(
         identity={
@@ -262,13 +254,25 @@ def test_v2_schema_rejects_unstructured_domain_rows(tmp_path: Path) -> None:
         report, root=tmp_path, store=FileRunReportStoreAdapter()
     )
     payload = json.loads(written.json_path.read_text())
-    schema = json.loads(
-        (
-            Path(__file__).resolve().parents[3]
-            / "configs/contracts/reports/pipeline_run_report.v2.json"
-        ).read_text(encoding="utf-8")
-    )
-    validator = Draft202012Validator(schema)
+    validator = _report_validator()
     assert list(validator.iter_errors(payload)) == []
     payload["selected_run_snapshot"]["assessment"]["domains"] = [None] * 6
     assert list(validator.iter_errors(payload))
+
+
+def _report_validator():
+    """Resolve both published schema versions locally, without network retrieval."""
+    from jsonschema import Draft202012Validator
+    from referencing import Registry, Resource
+
+    root = Path(__file__).resolve().parents[3] / "configs/contracts/reports"
+    schemas = [
+        json.loads(
+            (root / f"pipeline_run_report.v{version}.json").read_text(encoding="utf-8")
+        )
+        for version in (1, 2)
+    ]
+    registry = Registry().with_resources(
+        (schema["$id"], Resource.from_contents(schema)) for schema in schemas
+    )
+    return Draft202012Validator(schemas[1], registry=registry)

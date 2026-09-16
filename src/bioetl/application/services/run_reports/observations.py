@@ -103,6 +103,7 @@ def observed_health_report(
                     if report.checked_at is not None
                     else None,
                     "status": component.status.value,
+                    "probe_fallback_reason": component.probe_fallback_reason,
                 },
             )
 

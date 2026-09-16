@@ -82,6 +82,32 @@ def _panel(
     }
 
 
+def _detail_fields(panel: dict, fields: list[str]) -> None:
+    """Show evidence fields explicitly instead of exposing the entire API envelope."""
+    for transform in panel["transformations"]:
+        if transform["id"] == "filterFieldsByName":
+            transform["options"]["include"]["names"] = fields
+        if transform["id"] == "organize":
+            transform["options"]["indexByName"] = {
+                name: index for index, name in enumerate(fields)
+            }
+            transform["options"]["renameByName"].update(
+                {
+                    "reason": "Reason",
+                    "action": "Action",
+                    "evidence_ref": "Evidence reference",
+                    "pipeline": "Pipeline",
+                    "run_id": "Run ID",
+                    "completed_at": "Completed",
+                    "revision": "Revision",
+                }
+            )
+    panel["fieldConfig"]["defaults"]["custom"]["cellOptions"]["wrapText"] = True
+    panel["fieldConfig"]["defaults"]["custom"]["minWidth"] = 50
+    panel["options"]["cellHeight"] = "lg"
+    panel["options"]["footer"]["enablePagination"] = True
+
+
 def _walk_panels(panels):
     for panel in panels:
         if isinstance(panel, dict):
@@ -229,14 +255,24 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
         {"x": 0, "y": y + 1, "w": 24, "h": 10},
         domains=True,
     )
-    details["transformations"] = []
+    _detail_fields(details, ["domain", "verdict", "reason", "action", "evidence_ref"])
     summary = _panel(
         9452,
         "Inspect Selected Run Identity",
-        {"x": 0, "y": y + 11, "w": 24, "h": 6},
+        {"x": 0, "y": y + 11, "w": 24, "h": 8},
         domains=False,
     )
-    summary["transformations"] = []
+    _detail_fields(
+        summary,
+        [
+            "pipeline",
+            "run_id",
+            "completed_at",
+            "rules_version",
+            "revision",
+            "evidence_completeness",
+        ],
+    )
     panels.append(
         {
             "id": 9450,

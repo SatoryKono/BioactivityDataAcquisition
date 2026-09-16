@@ -19,8 +19,7 @@
       "const": "pipeline_run_report_v2"
     },
     "reason_catalog_version": {
-      "type": "string",
-      "minLength": 1
+      "$ref": "bioetl://contracts/reports/pipeline_run_report.v1.json#/properties/reason_catalog_version"
     },
     "identity": {
       "type": "object",
@@ -114,345 +113,49 @@
       }
     },
     "funnel": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "stage_id",
-          "records_in",
-          "records_out",
-          "removed_total",
-          "removals",
-          "balance_status",
-          "tracking"
-        ],
-        "properties": {
-          "stage_id": {
-            "type": "string",
-            "enum": [
-              "extract",
-              "bronze",
-              "silver",
-              "gold",
-              "export"
-            ]
-          },
-          "records_in": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "records_out": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "removed_total": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "removals": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": [
-                "outcome",
-                "reason_code",
-                "count"
-              ],
-              "properties": {
-                "outcome": {
-                  "type": "string",
-                  "enum": [
-                    "filtered_out",
-                    "quarantined",
-                    "skipped",
-                    "deduplicated",
-                    "excluded_by_contract",
-                    "other"
-                  ]
-                },
-                "reason_code": {
-                  "type": "string",
-                  "minLength": 1
-                },
-                "reason_family": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
-                },
-                "count": {
-                  "type": "integer",
-                  "minimum": 0
-                },
-                "sample_refs": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  },
-                  "maxItems": 20
-                }
-              }
-            }
-          },
-          "balance_status": {
-            "type": "string",
-            "enum": [
-              "OK",
-              "DEGRADED",
-              "FAILING",
-              "UNKNOWN"
-            ]
-          },
-          "tracking": {
-            "type": "string",
-            "enum": [
-              "full",
-              "partial",
-              "not_tracked"
-            ]
-          },
-          "unaccounted": {
-            "type": "integer",
-            "minimum": 0
-          }
-        }
-      }
+      "$ref": "bioetl://contracts/reports/pipeline_run_report.v1.json#/properties/funnel"
     },
     "layers": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "bronze_records",
-        "silver_valid",
-        "silver_filtered_out",
-        "silver_quarantined",
-        "silver_skipped",
-        "silver_deduplicated",
-        "gold_written",
-        "gold_excluded_by_contract",
-        "gold_quarantined",
-        "gold_skipped",
-        "gold_deduplicated"
-      ],
-      "properties": {
-        "bronze_records": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "silver_valid": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "silver_filtered_out": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "silver_quarantined": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "silver_skipped": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "silver_deduplicated": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "gold_written": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "gold_excluded_by_contract": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "gold_quarantined": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "gold_skipped": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "gold_deduplicated": {
-          "type": "integer",
-          "minimum": 0
-        }
-      }
+      "$ref": "bioetl://contracts/reports/pipeline_run_report.v1.json#/properties/layers"
     },
     "reasons_top_n": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "reason_code",
-          "count"
-        ],
-        "properties": {
-          "reason_code": {
-            "type": "string"
-          },
-          "reason_family": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "outcome": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "count": {
-            "type": "integer",
-            "minimum": 0
-          }
-        }
-      }
+      "$ref": "bioetl://contracts/reports/pipeline_run_report.v1.json#/properties/reasons_top_n"
     },
     "artifacts": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "kind",
-          "ref"
-        ],
-        "properties": {
-          "kind": {
-            "type": "string"
-          },
-          "ref": {
-            "type": "string"
-          },
-          "hash": {
-            "type": [
-              "string",
-              "null"
-            ]
-          }
-        }
-      }
+      "$ref": "bioetl://contracts/reports/pipeline_run_report.v1.json#/properties/artifacts"
     },
     "reconciliation": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "silver_vs_bronze_status",
-        "gold_vs_silver_status",
-        "silver_accounted",
-        "gold_accounted"
-      ],
-      "properties": {
-        "silver_vs_bronze_status": {
-          "type": "string",
-          "enum": [
-            "OK",
-            "DEGRADED",
-            "FAILING",
-            "UNKNOWN"
-          ]
-        },
-        "gold_vs_silver_status": {
-          "type": "string",
-          "enum": [
-            "OK",
-            "DEGRADED",
-            "FAILING",
-            "UNKNOWN"
-          ]
-        },
-        "silver_accounted": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "gold_accounted": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "silver_delta": {
-          "type": "integer"
-        },
-        "gold_delta": {
-          "type": "integer"
-        }
-      }
+      "$ref": "bioetl://contracts/reports/pipeline_run_report.v1.json#/properties/reconciliation"
     },
     "tracking_coverage": {
-      "type": "string",
-      "enum": [
-        "full",
-        "partial",
-        "not_tracked"
-      ]
+      "$ref": "bioetl://contracts/reports/pipeline_run_report.v1.json#/properties/tracking_coverage"
     },
     "failure": {
-      "type": "object",
-      "additionalProperties": true,
-      "properties": {
-        "error_type": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "error_message": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "failed_stage": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "exit_hint": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      }
+      "$ref": "bioetl://contracts/reports/pipeline_run_report.v1.json#/properties/failure"
     },
     "io": {
-      "type": "object",
-      "additionalProperties": true
+      "$ref": "bioetl://contracts/reports/pipeline_run_report.v1.json#/properties/io"
     },
     "quarantine": {
-      "type": "object",
-      "additionalProperties": true
+      "$ref": "bioetl://contracts/reports/pipeline_run_report.v1.json#/properties/quarantine"
     },
     "dq_summary": {
-      "type": "object",
-      "additionalProperties": true
+      "$ref": "bioetl://contracts/reports/pipeline_run_report.v1.json#/properties/dq_summary"
     },
     "contract_summary": {
-      "type": "object",
-      "additionalProperties": true
+      "$ref": "bioetl://contracts/reports/pipeline_run_report.v1.json#/properties/contract_summary"
     },
     "schema_versions": {
-      "type": "object",
-      "additionalProperties": true
+      "$ref": "bioetl://contracts/reports/pipeline_run_report.v1.json#/properties/schema_versions"
     },
     "stage_timings": {
-      "type": "object",
-      "additionalProperties": true
+      "$ref": "bioetl://contracts/reports/pipeline_run_report.v1.json#/properties/stage_timings"
     },
     "http_summary": {
-      "type": "object",
-      "additionalProperties": true
+      "$ref": "bioetl://contracts/reports/pipeline_run_report.v1.json#/properties/http_summary"
     },
     "performance": {
-      "type": "object",
-      "additionalProperties": true
+      "$ref": "bioetl://contracts/reports/pipeline_run_report.v1.json#/properties/performance"
     },
     "observations": {
       "type": "object",

@@ -10,17 +10,27 @@ from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.run_reports.selected_status import evidence_digest, verify_snapshot
 
 
+def _identity_matches(identity: object, manifest: RunManifest) -> bool:
+    """Legacy identity may omit manifest_id; present values must bind exactly."""
+    if not isinstance(identity, dict):
+        return False
+    return (
+        identity.get("run_id") == str(manifest.run_id)
+        and identity.get("pipeline_name") == manifest.pipeline_name
+        and (
+            identity.get("manifest_id") is None
+            or identity["manifest_id"] == str(manifest.manifest_id)
+        )
+    )
+
+
 def _load_report(path: Path, manifest: RunManifest) -> dict[str, object]:
     """Read a JSON report only when its identity matches the archive manifest."""
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError("archive_report_corrupt")
     identity = payload.get("identity", {})
-    if (
-        not isinstance(identity, dict)
-        or identity.get("run_id") != str(manifest.run_id)
-        or identity.get("pipeline_name") != manifest.pipeline_name
-    ):
+    if not _identity_matches(identity, manifest):
         raise ValueError("archive_report_identity_mismatch")
     return payload
 
@@ -65,10 +75,7 @@ def _validate_source(
             raise ValueError("archive_report_revision_corrupt")
         evidence = revision["evidence"]
         identity = evidence.get("identity", {})
-        if not isinstance(identity, dict) or (
-            identity.get("run_id") != str(manifest.run_id)
-            or identity.get("pipeline_name") != manifest.pipeline_name
-        ):
+        if not _identity_matches(identity, manifest):
             raise ValueError("archive_revision_identity_mismatch")
 
 

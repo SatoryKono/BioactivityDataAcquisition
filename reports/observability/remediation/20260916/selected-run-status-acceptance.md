@@ -12,7 +12,7 @@ Candidate deployment: native health API on 127.0.0.1:8001, seven candidate Grafa
 
 | Run | Source | Execution | Saved assessment | Revision |
 | --- | --- | --- | --- | --- |
-| `3432761e-d4eb-511e-a62c-b186b301c758` | Actual historical chembl_assay workflow report, completed 2026-09-15 14:21:30 UTC; byte-identical copy of original report | SUCCESS | INCOMPLETE, legacy_no_snapshot | `dfc38e5badcc13a0d74a68dd6ed4f6ab26cb8fbad180bbc62a28750f40bb1b50` |
+| `3432761e-d4eb-511e-a62c-b186b301c758` | Actual historical chembl_assay workflow report, completed 2026-09-15 11:21:30 UTC; byte-identical copy of original report | SUCCESS | INCOMPLETE, legacy_no_snapshot | `dfc38e5badcc13a0d74a68dd6ed4f6ab26cb8fbad180bbc62a28750f40bb1b50` |
 | `2c5ce6e4-c31d-56d9-bbaf-ed1c9175614b` | Actual one-record cached-Bronze execution from clean commit 5f1aedf5698, completed 2026-09-16 08:24:55 UTC | SUCCESS | ERROR; Control Plane lineage_closure_gap, Data Validation INCOMPLETE because no Gold schema check executed | `d2bad8ca2ac8add4c4cddbc479f6d3c0ef5caf9e162506ac628d75e6fa084caa` |
 
 The new execution wrote one Bronze and one Silver record. Its single Gold candidate was excluded by the existing contract. This is not evidence of a successful Gold schema validation. Provider remote probing and Workflow are N/A for this standalone cached-Bronze run. DQ is OK. The recorded Control Plane failure is not hidden by processing success.
@@ -90,3 +90,47 @@ Remote main advanced during verification. Commit
 architecture-quality-scorecard.json and module-coverage-inventory.json. The local
 artifacts have been regenerated cleanly. Debt gates now report 44 pass / 1 fail
 for this remote-main blocker; this supersedes earlier green debt snapshots.
+
+
+## Post-merge follow-up on main
+
+PR #10490 was merged by the repository owner at 2026-09-16 11:31:35 UTC,
+merge commit f69e37a45cd8be728d624ccf646cc428d09a8439. Follow-up fixes use a new
+branch on that merge and preserve the independently merged changes. The earlier
+remote-main conflict blocker was repaired by #10491/#10492; the refreshed debt
+gates report 45 pass / 0 fail. This does not clear hosted CI or browser boundaries.
+
+A third real cached-Bronze run, `45111bfa-3adb-5cc3-9258-3f5662f20b9f`,
+completed at 2026-09-16T11:22:58.013543+00:00 from clean commit
+`4f2cbb5b50842489621e752285156e5cc20690b2`. Its v2 revision is
+`150a7ac3293200a95ae3814844b1ddade394a62b25251b941ca344c79547361e`.
+Execution SUCCESS remains distinct from checks ERROR and evidence INCOMPLETE:
+Control Plane records lineage_closure_gap; no Gold validation executed after the
+single candidate was excluded. API restart preserved this exact revision.
+
+Grafana datasource comparisons passed all 36 combinations: these three real runs,
+concrete/All/glob-list pipeline selectors, and full/partial/outside/relative graph
+ranges. Every summary field matched the exact API result. The machine evidence is
+`reports/selected-run-acceptance/grafana-api-matrix-selector-final.json`.
+Browser navigation exposed Grafana's `{unknown,chembl_assay}` All expansion on
+Trust. The API now resolves only owners in that list; foreign or ambiguous IDs
+remain unavailable/error. Trust displays the saved reason and completion with
+the 1970 outside range; CURRENT remains separately UNKNOWN.
+
+The first follow-up suite on main ran 1024 cases: 1016 passed, 8 skipped,
+zero failures (`reports/quality/selected-run-main-followup-tests.xml`).
+The eight skips retain the documented retired/POSIX/opt-in reasons.
+Gold helper cleanup reduces application-core LOC to 23440, below the historical
+23445 bound. V2 reuses immutable v1 field definitions through local JSON Schema
+references; offline schema tests pass and config duplication returns to six
+baseline clusters. No budget or exemption was increased.
+
+The expanded saved-evidence tables now select operator fields instead of all
+22 API fields. Long evidence values use the standard wrapped, paginated layout.
+A final dashboard-only rerun and final proof bundle follow this UI adjustment.
+
+Final dashboard-only rerun: 752 passed, 8 skipped, zero failures
+(`reports/quality/selected-run-details-tests.xml`). Candidate version 7 was
+visually checked at 1280x900: both domain pages, full Run ID, completion, rules
+and revision are visible. A stale tab with ERR_NETWORK_CHANGED was replaced
+with a fresh tab in the same browser. No browser security settings changed.

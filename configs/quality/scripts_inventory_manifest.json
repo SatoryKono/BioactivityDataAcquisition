@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-16T09:32:56.561497+00:00",
+  "generated_at": "2026-09-16T11:49:38.187826+00:00",
   "summary": {
     "total_scripts": 620,
     "status_counts": {
@@ -12835,7 +12835,7 @@
         },
         {
           "path": "tests/integration/test_grafana_render_first_remediation.py",
-          "line": 1418,
+          "line": 1428,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         },
@@ -14268,13 +14268,19 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "tests/integration/test_dashboard_content_contract.py",
           "line": 9,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import ("
+        },
+        {
+          "path": "tests/integration/test_dashboard_content_contract.py",
+          "line": 183,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.generate_dashboard_content_contract import ("
         }
       ],
       "owner": "@bioetl-observability",
@@ -14397,7 +14403,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 13,
       "references": [
         {
           "path": "scripts/engineering/qa/report_hotspot_family_baseline.py",
@@ -15963,7 +15969,7 @@
         },
         {
           "path": "tests/unit/scripts/qa/test_report_hotspot_family_baseline.py",
-          "line": 17,
+          "line": 21,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_hotspot_family_baseline import ("
         }

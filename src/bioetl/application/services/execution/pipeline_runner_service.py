@@ -220,6 +220,17 @@ class PipelineRunnerService:
                 options=options,
             )
         except asyncio.CancelledError:
+            completed_at = self.clock.now()
+            await _record_pipeline_audit_event(
+                self.audit,
+                event_name="PipelineRunCompleted",
+                pipeline_name=pipeline_name,
+                run_id=run_id,
+                run_type=options.run_type,
+                status="shutdown",
+                timestamp=completed_at,
+                error_type="CancelledError",
+            )
             self._finalize_report(
                 RunResult(
                     status=PipelineRunResult.SHUTDOWN,
@@ -227,7 +238,7 @@ class PipelineRunnerService:
                     run_id=str(run_id),
                     run_type=options.run_type,
                     started_at=started_at,
-                    completed_at=self.clock.now(),
+                    completed_at=completed_at,
                     error_type="CancelledError",
                 ),
                 options,

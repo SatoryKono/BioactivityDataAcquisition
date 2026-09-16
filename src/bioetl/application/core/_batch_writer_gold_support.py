@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol, cast, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.services.run_reports.observations import record_gold_observation
 from bioetl.domain.exceptions import SchemaViolationError
@@ -14,21 +14,6 @@ if TYPE_CHECKING:
     from bioetl.domain.types import GoldRecord, GoldSchemaType
 
 
-class _GoldValidationResult(Protocol):
-    valid: bool
-    errors: list[str]
-
-
-@runtime_checkable
-class _GoldValidatorRebindProtocol(Protocol):
-    """Validators that can rebind to a projected Gold schema."""
-
-    def rebind_schema(self, schema: object) -> _GoldValidatorRebindProtocol: ...
-
-    def validate(self, records: object) -> _GoldValidationResult: ...
-
-
-@runtime_checkable
 class _GoldWriterHost(Protocol):
     """Minimal BatchWriter surface for Gold prepare/validate helpers."""
 
@@ -72,11 +57,11 @@ def validate_gold_records(
     schema: object | None = None,
 ) -> None:
     """Validate Gold records against schema contract."""
-    validator = cast(_GoldValidatorRebindProtocol, writer._gold_validator)
+    validator = writer._gold_validator
     target_schema = schema if schema is not None else writer._gold_schema
     if schema is not None:
         validator = cast(
-            _GoldValidatorRebindProtocol,
+            "GoldValidatorPort",
             rebind_gold_validator_schema(validator, target_schema),
         )
 
