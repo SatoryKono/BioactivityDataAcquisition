@@ -2165,9 +2165,12 @@ fields:
 | [ADR-058](../02-architecture/decisions/ADR-058-layered-port-registries.md) | Layered Port Registries | Accepted | 2026-08-25 |
 | [ADR-059](../02-architecture/decisions/ADR-059-package-cohesion-budgets.md) | Package Cohesion Budgets | Accepted | 2026-08-25 |
 | [ADR-060](../02-architecture/decisions/ADR-060-prompt-kernel-and-overlay-architecture.md) | Prompt Kernel and Overlay Architecture | Accepted | 2026-08-28 |
+| [ADR-061](../02-architecture/decisions/ADR-061-persisted-selected-run-assessment.md) | Persisted Selected Run Assessment | Proposed | 2026-09-16 |
 
 ## История Изменений (Changelog)
 
+- **6.1.13** (2026-09-16): синхронизирован индекс решений с ADR-061
+  (persisted selected-run assessment; Proposed).
 - **6.1.12** (2026-08-31): синхронизирован индекс принятых решений с
   ADR-060 (prompt kernel and overlay architecture).
 - **6.1.11** (2026-08-25): синхронизирован индекс принятых решений с

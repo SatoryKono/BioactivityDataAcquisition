@@ -58,7 +58,6 @@ def test_preflight_profile_summary_is_quiet_without_profiles() -> None:
 async def test_merge_input_requires_an_explicit_silver_reader() -> None:
     host = object.__new__(_MergeInputLoaderMixin)
     host._delta_reader = None
-    host._silver_reader = None
     host._storage = None
 
     with pytest.raises(RuntimeError, match="requires delta_reader or silver_reader"):
