@@ -16,6 +16,8 @@ from bioetl.application.services.run_reports.observations import record_run_obse
 from bioetl.domain.ports import RunManifestPort
 from bioetl.domain.types import RunID
 
+_CONTROL_PLANE = "Control Plane"
+
 if TYPE_CHECKING:
     from bioetl.application.services.execution.pipeline_runner_models import (
         RunOptions,
@@ -34,7 +36,7 @@ class CaptureControlPlaneSnapshot:
         manifest = self.manifests.get_by_run_id(cast(RunID, UUID(run_id)))
         if manifest is None or manifest.pipeline_name != pipeline:
             record_run_observation(
-                "Control Plane",
+                _CONTROL_PLANE,
                 verdict="INCOMPLETE",
                 reason="manifest_not_found",
                 facts={"run_id": run_id},
@@ -45,7 +47,7 @@ class CaptureControlPlaneSnapshot:
         status = str(payload.get("trust_status", payload.get("status", "UNKNOWN")))
         # Replace the provisional manifest observation only after the full checks.
         record_run_observation(
-            "Control Plane",
+            _CONTROL_PLANE,
             verdict={"WARNING": "WARN"}.get(status, status),
             reason="run_completion_trust_assessment",
             facts={"observed_at": completed_at.isoformat(), "checks": payload},
@@ -65,7 +67,7 @@ def capture_run_completion(
         capture(result.pipeline_name, result.run_id, result.completed_at)
     except (OSError, RuntimeError, ValueError, TypeError):
         record_run_observation(
-            "Control Plane",
+            _CONTROL_PLANE,
             verdict="INCOMPLETE",
             reason="completion_assessment_failed",
             facts={},

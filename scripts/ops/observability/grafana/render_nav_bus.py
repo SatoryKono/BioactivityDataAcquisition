@@ -1108,22 +1108,49 @@ def _stamp_aggregate_trust(by_id: dict[object, dict[str, object]]) -> None:
         "Trust response unavailable. Check the panel error and run selection."
     )
     for override in field_config.setdefault("overrides", []):
-        field = override.get("matcher", {}).get("options")
-        field = {"Processing": "Result", "Observed at": "Observed"}.get(field, field)
-        override["matcher"]["options"] = field
-        if field == "processing_status":
-            for prop in override.get("properties", []):
-                if prop.get("id") == "displayName":
-                    prop["value"] = "Result"
-        width = {"Result": 80, "Trust": 130, "Observed": 90}.get(field)
-        if width is not None:
-            for prop in override.get("properties", []):
-                if prop.get("id") == CUSTOM_WIDTH:
-                    prop["value"] = width
-        if field == "reasons_text":
-            for prop in override.get("properties", []):
-                if prop.get("id") == "noValue":
-                    prop["value"] = "—"
+        _stamp_trust_override(override)
+
+
+def _stamp_trust_override(override: dict[str, object]) -> None:
+    matcher = override.get("matcher", {})
+    field = matcher.get("options") if isinstance(matcher, dict) else None
+    field = {"Processing": "Result", "Observed at": "Observed"}.get(field, field)
+    if isinstance(matcher, dict):
+        matcher["options"] = field
+    if field == "processing_status":
+        for prop in override.get("properties", []):
+            if prop.get("id") == "displayName":
+                prop["value"] = "Result"
+    width = {"Result": 80, "Trust": 130, "Observed": 90}.get(field)
+    if width is not None:
+        for prop in override.get("properties", []):
+            if prop.get("id") == CUSTOM_WIDTH:
+                prop["value"] = width
+    if field == "reasons_text":
+        for prop in override.get("properties", []):
+            if prop.get("id") == "noValue":
+                prop["value"] = "—"
+
+
+def _layout_uid_detail_panels(panels: list[object], *, current_uid: str) -> None:
+    if current_uid == "bioetl-runtime":
+        _normalize_runtime_record_delta_scope(panels)
+        _layout_runtime_detail_panels(panels)
+        return
+    if current_uid == "bioetl-control-plane-v1":
+        _layout_control_plane_detail_panels(panels)
+        _clarify_manifest_counter_evidence(panels)
+        stamp_latest_complete_run_panel(panels)
+        return
+    if current_uid == "bioetl-overview-v2":
+        _layout_overview_detail_panels(panels)
+        _normalize_overview_domain_snapshots(panels)
+        return
+    if current_uid == "bioetl-dq-v2":
+        _layout_dq_detail_panels(panels)
+        return
+    if current_uid == "bioetl-incident-v1":
+        _layout_incident_detail_panels(panels)
 
 
 def _layout_control_plane_first_window(panels: list[object]) -> None:
@@ -1283,6 +1310,37 @@ def _expand_nav_height(
             grid["y"] += delta
 
 
+def _stamp_nav_panel(nav: dict[str, object], panels: list[object]) -> None:
+    # The link-only navigation has no visible heading on any dashboard.
+    # Keep its inventory name as metadata; links retain visible names and tooltips.
+    nav["title"] = ""
+    nav["type"] = "text"
+    nav["description"] = NAV_DESCRIPTION
+    _expand_nav_height(nav, panels, new_height=NAV_HEIGHT)
+    grid_pos = nav["gridPos"]
+    if not isinstance(grid_pos, dict):
+        raise SystemExit("navigation panel gridPos must be an object")
+    grid_pos["h"] = NAV_HEIGHT
+    grid_pos.update({"w": 24, "x": 0, "y": 0})
+
+
+def _attach_nav_bus(nav: dict[str, object], *, current_uid: str) -> None:
+    nav["options"] = {
+        "mode": "html",
+        "bioetlDisplayTitle": NAV_DISPLAY_TITLE,
+        "content": render_html(current_uid=current_uid),
+    }
+    bus_titles = {item["title"] for item in BUS}
+    previous_links = nav.get("links") if isinstance(nav.get("links"), list) else []
+    extra_links = [
+        link
+        for link in previous_links
+        if isinstance(link, dict) and link.get("title") not in bus_titles
+    ]
+    nav["links"] = render_links(current_uid=current_uid) + extra_links
+    nav.pop("transparent", None)
+
+
 def apply_to_dashboard(
     path: Path, *, current_uid: str, check: bool = False, state_followup: bool = False
 ) -> bool:
@@ -1317,55 +1375,14 @@ def apply_to_dashboard(
     nav = next((p for p in panels if p.get("id") == 1000), None)
     if nav is None:
         raise SystemExit(f"{safe_path.name}: missing panel id=1000")
-
-    # The link-only navigation has no visible heading on any dashboard.
-    # Keep its inventory name as metadata; links retain visible names and tooltips.
-    nav["title"] = ""
-    nav["type"] = "text"
-    nav["description"] = NAV_DESCRIPTION
-    _expand_nav_height(nav, panels, new_height=NAV_HEIGHT)
-    # Use identical geometry, including Run Explorer, so wrapped links fit.
-    grid_pos = nav["gridPos"]
-    if not isinstance(grid_pos, dict):
-        raise SystemExit("navigation panel gridPos must be an object")
-    grid_pos["h"] = NAV_HEIGHT
-    grid_pos.update({"w": 24, "x": 0, "y": 0})
+    _stamp_nav_panel(nav, panels)
     _restore_minimum_first_window_heights(panels, current_uid=current_uid)
     _layout_uid_first_window(panels, current_uid=current_uid)
     _reclaim_first_window_overflow(nav, panels, current_uid=current_uid)
     _layout_uid_first_window(panels, current_uid=current_uid)
     _normalize_collapsed_row_children(panels)
-    if current_uid == "bioetl-runtime":
-        _normalize_runtime_record_delta_scope(panels)
-    if current_uid == "bioetl-control-plane-v1":
-        _layout_control_plane_detail_panels(panels)
-        _clarify_manifest_counter_evidence(panels)
-        stamp_latest_complete_run_panel(panels)
-    if current_uid == "bioetl-overview-v2":
-        _layout_overview_detail_panels(panels)
-        _normalize_overview_domain_snapshots(panels)
-    if current_uid == "bioetl-runtime":
-        _layout_runtime_detail_panels(panels)
-    if current_uid == "bioetl-dq-v2":
-        _layout_dq_detail_panels(panels)
-    if current_uid == "bioetl-incident-v1":
-        _layout_incident_detail_panels(panels)
-    nav["options"] = {
-        "mode": "html",
-        "bioetlDisplayTitle": NAV_DISPLAY_TITLE,
-        "content": render_html(current_uid=current_uid),
-    }
-    bus_titles = {item["title"] for item in BUS}
-    previous_links = nav.get("links") if isinstance(nav.get("links"), list) else []
-    extra_links = [
-        link
-        for link in previous_links
-        if isinstance(link, dict) and link.get("title") not in bus_titles
-    ]
-    nav["links"] = render_links(current_uid=current_uid) + extra_links
-    # Drop stale transparent fields that confuse some exporters.
-    nav.pop("transparent", None)
-
+    _layout_uid_detail_panels(panels, current_uid=current_uid)
+    _attach_nav_bus(nav, current_uid=current_uid)
     stamp_selector_columns(payload)
     stamp_selected_run_panels(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"

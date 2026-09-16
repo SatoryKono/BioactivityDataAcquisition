@@ -149,6 +149,13 @@ def _row_matches_scope(
     return not lookup_run_id or row["run_id"] == lookup_run_id
 
 
+def _workflow_scope(row: dict[str, object]) -> str:
+    workflow_id = row.get("workflow_id")
+    if workflow_id in {None, "", "—"}:
+        return "$__all"
+    return str(workflow_id)
+
+
 def list_recent_pipeline_runs(
     *,
     pipeline: str | None,
@@ -224,11 +231,7 @@ def list_recent_pipeline_runs(
         item.update(_report_link(item, root))
         item.update(_timing_fields(item, observed_at))
         item["selected"] = int(item["run_id"] == selected_run_id)
-        item["workflow_scope"] = (
-            item["workflow_id"]
-            if item.get("workflow_id") not in {None, "", "—"}
-            else "$__all"
-        )
+        item["workflow_scope"] = _workflow_scope(item)
     return {
         **payload,
         "items": items,
