@@ -9,6 +9,8 @@ from bioetl.interfaces.http.processed_records_table import (
     build_processed_records_table_payload_from_ledger,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def rows():
@@ -72,6 +74,7 @@ def test_distinct_batch_publications_are_not_last_batch_totals(
     assert int(rows[parameter]["value"].replace(" ", "")) == expected
 
 
+@pytest.mark.unit
 def test_gold_exclusion_percentage_uses_run_bronze_total(rows):
     assert rows["08 gold_excluded_by_contract_records"]["percentage"] == "1.679%"
 
@@ -105,6 +108,7 @@ def test_repeated_publication_is_counted_once(use_idempotency_key):
     }
 
 
+@pytest.mark.unit
 def test_conflicting_publication_identity_fails_closed():
     from bioetl.interfaces.http._processed_records_table_support import (
         published_layer_artifact_counts,
