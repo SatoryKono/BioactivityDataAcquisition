@@ -51,7 +51,7 @@
     },
     {
       "evidence_metrics": {
-        "families_at_budget_count": 2,
+        "families_at_budget_count": 1,
         "hotspot_budget_warning_count": 0,
         "hotspot_family_count": 5,
         "lazy_util": 0.0,
@@ -59,9 +59,9 @@
       },
       "id": "module_boundaries_coupling",
       "name": "Module boundaries / coupling",
-      "score": 8.4,
+      "score": 9.2,
       "weight": 0.14,
-      "weighted_score": 1.176
+      "weighted_score": 1.288
     },
     {
       "evidence_metrics": {
@@ -171,10 +171,9 @@
     "composition_module_count": 296,
     "composition_util": 0.9867,
     "families_at_budget": [
-      "application_services_control_plane",
-      "composition_runtime_builders"
+      "application_services_control_plane"
     ],
-    "families_at_budget_count": 2,
+    "families_at_budget_count": 1,
     "grade_kind": "diagnostic_proxy",
     "lazy_import_cap": 0,
     "lazy_import_observed_count": 0,
@@ -186,7 +185,7 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.25,
+  "integral_score": 9.36,
   "interpretation": "good_targeted_improvements",
   "metrics": {
     "accepted_adr_count": 58,
@@ -202,10 +201,9 @@
     "dq_blocking_issue_count": 0,
     "expired_compat_count": 0,
     "families_at_budget": [
-      "application_services_control_plane",
-      "composition_runtime_builders"
+      "application_services_control_plane"
     ],
-    "families_at_budget_count": 2,
+    "families_at_budget_count": 1,
     "hotspot_budget_warning_count": 0,
     "hotspot_family_count": 5,
     "layer_violations": 0,
@@ -275,13 +273,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "7184937818099a4c3d38b8fe4bd91613c81562af068ac278d680b5aba09c99e9",
       "path": "reports/quality/module-coverage-inventory.json",
-<<<<<<< HEAD
-      "source_tree_sha256": "cb90f15de3a7526828f4ed6238c2d160a858afd2a57973b48031c2e6156f23c0"
-||||||| 5ef3a2c12bc
-      "source_tree_sha256": "182d935a33add5d28adc8bdddced82288116a1546f72314883cc2a13e5bbc9f9"
-=======
-      "source_tree_sha256": "856a48a819b44b55fa24fe572b9ea97dfd1d0f34227f7a426af3df443eeba98d"
->>>>>>> codex/issue-10469-full-coverage-final
+      "source_tree_sha256": "38113cbdf112c0fa8a6f1886d670f2db22c079fac985173a98d767e7bf6d7b56"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,
