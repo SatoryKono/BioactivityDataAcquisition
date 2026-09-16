@@ -562,7 +562,7 @@ def _assert_run_id_filter_options_url(query_url: str) -> None:
 def _assert_pipeline_filter_options_url(query_url: str) -> None:
     assert "/ops/control-plane/filter-options" in query_url
     assert "dimension=pipeline" in query_url
-    assert "response_shape=list" in query_url
+    assert "response_shape=options" in query_url
     assert "workflow=${workflow}" in query_url
 
 
@@ -579,7 +579,7 @@ def _assert_pipeline_filter_options_shell(
     assert query.get("queryType") == "infinity"
     infinity_query = query.get("infinityQuery", {})
     assert isinstance(infinity_query, dict)
-    assert infinity_query.get("root_selector") == "$.items"
+    assert infinity_query.get("root_selector") == "items"
     _assert_pipeline_filter_options_url(str(infinity_query.get("url", "")))
 
 
@@ -597,8 +597,8 @@ def _assert_run_id_infinity_shell(
     infinity_query = run_id_query.get("infinityQuery", {})
     assert isinstance(infinity_query, dict)
     assert infinity_query.get("format") == "table"
-    assert infinity_query.get("parser") == "backend"
-    assert infinity_query.get("root_selector") == "$.items"
+    assert infinity_query.get("parser") == "simple"
+    assert infinity_query.get("root_selector") == "items"
     assert infinity_query.get("url_options", {}).get("method") == "GET"
     columns = infinity_query.get("columns")
     assert isinstance(columns, list)
@@ -746,7 +746,7 @@ def _assert_silver_reject_infinity_query_block(
         f"Dashboard {dashboard_path.name} '{variable_name}' query must return "
         "a table for Grafana variable extraction"
     )
-    assert infinity_query.get("parser") == "backend", (
+    assert infinity_query.get("parser") == "simple", (
         f"Dashboard {dashboard_path.name} '{variable_name}' query must use "
         "the backend parser"
     )

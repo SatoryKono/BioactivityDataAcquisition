@@ -75,7 +75,7 @@
           "value": "unknown"
         },
         "datasource": "BioETL Ops HTTP",
-        "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list&workflow=${workflow}",
+        "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}",
         "hide": 0,
         "includeAll": false,
         "label": "Pipeline",
@@ -93,15 +93,27 @@
           "refId": "variable",
           "infinityQuery": {
             "format": "table",
-            "parser": "backend",
-            "root_selector": "$.items",
+            "parser": "simple",
+            "root_selector": "items",
             "type": "json",
             "source": "url",
             "url_options": {
               "method": "GET",
               "data": ""
             },
-            "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list&workflow=${workflow}"
+            "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
           }
         },
         "refresh": 1,
@@ -172,8 +184,8 @@
           "refId": "variable",
           "infinityQuery": {
             "format": "table",
-            "parser": "backend",
-            "root_selector": "$.items",
+            "parser": "simple",
+            "root_selector": "items",
             "type": "json",
             "source": "url",
             "url_options": {

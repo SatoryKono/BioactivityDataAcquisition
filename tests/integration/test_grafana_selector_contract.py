@@ -525,3 +525,22 @@ def test_current_dashboards_do_not_ship_future_execution_selectors() -> None:
             f"{dashboard_path.name} must not ship future execution selectors yet: "
             f"{sorted(variable_names & forbidden_now)}"
         )
+
+
+def test_http_selector_frames_declare_columns_for_empty_catalogs() -> None:
+    for path in Path("grafana/dashboards").glob("*.json"):
+        dashboard = json.loads(path.read_text(encoding="utf-8"))
+        for variable in dashboard.get("templating", {}).get("list", []):
+            query = variable.get("query")
+            if not isinstance(query, dict):
+                continue
+            infinity = query.get("infinityQuery", {})
+            if "/ops/control-plane/filter-options?" not in infinity.get("url", ""):
+                continue
+            assert "response_shape=options" in infinity["url"], path.name
+            assert infinity["parser"] == "simple", path.name
+            assert infinity["root_selector"] == "items", path.name
+            assert infinity["columns"] == [
+                {"selector": field, "text": f"__{field}", "type": "string"}
+                for field in ("text", "value")
+            ], path.name

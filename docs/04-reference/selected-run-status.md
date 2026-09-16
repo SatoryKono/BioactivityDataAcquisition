@@ -70,3 +70,19 @@ The v2 JSON Schema references unchanged field contracts in the immutable v1
 schema through its `bioetl://` identifier. Package both schema files and register
 both `$id` values with the validator's local schema registry; validation requires
 no network access. The writer integration tests exercise this offline registry.
+
+
+### Persisted selector options
+
+Control-plane filter options include identity-checked persisted pipeline reports,
+including historical runs absent from the current manifest catalog. Workflow,
+pipeline, run type, status and exact run filters remain conjunctive; unrelated
+reports never supply a selected scope. Corrupt or mismatched report identities
+produce an error instead of fabricated options. Existing manifest options are
+retained and report values are deduplicated.
+
+Grafana HTTP selector queries request `response_shape=options` and declare string
+`text`/`value` columns with Infinity's `simple` parser and `items` root. The backend
+parser drops all fields for an empty array even with declared columns, causing
+`at least one field expected for variable`. The simple parser preserves the empty
+column schema. Empty options remain empty; transport errors remain query errors.

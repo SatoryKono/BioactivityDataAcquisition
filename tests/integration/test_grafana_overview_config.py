@@ -134,8 +134,8 @@ def test_run_id_selector_is_control_plane_backed_table_query() -> None:
     infinity_query = run_id_query.get("infinityQuery", {})
     assert isinstance(infinity_query, dict)
     assert infinity_query.get("format") == "table"
-    assert infinity_query.get("parser") == "backend"
-    assert infinity_query.get("root_selector") == "$.items"
+    assert infinity_query.get("parser") == "simple"
+    assert infinity_query.get("root_selector") == "items"
     assert infinity_query.get("url_options", {}).get("method") == "GET"
     query_url = str(infinity_query.get("url", ""))
     assert "/ops/control-plane/filter-options" in query_url

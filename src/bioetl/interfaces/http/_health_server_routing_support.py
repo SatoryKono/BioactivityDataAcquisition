@@ -34,6 +34,7 @@ from bioetl.interfaces.http._health_server_observability_routing import (
 from bioetl.interfaces.http._health_server_quarantine_routing import (
     dispatch_quarantine_request,
 )
+from bioetl.interfaces.http._report_selector_options import supplement_report_options
 from bioetl.interfaces.http.control_plane_selector_context import (
     RUN_ID_NO_SELECTION,
     build_selector_context_payload,
@@ -209,6 +210,20 @@ async def handle_control_plane_filter_options(
         exact_run_only=exact_run_only,
         fallback_value=fallback_value,
     )
+    if not exact_run_only or selected_run_id is not None:
+        payload = await asyncio.to_thread(
+            supplement_report_options,
+            payload,
+            dimension=dimension,
+            response_shape=response_shape,
+            scopes={
+                "workflow": selected_workflows,
+                "pipeline": selected_pipelines,
+                "run_type": selected_run_types,
+                "run_status": selected_run_statuses,
+                "run_id": (selected_run_id,) if selected_run_id else (),
+            },
+        )
     if response_shape != "list" and dimension == "run_id":
         payload["run_ids"] = [
             value

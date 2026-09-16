@@ -142,6 +142,8 @@ def _filter_options_response(
     selected_run_types: tuple[str, ...],
     values: list[str],
 ) -> dict[str, object]:
+    if response_shape == "options":
+        return {"items": [{"text": value, "value": value} for value in values]}
     if response_shape == "list":
         return {"items": values}
     return {
