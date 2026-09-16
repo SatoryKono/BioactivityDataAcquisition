@@ -2,6 +2,26 @@
 
 from __future__ import annotations
 
+# Canonical workflow totals key order for Run Explorer / Delta reconciliation.
+_WORKFLOW_TOTALS_ROW_ORDER: tuple[str, ...] = (
+    "steps_planned",
+    "steps_succeeded",
+    "steps_failed",
+    "steps_skipped",
+    "records_extracted_sum",
+    "records_silver_sum",
+    "records_gold_sum",
+    "records_gold_loaded_sum",
+    "records_gold_expired_sum",
+    "written_by_pipeline",
+    "contract_excluded",
+    "reconciliation_deactivated",
+    "gold_current_after_reconciliation_by_table",
+    "final_current_by_table",
+    "historical_by_table",
+)
+
+
 # Canonical reconciliation key order for Run Explorer panel 3015 (REC-04).
 _RECONCILIATION_ROW_ORDER: tuple[str, ...] = (
     "silver_accounted",

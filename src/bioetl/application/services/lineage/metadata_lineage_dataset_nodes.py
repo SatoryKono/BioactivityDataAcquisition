@@ -20,20 +20,48 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.run_context import RunContext
 
 
+def _canonical_bronze_batch_node(
+    *,
+    batch_id: object,
+    provider: str,
+    entity: str,
+    extra: dict[str, object] | None = None,
+) -> LineageNodeRef:
+    """Build a merge-safe Bronze-batch node.
+
+    Identity fields (node_id, label, batch_id, provider, entity, counts) must
+    match across Bronze and Silver fragments so Trust does not report
+    ``node_definition_conflict``. Path-only extras stay on distinct keys.
+    """
+    attributes: dict[str, object] = {
+        "batch_id": str(batch_id),
+        "provider": provider,
+        "entity": entity,
+    }
+    if extra:
+        for key, value in extra.items():
+            if key in attributes or value is None:
+                continue
+            attributes[key] = value
+    return LineageNodeRef(
+        node_type=LineageNodeType.BRONZE_BATCH,
+        node_id=f"bronze_batch:{batch_id}",
+        label=f"{provider}.{entity}",
+        attributes=attributes,
+    )
+
+
 def bronze_batch_node_from_input(
     *,
     run_context: RunContext,
     input_data: BronzeMetadataInput,
 ) -> LineageNodeRef:
     """Build Bronze-batch node from Bronze metadata input."""
-    return LineageNodeRef(
-        node_type=LineageNodeType.BRONZE_BATCH,
-        node_id=f"bronze_batch:{input_data.batch_id}",
-        label=f"{run_context.provider}.{run_context.entity}",
-        attributes={
-            "batch_id": str(input_data.batch_id),
-            "provider": run_context.provider,
-            "entity": run_context.entity,
+    return _canonical_bronze_batch_node(
+        batch_id=input_data.batch_id,
+        provider=run_context.provider,
+        entity=run_context.entity,
+        extra={
             "output_path": input_data.output_path,
             "record_count": input_data.record_count,
             "compressed_size": input_data.compressed_size,
@@ -44,20 +72,13 @@ def bronze_batch_node_from_input(
 def _bronze_batch_node_from_result(ref: BronzeWriteResult) -> LineageNodeRef:
     """Build Bronze-batch node from Bronze write result."""
     provider, entity = ref.provider_entity
-    return LineageNodeRef(
-        node_type=LineageNodeType.BRONZE_BATCH,
-        node_id=f"bronze_batch:{ref.batch_id}",
-        label=ref.table_name,
-        attributes={
-            "batch_id": str(ref.batch_id),
-            "provider": provider,
-            "entity": entity,
-            "table_name": ref.table_name,
-            "relative_path": ref.relative_path,
-            "absolute_path": ref.absolute_path,
+    return _canonical_bronze_batch_node(
+        batch_id=ref.batch_id,
+        provider=provider,
+        entity=entity,
+        extra={
             "record_count": ref.record_count,
             "compressed_size": ref.compressed_size,
-            "checksum_blake2": ref.checksum_blake2,
         },
     )
 

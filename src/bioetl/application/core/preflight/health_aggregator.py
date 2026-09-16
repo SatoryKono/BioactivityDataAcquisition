@@ -160,9 +160,17 @@ class HealthAggregator:
                 )
             else:
                 status = await services.data_source.health_check()
-                fallback_reason = resolve_probe_fallback_reason(
-                    health_check_mode=self._health_check_mode,
-                    status=status,
+                cached_bronze = (
+                    getattr(services.data_source, "source_health_kind", None)
+                    == "cached_bronze"
+                )
+                fallback_reason = (
+                    "cached_bronze_api_not_exercised"
+                    if cached_bronze
+                    else resolve_probe_fallback_reason(
+                        health_check_mode=self._health_check_mode,
+                        status=status,
+                    )
                 )
                 duration = time.perf_counter() - start_time
                 result = build_component_result(
@@ -172,10 +180,14 @@ class HealthAggregator:
                         status=status,
                     ),
                     duration_seconds=duration,
-                    error_message=normalize_data_source_error(
-                        health_check_mode=self._health_check_mode,
-                        status=status,
-                        error_message=None,
+                    error_message=(
+                        "cached Bronze local files healthy; provider API not exercised"
+                        if cached_bronze
+                        else normalize_data_source_error(
+                            health_check_mode=self._health_check_mode,
+                            status=status,
+                            error_message=None,
+                        )
                     ),
                     probe_fallback_reason=fallback_reason,
                 )

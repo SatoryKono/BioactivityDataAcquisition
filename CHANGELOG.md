@@ -17,8 +17,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `current_run` is fail-closed. Workflow totals add additive
   `written_by_pipeline`, `contract_excluded`, `reconciliation_deactivated`,
   `final_current_by_table`, and `historical_by_table` without replacing
-  existing `records_gold_*` keys (#10426). Coarse Gold exclusion fallback
-  no longer labels missing diagnostics as `gold_filter_exclusion` (#10428).
+  existing `records_gold_*` keys (#10426). HTTP workflow-run-report now
+  exposes those totals as `totals_rows`. Coarse Gold exclusion fallback
+  no longer labels missing diagnostics as `gold_filter_exclusion` (#10428);
+  pipeline-run-report HTTP surfaces `rejection_details_display` field/rule
+  rows. Cached Bronze consumption persists a `CONSUMED_BY` lineage fragment
+  for the new run/manifest (not a layer-alias `bronze` fragment id) and
+  does not publish `bioetl_provider_health_status` (#10427, #10429).
 
 - **Requirements catalog Wave 1 (#9803):** 20 invented `REQ-*` IDs from
   RULES/ADR-033/`src/` now have canonical rows; catalog 172→192.

@@ -42,6 +42,7 @@ from bioetl.interfaces.http._health_server_observability_routing import (
     _not_found_pipeline_run_report_shell,
     _summary_rows_pipeline_run_report,
     _table_shape_pipeline_run_report,
+    _table_shape_workflow_run_report,
     _unresolved_pipeline_run_report_shell,
 )
 from bioetl.interfaces.http._pipeline_run_report_display import (
@@ -833,3 +834,59 @@ def test_run_report_display_helpers_cover_fallbacks_and_unknown_kinds() -> None:
     )[0]
     assert json_row["title"] == "Report JSON"
     assert json_row["action"] == "Download"
+
+
+def test_table_shape_exposes_rejection_field_rule_rows() -> None:
+    shaped = _table_shape_pipeline_run_report(
+        {
+            "schema_version": "pipeline_run_report_v1",
+            "contract_summary": {
+                "gold_excluded_by_contract": 2,
+                "rejection_details": [
+                    {
+                        "reason_code": "gold_contract_schema_failure",
+                        "rule_type": "schema",
+                        "field": "standard_value",
+                        "operator": "required",
+                        "count": 2,
+                    }
+                ],
+            },
+        }
+    )
+    rows = shaped["rejection_details_display"]
+    assert rows == [
+        {
+            "reason_code": "gold_contract_schema_failure",
+            "rule_type": "schema",
+            "field": "standard_value",
+            "operator": "required",
+            "count": 2,
+            "reason_label": (
+                "Excluded by Gold schema contract (gold_contract_schema_failure)"
+            ),
+        }
+    ]
+
+
+def test_table_shape_workflow_totals_rows_include_additive_keys() -> None:
+    shaped = _table_shape_workflow_run_report(
+        {
+            "schema_version": "workflow_run_report_v1",
+            "totals": {
+                "historical_by_table": {"activity": 5},
+                "written_by_pipeline": 10,
+                "steps_planned": 1,
+                "contract_excluded": 2,
+                "reconciliation_deactivated": 3,
+                "final_current_by_table": {"activity": 10},
+            },
+        }
+    )
+    by_parameter = {row["parameter"]: row["value"] for row in shaped["totals_rows"]}
+    assert by_parameter["written_by_pipeline"] == "10"
+    assert by_parameter["contract_excluded"] == "2"
+    assert by_parameter["reconciliation_deactivated"] == "3"
+    assert "final_current_by_table" in by_parameter
+    assert "historical_by_table" in by_parameter
+    assert list(by_parameter)[0] == "steps_planned"
