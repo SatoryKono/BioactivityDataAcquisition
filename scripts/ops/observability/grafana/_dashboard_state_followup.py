@@ -212,80 +212,100 @@ def apply_dashboard(dashboard: dict[str, Any]) -> None:
         applier(dashboard, panels)
 
 
+def _rename_event_age_fields(panel: dict[str, Any]) -> None:
+    for transform in panel["transformations"]:
+        options = transform["options"]
+        if transform["id"] == "filterFieldsByName":
+            options["include"]["names"] = [
+                "event_age_display" if name == "last_event_age_seconds" else name
+                for name in options["include"]["names"]
+            ]
+        if transform["id"] == "organize":
+            for key in ("indexByName", "renameByName"):
+                if "last_event_age_seconds" in options[key]:
+                    options[key]["event_age_display"] = options[key].pop(
+                        "last_event_age_seconds"
+                    )
+
+
+def _relabel_run_variables(dashboard: dict[str, Any]) -> None:
+    for variable in dashboard["templating"]["list"]:
+        if variable["name"] == "run_id":
+            variable["label"] = "Selected Run"
+        elif variable["name"] == "lookup_run_id":
+            variable["label"] = "Find exact Run ID"
+
+
 def _apply_run_explorer(
     dashboard: dict[str, Any], panels: dict[int, dict[str, Any]]
 ) -> None:
-        p = panels[3010]
-        for transform in p["transformations"]:
-            options = transform["options"]
-            if transform["id"] == "filterFieldsByName":
-                options["include"]["names"] = [
-                    "event_age_display" if n == "last_event_age_seconds" else n
-                    for n in options["include"]["names"]
-                ]
-            if transform["id"] == "organize":
-                for key in ("indexByName", "renameByName"):
-                    if "last_event_age_seconds" in options[key]:
-                        options[key]["event_age_display"] = options[key].pop(
-                            "last_event_age_seconds"
-                        )
-        override(
-            p,
-            "Event age",
-            **{"unit": "none", CUSTOM_WIDTH: 140, "noValue": "UNKNOWN"},
-        )
-        content = panels[1]["options"]["content"]
-        panels[1]["options"]["content"] = content.replace(
-            ". Find Run ID: ${lookup_run_id}.", "."
-        ).replace("6-run-explorer", "0-run-explorer")
-        for variable in dashboard["templating"]["list"]:
-            if variable["name"] == "run_id":
-                variable["label"] = "Selected Run"
-            elif variable["name"] == "lookup_run_id":
-                variable["label"] = "Find exact Run ID"
+    panel = panels[3010]
+    _rename_event_age_fields(panel)
+    override(
+        panel,
+        "Event age",
+        **{"unit": "none", CUSTOM_WIDTH: 140, "noValue": "UNKNOWN"},
+    )
+    content = panels[1]["options"]["content"]
+    panels[1]["options"]["content"] = content.replace(
+        ". Find Run ID: ${lookup_run_id}.", "."
+    ).replace("6-run-explorer", "0-run-explorer")
+    _relabel_run_variables(dashboard)
+
+
+def _clear_wrap_overrides(panel: dict[str, Any]) -> None:
+    for item in panel["fieldConfig"]["overrides"]:
+        for prop in item["properties"]:
+            if prop["id"] == "custom.cellOptions":
+                prop["value"].pop("wrapText", None)
+
+
+def _stamp_trust_table(panel: dict[str, Any]) -> None:
+    panel["options"]["cellHeight"] = "sm"
+    panel["options"].pop("maxRowHeight", None)
+    # Grafana 12 can measure only one wrapped field per row. Let its
+    # longest-field measurement select Reasons instead of the timestamp.
+    panel["fieldConfig"]["defaults"]["custom"]["cellOptions"] = {
+        "type": "auto",
+        "wrapText": True,
+    }
+    _clear_wrap_overrides(panel)
+    for name, width in (("Processing", 85), ("Trust", 100), ("Observed at", 115)):
+        override(panel, name, **{CUSTOM_WIDTH: width})
+    override(panel, "Reasons", **{"custom.inspect": True, "links": []})
+    panel["description"] = panel["description"].replace(
+        "Select Reasons to inspect", "Use the panel link to inspect"
+    )
+    panel["links"] = [
+        {
+            "title": "Inspect all trust reasons",
+            "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9414&${__url_time_range}",
+            "includeVars": False,
+            "targetBlank": False,
+        }
+    ]
+
+
+def _restack_accounting_row(
+    dashboard: dict[str, Any], panel: dict[str, Any], identity: dict[str, Any]
+) -> None:
+    panel["gridPos"].update(x=0, w=24)
+    panel["gridPos"]["y"] = identity["gridPos"]["y"] + identity["gridPos"]["h"]
+    for row in dashboard["panels"]:
+        if panel not in row.get("panels", []):
+            continue
+        cursor = panel["gridPos"]["y"] + panel["gridPos"]["h"]
+        for other in row["panels"]:
+            if other["id"] not in {9402, 9403}:
+                other["gridPos"].update(x=0, w=24, y=cursor)
+                cursor += other["gridPos"]["h"]
+
 
 def _apply_control_plane(
     dashboard: dict[str, Any], panels: dict[int, dict[str, Any]]
 ) -> None:
-        p = panels[9418]
-        p["options"]["cellHeight"] = "sm"
-        p["options"].pop("maxRowHeight", None)
-        # Grafana 12 can measure only one wrapped field per row. Let its
-        # longest-field measurement select Reasons instead of the timestamp.
-        p["fieldConfig"]["defaults"]["custom"]["cellOptions"] = {
-            "type": "auto",
-            "wrapText": True,
-        }
-        for item in p["fieldConfig"]["overrides"]:
-            for prop in item["properties"]:
-                if prop["id"] == "custom.cellOptions":
-                    prop["value"].pop("wrapText", None)
-        for name, width in (("Processing", 85), ("Trust", 100), ("Observed at", 115)):
-            override(p, name, **{CUSTOM_WIDTH: width})
-        override(p, "Reasons", **{"custom.inspect": True, "links": []})
-        p["description"] = p["description"].replace(
-            "Select Reasons to inspect", "Use the panel link to inspect"
-        )
-        p["links"] = [
-            {
-                "title": "Inspect all trust reasons",
-                "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9414&${__url_time_range}",
-                "includeVars": False,
-                "targetBlank": False,
-            }
-        ]
-        # Give detailed accounting the full width of its own row.
-        p = panels[9403]
-        p["gridPos"].update(x=0, w=24)
-        identity = panels[9402]
-        p["gridPos"]["y"] = identity["gridPos"]["y"] + identity["gridPos"]["h"]
-        for row in dashboard["panels"]:
-            if p in row.get("panels", []):
-                cursor = p["gridPos"]["y"] + p["gridPos"]["h"]
-                for other in row["panels"]:
-                    if other["id"] not in {9402, 9403}:
-                        other["gridPos"].update(x=0, w=24, y=cursor)
-                        cursor += other["gridPos"]["h"]
+    _stamp_trust_table(panels[9418])
+    _restack_accounting_row(dashboard, panels[9403], panels[9402])
 
 def _apply_overview(
     dashboard: dict[str, Any], panels: dict[int, dict[str, Any]]

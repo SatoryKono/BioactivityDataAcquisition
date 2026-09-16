@@ -1111,6 +1111,13 @@ def _stamp_aggregate_trust(by_id: dict[object, dict[str, object]]) -> None:
         _stamp_trust_override(override)
 
 
+def _set_override_value(override: dict[str, object], prop_id: str, value: object) -> None:
+    for prop in override.get("properties", []):
+        if prop.get("id") == prop_id:
+            prop["value"] = value
+            return
+
+
 def _stamp_trust_override(override: dict[str, object]) -> None:
     matcher = override.get("matcher", {})
     field = matcher.get("options") if isinstance(matcher, dict) else None
@@ -1118,18 +1125,12 @@ def _stamp_trust_override(override: dict[str, object]) -> None:
     if isinstance(matcher, dict):
         matcher["options"] = field
     if field == "processing_status":
-        for prop in override.get("properties", []):
-            if prop.get("id") == "displayName":
-                prop["value"] = "Result"
+        _set_override_value(override, "displayName", "Result")
     width = {"Result": 80, "Trust": 130, "Observed": 90}.get(field)
     if width is not None:
-        for prop in override.get("properties", []):
-            if prop.get("id") == CUSTOM_WIDTH:
-                prop["value"] = width
+        _set_override_value(override, CUSTOM_WIDTH, width)
     if field == "reasons_text":
-        for prop in override.get("properties", []):
-            if prop.get("id") == "noValue":
-                prop["value"] = "—"
+        _set_override_value(override, "noValue", "—")
 
 
 def _layout_uid_detail_panels(panels: list[object], *, current_uid: str) -> None:
