@@ -46,8 +46,16 @@
       "status": "pass"
     },
     {
+<<<<<<< HEAD
       "current": "cb90f15de3a7526828f4ed6238c2d160a858afd2a57973b48031c2e6156f23c0",
       "limit": "cb90f15de3a7526828f4ed6238c2d160a858afd2a57973b48031c2e6156f23c0",
+||||||| 5ef3a2c12bc
+      "current": "182d935a33add5d28adc8bdddced82288116a1546f72314883cc2a13e5bbc9f9",
+      "limit": "182d935a33add5d28adc8bdddced82288116a1546f72314883cc2a13e5bbc9f9",
+=======
+      "current": "856a48a819b44b55fa24fe572b9ea97dfd1d0f34227f7a426af3df443eeba98d",
+      "limit": "856a48a819b44b55fa24fe572b9ea97dfd1d0f34227f7a426af3df443eeba98d",
+>>>>>>> codex/issue-10469-full-coverage-final
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -56,14 +64,30 @@
     },
     {
       "current": {
+<<<<<<< HEAD
         "source_module_count": 2473,
         "source_tree_sha256": "cb90f15de3a7526828f4ed6238c2d160a858afd2a57973b48031c2e6156f23c0",
+||||||| 5ef3a2c12bc
+        "source_module_count": 2475,
+        "source_tree_sha256": "182d935a33add5d28adc8bdddced82288116a1546f72314883cc2a13e5bbc9f9",
+=======
+        "source_module_count": 2475,
+        "source_tree_sha256": "856a48a819b44b55fa24fe572b9ea97dfd1d0f34227f7a426af3df443eeba98d",
+>>>>>>> codex/issue-10469-full-coverage-final
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
+<<<<<<< HEAD
         "source_module_count": 2473,
         "source_tree_sha256": "cb90f15de3a7526828f4ed6238c2d160a858afd2a57973b48031c2e6156f23c0",
+||||||| 5ef3a2c12bc
+        "source_module_count": 2475,
+        "source_tree_sha256": "182d935a33add5d28adc8bdddced82288116a1546f72314883cc2a13e5bbc9f9",
+=======
+        "source_module_count": 2475,
+        "source_tree_sha256": "856a48a819b44b55fa24fe572b9ea97dfd1d0f34227f7a426af3df443eeba98d",
+>>>>>>> codex/issue-10469-full-coverage-final
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -406,7 +430,7 @@
       "status": "pass"
     },
     {
-      "current": "6b7b22364086ea2ac4691fae144d7f6520859f5795fff200e0c8b2b4a6c89d7c",
+      "current": "495cf8ee66401b30e4f115ed47f854cc0d2b9bdd07cf1a62a8ada64b0a3454bc",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -416,17 +440,15 @@
     },
     {
       "current": {
-        "artifacts": [
-          "remote_main_baseline"
-        ],
-        "count": 1
+        "artifacts": [],
+        "count": 0
       },
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
-      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: remote_main_baseline",
+      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: none",
       "source_artifact": "reports/quality/*.json",
-      "status": "fail"
+      "status": "pass"
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
@@ -457,23 +479,21 @@
     "dq_contract_registry_diagnostics": false,
     "hotspot_family_baseline": false,
     "module_coverage_inventory": false,
-    "remote_main_baseline": true
+    "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 1,
-    "pass": 44,
+    "fail": 0,
+    "pass": 45,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 9.25,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 1,
-    "failing_gates": [
-      "generated_artifact_drift"
-    ],
+    "fail_count": 0,
+    "failing_gates": [],
     "gate_count": 45,
-    "pass_count": 44,
-    "release_gate_status": "failing",
+    "pass_count": 45,
+    "release_gate_status": "passing",
     "warn_count": 0,
     "warning_gates": []
   }

@@ -1523,7 +1523,13 @@
       ],
       "duplication_clusters": 0,
       "files": 51,
+<<<<<<< HEAD
       "total_loc": 6129,
+||||||| 5ef3a2c12bc
+      "total_loc": 6132,
+=======
+      "total_loc": 6136,
+>>>>>>> codex/issue-10469-full-coverage-final
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.33,
       "max_internal_fan_in": 2,
@@ -3759,8 +3765,16 @@
         "src/bioetl/composition/runtime_builders/"
       ],
       "duplication_clusters": 0,
+<<<<<<< HEAD
       "files": 55,
       "total_loc": 7097,
+||||||| 5ef3a2c12bc
+      "files": 57,
+      "total_loc": 7221,
+=======
+      "files": 57,
+      "total_loc": 7219,
+>>>>>>> codex/issue-10469-full-coverage-final
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.375,
       "max_internal_fan_in": 2,
@@ -3771,9 +3785,21 @@
       },
       "internal_fan_in_census": {
         "distribution": {
+<<<<<<< HEAD
           "0": 2,
           "1": 27,
           "2": 26
+||||||| 5ef3a2c12bc
+          "0": 2,
+          "1": 28,
+          "2": 15,
+          "3": 12
+=======
+          "0": 3,
+          "1": 27,
+          "2": 15,
+          "3": 12
+>>>>>>> codex/issue-10469-full-coverage-final
         },
         "modules": [
           {
@@ -4114,10 +4140,8 @@
           },
           {
             "module": "bioetl.composition.runtime_builders.observability_builder",
-            "fan_in": 1,
-            "runtime_importers": [
-              "bioetl.composition.runtime_builders.runner_input_assembly"
-            ]
+            "fan_in": 0,
+            "runtime_importers": []
           },
           {
             "module": "bioetl.composition.runtime_builders.registry_manifest",
