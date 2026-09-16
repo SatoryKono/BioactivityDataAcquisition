@@ -4,7 +4,7 @@ Refresh note (2026-09-16): selected-run persisted status API and evidence captur
 Counts and fingerprint come from `reports/quality/module-coverage-inventory.json`;
 historical notes below retain their original scope.
 
-`source_tree_sha256=7a63a1d28b3482e1ac694d9f7815b0121463caa590c643e08e25b28cbc0e3b9c`
+`source_tree_sha256=70d44321e739347ebce98ff48d2c2e7cf65fbbabfcaeba35940e6e79816a5f64`
 
 `source_module_count=2484`
 

@@ -16,7 +16,6 @@ from bioetl.application.services.run_reports.observations import record_run_obse
 from bioetl.domain.ports import RunManifestPort
 from bioetl.domain.types import RunID
 
-
 if TYPE_CHECKING:
     from bioetl.application.services.execution.pipeline_runner_models import (
         RunOptions,
