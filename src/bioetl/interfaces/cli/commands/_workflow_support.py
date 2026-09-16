@@ -64,8 +64,9 @@ def select_workflow_steps(
     while pending:
         step_id = pending.pop()
         step = config.get_step(step_id)
-        if step is None:
-            continue
+        # WorkflowConfig validates both selected step IDs and dependency edges,
+        # so every pending ID is guaranteed to resolve in this same snapshot.
+        assert step is not None
         for dependency in step.depends_on:
             if dependency not in required:
                 required.add(dependency)
