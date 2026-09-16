@@ -19,7 +19,7 @@ from bioetl.application.composite.runner_pkg.runner_control_plane_phase_followup
 from bioetl.application.composite.runner_pkg.runner_merge_stage_runtime import (
     handle_dry_run_merge_skip,
 )
-from bioetl.application.services.control_plane.manifest._inspection_compare_support import (
+from bioetl.application.services.control_plane.manifest.inspection_verification import (
     RunManifestInspectionCompareMixin,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_parentage import (
