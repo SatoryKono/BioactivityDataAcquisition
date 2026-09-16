@@ -409,3 +409,44 @@ async def test_run_fetch_with_fallback_policy_without_handler_stops_after_primar
     )
 
     assert results == [{"id": "primary-without-doi"}]
+
+
+@pytest.mark.asyncio
+async def test_run_fetch_with_fallback_policy_stops_after_phase_two_limit() -> None:
+    """Reaching the global limit in phase two prevents title fallback work."""
+
+    async def primary_records() -> AsyncIterator[dict[str, object]]:
+        if False:
+            yield {}
+
+    class _PhaseTwoOnly:
+        def __init__(self) -> None:
+            self.calls: list[str] = []
+
+        async def process_missing_dois(self, **_kwargs):
+            self.calls.append("phase2")
+            yield {"id": "phase2"}
+
+        async def process_title_only_entries(self, **_kwargs):
+            self.calls.append("phase3")
+            yield {"id": "phase3"}
+
+    fallback = _PhaseTwoOnly()
+    results = await collect_async_iterator(
+        run_fetch_with_fallback_policy(
+            primary_records=primary_records(),
+            primary_ids=["10.1/a"],
+            title_only_entries=["__title_only_0__"],
+            fallback_mapping={
+                "10.1/a": "Missing title",
+                "__title_only_0__": "Title only",
+            },
+            normalize_id=_normalize_lower_strip,
+            extract_record_id=_extract_doi,
+            fallback_handler=fallback,
+            limit=1,
+        )
+    )
+
+    assert results == [{"id": "phase2"}]
+    assert fallback.calls == ["phase2"]
