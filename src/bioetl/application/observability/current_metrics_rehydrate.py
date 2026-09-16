@@ -117,7 +117,11 @@ def collect_latest_terminal_anchors(
 
 
 def collect_latest_terminal_workflow_anchors(
-    *, root: Path | None = None, limit: int = 200, store: RunReportStorePort
+    *,
+    root: Path | None = None,
+    limit: int = 200,
+    store: RunReportStorePort,
+    include_pipeline_scopes: bool = True,
 ) -> tuple[WorkflowRunSnapshot, ...]:
     """Return one latest terminal anchor per workflow_name."""
     entries = list_workflow_reports(
@@ -125,7 +129,12 @@ def collect_latest_terminal_workflow_anchors(
     )
     selected: dict[str, WorkflowRunSnapshot] = {}
     for entry in entries:
-        anchor = _anchor_from_workflow_entry(entry, root=root, store=store)
+        anchor = _anchor_from_workflow_entry(
+            entry,
+            root=root,
+            store=store,
+            include_pipeline_scopes=include_pipeline_scopes,
+        )
         if anchor is None:
             continue
         if anchor.workflow in selected:
@@ -271,7 +280,11 @@ def _seed_workflow_pipeline_expected(
 
 
 def _anchor_from_workflow_entry(
-    entry: ReportIndexEntry, *, root: Path | None, store: RunReportStorePort
+    entry: ReportIndexEntry,
+    *,
+    root: Path | None,
+    store: RunReportStorePort,
+    include_pipeline_scopes: bool = True,
 ) -> WorkflowRunSnapshot | None:
     """Build one terminal workflow anchor, or None."""
     payload = _load_report_payload(entry.json_path, store=store)
@@ -293,7 +306,11 @@ def _anchor_from_workflow_entry(
     )
     if not workflow or status not in _WORKFLOW_TERMINAL_STATUSES:
         return None
-    pipelines = _pipeline_scopes_from_payload(payload, root=root, store=store)
+    pipelines = (
+        _pipeline_scopes_from_payload(payload, root=root, store=store)
+        if include_pipeline_scopes
+        else ()
+    )
     provider = _workflow_provider(payload, pipelines)
     return WorkflowRunSnapshot(
         workflow=workflow,
