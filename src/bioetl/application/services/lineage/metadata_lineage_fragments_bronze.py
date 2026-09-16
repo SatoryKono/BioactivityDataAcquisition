@@ -20,6 +20,8 @@ from bioetl.domain.lineage import (
     LineageEdge,
     LineageEdgeType,
     LineageGraphFragment,
+    LineageNodeRef,
+    LineageNodeType,
 )
 
 if TYPE_CHECKING:
@@ -88,20 +90,73 @@ def build_bronze_lineage_fragment(
                 created_at=created_at,
             )
         )
-    edges.append(
-        LineageEdge(
-            edge_type=LineageEdgeType.PRODUCED_BY,
-            source=bronze_batch,
-            target=run,
-            run_id=str(run_context.run_id),
-            manifest_id=run_context.manifest_id,
-            created_at=created_at,
+    if _is_cached_bronze_source(input_data):
+        consumption = _cached_bronze_consumption_node(
+            run_context=run_context,
+            bronze_batch=bronze_batch,
         )
-    )
+        nodes.append(consumption)
+        edges.extend(
+            [
+                LineageEdge(
+                    edge_type=LineageEdgeType.CONSUMED_BY,
+                    source=bronze_batch,
+                    target=consumption,
+                    run_id=str(run_context.run_id),
+                    manifest_id=run_context.manifest_id,
+                    created_at=created_at,
+                ),
+                LineageEdge(
+                    edge_type=LineageEdgeType.EXECUTED_IN,
+                    source=consumption,
+                    target=run,
+                    run_id=str(run_context.run_id),
+                    manifest_id=run_context.manifest_id,
+                    created_at=created_at,
+                ),
+            ]
+        )
+    else:
+        edges.append(
+            LineageEdge(
+                edge_type=LineageEdgeType.PRODUCED_BY,
+                source=bronze_batch,
+                target=run,
+                run_id=str(run_context.run_id),
+                manifest_id=run_context.manifest_id,
+                created_at=created_at,
+            )
+        )
     return finalize_lineage_fragment(
         fragment_name="bronze",
         run_context=run_context,
         nodes=nodes,
         edges=edges,
         created_at=created_at,
+    )
+
+
+def _is_cached_bronze_source(input_data: object) -> bool:
+    """Return True when Bronze input is a cached-Bronze consumption, not a live fetch."""
+    source = getattr(input_data, "source_metadata", None)
+    return getattr(source, "type", None) == "cached_bronze"
+
+
+def _cached_bronze_consumption_node(
+    *,
+    run_context: RunContext,
+    bronze_batch: LineageNodeRef,
+) -> LineageNodeRef:
+    """Occurrence node for the current run consuming an existing Bronze batch."""
+    batch_id = str(bronze_batch.attributes.get("batch_id") or bronze_batch.node_id)
+    return LineageNodeRef(
+        node_type=LineageNodeType.CONSUMPTION,
+        node_id=f"consumption:{run_context.run_id}:{batch_id}",
+        label=f"{run_context.provider}.{run_context.entity}",
+        attributes={
+            "run_id": str(run_context.run_id),
+            "manifest_id": run_context.manifest_id,
+            "batch_id": batch_id,
+            "source_type": "cached_bronze",
+        },
     )

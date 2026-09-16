@@ -177,7 +177,7 @@ class SourceMetadata(BaseModel):
     debugging, and monitoring purposes.
 
     Attributes:
-        type: Source type (api, csv, parquet).
+        type: Source type (api, csv, parquet, cached_bronze).
         url: API URL for API sources.
         file_path: File path for file sources.
         query_string: Query string used for data source filtering
@@ -190,7 +190,7 @@ class SourceMetadata(BaseModel):
         input_snapshots: Immutable snapshot references for replayable input batches.
     """
 
-    type: Literal["api", "csv", "parquet"] = Field(
+    type: Literal["api", "csv", "parquet", "cached_bronze"] = Field(
         default="api", description="Source type"
     )
     url: str | None = Field(default=None, description="API URL")

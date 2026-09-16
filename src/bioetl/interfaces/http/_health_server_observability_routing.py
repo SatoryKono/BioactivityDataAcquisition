@@ -20,6 +20,7 @@ from bioetl.interfaces.http._pipeline_run_report_table import (
     _not_found_pipeline_run_report_shell,
     _summary_rows_pipeline_run_report,
     _table_shape_pipeline_run_report,
+    _table_shape_workflow_run_report,
     _unresolved_pipeline_run_report_shell,
 )
 from bioetl.interfaces.http.processed_records_table import (
@@ -46,6 +47,7 @@ __all__ = (
     "_not_found_pipeline_run_report_shell",
     "_summary_rows_pipeline_run_report",
     "_table_shape_pipeline_run_report",
+    "_table_shape_workflow_run_report",
     "_unresolved_pipeline_run_report_shell",
 )
 
@@ -247,7 +249,9 @@ async def handle_workflow_run_report(
             },
         )
         return
-    await host._send_payload_response(writer, 200, payload)
+    await host._send_payload_response(
+        writer, 200, _table_shape_workflow_run_report(payload)
+    )
 
 
 async def handle_pipeline_run_reports_list(

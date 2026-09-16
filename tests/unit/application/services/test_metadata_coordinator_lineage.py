@@ -138,6 +138,50 @@ class TestLineageFragments:
             edge.edge_type == LineageEdgeType.EXPLAINS for edge in fragment.edges
         )
 
+    def test_cached_bronze_fragment_is_consumption_not_production(self) -> None:
+        context = RunContext.create(
+            run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
+            run_type=RunType.INCREMENTAL,
+            started_at=_FIXED_TIME,
+            provider="chembl",
+            entity="activity",
+            manifest_id="manifest-cached-001",
+            execution_fingerprint="fingerprint-001",
+            config_hash="a" * 64,
+            effective_config_hash="b" * 64,
+            effective_config_artifact_id="artifact-001",
+            dq_contract_compatibility_hash="dq-hash-001",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+        )
+        coordinator = MetadataCoordinator(context)
+        input_data = BronzeMetadataInput(
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
+            record_count=50,
+            compressed_size=1024,
+            output_path="v1/chembl/activity/2026-03-24/batch-1.jsonl.zst",
+            started_at=_FIXED_TIME,
+            completed_at=_FIXED_TIME,
+            source_metadata=SourceMetadata(
+                type="cached_bronze",
+                file_path="/data/bronze/chembl/activity",
+            ),
+        )
+        fragment = coordinator.build_bronze_lineage_fragment(input_data)
+        assert fragment.run_id == str(context.run_id)
+        assert fragment.manifest_id == "manifest-cached-001"
+        assert fragment.fragment_id.startswith("bronze:")
+        assert fragment.fragment_id != "bronze"
+        assert any(
+            node.node_type == LineageNodeType.CONSUMPTION for node in fragment.nodes
+        )
+        assert any(
+            edge.edge_type == LineageEdgeType.CONSUMED_BY for edge in fragment.edges
+        )
+        assert not any(
+            edge.edge_type == LineageEdgeType.PRODUCED_BY for edge in fragment.edges
+        )
+
     def test_bronze_fragment_id_is_stable_across_run_ids(self) -> None:
         """Bronze fragment identity must not depend on run_id."""
         batch_id = BatchID(deterministic_uuid_from_callsite("replay-sensitive"))
