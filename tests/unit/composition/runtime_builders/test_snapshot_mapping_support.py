@@ -92,3 +92,15 @@ def test_to_serializable_mapping_handles_frozen_pydantic_payload() -> None:
 
 def test_to_serializable_mapping_non_mapping_wraps_value() -> None:
     assert to_serializable_mapping("plain") == {"value": "plain"}
+
+
+def test_snapshot_helpers_serialize_plain_object_public_attributes() -> None:
+    class PlainObject:
+        def __init__(self) -> None:
+            self.visible = _SampleEnum.ALPHA
+            self._private = "ignored"
+
+    value = PlainObject()
+
+    assert normalize_snapshot(value) == {"visible": "alpha"}
+    assert to_serializable_mapping(value) == {"visible": "alpha"}

@@ -281,6 +281,7 @@ nav:
           - "ADR-057 Deterministic Runtime Config Authority": 02-architecture/decisions/ADR-057-deterministic-runtime-config-authority-and-identity.md
           - "ADR-058 Layered Port Registries": 02-architecture/decisions/ADR-058-layered-port-registries.md
           - "ADR-059 Package Cohesion Budgets": 02-architecture/decisions/ADR-059-package-cohesion-budgets.md
+          - "ADR-061 Persisted Selected Run Assessment": 02-architecture/decisions/ADR-061-persisted-selected-run-assessment.md
           - "Infrastructure Config Package Root Sunset": 02-architecture/compatibility/infrastructure-config-package-root-sunset.md
           - "Public API Freeze": 00-project/ai/agents/guides/PUBLIC_API_FREEZE.md
   - Guides:
@@ -340,6 +341,7 @@ nav:
           - "PyCharm Setup": 03-guides/development/pycharm-setup.md
       - Dashboards:
           - "Overview": 03-guides/dashboards/README.md
+          - "Regression Acceptance": 03-guides/dashboards/regression-acceptance.md
           - "V2 Updates": 03-guides/dashboards/dashboard-v2-updates.md
           - "V2 Usage (stable shipped)": 03-guides/dashboards/dashboard-v2-usage.md
           - "Extension Guides":
@@ -635,6 +637,7 @@ nav:
           - "Pipeline Compatibility Summary: ChEMBL Activity": 04-reference/pipelines/chembl-activity.md
           - "Pipeline Compatibility Summary: ChEMBL Assay": 04-reference/pipelines/chembl-assay.md
           - "Environment Variables": 04-reference/environment-variables.md
+          - "Selected Run Status": 04-reference/selected-run-status.md
       - "Operations Extras":
           - "Monitoring Guide": 05-operations/01-monitoring-guide.md
           - "Monitoring Architecture": 05-operations/monitoring-architecture.md

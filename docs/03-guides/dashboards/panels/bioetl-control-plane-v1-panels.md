@@ -193,3 +193,13 @@ panels; HTTP-backed identity panels are documented in the inventory above.
 - Thresholds and value mappings not spelled out above should be taken from the
   shipped panel JSON; this page documents the panel inventory, datasource
   family, primary PromQL formulas, and operator purpose 1:1.
+
+## Saved evidence and discovery panels
+
+| ID | Title | Purpose |
+| --- | --- | --- |
+| 9420 | Inspect Complete Run Discovery | Discover the exact completed run and inspect its persisted identity. |
+| 9421 | Inspect Latest Complete Run | Discover the exact completed run and inspect its persisted identity. |
+| 9450 | Inspect Saved Run Evidence | Saved exact-run evidence; expand for identity, version, reasons and actions. |
+| 9451 | Inspect Selected Run Domains | Saved exact-run evidence; expand for identity, version, reasons and actions. |
+| 9452 | Inspect Selected Run Identity | Saved exact-run evidence; expand for identity, version, reasons and actions. |

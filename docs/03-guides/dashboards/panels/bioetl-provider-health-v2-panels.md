@@ -213,3 +213,11 @@ Shipped in `bioetl-provider-health-v2.json`.
 Shipped in `bioetl-provider-health-v2.json`.
 
 Circuit-breaker panels are GLOBAL ADAPTER evidence, independent of the Provider selector. Navigation preserves the visible Pipeline selection; legacy pipeline_context is not its authority. Absent health-check series are TELEMETRY MISSING, not a measured zero.
+
+## Saved evidence and discovery panels
+
+| ID | Title | Purpose |
+| --- | --- | --- |
+| 9450 | Inspect Saved Run Evidence | Saved exact-run evidence; expand for identity, version, reasons and actions. |
+| 9451 | Inspect Selected Run Domains | Saved exact-run evidence; expand for identity, version, reasons and actions. |
+| 9452 | Inspect Selected Run Identity | Saved exact-run evidence; expand for identity, version, reasons and actions. |

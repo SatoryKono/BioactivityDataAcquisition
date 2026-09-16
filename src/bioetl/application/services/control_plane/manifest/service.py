@@ -19,6 +19,7 @@ from bioetl.application.services.control_plane.manifest.validation import (
     RunManifestCreateSpec,
     validate_run_manifest_request,
 )
+from bioetl.application.services.run_reports.observations import record_run_observation
 from bioetl.domain.control_plane import RunCodeProvenance, RunManifest
 from bioetl.domain.normalization import (
     compute_execution_identity_fingerprint,
@@ -116,6 +117,17 @@ class RunManifestService(
         )
         self.manifest_port.save(manifest)
         self._assert_manifest_persisted(manifest)
+
+        record_run_observation(
+            "Control Plane",
+            verdict="INCOMPLETE",
+            reason="manifest_saved_full_trust_not_assessed",
+            facts={
+                "manifest_id": manifest.manifest_id,
+                "run_id": str(manifest.run_id),
+                "observed_at": created_at.isoformat(),
+            },
+        )
         emit_replay_write_risk_metrics(self.metrics, manifest)
         return manifest
 

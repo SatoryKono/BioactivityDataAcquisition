@@ -53,8 +53,9 @@ def test_set_range_action_names_run_explorer_handoff() -> None:
     blob = str(panel)
     assert "Open run in Run Explorer" in blob
     assert '"text": "Set range to run"' not in blob
-    assert "from=${__data.fields.from_ms}" in blob
-    assert "to=${__data.fields.to_ms}" in blob
+    assert "${__url_time_range}" in blob
+    assert "Set range to run" in panel["description"]
+    assert "var-run_id" in blob or "${run_id:queryparam}" in blob
 
 
 def test_overview_and_dq_lower_handoffs_are_explicit_links() -> None:

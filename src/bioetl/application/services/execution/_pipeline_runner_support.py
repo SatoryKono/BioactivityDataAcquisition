@@ -24,6 +24,7 @@ from bioetl.application.services.run_reports.enrichment import (
     build_schema_versions,
     build_stage_timings,
 )
+from bioetl.application.services.run_reports.observations import run_observations
 from bioetl.application.services.run_reports.writer import write_pipeline_run_report
 from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
@@ -192,6 +193,10 @@ def finalize_pipeline_run_report(
                 http_summary=build_http_summary(http_summary),
             ),
         )
+        report = replace(
+            report,
+            observations={} if options and options.dry_run else run_observations(),
+        )
         written = write_pipeline_run_report(report, root=report_root, store=store)
     except Exception as exc:
         return _require_run_result(
@@ -305,6 +310,47 @@ def _require_execution_runner(runner: object) -> ExecutionMetricsRunnerPort:
     if not isinstance(runner, ExecutionMetricsRunnerPort):
         raise TypeError("Runner does not implement ExecutionMetricsRunnerPort")
     return runner
+
+
+def constructor_failure_recorder(
+    *,
+    audit: AuditPort,
+    clock: ClockPort,
+    pipeline_name: str,
+    run_id: RunID,
+    options: RunOptions,
+    started_at: datetime,
+    finalize: Callable[[RunResult, RunOptions | None], RunResult],
+    record_event: Callable[..., Awaitable[None]],
+) -> Callable[[Exception], Awaitable[None]]:
+    """Build an audited finalizer for failures before the runner can execute."""
+
+    async def record(exc: Exception) -> None:
+        completed_at = clock.now()
+        await record_event(
+            audit,
+            event_name="PipelineRunCompleted",
+            pipeline_name=pipeline_name,
+            run_id=run_id,
+            run_type=options.run_type,
+            status="failed",
+            timestamp=completed_at,
+            error_type=type(exc).__name__,
+        )
+        finalize(
+            RunResult(
+                status=PipelineRunResult.FAILED,
+                pipeline_name=pipeline_name,
+                run_id=str(run_id),
+                run_type=options.run_type,
+                started_at=started_at,
+                completed_at=completed_at,
+                error_type=type(exc).__name__,
+            ),
+            options,
+        )
+
+    return record
 
 
 async def record_pipeline_audit_event(

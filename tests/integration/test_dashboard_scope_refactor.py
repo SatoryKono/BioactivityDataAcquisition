@@ -106,12 +106,12 @@ def test_overview_selected_run_summary_is_in_first_window() -> None:
     )
     blob = f"{panel.get('title') or ''}\n{panel.get('description') or ''}"
     assert "SELECTED RUN" in blob
-    urls = [
-        str(target.get("url") or "")
-        for target in (panel.get("targets") or [])
-        if isinstance(target, dict)
+    assert panel["datasource"]["uid"] == "-- Dashboard --"
+    assert panel["targets"] == [
+        {"panelId": 9002, "refId": "A", "withTransforms": False}
     ]
-    assert any("view=summary" in url for url in urls)
+    source = next(item for item in root if item.get("id") == 9002)
+    assert "selected-run-status" in source["targets"][0]["url"]
 
 
 def test_query_panels_declare_scope_class_matching_scope() -> None:
@@ -217,26 +217,37 @@ def test_compact_selected_run_summary_uses_shared_projection() -> None:
             missing.append(f"{name}:{panel_id} missing")
             continue
         targets = panel.get("targets") or []
+        if name == "bioetl-overview-v2.json":
+            assert panel["datasource"]["uid"] == "-- Dashboard --"
+            assert targets == [{"panelId": 9002, "refId": "A", "withTransforms": False}]
+            targets = next(
+                item for item in _root_panels(dashboard) if item.get("id") == 9002
+            )["targets"]
         urls = [
             str(target.get("url") or "")
             for target in targets
             if isinstance(target, dict)
         ]
         if not any(
-            "view=summary" in url and "pipeline-run-report" in url for url in urls
+            "selected-run-status?pipeline=${pipeline}&run_id=${run_id}" in url
+            for url in urls
         ):
-            missing.append(f"{name}:{panel_id} missing view=summary")
+            missing.append(
+                f"{name}:{panel_id} missing exact selected-run-status projection"
+            )
         blob = json.dumps(panel)
         if "viewPanel=3022" in blob:
             missing.append(f"{name}:{panel_id} targets retired D6 panel 3022")
-        if "from=${__data.fields.from_ms}" not in blob:
-            missing.append(f"{name}:{panel_id} missing Set range from_ms")
+        if "Open run in Run Explorer" not in blob:
+            missing.append(f"{name}:{panel_id} missing chart range handoff")
         no_value = str(
             ((panel.get("fieldConfig") or {}).get("defaults") or {}).get("noValue")
             or ""
         )
-        if "SELECT RUN" not in no_value and "VALID EMPTY" not in no_value:
-            missing.append(f"{name}:{panel_id} missing SELECT RUN/VALID EMPTY")
+        if no_value != "UNKNOWN":
+            missing.append(f"{name}:{panel_id} missing UNKNOWN no-value state")
+        if "SELECT RUN" not in panel["description"]:
+            missing.append(f"{name}:{panel_id} missing SELECT RUN explanation")
     assert not missing, "selected-run summary:\n" + "\n".join(missing)
 
 
@@ -276,8 +287,9 @@ def test_promql_targets_do_not_select_run_id_label() -> None:
 def test_run_explorer_selects_rows_without_removed_detail_groups() -> None:
     dashboard = _load(DASHBOARD_DIR / "bioetl-run-explorer-v1.json")
     roots = _root_panels(dashboard)
-    assert len(roots) == 3
-    assert all(p.get("type") != "row" for p in roots)
+    assert len(roots) == 4
+    assert len([p for p in roots if p.get("type") != "row"]) == 3
+    assert next(p for p in roots if p["id"] == 9450)["collapsed"] is True
     browse = next(p for p in roots if p["id"] == 3010)
     override = next(
         o

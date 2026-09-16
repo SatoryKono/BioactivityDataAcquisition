@@ -213,7 +213,7 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     assert report["direct_alert_inputs"]
 
     http_targets = report["http_targets"]
-    assert len(http_targets) == 29
+    assert len(http_targets) == 43  # Overview summary reuses the saved domain response.
     assert any(
         target["dashboard_uid"] == "bioetl-control-plane-v1"
         and target["panel_id"] == 9418
@@ -224,8 +224,8 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
         str(target["url"]).startswith(("/ops/", "/health/")) for target in http_targets
     )
     assert report["typed_target_counts"] == {
-        "promql": 173,  # Trust read-latency uses one $read_latency_quantile target.
-        "http": 29,
+        "promql": 172,  # Selected-run domain summary moved to persisted HTTP evidence.
+        "http": 43,
         "loki": 0,
         "tempo": 0,
         "unknown": 0,

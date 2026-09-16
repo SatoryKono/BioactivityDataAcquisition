@@ -223,7 +223,7 @@ def test_runtime_10251_select_run_novalue_drops_hedge_tails() -> None:
             "SELECT RUN — no exact Run ID selected. "
             "Choose a run in Inspect Recent Runs."
         ),
-        9998: "SELECT RUN — no exact Run ID selected. Choose a run first.",
+        9998: "UNKNOWN",
     }
     for panel_id, expected_no_value in expected.items():
         no_value = (
@@ -247,11 +247,18 @@ def test_dq_10253_selected_run_summary_is_first_window() -> None:
         for item in summary.get("transformations") or []
         if item.get("id") == "organize"
     )
-    exclude = (organize.get("options") or {}).get("excludeByName") or {}
-    assert exclude.get("started_at") is False
-    assert exclude.get("completed_at") is True
+    assert organize["options"]["indexByName"] == {
+        "execution_state": 0,
+        "verdict": 1,
+        "evidence_completeness": 2,
+        "rules_version": 3,
+    }
+    assert summary["targets"][0]["root_selector"] == "summary"
+    assert "/selected-run-status?" in summary["targets"][0]["url"]
     no_value = str(summary.get("fieldConfig", {}).get("defaults", {}).get("noValue"))
-    assert no_value.startswith("SELECT RUN")
+    assert (
+        no_value == "UNKNOWN"
+    )  # Missing response must not masquerade as no selection.
     assert "VALID EMPTY if" not in no_value
 
 
@@ -269,7 +276,7 @@ def test_dq_10253_select_run_novalue_drops_hedge_tails() -> None:
             "SELECT RUN — no exact Run ID selected. "
             "Choose a run in Inspect Recent Runs."
         ),
-        9406: "SELECT RUN — no exact Run ID selected. Choose a run first.",
+        9406: "UNKNOWN",
     }
     for panel_id, expected_no_value in expected.items():
         no_value = (

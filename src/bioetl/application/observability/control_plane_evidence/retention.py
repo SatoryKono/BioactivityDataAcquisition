@@ -1,3 +1,5 @@
+"""Read-only retention and archive evidence checks for the selected manifest."""
+
 from __future__ import annotations
 
 from collections.abc import Iterable
