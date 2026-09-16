@@ -133,7 +133,11 @@ async def dispatch_control_plane_evidence_request(
         await host._send_payload_response(
             writer,
             status_code,
-            forensic_unavailable_table_payload(endpoint=path, reason=exc.reason),
+            forensic_unavailable_table_payload(
+                endpoint=path,
+                reason=exc.reason,
+                observed_at=current_utc_time().isoformat(),
+            ),
         )
         return True
     await host._send_payload_response(writer, 200, payload)

@@ -60,6 +60,17 @@ def forensic_unavailable_table_payload(
             "observed_at": stamp,
         }
     ]
+    if endpoint == "/ops/control-plane/trust-summary":
+        # The Trust panel selects an object, unlike the validation row tables.
+        # Query failure must not masquerade as missing selection or run evidence.
+        payload["trust"] = {
+            "processing_status": "UNKNOWN",
+            "trust_status": "QUERY ERROR",
+            "reasons_text": f"{reason}; Trust not evaluated. Retry the query.",
+            "reasons_count": 1,
+            "evidence_observed_at": None,
+            "evidence_freshness": "unavailable",
+        }
     return payload
 
 

@@ -193,5 +193,26 @@ def test_table_error_as_http_ok_accepts_grafana_flag() -> None:
     assert table_error_as_http_ok({}) is False
 
 
+@pytest.mark.parametrize("reason", ["deadline_exceeded", "capacity_exhausted"])
+def test_trust_query_failure_has_displayable_row_without_claiming_run_evidence(
+    reason: str,
+) -> None:
+    payload = forensic_unavailable_table_payload(
+        endpoint="/ops/control-plane/trust-summary",
+        reason=reason,
+        observed_at="2026-09-16T08:00:00+00:00",
+    )
+    assert payload["status"] == "unavailable"
+    assert payload["observed_at"] == "2026-09-16T08:00:00+00:00"
+    assert payload["trust"] == {
+        "processing_status": "UNKNOWN",
+        "trust_status": "QUERY ERROR",
+        "reasons_text": f"{reason}; Trust not evaluated. Retry the query.",
+        "reasons_count": 1,
+        "evidence_observed_at": None,
+        "evidence_freshness": "unavailable",
+    }
+
+
 def test_forensic_deadline_remains_twelve_seconds() -> None:
     assert FORENSIC_ENDPOINT_TIMEOUT_SECONDS == 12.0

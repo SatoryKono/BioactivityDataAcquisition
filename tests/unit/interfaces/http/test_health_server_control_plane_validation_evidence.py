@@ -281,10 +281,17 @@ async def test_missing_evidence_service_returns_unknown_table_contract() -> None
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("endpoint", ["retention-compliance", "latest-complete-run"])
-async def test_retention_deadline_returns_table_row_and_keeps_504(
+@pytest.mark.parametrize(
+    "endpoint", ["retention-compliance", "latest-complete-run", "trust-summary"]
+)
+@pytest.mark.parametrize(
+    ("reason", "http_status"), [("deadline_exceeded", 504), ("capacity_exhausted", 503)]
+)
+async def test_forensic_failure_returns_table_row_and_preserves_http_error(
     monkeypatch: pytest.MonkeyPatch,
     endpoint: str,
+    reason: str,
+    http_status: int,
 ) -> None:
     from bioetl.interfaces.http import (
         _health_server_control_plane_evidence_routing as routing,
@@ -304,7 +311,7 @@ async def test_retention_deadline_returns_table_row_and_keeps_504(
     )
 
     async def deadline(**_kwargs: object) -> dict[str, object]:
-        raise ForensicEndpointUnavailable(reason="deadline_exceeded", status_code=504)
+        raise ForensicEndpointUnavailable(reason=reason, status_code=http_status)
 
     monkeypatch.setattr(routing, "run_bounded_forensic_operation", deadline)
     await server.start()
@@ -314,12 +321,12 @@ async def test_retention_deadline_returns_table_row_and_keeps_504(
             f"/ops/control-plane/{endpoint}?pipeline=chembl_activity"
             f"&run_id={manifest.run_id}",
         )
-        assert status == 504
+        assert status == http_status
         assert payload["contract"] == "forensic_endpoint_error_v1"
-        assert payload["reason"] == "deadline_exceeded"
+        assert payload["reason"] == reason
         deadline_rows = _payload_rows(payload)
         assert deadline_rows[0]["status"] == "ERROR"
-        assert deadline_rows[0]["reason"] == "deadline_exceeded"
+        assert deadline_rows[0]["reason"] == reason
 
         status_ok, payload_ok = await _get_json(
             server,
@@ -329,6 +336,14 @@ async def test_retention_deadline_returns_table_row_and_keeps_504(
         assert status_ok == 200
         assert payload_ok["contract"] == "forensic_endpoint_error_v1"
         assert _payload_rows(payload_ok)[0]["check"] == "endpoint_availability"
+        assert payload_ok["status"] == "unavailable"
+        assert payload_ok["observed_at"] != "unavailable"
+        if endpoint == "trust-summary":
+            assert payload_ok["trust"]["trust_status"] == "QUERY ERROR"
+            assert reason in payload_ok["trust"]["reasons_text"]
+            assert payload_ok["trust"]["evidence_observed_at"] is None
+        else:
+            assert "trust" not in payload_ok
     finally:
         await server.stop()
 

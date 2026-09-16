@@ -4,7 +4,7 @@
 
 ## Обзор
 
-Dashboard `0. Control Plane` monitors replay safety, manifest/ledger integrity,
+Dashboard `1. Trust` monitors replay safety, manifest/ledger integrity,
 checkpoint freshness, explicit checkpoint/manifest/lineage validation, retention
 compliance, bounded failure reasons, audit activity, and lineage evidence.
 Shipped dashboard JSON is the source of truth.
@@ -31,7 +31,7 @@ absence.
 | --- | --- | --- | --- | --- | --- | --- |
 | 9400 | Inspect Scope & Evidence | text | Static | Replay-safety question: SELECTED RUN is this run's processing outcome and Trust status; CURRENT is pipeline replay readiness now, not this run. INCOMPLETE/UNKNOWN is incomplete evidence, not OK. | shared shell | No thresholds; interpretive guidance only. |
 | 9401 | Monitor Current Readiness | stat | Prometheus | CURRENT Prometheus replay/resume verdict from `bioetl_control_plane_current_status_trusted` (not selected-run HTTP trust). | shared shell | `0=OK`, `1=WARN`, `2=CRIT`, `3=INCOMPLETE`, `null=UNKNOWN`. `INCOMPLETE` blocks Prom-current replay approval. |
-| 9418 | Review Selected-Run Trust | table | BioETL Ops HTTP | First-screen exact-run `processing_status`, `trust_status`, `scope_kind`, `evidence_freshness`, and top-3 multiline `reasons_text` from manifest-validation. Full reason list stays in `9414` / `rows`. | shared shell | `INCOMPLETE`/`ERROR`/`UNAVAILABLE` are not OK. |
+| 9418 | Review Selected-Run Trust | table | BioETL Ops HTTP | Exact-run processing outcome and aggregate manifest, lineage, and retention Trust from `trust-summary`. `error_as_row=1` displays deadline/capacity failures as `QUERY ERROR` with the reason code, unknown processing outcome, and no manifest timestamp. | shared shell | `INCOMPLETE`/`ERROR`/`UNKNOWN`/`QUERY ERROR` are not OK; query failure does not mean the run selection is missing. |
 | 9416 | Review Retention Compliance | table | BioETL Ops HTTP | First-screen run-scoped evidence-floor, retention-policy, required-evidence, and archive-support checks. | shared shell | Unsupported archive behavior is explicit rather than inferred as compliant. |
 | 9402 | Review Run Summary | table | BioETL Ops HTTP | Identity anchors for the selected workflow/pipeline/run scope. | shared shell | No numeric threshold; forensic handoff table. |
 | 9403 | Review Processed Records | table | BioETL Ops HTTP | Current processed-record evidence for the selected run scope. | shared shell | No numeric threshold; read-path evidence table. |
