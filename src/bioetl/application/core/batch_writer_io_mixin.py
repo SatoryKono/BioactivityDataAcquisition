@@ -11,12 +11,12 @@ import orjson
 
 from bioetl.application.core._batch_writer_gold_support import (
     prepare_gold_records,
-    should_defer_gold_validation_to_storage,
-    validate_gold_records,
+    prepare_validated_gold_write,
 )
 from bioetl.application.core.batch_processing_runtime import (
     OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
 )
+from bioetl.application.services.run_reports.observations import observe_gold_write
 from bioetl.domain.ports import SilverWriteRequest
 
 if TYPE_CHECKING:
@@ -188,30 +188,9 @@ class BatchWriterIOMixin:
         await self._validate_lock("write_gold")
         span = self._start_span("write_gold", "gold", len(records))
         try:
-            if should_defer_gold_validation_to_storage(self):
-                available_cols = self._collect_record_columns(records)
-                schema_payload: object = self._gold_schema_policy_by_version
-            else:
-                records, available_cols = prepare_gold_records(self, records)
-                validate_gold_records(self, records)
-                column_order_preview, _rename_preview = self._resolve_layer_columns(
-                    "gold", available_cols
-                )
-                schema_payload = self._project_schema_for_layer(
-                    "gold",
-                    self._gold_schema,
-                    column_order_preview,
-                )
-                if (
-                    schema_payload is not None
-                    and schema_payload is not self._gold_schema
-                ):
-                    records, available_cols = prepare_gold_records(
-                        self,
-                        records,
-                        schema=schema_payload,
-                    )
-                    validate_gold_records(self, records, schema=schema_payload)
+            records, available_cols, schema_payload = prepare_validated_gold_write(
+                self, records
+            )
 
             column_order, rename_map = self._resolve_layer_columns(
                 "gold", available_cols
@@ -219,17 +198,20 @@ class BatchWriterIOMixin:
             records, column_order, schema_payload = self._apply_layer_renames(
                 records, column_order, schema_payload, rename_map
             )
-            await self._storage.write_gold(
-                table_name=self._gold_table_name,
-                records=records,
-                schema=schema_payload,
-                primary_keys=list(self._table_config.primary_keys),
-                mode=self._gold_mode,
-                scd_config=self._config.scd_config,
-                column_order=column_order,
-                ingestion_ts=self._resolve_gold_ingestion_ts(),
-                run_id=self._context.run_id,
-                silver_refs=silver_refs,
+            await observe_gold_write(
+                self._storage.write_gold(
+                    table_name=self._gold_table_name,
+                    records=records,
+                    schema=schema_payload,
+                    primary_keys=list(self._table_config.primary_keys),
+                    mode=self._gold_mode,
+                    scd_config=self._config.scd_config,
+                    column_order=column_order,
+                    ingestion_ts=self._resolve_gold_ingestion_ts(),
+                    run_id=self._context.run_id,
+                    silver_refs=silver_refs,
+                ),
+                len(records),
             )
             self._end_span(span)
         except _WRITE_SPAN_ERRORS as error:

@@ -1,3 +1,5 @@
+"""Run-manifest construction and propagation into the composed execution context."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

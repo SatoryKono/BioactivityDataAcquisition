@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-16T06:57:31.326159+00:00",
+  "generated_at": "2026-09-16T09:32:56.561497+00:00",
   "summary": {
-    "total_scripts": 619,
+    "total_scripts": 620,
     "status_counts": {
-      "active": 339,
-      "supporting": 280
+      "active": 338,
+      "supporting": 282
     },
     "reference_group_coverage": {
       "agents": 9,
@@ -13,7 +13,7 @@
       "ci": 83,
       "docs": 259,
       "other": 75,
-      "scripts": 518,
+      "scripts": 519,
       "skills": 12,
       "tests": 434
     }
@@ -16408,7 +16408,7 @@
         },
         {
           "path": "tests/architecture/test_arch_s4_s9_gates.py",
-          "line": 34,
+          "line": 103,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_source_tree_manifest import ("
         }
@@ -19987,7 +19987,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1252,
+          "line": 1279,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._dashboard_state_followup import ("
         },
@@ -20006,7 +20006,7 @@
     {
       "path": "scripts/ops/observability/grafana/_latest_complete_run_panel.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -20022,7 +20022,30 @@
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._latest_complete_run_panel import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-observability",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Keep as the internal discovery-panel transformation imported by render_nav_bus and its tests; this module has no CLI entrypoint."
+    },
+    {
+      "path": "scripts/ops/observability/grafana/_selected_run_panels.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 21,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Keep as an internal transformation invoked by render_nav_bus; no standalone command or active CLI entrypoint."
     },
     {
       "path": "scripts/ops/observability/grafana/action_target_routes.py",
@@ -20033,7 +20056,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 21,
+          "line": 24,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.action_target_routes import ("
         },
@@ -20381,13 +20404,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 24,
+          "line": 27,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1247,
+          "line": 1274,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },

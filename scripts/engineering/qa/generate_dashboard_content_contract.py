@@ -292,6 +292,13 @@ def _merge_panel_contract(
     merged = {**generated, **previous}
     merged["title"] = generated["title"]
     merged["evidence_source"] = generated["evidence_source"]
+    if (
+        previous.get("evidence_source")
+        and previous["evidence_source"] != generated["evidence_source"]
+    ):
+        # A data-source migration changes the semantic scope and empty states.
+        for key in ("scope", "scope_class", "empty_state_class"):
+            merged[key] = generated[key]
     role = str(merged.get("role") or generated["role"])
     if (
         merged["evidence_source"] == "prometheus"
@@ -310,6 +317,25 @@ def _merge_panel_contract(
     return merged
 
 
+def _resolved_evidence_source(panel, panels_by_id, seen=frozenset()):
+    """Follow Dashboard datasource reuse to its real source; reject broken chains."""
+    datasource = panel.get("datasource", {})
+    if not isinstance(datasource, dict) or datasource.get("uid") != "-- Dashboard --":
+        return _evidence_source(panel)
+    panel_id = panel.get("id")
+    if panel_id in seen:
+        raise ValueError("dashboard datasource cycle")
+    sources = set()
+    for target in panel.get("targets", []):
+        source = panels_by_id.get(target.get("panelId"))
+        if source is None:
+            raise ValueError("dashboard datasource source missing")
+        sources.add(_resolved_evidence_source(source, panels_by_id, seen | {panel_id}))
+    if len(sources) != 1:
+        raise ValueError("dashboard datasource must have one evidence source")
+    return sources.pop()
+
+
 def _dashboard_panel_contracts(
     *,
     payload: dict[str, object],
@@ -320,11 +346,19 @@ def _dashboard_panel_contracts(
         uid=uid, existing_dashboards=existing_dashboards
     )
     panels: dict[str, object] = {}
+    panels_by_id = {panel.get("id"): panel for panel in _iter_panels(payload)}
     for panel in _iter_panels(payload):
         panel_id = panel.get("id")
         if not isinstance(panel_id, int):
             continue
         generated = _record(panel)
+        if generated["scope"] == "selected_run":
+            generated["evidence_source"] = _resolved_evidence_source(
+                panel, panels_by_id
+            )
+        generated["empty_state_class"] = _empty_state_class(
+            panel, generated["role"], generated["evidence_source"]
+        )
         panels[str(panel_id)] = _merge_panel_contract(
             generated=generated, previous=previous_panels.get(str(panel_id))
         )

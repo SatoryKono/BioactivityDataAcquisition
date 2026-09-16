@@ -456,9 +456,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 194
-      total_loc: 23445
+      total_loc: 23455
       files_ge_250_loc: 0
-      helper_function_ratio: 0.374
+      helper_function_ratio: 0.373
       max_internal_fan_in: 5
       max_internal_fan_in_module: bioetl.application.core.record_processor_config
     trend:
@@ -483,16 +483,10 @@ hotspot_family_ratchets:
       max_internal_fan_in: 3
     metrics:
       duplication_clusters: 0
-      files: 51
-<<<<<<< HEAD
-      total_loc: 6129
-||||||| 5ef3a2c12bc
-      total_loc: 6146
-=======
-      total_loc: 6136
->>>>>>> codex/issue-10469-full-coverage-final
+      files: 52
+      total_loc: 6172
       files_ge_250_loc: 0
-      helper_function_ratio: 0.33
+      helper_function_ratio: 0.328
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.tracing_bootstrap
     trend:
@@ -507,8 +501,8 @@ hotspot_family_ratchets:
     linked_issue: '#4477'
     ratchet_stage: active
     ratchet_scope: duplication-non-growth-plus-bounded-growth
-    expected_action: Hold duplication at zero, file-growth, and fan-in at the reviewed baseline during
-      pipeline-factory changes. files_ge_250_loc budget is 0 (live 0; leftover-cap ratchet
+    expected_action: 'Hold duplication at zero, file-growth, and fan-in at the reviewed baseline during
+      pipeline-factory changes. files_ge_250_loc budget is 0 (live 0; leftover-cap ratchet #10419).'
     path_prefixes:
     - src/bioetl/composition/factories/pipeline/
     bounded_growth_budgets:
@@ -544,7 +538,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 131
-      total_loc: 15077
+      total_loc: 15089
       files_ge_250_loc: 0
       helper_function_ratio: 0.376
       max_internal_fan_in: 2
@@ -571,16 +565,8 @@ hotspot_family_ratchets:
       max_internal_fan_in: 3
     metrics:
       duplication_clusters: 0
-<<<<<<< HEAD
       files: 55
-      total_loc: 7097
-||||||| 5ef3a2c12bc
-      files: 57
-      total_loc: 7221
-=======
-      files: 57
-      total_loc: 7219
->>>>>>> codex/issue-10469-full-coverage-final
+      total_loc: 7100
       files_ge_250_loc: 0
       helper_function_ratio: 0.375
       max_internal_fan_in: 2

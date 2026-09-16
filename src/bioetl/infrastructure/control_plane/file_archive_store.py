@@ -17,6 +17,10 @@ from bioetl.domain.control_plane import (
     ControlPlaneArtifactSurface,
     RunManifest,
 )
+from bioetl.infrastructure.control_plane.archive_run_reports import (
+    selected_report_archive_key,
+    selected_report_sources,
+)
 
 _SCHEMA = "bioetl_local_archive_v1"
 _ARCHIVE_READ_WORKERS = 16
@@ -121,9 +125,12 @@ class FileArchiveStore:
 
     data_root: Path
     archive_root: Path
+    report_root: Path | None = None
 
     def _pack(self, manifest: RunManifest) -> Path:
-        key = hashlib.sha256(manifest.manifest_id.encode()).hexdigest()
+        revision = selected_report_archive_key(self.report_root, manifest)
+        identity = manifest.manifest_id + (":" + revision if revision else "")
+        key = hashlib.sha256(identity.encode()).hexdigest()
         return self.archive_root.resolve() / key
 
     def _sources(
@@ -138,7 +145,10 @@ class FileArchiveStore:
             entries = list(executor.map(read_source, plan.artifacts))
         if not any(found for _, _, found in entries):
             raise ValueError("archive_manifest_missing")
-        return {relative: path for relative, path, _ in entries}
+        return {
+            **{relative: path for relative, path, _ in entries},
+            **selected_report_sources(self.report_root, manifest),
+        }
 
     def create(
         self, *, manifest: RunManifest, plan: ControlPlaneArtifactLifecyclePlan
@@ -187,10 +197,10 @@ class FileArchiveStore:
         self, *, manifest: RunManifest, plan: ControlPlaneArtifactLifecyclePlan
     ) -> tuple[bool | None, str]:
         """Return true/false/unknown and a bounded reason; re-read every file."""
-        pack = self._pack(manifest)
-        if not (pack / "index.json").exists():
-            return None, "archive_evidence_not_recorded"
         try:
+            pack = self._pack(manifest)
+            if not (pack / "index.json").exists():
+                return None, "archive_evidence_not_recorded"
             index_path = _contained_file(
                 self.archive_root.resolve(), f"{pack.name}/index.json"
             )
