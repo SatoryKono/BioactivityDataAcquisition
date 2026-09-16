@@ -35,7 +35,11 @@ def reconcile_current_metrics_with_run_reports(
 ) -> CurrentMetricsReconciliationOutcome:
     """Return an explicit gap reason when durable success lacks scrape samples."""
     anchors = collect_latest_terminal_anchors(root=root, store=store)
-    workflow_anchors = collect_latest_terminal_workflow_anchors(root=root, store=store)
+    # Reconciliation needs workflow identity/status only. Child pipeline scopes
+    # are used by metric rehydration, but do not participate in this comparison.
+    workflow_anchors = collect_latest_terminal_workflow_anchors(
+        root=root, store=store, include_pipeline_scopes=False
+    )
     successes = tuple(anchor for anchor in anchors if anchor.status == "success")
     workflow_successes = tuple(
         anchor for anchor in workflow_anchors if anchor.status == "success"

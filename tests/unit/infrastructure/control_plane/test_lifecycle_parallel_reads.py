@@ -4,6 +4,7 @@ from dataclasses import fields
 from datetime import UTC, datetime
 from pathlib import Path
 from threading import Barrier, Lock
+from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
@@ -91,3 +92,48 @@ def test_selected_read_error_is_not_silently_omitted(tmp_path: Path, monkeypatch
             protected_refs=Mock(),
             manifest=Mock(),
         )
+
+
+def test_snapshot_resolution_overlaps_and_preserves_deduplication(
+    tmp_path, monkeypatch
+):
+    barrier = Barrier(4)
+    original = refs._append_snapshot_bronze_candidate
+    snapshots = tuple(
+        SimpleNamespace(
+            immutable_uri=f"bronze://day/{i % 2}.jsonl.zst", snapshot_id=str(i)
+        )
+        for i in range(4)
+    )
+    manifest = SimpleNamespace(
+        source_refs=(
+            SimpleNamespace(
+                provider="chembl", entity="assay", input_snapshots=snapshots
+            ),
+        ),
+        planned_artifacts=(),
+    )
+
+    def overlapping(*args, **kwargs):
+        barrier.wait(timeout=5)
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(refs, "_append_snapshot_bronze_candidate", overlapping)
+    candidates, issues = [], []
+    refs._append_cached_bronze_candidates(
+        candidates, issues, tmp_path / "control", manifest
+    )
+    assert [path.name for _, path in candidates] == ["0.jsonl.zst", "1.jsonl.zst"]
+    assert issues == []
+
+    # A later request must resolve the URI again and surface missing evidence.
+    snapshots[0].immutable_uri = None
+    candidates, issues = [], []
+    refs._append_cached_bronze_candidates(
+        candidates, issues, tmp_path / "control", manifest
+    )
+    assert len(issues) == 1
+    assert (
+        issues[0].code
+        is refs.ControlPlaneArtifactResolutionIssueCode.SNAPSHOT_URI_NOT_RECORDED
+    )

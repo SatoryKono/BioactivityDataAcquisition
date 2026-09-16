@@ -229,3 +229,32 @@ def test_archive_parallel_reads_keep_checksum_validation(archive_case, monkeypat
         False,
         "archive_checksum_mismatch",
     )
+
+
+@pytest.mark.parametrize("relative", ["../outside", "nested/../../outside"])
+def test_archive_containment_rejects_parent_traversal(tmp_path, relative):
+    with pytest.raises(ValueError, match="archive_path_outside_root"):
+        archive_module._contained_file(tmp_path, relative)
+
+
+def test_archive_containment_rechecks_parent_links(archive_case, monkeypatch):
+    import stat
+
+    store, manifest, plan = archive_case
+    pack = store.create(manifest=manifest, plan=plan)
+    original = Path.lstat
+    linked = pack / "restored"
+
+    def changed_parent(path, *args, **kwargs):
+        metadata = original(path, *args, **kwargs)
+        if path == linked:
+            from types import SimpleNamespace
+
+            return SimpleNamespace(st_mode=stat.S_IFLNK)
+        return metadata
+
+    monkeypatch.setattr(Path, "lstat", changed_parent)
+    assert store.verify(manifest=manifest, plan=plan) == (
+        False,
+        "archive_evidence_invalid",
+    )

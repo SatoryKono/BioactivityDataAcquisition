@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import shutil
+import stat
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from functools import partial
@@ -65,17 +66,20 @@ def _manifest_digest(manifest: RunManifest) -> str:
 
 
 def _contained_file(base: Path, relative: str) -> Path:
-    candidate = base / relative
-    resolved = candidate.resolve(strict=True)
-    if not resolved.is_relative_to(base.resolve()) or not resolved.is_file():
+    relative_path = Path(relative)
+    if relative_path.is_absolute() or ".." in relative_path.parts:
         raise ValueError("archive_path_outside_root")
-    # Reject symlinks, including directory links, even when their target is local.
-    if any(
-        part.is_symlink() or part.is_junction()
-        for part in (candidate, *candidate.parents)
-    ):
-        raise ValueError("archive_symlink_rejected")
-    return resolved
+    candidate = base.absolute() / relative_path
+    # Inspect every component without following links. Reusing this lstat result
+    # avoids resolving the same path and then stat-ing every component again.
+    # No metadata survives this call, so later requests recheck all components.
+    for part in (*reversed(candidate.parents), candidate):
+        metadata = part.lstat()
+        if stat.S_ISLNK(metadata.st_mode) or part.is_junction():
+            raise ValueError("archive_symlink_rejected")
+    if not stat.S_ISREG(metadata.st_mode):
+        raise ValueError("archive_path_outside_root")
+    return candidate
 
 
 def _validate_manifest_source(path: Path, manifest: RunManifest) -> bool:

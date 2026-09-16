@@ -470,6 +470,39 @@ def test_reconciliation_aligns_workflow_without_child_pipeline_report(
     assert "workflow success reports" in result.message
 
 
+def test_reconciliation_does_not_load_child_scopes_and_rereads_workflow(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    report = _write_workflow_report(
+        tmp_path,
+        workflow="workflow_only",
+        run_id="run-1",
+        status="success",
+        pipelines=(("chembl_assay", "child-1"),),
+        attach_children=False,
+    )
+    from bioetl.application.observability import current_metrics_rehydrate as module
+
+    def forbidden_child_read(*args: object, **kwargs: object) -> None:
+        raise AssertionError("Reconciliation must not hydrate child pipeline scopes")
+
+    monkeypatch.setattr(module, "_pipeline_scopes_from_payload", forbidden_child_read)
+    store = FileRunReportStoreAdapter()
+    missing = reconcile_current_metrics_with_run_reports(root=tmp_path, store=store)
+    assert missing.missing_workflows == ("workflow_only",)
+    aligned = reconcile_current_metrics_with_run_reports(
+        root=tmp_path,
+        store=store,
+        exposition='bioetl_workflow_expected{workflow="workflow_only"} 1.0\n',
+    )
+    assert aligned.state == "aligned"
+    payload = json.loads(report.read_text(encoding="utf-8"))
+    payload["identity"]["status"] = "failed"
+    report.write_text(json.dumps(payload), encoding="utf-8")
+    changed = reconcile_current_metrics_with_run_reports(root=tmp_path, store=store)
+    assert changed.state == "no_durable_success"
+
+
 @pytest.mark.parametrize(
     ("completed_at", "expected_unix"),
     [("2026-01-01T00:00:00+00:00", 1767225600.0), ("invalid-date", 1700000000.0)],
