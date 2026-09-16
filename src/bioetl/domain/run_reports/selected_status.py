@@ -12,14 +12,22 @@ SUPPORTED_RULES = {_SELECTED_RUN_V1, RULES_VERSION}
 SNAPSHOT_SCHEMA = "selected_run_snapshot_v1"
 _INCOMPLETE = "INCOMPLETE"
 _UNKNOWN = "UNKNOWN"
-_PRIORITY = ("ERROR", _INCOMPLETE, _UNKNOWN, "WARN", "OK")
+_OK = "OK"
+_NA = "N/A"
+_PRIORITY = ("ERROR", _INCOMPLETE, _UNKNOWN, "WARN", _OK)
+RUNTIME = "Runtime"
+CONTROL_PLANE = "Control Plane"
+WORKFLOW = "Workflow"
+DATA_QUALITY = "Data Quality"
+PROVIDER = "Provider"
+DATA_VALIDATION = "Data Validation"
 DOMAINS = (
-    "Runtime",
-    "Control Plane",
-    "Workflow",
-    "Data Quality",
-    "Provider",
-    "Data Validation",
+    RUNTIME,
+    CONTROL_PLANE,
+    WORKFLOW,
+    DATA_QUALITY,
+    PROVIDER,
+    DATA_VALIDATION,
 )
 
 
@@ -38,10 +46,10 @@ def _row(domain: str, verdict: str, reason: str, source: str) -> dict[str, objec
         "domain": domain,
         "verdict": verdict,
         "reason": reason,
-        "applicable": verdict != "N/A",
+        "applicable": verdict != _NA,
         "evidence_ref": source,
         "action": "Inspect saved evidence"
-        if verdict in {"OK", "N/A"}
+        if verdict in {_OK, _NA}
         else "Inspect reason and evidence",
     }
 
@@ -49,7 +57,7 @@ def _row(domain: str, verdict: str, reason: str, source: str) -> dict[str, objec
 def _observed_row(domain: str, observations: Mapping[str, object]) -> dict[str, object]:
     observation = _mapping(observations.get(domain))
     verdict = str(observation.get("verdict", _INCOMPLETE))
-    if verdict not in {*_PRIORITY, "N/A"}:
+    if verdict not in {*_PRIORITY, _NA}:
         verdict = _UNKNOWN
     return _row(
         domain,
@@ -67,34 +75,34 @@ def _domain_rows(
     execution = str(identity.get("status", "unknown")).lower()
     observations = _mapping(report.get("observations"))
     runtime = {
-        "success": "OK",
+        "success": _OK,
         "failed": "ERROR",
         "shutdown": "WARN",
         "cancelled": "WARN",
-        "dry_run": "N/A",
+        "dry_run": _NA,
     }.get(execution, _UNKNOWN)
-    rows = [_row("Runtime", runtime, f"execution_{execution}", "#/identity")]
-    rows.append(_observed_row("Control Plane", observations))
+    rows = [_row(RUNTIME, runtime, f"execution_{execution}", "#/identity")]
+    rows.append(_observed_row(CONTROL_PLANE, observations))
     rows.append(
-        _observed_row("Workflow", observations)
+        _observed_row(WORKFLOW, observations)
         if identity.get("workflow_run_id")
         else _row(
-            "Workflow", "N/A", "standalone_pipeline", "#/identity/workflow_run_id"
+            WORKFLOW, _NA, "standalone_pipeline", "#/identity/workflow_run_id"
         )
     )
-    rows.append(_observed_row("Data Quality", observations))
+    rows.append(_observed_row(DATA_QUALITY, observations))
     io = _mapping(report.get("io"))
     rows.append(
         _row(
-            "Provider", "N/A", "cached_bronze_no_remote_probe", "#/io/use_cached_bronze"
+            PROVIDER, _NA, "cached_bronze_no_remote_probe", "#/io/use_cached_bronze"
         )
         if io.get("use_cached_bronze") is True
-        else _observed_row("Provider", observations)
+        else _observed_row(PROVIDER, observations)
     )
     rows.append(
-        _row("Data Validation", "N/A", "gold_explicitly_skipped", "#/io/skip_gold")
+        _row(DATA_VALIDATION, _NA, "gold_explicitly_skipped", "#/io/skip_gold")
         if rules_version != _SELECTED_RUN_V1 and io.get("skip_gold") is True
-        else _observed_row("Data Validation", observations)
+        else _observed_row(DATA_VALIDATION, observations)
     )
     return rows
 
@@ -104,14 +112,14 @@ def _assessment_rows(
 ) -> list[dict[str, object]]:
     if execution == "dry_run":
         return [
-            _row(name, "N/A", "dry_run_no_execution", "#/identity/status")
+            _row(name, _NA, "dry_run_no_execution", "#/identity/status")
             for name in DOMAINS
         ]
     return _domain_rows(report, rules_version)
 
 
 def _aggregate(verdicts: set[str]) -> str:
-    return next((status for status in _PRIORITY if status in verdicts), "N/A")
+    return next((status for status in _PRIORITY if status in verdicts), _NA)
 
 
 def assess_report(

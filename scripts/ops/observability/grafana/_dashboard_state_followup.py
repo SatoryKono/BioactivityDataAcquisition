@@ -55,18 +55,22 @@ def _scrub_property_links(properties: list[Any]) -> None:
 
 def clean_links(value: Any) -> None:
     if isinstance(value, dict):
-        for key in tuple(value):
-            child = value[key]
-            if key in {"links", "dataLinks"} and isinstance(child, list):
-                value[key] = _scrub_link_list(child)
-            if key == "properties" and isinstance(child, list):
-                _scrub_property_links(child)
-            if "url" in value and str(value["url"]).startswith("/d/"):
-                value["includeVars"] = False
-            clean_links(value[key])
+        _clean_link_mapping(value)
     elif isinstance(value, list):
         for child in value:
             clean_links(child)
+
+
+def _clean_link_mapping(value: dict[str, Any]) -> None:
+    for key in tuple(value):
+        child = value[key]
+        if key in {"links", "dataLinks"} and isinstance(child, list):
+            value[key] = _scrub_link_list(child)
+        if key == "properties" and isinstance(child, list):
+            _scrub_property_links(child)
+        if "url" in value and str(value["url"]).startswith("/d/"):
+            value["includeVars"] = False
+        clean_links(value[key])
 
 
 def all_rows(panel: dict[str, Any]) -> None:
