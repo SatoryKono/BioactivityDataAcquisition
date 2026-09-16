@@ -177,6 +177,7 @@ def _install_workflow_runner_service_dependencies(
             gold_path=tmp_path / "gold",
             quarantine_path=tmp_path / "quarantine",
             data_dir=tmp_path,
+            report_root=tmp_path / "reports",
         ),
     )
 
@@ -619,6 +620,7 @@ def test_workflow_services_cover_default_factory_and_runner_service_paths(
     )
 
     _workflow_services.get_workflow_runner_service(registry="registry-y")
+    assert created["workflow_runner_service"]["report_root"] == tmp_path / "reports"
     assert created["workflow_runner_service"]["pipeline_runner"] == (
         "pipeline_runner",
         "registry-y",
