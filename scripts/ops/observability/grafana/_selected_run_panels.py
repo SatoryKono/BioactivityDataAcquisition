@@ -62,6 +62,7 @@ def _panel(
             }
         ],
         "transformations": [
+            {"id": "limit", "options": {"limitField": 6 if domains else 1}},
             {"id": "filterFieldsByName", "options": {"include": {"names": fields}}},
             {
                 "id": "organize",
@@ -77,14 +78,7 @@ def _panel(
                 },
             },
         ],
-        "links": [
-            {
-                "title": "Open run in Run Explorer",
-                "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-                "targetBlank": False,
-                "includeVars": False,
-            },
-        ],
+        "links": [],
     }
 
 
@@ -100,6 +94,10 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
     panels = payload.get("panels", [])
     uid = payload.get("uid")
     for panel in _walk_panels(panels):
+        old_links = deepcopy(panel.get("links", []))
+        old_data_links = deepcopy(
+            panel.get("fieldConfig", {}).get("defaults", {}).get("links", [])
+        )
         if not isinstance(panel, dict):
             continue
         if uid == "bioetl-control-plane-v1" and panel.get("id") == 9418:
@@ -143,8 +141,69 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
                     9002, "Review Selected Run Domains", panel["gridPos"], domains=True
                 )
             )
+        if (
+            panel.get("id") in {9406, 9603, 9402, 9002}
+            or panel.get("title") == "Review Selected Run Status"
+        ):
+            panel["links"] = old_links
+            panel.setdefault("fieldConfig", {}).setdefault("defaults", {})["links"] = (
+                old_data_links
+            )
+        if uid == "bioetl-overview-v2" and panel.get("id") == 9002:
+            panel["fieldConfig"]["defaults"]["links"] = [
+                {
+                    "title": title,
+                    "url": next(
+                        link["url"]
+                        for nav in panels
+                        if nav.get("id") == 1000
+                        for link in nav["links"]
+                        if f"/d/{target}/" in link["url"]
+                    ),
+                    "targetBlank": False,
+                    "includeVars": False,
+                }
+                for title, target in (
+                    ("Open Runtime", "bioetl-runtime"),
+                    ("Open Control Plane", "bioetl-control-plane-v1"),
+                    ("Open Data Quality", "bioetl-dq-v2"),
+                    ("Open Provider Health", "bioetl-provider-health-v2"),
+                )
+            ]
+        if panel.get("title") == "Review Selected Run Status":
+            panel["fieldConfig"]["defaults"]["links"] = [
+                {
+                    "title": "Open Run Explorer",
+                    "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+                    "targetBlank": False,
+                    "includeVars": False,
+                }
+            ]
+        if (
+            uid == "bioetl-incident-v1"
+            and panel.get("title") == "Review Selected Run Status"
+        ):
+            panel["fieldConfig"]["defaults"]["links"] += [
+                {
+                    "title": "Check BioETL Ops HTTP health",
+                    "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
+                    "targetBlank": True,
+                }
+            ]
+        if uid == "bioetl-overview-v2" and panel.get("id") == 9603:
+            panel["datasource"] = {"type": "datasource", "uid": "-- Dashboard --"}
+            panel["targets"] = [
+                {"panelId": 9002, "refId": "A", "withTransforms": False}
+            ]
+            for transform in panel["transformations"]:
+                if transform["id"] == "filterFieldsByName":
+                    transform["options"]["include"]["names"][1] = "run_verdict"
+                if transform["id"] == "organize":
+                    transform["options"]["indexByName"].pop("verdict")
+                    transform["options"]["indexByName"]["run_verdict"] = 1
+                    transform["options"]["renameByName"]["run_verdict"] = "Status"
         if uid == "bioetl-overview-v2" and panel.get("id") == 215:
-            panel["title"] = "Review Current First Action"
+            panel["title"] = "Review First Action"
             panel["description"] = (
                 "CURRENT · Fresh pipeline/run_type telemetry only. "
                 + str(panel.get("description", "")).removeprefix(
@@ -185,6 +244,6 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
             "title": "Inspect Saved Run Evidence",
             "collapsed": True,
             "gridPos": {"x": 0, "y": y, "w": 24, "h": 1},
-            "panels": [deepcopy(summary), details],
+            "panels": [details, deepcopy(summary)],
         }
     )

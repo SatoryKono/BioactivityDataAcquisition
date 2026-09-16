@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 from pathlib import Path
+from typing import cast
 
 from bioetl.domain.run_reports.selected_status import (
     DOMAINS,
@@ -13,6 +14,7 @@ from bioetl.domain.run_reports.selected_status import (
     evidence_digest,
     verify_snapshot,
 )
+from bioetl.interfaces.http import run_report_ops
 from bioetl.interfaces.http._forensic_request_budget import (
     ForensicEndpointUnavailable,
     run_bounded_forensic_operation,
@@ -49,7 +51,14 @@ def unavailable_status(
         "reason": reason,
         "evidence_availability": reason,
         "rules_version": RULES_VERSION,
+        "execution_state": "UNKNOWN",
+        "checks_verdict": "UNKNOWN",
+        "evidence_completeness": "INCOMPLETE",
+        "replay_readiness_now": "NOT EVALUATED",
+        "heartbeat_now": "NOT EVALUATED",
     }
+    for row in rows:
+        row.update({**summary, **row, "run_verdict": state})
     trust = {
         "processing_status": "UNKNOWN",
         "trust_status": state,
@@ -93,12 +102,36 @@ def _saved_trust(
     }
 
 
+def _selected_pipeline(pipeline: str, run_id: str, root: Path | None) -> str | None:
+    """Resolve an aggregate selector only from an unambiguous exact report path."""
+    if run_report_ops._normalize_list_owner(pipeline) is not None:
+        return pipeline
+    if run_report_ops._safe_segment(run_id) != run_id:
+        raise ValueError("invalid_run_id")
+    base = run_report_ops._effective_root(root).resolve() / "pipeline"
+    matches = [
+        path.parent.parent.name
+        for path in base.glob(f"*/{run_id}/pipeline-run-report.json")
+        if path.is_file()
+    ]
+    if len(matches) > 1:
+        raise ValueError("run_id_ambiguous")
+    return matches[0] if matches else None
+
+
 def load_selected_run_status(
     *, pipeline: str, run_id: str, root: Path | None = None
 ) -> dict[str, object]:
     """Load and revalidate the exact report, revision and bound identity each time."""
     if run_id in {"", "-", "All", "$__all"}:
         return unavailable_status(pipeline, run_id, "SELECT RUN", "selection_required")
+    try:
+        selected_pipeline = _selected_pipeline(pipeline, run_id, root)
+    except ValueError as exc:
+        return unavailable_status(pipeline, run_id, "ERROR", str(exc))
+    if selected_pipeline is None:
+        return unavailable_status(pipeline, run_id, "UNKNOWN", "run_not_found")
+    pipeline = selected_pipeline
     path, _ = _validated_artifact_paths(
         pipeline, run_id, "pipeline_run_report_json", root
     )
@@ -106,10 +139,10 @@ def load_selected_run_status(
         return unavailable_status(pipeline, run_id, "UNKNOWN", "run_not_found")
     try:
         report = json.loads(path.read_text(encoding="utf-8"))
-        if (
-            not isinstance(report, dict)
-            or report.get("schema_version") != "pipeline_run_report_v1"
-        ):
+        if not isinstance(report, dict) or report.get("schema_version") not in {
+            "pipeline_run_report_v1",
+            "pipeline_run_report_v2",
+        }:
             raise ValueError("report_schema_invalid")
         identity = report.get("identity")
         if (
@@ -172,8 +205,7 @@ def load_selected_run_status(
     domain_rows = assessment["domains"]
     assert isinstance(domain_rows, list)  # Produced by the verified assessment.
     rows = [
-        {**row, "pipeline": pipeline, "run_id": run_id, "revision": revision}
-        for row in domain_rows
+        {**summary, **row, "run_verdict": summary["verdict"]} for row in domain_rows
     ]
     return {
         **summary,
@@ -199,17 +231,25 @@ async def handle_selected_run_status(
             active = active_run_diagnostics(host, pipeline, run_id)
             if active is not None:
                 result = unavailable_status(
-                    pipeline, run_id, str(active["verdict"]), str(active["reason"])
+                    str(active.get("pipeline", pipeline)),
+                    run_id,
+                    str(active["verdict"]),
+                    str(active["reason"]),
                 )
                 result.update(active)
+                for row in cast(list[dict[str, object]], result["domains"]):
+                    row.update(active)
+                    row["run_verdict"] = active["verdict"]
                 result["summary"] = [
                     {
                         key: value
                         for key, value in result.items()
-                        if key not in {"summary", "domains", "rows"}
+                        if key not in {"summary", "domains", "rows", "trust"}
                     }
                 ]
-        if result.get("execution_state") and not scope_matches(result, query):
+        if result.get("execution_state") not in {None, "UNKNOWN"} and not scope_matches(
+            result, query
+        ):
             return unavailable_status(
                 pipeline, run_id, "ERROR", "selector_context_mismatch"
             )

@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+from collections.abc import Awaitable
 from contextvars import ContextVar, Token
 from copy import deepcopy
 from datetime import datetime
 
 from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatus
+from bioetl.domain.types.gold_contracts_rejects import GoldContractValidationError
 from bioetl.domain.value_objects.dq_result import DQResult
 
 _observations: ContextVar[dict[str, object] | None] = ContextVar(
@@ -115,3 +117,14 @@ def record_gold_observation(valid: bool, count: int) -> None:
         reason="run_gold_schema_validation",
         facts={"valid": valid, "records": count},
     )
+
+
+async def observe_gold_write(operation: Awaitable[object], count: int) -> None:
+    """Capture storage-delegated schema outcomes without misclassifying IO failures."""
+    try:
+        await operation
+    except GoldContractValidationError:
+        record_gold_observation(False, count)
+        raise
+    else:
+        record_gold_observation(True, count)

@@ -60,6 +60,8 @@ def _validate_child_identity(
         "pipeline_name": row.pipeline_name,
         "workflow_run_id": workflow_id,
     }
+    if row.pipeline_manifest_id is not None:
+        expected["manifest_id"] = row.pipeline_manifest_id
     if not isinstance(identity, dict) or any(
         identity.get(key) != value for key, value in expected.items()
     ):

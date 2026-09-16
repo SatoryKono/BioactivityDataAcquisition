@@ -302,6 +302,7 @@ def test_active_and_unfinalized_run_do_not_expire(monkeypatch, event, expected):
     host._run_manifest_port.get_by_run_id.return_value = SimpleNamespace(
         pipeline_name="chembl_activity",
         manifest_id="m",
+        workflow_name=None,
         run_type=SimpleNamespace(value="incremental"),
     )
     host._run_ledger_port.list_entries_by_run_id.return_value = [
@@ -436,6 +437,7 @@ def test_control_plane_capture_binds_exact_identity_and_completion(tmp_path, mis
         ("json_list", "workflow_child_report_corrupt"),
         ("snapshot", "workflow_child_snapshot_corrupt"),
         ("identity", "workflow_child_identity_mismatch"),
+        ("manifest", "workflow_child_identity_mismatch"),
     ],
 )
 def test_workflow_rejects_unbound_child_evidence(tmp_path, mutation, reason):
@@ -464,6 +466,7 @@ def test_workflow_rejects_unbound_child_evidence(tmp_path, mutation, reason):
         records_extracted=1,
         pipeline_name="chembl_activity",
         pipeline_run_id="run-a",
+        pipeline_manifest_id="foreign-manifest" if mutation == "manifest" else None,
     )
     store = FileRunReportStoreAdapter()
     if reason:
@@ -608,5 +611,205 @@ def test_preflight_observations_retain_actual_probe_status(status, verdict):
         assert saved["Provider"]["verdict"] == verdict
         assert saved["Provider"]["facts"]["observed_at"] == observed.isoformat()
         assert saved["Data Validation"]["facts"] == {"valid": False, "records": 0}
+    finally:
+        reset_run_observations(token)
+
+
+@pytest.mark.parametrize("pipeline", [".*", "All", "$__all", "*"])
+def test_all_pipeline_selector_resolves_exact_saved_run(tmp_path, pipeline):
+    persist(tmp_path)
+    result = load_selected_run_status(pipeline=pipeline, run_id="run-a", root=tmp_path)
+    assert result["pipeline"] == "chembl_activity"
+    assert result["verdict"] == "OK"
+    assert {row["pipeline"] for row in result["domains"]} == {"chembl_activity"}
+
+
+def test_all_pipeline_selector_rejects_ambiguous_identity(tmp_path):
+    persist(tmp_path)
+    other = report()
+    other.identity["pipeline_name"] = "pubmed_publication"
+    persist(tmp_path, other)
+    result = load_selected_run_status(pipeline=".*", run_id="run-a", root=tmp_path)
+    assert result["reason"] == "run_id_ambiguous"
+    assert result["verdict"] == "ERROR"
+
+
+@pytest.mark.parametrize("bad", [float("nan"), float("inf"), object(), None])
+def test_snapshot_verifier_returns_false_for_malformed_evidence(bad):
+    snapshot = build_snapshot(report().to_dict())
+    snapshot["evidence"] = bad
+    assert verify_snapshot(snapshot) is False
+    snapshot["evidence"] = {"nested": bad}
+    assert verify_snapshot(snapshot) is False
+
+
+def test_skip_gold_is_versioned_without_invalidating_old_rules():
+    from bioetl.domain.run_reports.selected_status import assess_report, evidence_digest
+
+    payload = report().to_dict()
+    payload["io"] = {"skip_gold": True}
+    payload["observations"].pop("Data Validation")
+    legacy = {
+        "schema_version": "selected_run_snapshot_v1",
+        "evidence": payload,
+        "assessment": assess_report(payload, rules_version="selected-run-v1"),
+    }
+    legacy["revision"] = evidence_digest(legacy)
+    current = build_snapshot(payload)
+    assert verify_snapshot(legacy) and verify_snapshot(current)
+    assert legacy["assessment"]["domains"][-1]["verdict"] == "INCOMPLETE"
+    assert current["assessment"]["domains"][-1]["verdict"] == "N/A"
+    assert current["assessment"]["rules_version"] == "selected-run-v2"
+    assert current["revision"] != legacy["revision"]
+
+
+async def test_active_workflow_in_all_scope_retains_exact_context(
+    tmp_path, monkeypatch
+):
+    from types import SimpleNamespace
+
+    run_id = "00000000-0000-0000-0000-000000000001"
+    host = MagicMock()
+    host._read_required_param.side_effect = lambda q, key: q[key]
+    host._read_optional_param.side_effect = lambda q, key: q.get(key)
+    host._forensic_endpoint_limiter = asyncio.Semaphore(2)
+    host._send_payload_response = AsyncMock()
+    host._run_manifest_port.get_by_run_id.return_value = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        manifest_id="m",
+        workflow_name="workflow-a",
+        run_type=SimpleNamespace(value="incremental"),
+    )
+    host._run_ledger_port.list_entries_by_run_id.return_value = [
+        SimpleNamespace(
+            manifest_id="m",
+            event_type="run_started",
+            occurred_at=datetime(2026, 1, 1, tzinfo=UTC),
+        )
+    ]
+    monkeypatch.setattr(
+        "bioetl.interfaces.http.run_report_ops._effective_root", lambda root: tmp_path
+    )
+    query = {"pipeline": ".*", "run_id": run_id, "workflow": "workflow-a"}
+    await handle_selected_run_status(host, MagicMock(), query)
+    result = host._send_payload_response.call_args.args[2]
+    assert result["execution_state"] == "RUNNING"
+    assert result["workflow_id"] == "workflow-a"
+    assert result["pipeline"] == "chembl_activity"
+    assert "trust" not in result["summary"][0]
+    assert all(row["pipeline"] == "chembl_activity" for row in result["domains"])
+
+
+def test_unavailable_response_keeps_status_dimensions(tmp_path):
+    value = read(tmp_path)
+    assert value["execution_state"] == "UNKNOWN"
+    assert value["checks_verdict"] == "UNKNOWN"
+    assert value["evidence_completeness"] == "INCOMPLETE"
+    assert value["evidence_availability"] == "run_not_found"
+    assert value["replay_readiness_now"] == "NOT EVALUATED"
+
+
+def test_archive_rejects_valid_revision_from_a_neighbour(tmp_path):
+    from types import SimpleNamespace
+    from bioetl.infrastructure.control_plane.archive_run_reports import (
+        selected_report_sources,
+    )
+
+    path = persist(tmp_path).json_path
+    other = build_snapshot(report("other-run").to_dict())
+    revision = path.parent / "status-revisions" / (other["revision"] + ".json")
+    revision.write_text(json.dumps(other))
+    manifest = SimpleNamespace(run_id="run-a", pipeline_name="chembl_activity")
+    with pytest.raises(ValueError, match="archive_revision_identity_mismatch"):
+        selected_report_sources(tmp_path, manifest)
+
+
+def test_workflow_parent_is_not_committed_before_invalid_child_is_repaired(tmp_path):
+    from bioetl.application.services.run_reports.writer import write_workflow_run_report
+    from bioetl.domain.run_reports.models import WorkflowRunReport, WorkflowExecutionRow
+
+    child = report()
+    child.identity["workflow_run_id"] = "workflow-a"
+    path = persist(tmp_path, child).json_path
+    path.write_text("[]")
+    workflow = WorkflowRunReport(
+        identity={
+            "workflow_name": "wf",
+            "workflow_run_id": "workflow-a",
+            "status": "success",
+        },
+        plan_steps=(),
+        totals={},
+        execution=(
+            WorkflowExecutionRow(
+                step_id="s",
+                status="success",
+                records_extracted=1,
+                pipeline_name="chembl_activity",
+                pipeline_run_id="run-a",
+            ),
+        ),
+    )
+    store = FileRunReportStoreAdapter()
+    with pytest.raises(ValueError, match="workflow_child_report_corrupt"):
+        write_workflow_run_report(workflow, root=tmp_path, store=store)
+    assert not list((tmp_path / "workflow").rglob("workflow-run-report.json"))
+    persist(tmp_path, child)
+    first = write_workflow_run_report(workflow, root=tmp_path, store=store)
+    committed = first.json_path.read_bytes()
+    write_workflow_run_report(workflow, root=tmp_path, store=store)
+    assert first.json_path.read_bytes() == committed
+    assert read(tmp_path)["domains"][2]["verdict"] == "OK"
+
+
+def test_active_run_rejects_naive_ledger_timestamp():
+    from types import SimpleNamespace
+    from bioetl.interfaces.http._selected_run_live import active_run_diagnostics
+
+    host = MagicMock()
+    host._run_manifest_port.get_by_run_id.return_value = SimpleNamespace(
+        pipeline_name="chembl_activity", manifest_id="m"
+    )
+    host._run_ledger_port.list_entries_by_run_id.return_value = [
+        SimpleNamespace(manifest_id="m", occurred_at=datetime(2026, 1, 1)),
+        SimpleNamespace(manifest_id="m", occurred_at=datetime(2026, 1, 1, tzinfo=UTC)),
+    ]
+    with pytest.raises(ValueError, match="ledger_timestamp_timezone_missing"):
+        active_run_diagnostics(
+            host, "chembl_activity", "00000000-0000-0000-0000-000000000001"
+        )
+
+
+@pytest.mark.parametrize("failure,expected", [("schema", "ERROR"), ("io", None)])
+async def test_delegated_gold_rejection_distinguishes_storage_failure(
+    failure, expected
+):
+    from bioetl.application.services.run_reports.observations import (
+        bind_run_observations,
+        reset_run_observations,
+        run_observations,
+        observe_gold_write,
+    )
+    from bioetl.domain.types.gold_contracts_rejects import (
+        GoldContractValidationError,
+        build_gold_contract_reject_reason,
+    )
+
+    async def write():
+        if failure == "schema":
+            raise GoldContractValidationError(
+                build_gold_contract_reject_reason(
+                    reason_code="gold_contract_schema_failure",
+                    message="schema rejected",
+                )
+            )
+        raise OSError("disk unavailable")
+
+    token = bind_run_observations()
+    try:
+        with pytest.raises((GoldContractValidationError, OSError)):
+            await observe_gold_write(write(), 1)
+        observation = run_observations().get("Data Validation")
+        assert (observation["verdict"] if observation else None) == expected
     finally:
         reset_run_observations(token)

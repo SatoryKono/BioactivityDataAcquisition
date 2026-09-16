@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
 from bioetl.domain.control_plane import RunManifest
-from bioetl.domain.run_reports.selected_status import verify_snapshot
+from bioetl.domain.run_reports.selected_status import evidence_digest, verify_snapshot
 
 
 def _load_report(path: Path, manifest: RunManifest) -> dict[str, object]:
@@ -44,7 +45,9 @@ def _revision_sources(payload: dict[str, object], revisions: Path) -> list[Path]
     return sorted(revisions.glob("*.json"))
 
 
-def _validate_source(item: Path, base: Path, revisions: Path) -> None:
+def _validate_source(
+    item: Path, base: Path, revisions: Path, manifest: RunManifest
+) -> None:
     """Reject escaped paths and corrupt historical revisions before archiving."""
     if (
         item.is_symlink()
@@ -60,6 +63,13 @@ def _validate_source(item: Path, base: Path, revisions: Path) -> None:
             or item.stem != revision.get("revision")
         ):
             raise ValueError("archive_report_revision_corrupt")
+        evidence = revision["evidence"]
+        identity = evidence.get("identity", {})
+        if not isinstance(identity, dict) or (
+            identity.get("run_id") != str(manifest.run_id)
+            or identity.get("pipeline_name") != manifest.pipeline_name
+        ):
+            raise ValueError("archive_revision_identity_mismatch")
 
 
 def selected_report_sources(
@@ -80,6 +90,18 @@ def selected_report_sources(
     files = [path, *_revision_sources(payload, revisions)]
     result = {}
     for item in files:
-        _validate_source(item, base, revisions)
+        _validate_source(item, base, revisions, manifest)
         result[f"run-reports/{item.relative_to(base).as_posix()}"] = item
     return result
+
+
+def selected_report_archive_key(root: Path | None, manifest: RunManifest) -> str:
+    """Version the archive by the complete validated report/revision inventory."""
+    sources = selected_report_sources(root, manifest)
+    if not sources:
+        return ""
+    digests = {}
+    for relative, path in sources.items():
+        with path.open("rb") as stream:
+            digests[relative] = hashlib.file_digest(stream, "sha256").hexdigest()
+    return evidence_digest(digests)

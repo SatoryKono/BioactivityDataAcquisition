@@ -18,6 +18,7 @@ def publish_snapshot(
     Concurrent publications can select either complete revision, never a mixed one.
     Identical finalization is a no-op; late evidence creates a different revision.
     """
+    report = {**report, "schema_version": "pipeline_run_report_v2"}
     snapshot = build_snapshot(report)
     revision_path = path.parent / "status-revisions" / f"{snapshot['revision']}.json"
     content = (

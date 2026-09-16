@@ -77,3 +77,11 @@ Regression checks require both removed groups to stay absent, ten rows without
 pagination, a line break before Pipeline, and no links to retired detail panels.
 Run dashboard readability and first-window containment tests and verify the
 actual browser table with ten populated rows and working Report links.
+
+## Saved evidence and discovery panels
+
+| ID | Title | Purpose |
+| --- | --- | --- |
+| 9450 | Inspect Saved Run Evidence | Saved exact-run evidence; expand for identity, version, reasons and actions. |
+| 9451 | Inspect Selected Run Domains | Saved exact-run evidence; expand for identity, version, reasons and actions. |
+| 9452 | Inspect Selected Run Identity | Saved exact-run evidence; expand for identity, version, reasons and actions. |

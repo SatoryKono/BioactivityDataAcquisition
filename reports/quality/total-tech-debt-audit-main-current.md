@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `a31671792796357a73c0cb1132620267b8ba53dba2812a05f56b1c616e8cb650`
+Evidence surface SHA-256: `0aa0cfd2b830cf78b5ea1e8b88f0930b94a507007726bb32ed72e96911c8eb85`
 
 Evidence metadata refresh (2026-09-11): the canonical registry digest was
 recomputed after #10304 adopted the SHA-bound coverage-verify inventory for
@@ -32,15 +32,15 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "a31671792796357a73c0cb1132620267b8ba53dba2812a05f56b1c616e8cb650",
+  "evidence_surface_sha256": "0aa0cfd2b830cf78b5ea1e8b88f0930b94a507007726bb32ed72e96911c8eb85",
   "metrics": {
     "architecture_integral_score": 9.25,
     "architecture_interpretation": "good_targeted_improvements",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 45,
-    "debt_gate_fail_count": 0,
-    "debt_gate_pass_count": 45,
+    "debt_gate_fail_count": 1,
+    "debt_gate_pass_count": 44,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
     "fully_covered_module_count": 1620,
@@ -58,12 +58,12 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 }
 -->
 
-Refresh reason: Reconcile the current evidence surface and semantic summary with the canonical generated artifacts while preserving the accepted audited commit. The generated debt-governance evidence records 45/45 passing gates. No budget growth.
+Refresh reason: Reconcile the current evidence surface and semantic summary with the canonical generated artifacts while preserving the accepted audited commit. The generated debt-governance evidence records 44 passing gates and one remote-main baseline failure. No budget growth.
 
 ## Executive summary
 
-1. Debt-governance gates: **45 pass / 0 fail** (45 debt-governance gates).
-1. Release status: **debt-governance gates passing**; no blocking gaps remain.
+1. Debt-governance gates: **44 pass / 1 fail** (45 debt-governance gates).
+1. Release status: **blocked by remote-main artifact conflicts**; the architecture scorecard and module inventory at `10f80c2404d4a74f572b35af66aa435b09969764` contain merge markers.
 1. Architecture quality integral score: **9.25** (`good_targeted_improvements`). Integral score `9.25`.
 1. Module inventory (from module-coverage-inventory.json only):
    - source_module_count: **2484**

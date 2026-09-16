@@ -18,6 +18,7 @@ from bioetl.domain.control_plane import (
     RunManifest,
 )
 from bioetl.infrastructure.control_plane.archive_run_reports import (
+    selected_report_archive_key,
     selected_report_sources,
 )
 
@@ -127,7 +128,9 @@ class FileArchiveStore:
     report_root: Path | None = None
 
     def _pack(self, manifest: RunManifest) -> Path:
-        key = hashlib.sha256(manifest.manifest_id.encode()).hexdigest()
+        revision = selected_report_archive_key(self.report_root, manifest)
+        identity = manifest.manifest_id + (":" + revision if revision else "")
+        key = hashlib.sha256(identity.encode()).hexdigest()
         return self.archive_root.resolve() / key
 
     def _sources(
@@ -194,10 +197,10 @@ class FileArchiveStore:
         self, *, manifest: RunManifest, plan: ControlPlaneArtifactLifecyclePlan
     ) -> tuple[bool | None, str]:
         """Return true/false/unknown and a bounded reason; re-read every file."""
-        pack = self._pack(manifest)
-        if not (pack / "index.json").exists():
-            return None, "archive_evidence_not_recorded"
         try:
+            pack = self._pack(manifest)
+            if not (pack / "index.json").exists():
+                return None, "archive_evidence_not_recorded"
             index_path = _contained_file(
                 self.archive_root.resolve(), f"{pack.name}/index.json"
             )

@@ -227,10 +227,10 @@ def write_workflow_run_report(
     writer.mkdir(str(out_dir))
     json_path = out_dir / "workflow-run-report.json"
     md_path = out_dir / "workflow-run-report.md"
-    write_json(json_path, report.to_dict(), store=writer)
     finalize_workflow_children(
         report, root=resolve_report_root(root=root), store=writer
     )
+    write_json(json_path, report.to_dict(), store=writer)
     _atomic_write_text(
         md_path, render_workflow_run_report_markdown(report), store=writer
     )

@@ -4,7 +4,7 @@ Refresh note (2026-09-16): selected-run persisted status API and evidence captur
 Counts and fingerprint come from `reports/quality/module-coverage-inventory.json`;
 historical notes below retain their original scope.
 
-`source_tree_sha256=70d44321e739347ebce98ff48d2c2e7cf65fbbabfcaeba35940e6e79816a5f64`
+`source_tree_sha256=668a195458a1a0fe6df0c23a9cd786bdd757b4a00af916f332b79e2cc974e5d5`
 
 `source_module_count=2484`
 
@@ -158,7 +158,7 @@ Collected: `6`
   for source, config, tests, scripts, docs, and reports.
 - `src/bioetl/` reflects the intended layered architecture through distinct
   first-order package groups.
-- Current Python file count under `src/bioetl` is `2469`, including two
+- Historical Python file count under `src/bioetl` is `2469`, including two
   top-level package modules outside the five first-order architecture layers.
 - Current layer file counts are: `domain=608`, `application=772`,
   `infrastructure=632`, `composition=295`, `interfaces=160`.
@@ -179,7 +179,7 @@ Collected: `6`
   snapshots; refresh those raw files before using them for line-item topology
   decisions.
 
-## Source tree stamp
+## Historical source tree stamp
 
 - source_tree_sha256: `c5a7e8f28785b3bbc04f32b5d6c49fc20d4848e7b90db779c7a5ff3feed7e1a8`
 

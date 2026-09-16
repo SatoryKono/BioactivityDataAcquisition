@@ -1,34 +1,27 @@
 {
   "artifacts": [
     {
-      "blob_sha256": "ccfe246e758bafa942945053fd72ed407cf6c4e4af68d0ee33846d6eaed5e8be",
+      "blob_sha256": "d329b8855346fd59e04aefae1bd0f25a4a88fde056ada671b4a3f703af5d4f2b",
       "introduced_after_remote_main": false,
       "path": "reports/quality/architecture-quality-scorecard.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "5ef3a2c12bc37b037c644b485cbac52851055c81",
+      "source_revision": "10f80c2404d4a74f572b35af66aa435b09969764",
       "summary": {
-        "available": true,
-        "integral_score": 9.25,
-        "schema_version": 2,
-        "weights_sum": 1.0
+        "available": false,
+        "conflict_markers_detected": true
       }
     },
     {
-      "blob_sha256": "1b72c51d5b5d0c4979d253890082c285ff05c1a1d44cbf51d5f2826b611a0711",
+      "blob_sha256": "336ac241a6a6e7e28fe7a7921ab5eed249afca74f235d54e7083d10453ff80a4",
       "introduced_after_remote_main": false,
       "path": "reports/quality/module-coverage-inventory.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "5ef3a2c12bc37b037c644b485cbac52851055c81",
+      "source_revision": "10f80c2404d4a74f572b35af66aa435b09969764",
       "summary": {
-        "available": true,
-        "coverage_xml_sha256": "7184937818099a4c3d38b8fe4bd91613c81562af068ac278d680b5aba09c99e9",
-        "schema_version": 1,
-        "snapshot_date": "2026-09-10",
-        "source_module_count": 2475,
-        "source_tree_sha256": "6fb53d1b573529b016998c8905df570d9c3114e85fdd245ecb3d82b25b7d1a74",
-        "unmeasured_module_count": 0
+        "available": false,
+        "conflict_markers_detected": true
       }
     },
     {
@@ -37,7 +30,7 @@
       "path": "reports/quality/compatibility-importer-census.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "5ef3a2c12bc37b037c644b485cbac52851055c81",
+      "source_revision": "10f80c2404d4a74f572b35af66aa435b09969764",
       "summary": {
         "available": true,
         "retained_entrypoint_count": 12,
@@ -45,12 +38,12 @@
       }
     },
     {
-      "blob_sha256": "d959203101c56fbce8f0905e85e6f77a214a37ee6eb0bafa6886c30fcef2ecbf",
+      "blob_sha256": "7a89a1706f78a63a0bd22301a61753ac322d500a17a014be81cc7dec099fb9a7",
       "introduced_after_remote_main": false,
       "path": "reports/quality/dead-code-inventory.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "5ef3a2c12bc37b037c644b485cbac52851055c81",
+      "source_revision": "10f80c2404d4a74f572b35af66aa435b09969764",
       "summary": {
         "available": true,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
@@ -63,7 +56,7 @@
       "path": "reports/quality/contract-registry-diagnostics.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "5ef3a2c12bc37b037c644b485cbac52851055c81",
+      "source_revision": "10f80c2404d4a74f572b35af66aa435b09969764",
       "summary": {
         "available": true,
         "blocking_issue_count": 0,
@@ -76,13 +69,13 @@
       "path": "reports/observability/runtime_cardinality_inventory.json",
       "required": false,
       "required_on_remote": false,
-      "source_revision": "5ef3a2c12bc37b037c644b485cbac52851055c81",
+      "source_revision": "10f80c2404d4a74f572b35af66aa435b09969764",
       "summary": {
         "available": true
       }
     }
   ],
-  "baseline_artifact_fingerprint": "b1f4156058271db45eb911c8c018f29d89d2fe0b2a117958ab6419e260db1b61",
+  "baseline_artifact_fingerprint": "fc9275b4a4227285676bff6338e9fc05723fcafc2721105854ae27402482c3ef",
   "branch": "main",
   "dirty_closeout_guard": {
     "command": "git status --porcelain --untracked-files=no",
@@ -102,9 +95,9 @@
   ],
   "local_tracking_ref": "origin/main",
   "local_tracking_ref_matches_remote": true,
-  "local_tracking_ref_sha": "5ef3a2c12bc37b037c644b485cbac52851055c81",
+  "local_tracking_ref_sha": "10f80c2404d4a74f572b35af66aa435b09969764",
   "remote": "origin",
   "remote_main_ref": "refs/heads/main",
-  "remote_main_sha": "5ef3a2c12bc37b037c644b485cbac52851055c81",
+  "remote_main_sha": "10f80c2404d4a74f572b35af66aa435b09969764",
   "schema_version": 1
 }

@@ -22,7 +22,15 @@ def active_run_diagnostics(
     manifest = host._run_manifest_port.get_by_run_id(selected_id)
     if manifest is None:
         return None
-    if manifest.pipeline_name != pipeline:
+    if pipeline not in {
+        manifest.pipeline_name,
+        ".*",
+        "All",
+        "all",
+        "*",
+        "$__all",
+        "__all",
+    }:
         return {"verdict": "ERROR", "reason": "identity_mismatch"}
     entries = (
         host._run_ledger_port.list_entries_by_run_id(selected_id)
@@ -32,6 +40,8 @@ def active_run_diagnostics(
     entries = [entry for entry in entries if entry.manifest_id == manifest.manifest_id]
     if not entries:
         return {"verdict": "INCOMPLETE", "reason": "ledger_missing"}
+    if any(entry.occurred_at.utcoffset() is None for entry in entries):
+        raise ValueError("ledger_timestamp_timezone_missing")
     latest = max(entries, key=lambda entry: entry.occurred_at)
     terminal = any(
         entry.event_type in {"run_finished", "run_failed", "run_shutdown"}
@@ -45,6 +55,9 @@ def active_run_diagnostics(
         "heartbeat_now": "STALE" if age > 900 else "RECENT LEDGER EVENT",
         "heartbeat_age_seconds": max(0, age),
         "run_type": manifest.run_type.value,
+        "workflow_id": manifest.workflow_name,
+        "pipeline": manifest.pipeline_name,
+        "run_id": run_id,
     }
 
 

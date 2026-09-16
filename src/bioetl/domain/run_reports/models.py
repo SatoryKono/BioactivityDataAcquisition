@@ -170,7 +170,7 @@ class LayerCounts:
 
 @dataclass(frozen=True, slots=True)
 class PipelineRunReport:
-    """Canonical pipeline_run_report_v1 payload."""
+    """Canonical pipeline_run_report_v2 payload."""
 
     identity: dict[str, Any]  # Any: report/json payload shape is dynamic
     funnel: tuple[StageFunnelRow, ...]
@@ -194,7 +194,7 @@ class PipelineRunReport:
     http_summary: dict[str, Any] | None = None  # Any: optional HTTP rollup
     performance: dict[str, Any] | None = None  # Any: optional throughput
     observations: dict[str, object] | None = None
-    schema_version: str = "pipeline_run_report_v1"
+    schema_version: str = "pipeline_run_report_v2"
 
     def to_dict(self) -> dict[str, Any]:  # Any: report/json payload shape is dynamic
         payload: dict[str, Any] = {  # Any: report/json payload shape is dynamic

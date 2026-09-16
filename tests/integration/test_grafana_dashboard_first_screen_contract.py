@@ -320,7 +320,7 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
     expectations = {
         "bioetl-overview-v2.json": {
             "Monitor Scope Health": "bioetl_l0_status",
-            "Review Current First Action": "bioetl_l0_next_action_route",
+            "Review First Action": "bioetl_l0_next_action_route",
         },
         "bioetl-control-plane-v1.json": {
             "Monitor Replay Safety": "bioetl_replay_safety_blockers_15m",

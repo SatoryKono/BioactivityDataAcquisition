@@ -251,7 +251,7 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
     """Historical evidence must stay behind disclosure below the L0 answer path."""
     first_answer_titles = {
         "Monitor Scope Health",
-        "Review Current First Action",
+        "Review First Action",
         "Review Selected Run Domains",
     }
     compact_evidence = {
@@ -349,7 +349,7 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
                 str(link.get("title", "")).startswith("Open ") for link in data_links
             )
 
-        for panel_title in ("Monitor Scope Health", "Review Current First Action"):
+        for panel_title in ("Monitor Scope Health", "Review First Action"):
             assert "$__range" not in "\n".join(
                 get_panel_expressions(panels[panel_title])
             )

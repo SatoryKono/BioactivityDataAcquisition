@@ -106,12 +106,12 @@ def test_overview_selected_run_summary_is_in_first_window() -> None:
     )
     blob = f"{panel.get('title') or ''}\n{panel.get('description') or ''}"
     assert "SELECTED RUN" in blob
-    urls = [
-        str(target.get("url") or "")
-        for target in (panel.get("targets") or [])
-        if isinstance(target, dict)
+    assert panel["datasource"]["uid"] == "-- Dashboard --"
+    assert panel["targets"] == [
+        {"panelId": 9002, "refId": "A", "withTransforms": False}
     ]
-    assert any("selected-run-status" in url for url in urls)
+    source = next(item for item in root if item.get("id") == 9002)
+    assert "selected-run-status" in source["targets"][0]["url"]
 
 
 def test_query_panels_declare_scope_class_matching_scope() -> None:
@@ -217,6 +217,12 @@ def test_compact_selected_run_summary_uses_shared_projection() -> None:
             missing.append(f"{name}:{panel_id} missing")
             continue
         targets = panel.get("targets") or []
+        if name == "bioetl-overview-v2.json":
+            assert panel["datasource"]["uid"] == "-- Dashboard --"
+            assert targets == [{"panelId": 9002, "refId": "A", "withTransforms": False}]
+            targets = next(
+                item for item in _root_panels(dashboard) if item.get("id") == 9002
+            )["targets"]
         urls = [
             str(target.get("url") or "")
             for target in targets
@@ -238,8 +244,10 @@ def test_compact_selected_run_summary_uses_shared_projection() -> None:
             ((panel.get("fieldConfig") or {}).get("defaults") or {}).get("noValue")
             or ""
         )
-        if no_value != "UNKNOWN" or "SELECT RUN" not in panel["description"]:
-            missing.append(f"{name}:{panel_id} missing SELECT RUN/VALID EMPTY")
+        if no_value != "UNKNOWN":
+            missing.append(f"{name}:{panel_id} missing UNKNOWN no-value state")
+        if "SELECT RUN" not in panel["description"]:
+            missing.append(f"{name}:{panel_id} missing SELECT RUN explanation")
     assert not missing, "selected-run summary:\n" + "\n".join(missing)
 
 

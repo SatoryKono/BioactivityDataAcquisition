@@ -14,7 +14,7 @@
   "schema_version": 1,
   "source": "grafana/dashboards/*.json",
   "target_counts": {
-    "http": 44,
+    "http": 43,
     "loki": 0,
     "promql": 172,
     "tempo": 0,
@@ -3222,7 +3222,7 @@
       "formula": "max without(run_type)(bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}>0) or on() bioetl_l0_next_action_no_route",
       "kind": "promql",
       "panel_id": 215,
-      "panel_title": "Review Current First Action",
+      "panel_title": "Review First Action",
       "query": "max without(run_type)(bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}>0) or on() bioetl_l0_next_action_no_route",
       "query_tokens": [
         "bioetl_l0_next_action_no_route",
@@ -3848,30 +3848,6 @@
           "value": 2
         }
       ],
-      "unit": "none"
-    },
-    {
-      "coverage_class": null,
-      "dashboard_uid": "bioetl-overview-v2",
-      "datasource_type": "yesoreyeram-infinity-datasource",
-      "documents_backend_down": true,
-      "documents_valid_empty": true,
-      "empty_state": "valid_empty",
-      "formula": "",
-      "kind": "http",
-      "panel_id": 9603,
-      "panel_title": "Review Selected Run Status",
-      "query": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
-      "query_tokens": [
-        "/ops/observability/selected-run-status",
-        "pipeline",
-        "run_id",
-        "run_type",
-        "workflow"
-      ],
-      "ref_id": "A",
-      "runbook_urls": [],
-      "thresholds": [],
       "unit": "none"
     },
     {
