@@ -314,11 +314,11 @@ def test_review_domain_status_uses_exact_persisted_evidence() -> None:
     for key, text in {
         "runtime": "Pipeline Diagnostics",
         "control_plane": "Trust",
-        "dq": "DQ",
-        "provider": "Provider",
+        "dq": "Data Quality",
+        "provider": "Provider Health",
         "monitor": "Monitor",
         "no_route": "No route",
-        "workflow": "Runtime (wf)",
+        "workflow": "Pipeline Diagnostics",
     }.items():
         assert key in action_maps, f"missing Action map for {key}"
         assert action_maps[key].get("text") == text

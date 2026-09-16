@@ -704,7 +704,7 @@
                         "color": "text"
                       },
                       "dq": {
-                        "text": "DQ",
+                        "text": "Data Quality",
                         "color": "text"
                       },
                       "monitor": {
@@ -716,7 +716,7 @@
                         "color": "text"
                       },
                       "provider": {
-                        "text": "Provider",
+                        "text": "Provider Health",
                         "color": "text"
                       },
                       "runtime": {
@@ -724,7 +724,7 @@
                         "color": "text"
                       },
                       "workflow": {
-                        "text": "Runtime (wf)",
+                        "text": "Pipeline Diagnostics",
                         "color": "text"
                       }
                     }
@@ -4215,7 +4215,7 @@
                             "color": "text"
                           },
                           "dq": {
-                            "text": "DQ",
+                            "text": "Data Quality",
                             "color": "text"
                           },
                           "monitor": {
@@ -4227,7 +4227,7 @@
                             "color": "text"
                           },
                           "provider": {
-                            "text": "Provider",
+                            "text": "Provider Health",
                             "color": "text"
                           },
                           "runtime": {
@@ -4235,7 +4235,7 @@
                             "color": "text"
                           },
                           "workflow": {
-                            "text": "Runtime (wf)",
+                            "text": "Pipeline Diagnostics",
                             "color": "text"
                           }
                         }

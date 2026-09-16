@@ -142,7 +142,10 @@ def _overview(p: dict[int, dict]) -> None:
                             if isinstance(value, dict):
                                 value["text"] = {
                                     "Runtime": "Pipeline Diagnostics",
+                                    "Runtime (wf)": "Pipeline Diagnostics",
                                     "Control Plane": "Trust",
+                                    "DQ": "Data Quality",
+                                    "Provider": "Provider Health",
                                 }.get(value.get("text"), value.get("text", ""))
     p[20215]["gridPos"]["h"] = 12
     # Retain domain-specific links and queries, but compare the six diagnostics in one banded grid.
