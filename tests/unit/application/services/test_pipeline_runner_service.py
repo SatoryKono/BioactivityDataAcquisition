@@ -953,6 +953,16 @@ async def test_cancelled_execution_persists_snapshot_and_releases_observations(
 
     service.report_root = tmp_path
     service.report_store = FileRunReportStoreAdapter()
+
+    def check_terminal_audit_before_capture(*args, **kwargs):
+        event = service.audit.log_event.await_args
+        assert event.args[0] == "PipelineRunCompleted"
+        assert event.args[1]["status"] == "shutdown"
+        assert event.args[1]["error_type"] == "CancelledError"
+
+    service.capture_control_plane = MagicMock(
+        side_effect=check_terminal_audit_before_capture
+    )
     mock_runner.run.side_effect = asyncio.CancelledError()
     with pytest.raises(asyncio.CancelledError):
         await service.run("test_pipeline")
@@ -965,3 +975,4 @@ async def test_cancelled_execution_persists_snapshot_and_releases_observations(
         payload["selected_run_snapshot"]["assessment"]["execution_state"] == "SHUTDOWN"
     )
     assert run_observations() == {}
+    service.capture_control_plane.assert_called_once()

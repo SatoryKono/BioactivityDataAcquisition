@@ -65,3 +65,8 @@ Readers retain v1 report and rule support; old revisions are never rewritten.
 Explicit `skip_gold` is N/A under v2 rules. See
 [ADR-061](../02-architecture/decisions/ADR-061-persisted-selected-run-assessment.md)
 for deployment order, archive versioning and rollback without deleting evidence.
+
+The v2 JSON Schema references unchanged field contracts in the immutable v1
+schema through its `bioetl://` identifier. Package both schema files and register
+both `$id` values with the validator's local schema registry; validation requires
+no network access. The writer integration tests exercise this offline registry.

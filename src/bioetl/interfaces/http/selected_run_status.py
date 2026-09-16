@@ -24,6 +24,7 @@ from bioetl.interfaces.http._health_server_observability_protocols import (
 )
 from bioetl.interfaces.http._selected_run_live import (
     active_run_diagnostics,
+    pipeline_owners,
     scope_matches,
 )
 from bioetl.interfaces.http.run_report_ops import _validated_artifact_paths
@@ -104,15 +105,16 @@ def _saved_trust(
 
 def _selected_pipeline(pipeline: str, run_id: str, root: Path | None) -> str | None:
     """Resolve an aggregate selector only from an unambiguous exact report path."""
-    if run_report_ops._normalize_list_owner(pipeline) is not None:
-        return pipeline
+    owners = pipeline_owners(pipeline)
+    if owners is not None and len(owners) == 1:
+        return next(iter(owners))
     if run_report_ops._safe_segment(run_id) != run_id:
         raise ValueError("invalid_run_id")
     base = run_report_ops._effective_root(root).resolve() / "pipeline"
     matches = [
         path.parent.parent.name
         for path in base.glob(f"*/{run_id}/pipeline-run-report.json")
-        if path.is_file()
+        if path.is_file() and (owners is None or path.parent.parent.name in owners)
     ]
     if len(matches) > 1:
         raise ValueError("run_id_ambiguous")
