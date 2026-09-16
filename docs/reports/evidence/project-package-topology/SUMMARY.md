@@ -1,12 +1,33 @@
 # Сводка evidence: project-package-topology
 
-Refresh note (2026-09-16): selected-run persisted status API and evidence capture.
-Counts and fingerprint come from `reports/quality/module-coverage-inventory.json`;
-historical notes below retain their original scope.
+Refresh note (2026-09-16): hash-only reconcile after selected-run merge
+coverage rebind. Counts and the source fingerprint below come from
+`reports/quality/module-coverage-inventory.json`. Historical notes remain
+historical.
 
-`source_tree_sha256=4ebd484cd59a78bbccfe21170fe6d33dfa3268fc2ffbf0f1bf6e2721f0726a44`
+`source_tree_sha256=e5ab6c7b712b06de7b2dd77593aac5a6466a30da6be5f23743ea2a52e4b59277`
 
-`source_module_count=2486`
+`source_module_count=2484`
+
+Refresh note (2026-09-16): hash-only reconcile after live coverage inventory
+rebind (control-plane public data-root seam). Counts and the source
+fingerprint below come from
+`reports/quality/module-coverage-inventory.json`. Historical notes remain
+historical.
+
+`source_tree_sha256=0e74e9e3cf7e4cd15eb467a283c843f91cba9fd133d6c826d995429bfcc10d74`
+
+`source_module_count=2469`
+
+Refresh note (2026-09-16): hash-only reconcile after architecture green loop
+(control-plane public data-root seam, live coverage inventory rebind). Counts
+and the source fingerprint below come from
+`reports/quality/module-coverage-inventory.json`. Historical notes remain
+historical.
+
+`source_tree_sha256=c7d0ffb86f07bf48b0cc7aadc6c19295456b63640f2c13055d85e134c6d7ee3b`
+
+`source_module_count=2470`
 
 Refresh note (2026-09-15): hash-only reconcile after pytest-zero loop
 (source-tree rebind, archive operator test, Grafana copy). Counts and the
@@ -158,7 +179,7 @@ Collected: `6`
   for source, config, tests, scripts, docs, and reports.
 - `src/bioetl/` reflects the intended layered architecture through distinct
   first-order package groups.
-- Historical Python file count under `src/bioetl` is `2469`, including two
+- Current Python file count under `src/bioetl` is `2469`, including two
   top-level package modules outside the five first-order architecture layers.
 - Current layer file counts are: `domain=608`, `application=772`,
   `infrastructure=632`, `composition=295`, `interfaces=160`.
@@ -179,7 +200,7 @@ Collected: `6`
   snapshots; refresh those raw files before using them for line-item topology
   decisions.
 
-## Historical source tree stamp
+## Source tree stamp
 
 - source_tree_sha256: `c5a7e8f28785b3bbc04f32b5d6c49fc20d4848e7b90db779c7a5ff3feed7e1a8`
 

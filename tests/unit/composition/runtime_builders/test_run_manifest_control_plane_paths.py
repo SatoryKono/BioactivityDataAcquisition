@@ -34,7 +34,7 @@ import pytest
 
 from bioetl.composition import control_plane_paths as paths_subject
 from bioetl.composition.runtime_builders import (
-    _run_manifest_data_roots as subject,
+    run_manifest_data_roots as subject,
 )
 
 pytestmark = pytest.mark.unit
