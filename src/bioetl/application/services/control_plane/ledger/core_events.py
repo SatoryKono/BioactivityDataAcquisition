@@ -4,16 +4,16 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from bioetl.application.services.control_plane.ledger.diagnostic_support import (
-    RunLedgerCorrelationFieldsProtocol,
-    sync_manifest_contract_defaults,
-    sync_manifest_runtime_defaults,
-)
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import (
     ARTIFACT_PUBLISHED_EVENT,
     DQ_POLICY_APPLIED_EVENT,
     MANIFEST_CREATED_EVENT,
+)
+from bioetl.domain.normalization import (
+    normalize_contract_ref,
+    normalize_contract_version,
+    normalize_control_plane_opaque_hash_ref,
 )
 from bioetl.domain.types import RunID
 from bioetl.domain.types.dq_contracts import DQDisposition
@@ -25,7 +25,22 @@ __all__ = [
 ]
 
 
-class _RunLedgerCoreEventAppender(RunLedgerCorrelationFieldsProtocol, Protocol):
+class _RunLedgerCorrelationFields(Protocol):
+    pipeline_name: str | None
+    provider: str | None
+    entity: str | None
+    run_type: str | None
+    resolved_config_hash: str | None
+    effective_config_hash: str | None
+    contract_ref: str | None
+    contract_version: str | None
+    dq_policy_ref: str | None
+    rule_bundle_version: str | None
+    dq_contract_compatibility_hash: str | None
+    effective_config_artifact_id: str | None
+
+
+class _RunLedgerCoreEventAppender(_RunLedgerCorrelationFields, Protocol):
     @property
     def manifest_id(self) -> str: ...
 
@@ -52,6 +67,65 @@ def _required_text(value: str, field_name: str) -> str:
     if not stripped:
         raise ValueError(f"{field_name} is required")
     return stripped
+
+
+def _coalesce_missing(current: str | None, default: str | None) -> str | None:
+    """Return default only when current value is missing."""
+    if current is None:
+        return default
+    return current
+
+
+def sync_manifest_runtime_defaults(
+    host: _RunLedgerCoreEventAppender,
+    manifest: RunManifest,
+) -> None:
+    """Hydrate runtime correlation defaults from the immutable manifest."""
+    code_provenance = manifest.code_provenance
+    host.pipeline_name = _coalesce_missing(host.pipeline_name, manifest.pipeline_name)
+    host.provider = _coalesce_missing(host.provider, manifest.provider)
+    host.entity = _coalesce_missing(host.entity, manifest.entity)
+    host.run_type = _coalesce_missing(host.run_type, manifest.run_type.value)
+    host.resolved_config_hash = _coalesce_missing(
+        host.resolved_config_hash,
+        normalize_control_plane_opaque_hash_ref(code_provenance.resolved_config_hash),
+    )
+    host.effective_config_hash = _coalesce_missing(
+        host.effective_config_hash,
+        normalize_control_plane_opaque_hash_ref(code_provenance.effective_config_hash),
+    )
+
+
+def sync_manifest_contract_defaults(
+    host: _RunLedgerCoreEventAppender,
+    manifest: RunManifest,
+) -> None:
+    """Hydrate contract/DQ correlation defaults from the immutable manifest."""
+    code_provenance = manifest.code_provenance
+    host.contract_ref = _coalesce_missing(
+        host.contract_ref,
+        normalize_contract_ref(code_provenance.contract_ref),
+    )
+    host.contract_version = _coalesce_missing(
+        host.contract_version,
+        normalize_contract_version(code_provenance.contract_version),
+    )
+    host.dq_policy_ref = _coalesce_missing(
+        host.dq_policy_ref,
+        code_provenance.dq_policy_ref,
+    )
+    host.rule_bundle_version = _coalesce_missing(
+        host.rule_bundle_version,
+        code_provenance.rule_bundle_version,
+    )
+    host.dq_contract_compatibility_hash = _coalesce_missing(
+        host.dq_contract_compatibility_hash,
+        code_provenance.dq_contract_compatibility_hash,
+    )
+    host.effective_config_artifact_id = _coalesce_missing(
+        host.effective_config_artifact_id,
+        code_provenance.effective_config_artifact_id,
+    )
 
 
 def record_manifest_created(

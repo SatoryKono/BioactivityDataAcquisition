@@ -253,7 +253,9 @@ def test_apply_to_dashboard_expands_nav_and_reclaims_first_window(
     )
 
     rendered = json.loads(dashboard.read_text(encoding="utf-8"))
-    nav, slack, first_window = [p for p in rendered["panels"] if p["id"] != 9450]
+    nav, slack, first_window, evidence_row = rendered["panels"]
+    assert evidence_row["id"] == 9450
+    assert evidence_row["type"] == "row"
     assert nav["gridPos"] == {"x": 0, "y": 0, "w": 24, "h": 2}
     assert slack["gridPos"]["h"] == 5
     assert first_window["gridPos"]["y"] + first_window["gridPos"]["h"] == 17

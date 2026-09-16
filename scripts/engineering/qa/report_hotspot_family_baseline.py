@@ -320,28 +320,30 @@ def _render_fan_in_census_sections(metrics: list[dict[str, object]]) -> list[str
             ]
         )
         at_budget_modules = family.get("at_budget_modules", [])
-        if not isinstance(at_budget_modules, list) or not at_budget_modules:
-            lines.append("No modules currently sit at the fan-in cap.")
+        lines.extend(_render_at_budget_modules(at_budget_modules))
+    return lines
+
+
+def _render_at_budget_modules(at_budget_modules: object) -> list[str]:
+    if not isinstance(at_budget_modules, list) or not at_budget_modules:
+        return ["No modules currently sit at the fan-in cap."]
+    lines = [
+        "| Module | Fan-in | Runtime importers |",
+        "| --- | ---: | --- |",
+    ]
+    for module in at_budget_modules:
+        if not isinstance(module, dict):
             continue
-        lines.extend(
-            [
-                "| Module | Fan-in | Runtime importers |",
-                "| --- | ---: | --- |",
-            ]
+        module_name = module.get("module")
+        fan_in = module.get("fan_in")
+        if not isinstance(module_name, str) or not isinstance(fan_in, int):
+            continue
+        lines.append(
+            "| "
+            f"`{module_name}` | "
+            f"{fan_in} | "
+            f"{_render_importer_list(module.get('runtime_importers'))} |"
         )
-        for module in at_budget_modules:
-            if not isinstance(module, dict):
-                continue
-            module_name = module.get("module")
-            fan_in = module.get("fan_in")
-            if not isinstance(module_name, str) or not isinstance(fan_in, int):
-                continue
-            lines.append(
-                "| "
-                f"`{module_name}` | "
-                f"{fan_in} | "
-                f"{_render_importer_list(module.get('runtime_importers'))} |"
-            )
     return lines
 
 

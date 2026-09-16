@@ -146,7 +146,7 @@ def test_corpus_service_shares_export_tuple_without_importing_models() -> None:
     from pathlib import Path
 
     from bioetl.application.services.control_plane.replay import (
-        _historical_record_payload as payload,
+        historical_certification_service as certification,
     )
     from bioetl.application.services.control_plane.replay import (
         historical_corpus_models as models,
@@ -155,8 +155,8 @@ def test_corpus_service_shares_export_tuple_without_importing_models() -> None:
         historical_corpus_service as service,
     )
 
-    assert models.CORPUS_MODEL_PUBLIC_NAMES is payload.CORPUS_MODEL_PUBLIC_NAMES
-    assert service.CORPUS_MODEL_PUBLIC_NAMES is payload.CORPUS_MODEL_PUBLIC_NAMES
+    assert models.CORPUS_MODEL_PUBLIC_NAMES is certification.CORPUS_MODEL_PUBLIC_NAMES
+    assert service.CORPUS_MODEL_PUBLIC_NAMES is certification.CORPUS_MODEL_PUBLIC_NAMES
     tree = ast.parse(Path(service.__file__).read_text(encoding="utf-8"))
     imported_modules = [
         node.module

@@ -38,6 +38,26 @@ def _index_error(payload: object, manifest: RunManifest) -> str | None:
     return None
 
 
+def _inventory_error(entries: object, sources: dict[str, Path]) -> str | None:
+    if not isinstance(entries, list):
+        return "archive_index_invalid"
+    seen: set[str] = set()
+    for entry in entries:
+        if not isinstance(entry, dict):
+            return "archive_index_invalid"
+        relative = entry.get("path")
+        if (
+            not isinstance(relative, str)
+            or relative not in sources
+            or relative in seen
+        ):
+            return "archive_inventory_mismatch"
+        seen.add(relative)
+    if seen != set(sources):
+        return "archive_inventory_mismatch"
+    return None
+
+
 def _entry_error(
     entry: object,
     *,
@@ -212,20 +232,9 @@ class FileArchiveStore:
             if not isinstance(entries, list) or not entries:
                 return False, "archive_index_invalid"
             sources = self._sources(plan, manifest)
-            seen: set[str] = set()
-            for entry in entries:
-                if not isinstance(entry, dict):
-                    return False, "archive_index_invalid"
-                relative = entry.get("path")
-                if (
-                    not isinstance(relative, str)
-                    or relative not in sources
-                    or relative in seen
-                ):
-                    return False, "archive_inventory_mismatch"
-                seen.add(relative)
-            if seen != set(sources):
-                return False, "archive_inventory_mismatch"
+            inventory_error = _inventory_error(entries, sources)
+            if inventory_error is not None:
+                return False, inventory_error
 
             def verify_entry(entry: object) -> str | None:
                 return _entry_error(entry, sources=sources, seen=set(), pack=pack)
