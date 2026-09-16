@@ -1353,3 +1353,21 @@ class TestPipelineRunnerCheckDataQuality:
 
         # PostrunService.run should be called during run() (includes DQ checks, DQ reports, and VACUUM)
         postrun_service.run.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_cancelled_run_records_terminal_ledger_before_reraising(
+    runner, mock_executor
+):
+    from asyncio import CancelledError
+
+    ledger = MagicMock(spec=RunLedgerService)
+    runner.attach_run_ledger_service(ledger)
+    mock_executor.execute.side_effect = CancelledError()
+    with pytest.raises(CancelledError):
+        await runner.run()
+    ledger.record_run_shutdown.assert_called_once_with(
+        metrics_snapshot=runner.execution_metrics, details=None
+    )
+    ledger.record_run_finished.assert_not_called()
+    ledger.record_run_failed.assert_not_called()
