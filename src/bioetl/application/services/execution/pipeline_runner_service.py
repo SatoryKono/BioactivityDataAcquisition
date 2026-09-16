@@ -10,6 +10,11 @@ from __future__ import annotations
 
 import asyncio
 
+from bioetl.application.services.run_reports.observations import (
+    bind_run_observations,
+    record_run_observation,
+    reset_run_observations,
+)
 from bioetl.domain.ports import RunReportStorePort
 
 __all__ = [
@@ -252,10 +257,6 @@ class PipelineRunnerService:
         started_monotonic: float,
         record_constructor_failure: Callable[[Exception], Awaitable[None]],
     ) -> RunResult:
-        from bioetl.application.services.run_reports.observations import (
-            bind_run_observations,
-            reset_run_observations,
-        )
 
         observation_token = bind_run_observations()
         accounting = StageAccountingAccumulator()
@@ -452,16 +453,16 @@ class PipelineRunnerService:
         self, result: RunResult, options: RunOptions | None
     ) -> RunResult:
         """Use the configured report destination for every execution outcome."""
-        if self.capture_control_plane is not None and result.completed_at is not None:
+        if (
+            self.capture_control_plane is not None
+            and result.completed_at is not None
+            and not (options and options.dry_run)
+        ):
             try:
                 self.capture_control_plane(
                     result.pipeline_name, result.run_id, result.completed_at
                 )
             except (OSError, RuntimeError, ValueError, TypeError):
-                from bioetl.application.services.run_reports.observations import (
-                    record_run_observation,
-                )
-
                 record_run_observation(
                     "Control Plane",
                     verdict="INCOMPLETE",

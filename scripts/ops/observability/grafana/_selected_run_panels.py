@@ -102,6 +102,14 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
     for panel in _walk_panels(panels):
         if not isinstance(panel, dict):
             continue
+        if uid == "bioetl-control-plane-v1" and panel.get("id") == 9418:
+            for target in panel.get("targets", []):
+                target["url"] = STATUS_URL
+                target["root_selector"] = "trust"
+            panel["description"] = (
+                DESCRIPTION
+                + " Observed is the saved completion-time assessment. processing_status success does not imply trust_status OK."
+            )
         if uid == "bioetl-overview-v2" and panel.get("id") in {
             9006,
             9003,

@@ -50,7 +50,47 @@ def unavailable_status(
         "evidence_availability": reason,
         "rules_version": RULES_VERSION,
     }
-    return {**summary, "summary": [summary], "domains": rows, "rows": rows}
+    trust = {
+        "processing_status": "UNKNOWN",
+        "trust_status": state,
+        "reasons_text": reason,
+        "evidence_observed_at": None,
+    }
+    return {
+        **summary,
+        "summary": [summary],
+        "domains": rows,
+        "rows": rows,
+        "trust": [trust],
+    }
+
+
+def _saved_trust(
+    report: dict[str, object], summary: dict[str, object], rows: list[dict[str, object]]
+) -> dict[str, object]:
+    """Project Trust from the same frozen inputs as the six-domain summary."""
+    control = next(row for row in rows if row["domain"] == "Control Plane")
+    reasons: object = report
+    for key in (
+        "observations",
+        "Control Plane",
+        "facts",
+        "checks",
+        "trust",
+        "reasons_text",
+    ):
+        reasons = reasons.get(key) if isinstance(reasons, dict) else None
+    return {
+        "processing_status": str(summary["execution_state"]).lower(),
+        "trust_status": control["verdict"],
+        "reasons_text": reasons if isinstance(reasons, str) else control["reason"],
+        "evidence_observed_at": summary["evaluation_at"],
+        "pipeline": summary["pipeline"],
+        "run_id": summary["run_id"],
+        "rules_version": summary["rules_version"],
+        "revision": summary["revision"],
+        "replay_readiness_now": "NOT EVALUATED",
+    }
 
 
 def load_selected_run_status(
@@ -135,7 +175,13 @@ def load_selected_run_status(
         {**row, "pipeline": pipeline, "run_id": run_id, "revision": revision}
         for row in domain_rows
     ]
-    return {**summary, "summary": [summary], "domains": rows, "rows": rows}
+    return {
+        **summary,
+        "summary": [summary],
+        "domains": rows,
+        "rows": rows,
+        "trust": [_saved_trust(report, summary, rows)],
+    }
 
 
 async def handle_selected_run_status(

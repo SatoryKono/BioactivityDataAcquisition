@@ -192,7 +192,10 @@ def finalize_pipeline_run_report(
                 http_summary=build_http_summary(http_summary),
             ),
         )
-        report = replace(report, observations=run_observations())
+        report = replace(
+            report,
+            observations={} if options and options.dry_run else run_observations(),
+        )
         written = write_pipeline_run_report(report, root=report_root, store=store)
     except Exception as exc:
         return _require_run_result(

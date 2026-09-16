@@ -340,6 +340,7 @@ nav:
           - "PyCharm Setup": 03-guides/development/pycharm-setup.md
       - Dashboards:
           - "Overview": 03-guides/dashboards/README.md
+          - "Regression Acceptance": 03-guides/dashboards/regression-acceptance.md
           - "V2 Updates": 03-guides/dashboards/dashboard-v2-updates.md
           - "V2 Usage (stable shipped)": 03-guides/dashboards/dashboard-v2-usage.md
           - "Extension Guides":
@@ -634,6 +635,7 @@ nav:
           - "Pipeline Compatibility Summary: ChEMBL Activity": 04-reference/pipelines/chembl-activity.md
           - "Pipeline Compatibility Summary: ChEMBL Assay": 04-reference/pipelines/chembl-assay.md
           - "Environment Variables": 04-reference/environment-variables.md
+          - "Selected Run Status": 04-reference/selected-run-status.md
       - "Operations Extras":
           - "Monitoring Guide": 05-operations/01-monitoring-guide.md
           - "Monitoring Architecture": 05-operations/monitoring-architecture.md

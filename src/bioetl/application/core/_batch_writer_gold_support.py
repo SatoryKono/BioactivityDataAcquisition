@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol, cast, runtime_checkable
 
+from bioetl.application.services.run_reports.observations import record_run_observation
 from bioetl.domain.exceptions import SchemaViolationError
 
 if TYPE_CHECKING:
@@ -79,9 +80,6 @@ def validate_gold_records(
         )
 
     result = validator.validate(records)
-    from bioetl.application.services.run_reports.observations import (
-        record_run_observation,
-    )
 
     record_run_observation(
         "Data Validation",

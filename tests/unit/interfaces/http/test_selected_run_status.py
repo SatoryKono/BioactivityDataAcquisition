@@ -397,3 +397,44 @@ async def test_late_previous_request_keeps_its_own_identity(tmp_path, monkeypatc
     assert responses[0][1]["verdict"] == "ERROR"
     assert responses[1][0] is first_writer and responses[1][1]["run_id"] == "run-a"
     assert responses[1][1]["verdict"] == "OK"
+
+
+@pytest.mark.parametrize("missing", [True, False])
+def test_control_plane_capture_binds_exact_identity_and_completion(tmp_path, missing):
+    from types import SimpleNamespace
+    from uuid import UUID
+    from bioetl.application.services.run_reports.control_plane_snapshot import (
+        CaptureControlPlaneSnapshot,
+    )
+    from bioetl.composition.bootstrap.runtime.run_status import (
+        create_run_status_capture,
+    )
+
+    composed = create_run_status_capture(tmp_path)
+    assert isinstance(composed, CaptureControlPlaneSnapshot)
+    manifests, evidence = MagicMock(), MagicMock()
+    manifests.get_by_run_id.return_value = (
+        None if missing else SimpleNamespace(pipeline_name="chembl_activity")
+    )
+    evidence.trust_summary.return_value = {
+        "trust_status": "ERROR",
+        "rows": [{"reason": "lineage_gap"}],
+    }
+    capture = CaptureControlPlaneSnapshot(manifests, evidence)
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    run_id = "11111111-1111-4111-8111-111111111111"
+    token = bind_run_observations()
+    try:
+        capture("chembl_activity", run_id, now)
+        observation = run_observations()["Control Plane"]
+        assert observation["verdict"] == ("INCOMPLETE" if missing else "ERROR")
+        manifests.get_by_run_id.assert_called_once_with(UUID(run_id))
+        if not missing:
+            assert evidence.trust_summary.call_args.kwargs["now"] == now
+            assert (
+                evidence.trust_summary.call_args.kwargs["scope"].selected_run_id
+                == run_id
+            )
+            assert observation["facts"]["checks"]["rows"][0]["reason"] == "lineage_gap"
+    finally:
+        reset_run_observations(token)

@@ -5,6 +5,8 @@ from __future__ import annotations
 from contextvars import ContextVar, Token
 from copy import deepcopy
 
+from bioetl.domain.value_objects.dq_result import DQResult
+
 _observations: ContextVar[dict[str, object] | None] = ContextVar(
     "run_observations", default=None
 )
@@ -57,3 +59,21 @@ def record_run_observation(
 def run_observations() -> dict[str, object]:
     """Detach report inputs from the mutable execution context."""
     return deepcopy(_observations.get() or {})
+
+
+def record_dq_observation(result: DQResult) -> DQResult:
+    """Persist the executed assessment and return it unchanged to its caller."""
+    record_run_observation(
+        "Data Quality",
+        verdict={"passed": "OK", "warning": "WARN", "failed": "ERROR"}.get(
+            result.status.value, "UNKNOWN"
+        ),
+        reason="run_dq_threshold_evaluation",
+        facts={
+            "error_rate": result.error_rate,
+            "status": result.status.value,
+            "has_critical": result.has_critical,
+            "rule_outcomes_count": result.rule_outcomes_count,
+        },
+    )
+    return result

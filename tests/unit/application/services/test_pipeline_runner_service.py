@@ -92,6 +92,41 @@ async def test_configured_report_root_is_used_for_every_outcome(
     assert json.loads(target.read_text())["identity"]["run_id"] == result.run_id
 
 
+@pytest.mark.asyncio
+async def test_dry_run_does_not_inherit_or_mutate_caller_observations(
+    service, tmp_path
+):
+    from bioetl.application.services.run_reports.observations import (
+        bind_run_observations,
+        record_run_observation,
+        reset_run_observations,
+        run_observations,
+    )
+    from bioetl.infrastructure.storage.run_report_store_adapter import (
+        FileRunReportStoreAdapter,
+    )
+
+    service.report_root = tmp_path
+    service.report_store = FileRunReportStoreAdapter()
+    service.capture_control_plane = MagicMock()
+    token = bind_run_observations()
+    try:
+        record_run_observation(
+            "Control Plane", verdict="ERROR", reason="caller", facts={}
+        )
+        before = run_observations()
+        result = await service.run("test_pipeline", options=RunOptions(dry_run=True))
+        assert result.run_report_error is None
+        assert (
+            json.loads(Path(result.run_report_json_path).read_text())["observations"]
+            == {}
+        )
+        assert run_observations() == before
+        service.capture_control_plane.assert_not_called()
+    finally:
+        reset_run_observations(token)
+
+
 @pytest.mark.unit
 def test_composed_run_id_factory_accepts_string_uuid() -> None:
     from bioetl.application.services.execution.pipeline_runner_service import (
