@@ -25,7 +25,7 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2480,
+        "source_module_count": 2469,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
@@ -51,7 +51,7 @@
     },
     {
       "evidence_metrics": {
-        "families_at_budget_count": 2,
+        "families_at_budget_count": 0,
         "hotspot_budget_warning_count": 0,
         "hotspot_family_count": 5,
         "lazy_util": 0.0,
@@ -59,9 +59,9 @@
       },
       "id": "module_boundaries_coupling",
       "name": "Module boundaries / coupling",
-      "score": 8.4,
+      "score": 10.0,
       "weight": 0.14,
-      "weighted_score": 1.176
+      "weighted_score": 1.4
     },
     {
       "evidence_metrics": {
@@ -170,11 +170,8 @@
     "composition_module_cap": 300,
     "composition_module_count": 297,
     "composition_util": 0.99,
-    "families_at_budget": [
-      "application_services_control_plane",
-      "composition_runtime_builders"
-    ],
-    "families_at_budget_count": 2,
+    "families_at_budget": [],
+    "families_at_budget_count": 0,
     "grade_kind": "diagnostic_proxy",
     "lazy_import_cap": 0,
     "lazy_import_observed_count": 0,
@@ -186,7 +183,7 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.25,
+  "integral_score": 9.47,
   "interpretation": "good_targeted_improvements",
   "metrics": {
     "accepted_adr_count": 58,
@@ -201,11 +198,8 @@
     "dashboarded_without_emission_count": 0,
     "dq_blocking_issue_count": 0,
     "expired_compat_count": 0,
-    "families_at_budget": [
-      "application_services_control_plane",
-      "composition_runtime_builders"
-    ],
-    "families_at_budget_count": 2,
+    "families_at_budget": [],
+    "families_at_budget_count": 0,
     "hotspot_budget_warning_count": 0,
     "hotspot_family_count": 5,
     "layer_violations": 0,
@@ -220,7 +214,7 @@
     "retained_public_export_facade_count": 4,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2480,
+    "source_module_count": 2469,
     "sunset_compat_count": 0,
     "total_duplicate_clusters": 0,
     "transition_compat_count": 0,
@@ -275,7 +269,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "7184937818099a4c3d38b8fe4bd91613c81562af068ac278d680b5aba09c99e9",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "4db2cb13ae214bb747506ee169e51061e15b5215f2fb201e83955bda296a6176"
+      "source_tree_sha256": "c6f9e2bdd310d1c634a84ba274da33f84c10ba73e597dcef31cdcf3b01bb98ed"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

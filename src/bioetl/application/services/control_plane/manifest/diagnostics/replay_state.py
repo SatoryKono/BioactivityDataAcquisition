@@ -229,6 +229,7 @@ def _build_replay_state_projection(
 
 
 __all__ = [
+    "_build_replay_parentage",
     "_build_replay_state_projection",
     "_resolve_broader_historical_exact_replay_state",
     "_resolve_continuation_mode",

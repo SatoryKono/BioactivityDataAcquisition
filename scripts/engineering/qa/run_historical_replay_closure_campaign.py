@@ -506,6 +506,7 @@ def _build_campaign_services(
             entry_id_factory=lambda: create_runtime_occurrence_id(
                 "historical_replay_certification_ledger_entry"
             ),
+            summary_builder=build_diagnostics_summary,
         ),
     )
     closure_service = HistoricalReplayClosureService(

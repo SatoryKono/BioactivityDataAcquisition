@@ -4,9 +4,6 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from bioetl.application.services.control_plane.manifest.diagnostics.diagnostic_context import (
-    extract_diagnostic_context,
-)
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.execution_context import (
     is_composite_execution_context as _is_composite_execution_context,
@@ -29,6 +26,14 @@ class _CompositeSummaryRequest(Protocol):
     def resume_diagnostics(self) -> dict[str, object] | None: ...
 
 
+def _composite_run_id_from_entry(entry: RunLedgerEntry) -> object:
+    details = entry.details or {}
+    raw_diagnostic = details.get("_diagnostic")
+    if not isinstance(raw_diagnostic, dict):
+        return None
+    return raw_diagnostic.get("composite_run_id")
+
+
 def build_composite_dossier_projection(
     request: _CompositeSummaryRequest,
     *,
@@ -39,12 +44,7 @@ def build_composite_dossier_projection(
         {
             str(composite_run_id)
             for entry in request.ledger_entries
-            if (
-                composite_run_id := extract_diagnostic_context(entry).get(
-                    "composite_run_id"
-                )
-            )
-            is not None
+            if (composite_run_id := _composite_run_id_from_entry(entry)) is not None
         }
     )
     composite_gap_count = request.correlation_anchor_gaps.get("composite_run_id", 0)

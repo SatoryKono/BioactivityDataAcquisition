@@ -8,6 +8,9 @@ from bioetl.application.runtime_clock import current_utc_time
 from bioetl.application.services.control_plane.forensic import (
     ForensicRunDiffService,
 )
+from bioetl.application.services.control_plane.manifest.diagnostics import (
+    build_diagnostics_summary,
+)
 from bioetl.application.services.control_plane.replay.historical_certification_service import (
     HistoricalReplayCertificationService,
 )
@@ -130,6 +133,7 @@ def bootstrap_historical_replay_corpus_service() -> HistoricalReplayCorpusServic
             entry_id_factory=lambda: create_runtime_occurrence_id(
                 "historical_replay_certification_ledger_entry"
             ),
+            summary_builder=build_diagnostics_summary,
         ),
     )
 
@@ -148,6 +152,7 @@ def bootstrap_historical_replay_closure_service() -> HistoricalReplayClosureServ
             entry_id_factory=lambda: create_runtime_occurrence_id(
                 "historical_replay_certification_ledger_entry"
             ),
+            summary_builder=build_diagnostics_summary,
         ),
     )
     return HistoricalReplayClosureService(
@@ -170,6 +175,7 @@ def bootstrap_historical_replay_universe_service() -> HistoricalReplayUniverseSe
             entry_id_factory=lambda: create_runtime_occurrence_id(
                 "historical_replay_certification_ledger_entry"
             ),
+            summary_builder=build_diagnostics_summary,
         ),
     )
     return HistoricalReplayUniverseService(

@@ -5,13 +5,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.application.services.control_plane.manifest import (
-    execution_identity_support as _execution_identity_support,
-)
+from bioetl.domain.control_plane import execution_identity as _execution_identity_support
 from bioetl.application.services.control_plane.manifest._service_hydration import (
     RunManifestHydrationMixin as RunManifestHydrationMixin,
 )
-from bioetl.application.services.control_plane.manifest.snapshot_payloads import (
+from bioetl.domain.control_plane.snapshot_payloads import (
     source_refs_payload,
 )
 from bioetl.domain.config.runtime import CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE

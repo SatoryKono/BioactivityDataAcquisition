@@ -9,9 +9,6 @@ from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
     ManifestReproducibilityContext,
     resolve_manifest_reproducibility_context,
 )
-from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
-    resolve_provider_entity,
-)
 from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
     RunManifestContractIdentity,
     resolve_contract_identity,
@@ -45,6 +42,23 @@ class ManifestPublicationIdentityKwargs(TypedDict):
     reproducibility_context: ManifestReproducibilityContext | None
 
 
+def _resolve_provider_entity(
+    *,
+    pipeline_name: str,
+    yaml_config: object,
+) -> tuple[str, str]:
+    """Resolve provider/entity from pipeline name and YAML config."""
+    if "_" in pipeline_name:
+        fallback_provider, fallback_entity = pipeline_name.split("_", 1)
+    else:
+        fallback_provider = fallback_entity = pipeline_name
+    provider = getattr(yaml_config, "provider", None)
+    entity = getattr(yaml_config, "entity_type", None)
+    provider_text = provider.strip() if isinstance(provider, str) else ""
+    entity_text = entity.strip() if isinstance(entity, str) else ""
+    return provider_text or fallback_provider, entity_text or fallback_entity
+
+
 def contract_identity_requires_strict_resolution(
     *,
     exact_replay_requested: bool,
@@ -64,7 +78,7 @@ def resolve_manifest_publication_context(
     contract_identity: RunManifestContractIdentity | None = None,
 ) -> ResolvedManifestPublicationContext:
     """Resolve provider, reproducibility context, and contract identity."""
-    provider, entity = resolve_provider_entity(
+    provider, entity = _resolve_provider_entity(
         pipeline_name=ctx.pipeline_name,
         yaml_config=inputs.yaml_config,
     )

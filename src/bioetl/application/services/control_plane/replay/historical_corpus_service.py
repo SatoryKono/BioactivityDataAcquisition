@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
-from importlib import import_module
 
 from bioetl.application.services.control_plane.replay.historical_certification_service import (
     CORPUS_MODEL_PUBLIC_NAMES as CORPUS_MODEL_PUBLIC_NAMES,
@@ -44,18 +43,13 @@ from bioetl.domain.control_plane.reproducibility_profiles import (
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 
 
-def build_diagnostics_summary(*args: object, **kwargs: object) -> dict[str, object]:
-    payload = import_module(
-        "bioetl.application.services.control_plane.manifest.diagnostics"
-    ).build_diagnostics_summary(*args, **kwargs)
+def _as_diagnostics_mapping(payload: object) -> dict[str, object]:
     if not isinstance(payload, Mapping):
         raise TypeError(
             f"expected mapping for diagnostics summary, got {type(payload)!r}"
         )
     return {str(key): value for key, value in payload.items()}
 
-
-_build_diagnostics_summary = build_diagnostics_summary
 
 __all__ = ["HistoricalReplayCorpusService", *CORPUS_MODEL_PUBLIC_NAMES]
 
@@ -183,9 +177,11 @@ class HistoricalReplayCorpusService:
 
     def _record(self, manifest: RunManifest) -> HistoricalReplayCertifiabilityRecord:
         execution_context = resolve_execution_context(manifest)
-        diagnostics = build_diagnostics_summary(
-            manifest,
-            tuple(self.ledger_port.list_entries(manifest.manifest_id)),
+        diagnostics = _as_diagnostics_mapping(
+            self.certification_service.summary_builder(
+                manifest,
+                tuple(self.ledger_port.list_entries(manifest.manifest_id)),
+            )
         )
         profile = resolve_reproducibility_family_profile(
             provider=manifest.provider,

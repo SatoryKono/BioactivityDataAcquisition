@@ -5,10 +5,21 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 from importlib import import_module
+from typing import Protocol
 
-from bioetl.application.services.control_plane.manifest.inspection_result_model import (
-    RunManifestInspectionResult as RunManifestInspectionResult,
-)
+
+class _InspectionManifest(Protocol):
+    manifest_id: str
+    run_id: object
+    schema_version: object
+    execution_fingerprint: object
+    code_provenance: object
+
+
+class _InspectionBundleSource(Protocol):
+    identity_graph: dict[str, object]
+    ledger_entries: tuple[object, ...]
+    manifest: _InspectionManifest
 
 
 def resolve_replay_taxonomy_projection(
@@ -107,7 +118,7 @@ class ReplayClaimSnapshot:
 
 
 def resolve_identity_graph(
-    result: RunManifestInspectionResult,
+    result: _InspectionBundleSource,
     diagnostics: Mapping[str, object],
 ) -> dict[str, object]:
     """Return the canonical identity graph payload."""
@@ -149,7 +160,7 @@ def resolve_replay_claims(
 
 
 def _build_control_plane_bundle(
-    result: RunManifestInspectionResult,
+    result: _InspectionBundleSource,
     diagnostics: Mapping[str, object],
 ) -> dict[str, object]:
     manifest = result.manifest
@@ -184,7 +195,7 @@ def _build_replay_claims_bundle(
 
 
 def build_replay_bundle(
-    result: RunManifestInspectionResult,
+    result: _InspectionBundleSource,
     diagnostics: Mapping[str, object],
     identity_graph: Mapping[str, object],
     claims: ReplayClaimSnapshot,

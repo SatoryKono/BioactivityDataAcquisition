@@ -8,9 +8,6 @@ from typing import cast
 from bioetl.application.services.control_plane.manifest.inspection_artifact_refs import (
     build_artifact_ref_semantic_diff,
 )
-from bioetl.application.services.control_plane.manifest.inspection_dossier import (
-    build_authoritative_replay_dossier as build_authoritative_replay_dossier,
-)
 from bioetl.domain.control_plane import RunManifest
 
 

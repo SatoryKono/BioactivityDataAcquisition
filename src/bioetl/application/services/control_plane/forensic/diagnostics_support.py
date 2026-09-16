@@ -2,12 +2,28 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 
 from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestDiffResult,
     RunManifestInspectionResult,
+    RunManifestInspectionService,
 )
+from bioetl.domain.ports import RunLedgerPort, RunManifestPort
+
+
+def inspection_service_factory_from_ports(
+    manifest_port: RunManifestPort,
+    ledger_port: RunLedgerPort | None,
+    provided_factory: Callable[[], RunManifestInspectionService] | None,
+) -> Callable[[], RunManifestInspectionService]:
+    """Resolve the inspection-service factory without assembling in method bodies."""
+    if provided_factory is not None:
+        return provided_factory
+    return lambda: RunManifestInspectionService(
+        manifest_port=manifest_port,
+        ledger_port=ledger_port,
+    )
 
 
 def dict_or_empty(value: object) -> dict[str, object]:
@@ -70,9 +86,6 @@ def string_list(value: tuple[str, ...]) -> list[str]:
     return list(value)
 
 
-_string_list = string_list
-
-
 def trace_complete(diagnostics: dict[str, object]) -> bool:
     trace = _dict_or_empty(diagnostics.get("produced_artifact_trace"))
     return bool(trace.get("complete", False))
@@ -99,24 +112,24 @@ def lineage_closure_payload(result: RunManifestInspectionResult) -> dict[str, ob
 def artifact_completeness(result: RunManifestInspectionResult) -> dict[str, object]:
     diagnostics = result.diagnostics
     artifact_refs = _artifact_refs(diagnostics)
-    missing_sidecars = _metadata_sidecar_missing_count(diagnostics)
-    published_count = _coerce_int(diagnostics.get("published_artifact_count", 0) or 0)
-    missing_links = _coerce_int(diagnostics.get("missing_artifact_links", 0) or 0)
+    missing_sidecars = metadata_sidecar_missing_count(diagnostics)
+    published_count = coerce_int(diagnostics.get("published_artifact_count", 0) or 0)
+    missing_links = coerce_int(diagnostics.get("missing_artifact_links", 0) or 0)
     return {
         "manifest_id": result.manifest.manifest_id,
         "published_artifact_count": published_count,
         "missing_artifact_links": missing_links,
         "metadata_sidecar_count": len(artifact_refs) - missing_sidecars,
         "metadata_sidecar_missing_count": missing_sidecars,
-        "produced_artifact_trace_complete": _trace_complete(diagnostics),
+        "produced_artifact_trace_complete": trace_complete(diagnostics),
         "produced_artifact_trace_missing_requirements": list(
-            _trace_missing_requirements(diagnostics)
+            trace_missing_requirements(diagnostics)
         ),
         "complete": (
             published_count > 0
             and missing_links == 0
             and missing_sidecars == 0
-            and _trace_complete(diagnostics)
+            and trace_complete(diagnostics)
         ),
     }
 
@@ -126,8 +139,8 @@ def replay_capability_payload(
     left: RunManifestInspectionResult,
     right: RunManifestInspectionResult,
 ) -> dict[str, object]:
-    left_snapshot = _diagnostic_snapshot(left)
-    right_snapshot = _diagnostic_snapshot(right)
+    left_snapshot = diagnostic_snapshot(left)
+    right_snapshot = diagnostic_snapshot(right)
     return {
         "left": {
             "manifest_id": left.manifest.manifest_id,
@@ -155,8 +168,8 @@ def checkpoint_compatibility_payload(
     return {
         "available": bool(anchors),
         "compatible": anchors.get("compatible") if anchors else None,
-        "matching_fields": _string_list_or_empty(anchors.get("matching_fields")),
-        "mismatched_fields": _string_list_or_empty(anchors.get("mismatched_fields")),
+        "matching_fields": string_list_or_empty(anchors.get("matching_fields")),
+        "mismatched_fields": string_list_or_empty(anchors.get("mismatched_fields")),
     }
 
 
@@ -179,7 +192,7 @@ def forensic_diff_payload(manifest_diff: RunManifestDiffResult) -> dict[str, obj
     payload = _dict_or_empty(manifest_diff.cross_surface_replay_diff)
     verdict = payload.get("verdict")
     if not isinstance(verdict, str):
-        payload["verdict"] = _resolve_forensic_verdict(
+        payload["verdict"] = resolve_forensic_verdict(
             manifest_diff=manifest_diff,
             forensic_diff=payload,
         )
@@ -209,13 +222,13 @@ def missing_evidence(result: RunManifestInspectionResult) -> tuple[str, ...]:
     missing: list[str] = []
     if not result.ledger_entries:
         missing.append("run_ledger_entries_missing")
-    if _coerce_int(diagnostics.get("published_artifact_count", 0) or 0) == 0:
+    if coerce_int(diagnostics.get("published_artifact_count", 0) or 0) == 0:
         missing.append("published_artifacts_missing")
-    if _coerce_int(diagnostics.get("missing_artifact_links", 0) or 0) > 0:
+    if coerce_int(diagnostics.get("missing_artifact_links", 0) or 0) > 0:
         missing.append("artifact_links_incomplete")
-    if _metadata_sidecar_missing_count(diagnostics) > 0:
+    if metadata_sidecar_missing_count(diagnostics) > 0:
         missing.append("metadata_sidecars_missing")
-    if not _trace_complete(diagnostics):
+    if not trace_complete(diagnostics):
         missing.append("produced_artifact_trace_incomplete")
     lineage_closure = lineage_closure_payload(result)
     if lineage_closure["status"] == "missing":
@@ -223,19 +236,3 @@ def missing_evidence(result: RunManifestInspectionResult) -> tuple[str, ...]:
     elif lineage_closure["status"] == "unsupported":
         missing.append("lineage_closure_boundary_unsupported")
     return tuple(missing)
-
-
-# Private aliases kept for in-module call sites.
-_coerce_int = coerce_int
-_metadata_sidecar_missing_count = metadata_sidecar_missing_count
-_trace_missing_requirements = trace_missing_requirements
-_string_list_or_empty = string_list_or_empty
-_trace_complete = trace_complete
-_artifact_completeness = artifact_completeness
-_replay_capability_payload = replay_capability_payload
-_checkpoint_compatibility_payload = checkpoint_compatibility_payload
-_resolve_forensic_verdict = resolve_forensic_verdict
-_forensic_diff_payload = forensic_diff_payload
-_diagnostic_snapshot = diagnostic_snapshot
-_missing_evidence = missing_evidence
-_lineage_closure_payload = lineage_closure_payload

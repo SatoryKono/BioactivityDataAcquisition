@@ -7,19 +7,20 @@ from dataclasses import dataclass
 from typing import cast
 
 from bioetl.application.services.control_plane.ledger import RunLedgerService
-from bioetl.application.services.control_plane.replay._historical_certification_models import (
-    HistoricalReplayCertificationProtocol as HistoricalReplayCertificationProtocol,
-)
-from bioetl.application.services.control_plane.replay._historical_certification_models import (
-    HistoricalReplayCertificationResult as HistoricalReplayCertificationResult,
-)
-from bioetl.application.services.control_plane.replay._historical_certification_models import (
-    HistoricalReplayCertificationResultAssembler as HistoricalReplayCertificationResultAssembler,
-)
-from bioetl.application.services.control_plane.replay._historical_certification_models import (
-    _source_key,
+from bioetl.application.services.control_plane.replay._historical_certification_upstream import (
+    DiagnosticsSummaryBuilder as DiagnosticsSummaryBuilder,
 )
 from bioetl.application.services.control_plane.replay._historical_certification_upstream import (
+    HistoricalReplayCertificationProtocol as HistoricalReplayCertificationProtocol,
+)
+from bioetl.application.services.control_plane.replay._historical_certification_upstream import (
+    HistoricalReplayCertificationResult as HistoricalReplayCertificationResult,
+)
+from bioetl.application.services.control_plane.replay._historical_certification_upstream import (
+    HistoricalReplayCertificationResultAssembler as HistoricalReplayCertificationResultAssembler,
+)
+from bioetl.application.services.control_plane.replay._historical_certification_upstream import (
+    _source_key,
     load_upstream_manifest,
     validate_upstream_certification_state,
     validate_upstream_presence,
@@ -30,6 +31,7 @@ from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 from bioetl.domain.types import RunID
 
 __all__ = [
+    "DiagnosticsSummaryBuilder",
     "HistoricalReplayCertificationProtocol",
     "HistoricalReplayCertificationResult",
     "HistoricalReplayCertificationResultAssembler",
@@ -41,6 +43,7 @@ __all__ = [
 class HistoricalReplayCertificationValidator:
     manifest_port: RunManifestPort
     ledger_port: RunLedgerPort
+    summary_builder: DiagnosticsSummaryBuilder
 
     def load_manifest(
         self,
@@ -107,6 +110,7 @@ class HistoricalReplayCertificationValidator:
             validate_upstream_certification_state(
                 ledger_port=self.ledger_port,
                 upstream_manifest=upstream_manifest,
+                summary_builder=self.summary_builder,
             )
 
     def resolve_certification_query(

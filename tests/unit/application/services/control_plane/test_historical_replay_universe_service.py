@@ -39,6 +39,9 @@ from datetime import UTC, datetime
 from bioetl.application.services.control_plane.replay.historical_corpus_service import (
     HistoricalReplayCorpusService,
 )
+from bioetl.application.services.control_plane.manifest.diagnostics import (
+    build_diagnostics_summary,
+)
 from bioetl.application.services.control_plane.replay.historical_certification_service import (
     HistoricalReplayCertificationService,
 )
@@ -91,6 +94,7 @@ def test_universe_report_blocks_claim_when_external_archived_record_is_unresolve
                 manifest_port=manifest_store,
                 ledger_port=ledger_store,
                 entry_id_factory=_universe_entry_id_factory("entry-universe-gap"),
+                summary_builder=build_diagnostics_summary,
             ),
         ),
         now_factory=_fixed_universe_time,
@@ -140,6 +144,7 @@ def test_universe_report_supports_claim_when_local_and_external_records_are_clos
                 manifest_port=manifest_store,
                 ledger_port=ledger_store,
                 entry_id_factory=_universe_entry_id_factory("entry-universe-closed"),
+                summary_builder=build_diagnostics_summary,
             ),
         ),
         now_factory=_fixed_universe_time,

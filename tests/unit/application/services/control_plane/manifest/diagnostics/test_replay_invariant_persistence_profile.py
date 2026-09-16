@@ -34,14 +34,18 @@ from typing import Any
 
 import pytest
 
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy import (
-    _is_composite_execution_context,
-    _resolve_applied_checkpoint_compatibility_policy,
-    _resolve_exact_replay_support_boundary,
-    _resolve_replay_family_contract,
-    _resolve_reproducibility_profile,
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants import (
+    replay_family_context as replay_family_context_module,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.checkpoint_policy import (
     _resolve_requested_checkpoint_compatibility_policy,
+    resolve_applied_checkpoint_compatibility_policy as _resolve_applied_checkpoint_compatibility_policy,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.required_persistence_profile import (
     _resolve_required_persistence_profile,
+)
+from bioetl.domain.control_plane.execution_context import (
+    is_composite_execution_context as _is_composite_execution_context,
 )
 
 
@@ -64,7 +68,8 @@ def test_resolve_reproducibility_profile_uses_source_execution_context(
     profile = SimpleNamespace(exact_replay_support_boundary="source-boundary")
 
     monkeypatch.setattr(
-        "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family.build_replay_family_context",
+        replay_family_context_module,
+        "build_replay_family_context",
         lambda manifest: SimpleNamespace(
             profile=profile,
             exact_replay_support_boundary="source-boundary",
@@ -72,7 +77,9 @@ def test_resolve_reproducibility_profile_uses_source_execution_context(
         ),
     )
 
-    assert _resolve_reproducibility_profile(_manifest()) is profile
+    assert replay_family_context_module.build_replay_family_context(
+        _manifest()
+    ).profile is profile
 
 
 def test_resolve_replay_family_contract_uses_composite_execution_context(
@@ -81,7 +88,8 @@ def test_resolve_replay_family_contract_uses_composite_execution_context(
     contract = {"contract": "composite_family"}
 
     monkeypatch.setattr(
-        "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family.build_replay_family_context",
+        replay_family_context_module,
+        "build_replay_family_context",
         lambda manifest: SimpleNamespace(
             profile=SimpleNamespace(),
             exact_replay_support_boundary="composite-boundary",
@@ -89,14 +97,20 @@ def test_resolve_replay_family_contract_uses_composite_execution_context(
         ),
     )
 
-    assert _resolve_replay_family_contract(_manifest()) == contract
+    assert (
+        replay_family_context_module.build_replay_family_context(
+            _manifest()
+        ).replay_family_contract
+        == contract
+    )
 
 
 def test_exact_replay_support_boundary_delegates_to_resolved_profile(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
-        "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family.build_replay_family_context",
+        replay_family_context_module,
+        "build_replay_family_context",
         lambda manifest: SimpleNamespace(
             exact_replay_support_boundary="strict",
             profile=SimpleNamespace(),
@@ -104,17 +118,20 @@ def test_exact_replay_support_boundary_delegates_to_resolved_profile(
         ),
     )
 
-    assert _resolve_exact_replay_support_boundary(_manifest()) == ("strict")
+    assert (
+        replay_family_context_module.build_replay_family_context(
+            _manifest()
+        ).exact_replay_support_boundary
+        == "strict"
+    )
 
 
-def test_persistence_policy_facade_reexports_policy_helpers() -> None:
-    assert callable(_is_composite_execution_context)
+def test_persistence_policy_owners_export_policy_helpers() -> None:
+    assert callable(replay_family_context_module.build_replay_family_context)
     assert callable(_resolve_applied_checkpoint_compatibility_policy)
-    assert callable(_resolve_exact_replay_support_boundary)
-    assert callable(_resolve_replay_family_contract)
-    assert callable(_resolve_reproducibility_profile)
     assert callable(_resolve_requested_checkpoint_compatibility_policy)
     assert callable(_resolve_required_persistence_profile)
+    assert callable(_is_composite_execution_context)
 
 
 @pytest.mark.parametrize(

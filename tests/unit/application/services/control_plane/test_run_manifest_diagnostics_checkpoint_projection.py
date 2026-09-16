@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection import (
+from bioetl.application.services.control_plane.manifest.diagnostics.base import (
     build_checkpoint_anchor_projection,
     build_current_checkpoint_anchor_payload,
     build_resume_anchor_comparison,

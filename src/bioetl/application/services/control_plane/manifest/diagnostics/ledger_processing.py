@@ -13,6 +13,8 @@ from bioetl.application.services.control_plane.manifest.diagnostics.diagnostic_c
     update_correlation_anchor_gaps,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.dq_details import (
+    DQDetailsSummary,
+    build_dq_details_summary,
     extract_dq_details,
 )
 from bioetl.domain.control_plane import RunLedgerEntry
@@ -138,6 +140,26 @@ def _process_ledger_entries(
         _update_ledger_processing_state(state, entry)
 
     return _freeze_ledger_processing_state(state, resume_diagnostics)
+
+
+def build_ledger_dq_details_summary(
+    ledger_entries: tuple[RunLedgerEntry, ...],
+) -> tuple[LedgerProcessingResult, DQDetailsSummary]:
+    processed = _process_ledger_entries(ledger_entries)
+    dq_details = build_dq_details_summary(
+        rule_ids=processed[4],
+        dispositions=processed[5],
+        report_paths=processed[6],
+        violation_kinds=processed[7],
+        cross_validation_rule_ids=processed[8],
+        cross_validation_config_paths=processed[9],
+        cross_validation_quarantine_policies=processed[10],
+        cross_validation_replay_contracts=processed[11],
+        occurrence_only_diagnostic_scopes=processed[12],
+        has_signal=processed[13],
+        has_cross_validation_signal=processed[14],
+    )
+    return processed, dq_details
 
 
 def _update_ledger_processing_state(

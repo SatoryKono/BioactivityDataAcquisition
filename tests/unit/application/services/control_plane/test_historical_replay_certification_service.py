@@ -123,6 +123,7 @@ def test_certify_historical_source_run_appends_certified_snapshot_evidence() -> 
         manifest_port=manifest_store,
         ledger_port=ledger_store,
         entry_id_factory=_certification_entry_id_factory("entry-source-certification"),
+        summary_builder=build_diagnostics_summary,
     )
 
     result = service.certify_historical_source_run(
@@ -180,6 +181,7 @@ def test_certify_historical_composite_run_requires_certified_upstream_lineage() 
         entry_id_factory=_certification_entry_id_factory(
             "entry-composite-certification"
         ),
+        summary_builder=build_diagnostics_summary,
     )
 
     service.certify_historical_source_run(

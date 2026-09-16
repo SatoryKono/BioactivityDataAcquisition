@@ -6,6 +6,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from bioetl.application.services.control_plane.replay._historical_certification_support import (
+    DiagnosticsSummaryBuilder,
     HistoricalReplayCertificationResult,
     HistoricalReplayCertificationResultAssembler,
     HistoricalReplayCertificationValidator,
@@ -53,6 +54,7 @@ class HistoricalReplayCertificationService:
     manifest_port: RunManifestPort
     ledger_port: RunLedgerPort
     entry_id_factory: Callable[[], str]
+    summary_builder: DiagnosticsSummaryBuilder
 
     def certify_historical_source_run(
         self,
@@ -161,9 +163,11 @@ class HistoricalReplayCertificationService:
         return HistoricalReplayCertificationValidator(
             manifest_port=self.manifest_port,
             ledger_port=self.ledger_port,
+            summary_builder=self.summary_builder,
         )
 
     def _result_builder(self) -> HistoricalReplayCertificationResultAssembler:
         return HistoricalReplayCertificationResultAssembler(
             ledger_port=self.ledger_port,
+            summary_builder=self.summary_builder,
         )
