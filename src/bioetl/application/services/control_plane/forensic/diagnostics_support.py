@@ -7,6 +7,7 @@ from collections.abc import Mapping
 from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestDiffResult,
     RunManifestInspectionResult,
+    RunManifestInspectionService,
 )
 
 

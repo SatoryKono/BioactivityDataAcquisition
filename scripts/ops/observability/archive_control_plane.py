@@ -20,6 +20,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--data-root", required=True, type=Path)
     parser.add_argument("--archive-root", required=True, type=Path)
     parser.add_argument("--manifest", required=True, type=Path)
+    parser.add_argument("--report-root", type=Path)
     parser.add_argument("--verify-only", action="store_true")
     args = parser.parse_args(argv)
     manifest = RunManifest.from_dict(
@@ -32,7 +33,7 @@ def main(argv: list[str] | None = None) -> int:
         ControlPlaneArtifactLifecyclePolicy(retention_days=90, now=datetime.now(UTC)),
         manifest=manifest,
     )
-    store = FileArchiveStore(args.data_root, args.archive_root)
+    store = FileArchiveStore(args.data_root, args.archive_root, args.report_root)
     try:
         if not args.verify_only:
             store.create(manifest=manifest, plan=plan)

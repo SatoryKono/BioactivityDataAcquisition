@@ -388,9 +388,9 @@ def _load_versioned_payload(
     except (json.JSONDecodeError, UnicodeDecodeError, OSError):
         # Partial writes / corrupt artifacts must not 500 the ops surface.
         return None
-    if (
-        not isinstance(payload, dict)
-        or payload.get("schema_version") != expected_schema
-    ):
+    accepted = {expected_schema}
+    if expected_schema == "pipeline_run_report_v1":
+        accepted.add("pipeline_run_report_v2")
+    if not isinstance(payload, dict) or payload.get("schema_version") not in accepted:
         return None
     return payload

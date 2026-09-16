@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.models import (
-    RunManifestCreateSpec as RunManifestCreateSpec,
-)
+from collections.abc import Mapping, Sequence
+from typing import Protocol
+
 from bioetl.application.services.control_plane.manifest.validation_provenance import (
     _validate_canonical_config_identity,
     _validate_documented_code_provenance,
@@ -23,8 +23,22 @@ from bioetl.domain.control_plane.reproducibility_profiles import (
 __all__ = ["validate_run_manifest_request"]
 
 
+class _SourceRefSnapshots(Protocol):
+    input_snapshots: object
+
+
+class _RunManifestCreateRequest(Protocol):
+    launch_context: Mapping[str, object]
+    source_refs: Sequence[_SourceRefSnapshots]
+    planned_artifacts: object
+    replay_capability: ReplayCapability
+    provider: str
+    entity: str
+    contract_ref: str | None
+
+
 def validate_run_manifest_request(
-    request: RunManifestCreateSpec,
+    request: _RunManifestCreateRequest,
     code_provenance: RunCodeProvenance,
 ) -> None:
     """Validate control-plane replay, snapshot, and code-provenance policy."""
@@ -38,7 +52,7 @@ def validate_run_manifest_request(
     _validate_production_provenance_gate(request, code_provenance)
 
 
-def _validate_strict_input_snapshots(request: RunManifestCreateSpec) -> None:
+def _validate_strict_input_snapshots(request: _RunManifestCreateRequest) -> None:
     """Fail closed when strict replay contexts lack immutable input snapshots."""
     if not _is_strict_replay_context(request):
         return
@@ -53,7 +67,7 @@ def _validate_strict_input_snapshots(request: RunManifestCreateSpec) -> None:
     )
 
 
-def _is_strict_replay_context(request: RunManifestCreateSpec) -> bool:
+def _is_strict_replay_context(request: _RunManifestCreateRequest) -> bool:
     """Return whether manifest construction must satisfy strict replay invariants."""
     required_profile = str(
         request.launch_context.get("required_persistence_profile")
@@ -67,7 +81,7 @@ def _is_strict_replay_context(request: RunManifestCreateSpec) -> bool:
 
 
 def _validate_strict_replay_provenance(
-    request: RunManifestCreateSpec,
+    request: _RunManifestCreateRequest,
     code_provenance: RunCodeProvenance,
 ) -> None:
     """Require canonical provenance anchors before strict manifest persistence."""
@@ -97,7 +111,7 @@ def _validate_strict_replay_provenance(
         )
 
 
-def _validate_exact_replay_snapshot_claim(request: RunManifestCreateSpec) -> None:
+def _validate_exact_replay_snapshot_claim(request: _RunManifestCreateRequest) -> None:
     """Reject exact-replay capability claims without immutable input evidence."""
     if request.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED:
         return
@@ -110,7 +124,7 @@ def _validate_exact_replay_snapshot_claim(request: RunManifestCreateSpec) -> Non
         )
 
 
-def _validate_replay_capable_profile_floor(request: RunManifestCreateSpec) -> None:
+def _validate_replay_capable_profile_floor(request: _RunManifestCreateRequest) -> None:
     """Reject non-diagnostic opt-downs below replay-capable family floors."""
     configured_profile = normalize_required_persistence_profile(
         request.launch_context.get("required_persistence_profile")
@@ -141,7 +155,7 @@ def _validate_replay_capable_profile_floor(request: RunManifestCreateSpec) -> No
         )
 
 
-def _is_explicit_degraded_profile_opt_down(request: RunManifestCreateSpec) -> bool:
+def _is_explicit_degraded_profile_opt_down(request: _RunManifestCreateRequest) -> bool:
     """Return whether a local non-strict run explicitly opted down to degraded."""
     if bool(request.launch_context.get("exact_replay")):
         return False
@@ -156,7 +170,7 @@ def _is_explicit_degraded_profile_opt_down(request: RunManifestCreateSpec) -> bo
     return configured_profile == "degraded_observable"
 
 
-def _is_production_launch_context(request: RunManifestCreateSpec) -> bool:
+def _is_production_launch_context(request: _RunManifestCreateRequest) -> bool:
     """Return whether launch context signals a production-grade request."""
     launch = request.launch_context if isinstance(request.launch_context, dict) else {}
     env = str(launch.get("env") or launch.get("environment") or "").strip().lower()

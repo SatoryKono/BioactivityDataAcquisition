@@ -2,11 +2,40 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
+    CATEGORY_SCORER_EXPORTS as CATEGORY_SCORER_EXPORTS,
+)
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
+    PROFILE_SCORE_THRESHOLDS as PROFILE_SCORE_THRESHOLDS,
+)
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
     JsonDict,
-    ScoreCardRecord,
     string_items,
     supported_boundary_block_reason,
+)
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
+    ScoreCardRecord as ScoreCardRecord,
+)
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
+    score_checkpoint_safety as score_checkpoint_safety,
+)
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
+    score_determinism as score_determinism,
+)
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
+    score_idempotency as score_idempotency,
+)
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
+    score_layer_consistency as score_layer_consistency,
+)
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
+    score_lineage_completeness as score_lineage_completeness,
+)
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
+    score_replay_readiness as score_replay_readiness,
+)
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
+    score_run_identity as score_run_identity,
 )
 
 _BLOCKER_PRIORITY_ORDER: tuple[str, ...] = (

@@ -18,6 +18,9 @@ from pathlib import Path
 from scripts.ops.observability.grafana._latest_complete_run_panel import (
     stamp_latest_complete_run_panel,
 )
+from scripts.ops.observability.grafana._selected_run_panels import (
+    stamp_selected_run_panels,
+)
 from scripts.ops.observability.grafana.action_target_routes import (
     ACTION_DASHBOARD_UID_BY_TARGET,
 )
@@ -642,19 +645,29 @@ def _layout_control_plane_detail_panels(panels: list[object]) -> None:
 
 def _normalize_overview_domain_snapshots(panels: list[object]) -> None:
     """Keep CURRENT detail verdicts aligned with the evidence-qualified summary."""
-    domains = {9003: "runtime", 9004: "dq", 9005: "gold", 9006: "control_plane", 9013: "workflow"}
+    domains = {
+        9003: "runtime",
+        9004: "dq",
+        9005: "gold",
+        9006: "control_plane",
+        9013: "workflow",
+    }
     for panel in _walk_panels(panels):
         domain = domains.get(panel.get("id"))
         if domain is None:
             continue
-        panel["targets"] = [{
-            "expr": (
-                'max by (pipeline) (bioetl_l0_input_status_selected{'
-                f'input="{domain}",pipeline=~"$pipeline",run_type=~"$run_type"'
-                '}) or label_replace(vector(3), "pipeline", "$pipeline", "", "")'
-            ),
-            "refId": "A", "format": "table", "instant": True,
-        }]
+        panel["targets"] = [
+            {
+                "expr": (
+                    "max by (pipeline) (bioetl_l0_input_status_selected{"
+                    f'input="{domain}",pipeline=~"$pipeline",run_type=~"$run_type"'
+                    '}) or label_replace(vector(3), "pipeline", "$pipeline", "", "")'
+                ),
+                "refId": "A",
+                "format": "table",
+                "instant": True,
+            }
+        ]
         panel["description"] = (
             "CURRENT snapshot · Same evidence-qualified domain verdict as Review Domain Status "
             "for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, 2=CRIT, "
@@ -992,7 +1005,9 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
             expression = target.get("expr", "")
             if expression and not expression.startswith("clamp_max("):
                 target["expr"] = f"clamp_max({expression}, 2)"
-        count_note = " Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN."
+        count_note = (
+            " Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN."
+        )
         description = count_panel.get("description", "")
         if count_note not in description:
             count_panel["description"] = description + count_note
@@ -1034,17 +1049,21 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
                 continue
             for prop in override.get("properties", []):
                 if prop.get("id") == "mappings":
-                    prop["value"][0]["options"].update({
-                        "archive_not_applicable": {"text": "N/A: policy"},
-                        "archive_restore_verified": {"text": "Archive verified"},
-                        "archive_identity_mismatch": {"text": "Identity mismatch"},
-                        "archive_checksum_mismatch": {"text": "Checksum mismatch"},
-                        "archive_inventory_mismatch": {"text": "Files mismatch"},
-                        "archive_source_mismatch": {"text": "Source changed"},
-                        "archive_evidence_invalid": {"text": "Archive invalid"},
-                        "archive_index_invalid": {"text": "Index invalid"},
-                        "snapshot_lifecycle_evidence_present": {"text": "Snapshots present"},
-                    })
+                    prop["value"][0]["options"].update(
+                        {
+                            "archive_not_applicable": {"text": "N/A: policy"},
+                            "archive_restore_verified": {"text": "Archive verified"},
+                            "archive_identity_mismatch": {"text": "Identity mismatch"},
+                            "archive_checksum_mismatch": {"text": "Checksum mismatch"},
+                            "archive_inventory_mismatch": {"text": "Files mismatch"},
+                            "archive_source_mismatch": {"text": "Source changed"},
+                            "archive_evidence_invalid": {"text": "Archive invalid"},
+                            "archive_index_invalid": {"text": "Index invalid"},
+                            "snapshot_lifecycle_evidence_present": {
+                                "text": "Snapshots present"
+                            },
+                        }
+                    )
     if 9418 in by_id:
         for link in by_id[9418].get("links", []):
             if "viewPanel=9414" in str(link.get("url", "")):
@@ -1070,7 +1089,9 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
         )
         for transform in by_id[9418].get("transformations", []):
             if transform.get("id") == "organize":
-                transform.setdefault("options", {}).setdefault("renameByName", {}).update(
+                transform.setdefault("options", {}).setdefault(
+                    "renameByName", {}
+                ).update(
                     {"processing_status": "Result", "evidence_observed_at": "Observed"}
                 )
         options = by_id[9418].setdefault("options", {})
@@ -1083,7 +1104,9 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
         overrides = field_config.setdefault("overrides", [])
         for override in overrides:
             field = override.get("matcher", {}).get("options")
-            field = {"Processing": "Result", "Observed at": "Observed"}.get(field, field)
+            field = {"Processing": "Result", "Observed at": "Observed"}.get(
+                field, field
+            )
             override["matcher"]["options"] = field
             if field == "processing_status":
                 for prop in override.get("properties", []):
@@ -1244,6 +1267,10 @@ def apply_to_dashboard(
     payload = json.loads(
         safe_path.read_text(encoding="utf-8")  # NOSONAR - confined under DASH_DIR
     )
+    # Remove generated details before earlier layout passes measure bottom rows.
+    payload["panels"] = [
+        panel for panel in payload.get("panels", []) if panel.get("id") != 9450
+    ]
     from scripts.ops.observability.grafana.dashboard_context_links import (
         normalize_dashboard_actions,
     )
@@ -1314,6 +1341,7 @@ def apply_to_dashboard(
     # Drop stale transparent fields that confuse some exporters.
     nav.pop("transparent", None)
 
+    stamp_selected_run_panels(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:

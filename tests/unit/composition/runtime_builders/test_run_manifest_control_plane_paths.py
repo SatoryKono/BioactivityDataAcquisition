@@ -34,7 +34,7 @@ import pytest
 
 from bioetl.composition import control_plane_paths as paths_subject
 from bioetl.composition.runtime_builders import (
-    _run_manifest_data_roots as subject,
+    run_manifest_data_roots as subject,
 )
 
 pytestmark = pytest.mark.unit
@@ -102,3 +102,25 @@ def test_prepare_private_runtime_dir_creates_private_directory(tmp_path: Path) -
 
     assert subject._prepare_private_runtime_dir(target) == target
     assert target.is_dir()
+
+
+def test_private_fallback_data_root_with_mode_uses_private_cache(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    preferred = tmp_path / "home/.cache/bioetl-data"
+    preferred.mkdir(parents=True)
+    monkeypatch.setattr(subject.Path, "home", lambda: tmp_path / "home")
+    monkeypatch.setattr(subject, "_private_fallback_data_root", lambda: preferred)
+
+    path, mode = subject._private_fallback_data_root_with_mode()
+
+    assert path == preferred
+    assert mode == "private_cache"
+
+
+def test_assert_private_runtime_dir_rejects_non_directory(tmp_path: Path) -> None:
+    target = tmp_path / "not-a-dir"
+    target.write_text("x", encoding="utf-8")
+
+    with pytest.raises(OSError, match="not a directory"):
+        subject._assert_private_runtime_dir(target)

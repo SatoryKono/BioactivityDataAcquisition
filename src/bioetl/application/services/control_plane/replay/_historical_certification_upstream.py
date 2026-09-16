@@ -57,8 +57,9 @@ def validate_upstream_certification_state(
     *,
     ledger_port: RunLedgerPort,
     upstream_manifest: RunManifest,
+    summary_builder: DiagnosticsSummaryBuilder,
 ) -> None:
-    diagnostics = build_diagnostics_summary(
+    diagnostics = summary_builder(
         upstream_manifest,
         tuple(ledger_port.list_entries(upstream_manifest.manifest_id)),
     )

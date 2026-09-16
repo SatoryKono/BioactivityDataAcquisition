@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from asyncio import CancelledError
 from collections.abc import Generator
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, cast
@@ -175,11 +176,13 @@ class PipelineRunner(PipelineRunnerSupportMixin):
         debug_export_status = "success"
         try:
             await self._run_pipeline_lifecycle()
-        except PipelineShutdownError:
+        except (PipelineShutdownError, CancelledError) as exc:
             debug_export_status = "shutdown"
             # Terminal shutdown is recorded only here (not inside lifecycle).
             # Cooperative shutdown completes run() without re-raising.
             self._record_terminal_shutdown()
+            if isinstance(exc, CancelledError):
+                raise
         except _RUN_FAILURE_EXCEPTIONS as exc:
             debug_export_status = "failed"
             record_run_failed(self, exc)

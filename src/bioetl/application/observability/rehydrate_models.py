@@ -1,3 +1,5 @@
+"""Immutable pipeline and workflow snapshots used when restoring telemetry."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

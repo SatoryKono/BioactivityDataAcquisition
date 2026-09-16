@@ -8,6 +8,15 @@ Implements RULES.md Â§1.1 - Application Layer depends only on Domain.
 
 from __future__ import annotations
 
+import asyncio
+
+from bioetl.application.services.run_reports.control_plane_snapshot import (
+    capture_run_completion,
+)
+from bioetl.application.services.run_reports.observations import (
+    bind_run_observations,
+    reset_run_observations,
+)
 from bioetl.domain.ports import RunReportStorePort
 
 __all__ = [
@@ -32,6 +41,7 @@ from bioetl.application.services.execution._pipeline_runner_support import (
     build_dry_run_result,
     build_pipeline_run_result,
     complete_pipeline_dry_run,
+    constructor_failure_recorder,
     create_execution_runner_audited,
     finalize_pipeline_run_report,
 )
@@ -92,6 +102,7 @@ class PipelineRunnerService:
     report_store: RunReportStorePort
     run_id_factory: Callable[[], RunID | UUID | str] = _missing_run_id_factory
     report_root: Path | None = None
+    capture_control_plane: Callable[[str, str, datetime], None] | None = None
 
     async def run(
         self,
@@ -154,24 +165,18 @@ class PipelineRunnerService:
                 dry_run_result=dry_run_result,
                 record_event=_record_pipeline_audit_event,
             )
-            return finalize_pipeline_run_report(
-                result=completed_dry_run,
-                options=effective_options,
-                report_root=self.report_root,
-                store=self.report_store,
-            )
+            return self._finalize_report(completed_dry_run, effective_options)
 
-        async def _record_constructor_failure(exc: Exception) -> None:
-            await _record_pipeline_audit_event(
-                self.audit,
-                event_name="PipelineRunCompleted",
-                pipeline_name=pipeline_name,
-                run_id=effective_run_id,
-                run_type=effective_options.run_type,
-                status="failed",
-                timestamp=self.clock.now(),
-                error_type=type(exc).__name__,
-            )
+        record_constructor_failure = constructor_failure_recorder(
+            audit=self.audit,
+            clock=self.clock,
+            pipeline_name=pipeline_name,
+            run_id=effective_run_id,
+            options=effective_options,
+            started_at=started_at,
+            finalize=self._finalize_report,
+            record_event=_record_pipeline_audit_event,
+        )
 
         return await self._execute_prepared_run(
             context=context,
@@ -181,7 +186,7 @@ class PipelineRunnerService:
             options=effective_options,
             started_at=started_at,
             started_monotonic=started_monotonic,
-            record_constructor_failure=_record_constructor_failure,
+            record_constructor_failure=record_constructor_failure,
         )
 
     async def _execute_prepared_run(
@@ -196,13 +201,14 @@ class PipelineRunnerService:
         started_monotonic: float,
         record_constructor_failure: Callable[[Exception], Awaitable[None]],
     ) -> RunResult:
-        runner = await create_execution_runner_audited(
-            lambda: _require_execution_runner(self.runner_factory.create(context)),
-            record_failure=record_constructor_failure,
-        )
+        observation_token = bind_run_observations()
         accounting = StageAccountingAccumulator()
         accounting_token = bind_stage_accounting(accounting)
         try:
+            runner = await create_execution_runner_audited(
+                lambda: _require_execution_runner(self.runner_factory.create(context)),
+                record_failure=record_constructor_failure,
+            )
             return await self._execute_pipeline(
                 runner=runner,
                 run_logger=run_logger,
@@ -213,8 +219,34 @@ class PipelineRunnerService:
                 started_monotonic=started_monotonic,
                 options=options,
             )
+        except asyncio.CancelledError:
+            completed_at = self.clock.now()
+            await _record_pipeline_audit_event(
+                self.audit,
+                event_name="PipelineRunCompleted",
+                pipeline_name=pipeline_name,
+                run_id=run_id,
+                run_type=options.run_type,
+                status="shutdown",
+                timestamp=completed_at,
+                error_type="CancelledError",
+            )
+            self._finalize_report(
+                RunResult(
+                    status=PipelineRunResult.SHUTDOWN,
+                    pipeline_name=pipeline_name,
+                    run_id=str(run_id),
+                    run_type=options.run_type,
+                    started_at=started_at,
+                    completed_at=completed_at,
+                    error_type="CancelledError",
+                ),
+                options,
+            )
+            raise
         finally:
             reset_stage_accounting(accounting_token)
+            reset_run_observations(observation_token)
 
     def _ensure_pipeline_exists(self, pipeline_name: str) -> None:
         if self.runner_factory.contains(pipeline_name):
@@ -322,6 +354,13 @@ class PipelineRunnerService:
             write_report=False,
             store=self.report_store,
         )
+        return self._finalize_report(result, options)
+
+    def _finalize_report(
+        self, result: RunResult, options: RunOptions | None
+    ) -> RunResult:
+        """Capture control-plane evidence and persist the run report."""
+        capture_run_completion(self.capture_control_plane, result, options)
         return finalize_pipeline_run_report(
             result=result,
             options=options,

@@ -46,16 +46,8 @@
       "status": "pass"
     },
     {
-<<<<<<< HEAD
-      "current": "cb90f15de3a7526828f4ed6238c2d160a858afd2a57973b48031c2e6156f23c0",
-      "limit": "cb90f15de3a7526828f4ed6238c2d160a858afd2a57973b48031c2e6156f23c0",
-||||||| 5ef3a2c12bc
-      "current": "182d935a33add5d28adc8bdddced82288116a1546f72314883cc2a13e5bbc9f9",
-      "limit": "182d935a33add5d28adc8bdddced82288116a1546f72314883cc2a13e5bbc9f9",
-=======
-      "current": "856a48a819b44b55fa24fe572b9ea97dfd1d0f34227f7a426af3df443eeba98d",
-      "limit": "856a48a819b44b55fa24fe572b9ea97dfd1d0f34227f7a426af3df443eeba98d",
->>>>>>> codex/issue-10469-full-coverage-final
+      "current": "3383b0826c67ed9436d3b4ec54d6e17b07d0a838fef01fbc64912ebd2e0aa91c",
+      "limit": "3383b0826c67ed9436d3b4ec54d6e17b07d0a838fef01fbc64912ebd2e0aa91c",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -64,30 +56,14 @@
     },
     {
       "current": {
-<<<<<<< HEAD
-        "source_module_count": 2473,
-        "source_tree_sha256": "cb90f15de3a7526828f4ed6238c2d160a858afd2a57973b48031c2e6156f23c0",
-||||||| 5ef3a2c12bc
-        "source_module_count": 2475,
-        "source_tree_sha256": "182d935a33add5d28adc8bdddced82288116a1546f72314883cc2a13e5bbc9f9",
-=======
-        "source_module_count": 2475,
-        "source_tree_sha256": "856a48a819b44b55fa24fe572b9ea97dfd1d0f34227f7a426af3df443eeba98d",
->>>>>>> codex/issue-10469-full-coverage-final
+        "source_module_count": 2484,
+        "source_tree_sha256": "3383b0826c67ed9436d3b4ec54d6e17b07d0a838fef01fbc64912ebd2e0aa91c",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
-<<<<<<< HEAD
-        "source_module_count": 2473,
-        "source_tree_sha256": "cb90f15de3a7526828f4ed6238c2d160a858afd2a57973b48031c2e6156f23c0",
-||||||| 5ef3a2c12bc
-        "source_module_count": 2475,
-        "source_tree_sha256": "182d935a33add5d28adc8bdddced82288116a1546f72314883cc2a13e5bbc9f9",
-=======
-        "source_module_count": 2475,
-        "source_tree_sha256": "856a48a819b44b55fa24fe572b9ea97dfd1d0f34227f7a426af3df443eeba98d",
->>>>>>> codex/issue-10469-full-coverage-final
+        "source_module_count": 2484,
+        "source_tree_sha256": "3383b0826c67ed9436d3b4ec54d6e17b07d0a838fef01fbc64912ebd2e0aa91c",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -430,7 +406,7 @@
       "status": "pass"
     },
     {
-      "current": "495cf8ee66401b30e4f115ed47f854cc0d2b9bdd07cf1a62a8ada64b0a3454bc",
+      "current": "d1423ed06ca7324ca1fd475901718f5959c303bbd9c28653d992c51a80fe6681",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -487,7 +463,7 @@
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 9.25,
+    "architecture_quality_scorecard_integral_score": 9.36,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
     "fail_count": 0,
     "failing_gates": [],

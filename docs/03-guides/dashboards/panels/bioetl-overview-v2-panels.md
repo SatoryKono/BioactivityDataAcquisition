@@ -40,12 +40,12 @@ multiple runs; use RunLedger for exact reconciliation.
 - **Notes:** `run_id` is URL handoff context, never a Prometheus label. The
   Action cell preserves the domain target and the row's pipeline.
 
-### 5. Review Domain Status
+### 5. Review Selected Run Domains
 - **Type:** Table (`id=9002`)
-- **Purpose:** Show a first-screen deviation-first summary of the four worst
-  current domain statuses. The complete six-domain matrix stays in
-  `Review All Domain Status` under Domain Status Tracks.
-- **Data sources:** `topk(4, max by (input) (bioetl_l0_input_status_selected{…}))`
+- **Purpose:** Six fixed domains from the exact persisted run assessment, independent of age and range.
+- **Data source:** Selected-run API. Summary panel 9603 reuses this response through the Dashboard datasource.
+- **Layout:** Six rows; Domain and Status. Reasons, evidence and actions remain in Inspect Saved Run Evidence.
+- **States:** Missing selection is SELECT RUN; missing checks are INCOMPLETE. Missing response is UNKNOWN with the native query error indicator.
 
 ### 6. Review Runtime Status
 - **Type:** Table
@@ -226,7 +226,7 @@ Exact blocker reasons live in the Control Plane, Runtime, Data Quality, Provider
 ### 27. Review All Domain Status
 
 Shipped in `bioetl-overview-v2.json`.
-### 28. Review Selected Run Summary
+### 28. Review Selected Run Status
 
 Shipped in `bioetl-overview-v2.json`.
 
@@ -237,3 +237,11 @@ Complete evidence is available in the collapsed detail group. The table reuses t
 ### 101. Inspect Full First Action
 
 Complete evidence is available in the collapsed detail group. The table reuses the source panel response before transformations, keeps all rows, and shows the total through native pagination. It issues no duplicate backend query.
+
+## Saved evidence and discovery panels
+
+| ID | Title | Purpose |
+| --- | --- | --- |
+| 9450 | Inspect Saved Run Evidence | Saved exact-run evidence; expand for identity, version, reasons and actions. |
+| 9451 | Inspect Selected Run Domains | Saved exact-run evidence; expand for identity, version, reasons and actions. |
+| 9452 | Inspect Selected Run Identity | Saved exact-run evidence; expand for identity, version, reasons and actions. |

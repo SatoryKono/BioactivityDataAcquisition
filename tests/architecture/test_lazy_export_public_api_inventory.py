@@ -34,14 +34,7 @@ EXPECTED_LAZY_EXPORT_FACADES = {
         "public_package_facade"
     ),
     "src/bioetl/composition/bootstrap/__init__.py": "public_package_facade",
-<<<<<<< HEAD
     "src/bioetl/composition/bootstrap/assembly/__init__.py": "public_package_facade",
-||||||| 5ef3a2c12bc
-=======
-    "src/bioetl/composition/bootstrap/assembly/__init__.py": (
-        "public_package_facade"
-    ),
->>>>>>> codex/issue-10469-full-coverage-final
     "src/bioetl/composition/bootstrap/cli/__init__.py": "public_package_facade",
     "src/bioetl/composition/bootstrap/runtime/__init__.py": ("public_package_facade"),
     "src/bioetl/composition/bootstrap/runtime/composite.py": "compatibility_facade",

@@ -7,7 +7,7 @@ from typing import cast
 import hashlib
 import json
 
-from bioetl.composition.runtime_builders._run_manifest_data_roots import (
+from bioetl.composition.runtime_builders.run_manifest_data_roots import (
     resolve_data_root_mode,
 )
 from bioetl.composition.services.versioning import get_dependency_lock_hash

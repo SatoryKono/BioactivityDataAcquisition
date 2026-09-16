@@ -6,6 +6,9 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 
 from bioetl.application.services.control_plane.forensic.diagnostics_support import (
+    RunManifestDiffResult,
+    RunManifestInspectionResult,
+    RunManifestInspectionService,
     artifact_completeness,
     artifact_refs,
     checkpoint_compatibility_payload,
@@ -15,11 +18,6 @@ from bioetl.application.services.control_plane.forensic.diagnostics_support impo
     missing_evidence,
     replay_capability_payload,
     string_list,
-)
-from bioetl.application.services.control_plane.manifest.inspection_service import (
-    RunManifestDiffResult,
-    RunManifestInspectionResult,
-    RunManifestInspectionService,
 )
 from bioetl.domain.ports import (
     ArtifactByteComparisonPort,

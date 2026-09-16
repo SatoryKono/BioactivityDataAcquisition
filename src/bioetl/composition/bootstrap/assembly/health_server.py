@@ -163,7 +163,11 @@ def create_health_server_dependencies(
         workflow_manifest_port=control_plane_ports.workflow_manifest_port,
         control_plane_evidence_service=ControlPlaneEvidenceService(
             archive_verifier=(
-                FileArchiveStore(resolved_data_root, Path(settings.archive_root))
+                FileArchiveStore(
+                    resolved_data_root,
+                    Path(settings.archive_root),
+                    settings.report_root,
+                )
                 if settings.archive_root is not None
                 else None
             ),

@@ -121,7 +121,7 @@ def __getattr__(name: str) -> object:  # pragma: no cover
 
         return getattr(
             import_module(
-                "bioetl.composition.runtime_builders._run_manifest_data_roots"
+                "bioetl.composition.runtime_builders.run_manifest_data_roots"
             ),
             name,
         )

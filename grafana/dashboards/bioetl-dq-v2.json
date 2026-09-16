@@ -955,7 +955,7 @@
     {
       "id": 9406,
       "type": "table",
-      "title": "Review Selected Run Summary",
+      "title": "Review Selected Run Status",
       "gridPos": {
         "h": 5,
         "w": 24,
@@ -963,487 +963,57 @@
         "y": 12
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Persisted layer counts. Contract exclusion percentage uses Silver accepted as denominator; quarantine counts remain separate by layer. Missing counts or zero denominator remain UNKNOWN. Report opens this exact run. SELECTED RUN only. Empty means SELECT RUN or no persisted report; backend unavailable is QUERY ERROR, never a zero balance. Silver Q means Silver quarantine; Gold Q means Gold quarantine. Excl % = contract exclusions / Silver accepted records × 100. Started and Coverage describe persisted history, not current health.",
+      "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
       "fieldConfig": {
         "defaults": {
+          "noValue": "UNKNOWN",
+          "unit": "none",
           "custom": {
             "align": "left",
             "cellOptions": {
               "type": "auto",
               "wrapText": false
             },
-            "inspect": true,
-            "minWidth": 50
+            "inspect": true
           },
-          "unit": "none",
-          "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first.",
           "links": [
-            {
-              "title": "Set range to this run",
-              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}&timezone=${__timezone}",
-              "targetBlank": false,
-              "includeVars": false
-            },
             {
               "title": "Open Run Explorer",
               "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
               "targetBlank": false,
               "includeVars": false
             }
-          ],
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "text"
-          }
+          ]
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "bronze_records"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Input"
-              },
-              {
-                "id": "mappings",
-                "value": []
-              },
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "viz": false,
-                  "legend": false,
-                  "tooltip": false
-                }
-              },
-              {
-                "id": "custom.hidden",
-                "value": false
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "text"
-                }
-              },
-              {
-                "id": "noValue",
-                "value": "UNKNOWN"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "silver_valid"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Accepted"
-              },
-              {
-                "id": "mappings",
-                "value": []
-              },
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "viz": false,
-                  "legend": false,
-                  "tooltip": false
-                }
-              },
-              {
-                "id": "custom.hidden",
-                "value": false
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "text"
-                }
-              },
-              {
-                "id": "noValue",
-                "value": "UNKNOWN"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "silver_quarantined"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Silver Q"
-              },
-              {
-                "id": "mappings",
-                "value": []
-              },
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "viz": false,
-                  "legend": false,
-                  "tooltip": false
-                }
-              },
-              {
-                "id": "custom.hidden",
-                "value": false
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "text"
-                }
-              },
-              {
-                "id": "noValue",
-                "value": "UNKNOWN"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "gold_excluded_by_contract"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Excluded"
-              },
-              {
-                "id": "mappings",
-                "value": []
-              },
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "viz": false,
-                  "legend": false,
-                  "tooltip": false
-                }
-              },
-              {
-                "id": "custom.hidden",
-                "value": false
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "text"
-                }
-              },
-              {
-                "id": "noValue",
-                "value": "UNKNOWN"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "contract_excluded_percent"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Excl %"
-              },
-              {
-                "id": "mappings",
-                "value": []
-              },
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "viz": false,
-                  "legend": false,
-                  "tooltip": false
-                }
-              },
-              {
-                "id": "custom.hidden",
-                "value": false
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "text"
-                }
-              },
-              {
-                "id": "unit",
-                "value": "percent"
-              },
-              {
-                "id": "decimals",
-                "value": 1
-              },
-              {
-                "id": "noValue",
-                "value": "UNKNOWN"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "gold_quarantined"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Gold Q"
-              },
-              {
-                "id": "mappings",
-                "value": []
-              },
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "viz": false,
-                  "legend": false,
-                  "tooltip": false
-                }
-              },
-              {
-                "id": "custom.hidden",
-                "value": false
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "text"
-                }
-              },
-              {
-                "id": "noValue",
-                "value": "UNKNOWN"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "gold_written"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Gold"
-              },
-              {
-                "id": "mappings",
-                "value": []
-              },
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "viz": false,
-                  "legend": false,
-                  "tooltip": false
-                }
-              },
-              {
-                "id": "custom.hidden",
-                "value": false
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "text"
-                }
-              },
-              {
-                "id": "noValue",
-                "value": "UNKNOWN"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "report_label"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Report"
-              },
-              {
-                "id": "mappings",
-                "value": []
-              },
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "viz": false,
-                  "legend": false,
-                  "tooltip": false
-                }
-              },
-              {
-                "id": "custom.hidden",
-                "value": false
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "text"
-                }
-              },
-              {
-                "id": "links",
-                "value": [
-                  {
-                    "title": "Open report",
-                    "url": "${__data.fields.report_url:raw}",
-                    "targetBlank": true
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "report_url"
-            },
-            "properties": [
-              {
-                "id": "custom.hidden",
-                "value": true
-              },
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "viz": true,
-                  "legend": true,
-                  "tooltip": false
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "from_ms"
-            },
-            "properties": [
-              {
-                "id": "custom.hidden",
-                "value": true
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "to_ms"
-            },
-            "properties": [
-              {
-                "id": "custom.hidden",
-                "value": true
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Started"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "time:YYYY-MM-DD HH:mm"
-              },
-              {
-                "id": "custom.width",
-                "value": 155
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Coverage"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 150
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "options": {
         "showHeader": true,
+        "cellHeight": "sm",
         "footer": {
           "show": false
-        },
-        "cellHeight": "sm",
-        "dataLinks": [
-          {
-            "title": "Set range to this run",
-            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}&timezone=${__timezone}",
-            "targetBlank": false,
-            "includeVars": false
-          },
-          {
-            "title": "Open Run Explorer",
-            "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-            "targetBlank": false,
-            "includeVars": false
-          }
-        ]
+        }
       },
       "targets": [
         {
-          "format": "table",
-          "parser": "backend",
           "refId": "A",
-          "root_selector": "summary",
-          "source": "url",
           "type": "json",
-          "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}&view=summary&from=${__from}&to=${__to}",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "root_selector": "summary",
+          "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
           "url_options": {
-            "data": "",
-            "method": "GET"
-          },
-          "expr": ""
+            "method": "GET",
+            "data": ""
+          }
         }
       ],
       "transformations": [
         {
-          "id": "convertFieldType",
+          "id": "limit",
           "options": {
-            "conversions": [
-              {
-                "targetField": "started_at",
-                "destinationType": "time"
-              }
-            ]
+            "limitField": 1
           }
         },
         {
@@ -1451,17 +1021,10 @@
           "options": {
             "include": {
               "names": [
-                "coverage_chip",
-                "started_at",
-                "bronze_records",
-                "silver_valid",
-                "silver_quarantined",
-                "gold_excluded_by_contract",
-                "contract_excluded_percent",
-                "gold_quarantined",
-                "gold_written",
-                "report_label",
-                "report_url"
+                "execution_state",
+                "verdict",
+                "evidence_completeness",
+                "rules_version"
               ]
             }
           }
@@ -1470,47 +1033,24 @@
           "id": "organize",
           "options": {
             "indexByName": {
-              "started_at": 0,
-              "coverage_chip": 1,
-              "bronze_records": 2,
-              "silver_valid": 3,
-              "silver_quarantined": 4,
-              "gold_excluded_by_contract": 5,
-              "contract_excluded_percent": 6,
-              "gold_quarantined": 7,
-              "gold_written": 8,
-              "report_label": 9,
-              "report_url": 10
+              "execution_state": 0,
+              "verdict": 1,
+              "evidence_completeness": 2,
+              "rules_version": 3
             },
             "renameByName": {
-              "bronze_records": "Input",
-              "silver_valid": "Accepted",
-              "silver_quarantined": "Silver Q",
-              "gold_excluded_by_contract": "Excluded",
-              "contract_excluded_percent": "Excl %",
-              "gold_quarantined": "Gold Q",
-              "gold_written": "Gold",
-              "report_label": "Report",
-              "started_at": "Started",
-              "coverage_chip": "Coverage"
-            },
-            "excludeByName": {
-              "started_at": false,
-              "completed_at": true,
-              "report_url": false
+              "domain": "Domain",
+              "verdict": "Status",
+              "execution_state": "Result",
+              "evidence_completeness": "Evidence",
+              "rules_version": "Rules"
             }
-          }
-        },
-        {
-          "id": "limit",
-          "options": {
-            "limitField": 1
           }
         }
       ],
       "links": [
         {
-          "title": "Open Run Explorer",
+          "title": "Open run in Run Explorer",
           "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
@@ -4366,6 +3906,224 @@
           },
           "title": "Inspect Aggregate Control-Plane Issues",
           "type": "text"
+        }
+      ]
+    },
+    {
+      "id": 9450,
+      "type": "row",
+      "title": "Inspect Saved Run Evidence",
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 22,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "id": 9451,
+          "type": "table",
+          "title": "Inspect Selected Run Domains",
+          "gridPos": {
+            "x": 0,
+            "y": 23,
+            "w": 24,
+            "h": 10
+          },
+          "datasource": "BioETL Ops HTTP",
+          "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
+          "options": {
+            "showHeader": true,
+            "cellHeight": "lg",
+            "footer": {
+              "show": false,
+              "enablePagination": true
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "UNKNOWN",
+              "unit": "none",
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": true
+                },
+                "inspect": true,
+                "minWidth": 50
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "type": "json",
+              "source": "url",
+              "parser": "backend",
+              "format": "table",
+              "root_selector": "domains",
+              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+              "url_options": {
+                "method": "GET",
+                "data": ""
+              }
+            }
+          ],
+          "transformations": [
+            {
+              "id": "limit",
+              "options": {
+                "limitField": 6
+              }
+            },
+            {
+              "id": "filterFieldsByName",
+              "options": {
+                "include": {
+                  "names": [
+                    "domain",
+                    "verdict",
+                    "reason",
+                    "action",
+                    "evidence_ref"
+                  ]
+                }
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "indexByName": {
+                  "domain": 0,
+                  "verdict": 1,
+                  "reason": 2,
+                  "action": 3,
+                  "evidence_ref": 4
+                },
+                "renameByName": {
+                  "domain": "Domain",
+                  "verdict": "Status",
+                  "execution_state": "Result",
+                  "evidence_completeness": "Evidence",
+                  "rules_version": "Rules",
+                  "reason": "Reason",
+                  "action": "Action",
+                  "evidence_ref": "Evidence reference",
+                  "pipeline": "Pipeline",
+                  "run_id": "Run ID",
+                  "completed_at": "Completed",
+                  "revision": "Revision"
+                }
+              }
+            }
+          ],
+          "links": []
+        },
+        {
+          "id": 9452,
+          "type": "table",
+          "title": "Inspect Selected Run Identity",
+          "gridPos": {
+            "x": 0,
+            "y": 33,
+            "w": 24,
+            "h": 8
+          },
+          "datasource": "BioETL Ops HTTP",
+          "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
+          "options": {
+            "showHeader": true,
+            "cellHeight": "lg",
+            "footer": {
+              "show": false,
+              "enablePagination": true
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "UNKNOWN",
+              "unit": "none",
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": true
+                },
+                "inspect": true,
+                "minWidth": 50
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "type": "json",
+              "source": "url",
+              "parser": "backend",
+              "format": "table",
+              "root_selector": "summary",
+              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+              "url_options": {
+                "method": "GET",
+                "data": ""
+              }
+            }
+          ],
+          "transformations": [
+            {
+              "id": "limit",
+              "options": {
+                "limitField": 1
+              }
+            },
+            {
+              "id": "filterFieldsByName",
+              "options": {
+                "include": {
+                  "names": [
+                    "pipeline",
+                    "run_id",
+                    "completed_at",
+                    "rules_version",
+                    "revision",
+                    "evidence_completeness"
+                  ]
+                }
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "indexByName": {
+                  "pipeline": 0,
+                  "run_id": 1,
+                  "completed_at": 2,
+                  "rules_version": 3,
+                  "revision": 4,
+                  "evidence_completeness": 5
+                },
+                "renameByName": {
+                  "domain": "Domain",
+                  "verdict": "Status",
+                  "execution_state": "Result",
+                  "evidence_completeness": "Evidence",
+                  "rules_version": "Rules",
+                  "reason": "Reason",
+                  "action": "Action",
+                  "evidence_ref": "Evidence reference",
+                  "pipeline": "Pipeline",
+                  "run_id": "Run ID",
+                  "completed_at": "Completed",
+                  "revision": "Revision"
+                }
+              }
+            }
+          ],
+          "links": []
         }
       ]
     }

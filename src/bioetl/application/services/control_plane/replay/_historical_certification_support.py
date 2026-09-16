@@ -32,6 +32,7 @@ from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 from bioetl.domain.types import RunID
 
 __all__ = [
+    "DiagnosticsSummaryBuilder",
     "HistoricalReplayCertificationProtocol",
     "HistoricalReplayCertificationResult",
     "HistoricalReplayCertificationResultAssembler",
@@ -43,6 +44,7 @@ __all__ = [
 class HistoricalReplayCertificationValidator:
     manifest_port: RunManifestPort
     ledger_port: RunLedgerPort
+    summary_builder: DiagnosticsSummaryBuilder
 
     def load_manifest(
         self,
@@ -109,6 +111,7 @@ class HistoricalReplayCertificationValidator:
             validate_upstream_certification_state(
                 ledger_port=self.ledger_port,
                 upstream_manifest=upstream_manifest,
+                summary_builder=self.summary_builder,
             )
 
     def resolve_certification_query(

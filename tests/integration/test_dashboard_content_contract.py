@@ -177,3 +177,22 @@ def test_content_contract_fails_closed_when_table_columns_are_omitted(
         "panel-content-contract.yaml:bioetl-control-plane-v1:9403: table role "
         "requires required_columns" in errors
     )
+
+
+def test_reused_http_evidence_requires_valid_acyclic_source():
+    from scripts.engineering.qa.generate_dashboard_content_contract import (
+        _resolved_evidence_source,
+    )
+
+    source = {"id": 1, "targets": [{"url": "/ops/observability/selected-run-status"}]}
+    mirror = {
+        "id": 2,
+        "datasource": {"uid": "-- Dashboard --"},
+        "targets": [{"panelId": 1}],
+    }
+    assert _resolved_evidence_source(mirror, {1: source, 2: mirror}) == "ops_http"
+    with pytest.raises(ValueError, match="source missing"):
+        _resolved_evidence_source(mirror, {2: mirror})
+    mirror["targets"] = [{"panelId": 2}]
+    with pytest.raises(ValueError, match="cycle"):
+        _resolved_evidence_source(mirror, {2: mirror})

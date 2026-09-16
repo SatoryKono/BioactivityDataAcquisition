@@ -47,7 +47,7 @@ from bioetl.composition.runtime_builders import (
     _exact_replay_cached_bronze_context as replay_context,
 )
 from bioetl.composition.runtime_builders import (
-    _run_manifest_data_roots as data_roots,
+    run_manifest_data_roots as data_roots,
 )
 
 

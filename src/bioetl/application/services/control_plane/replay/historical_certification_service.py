@@ -6,13 +6,10 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from bioetl.application.services.control_plane.replay._historical_certification_support import (
+    DiagnosticsSummaryBuilder,
     HistoricalReplayCertificationResult,
     HistoricalReplayCertificationResultAssembler,
     HistoricalReplayCertificationValidator,
-)
-from bioetl.application.services.control_plane.replay._historical_snapshot_certification_modes import (
-    HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED,
-    HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
 )
 from bioetl.application.services.control_plane.replay.historical_corpus_models import (
     CORPUS_MODEL_PUBLIC_NAMES as CORPUS_MODEL_PUBLIC_NAMES,
@@ -35,6 +32,10 @@ from bioetl.application.services.control_plane.replay.historical_corpus_models i
 from bioetl.application.services.control_plane.replay.historical_corpus_models import (
     HistoricalReplaySnapshotCertification,
 )
+from bioetl.domain.control_plane.snapshot_materialization import (
+    HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED,
+    HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
+)
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 from bioetl.domain.types import RunID
 
@@ -52,6 +53,7 @@ class HistoricalReplayCertificationService:
     manifest_port: RunManifestPort
     ledger_port: RunLedgerPort
     entry_id_factory: Callable[[], str]
+    summary_builder: DiagnosticsSummaryBuilder
 
     def certify_historical_source_run(
         self,
@@ -160,9 +162,11 @@ class HistoricalReplayCertificationService:
         return HistoricalReplayCertificationValidator(
             manifest_port=self.manifest_port,
             ledger_port=self.ledger_port,
+            summary_builder=self.summary_builder,
         )
 
     def _result_builder(self) -> HistoricalReplayCertificationResultAssembler:
         return HistoricalReplayCertificationResultAssembler(
             ledger_port=self.ledger_port,
+            summary_builder=self.summary_builder,
         )

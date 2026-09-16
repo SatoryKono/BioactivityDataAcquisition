@@ -92,6 +92,41 @@ async def test_configured_report_root_is_used_for_every_outcome(
     assert json.loads(target.read_text())["identity"]["run_id"] == result.run_id
 
 
+@pytest.mark.asyncio
+async def test_dry_run_does_not_inherit_or_mutate_caller_observations(
+    service, tmp_path
+):
+    from bioetl.application.services.run_reports.observations import (
+        bind_run_observations,
+        record_run_observation,
+        reset_run_observations,
+        run_observations,
+    )
+    from bioetl.infrastructure.storage.run_report_store_adapter import (
+        FileRunReportStoreAdapter,
+    )
+
+    service.report_root = tmp_path
+    service.report_store = FileRunReportStoreAdapter()
+    service.capture_control_plane = MagicMock()
+    token = bind_run_observations()
+    try:
+        record_run_observation(
+            "Control Plane", verdict="ERROR", reason="caller", facts={}
+        )
+        before = run_observations()
+        result = await service.run("test_pipeline", options=RunOptions(dry_run=True))
+        assert result.run_report_error is None
+        assert (
+            json.loads(Path(result.run_report_json_path).read_text())["observations"]
+            == {}
+        )
+        assert run_observations() == before
+        service.capture_control_plane.assert_not_called()
+    finally:
+        reset_run_observations(token)
+
+
 @pytest.mark.unit
 def test_composed_run_id_factory_accepts_string_uuid() -> None:
     from bioetl.application.services.execution.pipeline_runner_service import (
@@ -904,3 +939,40 @@ class TestContextBuilding:
         context = call_args[0][0]
         assert context.vacuum.enabled is True
         assert context.vacuum.retention_days == 14
+
+
+@pytest.mark.asyncio
+async def test_cancelled_execution_persists_snapshot_and_releases_observations(
+    service, mock_runner, tmp_path
+):
+    from bioetl.infrastructure.storage.run_report_store_adapter import (
+        FileRunReportStoreAdapter,
+    )
+    from bioetl.domain.run_reports.selected_status import verify_snapshot
+    from bioetl.application.services.run_reports.observations import run_observations
+
+    service.report_root = tmp_path
+    service.report_store = FileRunReportStoreAdapter()
+
+    def check_terminal_audit_before_capture(*args, **kwargs):
+        event = service.audit.log_event.await_args
+        assert event.args[0] == "PipelineRunCompleted"
+        assert event.args[1]["status"] == "shutdown"
+        assert event.args[1]["error_type"] == "CancelledError"
+
+    service.capture_control_plane = MagicMock(
+        side_effect=check_terminal_audit_before_capture
+    )
+    mock_runner.run.side_effect = asyncio.CancelledError()
+    with pytest.raises(asyncio.CancelledError):
+        await service.run("test_pipeline")
+    paths = list(tmp_path.glob("pipeline/*/*/pipeline-run-report.json"))
+    assert len(paths) == 1
+    payload = json.loads(paths[0].read_text())
+    assert payload["identity"]["status"] == "shutdown"
+    assert verify_snapshot(payload["selected_run_snapshot"])
+    assert (
+        payload["selected_run_snapshot"]["assessment"]["execution_state"] == "SHUTDOWN"
+    )
+    assert run_observations() == {}
+    service.capture_control_plane.assert_called_once()
