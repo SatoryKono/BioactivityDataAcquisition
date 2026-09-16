@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from threading import Barrier
 from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
@@ -20,6 +21,7 @@ from bioetl.domain.control_plane import (
 )
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.control_plane.file_archive_store import FileArchiveStore
+from bioetl.infrastructure.control_plane import file_archive_store as archive_module
 
 pytestmark = pytest.mark.unit
 
@@ -153,4 +155,77 @@ def test_archive_rejects_junction_copies(archive_case, monkeypatch):
     assert store.verify(manifest=manifest, plan=plan) == (
         False,
         "archive_evidence_invalid",
+    )
+
+
+def test_archive_copies_contract_sidecar_without_treating_it_as_manifest(archive_case):
+    store, manifest, plan = archive_case
+    path = store.data_root / f"{manifest.manifest_id}.contract-evidence.json"
+    path.write_text(
+        json.dumps(
+            {
+                "schema_version": "contract_evidence_v1",
+                "manifest_id": manifest.manifest_id,
+            }
+        )
+    )
+    sidecar = replace(plan.artifacts[0], path=str(path))
+    with_sidecar = replace(plan, artifacts=(*plan.artifacts, sidecar))
+    pack = store.create(manifest=manifest, plan=with_sidecar)
+    assert store.verify(manifest=manifest, plan=with_sidecar) == (
+        True,
+        "archive_restore_verified",
+    )
+    assert (pack / "restored" / path.name).read_bytes() == path.read_bytes()
+    path.write_text("{}")
+    assert store.verify(manifest=manifest, plan=with_sidecar)[0] is False
+
+
+@pytest.mark.parametrize(
+    "damage", ["missing_manifest", "wrong_identity", "wrong_schema"]
+)
+def test_archive_sidecar_cannot_replace_manifest_or_change_identity(
+    archive_case, damage
+):
+    store, manifest, plan = archive_case
+    path = store.data_root / f"{manifest.manifest_id}.contract-evidence.json"
+    path.write_text(
+        json.dumps(
+            {
+                "schema_version": "wrong"
+                if damage == "wrong_schema"
+                else "contract_evidence_v1",
+                "manifest_id": "wrong"
+                if damage == "wrong_identity"
+                else manifest.manifest_id,
+            }
+        )
+    )
+    sidecar = replace(plan.artifacts[0], path=str(path))
+    artifacts = (
+        (sidecar, *plan.artifacts[1:])
+        if damage == "missing_manifest"
+        else (*plan.artifacts, sidecar)
+    )
+    with pytest.raises(
+        ValueError, match="archive_manifest_missing|archive_contract_evidence_mismatch"
+    ):
+        store.create(manifest=manifest, plan=replace(plan, artifacts=artifacts))
+
+
+def test_archive_parallel_reads_keep_checksum_validation(archive_case, monkeypatch):
+    store, manifest, plan = archive_case
+    barrier = Barrier(2)
+    original = archive_module._entry_error
+
+    def concurrent_verify(*args, **kwargs):
+        barrier.wait(timeout=5)
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(archive_module, "_entry_error", concurrent_verify)
+    pack = store.create(manifest=manifest, plan=plan)
+    (pack / "restored/ledger.jsonl").write_bytes(b"changed")
+    assert store.verify(manifest=manifest, plan=plan) == (
+        False,
+        "archive_checksum_mismatch",
     )

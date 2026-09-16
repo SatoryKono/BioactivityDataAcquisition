@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path, PureWindowsPath
 
@@ -93,16 +94,26 @@ def plan_manifest_artifact_refs(
 ]:
     """Resolve selected-run artifacts and typed index/URI issues."""
     issues: list[ControlPlaneArtifactResolutionIssue] = []
-    refs = [
-        build_artifact_ref(
+    candidates = _manifest_candidate_paths(base_path, manifest, issues)
+
+    def read_candidate(
+        candidate: tuple[ControlPlaneArtifactSurface, Path],
+    ) -> ControlPlaneArtifactRef | None:
+        surface, path = candidate
+        if not path.is_file():
+            return None
+        return build_artifact_ref(
             surface=surface,
             path=path,
             cutoff=cutoff,
             protected_refs=protected_refs,
         )
-        for surface, path in _manifest_candidate_paths(base_path, manifest, issues)
-        if path.is_file()
-    ]
+
+    # Bound concurrent filesystem reads for Desktop bind mounts. Every request
+    # re-reads its selected files; no results survive a mutation or new cutoff.
+    # map preserves input/error order and the context joins all workers.
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        refs = [ref for ref in executor.map(read_candidate, candidates) if ref]
     return (
         tuple(sorted(refs, key=lambda ref: (ref.surface.value, ref.path))),
         tuple(issues),
