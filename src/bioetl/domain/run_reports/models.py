@@ -247,6 +247,7 @@ class WorkflowExecutionRow:
     top_reasons: tuple[dict[str, Any], ...] = ()  # Any: optional child reasons
     skip_reason: str | None = None
     reconciliation: dict[str, object] | None = None
+    gold_excluded_by_contract: int | None = None
 
     def to_dict(self) -> dict[str, Any]:  # Any: report/json payload shape is dynamic
         payload: dict[str, Any] = {  # Any: report/json payload shape is dynamic
@@ -270,6 +271,7 @@ class WorkflowExecutionRow:
                 "error_message",
                 "skip_reason",
                 "reconciliation",
+                "gold_excluded_by_contract",
             ),
         )
         _copy_reason_items(payload, "top_reasons", self.top_reasons)

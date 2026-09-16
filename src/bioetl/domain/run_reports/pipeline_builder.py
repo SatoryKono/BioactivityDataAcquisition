@@ -273,9 +273,9 @@ def _resolve_top_reasons(
         ),
         (
             layers.gold_excluded_by_contract,
-            "gold_filter_exclusion",
+            "UNKNOWN_REASON",
             "excluded_by_contract",
-            "semantic",
+            "contract",
         ),
     )
     return tuple(

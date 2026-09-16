@@ -89,6 +89,8 @@ def build_reconciliation_result(
     quarantine_batch_id: str | None = None,
     quarantine_rows_written: int = 0,
     quarantine_error_code: str | None = None,
+    mutation_blocked_reason: str | None = None,
+    unproven_unmatched_rows: int = 0,
 ) -> ForeignKeyReconciliationResult:
     """Build the public reconciliation result payload."""
     return ForeignKeyReconciliationResult(
@@ -110,6 +112,9 @@ def build_reconciliation_result(
         quarantine_batch_id=quarantine_batch_id,
         quarantine_rows_written=quarantine_rows_written,
         quarantine_error_code=quarantine_error_code,
+        mutation_blocked_reason=mutation_blocked_reason,
+        unproven_unmatched_rows=unproven_unmatched_rows,
+        reference_completeness=request.reference_completeness,
     )
 
 

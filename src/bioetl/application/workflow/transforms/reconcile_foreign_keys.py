@@ -72,7 +72,12 @@ def _build_reconcile_payload(
         "quarantine_batch_id": r.quarantine_batch_id,
         "quarantine_rows_written": r.quarantine_rows_written,
         "quarantine_error_code": r.quarantine_error_code,
+        "reference_completeness": request.reference_completeness,
+        "unproven_unmatched_rows": getattr(r, "unproven_unmatched_rows", 0),
     }
+    blocked_reason = getattr(r, "mutation_blocked_reason", None)
+    if blocked_reason:
+        payload["mutation_blocked_reason"] = blocked_reason
     if r.dry_run and r.would_mutate:
         payload["mutation_blocked_reason"] = "workflow_dry_run"
     if getattr(r, "source_snapshot", None) is not None:
@@ -132,7 +137,9 @@ def build_reconcile_foreign_keys_executor(
                 workflow_run_id=_optional_runtime_str(
                     runtime_context, "workflow_run_id"
                 ),
+                depends_on=tuple(spec.depends_on),
             ),
+            upstream_outputs=upstream_outputs,
         )
         result = await reconciliation_port.reconcile_foreign_keys(request)
         payload = _build_reconcile_payload(
@@ -166,6 +173,7 @@ def _build_request(
     debug_export_enabled: bool = False,
     debug_export_dir: str | None = None,
     source_run_ids: tuple[str, ...] = (),
+    upstream_outputs: Mapping[str, object] | None = None,
 ) -> ForeignKeyReconciliationRequest:
     config = spec.config or {}
     source_table = _required_str(config, "source_table")
@@ -178,6 +186,13 @@ def _build_request(
     source_layer = _optional_layer(config, "source_layer", default="silver")
     reference_layer = _optional_layer(config, "reference_layer", default="silver")
     assert source_layer is not None and reference_layer is not None
+    completeness, identity, snapshot_version, evidence_ref = (
+        _resolve_reference_completeness(
+            config,
+            upstream_outputs or {},
+            reference_table=reference_table,
+        )
+    )
     return ForeignKeyReconciliationRequest(
         source_table=source_table,
         reference_table=reference_table,
@@ -201,6 +216,10 @@ def _build_request(
         debug_export_dir=debug_export_dir,
         source_scope=_source_scope(config),
         source_run_ids=source_run_ids,
+        reference_completeness=completeness,
+        reference_identity=identity,
+        reference_snapshot_version=snapshot_version,
+        completeness_evidence_ref=evidence_ref,
     )
 
 
@@ -286,12 +305,72 @@ def _run_ids_from_upstream(
     upstream_outputs: Mapping[str, object],
     *,
     workflow_run_id: str | None,
+    depends_on: tuple[str, ...] = (),
 ) -> tuple[str, ...]:
+    selected = upstream_outputs
+    if depends_on:
+        allowed = set(depends_on)
+        selected = {
+            step_id: payload
+            for step_id, payload in upstream_outputs.items()
+            if step_id in allowed
+        }
     candidates: list[object] = [workflow_run_id]
-    for payload in upstream_outputs.values():
+    for payload in selected.values():
         candidates.extend(_payload_run_ids(payload))
     normalized = [str(value).strip() for value in candidates if value]
     return tuple(dict.fromkeys(value for value in normalized if value))
+
+
+def _resolve_reference_completeness(
+    config: Mapping[str, object],
+    upstream_outputs: Mapping[str, object],
+    *,
+    reference_table: str,
+) -> tuple[str, str | None, str | None, str | None]:
+    """Return completeness only from typed evidence bound to the reference table."""
+    evidence = config.get("reference_completeness_evidence")
+    if not isinstance(evidence, Mapping):
+        evidence = _upstream_completeness_evidence(upstream_outputs, reference_table)
+    if not isinstance(evidence, Mapping):
+        return "unproven", None, None, None
+    status = str(evidence.get("status") or "unproven").strip().lower()
+    identity_raw = evidence.get("reference_identity")
+    identity = (
+        str(identity_raw).strip()
+        if identity_raw not in (None, "")
+        else reference_table
+    ) or None
+    version_raw = evidence.get("snapshot_version")
+    snapshot_version = (
+        str(version_raw).strip() if version_raw not in (None, "") else None
+    )
+    ref_raw = evidence.get("evidence_ref")
+    evidence_ref = str(ref_raw).strip() if ref_raw not in (None, "") else None
+    if (
+        status != "complete"
+        or identity != reference_table
+        or not evidence_ref
+    ):
+        return "unproven", identity, snapshot_version, evidence_ref
+    return "complete", identity, snapshot_version, evidence_ref
+
+
+def _upstream_completeness_evidence(
+    upstream_outputs: Mapping[str, object],
+    reference_table: str,
+) -> Mapping[str, object] | None:
+    for payload in upstream_outputs.values():
+        mapping = getattr(payload, "output", payload)
+        if not isinstance(mapping, Mapping):
+            continue
+        evidence = mapping.get("reference_completeness_evidence")
+        if not isinstance(evidence, Mapping):
+            continue
+        identity = str(evidence.get("reference_identity") or "").strip()
+        if identity in {"", reference_table}:
+            return evidence
+    return None
 
 
 def _require_delete_orphans_action(config: Mapping[str, object]) -> None:

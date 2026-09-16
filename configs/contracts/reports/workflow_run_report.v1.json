@@ -82,6 +82,7 @@
           "error_message": { "type": ["string", "null"] },
           "skip_reason": { "type": ["string", "null"] },
           "reconciliation": { "type": "object" },
+          "gold_excluded_by_contract": { "type": ["integer", "null"], "minimum": 0 },
           "top_reasons": {
             "type": "array",
             "items": {
@@ -113,6 +114,17 @@
         "records_gold_loaded_sum": { "type": ["integer", "null"], "minimum": 0 },
         "records_gold_expired_sum": { "type": "integer", "minimum": 0 },
         "gold_current_after_reconciliation_by_table": {
+          "type": "object",
+          "additionalProperties": { "type": ["integer", "null"], "minimum": 0 }
+        },
+        "written_by_pipeline": { "type": ["integer", "null"], "minimum": 0 },
+        "contract_excluded": { "type": ["integer", "null"], "minimum": 0 },
+        "reconciliation_deactivated": { "type": "integer", "minimum": 0 },
+        "final_current_by_table": {
+          "type": "object",
+          "additionalProperties": { "type": ["integer", "null"], "minimum": 0 }
+        },
+        "historical_by_table": {
           "type": "object",
           "additionalProperties": { "type": ["integer", "null"], "minimum": 0 }
         }

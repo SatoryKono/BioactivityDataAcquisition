@@ -93,14 +93,33 @@ def _reconciliation_totals(rows: Sequence[WorkflowExecutionRow]) -> dict[str, ob
     if not any(row.reconciliation is not None for row in rows):
         return {}
     final_by_table: dict[str, int | None] = {}
+    historical_by_table: dict[str, int | None] = {}
     expired = 0
     for row in _gold_outcomes(rows):
         details = cast(dict[str, object], row.reconciliation)
         table = str(details.get("source_table") or "unknown")
         final_by_table[table] = _measured_current(row, details)
         expired += _expired_count(details)
+        snapshot = details.get("source_snapshot")
+        if isinstance(snapshot, dict):
+            physical = snapshot.get("physical_rows")
+            current = snapshot.get("current_rows")
+            if isinstance(physical, int) and isinstance(current, int):
+                historical_by_table[table] = physical - current
+    loaded = _optional_sum(rows, "records_gold")
+    excluded_values = [
+        row.gold_excluded_by_contract
+        for row in rows
+        if row.gold_excluded_by_contract is not None
+    ]
+    excluded = sum(excluded_values) if excluded_values else None
     return {
-        "records_gold_loaded_sum": _optional_sum(rows, "records_gold"),
+        "records_gold_loaded_sum": loaded,
         "records_gold_expired_sum": expired,
         "gold_current_after_reconciliation_by_table": final_by_table,
+        "written_by_pipeline": loaded,
+        "contract_excluded": excluded,
+        "reconciliation_deactivated": expired,
+        "final_current_by_table": final_by_table,
+        "historical_by_table": historical_by_table,
     }

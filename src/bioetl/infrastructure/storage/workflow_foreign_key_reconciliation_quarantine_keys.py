@@ -9,11 +9,19 @@ __all__ = [
     "VALID_TO_COLUMNS",
     "build_orphan_key_rows",
     "require_sql_identifier",
+    "resolve_mutation_identity_keys",
     "resolve_present_column",
 ]
 
 CURRENT_FLAG_COLUMNS = ("_is_current", "is_current")
 VALID_TO_COLUMNS = ("_valid_to", "valid_to")
+_OPTIONAL_MUTATION_IDENTITY_COLUMNS = (
+    "_run_id",
+    "run_id",
+    "composite_run_id",
+    "_composite_run_id",
+    "workflow_run_id",
+)
 _SQL_IDENTIFIER_RE = re.compile(
     r"^[A-Za-z_]\w*$"
 )  # NOSONAR - requires non-digit first char, \w+ alone is insufficient
@@ -50,13 +58,48 @@ def resolve_present_column(
     )
 
 
+def resolve_mutation_identity_keys(
+    orphan_rows: list[dict[str, object]],
+    primary_keys: tuple[str, ...],
+    *,
+    source_scope: str,
+) -> tuple[str, ...]:
+    """Extend primary keys with uniform run-identity columns.
+
+    Mixed or blank identity on ``current_run`` blocks instead of widening the
+    mutation predicate to primary keys alone.
+    """
+    extra: list[str] = []
+    for column in _OPTIONAL_MUTATION_IDENTITY_COLUMNS:
+        present = sum(1 for row in orphan_rows if column in row)
+        if present == 0:
+            continue
+        if present != len(orphan_rows):
+            if source_scope == "current_run":
+                raise ValueError(
+                    "workflow foreign-key reconciliation mixed row identity; "
+                    "mutation blocked"
+                )
+            continue
+        values = [row.get(column) for row in orphan_rows]
+        if any(value is None or not str(value).strip() for value in values):
+            if source_scope == "current_run":
+                raise ValueError(
+                    "workflow foreign-key reconciliation blank row identity; "
+                    "mutation blocked"
+                )
+            continue
+        extra.append(column)
+    return primary_keys + tuple(extra)
+
+
 def build_orphan_key_rows(
     orphan_rows: list[dict[str, object]],
     primary_keys: tuple[str, ...],
     *,
     operation: str,
 ) -> list[dict[str, object]]:
-    """Project unique non-null primary-key rows for orphan mutations."""
+    """Project unique non-null identity-key rows for orphan mutations."""
     key_rows: list[dict[str, object]] = []
     seen: set[tuple[object, ...]] = set()
     for row in orphan_rows:

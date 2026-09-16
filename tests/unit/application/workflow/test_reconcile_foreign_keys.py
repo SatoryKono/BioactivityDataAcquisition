@@ -133,6 +133,10 @@ def test_build_request_supports_composite_keys_and_null_policy() -> None:
                 "reference_keys": ["target_id", "target_type"],
                 "primary_keys": ["assay_id"],
                 "action": "delete_orphans",
+                "reference_completeness_evidence": {
+                    "status": "complete",
+                    "evidence_ref": "tests/unit/application/workflow/fk-reference-complete",
+                },
                 "nulls_equal": True,
             },
         )
@@ -166,6 +170,10 @@ def test_build_request_parses_gold_layers() -> None:
                 "reference_key": "target_id",
                 "primary_keys": ["assay_id"],
                 "action": "delete_orphans",
+                "reference_completeness_evidence": {
+                    "status": "complete",
+                    "evidence_ref": "tests/unit/application/workflow/fk-reference-complete",
+                },
             },
         )
     )
@@ -209,6 +217,10 @@ def test_build_request_requires_non_empty_primary_keys() -> None:
                 "reference_key": "target_id",
                 "primary_keys": [],
                 "action": "delete_orphans",
+                "reference_completeness_evidence": {
+                    "status": "complete",
+                    "evidence_ref": "tests/unit/application/workflow/fk-reference-complete",
+                },
             },
         )
     )
@@ -229,6 +241,10 @@ def test_build_request_requires_matching_composite_key_lengths() -> None:
                 "reference_keys": ["target_id"],
                 "primary_keys": ["assay_id"],
                 "action": "delete_orphans",
+                "reference_completeness_evidence": {
+                    "status": "complete",
+                    "evidence_ref": "tests/unit/application/workflow/fk-reference-complete",
+                },
             },
         )
     )
@@ -250,6 +266,10 @@ def test_build_request_requires_source_and_reference_key_lists_together() -> Non
                 "source_scope": "all_current",
                 "primary_keys": ["assay_id"],
                 "action": "delete_orphans",
+                "reference_completeness_evidence": {
+                    "status": "complete",
+                    "evidence_ref": "tests/unit/application/workflow/fk-reference-complete",
+                },
             },
         )
     )
@@ -273,6 +293,10 @@ async def test_executor_returns_serializable_metadata_only() -> None:
                 "reference_key": "target_id",
                 "primary_keys": ["assay_id"],
                 "action": "delete_orphans",
+                "reference_completeness_evidence": {
+                    "status": "complete",
+                    "evidence_ref": "tests/unit/application/workflow/fk-reference-complete",
+                },
             },
         )
     )
@@ -310,6 +334,8 @@ async def test_executor_returns_serializable_metadata_only() -> None:
         "quarantine_batch_id": None,
         "quarantine_rows_written": 0,
         "quarantine_error_code": None,
+        "reference_completeness": "complete",
+        "unproven_unmatched_rows": 0,
     }
 
 
@@ -328,6 +354,10 @@ async def test_executor_passes_workflow_dry_run_to_reconciliation_request() -> N
                 "reference_key": "target_id",
                 "primary_keys": ["assay_id"],
                 "action": "delete_orphans",
+                "reference_completeness_evidence": {
+                    "status": "complete",
+                    "evidence_ref": "tests/unit/application/workflow/fk-reference-complete",
+                },
             },
         )
     )
@@ -359,6 +389,10 @@ async def test_executor_passes_workflow_name_to_request() -> None:
                 "reference_key": "target_id",
                 "primary_keys": ["assay_id"],
                 "action": "delete_orphans",
+                "reference_completeness_evidence": {
+                    "status": "complete",
+                    "evidence_ref": "tests/unit/application/workflow/fk-reference-complete",
+                },
             },
         )
     )
@@ -396,6 +430,10 @@ async def test_executor_marks_mutation_blocked_reason_for_dry_run_mutation() -> 
                 "reference_key": "target_id",
                 "primary_keys": ["assay_id"],
                 "action": "delete_orphans",
+                "reference_completeness_evidence": {
+                    "status": "complete",
+                    "evidence_ref": "tests/unit/application/workflow/fk-reference-complete",
+                },
             },
         )
     )
@@ -422,6 +460,10 @@ async def test_executor_records_destructive_commit_when_mutation_persists() -> N
                 "reference_key": "target_id",
                 "primary_keys": ["assay_id"],
                 "action": "delete_orphans",
+                "reference_completeness_evidence": {
+                    "status": "complete",
+                    "evidence_ref": "tests/unit/application/workflow/fk-reference-complete",
+                },
             },
         )
     )

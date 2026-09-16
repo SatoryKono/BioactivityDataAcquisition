@@ -703,17 +703,28 @@ Independently truncated reference extracts cannot prove that an unmatched key
 is an orphan. A requested `current_run` scope without resolvable row provenance
 fails before quarantine or storage mutation; it never falls back to all rows.
 Silver and Gold do not acquire occurrence columns to bypass this guard.
+Destructive `delete_orphans` also requires typed `reference_completeness`
+evidence bound to the reference table identity and an evidence ref. The default
+is `unproven`; absence of limit is not completeness. Unproven unmatched keys
+are not classified as orphans and produce `mutation_mode=blocked`. Mutation
+predicates use primary keys plus uniform run-identity columns when present;
+mixed identity on `current_run` fails closed instead of widening the predicate.
 
 Workflow reports preserve ingestion counts separately from reconciliation.
-`records_gold_loaded_sum` describes pipeline output, `records_gold_expired_sum`
-counts SCD2 expiry, and `gold_current_after_reconciliation_by_table` keeps the
-last successful all-current Delta snapshot for each source table. Dry-run,
+`records_gold_loaded_sum` / `written_by_pipeline` describe pipeline output,
+`contract_excluded` sums child `layers.gold_excluded_by_contract` when present,
+`records_gold_expired_sum` / `reconciliation_deactivated` count SCD2 expiry,
+and `gold_current_after_reconciliation_by_table` / `final_current_by_table`
+keep the last successful all-current Delta snapshot. `historical_by_table` is
+`physical_rows - current_rows` on that snapshot. Dry-run,
 missing snapshots and unproven scope yield an unknown count. The transform
 source_snapshot binds Delta version, physical rows and current rows. Each
 transform retains its source scope, row counts, mutation mode and quarantine
 reference. Timing fields describe the current workflow execution attempt.
 
-Gold eligibility rejections use `gold_filter_exclusion`. The pipeline report
+Gold eligibility rejections use the filter `reason_code` when hooks recorded
+it. Coarse fallback counts without diagnostics stay `UNKNOWN_REASON` instead of
+being labelled `gold_filter_exclusion`. The pipeline report
 `contract_summary.rejection_details` groups bounded counts by reason, rule,
 field and operator; it omits record values and exception text. Legacy reports
 retain their original reason codes. Rules are unchanged by this diagnostic fix.
