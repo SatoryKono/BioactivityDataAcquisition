@@ -159,7 +159,7 @@
       "module_path": "src/bioetl/application/composite/fsm_helper.py",
       "module_name": "bioetl.application.composite.fsm_helper",
       "src_importer_count": 10,
-      "test_importer_count": 5,
+      "test_importer_count": 6,
       "min_src_importers": 5,
       "verification_status": "satisfied",
       "evidence_lane": "retained_module_owner_suite",

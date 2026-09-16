@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `2472`
-- Internal import edges (raw): `7745`
+- Scanned modules: `2475`
+- Internal import edges (raw): `7751`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `326`
@@ -21,38 +21,38 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1558 OK| application
-    application -->|989 OK| domain
+    application -->|1565 OK| application
+    application -->|991 OK| domain
     composition -->|194 OK| application
-    composition -->|680 OK| composition
+    composition -->|670 OK| composition
     composition -->|285 OK| domain
     composition -->|250 OK| infrastructure
     domain -->|1242 OK| domain
-    infrastructure -->|764 OK| domain
-    infrastructure -->|1202 OK| infrastructure
-    interfaces -->|53 OK| application
+    infrastructure -->|765 OK| domain
+    infrastructure -->|1203 OK| infrastructure
+    interfaces -->|54 OK| application
     interfaces -->|56 OK| composition
-    interfaces -->|70 OK| domain
-    interfaces -->|402 OK| interfaces
+    interfaces -->|71 OK| domain
+    interfaces -->|405 OK| interfaces
 ```
 
 ## Layer Edge Table
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1558 | allowed |
-| `application`    | `domain`         |     989 | allowed |
+| `application`    | `application`    |    1565 | allowed |
+| `application`    | `domain`         |     991 | allowed |
 | `composition`    | `application`    |     194 | allowed |
-| `composition`    | `composition`    |     680 | allowed |
+| `composition`    | `composition`    |     670 | allowed |
 | `composition`    | `domain`         |     285 | allowed |
 | `composition`    | `infrastructure` |     250 | allowed |
 | `domain`         | `domain`         |    1242 | allowed |
-| `infrastructure` | `domain`         |     764 | allowed |
-| `infrastructure` | `infrastructure` |    1202 | allowed |
-| `interfaces`     | `application`    |      53 | allowed |
+| `infrastructure` | `domain`         |     765 | allowed |
+| `infrastructure` | `infrastructure` |    1203 | allowed |
+| `interfaces`     | `application`    |      54 | allowed |
 | `interfaces`     | `composition`    |      56 | allowed |
-| `interfaces`     | `domain`         |      70 | allowed |
-| `interfaces`     | `interfaces`     |     402 | allowed |
+| `interfaces`     | `domain`         |      71 | allowed |
+| `interfaces`     | `interfaces`     |     405 | allowed |
 
 ## Cross-Layer Module-Group Edges (Compact)
 
@@ -62,7 +62,7 @@ flowchart LR
 | `infrastructure.adapters`      | `domain.types`                             |     118 |
 | `application.composite`        | `domain.composite`                         |     104 |
 | `application.core`             | `domain.types`                             |      88 |
-| `application.services`         | `domain.types`                             |      81 |
+| `application.services`         | `domain.types`                             |      82 |
 | `infrastructure.storage`       | `domain.types`                             |      72 |
 | `infrastructure.storage`       | `domain.ports`                             |      61 |
 | `application.pipelines`        | `domain.types`                             |      57 |
@@ -80,18 +80,18 @@ flowchart LR
 | `composition.bootstrap`        | `domain.ports`                             |      28 |
 | `composition.runtime_builders` | `domain.control_plane`                     |      28 |
 | `composition.factories`        | `infrastructure.adapters`                  |      27 |
+| `infrastructure.control_plane` | `domain.control_plane`                     |      27 |
 | `composition.factories`        | `infrastructure.config`                    |      26 |
-| `infrastructure.control_plane` | `domain.control_plane`                     |      26 |
 | `infrastructure.config`        | `domain.types`                             |      25 |
 | `application.services`         | `domain.value_objects`                     |      24 |
 | `infrastructure.adapters`      | `domain.ports`                             |      23 |
 | `application.pipelines`        | `domain.entities`                          |      22 |
 | `composition.factories`        | `domain.schemas`                           |      22 |
 | `interfaces.cli`               | `composition.control_plane_service_access` |      21 |
+| `interfaces.http`              | `domain.control_plane`                     |      21 |
 | `application.core`             | `domain.normalization`                     |      20 |
 | `composition.bootstrap`        | `application.composite`                    |      20 |
 | `infrastructure.adapters`      | `domain.exceptions`                        |      20 |
-| `interfaces.http`              | `domain.control_plane`                     |      20 |
 | `application.services`         | `domain.exceptions`                        |      19 |
 | `composition.runtime_builders` | `infrastructure.config`                    |      19 |
 | `composition.factories`        | `application.services`                     |      18 |
@@ -103,12 +103,12 @@ flowchart LR
 | `infrastructure.schemas`       | `domain.config`                            |      17 |
 | `composition.bootstrap`        | `infrastructure.control_plane`             |      16 |
 | `composition.factories`        | `application.ports`                        |      16 |
-| `composition.bootstrap`        | `infrastructure.observability`             |      15 |
 | `composition.factories`        | `infrastructure.storage`                   |      15 |
 | `infrastructure.control_plane` | `domain.types`                             |      15 |
 | `infrastructure.quality`       | `domain.types`                             |      15 |
 | `infrastructure.storage`       | `domain.exceptions`                        |      15 |
 | `application.services`         | `domain.normalization`                     |      14 |
+| `composition.bootstrap`        | `infrastructure.observability`             |      14 |
 | `infrastructure.observability` | `domain.ports`                             |      14 |
 | `application.core`             | `domain.exceptions`                        |      13 |
 | `application.services`         | `domain.behavior`                          |      13 |
