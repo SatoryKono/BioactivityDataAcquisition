@@ -156,6 +156,9 @@ def test_historical_replay_closure_claims_are_replay_owned() -> None:
     assert not (
         CONTROL_PLANE_ROOT / "manifest" / "diagnostics" / "checkpoint_projection.py"
     ).exists()
+    assert not (
+        CONTROL_PLANE_ROOT / "manifest" / "diagnostics" / "snapshot_support.py"
+    ).exists()
 
 
 @pytest.mark.architecture
