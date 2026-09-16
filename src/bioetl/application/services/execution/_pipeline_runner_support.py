@@ -36,6 +36,7 @@ from bioetl.domain.run_reports.pipeline_builder import (
     PipelineRunReportOptionalBlocks,
     build_pipeline_run_report,
 )
+from bioetl.domain.run_reports.reason_catalog import UNKNOWN_REASON
 from bioetl.domain.types import RunID
 
 if TYPE_CHECKING:
@@ -86,7 +87,7 @@ def _seed_gold_removals_from_metrics(
         accounting.record_removal(
             StageId.GOLD.value,
             outcome="excluded_by_contract",
-            reason_code="gold_filter_exclusion",
+            reason_code=UNKNOWN_REASON,
             count=excluded,
         )
 

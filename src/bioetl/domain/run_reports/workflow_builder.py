@@ -102,6 +102,7 @@ def _mapping_execution(raw: Mapping[str, object]) -> _NormalizedExecution:
         top_reasons=raw.get("top_reasons") or (),
         skip_reason=raw.get("skip_reason"),
         reconciliation=_reconciliation_details(raw.get("payload")),
+        gold_excluded_by_contract=raw.get("gold_excluded_by_contract"),
     )
 
 
@@ -129,6 +130,7 @@ def _object_execution(raw: object) -> _NormalizedExecution:
         top_reasons=getattr(raw, "top_reasons", ()) or (),
         skip_reason=getattr(raw, "skip_reason", None),
         reconciliation=_reconciliation_details(getattr(raw, "payload", None)),
+        gold_excluded_by_contract=getattr(raw, "gold_excluded_by_contract", None),
     )
 
 
@@ -190,6 +192,7 @@ def _normalized_row(
     top_reasons: object = (),
     skip_reason: object = None,
     reconciliation: dict[str, object] | None = None,
+    gold_excluded_by_contract: object = None,
 ) -> _NormalizedExecution:
     name = _optional_text(pipeline_name)
     run_id = _optional_text(pipeline_run_id)
@@ -216,6 +219,11 @@ def _normalized_row(
         top_reasons=reasons,
         skip_reason=_optional_text(skip_reason),
         reconciliation=reconciliation,
+        gold_excluded_by_contract=(
+            None
+            if gold_excluded_by_contract is None
+            else _as_int(gold_excluded_by_contract)
+        ),
     )
     return _NormalizedExecution(row=row, pipeline_name=name)
 
