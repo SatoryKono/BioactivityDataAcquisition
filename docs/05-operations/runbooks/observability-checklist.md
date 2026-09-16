@@ -391,6 +391,14 @@ acceptance for required and optional panels alike. This is distinct from valid
 empty evidence and from an invalid query. Keep admission and timeout limits
 unchanged; confirm the error reason before retrying individual panels.
 
+Review Selected-Run Trust also requests `error_as_row=1`. For a deadline or
+capacity failure, its `trust` object displays `QUERY ERROR` and the stable reason
+code. The processing outcome is unknown and the manifest timestamp stays empty:
+the error response is not run evidence. A selected run does not need to be
+changed to resolve this error. Retention can succeed independently while the
+aggregate Trust request times out. A transport failure without an error envelope
+still requires opening Grafana's panel error details.
+
 A successful Prometheus query can return `NaN`, `+Inf`, or `-Inf`, including
 histogram quantiles without observed increments or a ratio with a zero
 denominator. The live panel auditor preserves these responses as

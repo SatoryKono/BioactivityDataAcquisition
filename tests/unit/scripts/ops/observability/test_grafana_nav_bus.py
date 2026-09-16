@@ -169,6 +169,11 @@ def test_trust_layout_preserves_scalar_area_and_detail_rows() -> None:
     scope = _panel(9400, "text", y=4, height=4)
     status = _panel(9401, "stat", y=4, height=4)
     trust = _panel(9418, "table", y=8, height=5)
+    trust["targets"] = [
+        {
+            "url": "/ops/control-plane/trust-summary?pipeline=${pipeline}&run_id=${run_id}"
+        }
+    ]
     retention = _panel(9416, "table", y=8, height=5)
     kpis = [
         _panel(891, "stat", y=15, height=3),
@@ -189,6 +194,7 @@ def test_trust_layout_preserves_scalar_area_and_detail_rows() -> None:
     ]
 
     nav_bus._layout_control_plane_first_window(panels)
+    nav_bus._layout_control_plane_first_window(panels)
     nav_bus._normalize_collapsed_row_children(panels)
 
     assert scope["gridPos"] == {"x": 0, "y": 3, "w": 16, "h": 3}
@@ -196,6 +202,9 @@ def test_trust_layout_preserves_scalar_area_and_detail_rows() -> None:
     assert status["gridPos"]["w"] * status["gridPos"]["h"] == 24
     assert trust["gridPos"]["y"] == retention["gridPos"]["y"] == 6
     assert trust["gridPos"]["h"] == retention["gridPos"]["h"] == 7
+    assert trust["targets"][0]["url"].count("error_as_row=1") == 1
+    assert "run_id=${run_id}" in trust["targets"][0]["url"]
+    assert "panel error" in trust["fieldConfig"]["defaults"]["noValue"]
     assert all(kpi["gridPos"]["y"] == 13 for kpi in kpis)
     assert all(kpi["gridPos"]["h"] == 4 for kpi in kpis)
     assert recovery["gridPos"] == {"x": 0, "y": 18, "w": 24, "h": 3}

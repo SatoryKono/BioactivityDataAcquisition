@@ -1053,13 +1053,20 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
             url = target.get("url")
             if isinstance(url, str):
                 target["url"] = url.replace("/manifest-validation?", "/trust-summary?")
+                if (
+                    "/trust-summary?" in target["url"]
+                    and "error_as_row=" not in target["url"]
+                ):
+                    target["url"] += "&error_as_row=1"
         by_id[9418]["description"] = (
             "SELECTED RUN · Aggregate Trust includes manifest, lineage and retention "
             "evidence for this run. ERROR wins; missing evidence is INCOMPLETE. "
             "processing_status success does not imply trust_status OK. Inspect each "
             "validation table for details. No selected run is a valid empty state "
-            "(UNKNOWN). Backend unavailable means QUERY ERROR. Result is the ETL "
-            "processing outcome; Observed is the manifest creation time."
+            "(UNKNOWN). Backend unavailable means QUERY ERROR; deadline_exceeded "
+            "means the backend timed out, not that the run selection is missing. "
+            "Result is the ETL processing outcome; Observed is the manifest "
+            "creation time and is unavailable when the query fails."
         )
         for transform in by_id[9418].get("transformations", []):
             if transform.get("id") == "organize":
@@ -1070,6 +1077,9 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
         footer = options.setdefault("footer", {})
         footer["enablePagination"] = True
         field_config = by_id[9418].setdefault("fieldConfig", {})
+        field_config.setdefault("defaults", {})["noValue"] = (
+            "Trust response unavailable. Check the panel error and run selection."
+        )
         overrides = field_config.setdefault("overrides", [])
         for override in overrides:
             field = override.get("matcher", {}).get("options")
