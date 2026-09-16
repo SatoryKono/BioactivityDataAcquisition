@@ -54,11 +54,12 @@ from bioetl.domain.types import RunID, RunType
 def test_factory_method_types_compat_shim_delegates_to_canonical_builder() -> None:
     """Retained compat shim must remain a thin delegate to the canonical builder."""
     expected = MagicMock(spec=PipelineCreateRunnerRequest)
+    mock_build = MagicMock(return_value=expected)
 
-    with patch(
-        "bioetl.composition.pipeline_runner_request.build_pipeline_create_runner_request_from_kwargs",
-        return_value=expected,
-    ) as mock_build:
+    with patch.dict(
+        build_pipeline_create_runner_request_from_kwargs.__globals__,
+        {"_build_request": mock_build},
+    ):
         result = build_pipeline_create_runner_request_from_kwargs(
             run_id=RunID("00000000-0000-0000-0000-000000000001"),
             runtime=MagicMock(),
