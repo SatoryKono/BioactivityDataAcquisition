@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import asyncio
+import importlib
+import json
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -289,3 +291,107 @@ def test_run_all_plan_fails_closed_if_exit_callback_returns(
             cli_input=cli_input,
             exit_func=lambda _code: None,
         )
+
+
+def test_show_settings_preserves_non_sensitive_additional_values(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config_command = importlib.import_module("bioetl.interfaces.cli.commands.config")
+    emitted = Mock()
+    settings = SimpleNamespace(
+        env="test",
+        data_dir="data",
+        bronze_path="bronze",
+        silver_path="silver",
+        gold_path="gold",
+        checkpoint_path="checkpoints",
+        quarantine_path="quarantine",
+        debug=False,
+        test_mode=True,
+        metrics_enabled=False,
+        metrics_port=8000,
+        batch_size=100,
+        additional={"worker_count": 4},
+    )
+    monkeypatch.setattr(
+        config_command,
+        "get_config_service",
+        lambda: SimpleNamespace(get_settings=lambda: settings),
+    )
+    monkeypatch.setattr(config_command, "echo_info", emitted)
+
+    callback = getattr(
+        config_command.show_settings_command,
+        "callback",
+        config_command.show_settings_command,
+    )
+    callback("json")
+
+    assert json.loads(emitted.call_args.args[0])["worker_count"] == 4
+
+
+def test_export_command_scrubs_helper_binding_from_package() -> None:
+    export_command = importlib.import_module("bioetl.interfaces.cli.commands.export")
+    package = importlib.import_module("bioetl.interfaces.cli.commands")
+    package.export_support = object()
+
+    export_command._scrub_helper_module_binding()
+
+    assert not hasattr(package, "export_support")
+
+
+def test_run_composite_disables_transient_server_when_backend_owns_port(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    run_composite_command = importlib.import_module(
+        "bioetl.interfaces.cli.commands.run_composite"
+    )
+    command_input = importlib.import_module(
+        "bioetl.interfaces.cli.commands.domains.composite.command_input"
+    )
+    cli_input = command_input.CompositeRunCommandInput(
+        composite="publication",
+        health_server=True,
+        health_port=8000,
+        observability_backend_port=8000,
+    )
+    runtime = SimpleNamespace(
+        use_cached_bronze=False,
+        cached_bronze_enrichers=None,
+        cached_bronze_dependencies=False,
+    )
+    runner = Mock(return_value=(True, None))
+    startup = Mock()
+    exit_result = Mock()
+    monkeypatch.setattr(
+        run_composite_command,
+        "build_composite_run_command_input",
+        lambda _options: cli_input,
+    )
+    monkeypatch.setattr(
+        run_composite_command,
+        "ensure_observability_backend_started",
+        lambda **_kwargs: object(),
+    )
+    monkeypatch.setattr(
+        run_composite_command,
+        "should_disable_transient_health_server",
+        lambda **_kwargs: True,
+    )
+    monkeypatch.setattr(
+        run_composite_command, "build_runtime_config", lambda _runtime: runtime
+    )
+    monkeypatch.setattr(run_composite_command, "_echo_composite_startup", startup)
+    monkeypatch.setattr(run_composite_command, "_run_composite_with_cli_policy", runner)
+    monkeypatch.setattr(run_composite_command, "_exit_with_composite_result", exit_result)
+
+    callback = getattr(
+        run_composite_command.run_composite,
+        "callback",
+        run_composite_command.run_composite,
+    )
+    callback()
+
+    assert startup.call_args.kwargs["health_server"] is False
+    assert runner.call_args.kwargs["health_server"] is False
+    exit_result.assert_called_once_with(True, None)

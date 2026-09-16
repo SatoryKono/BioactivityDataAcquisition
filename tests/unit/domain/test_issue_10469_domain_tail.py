@@ -8,6 +8,12 @@ from typing import Any, cast
 
 import pytest
 
+from bioetl.domain.aggregates.pipeline_run import (
+    PipelineRun,
+    PipelineRunState,
+    StageResult,
+    StageStatus,
+)
 import bioetl.domain.behavior as behavior_facade
 import bioetl.domain.config as config_facade
 import bioetl.domain.exceptions as exceptions_facade
@@ -344,3 +350,31 @@ def test_value_object_allows_assignment_during_manual_initialization() -> None:
     value._value = "0378-5955"
 
     assert value.value == "0378-5955"
+
+
+def test_duplicate_failed_stage_is_idempotent_during_rehydration() -> None:
+    now = datetime(2026, 9, 16, tzinfo=UTC)
+    run = PipelineRun(
+        run_id=cast(Any, "run-1"),
+        run_type=cast(Any, "incremental"),
+        pipeline_name="chembl_assay",
+    )
+    run.start(now)
+    existing = StageResult(
+        stage="extract",
+        status=StageStatus.FAILED,
+        started_at=now,
+        completed_at=now,
+        error="persisted failure",
+    )
+    run._stages.append(existing)
+
+    run.record_stage_failure(
+        "extract",
+        "duplicate failure",
+        started_at=now,
+        completed_at=now,
+    )
+
+    assert run.status is PipelineRunState.RUNNING
+    assert run.stages == (existing,)
