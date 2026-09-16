@@ -37,6 +37,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Composition lazy imports (#10467):** function-level `bioetl.*` imports in
+  `src/bioetl/composition/**` are gone (`69 → 0`). Observability/config owners
+  load at module level; package-root factory facades still resolve cycle-prone
+  names through the existing `__getattr__` + `importlib` seams. Architecture
+  scorecard treats ratchet `0/0` as `lazy_util=0.0`.
+
 - **Domain aggregates cohesion (#10305):** fold `_quarantine_aggregate.py`,
   `_batch_mixins.py`, and `_pipeline_run_mixins.py` into the remaining public
   aggregate modules. `src/bioetl/domain/aggregates/` is 11→8 modules;

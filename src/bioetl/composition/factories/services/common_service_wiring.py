@@ -55,7 +55,7 @@ from bioetl.application.ports.storage import (
 
 from bioetl.application.core.wiring.runtime import PipelineService
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
-from bioetl.composition.factories.storage import StorageFactory
+from bioetl.composition.factories.storage import StorageFactory as _StorageFactoryImpl
 
 
 class _LazyStorageFactory:
@@ -74,7 +74,7 @@ class _LazyStorageFactory:
         pipeline_name: str | None = None,
     ) -> StorageContext:
 
-        return StorageFactory.create(
+        return _StorageFactoryImpl.create(
             settings,
             config,
             logger,

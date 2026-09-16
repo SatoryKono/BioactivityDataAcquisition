@@ -484,9 +484,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 51
-      total_loc: 6191
+      total_loc: 6146
       files_ge_250_loc: 0
-      helper_function_ratio: 0.33
+      helper_function_ratio: 0.338
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.tracing_bootstrap
     trend:
@@ -567,7 +567,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 57
-      total_loc: 7220
+      total_loc: 7221
       files_ge_250_loc: 0
       helper_function_ratio: 0.375
       max_internal_fan_in: 3

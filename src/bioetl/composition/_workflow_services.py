@@ -162,7 +162,6 @@ def _get_workflow_memory_lock() -> LockPort:
     """Return or lazily create the global in-memory workflow lock."""
     global _workflow_memory_lock
     if _workflow_memory_lock is None:
-
         _workflow_memory_lock = locking.MemoryLock()
     return _workflow_memory_lock
 

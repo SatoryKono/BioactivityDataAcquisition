@@ -210,9 +210,12 @@ def test_architecture_quality_scorecard_diagnostics_match_shrink_only_sources() 
         == committed["metrics"]["families_at_budget_count"]
     )
     assert diagnostics["lazy_import_cap"] == lazy_import_ratchet["max_count"]
-    assert diagnostics["lazy_import_observed_count"] >= 0
+    assert diagnostics["lazy_import_observed_count"] == 0
+    assert diagnostics["lazy_import_cap"] == 0
+    assert diagnostics["lazy_util"] == 0.0
     assert diagnostics["composition_module_cap"] == composition_budget["max_modules"]
     assert diagnostics["composition_module_count"] >= 0
+    assert diagnostics["composition_module_count"] <= composition_budget["max_modules"]
 
 
 @pytest.mark.architecture

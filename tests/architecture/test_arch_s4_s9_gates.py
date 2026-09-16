@@ -25,8 +25,9 @@ def test_s4_lazy_import_ratchet_is_shrink_only() -> None:
         (ROOT / "configs/quality/lazy_import_ratchet.yaml").read_text(encoding="utf-8")
     )
     live = collect_lazy_imports()
-    assert len(live) <= int(config["max_count"])
-    assert len(live) == int(config["max_count"])
+    assert int(config["max_count"]) == 0
+    assert int(config["target_count"]) == 0
+    assert len(live) == 0
     assert lazy_main(["--check"]) == 0
 
 

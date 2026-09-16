@@ -79,7 +79,6 @@ __all__ = [
 def __getattr__(name: str) -> object:
     """Load heavier compatibility exports only when callers request them."""
     if name == "ServicesBuilder":
-
         return ServicesBuilder
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 

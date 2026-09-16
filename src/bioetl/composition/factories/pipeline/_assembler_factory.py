@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from importlib import import_module
 from typing import cast
 
 
@@ -62,11 +63,10 @@ from bioetl.domain.ports import (
 )
 from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-from bioetl.composition.factories.pipeline import assembler as public_assembler
 
 
 def _public_assembler_seam(name: str) -> object:
-
+    public_assembler = import_module("bioetl.composition.factories.pipeline.assembler")
     return getattr(public_assembler, name)
 
 

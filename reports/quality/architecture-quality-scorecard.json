@@ -38,30 +38,30 @@
       "evidence_metrics": {
         "composition_util": 0.9867,
         "layer_violations": 0,
-        "lazy_util": 1.0,
+        "lazy_util": 0.0,
         "public_entrypoint_growth_count": 0,
         "public_export_facade_conflict_count": 0,
         "public_export_facade_growth_count": 0
       },
       "id": "composition_di",
       "name": "Composition root / DI",
-      "score": 6.0,
+      "score": 6.5,
       "weight": 0.1,
-      "weighted_score": 0.6
+      "weighted_score": 0.65
     },
     {
       "evidence_metrics": {
         "families_at_budget_count": 2,
         "hotspot_budget_warning_count": 0,
         "hotspot_family_count": 5,
-        "lazy_util": 1.0,
+        "lazy_util": 0.0,
         "total_duplicate_clusters": 0
       },
       "id": "module_boundaries_coupling",
       "name": "Module boundaries / coupling",
-      "score": 8.0,
+      "score": 8.4,
       "weight": 0.14,
-      "weighted_score": 1.12
+      "weighted_score": 1.176
     },
     {
       "evidence_metrics": {
@@ -176,9 +176,9 @@
     ],
     "families_at_budget_count": 2,
     "grade_kind": "diagnostic_proxy",
-    "lazy_import_cap": 69,
-    "lazy_import_observed_count": 69,
-    "lazy_util": 1.0,
+    "lazy_import_cap": 0,
+    "lazy_import_observed_count": 0,
+    "lazy_util": 0.0,
     "program_gate_policy": "external_unchanged",
     "proxy_notes": {
       "ddd_invariants": "module coverage status proxy; not a count of DDD aggregates or invariant completeness",
@@ -186,7 +186,7 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.14,
+  "integral_score": 9.25,
   "interpretation": "good_targeted_improvements",
   "metrics": {
     "accepted_adr_count": 58,
@@ -209,9 +209,9 @@
     "hotspot_budget_warning_count": 0,
     "hotspot_family_count": 5,
     "layer_violations": 0,
-    "lazy_import_cap": 69,
-    "lazy_import_observed_count": 69,
-    "lazy_util": 1.0,
+    "lazy_import_cap": 0,
+    "lazy_import_observed_count": 0,
+    "lazy_util": 0.0,
     "public_entrypoint_growth_count": 0,
     "public_export_facade_conflict_count": 0,
     "public_export_facade_growth_count": 0,
@@ -275,7 +275,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "7184937818099a4c3d38b8fe4bd91613c81562af068ac278d680b5aba09c99e9",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "c1f9325afeb27650ec800ea77f6828d6edc7684c8977143294fd0be603f2990f"
+      "source_tree_sha256": "794c2228b95ee1d174b9fa3753ae2c1dab4922dd86b732f991e8e727731d3735"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

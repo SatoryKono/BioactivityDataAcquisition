@@ -223,9 +223,7 @@ def _run_command_with_stdout_file(
                     process.wait(timeout=kill_timeout)
                 except subprocess.TimeoutExpired:
                     process.terminate()
-                raise subprocess.TimeoutExpired(
-                    cmd=command, timeout=timeout
-                ) from exc
+                raise subprocess.TimeoutExpired(cmd=command, timeout=timeout) from exc
 
             completed = subprocess.CompletedProcess(
                 args=command,

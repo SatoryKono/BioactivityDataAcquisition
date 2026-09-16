@@ -323,6 +323,7 @@
     "bioetl_provider_health_check_provider_universe_15m",
     "bioetl_provider_health_observed_timestamp_seconds",
     "bioetl_provider_health_status",
+    "bioetl_provider_health_status_fresh",
     "bioetl_provider_observed_universe",
     "bioetl_provider_range_operational_ok",
     "bioetl_provider_status",
@@ -1763,7 +1764,6 @@
       "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_l1_control_plane_current_status": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md",
@@ -1801,7 +1801,6 @@
       "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_l1_workflow_global_status": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md",
@@ -2030,12 +2029,14 @@
       "docs/03-guides/dashboards/verdict-ontology.md",
       "docs/04-reference/observability/alerting-guide.md",
       "docs/04-reference/observability/metrics-catalog.md",
+      "docs/05-operations/runbooks/observability-checklist.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-provider-health-v2.json",
       "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_provider_current_status_info": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
+      "docs/05-operations/runbooks/observability-checklist.md",
       "grafana/dashboards/bioetl-provider-health-v2.json"
     ],
     "bioetl_provider_health_check_provider_universe_15m": [
@@ -2044,7 +2045,8 @@
       "grafana/dashboards/bioetl-provider-health-v2.json"
     ],
     "bioetl_provider_health_observed_timestamp_seconds": [
-      "docs/04-reference/observability/metrics-catalog.md"
+      "docs/04-reference/observability/metrics-catalog.md",
+      "docs/05-operations/runbooks/observability-checklist.md"
     ],
     "bioetl_provider_health_status": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
@@ -2053,6 +2055,9 @@
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-provider-health-v2.json"
+    ],
+    "bioetl_provider_health_status_fresh": [
+      "docs/05-operations/runbooks/observability-checklist.md"
     ],
     "bioetl_provider_observed_universe": [
       "docs/04-reference/observability/metrics-catalog.md",

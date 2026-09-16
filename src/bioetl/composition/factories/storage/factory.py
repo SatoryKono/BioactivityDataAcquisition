@@ -7,7 +7,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
-from bioetl.composition.observability_resolution import resolve_tracing_port
+from bioetl.composition.observability_resolution import (
+    resolve_tracing_port as resolve_tracing_port_impl,
+)
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -35,7 +37,22 @@ __all__ = [
     "SilverWriter",
     "StorageContext",
     "StorageFactory",
+    "resolve_tracing_port",
 ]
+
+
+def resolve_tracing_port(
+    *,
+    tracer: TracingPort | None,
+    settings: Settings | None = None,
+    service_name: str = "bioetl",
+) -> TracingPort:
+    """Resolve tracing through the composition-owned observability seam."""
+    return resolve_tracing_port_impl(
+        tracer=tracer,
+        settings=settings,
+        service_name=service_name,
+    )
 
 
 @dataclass(frozen=True)

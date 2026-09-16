@@ -100,10 +100,8 @@ def __getattr__(name: str) -> object:
     if name == "CompositeRuntimeConfig":
         return CompositeRuntimeConfig
     if name == "create_composite_runner_service":
-
         return create_composite_runner_service
     if name == "_create_dq_report_service":
-
         return _create_dq_report_service
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 

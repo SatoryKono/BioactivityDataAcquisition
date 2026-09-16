@@ -2,24 +2,23 @@
 """Public pipeline-factory imports; registry API lives in ``composition.registry_api``."""
 
 from __future__ import annotations
-from bioetl.composition.factories.pipeline import assembler as _assembler
-from bioetl.composition.factories.services.bundle import (
-    build_pipeline_services,
-)
+
+from importlib import import_module
+
+_ASSEMBLER_MODULE = "bioetl.composition.factories.pipeline.assembler"
+_BUNDLE_MODULE = "bioetl.composition.factories.services.bundle"
 
 
 def __getattr__(name: str) -> object:
-    """Expose pipeline assembly helpers lazily to avoid package import cycles."""
+    """Expose pipeline assembly helpers without importing the factory graph."""
     if name in {
         "GenericPipelineFactory",
         "assemble_runner",
         "create_pipeline_factory",
     }:
-
-        return getattr(_assembler, name)
+        return getattr(import_module(_ASSEMBLER_MODULE), name)
     if name == "build_pipeline_services":
-
-        return build_pipeline_services
+        return getattr(import_module(_BUNDLE_MODULE), name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 

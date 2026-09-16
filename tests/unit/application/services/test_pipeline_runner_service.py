@@ -71,7 +71,9 @@ from bioetl.application.services.execution.pipeline_runner_service import (
 async def test_configured_report_root_is_used_for_every_outcome(
     service, mock_runner, tmp_path, mode
 ):
-    from bioetl.infrastructure.storage.run_report_store_adapter import FileRunReportStoreAdapter
+    from bioetl.infrastructure.storage.run_report_store_adapter import (
+        FileRunReportStoreAdapter,
+    )
 
     service.report_root = tmp_path / "configured-reports"
     service.report_store = FileRunReportStoreAdapter()
@@ -79,7 +81,9 @@ async def test_configured_report_root_is_used_for_every_outcome(
     mock_runner.debug_export_hash = None
     if mode == "failure":
         mock_runner.run.side_effect = ValueError("bounded test failure")
-    result = await service.run("test_pipeline", options=RunOptions(dry_run=mode == "dry_run"))
+    result = await service.run(
+        "test_pipeline", options=RunOptions(dry_run=mode == "dry_run")
+    )
     assert result.run_report_error is None
     target = Path(result.run_report_json_path)
     assert target.is_relative_to(service.report_root)

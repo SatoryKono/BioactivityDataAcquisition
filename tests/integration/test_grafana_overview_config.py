@@ -397,7 +397,8 @@ def test_identity_panel_uses_run_id_without_leaking_to_prometheus_queries() -> N
     ],
 )
 def test_current_domain_detail_uses_same_qualified_verdict_as_summary(
-    title: str, domain: str,
+    title: str,
+    domain: str,
 ) -> None:
     panel = _panels_by_title()[title]
     expr = _panel_expr(panel)

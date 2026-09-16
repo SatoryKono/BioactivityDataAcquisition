@@ -154,6 +154,15 @@ def _composition_module_cap(package_cohesion_budget: dict[str, object]) -> int:
     raise ValueError("composition package cohesion budget is missing")
 
 
+def _lazy_import_util(*, observed: int, cap: int) -> float:
+    """Return lazy-import utilisation; ``0/0`` is the closed zero-state."""
+    if cap == 0:
+        if observed != 0:
+            raise ValueError("lazy_import_observed_count must be 0 when max_count is 0")
+        return 0.0
+    return round(observed / cap, 4)
+
+
 def _build_diagnostic_payload(
     *,
     families_at_budget: dict[str, object],
@@ -185,7 +194,10 @@ def _build_diagnostic_payload(
         "families_at_budget": families_at_budget["names"],
         "lazy_import_observed_count": lazy_import_observed_count,
         "lazy_import_cap": lazy_import_cap,
-        "lazy_util": round(lazy_import_observed_count / lazy_import_cap, 4),
+        "lazy_util": _lazy_import_util(
+            observed=lazy_import_observed_count,
+            cap=lazy_import_cap,
+        ),
         "composition_module_count": composition_module_count,
         "composition_module_cap": composition_cap,
         "composition_util": round(composition_module_count / composition_cap, 4),

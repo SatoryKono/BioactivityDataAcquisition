@@ -21,7 +21,7 @@ from bioetl.composition.runtime_builders.runner_inputs import (
 )
 from bioetl.domain.config import RuntimeConfig
 from bioetl.composition.runtime_builders.observability_builder import (
-    build_observability_bundle as resolved_observability_bundle,
+    build_observability_bundle,
 )
 
 if TYPE_CHECKING:
@@ -48,10 +48,11 @@ def _resolve_optional_functions(
     Callable[[PipelineRunContext], CachedBronzeContext],
 ]:
     """Resolve optional function parameters to their implementations."""
-    if build_observability_bundle_fn is None:
-        pass
-    else:
-        resolved_observability_bundle = build_observability_bundle_fn
+    resolved_observability_bundle = (
+        build_observability_bundle
+        if build_observability_bundle_fn is None
+        else build_observability_bundle_fn
+    )
 
     return (
         resolved_observability_bundle,

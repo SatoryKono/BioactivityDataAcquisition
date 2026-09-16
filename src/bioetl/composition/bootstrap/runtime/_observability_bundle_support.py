@@ -177,33 +177,22 @@ def resolve_observability_bootstrappers(
     preflight_validator: Callable[..., None] | None,
 ) -> ObservabilityBootstrappers:
     """Fill optional bootstrapper hooks with default composition collaborators."""
-    resolved_logger: Callable[[str, UUID, str], LoggerPort]
-    if logger_bootstrapper is None:
-
-        resolved_logger = bootstrap_logger
-    else:
-        resolved_logger = logger_bootstrapper
-
-    resolved_tracer: Callable[[Settings], TracingPort]
-    if tracer_bootstrapper is None:
-
-        resolved_tracer = bootstrap_tracer
-    else:
-        resolved_tracer = tracer_bootstrapper
-
-    resolved_metrics: Callable[[Settings], MetricsPort]
-    if metrics_bootstrapper is None:
-
-        resolved_metrics = bootstrap_metrics
-    else:
-        resolved_metrics = metrics_bootstrapper
-
-    resolved_dq_monitor: Callable[[Settings, LoggerPort | None], DQMonitorPort | None]
-    if dq_monitor_bootstrapper is None:
-
-        resolved_dq_monitor = bootstrap_dq_monitor
-    else:
-        resolved_dq_monitor = dq_monitor_bootstrapper
+    resolved_logger: Callable[[str, UUID, str], LoggerPort] = (
+        bootstrap_logger if logger_bootstrapper is None else logger_bootstrapper
+    )
+    resolved_tracer: Callable[[Settings], TracingPort] = (
+        bootstrap_tracer if tracer_bootstrapper is None else tracer_bootstrapper
+    )
+    resolved_metrics: Callable[[Settings], MetricsPort] = (
+        bootstrap_metrics if metrics_bootstrapper is None else metrics_bootstrapper
+    )
+    resolved_dq_monitor: Callable[
+        [Settings, LoggerPort | None], DQMonitorPort | None
+    ] = (
+        bootstrap_dq_monitor
+        if dq_monitor_bootstrapper is None
+        else dq_monitor_bootstrapper
+    )
 
     return ObservabilityBootstrappers(
         logger=resolved_logger,

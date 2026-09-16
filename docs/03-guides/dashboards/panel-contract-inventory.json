@@ -14,7 +14,7 @@
   "schema_version": 1,
   "source": "grafana/dashboards/*.json",
   "target_counts": {
-    "http": 28,
+    "http": 29,
     "loki": 0,
     "promql": 173,
     "tempo": 0,
@@ -1842,6 +1842,31 @@
       "unit": "none"
     },
     {
+      "coverage_class": null,
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "empty_state": "valid_empty",
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9421,
+      "panel_title": "Inspect Latest Complete Run",
+      "query": "/ops/control-plane/latest-complete-run?workflow=${workflow:csv}&pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&error_as_row=1",
+      "query_tokens": [
+        "/ops/control-plane/latest-complete-run",
+        "workflow",
+        "pipeline",
+        "run_type",
+        "run_id",
+        "error_as_row"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": ""
+    },
+    {
       "coverage_class": "event_optional",
       "dashboard_uid": "bioetl-dq-v2",
       "datasource_type": "prometheus",
@@ -3124,19 +3149,19 @@
       "unit": "none"
     },
     {
-      "coverage_class": "required_current",
+      "coverage_class": "required_when_active",
       "dashboard_uid": "bioetl-overview-v2",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
-      "documents_valid_empty": true,
+      "documents_valid_empty": false,
       "empty_state": "coverage_gap",
-      "formula": "max by (pipeline) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_runtime_blocker_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
+      "formula": "max by (pipeline) (bioetl_l0_input_status_selected{input=\"runtime\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
       "kind": "promql",
       "panel_id": 9003,
       "panel_title": "Review Runtime Status",
-      "query": "max by (pipeline) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_runtime_blocker_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
+      "query": "max by (pipeline) (bioetl_l0_input_status_selected{input=\"runtime\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
       "query_tokens": [
-        "bioetl_l1_runtime_blocker_status"
+        "bioetl_l0_input_status_selected"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -3157,19 +3182,19 @@
       "unit": "none"
     },
     {
-      "coverage_class": "required_current",
+      "coverage_class": "required_when_active",
       "dashboard_uid": "bioetl-overview-v2",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
-      "documents_valid_empty": true,
+      "documents_valid_empty": false,
       "empty_state": "coverage_gap",
-      "formula": "max by (pipeline) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_dq_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
+      "formula": "max by (pipeline) (bioetl_l0_input_status_selected{input=\"dq\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
       "kind": "promql",
       "panel_id": 9004,
       "panel_title": "Review Data Quality Status",
-      "query": "max by (pipeline) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_dq_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
+      "query": "max by (pipeline) (bioetl_l0_input_status_selected{input=\"dq\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
       "query_tokens": [
-        "bioetl_l1_dq_status"
+        "bioetl_l0_input_status_selected"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -3190,19 +3215,19 @@
       "unit": "none"
     },
     {
-      "coverage_class": "required_current",
+      "coverage_class": "required_when_active",
       "dashboard_uid": "bioetl-overview-v2",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
-      "documents_valid_empty": true,
+      "documents_valid_empty": false,
       "empty_state": "coverage_gap",
-      "formula": "max by (pipeline) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_gold_lifecycle_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
+      "formula": "max by (pipeline) (bioetl_l0_input_status_selected{input=\"gold\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
       "kind": "promql",
       "panel_id": 9005,
       "panel_title": "Review Data Validation Status",
-      "query": "max by (pipeline) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_gold_lifecycle_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
+      "query": "max by (pipeline) (bioetl_l0_input_status_selected{input=\"gold\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
       "query_tokens": [
-        "bioetl_l1_gold_lifecycle_status"
+        "bioetl_l0_input_status_selected"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -3223,19 +3248,19 @@
       "unit": "none"
     },
     {
-      "coverage_class": "required_current",
+      "coverage_class": "required_when_active",
       "dashboard_uid": "bioetl-overview-v2",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
-      "documents_valid_empty": true,
+      "documents_valid_empty": false,
       "empty_state": "coverage_gap",
-      "formula": "max by (pipeline) (bioetl_l1_control_plane_current_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_control_plane_current_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
+      "formula": "max by (pipeline) (bioetl_l0_input_status_selected{input=\"control_plane\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
       "kind": "promql",
       "panel_id": 9006,
       "panel_title": "Review Control Plane Status",
-      "query": "max by (pipeline) (bioetl_l1_control_plane_current_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_control_plane_current_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
+      "query": "max by (pipeline) (bioetl_l0_input_status_selected{input=\"control_plane\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
       "query_tokens": [
-        "bioetl_l1_control_plane_current_status"
+        "bioetl_l0_input_status_selected"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -3329,19 +3354,19 @@
       "unit": "none"
     },
     {
-      "coverage_class": "required_current",
+      "coverage_class": "required_when_active",
       "dashboard_uid": "bioetl-overview-v2",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
-      "documents_valid_empty": true,
+      "documents_valid_empty": false,
       "empty_state": "coverage_gap",
-      "formula": "max by (pipeline) (bioetl_l1_workflow_global_status{pipeline=~\"$pipeline\",pipeline!=\"test_pipe\"} or ((bioetl_l1_workflow_global_status{pipeline!=\"test_pipe\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
+      "formula": "max by (pipeline) (bioetl_l0_input_status_selected{input=\"workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
       "kind": "promql",
       "panel_id": 9013,
       "panel_title": "Review Workflow Status",
-      "query": "max by (pipeline) (bioetl_l1_workflow_global_status{pipeline=~\"$pipeline\",pipeline!=\"test_pipe\"} or ((bioetl_l1_workflow_global_status{pipeline!=\"test_pipe\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
+      "query": "max by (pipeline) (bioetl_l0_input_status_selected{input=\"workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
       "query_tokens": [
-        "bioetl_l1_workflow_global_status"
+        "bioetl_l0_input_status_selected"
       ],
       "ref_id": "A",
       "runbook_urls": [],

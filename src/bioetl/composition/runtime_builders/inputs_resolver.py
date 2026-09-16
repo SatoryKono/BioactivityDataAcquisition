@@ -60,7 +60,6 @@ def __getattr__(name: str) -> object:  # pragma: no cover
     if TYPE_CHECKING:
         raise AttributeError
     if name == "ResolvedVacuumSettings":
-
         return ResolvedVacuumSettings
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 

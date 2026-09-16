@@ -204,10 +204,10 @@ def test_promql_parity_ignores_layout_and_comments(tracked: str, live: str) -> N
     [
         ('metric{label="a  b"}', 'metric{label="a b"}'),
         ("metric{label='a  b'}", "metric{label='a b'}"),
-        ('metric{label=`a  b`}', 'metric{label=`a b`}'),
+        ("metric{label=`a  b`}", "metric{label=`a b`}"),
         ('metric{label="#first"}', 'metric{label="#second"}'),
-        ('metric > 0', 'metric >= 0'),
-        ('sum_metric', 'sum metric'),
+        ("metric > 0", "metric >= 0"),
+        ("sum_metric", "sum metric"),
     ],
 )
 def test_promql_parity_preserves_meaningful_tokens(left: str, right: str) -> None:

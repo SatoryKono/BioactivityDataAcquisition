@@ -49513,7 +49513,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-10",
-  "source_tree_sha256": "524c24daa5f9df1e289075ce8a4e993f9ae7a56321287ac76695e5d91095ba93",
+  "source_tree_sha256": "efc5f10e92923097c084d7c7acc34d34772cafc05d23fc333083d43f62106f46",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

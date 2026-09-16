@@ -412,7 +412,9 @@ class PipelineRunnerService:
         )
         return self._finalize_report(result, options)
 
-    def _finalize_report(self, result: RunResult, options: RunOptions | None) -> RunResult:
+    def _finalize_report(
+        self, result: RunResult, options: RunOptions | None
+    ) -> RunResult:
         """Use the configured report destination for every execution outcome."""
         return finalize_pipeline_run_report(
             result=result,

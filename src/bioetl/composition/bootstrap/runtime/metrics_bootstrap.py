@@ -3,11 +3,9 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from importlib import import_module
 from typing import TYPE_CHECKING
 
-from bioetl.composition.bootstrap.assembly.metrics_service import (
-    create_metrics_service as _create_metrics_service,
-)
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.ports.noop import NoOpMetrics
 
@@ -111,7 +109,8 @@ def create_metrics_service(
     tracer: TracingPort | None = None,
 ) -> MetricsService:
     """Compat seam for runtime tests patching metrics-service creation."""
-    return _create_metrics_service(logger=logger, tracer=tracer)
+    impl = import_module("bioetl.composition.bootstrap.assembly.metrics_service")
+    return impl.create_metrics_service(logger=logger, tracer=tracer)
 
 
 def maybe_start_metrics_server(

@@ -104,7 +104,9 @@ _LIST_SERVICE_CACHE: PipelineRunnerService | None = None
 
 
 @pytest.mark.unit
-def test_bootstrap_passes_configured_report_root(bootstrap_with_light_observability, tmp_path):
+def test_bootstrap_passes_configured_report_root(
+    bootstrap_with_light_observability, tmp_path
+):
     settings, _observability, _bundle = bootstrap_with_light_observability
     settings.return_value.report_root = tmp_path / "configured-reports"
     service = bootstrap_pipeline_runner_service()

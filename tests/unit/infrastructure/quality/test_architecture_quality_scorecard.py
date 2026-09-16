@@ -96,6 +96,36 @@ def test_scoring_diagnostic_payload_requires_integer_lazy_import_cap() -> None:
         )
 
 
+def test_lazy_import_util_zero_state_is_closed() -> None:
+    """``observed=0`` and ``cap=0`` is the completed shrink-only state."""
+    assert scoring_module._lazy_import_util(observed=0, cap=0) == 0.0
+
+
+def test_lazy_import_util_rejects_residual_when_cap_is_zero() -> None:
+    """A zero cap with remaining lazy imports must fail closed."""
+    with pytest.raises(ValueError, match="must be 0 when max_count is 0"):
+        scoring_module._lazy_import_util(observed=1, cap=0)
+
+
+_COMPOSITION_BUDGET = {
+    "packages": [{"path": "src/bioetl/composition", "max_modules": 296}]
+}
+
+
+def test_scoring_diagnostic_payload_zero_lazy_import_state() -> None:
+    """Scorecard diagnostics keep ``lazy_util=0.0`` at the 0/0 ratchet."""
+    payload = scoring_module._build_diagnostic_payload(
+        families_at_budget={"count": 0, "names": []},
+        lazy_import_observed_count=0,
+        lazy_import_ratchet={"max_count": 0},
+        composition_module_count=296,
+        package_cohesion_budget=_COMPOSITION_BUDGET,
+    )
+    assert payload["lazy_import_observed_count"] == 0
+    assert payload["lazy_import_cap"] == 0
+    assert payload["lazy_util"] == 0.0
+
+
 @pytest.mark.parametrize(
     ("score", "expected"),
     [
