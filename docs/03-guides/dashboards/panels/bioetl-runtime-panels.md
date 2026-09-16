@@ -260,7 +260,7 @@ used.
 - GLOBAL panels show cross-scope aggregate signals for escalation context.
 
 ## Additional shipped panels
-### 43. Review Selected Run Summary
+### 43. Review Selected Run Status
 
 Shipped in `bioetl-runtime.json`.
 
@@ -279,3 +279,11 @@ Complete evidence is available in the collapsed detail group. The table reuses t
 ### 102. Inspect Current Missing Stage Signals
 
 CURRENT missing signals by pipeline, Run Type and stage. UNKNOWN means the expected-stage catalog is absent; VALID EMPTY means the expected stages have all required signals. An absent query result is UNKNOWN, never evidence of completeness.
+
+## Saved evidence and discovery panels
+
+| ID | Title | Purpose |
+| --- | --- | --- |
+| 9450 | Inspect Saved Run Evidence | Saved exact-run evidence; expand for identity, version, reasons and actions. |
+| 9451 | Inspect Selected Run Domains | Saved exact-run evidence; expand for identity, version, reasons and actions. |
+| 9452 | Inspect Selected Run Identity | Saved exact-run evidence; expand for identity, version, reasons and actions. |

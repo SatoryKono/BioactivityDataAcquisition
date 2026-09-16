@@ -297,3 +297,50 @@ def test_archive_containment_rechecks_parent_links(archive_case, monkeypatch):
         False,
         "archive_evidence_invalid",
     )
+
+
+def test_late_run_evidence_creates_new_archive_version(archive_case, tmp_path):
+    from bioetl.application.services.run_reports.writer import write_pipeline_run_report
+    from bioetl.domain.run_reports.pipeline_builder import build_pipeline_run_report
+    from bioetl.infrastructure.storage.run_report_store_adapter import (
+        FileRunReportStoreAdapter,
+    )
+
+    store, manifest, plan = archive_case
+    report_root = tmp_path / "reports"
+    store = replace(store, report_root=report_root)
+    report = build_pipeline_run_report(
+        identity={
+            "run_id": str(manifest.run_id),
+            "pipeline_name": manifest.pipeline_name,
+            "status": "success",
+        },
+        metrics={},
+    )
+    writer = FileRunReportStoreAdapter()
+    write_pipeline_run_report(report, root=report_root, store=writer)
+    first = store.create(manifest=manifest, plan=plan)
+    first_index = (first / "index.json").read_bytes()
+    report = replace(
+        report,
+        observations={
+            "Workflow": {"verdict": "OK", "reason": "late_completion", "facts": {}}
+        },
+    )
+    write_pipeline_run_report(report, root=report_root, store=writer)
+    assert store.verify(manifest=manifest, plan=plan) == (
+        None,
+        "archive_evidence_not_recorded",
+    )
+    second = store.create(manifest=manifest, plan=plan)
+    assert second != first
+    assert (first / "index.json").read_bytes() == first_index
+    restored_old = replace(store, report_root=first / "restored" / "run-reports")
+    assert restored_old.verify(manifest=manifest, plan=plan) == (
+        True,
+        "archive_restore_verified",
+    )
+    assert store.verify(manifest=manifest, plan=plan) == (
+        True,
+        "archive_restore_verified",
+    )

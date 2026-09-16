@@ -6,7 +6,8 @@ import hashlib
 import json
 from collections.abc import Mapping
 
-RULES_VERSION = "selected-run-v1"
+RULES_VERSION = "selected-run-v2"
+SUPPORTED_RULES = {"selected-run-v1", RULES_VERSION}
 SNAPSHOT_SCHEMA = "selected_run_snapshot_v1"
 DOMAINS = (
     "Runtime",
@@ -55,7 +56,9 @@ def _observed_row(domain: str, observations: Mapping[str, object]) -> dict[str, 
     )
 
 
-def _domain_rows(report: Mapping[str, object]) -> list[dict[str, object]]:
+def _domain_rows(
+    report: Mapping[str, object], rules_version: str
+) -> list[dict[str, object]]:
     """Project the six sources without aggregating their independent outcomes."""
     identity = _mapping(report.get("identity"))
     execution = str(identity.get("status", "unknown")).lower()
@@ -85,34 +88,42 @@ def _domain_rows(report: Mapping[str, object]) -> list[dict[str, object]]:
         if io.get("use_cached_bronze") is True
         else _observed_row("Provider", observations)
     )
-    rows.append(_observed_row("Data Validation", observations))
+    rows.append(
+        _row("Data Validation", "N/A", "gold_explicitly_skipped", "#/io/skip_gold")
+        if rules_version != "selected-run-v1" and io.get("skip_gold") is True
+        else _observed_row("Data Validation", observations)
+    )
     return rows
 
 
 def _assessment_rows(
-    report: Mapping[str, object], execution: str
+    report: Mapping[str, object], execution: str, rules_version: str
 ) -> list[dict[str, object]]:
     if execution == "dry_run":
         return [
             _row(name, "N/A", "dry_run_no_execution", "#/identity/status")
             for name in DOMAINS
         ]
-    return _domain_rows(report)
+    return _domain_rows(report, rules_version)
 
 
 def _aggregate(verdicts: set[str]) -> str:
     return next((status for status in _PRIORITY if status in verdicts), "N/A")
 
 
-def assess_report(report: Mapping[str, object]) -> dict[str, object]:
+def assess_report(
+    report: Mapping[str, object], *, rules_version: str = RULES_VERSION
+) -> dict[str, object]:
     """Assess only facts recorded by this run; missing checks cannot imply success."""
     identity = _mapping(report.get("identity"))
     execution = str(identity.get("status", "unknown")).lower()
-    rows = _assessment_rows(report, execution)
+    if rules_version not in SUPPORTED_RULES:
+        raise ValueError("assessment_rules_unsupported")
+    rows = _assessment_rows(report, execution, rules_version)
     verdicts = {str(row["verdict"]) for row in rows}
     checks = _aggregate(verdicts)
     return {
-        "rules_version": RULES_VERSION,
+        "rules_version": rules_version,
         "execution_state": execution.upper(),
         "verdict": "RUNNING" if execution in {"running", "started"} else checks,
         "checks_verdict": checks,
@@ -141,8 +152,21 @@ def verify_snapshot(snapshot: Mapping[str, object]) -> bool:
     """Recheck bytes and evaluation on every read, never trust a cached OK."""
     if snapshot.get("schema_version") != SNAPSHOT_SCHEMA:
         return False
+    if not isinstance(snapshot.get("evidence"), dict) or not isinstance(
+        snapshot.get("assessment"), dict
+    ):
+        return False
+    try:
+        return _snapshot_matches_evidence(snapshot)
+    except (TypeError, ValueError):
+        return False
+
+
+def _snapshot_matches_evidence(snapshot: Mapping[str, object]) -> bool:
+    """Compare a structurally valid envelope with its versioned recomputation."""
     body = {key: value for key, value in snapshot.items() if key != "revision"}
     evidence = _mapping(snapshot.get("evidence"))
+    rules_version = str(_mapping(snapshot.get("assessment")).get("rules_version"))
     return snapshot.get("revision") == evidence_digest(body) and snapshot.get(
         "assessment"
-    ) == assess_report(evidence)
+    ) == assess_report(evidence, rules_version=rules_version)

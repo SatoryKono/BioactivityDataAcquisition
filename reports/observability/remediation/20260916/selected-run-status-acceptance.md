@@ -50,3 +50,43 @@ The refactor removes introduced size/complexity violations and import cycles, re
 The initial full architecture scan ran 4751 cases: 4651 passed, 30 failed, 70 skipped. Its failures prompted the refactor and artifact regeneration; it is not a passing final acceptance result. Known baseline issues include two oversized unchanged modules, an unclassified lazy export, a direct clock call in an unchanged test, and a pre-existing bootstrap helper-ratio mismatch (0.338 baseline versus the older 0.330 residual bound; current ratio improved to 0.337). These are not waived.
 
 PR Gate run 35081004469 for commit 7947bb75a4f540efb7651b9375a9c22d4bfa70c3 failed before executing steps: "The job was not started because your account is locked due to a billing issue." This is an external blocker to CI acceptance. Historical telemetry still attributes coverage to Tests run 34618841349 / db7cc9283e3fb49b0e5766489b7abacf9a775cd9; its coverage-verify succeeded, but that whole workflow failed governance. Rebinding its test-tree fingerprint does not claim a green CI run for this PR.
+
+## Review remediation and repeated checks
+
+The report root contract is now `pipeline_run_report_v2`; the original strict v1
+schema is restored unchanged. Dual-version readers precede new writers. Rules v1
+remain verifiable, while v2 records explicit skip-Gold as N/A. The change-specific
+[ADR and migration/rollback procedure](../../../../docs/02-architecture/decisions/ADR-061-persisted-selected-run-assessment.md)
+remain proposed pending acceptance.
+
+Review regressions cover Pipeline=All, ambiguous exact-run IDs, workflow manifest
+ownership, parent/child publication retry, foreign archive revisions, a second archive
+version after late evidence, timezone-less ledger rejection and delegated Gold validation.
+Malformed snapshot serialization returns false. Overview summary reuses its domain
+response, so both show one revision and the first-paint HTTP budget remains unchanged.
+All panel links, row caps, inventory counts and active panel docs are synchronized.
+
+The expanded related suite ran 1095 cases: 1087 passed, 8 skipped, zero failures
+(`reports/quality/selected-run-reviewed-final.xml`). Skips are retired dashboard
+fixtures (5), POSIX bootstrap on Windows (2), and the opt-in live panel-fill gate (1).
+A subsequent Gold preparation refactor preserves the existing zero-large-files
+budget; its focused tests and final source-bound checks are recorded separately.
+Twelve changed modules passed mypy, followed by both refactored Gold modules.
+
+The 35-case code/architecture/metric check passed 33 and reproduced only the two
+unchanged module-size baseline failures. No new import-cycle, complexity or size
+violation was found. These local results do not clear the previously recorded CI
+billing lock or the 93-expired-notes pre-test governance blocker.
+
+Gold preparation refactor: 156 passed, zero skipped/failed
+(`reports/quality/selected-run-gold-refactor.xml`). The family budget is again met:
+zero application-core files at or above the governed threshold. Measured family LOC
+is 23455 and helper ratio is 0.373; these are measurements, not increased budgets.
+Docs verification passed, including links, drift, docstrings and cleanup inventory.
+
+Remote main advanced during verification. Commit
+`10f80c2404d4a74f572b35af66aa435b09969764` contains actual conflict markers
+(`<<<<<<< HEAD` / `>>>>>>> codex/issue-10469-full-coverage-final`) in both
+architecture-quality-scorecard.json and module-coverage-inventory.json. The local
+artifacts have been regenerated cleanly. Debt gates now report 44 pass / 1 fail
+for this remote-main blocker; this supersedes earlier green debt snapshots.

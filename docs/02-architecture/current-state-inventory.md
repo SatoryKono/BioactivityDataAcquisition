@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-09-11'
+  Last verified: '2026-09-16'
 
 ______________________________________________________________________
 
 # Current State Inventory
 
-This inventory is synchronized against the current worktree on 2026-09-11.
+This inventory is synchronized against the current worktree on 2026-09-16.
 Code, configs, domain contracts, ADRs, and tests are the source of
 truth; existing documentation is evidence only when it matches those sources.
 
@@ -36,14 +36,14 @@ Current committed quality artifacts agree on the following architecture evidence
 
 | Artifact | Current value | Source |
 | --- | ---: | --- |
-| Architecture quality score | `9.14` (`good_targeted_improvements`) | `reports/quality/debt-governance-gates.json`, `reports/quality/architecture-quality-scorecard.json` |
+| Architecture quality score | `9.36` (`good_targeted_improvements`) | `reports/quality/debt-governance-gates.json`, `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2474` | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2473` | `reports/quality/module-coverage-inventory.json` |
 | Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json`, `reports/quality/debt-governance-gates.json` |
-| Coverage inventory status counts | `1616` fully covered, `854` partially covered, `4` with no executable lines | `reports/quality/module-coverage-inventory.json` |
+| Coverage inventory status counts | `1615` fully covered, `854` partially covered, `4` with no executable lines | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
-| Families at fan-in budget | `2` (`application_services_control_plane`, `composition_runtime_builders`) | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
-| Debt-governance gates | `45` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
+| Families at fan-in budget | `1` (`application_services_control_plane`) | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
+| Debt-governance gates | `44` pass, `0` warn, `1` fail | `reports/quality/debt-governance-gates.json` |
 | Full-app duplication hotspot baseline | `0` actionable / `58` raw excluded clusters | `reports/quality/full-app-duplication-baseline.json` |
 
 The full-app duplication baseline distinguishes actionable clusters from raw
@@ -56,7 +56,7 @@ drift is currently clear (`stale_artifacts` are all false in
 release-gate failures rather than hidden warning-only coverage drift. Module
 coverage currently reports `0` unmeasured and `0` uncovered source modules
 from the committed coverage inventory (debt-governance gates). That is a module-inventory fact, not
-a blanket line/branch coverage guarantee: `853` modules
+a blanket line/branch coverage guarantee: `860` modules
 remain partially covered and line/branch coverage must be read from the
 `coverage-verify` artifacts. Read-only
 audit evidence should use
@@ -318,3 +318,5 @@ by storage technology. Current owner boundaries:
   `QuarantineEntry` transition wording drift. `PipelineStorageProtocol` remains
   valid only as an application-owned aggregate protocol and must not be listed as
   a domain storage port.
+
+The current remote-main baseline gate fails because commit `10f80c2404d4a74f572b35af66aa435b09969764` contains unresolved merge markers in the architecture scorecard and module coverage inventory. Local generated artifacts are clean; no debt budget or gate was waived.

@@ -345,7 +345,10 @@
         "x": 0,
         "y": 11
       },
-      "datasource": "BioETL Ops HTTP",
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Dashboard --"
+      },
       "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
       "fieldConfig": {
         "defaults": {
@@ -358,7 +361,15 @@
               "wrapText": false
             },
             "inspect": true
-          }
+          },
+          "links": [
+            {
+              "title": "Open Run Explorer",
+              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false
+            }
+          ]
         },
         "overrides": []
       },
@@ -371,27 +382,25 @@
       },
       "targets": [
         {
+          "panelId": 9002,
           "refId": "A",
-          "type": "json",
-          "source": "url",
-          "parser": "backend",
-          "format": "table",
-          "root_selector": "summary",
-          "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
-          "url_options": {
-            "method": "GET",
-            "data": ""
-          }
+          "withTransforms": false
         }
       ],
       "transformations": [
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 1
+          }
+        },
         {
           "id": "filterFieldsByName",
           "options": {
             "include": {
               "names": [
                 "execution_state",
-                "verdict",
+                "run_verdict",
                 "evidence_completeness",
                 "rules_version"
               ]
@@ -403,16 +412,17 @@
           "options": {
             "indexByName": {
               "execution_state": 0,
-              "verdict": 1,
               "evidence_completeness": 2,
-              "rules_version": 3
+              "rules_version": 3,
+              "run_verdict": 1
             },
             "renameByName": {
               "domain": "Domain",
               "verdict": "Status",
               "execution_state": "Result",
               "evidence_completeness": "Evidence",
-              "rules_version": "Rules"
+              "rules_version": "Rules",
+              "run_verdict": "Status"
             }
           }
         }
@@ -559,7 +569,7 @@
     {
       "id": 215,
       "type": "table",
-      "title": "Review Current First Action",
+      "title": "Review First Action",
       "gridPos": {
         "h": 5,
         "w": 16,
@@ -1055,7 +1065,33 @@
               "wrapText": false
             },
             "inspect": true
-          }
+          },
+          "links": [
+            {
+              "title": "Open Runtime",
+              "url": "/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false
+            },
+            {
+              "title": "Open Control Plane",
+              "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false
+            },
+            {
+              "title": "Open Data Quality",
+              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false
+            },
+            {
+              "title": "Open Provider Health",
+              "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=$__all&var-pipeline_context=${pipeline:percentencode}&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false
+            }
+          ]
         },
         "overrides": []
       },
@@ -1082,6 +1118,12 @@
         }
       },
       "transformations": [
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 6
+          }
+        },
         {
           "id": "filterFieldsByName",
           "options": {
@@ -4517,65 +4559,6 @@
       },
       "panels": [
         {
-          "id": 9452,
-          "type": "table",
-          "title": "Inspect Selected Run Identity",
-          "gridPos": {
-            "x": 0,
-            "y": 34,
-            "w": 24,
-            "h": 6
-          },
-          "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
-          "options": {
-            "showHeader": true,
-            "cellHeight": "sm",
-            "footer": {
-              "show": false
-            }
-          },
-          "fieldConfig": {
-            "defaults": {
-              "noValue": "UNKNOWN",
-              "unit": "none",
-              "custom": {
-                "align": "left",
-                "cellOptions": {
-                  "type": "auto",
-                  "wrapText": false
-                },
-                "inspect": true
-              }
-            },
-            "overrides": []
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "type": "json",
-              "source": "url",
-              "parser": "backend",
-              "format": "table",
-              "root_selector": "summary",
-              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
-              "url_options": {
-                "method": "GET",
-                "data": ""
-              }
-            }
-          ],
-          "transformations": [],
-          "links": [
-            {
-              "title": "Open run in Run Explorer",
-              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-              "targetBlank": false,
-              "includeVars": false
-            }
-          ]
-        },
-        {
           "id": 9451,
           "type": "table",
           "title": "Inspect Selected Run Domains",
@@ -4625,14 +4608,59 @@
             }
           ],
           "transformations": [],
-          "links": [
-            {
-              "title": "Open run in Run Explorer",
-              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-              "targetBlank": false,
-              "includeVars": false
+          "links": []
+        },
+        {
+          "id": 9452,
+          "type": "table",
+          "title": "Inspect Selected Run Identity",
+          "gridPos": {
+            "x": 0,
+            "y": 34,
+            "w": 24,
+            "h": 6
+          },
+          "datasource": "BioETL Ops HTTP",
+          "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {
+              "show": false
             }
-          ]
+          },
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "UNKNOWN",
+              "unit": "none",
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": false
+                },
+                "inspect": true
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "type": "json",
+              "source": "url",
+              "parser": "backend",
+              "format": "table",
+              "root_selector": "summary",
+              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+              "url_options": {
+                "method": "GET",
+                "data": ""
+              }
+            }
+          ],
+          "transformations": [],
+          "links": []
         }
       ]
     }

@@ -281,6 +281,7 @@ nav:
           - "ADR-057 Deterministic Runtime Config Authority": 02-architecture/decisions/ADR-057-deterministic-runtime-config-authority-and-identity.md
           - "ADR-058 Layered Port Registries": 02-architecture/decisions/ADR-058-layered-port-registries.md
           - "ADR-059 Package Cohesion Budgets": 02-architecture/decisions/ADR-059-package-cohesion-budgets.md
+          - "ADR-061 Persisted Selected Run Assessment": 02-architecture/decisions/ADR-061-persisted-selected-run-assessment.md
           - "Infrastructure Config Package Root Sunset": 02-architecture/compatibility/infrastructure-config-package-root-sunset.md
           - "Public API Freeze": 00-project/ai/agents/guides/PUBLIC_API_FREEZE.md
   - Guides:

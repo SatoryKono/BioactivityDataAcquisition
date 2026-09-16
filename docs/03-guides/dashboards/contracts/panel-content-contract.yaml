@@ -2929,7 +2929,10 @@ dashboards:
         - operator_guidance
         fixture_cases:
         - not_applicable
-        render_profiles: *id005
+        render_profiles: &id006
+        - full_dark
+        - full_light
+        - zoom_200
       '32010':
         title: Inspect Full Ranked Suspects
         role: row_group
@@ -2944,7 +2947,7 @@ dashboards:
         - operator_guidance
         fixture_cases:
         - not_applicable
-        render_profiles: *id005
+        render_profiles: *id006
   bioetl-overview-v2:
     panels:
       '99':
@@ -2992,7 +2995,7 @@ dashboards:
         - first_window_light
         - zoom_200
       '215':
-        title: Review Current First Action
+        title: Review First Action
         role: next_action
         tier: 1
         scope: current
@@ -3611,7 +3614,7 @@ dashboards:
         - operator_guidance
         fixture_cases:
         - not_applicable
-        render_profiles: *id005
+        render_profiles: *id006
   bioetl-provider-health-v2:
     panels:
       '1':
@@ -5716,4 +5719,4 @@ dashboards:
         - operator_guidance
         fixture_cases:
         - not_applicable
-        render_profiles: *id005
+        render_profiles: *id006

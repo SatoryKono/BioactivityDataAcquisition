@@ -403,7 +403,7 @@ def test_rf003_1024_layout_prioritizes_actions_and_readability() -> None:
     assert len(str(first_action["title"])) <= 24
     assert len(first_action.get("options", {}).get("dataLinks", [])) >= 4
     inputs = _panel(overview, 9002)
-    assert inputs["title"] == "Review Domain Status"
+    assert inputs["title"] == "Review Selected Run Domains"
     assert inputs["gridPos"]["y"] == first_action["gridPos"]["y"]
     assert inputs["gridPos"]["w"] >= 8
     assert first_action["gridPos"]["y"] < _panel(overview, 9603)["gridPos"]["y"]
@@ -566,13 +566,21 @@ def test_audit_followup_action_first_layout_contracts() -> None:
     provider_rows = [
         panel for panel in provider.get("panels", []) if panel.get("type") == "row"
     ]
-    assert [panel.get("id") for panel in provider_rows] == [9106, 9105, 91, 9404, 9405]
+    assert [panel.get("id") for panel in provider_rows] == [
+        9106,
+        9105,
+        91,
+        9404,
+        9405,
+        9450,
+    ]
     assert [panel.get("gridPos", {}).get("y") for panel in provider_rows] == [
         17,
         18,
         19,
         20,
         21,
+        22,
     ]
     assert all(panel.get("collapsed") is True for panel in provider_rows)
     for panel_id in (9101, 9102, 9103):
@@ -587,12 +595,14 @@ def test_audit_followup_action_first_layout_contracts() -> None:
         "Selected Range · Impact & Freshness",
         "Selected Range · Reject Evidence",
         "Selected Range · Validation Diagnostics",
+        "Inspect Saved Run Evidence",
     ]
     assert [panel.get("gridPos", {}).get("y") for panel in dq_rows] == [
         18,
         19,
         20,
         21,
+        22,
     ]
     assert all(panel.get("collapsed") is True for panel in dq_rows)
 

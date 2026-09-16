@@ -104,7 +104,7 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
 ### 11. Inspect Selected Run Summary
 
 Shipped in `bioetl-incident-v1.json`.
-### 12. Review Selected Run Summary
+### 12. Review Selected Run Status
 
 Shipped in `bioetl-incident-v1.json`.
 
@@ -123,3 +123,11 @@ Complete evidence is available in the collapsed detail group. The table reuses t
 ### 103. Inspect Full Current Alerts
 
 Complete evidence is available in the collapsed detail group. The table reuses the source panel response before transformations, keeps all rows, and shows the total through native pagination. It issues no duplicate backend query.
+
+## Saved evidence and discovery panels
+
+| ID | Title | Purpose |
+| --- | --- | --- |
+| 9450 | Inspect Saved Run Evidence | Saved exact-run evidence; expand for identity, version, reasons and actions. |
+| 9451 | Inspect Selected Run Domains | Saved exact-run evidence; expand for identity, version, reasons and actions. |
+| 9452 | Inspect Selected Run Identity | Saved exact-run evidence; expand for identity, version, reasons and actions. |

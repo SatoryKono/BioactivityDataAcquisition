@@ -5,7 +5,7 @@ audits:
     status: current
     report_path: reports/quality/total-tech-debt-audit-main-current.md
     audited_commit_sha: 09ab9ac286bacb7eee3324e950603539a5c62ee6
-    evidence_surface_sha256: a31671792796357a73c0cb1132620267b8ba53dba2812a05f56b1c616e8cb650
+    evidence_surface_sha256: 0aa0cfd2b830cf78b5ea1e8b88f0930b94a507007726bb32ed72e96911c8eb85
     evidence_paths:
       - configs/quality/constructor_waivers.yaml
       - reports/quality/architecture-quality-scorecard.json

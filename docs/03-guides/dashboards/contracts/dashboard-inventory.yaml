@@ -12,7 +12,7 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 66
+    panel_count: 69
     key_panels:
       - id: 891
         title: "Monitor Replay Safety"
@@ -52,14 +52,14 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 30
+    panel_count: 33
     key_panels:
       - id: 214
         title: Monitor Scope Health
         type: stat
         description: Current system status summary
       - id: 215
-        title: Review Current First Action
+        title: Review First Action
         type: table
         description: Recommended first action for current state
       - id: 1000
@@ -81,7 +81,7 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 47
+    panel_count: 50
     key_panels:
       - id: 9401
         title: Monitor Pipeline Status
@@ -116,7 +116,7 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 37
+    panel_count: 40
     key_panels:
       - id: 9101
         title: Monitor Fleet Severity
@@ -146,7 +146,7 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 37
+    panel_count: 40
     key_panels:
       - id: 9401
         title: Monitor Current DQ Status
@@ -183,7 +183,7 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 19
+    panel_count: 22
     key_panels:
       - id: 2010
         title: "Inspect Ranked Suspects"
@@ -214,7 +214,7 @@ dashboards:
     data_sources:
       - Prometheus
       - BioETL Ops HTTP
-    panel_count: 3
+    panel_count: 6
     key_panels:
       - id: 3010
         title: Inspect Recent Runs (last 10)
