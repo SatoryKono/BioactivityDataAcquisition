@@ -903,3 +903,245 @@ def test_provider_observation_preserves_probe_fallback(reason):
         assert provider["facts"]["probe_fallback_reason"] == reason
     finally:
         reset_run_observations(token)
+
+
+def test_completion_capture_failure_is_recorded() -> None:
+    from types import SimpleNamespace
+
+    from bioetl.application.services.run_reports.control_plane_snapshot import (
+        capture_run_completion,
+    )
+
+    def fail(*_args):
+        raise RuntimeError("control plane unavailable")
+
+    token = bind_run_observations()
+    try:
+        capture_run_completion(
+            fail,
+            SimpleNamespace(
+                pipeline_name="chembl_activity",
+                run_id="run-a",
+                completed_at=datetime(2026, 1, 1, tzinfo=UTC),
+            ),
+            None,
+        )
+        assert run_observations()["Control Plane"]["reason"] == (
+            "completion_assessment_failed"
+        )
+    finally:
+        reset_run_observations(token)
+
+
+def test_dq_observation_returns_original_result() -> None:
+    from types import SimpleNamespace
+
+    from bioetl.application.services.run_reports.observations import (
+        record_dq_observation,
+    )
+
+    result = SimpleNamespace(
+        status=SimpleNamespace(value="warning"),
+        error_rate=0.25,
+        has_critical=False,
+        rule_outcomes_count=2,
+    )
+    token = bind_run_observations()
+    try:
+        assert record_dq_observation(result) is result
+        assert run_observations()["Data Quality"]["verdict"] == "WARN"
+    finally:
+        reset_run_observations(token)
+
+
+def test_publish_snapshot_rejects_revision_content_conflict(tmp_path: Path) -> None:
+    from bioetl.application.services.run_reports.snapshots import publish_snapshot
+
+    store = FileRunReportStoreAdapter()
+    path = tmp_path / "pipeline-run-report.json"
+    payload = publish_snapshot(report().to_dict(), path, store=store)
+    revision = payload["selected_run_snapshot"]["revision"]
+    revision_path = path.parent / "status-revisions" / f"{revision}.json"
+    revision_path.write_text("{}", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="revision conflict"):
+        publish_snapshot(report().to_dict(), path, store=store)
+
+
+def test_workflow_child_validation_rejects_path_and_corrupt_observations(
+    tmp_path: Path,
+) -> None:
+    from bioetl.application.services.run_reports.workflow_observations import (
+        _child_path,
+        finalize_workflow_children,
+    )
+    from bioetl.domain.run_reports.models import WorkflowExecutionRow, WorkflowRunReport
+
+    invalid = WorkflowExecutionRow(
+        step_id="invalid",
+        status="success",
+        records_extracted=0,
+        pipeline_name="../escape",
+        pipeline_run_id="run-a",
+    )
+    with pytest.raises(ValueError, match="workflow_child_identity_invalid"):
+        _child_path(tmp_path, invalid)
+
+    child = report()
+    child.identity["workflow_run_id"] = "workflow-a"
+    persisted = persist(tmp_path, child)
+    payload = json.loads(persisted.json_path.read_text(encoding="utf-8"))
+    payload.pop("selected_run_snapshot")
+    payload["observations"] = []
+    snapshot = build_snapshot(payload)
+    payload["selected_run_snapshot"] = snapshot
+    revision_path = (
+        persisted.json_path.parent / "status-revisions" / f"{snapshot['revision']}.json"
+    )
+    revision_path.write_text(json.dumps(snapshot), encoding="utf-8")
+    persisted.json_path.write_text(json.dumps(payload), encoding="utf-8")
+    row = WorkflowExecutionRow(
+        step_id="step-a",
+        status="success",
+        records_extracted=1,
+        pipeline_name="chembl_activity",
+        pipeline_run_id="run-a",
+    )
+    workflow = WorkflowRunReport(
+        identity={"workflow_run_id": "workflow-a", "status": "success"},
+        plan_steps=(),
+        totals={},
+        execution=(row,),
+    )
+    with pytest.raises(ValueError, match="workflow_child_observations_corrupt"):
+        finalize_workflow_children(
+            workflow, root=tmp_path, store=FileRunReportStoreAdapter()
+        )
+
+    missing = replace(row, pipeline_run_id="missing")
+    finalize_workflow_children(
+        replace(workflow, execution=(missing,)),
+        root=tmp_path,
+        store=FileRunReportStoreAdapter(),
+    )
+
+
+def test_selected_status_rejects_invalid_observation_and_rules() -> None:
+    from bioetl.domain.run_reports.selected_status import assess_report
+
+    value = report().to_dict()
+    value["observations"]["Provider"]["verdict"] = "SURPRISE"
+    assessed = assess_report(value)
+    provider = next(row for row in assessed["domains"] if row["domain"] == "Provider")
+    assert provider["verdict"] == "UNKNOWN"
+    with pytest.raises(ValueError, match="assessment_rules_unsupported"):
+        assess_report(value, rules_version="future")
+
+
+def test_archive_report_source_empty_legacy_missing_and_containment(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from types import SimpleNamespace
+
+    from bioetl.infrastructure.control_plane.archive_run_reports import (
+        selected_report_sources,
+    )
+
+    manifest = SimpleNamespace(run_id="run-a", pipeline_name="chembl_activity")
+    assert selected_report_sources(tmp_path, manifest) == {}
+
+    path = persist(tmp_path).json_path
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload.pop("selected_run_snapshot")
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    assert list(selected_report_sources(tmp_path, manifest).values()) == [path]
+
+    original_is_symlink = Path.is_symlink
+    monkeypatch.setattr(
+        Path,
+        "is_symlink",
+        lambda candidate: candidate == path or original_is_symlink(candidate),
+    )
+    with pytest.raises(ValueError, match="archive_report_symlink_rejected"):
+        selected_report_sources(tmp_path, manifest)
+
+    escaped = SimpleNamespace(run_id="run-a", pipeline_name="../..")
+    with pytest.raises(ValueError, match="archive_report_outside_root"):
+        selected_report_sources(tmp_path, escaped)
+
+
+def test_scope_mismatch_and_selected_status_defensive_paths(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from bioetl.interfaces.http._selected_run_live import scope_matches
+    from bioetl.interfaces.http import selected_run_status as selected
+
+    assert not scope_matches(
+        {"run_type": "backfill", "workflow_id": "wf-a"},
+        {"run_type": "incremental", "workflow": "wf-a"},
+    )
+    monkeypatch.setattr(
+        selected.run_report_ops, "_safe_segment", lambda _value: "other"
+    )
+    with pytest.raises(ValueError, match="invalid_run_id"):
+        selected._selected_pipeline(".*", "../bad", tmp_path)
+    monkeypatch.undo()
+
+    path = persist(tmp_path).json_path
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload.pop("selected_run_snapshot")
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    assert read(tmp_path)["verdict"] == "INCOMPLETE"
+
+    persist(tmp_path)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["identity"]["status"] = "failed"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    assert read(tmp_path)["evidence_availability"] == "evidence_corrupt"
+
+    persist(tmp_path)
+    original_resolve = Path.resolve
+
+    def escaped_revision(candidate: Path, *args, **kwargs):
+        if candidate.parent.name == "status-revisions":
+            return tmp_path.parent / candidate.name
+        return original_resolve(candidate, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "resolve", escaped_revision)
+    assert read(tmp_path)["evidence_availability"] == "evidence_corrupt"
+
+
+async def test_selected_status_handler_covers_selector_and_request_failures(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from bioetl.interfaces.http import selected_run_status as selected
+
+    persist(tmp_path)
+    monkeypatch.setattr(
+        "bioetl.interfaces.http.run_report_ops._effective_root", lambda root: tmp_path
+    )
+    host = MagicMock()
+    host._read_required_param.side_effect = lambda query, key: query[key]
+    host._read_optional_param.side_effect = lambda query, key: query.get(key)
+    host._forensic_endpoint_limiter = asyncio.Semaphore(1)
+    host._send_payload_response = AsyncMock()
+    monkeypatch.setattr(selected, "scope_matches", lambda *_args: False)
+    await handle_selected_run_status(
+        host,
+        MagicMock(),
+        {"pipeline": "chembl_activity", "run_id": "run-a"},
+    )
+    assert host._send_payload_response.call_args.args[2]["reason"] == (
+        "selector_context_mismatch"
+    )
+
+    async def fail(**_kwargs):
+        raise ValueError("broken")
+
+    monkeypatch.setattr(selected, "run_bounded_forensic_operation", fail)
+    await handle_selected_run_status(
+        host,
+        MagicMock(),
+        {"pipeline": "chembl_activity", "run_id": "run-a"},
+    )
+    assert host._send_payload_response.call_args.args[2]["reason"] == "request_failed"

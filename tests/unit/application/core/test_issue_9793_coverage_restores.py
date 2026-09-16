@@ -534,6 +534,24 @@ def test_file_artifact_lifecycle_uri_and_planned_bronze(tmp_path: Any) -> None:
         seen=seen,  # type: ignore[arg-type]
     )
 
+    from bioetl.infrastructure.control_plane._file_artifact_lifecycle_bronze_refs import (
+        _append_cached_bronze_candidates,
+    )
+
+    relative_candidates: list[tuple[object, object]] = []
+    _append_cached_bronze_candidates(
+        relative_candidates,  # type: ignore[arg-type]
+        [],
+        tmp_path / "control-plane",
+        SimpleNamespace(
+            source_refs=(),
+            planned_artifacts=(SimpleNamespace(layer="bronze", path="planned.parquet"),),
+        ),  # type: ignore[arg-type]
+    )
+    assert relative_candidates == [
+        (ControlPlaneArtifactSurface.CACHED_BRONZE, tmp_path / "planned.parquet")
+    ]
+
     checkpoint = tmp_path / "chembl_activity.json"
     checkpoint.write_text("{not-json", encoding="utf-8")
     _append_latest_checkpoint_if_matching(
