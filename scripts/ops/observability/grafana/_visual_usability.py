@@ -346,7 +346,9 @@ def _dq(p: dict[int, dict]) -> None:
         "operational status and the 7d retained stat. Line and legend color use "
         "the minimum observed score in this range, with the stat's thresholds. "
         "Missing intervals remain gaps and do not recolor history. "
-        "100% does not prove current completeness; missing telemetry is not zero."
+        "100% does not prove current completeness. UNKNOWN / TELEMETRY MISSING "
+        "means no observed samples, not zero; full identifiers remain available "
+        "in the series legend and tooltip."
     )
     row = p[9404]
     row["panels"] = [child for child in row["panels"] if child["id"] not in {157, 158}]

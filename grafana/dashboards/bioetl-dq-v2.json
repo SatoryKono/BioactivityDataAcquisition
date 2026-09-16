@@ -3866,7 +3866,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Observed volume-weighted DQ score, separate from current operational status and the 7d retained stat. Line and legend color use the minimum observed score in this range, with the stat's thresholds. Missing intervals remain gaps and do not recolor history. 100% does not prove current completeness; missing telemetry is not zero.",
+          "description": "TIME RANGE · Observed volume-weighted DQ score, separate from current operational status and the 7d retained stat. Line and legend color use the minimum observed score in this range, with the stat's thresholds. Missing intervals remain gaps and do not recolor history. 100% does not prove current completeness. UNKNOWN / TELEMETRY MISSING means no observed samples, not zero; full identifiers remain available in the series legend and tooltip.",
           "fieldConfig": {
             "defaults": {
               "color": {
