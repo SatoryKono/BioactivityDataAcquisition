@@ -30,7 +30,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from httpx import HTTPStatusError, Request, Response
@@ -74,7 +74,7 @@ def test_resolve_failure_health_status_maps_transient_http_status_to_degraded() 
     assert (
         resolve_failure_health_status(
             error=error,
-            fallback_status=HealthStatus.HEALTHY,
+            fallback_status=HealthStatus.DEGRADED,
         )
         is HealthStatus.DEGRADED
     )
@@ -109,3 +109,49 @@ def test_build_error_context_includes_circuit_breaker_state() -> None:
 
     assert context["circuit_breaker_state"] == "half_open"
     assert context["circuit_breaker_failures"] == 1
+
+
+def test_resolve_failure_health_status_degrades_connection_error() -> None:
+    assert (
+        resolve_failure_health_status(
+            error=ConnectionError("offline"),
+            fallback_status=HealthStatus.DEGRADED,
+        )
+        is HealthStatus.DEGRADED
+    )
+
+
+def test_resolve_failure_health_status_preserves_nontransient_fallback() -> None:
+    request = Request("GET", "https://example.test/health")
+    response = Response(status_code=404, request=request)
+    error = HTTPStatusError("missing", request=request, response=response)
+    assert (
+        resolve_failure_health_status(
+            error=error,
+            fallback_status=HealthStatus.DEGRADED,
+        )
+        is HealthStatus.DEGRADED
+    )
+
+
+def test_get_consecutive_health_failures_fails_closed() -> None:
+    circuit_breaker = MagicMock()
+    circuit_breaker.get_failure_count.side_effect = ValueError("bad count")
+    assert get_consecutive_health_failures(circuit_breaker) == 1
+
+
+def test_fallback_health_status_fails_closed() -> None:
+    with patch(
+        "bioetl.infrastructure.adapters.http.health.assess_health_from_circuit_breaker",
+        side_effect=RuntimeError("bad state"),
+    ):
+        assert fallback_health_status(MagicMock()) is HealthStatus.UNHEALTHY
+
+
+def test_build_error_context_fails_closed() -> None:
+    circuit_breaker = MagicMock()
+    circuit_breaker.get_state.side_effect = KeyError("missing")
+    assert build_error_context(circuit_breaker) == {
+        "circuit_breaker_state": None,
+        "circuit_breaker_failures": 0,
+    }

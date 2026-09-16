@@ -4,6 +4,8 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import pytest
 
 from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
@@ -15,7 +17,12 @@ from bioetl.domain.run_reports.reason_catalog import (
     normalize_reason_code,
 )
 from bioetl.domain.run_reports.workflow_builder import build_workflow_run_report
-from bioetl.domain.run_reports.workflow_reasons import normalize_top_reasons
+from bioetl.domain.run_reports.workflow_reasons import (
+    _as_int,
+    _optional_reason_text,
+    build_reasons_rollup,
+    normalize_top_reasons,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -97,3 +104,81 @@ def test_top_reasons_are_largest_by_count_regardless_of_input_order() -> None:
     assert [item["reason_code"] for item in ranked] == ["B", "D", "C"]
     reversed_ranked = normalize_top_reasons(tuple(reversed(raw)))
     assert [item["reason_code"] for item in reversed_ranked] == ["B", "D", "C"]
+
+
+@pytest.mark.parametrize("raw", [None, 1, "reason", b"reason"])
+def test_top_reasons_rejects_non_reason_sequences(raw: object) -> None:
+    assert normalize_top_reasons(raw) == ()
+
+
+def test_top_reasons_filters_invalid_entries_and_normalizes_payload() -> None:
+    ranked = normalize_top_reasons(
+        [
+            "invalid",
+            {},
+            {"reason_code": ""},
+            {
+                "reason_code": 42,
+                "outcome": "filtered_out",
+                "reason_family": "quality",
+                "count": "3",
+            },
+        ]
+    )
+    assert ranked == (
+        {
+            "reason_code": "42",
+            "outcome": "filtered_out",
+            "reason_family": "quality",
+            "count": 3,
+        },
+    )
+
+
+def test_build_reasons_rollup_aggregates_same_semantic_key() -> None:
+    rows = [
+        SimpleNamespace(
+            top_reasons=(
+                {
+                    "reason_code": "FILTERED",
+                    "outcome": "filtered_out",
+                    "reason_family": "quality",
+                    "count": 2,
+                },
+            )
+        ),
+        SimpleNamespace(
+            top_reasons=(
+                {
+                    "reason_code": "FILTERED",
+                    "outcome": "filtered_out",
+                    "reason_family": "quality",
+                    "count": 3,
+                },
+                {"reason_code": "OTHER", "outcome": 123, "count": 1},
+            )
+        ),
+    ]
+    assert build_reasons_rollup(rows) == (
+        {
+            "reason_code": "FILTERED",
+            "outcome": "filtered_out",
+            "reason_family": "quality",
+            "count": 5,
+        },
+        {
+            "reason_code": "OTHER",
+            "outcome": None,
+            "reason_family": None,
+            "count": 1,
+        },
+    )
+
+
+def test_reason_scalar_normalizers_fail_closed() -> None:
+    assert _optional_reason_text("kept") == "kept"
+    assert _optional_reason_text(1) is None
+    assert _as_int(None, default=7) == 7
+    assert _as_int(object(), default=8) == 8
+    assert _as_int("bad", default=9) == 9
+    assert _as_int(float("inf"), default=10) == 10

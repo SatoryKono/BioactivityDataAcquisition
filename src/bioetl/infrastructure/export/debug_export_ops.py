@@ -116,7 +116,8 @@ def chunk_table_rows(
 def sheet_name_for_chunk(table_name: str, chunk_index: int, chunk_count: int) -> str:
     if chunk_count == 1:
         return table_name[:31]
-    return f"{table_name}_{chunk_index:04d}"[:31]
+    suffix = f"_{chunk_index:04d}"
+    return f"{table_name[: 31 - len(suffix)]}{suffix}"
 
 
 def write_sheet_rows(

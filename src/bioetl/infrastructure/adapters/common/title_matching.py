@@ -85,8 +85,6 @@ def titles_match(
         # Jaccard similarity on word sets
         q_words = set(q.split())
         f_words = set(f.split())
-        if not q_words or not f_words:
-            return False
         intersection = len(q_words & f_words)
         union = len(q_words | f_words)
         return (intersection / union) >= threshold
