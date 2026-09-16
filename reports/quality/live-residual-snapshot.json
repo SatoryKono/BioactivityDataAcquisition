@@ -23,9 +23,9 @@
     "composition_bootstrap_runtime": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 2,
-      "helper_function_ratio": 0.338,
+      "helper_function_ratio": 0.33,
       "files": 51,
-      "total_loc": 6136,
+      "total_loc": 6133,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
@@ -49,10 +49,10 @@
     },
     "composition_runtime_builders": {
       "files_ge_250_loc": 0,
-      "max_internal_fan_in": 3,
+      "max_internal_fan_in": 2,
       "helper_function_ratio": 0.375,
-      "files": 57,
-      "total_loc": 7219,
+      "files": 55,
+      "total_loc": 7098,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     }

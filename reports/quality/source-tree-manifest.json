@@ -1,12 +1,6 @@
 {
   "schema_version": 1,
   "linked_issue": "9602",
-<<<<<<< HEAD
-  "source_tree_sha256": "cb90f15de3a7526828f4ed6238c2d160a858afd2a57973b48031c2e6156f23c0",
-||||||| 5ef3a2c12bc
-  "source_tree_sha256": "0a49c2693d2edd72196cb5dc1f688ac6fb6145d97ade873782d240d2b6a81bed",
-=======
-  "source_tree_sha256": "856a48a819b44b55fa24fe572b9ea97dfd1d0f34227f7a426af3df443eeba98d",
->>>>>>> codex/issue-10469-full-coverage-final
+  "source_tree_sha256": "2a640062c2acffde5aced6ccb9f2739fb548628341a0d60fc3c89a64e7f5cb21",
   "generated_from_manifest": true
 }
