@@ -100,23 +100,7 @@ class PipelineRunnerService:
         run_id: UUID | None = None,
         options: RunOptions | None = None,
     ) -> RunResult:
-        """Run a pipeline and return normalized execution result.
-
-        Args:
-            pipeline_name: Registered pipeline identifier to execute.
-            dry_run: If True, validate and plan but skip storage writes.
-                Overridden by options.dry_run if options is provided.
-            run_id: Optional explicit UUID for the run. Required for exact replay
-                and auto-generated only for operational runtime paths.
-            options: Optional RunOptions controlling run type, limit, filters, etc.
-                If None, a default RunOptions instance is created using dry_run.
-
-        Returns:
-            RunResult with status, record counts, duration, and error details.
-
-        Raises:
-            PipelineNotFoundError: If pipeline_name is not registered in the factory.
-        """
+        """Run a registered pipeline and return a normalized ``RunResult``."""
         started_at, started_monotonic = capture_runtime_timing_anchor(
             clock=self.clock,
             started_at=self.clock.now(),

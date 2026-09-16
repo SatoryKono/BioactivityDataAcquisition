@@ -281,7 +281,6 @@ nav:
           - "ADR-057 Deterministic Runtime Config Authority": 02-architecture/decisions/ADR-057-deterministic-runtime-config-authority-and-identity.md
           - "ADR-058 Layered Port Registries": 02-architecture/decisions/ADR-058-layered-port-registries.md
           - "ADR-059 Package Cohesion Budgets": 02-architecture/decisions/ADR-059-package-cohesion-budgets.md
-          - "ADR-060 Prompt Kernel and Overlay Architecture": 02-architecture/decisions/ADR-060-prompt-kernel-and-overlay-architecture.md
           - "Infrastructure Config Package Root Sunset": 02-architecture/compatibility/infrastructure-config-package-root-sunset.md
           - "Public API Freeze": 00-project/ai/agents/guides/PUBLIC_API_FREEZE.md
   - Guides:
@@ -551,6 +550,7 @@ nav:
           - "Scaling": 05-operations/runbooks/scaling.md
           - "Publication Validation": 05-operations/runbooks/publication-validation-runbook.md
           - "Generated Artifact Drift": 05-operations/runbooks/generated-artifact-drift-workflow.md
+          - "Game Day": 05-operations/runbooks/game-day.md
           - "Workflow Control Plane": 05-operations/runbooks/workflow-control-plane.md
       - "Performance Baselines": 05-operations/performance-baselines.md
       - "VACUUM & Retention": 05-operations/vacuum-retention.md
