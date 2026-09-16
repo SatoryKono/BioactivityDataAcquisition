@@ -253,9 +253,9 @@ def test_apply_to_dashboard_expands_nav_and_reclaims_first_window(
     )
 
     rendered = json.loads(dashboard.read_text(encoding="utf-8"))
-    nav, slack, first_window = rendered["panels"]
-    assert nav["gridPos"] == {"x": 0, "y": 0, "w": 24, "h": 3}
-    assert slack["gridPos"]["h"] == 4
+    nav, slack, first_window = [p for p in rendered["panels"] if p["id"] != 9450]
+    assert nav["gridPos"] == {"x": 0, "y": 0, "w": 24, "h": 2}
+    assert slack["gridPos"]["h"] == 5
     assert first_window["gridPos"]["y"] + first_window["gridPos"]["h"] == 17
     assert len(nav["links"]) == 6
     assert "bioetl-panel-title" not in nav["options"]["content"]

@@ -32,8 +32,9 @@ TIME_TOKEN = "${__url_time_range}"
 RUN_ID_TEMPLATE = "$run_id"
 HTML_AMPERSAND = "&amp;"
 _CUSTOM_INSPECT = "custom.inspect"
-# Grafana query-variable regex: capture trimmed non-empty token.
-RUN_ID_GRAFANA_REGEX = r"/^\s*(\S(?:.*\S)?)\s*$/"
+# The API normalizes identity. Grafana capture groups replace the readable label
+# with the matched UUID even when Infinity supplies separate __text/__value.
+RUN_ID_GRAFANA_REGEX = ""
 _RUN_ID_TEMPLATE_VALUES = frozenset(
     {
         RUN_ID_TEMPLATE,

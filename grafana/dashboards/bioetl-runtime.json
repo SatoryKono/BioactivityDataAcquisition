@@ -204,7 +204,7 @@
           }
         },
         "refresh": 1,
-        "regex": "/^\\s*(\\S(?:.*\\S)?)\\s*$/",
+        "regex": "",
         "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
@@ -299,7 +299,7 @@
   "panels": [
     {
       "gridPos": {
-        "h": 3,
+        "h": 2,
         "w": 24,
         "x": 0,
         "y": 0
@@ -396,13 +396,13 @@
         "h": 3,
         "w": 16,
         "x": 0,
-        "y": 3
+        "y": 2
       },
       "description": "Distinguishes CURRENT Prometheus state, SELECTED RUN HTTP evidence, and selected-range history for Pipeline and Run Type. Run ID never filters Prometheus; Stage and collection states are context, not delivery proof. UNKNOWN means evidence is incomplete Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: stage=${stage} · provider_hint=${provider_hint}.",
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Pipeline Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">CURRENT · Blockers and expected stage signals use Pipeline / Run Type.<br>SCRAPING is not proof of completeness or an active blocker. Presence is not event freshness. UNKNOWN means the evidence cannot establish health.</div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2\">CURRENT · Pipeline / Run Type. <b>INCOMPLETE / UNKNOWN:</b> expected stage evidence is unverified. Check <b>Expected stage signals</b>, then open <b>Review Stage Progress</b> below. SCRAPING and None observed do not prove completeness or health.</div>"
       },
       "links": []
     },
@@ -414,7 +414,7 @@
         "h": 3,
         "w": 8,
         "x": 16,
-        "y": 3
+        "y": 2
       },
       "datasource": {
         "type": "prometheus",
@@ -773,7 +773,7 @@
         "h": 6,
         "w": 16,
         "x": 0,
-        "y": 6
+        "y": 5
       },
       "id": 9101,
       "options": {
@@ -989,7 +989,7 @@
         "h": 6,
         "w": 8,
         "x": 16,
-        "y": 6
+        "y": 5
       },
       "id": 9102,
       "options": {
@@ -1053,7 +1053,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT stage snapshots and TIME RANGE-independent 5m throughput. Maximum observed value per stage across selected run types; inspect one Run Type for exact values. Missing signals remain UNKNOWN. An active blocker is not established by missing evidence.",
+      "description": "CURRENT stage snapshots and TIME RANGE-independent 5m throughput. Maximum observed value per stage across selected run types; inspect one Run Type for exact values. Missing signals remain UNKNOWN. An active blocker is not established by missing evidence. INCOMPLETE: inspect expected-stage evidence; no observed blocker is not proof of coverage.",
       "fieldConfig": {
         "defaults": {
           "noValue": "UNKNOWN",
@@ -1107,9 +1107,9 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 12,
+        "y": 11,
         "w": 24,
-        "h": 5
+        "h": 6
       },
       "id": 2460,
       "options": {
@@ -2515,7 +2515,7 @@
           },
           "options": {
             "mode": "html",
-            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:16px;white-space:normal\"><strong>Runtime escalation:</strong> blockers → phase evidence → action.<br>Use Incident Workspace for multi-domain impact; Run Explorer for exact-run proof.</div>"
+            "content": "**INCOMPLETE / UNKNOWN:** verify Stage Expectedness and Telemetry first. **None observed** means no observed blocker, not complete coverage. Use the Stage Progress panel links for the complete evidence table."
           },
           "transparent": true,
           "description": "Contains Runtime-owned failure, no-records, and memory-pressure signals. A zero is conclusive only when Metrics Coverage is complete; otherwise verify telemetry before following the relevant runbook or Run Explorer path"
@@ -3165,7 +3165,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Counts selected-Pipeline entities with freshness lag over 24 hours. Zero means none are stale only when freshness telemetry is available; UNKNOWN means target-domain evidence is missing. Open Data Quality or Provider Health for diagnosis",
+          "description": "TIME RANGE independent · CURRENT · Count of distinct pipeline/entity pairs whose last successful ingestion is over 24h old. Each entity contributes 0 or 1, never its age in seconds. Missing freshness telemetry stays UNKNOWN; an observed fresh entity gives zero. Pipeline applies; Run ID, Run Type and chart range do not. Open Data Quality for diagnosis.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3201,7 +3201,7 @@
                   }
                 ]
               },
-              "unit": "none",
+              "unit": "suffix: entities",
               "decimals": 0,
               "displayName": "Inspect Entities Stale Over 24h"
             },
@@ -3242,8 +3242,10 @@
           },
           "targets": [
             {
-              "expr": "sum(clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}), 0) > 86400) or (count(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}) * 0)",
-              "refId": "A"
+              "expr": "sum(clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}), 0) > bool 86400) or (count(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}) * 0)",
+              "refId": "A",
+              "instant": true,
+              "range": false
             }
           ],
           "title": "Inspect Entities Stale Over 24h",
@@ -4656,13 +4658,13 @@
             "x": 0,
             "y": 25,
             "w": 24,
-            "h": 10
+            "h": 8
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "lg",
+            "cellHeight": "sm",
             "footer": {
               "show": false,
               "enablePagination": true
@@ -4755,15 +4757,15 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 35,
+            "y": 33,
             "w": 24,
-            "h": 8
+            "h": 5
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "lg",
+            "cellHeight": "sm",
             "footer": {
               "show": false,
               "enablePagination": true

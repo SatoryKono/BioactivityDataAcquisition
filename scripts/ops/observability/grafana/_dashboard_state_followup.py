@@ -415,7 +415,7 @@ def apply_dashboard(dashboard: dict[str, Any]) -> None:
                     if n not in {"started_at", "coverage_chip"}
                 ]
                 o["indexByName"] = {n: i for i, n in enumerate(names)}
-                o["excludeByName"]["started_at"] = False
+                o.setdefault("excludeByName", {})["started_at"] = False
                 o["renameByName"].update(started_at="Started", coverage_chip="Coverage")
         if not any(t["id"] == "convertFieldType" for t in p["transformations"]):
             p["transformations"].insert(

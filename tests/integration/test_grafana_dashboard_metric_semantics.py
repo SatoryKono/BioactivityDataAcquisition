@@ -1839,12 +1839,10 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     }.get(dashboard_name, (9402, 9403))
     identity = panels[identity_id]
     processed = panels[processed_id]
-    expected_height = 6
-    assert (
-        identity.get("gridPos", {}).get("h")
-        == processed.get("gridPos", {}).get("h")
-        == expected_height
+    expected_heights = (
+        (9, 10) if dashboard_name == "bioetl-control-plane-v1.json" else (6, 6)
     )
+    assert (identity["gridPos"]["h"], processed["gridPos"]["h"]) == expected_heights
     identity_no_value = str(
         identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
     )
@@ -1878,7 +1876,10 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         if property_.get("id") == "custom.cellOptions"
         and property_.get("value", {}).get("wrapText") is True
     }
-    assert wrapped_identity_fields == {"parameter"}
+    expected_wrapped_fields = {"parameter"}
+    if dashboard_name == "bioetl-control-plane-v1.json":
+        expected_wrapped_fields |= {"Current"}
+    assert wrapped_identity_fields == expected_wrapped_fields
 
     assert processed.get("datasource") == "BioETL Ops HTTP"
     _assert_processed_records_target_contract(processed)

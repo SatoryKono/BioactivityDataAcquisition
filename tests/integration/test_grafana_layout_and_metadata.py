@@ -401,8 +401,8 @@ def test_control_plane_trust_panels_follow_reference_widths() -> None:
     processed = panels["Review Processed Records"]["gridPos"]
     telemetry = panels["Monitor Telemetry"]["gridPos"]
 
-    assert scope == {"x": 0, "y": 3, "w": 16, "h": 3}
-    assert readiness == {"x": 16, "y": 3, "w": 8, "h": 3}
+    assert scope == {"x": 0, "y": 2, "w": 16, "h": 3}
+    assert readiness == {"x": 16, "y": 2, "w": 8, "h": 3}
     assert readiness["w"] * readiness["h"] == 24
     assert run_summary["w"] == 24
     assert processed["w"] == 24
@@ -1120,8 +1120,8 @@ def test_table_panels_fill_panel_width() -> None:
     )
 
 
-def test_dq_score_chart_keeps_readable_height_without_legend() -> None:
-    """The score chart retains drawing room without redundant legend chrome.
+def test_dq_score_chart_keeps_readable_height_with_semantic_legend() -> None:
+    """The score chart identifies the measured series and retains drawing room.
 
     Issue #8530: DQ panel 153 Track Volume-Weighted DQ Score.
     """
@@ -1133,7 +1133,7 @@ def test_dq_score_chart_keeps_readable_height_without_legend() -> None:
     assert panel is not None, "DQ panel 153 must exist"
     assert panel.get("type") == "timeseries"
     assert panel.get("gridPos", {}).get("h") == 6
-    assert panel.get("options", {}).get("legend", {}).get("showLegend") is False
+    assert panel.get("options", {}).get("legend", {}).get("showLegend") is True
 
 
 def test_dashboard_metadata_policy_invariants() -> None:

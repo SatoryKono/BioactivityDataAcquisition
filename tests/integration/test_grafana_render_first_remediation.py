@@ -556,8 +556,8 @@ def test_audit_followup_action_first_layout_contracts() -> None:
     workflow = _panel(overview, 9013)
     navigation = _panel(overview, 9021)
     run_context = _panel(overview, 9602)
-    assert workflow.get("gridPos", {}).get("x") == 0
-    assert workflow.get("gridPos", {}).get("w") == 24
+    assert workflow.get("gridPos", {}).get("x") == 16
+    assert workflow.get("gridPos", {}).get("w") == 8
     assert navigation.get("gridPos", {}).get("h") <= 3
     assert run_context.get("collapsed") is True
     assert run_context.get("panels")
@@ -657,7 +657,7 @@ def test_rf007_counts_and_dense_legends_are_bounded() -> None:
     for panel_id in (1, 10, 11, 153, 155):
         legend = _panel(dq, panel_id).get("options", {}).get("legend")
         if isinstance(legend, dict):
-            assert legend.get("showLegend") is False
+            assert legend.get("showLegend") is (panel_id == 153)
         assert "full identifiers remain available" in str(
             _panel(dq, panel_id).get("description", "")
         )
@@ -923,10 +923,10 @@ def test_incident_alert_history_has_readable_full_width_layout() -> None:
     assert current_alerts.get("gridPos", {}).get("w") == 24
     assert history_grid.get("x") == 0
     assert history_grid.get("w") == 24
-    assert history_grid.get("h") == 8
+    assert history_grid.get("h") == 14
     assert history.get("options", {}).get("legend", {}).get("showLegend") is True
     assert history.get("options", {}).get("showValue") == "never"
-    assert history.get("options", {}).get("rowHeight") == 1.0
+    assert history.get("options", {}).get("rowHeight") == 0.85
     assert impact.get("gridPos", {}).get("y", 0) >= (
         history_grid.get("y", 0) + history_grid.get("h", 0)
     )
@@ -1176,7 +1176,7 @@ def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     assert "run_type" in hidden
     assert "message" in hidden
     grid = recent.get("gridPos") or {}
-    assert int(grid.get("h") or 0) == 11
+    assert int(grid.get("h") or 0) == 12
     assert int(grid.get("y") or 0) + int(grid.get("h") or 0) == 17
     assert recent.get("options", {}).get("cellHeight") == "sm"
     assert (

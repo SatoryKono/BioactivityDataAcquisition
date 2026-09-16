@@ -288,6 +288,8 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
 def stamp_selector_columns(payload: dict[str, object]) -> None:
     """Keep Infinity variable frames typed even when the catalog is empty."""
     for variable in payload.get("templating", {}).get("list", []):
+        if variable.get("name") == "run_id":
+            variable["regex"] = ""
         query = variable.get("query")
         if not isinstance(query, dict):
             continue

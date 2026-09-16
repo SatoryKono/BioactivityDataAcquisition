@@ -35,7 +35,9 @@ def test_exact_prometheus_evaluation_and_macro_window(monkeypatch):
         "bioetl-runtime", 1, "Test", "prometheus", "prometheus_query"
     )
     result = live._audit_prometheus_panel(
-        spec, {"targets": [{"expr": "increase(x[$__range]) / ${__range_s}"}]}, config
+        spec,
+        {"targets": [{"expr": "increase(x[$__range]) / ${__range_s}", "instant": True}]},
+        config,
     )
     query = parse_qs(urlsplit(calls[0]).query)
     assert query["time"] == ["1788783000.0"]
