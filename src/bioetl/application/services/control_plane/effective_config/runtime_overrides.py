@@ -5,8 +5,6 @@ from __future__ import annotations
 import copy
 from typing import cast
 
-from bioetl.domain.normalization.json import stable_json_hash as stable_hash
-from bioetl.domain.normalization.json import to_jsonable
 from bioetl.domain.control_plane.effective_config_artifact import (
     EFFECTIVE_CONFIG_IDENTITY_VERSION,
     EffectiveExecutionConfig,
@@ -22,6 +20,8 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
     normalize_required_persistence_profile,
 )
+from bioetl.domain.normalization.json import stable_json_hash as stable_hash
+from bioetl.domain.normalization.json import to_jsonable
 from bioetl.domain.types import JsonDict
 
 ALLOWLISTED_SEMANTIC_ENV_OVERRIDE_KEYS: frozenset[str] = frozenset(

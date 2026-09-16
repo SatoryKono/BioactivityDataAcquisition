@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.replay.historical_certification import (
+from bioetl.domain.control_plane.snapshot_materialization import (
     HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED,
     HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
     LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.application.services.control_plane.replay._historical_record_payload import (
+from bioetl.application.services.control_plane.replay.historical_identity_models import (
     build_historical_certification_payload,
     build_historical_certified_identity_payload,
     build_historical_run_identity_payload,

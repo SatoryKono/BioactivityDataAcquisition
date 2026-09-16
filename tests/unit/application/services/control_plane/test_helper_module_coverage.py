@@ -41,9 +41,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.diagnostic_c
     extract_diagnostic_context,
     update_correlation_anchor_gaps,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.nested_mapping import (
-    lookup_mapping_path,
-)
+from bioetl.domain.normalization.json import lookup_mapping_path
 from bioetl.application.services.control_plane.manifest.inspection_result_model import (
     RunManifestInspectionResult,
 )
@@ -146,17 +144,13 @@ def test_corpus_service_shares_export_tuple_without_importing_models() -> None:
     from pathlib import Path
 
     from bioetl.application.services.control_plane.replay import (
-        _historical_record_payload as payload,
-    )
-    from bioetl.application.services.control_plane.replay import (
         historical_corpus_models as models,
     )
     from bioetl.application.services.control_plane.replay import (
         historical_corpus_service as service,
     )
 
-    assert models.CORPUS_MODEL_PUBLIC_NAMES is payload.CORPUS_MODEL_PUBLIC_NAMES
-    assert service.CORPUS_MODEL_PUBLIC_NAMES is payload.CORPUS_MODEL_PUBLIC_NAMES
+    assert service.CORPUS_MODEL_PUBLIC_NAMES is models.CORPUS_MODEL_PUBLIC_NAMES
     tree = ast.parse(Path(service.__file__).read_text(encoding="utf-8"))
     imported_modules = [
         node.module

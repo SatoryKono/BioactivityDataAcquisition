@@ -4,19 +4,16 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from bioetl.application.services.control_plane.ledger.entry_diagnostic_details import (
-    RunLedgerCorrelationFieldsProtocol,
-)
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
-from bioetl.domain.normalization import (
-    normalize_contract_ref,
-    normalize_contract_version,
-    normalize_control_plane_opaque_hash_ref,
-)
 from bioetl.domain.control_plane.run_ledger import (
     ARTIFACT_PUBLISHED_EVENT,
     DQ_POLICY_APPLIED_EVENT,
     MANIFEST_CREATED_EVENT,
+)
+from bioetl.domain.normalization import (
+    normalize_contract_ref,
+    normalize_contract_version,
+    normalize_control_plane_opaque_hash_ref,
 )
 from bioetl.domain.types import RunID
 from bioetl.domain.types.dq_contracts import DQDisposition
@@ -28,7 +25,22 @@ __all__ = [
 ]
 
 
-class _RunLedgerCoreEventAppender(RunLedgerCorrelationFieldsProtocol, Protocol):
+class _RunLedgerCorrelationFields(Protocol):
+    pipeline_name: str | None
+    provider: str | None
+    entity: str | None
+    run_type: str | None
+    resolved_config_hash: str | None
+    effective_config_hash: str | None
+    contract_ref: str | None
+    contract_version: str | None
+    dq_policy_ref: str | None
+    rule_bundle_version: str | None
+    dq_contract_compatibility_hash: str | None
+    effective_config_artifact_id: str | None
+
+
+class _RunLedgerCoreEventAppender(_RunLedgerCorrelationFields, Protocol):
     @property
     def manifest_id(self) -> str: ...
 

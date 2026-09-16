@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.diagnostics.nested_mapping import (
-    lookup_mapping_path,
-)
+from bioetl.domain.normalization.json import lookup_mapping_path
 from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_ledger import (
     collect_ledger_input_snapshot_refs,
 )

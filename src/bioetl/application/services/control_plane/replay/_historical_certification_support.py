@@ -6,22 +6,18 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import cast
 
-from bioetl.application.services.control_plane.ledger.service import (
-    RunLedgerService,
-)
-from bioetl.application.services.control_plane.replay._historical_certification_models import (
+from bioetl.application.services.control_plane.ledger import RunLedgerService
+from bioetl.application.services.control_plane.replay._historical_certification_upstream import (
     HistoricalReplayCertificationProtocol as HistoricalReplayCertificationProtocol,
 )
-from bioetl.application.services.control_plane.replay._historical_certification_models import (
+from bioetl.application.services.control_plane.replay._historical_certification_upstream import (
     HistoricalReplayCertificationResult as HistoricalReplayCertificationResult,
 )
-from bioetl.application.services.control_plane.replay._historical_certification_models import (
+from bioetl.application.services.control_plane.replay._historical_certification_upstream import (
     HistoricalReplayCertificationResultAssembler as HistoricalReplayCertificationResultAssembler,
 )
-from bioetl.application.services.control_plane.replay._historical_certification_models import (
-    _source_key,
-)
 from bioetl.application.services.control_plane.replay._historical_certification_upstream import (
+    _source_key,
     load_upstream_manifest,
     validate_upstream_certification_state,
     validate_upstream_presence,

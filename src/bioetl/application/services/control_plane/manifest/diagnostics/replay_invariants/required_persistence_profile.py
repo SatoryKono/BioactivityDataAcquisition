@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.nested_mapping import (
-    lookup_mapping_path,
-)
+from bioetl.domain.normalization.json import lookup_mapping_path
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,

@@ -49,7 +49,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_ref
 from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_summary import (
     merge_ledger_input_snapshots_into_summary,
 )
-from bioetl.application.services.control_plane.replay.historical_certification import (
+from bioetl.domain.control_plane.snapshot_materialization import (
     LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,
     MIXED_POST_MANIFEST_SNAPSHOT_MATERIALIZATION,
 )

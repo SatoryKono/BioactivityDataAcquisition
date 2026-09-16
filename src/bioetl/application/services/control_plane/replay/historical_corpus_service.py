@@ -6,7 +6,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from importlib import import_module
 
-from bioetl.application.services.control_plane.replay._historical_record_payload import (
+from bioetl.application.services.control_plane.replay.historical_certification_service import (
     CORPUS_MODEL_PUBLIC_NAMES as CORPUS_MODEL_PUBLIC_NAMES,
 )
 from bioetl.application.services.control_plane.replay.historical_certification_service import (
