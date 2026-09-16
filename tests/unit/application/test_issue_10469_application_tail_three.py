@@ -236,7 +236,9 @@ def test_uniprot_comment_serialization_ignores_scalar_facets(
     monkeypatch.setattr(
         _comment_facets_all,
         "extract_all_comments_raw",
-        lambda _comments: {key: "invalid" for key in _comment_facets_all._COMMENT_OUTPUT_KEYS},
+        lambda _comments: dict.fromkeys(
+            _comment_facets_all._COMMENT_OUTPUT_KEYS, "invalid"
+        ),
     )
 
     result = _comment_facets_all.extract_all_comments(None)
