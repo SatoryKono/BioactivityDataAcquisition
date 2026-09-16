@@ -49392,8 +49392,8 @@
     }
   ],
   "schema_version": 1,
-  "snapshot_date": "2026-09-10",
-  "source_tree_sha256": "37b8fd1afbebd062937b7cbd17b58f1888813f5b55b725029c394bcfce8f9fc3",
+  "snapshot_date": "2026-09-16",
+  "source_tree_sha256": "5d563198ff63688ec4a86cc9c25d833ffc0f45c9fa7ce9db09a6d6e052fe7cb3",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

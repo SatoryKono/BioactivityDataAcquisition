@@ -1029,7 +1029,7 @@ def _stamp_current_readiness(by_id: dict[object, dict[str, object]]) -> None:
     readiness["description"] = (
         "CURRENT · Latest fresh pipeline/run_type telemetry. Run ID does not filter "
         "this panel. Palette: 0=OK, 1=WARN, 2=CRIT, 3=INCOMPLETE, "
-        "null=UNKNOWN. This CURRENT "
+        "null=UNKNOWN. UNKNOWN means evidence incomplete. This CURRENT "
         "verdict is not exact-run processing_status or trust_status. OK here does "
         "not authorize replay: selected-run trust_status INCOMPLETE or UNKNOWN "
         "still blocks replay."

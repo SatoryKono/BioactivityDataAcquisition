@@ -10,7 +10,7 @@ __all__ = ["dq_overrides_to_domain", "yaml_config_to_domain"]
 
 from typing import Literal
 
-from bioetl.domain.composite import ColumnGroupConfig, DataSchemaConfig
+from bioetl.domain.composite import ColumnGroupConfig
 from bioetl.domain.config import (
     DQConfig,
     FieldPolicyConfig,
@@ -191,12 +191,7 @@ def yaml_config_to_domain(
         else None
     )
 
-    if isinstance(yaml_config.data_schema, DataSchemaConfig):
-        data_schema = yaml_config.data_schema
-    elif yaml_config.data_schema is not None:
-        data_schema = DataSchemaConfig(**yaml_config.data_schema.model_dump())
-    else:
-        data_schema = None
+    data_schema = yaml_config.data_schema
 
     return PipelineConfig(
         pipeline_name=yaml_config.pipeline_name,

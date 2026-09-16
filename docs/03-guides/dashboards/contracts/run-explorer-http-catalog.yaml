@@ -40,6 +40,9 @@ endpoints:
   workflow_run_reports:
     path: /ops/observability/workflow-run-reports
     required_query: [workflow]
+  selected_run_status:
+    path: /ops/observability/selected-run-status
+    required_query: [pipeline, run_id, run_type, workflow]
 
 panels:
   - id: 3010
@@ -49,3 +52,17 @@ panels:
     root_selector: items
     no_value_tokens: [VALID EMPTY]
     copy_tokens: [TREE_MISSING, LAYOUT_UNHEALTHY]
+  - id: 9451
+    title: Inspect Selected Run Domains
+    endpoint: selected_run_status
+    url: /ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}
+    root_selector: domains
+    no_value_tokens: [UNKNOWN]
+    copy_tokens: [SELECT RUN, QUERY ERROR, VALID EMPTY, INCOMPLETE]
+  - id: 9452
+    title: Inspect Selected Run Identity
+    endpoint: selected_run_status
+    url: /ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}
+    root_selector: summary
+    no_value_tokens: [UNKNOWN]
+    copy_tokens: [SELECT RUN, QUERY ERROR, VALID EMPTY, INCOMPLETE]
