@@ -24,7 +24,7 @@ from bioetl.composition.runtime_builders._runtime_launch_context_fields import (
 from bioetl.composition.runtime_builders._run_context_values import (
     resolve_run_context_values,
 )
-from bioetl.composition.runtime_builders._snapshot_mapping_support import (
+from bioetl.composition.snapshot_serialization import (
     to_serializable_mapping as _to_serializable_mapping,
 )
 from bioetl.infrastructure.config.config_root import resolve_configs_root

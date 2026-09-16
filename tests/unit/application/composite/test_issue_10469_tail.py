@@ -97,13 +97,16 @@ def test_resume_phase_routes_completed_merge_to_cross_validation() -> None:
 
 def test_layer_filter_without_selection_preserves_columns() -> None:
     columns = ["a", "b"]
-    assert filter_columns_by_layer_config(
-        columns=columns,
-        layer_config=LayerColumnConfig(),
-        column_groups=None,
-        collect_group_columns=MagicMock(),
-        logger=MagicMock(),
-    ) == columns
+    assert (
+        filter_columns_by_layer_config(
+            columns=columns,
+            layer_config=LayerColumnConfig(),
+            column_groups=None,
+            collect_group_columns=MagicMock(),
+            logger=MagicMock(),
+        )
+        == columns
+    )
 
 
 def test_nullify_enricher_columns_returns_same_frame_without_prefixed_columns() -> None:

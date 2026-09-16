@@ -189,7 +189,9 @@ def test_build_config_rejects_invalid_contracts(
 
 
 @pytest.mark.asyncio
-async def test_executor_persists_artifact_refs_when_runtime_identity_is_complete() -> None:
+async def test_executor_persists_artifact_refs_when_runtime_identity_is_complete() -> (
+    None
+):
     sink = MagicMock()
     sink.write_reconcile_result_artifact.return_value = (
         {"kind": "reconcile_result", "ref": "artifact.json"},
@@ -218,9 +220,7 @@ async def test_executor_persists_artifact_refs_when_runtime_identity_is_complete
 @pytest.mark.asyncio
 async def test_persist_artifact_skips_absent_runtime_sink_and_writer() -> None:
     spec = _spec()
-    assert (
-        await _persist_reconcile_rows_artifact(None, spec=spec, payload={}) == ()
-    )
+    assert await _persist_reconcile_rows_artifact(None, spec=spec, payload={}) == ()
     assert (
         await _persist_reconcile_rows_artifact(
             WorkflowTransformRuntimeContext(workflow_name="nightly"),

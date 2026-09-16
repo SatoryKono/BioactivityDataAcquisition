@@ -33,8 +33,8 @@ from bioetl.composition.pipeline_runner_request import (
     _require_runtime,
     _require_settings,
 )
-from bioetl.composition.runtime_builders import _snapshot_mapping_support
-from bioetl.composition.runtime_builders._snapshot_mapping_support import (
+from bioetl.composition import snapshot_serialization as _snapshot_mapping_support
+from bioetl.composition.snapshot_serialization import (
     normalize_snapshot,
     to_serializable_mapping,
 )

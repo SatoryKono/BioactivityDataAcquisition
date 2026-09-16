@@ -9,7 +9,9 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from bioetl.interfaces.cli.commands.domains.health import server_integration_deps as deps
+from bioetl.interfaces.cli.commands.domains.health import (
+    server_integration_deps as deps,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -39,7 +41,9 @@ def test_get_health_server_quarantine_service_delegates_optional_root(
         "bioetl.composition.health_service_access.get_quarantine_service",
         return_value=sentinel,
     ) as implementation:
-        assert deps.get_health_server_quarantine_service(data_root=data_root) is sentinel
+        assert (
+            deps.get_health_server_quarantine_service(data_root=data_root) is sentinel
+        )
     if data_root is None:
         implementation.assert_called_once_with()
     else:

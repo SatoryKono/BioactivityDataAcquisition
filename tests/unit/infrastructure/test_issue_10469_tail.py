@@ -26,13 +26,17 @@ from bioetl.infrastructure.adapters.health_status_policy import (
 from bioetl.infrastructure.adapters.http._client_retry_policy import (
     _record_request_metrics,
 )
-from bioetl.infrastructure.adapters.openalex.query_execution import OpenAlexQueryExecutor
+from bioetl.infrastructure.adapters.openalex.query_execution import (
+    OpenAlexQueryExecutor,
+)
 from bioetl.infrastructure.adapters.pubchem._fetch_strategy_transport import (
     resolve_transport_bag,
 )
 from bioetl.infrastructure.adr._adr_file_utils import parse_adr_filename
 from bioetl.infrastructure.config._dq_config_layers import _load_unified_quality_layer
-from bioetl.infrastructure.config._dq_config_normalization import normalize_to_file_format
+from bioetl.infrastructure.config._dq_config_normalization import (
+    normalize_to_file_format,
+)
 from bioetl.infrastructure.config._dq_config_validation_merge import (
     merge_validation_lists_for_key,
 )
@@ -61,9 +65,7 @@ def test_unknown_health_status_code_is_unhealthy() -> None:
 
 
 def test_http_metrics_noop_when_metrics_are_disabled() -> None:
-    assert (
-        _record_request_metrics(None, "chembl", "get", 0.1, 200, 0, None) is None
-    )
+    assert _record_request_metrics(None, "chembl", "get", 0.1, 200, 0, None) is None
 
 
 @pytest.mark.asyncio
@@ -118,6 +120,8 @@ def test_dq_threshold_normalization_replaces_non_mapping_container() -> None:
 
 def test_validation_list_merge_replaces_heterogeneous_override() -> None:
     override = ["replacement"]
-    result = merge_validation_lists_for_key([{"type": "range"}], override, "validations")
+    result = merge_validation_lists_for_key(
+        [{"type": "range"}], override, "validations"
+    )
     assert result == override
     assert result is not override

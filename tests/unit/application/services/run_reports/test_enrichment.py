@@ -61,9 +61,7 @@ def test_build_artifacts_from_result_handles_absent_and_hashed_export() -> None:
     assert build_artifacts_from_result(_result()) == ()
     assert build_artifacts_from_result(
         _result(debug_export_uri="debug.xlsx", debug_export_hash="sha256:abc")
-    ) == (
-        {"kind": "debug_export", "ref": "debug.xlsx", "hash": "sha256:abc"},
-    )
+    ) == ({"kind": "debug_export", "ref": "debug.xlsx", "hash": "sha256:abc"},)
     assert build_artifacts_from_result(_result(debug_export_uri="debug.xlsx")) == (
         {"kind": "debug_export", "ref": "debug.xlsx"},
     )

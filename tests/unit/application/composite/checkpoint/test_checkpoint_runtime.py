@@ -43,11 +43,15 @@ def test_latest_checkpoint_filename_handles_zero_or_one_match(
 ) -> None:
     storage = MagicMock()
     storage.list_glob.return_value = matches
-    assert latest_checkpoint_filename(storage=storage, glob_pattern="*.json") == expected
+    assert (
+        latest_checkpoint_filename(storage=storage, glob_pattern="*.json") == expected
+    )
     storage.read.assert_not_called()
 
 
-def test_latest_checkpoint_filename_ranks_valid_timestamps_and_skips_bad_entries() -> None:
+def test_latest_checkpoint_filename_ranks_valid_timestamps_and_skips_bad_entries() -> (
+    None
+):
     old = datetime(2026, 1, 1)
     new = datetime(2026, 1, 2, tzinfo=UTC)
     storage = MagicMock()
@@ -59,19 +63,23 @@ def test_latest_checkpoint_filename_ranks_valid_timestamps_and_skips_bad_entries
         _serialized_state(updated_at=new),
     ]
 
-    assert (
-        latest_checkpoint_filename(storage=storage, glob_pattern="*.json") == "new"
-    )
+    assert latest_checkpoint_filename(storage=storage, glob_pattern="*.json") == "new"
 
 
-def test_latest_checkpoint_filename_falls_back_to_sorted_name_without_timestamps() -> None:
+def test_latest_checkpoint_filename_falls_back_to_sorted_name_without_timestamps() -> (
+    None
+):
     storage = MagicMock()
     storage.list_glob.return_value = ["b.json", "a.json"]
     storage.read.return_value = _serialized_state()
-    assert latest_checkpoint_filename(storage=storage, glob_pattern="*.json") == "b.json"
+    assert (
+        latest_checkpoint_filename(storage=storage, glob_pattern="*.json") == "b.json"
+    )
 
 
-def test_latest_checkpoint_filename_has_deterministic_fallback_for_unorderable_rank() -> None:
+def test_latest_checkpoint_filename_has_deterministic_fallback_for_unorderable_rank() -> (
+    None
+):
     storage = MagicMock()
     storage.list_glob.return_value = ["b.json", "a.json"]
     storage.read.side_effect = [
@@ -83,7 +91,10 @@ def test_latest_checkpoint_filename_has_deterministic_fallback_for_unorderable_r
         side_effect=TypeError("unorderable"),
         create=True,
     ):
-        assert latest_checkpoint_filename(storage=storage, glob_pattern="*.json") == "b.json"
+        assert (
+            latest_checkpoint_filename(storage=storage, glob_pattern="*.json")
+            == "b.json"
+        )
 
 
 def test_as_utc_comparable_normalizes_naive_and_aware_values() -> None:
@@ -97,7 +108,9 @@ def test_emit_checkpoint_saved_at_requires_metrics_and_timestamp() -> None:
     empty = CompositeCheckpointState(composite_name="c", run_id="r")
     metrics = MagicMock()
     _emit_checkpoint_saved_at_from_state(metrics=None, composite_name="c", state=empty)
-    _emit_checkpoint_saved_at_from_state(metrics=metrics, composite_name="c", state=empty)
+    _emit_checkpoint_saved_at_from_state(
+        metrics=metrics, composite_name="c", state=empty
+    )
     metrics.set_gauge.assert_not_called()
 
 
@@ -107,7 +120,9 @@ def test_emit_checkpoint_saved_at_uses_updated_timestamp() -> None:
         composite_name="c", run_id="r", created_at=stamp, updated_at=stamp
     )
     metrics = MagicMock()
-    _emit_checkpoint_saved_at_from_state(metrics=metrics, composite_name="c", state=state)
+    _emit_checkpoint_saved_at_from_state(
+        metrics=metrics, composite_name="c", state=state
+    )
     metrics.set_gauge.assert_called_once_with(
         "bioetl_checkpoint_saved_at_seconds", stamp.timestamp(), {"pipeline": "c"}
     )

@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, cast
 from bioetl.composition.runtime_builders.input_snapshot_resolution import (
     resolve_pipeline_input_snapshot_refs,
 )
-from bioetl.composition.runtime_builders._run_manifest_identity_ref_values import (
+from bioetl.composition.runtime_builders._run_manifest_context_updates import (
     build_contract_identity_field_values,
     build_control_plane_identity_ref_values,
 )
@@ -35,9 +35,7 @@ def control_plane_root(settings: Settings, leaf: str) -> Path:
 
     impl = cast(
         Callable[..., Path],
-        import_module(
-            "bioetl.composition.runtime_builders._run_manifest_control_plane_paths"
-        ).control_plane_root,
+        import_module("bioetl.composition.control_plane_paths").control_plane_root,
     )
     return impl(settings, leaf)
 

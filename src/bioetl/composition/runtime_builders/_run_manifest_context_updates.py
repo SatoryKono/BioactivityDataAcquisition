@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.composition.runtime_builders._run_manifest_identity_ref_values import (
     CONTRACT_IDENTITY_FIELD_NAMES,
+    build_contract_identity_field_values,
     build_contract_identity_field_values_from_mapping,
     build_control_plane_identity_ref_values,
 )
@@ -17,7 +18,11 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
 
 __all__ = [
+    "CONTRACT_IDENTITY_FIELD_NAMES",
     "apply_manifest_updates_to_mutable_context",
+    "build_contract_identity_field_values",
+    "build_contract_identity_field_values_from_mapping",
+    "build_control_plane_identity_ref_values",
     "build_dataclass_manifest_updates",
     "extract_optional_updates_from_refs",
     "iter_optional_control_plane_updates",

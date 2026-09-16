@@ -6,14 +6,6 @@ from typing import TYPE_CHECKING
 
 import bioetl.composition.runtime_builders.run_manifest_support as _manifest_support
 from bioetl.application.services.control_plane.ledger.service import RunLedgerService
-from bioetl.composition.runtime_builders._manifest_publication_context_support import (
-    ResolvedManifestPublicationContext,
-    resolve_manifest_publication_identity,
-    resolve_manifest_publication_context,
-)
-from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
-    ManifestReproducibilityContext,
-)
 from bioetl.composition.runtime_builders._run_manifest_creation_support import (
     build_manifest_create_request,
     create_ledger_service,
@@ -26,7 +18,7 @@ from bioetl.composition.runtime_builders._run_manifest_publication_support impor
     create_manifest_record,
     create_manifest_store,
 )
-from bioetl.composition.runtime_builders._runner_control_plane_policy_support import (
+from bioetl.composition.runtime_builders._runner_control_plane_policy import (
     validate_manifest_persistence_requirements,
 )
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
@@ -34,6 +26,12 @@ from bioetl.domain.normalization import compute_input_snapshot_identity_fingerpr
 if TYPE_CHECKING:
     from bioetl.application.services.control_plane.manifest.service import (
         RunManifestCreateSpec,
+    )
+    from bioetl.composition.runtime_builders._manifest_publication_context_support import (
+        ResolvedManifestPublicationContext,
+    )
+    from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
+        ManifestReproducibilityContext,
     )
     from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
     from bioetl.domain.control_plane import RunManifest
@@ -94,41 +92,37 @@ def create_run_manifest(
     inputs: RunnerInputs,
     ledger_enabled: bool,
     provenance: RunManifestProvenanceBundle,
-    reproducibility_context: ManifestReproducibilityContext | None = None,
-    contract_identity: _manifest_support.RunManifestContractIdentity | None = None,
+    publication_context: ResolvedManifestPublicationContext,
 ) -> tuple[_manifest_support.ManifestControlPlaneRefs, RunLedgerService | None]:
     run_type_value, execution_context_value = (
         _manifest_support.resolve_run_context_values(ctx)
-    )
-    manifest_context = resolve_manifest_publication_context(
-        ctx, inputs, reproducibility_context, contract_identity
     )
     validate_manifest_persistence_requirements(
         yaml_config=inputs.yaml_config,
         skip_gold=bool(getattr(ctx, "skip_gold", False)),
         ledger_enabled=ledger_enabled,
-        required_profile=manifest_context.reproducibility_context.required_persistence_profile,
+        required_profile=publication_context.reproducibility_context.required_persistence_profile,
         strict_exact_replay_supported=(
-            manifest_context.reproducibility_context.strict_exact_replay_supported
+            publication_context.reproducibility_context.strict_exact_replay_supported
         ),
     )
     manifest_create_request = _build_manifest_create_request(
         ctx=ctx,
         inputs=inputs,
-        provider=manifest_context.provider,
-        entity=manifest_context.entity,
-        reproducibility_context=manifest_context.reproducibility_context,
+        provider=publication_context.provider,
+        entity=publication_context.entity,
+        reproducibility_context=publication_context.reproducibility_context,
         run_type_value=run_type_value,
         execution_context_value=execution_context_value,
         provenance=provenance,
-        contract_identity=manifest_context.contract_identity,
+        contract_identity=publication_context.contract_identity,
         ledger_enabled=ledger_enabled,
     )
     return _publish_manifest_and_refs(
         ctx=ctx,
         inputs=inputs,
         ledger_enabled=ledger_enabled,
-        manifest_context=manifest_context,
+        manifest_context=publication_context,
         manifest_create_request=manifest_create_request,
         provenance=provenance,
     )
@@ -186,14 +180,6 @@ def _build_manifest_create_request(
     contract_identity: _manifest_support.RunManifestContractIdentity,
     ledger_enabled: bool = True,
 ) -> RunManifestCreateSpec:
-    reproducibility_context, contract_identity = resolve_manifest_publication_identity(
-        ctx=ctx,
-        inputs=inputs,
-        provider=provider,
-        entity=entity,
-        reproducibility_context=reproducibility_context,
-        contract_identity=contract_identity,
-    )
     request: RunManifestCreateSpec = build_manifest_create_request(
         RunManifestCreateRequestInputs(
             ctx=ctx,

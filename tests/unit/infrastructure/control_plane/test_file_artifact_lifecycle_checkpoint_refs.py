@@ -76,7 +76,10 @@ def test_append_checkpoint_manifest_index_reports_missing_index(tmp_path: Path) 
         read_json_file=lambda _: {},
     )
     assert candidates == []
-    assert issues[0].code is ControlPlaneArtifactResolutionIssueCode.CHECKPOINT_INDEX_MISSING
+    assert (
+        issues[0].code
+        is ControlPlaneArtifactResolutionIssueCode.CHECKPOINT_INDEX_MISSING
+    )
 
 
 @pytest.mark.parametrize(
@@ -97,7 +100,10 @@ def test_append_checkpoint_manifest_index_reports_corrupt_index(
         tmp_path=tmp_path, index_path=index_path, read_json_file=reader
     )
     assert candidates == [(ControlPlaneArtifactSurface.CHECKPOINT, index_path)]
-    assert issues[0].code is ControlPlaneArtifactResolutionIssueCode.CHECKPOINT_INDEX_CORRUPT
+    assert (
+        issues[0].code
+        is ControlPlaneArtifactResolutionIssueCode.CHECKPOINT_INDEX_CORRUPT
+    )
 
 
 def test_append_checkpoint_manifest_index_adds_existing_history(tmp_path: Path) -> None:

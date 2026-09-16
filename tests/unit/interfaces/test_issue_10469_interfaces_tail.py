@@ -48,7 +48,9 @@ def test_workflow_override_kwargs_wrapper_preserves_explicit_values() -> None:
 
 
 def test_composite_runtime_rejects_unknown_override_key() -> None:
-    with pytest.raises(ValueError, match="Unknown composite runtime override keys: typo"):
+    with pytest.raises(
+        ValueError, match="Unknown composite runtime override keys: typo"
+    ):
         _build_overridden_cli_input(
             CompositeRuntimeCliInput(),
             {"typo": True},

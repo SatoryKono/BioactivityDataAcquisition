@@ -13,9 +13,6 @@ from bioetl.composition.runtime_builders._runner_builder_orchestration import (
     bootstrap_runner_factory as _bootstrap_runner_factory,
     create_runner as _create_runner,
 )
-from bioetl.composition.runtime_builders.config_access import (
-    load_source_config as _load_source_config,
-)
 from bioetl.composition.runtime_builders.inputs_resolver import prepare_runner_inputs
 from bioetl.composition.runtime_builders.runner_builder_wiring import (
     RunnerBuilderWiring,
@@ -41,10 +38,7 @@ __all__ = [
     "RunnerInputWiring",
     "build_pipeline_runner",
     "ensure_providers_loaded",
-    "load_source_config",
 ]
-
-load_source_config = _load_source_config
 
 
 def build_pipeline_runner(

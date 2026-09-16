@@ -10461,16 +10461,6 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 45,
-      "executable_lines": 45,
-      "missing_lines": 0,
-      "module": "bioetl.composition.runtime_builders._snapshot_mapping_support",
-      "path": "src/bioetl/composition/runtime_builders/_snapshot_mapping_support.py",
-      "source_lines": 69
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
       "covered_lines": 37,
       "executable_lines": 37,
       "missing_lines": 0,
@@ -35213,16 +35203,6 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 45,
-      "executable_lines": 45,
-      "missing_lines": 0,
-      "module": "bioetl.composition.runtime_builders._snapshot_mapping_support",
-      "path": "src/bioetl/composition/runtime_builders/_snapshot_mapping_support.py",
-      "source_lines": 69
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
       "covered_lines": 37,
       "executable_lines": 37,
       "missing_lines": 0,
@@ -49513,7 +49493,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-10",
-  "source_tree_sha256": "6fb53d1b573529b016998c8905df570d9c3114e85fdd245ecb3d82b25b7d1a74",
+  "source_tree_sha256": "7435c2a9ea9e63a7280c73add9951da9fe90122e84315e23ec1df615abfd2c6f",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -49640,16 +49620,16 @@
       "composition_runtime_builders": {
         "allowlisted_unmeasured_module_count": 0,
         "allowlisted_unmeasured_modules": [],
-        "coverage_percent_avg": 96.55,
+        "coverage_percent_avg": 96.49,
         "coverage_percent_min": 80.0,
-        "covered_line_percent": 95.22,
-        "covered_module_count": 57,
-        "measured_module_count": 57,
+        "covered_line_percent": 95.12,
+        "covered_module_count": 56,
+        "measured_module_count": 56,
         "measured_percent": 100.0,
-        "module_count": 57,
+        "module_count": 56,
         "status_counts": {
           "coverage_xml_missing": 0,
-          "fully_covered": 31,
+          "fully_covered": 30,
           "no_executable_lines": 0,
           "partially_covered": 26,
           "uncovered": 0,
@@ -49668,10 +49648,10 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2475,
+    "source_module_count": 2474,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 1617,
+      "fully_covered": 1616,
       "no_executable_lines": 4,
       "partially_covered": 854,
       "uncovered": 0,

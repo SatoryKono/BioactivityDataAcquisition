@@ -1,4 +1,4 @@
-"""Writable data-root and control-plane path helpers for run manifests."""
+"""Writable control-plane path helpers shared outside runtime-builder fan-in."""
 
 from __future__ import annotations
 

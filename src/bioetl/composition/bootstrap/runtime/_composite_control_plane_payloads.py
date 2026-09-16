@@ -10,7 +10,7 @@ from bioetl.composition.runtime_builders.input_snapshot_resolution import (
     resolve_cached_bronze_input_snapshot_refs,
     resolve_manifest_input_snapshot_refs,
 )
-from bioetl.composition.runtime_builders.run_manifest_support import (
+from bioetl.composition.snapshot_serialization import (
     to_serializable_mapping,
 )
 from bioetl.domain.composite import CompositeConfig

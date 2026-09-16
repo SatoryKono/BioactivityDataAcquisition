@@ -227,7 +227,9 @@ def test_apply_resolved_dependency_join_dispatches_strategy(
     multi_field: bool, target: str
 ) -> None:
     merged = pl.DataFrame({"id": [1]})
-    dependency = _make_dependency("pubmed_publication", is_multi_field_filter=multi_field)
+    dependency = _make_dependency(
+        "pubmed_publication", is_multi_field_filter=multi_field
+    )
     expected = pl.DataFrame({"joined": [1]})
     kwargs = _helper_kwargs(merged_df=merged, dependency=dependency)
     kwargs["dep_df"] = pl.DataFrame({"id": [1]})

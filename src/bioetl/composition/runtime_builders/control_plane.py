@@ -134,6 +134,5 @@ def create_run_manifest_with_effective_config(
         inputs=inputs,
         ledger_enabled=ledger_enabled,
         provenance=provenance,
-        reproducibility_context=publication_context.reproducibility_context,
-        contract_identity=publication_context.contract_identity,
+        publication_context=publication_context,
     )

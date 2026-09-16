@@ -15,7 +15,9 @@ def test_default_mapper_and_collector_builders_delegate_to_canonical_types() -> 
     mapper = object()
     collector = object()
     with (
-        patch.object(client_builders, "PubChemEntityMapper", return_value=mapper) as mapper_cls,
+        patch.object(
+            client_builders, "PubChemEntityMapper", return_value=mapper
+        ) as mapper_cls,
         patch.object(
             client_builders,
             "create_default_request_collector",

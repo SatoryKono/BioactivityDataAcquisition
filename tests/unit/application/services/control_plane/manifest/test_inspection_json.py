@@ -26,12 +26,14 @@ def test_normalize_typed_jsonable_preserves_scalar_type_identity() -> None:
         "tz": "UTC",
     }
     assert cast(dict[str, Any], normalize_typed_jsonable(naive))["aware"] is False
-    assert cast(dict[str, Any], normalize_typed_jsonable(date(2026, 1, 2)))[
-        "__type__"
-    ] == "date"
-    assert cast(dict[str, Any], normalize_typed_jsonable(UUID(int=1)))[
-        "__type__"
-    ] == "uuid"
+    assert (
+        cast(dict[str, Any], normalize_typed_jsonable(date(2026, 1, 2)))["__type__"]
+        == "date"
+    )
+    assert (
+        cast(dict[str, Any], normalize_typed_jsonable(UUID(int=1)))["__type__"]
+        == "uuid"
+    )
     assert normalize_typed_jsonable(b"\x00\xff") == {
         "__type__": "bytes",
         "hex": "00ff",

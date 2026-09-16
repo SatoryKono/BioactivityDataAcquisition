@@ -180,9 +180,21 @@ def test_at_budget_fan_in_views_select_modules_at_current_cap() -> None:
         "bounded_growth_budgets": {"max_internal_fan_in": 2},
         "internal_fan_in_census": {
             "modules": [
-                {"module": "bioetl.fam.a", "fan_in": 1, "runtime_importers": ["bioetl.fam.b"]},
-                {"module": "bioetl.fam.b", "fan_in": 2, "runtime_importers": ["bioetl.fam.a"]},
-                {"module": "bioetl.fam.c", "fan_in": 2, "runtime_importers": ["bioetl.fam.d"]},
+                {
+                    "module": "bioetl.fam.a",
+                    "fan_in": 1,
+                    "runtime_importers": ["bioetl.fam.b"],
+                },
+                {
+                    "module": "bioetl.fam.b",
+                    "fan_in": 2,
+                    "runtime_importers": ["bioetl.fam.a"],
+                },
+                {
+                    "module": "bioetl.fam.c",
+                    "fan_in": 2,
+                    "runtime_importers": ["bioetl.fam.d"],
+                },
             ]
         },
     }
@@ -200,7 +212,9 @@ def test_compact_distribution_orders_buckets_numerically() -> None:
     assert _compact_distribution({"2": 12, "0": 2, "1": 28}) == "0:2, 1:28, 2:12"
 
 
-def _write_family_tree(tmp_path: Path, sources: dict[str, str]) -> tuple[Path, list[Path]]:
+def _write_family_tree(
+    tmp_path: Path, sources: dict[str, str]
+) -> tuple[Path, list[Path]]:
     src_root = tmp_path / "src" / "bioetl"
     family_root = src_root / "fam"
     family_root.mkdir(parents=True)
