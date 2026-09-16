@@ -19,8 +19,11 @@ from bioetl.composition.runtime_builders.inputs_runtime_assembly import (
     validate_pk_contract,
 )
 from bioetl.composition.runtime_builders.inputs_resolver import prepare_runner_inputs
-from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs as _RunnerInputs
+from bioetl.composition.runtime_builders.runner_inputs import (
+    RunnerInputs as _RunnerInputs,
+)
 from bioetl.domain.config import RuntimeConfig
+
 if TYPE_CHECKING:
     from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
     from bioetl.domain.filtering import InputFilterConfig
