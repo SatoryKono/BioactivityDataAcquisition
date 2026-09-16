@@ -12,6 +12,7 @@ import bioetl.domain.behavior as behavior_facade
 import bioetl.domain.config as config_facade
 import bioetl.domain.exceptions as exceptions_facade
 import bioetl.domain.filtering as filtering_facade
+import bioetl.domain.mapping.publication_controlled_vocabulary as publication_vocabulary
 import bioetl.domain.normalization.profiles as profiles_facade
 from bioetl.domain.behavior._dq_serializer_yaml import format_yaml_scalar
 from bioetl.domain.behavior.composite_metadata_cv import summarize_composite_cv_dq
@@ -25,6 +26,8 @@ from bioetl.domain.filtering.silver_filter_identity import (
     normalize_silver_filter_compatibility_mode,
 )
 from bioetl.domain.mapping.publication_controlled_vocabulary import (
+    PublicationControlledVocabularyRegistry,
+    initialize_publication_controlled_vocabulary,
     is_publication_controlled_vocabulary_initialized,
 )
 from bioetl.domain.models._metadata_common import validate_utc_datetime
@@ -34,16 +37,27 @@ from bioetl.domain.types.validation_severity import ValidationSeverity
 pytestmark = pytest.mark.unit
 
 
+class _StringableValue:
+    def __str__(self) -> str:
+        return "value with space"
+
+
 @pytest.mark.parametrize(
     "facade",
-    [behavior_facade, config_facade, exceptions_facade, filtering_facade, profiles_facade],
+    [
+        behavior_facade,
+        config_facade,
+        exceptions_facade,
+        filtering_facade,
+        profiles_facade,
+    ],
 )
 def test_domain_lazy_facade_directory_contains_public_exports(facade: Any) -> None:
     assert set(facade.__all__).issubset(facade.__dir__())
 
 
 def test_yaml_scalar_falls_back_to_string_representation() -> None:
-    assert format_yaml_scalar(SimpleNamespace(__str__=lambda _: "value"))
+    assert format_yaml_scalar(_StringableValue()) == '"value with space"'
 
 
 def test_empty_composite_cv_summary_is_explicitly_signal_free() -> None:
@@ -87,8 +101,17 @@ def test_missing_silver_filter_mode_uses_compatibility_default() -> None:
     )
 
 
-def test_publication_vocabulary_reports_registry_state_as_bool() -> None:
-    assert isinstance(is_publication_controlled_vocabulary_initialized(), bool)
+def test_publication_vocabulary_reports_registry_lifecycle(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(publication_vocabulary, "_registry", None)
+    assert is_publication_controlled_vocabulary_initialized() is False
+
+    initialize_publication_controlled_vocabulary(
+        PublicationControlledVocabularyRegistry(allowed_values_by_field={})
+    )
+
+    assert is_publication_controlled_vocabulary_initialized() is True
 
 
 def test_metadata_datetime_rejects_naive_value() -> None:
