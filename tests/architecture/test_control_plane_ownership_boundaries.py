@@ -98,7 +98,8 @@ def test_ledger_entry_support_implementation_is_not_flat_root_module() -> None:
     """Ledger entry helpers must be implemented under the ledger seam."""
     assert not (CONTROL_PLANE_ROOT / "run_ledger_service.py").exists()
     assert not (CONTROL_PLANE_ROOT / "_run_ledger_diagnostic_support.py").exists()
-    assert (CONTROL_PLANE_ROOT / "ledger" / "diagnostic_support.py").is_file()
+    assert not (CONTROL_PLANE_ROOT / "ledger" / "diagnostic_support.py").exists()
+    assert not (CONTROL_PLANE_ROOT / "ledger" / "idempotency.py").exists()
     assert (CONTROL_PLANE_ROOT / "ledger" / "entry_support.py").is_file()
     assert (CONTROL_PLANE_ROOT / "ledger" / "core_events.py").is_file()
     assert (CONTROL_PLANE_ROOT / "ledger" / "rich_events.py").is_file()
@@ -111,7 +112,7 @@ def test_effective_config_context_helpers_are_not_flat_root_modules() -> None:
     assert not (CONTROL_PLANE_ROOT / "effective_config_service.py").exists()
     assert (CONTROL_PLANE_ROOT / "effective_config" / "context.py").is_file()
     assert (CONTROL_PLANE_ROOT / "effective_config" / "provenance_support.py").is_file()
-    assert (CONTROL_PLANE_ROOT / "effective_config" / "support.py").is_file()
+    assert not (CONTROL_PLANE_ROOT / "effective_config" / "support.py").exists()
 
 
 @pytest.mark.architecture

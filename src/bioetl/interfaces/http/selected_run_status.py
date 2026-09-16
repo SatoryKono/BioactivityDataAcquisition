@@ -29,6 +29,19 @@ from bioetl.interfaces.http._selected_run_live import (
 )
 from bioetl.interfaces.http.run_report_ops import _validated_artifact_paths
 
+_NOT_EVALUATED = "NOT EVALUATED"
+_QUERY_ERROR = "QUERY ERROR"
+_CONTROL_PLANE = "Control Plane"
+_REPORT_SCHEMAS = {"pipeline_run_report_v1", "pipeline_run_report_v2"}
+
+
+class _RevisionMissingError(LookupError):
+    """Selected-run snapshot revision file is absent after identity checks."""
+
+
+class _IdentityMismatchError(LookupError):
+    """Persisted report identity does not match the requested pipeline/run."""
+
 
 def unavailable_status(
     pipeline: str, run_id: str, state: str, reason: str
@@ -55,8 +68,8 @@ def unavailable_status(
         "execution_state": "UNKNOWN",
         "checks_verdict": "UNKNOWN",
         "evidence_completeness": "INCOMPLETE",
-        "replay_readiness_now": "NOT EVALUATED",
-        "heartbeat_now": "NOT EVALUATED",
+        "replay_readiness_now": _NOT_EVALUATED,
+        "heartbeat_now": _NOT_EVALUATED,
     }
     for row in rows:
         row.update({**summary, **row, "run_verdict": state})
@@ -79,11 +92,11 @@ def _saved_trust(
     report: dict[str, object], summary: dict[str, object], rows: list[dict[str, object]]
 ) -> dict[str, object]:
     """Project Trust from the same frozen inputs as the six-domain summary."""
-    control = next(row for row in rows if row["domain"] == "Control Plane")
+    control = next(row for row in rows if row["domain"] == _CONTROL_PLANE)
     reasons: object = report
     for key in (
         "observations",
-        "Control Plane",
+        _CONTROL_PLANE,
         "facts",
         "checks",
         "trust",
@@ -99,7 +112,7 @@ def _saved_trust(
         "run_id": summary["run_id"],
         "rules_version": summary["rules_version"],
         "revision": summary["revision"],
-        "replay_readiness_now": "NOT EVALUATED",
+        "replay_readiness_now": _NOT_EVALUATED,
     }
 
 
@@ -121,6 +134,60 @@ def _selected_pipeline(pipeline: str, run_id: str, root: Path | None) -> str | N
     return matches[0] if matches else None
 
 
+def _legacy_assessment(report: dict[str, object]) -> tuple[dict[str, object], str, str]:
+    assessment = assess_report(report)
+    assessment["evidence_completeness"] = "INCOMPLETE"
+    if assessment["verdict"] in {"OK", "N/A"}:
+        assessment["verdict"] = "INCOMPLETE"
+    return assessment, "legacy_no_snapshot", evidence_digest(report)
+
+
+def _snapshot_assessment(
+    report: dict[str, object], snapshot: dict[str, object], path: Path
+) -> tuple[dict[str, object], str, str]:
+    if not verify_snapshot(snapshot):
+        raise ValueError("snapshot_corrupt_or_rules_unsupported")
+    evidence = {
+        key: value for key, value in report.items() if key != "selected_run_snapshot"
+    }
+    if snapshot.get("evidence") != evidence:
+        raise ValueError("snapshot_evidence_mismatch")
+    revision = str(snapshot["revision"])
+    revision_path = path.parent / "status-revisions" / f"{revision}.json"
+    if not revision_path.resolve().is_relative_to(path.parent.resolve()):
+        raise ValueError("revision_outside_selected_run")
+    if not revision_path.is_file():
+        raise _RevisionMissingError("revision_missing")
+    if json.loads(revision_path.read_text(encoding="utf-8")) != snapshot:
+        raise ValueError("revision_corrupt")
+    return dict(snapshot["assessment"]), "AVAILABLE", revision
+
+
+def _load_report_assessment(
+    path: Path, pipeline: str, run_id: str
+) -> tuple[dict[str, object], dict[str, object], dict[str, object], str, str]:
+    report = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(report, dict) or report.get("schema_version") not in _REPORT_SCHEMAS:
+        raise ValueError("report_schema_invalid")
+    identity = report.get("identity")
+    if (
+        not isinstance(identity, dict)
+        or identity.get("run_id") != run_id
+        or identity.get("pipeline_name") != pipeline
+    ):
+        raise _IdentityMismatchError("identity_mismatch")
+    snapshot = report.get("selected_run_snapshot")
+    if snapshot is None:
+        assessment, availability, revision = _legacy_assessment(report)
+    else:
+        if not isinstance(snapshot, dict):
+            raise ValueError("snapshot_corrupt_or_rules_unsupported")
+        assessment, availability, revision = _snapshot_assessment(
+            report, snapshot, path
+        )
+    return report, identity, assessment, availability, revision
+
+
 def load_selected_run_status(
     *, pipeline: str, run_id: str, root: Path | None = None
 ) -> dict[str, object]:
@@ -140,54 +207,18 @@ def load_selected_run_status(
     if not path.is_file():
         return unavailable_status(pipeline, run_id, "UNKNOWN", "run_not_found")
     try:
-        report = json.loads(path.read_text(encoding="utf-8"))
-        if not isinstance(report, dict) or report.get("schema_version") not in {
-            "pipeline_run_report_v1",
-            "pipeline_run_report_v2",
-        }:
-            raise ValueError("report_schema_invalid")
-        identity = report.get("identity")
-        if (
-            not isinstance(identity, dict)
-            or identity.get("run_id") != run_id
-            or identity.get("pipeline_name") != pipeline
-        ):
-            return unavailable_status(pipeline, run_id, "ERROR", "identity_mismatch")
-        snapshot = report.get("selected_run_snapshot")
-        if snapshot is None:
-            assessment = assess_report(report)
-            availability, revision = "legacy_no_snapshot", evidence_digest(report)
-            # Legacy reports lack the complete observation contract. Do not backfill.
-            assessment["evidence_completeness"] = "INCOMPLETE"
-            if assessment["verdict"] in {"OK", "N/A"}:
-                assessment["verdict"] = "INCOMPLETE"
-        else:
-            if not isinstance(snapshot, dict) or not verify_snapshot(snapshot):
-                raise ValueError("snapshot_corrupt_or_rules_unsupported")
-            evidence = {
-                key: value
-                for key, value in report.items()
-                if key != "selected_run_snapshot"
-            }
-            if snapshot.get("evidence") != evidence:
-                raise ValueError("snapshot_evidence_mismatch")
-            revision = str(snapshot["revision"])
-            revision_path = path.parent / "status-revisions" / f"{revision}.json"
-            if not revision_path.resolve().is_relative_to(path.parent.resolve()):
-                raise ValueError("revision_outside_selected_run")
-            if not revision_path.is_file():
-                return unavailable_status(
-                    pipeline, run_id, "INCOMPLETE", "revision_missing"
-                )
-            if json.loads(revision_path.read_text(encoding="utf-8")) != snapshot:
-                raise ValueError("revision_corrupt")
-            assessment = dict(snapshot["assessment"])
-            availability = "AVAILABLE"
+        report, identity, assessment, availability, revision = _load_report_assessment(
+            path, pipeline, run_id
+        )
+    except _IdentityMismatchError:
+        return unavailable_status(pipeline, run_id, "ERROR", "identity_mismatch")
+    except _RevisionMissingError:
+        return unavailable_status(pipeline, run_id, "INCOMPLETE", "revision_missing")
     except (ValueError, TypeError, UnicodeError):
         return unavailable_status(pipeline, run_id, "ERROR", "evidence_corrupt")
     except OSError:
         return unavailable_status(
-            pipeline, run_id, "QUERY ERROR", "evidence_read_failed"
+            pipeline, run_id, _QUERY_ERROR, "evidence_read_failed"
         )
     summary = {
         **{key: value for key, value in assessment.items() if key != "domains"},
@@ -200,8 +231,8 @@ def load_selected_run_status(
         "evaluation_at": identity.get("completed_at"),
         "revision": revision,
         "evidence_availability": availability,
-        "replay_readiness_now": "NOT EVALUATED",
-        "heartbeat_now": "NOT EVALUATED",
+        "replay_readiness_now": _NOT_EVALUATED,
+        "heartbeat_now": _NOT_EVALUATED,
         "reason": "Saved run evidence; CURRENT and chart coverage are separate",
     }
     domain_rows = assessment["domains"]
@@ -263,7 +294,7 @@ async def handle_selected_run_status(
             operation_factory=lambda: asyncio.to_thread(load),
         )
     except ForensicEndpointUnavailable as exc:
-        payload = unavailable_status(pipeline, run_id, "QUERY ERROR", exc.reason)
+        payload = unavailable_status(pipeline, run_id, _QUERY_ERROR, exc.reason)
     except (OSError, RuntimeError, ValueError):
-        payload = unavailable_status(pipeline, run_id, "QUERY ERROR", "request_failed")
+        payload = unavailable_status(pipeline, run_id, _QUERY_ERROR, "request_failed")
     await host._send_payload_response(writer, 200, payload)

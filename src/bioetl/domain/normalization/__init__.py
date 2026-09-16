@@ -8,6 +8,7 @@ from bioetl.domain.normalization.authors import (
     parse_authors_to_list,
 )
 from bioetl.domain.normalization.control_plane import (
+    build_control_plane_idempotency_key,
     build_execution_identity_payload,
     normalize_contract_ref,
     normalize_contract_version,
@@ -54,7 +55,10 @@ from bioetl.domain.normalization.join_keys import (
 )
 from bioetl.domain.normalization.json import (
     canonicalize_json_string,
+    lookup_mapping_path,
     serialize_json_canonical,
+    stable_json_hash,
+    to_jsonable,
 )
 from bioetl.domain.normalization.pages import parse_page_range
 from bioetl.domain.normalization.text import (
@@ -66,6 +70,7 @@ from bioetl.domain.normalization.text import (
 __all__ = [
     "JOIN_KEY_NORMALIZATION_POLICIES",
     "JoinKeyNormalizationPolicy",
+    "build_control_plane_idempotency_key",
     "build_execution_identity_payload",
     "canonicalize_json_string",
     "compute_execution_identity_fingerprint",
@@ -75,6 +80,7 @@ __all__ = [
     "extract_first_string",
     "format_date_parts",
     "get_join_key_normalization_policy",
+    "lookup_mapping_path",
     "normalize_contract_ref",
     "normalize_contract_version",
     "normalize_control_plane_datetime",
@@ -102,8 +108,10 @@ __all__ = [
     "parse_page_range",
     "serialize_hash_identity_canonical_json",
     "serialize_json_canonical",
+    "stable_json_hash",
     "stringify_join_key_value",
     "strip_doi_prefix",
     "strip_html_tags",
+    "to_jsonable",
     "validate_publication_year",
 ]

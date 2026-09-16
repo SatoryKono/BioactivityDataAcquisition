@@ -223,21 +223,38 @@ def published_layer_artifact_counts(
         stage = _optional_text(details.get("stage") or entry.stage)
         record_count = _optional_int(details.get("record_count"))
         if stage in {"bronze", "silver", "gold"} and record_count is not None:
-            identity = (
-                str(entry.run_id),
-                entry.manifest_id,
-                stage,
-                entry.idempotency_key or entry.entry_id,
+            _accumulate_stage_count(
+                counts, seen, entry=entry, stage=stage, record_count=record_count
             )
-            if identity in seen:
-                if seen[identity] != record_count:
-                    raise RuntimeError(
-                        "Conflicting record counts for one ledger publication"
-                    )
-                continue
-            seen[identity] = record_count
-            counts[stage] = counts.get(stage, 0) + record_count
     return counts
+
+
+def _publication_identity(
+    entry: RunLedgerEntry, stage: str
+) -> tuple[str, str, str, str]:
+    return (
+        str(entry.run_id),
+        entry.manifest_id,
+        stage,
+        entry.idempotency_key or entry.entry_id,
+    )
+
+
+def _accumulate_stage_count(
+    counts: dict[str, int],
+    seen: dict[tuple[str, str, str, str], int],
+    *,
+    entry: RunLedgerEntry,
+    stage: str,
+    record_count: int,
+) -> None:
+    identity = _publication_identity(entry, stage)
+    if identity in seen:
+        if seen[identity] != record_count:
+            raise RuntimeError("Conflicting record counts for one ledger publication")
+        return
+    seen[identity] = record_count
+    counts[stage] = counts.get(stage, 0) + record_count
 
 
 def _processed_record_value_query(

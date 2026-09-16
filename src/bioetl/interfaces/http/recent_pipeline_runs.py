@@ -20,6 +20,11 @@ from bioetl.interfaces.http.run_report_ops import (
     list_pipeline_run_report_payloads,
 )
 
+REPORT_MISSING = "REPORT MISSING"
+_TERMINAL_STATUSES = frozenset(
+    {"success", "failed", "fail", "partial", "shutdown", "dry_run"}
+)
+
 
 def _timestamp(value: object) -> datetime:
     try:
@@ -39,6 +44,14 @@ def _scope(value: str | None) -> tuple[str, ...]:
     )
 
 
+def _catalog_status(*, started: bool, terminal: bool, run_status: object) -> str:
+    if terminal:
+        return str(run_status)
+    if started:
+        return "running"
+    return "unknown"
+
+
 def _catalog_row(record: SelectorRecord) -> dict[str, object]:
     """A started event is the last known state, not a live-process health probe."""
     started = record.started_at_source == "run_ledger_started_event"
@@ -52,10 +65,10 @@ def _catalog_row(record: SelectorRecord) -> dict[str, object]:
         "started_at": record.started_at.isoformat(),
         "started_at_source": record.started_at_source,
         "completed_at": record.completed_at.isoformat() if terminal else None,
-        "status": record.run_status
-        if terminal
-        else ("running" if started else "unknown"),
-        "report_state": "REPORT MISSING",
+        "status": _catalog_status(
+            started=started, terminal=terminal, run_status=record.run_status
+        ),
+        "report_state": REPORT_MISSING,
         "selected": 0,
         "json_path": None,
         "markdown_path": None,
@@ -90,6 +103,57 @@ def _merge_record(row: dict[str, object], record: SelectorRecord) -> dict[str, o
         merged["started_at"] = catalog["started_at"]
         merged["started_at_source"] = catalog["started_at_source"]
     return merged
+
+
+def _merge_catalog_rows(
+    rows: dict[tuple[str, str], dict[str, object]],
+    *,
+    manifest_port: RunManifestPort,
+    ledger_port: RunLedgerLookup | None,
+    pipelines: tuple[str, ...],
+    run_types: tuple[str, ...],
+) -> None:
+    try:
+        manifests = narrow_manifest_catalog(
+            manifest_port.list_all(),
+            selected_pipelines=pipelines,
+            selected_workflows=(),
+            selected_run_types=run_types,
+            selected_run_id=None,
+            fail_open_when_empty=False,
+        )
+        for manifest in manifests:
+            key = (manifest.pipeline_name, str(manifest.run_id))
+            report = rows.get(key, {})
+            # Final reports already contain immutable start/status evidence.
+            # Read ledger history only for missing/incomplete reports, avoiding
+            # an expensive full-history scan on every fleet refresh.
+            lookup = None if _has_terminal_identity(report) else ledger_port
+            record = build_selector_records((manifest,), lookup)[0]
+            rows[key] = _merge_record(report, record)
+    except OSError as exc:
+        raise RuntimeError("Recent launch catalog could not be read") from exc
+
+
+def _row_matches_scope(
+    row: dict[str, object],
+    *,
+    workflows: tuple[str, ...],
+    run_types: tuple[str, ...],
+    lookup_run_id: str,
+) -> bool:
+    if workflows and row.get("workflow_id") not in workflows:
+        return False
+    if run_types and row.get("run_type") not in run_types:
+        return False
+    return not lookup_run_id or row["run_id"] == lookup_run_id
+
+
+def _workflow_scope(row: dict[str, object]) -> str:
+    workflow_id = row.get("workflow_id")
+    if workflow_id in {None, "", "—"}:
+        return "$__all"
+    return str(workflow_id)
 
 
 def list_recent_pipeline_runs(
@@ -135,33 +199,23 @@ def list_recent_pipeline_runs(
         _scope(workflow),
         _scope(run_type),
     )
-    try:
-        manifests = narrow_manifest_catalog(
-            manifest_port.list_all(),
-            selected_pipelines=pipelines,
-            selected_workflows=(),
-            selected_run_types=run_types,
-            selected_run_id=None,
-            fail_open_when_empty=False,
-        )
-        for manifest in manifests:
-            key = (manifest.pipeline_name, str(manifest.run_id))
-            report = rows.get(key, {})
-            # Final reports already contain immutable start/status evidence.
-            # Read ledger history only for missing/incomplete reports, avoiding
-            # an expensive full-history scan on every fleet refresh.
-            lookup = None if _has_terminal_identity(report) else ledger_port
-            record = build_selector_records((manifest,), lookup)[0]
-            rows[key] = _merge_record(report, record)
-    except OSError as exc:
-        raise RuntimeError("Recent launch catalog could not be read") from exc
+    _merge_catalog_rows(
+        rows,
+        manifest_port=manifest_port,
+        ledger_port=ledger_port,
+        pipelines=pipelines,
+        run_types=run_types,
+    )
     lookup_run_id = (lookup_run_id or "").strip()
     items = [
         row
         for row in rows.values()
-        if (not workflows or row.get("workflow_id") in workflows)
-        and (not run_types or row.get("run_type") in run_types)
-        and (not lookup_run_id or row["run_id"] == lookup_run_id.strip())
+        if _row_matches_scope(
+            row,
+            workflows=workflows,
+            run_types=run_types,
+            lookup_run_id=lookup_run_id,
+        )
     ]
     items.sort(
         key=lambda row: (
@@ -177,11 +231,7 @@ def list_recent_pipeline_runs(
         item.update(_report_link(item, root))
         item.update(_timing_fields(item, observed_at))
         item["selected"] = int(item["run_id"] == selected_run_id)
-        item["workflow_scope"] = (
-            item["workflow_id"]
-            if item.get("workflow_id") not in {None, "", "—"}
-            else "$__all"
-        )
+        item["workflow_scope"] = _workflow_scope(item)
     return {
         **payload,
         "items": items,
@@ -193,28 +243,34 @@ def list_recent_pipeline_runs(
     }
 
 
+def _event_age_display(
+    row: dict[str, object], now: datetime, last: datetime, minimum: datetime
+) -> str:
+    status = row.get("status")
+    if status == "running":
+        if minimum < last <= now:
+            return f"{(now - last).total_seconds():.0f} s"
+        return "UNKNOWN"
+    if status in _TERMINAL_STATUSES:
+        return "N/A — completed"
+    return "UNKNOWN"
+
+
 def _timing_fields(row: dict[str, object], now: datetime) -> dict[str, object]:
     """Use event timestamps, never file mtime or scrape time, for elapsed values."""
     minimum = datetime.min.replace(tzinfo=UTC)
     start, end = _timestamp(row.get("started_at")), _timestamp(row.get("completed_at"))
     last = _timestamp(row.get("last_event_at"))
+    duration = None
+    if start != minimum and end >= start and end != minimum:
+        duration = (end - start).total_seconds()
+    last_event_age = None
+    if row.get("status") == "running" and minimum < last <= now:
+        last_event_age = (now - last).total_seconds()
     return {
-        "duration_seconds": (end - start).total_seconds()
-        if start != minimum and end >= start and end != minimum
-        else None,
-        "last_event_age_seconds": (now - last).total_seconds()
-        if row.get("status") == "running" and minimum < last <= now
-        else None,
-        "event_age_display": (
-            f"{(now - last).total_seconds():.0f} s"
-            if minimum < last <= now
-            else "UNKNOWN"
-        )
-        if row.get("status") == "running"
-        else "N/A — completed"
-        if row.get("status")
-        in {"success", "failed", "fail", "partial", "shutdown", "dry_run"}
-        else "UNKNOWN",
+        "duration_seconds": duration,
+        "last_event_age_seconds": last_event_age,
+        "event_age_display": _event_age_display(row, now, last, minimum),
     }
 
 
@@ -230,8 +286,8 @@ def _report_link(row: dict[str, object], root: Path | None) -> dict[str, object]
     missing: dict[str, object] = {
         "report_url": "",
         "report_format": None,
-        "report_label": "REPORT MISSING",
-        "report_state": "REPORT MISSING",
+        "report_label": REPORT_MISSING,
+        "report_state": REPORT_MISSING,
     }
     pipeline, run_id = str(row["pipeline"]), str(row["run_id"])
     try:
@@ -266,11 +322,4 @@ def _report_link(row: dict[str, object], root: Path | None) -> dict[str, object]
 def _has_terminal_identity(row: dict[str, object]) -> bool:
     return _timestamp(row.get("started_at")) != datetime.min.replace(
         tzinfo=UTC
-    ) and row.get("status") in {
-        "success",
-        "failed",
-        "fail",
-        "partial",
-        "shutdown",
-        "dry_run",
-    }
+    ) and row.get("status") in _TERMINAL_STATUSES
