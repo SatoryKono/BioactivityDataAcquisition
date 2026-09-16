@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-16T11:49:38.187826+00:00",
+  "generated_at": "2026-09-16T13:00:36.630452+00:00",
   "summary": {
     "total_scripts": 620,
     "status_counts": {
@@ -19993,7 +19993,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1279,
+          "line": 1280,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._dashboard_state_followup import ("
         },
@@ -20062,7 +20062,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 24,
+          "line": 25,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.action_target_routes import ("
         },
@@ -20410,13 +20410,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 27,
+          "line": 28,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1274,
+          "line": 1275,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },
