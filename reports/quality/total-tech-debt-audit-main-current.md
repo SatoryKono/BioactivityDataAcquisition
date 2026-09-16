@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `6ea81ffff83925c607196c22908e0c544f4b234390725540d39847dd56efec43`
+Evidence surface SHA-256: `7eff0427b7d7bfd50b477d7a2d9a580888131e8d4de184c4b6d9010142c9f163`
 
 Evidence metadata refresh (2026-09-11): the canonical registry digest was
 recomputed after #10304 adopted the SHA-bound coverage-verify inventory for
@@ -32,7 +32,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "6ea81ffff83925c607196c22908e0c544f4b234390725540d39847dd56efec43",
+  "evidence_surface_sha256": "7eff0427b7d7bfd50b477d7a2d9a580888131e8d4de184c4b6d9010142c9f163",
   "metrics": {
     "architecture_integral_score": 9.36,
     "architecture_interpretation": "good_targeted_improvements",
@@ -43,11 +43,11 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 1615,
+    "fully_covered_module_count": 1631,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 4,
-    "partially_covered_module_count": 854,
-    "source_module_count": 2473,
+    "partially_covered_module_count": 851,
+    "source_module_count": 2486,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
@@ -66,13 +66,13 @@ Refresh reason: Reconcile the current evidence surface and semantic summary with
 1. Debt release gate status: **passing**. This local governance result does not claim successful hosted CI or full dashboard acceptance.
 1. Architecture quality integral score: **9.36** (`good_targeted_improvements`). Integral score `9.36`.
 1. Module inventory (from module-coverage-inventory.json only):
-   - source_module_count: **2473**
-   - fully_covered: **1615**
-   - partially_covered: **854**
+   - source_module_count: **2486**
+   - fully_covered: **1631**
+   - partially_covered: **851**
    - no_executable_lines: **4**
    - uncovered: **0**
    - unmeasured: **0**
-   - check: fully + partial + no_exec + uncovered + unmeasured = 2473 == source_module_count
+   - check: fully + partial + no_exec + uncovered + unmeasured = 2486 == source_module_count
 1. Contract coverage matrix schema: **contract-coverage-matrix-v3** (v3: strict Gold required for availability).
 1. Constructor waivers (shrink-only inventory): **1** entries.
 1. Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**.

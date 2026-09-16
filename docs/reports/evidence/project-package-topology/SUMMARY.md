@@ -6,7 +6,7 @@ historical notes below retain their original scope.
 
 `source_tree_sha256=4ebd484cd59a78bbccfe21170fe6d33dfa3268fc2ffbf0f1bf6e2721f0726a44`
 
-`source_module_count=2484`
+`source_module_count=2486`
 
 Refresh note (2026-09-15): hash-only reconcile after pytest-zero loop
 (source-tree rebind, archive operator test, Grafana copy). Counts and the

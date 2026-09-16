@@ -134,3 +134,12 @@ Final dashboard-only rerun: 752 passed, 8 skipped, zero failures
 visually checked at 1280x900: both domain pages, full Run ID, completion, rules
 and revision are visible. A stale tab with ERR_NETWORK_CHANGED was replaced
 with a fresh tab in the same browser. No browser security settings changed.
+
+
+Latest review fixes also bind archived reports and every revision to manifest_id
+when present, persist probe_fallback_reason, and record cancellation shutdown in
+the run ledger and terminal audit before publishing its snapshot. The 414-case
+measured suite passed with no skips or failures. Full coverage inventory refresh
+includes all 2486 source modules. Main's additional coverage measurements and
+regression tests from #10491/#10492 were preserved during the follow-up merge.
+Final application-core LOC is 23443 (historical bound 23445), with no budget growth.
