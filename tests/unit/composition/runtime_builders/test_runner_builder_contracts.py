@@ -206,7 +206,6 @@ def test_inputs_resolver_public_surface_is_narrowed_to_reviewed_exports() -> Non
         "ResolvedVacuumSettings",
         "RunnerInputs",
         "prepare_runner_inputs",
-        "resolve_health_check_mode",
     }
     assert "assemble_runtime_config" not in inputs_resolver.__all__
     assert "assemble_filter_config" not in inputs_resolver.__all__

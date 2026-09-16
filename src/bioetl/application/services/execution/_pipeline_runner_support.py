@@ -6,7 +6,8 @@ from collections.abc import Awaitable, Callable
 from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
+from uuid import UUID
 
 from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
@@ -35,6 +36,7 @@ from bioetl.domain.run_reports.pipeline_builder import (
     PipelineRunReportOptionalBlocks,
     build_pipeline_run_report,
 )
+from bioetl.domain.types import RunID
 
 if TYPE_CHECKING:
     from bioetl.application.services.execution.pipeline_run_execution_service import (
@@ -46,7 +48,6 @@ if TYPE_CHECKING:
         ExecutionMetricsRunnerPort,
         LoggerPort,
     )
-    from bioetl.domain.types import RunID
 
 
 def build_dry_run_result(
@@ -352,7 +353,7 @@ def constructor_failure_recorder(
     return record
 
 
-async def _record_pipeline_audit_event(
+async def record_pipeline_audit_event(
     audit: AuditPort,
     *,
     event_name: str,
@@ -376,3 +377,23 @@ async def _record_pipeline_audit_event(
     if error_type is not None:
         event_data["error_type"] = error_type
     await audit.log_event(event_name, event_data, timestamp=timestamp)
+
+
+def resolve_effective_run_id(
+    *,
+    run_id: UUID | None,
+    options: RunOptions,
+    run_id_factory: Callable[[], RunID | UUID | str],
+) -> RunID:
+    if run_id is not None:
+        return cast(RunID, run_id)
+    if options.exact_replay:
+        raise ValueError("exact replay requires explicit run_id")
+    generated_run_id = run_id_factory()
+    if isinstance(generated_run_id, UUID):
+        return cast(RunID, generated_run_id)
+    return cast(RunID, UUID(str(generated_run_id)))
+
+
+def missing_run_id_factory() -> RunID:
+    raise RuntimeError("pipeline run_id_factory must be supplied by composition root")

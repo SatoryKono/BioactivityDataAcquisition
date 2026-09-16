@@ -20,6 +20,25 @@ TYPE_CHECKING_NAME = "TYPE_CHECKING"
 
 
 @dataclass(frozen=True)
+class InternalFanInModule:
+    """One family module and the runtime importers that depend on it."""
+
+    module: str
+    fan_in: int
+    runtime_importers: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class InternalFanInCensus:
+    """Deterministic reverse-import fan-in census for one hotspot family."""
+
+    distribution: dict[str, int]
+    modules: tuple[InternalFanInModule, ...]
+    max_fan_in: int
+    max_modules: tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class HotspotFamilyMetrics:
     """Measured metrics for one hotspot family."""
 
@@ -37,10 +56,26 @@ class HotspotFamilyMetrics:
     max_internal_fan_in: int
     max_internal_fan_in_module: str | None
     bounded_growth_budgets: dict[str, int]
+    internal_fan_in_census: InternalFanInCensus
 
     def to_dict(self) -> dict[str, Any]:
         """Return a JSON-friendly mapping."""
-        return asdict(self)
+        payload = asdict(self)
+        census = self.internal_fan_in_census
+        payload["internal_fan_in_census"] = {
+            "distribution": dict(census.distribution),
+            "modules": [
+                {
+                    "module": row.module,
+                    "fan_in": row.fan_in,
+                    "runtime_importers": list(row.runtime_importers),
+                }
+                for row in census.modules
+            ],
+            "max_fan_in": census.max_fan_in,
+            "max_modules": list(census.max_modules),
+        }
+        return payload
 
 
 def load_scorecard(path: Path = SCORECARD_PATH) -> dict[str, object]:
@@ -424,15 +459,6 @@ def _import_from_targets(
     return tuple(targets)
 
 
-def _is_type_checking_guard(test: ast.AST) -> bool:
-    """Return whether an ``if`` test guards type-only imports."""
-    if isinstance(test, ast.Name):
-        return test.id == "TYPE_CHECKING"
-    if isinstance(test, ast.Attribute):
-        return test.attr == "TYPE_CHECKING"
-    return False
-
-
 def _iter_runtime_import_nodes(
     node: ast.AST,
 ) -> tuple[ast.Import | ast.ImportFrom, ...]:
@@ -469,49 +495,63 @@ def _seen_internal_targets_for_module(
     return seen_targets
 
 
-def _update_fan_in_counter(
-    fan_in_counter: Counter[str],
+def collect_internal_fan_in_census(
     *,
-    source_module: str,
-    seen_targets: set[str],
-) -> None:
-    """Apply one module's unique internal dependencies to the fan-in counter."""
-    for target in seen_targets:
-        if target == source_module:
-            continue
-        fan_in_counter[target] += 1
-
-
-def count_internal_fan_in(*, files: list[Path]) -> tuple[int, str | None]:
-    """Count the maximum family-internal fan-in across the file set."""
-    module_map = {module_name_from_path(path): path for path in files}
+    files: list[Path],
+    src_root: Path = SRC_ROOT,
+) -> InternalFanInCensus:
+    """Collect a deterministic reverse-import fan-in census for ``files``."""
+    module_map = {
+        module_name_from_path(path, src_root=src_root): path for path in files
+    }
     family_modules = set(module_map)
-    fan_in_counter: Counter[str] = Counter()
+    importers: dict[str, set[str]] = {module: set() for module in family_modules}
 
     for source_module, path in module_map.items():
         tree = _parse_python_ast(path)
         if tree is None:
             continue
-
         seen_targets = _seen_internal_targets_for_module(
             tree,
             source_module=source_module,
             family_modules=family_modules,
         )
-        _update_fan_in_counter(
-            fan_in_counter,
-            source_module=source_module,
-            seen_targets=seen_targets,
+        for target in seen_targets:
+            if target == source_module or target not in importers:
+                continue
+            importers[target].add(source_module)
+
+    modules = tuple(
+        InternalFanInModule(
+            module=module,
+            fan_in=len(importers[module]),
+            runtime_importers=tuple(sorted(importers[module])),
         )
-
-    if not fan_in_counter:
-        return 0, None
-
-    max_module, max_fan_in = max(
-        fan_in_counter.items(),
-        key=lambda item: (item[1], item[0]),
+        for module in sorted(family_modules)
     )
-    return max_fan_in, max_module
+    fan_ins = [row.fan_in for row in modules]
+    counts: Counter[int] = Counter(fan_ins)
+    distribution = {str(value): counts[value] for value in sorted(counts)}
+    max_fan_in = max(fan_ins) if fan_ins else 0
+    max_modules = tuple(row.module for row in modules if row.fan_in == max_fan_in)
+    return InternalFanInCensus(
+        distribution=distribution,
+        modules=modules,
+        max_fan_in=max_fan_in,
+        max_modules=max_modules,
+    )
+
+
+def count_internal_fan_in(
+    *,
+    files: list[Path],
+    src_root: Path = SRC_ROOT,
+) -> tuple[int, str | None]:
+    """Count the maximum family-internal fan-in across the file set."""
+    census = collect_internal_fan_in_census(files=files, src_root=src_root)
+    if census.max_fan_in == 0:
+        return 0, None
+    return census.max_fan_in, census.max_modules[-1]
 
 
 def _load_duplication_baseline(path: Path | None) -> dict[str, int]:
@@ -594,7 +634,9 @@ def _hotspot_family_metric(
     """Build current metrics for one hotspot family row."""
     path_prefixes = _path_prefixes(family)
     files = iter_family_python_files(path_prefixes=list(path_prefixes))
-    max_fan_in, max_fan_in_module = count_internal_fan_in(files=files)
+    census = collect_internal_fan_in_census(files=files)
+    max_fan_in = census.max_fan_in
+    max_fan_in_module = None if max_fan_in == 0 else census.max_modules[-1]
     return HotspotFamilyMetrics(
         name=str(family.get("name", "")),
         owner=str(family.get("owner", "")),
@@ -613,6 +655,7 @@ def _hotspot_family_metric(
         max_internal_fan_in=max_fan_in,
         max_internal_fan_in_module=max_fan_in_module,
         bounded_growth_budgets=_bounded_growth_budgets(family),
+        internal_fan_in_census=census,
     )
 
 

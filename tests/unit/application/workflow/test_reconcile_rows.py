@@ -30,12 +30,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from types import SimpleNamespace
+from unittest.mock import MagicMock
 
 import pytest
 
 from bioetl.application.workflow.transforms import WorkflowTransformRuntimeContext
 from bioetl.application.workflow.transforms.reconcile_rows import (
     _build_config,
+    _optional_runtime_str,
+    _persist_reconcile_rows_artifact,
     build_reconcile_rows_executor,
 )
 from bioetl.domain.ports import (
@@ -154,3 +158,112 @@ async def test_executor_returns_deterministic_report_without_rows() -> None:
         "report_only": True,
         "mutated": False,
     }
+
+
+def _spec_with_config(config: dict[str, object]) -> WorkflowTransformSpec:
+    return WorkflowTransformSpec(
+        step_id="reconcile_activity_rows",
+        transform_name="reconcile_rows",
+        config=config,
+    )
+
+
+@pytest.mark.parametrize(
+    ("change", "message"),
+    [
+        ({"left_columns": ["a", "b"]}, "matching lengths"),
+        ({"left_primary_keys": ["a", "b"]}, "length to be <="),
+        ({"layer": " "}, "config.layer"),
+        ({"left_columns": "target_id"}, "config.left_columns as a non-empty list"),
+        ({"left_columns": [" "]}, r"config\.left_columns\[0\]"),
+        ({"left_columns": []}, "config.left_columns as a non-empty list"),
+    ],
+)
+def test_build_config_rejects_invalid_contracts(
+    change: dict[str, object], message: str
+) -> None:
+    config = dict(_spec().config or {})
+    config.update(change)
+    with pytest.raises(ValueError, match=message):
+        _build_config(_spec_with_config(config))
+
+
+@pytest.mark.asyncio
+async def test_executor_persists_artifact_refs_when_runtime_identity_is_complete() -> (
+    None
+):
+    sink = MagicMock()
+    sink.write_reconcile_result_artifact.return_value = (
+        {"kind": "reconcile_result", "ref": "artifact.json"},
+    )
+    context = WorkflowTransformRuntimeContext(
+        workflow_name="nightly",
+        workflow_run_id="workflow-run-1",
+        manifest_id="manifest-1",
+        debug_export_enabled=True,
+        debug_export_dir=123,
+        artifact_sink=sink,
+    )
+
+    payload = await build_reconcile_rows_executor(_RecordingPort())(
+        _spec(), upstream_outputs={}, runtime_context=context
+    )
+
+    assert payload["artifact_refs"] == [
+        {"kind": "reconcile_result", "ref": "artifact.json"}
+    ]
+    artifact_context = sink.write_reconcile_result_artifact.call_args.kwargs["context"]
+    assert artifact_context.workflow_name == "nightly"
+    assert artifact_context.debug_export_dir == "123"
+
+
+@pytest.mark.asyncio
+async def test_persist_artifact_skips_absent_runtime_sink_and_writer() -> None:
+    spec = _spec()
+    assert await _persist_reconcile_rows_artifact(None, spec=spec, payload={}) == ()
+    assert (
+        await _persist_reconcile_rows_artifact(
+            WorkflowTransformRuntimeContext(workflow_name="nightly"),
+            spec=spec,
+            payload={},
+        )
+        == ()
+    )
+    assert (
+        await _persist_reconcile_rows_artifact(
+            SimpleNamespace(
+                artifact_sink=SimpleNamespace(write_reconcile_result_artifact=None),
+                workflow_name="nightly",
+                workflow_run_id="run-1",
+                manifest_id="manifest-1",
+            ),
+            spec=spec,
+            payload={},
+        )
+        == ()
+    )
+
+
+@pytest.mark.asyncio
+async def test_persist_artifact_logs_missing_runtime_identifiers() -> None:
+    logger = MagicMock()
+    context = SimpleNamespace(
+        artifact_sink=MagicMock(),
+        workflow_name="nightly",
+        workflow_run_id=None,
+        manifest_id="manifest-1",
+        logger=logger,
+    )
+    assert (
+        await _persist_reconcile_rows_artifact(context, spec=_spec(), payload={}) == ()
+    )
+    logger.debug.assert_called_once()
+
+
+def test_optional_runtime_str_handles_missing_context_and_value() -> None:
+    assert _optional_runtime_str(None, "debug_export_dir") is None
+    assert _optional_runtime_str(SimpleNamespace(), "debug_export_dir") is None
+    assert (
+        _optional_runtime_str(SimpleNamespace(debug_export_dir=123), "debug_export_dir")
+        == "123"
+    )

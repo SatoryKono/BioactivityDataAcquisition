@@ -10,10 +10,12 @@ from typing import TYPE_CHECKING
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.runtime_builders.inputs_runtime_assembly import (
     ResolvedVacuumSettings,
+    adjust_batch_size_for_filter,
     assemble_cached_bronze_context,
     assemble_filter_config,
     assemble_runtime_config,
     assemble_vacuum_settings,
+    validate_pk_contract,
 )
 from bioetl.composition.runtime_builders.inputs_resolver import prepare_runner_inputs
 from bioetl.composition.runtime_builders.runner_inputs import (
@@ -103,6 +105,8 @@ def _prepare_runner_inputs_with_resolved_functions(
         assemble_filter_config_fn=assemble_filter,
         assemble_cached_bronze_context_fn=assemble_cached_bronze,
         load_source_config_fn=load_source_config_fn,
+        validate_pk_contract_fn=validate_pk_contract,
+        adjust_batch_size_for_filter_fn=adjust_batch_size_for_filter,
     )
 
 

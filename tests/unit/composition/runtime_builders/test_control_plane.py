@@ -183,8 +183,9 @@ def test_create_run_manifest_with_effective_config_reuses_publication_context(
         )
 
     def _fake_create_run_manifest(**kwargs: object):
-        captured["manifest_context"] = kwargs["reproducibility_context"]
-        captured["manifest_identity"] = kwargs["contract_identity"]
+        publication_context = kwargs["publication_context"]
+        captured["manifest_context"] = publication_context.reproducibility_context
+        captured["manifest_identity"] = publication_context.contract_identity
         return ("control-plane-refs", None)
 
     monkeypatch.setattr(

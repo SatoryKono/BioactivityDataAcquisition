@@ -551,6 +551,7 @@ nav:
           - "Scaling": 05-operations/runbooks/scaling.md
           - "Publication Validation": 05-operations/runbooks/publication-validation-runbook.md
           - "Generated Artifact Drift": 05-operations/runbooks/generated-artifact-drift-workflow.md
+          - "Game Day": 05-operations/runbooks/game-day.md
           - "Workflow Control Plane": 05-operations/runbooks/workflow-control-plane.md
       - "Performance Baselines": 05-operations/performance-baselines.md
       - "VACUUM & Retention": 05-operations/vacuum-retention.md

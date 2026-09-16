@@ -1,5 +1,5 @@
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
-"""Shared snapshot-to-mapping serialization helpers for runtime builders."""
+"""Shared snapshot-to-mapping serialization helpers for composition payloads."""
 
 from __future__ import annotations
 
@@ -15,13 +15,12 @@ from uuid import UUID
 if TYPE_CHECKING:
     from _typeshed import DataclassInstance
 
-__all__ = ["normalize_snapshot", "to_serializable_mapping"]
-
-
 from bioetl.composition.contracts.structural import (
     DictHost as _DictHost,
     ModelDumpHost as _ModelDumpHost,
 )
+
+__all__ = ["normalize_snapshot", "to_serializable_mapping"]
 
 
 def normalize_snapshot(value: object) -> object:

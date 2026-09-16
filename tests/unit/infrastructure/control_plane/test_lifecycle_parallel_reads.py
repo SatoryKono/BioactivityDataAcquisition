@@ -88,7 +88,7 @@ def test_selected_read_error_is_not_silently_omitted(tmp_path: Path, monkeypatch
     with pytest.raises(OSError, match="read failed"):
         refs.plan_manifest_artifact_refs(
             base_path=tmp_path,
-            cutoff=datetime.now(UTC),
+            cutoff=datetime(2026, 1, 1, tzinfo=UTC),
             protected_refs=Mock(),
             manifest=Mock(),
         )

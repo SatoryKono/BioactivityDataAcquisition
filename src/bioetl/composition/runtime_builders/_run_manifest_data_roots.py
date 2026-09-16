@@ -28,7 +28,7 @@ __all__ = [
 
 
 def control_plane_root(*args: object, **kwargs: object) -> object:
-    module = "bioetl.composition.runtime_builders._run_manifest_control_plane_paths"
+    module = "bioetl.composition.control_plane_paths"
     return import_module(module).control_plane_root(*args, **kwargs)
 
 

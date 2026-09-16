@@ -147,7 +147,36 @@ def _with_budget_warnings(family: dict[str, object]) -> dict[str, object]:
     enriched = dict(family)
     enriched["budget_warnings"] = _budget_warnings_for_family(family)
     enriched["budget_review_notes"] = _budget_review_notes_for_family(family)
+    enriched.update(_at_budget_fan_in_views(family))
     return enriched
+
+
+def _fan_in_cap(family: dict[str, object]) -> int | None:
+    budgets = family.get("bounded_growth_budgets", {})
+    if not isinstance(budgets, dict):
+        return None
+    cap = budgets.get("max_internal_fan_in")
+    return cap if isinstance(cap, int) else None
+
+
+def _at_budget_fan_in_views(family: dict[str, object]) -> dict[str, object]:
+    """Return at-cap fan-in modules relative to the current shrink-only budget."""
+    census = family.get("internal_fan_in_census")
+    cap = _fan_in_cap(family)
+    if not isinstance(census, dict) or cap is None:
+        return {}
+    modules = census.get("modules", [])
+    if not isinstance(modules, list):
+        return {}
+    at_budget_modules = [
+        module
+        for module in modules
+        if isinstance(module, dict) and module.get("fan_in") == cap
+    ]
+    return {
+        "at_budget_modules": at_budget_modules,
+        "at_budget_module_count": len(at_budget_modules),
+    }
 
 
 def _merge_reviewed_baseline_metrics(
@@ -247,8 +276,73 @@ def _render_markdown(
             f"`{review_note_text}` |"
         )
 
+    lines.extend(_render_fan_in_census_sections(metrics))
     lines.append("")
     return "\n".join(lines)
+
+
+def _compact_distribution(distribution: object) -> str:
+    if not isinstance(distribution, dict) or not distribution:
+        return "-"
+    parts: list[str] = []
+    for key in sorted(distribution, key=lambda item: int(str(item))):
+        value = distribution[key]
+        if isinstance(value, int):
+            parts.append(f"{key}:{value}")
+    return ", ".join(parts) if parts else "-"
+
+
+def _render_importer_list(importers: object) -> str:
+    if not isinstance(importers, list) or not importers:
+        return "-"
+    return ", ".join(f"`{name}`" for name in importers if isinstance(name, str))
+
+
+def _render_fan_in_census_sections(metrics: list[dict[str, object]]) -> list[str]:
+    """Render compact distributions and at-budget importer tables."""
+    lines: list[str] = []
+    for family in (_with_budget_warnings(item) for item in metrics):
+        name = family.get("name")
+        census = family.get("internal_fan_in_census")
+        if not isinstance(name, str) or not isinstance(census, dict):
+            continue
+        cap = _fan_in_cap(family)
+        cap_text = str(cap) if cap is not None else "-"
+        at_budget_count = family.get("at_budget_module_count", 0)
+        lines.extend(
+            [
+                "",
+                f"## `{name}` internal fan-in",
+                "",
+                f"- distribution: `{_compact_distribution(census.get('distribution'))}`",
+                f"- at_budget_module_count: `{at_budget_count}` (cap `{cap_text}`)",
+                "",
+            ]
+        )
+        at_budget_modules = family.get("at_budget_modules", [])
+        if not isinstance(at_budget_modules, list) or not at_budget_modules:
+            lines.append("No modules currently sit at the fan-in cap.")
+            continue
+        lines.extend(
+            [
+                "| Module | Fan-in | Runtime importers |",
+                "| --- | ---: | --- |",
+            ]
+        )
+        for module in at_budget_modules:
+            if not isinstance(module, dict):
+                continue
+            module_name = module.get("module")
+            fan_in = module.get("fan_in")
+            if not isinstance(module_name, str) or not isinstance(fan_in, int):
+                continue
+            lines.append(
+                "| "
+                f"`{module_name}` | "
+                f"{fan_in} | "
+                f"{_render_importer_list(module.get('runtime_importers'))} |"
+            )
+    return lines
 
 
 def _content_already_written(path: Path, content: str) -> bool:

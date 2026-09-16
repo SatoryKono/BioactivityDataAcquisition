@@ -40,9 +40,10 @@ from bioetl.composition.runtime_builders.runner_builder_wiring import (
     resolve_runner_factory_wiring,
 )
 from bioetl.composition.runtime_builders import (
-    inputs_resolver,
+    inputs_runtime_assembly,
     runner_control_plane_assembly,
 )
+from bioetl.composition.runtime_builders.config_access import load_source_config
 
 from tests.unit.composition.runtime_builders.runner_builder_test_support import *
 
@@ -380,17 +381,21 @@ def test_build_pipeline_runner_uses_canonical_subservices_with_observability_sea
     assert kwargs["build_observability_bundle_fn"] is build_observability_bundle_fn
     assert (
         kwargs["assemble_vacuum_settings_fn"]
-        is inputs_resolver.assemble_vacuum_settings
+        is inputs_runtime_assembly.assemble_vacuum_settings
     )
     assert (
-        kwargs["assemble_runtime_config_fn"] is inputs_resolver.assemble_runtime_config
+        kwargs["assemble_runtime_config_fn"]
+        is inputs_runtime_assembly.assemble_runtime_config
     )
-    assert kwargs["assemble_filter_config_fn"] is inputs_resolver.assemble_filter_config
+    assert (
+        kwargs["assemble_filter_config_fn"]
+        is inputs_runtime_assembly.assemble_filter_config
+    )
     assert (
         kwargs["assemble_cached_bronze_context_fn"]
-        is inputs_resolver.assemble_cached_bronze_context
+        is inputs_runtime_assembly.assemble_cached_bronze_context
     )
-    assert kwargs["load_source_config_fn"] is runner_builder.load_source_config
+    assert kwargs["load_source_config_fn"] is load_source_config
 
 
 def test_build_pipeline_runner_persists_manifest_before_factory_create(

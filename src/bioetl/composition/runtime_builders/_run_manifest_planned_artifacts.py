@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.composition.runtime_builders._run_manifest_control_plane_paths import (
+from bioetl.composition.control_plane_paths import (
     resolve_data_root,
 )
 from bioetl.domain.control_plane import RunArtifactRef

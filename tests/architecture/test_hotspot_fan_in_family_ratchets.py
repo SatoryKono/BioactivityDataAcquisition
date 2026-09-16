@@ -18,10 +18,13 @@ from pathlib import Path
 import pytest
 
 from scripts.engineering.qa.hotspot_family_metrics import (
+    _is_type_checking_guard,
+    collect_internal_fan_in_census,
     count_internal_fan_in,
     iter_family_python_files,
     load_scorecard,
 )
+from tests.architecture.quality_artifacts import load_quality_json
 
 pytestmark = pytest.mark.architecture
 
@@ -137,12 +140,6 @@ _PIPELINE_SPAN_LIFECYCLE_RUNTIME_IMPORTERS = (
 )
 
 
-def _is_type_checking_guard(test: ast.AST) -> bool:
-    return (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
-        isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
-    )
-
-
 def _runtime_imported_modules(path: Path) -> set[str]:
     tree = ast.parse(path.read_text(encoding="utf-8"))
     found: set[str] = set()
@@ -192,3 +189,104 @@ def test_issue_10306_pipeline_span_lifecycle_fan_in_at_most_five() -> None:
     )
     assert importers == list(_PIPELINE_SPAN_LIFECYCLE_RUNTIME_IMPORTERS)
     assert len(importers) <= 5
+
+
+_C0_FAMILY_CAPS = {
+    "application_services_control_plane": 2,
+    "composition_runtime_builders": 3,
+}
+
+
+def test_hotspot_family_fan_in_census_matches_live_ast_graph() -> None:
+    """#10470: committed reverse-import census must equal the live AST graph."""
+    committed = load_quality_json("hotspot-family-baseline.json")
+    families = committed.get("families")
+    assert isinstance(families, list) and families
+
+    for family in families:
+        assert isinstance(family, dict)
+        name = family.get("name")
+        path_prefixes = family.get("path_prefixes", [])
+        assert isinstance(name, str)
+        assert isinstance(path_prefixes, list) and path_prefixes
+        files = iter_family_python_files(
+            path_prefixes=[
+                prefix for prefix in path_prefixes if isinstance(prefix, str)
+            ]
+        )
+        live = collect_internal_fan_in_census(files=files)
+        wrapper_max, wrapper_module = count_internal_fan_in(files=files)
+        census = family.get("internal_fan_in_census")
+        assert isinstance(census, dict)
+        live_modules = [
+            {
+                "module": row.module,
+                "fan_in": row.fan_in,
+                "runtime_importers": list(row.runtime_importers),
+            }
+            for row in live.modules
+        ]
+        assert census["distribution"] == live.distribution
+        assert census["modules"] == live_modules
+        assert census["max_fan_in"] == live.max_fan_in
+        assert census["max_modules"] == list(live.max_modules)
+        assert family["max_internal_fan_in"] == live.max_fan_in
+        assert family["files"] == len(live.modules)
+        assert sum(live.distribution.values()) == family["files"]
+        assert wrapper_max == live.max_fan_in
+        if live.max_fan_in == 0:
+            assert wrapper_module is None
+        else:
+            assert wrapper_module == live.max_modules[-1]
+        for row in live.modules:
+            assert row.runtime_importers == tuple(sorted(set(row.runtime_importers)))
+
+        cap = family.get("bounded_growth_budgets", {})
+        assert isinstance(cap, dict)
+        fan_in_cap = cap.get("max_internal_fan_in")
+        if isinstance(fan_in_cap, int):
+            at_budget = [
+                module for module in live.modules if module.fan_in == fan_in_cap
+            ]
+            assert family.get("at_budget_module_count") == len(at_budget)
+            assert family.get("at_budget_modules") == [
+                {
+                    "module": row.module,
+                    "fan_in": row.fan_in,
+                    "runtime_importers": list(row.runtime_importers),
+                }
+                for row in at_budget
+            ]
+
+    by_name = {
+        str(row["name"]): row
+        for row in families
+        if isinstance(row, dict) and "name" in row
+    }
+    for family_name, expected_cap in _C0_FAMILY_CAPS.items():
+        family = by_name[family_name]
+        budgets = family.get("bounded_growth_budgets", {})
+        assert isinstance(budgets, dict)
+        assert budgets.get("max_internal_fan_in") == expected_cap
+        census = family["internal_fan_in_census"]
+        assert isinstance(census, dict)
+        assert census["max_fan_in"] == expected_cap
+        assert family["at_budget_module_count"] > 0
+
+    control_plane = by_name["application_services_control_plane"]
+    runtime_builders = by_name["composition_runtime_builders"]
+    assert control_plane["files"] == 131
+    assert control_plane["internal_fan_in_census"]["distribution"] == {
+        "0": 17,
+        "1": 55,
+        "2": 59,
+    }
+    assert control_plane["at_budget_module_count"] == 59
+    assert runtime_builders["files"] == 57
+    assert runtime_builders["internal_fan_in_census"]["distribution"] == {
+        "0": 2,
+        "1": 28,
+        "2": 15,
+        "3": 12,
+    }
+    assert runtime_builders["at_budget_module_count"] == 12

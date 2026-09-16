@@ -32,12 +32,11 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 from bioetl.application.runtime_timestamps import capture_runtime_timing_anchor
 from bioetl.application.services.execution._pipeline_runner_support import (
-    _record_pipeline_audit_event,
     _require_execution_runner,
     build_dry_run_result,
     build_pipeline_run_result,
@@ -45,6 +44,15 @@ from bioetl.application.services.execution._pipeline_runner_support import (
     constructor_failure_recorder,
     create_execution_runner_audited,
     finalize_pipeline_run_report,
+)
+from bioetl.application.services.execution._pipeline_runner_support import (
+    missing_run_id_factory as _missing_run_id_factory,
+)
+from bioetl.application.services.execution._pipeline_runner_support import (
+    record_pipeline_audit_event as _record_pipeline_audit_event,
+)
+from bioetl.application.services.execution._pipeline_runner_support import (
+    resolve_effective_run_id as _resolve_effective_run_id,
 )
 from bioetl.application.services.execution.pipeline_run_context_service import (
     PipelineRunContextService,
@@ -79,26 +87,6 @@ if TYPE_CHECKING:
     )
 
 
-def _resolve_effective_run_id(
-    *,
-    run_id: UUID | None,
-    options: RunOptions,
-    run_id_factory: Callable[[], RunID | UUID | str],
-) -> RunID:
-    if run_id is not None:
-        return cast(RunID, run_id)
-    if options.exact_replay:
-        raise ValueError("exact replay requires explicit run_id")
-    generated_run_id = run_id_factory()
-    if isinstance(generated_run_id, UUID):
-        return cast(RunID, generated_run_id)
-    return cast(RunID, UUID(str(generated_run_id)))
-
-
-def _missing_run_id_factory() -> RunID:
-    raise RuntimeError("pipeline run_id_factory must be supplied by composition root")
-
-
 @dataclass
 class PipelineRunnerService:
     """Interface-agnostic application service for pipeline execution."""
@@ -123,27 +111,28 @@ class PipelineRunnerService:
         run_id: UUID | None = None,
         options: RunOptions | None = None,
     ) -> RunResult:
-        """Execute a registered pipeline and return its outcome and report paths.
-
-        Options override the dry_run flag. Exact replay requires an explicit run_id;
-        operational runs otherwise receive an ID from the composition factory.
-        Raises PipelineNotFoundError for an unregistered pipeline name.
-        """
+        """Run a registered pipeline and return a normalized ``RunResult``."""
         started_at, started_monotonic = capture_runtime_timing_anchor(
             clock=self.clock,
             started_at=self.clock.now(),
         )
-        effective_options = self._merge_options(options, dry_run)
+        effective_options = self._context_service.merge_options(
+            options=options,
+            dry_run=dry_run,
+            default_options_factory=lambda dry_run_value: RunOptions(
+                dry_run=dry_run_value
+            ),
+        )
         self._ensure_pipeline_exists(pipeline_name)
         effective_run_id = _resolve_effective_run_id(
             run_id=run_id,
             options=effective_options,
             run_id_factory=self.run_id_factory,
         )
-        context = self._build_context(
-            pipeline_name,
-            effective_run_id,
-            effective_options,
+        context = self._context_service.build_context(
+            pipeline_name=pipeline_name,
+            run_id=effective_run_id,
+            options=effective_options,
             started_at=started_at,
         )
         run_logger = self._create_run_logger(
@@ -212,7 +201,6 @@ class PipelineRunnerService:
         started_monotonic: float,
         record_constructor_failure: Callable[[Exception], Awaitable[None]],
     ) -> RunResult:
-
         observation_token = bind_run_observations()
         accounting = StageAccountingAccumulator()
         accounting_token = bind_stage_accounting(accounting)
@@ -289,35 +277,6 @@ class PipelineRunnerService:
         """
         return self.runner_factory.contains(pipeline_name)
 
-    def _merge_options(
-        self,
-        options: RunOptions | None,
-        dry_run: bool,
-    ) -> RunOptions:
-        """Merge individual parameters with RunOptions."""
-        return self._context_service.merge_options(
-            options=options,
-            dry_run=dry_run,
-            default_options_factory=lambda dry_run_value: RunOptions(
-                dry_run=dry_run_value
-            ),
-        )
-
-    def _build_context(
-        self,
-        pipeline_name: str,
-        run_id: RunID,
-        options: RunOptions,
-        started_at: datetime,
-    ) -> PipelineRunContext:
-        """Build PipelineRunContext from options."""
-        return self._context_service.build_context(
-            pipeline_name=pipeline_name,
-            run_id=run_id,
-            options=options,
-            started_at=started_at,
-        )
-
     async def _execute_pipeline(
         self,
         runner: ExecutionMetricsRunnerPort,
@@ -389,7 +348,7 @@ class PipelineRunnerService:
     def _finalize_report(
         self, result: RunResult, options: RunOptions | None
     ) -> RunResult:
-        """Use the configured report destination for every execution outcome."""
+        """Capture control-plane evidence and persist the run report."""
         capture_run_completion(self.capture_control_plane, result, options)
         return finalize_pipeline_run_report(
             result=result,
