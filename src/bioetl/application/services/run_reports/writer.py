@@ -22,6 +22,10 @@ from bioetl.application.services.run_reports.paths import (
     report_root_marker_path,
     resolve_report_root,
 )
+from bioetl.application.services.run_reports.snapshots import publish_snapshot
+from bioetl.application.services.run_reports.workflow_observations import (
+    finalize_workflow_children,
+)
 from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.run_reports.models import PipelineRunReport, WorkflowRunReport
 
@@ -177,7 +181,8 @@ def write_pipeline_run_report(
             ),
         )
     )
-    write_json(json_path, enriched.to_dict(), store=writer)
+    payload = publish_snapshot(enriched.to_dict(), json_path, store=writer)
+    write_json(json_path, payload, store=writer)
     _atomic_write_text(
         md_path,
         render_pipeline_run_report_markdown(enriched),
@@ -223,6 +228,9 @@ def write_workflow_run_report(
     json_path = out_dir / "workflow-run-report.json"
     md_path = out_dir / "workflow-run-report.md"
     write_json(json_path, report.to_dict(), store=writer)
+    finalize_workflow_children(
+        report, root=resolve_report_root(root=root), store=writer
+    )
     _atomic_write_text(
         md_path, render_workflow_run_report_markdown(report), store=writer
     )

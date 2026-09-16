@@ -32,22 +32,82 @@
         "status"
       ],
       "properties": {
-        "run_id": { "type": "string", "minLength": 1 },
-        "manifest_id": { "type": ["string", "null"] },
-        "pipeline_name": { "type": "string", "minLength": 1 },
-        "provider": { "type": ["string", "null"] },
-        "entity": { "type": ["string", "null"] },
-        "run_type": { "type": "string", "minLength": 1 },
+        "run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "manifest_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pipeline_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provider": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "entity": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "run_type": {
+          "type": "string",
+          "minLength": 1
+        },
         "status": {
           "type": "string",
-          "enum": ["success", "failed", "shutdown", "dry_run", "partial"]
+          "enum": [
+            "success",
+            "failed",
+            "shutdown",
+            "dry_run",
+            "partial"
+          ]
         },
-        "started_at": { "type": ["string", "null"] },
-        "completed_at": { "type": ["string", "null"] },
-        "duration_seconds": { "type": ["number", "null"] },
-        "workflow_id": { "type": ["string", "null"] },
-        "workflow_run_id": { "type": ["string", "null"] },
-        "workflow_step_id": { "type": ["string", "null"] }
+        "started_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "completed_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "duration_seconds": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "workflow_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "workflow_run_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "workflow_step_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
       }
     },
     "funnel": {
@@ -75,15 +135,28 @@
               "export"
             ]
           },
-          "records_in": { "type": "integer", "minimum": 0 },
-          "records_out": { "type": "integer", "minimum": 0 },
-          "removed_total": { "type": "integer", "minimum": 0 },
+          "records_in": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "records_out": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "removed_total": {
+            "type": "integer",
+            "minimum": 0
+          },
           "removals": {
             "type": "array",
             "items": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["outcome", "reason_code", "count"],
+              "required": [
+                "outcome",
+                "reason_code",
+                "count"
+              ],
               "properties": {
                 "outcome": {
                   "type": "string",
@@ -96,12 +169,25 @@
                     "other"
                   ]
                 },
-                "reason_code": { "type": "string", "minLength": 1 },
-                "reason_family": { "type": ["string", "null"] },
-                "count": { "type": "integer", "minimum": 0 },
+                "reason_code": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reason_family": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 0
+                },
                 "sample_refs": {
                   "type": "array",
-                  "items": { "type": "string" },
+                  "items": {
+                    "type": "string"
+                  },
                   "maxItems": 20
                 }
               }
@@ -109,13 +195,25 @@
           },
           "balance_status": {
             "type": "string",
-            "enum": ["OK", "DEGRADED", "FAILING", "UNKNOWN"]
+            "enum": [
+              "OK",
+              "DEGRADED",
+              "FAILING",
+              "UNKNOWN"
+            ]
           },
           "tracking": {
             "type": "string",
-            "enum": ["full", "partial", "not_tracked"]
+            "enum": [
+              "full",
+              "partial",
+              "not_tracked"
+            ]
           },
-          "unaccounted": { "type": "integer", "minimum": 0 }
+          "unaccounted": {
+            "type": "integer",
+            "minimum": 0
+          }
         }
       }
     },
@@ -136,17 +234,50 @@
         "gold_deduplicated"
       ],
       "properties": {
-        "bronze_records": { "type": "integer", "minimum": 0 },
-        "silver_valid": { "type": "integer", "minimum": 0 },
-        "silver_filtered_out": { "type": "integer", "minimum": 0 },
-        "silver_quarantined": { "type": "integer", "minimum": 0 },
-        "silver_skipped": { "type": "integer", "minimum": 0 },
-        "silver_deduplicated": { "type": "integer", "minimum": 0 },
-        "gold_written": { "type": "integer", "minimum": 0 },
-        "gold_excluded_by_contract": { "type": "integer", "minimum": 0 },
-        "gold_quarantined": { "type": "integer", "minimum": 0 },
-        "gold_skipped": { "type": "integer", "minimum": 0 },
-        "gold_deduplicated": { "type": "integer", "minimum": 0 }
+        "bronze_records": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "silver_valid": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "silver_filtered_out": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "silver_quarantined": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "silver_skipped": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "silver_deduplicated": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "gold_written": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "gold_excluded_by_contract": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "gold_quarantined": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "gold_skipped": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "gold_deduplicated": {
+          "type": "integer",
+          "minimum": 0
+        }
       }
     },
     "reasons_top_n": {
@@ -154,12 +285,30 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["reason_code", "count"],
+        "required": [
+          "reason_code",
+          "count"
+        ],
         "properties": {
-          "reason_code": { "type": "string" },
-          "reason_family": { "type": ["string", "null"] },
-          "outcome": { "type": ["string", "null"] },
-          "count": { "type": "integer", "minimum": 0 }
+          "reason_code": {
+            "type": "string"
+          },
+          "reason_family": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "outcome": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          }
         }
       }
     },
@@ -168,11 +317,23 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["kind", "ref"],
+        "required": [
+          "kind",
+          "ref"
+        ],
         "properties": {
-          "kind": { "type": "string" },
-          "ref": { "type": "string" },
-          "hash": { "type": ["string", "null"] }
+          "kind": {
+            "type": "string"
+          },
+          "ref": {
+            "type": "string"
+          },
+          "hash": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
         }
       }
     },
@@ -188,30 +349,74 @@
       "properties": {
         "silver_vs_bronze_status": {
           "type": "string",
-          "enum": ["OK", "DEGRADED", "FAILING", "UNKNOWN"]
+          "enum": [
+            "OK",
+            "DEGRADED",
+            "FAILING",
+            "UNKNOWN"
+          ]
         },
         "gold_vs_silver_status": {
           "type": "string",
-          "enum": ["OK", "DEGRADED", "FAILING", "UNKNOWN"]
+          "enum": [
+            "OK",
+            "DEGRADED",
+            "FAILING",
+            "UNKNOWN"
+          ]
         },
-        "silver_accounted": { "type": "integer", "minimum": 0 },
-        "gold_accounted": { "type": "integer", "minimum": 0 },
-        "silver_delta": { "type": "integer" },
-        "gold_delta": { "type": "integer" }
+        "silver_accounted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "gold_accounted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "silver_delta": {
+          "type": "integer"
+        },
+        "gold_delta": {
+          "type": "integer"
+        }
       }
     },
     "tracking_coverage": {
       "type": "string",
-      "enum": ["full", "partial", "not_tracked"]
+      "enum": [
+        "full",
+        "partial",
+        "not_tracked"
+      ]
     },
     "failure": {
       "type": "object",
       "additionalProperties": true,
       "properties": {
-        "error_type": { "type": ["string", "null"] },
-        "error_message": { "type": ["string", "null"] },
-        "failed_stage": { "type": ["string", "null"] },
-        "exit_hint": { "type": ["string", "null"] }
+        "error_type": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "error_message": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "failed_stage": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "exit_hint": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
       }
     },
     "io": {
@@ -245,6 +450,78 @@
     "performance": {
       "type": "object",
       "additionalProperties": true
+    },
+    "observations": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "reason",
+          "facts"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "OK",
+              "WARN",
+              "ERROR",
+              "INCOMPLETE",
+              "UNKNOWN",
+              "N/A"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "facts": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "selected_run_snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "revision",
+        "evidence",
+        "assessment"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "selected_run_snapshot_v1"
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "evidence": {
+          "type": "object"
+        },
+        "assessment": {
+          "type": "object",
+          "required": [
+            "rules_version",
+            "execution_state",
+            "verdict",
+            "checks_verdict",
+            "evidence_completeness",
+            "domains"
+          ],
+          "properties": {
+            "rules_version": {
+              "const": "selected-run-v1"
+            },
+            "domains": {
+              "type": "array",
+              "minItems": 6,
+              "maxItems": 6
+            }
+          }
+        }
+      }
     }
   }
 }

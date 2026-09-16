@@ -292,6 +292,13 @@ def _merge_panel_contract(
     merged = {**generated, **previous}
     merged["title"] = generated["title"]
     merged["evidence_source"] = generated["evidence_source"]
+    if (
+        previous.get("evidence_source")
+        and previous["evidence_source"] != generated["evidence_source"]
+    ):
+        # A data-source migration changes the semantic scope and empty states.
+        for key in ("scope", "scope_class", "empty_state_class"):
+            merged[key] = generated[key]
     role = str(merged.get("role") or generated["role"])
     if (
         merged["evidence_source"] == "prometheus"

@@ -83,6 +83,45 @@ def test_archive_restores_without_changing_source_and_rejects_overwrite(archive_
         store.create(manifest=manifest, plan=plan)
 
 
+def test_archive_preserves_selected_run_snapshot_and_revisions(archive_case, tmp_path):
+    from bioetl.application.services.run_reports.writer import write_pipeline_run_report
+    from bioetl.domain.run_reports.pipeline_builder import build_pipeline_run_report
+    from bioetl.infrastructure.storage.run_report_store_adapter import (
+        FileRunReportStoreAdapter,
+    )
+    from bioetl.interfaces.http.selected_run_status import load_selected_run_status
+
+    store, manifest, plan = archive_case
+    root = tmp_path / "reports"
+    report = build_pipeline_run_report(
+        identity={
+            "run_id": str(manifest.run_id),
+            "pipeline_name": manifest.pipeline_name,
+            "manifest_id": manifest.manifest_id,
+            "status": "success",
+        },
+        metrics={},
+    )
+    write_pipeline_run_report(report, root=root, store=FileRunReportStoreAdapter())
+    store = replace(store, report_root=root)
+    pack = store.create(manifest=manifest, plan=plan)
+    original = load_selected_run_status(
+        pipeline=manifest.pipeline_name, run_id=str(manifest.run_id), root=root
+    )
+    restored = load_selected_run_status(
+        pipeline=manifest.pipeline_name,
+        run_id=str(manifest.run_id),
+        root=pack / "restored" / "run-reports",
+    )
+    assert original == restored
+    assert store.verify(manifest=manifest, plan=plan)[0] is True
+    revision = next(
+        (pack / "restored" / "run-reports").rglob("status-revisions/*.json")
+    )
+    revision.write_text("broken")
+    assert store.verify(manifest=manifest, plan=plan)[0] is False
+
+
 @pytest.mark.parametrize("area", ["files", "restored"])
 @pytest.mark.parametrize("damage", ["delete", "corrupt"])
 def test_archive_rechecks_files_on_same_reader(archive_case, area, damage):

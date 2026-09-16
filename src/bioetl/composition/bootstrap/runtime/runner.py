@@ -59,6 +59,10 @@ def bootstrap_pipeline_runner_service(
         >>> options = RunOptions(run_type="incremental", limit=100)
         >>> result = await service.run("chembl_activity", options=options)
     """
+    from bioetl.composition.bootstrap.runtime.run_status import (
+        create_run_status_capture,
+    )
+
     settings = get_settings()
     service_run_id = create_runtime_occurrence_run_id("pipeline_runner_service")
     observability = bootstrap_observability_bundle(
@@ -75,6 +79,7 @@ def bootstrap_pipeline_runner_service(
     return PipelineRunnerService(
         report_store=FileRunReportStoreAdapter(),
         report_root=settings.report_root,
+        capture_control_plane=create_run_status_capture(settings.data_dir),
         runner_factory=runner_factory,
         metrics_extractor=metrics_extractor,
         logger=observability.logger,

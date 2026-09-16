@@ -152,18 +152,18 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
     # Stable panel IDs; y-bands sit under the shared nav (h=4), not nav-h=3.
     assert panels["Inspect Scope & Evidence"].get("id") == 99
     assert panels["Monitor Scope Health"].get("id") == 214
-    assert panels["Review First Action"].get("id") == 215
-    assert panels["Review Domain Status"].get("id") == 9002
+    assert panels["Review Current First Action"].get("id") == 215
+    assert panels["Review Selected Run Domains"].get("id") == 9002
     assert panels["Inspect Scope & Evidence"].get("gridPos", {}).get("y") == 3
-    assert panels["Review Selected Run Summary"].get("id") == 9603
-    assert panels["Review Selected Run Summary"].get("gridPos", {}).get("y") == 11
+    assert panels["Review Selected Run Status"].get("id") == 9603
+    assert panels["Review Selected Run Status"].get("gridPos", {}).get("y") == 11
     assert panels["Monitor Scope Health"].get("gridPos", {}).get("y") == 3
-    assert panels["Review First Action"].get("gridPos", {}).get("y") == 6
-    assert panels["Review Domain Status"].get("gridPos", {}).get("y") == panels[
-        "Review First Action"
+    assert panels["Review Current First Action"].get("gridPos", {}).get("y") == 6
+    assert panels["Review Selected Run Domains"].get("gridPos", {}).get("y") == panels[
+        "Review Current First Action"
     ].get("gridPos", {}).get("y")
-    assert panels["Review First Action"].get("gridPos", {}).get("w", 0) >= 8
-    assert panels["Review Domain Status"].get("gridPos", {}).get("w", 0) >= 8
+    assert panels["Review Current First Action"].get("gridPos", {}).get("w", 0) >= 8
+    assert panels["Review Selected Run Domains"].get("gridPos", {}).get("w", 0) >= 8
     lazy = {"Review Run Identity": 9300, "Review Processed Records": 9301}
     for title, panel_id in lazy.items():
         panel = panels[title]
@@ -181,7 +181,7 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
 def test_status_and_next_action_preserve_current_status_semantics() -> None:
     panels = _panels_by_title()
     status = panels["Monitor Scope Health"]
-    next_action = panels["Review First Action"]
+    next_action = panels["Review Current First Action"]
 
     assert status.get("type") == "stat"
     assert "bioetl_l0_status" in _panel_expr(status)
@@ -221,18 +221,19 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
 def test_review_domain_status_is_deviation_first_and_capped() -> None:
     """#8898: first-window domain matrix is top-four; full matrix stays below fold."""
     panels = _panels_by_title()
-    summary = panels["Review Domain Status"]
+    summary = panels["Review Selected Run Domains"]
     full_matrix = panels["Review All Domain Status"]
-    next_action = panels["Review First Action"]
+    next_action = panels["Review Current First Action"]
     summary_expr = _panel_expr(summary)
     full_expr = _panel_expr(full_matrix)
 
     assert summary.get("id") == 9002
-    assert "topk" not in summary_expr
-    assert "sort_desc" in summary_expr
-    assert "bioetl_l0_input_status_selected" in summary_expr
-    assert len(summary_expr) <= 200
-    assert "six" in str(summary.get("description", "")).lower()
+    assert not summary_expr
+    target = summary["targets"][0]
+    assert "selected-run-status?pipeline=${pipeline}&run_id=${run_id}" in target["url"]
+    assert target["root_selector"] == "domains"
+    assert "from=" not in target["url"] and "to=" not in target["url"]
+    assert "15-minute" in summary["description"]
 
     assert full_matrix.get("id") == 9031
     assert "topk(" not in full_expr
@@ -435,12 +436,11 @@ def test_selected_scope_cards_normalize_workflow_pipeline_aliases() -> None:
     """Epic #6574: first-screen cards use thin pipeline selectors (no mega-expr glue)."""
     for title in (
         "Monitor Scope Health",
-        "Review First Action",
-        "Review Domain Status",
+        "Review Current First Action",
     ):
         expr = _panel_expr(_panels_by_title()[title])
         assert 'pipeline=~"$pipeline"' in expr
-        # Review First Action uses recording-rule NO_ROUTE fallback (#6574 diet).
+        # Review Current First Action uses recording-rule NO_ROUTE fallback (#6574 diet).
         max_len = 200
         assert len(expr) <= max_len, f"{title} expr length {len(expr)} > {max_len}"
         assert "$__range" not in expr
@@ -480,8 +480,8 @@ def test_range_evidence_and_trend_rows_are_retained() -> None:
     panels = _panels_by_title()
     current_verdict_titles = {
         "Monitor Scope Health",
-        "Review First Action",
-        "Review Domain Status",
+        "Review Current First Action",
+        "Review Selected Run Domains",
         *_L1_CARD_TITLES,
     }
     expected_evidence_panels = {

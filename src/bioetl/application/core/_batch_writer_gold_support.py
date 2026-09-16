@@ -79,6 +79,16 @@ def validate_gold_records(
         )
 
     result = validator.validate(records)
+    from bioetl.application.services.run_reports.observations import (
+        record_run_observation,
+    )
+
+    record_run_observation(
+        "Data Validation",
+        verdict="OK" if result.valid else "ERROR",
+        reason="run_gold_schema_validation",
+        facts={"valid": result.valid, "records": len(records)},
+    )
     if not result.valid:
         debug_export_service = getattr(writer, "_debug_export_service", None)
         if debug_export_service is not None:

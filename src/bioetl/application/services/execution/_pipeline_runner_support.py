@@ -23,6 +23,7 @@ from bioetl.application.services.run_reports.enrichment import (
     build_schema_versions,
     build_stage_timings,
 )
+from bioetl.application.services.run_reports.observations import run_observations
 from bioetl.application.services.run_reports.writer import write_pipeline_run_report
 from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
@@ -191,6 +192,7 @@ def finalize_pipeline_run_report(
                 http_summary=build_http_summary(http_summary),
             ),
         )
+        report = replace(report, observations=run_observations())
         written = write_pipeline_run_report(report, root=report_root, store=store)
     except Exception as exc:
         return _require_run_result(

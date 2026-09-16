@@ -15,6 +15,7 @@ from bioetl.application.core.preflight.health_aggregator_runtime import (
     normalize_data_source_status,
     resolve_probe_fallback_reason,
 )
+from bioetl.application.services.run_reports.observations import record_run_observation
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
 from bioetl.domain.exceptions import BioETLError, InfrastructureError
 from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatus
@@ -90,6 +91,23 @@ class HealthAggregator:
                 else MISSING_RUNTIME_TIMESTAMP
             ),
         )
+        for component in component_results:
+            if component.component == "data_source":
+                record_run_observation(
+                    "Provider",
+                    verdict={
+                        HealthStatus.HEALTHY: "OK",
+                        HealthStatus.DEGRADED: "WARN",
+                        HealthStatus.UNHEALTHY: "ERROR",
+                    }.get(component.status, "UNKNOWN"),
+                    reason="run_preflight_provider_observation",
+                    facts={
+                        "observed_at": report.checked_at.isoformat()
+                        if report.checked_at is not None
+                        else None,
+                        "status": component.status.value,
+                    },
+                )
         return report
 
     async def _check_storage(

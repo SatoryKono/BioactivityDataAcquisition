@@ -17,6 +17,9 @@ from bioetl.domain.control_plane import (
     ControlPlaneArtifactSurface,
     RunManifest,
 )
+from bioetl.infrastructure.control_plane.archive_run_reports import (
+    selected_report_sources,
+)
 
 _SCHEMA = "bioetl_local_archive_v1"
 _ARCHIVE_READ_WORKERS = 16
@@ -121,6 +124,7 @@ class FileArchiveStore:
 
     data_root: Path
     archive_root: Path
+    report_root: Path | None = None
 
     def _pack(self, manifest: RunManifest) -> Path:
         key = hashlib.sha256(manifest.manifest_id.encode()).hexdigest()
@@ -138,7 +142,10 @@ class FileArchiveStore:
             entries = list(executor.map(read_source, plan.artifacts))
         if not any(found for _, _, found in entries):
             raise ValueError("archive_manifest_missing")
-        return {relative: path for relative, path, _ in entries}
+        return {
+            **{relative: path for relative, path, _ in entries},
+            **selected_report_sources(self.report_root, manifest),
+        }
 
     def create(
         self, *, manifest: RunManifest, plan: ControlPlaneArtifactLifecyclePlan

@@ -38,6 +38,7 @@ from bioetl.interfaces.http.run_report_ops import (
     load_pipeline_run_report_payload,
     load_workflow_run_report_payload,
 )
+from bioetl.interfaces.http.selected_run_status import handle_selected_run_status
 
 # Re-export table-shell helpers for existing unit imports.
 __all__ = (
@@ -60,6 +61,9 @@ async def dispatch_observability_request(
 ) -> None:
     """Route dashboard observability helper endpoints."""
     try:
+        if path == "/ops/observability/selected-run-status":
+            await handle_selected_run_status(host, writer, query)
+            return
         if path == "/ops/observability/processed-records":
             await handle_processed_records_table(host, writer, query)
             return

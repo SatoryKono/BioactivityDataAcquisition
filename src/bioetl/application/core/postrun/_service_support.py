@@ -210,7 +210,25 @@ class PostrunServiceSupportMixin:
         executor: ExecutorMetricsPort,
     ) -> DQResult:
         batch_metrics = self._collect_batch_metrics(executor)
-        return self._dq_service.evaluate(batch_metrics)
+        from bioetl.application.services.run_reports.observations import (
+            record_run_observation,
+        )
+
+        result = self._dq_service.evaluate(batch_metrics)
+        record_run_observation(
+            "Data Quality",
+            verdict={"passed": "OK", "warning": "WARN", "failed": "ERROR"}.get(
+                result.status.value, "UNKNOWN"
+            ),
+            reason="run_dq_threshold_evaluation",
+            facts={
+                "error_rate": result.error_rate,
+                "status": result.status.value,
+                "has_critical": result.has_critical,
+                "rule_outcomes_count": result.rule_outcomes_count,
+            },
+        )
+        return result
 
     async def run_vacuum_if_enabled(self: _PostrunSupportHost) -> VacuumResult:
         return await self._lifecycle_service.finalize_run(

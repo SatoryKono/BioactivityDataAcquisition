@@ -59,7 +59,7 @@ dashboards:
         type: stat
         description: Current system status summary
       - id: 215
-        title: Review First Action
+        title: Review Current First Action
         type: table
         description: Recommended first action for current state
       - id: 1000

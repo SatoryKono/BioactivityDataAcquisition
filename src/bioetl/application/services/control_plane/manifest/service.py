@@ -116,6 +116,20 @@ class RunManifestService(
         )
         self.manifest_port.save(manifest)
         self._assert_manifest_persisted(manifest)
+        from bioetl.application.services.run_reports.observations import (
+            record_run_observation,
+        )
+
+        record_run_observation(
+            "Control Plane",
+            verdict="INCOMPLETE",
+            reason="manifest_saved_full_trust_not_assessed",
+            facts={
+                "manifest_id": manifest.manifest_id,
+                "run_id": str(manifest.run_id),
+                "observed_at": created_at.isoformat(),
+            },
+        )
         emit_replay_write_risk_metrics(self.metrics, manifest)
         return manifest
 

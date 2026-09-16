@@ -904,3 +904,29 @@ class TestContextBuilding:
         context = call_args[0][0]
         assert context.vacuum.enabled is True
         assert context.vacuum.retention_days == 14
+
+
+@pytest.mark.asyncio
+async def test_cancelled_execution_persists_snapshot_and_releases_observations(
+    service, mock_runner, tmp_path
+):
+    from bioetl.infrastructure.storage.run_report_store_adapter import (
+        FileRunReportStoreAdapter,
+    )
+    from bioetl.domain.run_reports.selected_status import verify_snapshot
+    from bioetl.application.services.run_reports.observations import run_observations
+
+    service.report_root = tmp_path
+    service.report_store = FileRunReportStoreAdapter()
+    mock_runner.run.side_effect = asyncio.CancelledError()
+    with pytest.raises(asyncio.CancelledError):
+        await service.run("test_pipeline")
+    paths = list(tmp_path.glob("pipeline/*/*/pipeline-run-report.json"))
+    assert len(paths) == 1
+    payload = json.loads(paths[0].read_text())
+    assert payload["identity"]["status"] == "shutdown"
+    assert verify_snapshot(payload["selected_run_snapshot"])
+    assert (
+        payload["selected_run_snapshot"]["assessment"]["execution_state"] == "SHUTDOWN"
+    )
+    assert run_observations() == {}
