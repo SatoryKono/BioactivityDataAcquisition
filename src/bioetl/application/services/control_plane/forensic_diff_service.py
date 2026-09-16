@@ -6,20 +6,19 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 
 from bioetl.application.services.control_plane.forensic.diagnostics_support import (
+    RunManifestDiffResult,
+    RunManifestInspectionResult,
+    RunManifestInspectionService,
     artifact_completeness,
     artifact_refs,
     checkpoint_compatibility_payload,
     diagnostic_snapshot,
     forensic_diff_payload,
+    inspection_service_factory_from_ports,
     lineage_closure_payload,
     missing_evidence,
     replay_capability_payload,
     string_list,
-)
-from bioetl.application.services.control_plane.manifest.inspection_service import (
-    RunManifestDiffResult,
-    RunManifestInspectionResult,
-    RunManifestInspectionService,
 )
 from bioetl.domain.ports import (
     ArtifactByteComparisonPort,
@@ -31,20 +30,6 @@ __all__ = [
     "ForensicRunDiffResult",
     "ForensicRunDiffService",
 ]
-
-
-def _inspection_service_factory_from_ports(
-    manifest_port: RunManifestPort,
-    ledger_port: RunLedgerPort | None,
-    provided_factory: Callable[[], RunManifestInspectionService] | None,
-) -> Callable[[], RunManifestInspectionService]:
-    """Resolve the inspection-service factory without assembling in method bodies."""
-    if provided_factory is not None:
-        return provided_factory
-    return lambda: RunManifestInspectionService(
-        manifest_port=manifest_port,
-        ledger_port=ledger_port,
-    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -115,7 +100,7 @@ class ForensicRunDiffService:
         right_identifier: str,
     ) -> ForensicRunDiffResult:
         """Compare two run or manifest identifiers using existing inspection seams."""
-        inspection = _inspection_service_factory_from_ports(
+        inspection = inspection_service_factory_from_ports(
             self.manifest_port,
             self.ledger_port,
             self.inspection_service_factory,

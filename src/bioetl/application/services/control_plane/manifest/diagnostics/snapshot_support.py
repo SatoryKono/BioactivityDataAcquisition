@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.diagnostics.nested_mapping import (
-    lookup_mapping_path,
-)
 from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_ledger import (
     collect_ledger_input_snapshot_refs,
 )
@@ -18,6 +15,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_sum
     merge_ledger_input_snapshots_into_summary,
     resolve_post_manifest_input_snapshot_materialization_mode,
 )
+from bioetl.domain.normalization import lookup_mapping_path
 
 # Legacy aliases retained while helper imports are migrated incrementally.
 _lookup_mapping_path = lookup_mapping_path

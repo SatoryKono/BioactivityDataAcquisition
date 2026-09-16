@@ -128,6 +128,34 @@ def test_manifest_validation_implementation_is_not_flat_root_module() -> None:
 def test_historical_replay_closure_claims_are_replay_owned() -> None:
     """Historical replay closure claim helpers must live under replay seam."""
     assert (CONTROL_PLANE_ROOT / "replay" / "closure_claims.py").is_file()
+    assert not (
+        CONTROL_PLANE_ROOT / "replay" / "historical_certification.py"
+    ).exists()
+    assert not (
+        CONTROL_PLANE_ROOT / "replay" / "_historical_record_payload.py"
+    ).exists()
+    assert not (
+        CONTROL_PLANE_ROOT / "replay" / "_historical_certification_models.py"
+    ).exists()
+    assert not (
+        CONTROL_PLANE_ROOT / "manifest" / "diagnostics" / "nested_mapping.py"
+    ).exists()
+    assert not (
+        CONTROL_PLANE_ROOT
+        / "manifest"
+        / "diagnostics"
+        / "replay_invariants"
+        / "nested_mapping.py"
+    ).exists()
+    assert not (
+        CONTROL_PLANE_ROOT
+        / "manifest"
+        / "diagnostics"
+        / "base_effective_config_diagnostics.py"
+    ).exists()
+    assert not (
+        CONTROL_PLANE_ROOT / "manifest" / "diagnostics" / "checkpoint_projection.py"
+    ).exists()
 
 
 @pytest.mark.architecture

@@ -41,7 +41,7 @@ from bioetl.application.services.control_plane import RunLedgerService
 from bioetl.application.services.control_plane.manifest.diagnostics import (
     build_diagnostics_summary,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.base_effective_config_diagnostics import (
+from bioetl.application.services.control_plane.manifest.diagnostics.base import (
     _build_effective_config_diagnostics,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections import (

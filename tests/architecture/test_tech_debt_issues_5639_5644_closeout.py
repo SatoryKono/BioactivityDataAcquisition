@@ -19,7 +19,7 @@ from typing import Any
 import pytest
 import yaml
 
-from bioetl.application.services.control_plane.manifest.diagnostics.base_effective_config_diagnostics import (
+from bioetl.application.services.control_plane.manifest.diagnostics.base import (
     _build_effective_config_diagnostics,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.main_helpers import (

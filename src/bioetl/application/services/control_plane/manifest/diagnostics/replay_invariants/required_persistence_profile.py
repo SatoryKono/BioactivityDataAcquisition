@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.nested_mapping import (
-    lookup_mapping_path,
-)
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     STRICT_PERSISTENCE_PROFILES,
     normalize_required_persistence_profile,
 )
+from bioetl.domain.normalization import lookup_mapping_path
 
 
 def _resolve_required_persistence_profile(manifest: RunManifest) -> str:

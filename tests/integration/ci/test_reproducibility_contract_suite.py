@@ -267,6 +267,7 @@ def test_historical_replay_corpus_inventory_and_bulk_certification() -> None:
             manifest_port=manifest_store,
             ledger_port=ledger_store,
             entry_id_factory=_repro_contract_entry_id_factory("entry-corpus"),
+            summary_builder=build_diagnostics_summary,
         ),
     )
 
@@ -344,6 +345,7 @@ def test_reproducibility_contract_historical_source_certification_promotes_certi
         manifest_port=manifest_store,
         ledger_port=ledger_store,
         entry_id_factory=_repro_contract_entry_id_factory("entry-source-certification"),
+        summary_builder=build_diagnostics_summary,
     )
 
     result = certification_service.certify_historical_source_run(
@@ -467,6 +469,7 @@ def test_reproducibility_contract_historical_composite_certification_requires_ce
         entry_id_factory=_repro_contract_entry_id_factory(
             "entry-composite-certification"
         ),
+        summary_builder=build_diagnostics_summary,
     )
 
     certification_service.certify_historical_source_run(

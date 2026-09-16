@@ -2,12 +2,31 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 
 from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestDiffResult,
     RunManifestInspectionResult,
+    RunManifestInspectionService,
 )
+from bioetl.domain.ports import RunLedgerPort, RunManifestPort
+
+
+def inspection_service_factory_from_ports(
+    manifest_port: RunManifestPort,
+    ledger_port: RunLedgerPort | None,
+    provided_factory: Callable[[], RunManifestInspectionService] | None,
+) -> Callable[[], RunManifestInspectionService]:
+    """Resolve the inspection-service factory without assembling in method bodies."""
+    if provided_factory is not None:
+        return provided_factory
+    return lambda: RunManifestInspectionService(
+        manifest_port=manifest_port,
+        ledger_port=ledger_port,
+    )
+
+
+_inspection_service_factory_from_ports = inspection_service_factory_from_ports
 
 
 def dict_or_empty(value: object) -> dict[str, object]:

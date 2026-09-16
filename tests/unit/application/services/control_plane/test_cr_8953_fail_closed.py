@@ -136,7 +136,6 @@ def test_effective_config_snapshots_are_isolated_from_caller_mutation() -> None:
     runtime_overrides = {"cli": {"limit": 5}}
 
     context = build_effective_config_context(
-        pipeline_name="chembl_activity",
         pipeline_kind="activity",
         resolved_config=resolved_config,
         runtime_overrides=runtime_overrides,
@@ -144,9 +143,6 @@ def test_effective_config_snapshots_are_isolated_from_caller_mutation() -> None:
         dq_config=None,
         resolution_policy=None,
         required_persistence_profile="degraded_observable",
-        normalization_profile_ref=None,
-        normalization_profile_version=None,
-        normalization_profile_hash=None,
     )
     resolved_config["pipeline"]["limit"] = 99
     runtime_overrides["cli"]["limit"] = 99
@@ -420,6 +416,7 @@ def test_ambiguous_certification_query_raises() -> None:
     validator = HistoricalReplayCertificationValidator(
         manifest_port=SimpleNamespace(),
         ledger_port=SimpleNamespace(),
+        summary_builder=lambda *_a, **_k: {},
     )
     manifest = make_run_manifest()
     manifest = SimpleNamespace(

@@ -79,18 +79,9 @@ def test_replay_refresh_returns_summary_without_snapshot_payloads() -> None:
     )
 
 
-def test_historical_diagnostics_rejects_non_mapping_payload(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    diagnostics = SimpleNamespace(build_diagnostics_summary=lambda *_a, **_k: [])
-    monkeypatch.setattr(
-        historical_corpus_service,
-        "import_module",
-        lambda _name: diagnostics,
-    )
-
+def test_historical_diagnostics_rejects_non_mapping_payload() -> None:
     with pytest.raises(TypeError, match="expected mapping"):
-        historical_corpus_service._build_diagnostics_summary(object())
+        historical_corpus_service._as_diagnostics_mapping([])
 
 
 def test_score_card_residual_failure_branches_are_explicit() -> None:

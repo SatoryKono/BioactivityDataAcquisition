@@ -51,7 +51,7 @@ from bioetl.application.services.control_plane.forensic.diagnostics_support impo
     _trace_complete,
     _trace_missing_requirements,
 )
-from bioetl.application.services.control_plane.forensic_diff_service import (
+from bioetl.application.services.control_plane.forensic.diagnostics_support import (
     _inspection_service_factory_from_ports,
 )
 from bioetl.domain.control_plane import RunLedgerEntry
