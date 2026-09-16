@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from contextlib import nullcontext
+from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock
@@ -23,6 +24,10 @@ from bioetl.infrastructure.adapters.crossref.client_runtime_helpers import (
 from bioetl.infrastructure.adapters.health_status_policy import (
     classify_health_probe_status,
 )
+from bioetl.infrastructure.adapters.decorators._data_source_delegation import (
+    DataSourceFetchRequest,
+)
+from bioetl.infrastructure.adapters.http.health import assess_health_from_circuit_breaker
 from bioetl.infrastructure.adapters.http._client_retry_policy import (
     _record_request_metrics,
 )
@@ -40,6 +45,17 @@ from bioetl.infrastructure.config._dq_config_normalization import (
 from bioetl.infrastructure.config._dq_config_validation_merge import (
     merge_validation_lists_for_key,
 )
+from bioetl.infrastructure.control_plane.archive_run_reports import _identity_matches
+from bioetl.infrastructure.control_plane.file_historical_replay_universe_store import (
+    FileHistoricalReplayUniverseStore,
+)
+from bioetl.infrastructure.observability.required_publication_series import _child_exists
+from bioetl.infrastructure.quality.architecture_debt_task_policy import (
+    load_yaml_if_present,
+)
+from bioetl.infrastructure.quality.architecture_quality_scoring import _lazy_import_util
+from bioetl.infrastructure.quality.exemptions_registry_paths import build_module_path_key
+from bioetl.infrastructure.storage.audit_normalization import require_audit_timestamp
 
 pytestmark = pytest.mark.unit
 
@@ -125,3 +141,84 @@ def test_validation_list_merge_replaces_heterogeneous_override() -> None:
     )
     assert result == override
     assert result is not override
+
+
+def test_data_source_fetch_request_exposes_all_port_arguments() -> None:
+    request = DataSourceFetchRequest(
+        entity_type="publication",
+        limit=10,
+        query="kinase",
+        filter_ids=["1"],
+        filter_field="pmid",
+        offset=2,
+    )
+
+    assert request.as_kwargs() == {
+        "entity_type": "publication",
+        "limit": 10,
+        "query": "kinase",
+        "filter_ids": ["1"],
+        "filter_field": "pmid",
+        "offset": 2,
+    }
+
+
+def test_half_open_circuit_breaker_is_degraded() -> None:
+    circuit_breaker = MagicMock()
+    circuit_breaker.get_state.return_value = SimpleNamespace(value="HALF_OPEN")
+    circuit_breaker.get_failure_count.return_value = 1
+
+    assert assess_health_from_circuit_breaker(circuit_breaker) is HealthStatus.DEGRADED
+
+
+def test_archive_identity_rejects_non_mapping_payload() -> None:
+    assert _identity_matches("invalid", MagicMock()) is False
+
+
+def test_historical_universe_store_returns_none_when_directory_is_absent(
+    tmp_path: Path,
+) -> None:
+    store = FileHistoricalReplayUniverseStore(tmp_path / "missing")
+
+    assert store.load_latest_report() is None
+
+
+def test_prometheus_child_lookup_rejects_non_mapping_registry() -> None:
+    metric = SimpleNamespace(_metrics=None, _labelnames=("pipeline",))
+
+    assert _child_exists(metric, {"pipeline": "chembl_assay"}) is False
+
+
+def test_missing_architecture_task_yaml_loads_as_empty_mapping(tmp_path: Path) -> None:
+    assert load_yaml_if_present(tmp_path / "missing.yaml") == {}
+
+
+def test_lazy_import_utilization_reports_bounded_ratio() -> None:
+    assert _lazy_import_util(observed=7, cap=10) == 0.7
+
+
+def test_module_path_key_resolves_relative_source_root() -> None:
+    assert (
+        build_module_path_key(
+            Path.cwd() / "src/bioetl/domain/example.py",
+            src_root="src",
+        )
+        == "src/bioetl/domain/example.py"
+    )
+
+
+def test_audit_timestamp_rejects_naive_datetime() -> None:
+    with pytest.raises(ValueError, match="must be timezone-aware"):
+        require_audit_timestamp(
+            logger=MagicMock(),
+            timestamp=datetime(2026, 1, 1),
+            table_name="assay",
+            mode="append",
+        )
+
+
+def test_infrastructure_export_facade_rejects_unknown_attribute() -> None:
+    import bioetl.infrastructure.export as export_facade
+
+    with pytest.raises(AttributeError, match="has no attribute 'unknown_export'"):
+        export_facade.__getattr__("unknown_export")

@@ -59,11 +59,13 @@ from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
 from bioetl.composition.runtime_builders.run_manifest_support import (
     RunManifestContractIdentity,
     build_planned_artifacts,
-    build_launch_context_snapshot,
     build_run_source_refs,
     resolve_contract_identity,
     resolve_replay_capability,
     validate_reproducible_sink_modes,
+)
+from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
+    build_launch_context_snapshot,
 )
 from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
     resolve_code_revision_for_manifest,

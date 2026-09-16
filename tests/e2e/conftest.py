@@ -1203,8 +1203,9 @@ def guard_bootstrap_pipeline_runner_for_e2e(
     import bioetl.composition.bootstrap as bootstrap_package
     from bioetl.composition.bootstrap.runtime import pipeline as runtime_pipeline
     from bioetl.composition.runtime_builders import (
+        _run_manifest_refs as run_manifest_refs,
+        control_plane as control_plane_builder,
         input_snapshot_resolution,
-        run_manifest_support,
     )
 
     # Register before monkeypatch so teardown runs after monkeypatch undo (LIFO).
@@ -1231,7 +1232,7 @@ def guard_bootstrap_pipeline_runner_for_e2e(
         monkeypatch.setattr(module, "bootstrap_pipeline_runner", guarded_bootstrap)
 
     original_resolve_input_snapshots = (
-        run_manifest_support.resolve_pipeline_input_snapshot_refs
+        input_snapshot_resolution.resolve_pipeline_input_snapshot_refs
     )
     has_vcr_marker = request.node.get_closest_marker("vcr") is not None
     fallback_snapshot_refs = (
@@ -1247,11 +1248,17 @@ def guard_bootstrap_pipeline_runner_for_e2e(
         return fallback_snapshot_refs
 
     monkeypatch.setattr(
-        "bioetl.composition.runtime_builders.run_manifest_support.resolve_pipeline_input_snapshot_refs",
+        run_manifest_refs,
+        "resolve_pipeline_input_snapshot_refs",
         _resolve_pipeline_input_snapshot_refs_with_vcr_fallback,
     )
     monkeypatch.setattr(
         input_snapshot_resolution,
+        "resolve_pipeline_input_snapshot_refs",
+        _resolve_pipeline_input_snapshot_refs_with_vcr_fallback,
+    )
+    monkeypatch.setattr(
+        control_plane_builder,
         "resolve_pipeline_input_snapshot_refs",
         _resolve_pipeline_input_snapshot_refs_with_vcr_fallback,
     )
