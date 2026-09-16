@@ -501,8 +501,8 @@ hotspot_family_ratchets:
     linked_issue: '#4477'
     ratchet_stage: active
     ratchet_scope: duplication-non-growth-plus-bounded-growth
-    expected_action: 'Hold duplication at zero, file-growth, and fan-in at the reviewed baseline during
-      pipeline-factory changes. files_ge_250_loc budget is 0 (live 0; leftover-cap ratchet #10419).'
+    expected_action: Hold duplication at zero, file-growth, and fan-in at the reviewed baseline during
+      pipeline-factory changes. files_ge_250_loc budget is 0 (live 0; leftover-cap ratchet
     path_prefixes:
     - src/bioetl/composition/factories/pipeline/
     bounded_growth_budgets:
