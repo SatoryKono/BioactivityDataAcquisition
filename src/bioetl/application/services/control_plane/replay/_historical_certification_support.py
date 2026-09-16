@@ -6,7 +6,9 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import cast
 
-from bioetl.application.services.control_plane.ledger import RunLedgerService
+from bioetl.application.services.control_plane.ledger.service import (
+    RunLedgerService,
+)
 from bioetl.application.services.control_plane.replay._historical_certification_models import (
     HistoricalReplayCertificationProtocol as HistoricalReplayCertificationProtocol,
 )

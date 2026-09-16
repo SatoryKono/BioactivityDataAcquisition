@@ -6,7 +6,9 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from datetime import datetime
 
-from bioetl.domain.normalization import build_control_plane_idempotency_key
+from bioetl.application.services.control_plane.ledger.idempotency import (
+    build_control_plane_idempotency_key,
+)
 from bioetl.domain.control_plane import WorkflowLedgerEntry, WorkflowManifest
 from bioetl.domain.control_plane.workflow_ledger import (
     STEP_COMMIT_PENDING_CONFIRMATION_EVENT,
