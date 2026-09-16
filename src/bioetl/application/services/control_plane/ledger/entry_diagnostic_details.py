@@ -2,21 +2,104 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.ledger.diagnostic_support import (
-    LEDGER_DIAGNOSTIC_CONTRACT_VERSION,
-    _RunLedgerDiagnosticRequest,
-)
-from bioetl.application.services.control_plane.ledger.diagnostic_support import (
-    RunLedgerCorrelationFieldsProtocol as RunLedgerCorrelationFieldsProtocol,
-)
-from bioetl.application.services.control_plane.ledger.diagnostic_support import (
-    build_run_ledger_diagnostic_request as build_run_ledger_diagnostic_request,
-)
+from dataclasses import dataclass
+from typing import Protocol
+
 from bioetl.domain.normalization import (
     normalize_contract_ref,
     normalize_contract_version,
     normalize_control_plane_opaque_hash_ref,
 )
+from bioetl.domain.types import RunID
+
+LEDGER_DIAGNOSTIC_CONTRACT_VERSION = "v1"
+
+
+class RunLedgerCorrelationFieldsProtocol(Protocol):
+    """Shared correlation defaults carried by ledger services and diagnostics."""
+
+    pipeline_name: str | None
+    provider: str | None
+    entity: str | None
+    run_type: str | None
+    resolved_config_hash: str | None
+    effective_config_hash: str | None
+    contract_ref: str | None
+    contract_version: str | None
+    dq_policy_ref: str | None
+    rule_bundle_version: str | None
+    dq_contract_compatibility_hash: str | None
+    effective_config_artifact_id: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class _RunLedgerDiagnosticRequest:
+    event_type: str
+    event_family: str
+    manifest_id: str
+    run_id: RunID
+    pipeline_name: str | None
+    provider: str | None
+    entity: str | None
+    run_type: str | None
+    resolved_config_hash: str | None
+    effective_config_hash: str | None
+    contract_ref: str | None
+    contract_version: str | None
+    dq_policy_ref: str | None
+    rule_bundle_version: str | None
+    dq_contract_compatibility_hash: str | None
+    effective_config_artifact_id: str | None
+    composite_run_id: str | None
+    status: str | None
+    stage: str | None
+    error_type: str | None
+    dataset_ref: str | None
+    lineage_fragment_id: str | None
+    details: dict[str, object] | None
+
+
+def build_run_ledger_diagnostic_request(
+    service: RunLedgerCorrelationFieldsProtocol,
+    *,
+    event_type: str,
+    event_family: str,
+    manifest_id: str,
+    run_id: RunID,
+    composite_run_id: str | None,
+    status: str | None,
+    stage: str | None,
+    error_type: str | None,
+    dataset_ref: str | None,
+    lineage_fragment_id: str | None,
+    details: dict[str, object] | None,
+) -> _RunLedgerDiagnosticRequest:
+    """Build one diagnostic request from shared ledger correlation defaults."""
+    return _RunLedgerDiagnosticRequest(
+        event_type=event_type,
+        event_family=event_family,
+        manifest_id=manifest_id,
+        run_id=run_id,
+        pipeline_name=service.pipeline_name,
+        provider=service.provider,
+        entity=service.entity,
+        run_type=service.run_type,
+        resolved_config_hash=service.resolved_config_hash,
+        effective_config_hash=service.effective_config_hash,
+        contract_ref=service.contract_ref,
+        contract_version=service.contract_version,
+        dq_policy_ref=service.dq_policy_ref,
+        rule_bundle_version=service.rule_bundle_version,
+        dq_contract_compatibility_hash=service.dq_contract_compatibility_hash,
+        effective_config_artifact_id=service.effective_config_artifact_id,
+        composite_run_id=composite_run_id,
+        status=status,
+        stage=stage,
+        error_type=error_type,
+        dataset_ref=dataset_ref,
+        lineage_fragment_id=lineage_fragment_id,
+        details=details,
+    )
 
 
 def _apply_optional_diagnostic_anchor(

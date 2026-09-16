@@ -5,10 +5,8 @@ from __future__ import annotations
 import copy
 from typing import cast
 
-from bioetl.application.services.control_plane.effective_config.serialization import (
-    stable_hash,
-    to_jsonable,
-)
+from bioetl.domain.normalization.json import stable_json_hash as stable_hash
+from bioetl.domain.normalization.json import to_jsonable
 from bioetl.domain.control_plane.effective_config_artifact import (
     EFFECTIVE_CONFIG_IDENTITY_VERSION,
     EffectiveExecutionConfig,

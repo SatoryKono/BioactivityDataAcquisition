@@ -8,6 +8,7 @@ from bioetl.domain.normalization.authors import (
     parse_authors_to_list,
 )
 from bioetl.domain.normalization.control_plane import (
+    build_control_plane_idempotency_key,
     build_execution_identity_payload,
     normalize_contract_ref,
     normalize_contract_version,
@@ -66,6 +67,7 @@ from bioetl.domain.normalization.text import (
 __all__ = [
     "JOIN_KEY_NORMALIZATION_POLICIES",
     "JoinKeyNormalizationPolicy",
+    "build_control_plane_idempotency_key",
     "build_execution_identity_payload",
     "canonicalize_json_string",
     "compute_execution_identity_fingerprint",
