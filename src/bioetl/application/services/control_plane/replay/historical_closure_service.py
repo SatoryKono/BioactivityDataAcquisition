@@ -6,13 +6,11 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 
-from bioetl.application.services.control_plane.replay.historical_closure_models import (
+from bioetl.application.services.control_plane.replay.historical_closure_policy import (
     RESIDUAL_BLOCKED_STATUSES,
     HistoricalReplayClaimScopeMode,
     HistoricalReplayClosureReportRecord,
     HistoricalReplayResidualDispositionRecord,
-)
-from bioetl.application.services.control_plane.replay.historical_closure_policy import (
     build_closure_report_id,
     build_global_claim_gate,
     build_retained_corpus_claim,

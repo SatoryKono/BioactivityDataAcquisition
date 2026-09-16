@@ -3,11 +3,16 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import re
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
+from dataclasses import asdict, is_dataclass
+from datetime import datetime
 from typing import TYPE_CHECKING, cast
+
+from bioetl.domain.types.dq_contracts import DQDisposition
 
 if TYPE_CHECKING:
     from bioetl.domain.types import JsonDict
@@ -25,7 +30,10 @@ except ImportError:
 __all__ = [
     "canonicalize_json_string",
     "deserialize_json_value",
+    "lookup_mapping_path",
     "serialize_json_canonical",
+    "stable_json_hash",
+    "to_jsonable",
 ]
 
 _NON_ASCII_RE = re.compile(r"[^\x00-\x7F]")
@@ -165,6 +173,40 @@ def _is_numpy_like_array(value: object) -> bool:
         and hasattr(value, "shape")
         and not isinstance(value, (str, bytes, bytearray, memoryview))
     )
+
+
+def lookup_mapping_path(
+    mapping: Mapping[str, object],
+    *path: str,
+) -> object | None:
+    """Read one nested mapping path using only mapping-shaped objects."""
+    current: object = mapping
+    for component in path:
+        if not isinstance(current, Mapping):
+            return None
+        current = current.get(component)
+    return current
+
+
+def to_jsonable(value: object) -> object:
+    """Convert nested dataclasses, datetimes, and mappings into JSON-safe values."""
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, DQDisposition):
+        return value.value
+    if is_dataclass(value) and not isinstance(value, type):
+        return {key: to_jsonable(item) for key, item in asdict(value).items()}
+    if isinstance(value, Mapping):
+        return {str(key): to_jsonable(item) for key, item in sorted(value.items())}
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+        return [to_jsonable(item) for item in value]
+    return value
+
+
+def stable_json_hash(payload: object) -> str:
+    """Return a SHA-256 hex digest of the canonical JSON form of ``payload``."""
+    serialized = serialize_json_canonical(cast(JsonDict, to_jsonable(payload)))
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
 
 def serialize_json_canonical(data: JsonDict | Sequence[object]) -> str:

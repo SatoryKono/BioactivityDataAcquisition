@@ -14,12 +14,12 @@ from bioetl.application.services.control_plane.ledger.entry_diagnostic_details i
 from bioetl.application.services.control_plane.ledger.entry_diagnostic_details import (
     build_run_ledger_diagnostic_details as build_run_ledger_diagnostic_details,
 )
-from bioetl.application.services.control_plane.ledger.idempotency import (
-    build_control_plane_idempotency_key,
-)
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.control_plane.run_ledger import infer_ledger_event_family
-from bioetl.domain.normalization import normalize_run_ledger_payload
+from bioetl.domain.normalization import (
+    build_control_plane_idempotency_key,
+    normalize_run_ledger_payload,
+)
 from bioetl.domain.ports import RunLedgerPort
 from bioetl.domain.types import RunID
 

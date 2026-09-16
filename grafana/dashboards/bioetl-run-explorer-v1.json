@@ -208,7 +208,7 @@
           }
         },
         "refresh": 1,
-        "regex": "/^\\s*(\\S(?:.*\\S)?)\\s*$/",
+        "regex": "",
         "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
@@ -249,7 +249,7 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 3,
+        "h": 2,
         "w": 24,
         "x": 0,
         "y": 0
@@ -343,7 +343,7 @@
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 3
+        "y": 2
       },
       "options": {
         "bioetlDisplayTitle": "Understand Run Scope",
@@ -366,10 +366,10 @@
       "title": "Inspect Recent Runs (last 10)",
       "description": "BROWSE — Last 10 launches by started_at across the selected pipeline scope, after Workflow and Run Type filters. The dashboard time picker does not filter this table. Start time comes from ledger/report identity, with explicitly recorded manifest-created fallback; never file mtime. One row is one launch. Running is the last recorded lifecycle state, not live-process proof. REPORT MISSING distinguishes launches without a persisted report. Click a Run cell to select and mark that run, binding Workflow, Pipeline, Run Type and Run ID from that row. Pipeline and Workflow belong to each row. Older runs: use the Run ID catalog. limit=10 shows all ten rows together without pagination. VALID EMPTY means no matching launches; TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY means a report bind failure. Backend failures are QUERY ERROR, not empty data. Run python scripts/ops/runtime/docker/verify_report_bind.py to diagnose the report bind. The matching SELECTED RUN row is marked; browse is not an exact-run snapshot. Report opens the row file in a new tab: Markdown when present, otherwise JSON. REPORT MISSING opens an explicit not-found response; it does not imply a persisted file. Find Run ID searches exact UUID before the ten-row limit. Duration needs valid start/end. Event age is the last ledger event for unfinished runs, not a heartbeat. Inspect a Run cell to copy its full UUID.",
       "gridPos": {
-        "h": 11,
+        "h": 12,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 5
       },
       "datasource": "BioETL Ops HTTP",
       "fieldConfig": {
@@ -1080,13 +1080,13 @@
             "x": 0,
             "y": 18,
             "w": 24,
-            "h": 10
+            "h": 8
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "lg",
+            "cellHeight": "sm",
             "footer": {
               "show": false,
               "enablePagination": true
@@ -1179,15 +1179,15 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 28,
+            "y": 26,
             "w": 24,
-            "h": 8
+            "h": 5
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "lg",
+            "cellHeight": "sm",
             "footer": {
               "show": false,
               "enablePagination": true

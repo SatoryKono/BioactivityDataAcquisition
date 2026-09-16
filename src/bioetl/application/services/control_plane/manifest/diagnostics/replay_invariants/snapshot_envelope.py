@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.replay.historical_certification import (
+from bioetl.domain.control_plane import ReplayCapability, RunManifest
+from bioetl.domain.control_plane.snapshot_materialization import (
     HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED,
     HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
     LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,
 )
-from bioetl.domain.control_plane import ReplayCapability, RunManifest
 
 
 def _has_partial_input_snapshot_envelope(snapshot_envelope: object) -> bool:
