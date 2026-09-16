@@ -4,7 +4,7 @@
 
 schema_version: 1
 strict_mode: false
-max_count: 14
+max_count: 13
 owner: "@bioetl-architecture"
 linked_issue: "9626"
 ratchet_policy: fail on growth; shrink max_count to live observed_count
@@ -15,10 +15,6 @@ pairs:
     target_removal_wave: residual
   - importer: bioetl/application/composite/helpers/preflight_type_and_aggregation.py
     target: bioetl.application.composite._preflight_types
-    owner: "@bioetl-application"
-    target_removal_wave: residual
-  - importer: bioetl/application/services/control_plane/manifest/diagnostics/snapshot_ledger.py
-    target: bioetl.application.services.control_plane.replay._historical_snapshot_materialization_modes
     owner: "@bioetl-application"
     target_removal_wave: residual
   - importer: bioetl/application/services/control_plane/run_manifest_reproducibility_claims.py

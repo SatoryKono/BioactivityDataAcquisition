@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.composition.runtime_builders._run_manifest_data_roots import (
+from bioetl.composition.runtime_builders.run_manifest_data_roots import (
     is_explicit_data_root_configured,
     resolve_data_root_mode,
 )

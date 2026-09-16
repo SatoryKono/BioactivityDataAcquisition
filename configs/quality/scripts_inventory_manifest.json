@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-16T06:57:31.326159+00:00",
+  "generated_at": "2026-09-16T11:42:20.959545+00:00",
   "summary": {
     "total_scripts": 619,
     "status_counts": {
@@ -14397,7 +14397,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 13,
       "references": [
         {
           "path": "scripts/engineering/qa/report_hotspot_family_baseline.py",
@@ -15963,7 +15963,7 @@
         },
         {
           "path": "tests/unit/scripts/qa/test_report_hotspot_family_baseline.py",
-          "line": 17,
+          "line": 21,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_hotspot_family_baseline import ("
         }
@@ -16408,7 +16408,7 @@
         },
         {
           "path": "tests/architecture/test_arch_s4_s9_gates.py",
-          "line": 34,
+          "line": 103,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_source_tree_manifest import ("
         }

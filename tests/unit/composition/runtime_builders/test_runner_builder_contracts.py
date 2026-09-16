@@ -42,9 +42,11 @@ from bioetl.composition.runtime_builders._runner_control_plane_artifact_policy i
 from bioetl.composition.runtime_builders._runner_control_plane_data_root_policy import (
     validate_strict_data_root_policy,
 )
-from bioetl.composition.runtime_builders import inputs_resolver
-from bioetl.composition.runtime_builders import runner_builder
-from bioetl.composition.runtime_builders import runner_control_plane_assembly
+from bioetl.composition.runtime_builders import (
+    inputs_resolver,
+    runner_builder,
+    runner_control_plane_assembly,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -189,29 +191,19 @@ def test_runner_builder_leaf_keeps_runtime_builder_stages_split() -> None:
         "bioetl.composition.runtime_builders.runner_input_assembly",
         "bioetl.composition.runtime_builders.runner_control_plane_assembly",
     }.issubset(imported_modules)
-    assert (
-        "bioetl.composition.runtime_builders._run_manifest_data_roots"
-        not in imported_modules
-    )
-    assert (
-        "bioetl.composition.runtime_builders._run_manifest_planned_artifacts"
-        not in imported_modules
-    )
-    assert (
-        "bioetl.composition.runtime_builders._exact_replay_cached_bronze_context"
-        not in imported_modules
-    )
+    assert {
+        "bioetl.composition.runtime_builders.run_manifest_data_roots",
+        "bioetl.composition.runtime_builders._run_manifest_planned_artifacts",
+        "bioetl.composition.runtime_builders._exact_replay_cached_bronze_context",
+    }.isdisjoint(imported_modules)
     assert "FileRunManifestStore" not in source
     assert "FileRunLedgerStore" not in source
     assert "build_planned_artifacts" not in source
 
 
-def test_inputs_resolver_uses_explicit_resolved_vacuumsettings_name() -> None:
+def test_inputs_resolver_public_surface_is_narrowed_to_reviewed_exports() -> None:
     assert hasattr(inputs_resolver, "ResolvedVacuumSettings")
     assert not hasattr(inputs_resolver, "VacuumSettings")
-
-
-def test_inputs_resolver_public_surface_is_narrowed_to_reviewed_exports() -> None:
     assert set(inputs_resolver.__all__) == {
         "ResolvedVacuumSettings",
         "RunnerInputs",
@@ -220,3 +212,4 @@ def test_inputs_resolver_public_surface_is_narrowed_to_reviewed_exports() -> Non
     assert "assemble_runtime_config" not in inputs_resolver.__all__
     assert "assemble_filter_config" not in inputs_resolver.__all__
     assert "adjust_batch_size_for_filter" not in inputs_resolver.__all__
+

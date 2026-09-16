@@ -39,7 +39,7 @@ _ALLOWED_DYNAMIC_IMPORT_FILES = frozenset(
         "src/bioetl/composition/providers/__init__.py",
         "src/bioetl/composition/providers/_default_registry.py",
         "src/bioetl/composition/providers/provider_registry.py",
-        "src/bioetl/composition/runtime_builders/_run_manifest_data_roots.py",
+        "src/bioetl/composition/runtime_builders/run_manifest_data_roots.py",
         "src/bioetl/composition/runtime_builders/_run_manifest_refs.py",
     }
 )
