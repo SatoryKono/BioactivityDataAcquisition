@@ -7,7 +7,7 @@ import base64
 import json
 import math
 import os
-from dataclasses import asdict, dataclass, replace
+from dataclasses import asdict, dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from time import monotonic, sleep
@@ -1557,6 +1557,26 @@ def _combine_prometheus_outcomes(requests: list[dict[str, Any]]) -> tuple[str, s
     return "mixed_query_results", detail
 
 
+def _with_query_requests(
+    result: AuditResult, requests: list[dict[str, Any]]
+) -> AuditResult:
+    return AuditResult(
+        dashboard_uid=result.dashboard_uid,
+        panel_id=result.panel_id,
+        title=result.title,
+        source_kind=result.source_kind,
+        semantic_kind=result.semantic_kind,
+        status=result.status,
+        classification=result.classification,
+        detail=result.detail,
+        query_preview=result.query_preview,
+        target_ref_id=result.target_ref_id,
+        request_url=result.request_url,
+        response=result.response,
+        query_requests=requests,
+    )
+
+
 def _audit_prometheus_panel(
     spec: PanelAuditSpec,
     panel: dict[str, Any],
@@ -1600,7 +1620,7 @@ def _audit_prometheus_panel(
                     "detail": failure.detail,
                 }
             )
-            return replace(failure, query_requests=requests)
+            return _with_query_requests(failure, requests)
         classification, detail = _classify_prometheus_payload(payload)
         requests.append(
             {
