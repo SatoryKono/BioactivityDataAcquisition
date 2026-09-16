@@ -792,11 +792,15 @@ def test_cycle4_named_text_columns_wrap_below_fold() -> None:
         custom = (panel.get("fieldConfig") or {}).get("defaults", {}).get("custom", {})
         assert custom.get("cellOptions", {}).get("wrapText") is not True
         wrapped = _wrapped_field_names(panel)
-        if dashboard_name == "bioetl-control-plane-v1.json":
-            # #10498: fixed-height pagination replaces wrapped rows after live
+        if dashboard_name in {
+            "bioetl-control-plane-v1.json",
+            "bioetl-provider-health-v2.json",
+        }:
+            # #10498/#10501: fixed-height pagination replaces wrapped rows after live
             # 1600x900 verification; Inspect retains the full selectable value.
             assert panel["options"]["cellHeight"] == "md"
             assert custom.get("inspect") is True
+            assert panel["options"]["footer"]["enablePagination"] is True
             assert field not in wrapped
             continue
         assert field in wrapped, (dashboard_name, panel_id, wrapped)
