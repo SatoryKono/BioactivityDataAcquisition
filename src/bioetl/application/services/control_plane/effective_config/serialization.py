@@ -2,12 +2,8 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
-from collections.abc import Mapping, Sequence
-from dataclasses import asdict, dataclass, is_dataclass
-from datetime import datetime
-from typing import cast
+from dataclasses import dataclass
 
 from bioetl.domain.control_plane.effective_config_artifact import (
     EFFECTIVE_CONFIG_ARTIFACT_SCHEMA_VERSION,
@@ -21,37 +17,12 @@ from bioetl.domain.control_plane.effective_config_artifact import (
     RuntimeOverrideSnapshot,
     SourceClassProvenance,
 )
-from bioetl.domain.normalization import serialize_json_canonical
+from bioetl.domain.normalization.json import stable_json_hash as stable_hash
+from bioetl.domain.normalization.json import to_jsonable
 from bioetl.domain.types import JsonDict
-from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
+from bioetl.domain.types.dq_contracts import DQPolicyRef
 
 EFFECTIVE_CONFIG_SCHEMA_VERSION = EFFECTIVE_CONFIG_ARTIFACT_SCHEMA_VERSION
-
-
-def dataclass_to_dict(value: object) -> JsonDict | None:
-    if not is_dataclass(value) or isinstance(value, type):
-        return None
-    return asdict(value)
-
-
-def to_jsonable(value: object) -> object:
-    if isinstance(value, datetime):
-        return value.isoformat()
-    if isinstance(value, DQDisposition):
-        return value.value
-    dataclass_value = dataclass_to_dict(value)
-    if dataclass_value is not None:
-        return {k: to_jsonable(v) for k, v in dataclass_value.items()}
-    if isinstance(value, Mapping):
-        return {str(k): to_jsonable(v) for k, v in sorted(value.items())}
-    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
-        return [to_jsonable(item) for item in value]
-    return value
-
-
-def stable_hash(payload: object) -> str:
-    serialized = serialize_json_canonical(cast(JsonDict, to_jsonable(payload)))
-    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
 
 def _source_ref_sort_key(src: ConfigSourceRef) -> tuple[int, str, str, str, str]:

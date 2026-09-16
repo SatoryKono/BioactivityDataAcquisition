@@ -14,6 +14,7 @@ from bioetl.domain.normalization._control_plane_identity import (
     normalize_runtime_anchor_payload,
 )
 from bioetl.domain.normalization._control_plane_payloads import (
+    build_control_plane_idempotency_key,
     normalize_run_ledger_payload,
     normalize_run_manifest_spec,
 )
@@ -23,6 +24,7 @@ from bioetl.domain.normalization._control_plane_primitives import (
 )
 
 __all__ = [
+    "build_control_plane_idempotency_key",
     "build_execution_identity_payload",
     "normalize_contract_ref",
     "normalize_contract_version",
