@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from importlib import import_module
 from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.bootstrap_contexts import (
@@ -24,6 +23,7 @@ from bioetl.composition.providers._registration_contracts import (
 from bioetl.composition.factories.datasource.adapter_helpers import (
     AdapterHelpersFactory,
 )
+from bioetl.composition.lazy_exports import resolve_lazy_callable
 
 if TYPE_CHECKING:
     from bioetl.composition.bootstrap_contexts import RateLimitContext
@@ -41,6 +41,9 @@ ProviderFamilyExtraConfigBuilder = Callable[
     [dict[str, "RateLimitContext"], "ProviderAssemblySupport"],
     dict[str, "ProviderConfig"],
 ]
+
+_CSV_FILTER_READER_MODULE = "bioetl.infrastructure.adapters.input.csv_filter_reader"
+_FILTERED_DATA_SOURCE_MODULE = "bioetl.application.core.data_sources.filtered"
 
 
 def _get_source_config(provider: str) -> SourceYamlConfig | None:
@@ -232,17 +235,17 @@ def _wrap_with_filter(
     _wire_composable_fallback(data_source)
 
     if filter_config and filter_config.enabled:
-        filtered_data_source_type = import_module(
-            "bioetl.application.core.data_sources.filtered"
-        ).FilteredDataSource
-        csv_filter_reader_type = import_module(
-            "bioetl.infrastructure.adapters.input.csv_filter_reader"
-        ).CsvFilterReader
+        filtered_data_source_factory: Callable[..., DataSourcePort] = (
+            resolve_lazy_callable(_FILTERED_DATA_SOURCE_MODULE, "FilteredDataSource")
+        )
+        csv_filter_reader_factory: Callable[..., object] = resolve_lazy_callable(
+            _CSV_FILTER_READER_MODULE, "CsvFilterReader"
+        )
         return cast(  # pyright: ignore[reportInvalidCast]
             DataSourcePort,
-            filtered_data_source_type(
+            filtered_data_source_factory(
                 data_source=data_source,
-                filter_reader=csv_filter_reader_type(logger=logger),
+                filter_reader=csv_filter_reader_factory(logger=logger),
                 filter_config=filter_config,
                 metrics=metrics,
                 pipeline_name=pipeline_name,

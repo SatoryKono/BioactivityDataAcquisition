@@ -7,6 +7,7 @@ from dataclasses import is_dataclass, replace
 from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
+from bioetl.composition.lazy_exports import resolve_lazy_callable
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.runtime_builders.inputs_runtime_assembly import (
     ResolvedVacuumSettings,
@@ -16,14 +17,8 @@ from bioetl.composition.runtime_builders.inputs_runtime_assembly import (
     assemble_vacuum_settings,
 )
 from bioetl.composition.runtime_builders.inputs_resolver import prepare_runner_inputs
-from bioetl.composition.runtime_builders.runner_inputs import (
-    RunnerInputs as _RunnerInputs,
-)
+from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs as _RunnerInputs
 from bioetl.domain.config import RuntimeConfig
-from bioetl.composition.runtime_builders.observability_builder import (
-    build_observability_bundle,
-)
-
 if TYPE_CHECKING:
     from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
     from bioetl.domain.filtering import InputFilterConfig
@@ -48,8 +43,11 @@ def _resolve_optional_functions(
     Callable[[PipelineRunContext], CachedBronzeContext],
 ]:
     """Resolve optional function parameters to their implementations."""
-    resolved_observability_bundle = (
-        build_observability_bundle
+    resolved_observability_bundle: Callable[..., ObservabilityBundle] = (
+        resolve_lazy_callable(
+            "bioetl.composition.runtime_builders.observability_builder",
+            "build_observability_bundle",
+        )
         if build_observability_bundle_fn is None
         else build_observability_bundle_fn
     )

@@ -265,6 +265,8 @@ def test_factories_package_lazy_exports_and_unknown_attributes(
     def _fake_import_module(name: str) -> ModuleType:
         mapping = {
             "bioetl.composition.factories.services.factory": fake_module,
+            "bioetl.composition.factories.pipeline": fake_pipeline,
+            "bioetl.composition.factories.pipeline.registry": fake_registry,
         }
         return mapping[name]
 
@@ -356,7 +358,8 @@ def test_cli_bootstrap_lazy_exports_and_unknown_attribute(
         cli_bootstrap.__getattr__("missing")
 
     monkeypatch.setattr(
-        "bioetl.composition.runtime_builders.config_access.get_settings",
+        cli_bootstrap,
+        "get_settings",
         lambda: SimpleNamespace(data_dir=tmp_path),
     )
     store = cli_bootstrap.bootstrap_control_plane_lifecycle_store()

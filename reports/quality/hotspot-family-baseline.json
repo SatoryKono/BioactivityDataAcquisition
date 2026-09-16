@@ -3760,7 +3760,7 @@
       ],
       "duplication_clusters": 0,
       "files": 57,
-      "total_loc": 7221,
+      "total_loc": 7219,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.375,
       "max_internal_fan_in": 3,
@@ -3771,8 +3771,8 @@
       },
       "internal_fan_in_census": {
         "distribution": {
-          "0": 2,
-          "1": 28,
+          "0": 3,
+          "1": 27,
           "2": 15,
           "3": 12
         },
@@ -4142,10 +4142,8 @@
           },
           {
             "module": "bioetl.composition.runtime_builders.observability_builder",
-            "fan_in": 1,
-            "runtime_importers": [
-              "bioetl.composition.runtime_builders.runner_input_assembly"
-            ]
+            "fan_in": 0,
+            "runtime_importers": []
           },
           {
             "module": "bioetl.composition.runtime_builders.registry_manifest",
