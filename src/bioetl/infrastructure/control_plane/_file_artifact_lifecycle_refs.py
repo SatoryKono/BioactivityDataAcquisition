@@ -273,16 +273,38 @@ def _append_cached_bronze_candidates(
 ) -> None:
     bronze_root = base_path.parent / "bronze"
     seen: set[Path] = set()
-    for source in manifest.source_refs:
-        for snapshot in source.input_snapshots:
-            _append_snapshot_bronze_candidate(
-                candidates,
-                issues,
-                bronze_root=bronze_root,
-                source_root=bronze_root / source.provider / source.entity,
-                snapshot=snapshot,
-                seen=seen,
-            )
+    snapshots = [
+        (bronze_root / source.provider / source.entity, snapshot)
+        for source in manifest.source_refs
+        for snapshot in source.input_snapshots
+    ]
+
+    def read_snapshot(
+        item: tuple[Path, object],
+    ) -> tuple[
+        list[tuple[ControlPlaneArtifactSurface, Path]],
+        list[ControlPlaneArtifactResolutionIssue],
+    ]:
+        found: list[tuple[ControlPlaneArtifactSurface, Path]] = []
+        problems: list[ControlPlaneArtifactResolutionIssue] = []
+        _append_snapshot_bronze_candidate(
+            found,
+            problems,
+            bronze_root=bronze_root,
+            source_root=item[0],
+            snapshot=item[1],
+            seen=set(),
+        )
+        return found, problems
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        results = list(executor.map(read_snapshot, snapshots))
+    for found, problems in results:
+        issues.extend(problems)
+        for surface, path in found:
+            if path not in seen:
+                seen.add(path)
+                candidates.append((surface, path))
     for artifact in manifest.planned_artifacts:
         _append_planned_bronze_candidate(
             candidates,
