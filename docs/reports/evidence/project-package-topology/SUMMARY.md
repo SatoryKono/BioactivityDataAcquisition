@@ -1,5 +1,14 @@
 # Сводка evidence: project-package-topology
 
+Refresh note (2026-09-16): hash-only reconcile after selected-run merge
+coverage rebind. Counts and the source fingerprint below come from
+`reports/quality/module-coverage-inventory.json`. Historical notes remain
+historical.
+
+`source_tree_sha256=e5ab6c7b712b06de7b2dd77593aac5a6466a30da6be5f23743ea2a52e4b59277`
+
+`source_module_count=2484`
+
 Refresh note (2026-09-16): hash-only reconcile after live coverage inventory
 rebind (control-plane public data-root seam). Counts and the source
 fingerprint below come from

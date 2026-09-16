@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
+from bioetl.domain.control_plane import RunLedgerEntry
+from bioetl.domain.control_plane.run_ledger import INPUT_SNAPSHOT_PUBLISHED_EVENT
 from bioetl.domain.control_plane.snapshot_materialization import (
     LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,
 )
-from bioetl.domain.control_plane import RunLedgerEntry
-from bioetl.domain.control_plane.run_ledger import INPUT_SNAPSHOT_PUBLISHED_EVENT
 
 
 def collect_ledger_input_snapshot_refs(
