@@ -4338,7 +4338,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -4535,7 +4535,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]

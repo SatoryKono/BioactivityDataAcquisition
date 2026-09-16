@@ -311,6 +311,10 @@ def _provider(p: dict[int, dict]) -> None:
         _table(p[panel_id], compact=False)
         p[panel_id]["options"].pop("enablePagination", None)
         p[panel_id]["options"]["footer"].update(enablePagination=True, countRows=True)
+        for item in p[panel_id]["fieldConfig"].get("overrides", []):
+            for prop in item["properties"]:
+                if prop["id"] == "custom.cellOptions" and "wrapText" in prop["value"]:
+                    prop["value"]["wrapText"] = False
     _bands(p[9405], [[(9402, 0, 24, 12)], [(9403, 0, 24, 12)]])
 
 

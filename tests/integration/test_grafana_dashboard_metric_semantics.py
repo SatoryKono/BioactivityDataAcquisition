@@ -1883,7 +1883,7 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         and property_.get("value", {}).get("wrapText") is True
     }
     expected_wrapped_fields = {"parameter"}
-    if dashboard_name == "bioetl-control-plane-v1.json":
+    if full_width_evidence:
         expected_wrapped_fields = set()
         assert identity["fieldConfig"]["defaults"]["custom"]["inspect"] is True
     assert wrapped_identity_fields == expected_wrapped_fields
@@ -1985,6 +1985,7 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     expected_wrap = dashboard_name not in {
         "bioetl-run-explorer-v1.json",
         "bioetl-control-plane-v1.json",
+        "bioetl-provider-health-v2.json",
     }
     assert parameter_properties["custom.cellOptions"].get("wrapText") is expected_wrap
 
