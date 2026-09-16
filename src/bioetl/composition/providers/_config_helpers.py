@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from importlib import import_module
 from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.bootstrap_contexts import (
@@ -20,8 +21,6 @@ from bioetl.composition.providers._registration_contracts import (
 from bioetl.composition.providers._registration_contracts import (
     build_http_provider_config_map,
 )
-from bioetl.application.core.data_sources.filtered import FilteredDataSource
-from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
 from bioetl.composition.factories.datasource.adapter_helpers import (
     AdapterHelpersFactory,
 )
@@ -233,11 +232,17 @@ def _wrap_with_filter(
     _wire_composable_fallback(data_source)
 
     if filter_config and filter_config.enabled:
+        filtered_data_source_type = import_module(
+            "bioetl.application.core.data_sources.filtered"
+        ).FilteredDataSource
+        csv_filter_reader_type = import_module(
+            "bioetl.infrastructure.adapters.input.csv_filter_reader"
+        ).CsvFilterReader
         return cast(  # pyright: ignore[reportInvalidCast]
             DataSourcePort,
-            FilteredDataSource(
+            filtered_data_source_type(
                 data_source=data_source,
-                filter_reader=CsvFilterReader(logger=logger),
+                filter_reader=csv_filter_reader_type(logger=logger),
                 filter_config=filter_config,
                 metrics=metrics,
                 pipeline_name=pipeline_name,
