@@ -130,28 +130,14 @@ def push_metrics_to_gateway(
     if grouping_key_extra:
         grouping_key.update(grouping_key_extra)
     if metric_names is None:
-        seed_pipelines = tuple(
-            name
-            for name in ((pipeline_name,) if pipeline_name else pipeline_names)
-            if isinstance(name, str) and name.strip()
+        grouping_key = _ensure_publication_seeds(
+            settings=settings,
+            pipeline_name=pipeline_name,
+            run_type=run_type,
+            pipeline_names=pipeline_names,
+            workflow_name=workflow_name,
+            logger=logger,
         )
-        seed_run_type = (
-            run_type.strip()
-            if isinstance(run_type, str) and run_type.strip()
-            else ("incremental" if workflow_name is None else "")
-        )
-        for seed_pipeline in seed_pipelines:
-            if not seed_run_type:
-                continue
-            ensure_required_control_plane_publication_series(
-                pipeline=seed_pipeline,
-                run_type=seed_run_type,
-            )
-        refresh_control_plane_integrity_metrics(settings, logger=logger)
-        # Let the infrastructure partition samples by their own bounded scope.
-        # Applying the caller scope to a full multi-pipeline registry either
-        # relabels unrelated samples or duplicates them across gateway groups.
-        grouping_key = {}
     if workflow_name is not None:
         publication_logger = logger or bootstrap_logger(
             pipeline=pipeline_name or "unknown"
@@ -178,6 +164,43 @@ def push_metrics_to_gateway(
             metric_names=metric_names,
         )
     return bool(result.success)
+
+
+def _seed_run_type(run_type: str | None, workflow_name: str | None) -> str:
+    if isinstance(run_type, str) and run_type.strip():
+        return run_type.strip()
+    if workflow_name is None:
+        return "incremental"
+    return ""
+
+
+def _ensure_publication_seeds(
+    *,
+    settings: object,
+    pipeline_name: str | None,
+    run_type: str | None,
+    pipeline_names: tuple[str, ...],
+    workflow_name: str | None,
+    logger: LoggerPort | None,
+) -> dict[str, str]:
+    seed_pipelines = tuple(
+        name
+        for name in ((pipeline_name,) if pipeline_name else pipeline_names)
+        if isinstance(name, str) and name.strip()
+    )
+    seed_run_type = _seed_run_type(run_type, workflow_name)
+    for seed_pipeline in seed_pipelines:
+        if not seed_run_type:
+            continue
+        ensure_required_control_plane_publication_series(
+            pipeline=seed_pipeline,
+            run_type=seed_run_type,
+        )
+    refresh_control_plane_integrity_metrics(settings, logger=logger)
+    # Let the infrastructure partition samples by their own bounded scope.
+    # Applying the caller scope to a full multi-pipeline registry either
+    # relabels unrelated samples or duplicates them across gateway groups.
+    return {}
 
 
 def delete_metrics_from_gateway(

@@ -208,7 +208,7 @@
           }
         },
         "refresh": 1,
-        "regex": "/^\\s*(\\S(?:.*\\S)?)\\s*$/",
+        "regex": "",
         "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
@@ -277,7 +277,7 @@
   "panels": [
     {
       "gridPos": {
-        "h": 3,
+        "h": 2,
         "w": 24,
         "x": 0,
         "y": 0
@@ -374,7 +374,7 @@
         "h": 3,
         "w": 16,
         "x": 0,
-        "y": 3
+        "y": 2
       },
       "description": "CURRENT readiness is pipeline/run_type telemetry. SELECTED RUN Trust and retention tables are exact-run persisted evidence. An incomplete selected run cannot be replayed even when current readiness is OK. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser.",
       "options": {
@@ -418,7 +418,7 @@
         "h": 3,
         "w": 8,
         "x": 16,
-        "y": 3
+        "y": 2
       },
       "datasource": {
         "type": "prometheus",
@@ -534,7 +534,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 6
+        "y": 5
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence. Observed is the saved completion-time assessment. processing_status success does not imply trust_status OK.",
@@ -1204,7 +1204,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 6
+        "y": 5
       },
       "id": 9416,
       "options": {
@@ -1430,10 +1430,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 6,
         "x": 0,
-        "y": 13
+        "y": 12
       },
       "id": 891,
       "options": {
@@ -1527,10 +1527,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 6,
         "x": 6,
-        "y": 13
+        "y": 12
       },
       "id": 892,
       "options": {
@@ -1651,10 +1651,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 6,
         "x": 12,
-        "y": 13
+        "y": 12
       },
       "id": 893,
       "options": {
@@ -1757,10 +1757,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 6,
         "x": 18,
-        "y": 13
+        "y": 12
       },
       "id": 907,
       "options": {
@@ -4092,8 +4092,7 @@
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "fixed",
-                "fixedColor": "#2563eb"
+                "mode": "palette-classic"
               },
               "links": [
                 {
@@ -4132,18 +4131,19 @@
             "x": 0,
             "y": 30,
             "w": 24,
-            "h": 8
+            "h": 10
           },
           "id": 111,
           "options": {
             "legend": {
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
               "calcs": [
                 "lastNotNull",
                 "max"
               ],
-              "displayMode": "table",
-              "placement": "bottom",
-              "showLegend": true
+              "width": 430
             },
             "tooltip": {
               "mode": "multi",
@@ -4866,7 +4866,8 @@
               "custom": {
                 "align": "left",
                 "cellOptions": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": false
                 },
                 "inspect": true
               },
@@ -5144,7 +5145,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   },
                   {
@@ -5168,6 +5169,59 @@
                     "value": 160
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Current"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Parameter"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Action"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -5175,15 +5229,17 @@
             "x": 0,
             "y": 23,
             "w": 24,
-            "h": 18
+            "h": 12
           },
           "id": 9404,
           "options": {
             "footer": {
-              "show": false
+              "show": false,
+              "enablePagination": true,
+              "countRows": true
             },
             "showHeader": true,
-            "cellHeight": "sm"
+            "cellHeight": "md"
           },
           "targets": [
             {
@@ -5557,22 +5613,77 @@
                     }
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Current"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Parameter"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Action"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
               }
             ]
           },
           "gridPos": {
             "x": 0,
-            "y": 41,
+            "y": 35,
             "w": 24,
             "h": 8
           },
           "id": 9407,
           "options": {
             "footer": {
-              "show": false
+              "show": false,
+              "enablePagination": true,
+              "countRows": true
             },
             "showHeader": true,
-            "cellHeight": "sm"
+            "cellHeight": "md"
           },
           "targets": [
             {
@@ -5650,9 +5761,9 @@
           "description": "Shown when no identity rows are returned. This can mean no matching run, unresolved scope, or an unavailable backend; it is not a critical verdict by itself.",
           "gridPos": {
             "x": 0,
-            "y": 49,
+            "y": 43,
             "w": 12,
-            "h": 4
+            "h": 5
           },
           "id": 9410,
           "options": {
@@ -5679,9 +5790,9 @@
           "description": "Shown when no processed-record rows are returned. This can mean no activity, a run that has not started, unresolved scope, or an unavailable backend.",
           "gridPos": {
             "x": 12,
-            "y": 49,
+            "y": 43,
             "w": 12,
-            "h": 4
+            "h": 5
           },
           "id": 9411,
           "options": {
@@ -6033,22 +6144,77 @@
                     }
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Current"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Parameter"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Action"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
               }
             ]
           },
           "gridPos": {
             "x": 0,
-            "y": 53,
+            "y": 48,
             "w": 24,
-            "h": 8
+            "h": 7
           },
           "id": 9405,
           "options": {
             "footer": {
-              "show": false
+              "show": false,
+              "enablePagination": true,
+              "countRows": true
             },
             "showHeader": true,
-            "cellHeight": "sm"
+            "cellHeight": "md"
           },
           "targets": [
             {
@@ -6472,22 +6638,77 @@
                     }
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Current"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Parameter"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Action"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
               }
             ]
           },
           "gridPos": {
             "x": 0,
-            "y": 61,
+            "y": 55,
             "w": 24,
-            "h": 4
+            "h": 12
           },
           "id": 9408,
           "options": {
             "footer": {
-              "show": false
+              "show": false,
+              "enablePagination": true,
+              "countRows": true
             },
             "showHeader": true,
-            "cellHeight": "sm"
+            "cellHeight": "md"
           },
           "targets": [
             {
@@ -6912,22 +7133,77 @@
                     }
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Current"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Parameter"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Action"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
               }
             ]
           },
           "gridPos": {
             "x": 0,
-            "y": 65,
+            "y": 67,
             "w": 24,
-            "h": 4
+            "h": 12
           },
           "id": 9406,
           "options": {
             "footer": {
-              "show": false
+              "show": false,
+              "enablePagination": true,
+              "countRows": true
             },
             "showHeader": true,
-            "cellHeight": "sm"
+            "cellHeight": "md"
           },
           "targets": [
             {
@@ -7352,22 +7628,77 @@
                     }
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Current"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Parameter"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Action"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
               }
             ]
           },
           "gridPos": {
             "x": 0,
-            "y": 69,
+            "y": 79,
             "w": 24,
-            "h": 4
+            "h": 12
           },
           "id": 9409,
           "options": {
             "footer": {
-              "show": false
+              "show": false,
+              "enablePagination": true,
+              "countRows": true
             },
             "showHeader": true,
-            "cellHeight": "sm"
+            "cellHeight": "md"
           },
           "targets": [
             {
@@ -7434,7 +7765,7 @@
         {
           "gridPos": {
             "x": 0,
-            "y": 73,
+            "y": 91,
             "w": 24,
             "h": 4
           },
@@ -7470,7 +7801,7 @@
             "x": 0,
             "y": 24,
             "w": 24,
-            "h": 6
+            "h": 12
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Shows identity details for the selected run. An exact Run ID resolves one run; an aggregate pipeline scope does not guess a manifest. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
@@ -7479,7 +7810,8 @@
               "custom": {
                 "align": "left",
                 "cellOptions": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": false
                 },
                 "inspect": true
               },
@@ -7521,7 +7853,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -7561,15 +7893,70 @@
                     "value": true
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Current"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Parameter"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Action"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
               }
             ]
           },
           "options": {
             "showHeader": true,
             "footer": {
-              "show": false
+              "show": false,
+              "enablePagination": true,
+              "countRows": true
             },
-            "cellHeight": "sm"
+            "cellHeight": "md"
           },
           "targets": [
             {
@@ -7620,9 +8007,9 @@
           "title": "Review Processed Records",
           "gridPos": {
             "x": 0,
-            "y": 30,
+            "y": 36,
             "w": 24,
-            "h": 6
+            "h": 12
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · CURRENT · Shows Bronze, Silver, and Gold record counts and outcomes for the selected scope. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Use Run Explorer for full run details. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
@@ -7631,7 +8018,8 @@
               "custom": {
                 "align": "left",
                 "cellOptions": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": false
                 },
                 "inspect": true
               },
@@ -7728,7 +8116,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -7742,10 +8130,6 @@
                   {
                     "id": "displayName",
                     "value": "count"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 70
                   },
                   {
                     "id": "custom.align",
@@ -7767,6 +8151,10 @@
                       "mode": "fixed",
                       "fixedColor": "text"
                     }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 70
                   }
                 ]
               },
@@ -7877,7 +8265,8 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text"
+                      "type": "color-text",
+                      "wrapText": false
                     }
                   },
                   {
@@ -7916,6 +8305,59 @@
                     }
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Current"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Parameter"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Action"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -7928,9 +8370,11 @@
               }
             ],
             "footer": {
-              "show": false
+              "show": false,
+              "enablePagination": true,
+              "countRows": true
             },
-            "cellHeight": "sm"
+            "cellHeight": "md"
           },
           "targets": [
             {
@@ -7986,7 +8430,8 @@
               "custom": {
                 "align": "left",
                 "cellOptions": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": false
                 },
                 "inspect": true
               },
@@ -8036,7 +8481,60 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Current"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Parameter"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Action"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
                     }
                   }
                 ]
@@ -8045,17 +8543,19 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 36,
+            "y": 48,
             "w": 24,
-            "h": 6
+            "h": 7
           },
           "id": 9417,
           "options": {
             "footer": {
-              "show": false
+              "show": false,
+              "enablePagination": true,
+              "countRows": true
             },
             "showHeader": true,
-            "cellHeight": "sm"
+            "cellHeight": "md"
           },
           "targets": [
             {
@@ -8260,13 +8760,13 @@
             "x": 0,
             "y": 26,
             "w": 24,
-            "h": 10
+            "h": 12
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "lg",
+            "cellHeight": "md",
             "footer": {
               "show": false,
               "enablePagination": true
@@ -8359,15 +8859,15 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 36,
+            "y": 38,
             "w": 24,
-            "h": 8
+            "h": 7
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "lg",
+            "cellHeight": "md",
             "footer": {
               "show": false,
               "enablePagination": true

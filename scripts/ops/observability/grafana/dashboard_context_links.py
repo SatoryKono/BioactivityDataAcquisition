@@ -32,8 +32,9 @@ TIME_TOKEN = "${__url_time_range}"
 RUN_ID_TEMPLATE = "$run_id"
 HTML_AMPERSAND = "&amp;"
 _CUSTOM_INSPECT = "custom.inspect"
-# Grafana query-variable regex: capture trimmed non-empty token.
-RUN_ID_GRAFANA_REGEX = r"/^\s*(\S(?:.*\S)?)\s*$/"
+# The API normalizes identity. Grafana capture groups replace the readable label
+# with the matched UUID even when Infinity supplies separate __text/__value.
+RUN_ID_GRAFANA_REGEX = ""
 _RUN_ID_TEMPLATE_VALUES = frozenset(
     {
         RUN_ID_TEMPLATE,
@@ -43,6 +44,7 @@ _RUN_ID_TEMPLATE_VALUES = frozenset(
         "${__data.fields.Run ID}",
     }
 )
+GRAFANA_ALL = "$__all"
 
 
 class RunIdError(ValueError):
@@ -71,7 +73,7 @@ class DashboardContext:
     run_id: str
     provider: str = "unknown"
     pipeline_context: str | None = None
-    stage: str = "$__all"
+    stage: str = GRAFANA_ALL
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "run_id", normalize_run_id(self.run_id))
@@ -107,9 +109,9 @@ def build_handoff_url(
         provider = (
             "$provider"
             if source_uid in {"bioetl-provider-health-v2", "bioetl-incident-v1"}
-            else "$__all"
+            else GRAFANA_ALL
         )
-        stage = "$__all"
+        stage = GRAFANA_ALL
         pipeline_context = pipe
     else:
         assert context is not None

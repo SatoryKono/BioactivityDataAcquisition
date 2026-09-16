@@ -152,21 +152,28 @@ def _load_density_contract(
     payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     if not isinstance(payload, dict):
         return set(), None
+    return _scalar_density_allowlist(payload), _enforced_uids(payload)
+
+
+def _scalar_density_allowlist(payload: dict[str, Any]) -> set[tuple[str, Any]]:
     allow: set[tuple[str, Any]] = set()
     allowlists = payload.get("allowlists")
-    if isinstance(allowlists, dict):
-        entries = allowlists.get("scalar_density")
-        if isinstance(entries, list):
-            for entry in entries:
-                if isinstance(entry, dict) and "dashboard" in entry and "id" in entry:
-                    allow.add((str(entry.get("dashboard")), entry.get("id")))
+    if not isinstance(allowlists, dict):
+        return allow
+    entries = allowlists.get("scalar_density")
+    if not isinstance(entries, list):
+        return allow
+    for entry in entries:
+        if isinstance(entry, dict) and "dashboard" in entry and "id" in entry:
+            allow.add((str(entry.get("dashboard")), entry.get("id")))
+    return allow
+
+
+def _enforced_uids(payload: dict[str, Any]) -> set[str] | None:
     raw_uids = payload.get("scalar_density_enforced_uids")
-    enforced: set[str] | None
     if isinstance(raw_uids, list):
-        enforced = {str(item) for item in raw_uids}
-    else:
-        enforced = None
-    return allow, enforced
+        return {str(item) for item in raw_uids}
+    return None
 
 
 def _load_allowlist(path: Path | None) -> set[tuple[str, Any]]:

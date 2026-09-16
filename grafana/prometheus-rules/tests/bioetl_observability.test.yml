@@ -2539,3 +2539,70 @@ tests:
     - expr: bioetl_provider_current_status
       eval_time: 20m
       exp_samples: []
+
+  - name: runtime-stale-entity-count-mixed
+    interval: 1m
+    input_series:
+    - series: bioetl_data_freshness_seconds{pipeline="chembl_assay",entity="a",job="one"}
+      values: -100000+0x2
+    - series: bioetl_data_freshness_seconds{pipeline="chembl_assay",entity="b",job="one"}
+      values: -200000+0x2
+    - series: bioetl_data_freshness_seconds{pipeline="chembl_assay",entity="c",job="one"}
+      values: 0+0x2
+    promql_expr_test:
+    - expr: sum(clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds{pipeline=~"chembl_assay"}), 0) > bool 86400) or (count(bioetl_data_freshness_seconds{pipeline=~"chembl_assay"})
+        * 0)
+      eval_time: 0m
+      exp_samples:
+      - labels: '{}'
+        value: 2
+
+  - name: runtime-stale-entity-count-fresh-zero
+    interval: 1m
+    input_series:
+    - series: bioetl_data_freshness_seconds{pipeline="chembl_assay",entity="a",job="one"}
+      values: 0+0x2
+    promql_expr_test:
+    - expr: sum(clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds{pipeline=~"chembl_assay"}), 0) > bool 86400) or (count(bioetl_data_freshness_seconds{pipeline=~"chembl_assay"})
+        * 0)
+      eval_time: 0m
+      exp_samples:
+      - labels: '{}'
+        value: 0
+
+  - name: runtime-stale-entity-count-missing
+    interval: 1m
+    input_series: []
+    promql_expr_test:
+    - expr: sum(clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds{pipeline=~"chembl_assay"}), 0) > bool 86400) or (count(bioetl_data_freshness_seconds{pipeline=~"chembl_assay"})
+        * 0)
+      eval_time: 0m
+      exp_samples: []
+
+  - name: runtime-stale-entity-count-duplicate-exporters
+    interval: 1m
+    input_series:
+    - series: bioetl_data_freshness_seconds{pipeline="chembl_assay",entity="a",job="one"}
+      values: -100000+0x2
+    - series: bioetl_data_freshness_seconds{pipeline="chembl_assay",entity="a",job="two"}
+      values: -100000+0x2
+    promql_expr_test:
+    - expr: sum(clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds{pipeline=~"chembl_assay"}), 0) > bool 86400) or (count(bioetl_data_freshness_seconds{pipeline=~"chembl_assay"})
+        * 0)
+      eval_time: 0m
+      exp_samples:
+      - labels: '{}'
+        value: 1
+
+  - name: runtime-stale-entity-count-boundary
+    interval: 1m
+    input_series:
+    - series: bioetl_data_freshness_seconds{pipeline="chembl_assay",entity="a",job="one"}
+      values: -86400+0x2
+    promql_expr_test:
+    - expr: sum(clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds{pipeline=~"chembl_assay"}), 0) > bool 86400) or (count(bioetl_data_freshness_seconds{pipeline=~"chembl_assay"})
+        * 0)
+      eval_time: 0m
+      exp_samples:
+      - labels: '{}'
+        value: 0

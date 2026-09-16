@@ -1437,7 +1437,7 @@ def _assert_visual_bus_base_content(
     assert options.get("bioetlDisplayTitle") == "Navigate Dashboards"
     assert panel.get("title") == ""
     assert "bioetl-panel-title" not in content
-    assert panel["gridPos"]["h"] == 3
+    assert panel["gridPos"]["h"] == 2
     description = str(panel.get("description", ""))
     assert "Sanitizer-compatible" in description
     assert "native keyboard focus" in description

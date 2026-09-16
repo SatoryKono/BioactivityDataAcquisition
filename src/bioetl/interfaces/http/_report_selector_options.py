@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from bioetl.application.services.run_reports.query import list_pipeline_reports
+from bioetl.application.services.run_reports.query import (
+    ReportIndexEntry,
+    list_pipeline_reports,
+)
 from bioetl.composition.observability_runtime import create_run_report_store
 from bioetl.interfaces.http.report_root_config import configured_report_root
 from bioetl.interfaces.http.run_report_ops import load_pipeline_run_report_payload
@@ -18,6 +21,57 @@ _FIELDS = {
     "provider": "provider",
 }
 _ALL = {"", "All", "all", "$__all", ".*"}
+
+
+def _allowed_scope(values: tuple[str, ...]) -> set[str]:
+    return set(values) - _ALL
+
+
+def _entry_matches_catalog(
+    entry: ReportIndexEntry, scopes: dict[str, tuple[str, ...]]
+) -> bool:
+    pipelines = _allowed_scope(scopes.get("pipeline", ()))
+    run_ids = _allowed_scope(scopes.get("run_id", ()))
+    if pipelines and entry.owner not in pipelines:
+        return False
+    return not run_ids or entry.run_id in run_ids
+
+
+def _checked_identity(entry: ReportIndexEntry, root: Path) -> dict[str, object]:
+    report = load_pipeline_run_report_payload(
+        run_id=entry.run_id,
+        pipeline_name=entry.owner,
+        root=root,
+    )
+    if report is None:
+        raise ValueError("Persisted selector report is unreadable or unsupported")
+    identity = report.get("identity")
+    if not isinstance(identity, dict):
+        raise ValueError("Persisted selector report has no identity")
+    if identity.get("run_id") != entry.run_id or identity.get("pipeline_name") != entry.owner:
+        raise ValueError("Persisted selector report identity does not match its path")
+    return identity
+
+
+def _identity_matches_scopes(
+    identity: dict[str, object], scopes: dict[str, tuple[str, ...]]
+) -> bool:
+    return not any(
+        allowed and identity.get(_FIELDS[name]) not in allowed
+        for name, values in scopes.items()
+        if (allowed := _allowed_scope(values))
+    )
+
+
+def _option_label(
+    dimension: str, identity: dict[str, object], entry: ReportIndexEntry, value: str
+) -> str:
+    if dimension != "run_id":
+        return value
+    return (
+        f"{identity.get('started_at', 'UNKNOWN')} · {entry.owner} · "
+        f"{identity.get('status', 'unknown')} · {value}"
+    )
 
 
 def supplement_report_options(
@@ -39,45 +93,16 @@ def supplement_report_options(
     items = list(raw_items) if isinstance(raw_items, list) else []
     seen = {item.get("value") if isinstance(item, dict) else item for item in items}
     for entry in sorted(entries, key=lambda item: item.started_at or "", reverse=True):
-        pipelines = set(scopes.get("pipeline", ())) - _ALL
-        run_ids = set(scopes.get("run_id", ())) - _ALL
-        if (pipelines and entry.owner not in pipelines) or (
-            run_ids and entry.run_id not in run_ids
-        ):
+        if not _entry_matches_catalog(entry, scopes):
             continue
-        report = load_pipeline_run_report_payload(
-            run_id=entry.run_id,
-            pipeline_name=entry.owner,
-            root=root,
-        )
-        if report is None:
-            raise ValueError("Persisted selector report is unreadable or unsupported")
-        identity = report.get("identity")
-        if not isinstance(identity, dict):
-            raise ValueError("Persisted selector report has no identity")
-        if (
-            identity.get("run_id") != entry.run_id
-            or identity.get("pipeline_name") != entry.owner
-        ):
-            raise ValueError(
-                "Persisted selector report identity does not match its path"
-            )
-        if any(
-            allowed and identity.get(_FIELDS[name]) not in allowed
-            for name, values in scopes.items()
-            if (allowed := set(values) - _ALL)
-        ):
+        identity = _checked_identity(entry, root)
+        if not _identity_matches_scopes(identity, scopes):
             continue
         value = identity.get(_FIELDS[dimension])
         if not isinstance(value, str) or not value or value in seen:
             continue
         seen.add(value)
-        label = value
-        if dimension == "run_id":
-            label = (
-                f"{identity.get('started_at', 'UNKNOWN')} · {entry.owner} · "
-                f"{identity.get('status', 'unknown')} · {value}"
-            )
+        label = _option_label(dimension, identity, entry, value)
         items.append(
             {"text": label, "value": value} if response_shape == "options" else value
         )

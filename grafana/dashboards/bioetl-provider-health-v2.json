@@ -209,7 +209,7 @@
           }
         },
         "refresh": 1,
-        "regex": "/^\\s*(\\S(?:.*\\S)?)\\s*$/",
+        "regex": "",
         "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
@@ -322,7 +322,7 @@
   "panels": [
     {
       "gridPos": {
-        "h": 3,
+        "h": 2,
         "w": 24,
         "x": 0,
         "y": 0
@@ -419,7 +419,7 @@
         "h": 3,
         "w": 16,
         "x": 0,
-        "y": 3
+        "y": 2
       },
       "description": "Scope and evidence: provider health is determined from provider telemetry. Fleet panels cover all providers; selected-provider panels use `$provider`. Pipeline, workflow, run type, run ID, identity, and processed-record data are supporting context and do not determine provider health. Missing current-status telemetry means UNKNOWN, not healthy. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: provider=${provider} · adapter=${adapter} · pipeline_context=${pipeline_context}.",
       "options": {
@@ -437,7 +437,7 @@
         "h": 3,
         "w": 8,
         "x": 16,
-        "y": 3
+        "y": 2
       },
       "datasource": {
         "type": "prometheus",
@@ -581,7 +581,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 5
       },
       "options": {
         "bioetlDisplayTitle": "Start Provider Triage",
@@ -801,7 +801,7 @@
         "h": 5,
         "w": 12,
         "x": 0,
-        "y": 8
+        "y": 7
       },
       "id": 9101,
       "options": {
@@ -1156,7 +1156,7 @@
         "h": 5,
         "w": 12,
         "x": 12,
-        "y": 8
+        "y": 7
       },
       "id": 9107,
       "options": {
@@ -1279,10 +1279,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 12
       },
       "id": 9104,
       "options": {
@@ -1794,8 +1794,8 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 280
+                    "id": "custom.inspect",
+                    "value": true
                   },
                   {
                     "id": "custom.cellOptions",
@@ -1803,10 +1803,6 @@
                       "type": "auto",
                       "wrapText": true
                     }
-                  },
-                  {
-                    "id": "custom.inspect",
-                    "value": true
                   }
                 ]
               },
@@ -1976,10 +1972,10 @@
           },
           "description": "CURRENT · TIME RANGE · Complete GLOBAL provider severity matrix. First-screen Monitor Fleet Severity is the four-row summary. TELEMETRY MISSING is a blind spot, not a healthy fleet. TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
           "gridPos": {
-            "h": 8,
-            "w": 8,
             "x": 0,
-            "y": 19
+            "y": 19,
+            "w": 12,
+            "h": 5
           },
           "id": 9111,
           "options": {
@@ -2178,10 +2174,10 @@
           },
           "description": "TIME RANGE · Complete DEGRADED or FAILING provider list. First-screen Inspect Non-OK Providers is the four-row summary. TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
           "gridPos": {
-            "h": 8,
-            "w": 6,
-            "x": 8,
-            "y": 19
+            "x": 12,
+            "y": 19,
+            "w": 12,
+            "h": 5
           },
           "id": 9112,
           "options": {
@@ -2380,10 +2376,10 @@
           },
           "description": "TIME RANGE · Complete current cause evidence, unbounded copy of Inspect Top Provider Causes. Same one-state rule: active-cause rows, or a single FLEET verdict row. VALID EMPTY needs proven coverage — recorded status for every provider, no provider above OK, present health telemetry, present cause series, and no active cause. Unproven coverage stays UNKNOWN and means restore provider telemetry. TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
           "gridPos": {
-            "h": 8,
-            "w": 10,
-            "x": 14,
-            "y": 19
+            "x": 0,
+            "y": 24,
+            "w": 24,
+            "h": 5
           },
           "id": 9113,
           "options": {
@@ -2434,8 +2430,11 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 120
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
                   }
                 ]
               },
@@ -2589,10 +2588,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 24,
             "x": 0,
-            "y": 20
+            "y": 20,
+            "w": 24,
+            "h": 5
           },
           "id": 106,
           "options": {
@@ -2691,10 +2690,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 24,
             "x": 0,
-            "y": 26
+            "y": 25,
+            "w": 24,
+            "h": 4
           },
           "id": 107,
           "options": {
@@ -2840,10 +2839,10 @@
             ]
           },
           "gridPos": {
-            "h": 7,
-            "w": 24,
             "x": 0,
-            "y": 32
+            "y": 29,
+            "w": 24,
+            "h": 4
           },
           "id": 108,
           "options": {
@@ -2934,10 +2933,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 7,
-            "w": 24,
             "x": 0,
-            "y": 39
+            "y": 33,
+            "w": 24,
+            "h": 5
           },
           "id": 109,
           "options": {
@@ -3013,22 +3012,21 @@
                     }
                   }
                 }
-              ],
-              "displayName": "Inspect Health-Check Latency p95"
+              ]
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
-            "w": 12,
             "x": 0,
-            "y": 46
+            "y": 38,
+            "w": 8,
+            "h": 10
           },
           "id": 102,
           "options": {
             "colorMode": "value",
             "graphMode": "none",
-            "textMode": "value",
+            "textMode": "value_and_name",
             "justifyMode": "center",
             "orientation": "auto",
             "reduceOptions": {
@@ -3084,7 +3082,7 @@
                 ]
               },
               "unit": "s",
-              "noValue": "No optional adapter latency samples in range; not a provider verdict.",
+              "noValue": "TELEMETRY MISSING",
               "links": [
                 {
                   "targetBlank": false,
@@ -3098,24 +3096,34 @@
                   "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
                   "includeVars": false
                 }
-              ]
+              ],
+              "custom": {
+                "drawStyle": "line",
+                "showPoints": "always",
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                }
+              }
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 12,
-            "x": 12,
-            "y": 46
+            "x": 8,
+            "y": 38,
+            "w": 16,
+            "h": 10
           },
           "id": 110,
           "options": {
             "legend": {
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
               "calcs": [
-                "max"
+                "lastNotNull"
               ],
-              "displayMode": "hidden",
-              "placement": "bottom"
+              "width": 400
             },
             "tooltip": {
               "mode": "multi",
@@ -3131,7 +3139,7 @@
           ],
           "title": "Track Request Latency p95",
           "type": "timeseries",
-          "description": "TIME RANGE · Compact optional selected-range evidence: p95 adapter request latency by endpoint for the selected provider scope. Provider-global selected-range only; for backfill-specific stage latency open 2. Runtime with preserved pipeline/run_type/run_id scope. No data remains diagnostic and means no endpoint latency samples in range; it does not refute current provider severity TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Optional latency samples only. Empty/NaN is TELEMETRY MISSING, not zero latency or a healthy provider. Check telemetry presence above.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
@@ -3189,10 +3197,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 12,
             "x": 0,
-            "y": 51
+            "y": 48,
+            "w": 12,
+            "h": 5
           },
           "id": 111,
           "options": {
@@ -3267,10 +3275,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 12,
             "x": 12,
-            "y": 51
+            "y": 48,
+            "w": 12,
+            "h": 5
           },
           "id": 115,
           "options": {
@@ -3356,10 +3364,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 12,
             "x": 0,
-            "y": 56
+            "y": 53,
+            "w": 12,
+            "h": 5
           },
           "id": 112,
           "options": {
@@ -3434,10 +3442,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
-            "w": 12,
             "x": 12,
-            "y": 56
+            "y": 53,
+            "w": 12,
+            "h": 5
           },
           "id": 113,
           "options": {
@@ -3531,10 +3539,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
-            "w": 12,
             "x": 0,
-            "y": 61
+            "y": 58,
+            "w": 12,
+            "h": 5
           },
           "id": 31,
           "options": {
@@ -3606,10 +3614,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 12,
             "x": 12,
-            "y": 61
+            "y": 58,
+            "w": 12,
+            "h": 5
           },
           "id": 32,
           "options": {
@@ -3734,18 +3742,6 @@
             "overrides": [
               {
                 "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Count"
-                  }
-                ]
-              },
-              {
-                "matcher": {
                   "id": "byName",
                   "options": "provider"
                 },
@@ -3761,20 +3757,69 @@
                   "id": "byName",
                   "options": "Value"
                 },
+                "properties": []
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Last check"
+                },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 80
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm"
+                  },
+                  {
+                    "id": "mappings",
+                    "value": []
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "text"
+                    }
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "UNKNOWN"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Observation age"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "s"
+                  },
+                  {
+                    "id": "mappings",
+                    "value": []
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "text"
+                    }
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "UNKNOWN"
                   }
                 ]
               }
             ]
           },
           "gridPos": {
-            "h": 5,
-            "w": 12,
             "x": 0,
-            "y": 21
+            "y": 21,
+            "w": 12,
+            "h": 7
           },
           "id": 114,
           "options": {
@@ -3797,23 +3842,50 @@
           },
           "targets": [
             {
-              "expr": "max by (provider) (max_over_time(bioetl_provider_health_status{provider=~\"$provider\"}[${__range_s}s])) or ((max_over_time(bioetl_provider_health_check_provider_universe_15m{provider=~\"$provider\"}[${__range_s}s]) * 0) / (max_over_time(bioetl_provider_health_check_provider_universe_15m{provider=~\"$provider\"}[${__range_s}s]) * 0))",
+              "expr": "max by (provider) (max_over_time(bioetl_provider_health_status{provider=~\"$provider\"}[${__range_s}s])) or on (provider) ((max by (provider) (max_over_time(bioetl_provider_health_check_provider_universe_15m{provider=~\"$provider\"}[${__range_s}s])) * 0) / (max by (provider) (max_over_time(bioetl_provider_health_check_provider_universe_15m{provider=~\"$provider\"}[${__range_s}s])) * 0))",
               "format": "table",
               "instant": true,
               "legendFormat": "{{ provider }}",
               "refId": "A"
+            },
+            {
+              "refId": "B",
+              "expr": "max by (provider) (max_over_time(bioetl_provider_health_observed_timestamp_seconds{provider=~\"$provider\"}[${__range_s}s])) * 1000",
+              "format": "table",
+              "instant": true
+            },
+            {
+              "refId": "C",
+              "expr": "clamp_min(time() - max by (provider) (max_over_time(bioetl_provider_health_observed_timestamp_seconds{provider=~\"$provider\"}[${__range_s}s])), 0)",
+              "format": "table",
+              "instant": true
             }
           ],
           "title": "Inspect Raw Health Status",
           "type": "table",
-          "description": "CURRENT · TIME RANGE · Do not put full UUIDs into Prometheus labels. Raw provider health enum evidence for the current first-screen scope (instant), not the canonical first-screen verdict. Values are source enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY (or dashboard-local mapping). null/NaN=UNKNOWN when raw status is absent (mapping fallback), not healthy. When raw status is absent the mapped status is unknown (fail-closed), never synthetic healthy TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE / DIAGNOSTIC · 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null/NaN=UNKNOWN. Raw provider health enum evidence: best observed status in the selected range, not the canonical first-screen verdict. When raw status is absent, status is UNKNOWN. A past HEALTHY observation does not establish current freshness. Last check and age describe the latest observation, not necessarily the best status. Use Status Reason / Telemetry Presence for the current verdict.",
           "transformations": [
+            {
+              "id": "joinByField",
+              "options": {
+                "byField": "provider",
+                "mode": "outer"
+              }
+            },
             {
               "id": "organize",
               "options": {
                 "excludeByName": {
                   "Time": true,
+                  "Time 1": true,
+                  "Time 2": true,
+                  "Time 3": true,
                   "__name__": true
+                },
+                "renameByName": {
+                  "Value #A": "Best status · range",
+                  "Value #B": "Last check",
+                  "Value #C": "Observation age"
                 }
               }
             }
@@ -3832,17 +3904,17 @@
               "custom": {
                 "axisLabel": "Duration (seconds)",
                 "axisPlacement": "auto",
-                "drawStyle": "bars",
+                "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
-                "showPoints": "auto",
+                "showPoints": "always",
                 "spanNulls": false,
                 "stacking": {
-                  "group": "A",
-                  "mode": "normal"
+                  "mode": "none",
+                  "group": "A"
                 },
                 "thresholdsStyle": {
                   "mode": "off"
@@ -3859,26 +3931,25 @@
                 ]
               },
               "unit": "s",
-              "noValue": "No provider latency samples in range. This optional telemetry is neutral; use severity, freshness, and raw enum panels for provider verdict."
+              "noValue": "TELEMETRY MISSING"
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 12,
-            "y": 21
+            "y": 21,
+            "w": 12,
+            "h": 7
           },
           "id": 1,
           "options": {
             "legend": {
-              "calcs": [
-                "sum",
-                "mean"
-              ],
               "displayMode": "table",
               "placement": "bottom",
-              "showLegend": false
+              "showLegend": true,
+              "calcs": [
+                "lastNotNull"
+              ]
             },
             "tooltip": {
               "mode": "multi",
@@ -3894,7 +3965,7 @@
           ],
           "title": "Track Health-Check Latency p95",
           "type": "timeseries",
-          "description": "TIME RANGE · Selected-range evidence: p95 provider health-check latency over the active Grafana interval. Current provider severity is owned by the GLOBAL Provider Severity Matrix TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: $__interval trend of health-check p95; the range snapshot is Inspect Health-Check Latency p95 (102).",
+          "description": "TIME RANGE · Optional latency samples only. Empty/NaN is TELEMETRY MISSING, not zero latency or a healthy provider. Check telemetry presence above.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
@@ -3936,10 +4007,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
-            "w": 12,
             "x": 0,
-            "y": 27
+            "y": 28,
+            "w": 12,
+            "h": 3
           },
           "id": 2,
           "options": {
@@ -4006,10 +4077,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
-            "w": 12,
             "x": 12,
-            "y": 27
+            "y": 28,
+            "w": 12,
+            "h": 3
           },
           "id": 105,
           "options": {
@@ -4086,10 +4157,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
-            "w": 12,
             "x": 0,
-            "y": 33
+            "y": 31,
+            "w": 12,
+            "h": 3
           },
           "id": 104,
           "options": {
@@ -4162,10 +4233,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
+            "x": 12,
+            "y": 31,
             "w": 12,
-            "x": 0,
-            "y": 38
+            "h": 3
           },
           "id": 7,
           "options": {
@@ -4213,10 +4284,10 @@
           "type": "table",
           "title": "Inspect Run Identity",
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 0,
-            "y": 22
+            "y": 22,
+            "w": 24,
+            "h": 12
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Do not put full UUIDs into Prometheus labels. Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. This card is bounded pipeline/run context evidence only and does not prove current provider health. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero Inspect value opens full identifiers as selectable plain text.",
@@ -4315,7 +4386,8 @@
             "footer": {
               "show": false
             },
-            "cellHeight": "sm"
+            "cellHeight": "md",
+            "enablePagination": true
           },
           "targets": [
             {
@@ -4365,10 +4437,10 @@
           "type": "table",
           "title": "Inspect Processed Records",
           "gridPos": {
-            "h": 6,
-            "w": 12,
-            "x": 12,
-            "y": 22
+            "x": 0,
+            "y": 34,
+            "w": 24,
+            "h": 12
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · TIME RANGE · Do not put full UUIDs into Prometheus labels. Current stage/outcome accounting evidence for the shared pipeline/run_type context. Provider remains the primary health selector; this table is bounded pipeline/run_type accounting evidence and does not prove current provider health by itself. Missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status, Monitor Provider Telemetry Freshness, and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
@@ -4672,7 +4744,8 @@
             "footer": {
               "show": false
             },
-            "cellHeight": "sm"
+            "cellHeight": "md",
+            "enablePagination": true
           },
           "targets": [
             {
@@ -4742,13 +4815,13 @@
             "x": 0,
             "y": 23,
             "w": 24,
-            "h": 10
+            "h": 12
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "lg",
+            "cellHeight": "md",
             "footer": {
               "show": false,
               "enablePagination": true
@@ -4841,15 +4914,15 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 33,
+            "y": 35,
             "w": 24,
-            "h": 8
+            "h": 7
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "lg",
+            "cellHeight": "md",
             "footer": {
               "show": false,
               "enablePagination": true

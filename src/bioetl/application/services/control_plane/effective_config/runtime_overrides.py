@@ -5,10 +5,6 @@ from __future__ import annotations
 import copy
 from typing import cast
 
-from bioetl.application.services.control_plane.effective_config.serialization import (
-    stable_hash,
-    to_jsonable,
-)
 from bioetl.domain.control_plane.effective_config_artifact import (
     EFFECTIVE_CONFIG_IDENTITY_VERSION,
     EffectiveExecutionConfig,
@@ -24,6 +20,7 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
     normalize_required_persistence_profile,
 )
+from bioetl.domain.normalization.json import stable_json_hash, to_jsonable
 from bioetl.domain.types import JsonDict
 
 ALLOWLISTED_SEMANTIC_ENV_OVERRIDE_KEYS: frozenset[str] = frozenset(
@@ -104,14 +101,14 @@ def build_runtime_override_snapshot(
         cli_overrides=coerce_runtime_override_layer(runtime_overrides, "cli"),
         env_overrides=coerce_runtime_override_layer(runtime_overrides, "env"),
         runtime_adjustments=coerce_runtime_override_layer(runtime_overrides, "runtime"),
-        override_hash=stable_hash(runtime_overrides),
+        override_hash=stable_json_hash(runtime_overrides),
     )
 
 
 def _normalized_settings_snapshot_hash(settings_snapshot: JsonDict) -> str:
     snapshot_payload = copy.deepcopy(settings_snapshot)
     snapshot_payload.pop("snapshot_hash", None)
-    return f"sha256:{stable_hash(snapshot_payload)}"
+    return f"sha256:{stable_json_hash(snapshot_payload)}"
 
 
 def _normalize_settings_snapshot_for_semantic_identity(
@@ -205,7 +202,7 @@ def build_execution_environment_snapshot(
         materialized_env_overrides=materialized_env_overrides,
         ambient_environment_policy=ambient_environment_policy,
         non_materialized_semantic_env_dependencies=semantic_dependencies,
-        environment_hash=stable_hash(snapshot_payload),
+        environment_hash=stable_json_hash(snapshot_payload),
     )
 
 
@@ -217,7 +214,7 @@ def build_effective_execution_config(
     effective_config_data = apply_runtime_overrides(resolved_config, runtime_overrides)
     return EffectiveExecutionConfig(
         config_data=effective_config_data,
-        effective_hash=stable_hash(
+        effective_hash=stable_json_hash(
             {
                 "identity_version": EFFECTIVE_CONFIG_IDENTITY_VERSION,
                 "config_data": effective_config_data,

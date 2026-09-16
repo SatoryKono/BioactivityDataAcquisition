@@ -249,8 +249,8 @@ def test_navigation_bus_uses_full_width_short_band() -> None:
         assert grid.get("w") == 24, (
             f"{path.name}:id=1000 must use w=24, got {grid.get('w')}"
         )
-        assert grid.get("h") == 3, (
-            f"{path.name}:id=1000 must use the shared h=3 link-only bus, "
+        assert grid.get("h") == 2, (
+            f"{path.name}:id=1000 must use the shared h=2 link-only bus, "
             f"got {grid.get('h')}"
         )
         options = buses[0].get("options") or {}

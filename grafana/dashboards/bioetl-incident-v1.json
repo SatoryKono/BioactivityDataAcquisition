@@ -194,7 +194,7 @@
           }
         },
         "refresh": 1,
-        "regex": "/^\\s*(\\S(?:.*\\S)?)\\s*$/",
+        "regex": "",
         "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
@@ -251,7 +251,7 @@
   "panels": [
     {
       "gridPos": {
-        "h": 3,
+        "h": 2,
         "w": 24,
         "x": 0,
         "y": 0
@@ -349,7 +349,7 @@
         "h": 3,
         "w": 16,
         "x": 0,
-        "y": 3
+        "y": 2
       },
       "options": {
         "mode": "html",
@@ -367,7 +367,7 @@
         "h": 3,
         "w": 8,
         "x": 16,
-        "y": 3
+        "y": 2
       },
       "datasource": {
         "type": "prometheus",
@@ -470,10 +470,10 @@
       "title": "",
       "description": "DSA-07 decision rail. Read-only",
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 5
       },
       "options": {
         "mode": "html",
@@ -1211,12 +1211,12 @@
                     "type": "value",
                     "options": {
                       "firing": {
-                        "text": "firing",
-                        "color": "#9f1239"
+                        "text": "FIRING",
+                        "color": "#ff7383"
                       },
                       "pending": {
-                        "text": "pending",
-                        "color": "#9a3412"
+                        "text": "PENDING",
+                        "color": "#ffb357"
                       }
                     }
                   }
@@ -1225,8 +1225,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background",
-                  "wrapText": false
+                  "type": "color-text"
                 }
               }
             ]
@@ -1305,7 +1304,7 @@
           "title": "Track Alert State History",
           "description": "GLOBAL · TIME RANGE · ALERTS history, not a persistent incident log. FIRING/PENDING legend names the states; adjacent equal samples merge. Auto labels avoid clipped fragments. Hover a band for full alert name and interval start/end; gaps remain gaps. VALID EMPTY (no events) is not TELEMETRY MISSING. Outlined intervals use semantic state colors; hover for exact interval boundaries. Gaps mean no observed samples, not OK. State is explicit in the full row label and legend; narrow intervals carry no clipped in-band text.",
           "gridPos": {
-            "h": 8,
+            "h": 14,
             "w": 24,
             "x": 0,
             "y": 18
@@ -1317,7 +1316,7 @@
           "targets": [
             {
               "expr": "ALERTS{alertstate=\"firing\"} or (ALERTS{alertstate=\"pending\"} * 2)",
-              "legendFormat": "{{alertname}} · {{alertstate}}",
+              "legendFormat": "{{alertname}} · {{pipeline}} / {{entity}} {{provider}} · {{alertstate}}",
               "refId": "A",
               "instant": false,
               "range": true
@@ -1329,7 +1328,7 @@
               "custom": {
                 "fillOpacity": 0,
                 "lineWidth": 2,
-                "axisWidth": 360
+                "axisWidth": 650
               },
               "color": {
                 "mode": "fixed",
@@ -1370,7 +1369,7 @@
             "mergeValues": true,
             "showValue": "never",
             "alignValue": "left",
-            "rowHeight": 1.0,
+            "rowHeight": 0.85,
             "legend": {
               "displayMode": "list",
               "placement": "bottom",
@@ -1379,7 +1378,8 @@
             "tooltip": {
               "mode": "single",
               "sort": "none"
-            }
+            },
+            "pageSize": 10
           },
           "maxDataPoints": 400
         },
@@ -1392,7 +1392,7 @@
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 26
+            "y": 32
           },
           "options": {
             "mode": "html",
@@ -2868,12 +2868,12 @@
                         "type": "value",
                         "options": {
                           "firing": {
-                            "text": "firing",
-                            "color": "#9f1239"
+                            "text": "FIRING",
+                            "color": "#ff7383"
                           },
                           "pending": {
-                            "text": "pending",
-                            "color": "#9a3412"
+                            "text": "PENDING",
+                            "color": "#ffb357"
                           }
                         }
                       }
@@ -2882,8 +2882,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text",
-                      "wrapText": false
+                      "type": "color-text"
                     }
                   }
                 ]
@@ -2954,13 +2953,13 @@
             "x": 0,
             "y": 23,
             "w": 24,
-            "h": 10
+            "h": 12
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "lg",
+            "cellHeight": "md",
             "footer": {
               "show": false,
               "enablePagination": true
@@ -3053,15 +3052,15 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 33,
+            "y": 35,
             "w": 24,
-            "h": 8
+            "h": 7
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "lg",
+            "cellHeight": "md",
             "footer": {
               "show": false,
               "enablePagination": true
