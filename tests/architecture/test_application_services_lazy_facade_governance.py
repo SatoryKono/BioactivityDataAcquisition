@@ -49,7 +49,9 @@ _PACKAGE_ROOT_IMPORT_SOURCE_PATTERNS = tuple(
     re.compile(pattern, re.MULTILINE)
     for pattern in _PACKAGE_ROOT_IMPORT_SOURCE_PATTERN_TEXTS
 )
-_SEARCH_TIMEOUT_SECONDS = 120.0
+# Must stay below pyproject [tool.pytest.ini_options] timeout=60 so a hung
+# rg/git-grep child is killed and the Python fallback still runs.
+_SEARCH_TIMEOUT_SECONDS = 15.0
 _READ_TIMEOUT_SECONDS = 15.0
 _TEMPFILE_UNLINK_ATTEMPTS = 3
 _TEMPFILE_UNLINK_RETRY_SECONDS = 0.05
@@ -199,8 +201,6 @@ def _run_command_with_stdout_file(
     timeout: float,
 ) -> tuple[subprocess.CompletedProcess[str], str]:
     """Run a child process without Windows pipe reader threads."""
-    import time
-
     output_path = _temporary_output_path()
     try:
         with output_path.open("w", encoding="utf-8", errors="replace") as stdout_file:
@@ -214,29 +214,22 @@ def _run_command_with_stdout_file(
                 errors="replace",
                 **_hidden_windows_subprocess_kwargs(),
             )
-            start_time = time.time()
-            poll_interval = 0.1
-            kill_timeout = 5.0  # Secondary timeout after kill
-            killed = False
-            while True:
-                returncode = process.poll()
-                if returncode is not None:
-                    break
-                elapsed = time.time() - start_time
-                if elapsed > timeout:
-                    process.kill()
-                    killed = True
-                    start_time = time.time()  # Reset for kill timeout
-                if killed and (time.time() - start_time > kill_timeout):
+            kill_timeout = 5.0
+            try:
+                process.wait(timeout=timeout)
+            except subprocess.TimeoutExpired as exc:
+                process.kill()
+                try:
+                    process.wait(timeout=kill_timeout)
+                except subprocess.TimeoutExpired:
                     process.terminate()
-                    raise OSError(
-                        f"Command timed out after {timeout}s and failed to terminate: {' '.join(command)}"
-                    )
-                time.sleep(poll_interval)
+                raise subprocess.TimeoutExpired(
+                    cmd=command, timeout=timeout
+                ) from exc
 
             completed = subprocess.CompletedProcess(
                 args=command,
-                returncode=returncode,
+                returncode=process.returncode,
                 stdout="",
                 stderr="",
             )
@@ -535,6 +528,7 @@ def test_windows_subprocess_kwargs_hide_command_windows() -> None:
     assert startupinfo.wShowWindow == 0
 
 
+@pytest.mark.timeout(180)
 def test_application_services_package_root_has_zero_first_party_src_callers() -> None:
     """Production code must stay off the package-root lazy compatibility facade."""
     src_imports = _collect_imports(ROOT / "src")
@@ -547,6 +541,7 @@ def test_application_services_package_root_has_zero_first_party_src_callers() ->
     )
 
 
+@pytest.mark.timeout(180)
 def test_application_services_package_root_test_import_inventory_is_frozen() -> None:
     """Test-only compatibility callers must remain explicit until the facade is removed."""
     observed_test_imports = _collect_imports(ROOT / "tests")
@@ -559,6 +554,7 @@ def test_application_services_package_root_test_import_inventory_is_frozen() -> 
     )
 
 
+@pytest.mark.timeout(180)
 def test_application_services_package_root_inventory_avoids_direct_module_imports() -> (
     None
 ):
