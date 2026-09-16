@@ -60,13 +60,21 @@ def build_retention_checks(
         verified, reason = archive_verifier.verify(manifest=manifest, plan=plan)
         archive = EvidenceCheckResult(
             "archive",
-            "OK" if verified is True else "ERROR" if verified is False else "UNKNOWN",
+            _archive_status(verified),
             reason,
             "Local archive and restored copies are hash-checked against selected-run "
             "evidence on every read. This is not an off-host durability guarantee.",
         )
         checks = (*checks[:-1], archive)
     return checks, relevant
+
+
+def _archive_status(verified: bool | None) -> str:
+    if verified is True:
+        return "OK"
+    if verified is False:
+        return "ERROR"
+    return "UNKNOWN"
 
 
 def _artifact_matches_manifest(

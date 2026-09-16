@@ -1591,7 +1591,7 @@ def _audit_prometheus_panel(
             TimeoutError,
             json.JSONDecodeError,
         ) as exc:
-            failure = _panel_audit_exception_result(spec, exc)
+            failure: AuditResult = _panel_audit_exception_result(spec, exc)
             requests.append(
                 {
                     "mode": mode,

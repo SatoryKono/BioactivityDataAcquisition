@@ -7,8 +7,12 @@ import json
 from collections.abc import Mapping
 
 RULES_VERSION = "selected-run-v2"
-SUPPORTED_RULES = {"selected-run-v1", RULES_VERSION}
+_SELECTED_RUN_V1 = "selected-run-v1"
+SUPPORTED_RULES = {_SELECTED_RUN_V1, RULES_VERSION}
 SNAPSHOT_SCHEMA = "selected_run_snapshot_v1"
+_INCOMPLETE = "INCOMPLETE"
+_UNKNOWN = "UNKNOWN"
+_PRIORITY = ("ERROR", _INCOMPLETE, _UNKNOWN, "WARN", "OK")
 DOMAINS = (
     "Runtime",
     "Control Plane",
@@ -17,7 +21,6 @@ DOMAINS = (
     "Provider",
     "Data Validation",
 )
-_PRIORITY = ("ERROR", "INCOMPLETE", "UNKNOWN", "WARN", "OK")
 
 
 def evidence_digest(value: Mapping[str, object]) -> str:
@@ -45,9 +48,9 @@ def _row(domain: str, verdict: str, reason: str, source: str) -> dict[str, objec
 
 def _observed_row(domain: str, observations: Mapping[str, object]) -> dict[str, object]:
     observation = _mapping(observations.get(domain))
-    verdict = str(observation.get("verdict", "INCOMPLETE"))
+    verdict = str(observation.get("verdict", _INCOMPLETE))
     if verdict not in {*_PRIORITY, "N/A"}:
-        verdict = "UNKNOWN"
+        verdict = _UNKNOWN
     return _row(
         domain,
         verdict,
@@ -69,7 +72,7 @@ def _domain_rows(
         "shutdown": "WARN",
         "cancelled": "WARN",
         "dry_run": "N/A",
-    }.get(execution, "UNKNOWN")
+    }.get(execution, _UNKNOWN)
     rows = [_row("Runtime", runtime, f"execution_{execution}", "#/identity")]
     rows.append(_observed_row("Control Plane", observations))
     rows.append(
@@ -90,7 +93,7 @@ def _domain_rows(
     )
     rows.append(
         _row("Data Validation", "N/A", "gold_explicitly_skipped", "#/io/skip_gold")
-        if rules_version != "selected-run-v1" and io.get("skip_gold") is True
+        if rules_version != _SELECTED_RUN_V1 and io.get("skip_gold") is True
         else _observed_row("Data Validation", observations)
     )
     return rows
@@ -127,8 +130,8 @@ def assess_report(
         "execution_state": execution.upper(),
         "verdict": "RUNNING" if execution in {"running", "started"} else checks,
         "checks_verdict": checks,
-        "evidence_completeness": "INCOMPLETE"
-        if verdicts & {"UNKNOWN", "INCOMPLETE"}
+        "evidence_completeness": _INCOMPLETE
+        if verdicts & {_UNKNOWN, _INCOMPLETE}
         else "COMPLETE",
         "domains": rows,
     }

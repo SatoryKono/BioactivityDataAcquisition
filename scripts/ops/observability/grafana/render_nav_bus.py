@@ -35,6 +35,7 @@ if __package__ in {None, ""}:
     if root_str not in sys.path:
         sys.path.insert(0, root_str)
 DASH_DIR = ROOT / "grafana" / "dashboards"
+CUSTOM_WIDTH = "custom.width"
 
 # Full portfolio bus (order is normative).
 BUS: list[dict[str, str]] = [
@@ -604,22 +605,25 @@ def _compact_fallback_panel(
     return False
 
 
+def _organize_control_plane_status_columns(panel: dict[str, object]) -> None:
+    panel_id = panel.get("id")
+    for transform in panel.get("transformations", []):
+        if transform.get("id") != "organize":
+            continue
+        options = transform.setdefault("options", {})
+        # Keep one result column; checkpoint Result retains MISMATCH/MISSING/N/A.
+        duplicate = "status" if panel_id in {9405, 9407} else "ui_status"
+        options.setdefault("excludeByName", {})[duplicate] = True
+        if panel_id in {9405, 9407}:
+            options.setdefault("renameByName", {})["drilldown_label"] = "Action"
+            options.setdefault("indexByName", {})["drilldown_label"] = 3
+
+
 def _layout_control_plane_detail_panels(panels: list[object]) -> None:
     """Fill the operator-reviewed gaps using row-relative, repeatable geometry."""
     for panel in _walk_panels(panels):
-        panel_id = panel.get("id")
-        if panel_id not in {9405, 9406, 9407, 9408, 9409}:
-            continue
-        for transform in panel.get("transformations", []):
-            if transform.get("id") != "organize":
-                continue
-            options = transform.setdefault("options", {})
-            # Keep one result column; checkpoint Result retains MISMATCH/MISSING/N/A.
-            duplicate = "status" if panel_id in {9405, 9407} else "ui_status"
-            options.setdefault("excludeByName", {})[duplicate] = True
-            if panel_id in {9405, 9407}:
-                options.setdefault("renameByName", {})["drilldown_label"] = "Action"
-                options.setdefault("indexByName", {})["drilldown_label"] = 3
+        if panel.get("id") in {9405, 9406, 9407, 9408, 9409}:
+            _organize_control_plane_status_columns(panel)
     layouts = {
         902: {134: (0, 11, 12), 5: (12, 11, 12), 135: (0, 17, 24)},
         903: {4: (0, 0, 12), 136: (12, 0, 12)},
@@ -736,6 +740,33 @@ def _layout_overview_detail_panels(panels: list[object]) -> None:
         children.sort(key=lambda child: (child["gridPos"]["y"], child["gridPos"]["x"]))
 
 
+def _clear_run_column_width(child: dict[str, object]) -> None:
+    for override in child["fieldConfig"]["overrides"]:
+        if override.get("matcher", {}).get("options") in {"Run", "run_id"}:
+            override["properties"] = [
+                prop
+                for prop in override["properties"]
+                if prop["id"] != CUSTOM_WIDTH
+            ]
+
+
+def _stamp_duration_quantile(child: dict[str, object]) -> None:
+    for target in child.get("targets", []):
+        expr = target.get("expr", "")
+        if expr and not expr.endswith(" >= 0"):
+            target["expr"] = f"({expr}) >= 0"
+    field_config = child.setdefault("fieldConfig", {})
+    defaults = field_config.setdefault("defaults", {})
+    custom = defaults.setdefault("custom", {})
+    custom["showPoints"] = "always"
+    child["description"] = (
+        "TIME RANGE · Duration quantiles require observed histogram increments "
+        "within the rate interval. An empty chart is UNKNOWN, not zero duration "
+        "or a failed run. NaN quantiles are omitted; isolated valid observations "
+        "are shown as points."
+    )
+
+
 def _layout_runtime_detail_panels(panels: list[object]) -> None:
     """Fill detail rows and preserve explicit absence of duration observations."""
     layouts = {
@@ -767,30 +798,9 @@ def _layout_runtime_detail_panels(panels: list[object]) -> None:
                 x, offset, width, height = position
                 child["gridPos"].update(x=x, y=base_y + offset, w=width, h=height)
             if child.get("id") == 9998:
-                # Grafana applies widths before/after display-name transforms.
-                # Keep both possible Run field names flexible.
-                for override in child["fieldConfig"]["overrides"]:
-                    if override.get("matcher", {}).get("options") in {"Run", "run_id"}:
-                        override["properties"] = [
-                            prop
-                            for prop in override["properties"]
-                            if prop["id"] != "custom.width"
-                        ]
+                _clear_run_column_width(child)
             if child.get("id") in {207, 239}:
-                for target in child.get("targets", []):
-                    expr = target.get("expr", "")
-                    if expr and not expr.endswith(" >= 0"):
-                        target["expr"] = f"({expr}) >= 0"
-                field_config = child.setdefault("fieldConfig", {})
-                defaults = field_config.setdefault("defaults", {})
-                custom = defaults.setdefault("custom", {})
-                custom["showPoints"] = "always"
-                child["description"] = (
-                    "TIME RANGE · Duration quantiles require observed histogram increments "
-                    "within the rate interval. An empty chart is UNKNOWN, not zero duration "
-                    "or a failed run. NaN quantiles are omitted; isolated valid observations "
-                    "are shown as points."
-                )
+                _stamp_duration_quantile(child)
         children.sort(key=lambda child: (child["gridPos"]["y"], child["gridPos"]["x"]))
 
 
@@ -835,13 +845,7 @@ def _layout_incident_detail_panels(panels: list[object]) -> None:
             if child.get("id") in {22005, 22010}:
                 child["gridPos"]["h"] = 6
             if child.get("id") == 2101:
-                for override in child["fieldConfig"]["overrides"]:
-                    if override.get("matcher", {}).get("options") in {"Run", "run_id"}:
-                        override["properties"] = [
-                            prop
-                            for prop in override["properties"]
-                            if prop["id"] != "custom.width"
-                        ]
+                _clear_run_column_width(child)
 
 
 def _clarify_manifest_counter_evidence(panels: list[object]) -> None:
@@ -984,6 +988,171 @@ def _stamp_control_plane_recovery_cta(cta: dict[str, object]) -> None:
     )
 
 
+def _stamp_control_plane_counts(by_id: dict[object, dict[str, object]]) -> None:
+    for panel_id in (891, 893, 907):
+        if (count_panel := by_id.get(panel_id)) is None:
+            continue
+        for target in count_panel.get("targets", []):
+            expression = target.get("expr", "")
+            if expression and not expression.startswith("clamp_max("):
+                target["expr"] = f"clamp_max({expression}, 2)"
+        count_note = (
+            " Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN."
+        )
+        description = count_panel.get("description", "")
+        if count_note not in description:
+            count_panel["description"] = description + count_note
+
+
+def _stamp_recovery_copy(by_id: dict[object, dict[str, object]]) -> None:
+    if 9400 not in by_id:
+        return
+    options = by_id[9400].setdefault("options", {})
+    options["content"] = _RECOVERY_ACTION_HTML
+    by_id[9400]["description"] = (
+        "CURRENT readiness is pipeline/run_type telemetry. SELECTED RUN Trust "
+        "and retention tables are exact-run persisted evidence. An incomplete "
+        "selected run cannot be replayed even when current readiness is OK. "
+        "Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when "
+        "OUT OF RANGE. Effective refresh: 60s · timezone: browser."
+    )
+
+
+def _stamp_current_readiness(by_id: dict[object, dict[str, object]]) -> None:
+    if 9401 not in by_id:
+        return
+    readiness = by_id[9401]
+    readiness["title"] = "Monitor Current Readiness"
+    field_config = readiness.setdefault("fieldConfig", {})
+    defaults = field_config.setdefault("defaults", {})
+    defaults["displayName"] = "Monitor Current Readiness"
+    readiness["description"] = (
+        "CURRENT · Latest fresh pipeline/run_type telemetry. Run ID does not filter "
+        "this panel. Palette: 0=OK, 1=WARN, 2=CRIT, 3=INCOMPLETE, "
+        "null=UNKNOWN. This CURRENT "
+        "verdict is not exact-run processing_status or trust_status. OK here does "
+        "not authorize replay: selected-run trust_status INCOMPLETE or UNKNOWN "
+        "still blocks replay."
+    )
+
+
+def _stamp_retention_copy(by_id: dict[object, dict[str, object]]) -> None:
+    if 9416 not in by_id:
+        return
+    retention = by_id[9416]
+    note = (
+        " Archive N/A means a referenced policy does not require archiving; "
+        "it is not proof of an archive. Archive verified means local copies "
+        "and restore evidence passed current hash and identity checks."
+    )
+    if note not in retention.get("description", ""):
+        retention["description"] = retention.get("description", "") + note
+    for override in retention.get("fieldConfig", {}).get("overrides", []):
+        if override.get("matcher", {}).get("options") != "reason":
+            continue
+        for prop in override.get("properties", []):
+            if prop.get("id") == "mappings":
+                prop["value"][0]["options"].update(
+                    {
+                        "archive_not_applicable": {"text": "N/A: policy"},
+                        "archive_restore_verified": {"text": "Archive verified"},
+                        "archive_identity_mismatch": {"text": "Identity mismatch"},
+                        "archive_checksum_mismatch": {"text": "Checksum mismatch"},
+                        "archive_inventory_mismatch": {"text": "Files mismatch"},
+                        "archive_source_mismatch": {"text": "Source changed"},
+                        "archive_evidence_invalid": {"text": "Archive invalid"},
+                        "archive_index_invalid": {"text": "Index invalid"},
+                        "snapshot_lifecycle_evidence_present": {
+                            "text": "Snapshots present"
+                        },
+                    }
+                )
+
+
+def _stamp_aggregate_trust(by_id: dict[object, dict[str, object]]) -> None:
+    if 9418 not in by_id:
+        return
+    panel = by_id[9418]
+    for link in panel.get("links", []):
+        if "viewPanel=9414" in str(link.get("url", "")):
+            link["title"] = "Inspect manifest checks"
+    for target in panel.get("targets", []):
+        url = target.get("url")
+        if isinstance(url, str):
+            target["url"] = url.replace("/manifest-validation?", "/trust-summary?")
+            if (
+                "/trust-summary?" in target["url"]
+                and "error_as_row=" not in target["url"]
+            ):
+                target["url"] += "&error_as_row=1"
+    panel["description"] = (
+        "SELECTED RUN · Aggregate Trust includes manifest, lineage and retention "
+        "evidence for this run. ERROR wins; missing evidence is INCOMPLETE. "
+        "processing_status success does not imply trust_status OK. Inspect each "
+        "validation table for details. No selected run is a valid empty state "
+        "(UNKNOWN). Backend unavailable means QUERY ERROR; deadline_exceeded "
+        "means the backend timed out, not that the run selection is missing. "
+        "Result is the ETL processing outcome; Observed is the manifest "
+        "creation time and is unavailable when the query fails."
+    )
+    for transform in panel.get("transformations", []):
+        if transform.get("id") == "organize":
+            transform.setdefault("options", {}).setdefault("renameByName", {}).update(
+                {"processing_status": "Result", "evidence_observed_at": "Observed"}
+            )
+    options = panel.setdefault("options", {})
+    footer = options.setdefault("footer", {})
+    footer["enablePagination"] = True
+    field_config = panel.setdefault("fieldConfig", {})
+    field_config.setdefault("defaults", {})["noValue"] = (
+        "Trust response unavailable. Check the panel error and run selection."
+    )
+    for override in field_config.setdefault("overrides", []):
+        _stamp_trust_override(override)
+
+
+def _stamp_trust_override(override: dict[str, object]) -> None:
+    matcher = override.get("matcher", {})
+    field = matcher.get("options") if isinstance(matcher, dict) else None
+    field = {"Processing": "Result", "Observed at": "Observed"}.get(field, field)
+    if isinstance(matcher, dict):
+        matcher["options"] = field
+    if field == "processing_status":
+        for prop in override.get("properties", []):
+            if prop.get("id") == "displayName":
+                prop["value"] = "Result"
+    width = {"Result": 80, "Trust": 130, "Observed": 90}.get(field)
+    if width is not None:
+        for prop in override.get("properties", []):
+            if prop.get("id") == CUSTOM_WIDTH:
+                prop["value"] = width
+    if field == "reasons_text":
+        for prop in override.get("properties", []):
+            if prop.get("id") == "noValue":
+                prop["value"] = "—"
+
+
+def _layout_uid_detail_panels(panels: list[object], *, current_uid: str) -> None:
+    if current_uid == "bioetl-runtime":
+        _normalize_runtime_record_delta_scope(panels)
+        _layout_runtime_detail_panels(panels)
+        return
+    if current_uid == "bioetl-control-plane-v1":
+        _layout_control_plane_detail_panels(panels)
+        _clarify_manifest_counter_evidence(panels)
+        stamp_latest_complete_run_panel(panels)
+        return
+    if current_uid == "bioetl-overview-v2":
+        _layout_overview_detail_panels(panels)
+        _normalize_overview_domain_snapshots(panels)
+        return
+    if current_uid == "bioetl-dq-v2":
+        _layout_dq_detail_panels(panels)
+        return
+    if current_uid == "bioetl-incident-v1":
+        _layout_incident_detail_panels(panels)
+
+
 def _layout_control_plane_first_window(panels: list[object]) -> None:
     """Keep Trust density/readability while fitting the canonical h=4 nav."""
     root = _root_panels(panels)
@@ -999,129 +1168,11 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
         panels, _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY, uid="bioetl-control-plane-v1"
     )
     by_id = {panel.get("id"): panel for panel in root}
-    for panel_id in (891, 893, 907):
-        if (count_panel := by_id.get(panel_id)) is None:
-            continue
-        for target in count_panel.get("targets", []):
-            expression = target.get("expr", "")
-            if expression and not expression.startswith("clamp_max("):
-                target["expr"] = f"clamp_max({expression}, 2)"
-        count_note = (
-            " Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN."
-        )
-        description = count_panel.get("description", "")
-        if count_note not in description:
-            count_panel["description"] = description + count_note
-    if 9400 in by_id:
-        options = by_id[9400].setdefault("options", {})
-        options["content"] = _RECOVERY_ACTION_HTML
-        by_id[9400]["description"] = (
-            "CURRENT readiness is pipeline/run_type telemetry. SELECTED RUN Trust "
-            "and retention tables are exact-run persisted evidence. An incomplete "
-            "selected run cannot be replayed even when current readiness is OK. "
-            "Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when "
-            "OUT OF RANGE. Effective refresh: 60s · timezone: browser."
-        )
-    if 9401 in by_id:
-        readiness = by_id[9401]
-        readiness["title"] = "Monitor Current Readiness"
-        field_config = readiness.setdefault("fieldConfig", {})
-        defaults = field_config.setdefault("defaults", {})
-        defaults["displayName"] = "Monitor Current Readiness"
-        readiness["description"] = (
-            "CURRENT · Latest fresh pipeline/run_type telemetry. Run ID does not filter "
-            "this panel. Palette: 0=OK, 1=WARN, 2=CRIT, 3=INCOMPLETE, "
-            "null=UNKNOWN. This CURRENT "
-            "verdict is not exact-run processing_status or trust_status. OK here does "
-            "not authorize replay: selected-run trust_status INCOMPLETE or UNKNOWN "
-            "still blocks replay."
-        )
-    if 9416 in by_id:
-        retention = by_id[9416]
-        note = (
-            " Archive N/A means a referenced policy does not require archiving; "
-            "it is not proof of an archive. Archive verified means local copies "
-            "and restore evidence passed current hash and identity checks."
-        )
-        if note not in retention.get("description", ""):
-            retention["description"] = retention.get("description", "") + note
-        for override in retention.get("fieldConfig", {}).get("overrides", []):
-            if override.get("matcher", {}).get("options") != "reason":
-                continue
-            for prop in override.get("properties", []):
-                if prop.get("id") == "mappings":
-                    prop["value"][0]["options"].update(
-                        {
-                            "archive_not_applicable": {"text": "N/A: policy"},
-                            "archive_restore_verified": {"text": "Archive verified"},
-                            "archive_identity_mismatch": {"text": "Identity mismatch"},
-                            "archive_checksum_mismatch": {"text": "Checksum mismatch"},
-                            "archive_inventory_mismatch": {"text": "Files mismatch"},
-                            "archive_source_mismatch": {"text": "Source changed"},
-                            "archive_evidence_invalid": {"text": "Archive invalid"},
-                            "archive_index_invalid": {"text": "Index invalid"},
-                            "snapshot_lifecycle_evidence_present": {
-                                "text": "Snapshots present"
-                            },
-                        }
-                    )
-    if 9418 in by_id:
-        for link in by_id[9418].get("links", []):
-            if "viewPanel=9414" in str(link.get("url", "")):
-                link["title"] = "Inspect manifest checks"
-        for target in by_id[9418].get("targets", []):
-            url = target.get("url")
-            if isinstance(url, str):
-                target["url"] = url.replace("/manifest-validation?", "/trust-summary?")
-                if (
-                    "/trust-summary?" in target["url"]
-                    and "error_as_row=" not in target["url"]
-                ):
-                    target["url"] += "&error_as_row=1"
-        by_id[9418]["description"] = (
-            "SELECTED RUN · Aggregate Trust includes manifest, lineage and retention "
-            "evidence for this run. ERROR wins; missing evidence is INCOMPLETE. "
-            "processing_status success does not imply trust_status OK. Inspect each "
-            "validation table for details. No selected run is a valid empty state "
-            "(UNKNOWN). Backend unavailable means QUERY ERROR; deadline_exceeded "
-            "means the backend timed out, not that the run selection is missing. "
-            "Result is the ETL processing outcome; Observed is the manifest "
-            "creation time and is unavailable when the query fails."
-        )
-        for transform in by_id[9418].get("transformations", []):
-            if transform.get("id") == "organize":
-                transform.setdefault("options", {}).setdefault(
-                    "renameByName", {}
-                ).update(
-                    {"processing_status": "Result", "evidence_observed_at": "Observed"}
-                )
-        options = by_id[9418].setdefault("options", {})
-        footer = options.setdefault("footer", {})
-        footer["enablePagination"] = True
-        field_config = by_id[9418].setdefault("fieldConfig", {})
-        field_config.setdefault("defaults", {})["noValue"] = (
-            "Trust response unavailable. Check the panel error and run selection."
-        )
-        overrides = field_config.setdefault("overrides", [])
-        for override in overrides:
-            field = override.get("matcher", {}).get("options")
-            field = {"Processing": "Result", "Observed at": "Observed"}.get(
-                field, field
-            )
-            override["matcher"]["options"] = field
-            if field == "processing_status":
-                for prop in override.get("properties", []):
-                    if prop.get("id") == "displayName":
-                        prop["value"] = "Result"
-            width = {"Result": 80, "Trust": 130, "Observed": 90}.get(field)
-            if width is not None:
-                for prop in override.get("properties", []):
-                    if prop.get("id") == "custom.width":
-                        prop["value"] = width
-            if field == "reasons_text":
-                for prop in override.get("properties", []):
-                    if prop.get("id") == "noValue":
-                        prop["value"] = "—"
+    _stamp_control_plane_counts(by_id)
+    _stamp_recovery_copy(by_id)
+    _stamp_current_readiness(by_id)
+    _stamp_retention_copy(by_id)
+    _stamp_aggregate_trust(by_id)
     if 906 in by_id:
         _stamp_control_plane_recovery_cta(by_id[906])
 
@@ -1259,6 +1310,37 @@ def _expand_nav_height(
             grid["y"] += delta
 
 
+def _stamp_nav_panel(nav: dict[str, object], panels: list[object]) -> None:
+    # The link-only navigation has no visible heading on any dashboard.
+    # Keep its inventory name as metadata; links retain visible names and tooltips.
+    nav["title"] = ""
+    nav["type"] = "text"
+    nav["description"] = NAV_DESCRIPTION
+    _expand_nav_height(nav, panels, new_height=NAV_HEIGHT)
+    grid_pos = nav["gridPos"]
+    if not isinstance(grid_pos, dict):
+        raise SystemExit("navigation panel gridPos must be an object")
+    grid_pos["h"] = NAV_HEIGHT
+    grid_pos.update({"w": 24, "x": 0, "y": 0})
+
+
+def _attach_nav_bus(nav: dict[str, object], *, current_uid: str) -> None:
+    nav["options"] = {
+        "mode": "html",
+        "bioetlDisplayTitle": NAV_DISPLAY_TITLE,
+        "content": render_html(current_uid=current_uid),
+    }
+    bus_titles = {item["title"] for item in BUS}
+    previous_links = nav.get("links") if isinstance(nav.get("links"), list) else []
+    extra_links = [
+        link
+        for link in previous_links
+        if isinstance(link, dict) and link.get("title") not in bus_titles
+    ]
+    nav["links"] = render_links(current_uid=current_uid) + extra_links
+    nav.pop("transparent", None)
+
+
 def apply_to_dashboard(
     path: Path, *, current_uid: str, check: bool = False, state_followup: bool = False
 ) -> bool:
@@ -1293,55 +1375,14 @@ def apply_to_dashboard(
     nav = next((p for p in panels if p.get("id") == 1000), None)
     if nav is None:
         raise SystemExit(f"{safe_path.name}: missing panel id=1000")
-
-    # The link-only navigation has no visible heading on any dashboard.
-    # Keep its inventory name as metadata; links retain visible names and tooltips.
-    nav["title"] = ""
-    nav["type"] = "text"
-    nav["description"] = NAV_DESCRIPTION
-    _expand_nav_height(nav, panels, new_height=NAV_HEIGHT)
-    # Use identical geometry, including Run Explorer, so wrapped links fit.
-    grid_pos = nav["gridPos"]
-    if not isinstance(grid_pos, dict):
-        raise SystemExit("navigation panel gridPos must be an object")
-    grid_pos["h"] = NAV_HEIGHT
-    grid_pos.update({"w": 24, "x": 0, "y": 0})
+    _stamp_nav_panel(nav, panels)
     _restore_minimum_first_window_heights(panels, current_uid=current_uid)
     _layout_uid_first_window(panels, current_uid=current_uid)
     _reclaim_first_window_overflow(nav, panels, current_uid=current_uid)
     _layout_uid_first_window(panels, current_uid=current_uid)
     _normalize_collapsed_row_children(panels)
-    if current_uid == "bioetl-runtime":
-        _normalize_runtime_record_delta_scope(panels)
-    if current_uid == "bioetl-control-plane-v1":
-        _layout_control_plane_detail_panels(panels)
-        _clarify_manifest_counter_evidence(panels)
-        stamp_latest_complete_run_panel(panels)
-    if current_uid == "bioetl-overview-v2":
-        _layout_overview_detail_panels(panels)
-        _normalize_overview_domain_snapshots(panels)
-    if current_uid == "bioetl-runtime":
-        _layout_runtime_detail_panels(panels)
-    if current_uid == "bioetl-dq-v2":
-        _layout_dq_detail_panels(panels)
-    if current_uid == "bioetl-incident-v1":
-        _layout_incident_detail_panels(panels)
-    nav["options"] = {
-        "mode": "html",
-        "bioetlDisplayTitle": NAV_DISPLAY_TITLE,
-        "content": render_html(current_uid=current_uid),
-    }
-    bus_titles = {item["title"] for item in BUS}
-    previous_links = nav.get("links") if isinstance(nav.get("links"), list) else []
-    extra_links = [
-        link
-        for link in previous_links
-        if isinstance(link, dict) and link.get("title") not in bus_titles
-    ]
-    nav["links"] = render_links(current_uid=current_uid) + extra_links
-    # Drop stale transparent fields that confuse some exporters.
-    nav.pop("transparent", None)
-
+    _layout_uid_detail_panels(panels, current_uid=current_uid)
+    _attach_nav_bus(nav, current_uid=current_uid)
     stamp_selector_columns(payload)
     stamp_selected_run_panels(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
