@@ -11,6 +11,9 @@ from bioetl.application.observability.current_metrics_rehydrate_payload import (
     first_text,
     load_report_payload,
 )
+from bioetl.application.observability.current_metrics_rehydrate_payload import (
+    pipeline_scopes_from_payload as _pipeline_scopes_from_payload,  # noqa: F401
+)
 from bioetl.application.observability.rehydrate_models import (
     PipelineRunSnapshot,
     RehydrateResult,
