@@ -8097,7 +8097,7 @@
             "h": 6
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Search the same workflow/pipeline/run_type, newest manifest first. Only processing success plus aggregate Trust OK qualifies. Search is bounded: INCOMPLETE means the scan limit, not no complete runs. Open a candidate in a new tab; this historical selection and time range remain unchanged. The link preserves the time range, so the candidate may be OUT OF RANGE. This is not replay authorization.",
+          "description": "SELECTED RUN · Search the same workflow/pipeline/run_type, newest manifest first. Only processing success plus aggregate Trust OK qualifies. Search is bounded: INCOMPLETE means the scan limit, not no complete runs. No matching rows are a valid empty result. Backend unavailable means the query could not be evaluated; verify /health/live. Open a candidate in a new tab; this historical selection and time range remain unchanged. The link preserves the time range, so the candidate may be OUT OF RANGE. This is not replay authorization.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm"

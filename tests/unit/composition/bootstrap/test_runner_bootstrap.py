@@ -62,6 +62,8 @@ from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.domain.ports import ClockPort
 from bioetl.infrastructure.time import SystemClock
 
+pytestmark = pytest.mark.unit
+
 _OBSERVABILITY_PATCH = (
     "bioetl.composition.bootstrap.runtime.runner.bootstrap_observability_bundle"
 )
@@ -101,6 +103,7 @@ def bootstrap_with_light_observability(light_observability: SimpleNamespace):
 _LIST_SERVICE_CACHE: PipelineRunnerService | None = None
 
 
+@pytest.mark.unit
 def test_bootstrap_passes_configured_report_root(bootstrap_with_light_observability, tmp_path):
     settings, _observability, _bundle = bootstrap_with_light_observability
     settings.return_value.report_root = tmp_path / "configured-reports"
