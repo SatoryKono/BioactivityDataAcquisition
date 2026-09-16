@@ -11,7 +11,7 @@
 | `application_core` | 194 | 23443 | 0 | 0.374 | 0 | 5 | `bioetl.application.core.record_processor_config` | `files_ge_250_loc=0, max_internal_fan_in=7` | `-` | `-` |
 | `composition_bootstrap_runtime` | 52 | 6172 | 0 | 0.328 | 0 | 2 | `bioetl.composition.bootstrap.runtime.tracing_bootstrap` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
 | `composition_factories_pipeline` | 35 | 3934 | 0 | 0.358 | 0 | 2 | `bioetl.composition.factories.pipeline.transformer_builder` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
-| `application_services_control_plane` | 128 | 15024 | 0 | 0.376 | 0 | 2 | `bioetl.application.services.control_plane.replay.historical_identity_models` | `files_ge_250_loc=0, max_internal_fan_in=2` | `-` | `at_budget:max_internal_fan_in=2/2` |
+| `application_services_control_plane` | 123 | 14921 | 0 | 0.377 | 0 | 2 | `bioetl.application.services.control_plane.replay._historical_certification_models` | `files_ge_250_loc=0, max_internal_fan_in=2` | `-` | `at_budget:max_internal_fan_in=2/2` |
 | `composition_runtime_builders` | 55 | 7100 | 0 | 0.375 | 0 | 2 | `bioetl.composition.runtime_builders.runner_inputs` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
 
 ## `application_core` internal fan-in
@@ -37,16 +37,11 @@ No modules currently sit at the fan-in cap.
 
 ## `application_services_control_plane` internal fan-in
 
-- distribution: `0:17, 1:55, 2:56`
-- at_budget_module_count: `56` (cap `2`)
+- distribution: `0:16, 1:62, 2:45`
+- at_budget_module_count: `45` (cap `2`)
 
 | Module | Fan-in | Runtime importers |
 | --- | ---: | --- |
-| `bioetl.application.services.control_plane.effective_config.serialization` | 2 | `bioetl.application.services.control_plane.effective_config.runtime_overrides`, `bioetl.application.services.control_plane.effective_config.support` |
-| `bioetl.application.services.control_plane.effective_config.support` | 2 | `bioetl.application.services.control_plane.effective_config.context`, `bioetl.application.services.control_plane.effective_config.service` |
-| `bioetl.application.services.control_plane.ledger.diagnostic_support` | 2 | `bioetl.application.services.control_plane.ledger.core_events`, `bioetl.application.services.control_plane.ledger.entry_diagnostic_details` |
-| `bioetl.application.services.control_plane.ledger.idempotency` | 2 | `bioetl.application.services.control_plane.ledger.entry_support`, `bioetl.application.services.control_plane.workflow.ledger_service` |
-| `bioetl.application.services.control_plane.ledger.service` | 2 | `bioetl.application.services.control_plane.ledger`, `bioetl.application.services.control_plane.replay._historical_certification_support` |
 | `bioetl.application.services.control_plane.manifest._service_support` | 2 | `bioetl.application.services.control_plane.manifest.identity_graph_assembly`, `bioetl.application.services.control_plane.manifest.service` |
 | `bioetl.application.services.control_plane.manifest.artifact_payloads` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.artifact_support`, `bioetl.application.services.control_plane.manifest.diagnostics.ledger_processing` |
 | `bioetl.application.services.control_plane.manifest.diagnostics` | 2 | `bioetl.application.services.control_plane.manifest.inspection_service`, `bioetl.application.services.control_plane.replay._historical_certification_models` |
@@ -92,12 +87,6 @@ No modules currently sit at the fan-in cap.
 | `bioetl.application.services.control_plane.manifest.service_scaffold` | 2 | `bioetl.application.services.control_plane.manifest.service`, `bioetl.application.services.control_plane.workflow.manifest_service` |
 | `bioetl.application.services.control_plane.manifest.snapshot_payloads` | 2 | `bioetl.application.services.control_plane.manifest._service_support`, `bioetl.application.services.control_plane.manifest.diagnostics.snapshot_refs` |
 | `bioetl.application.services.control_plane.replay._historical_certification_models` | 2 | `bioetl.application.services.control_plane.replay._historical_certification_support`, `bioetl.application.services.control_plane.replay._historical_certification_upstream` |
-| `bioetl.application.services.control_plane.replay._historical_record_payload` | 2 | `bioetl.application.services.control_plane.replay.historical_corpus_models`, `bioetl.application.services.control_plane.replay.historical_corpus_service` |
-| `bioetl.application.services.control_plane.replay.historical_certification` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.snapshot_envelope`, `bioetl.application.services.control_plane.manifest.diagnostics.snapshot_materialization` |
-| `bioetl.application.services.control_plane.replay.historical_closure_models` | 2 | `bioetl.application.services.control_plane.replay.closure_claims`, `bioetl.application.services.control_plane.replay.historical_closure_service` |
-| `bioetl.application.services.control_plane.replay.historical_corpus_models` | 2 | `bioetl.application.services.control_plane.replay.historical_certification_service`, `bioetl.application.services.control_plane.replay.historical_closure_policy` |
-| `bioetl.application.services.control_plane.replay.historical_corpus_service` | 2 | `bioetl.application.services.control_plane.replay.historical_closure_service`, `bioetl.application.services.control_plane.replay.historical_universe_service` |
-| `bioetl.application.services.control_plane.replay.historical_identity_models` | 2 | `bioetl.application.services.control_plane.replay._historical_record_payload`, `bioetl.application.services.control_plane.replay.historical_universe_service` |
 
 ## `composition_runtime_builders` internal fan-in
 

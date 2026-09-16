@@ -792,6 +792,13 @@ def test_cycle4_named_text_columns_wrap_below_fold() -> None:
         custom = (panel.get("fieldConfig") or {}).get("defaults", {}).get("custom", {})
         assert custom.get("cellOptions", {}).get("wrapText") is not True
         wrapped = _wrapped_field_names(panel)
+        if dashboard_name == "bioetl-control-plane-v1.json":
+            # #10498: fixed-height pagination replaces wrapped rows after live
+            # 1600x900 verification; Inspect retains the full selectable value.
+            assert panel["options"]["cellHeight"] == "md"
+            assert custom.get("inspect") is True
+            assert field not in wrapped
+            continue
         assert field in wrapped, (dashboard_name, panel_id, wrapped)
 
 
@@ -1256,7 +1263,7 @@ def test_cycle4_below_fold_declared_widths_fit_200pct_css_budget() -> None:
     )
     for dashboard_name, panel_id, grid_w in cases:
         panel = _panel(_load(dashboard_name), panel_id)
-        budget = layout_width * grid_w // 24 - chrome_px
+        budget = layout_width * panel["gridPos"]["w"] // 24 - chrome_px
         hidden: set[str] = set()
         widths: dict[str, int] = {}
         for override in (panel.get("fieldConfig") or {}).get("overrides") or []:

@@ -45,10 +45,10 @@ def _bands(row: dict, bands: list[list[tuple[int, int, int, int]]]) -> None:
 
 def _runtime(p: dict[int, dict]) -> None:
     p[9400]["options"]["content"] = (
-        "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2\">"
+        '<div style="padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch">'
         "CURRENT · Pipeline / Run Type. <b>INCOMPLETE / UNKNOWN:</b> expected stage evidence is unverified. "
         "Check <b>Expected stage signals</b>, then open <b>Review Stage Progress</b> below. "
-        "SCRAPING and None observed do not prove completeness or health.</div>"
+        "SCRAPING is not an active blocker. None observed does not prove completeness or health.</div>"
     )
     # A filtering comparison preserves ages; bool converts each entity to 0/1.
     p[7]["targets"][0]["expr"] = (
@@ -59,17 +59,18 @@ def _runtime(p: dict[int, dict]) -> None:
     p[7]["targets"][0].update(instant=True, range=False)
     p[7]["fieldConfig"]["defaults"].update(unit="suffix: entities", decimals=0)
     p[7]["description"] = (
-        "TIME RANGE independent · CURRENT · Count of distinct pipeline/entity pairs whose last successful ingestion "
+        "TIME RANGE · Instant snapshot at the selected range end. Count of distinct pipeline/entity pairs whose last successful ingestion "
         "is over 24h old. Each entity contributes 0 or 1, never its age in seconds. "
         "Missing freshness telemetry stays UNKNOWN; an observed fresh entity gives zero. "
-        "Pipeline applies; Run ID, Run Type and chart range do not. Open Data Quality for diagnosis."
+        "Pipeline applies; Run ID and Run Type do not. Use a range ending now for current age. Open Data Quality for diagnosis."
     )
     for panel in p.values():
         if panel.get("title") == "Review Runtime Escalation":
+            panel["options"]["mode"] = "html"
             panel["options"]["content"] = (
-                "**INCOMPLETE / UNKNOWN:** verify Stage Expectedness and Telemetry first. "
-                "**None observed** means no observed blocker, not complete coverage. "
-                "Use the Stage Progress panel links for the complete evidence table."
+                '<div style="font-size:16px;line-height:1.2"><b>INCOMPLETE / UNKNOWN:</b> verify Stage Expectedness and Telemetry first. '
+                "<b>None observed</b> means no observed blocker, not complete coverage. "
+                "Use the Stage Progress panel links for the complete evidence table.</div>"
             )
             panel["gridPos"]["h"] = max(3, panel["gridPos"]["h"])
     note = " INCOMPLETE: inspect expected-stage evidence; no observed blocker is not proof of coverage."
@@ -89,19 +90,36 @@ def _trust(p: dict[int, dict]) -> None:
     latency["gridPos"]["h"] = 10
     for panel_id in (9404, 9405, 9406, 9407, 9408, 9409, 9402, 9403, 9417):
         panel = p[panel_id]
-        _table(panel)
+        _table(panel, compact=False)
         _flex(panel, {"Current", "Value"})
         if panel_id == 9403:
             override(panel, "value", **{"custom.width": 70})
         panel["options"].setdefault("footer", {}).update(
             enablePagination=True, countRows=True
         )
-        for name in ("Current",):
+        # Grafana pagination uses the configured row height. Wrapped cells can
+        # exceed it and hide the last row; full values remain available in Inspect.
+        panel["fieldConfig"]["defaults"]["custom"]["cellOptions"] = {
+            "type": "auto",
+            "wrapText": False,
+        }
+        for item in panel["fieldConfig"].get("overrides", []):
+            for prop in item["properties"]:
+                if prop["id"] == "custom.cellOptions":
+                    if item["matcher"].get("options") in {
+                        "value",
+                        "percentage",
+                        "row_status",
+                    }:
+                        prop["value"].pop("wrapText", None)
+                    else:
+                        prop["value"]["wrapText"] = False
+        for name in ("Current", "Parameter", "Action"):
             override(
                 panel,
                 name,
                 **{
-                    "custom.cellOptions": {"type": "auto", "wrapText": True},
+                    "custom.cellOptions": {"type": "auto", "wrapText": False},
                 },
             )
     _bands(
@@ -109,15 +127,15 @@ def _trust(p: dict[int, dict]) -> None:
         [
             [(9404, 0, 24, 12)],
             [(9407, 0, 24, 8)],
-            [(9410, 0, 12, 3), (9411, 12, 12, 3)],
-            [(9405, 0, 24, 4)],
-            [(9408, 0, 24, 7)],
-            [(9406, 0, 24, 8)],
-            [(9409, 0, 24, 7)],
+            [(9410, 0, 12, 5), (9411, 12, 12, 5)],
+            [(9405, 0, 24, 7)],
+            [(9408, 0, 24, 12)],
+            [(9406, 0, 24, 12)],
+            [(9409, 0, 24, 12)],
             [(139, 0, 24, 4)],
         ],
     )
-    _bands(p[9412], [[(9402, 0, 24, 9)], [(9403, 0, 24, 10)], [(9417, 0, 24, 7)]])
+    _bands(p[9412], [[(9402, 0, 24, 12)], [(9403, 0, 24, 12)], [(9417, 0, 24, 7)]])
 
 
 def _overview(p: dict[int, dict]) -> None:
@@ -147,7 +165,8 @@ def _overview(p: dict[int, dict]) -> None:
                                     "DQ": "Data Quality",
                                     "Provider": "Provider Health",
                                 }.get(value.get("text"), value.get("text", ""))
-    p[20215]["gridPos"]["h"] = 12
+    _table(p[20215], compact=False)
+    p[20215]["gridPos"]["h"] = 14
     # Retain domain-specific links and queries, but compare the six diagnostics in one banded grid.
     _bands(
         p[9012],
@@ -190,6 +209,7 @@ def _provider(p: dict[int, dict]) -> None:
             "TIME RANGE · Optional latency samples only. Empty/NaN is TELEMETRY MISSING, not zero latency or a healthy provider. Check telemetry presence above."
         )
         panel["fieldConfig"]["defaults"]["noValue"] = "TELEMETRY MISSING"
+    p[110]["options"]["legend"].update(placement="right", width=400)
     raw = p[114]
     _table(raw)
     for item in raw["fieldConfig"]["overrides"]:
@@ -265,6 +285,33 @@ def _provider(p: dict[int, dict]) -> None:
                 "noValue": "UNKNOWN",
             },
         )
+    _bands(
+        p[9404],
+        [
+            [(114, 0, 12, 7), (1, 12, 12, 7)],
+            [(2, 0, 12, 3), (105, 12, 12, 3)],
+            [(104, 0, 12, 3), (7, 12, 12, 3)],
+        ],
+    )
+    _bands(
+        p[91],
+        [
+            [(106, 0, 24, 5)],
+            [(107, 0, 24, 4)],
+            [(108, 0, 24, 4)],
+            [(109, 0, 24, 5)],
+            [(102, 0, 8, 10), (110, 8, 16, 10)],
+            [(111, 0, 12, 5), (115, 12, 12, 5)],
+            [(112, 0, 12, 5), (113, 12, 12, 5)],
+            [(31, 0, 12, 5), (32, 12, 12, 5)],
+        ],
+    )
+
+    for panel_id in (9402, 9403):
+        _table(p[panel_id], compact=False)
+        p[panel_id]["options"].pop("enablePagination", None)
+        p[panel_id]["options"]["footer"].update(enablePagination=True, countRows=True)
+    _bands(p[9405], [[(9402, 0, 24, 12)], [(9403, 0, 24, 12)]])
 
 
 def _dq(p: dict[int, dict]) -> None:
@@ -348,6 +395,7 @@ def _incident(p: dict[int, dict]) -> None:
         "{{alertname}} · {{pipeline}} / {{entity}} {{provider}} · {{alertstate}}"
     )
     timeline["options"].update(pageSize=10, rowHeight=0.85)
+    timeline["fieldConfig"]["defaults"]["custom"]["axisWidth"] = 650
     timeline["gridPos"]["h"] = 14
     p[2007]["gridPos"]["y"] = timeline["gridPos"]["y"] + 14
     for panel_id in (2005, 22005):
@@ -389,10 +437,10 @@ def apply_visual_usability(payload: dict) -> None:
     if payload["uid"] == "bioetl-incident-v1":
         p[2001]["gridPos"].update(y=5, h=3)
     # Keep useful evidence tables compact with explicit pagination, not huge repeated placeholders.
-    p[9452]["gridPos"].update(y=p[9451]["gridPos"]["y"] + 8, h=5)
-    p[9451]["gridPos"]["h"] = 8
+    p[9452]["gridPos"].update(y=p[9451]["gridPos"]["y"] + 12, h=7)
+    p[9451]["gridPos"]["h"] = 12
     for panel_id in (9451, 9452):
-        _table(p[panel_id])
+        _table(p[panel_id], compact=False)
     if payload["uid"] == "bioetl-run-explorer-v1":
         _table(p[3010])
         _flex(p[3010], {"Run", "run_id"})

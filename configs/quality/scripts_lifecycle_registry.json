@@ -1681,6 +1681,12 @@
       "owner": "@bioetl-observability",
       "review_by": "2026-12-14"
     },
+    "scripts/ops/observability/grafana/_visual_usability.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Keep the visual-audit transformations internal to render_nav_bus. This module has no standalone CLI or deployment entrypoint.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-12-14"
+    },
     "scripts/ops/observability/grafana/_selected_run_panels.py": {
       "decision": "shared_helper_module",
       "next_step": "Keep as an internal transformation invoked by render_nav_bus; no standalone command or active CLI entrypoint.",

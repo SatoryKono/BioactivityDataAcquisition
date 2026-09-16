@@ -16,7 +16,7 @@
   "target_counts": {
     "http": 43,
     "loki": 0,
-    "promql": 172,
+    "promql": 176,
     "tempo": 0,
     "unknown": 0
   },
@@ -2466,7 +2466,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "red",
+          "color": "gray",
           "value": null
         },
         {
@@ -2586,6 +2586,56 @@
         {
           "color": "green",
           "value": 0
+        }
+      ],
+      "unit": "short"
+    },
+    {
+      "coverage_class": "required_current",
+      "dashboard_uid": "bioetl-dq-v2",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "empty_state": "coverage_gap",
+      "formula": "sum(last_over_time(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}[7d]))",
+      "kind": "promql",
+      "panel_id": 158,
+      "panel_title": "Inspect DQ Sample Coverage",
+      "query": "sum(last_over_time(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}[7d]))",
+      "query_tokens": [
+        "bioetl_dq_validation_record_count"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "gray",
+          "value": null
+        }
+      ],
+      "unit": "short"
+    },
+    {
+      "coverage_class": "required_current",
+      "dashboard_uid": "bioetl-dq-v2",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "empty_state": "coverage_gap",
+      "formula": "count(last_over_time(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}[7d]))",
+      "kind": "promql",
+      "panel_id": 158,
+      "panel_title": "Inspect DQ Sample Coverage",
+      "query": "count(last_over_time(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}[7d]))",
+      "query_tokens": [
+        "bioetl_dq_validation_score"
+      ],
+      "ref_id": "B",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "gray",
+          "value": null
         }
       ],
       "unit": "short"
@@ -3855,7 +3905,7 @@
       "dashboard_uid": "bioetl-provider-health-v2",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
-      "documents_valid_empty": true,
+      "documents_valid_empty": false,
       "empty_state": "valid_empty",
       "formula": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
       "kind": "promql",
@@ -4244,7 +4294,7 @@
       "dashboard_uid": "bioetl-provider-health-v2",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
-      "documents_valid_empty": true,
+      "documents_valid_empty": false,
       "empty_state": "valid_empty",
       "formula": "histogram_quantile(0.95, sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
       "kind": "promql",
@@ -4384,18 +4434,84 @@
       "dashboard_uid": "bioetl-provider-health-v2",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
-      "documents_valid_empty": true,
+      "documents_valid_empty": false,
       "empty_state": "valid_empty",
-      "formula": "max by (provider) (max_over_time(bioetl_provider_health_status{provider=~\"$provider\"}[${__range_s}s])) or ((max_over_time(bioetl_provider_health_check_provider_universe_15m{provider=~\"$provider\"}[${__range_s}s]) * 0) / (max_over_time(bioetl_provider_health_check_provider_universe_15m{provider=~\"$provider\"}[${__range_s}s]) * 0))",
+      "formula": "max by (provider) (max_over_time(bioetl_provider_health_status{provider=~\"$provider\"}[${__range_s}s])) or on (provider) ((max by (provider) (max_over_time(bioetl_provider_health_check_provider_universe_15m{provider=~\"$provider\"}[${__range_s}s])) * 0) / (max by (provider) (max_over_time(bioetl_provider_health_check_provider_universe_15m{provider=~\"$provider\"}[${__range_s}s])) * 0))",
       "kind": "promql",
       "panel_id": 114,
       "panel_title": "Inspect Raw Health Status",
-      "query": "max by (provider) (max_over_time(bioetl_provider_health_status{provider=~\"$provider\"}[${__range_s}s])) or ((max_over_time(bioetl_provider_health_check_provider_universe_15m{provider=~\"$provider\"}[${__range_s}s]) * 0) / (max_over_time(bioetl_provider_health_check_provider_universe_15m{provider=~\"$provider\"}[${__range_s}s]) * 0))",
+      "query": "max by (provider) (max_over_time(bioetl_provider_health_status{provider=~\"$provider\"}[${__range_s}s])) or on (provider) ((max by (provider) (max_over_time(bioetl_provider_health_check_provider_universe_15m{provider=~\"$provider\"}[${__range_s}s])) * 0) / (max by (provider) (max_over_time(bioetl_provider_health_check_provider_universe_15m{provider=~\"$provider\"}[${__range_s}s])) * 0))",
       "query_tokens": [
         "bioetl_provider_health_check_provider_universe_15m",
         "bioetl_provider_health_status"
       ],
       "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "red",
+          "value": null
+        },
+        {
+          "color": "yellow",
+          "value": 1
+        },
+        {
+          "color": "green",
+          "value": 2
+        }
+      ],
+      "unit": "short"
+    },
+    {
+      "coverage_class": "required_current",
+      "dashboard_uid": "bioetl-provider-health-v2",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "empty_state": "coverage_gap",
+      "formula": "max by (provider) (max_over_time(bioetl_provider_health_observed_timestamp_seconds{provider=~\"$provider\"}[${__range_s}s])) * 1000",
+      "kind": "promql",
+      "panel_id": 114,
+      "panel_title": "Inspect Raw Health Status",
+      "query": "max by (provider) (max_over_time(bioetl_provider_health_observed_timestamp_seconds{provider=~\"$provider\"}[${__range_s}s])) * 1000",
+      "query_tokens": [
+        "bioetl_provider_health_observed_timestamp_seconds"
+      ],
+      "ref_id": "B",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "red",
+          "value": null
+        },
+        {
+          "color": "yellow",
+          "value": 1
+        },
+        {
+          "color": "green",
+          "value": 2
+        }
+      ],
+      "unit": "short"
+    },
+    {
+      "coverage_class": "required_current",
+      "dashboard_uid": "bioetl-provider-health-v2",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "empty_state": "coverage_gap",
+      "formula": "clamp_min(time() - max by (provider) (max_over_time(bioetl_provider_health_observed_timestamp_seconds{provider=~\"$provider\"}[${__range_s}s])), 0)",
+      "kind": "promql",
+      "panel_id": 114,
+      "panel_title": "Inspect Raw Health Status",
+      "query": "clamp_min(time() - max by (provider) (max_over_time(bioetl_provider_health_observed_timestamp_seconds{provider=~\"$provider\"}[${__range_s}s])), 0)",
+      "query_tokens": [
+        "bioetl_provider_health_observed_timestamp_seconds"
+      ],
+      "ref_id": "C",
       "runbook_urls": [],
       "thresholds": [
         {
@@ -5019,11 +5135,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "coverage_gap",
-      "formula": "sum(clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}), 0) > 86400) or (count(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}) * 0)",
+      "formula": "sum(clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}), 0) > bool 86400) or (count(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}) * 0)",
       "kind": "promql",
       "panel_id": 7,
       "panel_title": "Inspect Entities Stale Over 24h",
-      "query": "sum(clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}), 0) > 86400) or (count(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}) * 0)",
+      "query": "sum(clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}), 0) > bool 86400) or (count(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}) * 0)",
       "query_tokens": [
         "bioetl_data_freshness_seconds"
       ],
@@ -5043,7 +5159,7 @@
           "value": 2
         }
       ],
-      "unit": "none"
+      "unit": "suffix: entities"
     },
     {
       "coverage_class": "required_current",

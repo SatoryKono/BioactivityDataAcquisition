@@ -996,13 +996,17 @@ def test_all_table_panels_use_uniform_cell_height() -> None:
             paginated = options.get("footer", {}).get("enablePagination") is True
             wrapped = custom.get("cellOptions", {}).get("wrapText") is True
             height = options.get("cellHeight")
-            assert height in {"sm", "lg"}, (
+            assert height in {"sm", "md", "lg"}, (
                 dashboard_path.name,
                 panel.get("id"),
                 height,
             )
             if height == "lg":
                 assert paginated and wrapped
+                assert panel["gridPos"]["h"] > 6
+            if height == "md":
+                # #10498/#10504: native 54px pages prevent partially hidden rows.
+                assert paginated and custom.get("inspect") is True
                 assert panel["gridPos"]["h"] > 6
             if wrapped:
                 # 1fee6a viewport-fit: incident 2010 h4 with wrap uses no pagination to avoid 21px footer overflow

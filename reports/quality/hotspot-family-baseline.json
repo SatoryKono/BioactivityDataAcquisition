@@ -2253,21 +2253,21 @@
         "src/bioetl/application/services/control_plane/"
       ],
       "duplication_clusters": 0,
-      "files": 128,
-      "total_loc": 15024,
+      "files": 123,
+      "total_loc": 14921,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.376,
+      "helper_function_ratio": 0.377,
       "max_internal_fan_in": 2,
-      "max_internal_fan_in_module": "bioetl.application.services.control_plane.replay.historical_identity_models",
+      "max_internal_fan_in_module": "bioetl.application.services.control_plane.replay._historical_certification_models",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 2
       },
       "internal_fan_in_census": {
         "distribution": {
-          "0": 17,
-          "1": 55,
-          "2": 56
+          "0": 16,
+          "1": 62,
+          "2": 45
         },
         "modules": [
           {
@@ -2305,15 +2305,14 @@
             "module": "bioetl.application.services.control_plane.effective_config.runtime_overrides",
             "fan_in": 1,
             "runtime_importers": [
-              "bioetl.application.services.control_plane.effective_config.support"
+              "bioetl.application.services.control_plane.effective_config.context"
             ]
           },
           {
             "module": "bioetl.application.services.control_plane.effective_config.serialization",
-            "fan_in": 2,
+            "fan_in": 1,
             "runtime_importers": [
-              "bioetl.application.services.control_plane.effective_config.runtime_overrides",
-              "bioetl.application.services.control_plane.effective_config.support"
+              "bioetl.application.services.control_plane.effective_config.service"
             ]
           },
           {
@@ -2321,14 +2320,6 @@
             "fan_in": 1,
             "runtime_importers": [
               "bioetl.application.services.control_plane.effective_config"
-            ]
-          },
-          {
-            "module": "bioetl.application.services.control_plane.effective_config.support",
-            "fan_in": 2,
-            "runtime_importers": [
-              "bioetl.application.services.control_plane.effective_config.context",
-              "bioetl.application.services.control_plane.effective_config.service"
             ]
           },
           {
@@ -2352,22 +2343,16 @@
           },
           {
             "module": "bioetl.application.services.control_plane.ledger",
-            "fan_in": 0,
-            "runtime_importers": []
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.replay._historical_certification_support"
+            ]
           },
           {
             "module": "bioetl.application.services.control_plane.ledger.core_events",
             "fan_in": 1,
             "runtime_importers": [
               "bioetl.application.services.control_plane.ledger.service"
-            ]
-          },
-          {
-            "module": "bioetl.application.services.control_plane.ledger.diagnostic_support",
-            "fan_in": 2,
-            "runtime_importers": [
-              "bioetl.application.services.control_plane.ledger.core_events",
-              "bioetl.application.services.control_plane.ledger.entry_diagnostic_details"
             ]
           },
           {
@@ -2385,14 +2370,6 @@
             ]
           },
           {
-            "module": "bioetl.application.services.control_plane.ledger.idempotency",
-            "fan_in": 2,
-            "runtime_importers": [
-              "bioetl.application.services.control_plane.ledger.entry_support",
-              "bioetl.application.services.control_plane.workflow.ledger_service"
-            ]
-          },
-          {
             "module": "bioetl.application.services.control_plane.ledger.rich_events",
             "fan_in": 1,
             "runtime_importers": [
@@ -2401,10 +2378,9 @@
           },
           {
             "module": "bioetl.application.services.control_plane.ledger.service",
-            "fan_in": 2,
+            "fan_in": 1,
             "runtime_importers": [
-              "bioetl.application.services.control_plane.ledger",
-              "bioetl.application.services.control_plane.replay._historical_certification_support"
+              "bioetl.application.services.control_plane.ledger"
             ]
           },
           {
@@ -3015,14 +2991,6 @@
             ]
           },
           {
-            "module": "bioetl.application.services.control_plane.replay._historical_record_payload",
-            "fan_in": 2,
-            "runtime_importers": [
-              "bioetl.application.services.control_plane.replay.historical_corpus_models",
-              "bioetl.application.services.control_plane.replay.historical_corpus_service"
-            ]
-          },
-          {
             "module": "bioetl.application.services.control_plane.replay.bundle_descriptor_service",
             "fan_in": 0,
             "runtime_importers": []
@@ -3035,14 +3003,6 @@
             ]
           },
           {
-            "module": "bioetl.application.services.control_plane.replay.historical_certification",
-            "fan_in": 2,
-            "runtime_importers": [
-              "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.snapshot_envelope",
-              "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_materialization"
-            ]
-          },
-          {
             "module": "bioetl.application.services.control_plane.replay.historical_certification_service",
             "fan_in": 1,
             "runtime_importers": [
@@ -3051,10 +3011,9 @@
           },
           {
             "module": "bioetl.application.services.control_plane.replay.historical_closure_models",
-            "fan_in": 2,
+            "fan_in": 1,
             "runtime_importers": [
-              "bioetl.application.services.control_plane.replay.closure_claims",
-              "bioetl.application.services.control_plane.replay.historical_closure_service"
+              "bioetl.application.services.control_plane.replay.closure_claims"
             ]
           },
           {
@@ -3071,10 +3030,9 @@
           },
           {
             "module": "bioetl.application.services.control_plane.replay.historical_corpus_models",
-            "fan_in": 2,
+            "fan_in": 1,
             "runtime_importers": [
-              "bioetl.application.services.control_plane.replay.historical_certification_service",
-              "bioetl.application.services.control_plane.replay.historical_closure_policy"
+              "bioetl.application.services.control_plane.replay.historical_certification_service"
             ]
           },
           {
@@ -3086,17 +3044,15 @@
           },
           {
             "module": "bioetl.application.services.control_plane.replay.historical_corpus_service",
-            "fan_in": 2,
+            "fan_in": 1,
             "runtime_importers": [
-              "bioetl.application.services.control_plane.replay.historical_closure_service",
-              "bioetl.application.services.control_plane.replay.historical_universe_service"
+              "bioetl.application.services.control_plane.replay.historical_closure_service"
             ]
           },
           {
             "module": "bioetl.application.services.control_plane.replay.historical_identity_models",
-            "fan_in": 2,
+            "fan_in": 1,
             "runtime_importers": [
-              "bioetl.application.services.control_plane.replay._historical_record_payload",
               "bioetl.application.services.control_plane.replay.historical_universe_service"
             ]
           },
@@ -3191,11 +3147,6 @@
         ],
         "max_fan_in": 2,
         "max_modules": [
-          "bioetl.application.services.control_plane.effective_config.serialization",
-          "bioetl.application.services.control_plane.effective_config.support",
-          "bioetl.application.services.control_plane.ledger.diagnostic_support",
-          "bioetl.application.services.control_plane.ledger.idempotency",
-          "bioetl.application.services.control_plane.ledger.service",
           "bioetl.application.services.control_plane.manifest._service_support",
           "bioetl.application.services.control_plane.manifest.artifact_payloads",
           "bioetl.application.services.control_plane.manifest.diagnostics",
@@ -3240,13 +3191,7 @@
           "bioetl.application.services.control_plane.manifest.replay_taxonomy",
           "bioetl.application.services.control_plane.manifest.service_scaffold",
           "bioetl.application.services.control_plane.manifest.snapshot_payloads",
-          "bioetl.application.services.control_plane.replay._historical_certification_models",
-          "bioetl.application.services.control_plane.replay._historical_record_payload",
-          "bioetl.application.services.control_plane.replay.historical_certification",
-          "bioetl.application.services.control_plane.replay.historical_closure_models",
-          "bioetl.application.services.control_plane.replay.historical_corpus_models",
-          "bioetl.application.services.control_plane.replay.historical_corpus_service",
-          "bioetl.application.services.control_plane.replay.historical_identity_models"
+          "bioetl.application.services.control_plane.replay._historical_certification_models"
         ]
       },
       "budget_warnings": [],
@@ -3254,46 +3199,6 @@
         "at_budget:max_internal_fan_in=2/2"
       ],
       "at_budget_modules": [
-        {
-          "module": "bioetl.application.services.control_plane.effective_config.serialization",
-          "fan_in": 2,
-          "runtime_importers": [
-            "bioetl.application.services.control_plane.effective_config.runtime_overrides",
-            "bioetl.application.services.control_plane.effective_config.support"
-          ]
-        },
-        {
-          "module": "bioetl.application.services.control_plane.effective_config.support",
-          "fan_in": 2,
-          "runtime_importers": [
-            "bioetl.application.services.control_plane.effective_config.context",
-            "bioetl.application.services.control_plane.effective_config.service"
-          ]
-        },
-        {
-          "module": "bioetl.application.services.control_plane.ledger.diagnostic_support",
-          "fan_in": 2,
-          "runtime_importers": [
-            "bioetl.application.services.control_plane.ledger.core_events",
-            "bioetl.application.services.control_plane.ledger.entry_diagnostic_details"
-          ]
-        },
-        {
-          "module": "bioetl.application.services.control_plane.ledger.idempotency",
-          "fan_in": 2,
-          "runtime_importers": [
-            "bioetl.application.services.control_plane.ledger.entry_support",
-            "bioetl.application.services.control_plane.workflow.ledger_service"
-          ]
-        },
-        {
-          "module": "bioetl.application.services.control_plane.ledger.service",
-          "fan_in": 2,
-          "runtime_importers": [
-            "bioetl.application.services.control_plane.ledger",
-            "bioetl.application.services.control_plane.replay._historical_certification_support"
-          ]
-        },
         {
           "module": "bioetl.application.services.control_plane.manifest._service_support",
           "fan_in": 2,
@@ -3653,57 +3558,9 @@
             "bioetl.application.services.control_plane.replay._historical_certification_support",
             "bioetl.application.services.control_plane.replay._historical_certification_upstream"
           ]
-        },
-        {
-          "module": "bioetl.application.services.control_plane.replay._historical_record_payload",
-          "fan_in": 2,
-          "runtime_importers": [
-            "bioetl.application.services.control_plane.replay.historical_corpus_models",
-            "bioetl.application.services.control_plane.replay.historical_corpus_service"
-          ]
-        },
-        {
-          "module": "bioetl.application.services.control_plane.replay.historical_certification",
-          "fan_in": 2,
-          "runtime_importers": [
-            "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.snapshot_envelope",
-            "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_materialization"
-          ]
-        },
-        {
-          "module": "bioetl.application.services.control_plane.replay.historical_closure_models",
-          "fan_in": 2,
-          "runtime_importers": [
-            "bioetl.application.services.control_plane.replay.closure_claims",
-            "bioetl.application.services.control_plane.replay.historical_closure_service"
-          ]
-        },
-        {
-          "module": "bioetl.application.services.control_plane.replay.historical_corpus_models",
-          "fan_in": 2,
-          "runtime_importers": [
-            "bioetl.application.services.control_plane.replay.historical_certification_service",
-            "bioetl.application.services.control_plane.replay.historical_closure_policy"
-          ]
-        },
-        {
-          "module": "bioetl.application.services.control_plane.replay.historical_corpus_service",
-          "fan_in": 2,
-          "runtime_importers": [
-            "bioetl.application.services.control_plane.replay.historical_closure_service",
-            "bioetl.application.services.control_plane.replay.historical_universe_service"
-          ]
-        },
-        {
-          "module": "bioetl.application.services.control_plane.replay.historical_identity_models",
-          "fan_in": 2,
-          "runtime_importers": [
-            "bioetl.application.services.control_plane.replay._historical_record_payload",
-            "bioetl.application.services.control_plane.replay.historical_universe_service"
-          ]
         }
       ],
-      "at_budget_module_count": 56
+      "at_budget_module_count": 45
     },
     {
       "name": "composition_runtime_builders",

@@ -1839,9 +1839,15 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     }.get(dashboard_name, (9402, 9403))
     identity = panels[identity_id]
     processed = panels[processed_id]
-    expected_heights = (
-        (9, 10) if dashboard_name == "bioetl-control-plane-v1.json" else (6, 6)
-    )
+    full_width_evidence = dashboard_name in {
+        "bioetl-control-plane-v1.json",
+        "bioetl-provider-health-v2.json",
+    }
+    expected_heights = (12, 12) if full_width_evidence else (6, 6)
+    if full_width_evidence:
+        for panel in (identity, processed):
+            assert panel["gridPos"]["w"] == 24
+            assert panel["options"]["footer"]["enablePagination"] is True
     assert (identity["gridPos"]["h"], processed["gridPos"]["h"]) == expected_heights
     identity_no_value = str(
         identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
@@ -1860,7 +1866,7 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     assert (
         identity.get("options", {}).get("cellHeight")
         == processed.get("options", {}).get("cellHeight")
-        == "sm"
+        == ("md" if full_width_evidence else "sm")
     )
     default_identity_cell_options = (
         identity.get("fieldConfig", {})
@@ -1878,7 +1884,8 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     }
     expected_wrapped_fields = {"parameter"}
     if dashboard_name == "bioetl-control-plane-v1.json":
-        expected_wrapped_fields |= {"Current"}
+        expected_wrapped_fields = set()
+        assert identity["fieldConfig"]["defaults"]["custom"]["inspect"] is True
     assert wrapped_identity_fields == expected_wrapped_fields
 
     assert processed.get("datasource") == "BioETL Ops HTTP"
@@ -1904,7 +1911,9 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
 
     sort_by = processed.get("options", {}).get("sortBy", [])
     assert sort_by == [{"desc": False, "displayName": "parameter"}]
-    assert processed.get("options", {}).get("cellHeight") == "sm"
+    assert processed.get("options", {}).get("cellHeight") == (
+        "md" if full_width_evidence else "sm"
+    )
 
     transformations = processed.get("transformations", [])
     transform_ids = [transformation.get("id") for transformation in transformations]
@@ -1973,7 +1982,10 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     assert parameter_properties["custom.cellOptions"]["type"] == "color-text"
     # Run Explorer aligns accounting with the adjacent 36px identity rows.
     # Its bounded labels fit without wrapping at the audited 900px viewport.
-    expected_wrap = dashboard_name != "bioetl-run-explorer-v1.json"
+    expected_wrap = dashboard_name not in {
+        "bioetl-run-explorer-v1.json",
+        "bioetl-control-plane-v1.json",
+    }
     assert parameter_properties["custom.cellOptions"].get("wrapText") is expected_wrap
 
     assert_processed_records_field_overrides(
