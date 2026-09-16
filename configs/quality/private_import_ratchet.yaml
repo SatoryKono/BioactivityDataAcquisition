@@ -4,7 +4,7 @@
 
 schema_version: 1
 strict_mode: false
-max_count: 15
+max_count: 14
 owner: "@bioetl-architecture"
 linked_issue: "9626"
 ratchet_policy: fail on growth; shrink max_count to live observed_count
@@ -31,10 +31,6 @@ pairs:
     target_removal_wave: residual
   - importer: bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py
     target: bioetl.composition.runtime_builders._run_manifest_refs
-    owner: "@bioetl-composition"
-    target_removal_wave: residual
-  - importer: bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py
-    target: bioetl.composition.runtime_builders._snapshot_mapping_support
     owner: "@bioetl-composition"
     target_removal_wave: residual
   - importer: bioetl/composition/factories/services/common_service_wiring.py

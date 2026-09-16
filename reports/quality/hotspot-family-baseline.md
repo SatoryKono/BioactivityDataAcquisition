@@ -12,7 +12,7 @@
 | `composition_bootstrap_runtime` | 51 | 6129 | 0 | 0.330 | 0 | 2 | `bioetl.composition.bootstrap.runtime.tracing_bootstrap` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
 | `composition_factories_pipeline` | 35 | 3934 | 0 | 0.358 | 0 | 2 | `bioetl.composition.factories.pipeline.transformer_builder` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
 | `application_services_control_plane` | 131 | 15077 | 0 | 0.376 | 0 | 2 | `bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories` | `files_ge_250_loc=0, max_internal_fan_in=2` | `-` | `at_budget:max_internal_fan_in=2/2` |
-| `composition_runtime_builders` | 55 | 7097 | 0 | 0.375 | 0 | 2 | `bioetl.composition.runtime_builders.runner_inputs` | `files_ge_250_loc=0, max_internal_fan_in=2` | `-` | `at_budget:max_internal_fan_in=2/2` |
+| `composition_runtime_builders` | 55 | 7097 | 0 | 0.375 | 0 | 2 | `bioetl.composition.runtime_builders.runner_inputs` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
 
 ## `application_core` internal fan-in
 
@@ -105,33 +105,6 @@ No modules currently sit at the fan-in cap.
 ## `composition_runtime_builders` internal fan-in
 
 - distribution: `0:2, 1:27, 2:26`
-- at_budget_module_count: `26` (cap `2`)
+- at_budget_module_count: `0` (cap `3`)
 
-| Module | Fan-in | Runtime importers |
-| --- | ---: | --- |
-| `bioetl.composition.runtime_builders._inputs_resolution_support` | 2 | `bioetl.composition.runtime_builders._runner_input_preparation`, `bioetl.composition.runtime_builders.inputs_runtime_assembly` |
-| `bioetl.composition.runtime_builders._manifest_publication_context_support` | 2 | `bioetl.composition.runtime_builders.control_plane`, `bioetl.composition.runtime_builders.effective_config_artifact_builder` |
-| `bioetl.composition.runtime_builders._run_context_values` | 2 | `bioetl.composition.runtime_builders._effective_config_artifact_builder_support`, `bioetl.composition.runtime_builders.run_manifest_support` |
-| `bioetl.composition.runtime_builders._run_manifest_builder_policy` | 2 | `bioetl.composition.runtime_builders._manifest_publication_context_support`, `bioetl.composition.runtime_builders._run_manifest_creation_support` |
-| `bioetl.composition.runtime_builders._run_manifest_context_updates` | 2 | `bioetl.composition.runtime_builders._run_manifest_refs`, `bioetl.composition.runtime_builders.run_manifest_support` |
-| `bioetl.composition.runtime_builders._run_manifest_creation_support_helpers` | 2 | `bioetl.composition.runtime_builders._run_manifest_creation_support`, `bioetl.composition.runtime_builders.run_manifest_builder` |
-| `bioetl.composition.runtime_builders._run_manifest_data_roots` | 2 | `bioetl.composition.runtime_builders._effective_config_runtime_snapshot_support`, `bioetl.composition.runtime_builders._runner_control_plane_data_root_policy` |
-| `bioetl.composition.runtime_builders._run_manifest_identity_ref_values` | 2 | `bioetl.composition.runtime_builders._run_manifest_context_updates`, `bioetl.composition.runtime_builders.run_manifest_contract_identity` |
-| `bioetl.composition.runtime_builders._run_manifest_refs` | 2 | `bioetl.composition.runtime_builders._run_manifest_creation_support_helpers`, `bioetl.composition.runtime_builders.run_manifest_support` |
-| `bioetl.composition.runtime_builders._run_manifest_replay_support` | 2 | `bioetl.composition.runtime_builders._run_manifest_creation_support`, `bioetl.composition.runtime_builders.run_manifest_support` |
-| `bioetl.composition.runtime_builders._run_manifest_sink_policy` | 2 | `bioetl.composition.runtime_builders._run_manifest_builder_policy`, `bioetl.composition.runtime_builders.run_manifest_support` |
-| `bioetl.composition.runtime_builders._run_manifest_snapshot_resolution` | 2 | `bioetl.composition.runtime_builders._run_manifest_replay_support`, `bioetl.composition.runtime_builders._run_manifest_snapshot_support` |
-| `bioetl.composition.runtime_builders._run_manifest_snapshot_support` | 2 | `bioetl.composition.runtime_builders._manifest_publication_context_support`, `bioetl.composition.runtime_builders._run_manifest_replay_support` |
-| `bioetl.composition.runtime_builders._runner_control_plane_artifact_policy` | 2 | `bioetl.composition.runtime_builders._runner_builder_orchestration`, `bioetl.composition.runtime_builders._runner_control_plane_policy_support` |
-| `bioetl.composition.runtime_builders._runner_control_plane_data_root_policy` | 2 | `bioetl.composition.runtime_builders._runner_control_plane_policy_support`, `bioetl.composition.runtime_builders.inputs_resolution_orchestration` |
-| `bioetl.composition.runtime_builders._runner_control_plane_policy` | 2 | `bioetl.composition.runtime_builders.run_manifest_builder`, `bioetl.composition.runtime_builders.runner_control_plane_assembly` |
-| `bioetl.composition.runtime_builders._runtime_launch_context_fields` | 2 | `bioetl.composition.runtime_builders._effective_config_artifact_builder_support`, `bioetl.composition.runtime_builders._run_manifest_snapshot_support` |
-| `bioetl.composition.runtime_builders.config_access` | 2 | `bioetl.composition.runtime_builders.inputs_resolver`, `bioetl.composition.runtime_builders.runner_builder_wiring` |
-| `bioetl.composition.runtime_builders.input_snapshot_resolution` | 2 | `bioetl.composition.runtime_builders._run_manifest_refs`, `bioetl.composition.runtime_builders.control_plane` |
-| `bioetl.composition.runtime_builders.inputs_resolver` | 2 | `bioetl.composition.runtime_builders.runner_builder`, `bioetl.composition.runtime_builders.runner_input_assembly` |
-| `bioetl.composition.runtime_builders.inputs_runtime_assembly` | 2 | `bioetl.composition.runtime_builders.runner_builder_wiring`, `bioetl.composition.runtime_builders.runner_input_assembly` |
-| `bioetl.composition.runtime_builders.inputs_runtime_helpers` | 2 | `bioetl.composition.runtime_builders.inputs_resolution_orchestration`, `bioetl.composition.runtime_builders.inputs_runtime_assembly` |
-| `bioetl.composition.runtime_builders.inputs_runtime_models` | 2 | `bioetl.composition.runtime_builders.inputs_resolver`, `bioetl.composition.runtime_builders.inputs_runtime_assembly` |
-| `bioetl.composition.runtime_builders.run_manifest_contract_identity` | 2 | `bioetl.composition.runtime_builders._manifest_publication_context_support`, `bioetl.composition.runtime_builders.run_manifest_support` |
-| `bioetl.composition.runtime_builders.run_manifest_support` | 2 | `bioetl.composition.runtime_builders.control_plane`, `bioetl.composition.runtime_builders.run_manifest_builder` |
-| `bioetl.composition.runtime_builders.runner_inputs` | 2 | `bioetl.composition.runtime_builders.inputs_resolver`, `bioetl.composition.runtime_builders.runner_input_assembly` |
+No modules currently sit at the fan-in cap.

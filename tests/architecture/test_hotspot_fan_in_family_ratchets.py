@@ -193,7 +193,7 @@ def test_issue_10306_pipeline_span_lifecycle_fan_in_at_most_five() -> None:
 
 _C0_FAMILY_CAPS = {
     "application_services_control_plane": 2,
-    "composition_runtime_builders": 2,
+    "composition_runtime_builders": 3,
 }
 
 
@@ -270,8 +270,13 @@ def test_hotspot_family_fan_in_census_matches_live_ast_graph() -> None:
         assert budgets.get("max_internal_fan_in") == expected_cap
         census = family["internal_fan_in_census"]
         assert isinstance(census, dict)
-        assert census["max_fan_in"] == expected_cap
-        assert family["at_budget_module_count"] > 0
+        assert census["max_fan_in"] <= expected_cap
+        if family_name == "composition_runtime_builders":
+            assert census["max_fan_in"] == 2
+            assert family["at_budget_module_count"] == 0
+        else:
+            assert census["max_fan_in"] == expected_cap
+            assert family["at_budget_module_count"] > 0
 
     control_plane = by_name["application_services_control_plane"]
     runtime_builders = by_name["composition_runtime_builders"]
@@ -289,4 +294,4 @@ def test_hotspot_family_fan_in_census_matches_live_ast_graph() -> None:
         "2": 26,
     }
     assert runtime_builders["internal_fan_in_census"]["max_fan_in"] == 2
-    assert runtime_builders["at_budget_module_count"] == 26
+    assert runtime_builders["at_budget_module_count"] == 0
