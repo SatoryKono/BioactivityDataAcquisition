@@ -4388,7 +4388,14 @@
               "enablePagination": true,
               "countRows": true
             },
+<<<<<<< HEAD
             "cellHeight": "md"
+||||||| 01128b20721
+            "cellHeight": "sm"
+=======
+            "cellHeight": "md",
+            "enablePagination": true
+>>>>>>> master20260916-4
           },
           "targets": [
             {
@@ -4747,7 +4754,14 @@
               "enablePagination": true,
               "countRows": true
             },
+<<<<<<< HEAD
             "cellHeight": "md"
+||||||| 01128b20721
+            "cellHeight": "sm"
+=======
+            "cellHeight": "md",
+            "enablePagination": true
+>>>>>>> master20260916-4
           },
           "targets": [
             {
