@@ -43,19 +43,7 @@ def partition_snapshots(
     for metric in registry.collect():
         for sample in metric.samples:
             labels = sample.labels
-            workflow = labels.get("workflow")
-            sample_job = f"{job}_workflow_{workflow}" if workflow else job
-            provider = labels.get("provider")
-            if provider and metric.name in {
-                "bioetl_provider_health_status",
-                "bioetl_provider_health_observed_timestamp_seconds",
-                "bioetl_provider_observed_universe",
-            }:
-                sample_job = f"{job}_provider_{provider}"
-            # Integrity refresh scans persisted scopes beyond this process's
-            # executed runs. It must not replace their runtime snapshots.
-            if metric.name == "bioetl_manifest_ledger_integrity_ratio":
-                sample_job = f"{job}_control_plane"
+            sample_job = _snapshot_job(job, metric, labels)
             group = tuple(
                 (key, labels[key]) for key in ("pipeline", "run_type") if key in labels
             )
@@ -71,3 +59,23 @@ def partition_snapshots(
         (sample_job, dict(group), MetricSnapshot(tuple(families.values())))
         for (sample_job, group), families in sorted(partitions.items())
     ]
+
+
+_PROVIDER_HEALTH_METRICS = frozenset(
+    {
+        "bioetl_provider_health_status",
+        "bioetl_provider_health_observed_timestamp_seconds",
+        "bioetl_provider_observed_universe",
+    }
+)
+
+
+def _snapshot_job(job: str, metric: Metric, labels: dict[str, str]) -> str:
+    workflow = labels.get("workflow")
+    sample_job = f"{job}_workflow_{workflow}" if workflow else job
+    provider = labels.get("provider")
+    if provider and metric.name in _PROVIDER_HEALTH_METRICS:
+        sample_job = f"{job}_provider_{provider}"
+    if metric.name == "bioetl_manifest_ledger_integrity_ratio":
+        sample_job = f"{job}_control_plane"
+    return sample_job
