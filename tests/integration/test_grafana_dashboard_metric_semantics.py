@@ -252,7 +252,7 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
     first_answer_titles = {
         "Monitor Scope Health",
         "Review First Action",
-        "Review Domain Status",
+        "Review Selected Run Domains",
     }
     compact_evidence = {
         "Track Runtime Blockers": (9018, "bioetl_l1_runtime_blocker_status"),

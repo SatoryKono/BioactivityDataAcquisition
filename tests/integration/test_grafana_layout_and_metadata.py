@@ -555,7 +555,7 @@ def test_overview_current_panels_stay_out_of_selected_range_semantics() -> None:
     for panel_title in (
         "Monitor Scope Health",
         "Review First Action",
-        "Review Domain Status",
+        "Review All Domain Status",
         "Review Runtime Status",
         "Review Data Quality Status",
         "Review Data Validation Status",

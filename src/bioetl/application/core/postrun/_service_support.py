@@ -5,6 +5,9 @@ from __future__ import annotations
 from contextlib import AbstractContextManager
 from typing import TYPE_CHECKING, Protocol
 
+from bioetl.application.core.postrun._batch_metrics_projection import (
+    project_batch_metrics,
+)
 from bioetl.application.core.postrun._phase_descriptions import (
     PostrunLogLevel,
     describe_compaction_phase,
@@ -19,6 +22,7 @@ from bioetl.application.core.postrun._phase_runtime import (
     run_async_postrun_phase,
     run_sync_postrun_phase,
 )
+from bioetl.application.services.run_reports.observations import record_dq_observation
 from bioetl.domain.ports import (
     ExecutorMetricsPort,
     LoggerPort,
@@ -210,7 +214,7 @@ class PostrunServiceSupportMixin:
         executor: ExecutorMetricsPort,
     ) -> DQResult:
         batch_metrics = self._collect_batch_metrics(executor)
-        return self._dq_service.evaluate(batch_metrics)
+        return record_dq_observation(self._dq_service.evaluate(batch_metrics))
 
     async def run_vacuum_if_enabled(self: _PostrunSupportHost) -> VacuumResult:
         return await self._lifecycle_service.finalize_run(
@@ -240,10 +244,6 @@ class PostrunServiceSupportMixin:
         self: _PostrunSupportHost,
         executor: ExecutorMetricsPort,
     ) -> dict[str, float]:
-        from bioetl.application.core.postrun._batch_metrics_projection import (
-            project_batch_metrics as _project,
-        )
-
-        return _project(
+        return project_batch_metrics(
             executor, freshness_anchor_timestamp=self._context.started_at.timestamp()
         )

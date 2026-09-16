@@ -207,7 +207,7 @@ def test_pipeline_report_builder_from_instrumented_accounting() -> None:
         accounting=acc,
     )
     payload = report.to_dict()
-    assert payload["schema_version"] == "pipeline_run_report_v1"
+    assert payload["schema_version"] == "pipeline_run_report_v2"
     assert payload["layers"]["bronze_records"] == 1000
     silver = next(row for row in payload["funnel"] if row["stage_id"] == "silver")
     assert silver["removed_total"] == 150

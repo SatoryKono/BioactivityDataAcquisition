@@ -590,8 +590,19 @@ class TestBatchWriterIOMixinGold:
             batch_metrics=MagicMock(spec=BatchMetricsRecorder),
         )
 
+        from bioetl.application.services.run_reports.observations import (
+            bind_run_observations,
+            reset_run_observations,
+            run_observations,
+        )
+
         records = [{"entity_id": "e1", "legacy_value": "x", "new_value": "y"}]
-        await writer.write_gold(records)
+        token = bind_run_observations()
+        try:
+            await writer.write_gold(records)
+            assert run_observations()["Data Validation"]["verdict"] == "OK"
+        finally:
+            reset_run_observations(token)
 
         mock_gold_validator.validate.assert_not_called()
         kwargs = mock_storage.write_gold.call_args[1]
@@ -969,3 +980,33 @@ class TestBatchWriterIOMixinFailureAndProjectionPaths:
         if gold_kwargs["column_order"] is not None:
             assert "record_id" in gold_kwargs["column_order"]
             assert "entity_id" not in gold_kwargs["column_order"]
+
+
+@pytest.mark.parametrize("valid", [True, False])
+def test_gold_producer_records_actual_validation_before_return_or_raise(valid):
+    from bioetl.application.services.run_reports.observations import (
+        bind_run_observations,
+        reset_run_observations,
+        run_observations,
+    )
+
+    writer = SimpleNamespace(
+        _gold_schema=object(),
+        _gold_validator=SimpleNamespace(
+            validate=lambda records: ValidationResult(
+                valid=valid, errors=[] if valid else ["invalid"]
+            )
+        ),
+    )
+    token = bind_run_observations()
+    try:
+        if valid:
+            validate_gold_records(writer, [{"entity_id": "e1"}])
+        else:
+            with pytest.raises(SchemaViolationError):
+                validate_gold_records(writer, [{"entity_id": "e1"}])
+        observation = run_observations()["Data Validation"]
+        assert observation["verdict"] == ("OK" if valid else "ERROR")
+        assert observation["facts"] == {"valid": valid, "records": 1}
+    finally:
+        reset_run_observations(token)

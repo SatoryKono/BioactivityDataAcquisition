@@ -14,18 +14,18 @@
     "application_core": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 5,
-      "helper_function_ratio": 0.374,
+      "helper_function_ratio": 0.373,
       "files": 194,
-      "total_loc": 23445,
+      "total_loc": 23455,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 7
     },
     "composition_bootstrap_runtime": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 2,
-      "helper_function_ratio": 0.33,
-      "files": 51,
-      "total_loc": 6133,
+      "helper_function_ratio": 0.328,
+      "files": 52,
+      "total_loc": 6172,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
@@ -43,7 +43,7 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.376,
       "files": 131,
-      "total_loc": 15077,
+      "total_loc": 15089,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 2
     },
@@ -52,7 +52,7 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.375,
       "files": 55,
-      "total_loc": 7098,
+      "total_loc": 7100,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     }
@@ -64,7 +64,7 @@
     "repo_wide_candidates_without_owner_tests_count": 0
   },
   "config_surface": {
-    "duplicate_cluster_count": 6
+    "duplicate_cluster_count": 15
   },
   "module_coverage": {
     "uncovered_module_count": 0,
