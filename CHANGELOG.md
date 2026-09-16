@@ -22,7 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   no longer labels missing diagnostics as `gold_filter_exclusion` (#10428);
   pipeline-run-report HTTP surfaces `rejection_details_display` field/rule
   rows. Cached Bronze consumption persists a `CONSUMED_BY` lineage fragment
-  for the new run/manifest (not a layer-alias `bronze` fragment id) and
+  for the new run/manifest (not a layer-alias `bronze` fragment id) while
+  the written Bronze batch of that run keeps `PRODUCED_BY`, and
   does not publish `bioetl_provider_health_status` (#10427, #10429).
 
 - **Requirements catalog Wave 1 (#9803):** 20 invented `REQ-*` IDs from

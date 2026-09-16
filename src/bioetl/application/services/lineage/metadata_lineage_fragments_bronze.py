@@ -116,17 +116,19 @@ def build_bronze_lineage_fragment(
                 ),
             ]
         )
-    else:
-        edges.append(
-            LineageEdge(
-                edge_type=LineageEdgeType.PRODUCED_BY,
-                source=bronze_batch,
-                target=run,
-                run_id=str(run_context.run_id),
-                manifest_id=run_context.manifest_id,
-                created_at=created_at,
-            )
+    # Cached consumption still writes a new Bronze batch for this run. Trust
+    # sidecars require PRODUCED_BY on that written batch; CONSUMED_BY above
+    # records cache use without cloning the original cache occurrence.
+    edges.append(
+        LineageEdge(
+            edge_type=LineageEdgeType.PRODUCED_BY,
+            source=bronze_batch,
+            target=run,
+            run_id=str(run_context.run_id),
+            manifest_id=run_context.manifest_id,
+            created_at=created_at,
         )
+    )
     return finalize_lineage_fragment(
         fragment_name="bronze",
         run_context=run_context,

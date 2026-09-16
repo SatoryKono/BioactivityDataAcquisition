@@ -178,7 +178,7 @@ class TestLineageFragments:
         assert any(
             edge.edge_type == LineageEdgeType.CONSUMED_BY for edge in fragment.edges
         )
-        assert not any(
+        assert any(
             edge.edge_type == LineageEdgeType.PRODUCED_BY for edge in fragment.edges
         )
 
