@@ -2953,25 +2953,13 @@
             "x": 0,
             "y": 23,
             "w": 24,
-<<<<<<< HEAD
             "h": 8
-||||||| 01128b20721
-            "h": 10
-=======
-            "h": 12
->>>>>>> master20260916-4
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-<<<<<<< HEAD
             "cellHeight": "sm",
-||||||| 01128b20721
-            "cellHeight": "lg",
-=======
-            "cellHeight": "md",
->>>>>>> master20260916-4
             "footer": {
               "show": false,
               "enablePagination": true
@@ -3064,33 +3052,15 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-<<<<<<< HEAD
             "y": 31,
-||||||| 01128b20721
-            "y": 33,
-=======
-            "y": 35,
->>>>>>> master20260916-4
             "w": 24,
-<<<<<<< HEAD
             "h": 5
-||||||| 01128b20721
-            "h": 8
-=======
-            "h": 7
->>>>>>> master20260916-4
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-<<<<<<< HEAD
             "cellHeight": "sm",
-||||||| 01128b20721
-            "cellHeight": "lg",
-=======
-            "cellHeight": "md",
->>>>>>> master20260916-4
             "footer": {
               "show": false,
               "enablePagination": true

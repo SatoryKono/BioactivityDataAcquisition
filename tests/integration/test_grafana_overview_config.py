@@ -149,16 +149,16 @@ def test_run_id_selector_is_control_plane_backed_table_query() -> None:
 def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() -> None:
     """Epic #6570/#6573/DRM-R: Status/First Action/Inputs on first path; shell lazy."""
     panels = _panels_by_title()
-    # Stable panel IDs; y-bands sit under the shared nav (h=4), not nav-h=3.
+    # Compact navigation gives the first screen one extra grid row.
     assert panels["Inspect Scope & Evidence"].get("id") == 99
     assert panels["Monitor Scope Health"].get("id") == 214
     assert panels["Review First Action"].get("id") == 215
     assert panels["Review Selected Run Domains"].get("id") == 9002
-    assert panels["Inspect Scope & Evidence"].get("gridPos", {}).get("y") == 3
+    assert panels["Inspect Scope & Evidence"].get("gridPos", {}).get("y") == 2
     assert panels["Review Selected Run Status"].get("id") == 9603
-    assert panels["Review Selected Run Status"].get("gridPos", {}).get("y") == 11
-    assert panels["Monitor Scope Health"].get("gridPos", {}).get("y") == 3
-    assert panels["Review First Action"].get("gridPos", {}).get("y") == 6
+    assert panels["Review Selected Run Status"].get("gridPos", {}).get("y") == 10
+    assert panels["Monitor Scope Health"].get("gridPos", {}).get("y") == 2
+    assert panels["Review First Action"].get("gridPos", {}).get("y") == 5
     assert panels["Review Selected Run Domains"].get("gridPos", {}).get("y") == panels[
         "Review First Action"
     ].get("gridPos", {}).get("y")
@@ -312,18 +312,18 @@ def test_review_domain_status_uses_exact_persisted_evidence() -> None:
         if mapping.get("type") == "value":
             action_maps.update(mapping.get("options") or {})
     for key, text in {
-        "runtime": "Runtime",
-        "control_plane": "Control Plane",
-        "dq": "DQ",
-        "provider": "Provider",
+        "runtime": "Pipeline Diagnostics",
+        "control_plane": "Trust",
+        "dq": "Data Quality",
+        "provider": "Provider Health",
         "monitor": "Monitor",
         "no_route": "No route",
-        "workflow": "Runtime (wf)",
+        "workflow": "Pipeline Diagnostics",
     }.items():
         assert key in action_maps, f"missing Action map for {key}"
         assert action_maps[key].get("text") == text
         assert action_maps[key].get("color") == "text"
-        assert len(str(action_maps[key].get("text") or "")) <= 16
+        assert len(str(action_maps[key].get("text") or "")) <= 20
     links = action_props.get("links") or []
     assert links, "Action column must expose row-aware board links"
     assert any(

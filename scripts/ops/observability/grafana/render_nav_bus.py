@@ -97,7 +97,7 @@ def _validate_action_route_uids() -> None:
 
 
 NAV_DISPLAY_TITLE = "Navigate Dashboards"
-NAV_HEIGHT = 3
+NAV_HEIGHT = 2
 # Shared link-only band reserves two wrapped rows with native 16px links.
 # Verify narrow/200% reflow in the browser after Grafana sanitization.
 # layout-budgets.yaml first_window_y / viewport_rows. Expanding nav must not
@@ -1386,6 +1386,9 @@ def apply_to_dashboard(
     _attach_nav_bus(nav, current_uid=current_uid)
     stamp_selector_columns(payload)
     stamp_selected_run_panels(payload)
+    from scripts.ops.observability.grafana._visual_usability import apply_visual_usability
+
+    apply_visual_usability(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:

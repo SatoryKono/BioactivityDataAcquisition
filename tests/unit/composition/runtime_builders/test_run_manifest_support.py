@@ -404,7 +404,8 @@ def test_creation_helper_create_ledger_service_uses_runtime_factories(
 ) -> None:
     sentinel_store = object()
     monkeypatch.setattr(
-        "bioetl.composition.bootstrap.control_plane_store_builders.create_run_ledger_store",
+        creation_helper_module,
+        "create_run_ledger_store",
         lambda **kwargs: sentinel_store,
     )
     monkeypatch.setattr(

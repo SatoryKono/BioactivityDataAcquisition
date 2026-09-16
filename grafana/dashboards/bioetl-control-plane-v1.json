@@ -5180,50 +5180,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-<<<<<<< HEAD
                       "wrapText": true
-||||||| 01128b20721
-=======
-                      "wrapText": false
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Parameter"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Action"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
->>>>>>> master20260916-4
                     }
                   }
                 ]
@@ -5244,7 +5201,7 @@
               "countRows": true
             },
             "showHeader": true,
-            "cellHeight": "md"
+            "cellHeight": "sm"
           },
           "targets": [
             {
@@ -5629,50 +5586,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-<<<<<<< HEAD
                       "wrapText": true
-||||||| 01128b20721
-=======
-                      "wrapText": false
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Parameter"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Action"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
->>>>>>> master20260916-4
                     }
                   }
                 ]
@@ -5693,7 +5607,7 @@
               "countRows": true
             },
             "showHeader": true,
-            "cellHeight": "md"
+            "cellHeight": "sm"
           },
           "targets": [
             {
@@ -5773,13 +5687,7 @@
             "x": 0,
             "y": 43,
             "w": 12,
-<<<<<<< HEAD
             "h": 3
-||||||| 01128b20721
-            "h": 4
-=======
-            "h": 5
->>>>>>> master20260916-4
           },
           "id": 9410,
           "options": {
@@ -5808,13 +5716,7 @@
             "x": 12,
             "y": 43,
             "w": 12,
-<<<<<<< HEAD
             "h": 3
-||||||| 01128b20721
-            "h": 4
-=======
-            "h": 5
->>>>>>> master20260916-4
           },
           "id": 9411,
           "options": {
@@ -6177,50 +6079,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-<<<<<<< HEAD
                       "wrapText": true
-||||||| 01128b20721
-=======
-                      "wrapText": false
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Parameter"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Action"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
->>>>>>> master20260916-4
                     }
                   }
                 ]
@@ -6229,21 +6088,9 @@
           },
           "gridPos": {
             "x": 0,
-<<<<<<< HEAD
             "y": 46,
-||||||| 01128b20721
-            "y": 53,
-=======
-            "y": 48,
->>>>>>> master20260916-4
             "w": 24,
-<<<<<<< HEAD
             "h": 4
-||||||| 01128b20721
-            "h": 8
-=======
-            "h": 7
->>>>>>> master20260916-4
           },
           "id": 9405,
           "options": {
@@ -6253,7 +6100,7 @@
               "countRows": true
             },
             "showHeader": true,
-            "cellHeight": "md"
+            "cellHeight": "sm"
           },
           "targets": [
             {
@@ -6688,50 +6535,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-<<<<<<< HEAD
                       "wrapText": true
-||||||| 01128b20721
-=======
-                      "wrapText": false
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Parameter"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Action"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
->>>>>>> master20260916-4
                     }
                   }
                 ]
@@ -6740,21 +6544,9 @@
           },
           "gridPos": {
             "x": 0,
-<<<<<<< HEAD
             "y": 50,
-||||||| 01128b20721
-            "y": 61,
-=======
-            "y": 55,
->>>>>>> master20260916-4
             "w": 24,
-<<<<<<< HEAD
             "h": 7
-||||||| 01128b20721
-            "h": 4
-=======
-            "h": 12
->>>>>>> master20260916-4
           },
           "id": 9408,
           "options": {
@@ -6764,7 +6556,7 @@
               "countRows": true
             },
             "showHeader": true,
-            "cellHeight": "md"
+            "cellHeight": "sm"
           },
           "targets": [
             {
@@ -7200,50 +6992,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-<<<<<<< HEAD
                       "wrapText": true
-||||||| 01128b20721
-=======
-                      "wrapText": false
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Parameter"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Action"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
->>>>>>> master20260916-4
                     }
                   }
                 ]
@@ -7252,21 +7001,9 @@
           },
           "gridPos": {
             "x": 0,
-<<<<<<< HEAD
             "y": 57,
-||||||| 01128b20721
-            "y": 65,
-=======
-            "y": 67,
->>>>>>> master20260916-4
             "w": 24,
-<<<<<<< HEAD
             "h": 8
-||||||| 01128b20721
-            "h": 4
-=======
-            "h": 12
->>>>>>> master20260916-4
           },
           "id": 9406,
           "options": {
@@ -7276,7 +7013,7 @@
               "countRows": true
             },
             "showHeader": true,
-            "cellHeight": "md"
+            "cellHeight": "sm"
           },
           "targets": [
             {
@@ -7712,50 +7449,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-<<<<<<< HEAD
                       "wrapText": true
-||||||| 01128b20721
-=======
-                      "wrapText": false
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Parameter"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Action"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
->>>>>>> master20260916-4
                     }
                   }
                 ]
@@ -7764,21 +7458,9 @@
           },
           "gridPos": {
             "x": 0,
-<<<<<<< HEAD
             "y": 65,
-||||||| 01128b20721
-            "y": 69,
-=======
-            "y": 79,
->>>>>>> master20260916-4
             "w": 24,
-<<<<<<< HEAD
             "h": 7
-||||||| 01128b20721
-            "h": 4
-=======
-            "h": 12
->>>>>>> master20260916-4
           },
           "id": 9409,
           "options": {
@@ -7788,7 +7470,7 @@
               "countRows": true
             },
             "showHeader": true,
-            "cellHeight": "md"
+            "cellHeight": "sm"
           },
           "targets": [
             {
@@ -7855,13 +7537,7 @@
         {
           "gridPos": {
             "x": 0,
-<<<<<<< HEAD
             "y": 72,
-||||||| 01128b20721
-            "y": 73,
-=======
-            "y": 91,
->>>>>>> master20260916-4
             "w": 24,
             "h": 4
           },
@@ -7897,13 +7573,7 @@
             "x": 0,
             "y": 24,
             "w": 24,
-<<<<<<< HEAD
             "h": 9
-||||||| 01128b20721
-            "h": 6
-=======
-            "h": 12
->>>>>>> master20260916-4
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Shows identity details for the selected run. An exact Run ID resolves one run; an aggregate pipeline scope does not guess a manifest. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
@@ -8006,50 +7676,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-<<<<<<< HEAD
                       "wrapText": true
-||||||| 01128b20721
-=======
-                      "wrapText": false
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Parameter"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Action"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
->>>>>>> master20260916-4
                     }
                   }
                 ]
@@ -8063,7 +7690,7 @@
               "enablePagination": true,
               "countRows": true
             },
-            "cellHeight": "md"
+            "cellHeight": "sm"
           },
           "targets": [
             {
@@ -8114,21 +7741,9 @@
           "title": "Review Processed Records",
           "gridPos": {
             "x": 0,
-<<<<<<< HEAD
             "y": 33,
-||||||| 01128b20721
-            "y": 30,
-=======
-            "y": 36,
->>>>>>> master20260916-4
             "w": 24,
-<<<<<<< HEAD
             "h": 10
-||||||| 01128b20721
-            "h": 6
-=======
-            "h": 12
->>>>>>> master20260916-4
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · CURRENT · Shows Bronze, Silver, and Gold record counts and outcomes for the selected scope. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Use Run Explorer for full run details. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
@@ -8435,50 +8050,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-<<<<<<< HEAD
                       "wrapText": true
-||||||| 01128b20721
-=======
-                      "wrapText": false
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Parameter"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Action"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
->>>>>>> master20260916-4
                     }
                   }
                 ]
@@ -8498,7 +8070,7 @@
               "enablePagination": true,
               "countRows": true
             },
-            "cellHeight": "md"
+            "cellHeight": "sm"
           },
           "targets": [
             {
@@ -8620,7 +8192,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   }
                 ]
@@ -8682,13 +8254,7 @@
           },
           "gridPos": {
             "x": 0,
-<<<<<<< HEAD
             "y": 43,
-||||||| 01128b20721
-            "y": 36,
-=======
-            "y": 48,
->>>>>>> master20260916-4
             "w": 24,
             "h": 7
           },
@@ -8700,7 +8266,7 @@
               "countRows": true
             },
             "showHeader": true,
-            "cellHeight": "md"
+            "cellHeight": "sm"
           },
           "targets": [
             {
@@ -8905,25 +8471,13 @@
             "x": 0,
             "y": 26,
             "w": 24,
-<<<<<<< HEAD
             "h": 8
-||||||| 01128b20721
-            "h": 10
-=======
-            "h": 12
->>>>>>> master20260916-4
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-<<<<<<< HEAD
             "cellHeight": "sm",
-||||||| 01128b20721
-            "cellHeight": "lg",
-=======
-            "cellHeight": "md",
->>>>>>> master20260916-4
             "footer": {
               "show": false,
               "enablePagination": true
@@ -9016,33 +8570,15 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-<<<<<<< HEAD
             "y": 34,
-||||||| 01128b20721
-            "y": 36,
-=======
-            "y": 38,
->>>>>>> master20260916-4
             "w": 24,
-<<<<<<< HEAD
             "h": 5
-||||||| 01128b20721
-            "h": 8
-=======
-            "h": 7
->>>>>>> master20260916-4
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-<<<<<<< HEAD
             "cellHeight": "sm",
-||||||| 01128b20721
-            "cellHeight": "lg",
-=======
-            "cellHeight": "md",
->>>>>>> master20260916-4
             "footer": {
               "show": false,
               "enablePagination": true

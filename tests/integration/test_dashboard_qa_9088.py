@@ -76,7 +76,7 @@ def test_canonical_context_trims_run_id_and_shares_uuid_across_seven_uids() -> N
         assert preserves_time_window(url)
 
 
-def test_shipped_run_id_variables_trim_whitespace() -> None:
+def test_shipped_run_id_variables_preserve_api_display_labels() -> None:
     for path in get_dashboard_files():
         dashboard = load_dashboard(path)
         variables = (dashboard.get("templating") or {}).get("list") or []

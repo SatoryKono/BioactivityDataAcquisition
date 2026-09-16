@@ -2214,6 +2214,52 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id001
+      '157':
+        title: Review DQ Coverage
+        role: guidance
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: &id004
+        - full_dark
+        - full_light
+        - zoom_200
+      '158':
+        title: Inspect DQ Sample Coverage
+        role: freshness
+        tier: 3
+        scope: time_range
+        scope_class: time_range
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - ok
+        - warn
+        - crit
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id004
       '220':
         title: Selected Range · Reject Evidence
         role: row_group
@@ -2462,7 +2508,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: &id004
+        render_profiles: &id005
         - full_dark
         - full_light
         - zoom_200
@@ -2748,7 +2794,7 @@ dashboards:
         - operator_guidance
         fixture_cases:
         - not_applicable
-        render_profiles: *id004
+        render_profiles: *id005
       '2101':
         title: Review Selected Run Status
         role: evidence_table
@@ -2769,7 +2815,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: *id004
+        render_profiles: *id005
       '9400':
         title: ''
         role: guidance
@@ -2890,7 +2936,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: &id005
+        render_profiles: &id006
         - full_dark
         - full_light
         - zoom_200
@@ -2914,7 +2960,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: *id005
+        render_profiles: *id006
       '32005':
         title: Inspect Full Current Alerts
         role: row_group
@@ -2929,7 +2975,7 @@ dashboards:
         - operator_guidance
         fixture_cases:
         - not_applicable
-        render_profiles: &id006
+        render_profiles: &id007
         - full_dark
         - full_light
         - zoom_200
@@ -2947,7 +2993,7 @@ dashboards:
         - operator_guidance
         fixture_cases:
         - not_applicable
-        render_profiles: *id006
+        render_profiles: *id007
   bioetl-overview-v2:
     panels:
       '99':
@@ -3578,7 +3624,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: *id004
+        render_profiles: *id005
       '20215':
         title: Inspect Full First Action
         role: forensic_table
@@ -3599,7 +3645,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: *id005
+        render_profiles: *id006
       '30215':
         title: Inspect Full First Action
         role: row_group
@@ -3614,7 +3660,7 @@ dashboards:
         - operator_guidance
         fixture_cases:
         - not_applicable
-        render_profiles: *id006
+        render_profiles: *id007
   bioetl-provider-health-v2:
     panels:
       '1':
@@ -4265,7 +4311,7 @@ dashboards:
         - populated
         - telemetry_absent
         - backend_error
-        render_profiles: *id004
+        render_profiles: *id005
       '9111':
         title: Inspect Full Fleet Severity
         role: forensic_table
@@ -5683,7 +5729,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: *id004
+        render_profiles: *id005
       '22460':
         title: Inspect Full Stage Progress
         role: forensic_table
@@ -5704,7 +5750,7 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: *id005
+        render_profiles: *id006
       '32460':
         title: Inspect Full Stage Progress
         role: row_group
@@ -5719,4 +5765,4 @@ dashboards:
         - operator_guidance
         fixture_cases:
         - not_applicable
-        render_profiles: *id006
+        render_profiles: *id007
