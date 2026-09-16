@@ -2045,8 +2045,10 @@
       "grafana/dashboards/bioetl-provider-health-v2.json"
     ],
     "bioetl_provider_health_observed_timestamp_seconds": [
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/04-reference/observability/metrics-catalog.md",
-      "docs/05-operations/runbooks/observability-checklist.md"
+      "docs/05-operations/runbooks/observability-checklist.md",
+      "grafana/dashboards/bioetl-provider-health-v2.json"
     ],
     "bioetl_provider_health_status": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",

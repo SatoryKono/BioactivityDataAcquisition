@@ -1,6 +1,6 @@
 {
-  "generated": "2026-08-30T21:14:41.260534",
-  "total_adrs": 60,
+  "generated": "2026-09-16T11:31:34+00:00",
+  "total_adrs": 61,
   "adrs": [
     {
       "adr_number": "001",
@@ -1157,7 +1157,7 @@
       "owner": "BioETL Team",
       "decision_date": "2026-08-28",
       "last_reviewed": "2026-08-28",
-      "context": "The audit prompt library contains 24 full operator-paste prompts materialized at\n`docs/00-project/ai/prompts/library/audit/project/materialized-v3/`:\n- 10 `cycle/` cards (`01-docs` … `10-coderabbit...",
+      "context": "The audit prompt library contains 24 full operator-paste prompts materialized at\n`docs/99-archive/prompts-2026-09/project-materialized/materialized-v3/`:\n- 10 `cycle/` cards (`01-docs` … `10-codera...",
       "decision": "### 1. Kernel v3.0 — fail-closed extraction\nExtract the shared cyclic controller from the 24 cards into a single versioned kernel:\n```\ndocs/00-project/ai/prompts/\n  fragments/\n    cyclic-kernel-v3....",
       "consequences": "### Positive\n- Single kernel eliminates 24× controller duplication → no drift between domains (Table 9: 24→1).\n- Fail-closed defaults remove unsafe `ALLOW_*=true` library defaults (Table 9: unsafe ...",
       "supersedes": [],
@@ -1169,19 +1169,38 @@
         "ADR-046"
       ],
       "tags": []
+    },
+    {
+      "adr_number": "061",
+      "title": "Persisted Selected Run Assessment",
+      "file_path": "ADR-061-persisted-selected-run-assessment.md",
+      "status": "proposed",
+      "source_status": "Proposed",
+      "category": "Observability",
+      "owner": "BioETL Team",
+      "decision_date": "2026-09-16",
+      "last_reviewed": "2026-09-16",
+      "context": "Prometheus freshness and dashboard ranges describe current telemetry and chart\ncoverage. They cannot define the outcome of a completed run. A successful execution\nalso does not prove that all check...",
+      "decision": "Publish new pipeline reports as `pipeline_run_report_v2`, with optional observations\nand a content-addressed `selected_run_snapshot_v1` envelope. Keep the v1 schema\nsemantically unchanged. Readers ...",
+      "consequences": "",
+      "supersedes": [],
+      "superseded_by": [],
+      "related": [],
+      "tags": []
     }
   ],
   "stats": {
     "by_status": {
       "accepted": 58,
-      "superseded": 2
+      "superseded": 2,
+      "proposed": 1
     },
     "by_category": {
       "Storage": 3,
       "Architecture": 15,
       "Locking": 1,
       "Data Modeling": 3,
-      "Observability": 6,
+      "Observability": 7,
       "Resilience": 2,
       "Lifecycle": 2,
       "Data Fetching": 2,

@@ -7,14 +7,15 @@ Canonical live ADR index: `docs/02-architecture/decisions/README.md`.
 This page is a generated governance mirror and MUST be regenerated via
 `python3 scripts/generate_adr_registry.py` after ADR additions or metadata changes.
 
-**Total ADRs**: 60
-**Last Updated**: 2026-08-30
+**Total ADRs**: 61
+**Last Updated**: 2026-09-16
 
 ## 📊 Status Summary
 
 | Status | Count | Percentage |
 |--------|-------|------------|
-| `accepted` | 58 | 96.7% |
+| `accepted` | 58 | 95.1% |
+| `proposed` | 1 | 1.6% |
 | `superseded` | 2 | 3.3% |
 
 ## 🟢 Accepted ADRs
@@ -714,8 +715,7 @@ stay un...
 **Relationships**: Related: ADR-041, ADR-043, ADR-044, ADR-046
 
 **Context**: The audit prompt library contains 24 full operator-paste prompts materialized at
-`docs/00-project/ai/prompts/library/audit/project/materialized-v3/`:
-...
+`docs/99-archive/prompts-2026-09/project-materialized/materialized-v3...
 
 [📄 View Full ADR](decisions/ADR-060-prompt-kernel-and-overlay-architecture.md)
 

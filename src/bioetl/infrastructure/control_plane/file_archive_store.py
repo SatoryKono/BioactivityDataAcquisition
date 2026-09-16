@@ -46,11 +46,7 @@ def _inventory_error(entries: object, sources: dict[str, Path]) -> str | None:
         if not isinstance(entry, dict):
             return "archive_index_invalid"
         relative = entry.get("path")
-        if (
-            not isinstance(relative, str)
-            or relative not in sources
-            or relative in seen
-        ):
+        if not isinstance(relative, str) or relative not in sources or relative in seen:
             return "archive_inventory_mismatch"
         seen.add(relative)
     if seen != set(sources):

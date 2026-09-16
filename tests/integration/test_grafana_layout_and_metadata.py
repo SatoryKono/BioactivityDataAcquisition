@@ -401,8 +401,8 @@ def test_control_plane_trust_panels_follow_reference_widths() -> None:
     processed = panels["Review Processed Records"]["gridPos"]
     telemetry = panels["Monitor Telemetry"]["gridPos"]
 
-    assert scope == {"x": 0, "y": 3, "w": 16, "h": 3}
-    assert readiness == {"x": 16, "y": 3, "w": 8, "h": 3}
+    assert scope == {"x": 0, "y": 2, "w": 16, "h": 3}
+    assert readiness == {"x": 16, "y": 2, "w": 8, "h": 3}
     assert readiness["w"] * readiness["h"] == 24
     assert run_summary["w"] == 24
     assert processed["w"] == 24
@@ -996,13 +996,17 @@ def test_all_table_panels_use_uniform_cell_height() -> None:
             paginated = options.get("footer", {}).get("enablePagination") is True
             wrapped = custom.get("cellOptions", {}).get("wrapText") is True
             height = options.get("cellHeight")
-            assert height in {"sm", "lg"}, (
+            assert height in {"sm", "md", "lg"}, (
                 dashboard_path.name,
                 panel.get("id"),
                 height,
             )
             if height == "lg":
                 assert paginated and wrapped
+                assert panel["gridPos"]["h"] > 6
+            if height == "md":
+                # #10498/#10504: native 54px pages prevent partially hidden rows.
+                assert paginated and custom.get("inspect") is True
                 assert panel["gridPos"]["h"] > 6
             if wrapped:
                 # 1fee6a viewport-fit: incident 2010 h4 with wrap uses no pagination to avoid 21px footer overflow
@@ -1120,8 +1124,8 @@ def test_table_panels_fill_panel_width() -> None:
     )
 
 
-def test_dq_score_chart_keeps_readable_height_without_legend() -> None:
-    """The score chart retains drawing room without redundant legend chrome.
+def test_dq_score_chart_keeps_readable_height_with_semantic_legend() -> None:
+    """The score chart identifies the measured series and retains drawing room.
 
     Issue #8530: DQ panel 153 Track Volume-Weighted DQ Score.
     """
@@ -1133,7 +1137,7 @@ def test_dq_score_chart_keeps_readable_height_without_legend() -> None:
     assert panel is not None, "DQ panel 153 must exist"
     assert panel.get("type") == "timeseries"
     assert panel.get("gridPos", {}).get("h") == 6
-    assert panel.get("options", {}).get("legend", {}).get("showLegend") is False
+    assert panel.get("options", {}).get("legend", {}).get("showLegend") is True
 
 
 def test_dashboard_metadata_policy_invariants() -> None:

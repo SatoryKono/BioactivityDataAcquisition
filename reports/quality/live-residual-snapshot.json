@@ -41,18 +41,18 @@
     "application_services_control_plane": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 1,
-      "helper_function_ratio": 0.385,
-      "files": 112,
-      "total_loc": 14334,
+      "helper_function_ratio": 0.381,
+      "files": 113,
+      "total_loc": 14516,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 2
     },
     "composition_runtime_builders": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 2,
-      "helper_function_ratio": 0.375,
+      "helper_function_ratio": 0.378,
       "files": 55,
-      "total_loc": 7100,
+      "total_loc": 7118,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     }

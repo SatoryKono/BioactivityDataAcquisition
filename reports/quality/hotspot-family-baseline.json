@@ -2253,10 +2253,10 @@
         "src/bioetl/application/services/control_plane/"
       ],
       "duplication_clusters": 0,
-      "files": 112,
-      "total_loc": 14334,
+      "files": 113,
+      "total_loc": 14516,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.385,
+      "helper_function_ratio": 0.381,
       "max_internal_fan_in": 1,
       "max_internal_fan_in_module": "bioetl.application.services.control_plane.workflow.manifest_models",
       "bounded_growth_budgets": {
@@ -2265,8 +2265,8 @@
       },
       "internal_fan_in_census": {
         "distribution": {
-          "0": 21,
-          "1": 91
+          "0": 20,
+          "1": 93
         },
         "modules": [
           {
@@ -2733,6 +2733,13 @@
             ]
           },
           {
+            "module": "bioetl.application.services.control_plane.manifest.inspection_cross_surface",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.inspection_verification"
+            ]
+          },
+          {
             "module": "bioetl.application.services.control_plane.manifest.inspection_dossier",
             "fan_in": 1,
             "runtime_importers": [
@@ -2741,8 +2748,10 @@
           },
           {
             "module": "bioetl.application.services.control_plane.manifest.inspection_helpers",
-            "fan_in": 0,
-            "runtime_importers": []
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.inspection_cross_surface"
+            ]
           },
           {
             "module": "bioetl.application.services.control_plane.manifest.inspection_models",
@@ -3073,7 +3082,9 @@
           "bioetl.application.services.control_plane.manifest.execution_identity_support",
           "bioetl.application.services.control_plane.manifest.identity_graph_assembly",
           "bioetl.application.services.control_plane.manifest.inspection_artifact_refs",
+          "bioetl.application.services.control_plane.manifest.inspection_cross_surface",
           "bioetl.application.services.control_plane.manifest.inspection_dossier",
+          "bioetl.application.services.control_plane.manifest.inspection_helpers",
           "bioetl.application.services.control_plane.manifest.inspection_models",
           "bioetl.application.services.control_plane.manifest.inspection_result_model",
           "bioetl.application.services.control_plane.manifest.inspection_service",
@@ -3123,9 +3134,9 @@
       ],
       "duplication_clusters": 0,
       "files": 55,
-      "total_loc": 7100,
+      "total_loc": 7118,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.375,
+      "helper_function_ratio": 0.378,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.runtime_builders.runner_inputs",
       "bounded_growth_budgets": {
@@ -3327,8 +3338,8 @@
             "module": "bioetl.composition.runtime_builders._run_manifest_snapshot_support",
             "fan_in": 2,
             "runtime_importers": [
-              "bioetl.composition.runtime_builders._manifest_publication_context_support",
-              "bioetl.composition.runtime_builders._run_manifest_replay_support"
+              "bioetl.composition.runtime_builders._run_manifest_replay_support",
+              "bioetl.composition.runtime_builders.run_manifest_support"
             ]
           },
           {

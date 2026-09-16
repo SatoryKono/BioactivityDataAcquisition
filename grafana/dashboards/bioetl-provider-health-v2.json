@@ -2588,10 +2588,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 24,
             "x": 0,
-            "y": 20
+            "y": 20,
+            "w": 24,
+            "h": 5
           },
           "id": 106,
           "options": {
@@ -2690,10 +2690,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 24,
             "x": 0,
-            "y": 26
+            "y": 25,
+            "w": 24,
+            "h": 4
           },
           "id": 107,
           "options": {
@@ -2839,10 +2839,10 @@
             ]
           },
           "gridPos": {
-            "h": 7,
-            "w": 24,
             "x": 0,
-            "y": 32
+            "y": 29,
+            "w": 24,
+            "h": 4
           },
           "id": 108,
           "options": {
@@ -2933,10 +2933,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 7,
-            "w": 24,
             "x": 0,
-            "y": 39
+            "y": 33,
+            "w": 24,
+            "h": 5
           },
           "id": 109,
           "options": {
@@ -3017,10 +3017,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 12,
             "x": 0,
-            "y": 46
+            "y": 38,
+            "w": 8,
+            "h": 10
           },
           "id": 102,
           "options": {
@@ -3109,20 +3109,21 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 12,
-            "x": 12,
-            "y": 46
+            "x": 8,
+            "y": 38,
+            "w": 16,
+            "h": 10
           },
           "id": 110,
           "options": {
             "legend": {
               "displayMode": "table",
-              "placement": "bottom",
+              "placement": "right",
               "showLegend": true,
               "calcs": [
                 "lastNotNull"
-              ]
+              ],
+              "width": 400
             },
             "tooltip": {
               "mode": "multi",
@@ -3196,10 +3197,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 12,
             "x": 0,
-            "y": 51
+            "y": 48,
+            "w": 12,
+            "h": 5
           },
           "id": 111,
           "options": {
@@ -3274,10 +3275,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 12,
             "x": 12,
-            "y": 51
+            "y": 48,
+            "w": 12,
+            "h": 5
           },
           "id": 115,
           "options": {
@@ -3363,10 +3364,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 12,
             "x": 0,
-            "y": 56
+            "y": 53,
+            "w": 12,
+            "h": 5
           },
           "id": 112,
           "options": {
@@ -3441,10 +3442,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
-            "w": 12,
             "x": 12,
-            "y": 56
+            "y": 53,
+            "w": 12,
+            "h": 5
           },
           "id": 113,
           "options": {
@@ -3538,10 +3539,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
-            "w": 12,
             "x": 0,
-            "y": 61
+            "y": 58,
+            "w": 12,
+            "h": 5
           },
           "id": 31,
           "options": {
@@ -3613,10 +3614,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 12,
             "x": 12,
-            "y": 61
+            "y": 58,
+            "w": 12,
+            "h": 5
           },
           "id": 32,
           "options": {
@@ -3815,10 +3816,10 @@
             ]
           },
           "gridPos": {
-            "h": 5,
-            "w": 12,
             "x": 0,
-            "y": 21
+            "y": 21,
+            "w": 12,
+            "h": 7
           },
           "id": 114,
           "options": {
@@ -3935,10 +3936,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 12,
-            "y": 21
+            "y": 21,
+            "w": 12,
+            "h": 7
           },
           "id": 1,
           "options": {
@@ -4006,10 +4007,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
-            "w": 12,
             "x": 0,
-            "y": 27
+            "y": 28,
+            "w": 12,
+            "h": 3
           },
           "id": 2,
           "options": {
@@ -4076,10 +4077,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
-            "w": 12,
             "x": 12,
-            "y": 27
+            "y": 28,
+            "w": 12,
+            "h": 3
           },
           "id": 105,
           "options": {
@@ -4156,10 +4157,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
-            "w": 12,
             "x": 0,
-            "y": 33
+            "y": 31,
+            "w": 12,
+            "h": 3
           },
           "id": 104,
           "options": {
@@ -4232,10 +4233,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
+            "x": 12,
+            "y": 31,
             "w": 12,
-            "x": 0,
-            "y": 38
+            "h": 3
           },
           "id": 7,
           "options": {
@@ -4283,10 +4284,10 @@
           "type": "table",
           "title": "Inspect Run Identity",
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 0,
-            "y": 22
+            "y": 22,
+            "w": 24,
+            "h": 12
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Do not put full UUIDs into Prometheus labels. Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. This card is bounded pipeline/run context evidence only and does not prove current provider health. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero Inspect value opens full identifiers as selectable plain text.",
@@ -4337,7 +4338,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -4383,9 +4384,11 @@
           "options": {
             "showHeader": true,
             "footer": {
-              "show": false
+              "show": false,
+              "enablePagination": true,
+              "countRows": true
             },
-            "cellHeight": "sm"
+            "cellHeight": "md"
           },
           "targets": [
             {
@@ -4435,10 +4438,10 @@
           "type": "table",
           "title": "Inspect Processed Records",
           "gridPos": {
-            "h": 6,
-            "w": 12,
-            "x": 12,
-            "y": 22
+            "x": 0,
+            "y": 34,
+            "w": 24,
+            "h": 12
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · TIME RANGE · Do not put full UUIDs into Prometheus labels. Current stage/outcome accounting evidence for the shared pipeline/run_type context. Provider remains the primary health selector; this table is bounded pipeline/run_type accounting evidence and does not prove current provider health by itself. Missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status, Monitor Provider Telemetry Freshness, and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
@@ -4532,7 +4535,7 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
-                      "wrapText": true
+                      "wrapText": false
                     }
                   }
                 ]
@@ -4740,9 +4743,11 @@
               }
             ],
             "footer": {
-              "show": false
+              "show": false,
+              "enablePagination": true,
+              "countRows": true
             },
-            "cellHeight": "sm"
+            "cellHeight": "md"
           },
           "targets": [
             {
@@ -4812,13 +4817,13 @@
             "x": 0,
             "y": 23,
             "w": 24,
-            "h": 8
+            "h": 12
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "sm",
+            "cellHeight": "md",
             "footer": {
               "show": false,
               "enablePagination": true
@@ -4911,15 +4916,15 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 31,
+            "y": 35,
             "w": 24,
-            "h": 5
+            "h": 7
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "sm",
+            "cellHeight": "md",
             "footer": {
               "show": false,
               "enablePagination": true

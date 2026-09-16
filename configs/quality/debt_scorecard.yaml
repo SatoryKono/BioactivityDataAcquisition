@@ -537,16 +537,16 @@ hotspot_family_ratchets:
       max_internal_fan_in: 2
     metrics:
       duplication_clusters: 0
-      files: 112
-      total_loc: 14334
+      files: 113
+      total_loc: 14511
       files_ge_250_loc: 0
-      helper_function_ratio: 0.385
+      helper_function_ratio: 0.381
       max_internal_fan_in: 1
       max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_models
     trend:
       status: reduced_2026-09-16_issue_10468_coupling_closeout
       next_action: '2026-09-16 #10468/#10472-#10475: control-plane max_internal_fan_in
-        2->1 and files 128->112 with files_ge_250_loc remaining 0. Bounded-growth
+        2->1 and files 128->113 with files_ge_250_loc remaining 0. Bounded-growth
         budgets stay 0 files_ge_250_loc and max_internal_fan_in 2; no technical-debt
         budget is increased.
 

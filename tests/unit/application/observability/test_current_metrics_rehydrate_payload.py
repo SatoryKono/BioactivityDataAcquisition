@@ -8,7 +8,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.application.observability import current_metrics_rehydrate_payload as subject
+from bioetl.application.observability import (
+    current_metrics_rehydrate_payload as subject,
+)
 from bioetl.application.observability.rehydrate_models import WorkflowPipelineScopeInfo
 from bioetl.application.services.run_reports.query import ReportIndexEntry
 
@@ -31,7 +33,9 @@ def _entry(path: Path, *, status: str | None = "success") -> ReportIndexEntry:
     )
 
 
-def test_load_report_payload_rejects_io_invalid_json_and_non_mapping(tmp_path: Path) -> None:
+def test_load_report_payload_rejects_io_invalid_json_and_non_mapping(
+    tmp_path: Path,
+) -> None:
     store = MagicMock()
     store.read_text.side_effect = OSError("missing")
     assert subject.load_report_payload(tmp_path / "missing.json", store=store) is None
@@ -50,7 +54,9 @@ def test_load_report_payload_rejects_io_invalid_json_and_non_mapping(tmp_path: P
 def test_anchor_rejects_missing_identity_or_nonterminal_payload(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, payload: object
 ) -> None:
-    monkeypatch.setattr(subject, "load_report_payload", lambda *_args, **_kwargs: payload)
+    monkeypatch.setattr(
+        subject, "load_report_payload", lambda *_args, **_kwargs: payload
+    )
     assert (
         subject.anchor_from_workflow_entry(
             _entry(tmp_path / "workflow.json"), root=tmp_path, store=MagicMock()
@@ -95,7 +101,11 @@ def test_workflow_provider_and_pipeline_names_cover_fallbacks() -> None:
     assert subject.provider_from_pipeline_name("") == "unknown"
     assert subject.pipeline_names_from_payload(
         {
-            "execution": [None, {"pipeline_name": ""}, {"pipeline_name": "chembl_assay"}],
+            "execution": [
+                None,
+                {"pipeline_name": ""},
+                {"pipeline_name": "chembl_assay"},
+            ],
             "plan": {
                 "steps": [
                     {"pipeline_name": "chembl_assay"},
@@ -104,7 +114,9 @@ def test_workflow_provider_and_pipeline_names_cover_fallbacks() -> None:
             },
         }
     ) == ("chembl_assay", "pubchem_compound")
-    assert subject.pipeline_names_from_payload({"execution": object(), "plan": []}) == ()
+    assert (
+        subject.pipeline_names_from_payload({"execution": object(), "plan": []}) == ()
+    )
 
 
 def test_pipeline_scopes_skip_invalid_rows_and_deduplicate(
@@ -132,7 +144,9 @@ def test_pipeline_scopes_skip_invalid_rows_and_deduplicate(
         ("chembl_assay", "backfill", "chembl"),
         ("pubchem_compound", "incremental", "pubchem"),
     ]
-    assert subject.pipeline_scopes_from_payload({}, root=tmp_path, store=MagicMock()) == ()
+    assert (
+        subject.pipeline_scopes_from_payload({}, root=tmp_path, store=MagicMock()) == ()
+    )
 
 
 def test_run_type_child_report_failure_shapes(

@@ -12,11 +12,6 @@ from bioetl.application.services.control_plane.manifest.inspection_helpers impor
     build_manifest_diff_payload,
     build_run_artifact_diff_payload,
 )
-from bioetl.application.services.control_plane.manifest.inspection_models import (
-    effective_config_artifact_anchor as _effective_config_artifact_anchor,
-    effective_config_missing_evidence as _effective_config_missing_evidence,
-    manifest_effective_config_anchor as _manifest_effective_config_anchor,
-)
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.types import RunID
 
@@ -140,16 +135,16 @@ def build_effective_config_store_verification(
         left_manifest.run_id,
         right_manifest.run_id,
     )
-    missing_evidence = _effective_config_missing_evidence(
+    missing_evidence = effective_config_missing_evidence(
         left_artifact=left_artifact,
         right_artifact=right_artifact,
         left_occurrence=left_occurrence,
         right_occurrence=right_occurrence,
     )
-    left_anchor = _effective_config_artifact_anchor(left_artifact)
-    right_anchor = _effective_config_artifact_anchor(right_artifact)
-    left_manifest_anchor = _manifest_effective_config_anchor(left_manifest)
-    right_manifest_anchor = _manifest_effective_config_anchor(right_manifest)
+    left_anchor = effective_config_artifact_anchor(left_artifact)
+    right_anchor = effective_config_artifact_anchor(right_artifact)
+    left_manifest_anchor = manifest_effective_config_anchor(left_manifest)
+    right_manifest_anchor = manifest_effective_config_anchor(right_manifest)
     anchor_matches = {
         "left_artifact_id": (
             left_manifest_anchor["artifact_id"] == left_anchor.get("artifact_id")
@@ -183,4 +178,49 @@ def build_effective_config_store_verification(
         "right_artifact_anchor": right_anchor,
         "anchor_matches": anchor_matches,
         "missing_evidence": list(missing_evidence),
+    }
+
+
+def effective_config_missing_evidence(
+    *,
+    left_artifact: dict[str, object] | None,
+    right_artifact: dict[str, object] | None,
+    left_occurrence: dict[str, object] | None,
+    right_occurrence: dict[str, object] | None,
+) -> tuple[str, ...]:
+    """Return missing-evidence codes for effective-config store verification."""
+    missing: list[str] = []
+    if left_artifact is None:
+        missing.append("left_effective_config_artifact_missing")
+    if right_artifact is None:
+        missing.append("right_effective_config_artifact_missing")
+    if left_occurrence is None:
+        missing.append("left_effective_config_occurrence_missing")
+    if right_occurrence is None:
+        missing.append("right_effective_config_occurrence_missing")
+    return tuple(missing)
+
+
+def manifest_effective_config_anchor(manifest: RunManifest) -> dict[str, object]:
+    """Project the effective-config anchor fields from a run manifest."""
+    code_provenance = manifest.code_provenance
+    return {
+        "artifact_id": code_provenance.effective_config_artifact_id,
+        "effective_config_hash": code_provenance.effective_config_hash,
+    }
+
+
+def effective_config_artifact_anchor(
+    artifact: dict[str, object] | None,
+) -> dict[str, object]:
+    """Project the effective-config anchor fields from a stored artifact payload."""
+    if artifact is None:
+        return {"artifact_id": None, "effective_config_hash": None}
+    semantic_artifact = artifact.get("semantic_artifact")
+    if not isinstance(semantic_artifact, dict):
+        semantic_artifact = artifact
+    return {
+        "artifact_id": artifact.get("artifact_id")
+        or semantic_artifact.get("artifact_id"),
+        "effective_config_hash": semantic_artifact.get("effective_config_hash"),
     }

@@ -3,15 +3,20 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.replay._bundle_descriptor_payloads import (
-    RunManifestInspectionResult,
     build_replay_bundle,
     dict_or_empty,
     optional_string,
     resolve_identity_graph,
     resolve_replay_claims,
 )
+
+if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.manifest.inspection_models import (
+        RunManifestInspectionResult,
+    )
 
 __all__ = [
     "RunReplayBundleDescriptorRecord",

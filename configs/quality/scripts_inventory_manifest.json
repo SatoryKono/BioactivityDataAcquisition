@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-16T13:11:08.734501+00:00",
+  "generated_at": "2026-09-16T17:52:32.884903+00:00",
   "summary": {
-    "total_scripts": 620,
+    "total_scripts": 621,
     "status_counts": {
       "active": 338,
-      "supporting": 282
+      "supporting": 283
     },
     "reference_group_coverage": {
       "agents": 9,
@@ -13,7 +13,7 @@
       "ci": 83,
       "docs": 259,
       "other": 75,
-      "scripts": 519,
+      "scripts": 520,
       "skills": 12,
       "tests": 434
     }
@@ -12835,7 +12835,7 @@
         },
         {
           "path": "tests/integration/test_grafana_render_first_remediation.py",
-          "line": 1428,
+          "line": 1439,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         },
@@ -19989,11 +19989,17 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
+          "path": "scripts/ops/observability/grafana/_visual_usability.py",
+          "line": 7,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._dashboard_state_followup import override, walk"
+        },
+        {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1280,
+          "line": 1363,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._dashboard_state_followup import ("
         },
@@ -20052,6 +20058,25 @@
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-11-30",
       "next_step": "Keep as an internal transformation invoked by render_nav_bus; no standalone command or active CLI entrypoint."
+    },
+    {
+      "path": "scripts/ops/observability/grafana/_visual_usability.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 1389,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._visual_usability import apply_visual_usability"
+        }
+      ],
+      "owner": "@bioetl-observability",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-14",
+      "next_step": "Keep the visual-audit transformations internal to render_nav_bus. This module has no standalone CLI or deployment entrypoint."
     },
     {
       "path": "scripts/ops/observability/grafana/action_target_routes.py",
@@ -20416,7 +20441,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1275,
+          "line": 1358,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },

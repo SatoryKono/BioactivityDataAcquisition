@@ -545,7 +545,9 @@ def test_file_artifact_lifecycle_uri_and_planned_bronze(tmp_path: Any) -> None:
         tmp_path / "control-plane",
         SimpleNamespace(
             source_refs=(),
-            planned_artifacts=(SimpleNamespace(layer="bronze", path="planned.parquet"),),
+            planned_artifacts=(
+                SimpleNamespace(layer="bronze", path="planned.parquet"),
+            ),
         ),  # type: ignore[arg-type]
     )
     assert relative_candidates == [

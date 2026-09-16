@@ -23,6 +23,19 @@ from tests.integration._grafana_test_support import (
 pytestmark = pytest.mark.integration
 
 
+def test_dq_history_colors_survive_trailing_missing_samples() -> None:
+    """#10502: a missing final sample must not recolor measured 100% gray."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    panels = {panel["id"]: panel for panel in get_dashboard_panels(dashboard)}
+    defaults = panels[153]["fieldConfig"]["defaults"]
+    assert defaults["thresholds"] == panels[2]["fieldConfig"]["defaults"]["thresholds"]
+    assert defaults["color"]["seriesBy"] == "min"
+    assert defaults["custom"]["gradientMode"] == "none"
+    assert defaults["custom"]["fillOpacity"] == 0
+    assert defaults["custom"]["spanNulls"] is False
+    assert "color=minimum observed" in panels[153]["targets"][0]["legendFormat"]
+
+
 def test_status_panels_have_correct_value_mapping():
     """Current-status stat panels must have explicit value mapping for OK/WARN/CRIT/UNKNOWN."""
     status_dashboards = [

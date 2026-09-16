@@ -248,6 +248,16 @@ Shipped in `bioetl-dq-v2.json`.
 
 ## Saved evidence and discovery panels
 
+### 39. Review DQ Coverage
+
+Explains the seven-day measured-data scope, missing validation timestamp and
+unavailable expected-entity coverage. A 100% score does not prove completeness.
+
+### 40. Inspect DQ Sample Coverage
+
+Shows records in the weighted-score denominator and observed score series.
+Missing telemetry remains UNKNOWN; these counts are not expected-entity coverage.
+
 | ID | Title | Purpose |
 | --- | --- | --- |
 | 9450 | Inspect Saved Run Evidence | Saved exact-run evidence; expand for identity, version, reasons and actions. |

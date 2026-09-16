@@ -6,7 +6,7 @@
     "bioetl_pipeline_runs_total": 500
   },
   "degraded_reasons": [],
-  "generated_at": "2026-09-07T08:04:05Z",
+  "generated_at": "2026-09-16T16:48:20Z",
   "label_keys": {
     "bioetl_checkpoint_load_events_total": [
       "pipeline",
@@ -25,10 +25,10 @@
     ]
   },
   "live_observed_series": {
-    "bioetl_checkpoint_load_events_total": 0,
+    "bioetl_checkpoint_load_events_total": 12,
     "bioetl_checkpoint_saved_at_seconds": 0,
     "bioetl_health_check_latency_seconds": 0,
-    "bioetl_pipeline_runs_total": 4
+    "bioetl_pipeline_runs_total": 16
   },
   "live_threshold_violations": [],
   "local_cardinality_fallback_allowed": false,
@@ -42,8 +42,23 @@
   "mode": "live_review",
   "observed_label_values": {
     "bioetl_checkpoint_load_events_total": {
-      "pipeline": [],
-      "status": []
+      "pipeline": [
+        "chembl_activity",
+        "chembl_assay",
+        "chembl_molecule",
+        "chembl_publication",
+        "chembl_publication_term",
+        "chembl_target",
+        "crossref_publication",
+        "openalex_publication",
+        "pubchem_compound",
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "uniprot_protein"
+      ],
+      "status": [
+        "skipped"
+      ]
     },
     "bioetl_checkpoint_saved_at_seconds": {
       "pipeline": []
@@ -53,20 +68,30 @@
     },
     "bioetl_pipeline_runs_total": {
       "pipeline": [
+        "chembl_activity",
         "chembl_assay",
+        "chembl_molecule",
         "chembl_publication",
-        "chembl_target"
+        "chembl_publication_term",
+        "chembl_target",
+        "crossref_publication",
+        "obs_fill_rehydrate_probe",
+        "openalex_publication",
+        "pubchem_compound",
+        "pubmed_publication",
+        "uniprot_protein"
       ],
       "run_type": [
         "backfill",
-        "incremental"
+        "incremental",
+        "rebuild"
       ],
       "status": [
         "success"
       ]
     }
   },
-  "prometheus_base_url": "http://127.0.0.1:9090",
+  "prometheus_base_url": "http://localhost:9090",
   "prometheus_base_url_source": "cli",
   "prometheus_token_env_var": "BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN",
   "prometheus_url_env_var": "BIOETL_OBSERVABILITY_PROMETHEUS_URL",
@@ -79,7 +104,7 @@
     "bioetl_pipeline_runs_total"
   ],
   "source_command": "python -m scripts.engineering.qa.report_observability_metric_inventory --check --write-evidence reports/observability/runtime_cardinality_inventory.json --review-json-out reports/observability/runtime_cardinality_review.json --summary-out \"$GITHUB_STEP_SUMMARY\" --fail-on-degraded-live-review",
-  "source_revision": "cfbc6eb90fa77135e23b96170dff36ce52db5380",
+  "source_revision": "30a6dba898e5c979f60b5b8fefd777e4a28e473f",
   "source_worktree_dirty": true,
   "static_threshold_violations": [],
   "status": "passed"
