@@ -484,9 +484,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 51
-      total_loc: 6146
+      total_loc: 6129
       files_ge_250_loc: 0
-      helper_function_ratio: 0.338
+      helper_function_ratio: 0.33
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.tracing_bootstrap
     trend:
@@ -511,7 +511,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 35
-      total_loc: 3935
+      total_loc: 3934
       files_ge_250_loc: 0
       helper_function_ratio: 0.358
       max_internal_fan_in: 2
@@ -563,19 +563,19 @@ hotspot_family_ratchets:
     - src/bioetl/composition/runtime_builders/
     bounded_growth_budgets:
       files_ge_250_loc: 0
-      max_internal_fan_in: 3
+      max_internal_fan_in: 2
     metrics:
       duplication_clusters: 0
-      files: 57
-      total_loc: 7221
+      files: 55
+      total_loc: 7097
       files_ge_250_loc: 0
       helper_function_ratio: 0.375
-      max_internal_fan_in: 3
-      max_internal_fan_in_module: bioetl.composition.runtime_builders.inputs_runtime_helpers
+      max_internal_fan_in: 2
+      max_internal_fan_in_module: bioetl.composition.runtime_builders.runner_inputs
     trend:
-      status: reduced_2026-08-27_debt_cycle_fanin_ratchet
-      next_action: 2026-08-27 audit-cycle-tech-debt ratchets runtime_builders max_internal_fan_in budget
-        5->3 to live observed fan-in. No technical-debt budget is increased.
+      status: reduced_2026-09-16_control_plane_paths_extract
+      next_action: 2026-09-16 moved control-plane path helpers out of runtime_builders and ratcheted
+        max_internal_fan_in budget 3->2 to live observed fan-in. No technical-debt budget is increased.
 full_app_duplication_ratchets:
   snapshot_date: '2026-09-11'
   mode: fail-fast

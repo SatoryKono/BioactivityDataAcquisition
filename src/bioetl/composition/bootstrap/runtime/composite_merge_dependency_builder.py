@@ -120,7 +120,4 @@ def _create_join_type_resolver(
 ) -> Callable[[], JoinHow]:
     """Create a join type resolver function for the given merge strategy."""
 
-    def _resolver() -> JoinHow:
-        return resolve_join_how(merge_strategy)
-
-    return _resolver
+    return lambda: resolve_join_how(merge_strategy)

@@ -20,8 +20,8 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "688814424ffdfa57d1f9912ca164607618facd662be010d2302d5d13d2fb9eb6",
-    "bioetl-dq-v2": "eb3f91a3a5af80fa070c22017c5ebb4522f24ce95a9121d90538f66626a53ee9",
+    "bioetl-control-plane-v1": "fd05eed38963f5b4b56469936c4fa8b40249e44196c9edb66a1fba8ceaaf7c9b",
+    "bioetl-dq-v2": "617c948eaad0a362dd8703102fc1a9b979533970addedb1f9d6c455febae9d75",
     "bioetl-incident-v1": "3f880d07e0de5f2cb681ca2203ab05160212c6d7e033a7aa214e102a0a307915",
     "bioetl-overview-v2": "b8a15994619927ca1a9ad36a7128096ec39068e1e64efd253eaf11270688b800",
     "bioetl-provider-health-v2": "928b6fb15c09f3cf1844015895f5a3f5e4f32baa24fb2c03c78df6fdc88a74e1",
@@ -96,7 +96,7 @@
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/control-plane/trust-summary?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+          "/ops/control-plane/trust-summary?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&error_as_row=1"
         ],
         "target_count": 1
       }
