@@ -325,7 +325,13 @@ def _dq(p: dict[int, dict]) -> None:
             "Measured scores · 7d lookback"
         )
     graph = p[153]
-    graph["fieldConfig"]["defaults"]["color"] = {"mode": "thresholds"}
+    graph["fieldConfig"]["defaults"]["color"] = {
+        "mode": "thresholds",
+        "seriesBy": "min",
+    }
+    graph["fieldConfig"]["defaults"].setdefault("custom", {}).update(
+        gradientMode="scheme", spanNulls=False, showPoints="always"
+    )
     graph["fieldConfig"]["defaults"]["thresholds"] = deepcopy(
         p[2]["fieldConfig"]["defaults"]["thresholds"]
     )
@@ -334,7 +340,13 @@ def _dq(p: dict[int, dict]) -> None:
         "placement": "bottom",
         "showLegend": True,
     }
-    graph["targets"][0]["legendFormat"] = "Volume-weighted DQ score (observed)"
+    graph["targets"][0]["legendFormat"] = "DQ score (line=value; legend=minimum)"
+    history_color_help = (
+        " Line colors follow each observed value; legend color uses the minimum "
+        "observed score. Missing intervals remain gaps and do not recolor history."
+    )
+    if history_color_help not in graph["description"]:
+        graph["description"] += history_color_help
     row = p[9404]
     row["panels"] = [child for child in row["panels"] if child["id"] not in {157, 158}]
     context = {

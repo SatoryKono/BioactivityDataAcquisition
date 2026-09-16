@@ -3866,11 +3866,12 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Do not read dual 100% as “all healthy” when Status is UNKNOWN/INCOMPLETE. Quality score trend over selected time range. Kept separate from operational gating indicators. Score thresholds: <0.80=CRIT, 0.80-0.95=WARN, >=0.95=OK; null=UNKNOWN. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Do not read dual 100% as “all healthy” when Status is UNKNOWN/INCOMPLETE. Quality score trend over selected time range. Kept separate from operational gating indicators. Score thresholds: <0.80=CRIT, 0.80-0.95=WARN, >=0.95=OK; null=UNKNOWN. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row TELEMETRY MISSING is not a zero and not VALID EMPTY. Line colors follow each observed value; legend color uses the minimum observed score. Missing intervals remain gaps and do not recolor history.",
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "thresholds"
+                "mode": "thresholds",
+                "seriesBy": "min"
               },
               "decimals": 0,
               "max": 1,
@@ -3905,7 +3906,12 @@
                   }
                 }
               ],
-              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
+              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)",
+              "custom": {
+                "gradientMode": "scheme",
+                "spanNulls": false,
+                "showPoints": "always"
+              }
             },
             "overrides": []
           },
@@ -3935,7 +3941,7 @@
               },
               "editorMode": "code",
               "expr": "((sum((bioetl_dq_validation_score{pipeline=~\"$pipeline\"} * bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}))) / clamp_min(sum(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}), 1))",
-              "legendFormat": "Volume-weighted DQ score (observed)",
+              "legendFormat": "DQ score (line=value; legend=minimum)",
               "range": true,
               "refId": "A"
             }

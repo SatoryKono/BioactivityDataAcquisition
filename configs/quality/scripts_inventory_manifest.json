@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-16T16:43:51.575854+00:00",
+  "generated_at": "2026-09-16T17:52:32.884903+00:00",
   "summary": {
     "total_scripts": 621,
     "status_counts": {
@@ -12835,7 +12835,7 @@
         },
         {
           "path": "tests/integration/test_grafana_render_first_remediation.py",
-          "line": 1435,
+          "line": 1439,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         },
