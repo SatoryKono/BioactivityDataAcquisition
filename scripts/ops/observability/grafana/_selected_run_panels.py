@@ -283,3 +283,24 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
             "panels": [details, deepcopy(summary)],
         }
     )
+
+
+def stamp_selector_columns(payload: dict[str, object]) -> None:
+    """Keep Infinity variable frames typed even when the catalog is empty."""
+    for variable in payload.get("templating", {}).get("list", []):
+        query = variable.get("query")
+        if not isinstance(query, dict):
+            continue
+        infinity = query.get("infinityQuery", {})
+        url = infinity.get("url", "")
+        if not url.startswith("/ops/control-plane/filter-options?"):
+            continue
+        url = url.replace("response_shape=list", "response_shape=options")
+        infinity["url"] = url
+        infinity["parser"] = "simple"
+        infinity["root_selector"] = "items"
+        variable["definition"] = url
+        infinity["columns"] = [
+            {"selector": field, "text": f"__{field}", "type": "string"}
+            for field in ("text", "value")
+        ]

@@ -20,6 +20,7 @@ from scripts.ops.observability.grafana._latest_complete_run_panel import (
 )
 from scripts.ops.observability.grafana._selected_run_panels import (
     stamp_selected_run_panels,
+    stamp_selector_columns,
 )
 from scripts.ops.observability.grafana.action_target_routes import (
     ACTION_DASHBOARD_UID_BY_TARGET,
@@ -1341,6 +1342,7 @@ def apply_to_dashboard(
     # Drop stale transparent fields that confuse some exporters.
     nav.pop("transparent", None)
 
+    stamp_selector_columns(payload)
     stamp_selected_run_panels(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
