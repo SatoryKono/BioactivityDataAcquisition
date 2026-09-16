@@ -11,6 +11,12 @@ from typing import TYPE_CHECKING
 
 from bioetl.domain.ports import MetricsPort, TracingPort
 from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
+from bioetl.composition.bootstrap.runtime.metrics_bootstrap import (
+    bootstrap_metrics,
+)
+from bioetl.composition.bootstrap.runtime.observability import (
+    bootstrap_tracer,
+)
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
@@ -33,9 +39,6 @@ def resolve_metrics_port(
     if metrics is not None:
         return metrics
     if settings is not None:
-        from bioetl.composition.bootstrap.runtime.metrics_bootstrap import (
-            bootstrap_metrics,
-        )
 
         return bootstrap_metrics(settings)
     return NoOpMetrics(warn_on_use=False)
@@ -57,9 +60,6 @@ def resolve_tracing_port(
     if tracer is not None:
         return tracer
     if settings is not None:
-        from bioetl.composition.bootstrap.runtime.observability import (
-            bootstrap_tracer,
-        )
 
         return bootstrap_tracer(settings, service_name=service_name)
     return NoOpTracing()

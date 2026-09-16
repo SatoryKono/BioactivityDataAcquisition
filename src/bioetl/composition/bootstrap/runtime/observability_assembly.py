@@ -12,6 +12,7 @@ from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
 from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
 )
+from bioetl.composition.factories.storage.audit import create_audit_port
 
 if TYPE_CHECKING:
     from bioetl.composition.bootstrap.runtime._observability_bundle_support import (
@@ -27,7 +28,6 @@ def default_audit_bootstrapper(
     tracer: TracingPort,
 ) -> AuditPort:
     """Create the canonical runtime audit port for observability bootstrap."""
-    from bioetl.composition.factories.storage.audit import create_audit_port
 
     return create_audit_port(
         settings=settings,

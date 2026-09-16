@@ -17,6 +17,8 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from .datasource.data_source_factory import DataSourceCreatorProtocol
 
 from bioetl.application.ports.metrics import MetricsFactoryProtocol as _MetricsFactory
+from bioetl.infrastructure import adapters
+from bioetl.infrastructure.storage import bronze_writer
 
 
 def create_shared_metrics(
@@ -66,8 +68,6 @@ def _create_cached_bronze_data_source(
     cached_bronze: CachedBronzeContext,
 ) -> DataSourcePort:
     """Create CachedBronzeDataSource for reading from Bronze cache."""
-    from bioetl.infrastructure import adapters
-    from bioetl.infrastructure.storage import bronze_writer
 
     provider = pipeline_config.provider
     entity_type = pipeline_config.entity_type

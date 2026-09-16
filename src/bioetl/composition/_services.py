@@ -35,6 +35,7 @@ from bioetl.composition._registration import ensure_runtime_registrations
 from bioetl.composition._service_registry import resolve as _resolve
 from bioetl.composition._service_registry import typed_port as _typed_port
 from bioetl.composition.registry_api import create_registry
+from bioetl.composition import _workflow_services
 
 if TYPE_CHECKING:
     from bioetl.composition._service_types import (
@@ -141,14 +142,12 @@ def get_workflow_runner_service(
     registry: PipelineRegistry | None = None,
 ) -> WorkflowRunnerService:
     """Build workflow runner service via the canonical workflow seam."""
-    from bioetl.composition import _workflow_services
 
     return _workflow_services.get_workflow_runner_service(registry=registry)
 
 
 def _workflow_services_module() -> ModuleType:
     """Resolve the workflow composition module through one lazy boundary."""
-    from bioetl.composition import _workflow_services
 
     return _workflow_services
 

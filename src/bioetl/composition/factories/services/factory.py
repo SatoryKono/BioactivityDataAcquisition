@@ -38,6 +38,7 @@ from bioetl.composition.factories.services.port_factories import (
     create_metrics,
     create_quarantine,
 )
+from bioetl.composition.factories.services.builder import ServicesBuilder
 
 if TYPE_CHECKING:
     from bioetl.application.core.wiring.factory import PipelineService
@@ -78,7 +79,6 @@ __all__ = [
 def __getattr__(name: str) -> object:
     """Load heavier compatibility exports only when callers request them."""
     if name == "ServicesBuilder":
-        from bioetl.composition.factories.services.builder import ServicesBuilder
 
         return ServicesBuilder
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

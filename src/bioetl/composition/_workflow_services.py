@@ -56,6 +56,7 @@ from bioetl.application.services.control_plane.workflow.ledger_service import (
 from bioetl.composition.factories.services.port_factories import (
     WorkflowMetricsFactoryProtocol as _WorkflowMetricsFactory,
 )
+from bioetl.infrastructure import locking
 
 
 __all__ = [
@@ -161,7 +162,6 @@ def _get_workflow_memory_lock() -> LockPort:
     """Return or lazily create the global in-memory workflow lock."""
     global _workflow_memory_lock
     if _workflow_memory_lock is None:
-        from bioetl.infrastructure import locking
 
         _workflow_memory_lock = locking.MemoryLock()
     return _workflow_memory_lock

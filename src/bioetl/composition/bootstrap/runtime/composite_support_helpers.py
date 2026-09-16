@@ -41,6 +41,8 @@ from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import 
 from bioetl.composition.occurrence_identity import create_runtime_occurrence_uuid
 from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
+from bioetl.application.services.quality import dq_report_service
+from bioetl.infrastructure.export import dq_report_writer
 
 if TYPE_CHECKING:
     import polars as pl
@@ -224,8 +226,6 @@ def _create_dq_report_service(
     Returns:
         DQReportService ready for composite pipeline DQ report generation.
     """
-    from bioetl.application.services.quality import dq_report_service
-    from bioetl.infrastructure.export import dq_report_writer
 
     reports_base_path = Path(settings.data_dir) / "output" / "reports" / "dq"
     report_writer = dq_report_writer.DQReportWriter(

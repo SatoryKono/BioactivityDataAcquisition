@@ -61,6 +61,15 @@ from bioetl.infrastructure.schemas.composite_config import (
 )
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+from bioetl.composition.bootstrap.runtime.runner_assembly import (
+    create_composite_runner_service,
+)
+from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
+    _create_dq_report_service,
+)
+from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
+    create_composite_runner as _create_composite_runner_builder_impl,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -91,15 +100,9 @@ def __getattr__(name: str) -> object:
     if name == "CompositeRuntimeConfig":
         return CompositeRuntimeConfig
     if name == "create_composite_runner_service":
-        from bioetl.composition.bootstrap.runtime.runner_assembly import (
-            create_composite_runner_service,
-        )
 
         return create_composite_runner_service
     if name == "_create_dq_report_service":
-        from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
-            _create_dq_report_service,
-        )
 
         return _create_dq_report_service
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
@@ -211,12 +214,6 @@ def _create_composite_runner_from_plan(
     plan: _CompositeBootstrapPlan,
 ) -> CompositePipelineRunner:
     """Create the final composite runner from the resolved bootstrap plan."""
-    from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
-        create_composite_runner as _create_composite_runner_builder_impl,
-    )
-    from bioetl.composition.bootstrap.runtime.runner_assembly import (
-        create_composite_runner_service,
-    )
 
     return _create_composite_runner_from_plan_impl(
         config=config,

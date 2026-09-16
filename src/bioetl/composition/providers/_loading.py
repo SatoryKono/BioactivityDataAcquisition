@@ -7,11 +7,11 @@ from collections.abc import Callable
 from bioetl.composition.providers._registry_protocols import (
     ProviderRegistrarProtocol,
 )
+from bioetl.composition.providers.registration import register_all_providers
 
 
 def _register_default_providers(registry: ProviderRegistrarProtocol) -> None:
     """Register providers using the canonical registration entrypoint."""
-    from bioetl.composition.providers.registration import register_all_providers
 
     register_all_providers(registry=registry)
 

@@ -16,6 +16,9 @@ from bioetl.domain.types import RunType
 from bioetl.domain.filtering.silver_filter_identity import (
     resolve_silver_filter_compatibility_mode,
 )
+from bioetl.composition.runtime_builders.runner_builder_wiring import (
+    RunnerBuilderWiring,
+)
 
 if TYPE_CHECKING:
     from bioetl.composition.registry_api import PipelineRegistry
@@ -57,9 +60,6 @@ class RuntimeBootstrapPhases:
     @property
     def wiring(self) -> RunnerBuilderWiring:
         """Return the canonical aggregate runner wiring bundle."""
-        from bioetl.composition.runtime_builders.runner_builder_wiring import (
-            RunnerBuilderWiring,
-        )
 
         return RunnerBuilderWiring(
             factory=self.factory_wiring,

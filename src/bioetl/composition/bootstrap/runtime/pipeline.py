@@ -20,6 +20,9 @@ from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
 from bioetl.composition.runtime_builders.runner_builder import (
     build_pipeline_runner as _build_pipeline_runner,
 )
+from bioetl.composition.runtime_builders.runner_builder_wiring import (
+    RunnerBuilderWiring,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.composite.runtime_wiring_api import PipelineRunner
@@ -93,9 +96,6 @@ def bootstrap_pipeline_runner(
         registry=registry,
         load_pipeline_config_fn=load_pipeline_config_fn,
         resolve_configs_root_fn=resolve_configs_root,
-    )
-    from bioetl.composition.runtime_builders.runner_builder_wiring import (
-        RunnerBuilderWiring,
     )
 
     wiring = RunnerBuilderWiring(

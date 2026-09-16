@@ -22,6 +22,9 @@ from bioetl.composition.factories.services.port_factories import create_metrics
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.time import SystemClock
+from bioetl.composition.bootstrap.runtime.enum_loader_wiring import (
+    initialize_domain_enum_fields,
+)
 
 if TYPE_CHECKING:
     import polars as pl
@@ -82,11 +85,6 @@ def bootstrap_runtime_basics(
     effective_run_id = run_id or str(uuid_factory())
     settings = settings_provider()
     logger = logger_bootstrapper(config.name, UUID(effective_run_id), "INFO")
-
-    # Initialize domain layer enum fields with proper dependency injection
-    from bioetl.composition.bootstrap.runtime.enum_loader_wiring import (
-        initialize_domain_enum_fields,
-    )
 
     initialize_domain_enum_fields()
 

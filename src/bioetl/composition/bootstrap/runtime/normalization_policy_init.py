@@ -12,6 +12,9 @@ from bioetl.domain.normalization.profiles.chembl_policy_registry_data import (
 from bioetl.infrastructure.config.chembl_policy_registry_loader import (
     ChemblPolicyRegistryLoader,
 )
+from bioetl.domain.normalization.profiles.chembl_policy_registry import (
+    initialize_chembl_policy_registry as initialize_domain_chembl_policy_registry,
+)
 
 
 @cache
@@ -30,9 +33,6 @@ def initialize_chembl_policy_registry(configs_root: Path) -> None:
     The config payload is cached per ``configs_root`` within the current process
     to avoid repeated filesystem scans during sequential runtime bootstraps.
     """
-    from bioetl.domain.normalization.profiles.chembl_policy_registry import (
-        initialize_chembl_policy_registry as initialize_domain_chembl_policy_registry,
-    )
 
     initialize_domain_chembl_policy_registry(
         _load_chembl_policy_registry_data(str(configs_root))

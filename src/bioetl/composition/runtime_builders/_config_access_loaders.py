@@ -14,6 +14,9 @@ from bioetl.infrastructure.config.pipeline_config_api import (
 from bioetl.infrastructure.config.source_config_loader import (
     load_source_config_from_root,
 )
+from bioetl.infrastructure.config.dq_contract_config_loader import (
+    load_dq_config_for_pipeline as _load_dq_config_for_pipeline,
+)
 
 __all__ = [
     "create_dq_config_loader",
@@ -42,9 +45,6 @@ def create_dq_config_loader(
     configs_root: Path,
 ) -> Callable[[str], object]:
     """Bind DQ config loading to one explicit config root."""
-    from bioetl.infrastructure.config.dq_contract_config_loader import (
-        load_dq_config_for_pipeline as _load_dq_config_for_pipeline,
-    )
 
     resolved_configs_root = resolve_configs_root(configs_root)
 

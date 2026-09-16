@@ -7,6 +7,10 @@ from importlib import import_module
 from bioetl.composition.factories.pipeline.creation_support import (
     _BuildPipelineServicesFn as _BuildPipelineServicesFn,
 )
+from bioetl.composition.factories.services import factory as _factory
+from bioetl.composition.factories.services import (
+    observability_api as _observability_api,
+)
 
 _PIPELINE_CREATION_EXPORTS = frozenset(
     {
@@ -46,13 +50,9 @@ def __getattr__(name: str) -> object:
             name,
         )
     if name in _FACTORY_EXPORTS:
-        from bioetl.composition.factories.services import factory as _factory
 
         return getattr(_factory, name)
     if name in _OBSERVABILITY_EXPORTS:
-        from bioetl.composition.factories.services import (
-            observability_api as _observability_api,
-        )
 
         return getattr(_observability_api, name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

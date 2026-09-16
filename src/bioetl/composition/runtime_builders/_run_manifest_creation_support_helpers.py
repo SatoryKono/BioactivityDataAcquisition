@@ -30,6 +30,9 @@ from bioetl.domain.filtering.silver_filter_identity import (
     resolve_silver_filter_compatibility_mode,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunSourceRef
+from bioetl.composition.bootstrap.control_plane_store_builders import (
+    create_run_ledger_store,
+)
 
 if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
@@ -159,9 +162,6 @@ def create_ledger_service(
     ctx: PipelineRunContext,
 ) -> RunLedgerService | None:
     """Build the optional run-ledger service for manifest publication."""
-    from bioetl.composition.bootstrap.control_plane_store_builders import (
-        create_run_ledger_store,
-    )
 
     return RunLedgerService(
         ledger_port=create_run_ledger_store(

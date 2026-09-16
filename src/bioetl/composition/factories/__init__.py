@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from importlib import import_module
 from typing import TYPE_CHECKING
+from bioetl.composition.factories import pipeline as _pipeline
+from bioetl.composition.factories.pipeline import registry as _registry
 
 if TYPE_CHECKING:
     from bioetl.composition.factories.datasource.data_source_factory import (
@@ -131,11 +133,9 @@ def __getattr__(name: str) -> object:
         globals()[name] = value
         return value
     if name in _PIPELINE_EXPORTS:
-        from bioetl.composition.factories import pipeline as _pipeline
 
         return getattr(_pipeline, name)
     if name in _PIPELINE_FACTORY_EXPORTS:
-        from bioetl.composition.factories.pipeline import registry as _registry
 
         return getattr(_registry, name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

@@ -13,6 +13,16 @@ from bioetl.composition.runtime_builders._config_access_loaders import (
 from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.infrastructure.config.settings_api import get_settings as _get_settings
+from bioetl.infrastructure.config.pipeline_config_api import (
+    load_pipeline_config as _load_pipeline_config,
+)
+from bioetl.infrastructure.config.source_config_loader import (
+    load_source_config as _load_source_config,
+)
+from bioetl.infrastructure.config.dq_contract_config_loader import (
+    load_dq_config_for_pipeline as _load_dq_config_for_pipeline,
+)
 
 __all__ = [
     "create_dq_config_loader",
@@ -42,7 +52,6 @@ def create_source_config_loader(configs_root: Path) -> Callable[[str], object]:
 
 
 def get_settings() -> Settings:
-    from bioetl.infrastructure.config.settings_api import get_settings as _get_settings
 
     return _get_settings()
 
@@ -53,17 +62,11 @@ def load_settings() -> Settings:
 
 def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     """Load pipeline YAML through the canonical infrastructure entrypoint."""
-    from bioetl.infrastructure.config.pipeline_config_api import (
-        load_pipeline_config as _load_pipeline_config,
-    )
 
     return _load_pipeline_config(pipeline_name)
 
 
 def load_source_config(provider: str) -> object:
-    from bioetl.infrastructure.config.source_config_loader import (
-        load_source_config as _load_source_config,
-    )
 
     return _load_source_config(provider)
 
@@ -74,9 +77,6 @@ def load_dq_config_for_pipeline(
     configs_root: Path | None = None,
 ) -> object:
     """Load DQ config through the canonical infrastructure entrypoint."""
-    from bioetl.infrastructure.config.dq_contract_config_loader import (
-        load_dq_config_for_pipeline as _load_dq_config_for_pipeline,
-    )
 
     if configs_root is None:
         configs_root = resolve_configs_root(None)

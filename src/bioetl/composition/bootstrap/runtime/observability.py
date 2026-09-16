@@ -28,6 +28,9 @@ from .observability_bundle import (
     validate_observability_preflight_impl as _validate_observability_preflight_impl,
 )
 from .tracing_bootstrap import bootstrap_tracer as _bootstrap_tracer_impl
+from bioetl.composition.factories.storage.audit import (
+    create_audit_port as create_audit_port_impl,
+)
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
@@ -53,9 +56,6 @@ def _create_runtime_audit_port(
     tracing: TracingPort,
 ) -> AuditPort:
     """Resolve the canonical runtime audit factory lazily."""
-    from bioetl.composition.factories.storage.audit import (
-        create_audit_port as create_audit_port_impl,
-    )
 
     return create_audit_port_impl(
         settings=settings,

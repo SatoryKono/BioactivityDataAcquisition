@@ -14,6 +14,17 @@ from bioetl.composition.providers._models import ProviderSettingsProtocol
 from bioetl.domain.ports import DataSourcePort
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.infrastructure.config.source_config_loader import load_source_config
+from bioetl.composition.providers._registration_contracts import (
+    resolve_provider_assembly_support,
+)
+from bioetl.composition.providers._registration_contracts import (
+    build_http_provider_config_map,
+)
+from bioetl.application.core.data_sources.filtered import FilteredDataSource
+from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
+from bioetl.composition.factories.datasource.adapter_helpers import (
+    AdapterHelpersFactory,
+)
 
 if TYPE_CHECKING:
     from bioetl.composition.bootstrap_contexts import RateLimitContext
@@ -75,9 +86,6 @@ def _resolve_provider_family_registration_context(
     assembly_support: ProviderAssemblySupport | None = None,
 ) -> tuple[ProviderAssemblySupport, dict[str, RateLimitContext]]:
     """Resolve shared assembly support plus YAML-backed rate limits for a family."""
-    from bioetl.composition.providers._registration_contracts import (
-        resolve_provider_assembly_support,
-    )
 
     return (
         resolve_provider_assembly_support(assembly_support),
@@ -94,9 +102,6 @@ def _build_provider_family_http_config_map(
     ],
 ) -> dict[str, ProviderConfig]:
     """Build one family's HTTP provider configs from a manifest builder."""
-    from bioetl.composition.providers._registration_contracts import (
-        build_http_provider_config_map,
-    )
 
     return build_http_provider_config_map(
         specs=spec_builder(rate_limits),
@@ -224,8 +229,6 @@ def _wrap_with_filter(
     Returns:
         FilteredDataSource wrapping data_source, or data_source unchanged.
     """
-    from bioetl.application.core.data_sources.filtered import FilteredDataSource
-    from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
 
     _wire_composable_fallback(data_source)
 
@@ -295,12 +298,6 @@ def _create_http_data_source(
     Returns:
         DataSourcePort, optionally wrapped with FilteredDataSource.
     """
-    from bioetl.composition.factories.datasource.adapter_helpers import (
-        AdapterHelpersFactory,
-    )
-    from bioetl.composition.providers._registration_contracts import (
-        resolve_provider_assembly_support,
-    )
 
     support = resolve_provider_assembly_support(assembly_support)
     http_client = support.create_http_client(provider, settings, metrics=metrics)

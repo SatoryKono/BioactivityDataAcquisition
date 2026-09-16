@@ -16,6 +16,9 @@ from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
     log_cached_bronze as _log_cached_bronze,
 )
 from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
+from bioetl.composition.runtime_builders.inputs_runtime_models import (
+    ResolvedVacuumSettings,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -57,9 +60,6 @@ def __getattr__(name: str) -> object:  # pragma: no cover
     if TYPE_CHECKING:
         raise AttributeError
     if name == "ResolvedVacuumSettings":
-        from bioetl.composition.runtime_builders.inputs_runtime_models import (
-            ResolvedVacuumSettings,
-        )
 
         return ResolvedVacuumSettings
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

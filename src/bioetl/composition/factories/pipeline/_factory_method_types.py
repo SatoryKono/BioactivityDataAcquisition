@@ -34,6 +34,9 @@ from bioetl.domain.ports import (
 from bioetl.domain.types import GoldSchemaType, RunID
 from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.composition.pipeline_runner_request import (
+    build_pipeline_create_runner_request_from_kwargs as _build_request,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -114,9 +117,6 @@ def build_pipeline_create_runner_request_from_kwargs(
     **kwargs: object,
 ) -> PipelineCreateRunnerRequest:
     """Compat shim for legacy factory imports expecting the kwargs builder here."""
-    from bioetl.composition.pipeline_runner_request import (
-        build_pipeline_create_runner_request_from_kwargs as _build_request,
-    )
 
     return _build_request(**kwargs)
 

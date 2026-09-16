@@ -12,6 +12,9 @@ from bioetl.domain.mapping.publication_controlled_vocabulary import (
 from bioetl.infrastructure.config.publication_controlled_vocabulary_loader import (
     PublicationControlledVocabularyLoader,
 )
+from bioetl.domain.mapping.publication_controlled_vocabulary import (
+    initialize_publication_controlled_vocabulary as initialize_registry,
+)
 
 
 @cache
@@ -26,8 +29,5 @@ def _load_publication_controlled_vocabulary_data(
 
 def initialize_publication_controlled_vocabulary(configs_root: Path) -> None:
     """Load publication controlled vocabulary and initialize the domain registry."""
-    from bioetl.domain.mapping.publication_controlled_vocabulary import (
-        initialize_publication_controlled_vocabulary as initialize_registry,
-    )
 
     initialize_registry(_load_publication_controlled_vocabulary_data(str(configs_root)))

@@ -22,6 +22,9 @@ from bioetl.composition.bootstrap.runtime._runner_assembly_support import (
 )
 from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.ports import LoggerPort
+from bioetl.composition.bootstrap.runtime.runner_bootstrap_wiring import (
+    bootstrap_composite_runner_via_wiring,
+)
 
 if TYPE_CHECKING:
     import polars as pl
@@ -108,9 +111,6 @@ def bootstrap_composite_runner(
     create_composite_runner_fn: Callable[..., CompositePipelineRunner],
 ) -> CompositePipelineRunner:
     """Assemble and create a composite runner via injected dependency builders."""
-    from bioetl.composition.bootstrap.runtime.runner_bootstrap_wiring import (
-        bootstrap_composite_runner_via_wiring,
-    )
 
     return bootstrap_composite_runner_via_wiring(
         config=config,

@@ -2,6 +2,10 @@
 """Public pipeline-factory imports; registry API lives in ``composition.registry_api``."""
 
 from __future__ import annotations
+from bioetl.composition.factories.pipeline import assembler as _assembler
+from bioetl.composition.factories.services.bundle import (
+    build_pipeline_services,
+)
 
 
 def __getattr__(name: str) -> object:
@@ -11,13 +15,9 @@ def __getattr__(name: str) -> object:
         "assemble_runner",
         "create_pipeline_factory",
     }:
-        from bioetl.composition.factories.pipeline import assembler as _assembler
 
         return getattr(_assembler, name)
     if name == "build_pipeline_services":
-        from bioetl.composition.factories.services.bundle import (
-            build_pipeline_services,
-        )
 
         return build_pipeline_services
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

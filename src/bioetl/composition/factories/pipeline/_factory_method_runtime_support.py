@@ -35,6 +35,7 @@ from bioetl.domain.ports import (
 from bioetl.domain.types import GoldSchemaType, RunID
 from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.composition.factories.dq.context_resolver import extract_dq_configs
 
 
 def create_pipeline_instance_from_request(
@@ -84,7 +85,6 @@ def create_factory_runner_from_request(
     cached_bronze: CachedBronzeContext | None,
 ) -> PipelineRunner:
     """Create a pipeline and assemble a runner from resolved runtime inputs."""
-    from bioetl.composition.factories.dq.context_resolver import extract_dq_configs
 
     artifacts = control_plane_artifacts
     # Concrete Settings/PipelineYamlConfig still required by the creation-request

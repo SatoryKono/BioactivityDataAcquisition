@@ -25,6 +25,10 @@ if TYPE_CHECKING:
 from bioetl.application.ports.providers import ProviderHttpClientFactoryProtocol
 from bioetl.application.ports.providers import ProviderAdapterFactoryProtocol
 from bioetl.application.ports.providers import SupportAwareDataSourceCreatorProtocol
+from bioetl.composition.factories.datasource.http_client import HttpClientFactory
+from bioetl.composition.factories.datasource.data_source_factory import (
+    DataSourceFactory,
+)
 
 
 @dataclass(frozen=True)
@@ -76,7 +80,6 @@ def _create_http_client_for_provider(
     provider_registry: ProviderDataSourceAccessProtocol | None = None,
 ) -> UnifiedHTTPClient:
     """Resolve the canonical HTTP client factory lazily at the composition edge."""
-    from bioetl.composition.factories.datasource.http_client import HttpClientFactory
 
     return HttpClientFactory.create_for_provider(
         provider,
@@ -97,9 +100,6 @@ def _create_adapter_for_provider(
     **kwargs: object,
 ) -> DataSourcePort:
     """Resolve the canonical adapter factory lazily at the composition edge."""
-    from bioetl.composition.factories.datasource.data_source_factory import (
-        DataSourceFactory,
-    )
 
     return DataSourceFactory.create(
         provider,

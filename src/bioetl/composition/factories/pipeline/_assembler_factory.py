@@ -62,10 +62,10 @@ from bioetl.domain.ports import (
 )
 from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.composition.factories.pipeline import assembler as public_assembler
 
 
 def _public_assembler_seam(name: str) -> object:
-    from bioetl.composition.factories.pipeline import assembler as public_assembler
 
     return getattr(public_assembler, name)
 

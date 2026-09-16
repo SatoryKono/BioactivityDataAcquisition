@@ -25,6 +25,9 @@ from bioetl.composition.contracts.resources import (
     MedallionLifecycleServiceProtocol,
     QuarantineRuntimeServiceProtocol,
 )
+from bioetl.infrastructure.config.pipeline_config_api import (
+    load_pipeline_config as impl,
+)
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -69,9 +72,6 @@ def bootstrap_cleanup_service() -> CleanupServiceProtocol:
 
 def load_pipeline_config(pipeline: str) -> PipelineYamlConfig:
     """Resolve pipeline config loading lazily for patch-friendly tests."""
-    from bioetl.infrastructure.config.pipeline_config_api import (
-        load_pipeline_config as impl,
-    )
 
     return impl(pipeline)
 

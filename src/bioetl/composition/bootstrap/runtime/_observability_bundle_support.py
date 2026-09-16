@@ -24,6 +24,18 @@ from bioetl.domain.ports import (
     TracingPort,
 )
 from bioetl.domain.ports.noop import NoOpAudit
+from bioetl.composition.bootstrap.runtime.logger_bootstrap import (
+    bootstrap_logger,
+)
+from bioetl.composition.bootstrap.runtime.tracing_bootstrap import (
+    bootstrap_tracer,
+)
+from bioetl.composition.bootstrap.runtime.metrics_bootstrap import (
+    bootstrap_metrics,
+)
+from bioetl.composition.bootstrap.runtime.dq_bootstrap import (
+    bootstrap_dq_monitor,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -167,9 +179,6 @@ def resolve_observability_bootstrappers(
     """Fill optional bootstrapper hooks with default composition collaborators."""
     resolved_logger: Callable[[str, UUID, str], LoggerPort]
     if logger_bootstrapper is None:
-        from bioetl.composition.bootstrap.runtime.logger_bootstrap import (
-            bootstrap_logger,
-        )
 
         resolved_logger = bootstrap_logger
     else:
@@ -177,9 +186,6 @@ def resolve_observability_bootstrappers(
 
     resolved_tracer: Callable[[Settings], TracingPort]
     if tracer_bootstrapper is None:
-        from bioetl.composition.bootstrap.runtime.tracing_bootstrap import (
-            bootstrap_tracer,
-        )
 
         resolved_tracer = bootstrap_tracer
     else:
@@ -187,9 +193,6 @@ def resolve_observability_bootstrappers(
 
     resolved_metrics: Callable[[Settings], MetricsPort]
     if metrics_bootstrapper is None:
-        from bioetl.composition.bootstrap.runtime.metrics_bootstrap import (
-            bootstrap_metrics,
-        )
 
         resolved_metrics = bootstrap_metrics
     else:
@@ -197,9 +200,6 @@ def resolve_observability_bootstrappers(
 
     resolved_dq_monitor: Callable[[Settings, LoggerPort | None], DQMonitorPort | None]
     if dq_monitor_bootstrapper is None:
-        from bioetl.composition.bootstrap.runtime.dq_bootstrap import (
-            bootstrap_dq_monitor,
-        )
 
         resolved_dq_monitor = bootstrap_dq_monitor
     else:

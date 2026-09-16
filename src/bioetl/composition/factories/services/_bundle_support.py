@@ -28,6 +28,12 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 from bioetl.application.ports.pipeline import BaseServicesFactoryProtocol
+from bioetl.composition.factories.services.observability_api import (
+    create_data_source_with_observability,
+)
+from bioetl.composition.factories.pipeline.creation_support import (
+    _PipelineCreationInputs,
+)
 
 __all__ = [
     "BaseServicesFactoryProtocol",
@@ -79,9 +85,6 @@ def create_pipeline_data_source(
     create_data_source_impl_fn: Callable[..., DataSourcePort],
 ) -> DataSourcePort:
     """Resolve live-vs-cached data source construction for one pipeline run."""
-    from bioetl.composition.factories.services.observability_api import (
-        create_data_source_with_observability,
-    )
 
     return create_data_source_with_observability(
         create_data_source_fn=create_data_source_fn,
@@ -115,9 +118,6 @@ def build_pipeline_creation_inputs(
     request: _PipelineCreationRequest,
 ) -> _PipelineCreationInputs:
     """Build the delegated pipeline-creation envelope."""
-    from bioetl.composition.factories.pipeline.creation_support import (
-        _PipelineCreationInputs,
-    )
 
     return _PipelineCreationInputs(
         pipeline_name=identity.pipeline_name,
