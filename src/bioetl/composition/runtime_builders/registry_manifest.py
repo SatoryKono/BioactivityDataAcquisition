@@ -29,7 +29,7 @@ RUNTIME_BUILDER_EXPORTS: tuple[RuntimeBuilderExportEntry, ...] = (
     ),
     RuntimeBuilderExportEntry(
         "control_plane_root",
-        "bioetl.composition.runtime_builders._run_manifest_data_roots",
+        "bioetl.composition.runtime_builders.run_manifest_data_roots",
         "control_plane_root",
     ),
 )

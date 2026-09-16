@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.composition.runtime_builders._run_manifest_data_roots import (
+from bioetl.composition.runtime_builders.run_manifest_data_roots import (
     resolve_data_root,
 )
 

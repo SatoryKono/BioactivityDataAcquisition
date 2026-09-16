@@ -47,11 +47,9 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_invar
 from bioetl.application.services.control_plane.manifest.inspection_result_model import (
     RunManifestInspectionResult,
 )
-from bioetl.application.services.control_plane.replay._historical_snapshot_certification_modes import (
+from bioetl.domain.control_plane.snapshot_materialization import (
     HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED,
     HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
-)
-from bioetl.application.services.control_plane.replay._historical_snapshot_materialization_modes import (
     LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,
     MIXED_POST_MANIFEST_SNAPSHOT_MATERIALIZATION,
     POST_MANIFEST_SNAPSHOT_MATERIALIZATION_MODES,

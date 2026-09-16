@@ -42,8 +42,8 @@
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.376,
-      "files": 131,
-      "total_loc": 15089,
+      "files": 128,
+      "total_loc": 15024,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 2
     },

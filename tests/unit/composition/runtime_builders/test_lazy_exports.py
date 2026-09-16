@@ -32,7 +32,7 @@ from __future__ import annotations
 import pytest
 
 from bioetl.composition import runtime_builders
-from bioetl.composition.runtime_builders import _run_manifest_data_roots
+from bioetl.composition.runtime_builders import run_manifest_data_roots
 from bioetl.composition.runtime_builders import runner_builder
 
 pytestmark = pytest.mark.unit
@@ -65,7 +65,7 @@ def test_control_plane_root_lazy_export_delegates(monkeypatch) -> None:
         return "root"
 
     monkeypatch.setattr(
-        _run_manifest_data_roots,
+        run_manifest_data_roots,
         "control_plane_root",
         fake_control_plane_root,
     )
