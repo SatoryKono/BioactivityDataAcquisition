@@ -15,7 +15,7 @@ _CONFIG_GRAPH_FILE_SUFFIXES = (".yaml", ".yml", ".toml", ".lock")
 _DEPENDENCY_PROVENANCE_FILES = ("pyproject.toml", "uv.lock", "poetry.lock")
 
 
-def _normalize_relative_posix_path(value: str) -> str:
+def normalize_relative_posix_path(value: str) -> str:
     return posixpath.normpath(value.replace("\\", "/"))
 
 
@@ -72,14 +72,14 @@ def _resolve_config_graph_reference(*, raw_value: str, base_dir: str) -> str | N
         return None
     if not candidate.endswith(_CONFIG_GRAPH_FILE_SUFFIXES):
         return None
-    normalized_candidate = _normalize_relative_posix_path(candidate)
+    normalized_candidate = normalize_relative_posix_path(candidate)
     if normalized_candidate in _DEPENDENCY_PROVENANCE_FILES:
         return normalized_candidate
     if normalized_candidate.startswith("/"):
         return None
     if normalized_candidate.startswith("configs/"):
         return normalized_candidate
-    resolved = _normalize_relative_posix_path(
+    resolved = normalize_relative_posix_path(
         posixpath.join(base_dir, normalized_candidate)
     )
     if resolved.startswith("../") or resolved == "..":
@@ -117,7 +117,7 @@ def _discover_effective_config_graph_paths(
     seen: set[str] = set()
     while pending:
         relative_path = pending.pop(0)
-        normalized = _normalize_relative_posix_path(relative_path)
+        normalized = normalize_relative_posix_path(relative_path)
         if normalized in seen:
             continue
         seen.add(normalized)

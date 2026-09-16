@@ -52,7 +52,7 @@ class TestCreateHttpDataSource:
         "bioetl.composition.providers._config_helpers._wrap_with_filter",
     )
     @patch(
-        "bioetl.composition.factories.datasource.adapter_helpers.AdapterHelpersFactory",
+        "bioetl.composition.providers._config_helpers.AdapterHelpersFactory",
     )
     def test_assembles_adapter_with_helpers_and_wraps(
         self,
@@ -259,11 +259,10 @@ def test_config_helpers_build_http_map_via_registration_contract(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from bioetl.composition.providers import _config_helpers as helpers
-    from bioetl.composition.providers import _registration_contracts as contracts
 
     support = object()
     monkeypatch.setattr(
-        contracts,
+        helpers,
         "build_http_provider_config_map",
         lambda *, specs, assembly_support: {
             "specs": specs,

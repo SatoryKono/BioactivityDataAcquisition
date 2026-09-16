@@ -23,10 +23,10 @@ flowchart LR
     interfaces[interfaces]
     application -->|1577 OK| application
     application -->|1000 OK| domain
-    composition -->|196 OK| application
-    composition -->|662 OK| composition
+    composition -->|195 OK| application
+    composition -->|664 OK| composition
     composition -->|285 OK| domain
-    composition -->|254 OK| infrastructure
+    composition -->|253 OK| infrastructure
     domain -->|1242 OK| domain
     infrastructure -->|767 OK| domain
     infrastructure -->|1204 OK| infrastructure
@@ -42,10 +42,10 @@ flowchart LR
 | ---------------- | ---------------- | ------: | ------- |
 | `application`    | `application`    |    1577 | allowed |
 | `application`    | `domain`         |    1000 | allowed |
-| `composition`    | `application`    |     196 | allowed |
-| `composition`    | `composition`    |     662 | allowed |
+| `composition`    | `application`    |     195 | allowed |
+| `composition`    | `composition`    |     664 | allowed |
 | `composition`    | `domain`         |     285 | allowed |
-| `composition`    | `infrastructure` |     254 | allowed |
+| `composition`    | `infrastructure` |     253 | allowed |
 | `domain`         | `domain`         |    1242 | allowed |
 | `infrastructure` | `domain`         |     767 | allowed |
 | `infrastructure` | `infrastructure` |    1204 | allowed |
@@ -103,13 +103,13 @@ flowchart LR
 | `composition.bootstrap`        | `infrastructure.config`                    |      17 |
 | `infrastructure.schemas`       | `domain.config`                            |      17 |
 | `composition.factories`        | `application.ports`                        |      16 |
-| `composition.bootstrap`        | `infrastructure.observability`             |      15 |
 | `composition.factories`        | `infrastructure.storage`                   |      15 |
 | `infrastructure.control_plane` | `domain.types`                             |      15 |
 | `infrastructure.quality`       | `domain.types`                             |      15 |
 | `infrastructure.storage`       | `domain.exceptions`                        |      15 |
 | `application.services`         | `domain.normalization`                     |      14 |
 | `application.services`         | `domain.run_reports`                       |      14 |
+| `composition.bootstrap`        | `infrastructure.observability`             |      14 |
 | `infrastructure.observability` | `domain.ports`                             |      14 |
 | `application.core`             | `domain.exceptions`                        |      13 |
 | `application.services`         | `domain.behavior`                          |      13 |

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Mapping
 from importlib import import_module
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 type LazyExportTarget = str | tuple[str, str]
 
@@ -13,7 +13,9 @@ __all__ = [
     "install_cached_public_exports",
     "install_lazy_exports",
     "lazy_export_dir",
+    "resolve_lazy_callable",
     "resolve_lazy_export",
+    "resolve_lazy_target",
 ]
 
 
@@ -23,6 +25,18 @@ def _resolve_export_target(
     if isinstance(target, tuple):
         return target
     return target, export_name
+
+
+def resolve_lazy_target(target_module: str, target_attr: str) -> object:
+    """Resolve one module attribute without importing its owner eagerly."""
+    return getattr(import_module(target_module), target_attr)
+
+
+def resolve_lazy_callable[ResultT](
+    target_module: str, target_attr: str
+) -> Callable[..., ResultT]:
+    """Resolve a callable target while preserving its expected return type."""
+    return cast(Callable[..., ResultT], resolve_lazy_target(target_module, target_attr))
 
 
 def resolve_lazy_export(
@@ -39,7 +53,7 @@ def resolve_lazy_export(
         raise AttributeError(f"module {module_name!r} has no attribute {name!r}")
 
     target_module, target_attr = _resolve_export_target(target, name)
-    value = getattr(import_module(target_module), target_attr)
+    value = resolve_lazy_target(target_module, target_attr)
     if cache:
         module_globals[name] = value
     return value

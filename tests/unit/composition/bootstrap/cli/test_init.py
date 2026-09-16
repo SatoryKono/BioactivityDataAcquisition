@@ -68,13 +68,13 @@ def test_bootstrap_control_plane_lifecycle_store_builds_expected_path(
     class _FakeMetrics:
         pass
 
-    from bioetl.composition.runtime_builders import config_access
     from bioetl.infrastructure import control_plane
     from bioetl.infrastructure.observability import noop_logger
     from bioetl.domain.ports import noop as noop_port
+    import bioetl.composition.bootstrap.cli as cli_pkg
 
     monkeypatch.setattr(
-        config_access,
+        cli_pkg,
         "get_settings",
         lambda: SimpleNamespace(data_dir=str(tmp_path / "data")),
     )
@@ -83,8 +83,6 @@ def test_bootstrap_control_plane_lifecycle_store_builds_expected_path(
     )
     monkeypatch.setattr(noop_logger, "NoOpLogger", _FakeLogger)
     monkeypatch.setattr(noop_port, "NoOpMetrics", _FakeMetrics)
-
-    import bioetl.composition.bootstrap.cli as cli_pkg
 
     store = cli_pkg.bootstrap_control_plane_lifecycle_store()
 

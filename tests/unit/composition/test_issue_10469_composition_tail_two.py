@@ -55,7 +55,7 @@ def test_cached_bronze_preflight_ignores_disabled_context() -> None:
     "module",
     [transformer_dependencies, pipeline_transformer_dependencies],
 )
-def test_composition_default_pii_hasher__uses_configured_salt(
+def test_composition_default_pii_hasher_uses_configured_salt(
     module: object,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

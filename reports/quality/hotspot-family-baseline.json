@@ -1523,9 +1523,9 @@
       ],
       "duplication_clusters": 0,
       "files": 52,
-      "total_loc": 6171,
+      "total_loc": 6172,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.337,
+      "helper_function_ratio": 0.328,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.tracing_bootstrap",
       "bounded_growth_budgets": {
@@ -3767,9 +3767,9 @@
       ],
       "duplication_clusters": 0,
       "files": 55,
-      "total_loc": 7088,
+      "total_loc": 7100,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.379,
+      "helper_function_ratio": 0.375,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.runtime_builders.runner_inputs",
       "bounded_growth_budgets": {
@@ -3778,9 +3778,9 @@
       },
       "internal_fan_in_census": {
         "distribution": {
-          "0": 2,
-          "1": 28,
-          "2": 25
+          "0": 3,
+          "1": 26,
+          "2": 26
         },
         "modules": [
           {
@@ -4045,8 +4045,9 @@
           },
           {
             "module": "bioetl.composition.runtime_builders.config_access",
-            "fan_in": 1,
+            "fan_in": 2,
             "runtime_importers": [
+              "bioetl.composition.runtime_builders.inputs_resolver",
               "bioetl.composition.runtime_builders.runner_builder_wiring"
             ]
           },
@@ -4120,10 +4121,8 @@
           },
           {
             "module": "bioetl.composition.runtime_builders.observability_builder",
-            "fan_in": 1,
-            "runtime_importers": [
-              "bioetl.composition.runtime_builders.runner_input_assembly"
-            ]
+            "fan_in": 0,
+            "runtime_importers": []
           },
           {
             "module": "bioetl.composition.runtime_builders.registry_manifest",
@@ -4209,6 +4208,7 @@
           "bioetl.composition.runtime_builders._runner_control_plane_data_root_policy",
           "bioetl.composition.runtime_builders._runner_control_plane_policy",
           "bioetl.composition.runtime_builders._runtime_launch_context_fields",
+          "bioetl.composition.runtime_builders.config_access",
           "bioetl.composition.runtime_builders.input_snapshot_resolution",
           "bioetl.composition.runtime_builders.inputs_resolver",
           "bioetl.composition.runtime_builders.inputs_runtime_assembly",

@@ -598,10 +598,14 @@ class TestResourceBootstrapLazyImports:
     def test_load_pipeline_config_delegates(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
+        from bioetl.composition import _resource_management as resource_management
+
         monkeypatch.setattr(
-            "bioetl.infrastructure.config.pipeline_config_api.load_pipeline_config",
+            resource_management,
+            "impl",
             lambda pipeline: {"name": pipeline},
         )
-        from bioetl.composition._resource_management import load_pipeline_config
 
-        assert load_pipeline_config("chembl_activity") == {"name": "chembl_activity"}
+        assert resource_management.load_pipeline_config("chembl_activity") == {
+            "name": "chembl_activity"
+        }

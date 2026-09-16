@@ -49473,7 +49473,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-10",
-  "source_tree_sha256": "f005c0d09b60d77a76314882b95ab0e3e68a72c0cab9bfc466b0a5b6dfe38b2b",
+  "source_tree_sha256": "c6fd99abf729d2700773eaf384a14fe1654276232af0c0dfe7028168b0685975",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

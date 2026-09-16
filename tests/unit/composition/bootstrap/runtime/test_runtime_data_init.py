@@ -46,19 +46,21 @@ from bioetl.composition.bootstrap.runtime.normalization_policy_init import (
 @pytest.mark.unit
 def test_initialize_chembl_policy_registry_caches_loader_per_configs_root() -> None:
     """Repeated runtime bootstraps should reuse the same loaded policy payload."""
-    initialize_chembl_policy_registry.__globals__[
-        "_load_chembl_policy_registry_data"
-    ].cache_clear()
+    function_globals = initialize_chembl_policy_registry.__globals__
+    function_globals["_load_chembl_policy_registry_data"].cache_clear()
     data = MagicMock()
+    mock_initialize_domain = MagicMock()
 
     with (
-        patch(
-            "bioetl.infrastructure.config.chembl_policy_registry_loader.ChemblPolicyRegistryLoader.load",
+        patch.object(
+            function_globals["ChemblPolicyRegistryLoader"],
+            "load",
             return_value=data,
         ) as mock_load,
-        patch(
-            "bioetl.domain.normalization.profiles.chembl_policy_registry.initialize_chembl_policy_registry"
-        ) as mock_initialize_domain,
+        patch.dict(
+            function_globals,
+            {"initialize_domain_chembl_policy_registry": mock_initialize_domain},
+        ),
     ):
         initialize_chembl_policy_registry(Path("configs"))
         initialize_chembl_policy_registry(Path("configs"))
@@ -73,18 +75,21 @@ def test_initialize_publication_type_classification_caches_loader_per_configs_ro
     None
 ):
     """Repeated runtime bootstraps should reuse the same classification payload."""
-    initialize_publication_type_classification.__globals__[
-        "_load_publication_type_classification_data"
-    ].cache_clear()
+    function_globals = initialize_publication_type_classification.__globals__
+    function_globals["_load_publication_type_classification_data"].cache_clear()
     data = MagicMock()
 
     with (
-        patch(
-            "bioetl.infrastructure.config.publication_type_classification_loader.PublicationTypeClassificationLoader.load",
+        patch.object(
+            function_globals[
+                "publication_type_classification_loader"
+            ].PublicationTypeClassificationLoader,
+            "load",
             return_value=data,
         ) as mock_load,
-        patch(
-            "bioetl.domain.mapping.publication_type_classification.initialize_classification"
+        patch.object(
+            function_globals["publication_type_classification"],
+            "initialize_classification",
         ) as mock_initialize_domain,
     ):
         initialize_publication_type_classification(Path("configs"))
@@ -100,18 +105,21 @@ def test_initialize_protein_class_target_type_mapping_caches_loader_per_configs_
     None
 ):
     """Repeated runtime bootstraps should reuse the same protein-class mapping."""
-    initialize_protein_class_target_type_mapping.__globals__[
-        "_load_protein_class_target_type_mapping_data"
-    ].cache_clear()
+    function_globals = initialize_protein_class_target_type_mapping.__globals__
+    function_globals["_load_protein_class_target_type_mapping_data"].cache_clear()
     data = MagicMock()
 
     with (
-        patch(
-            "bioetl.infrastructure.config.protein_class_target_type_loader.ProteinClassTargetTypeMappingLoader.load",
+        patch.object(
+            function_globals[
+                "protein_class_target_type_loader"
+            ].ProteinClassTargetTypeMappingLoader,
+            "load",
             return_value=data,
         ) as mock_load,
-        patch(
-            "bioetl.domain.mapping.protein_class_target_type.initialize_protein_class_target_type_mapping"
+        patch.object(
+            function_globals["protein_class_target_type"],
+            "initialize_protein_class_target_type_mapping",
         ) as mock_initialize_domain,
     ):
         initialize_protein_class_target_type_mapping(Path("configs"))
@@ -125,43 +133,50 @@ def test_initialize_protein_class_target_type_mapping_caches_loader_per_configs_
 @pytest.mark.unit
 def test_runtime_data_caches_are_scoped_by_configs_root() -> None:
     """Different config roots should keep independent cached payloads."""
-    initialize_chembl_policy_registry.__globals__[
-        "_load_chembl_policy_registry_data"
-    ].cache_clear()
-    initialize_publication_type_classification.__globals__[
-        "_load_publication_type_classification_data"
-    ].cache_clear()
-    initialize_protein_class_target_type_mapping.__globals__[
-        "_load_protein_class_target_type_mapping_data"
-    ].cache_clear()
+    chembl_globals = initialize_chembl_policy_registry.__globals__
+    publication_globals = initialize_publication_type_classification.__globals__
+    protein_globals = initialize_protein_class_target_type_mapping.__globals__
+    chembl_globals["_load_chembl_policy_registry_data"].cache_clear()
+    publication_globals["_load_publication_type_classification_data"].cache_clear()
+    protein_globals["_load_protein_class_target_type_mapping_data"].cache_clear()
 
     with (
-        patch(
-            "bioetl.infrastructure.config.chembl_policy_registry_loader.ChemblPolicyRegistryLoader.load",
+        patch.object(
+            chembl_globals["ChemblPolicyRegistryLoader"],
+            "load",
             side_effect=[MagicMock(name="chembl-a"), MagicMock(name="chembl-b")],
         ) as mock_chembl_load,
-        patch(
-            "bioetl.infrastructure.config.publication_type_classification_loader.PublicationTypeClassificationLoader.load",
+        patch.object(
+            publication_globals[
+                "publication_type_classification_loader"
+            ].PublicationTypeClassificationLoader,
+            "load",
             side_effect=[
                 MagicMock(name="classification-a"),
                 MagicMock(name="classification-b"),
             ],
         ) as mock_classification_load,
-        patch(
-            "bioetl.infrastructure.config.protein_class_target_type_loader.ProteinClassTargetTypeMappingLoader.load",
+        patch.object(
+            protein_globals[
+                "protein_class_target_type_loader"
+            ].ProteinClassTargetTypeMappingLoader,
+            "load",
             side_effect=[
                 MagicMock(name="protein-class-a"),
                 MagicMock(name="protein-class-b"),
             ],
         ) as mock_protein_class_load,
-        patch(
-            "bioetl.domain.normalization.profiles.chembl_policy_registry.initialize_chembl_policy_registry"
+        patch.dict(
+            chembl_globals,
+            {"initialize_domain_chembl_policy_registry": MagicMock()},
         ),
-        patch(
-            "bioetl.domain.mapping.publication_type_classification.initialize_classification"
+        patch.object(
+            publication_globals["publication_type_classification"],
+            "initialize_classification",
         ),
-        patch(
-            "bioetl.domain.mapping.protein_class_target_type.initialize_protein_class_target_type_mapping"
+        patch.object(
+            protein_globals["protein_class_target_type"],
+            "initialize_protein_class_target_type_mapping",
         ),
     ):
         initialize_chembl_policy_registry(Path("configs"))

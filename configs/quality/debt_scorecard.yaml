@@ -484,9 +484,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 52
-      total_loc: 6171
+      total_loc: 6172
       files_ge_250_loc: 0
-      helper_function_ratio: 0.337
+      helper_function_ratio: 0.328
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.tracing_bootstrap
     trend:
@@ -501,9 +501,8 @@ hotspot_family_ratchets:
     linked_issue: '#4477'
     ratchet_stage: active
     ratchet_scope: duplication-non-growth-plus-bounded-growth
-    expected_action: >-
-      Hold duplication at zero, file-growth, and fan-in at the reviewed baseline during
-      pipeline-factory changes. files_ge_250_loc budget is 0 (live 0; leftover-cap ratchet #10419).
+    expected_action: 'Hold duplication at zero, file-growth, and fan-in at the reviewed baseline during
+      pipeline-factory changes. files_ge_250_loc budget is 0 (live 0; leftover-cap ratchet #10419).'
     path_prefixes:
     - src/bioetl/composition/factories/pipeline/
     bounded_growth_budgets:
@@ -567,9 +566,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 55
-      total_loc: 7088
+      total_loc: 7100
       files_ge_250_loc: 0
-      helper_function_ratio: 0.379
+      helper_function_ratio: 0.375
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.runtime_builders.runner_inputs
     trend:

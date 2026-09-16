@@ -132,7 +132,7 @@ def validate_observability_preflight_impl(
             allow_noop_in_prod=allow_noop_in_prod,
             audit=audit,
             audit_required=audit_required,
-            audit_required_fn=_audit_required,
+            audit_required_fn=audit_is_required,
         )
     if forensic_grade_required:
         validate_forensic_grade_observability_evidence(
@@ -215,5 +215,5 @@ def resolve_observability_bootstrappers(
 _resolve_observability_bootstrappers = resolve_observability_bootstrappers
 
 
-def _audit_required(*, audit: AuditPort | None, audit_required: bool) -> bool:
+def audit_is_required(*, audit: AuditPort | None, audit_required: bool) -> bool:
     return audit_required and audit is not None and isinstance(audit, NoOpAudit)

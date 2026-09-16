@@ -60,15 +60,25 @@ def test_runner_builder_uses_runtime_config_access_seam() -> None:
         for node in tree.body
         if isinstance(node, ast.ImportFrom) and node.module is not None
     }
-    assert "bioetl.composition.runtime_builders.config_access" in imported_modules, (
-        "runner_builder must use the runtime config_access seam."
-    )
     assert "bioetl.infrastructure.config.pipeline_config_api" not in imported_modules, (
         "runner_builder must not import pipeline_config_api directly."
     )
     assert (
         "bioetl.infrastructure.config.source_config_loader" not in imported_modules
     ), "runner_builder must not import source_config_loader directly."
+
+    wiring_source = Path(
+        "src/bioetl/composition/runtime_builders/runner_builder_wiring.py"
+    ).read_text(encoding="utf-8")
+    wiring_tree = ast.parse(wiring_source)
+    wiring_imports = {
+        node.module
+        for node in wiring_tree.body
+        if isinstance(node, ast.ImportFrom) and node.module is not None
+    }
+    assert "bioetl.composition.runtime_builders.config_access" in wiring_imports, (
+        "runner_builder_wiring must own the runtime config_access seam."
+    )
 
 
 def test_runner_builder_does_not_expose_legacy_wrapper_patch_points() -> None:

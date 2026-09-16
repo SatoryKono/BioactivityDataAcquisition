@@ -406,8 +406,9 @@ def test_resolve_provider_assembly_support_binds_explicit_registry_when_building
         captured["provider_registry"] = provider_registry
         return sentinel_support
 
-    monkeypatch.setattr(
-        "bioetl.composition.providers._registration_contracts.create_provider_assembly_support",
+    monkeypatch.setitem(
+        resolve_provider_assembly_support.__globals__,
+        "create_provider_assembly_support",
         _fake_create_provider_assembly_support,
     )
 
@@ -425,8 +426,9 @@ def test_resolve_provider_family_registration_context_reuses_injected_support(
     support = MagicMock(name="support")
     rate_limits = {"chembl": MagicMock(name="chembl_rate")}
 
-    monkeypatch.setattr(
-        "bioetl.composition.providers._config_helpers._get_rate_limits_from_config",
+    monkeypatch.setitem(
+        _resolve_provider_family_registration_context.__globals__,
+        "_get_rate_limits_from_config",
         lambda *providers: rate_limits,
     )
 
@@ -450,12 +452,14 @@ def test_resolve_provider_family_registration_context_builds_default_support_onc
     rate_limits = {"pubmed": MagicMock(name="pubmed_rate")}
     captured: dict[str, object] = {}
 
-    monkeypatch.setattr(
-        "bioetl.composition.providers._config_helpers._get_rate_limits_from_config",
+    monkeypatch.setitem(
+        _resolve_provider_family_registration_context.__globals__,
+        "_get_rate_limits_from_config",
         lambda *providers: captured.update(providers=providers) or rate_limits,
     )
-    monkeypatch.setattr(
-        "bioetl.composition.providers._registration_contracts.resolve_provider_assembly_support",
+    monkeypatch.setitem(
+        _resolve_provider_family_registration_context.__globals__,
+        "resolve_provider_assembly_support",
         lambda assembly_support: (
             captured.update(assembly_support=assembly_support) or sentinel_support
         ),
@@ -485,8 +489,9 @@ def test_build_provider_family_http_config_map_uses_shared_manifest_builder(
     sentinel_config_map = {"chembl": MagicMock(name="config")}
     captured: dict[str, object] = {}
 
-    monkeypatch.setattr(
-        "bioetl.composition.providers._registration_contracts.build_http_provider_config_map",
+    monkeypatch.setitem(
+        _build_provider_family_http_config_map.__globals__,
+        "build_http_provider_config_map",
         lambda *, specs, assembly_support: (
             captured.update(
                 specs=specs,
@@ -521,8 +526,9 @@ def test_build_provider_family_config_map_composes_context_http_and_extra_builde
     extra_configs = {"pubchem": MagicMock(name="extra_config")}
     captured: dict[str, object] = {}
 
-    monkeypatch.setattr(
-        "bioetl.composition.providers._config_helpers._resolve_provider_family_registration_context",
+    monkeypatch.setitem(
+        _build_provider_family_config_map.__globals__,
+        "_resolve_provider_family_registration_context",
         lambda *providers, assembly_support=None: (
             captured.update(
                 providers=providers,
@@ -531,8 +537,9 @@ def test_build_provider_family_config_map_composes_context_http_and_extra_builde
             or (support, rate_limits)
         ),
     )
-    monkeypatch.setattr(
-        "bioetl.composition.providers._config_helpers._build_provider_family_http_config_map",
+    monkeypatch.setitem(
+        _build_provider_family_config_map.__globals__,
+        "_build_provider_family_http_config_map",
         lambda *, rate_limits, assembly_support, spec_builder: (
             captured.update(
                 http_rate_limits=rate_limits,
