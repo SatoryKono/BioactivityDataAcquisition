@@ -207,9 +207,9 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
         }
         for override in panel.get("fieldConfig", {}).get("overrides", [])
     }
-    assert override_properties["check"]["custom.cellOptions"].get("wrapText") is False
+    assert override_properties["check"]["custom.cellOptions"].get("wrapText") is True
     assert override_properties["status"]["custom.cellOptions"].get("wrapText") is False
-    assert override_properties["reason"]["custom.cellOptions"].get("wrapText") is False
+    assert override_properties["reason"]["custom.cellOptions"].get("wrapText") is True
     assert override_properties["reason"]["custom.inspect"] is True
     assert override_properties["reason"]["custom.width"] == 150
     assert "custom.width" not in override_properties["status"]
@@ -217,11 +217,14 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
     check_maps = override_properties["check"]["mappings"][0]["options"]
     assert check_maps["snapshot_evidence"]["text"] == "Snapshots"
     assert check_maps["archive"]["text"] == "Archive"
+    assert check_maps["scope_resolution"]["text"] == "Scope"
     reason_maps = override_properties["reason"]["mappings"][0]["options"]
     assert reason_maps["snapshot_lifecycle_evidence_incomplete"]["text"] == (
         "Snapshot incomplete"
     )
     assert reason_maps["archive_evidence_not_recorded"]["text"] == "Archive missing"
+    assert reason_maps["selected_run_id_not_found"]["text"] == "Run not found"
+    assert reason_maps["deadline_exceeded"]["text"] == "Deadline exceeded"
     assert reason_maps["archive_not_applicable"]["text"] == "N/A: policy"
     assert reason_maps["archive_restore_verified"]["text"] == "Archive verified"
     for hidden in ("detail", "endpoint", "retryable", "observed_at"):
