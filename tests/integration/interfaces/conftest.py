@@ -166,6 +166,10 @@ def disable_detached_observability_backend_for_cli_integration_tests():
             "bioetl.interfaces.cli.commands.workflow.ensure_observability_backend_started",
             return_value=disabled_result,
         ),
+        patch(
+            "bioetl.interfaces.cli.commands.run.publish_metrics_safely",
+            return_value=False,
+        ),
     ):
         yield
 
