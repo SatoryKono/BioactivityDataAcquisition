@@ -213,6 +213,16 @@ def _convert_sequence(value: Sequence) -> list[object]:
     return [to_jsonable(item) for item in value]
 
 
+def _is_primitive_sequence(value: object) -> bool:
+    """Check if value is a string or bytes (should not be converted as sequence)."""
+    return isinstance(value, (str, bytes, bytearray))
+
+
+def _should_convert_as_sequence(value: object) -> bool:
+    """Check if value should be converted as a sequence."""
+    return isinstance(value, Sequence) and not _is_primitive_sequence(value)
+
+
 def to_jsonable(value: object) -> object:
     """Convert nested dataclasses, datetimes, and mappings into JSON-safe values."""
     if isinstance(value, datetime):
@@ -223,7 +233,7 @@ def to_jsonable(value: object) -> object:
         return _convert_dataclass(value)
     if isinstance(value, Mapping):
         return _convert_mapping(value)
-    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+    if _should_convert_as_sequence(value):
         return _convert_sequence(value)
     return value
 
