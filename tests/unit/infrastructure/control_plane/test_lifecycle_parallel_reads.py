@@ -14,6 +14,8 @@ from bioetl.infrastructure.control_plane.file_artifact_lifecycle_types import (
     _ProtectedRefs,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_selected_reads_overlap_preserve_results_and_refresh_files(
     tmp_path, monkeypatch
