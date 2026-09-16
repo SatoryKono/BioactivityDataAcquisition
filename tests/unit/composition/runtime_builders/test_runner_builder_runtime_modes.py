@@ -34,7 +34,6 @@ import pytest
 from bioetl.composition.runtime_builders import (
     inputs_runtime_assembly,
 )
-from bioetl.composition.runtime_builders import inputs_resolver
 from bioetl.composition.runtime_builders._runner_builder_orchestration import (
     attach_runner_control_plane_collaborators,
 )
@@ -77,7 +76,7 @@ def test_build_pipeline_runner_forces_skip_gold_when_sink_disabled(
             enabled=False,
             retention_days=7,
         ),
-        assemble_runtime_config_fn=inputs_resolver.assemble_runtime_config,
+        assemble_runtime_config_fn=inputs_runtime_assembly.assemble_runtime_config,
     )
 
     assert fake_factory.kwargs is not None
@@ -105,7 +104,7 @@ def test_assemble_filter_config_passes_cli_overrides_when_enabled() -> None:
     with patch.object(
         inputs_runtime_assembly.FilterConfigBuilder, "build", return_value=sentinel
     ) as mock_build:
-        result = inputs_resolver.assemble_filter_config(
+        result = inputs_runtime_assembly.assemble_filter_config(
             yaml_filter=SimpleNamespace(),
             ctx=ctx,
             test_mode=False,

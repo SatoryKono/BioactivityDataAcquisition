@@ -70,5 +70,4 @@ def test_runtime_builder_public_exports_stay_narrow() -> None:
         "RunnerInputWiring",
         "build_pipeline_runner",
         "ensure_providers_loaded",
-        "load_source_config",
     }

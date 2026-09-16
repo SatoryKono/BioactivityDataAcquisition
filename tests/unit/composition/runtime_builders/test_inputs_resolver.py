@@ -41,6 +41,7 @@ import pytest
 
 import bioetl.infrastructure.control_plane.file_run_ledger_store as run_ledger_store_module
 from bioetl.composition.runtime_builders import inputs_resolver
+from bioetl.composition.runtime_builders import inputs_runtime_assembly as _assembly
 from bioetl.application.services.control_plane import RunLedgerService
 from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManifestStore
 from tests.unit.application.services.run_manifest_test_support import (

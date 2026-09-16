@@ -32,9 +32,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from bioetl.composition.runtime_builders import (
-    _run_manifest_control_plane_paths as paths_subject,
-)
+from bioetl.composition import control_plane_paths as paths_subject
 from bioetl.composition.runtime_builders import (
     _run_manifest_data_roots as subject,
 )

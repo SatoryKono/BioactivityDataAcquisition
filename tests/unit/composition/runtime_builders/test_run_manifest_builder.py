@@ -35,6 +35,9 @@ from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 from types import SimpleNamespace
 
 from bioetl.composition.runtime_builders import run_manifest_builder
+from bioetl.composition.runtime_builders._manifest_publication_context_support import (
+    resolve_manifest_publication_context,
+)
 from bioetl.composition.runtime_builders.run_manifest_support import (
     RunManifestProvenanceBundle,
 )
@@ -240,7 +243,7 @@ def test_resolve_manifest_publication_context_uses_supplied_publication_context(
         strict_exact_replay_supported=False,
     )
     contract_identity = _make_contract_identity()
-    result = run_manifest_builder.resolve_manifest_publication_context(
+    result = resolve_manifest_publication_context(
         ctx=SimpleNamespace(
             run_id=deterministic_uuid_from_callsite("test_run_manifest_builder"),
             pipeline_name="custom_runtime_name",
