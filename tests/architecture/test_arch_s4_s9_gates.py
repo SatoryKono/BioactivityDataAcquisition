@@ -18,6 +18,60 @@ from tests.architecture.quality_artifacts import load_quality_json
 
 pytestmark = pytest.mark.architecture
 ROOT = Path(__file__).resolve().parents[2]
+COMPOSITION_ROOT = ROOT / "src/bioetl/composition"
+_DYNAMIC_IMPORT_NAMES = frozenset({"import_module", "__import__"})
+_ALLOWED_DYNAMIC_IMPORT_FILES = frozenset(
+    {
+        "src/bioetl/composition/_service_registry.py",
+        "src/bioetl/composition/_workflow_services.py",
+        "src/bioetl/composition/bootstrap/__init__.py",
+        "src/bioetl/composition/bootstrap/cli/__init__.py",
+        "src/bioetl/composition/bootstrap/runtime/__init__.py",
+        "src/bioetl/composition/bootstrap/runtime/metrics_bootstrap.py",
+        "src/bioetl/composition/factories/__init__.py",
+        "src/bioetl/composition/factories/dq/__init__.py",
+        "src/bioetl/composition/factories/pipeline/__init__.py",
+        "src/bioetl/composition/factories/pipeline/_assembler_factory.py",
+        "src/bioetl/composition/factories/pipeline_support/contract_validation_helpers.py",
+        "src/bioetl/composition/factories/services/__init__.py",
+        "src/bioetl/composition/factories/transformer_factory.py",
+        "src/bioetl/composition/lazy_exports.py",
+        "src/bioetl/composition/providers/__init__.py",
+        "src/bioetl/composition/providers/_default_registry.py",
+        "src/bioetl/composition/providers/provider_registry.py",
+        "src/bioetl/composition/runtime_builders/_run_manifest_data_roots.py",
+        "src/bioetl/composition/runtime_builders/_run_manifest_refs.py",
+    }
+)
+_DYNAMIC_IMPORT_CALL_CAP = 40
+
+
+def _call_func_name(func: ast.expr) -> str | None:
+    if isinstance(func, ast.Name):
+        return func.id
+    if isinstance(func, ast.Attribute):
+        return func.attr
+    return None
+
+
+def _collect_composition_function_dynamic_imports() -> list[tuple[str, str, int]]:
+    """Return function-body ``import_module`` / ``__import__`` sites under composition."""
+    rows: list[tuple[str, str, int]] = []
+    for py_file in sorted(COMPOSITION_ROOT.rglob("*.py")):
+        tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
+        relative_path = py_file.resolve().relative_to(ROOT.resolve()).as_posix()
+        for fn in ast.walk(tree):
+            if not isinstance(fn, ast.FunctionDef | ast.AsyncFunctionDef):
+                continue
+            for node in ast.walk(fn):
+                if not isinstance(node, ast.Call):
+                    continue
+                if _call_func_name(node.func) not in _DYNAMIC_IMPORT_NAMES:
+                    continue
+                rows.append(
+                    (relative_path, fn.name, int(getattr(node, "lineno", fn.lineno)))
+                )
+    return rows
 
 
 def test_s4_lazy_import_ratchet_is_shrink_only() -> None:
@@ -29,6 +83,20 @@ def test_s4_lazy_import_ratchet_is_shrink_only() -> None:
     assert int(config["target_count"]) == 0
     assert len(live) == 0
     assert lazy_main(["--check"]) == 0
+
+
+def test_s4_composition_dynamic_imports_are_frozen() -> None:
+    """#10467: do not grow function-body importlib seams as a census bypass."""
+    rows = _collect_composition_function_dynamic_imports()
+    files = {path for path, _function_name, _line in rows}
+    unexpected = sorted(files - _ALLOWED_DYNAMIC_IMPORT_FILES)
+    unused = sorted(_ALLOWED_DYNAMIC_IMPORT_FILES - files)
+    assert unexpected == []
+    assert unused == []
+    assert len(rows) <= _DYNAMIC_IMPORT_CALL_CAP
+    assert len(rows) == _DYNAMIC_IMPORT_CALL_CAP, (
+        f"shrink _DYNAMIC_IMPORT_CALL_CAP from {_DYNAMIC_IMPORT_CALL_CAP} to {len(rows)}"
+    )
 
 
 def test_s6_source_tree_manifest_is_the_pinned_sha() -> None:
