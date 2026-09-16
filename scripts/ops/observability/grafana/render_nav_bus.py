@@ -20,6 +20,7 @@ from scripts.ops.observability.grafana._latest_complete_run_panel import (
 )
 from scripts.ops.observability.grafana._selected_run_panels import (
     stamp_selected_run_panels,
+    stamp_selector_columns,
 )
 from scripts.ops.observability.grafana.action_target_routes import (
     ACTION_DASHBOARD_UID_BY_TARGET,
@@ -1340,10 +1341,6 @@ def apply_to_dashboard(
     nav["links"] = render_links(current_uid=current_uid) + extra_links
     # Drop stale transparent fields that confuse some exporters.
     nav.pop("transparent", None)
-
-    from scripts.ops.observability.grafana._selected_run_panels import (
-        stamp_selector_columns,
-    )
 
     stamp_selector_columns(payload)
     stamp_selected_run_panels(payload)
