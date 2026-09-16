@@ -330,7 +330,7 @@ def _dq(p: dict[int, dict]) -> None:
         "seriesBy": "min",
     }
     graph["fieldConfig"]["defaults"].setdefault("custom", {}).update(
-        gradientMode="scheme", spanNulls=False, showPoints="always"
+        gradientMode="none", spanNulls=False, showPoints="always", fillOpacity=0
     )
     graph["fieldConfig"]["defaults"]["thresholds"] = deepcopy(
         p[2]["fieldConfig"]["defaults"]["thresholds"]
@@ -340,13 +340,14 @@ def _dq(p: dict[int, dict]) -> None:
         "placement": "bottom",
         "showLegend": True,
     }
-    graph["targets"][0]["legendFormat"] = "DQ score (line=value; legend=minimum)"
-    history_color_help = (
-        " Line colors follow each observed value; legend color uses the minimum "
-        "observed score. Missing intervals remain gaps and do not recolor history."
+    graph["targets"][0]["legendFormat"] = "DQ score (color=minimum observed)"
+    graph["description"] = (
+        "TIME RANGE · Observed volume-weighted DQ score, separate from current "
+        "operational status and the 7d retained stat. Line and legend color use "
+        "the minimum observed score in this range, with the stat's thresholds. "
+        "Missing intervals remain gaps and do not recolor history. "
+        "100% does not prove current completeness; missing telemetry is not zero."
     )
-    if history_color_help not in graph["description"]:
-        graph["description"] += history_color_help
     row = p[9404]
     row["panels"] = [child for child in row["panels"] if child["id"] not in {157, 158}]
     context = {

@@ -30,9 +30,10 @@ def test_dq_history_colors_survive_trailing_missing_samples() -> None:
     defaults = panels[153]["fieldConfig"]["defaults"]
     assert defaults["thresholds"] == panels[2]["fieldConfig"]["defaults"]["thresholds"]
     assert defaults["color"]["seriesBy"] == "min"
-    assert defaults["custom"]["gradientMode"] == "scheme"
+    assert defaults["custom"]["gradientMode"] == "none"
+    assert defaults["custom"]["fillOpacity"] == 0
     assert defaults["custom"]["spanNulls"] is False
-    assert "legend=minimum" in panels[153]["targets"][0]["legendFormat"]
+    assert "color=minimum observed" in panels[153]["targets"][0]["legendFormat"]
 
 
 def test_status_panels_have_correct_value_mapping():
