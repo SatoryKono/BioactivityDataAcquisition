@@ -1,5 +1,13 @@
 # Сводка evidence: project-package-topology
 
+Refresh note (2026-09-16): selected-run persisted status API and evidence capture.
+Counts and fingerprint come from `reports/quality/module-coverage-inventory.json`;
+historical notes below retain their original scope.
+
+`source_tree_sha256=7a63a1d28b3482e1ac694d9f7815b0121463caa590c643e08e25b28cbc0e3b9c`
+
+`source_module_count=2484`
+
 Refresh note (2026-09-15): hash-only reconcile after pytest-zero loop
 (source-tree rebind, archive operator test, Grafana copy). Counts and the
 source fingerprint below come from

@@ -43,7 +43,7 @@ def test_overview_v2_semantics_contract():
     for token in ["UNKNOWN", "OK", "WARN", "CRIT"]:
         assert token in mapping
 
-    assert titles.count("Review First Action") == 1
+    assert titles.count("Review Current First Action") == 1
     row_labels = " ".join(
         p.get("title", "") for p in d.get("panels", []) if p.get("type") == "row"
     )
@@ -71,7 +71,7 @@ def test_overview_v2_semantics_contract():
 
     for current_title in [
         "Monitor Scope Health",
-        "Review First Action",
+        "Review Current First Action",
         "Review Control Plane Status",
         "Review Runtime Status",
         "Review Data Quality Status",

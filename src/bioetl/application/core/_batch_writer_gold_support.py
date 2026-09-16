@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol, cast, runtime_checkable
 
-from bioetl.application.services.run_reports.observations import record_run_observation
+from bioetl.application.services.run_reports.observations import record_gold_observation
 from bioetl.domain.exceptions import SchemaViolationError
 
 if TYPE_CHECKING:
@@ -81,12 +81,7 @@ def validate_gold_records(
 
     result = validator.validate(records)
 
-    record_run_observation(
-        "Data Validation",
-        verdict="OK" if result.valid else "ERROR",
-        reason="run_gold_schema_validation",
-        facts={"valid": result.valid, "records": len(records)},
-    )
+    record_gold_observation(result.valid, len(records))
     if not result.valid:
         debug_export_service = getattr(writer, "_debug_export_service", None)
         if debug_export_service is not None:

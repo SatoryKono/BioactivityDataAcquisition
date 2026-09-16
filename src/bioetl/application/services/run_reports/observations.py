@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from contextvars import ContextVar, Token
 from copy import deepcopy
+from datetime import datetime
 
+from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatus
 from bioetl.domain.value_objects.dq_result import DQResult
 
 _observations: ContextVar[dict[str, object] | None] = ContextVar(
@@ -77,3 +79,39 @@ def record_dq_observation(result: DQResult) -> DQResult:
         },
     )
     return result
+
+
+def observed_health_report(
+    results: list[ComponentHealthResult], checked_at: datetime
+) -> HealthReport:
+    """Build the report and freeze the data-source probe actually executed."""
+    report = HealthReport(results=results, checked_at=checked_at)
+    for component in report.results:
+        if component.component == "data_source":
+            record_run_observation(
+                "Provider",
+                verdict={
+                    HealthStatus.HEALTHY: "OK",
+                    HealthStatus.DEGRADED: "WARN",
+                    HealthStatus.UNHEALTHY: "ERROR",
+                }.get(component.status, "UNKNOWN"),
+                reason="run_preflight_provider_observation",
+                facts={
+                    "observed_at": report.checked_at.isoformat()
+                    if report.checked_at is not None
+                    else None,
+                    "status": component.status.value,
+                },
+            )
+
+    return report
+
+
+def record_gold_observation(valid: bool, count: int) -> None:
+    """Record the outcome of executed Gold schema validation."""
+    record_run_observation(
+        "Data Validation",
+        verdict="OK" if valid else "ERROR",
+        reason="run_gold_schema_validation",
+        facts={"valid": valid, "records": count},
+    )

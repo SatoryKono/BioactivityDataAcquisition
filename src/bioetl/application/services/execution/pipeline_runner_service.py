@@ -10,9 +10,11 @@ from __future__ import annotations
 
 import asyncio
 
+from bioetl.application.services.run_reports.control_plane_snapshot import (
+    capture_run_completion,
+)
 from bioetl.application.services.run_reports.observations import (
     bind_run_observations,
-    record_run_observation,
     reset_run_observations,
 )
 from bioetl.domain.ports import RunReportStorePort
@@ -35,10 +37,12 @@ from uuid import UUID
 
 from bioetl.application.runtime_timestamps import capture_runtime_timing_anchor
 from bioetl.application.services.execution._pipeline_runner_support import (
+    _record_pipeline_audit_event,
     _require_execution_runner,
     build_dry_run_result,
     build_pipeline_run_result,
     complete_pipeline_dry_run,
+    constructor_failure_recorder,
     create_execution_runner_audited,
     finalize_pipeline_run_report,
 )
@@ -73,32 +77,6 @@ if TYPE_CHECKING:
         MetricsPort,
         RunnerFactoryPort,
     )
-
-
-async def _record_pipeline_audit_event(
-    audit: AuditPort,
-    *,
-    event_name: str,
-    pipeline_name: str,
-    run_id: RunID,
-    run_type: str,
-    status: str,
-    timestamp: datetime,
-    manifest_id: str | None = None,
-    error_type: str | None = None,
-) -> None:
-    """Record pipeline lifecycle outcome via the audit port abstraction."""
-    event_data = {
-        "pipeline": pipeline_name,
-        "run_id": str(run_id),
-        "run_type": run_type,
-        "status": status,
-    }
-    if manifest_id is not None:
-        event_data["manifest_id"] = manifest_id
-    if error_type is not None:
-        event_data["error_type"] = error_type
-    await audit.log_event(event_name, event_data, timestamp=timestamp)
 
 
 def _resolve_effective_run_id(
@@ -145,22 +123,11 @@ class PipelineRunnerService:
         run_id: UUID | None = None,
         options: RunOptions | None = None,
     ) -> RunResult:
-        """Run a pipeline and return normalized execution result.
+        """Execute a registered pipeline and return its outcome and report paths.
 
-        Args:
-            pipeline_name: Registered pipeline identifier to execute.
-            dry_run: If True, validate and plan but skip storage writes.
-                Overridden by options.dry_run if options is provided.
-            run_id: Optional explicit UUID for the run. Required for exact replay
-                and auto-generated only for operational runtime paths.
-            options: Optional RunOptions controlling run type, limit, filters, etc.
-                If None, a default RunOptions instance is created using dry_run.
-
-        Returns:
-            RunResult with status, record counts, duration, and error details.
-
-        Raises:
-            PipelineNotFoundError: If pipeline_name is not registered in the factory.
+        Options override the dry_run flag. Exact replay requires an explicit run_id;
+        operational runs otherwise receive an ID from the composition factory.
+        Raises PipelineNotFoundError for an unregistered pipeline name.
         """
         started_at, started_monotonic = capture_runtime_timing_anchor(
             clock=self.clock,
@@ -192,7 +159,8 @@ class PipelineRunnerService:
             status="started",
             timestamp=started_at,
         )
-        dry_run_result = self._maybe_dry_run_result(
+        dry_run_result = build_dry_run_result(
+            clock=self.clock,
             pipeline_name=pipeline_name,
             run_id=effective_run_id,
             options=effective_options,
@@ -210,29 +178,16 @@ class PipelineRunnerService:
             )
             return self._finalize_report(completed_dry_run, effective_options)
 
-        async def _record_constructor_failure(exc: Exception) -> None:
-            await _record_pipeline_audit_event(
-                self.audit,
-                event_name="PipelineRunCompleted",
-                pipeline_name=pipeline_name,
-                run_id=effective_run_id,
-                run_type=effective_options.run_type,
-                status="failed",
-                timestamp=self.clock.now(),
-                error_type=type(exc).__name__,
-            )
-            self._finalize_report(
-                RunResult(
-                    status=PipelineRunResult.FAILED,
-                    pipeline_name=pipeline_name,
-                    run_id=str(effective_run_id),
-                    run_type=effective_options.run_type,
-                    started_at=started_at,
-                    completed_at=self.clock.now(),
-                    error_type=type(exc).__name__,
-                ),
-                effective_options,
-            )
+        record_constructor_failure = constructor_failure_recorder(
+            audit=self.audit,
+            clock=self.clock,
+            pipeline_name=pipeline_name,
+            run_id=effective_run_id,
+            options=effective_options,
+            started_at=started_at,
+            finalize=self._finalize_report,
+            record_event=_record_pipeline_audit_event,
+        )
 
         return await self._execute_prepared_run(
             context=context,
@@ -242,7 +197,7 @@ class PipelineRunnerService:
             options=effective_options,
             started_at=started_at,
             started_monotonic=started_monotonic,
-            record_constructor_failure=_record_constructor_failure,
+            record_constructor_failure=record_constructor_failure,
         )
 
     async def _execute_prepared_run(
@@ -314,24 +269,6 @@ class PipelineRunnerService:
             limit=options.limit,
         )
         return run_logger
-
-    def _maybe_dry_run_result(
-        self,
-        *,
-        pipeline_name: str,
-        run_id: RunID,
-        options: RunOptions,
-        started_at: datetime,
-        run_logger: LoggerPort,
-    ) -> RunResult | None:
-        return build_dry_run_result(
-            clock=self.clock,
-            pipeline_name=pipeline_name,
-            run_id=run_id,
-            options=options,
-            started_at=started_at,
-            run_logger=run_logger,
-        )
 
     def list_pipelines(self) -> list[str]:
         """List all available pipeline names.
@@ -453,22 +390,7 @@ class PipelineRunnerService:
         self, result: RunResult, options: RunOptions | None
     ) -> RunResult:
         """Use the configured report destination for every execution outcome."""
-        if (
-            self.capture_control_plane is not None
-            and result.completed_at is not None
-            and not (options and options.dry_run)
-        ):
-            try:
-                self.capture_control_plane(
-                    result.pipeline_name, result.run_id, result.completed_at
-                )
-            except (OSError, RuntimeError, ValueError, TypeError):
-                record_run_observation(
-                    "Control Plane",
-                    verdict="INCOMPLETE",
-                    reason="completion_assessment_failed",
-                    facts={},
-                )
+        capture_run_completion(self.capture_control_plane, result, options)
         return finalize_pipeline_run_report(
             result=result,
             options=options,

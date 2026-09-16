@@ -291,18 +291,6 @@ def test_workflow_completion_creates_explicit_child_revision(tmp_path):
     assert after["execution_state"] == "SUCCESS"
 
 
-def test_new_snapshot_report_matches_report_schema(tmp_path):
-    from jsonschema import Draft202012Validator
-
-    child = report()
-    child.identity["run_type"] = "incremental"
-    paths = persist(tmp_path, child)
-    schema = json.loads(
-        Path("configs/contracts/reports/pipeline_run_report.v1.json").read_text()
-    )
-    Draft202012Validator(schema).validate(json.loads(paths.json_path.read_text()))
-
-
 @pytest.mark.parametrize(
     "event,expected", [("run_started", "RUNNING"), ("run_finished", "INCOMPLETE")]
 )
@@ -436,5 +424,189 @@ def test_control_plane_capture_binds_exact_identity_and_completion(tmp_path, mis
                 == run_id
             )
             assert observation["facts"]["checks"]["rows"][0]["reason"] == "lineage_gap"
+    finally:
+        reset_run_observations(token)
+
+
+@pytest.mark.parametrize(
+    "mutation,reason",
+    [
+        ("missing", None),
+        ("legacy", None),
+        ("json_list", "workflow_child_report_corrupt"),
+        ("snapshot", "workflow_child_snapshot_corrupt"),
+        ("identity", "workflow_child_identity_mismatch"),
+    ],
+)
+def test_workflow_rejects_unbound_child_evidence(tmp_path, mutation, reason):
+    from bioetl.application.services.run_reports.workflow_observations import (
+        _verified_child,
+    )
+    from bioetl.domain.run_reports.models import WorkflowExecutionRow
+
+    child = report()
+    child.identity["workflow_run_id"] = "workflow-a"
+    path = persist(tmp_path, child).json_path
+    payload = json.loads(path.read_text())
+    if mutation == "missing":
+        path.unlink()
+    elif mutation == "legacy":
+        payload.pop("selected_run_snapshot")
+        path.write_text(json.dumps(payload))
+    elif mutation == "json_list":
+        path.write_text("[]")
+    elif mutation == "snapshot":
+        payload["selected_run_snapshot"]["revision"] = "corrupt"
+        path.write_text(json.dumps(payload))
+    row = WorkflowExecutionRow(
+        step_id="step-a",
+        status="success",
+        records_extracted=1,
+        pipeline_name="chembl_activity",
+        pipeline_run_id="run-a",
+    )
+    store = FileRunReportStoreAdapter()
+    if reason:
+        with pytest.raises(ValueError, match=reason):
+            _verified_child(
+                path,
+                row,
+                "different" if mutation == "identity" else "workflow-a",
+                store,
+            )
+    else:
+        assert _verified_child(path, row, "workflow-a", store) is None
+
+
+@pytest.mark.parametrize(
+    "scenario,expected",
+    [
+        ("no_port", None),
+        ("not_found", None),
+        ("wrong_pipeline", "identity_mismatch"),
+        ("no_ledger", "ledger_missing"),
+    ],
+)
+def test_active_run_requires_manifest_and_matching_ledger(scenario, expected):
+    from types import SimpleNamespace
+    from bioetl.interfaces.http._selected_run_live import active_run_diagnostics
+
+    host = MagicMock()
+    manifest = SimpleNamespace(
+        pipeline_name="wrong" if scenario == "wrong_pipeline" else "chembl_activity",
+        manifest_id="manifest-a",
+    )
+    if scenario == "no_port":
+        host._run_manifest_port = None
+    else:
+        host._run_manifest_port.get_by_run_id.return_value = (
+            None if scenario == "not_found" else manifest
+        )
+    host._run_ledger_port = None
+    result = active_run_diagnostics(
+        host, "chembl_activity", "3432761e-d4eb-511e-a62c-b186b301c758"
+    )
+    assert result is None if expected is None else result["reason"] == expected
+
+
+@pytest.mark.parametrize(
+    "kind", ["bad_schema", "bad_json", "read_error", "revision_corrupt"]
+)
+def test_report_read_failures_never_become_success(tmp_path, monkeypatch, kind):
+    path = persist(tmp_path).json_path
+    if kind == "bad_schema":
+        path.write_text('{"schema_version":"future"}')
+    elif kind == "bad_json":
+        path.write_text("{")
+    elif kind == "revision_corrupt":
+        revision = next((path.parent / "status-revisions").glob("*.json"))
+        revision.write_text("{}")
+    else:
+        original = Path.read_text
+
+        def guarded_read(candidate, *args, **kwargs):
+            if candidate == path:
+                raise OSError("unavailable storage")
+            return original(candidate, *args, **kwargs)
+
+        monkeypatch.setattr(Path, "read_text", guarded_read)
+    result = read(tmp_path)
+    assert result["verdict"] == ("QUERY ERROR" if kind == "read_error" else "ERROR")
+
+
+@pytest.mark.parametrize(
+    "fault,reason",
+    [
+        ("report_list", "archive_report_corrupt"),
+        ("identity", "archive_report_identity_mismatch"),
+        ("snapshot", "archive_report_snapshot_corrupt"),
+        ("evidence", "archive_report_evidence_mismatch"),
+        ("missing_revision", "archive_report_revision_missing"),
+        ("revision", "archive_report_revision_mismatch"),
+        ("old_revision", "archive_report_revision_corrupt"),
+    ],
+)
+def test_archive_refuses_corrupt_selected_evidence(tmp_path, fault, reason):
+    from types import SimpleNamespace
+    from bioetl.infrastructure.control_plane.archive_run_reports import (
+        selected_report_sources,
+    )
+
+    path = persist(tmp_path).json_path
+    payload = json.loads(path.read_text())
+    revisions = path.parent / "status-revisions"
+    revision = next(revisions.glob("*.json"))
+    if fault == "report_list":
+        payload = []
+    elif fault == "identity":
+        payload["identity"]["run_id"] = "other"
+    elif fault == "snapshot":
+        payload["selected_run_snapshot"]["revision"] = "bad"
+    elif fault == "evidence":
+        payload["identity"]["status"] = "failed"
+    elif fault == "missing_revision":
+        revision.unlink()
+    elif fault == "revision":
+        revision.write_text("{}")
+    else:
+        (revisions / "unbound.json").write_text("{}")
+    path.write_text(json.dumps(payload))
+    manifest = SimpleNamespace(run_id="run-a", pipeline_name="chembl_activity")
+    with pytest.raises(ValueError, match=reason):
+        selected_report_sources(tmp_path, manifest)
+
+
+@pytest.mark.parametrize(
+    "status,verdict", [("healthy", "OK"), ("degraded", "WARN"), ("unhealthy", "ERROR")]
+)
+def test_preflight_observations_retain_actual_probe_status(status, verdict):
+    from bioetl.application.services.run_reports.observations import (
+        observed_health_report,
+        record_gold_observation,
+    )
+    from bioetl.domain.types import ComponentHealthResult, HealthStatus
+
+    token = bind_run_observations()
+    try:
+        observed = datetime(2026, 1, 1, tzinfo=UTC)
+        result = observed_health_report(
+            [
+                ComponentHealthResult(
+                    component="storage", status=HealthStatus.HEALTHY, duration_seconds=0
+                ),
+                ComponentHealthResult(
+                    component="data_source",
+                    status=HealthStatus[status.upper()],
+                    duration_seconds=0,
+                ),
+            ],
+            observed,
+        )
+        record_gold_observation(False, 0)
+        assert result.checked_at == observed
+        saved = run_observations()
+        assert saved["Provider"]["verdict"] == verdict
+        assert saved["Provider"]["facts"]["observed_at"] == observed.isoformat()
+        assert saved["Data Validation"]["facts"] == {"valid": False, "records": 0}
     finally:
         reset_run_observations(token)

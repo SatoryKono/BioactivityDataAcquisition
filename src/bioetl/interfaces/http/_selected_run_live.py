@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
 from typing import cast
 from uuid import UUID
 
+from bioetl.application.runtime_clock import current_utc_time
 from bioetl.domain.types import RunID
 from bioetl.interfaces.http._health_server_observability_protocols import (
     _HealthObservabilityRoutingHost,
@@ -37,7 +37,7 @@ def active_run_diagnostics(
         entry.event_type in {"run_finished", "run_failed", "run_shutdown"}
         for entry in entries
     )
-    age = (datetime.now(UTC) - latest.occurred_at).total_seconds()
+    age = (current_utc_time() - latest.occurred_at).total_seconds()
     return {
         "verdict": "INCOMPLETE" if terminal else "RUNNING",
         "reason": "finalization_missing" if terminal else "active_run",

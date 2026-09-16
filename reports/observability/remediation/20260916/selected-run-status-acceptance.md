@@ -33,7 +33,7 @@ Browser observations: Overview rendered the old and new run identities and their
 - Module inventory contains all 2484 modules, including the nine new modules. Newly added capture modules have measured coverage; existing measured rows were not lowered by partial coverage refreshes.
 - Seven-dashboard generation is reproducible. No runtime agent/skill source was edited; runtime mirror synchronization is not applicable.
 
-The updated Trust panel was verified after re-upload (candidate version 3): processing success, Trust ERROR, lineage_closure_gap and the saved completion time remained visible with the 1970 outside range. Trust to Overview navigation preserved the exact run and range. After recovery, Docker/Grafana became unavailable again during the empty-selection browser check; that browser scenario is not recorded as passed.
+The updated Trust panel was verified after re-upload (candidate version 3): processing success, Trust ERROR, lineage_closure_gap and the saved completion time remained visible with the 1970 outside range. Trust to Overview navigation preserved the exact run and range. After a later recovery, empty selection was verified: all six domains display SELECT RUN and CURRENT remains UNKNOWN. Candidate dashboards version 4 were uploaded from the final generator. A deliberate outage of the candidate API produced UNKNOWN plus an explicit Infinity connection-refused error, with no stale OK. After restarting the API from the refactored source, the same saved revision and six-domain assessment returned. The 1280x900 screenshot clearly shows the complete summary and all six domains. This checks API outage/recovery, not the CURRENT metrics publisher recovery lifecycle.
 
 ## Remaining acceptance boundaries
 
@@ -42,3 +42,11 @@ This is local_single_host evidence, not a production/release acceptance or autho
 Full docs verification (`python -m scripts.docs verify --skip-build`) passed after repairing six pre-existing broken archive-reference redirects, adding the missing navigation entries, and adding three missing module docstrings. No baseline waiver or budget increase was added. Broad bootstrap testing also reproduced two pre-existing failures on the original checkout (policy-loader cache and tracing-import ordering).
 
 Do not close unfinished acceptance criteria merely because targeted tests pass. Production rollout, required CI disposition and the complete browser/error matrix must be recorded before final closure.
+
+## Final refactor validation and external blockers
+
+The refactor removes introduced size/complexity violations and import cycles, reuses the canonical clock seam, and moves repository-schema validation into integration tests. Application-core LOC is 23444 (baseline 23445); no debt budget increased. New module line coverage: workflow observations 94.00%, archive reports 92.45%, active diagnostics 93.55%, selected status API 87.06%. The focused measurement ran 147 tests with zero failures/skips. Six refactored modules passed mypy. Additional regression checks and the final source-bound architecture recheck are recorded in the follow-up PR evidence.
+
+The initial full architecture scan ran 4751 cases: 4651 passed, 30 failed, 70 skipped. Its failures prompted the refactor and artifact regeneration; it is not a passing final acceptance result. Known baseline issues include two oversized unchanged modules, an unclassified lazy export, a direct clock call in an unchanged test, and a pre-existing bootstrap helper-ratio mismatch (0.338 baseline versus the older 0.330 residual bound; current ratio improved to 0.337). These are not waived.
+
+PR Gate run 35081004469 for commit 7947bb75a4f540efb7651b9375a9c22d4bfa70c3 failed before executing steps: "The job was not started because your account is locked due to a billing issue." This is an external blocker to CI acceptance. Historical telemetry still attributes coverage to Tests run 34618841349 / db7cc9283e3fb49b0e5766489b7abacf9a775cd9; its coverage-verify succeeded, but that whole workflow failed governance. Rebinding its test-tree fingerprint does not claim a green CI run for this PR.

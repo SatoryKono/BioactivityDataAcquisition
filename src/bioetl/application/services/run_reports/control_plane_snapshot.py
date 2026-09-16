@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
-from typing import cast
+from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
 from bioetl.application.observability.control_plane_evidence import (
@@ -14,6 +15,13 @@ from bioetl.application.observability.control_plane_evidence import (
 from bioetl.application.services.run_reports.observations import record_run_observation
 from bioetl.domain.ports import RunManifestPort
 from bioetl.domain.types import RunID
+
+
+if TYPE_CHECKING:
+    from bioetl.application.services.execution.pipeline_runner_models import (
+        RunOptions,
+        RunResult,
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -43,4 +51,23 @@ class CaptureControlPlaneSnapshot:
             reason="run_completion_trust_assessment",
             facts={"observed_at": completed_at.isoformat(), "checks": payload},
             replace_provisional=True,
+        )
+
+
+def capture_run_completion(
+    capture: Callable[[str, str, datetime], None] | None,
+    result: RunResult,
+    options: RunOptions | None,
+) -> None:
+    """Capture completion checks without allowing their failure to lose the run report."""
+    if capture is None or result.completed_at is None or (options and options.dry_run):
+        return
+    try:
+        capture(result.pipeline_name, result.run_id, result.completed_at)
+    except (OSError, RuntimeError, ValueError, TypeError):
+        record_run_observation(
+            "Control Plane",
+            verdict="INCOMPLETE",
+            reason="completion_assessment_failed",
+            facts={},
         )

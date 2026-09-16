@@ -309,3 +309,70 @@ def _require_execution_runner(runner: object) -> ExecutionMetricsRunnerPort:
     if not isinstance(runner, ExecutionMetricsRunnerPort):
         raise TypeError("Runner does not implement ExecutionMetricsRunnerPort")
     return runner
+
+
+def constructor_failure_recorder(
+    *,
+    audit: AuditPort,
+    clock: ClockPort,
+    pipeline_name: str,
+    run_id: RunID,
+    options: RunOptions,
+    started_at: datetime,
+    finalize: Callable[[RunResult, RunOptions | None], RunResult],
+    record_event: Callable[..., Awaitable[None]],
+) -> Callable[[Exception], Awaitable[None]]:
+    """Build an audited finalizer for failures before the runner can execute."""
+
+    async def record(exc: Exception) -> None:
+        completed_at = clock.now()
+        await record_event(
+            audit,
+            event_name="PipelineRunCompleted",
+            pipeline_name=pipeline_name,
+            run_id=run_id,
+            run_type=options.run_type,
+            status="failed",
+            timestamp=completed_at,
+            error_type=type(exc).__name__,
+        )
+        finalize(
+            RunResult(
+                status=PipelineRunResult.FAILED,
+                pipeline_name=pipeline_name,
+                run_id=str(run_id),
+                run_type=options.run_type,
+                started_at=started_at,
+                completed_at=completed_at,
+                error_type=type(exc).__name__,
+            ),
+            options,
+        )
+
+    return record
+
+
+async def _record_pipeline_audit_event(
+    audit: AuditPort,
+    *,
+    event_name: str,
+    pipeline_name: str,
+    run_id: RunID,
+    run_type: str,
+    status: str,
+    timestamp: datetime,
+    manifest_id: str | None = None,
+    error_type: str | None = None,
+) -> None:
+    """Record pipeline lifecycle outcome via the audit port abstraction."""
+    event_data = {
+        "pipeline": pipeline_name,
+        "run_id": str(run_id),
+        "run_type": run_type,
+        "status": status,
+    }
+    if manifest_id is not None:
+        event_data["manifest_id"] = manifest_id
+    if error_type is not None:
+        event_data["error_type"] = error_type
+    await audit.log_event(event_name, event_data, timestamp=timestamp)

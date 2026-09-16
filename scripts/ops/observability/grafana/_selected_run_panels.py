@@ -10,7 +10,7 @@ DESCRIPTION = (
     "do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute "
     "freshness rule. Historical Trust never authorizes replay now. Missing checks are "
     "INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. "
-    "N/A means explicitly inapplicable. Chart coverage is separate: use Set range to run "
+    "N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run "
     "in Run Explorer to inspect a partial or outside range. Inspect the report for rules, "
     "revision, completion and the saved source evidence."
 )
@@ -121,9 +121,9 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
                 "as Review Domain Status", "as Review All Domain Status (CURRENT)"
             )
         if uid == "bioetl-control-plane-v1" and panel.get("id") == 9421:
-            panel["description"] = "SELECTED RUN search · " + str(
-                panel.get("description", "")
-            ).removeprefix("SELECTED RUN search · ")
+            panel["description"] = (
+                DESCRIPTION + " SELECTED RUN search: find an exact persisted identity."
+            )
         if panel.get("title") == "Review Selected Run Summary":
             panel.update(
                 _panel(

@@ -5,7 +5,9 @@ from __future__ import annotations
 from contextlib import AbstractContextManager
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.application.core.postrun import _batch_metrics_projection
+from bioetl.application.core.postrun._batch_metrics_projection import (
+    project_batch_metrics,
+)
 from bioetl.application.core.postrun._phase_descriptions import (
     PostrunLogLevel,
     describe_compaction_phase,
@@ -242,6 +244,6 @@ class PostrunServiceSupportMixin:
         self: _PostrunSupportHost,
         executor: ExecutorMetricsPort,
     ) -> dict[str, float]:
-        return _batch_metrics_projection.project_batch_metrics(
+        return project_batch_metrics(
             executor, freshness_anchor_timestamp=self._context.started_at.timestamp()
         )
