@@ -207,7 +207,7 @@
           }
         },
         "refresh": 1,
-        "regex": "/^\\s*(\\S(?:.*\\S)?)\\s*$/",
+        "regex": "",
         "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
@@ -273,7 +273,7 @@
   "panels": [
     {
       "gridPos": {
-        "h": 3,
+        "h": 2,
         "w": 24,
         "x": 0,
         "y": 0
@@ -370,7 +370,7 @@
         "h": 3,
         "w": 16,
         "x": 0,
-        "y": 3
+        "y": 2
       },
       "description": "Current panels show the latest DQ verdict and reasons for the selected pipeline. Selected-run panels use HTTP-backed identity and record accounting; run ID never filters Prometheus. Selected-range panels show scores, freshness, rejects, and delivery impact. These scopes answer different questions and must not be compared as equivalent status signals. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: stage=${stage}.",
       "options": {
@@ -388,7 +388,7 @@
         "h": 3,
         "w": 8,
         "x": 16,
-        "y": 3
+        "y": 2
       },
       "datasource": {
         "type": "prometheus",
@@ -502,10 +502,10 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 5
       },
       "options": {
         "content": "<div style=\"font-size:16px;line-height:1.15\">OK: review run accounting. WARN/CRIT: inspect reasons. UNKNOWN: verify <a href=\"https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md\">DQ metrics, freshness and source</a>.</div>",
@@ -1610,6 +1610,21 @@
       "description": "Expand for selected-range impact and freshness after resolving the current reason lane.",
       "panels": [
         {
+          "id": 157,
+          "type": "text",
+          "title": "Review DQ Coverage",
+          "options": {
+            "mode": "markdown",
+            "content": "**Measured data only · last 7 days.** Record count below is the score denominator; entity count is observed score coverage, not expected coverage. DQ validation time is not recorded by these metrics. Data freshness is separate. Run ID does not filter these scores; 100% does not prove current completeness."
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 20,
+            "w": 24,
+            "h": 3
+          }
+        },
+        {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
@@ -1653,15 +1668,15 @@
                   }
                 }
               ],
-              "displayName": "Monitor Volume-Weighted DQ Score"
+              "displayName": "Measured scores · 7d lookback"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 0,
-            "y": 20,
-            "w": 12,
-            "h": 3
+            "y": 23,
+            "w": 8,
+            "h": 4
           },
           "id": 2,
           "options": {
@@ -1676,7 +1691,7 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value",
+            "textMode": "value_and_name",
             "text": {
               "value": 32
             }
@@ -1736,15 +1751,15 @@
                   }
                 }
               ],
-              "displayName": "Monitor Worst-Entity DQ Score"
+              "displayName": "Measured scores · 7d lookback"
             },
             "overrides": []
           },
           "gridPos": {
-            "x": 12,
-            "y": 20,
-            "w": 12,
-            "h": 3
+            "x": 8,
+            "y": 23,
+            "w": 8,
+            "h": 4
           },
           "id": 5,
           "options": {
@@ -1766,7 +1781,7 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value",
+            "textMode": "value_and_name",
             "text": {
               "value": 32
             }
@@ -1830,10 +1845,10 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 0,
+            "x": 16,
             "y": 23,
-            "w": 12,
-            "h": 3
+            "w": 8,
+            "h": 4
           },
           "id": 8,
           "options": {
@@ -1869,6 +1884,85 @@
           ],
           "title": "Monitor Worst Freshness Age",
           "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "noValue": "UNKNOWN",
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "gray",
+                    "value": null
+                  }
+                ]
+              },
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 27,
+            "w": 24,
+            "h": 4
+          },
+          "id": 158,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value_and_name",
+            "text": {
+              "value": 32
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum(last_over_time(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}[7d]))",
+              "legendFormat": "Records in denominator",
+              "instant": true
+            },
+            {
+              "refId": "B",
+              "expr": "count(last_over_time(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}[7d]))",
+              "legendFormat": "Observed score series",
+              "instant": true
+            }
+          ],
+          "title": "Inspect DQ Sample Coverage",
+          "type": "stat",
+          "description": "TIME RANGE · Observed coverage over the fixed 7d score lookback. Not expected coverage; missing telemetry remains UNKNOWN."
         },
         {
           "datasource": {
@@ -1919,9 +2013,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 12,
-            "y": 23,
-            "w": 12,
+            "x": 0,
+            "y": 31,
+            "w": 8,
             "h": 3
           },
           "id": 154,
@@ -2010,9 +2104,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 0,
-            "y": 26,
-            "w": 12,
+            "x": 8,
+            "y": 31,
+            "w": 8,
             "h": 3
           },
           "id": 6,
@@ -2099,9 +2193,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 12,
-            "y": 26,
-            "w": 12,
+            "x": 16,
+            "y": 31,
+            "w": 8,
             "h": 3
           },
           "id": 117,
@@ -3785,7 +3879,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "red",
+                    "color": "gray",
                     "value": null
                   },
                   {
@@ -3826,7 +3920,7 @@
             "legend": {
               "displayMode": "list",
               "placement": "bottom",
-              "showLegend": false
+              "showLegend": true
             },
             "tooltip": {
               "mode": "single",
@@ -3841,7 +3935,7 @@
               },
               "editorMode": "code",
               "expr": "((sum((bioetl_dq_validation_score{pipeline=~\"$pipeline\"} * bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}))) / clamp_min(sum(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}), 1))",
-              "legendFormat": "DQ score",
+              "legendFormat": "Volume-weighted DQ score (observed)",
               "range": true,
               "refId": "A"
             }
@@ -3941,13 +4035,13 @@
             "x": 0,
             "y": 23,
             "w": 24,
-            "h": 10
+            "h": 8
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "lg",
+            "cellHeight": "sm",
             "footer": {
               "show": false,
               "enablePagination": true
@@ -4040,15 +4134,15 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 33,
+            "y": 31,
             "w": 24,
-            "h": 8
+            "h": 5
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "lg",
+            "cellHeight": "sm",
             "footer": {
               "show": false,
               "enablePagination": true
