@@ -24,6 +24,9 @@ from bioetl.composition.runtime_builders._run_manifest_refs import (
 from bioetl.composition.runtime_builders._run_manifest_replay_support import (
     resolve_replay_parentage,
 )
+from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
+    build_launch_context_snapshot,
+)
 from bioetl.composition.runtime_builders._run_manifest_sink_policy import (
     validate_reproducible_sink_modes,
 )
@@ -42,6 +45,7 @@ __all__ = [
     "RunManifestProvenanceBundle",
     "apply_manifest_updates_to_mutable_context",
     "build_dataclass_manifest_updates",
+    "build_launch_context_snapshot",
     "build_planned_artifacts",
     "build_run_manifest_provenance_bundle",
     "build_run_source_refs",

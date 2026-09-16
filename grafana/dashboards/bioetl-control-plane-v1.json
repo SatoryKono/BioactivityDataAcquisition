@@ -8489,6 +8489,44 @@
               {
                 "matcher": {
                   "id": "byName",
+                  "options": "Parameter"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Action"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
                   "options": "Current"
                 },
                 "properties": [
