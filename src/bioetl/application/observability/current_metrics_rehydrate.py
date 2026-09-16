@@ -6,17 +6,20 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.application.observability.current_metrics_rehydrate_payload import (
+    anchor_from_workflow_entry,
+    first_text,
+    load_report_payload,
+)
 from bioetl.application.observability.rehydrate_models import (
     PipelineRunSnapshot,
     RehydrateResult,
-    WorkflowPipelineScopeInfo,
     WorkflowRunSnapshot,
 )
 from bioetl.application.services.run_reports.query import (
     ReportIndexEntry,
     list_pipeline_reports,
     list_workflow_reports,
-    load_pipeline_report,
 )
 from bioetl.domain.ports import RunReportStorePort
 
@@ -24,7 +27,6 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
 
 _TERMINAL_STATUSES = frozenset({"success", "failed", "shutdown"})
-_WORKFLOW_TERMINAL_STATUSES = frozenset({"success", "failed", "shutdown"})
 _SEEDED_RUN_KEYS: set[tuple[str, str, str]] = set()
 _SEEDED_PROVIDER_KEYS: set[str] = set()
 _SEEDED_WORKFLOW_KEYS: set[str] = set()
@@ -39,17 +41,6 @@ def reset_rehydrate_seed_state() -> None:
     _SEEDED_WORKFLOW_PIPELINE_KEYS.clear()
 
 
-def _first_text(*values: object) -> str:
-    """Return the first non-empty stripped string from *values*."""
-    for value in values:
-        if value is None:
-            continue
-        text = str(value).strip()
-        if text:
-            return text
-    return ""
-
-
 def _persisted_unix(completed_at: str, fallback_mtime: float) -> float:
     """Prefer the report's completed_at; fall back to the artifact mtime."""
     if completed_at:
@@ -60,33 +51,25 @@ def _persisted_unix(completed_at: str, fallback_mtime: float) -> float:
     return float(fallback_mtime)
 
 
-def _provider_from_pipeline_name(pipeline_name: str) -> str:
-    """Derive the bounded provider label from ``provider_entity`` names."""
-    provider, separator, _entity = pipeline_name.partition("_")
-    if separator and provider:
-        return provider
-    return pipeline_name or "unknown"
-
-
 def _anchor_from_report_entry(
     entry: ReportIndexEntry, *, store: RunReportStorePort
 ) -> PipelineRunSnapshot | None:
     """Build one terminal anchor from a report index entry, or None."""
-    payload = _load_report_payload(entry.json_path, store=store)
+    payload = load_report_payload(entry.json_path, store=store)
     if payload is None:
         return None
     identity = payload.get("identity")
     if not isinstance(identity, dict):
         return None
-    pipeline = _first_text(identity.get("pipeline_name"), entry.owner)
-    run_type = _first_text(identity.get("run_type"))
-    status = _first_text(identity.get("status"), entry.status)
-    run_id = _first_text(identity.get("run_id"), entry.run_id)
+    pipeline = first_text(identity.get("pipeline_name"), entry.owner)
+    run_type = first_text(identity.get("run_type"))
+    status = first_text(identity.get("status"), entry.status)
+    run_id = first_text(identity.get("run_id"), entry.run_id)
     if not pipeline or not run_type or status not in _TERMINAL_STATUSES:
         return None
     provider_raw = identity.get("provider")
     provider = provider_raw.strip() if isinstance(provider_raw, str) else None
-    completed = _first_text(identity.get("completed_at"), entry.completed_at)
+    completed = first_text(identity.get("completed_at"), entry.completed_at)
     return PipelineRunSnapshot(
         pipeline=pipeline,
         run_type=run_type,
@@ -129,7 +112,7 @@ def collect_latest_terminal_workflow_anchors(
     )
     selected: dict[str, WorkflowRunSnapshot] = {}
     for entry in entries:
-        anchor = _anchor_from_workflow_entry(
+        anchor = anchor_from_workflow_entry(
             entry,
             root=root,
             store=store,
@@ -277,147 +260,3 @@ def _seed_workflow_pipeline_expected(
         _SEEDED_WORKFLOW_PIPELINE_KEYS.add(key)
         seeded += 1
     return seeded
-
-
-def _anchor_from_workflow_entry(
-    entry: ReportIndexEntry,
-    *,
-    root: Path | None,
-    store: RunReportStorePort,
-    include_pipeline_scopes: bool = True,
-) -> WorkflowRunSnapshot | None:
-    """Build one terminal workflow anchor, or None."""
-    payload = _load_report_payload(entry.json_path, store=store)
-    if payload is None:
-        return None
-    identity = payload.get("identity")
-    if not isinstance(identity, dict):
-        return None
-    workflow = _first_text(
-        identity.get("workflow_name"),
-        entry.owner,
-        entry.workflow_id,
-    )
-    status = _first_text(identity.get("status"), entry.status)
-    run_id = _first_text(
-        identity.get("workflow_run_id"),
-        entry.workflow_run_id,
-        entry.run_id,
-    )
-    if not workflow or status not in _WORKFLOW_TERMINAL_STATUSES:
-        return None
-    pipelines = (
-        _pipeline_scopes_from_payload(payload, root=root, store=store)
-        if include_pipeline_scopes
-        else ()
-    )
-    provider = _workflow_provider(payload, pipelines)
-    return WorkflowRunSnapshot(
-        workflow=workflow,
-        status=status,
-        provider=provider,
-        run_id=run_id,
-        pipelines=pipelines,
-    )
-
-
-def _workflow_provider(
-    payload: dict[str, object],
-    pipelines: tuple[WorkflowPipelineScopeInfo, ...],
-) -> str:
-    if pipelines:
-        return pipelines[0].provider
-    for pipeline_name in _pipeline_names_from_payload(payload):
-        return _provider_from_pipeline_name(pipeline_name)
-    return "unknown"
-
-
-def _collect_pipeline_names(rows: object, seen: set[str], names: list[str]) -> None:
-    if not isinstance(rows, list):
-        return
-    for row in rows:
-        if isinstance(row, dict):
-            pipeline = _first_text(row.get("pipeline_name"))
-            if pipeline and pipeline not in seen:
-                seen.add(pipeline)
-                names.append(pipeline)
-
-
-def _pipeline_names_from_payload(payload: dict[str, object]) -> tuple[str, ...]:
-    names: list[str] = []
-    seen: set[str] = set()
-    _collect_pipeline_names(payload.get("execution"), seen, names)
-    plan = payload.get("plan")
-    if isinstance(plan, dict):
-        _collect_pipeline_names(plan.get("steps"), seen, names)
-    return tuple(names)
-
-
-def _pipeline_scopes_from_payload(
-    payload: dict[str, object], *, root: Path | None, store: RunReportStorePort
-) -> tuple[WorkflowPipelineScopeInfo, ...]:
-    selected: dict[tuple[str, str, str], WorkflowPipelineScopeInfo] = {}
-    execution = payload.get("execution")
-    if not isinstance(execution, list):
-        return ()
-    for row in execution:
-        if not isinstance(row, dict):
-            continue
-        pipeline = _first_text(row.get("pipeline_name"))
-        if not pipeline:
-            continue
-        run_type = _run_type_from_execution_row(
-            row, pipeline=pipeline, root=root, store=store
-        )
-        if not run_type:
-            continue
-        provider = _provider_from_pipeline_name(pipeline)
-        key = (pipeline, run_type, provider)
-        if key in selected:
-            continue
-        selected[key] = WorkflowPipelineScopeInfo(
-            pipeline=pipeline,
-            run_type=run_type,
-            provider=provider,
-        )
-    return tuple(selected.values())
-
-
-def _run_type_from_execution_row(
-    row: dict[str, object],
-    *,
-    pipeline: str,
-    root: Path | None,
-    store: RunReportStorePort,
-) -> str:
-    explicit = _first_text(row.get("run_type"))
-    if explicit:
-        return explicit
-    pipeline_run_id = _first_text(row.get("pipeline_run_id"))
-    if not pipeline_run_id:
-        return ""
-    child = load_pipeline_report(
-        pipeline_name=pipeline, run_id=pipeline_run_id, root=root, store=store
-    )
-    if not isinstance(child, dict):
-        return ""
-    identity = child.get("identity")
-    if not isinstance(identity, dict):
-        return ""
-    return _first_text(identity.get("run_type"))
-
-
-def _load_report_payload(
-    path: Path, *, store: RunReportStorePort
-) -> dict[str, object] | None:
-    try:
-        text = store.read_text(str(path))
-    except OSError:
-        return None
-    try:
-        import json
-
-        payload = json.loads(text)
-    except (UnicodeDecodeError, ValueError):
-        return None
-    return payload if isinstance(payload, dict) else None

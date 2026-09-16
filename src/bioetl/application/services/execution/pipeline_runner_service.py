@@ -23,7 +23,7 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 from bioetl.application.runtime_timestamps import capture_runtime_timing_anchor
@@ -34,6 +34,15 @@ from bioetl.application.services.execution._pipeline_runner_support import (
     complete_pipeline_dry_run,
     create_execution_runner_audited,
     finalize_pipeline_run_report,
+)
+from bioetl.application.services.execution._pipeline_runner_support import (
+    missing_run_id_factory as _missing_run_id_factory,
+)
+from bioetl.application.services.execution._pipeline_runner_support import (
+    record_pipeline_audit_event as _record_pipeline_audit_event,
+)
+from bioetl.application.services.execution._pipeline_runner_support import (
+    resolve_effective_run_id as _resolve_effective_run_id,
 )
 from bioetl.application.services.execution.pipeline_run_context_service import (
     PipelineRunContextService,
@@ -66,52 +75,6 @@ if TYPE_CHECKING:
         MetricsPort,
         RunnerFactoryPort,
     )
-
-
-async def _record_pipeline_audit_event(
-    audit: AuditPort,
-    *,
-    event_name: str,
-    pipeline_name: str,
-    run_id: RunID,
-    run_type: str,
-    status: str,
-    timestamp: datetime,
-    manifest_id: str | None = None,
-    error_type: str | None = None,
-) -> None:
-    """Record pipeline lifecycle outcome via the audit port abstraction."""
-    event_data = {
-        "pipeline": pipeline_name,
-        "run_id": str(run_id),
-        "run_type": run_type,
-        "status": status,
-    }
-    if manifest_id is not None:
-        event_data["manifest_id"] = manifest_id
-    if error_type is not None:
-        event_data["error_type"] = error_type
-    await audit.log_event(event_name, event_data, timestamp=timestamp)
-
-
-def _resolve_effective_run_id(
-    *,
-    run_id: UUID | None,
-    options: RunOptions,
-    run_id_factory: Callable[[], RunID | UUID | str],
-) -> RunID:
-    if run_id is not None:
-        return cast(RunID, run_id)
-    if options.exact_replay:
-        raise ValueError("exact replay requires explicit run_id")
-    generated_run_id = run_id_factory()
-    if isinstance(generated_run_id, UUID):
-        return cast(RunID, generated_run_id)
-    return cast(RunID, UUID(str(generated_run_id)))
-
-
-def _missing_run_id_factory() -> RunID:
-    raise RuntimeError("pipeline run_id_factory must be supplied by composition root")
 
 
 @dataclass
@@ -158,17 +121,23 @@ class PipelineRunnerService:
             clock=self.clock,
             started_at=self.clock.now(),
         )
-        effective_options = self._merge_options(options, dry_run)
+        effective_options = self._context_service.merge_options(
+            options=options,
+            dry_run=dry_run,
+            default_options_factory=lambda dry_run_value: RunOptions(
+                dry_run=dry_run_value
+            ),
+        )
         self._ensure_pipeline_exists(pipeline_name)
         effective_run_id = _resolve_effective_run_id(
             run_id=run_id,
             options=effective_options,
             run_id_factory=self.run_id_factory,
         )
-        context = self._build_context(
-            pipeline_name,
-            effective_run_id,
-            effective_options,
+        context = self._context_service.build_context(
+            pipeline_name=pipeline_name,
+            run_id=effective_run_id,
+            options=effective_options,
             started_at=started_at,
         )
         run_logger = self._create_run_logger(
@@ -184,7 +153,8 @@ class PipelineRunnerService:
             status="started",
             timestamp=started_at,
         )
-        dry_run_result = self._maybe_dry_run_result(
+        dry_run_result = build_dry_run_result(
+            clock=self.clock,
             pipeline_name=pipeline_name,
             run_id=effective_run_id,
             options=effective_options,
@@ -200,7 +170,12 @@ class PipelineRunnerService:
                 dry_run_result=dry_run_result,
                 record_event=_record_pipeline_audit_event,
             )
-            return self._finalize_report(completed_dry_run, effective_options)
+            return finalize_pipeline_run_report(
+                result=completed_dry_run,
+                options=effective_options,
+                report_root=self.report_root,
+                store=self.report_store,
+            )
 
         async def _record_constructor_failure(exc: Exception) -> None:
             await _record_pipeline_audit_event(
@@ -278,24 +253,6 @@ class PipelineRunnerService:
         )
         return run_logger
 
-    def _maybe_dry_run_result(
-        self,
-        *,
-        pipeline_name: str,
-        run_id: RunID,
-        options: RunOptions,
-        started_at: datetime,
-        run_logger: LoggerPort,
-    ) -> RunResult | None:
-        return build_dry_run_result(
-            clock=self.clock,
-            pipeline_name=pipeline_name,
-            run_id=run_id,
-            options=options,
-            started_at=started_at,
-            run_logger=run_logger,
-        )
-
     def list_pipelines(self) -> list[str]:
         """List all available pipeline names.
 
@@ -314,35 +271,6 @@ class PipelineRunnerService:
             True if pipeline exists, False otherwise.
         """
         return self.runner_factory.contains(pipeline_name)
-
-    def _merge_options(
-        self,
-        options: RunOptions | None,
-        dry_run: bool,
-    ) -> RunOptions:
-        """Merge individual parameters with RunOptions."""
-        return self._context_service.merge_options(
-            options=options,
-            dry_run=dry_run,
-            default_options_factory=lambda dry_run_value: RunOptions(
-                dry_run=dry_run_value
-            ),
-        )
-
-    def _build_context(
-        self,
-        pipeline_name: str,
-        run_id: RunID,
-        options: RunOptions,
-        started_at: datetime,
-    ) -> PipelineRunContext:
-        """Build PipelineRunContext from options."""
-        return self._context_service.build_context(
-            pipeline_name=pipeline_name,
-            run_id=run_id,
-            options=options,
-            started_at=started_at,
-        )
 
     async def _execute_pipeline(
         self,
@@ -410,12 +338,6 @@ class PipelineRunnerService:
             write_report=False,
             store=self.report_store,
         )
-        return self._finalize_report(result, options)
-
-    def _finalize_report(
-        self, result: RunResult, options: RunOptions | None
-    ) -> RunResult:
-        """Use the configured report destination for every execution outcome."""
         return finalize_pipeline_run_report(
             result=result,
             options=options,

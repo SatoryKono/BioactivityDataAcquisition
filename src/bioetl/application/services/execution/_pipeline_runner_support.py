@@ -6,7 +6,8 @@ from collections.abc import Awaitable, Callable
 from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
+from uuid import UUID
 
 from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
@@ -34,6 +35,7 @@ from bioetl.domain.run_reports.pipeline_builder import (
     PipelineRunReportOptionalBlocks,
     build_pipeline_run_report,
 )
+from bioetl.domain.types import RunID
 
 if TYPE_CHECKING:
     from bioetl.application.services.execution.pipeline_run_execution_service import (
@@ -45,7 +47,6 @@ if TYPE_CHECKING:
         ExecutionMetricsRunnerPort,
         LoggerPort,
     )
-    from bioetl.domain.types import RunID
 
 
 def build_dry_run_result(
@@ -304,3 +305,49 @@ def _require_execution_runner(runner: object) -> ExecutionMetricsRunnerPort:
     if not isinstance(runner, ExecutionMetricsRunnerPort):
         raise TypeError("Runner does not implement ExecutionMetricsRunnerPort")
     return runner
+
+
+async def record_pipeline_audit_event(
+    audit: AuditPort,
+    *,
+    event_name: str,
+    pipeline_name: str,
+    run_id: RunID,
+    run_type: str,
+    status: str,
+    timestamp: datetime,
+    manifest_id: str | None = None,
+    error_type: str | None = None,
+) -> None:
+    """Record pipeline lifecycle outcome via the audit port abstraction."""
+    event_data = {
+        "pipeline": pipeline_name,
+        "run_id": str(run_id),
+        "run_type": run_type,
+        "status": status,
+    }
+    if manifest_id is not None:
+        event_data["manifest_id"] = manifest_id
+    if error_type is not None:
+        event_data["error_type"] = error_type
+    await audit.log_event(event_name, event_data, timestamp=timestamp)
+
+
+def resolve_effective_run_id(
+    *,
+    run_id: UUID | None,
+    options: RunOptions,
+    run_id_factory: Callable[[], RunID | UUID | str],
+) -> RunID:
+    if run_id is not None:
+        return cast(RunID, run_id)
+    if options.exact_replay:
+        raise ValueError("exact replay requires explicit run_id")
+    generated_run_id = run_id_factory()
+    if isinstance(generated_run_id, UUID):
+        return cast(RunID, generated_run_id)
+    return cast(RunID, UUID(str(generated_run_id)))
+
+
+def missing_run_id_factory() -> RunID:
+    raise RuntimeError("pipeline run_id_factory must be supplied by composition root")

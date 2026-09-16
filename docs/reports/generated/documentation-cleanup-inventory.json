@@ -3689,6 +3689,34 @@
       "lifecycle": "issue_pack",
       "outbound_links": 0,
       "owner": "BioETL Team",
+      "path": ".github/ISSUES/SNR-R3-2026-09-16-SONAR-RESIDUAL-ISSUE-PACK.md",
+      "recommended_action": "archive-after-github-state-check",
+      "root_doc_kind": null,
+      "section": ".github",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "issue_pack",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
       "path": ".github/ISSUES/TD2-2026-07-29-TECH-DEBT-POST-AUDIT-RESIDUAL-ISSUE-PACK.md",
       "recommended_action": "archive-after-github-state-check",
       "root_doc_kind": null,
@@ -103035,7 +103063,7 @@
       "generated_test_run_evidence": 4,
       "guide": 4,
       "index": 4,
-      "issue_pack": 58,
+      "issue_pack": 59,
       "live_issue_mirror": 8,
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 21,
@@ -103043,7 +103071,7 @@
       "working_report": 979
     },
     "by_recommended_action": {
-      "archive-after-github-state-check": 336,
+      "archive-after-github-state-check": 337,
       "archive-after-migration": 990,
       "generate-automatically": 1044,
       "keep": 1271,
@@ -103051,7 +103079,7 @@
       "replace-with-link": 2
     },
     "by_section": {
-      ".github": 352,
+      ".github": 353,
       "00-project": 259,
       "01-requirements": 4,
       "02-architecture": 991,
@@ -103086,7 +103114,7 @@
       "Canonical": 73,
       "Deprecated": 2,
       "Generated": 1044,
-      "Working": 1493
+      "Working": 1494
     },
     "by_surface_family": {
       "active": 747,
@@ -103094,10 +103122,10 @@
       "canonical": 73,
       "duplicate": 2,
       "generated": 1044,
-      "working": 1493
+      "working": 1494
     },
     "by_tracking_state": {
-      "tracked": 3651
+      "tracked": 3652
     },
     "docs_reports_local_count": 38,
     "duplicate_group_count": 7,
@@ -103108,13 +103136,13 @@
       "active_draft": 278,
       "guide": 4,
       "index": 4,
-      "issue_pack": 58,
+      "issue_pack": 59,
       "live_issue_mirror": 8
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3651,
+    "total_doc_like": 3652,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3651
+    "total_doc_like_tracked": 3652
   }
 }

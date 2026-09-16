@@ -27,8 +27,1490 @@
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 7
       },
+      "internal_fan_in_census": {
+        "distribution": {
+          "0": 18,
+          "1": 103,
+          "2": 42,
+          "3": 14,
+          "4": 6,
+          "5": 11
+        },
+        "modules": [
+          {
+            "module": "bioetl.application.core",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.core._base_transformer_execution_support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core._base_transformer_structural_support",
+              "bioetl.application.core.base_transformer_execution_mixin"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._base_transformer_structural_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.base_transformer_execution_mixin"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._batch_processing_layer_write_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.batch_processing_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._batch_processing_metrics_support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core._batch_processing_layer_write_support",
+              "bioetl.application.core.batch_processing_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._batch_tracing_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.batch_tracing"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._batch_transformer_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.batch_transformer"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._batch_write_support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core._batch_processing_layer_write_support",
+              "bioetl.application.core.batch_processing_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._batch_writer_column_order",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.batch_writer_columns_mixin"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._batch_writer_gold_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.batch_writer_io_mixin"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._checkpoint_payload",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.batch_checkpoint_recovery_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._fetch_forwarding",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core._target_data_source_fetch_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._filtered_data_source_fetch_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.filtered_data_source_mixins"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._filtered_data_source_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.filtered_data_source_mixins"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._quarantine_manager_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.quarantine_manager"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._quarantine_metrics_support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core._quarantine_request_builders",
+              "bioetl.application.core._quarantine_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._quarantine_request_builders",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core._quarantine_manager_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._quarantine_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core._quarantine_manager_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._quarantine_write_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core._quarantine_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._record_normalization_contract",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.application.core._record_normalization_mapping",
+              "bioetl.application.core._record_normalization_runtime_support",
+              "bioetl.application.core.record_normalization_processor"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._record_normalization_hash_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.record_normalization_processor"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._record_normalization_mapping",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.record_normalization_processor"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._record_normalization_runtime_support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core._record_normalization_mapping",
+              "bioetl.application.core.record_normalization_processor"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._record_processor_span_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.record_processor"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._runner_dependency_support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core._runner_support",
+              "bioetl.application.core.runner"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._runner_finalize",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.runner"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._runner_observability",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.runner_execution_flow"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._runner_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.runner"
+            ]
+          },
+          {
+            "module": "bioetl.application.core._target_data_source_fetch_support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.data_source_mixins",
+              "bioetl.application.core.target_data_source_mixins"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.base",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.wiring.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.base_transformer",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.batch_transformer_attempt_failures",
+              "bioetl.application.core.batch_transformer_attempts"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.base_transformer._structural_policy_coercion",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.base_transformer._structural_policy_evaluation"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.base_transformer._structural_policy_contracts",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.base_transformer._structural_policy_evaluation",
+              "bioetl.application.core.base_transformer._structural_policy_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.base_transformer._structural_policy_evaluation",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.base_transformer._structural_policy_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.base_transformer._structural_policy_events",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.base_transformer._structural_policy_evaluation"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.base_transformer._structural_policy_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.base_transformer.structural_policy"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.base_transformer._structural_policy_types",
+            "fan_in": 5,
+            "runtime_importers": [
+              "bioetl.application.core.base_transformer._structural_policy_coercion",
+              "bioetl.application.core.base_transformer._structural_policy_contracts",
+              "bioetl.application.core.base_transformer._structural_policy_evaluation",
+              "bioetl.application.core.base_transformer._structural_policy_events",
+              "bioetl.application.core.base_transformer._structural_policy_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.base_transformer.base",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.base_transformer"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.base_transformer.contract_policy",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.core.base_transformer.errors",
+            "fan_in": 4,
+            "runtime_importers": [
+              "bioetl.application.core._base_transformer_structural_support",
+              "bioetl.application.core.base_transformer",
+              "bioetl.application.core.base_transformer_execution_mixin",
+              "bioetl.application.core.base_transformer_runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.base_transformer.field_policy",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.application.core.base_transformer._structural_policy_contracts",
+              "bioetl.application.core.base_transformer._structural_policy_support",
+              "bioetl.application.core.base_transformer._structural_policy_types"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.base_transformer.optionality",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.base_transformer._structural_policy_contracts",
+              "bioetl.application.core.base_transformer.field_policy"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.base_transformer.structural_policy",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.base_transformer.types"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.base_transformer.types",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.base_transformer",
+              "bioetl.application.core.base_transformer.base"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.base_transformer_dependency_helpers_mixin",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.base_transformer.base"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.base_transformer_execution_mixin",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.base_transformer.base"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.base_transformer_helpers_mixin",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.base_transformer_execution_mixin"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.base_transformer_runtime",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.base_transformer_helpers_mixin"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_checkpoint_recovery_service",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.wiring.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_execution",
+            "fan_in": 4,
+            "runtime_importers": [
+              "bioetl.application.core.batch_executor",
+              "bioetl.application.core.batch_executor_state_flow",
+              "bioetl.application.core.batch_extraction_loop_service",
+              "bioetl.application.core.wiring.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_execution.contracts",
+            "fan_in": 5,
+            "runtime_importers": [
+              "bioetl.application.core.batch_execution.lifecycle",
+              "bioetl.application.core.batch_execution.run_service",
+              "bioetl.application.core.batch_execution.state_service",
+              "bioetl.application.core.batch_executor_helpers",
+              "bioetl.application.core.batch_executor_protocols"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_execution.lifecycle",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.batch_execution",
+              "bioetl.application.core.batch_execution.run_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_execution.run_service",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.batch_execution"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_execution.state_service",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.batch_execution"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_executor",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.record_processor",
+              "bioetl.application.core.wiring.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_executor_dq_helpers",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.batch_executor_dq_mixin"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_executor_dq_mixin",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.batch_executor"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_executor_helpers",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.batch_execution.state_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_executor_loop_flow",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.batch_executor_loop_helpers"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_executor_loop_helpers",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.batch_extraction_loop_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_executor_loop_progress",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.batch_executor_loop_flow",
+              "bioetl.application.core.batch_executor_loop_helpers"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_executor_protocols",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.batch_executor",
+              "bioetl.application.core.batch_executor_state_flow"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_executor_runtime_state",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.batch_executor"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_executor_state_flow",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.batch_executor"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_extraction_loop_service",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.batch_executor",
+              "bioetl.application.core.wiring.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_memory_decision_policy",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.batch_memory_manager",
+              "bioetl.application.core.batch_memory_metrics"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_memory_manager",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.batch_executor_state_flow",
+              "bioetl.application.core.wiring.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_memory_metrics",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.batch_memory_manager"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_metrics",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.application.core.batch_transformer_attempts",
+              "bioetl.application.core.quarantine_manager",
+              "bioetl.application.core.wiring.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_metrics_accounting",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core._quarantine_metrics_support",
+              "bioetl.application.core.batch_metrics"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_operation_errors",
+            "fan_in": 4,
+            "runtime_importers": [
+              "bioetl.application.core._batch_write_support",
+              "bioetl.application.core.batch_shared_operation_errors",
+              "bioetl.application.core.runner_execution_flow",
+              "bioetl.application.core.runner_flow"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_pipeline_execution_errors",
+            "fan_in": 5,
+            "runtime_importers": [
+              "bioetl.application.core.batch_execution.run_service",
+              "bioetl.application.core.batch_executor",
+              "bioetl.application.core.batch_executor_state_flow",
+              "bioetl.application.core.batch_processing_runtime",
+              "bioetl.application.core.batch_source_metadata_errors"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_processing_contracts",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.batch_executor_protocols",
+              "bioetl.application.core.batch_processing_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_processing_runtime",
+            "fan_in": 5,
+            "runtime_importers": [
+              "bioetl.application.core._record_processor_span_support",
+              "bioetl.application.core.batch_processing_support",
+              "bioetl.application.core.batch_transformer_attempts",
+              "bioetl.application.core.batch_transformer_quarantine",
+              "bioetl.application.core.batch_writer_io_mixin"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_processing_service",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.wiring.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_processing_support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.batch_processing_service",
+              "bioetl.application.core.wiring.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_progress_service",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.wiring.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_shared_operation_errors",
+            "fan_in": 5,
+            "runtime_importers": [
+              "bioetl.application.core._batch_processing_layer_write_support",
+              "bioetl.application.core.batch_pipeline_execution_errors",
+              "bioetl.application.core.batch_processing_support",
+              "bioetl.application.core.lifecycle.checkpoint_manager",
+              "bioetl.application.core.postrun.service"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_source_metadata_errors",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.batch_processing_runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_tracing",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.batch_writer_tracing_mixin",
+              "bioetl.application.core.wiring.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_transformer",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.application.core._batch_processing_layer_write_support",
+              "bioetl.application.core.batch_processing_support",
+              "bioetl.application.core.wiring.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_transformer_attempt_failures",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.batch_transformer_attempts"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_transformer_attempt_success",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.batch_transformer_attempt_failures",
+              "bioetl.application.core.batch_transformer_attempts"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_transformer_attempts",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.transformer_runtime.attempts"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_transformer_dq_thresholds",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.batch_transformer_finalization",
+              "bioetl.application.core.transformer_runtime.finalization"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_transformer_finalization",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.transformer_runtime.finalization"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_transformer_quarantine",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.transformer_runtime.quarantine"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_transformer_state",
+            "fan_in": 5,
+            "runtime_importers": [
+              "bioetl.application.core.batch_transformer_attempt_failures",
+              "bioetl.application.core.batch_transformer_attempt_success",
+              "bioetl.application.core.batch_transformer_finalization",
+              "bioetl.application.core.batch_transformer_quarantine",
+              "bioetl.application.core.transformer_runtime.state"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_transformer_streaming",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.transformer_runtime.streaming"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_writer",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.wiring.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_writer_columns_mixin",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.batch_writer"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_writer_io_mixin",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.batch_writer"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.batch_writer_tracing_mixin",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.batch_writer"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.config",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.application.core.lifecycle.lock_lifecycle",
+              "bioetl.application.core.lifecycle.lock_runtime",
+              "bioetl.application.core.lifecycle.lock_runtime_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.data_source_mixins",
+            "fan_in": 5,
+            "runtime_importers": [
+              "bioetl.application.core._filtered_data_source_fetch_support",
+              "bioetl.application.core.data_sources.filtered",
+              "bioetl.application.core.data_sources.publication_term",
+              "bioetl.application.core.data_sources.subcellular_fraction",
+              "bioetl.application.core.filtered_data_source_mixins"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.data_sources",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.core.data_sources.filtered",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.data_sources",
+              "bioetl.application.core.filtered_data_source"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.data_sources.idmapping",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.data_sources",
+              "bioetl.application.core.idmapping_data_source"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.data_sources.publication_term",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.data_sources",
+              "bioetl.application.core.publication_term_data_source"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.data_sources.subcellular_fraction",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.data_sources",
+              "bioetl.application.core.subcellular_fraction_data_source"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.dict_transformers",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.field_transforms"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.entity_id",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.application.core.field_transforms",
+              "bioetl.application.core.publication_term_runtime",
+              "bioetl.application.core.subcellular_fraction_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.factory_wiring_api",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.core.field_specs",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.field_transforms"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.field_transforms",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.core.filtered_data_source",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.core.filtered_data_source_mixins",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.data_sources.filtered"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.idmapping_data_source",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.core.idmapping_fetch_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.data_sources.idmapping"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.idmapping_lifecycle_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.data_sources.idmapping"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.lifecycle",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.wiring.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.lifecycle._checkpoint_types",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.application.core.lifecycle",
+              "bioetl.application.core.lifecycle.checkpoint_load_validation",
+              "bioetl.application.core.lifecycle.checkpoint_manager"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.lifecycle._cleanup_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.lifecycle.cleanup_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.lifecycle.batch_fsm",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.application.core.batch_executor",
+              "bioetl.application.core.batch_executor_state_flow",
+              "bioetl.application.core.wiring.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.lifecycle.checkpoint_disposition_policy",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.lifecycle.checkpoint_runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.lifecycle.checkpoint_identity_overrides",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.lifecycle.checkpoint_runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.lifecycle.checkpoint_load_validation",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.lifecycle.checkpoint_manager"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.lifecycle.checkpoint_manager",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.lifecycle"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.lifecycle.checkpoint_runtime",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.lifecycle.checkpoint_load_validation",
+              "bioetl.application.core.lifecycle.checkpoint_manager"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.lifecycle.checkpoint_runtime_types",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.lifecycle.checkpoint_disposition_policy",
+              "bioetl.application.core.lifecycle.checkpoint_runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.lifecycle.checkpoint_saved_at",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.lifecycle.checkpoint_manager"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.lifecycle.cleanup_service",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.lifecycle"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.lifecycle.heartbeat",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.application.core.lifecycle",
+              "bioetl.application.core.lifecycle.lock_lifecycle",
+              "bioetl.application.core.lifecycle.lock_runtime_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.lifecycle.lock_lifecycle",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.lifecycle.lock_runtime_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.lifecycle.lock_runtime",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.lifecycle.lock_runtime_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.lifecycle.lock_runtime_service",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.lifecycle"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.lifecycle.shutdown",
+            "fan_in": 5,
+            "runtime_importers": [
+              "bioetl.application.core.base",
+              "bioetl.application.core.batch_executor_loop_progress",
+              "bioetl.application.core.lifecycle",
+              "bioetl.application.core.lifecycle.lock_lifecycle",
+              "bioetl.application.core.runner"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.normalization_fallbacks",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core._record_normalization_mapping"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.normalization_rules",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.application.core.normalization_fallbacks",
+              "bioetl.application.core.record_normalization_processor",
+              "bioetl.application.core.record_processor_config"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.pipeline_aux_service_protocols",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.pipeline_service_protocols"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.pipeline_observability_service_protocols",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.pipeline_aux_service_protocols",
+              "bioetl.application.core.pipeline_service_protocols"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.pipeline_runtime_service_protocols",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.pipeline_observability_service_protocols",
+              "bioetl.application.core.pipeline_service_protocols"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.pipeline_service_protocols",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.pipeline_services"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.pipeline_services",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.wiring.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.pipeline_span_lifecycle",
+            "fan_in": 5,
+            "runtime_importers": [
+              "bioetl.application.core._base_transformer_execution_support",
+              "bioetl.application.core._record_processor_span_support",
+              "bioetl.application.core.batch_tracing",
+              "bioetl.application.core.postrun.service",
+              "bioetl.application.core.runner"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.postrun",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.core.postrun._batch_metrics_projection",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.postrun._service_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.postrun._failure_policy",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.application.core.postrun",
+              "bioetl.application.core.postrun.dq_report_orchestrator",
+              "bioetl.application.core.postrun.metadata_version_resolver"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.postrun._metadata_writes",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.postrun.metadata_write_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.postrun._phase_descriptions",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.application.core.postrun._phase_runtime",
+              "bioetl.application.core.postrun._service_support",
+              "bioetl.application.core.postrun.service"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.postrun._phase_runtime",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.postrun._service_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.postrun._service_collaborators",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.postrun.service"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.postrun._service_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.postrun.service"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.postrun.cleanup_orchestrator",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.postrun"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.postrun.compact_orchestrator",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.postrun"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.postrun.dq_report_orchestrator",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.postrun"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.postrun.metadata_version_resolver",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.postrun"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.postrun.metadata_write_service",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.postrun"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.postrun.service",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.postrun"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.pre_silver_adapter_mixin",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.core.pre_silver_finalization_flow",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.pre_silver_adapter_mixin"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.pre_silver_identity",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.pre_silver_finalization_flow",
+              "bioetl.application.core.pre_silver_staging_flow"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.pre_silver_record",
+            "fan_in": 4,
+            "runtime_importers": [
+              "bioetl.application.core.batch_transformer_attempt_success",
+              "bioetl.application.core.pre_silver_staging_flow",
+              "bioetl.application.core.record_normalization_finalization",
+              "bioetl.application.core.record_normalization_processor"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.pre_silver_staging_flow",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.pre_silver_adapter_mixin"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.preflight",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.core.preflight._observability",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.preflight.service"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.preflight.health_aggregator",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.preflight.service"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.preflight.health_aggregator_runtime",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.preflight.health_aggregator"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.preflight.medallion_validator",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.preflight.service"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.preflight.medallion_validator_idempotency",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.preflight.medallion_validator_runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.preflight.medallion_validator_runtime",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.preflight.medallion_validator"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.preflight.service",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.preflight",
+              "bioetl.application.core.runner_execution_flow"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.protocols",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.wiring.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.publication_term_data_source",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.core.publication_term_extraction_mixin",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.data_sources.publication_term",
+              "bioetl.application.core.publication_term_filtering_mixin"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.publication_term_filtering_mixin",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.data_sources.publication_term"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.publication_term_runtime",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.publication_term_extraction_mixin"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.quarantine_manager",
+            "fan_in": 5,
+            "runtime_importers": [
+              "bioetl.application.core._batch_write_support",
+              "bioetl.application.core.batch_transformer_attempt_failures",
+              "bioetl.application.core.batch_transformer_quarantine",
+              "bioetl.application.core.batch_transformer_state",
+              "bioetl.application.core.wiring.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.record_normalization_finalization",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.record_normalization_processor"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.record_normalization_processor",
+            "fan_in": 4,
+            "runtime_importers": [
+              "bioetl.application.core._batch_transformer_support",
+              "bioetl.application.core.batch_transformer",
+              "bioetl.application.core.pre_silver_finalization_flow",
+              "bioetl.application.core.wiring.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.record_processor",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.wiring.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.record_processor_config",
+            "fan_in": 5,
+            "runtime_importers": [
+              "bioetl.application.core._batch_transformer_support",
+              "bioetl.application.core._record_normalization_hash_support",
+              "bioetl.application.core.config",
+              "bioetl.application.core.record_normalization_processor",
+              "bioetl.application.core.wiring.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.runner",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.core.runner_execution_flow",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core._runner_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.runner_flow",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core._runner_support",
+              "bioetl.application.core.runner"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.runner_flow_metrics",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.runner_flow"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.subcellular_fraction_data_source",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.core.subcellular_fraction_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.data_sources.subcellular_fraction"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.target_data_source_mixins",
+            "fan_in": 4,
+            "runtime_importers": [
+              "bioetl.application.core.data_source_mixins",
+              "bioetl.application.core.data_sources.publication_term",
+              "bioetl.application.core.data_sources.subcellular_fraction",
+              "bioetl.application.core.publication_term_filtering_mixin"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.transformer_runtime",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.core.transformer_runtime.attempts",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.batch_transformer",
+              "bioetl.application.core.transformer_runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.transformer_runtime.finalization",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.batch_transformer",
+              "bioetl.application.core.transformer_runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.transformer_runtime.orchestration",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.batch_transformer",
+              "bioetl.application.core.transformer_runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.transformer_runtime.quarantine",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.batch_transformer",
+              "bioetl.application.core.transformer_runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.transformer_runtime.state",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.application.core.batch_transformer",
+              "bioetl.application.core.transformer_runtime",
+              "bioetl.application.core.transformer_runtime.orchestration"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.transformer_runtime.streaming",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.batch_transformer",
+              "bioetl.application.core.transformer_runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.wiring",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.core.wiring._lazy_export_facade",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.application.core.wiring.factory",
+              "bioetl.application.core.wiring.registry",
+              "bioetl.application.core.wiring.transformer"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.wiring._runtime_export_names",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.wiring",
+              "bioetl.application.core.wiring.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.wiring.factory",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.factory_wiring_api"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.wiring.lazy_export_hooks",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.core.wiring._lazy_export_facade"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.wiring.registry",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.core.wiring.runtime",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.core.wiring.transformer",
+            "fan_in": 0,
+            "runtime_importers": []
+          }
+        ],
+        "max_fan_in": 5,
+        "max_modules": [
+          "bioetl.application.core.base_transformer._structural_policy_types",
+          "bioetl.application.core.batch_execution.contracts",
+          "bioetl.application.core.batch_pipeline_execution_errors",
+          "bioetl.application.core.batch_processing_runtime",
+          "bioetl.application.core.batch_shared_operation_errors",
+          "bioetl.application.core.batch_transformer_state",
+          "bioetl.application.core.data_source_mixins",
+          "bioetl.application.core.lifecycle.shutdown",
+          "bioetl.application.core.pipeline_span_lifecycle",
+          "bioetl.application.core.quarantine_manager",
+          "bioetl.application.core.record_processor_config"
+        ]
+      },
       "budget_warnings": [],
-      "budget_review_notes": []
+      "budget_review_notes": [],
+      "at_budget_modules": [],
+      "at_budget_module_count": 0
     },
     {
       "name": "composition_bootstrap_runtime",
@@ -41,7 +1523,7 @@
       ],
       "duplication_clusters": 0,
       "files": 51,
-      "total_loc": 6146,
+      "total_loc": 6132,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.338,
       "max_internal_fan_in": 2,
@@ -50,8 +1532,409 @@
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 3
       },
+      "internal_fan_in_census": {
+        "distribution": {
+          "0": 5,
+          "1": 26,
+          "2": 20
+        },
+        "modules": [
+          {
+            "module": "bioetl.composition.bootstrap.runtime",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime._composite_control_plane_builder_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite_control_plane_builder"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime._composite_control_plane_payloads",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite_control_plane_builder"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime._composite_control_plane_support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime._composite_control_plane_builder_support",
+              "bioetl.composition.bootstrap.runtime.composite_control_plane_builder"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime._composite_plan_runtime_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime._composite_plan_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime._composite_plan_support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite",
+              "bioetl.composition.bootstrap.runtime.runner_bootstrap_wiring"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime._dependency_runner_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.runner_factory_builder_service"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime._observability_bundle_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.observability_bundle"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime._observability_preflight_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime._observability_bundle_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime._pipeline_bootstrap_lazy_dependencies",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime._runner_assembly_support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.runner_assembly",
+              "bioetl.composition.bootstrap.runtime.runner_bootstrap_wiring"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.assembly",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.pipeline",
+              "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.classification_init",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime._pipeline_bootstrap_lazy_dependencies"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.composite",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.composite_bootstrap_builders",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite",
+              "bioetl.composition.bootstrap.runtime.composite_support_helpers"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.composite_bootstrap_registry_manifest",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.composite_control_plane_builder",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite_support_runtime_context"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.composite_control_plane_bundle",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite_control_plane_builder",
+              "bioetl.composition.bootstrap.runtime.composite_support_service_bundles"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.composite_execution_support_builder",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite_support_service_builders"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.composite_execution_support_bundle",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite_execution_support_builder",
+              "bioetl.composition.bootstrap.runtime.composite_support_service_bundles"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.composite_filter_extraction_service",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite_support_helpers",
+              "bioetl.composition.bootstrap.runtime.runner_factory_builder_service"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.composite_infrastructure_context",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.composite_merge_dependencies_bundle",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder",
+              "bioetl.composition.bootstrap.runtime.composite_support_service_bundles"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite_support_service_builders"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.composite_merge_service_builder",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite_support_services_factory"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite_support_service_builders"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.composite_runtime_management_bundle",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder",
+              "bioetl.composition.bootstrap.runtime.composite_support_service_bundles"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.composite_support_helpers",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.composite_support_runtime_context",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite_support_services_factory"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.composite_support_service_builders",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite_merge_service_builder",
+              "bioetl.composition.bootstrap.runtime.composite_support_services_factory"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.composite_support_service_bundles",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.composite_support_services_factory",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite_support_helpers"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.dq_bootstrap",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime._observability_bundle_support",
+              "bioetl.composition.bootstrap.runtime.observability"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.enum_loader_wiring",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.runtime_basics"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.logger_bootstrap",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime._observability_bundle_support",
+              "bioetl.composition.bootstrap.runtime.observability"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.metrics_bootstrap",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime._observability_bundle_support",
+              "bioetl.composition.bootstrap.runtime.observability"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.normalization_policy_init",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime._pipeline_bootstrap_lazy_dependencies"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.observability",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite_support_helpers",
+              "bioetl.composition.bootstrap.runtime.runner"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.observability_assembly",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime._observability_bundle_support",
+              "bioetl.composition.bootstrap.runtime.observability_bundle"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.observability_bundle",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.observability",
+              "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.pipeline",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite",
+              "bioetl.composition.bootstrap.runtime.composite_support_helpers"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.pipeline"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.pipeline_context_builder",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.runtime_basics"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.pipeline_runner_service_bootstrap",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.publication_vocab_init",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime._pipeline_bootstrap_lazy_dependencies"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.runner",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.pipeline_runner_service_bootstrap"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.runner_assembly",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite",
+              "bioetl.composition.bootstrap.runtime.composite_bootstrap_builders"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.runner_bootstrap_wiring",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.runner_assembly"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.runner_factory_builder_service",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite_support_helpers"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.runtime_basics",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite_bootstrap_builders"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.tracing_bootstrap",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime._observability_bundle_support",
+              "bioetl.composition.bootstrap.runtime.observability"
+            ]
+          }
+        ],
+        "max_fan_in": 2,
+        "max_modules": [
+          "bioetl.composition.bootstrap.runtime._composite_control_plane_support",
+          "bioetl.composition.bootstrap.runtime._composite_plan_support",
+          "bioetl.composition.bootstrap.runtime._runner_assembly_support",
+          "bioetl.composition.bootstrap.runtime.assembly",
+          "bioetl.composition.bootstrap.runtime.composite_bootstrap_builders",
+          "bioetl.composition.bootstrap.runtime.composite_control_plane_bundle",
+          "bioetl.composition.bootstrap.runtime.composite_execution_support_bundle",
+          "bioetl.composition.bootstrap.runtime.composite_filter_extraction_service",
+          "bioetl.composition.bootstrap.runtime.composite_merge_dependencies_bundle",
+          "bioetl.composition.bootstrap.runtime.composite_runtime_management_bundle",
+          "bioetl.composition.bootstrap.runtime.composite_support_service_builders",
+          "bioetl.composition.bootstrap.runtime.dq_bootstrap",
+          "bioetl.composition.bootstrap.runtime.logger_bootstrap",
+          "bioetl.composition.bootstrap.runtime.metrics_bootstrap",
+          "bioetl.composition.bootstrap.runtime.observability",
+          "bioetl.composition.bootstrap.runtime.observability_assembly",
+          "bioetl.composition.bootstrap.runtime.observability_bundle",
+          "bioetl.composition.bootstrap.runtime.pipeline",
+          "bioetl.composition.bootstrap.runtime.runner_assembly",
+          "bioetl.composition.bootstrap.runtime.tracing_bootstrap"
+        ]
+      },
       "budget_warnings": [],
-      "budget_review_notes": []
+      "budget_review_notes": [],
+      "at_budget_modules": [],
+      "at_budget_module_count": 0
     },
     {
       "name": "composition_factories_pipeline",
@@ -64,7 +1947,7 @@
       ],
       "duplication_clusters": 0,
       "files": 35,
-      "total_loc": 3935,
+      "total_loc": 3934,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.358,
       "max_internal_fan_in": 2,
@@ -73,8 +1956,285 @@
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 3
       },
+      "internal_fan_in_census": {
+        "distribution": {
+          "0": 5,
+          "1": 16,
+          "2": 14
+        },
+        "modules": [
+          {
+            "module": "bioetl.composition.factories.pipeline",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline._assembler_factory",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline.assembler",
+              "bioetl.composition.factories.pipeline.contract_validator"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline._creation_metadata",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline._creation_wiring"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline._creation_wiring",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline.creation_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline._factory_method_control_plane",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline._factory_method_runtime_support",
+              "bioetl.composition.factories.pipeline.factory_method_helpers"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline._factory_method_runtime_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline.factory_method_helpers"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline._factory_method_types",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline._factory_method_runtime_support",
+              "bioetl.composition.factories.pipeline.factory_method_helpers"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline._preflight_health_monitor",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline._runner_preflight_observer"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline._registry_factory_catalog",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline.registry"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline._registry_manifest_chembl",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline.registry_manifest"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline._registry_manifest_non_chembl",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline.registry_manifest"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline._runner_assembly_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline.runner_assembly"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline._runner_preflight_observer",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline._runner_assembly_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline.assembler",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline.config_types",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline._registry_manifest_chembl",
+              "bioetl.composition.factories.pipeline._registry_manifest_non_chembl"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline.construction",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline.construction_types",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline._creation_metadata",
+              "bioetl.composition.factories.pipeline.construction"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline.contract_validator",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline._registry_factory_catalog"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline.control_plane_artifacts",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline._creation_wiring",
+              "bioetl.composition.factories.pipeline._factory_method_runtime_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline.creation_support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline._factory_method_runtime_support",
+              "bioetl.composition.factories.pipeline._factory_method_types"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline.entity_type_extractor",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline.construction",
+              "bioetl.composition.factories.pipeline.construction_types"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline.factory_method_helpers",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline._assembler_factory"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline.postrun_assembly",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline._runner_assembly_support",
+              "bioetl.composition.factories.pipeline.runner_assembly"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline.registry",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline.registry_validation",
+              "bioetl.composition.factories.pipeline.runner"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline.registry_core",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline.registry"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline.registry_exports",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline.registry"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline.registry_manifest",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline._registry_factory_catalog",
+              "bioetl.composition.factories.pipeline.registry"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline.registry_validation",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline.run_context_contract_identity",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline.run_context_factory"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline.run_context_factory",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline._creation_metadata",
+              "bioetl.composition.factories.pipeline.construction"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline.runner",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline.runner_assembly",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline.assembler"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline.runner_constructor",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline._runner_assembly_support",
+              "bioetl.composition.factories.pipeline.runner_assembly"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline.transformer_builder",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline._creation_wiring",
+              "bioetl.composition.factories.pipeline.construction"
+            ]
+          },
+          {
+            "module": "bioetl.composition.factories.pipeline.transformer_dependencies",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.factories.pipeline.factory_method_helpers"
+            ]
+          }
+        ],
+        "max_fan_in": 2,
+        "max_modules": [
+          "bioetl.composition.factories.pipeline._assembler_factory",
+          "bioetl.composition.factories.pipeline._factory_method_control_plane",
+          "bioetl.composition.factories.pipeline._factory_method_types",
+          "bioetl.composition.factories.pipeline.config_types",
+          "bioetl.composition.factories.pipeline.construction_types",
+          "bioetl.composition.factories.pipeline.control_plane_artifacts",
+          "bioetl.composition.factories.pipeline.creation_support",
+          "bioetl.composition.factories.pipeline.entity_type_extractor",
+          "bioetl.composition.factories.pipeline.postrun_assembly",
+          "bioetl.composition.factories.pipeline.registry",
+          "bioetl.composition.factories.pipeline.registry_manifest",
+          "bioetl.composition.factories.pipeline.run_context_factory",
+          "bioetl.composition.factories.pipeline.runner_constructor",
+          "bioetl.composition.factories.pipeline.transformer_builder"
+        ]
+      },
       "budget_warnings": [],
-      "budget_review_notes": []
+      "budget_review_notes": [],
+      "at_budget_modules": [],
+      "at_budget_module_count": 0
     },
     {
       "name": "application_services_control_plane",
@@ -96,10 +2256,1498 @@
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 2
       },
+      "internal_fan_in_census": {
+        "distribution": {
+          "0": 17,
+          "1": 55,
+          "2": 59
+        },
+        "modules": [
+          {
+            "module": "bioetl.application.services.control_plane",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.services.control_plane._lazy_export_facade",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.effective_config",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.services.control_plane.effective_config.context",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.effective_config.service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.effective_config.provenance_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.effective_config.context"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.effective_config.runtime_overrides",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.effective_config.support"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.effective_config.serialization",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.effective_config.runtime_overrides",
+              "bioetl.application.services.control_plane.effective_config.support"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.effective_config.service",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.effective_config"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.effective_config.support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.effective_config.context",
+              "bioetl.application.services.control_plane.effective_config.service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.forensic",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.services.control_plane.forensic.diagnostics_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.forensic_diff_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.forensic_diff_service",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.forensic"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.ledger",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.services.control_plane.ledger.core_events",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.ledger.service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.ledger.diagnostic_support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.ledger.core_events",
+              "bioetl.application.services.control_plane.ledger.entry_diagnostic_details"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.ledger.entry_diagnostic_details",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.ledger.entry_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.ledger.entry_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.ledger.service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.ledger.idempotency",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.ledger.entry_support",
+              "bioetl.application.services.control_plane.workflow.ledger_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.ledger.rich_events",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.ledger.service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.ledger.service",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.ledger",
+              "bioetl.application.services.control_plane.replay._historical_certification_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest._inspection_compare_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.inspection_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest._inspection_json",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.inspection_models"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest._inspection_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.inspection_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest._reference_hydration",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest._service_hydration"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest._service_hydration",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest._service_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest._service_support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.identity_graph_assembly",
+              "bioetl.application.services.control_plane.manifest.service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.artifact_payloads",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.artifact_support",
+              "bioetl.application.services.control_plane.manifest.diagnostics.ledger_processing"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.contract_evidence",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.validation_provenance"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.inspection_service",
+              "bioetl.application.services.control_plane.replay._historical_certification_models"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.artifact_support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.summary",
+              "bioetl.application.services.control_plane.manifest.diagnostics.summary_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.base",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.base_effective_config_diagnostics",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.base",
+              "bioetl.application.services.control_plane.manifest.diagnostics.main_helpers"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.base",
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.base_provenance_payloads",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.base",
+              "bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.base",
+              "bioetl.application.services.control_plane.manifest.diagnostics.main_helpers"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.composite_projection",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.summary"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.diagnostic_context",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.composite_projection",
+              "bioetl.application.services.control_plane.manifest.diagnostics.ledger_processing"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.dq_details",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.finalization",
+              "bioetl.application.services.control_plane.manifest.diagnostics.ledger_processing"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.finalization",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.inspection_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.ledger_processing",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.finalization"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.main_helpers",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.finalization"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.nested_mapping",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.nested_mapping",
+              "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.operator_replay_mode",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections",
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.persistence",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload",
+              "bioetl.application.services.control_plane.manifest.diagnostics.summary_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.persistence_alerts",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.persistence"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.persistence_profile_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.persistence_profiles"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.persistence_profiles",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.persistence"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.checkpoint_policy",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy",
+              "bioetl.application.services.control_plane.manifest.diagnostics.resume_contract"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.nested_mapping",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_blockers",
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.required_persistence_profile"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.resume_contract"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_blockers",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections",
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_state"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay",
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context",
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_parentage",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections",
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_state"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.required_persistence_profile",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy",
+              "bioetl.application.services.control_plane.manifest.diagnostics.reproducibility_assessment"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.snapshot_envelope",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_state"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context",
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_readiness",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay",
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_types",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_state",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.reproducibility_assessment",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context",
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.resume_contract",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context",
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_ledger",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_summary",
+              "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_materialization",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support",
+              "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_summary"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_refs",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_summary",
+              "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_status",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections",
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_summary",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.finalization",
+              "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context",
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_parentage"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.source_posture",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_state"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.source_refs",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.finalization",
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.summary",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.finalization"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.diagnostics.summary_support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.base",
+              "bioetl.application.services.control_plane.manifest.diagnostics.summary"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.execution_identity_support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest._service_support",
+              "bioetl.application.services.control_plane.manifest.inspection_dossier"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.identity_graph_assembly",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest._inspection_support",
+              "bioetl.application.services.control_plane.manifest.diagnostics.summary_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.inspection_artifact_refs",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.inspection_helpers"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.inspection_dossier",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.inspection_helpers"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.inspection_helpers",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.inspection_service",
+              "bioetl.application.services.control_plane.manifest.inspection_verification"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.inspection_models",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest._inspection_compare_support",
+              "bioetl.application.services.control_plane.manifest.inspection_verification"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.inspection_result_model",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.inspection_models",
+              "bioetl.application.services.control_plane.replay._bundle_descriptor_payloads"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.inspection_service",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.forensic.diagnostics_support",
+              "bioetl.application.services.control_plane.forensic_diff_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.inspection_verification",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest._inspection_compare_support",
+              "bioetl.application.services.control_plane.manifest.inspection_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.models",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.contract_evidence",
+              "bioetl.application.services.control_plane.manifest.validation"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.replay_family_contract_payload",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context",
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.replay_taxonomy",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload",
+              "bioetl.application.services.control_plane.manifest.identity_graph_assembly"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.replay_taxonomy_fields",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.replay_taxonomy"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.service",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.service_scaffold",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.service",
+              "bioetl.application.services.control_plane.workflow.manifest_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.snapshot_payloads",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest._service_support",
+              "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_refs"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.validation",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.manifest.validation_provenance",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.validation"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay._bundle_descriptor_payloads",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.replay.bundle_descriptor_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay._historical_certification_models",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.replay._historical_certification_support",
+              "bioetl.application.services.control_plane.replay._historical_certification_upstream"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay._historical_certification_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.replay.historical_certification_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay._historical_certification_upstream",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.replay._historical_certification_support"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay._historical_claim_reason",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.run_manifest_reproducibility_claims"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay._historical_record_payload",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.replay.historical_corpus_models",
+              "bioetl.application.services.control_plane.replay.historical_corpus_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay._historical_snapshot_certification_modes",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.replay.historical_certification",
+              "bioetl.application.services.control_plane.replay.historical_certification_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay._historical_snapshot_materialization_modes",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_ledger",
+              "bioetl.application.services.control_plane.replay.historical_certification"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay.bundle_descriptor_service",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay.closure_claims",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.replay.historical_closure_policy"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay.historical_certification",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.snapshot_envelope",
+              "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_materialization"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay.historical_certification_service",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.replay.historical_corpus_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay.historical_closure_models",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.replay.closure_claims",
+              "bioetl.application.services.control_plane.replay.historical_closure_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay.historical_closure_policy",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.replay.historical_closure_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay.historical_closure_service",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay.historical_corpus_models",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.replay.historical_certification_service",
+              "bioetl.application.services.control_plane.replay.historical_closure_policy"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay.historical_corpus_policy",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.replay.historical_corpus_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay.historical_corpus_service",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.replay.historical_closure_service",
+              "bioetl.application.services.control_plane.replay.historical_universe_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay.historical_identity_models",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.replay._historical_record_payload",
+              "bioetl.application.services.control_plane.replay.historical_universe_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay.historical_universe_policy",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.replay.historical_universe_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay.historical_universe_service",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.run_manifest_reproducibility_score_cards"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation",
+              "bioetl.application.services.control_plane.run_manifest_reproducibility_score_cards"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_core",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.run_manifest_exact_replay_blockers",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_blockers"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.run_manifest_reproducibility_claims",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.run_manifest_reproducibility_score_cards"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.run_manifest_reproducibility_score_cards",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.run_manifest_reproducibility_scoring"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.run_manifest_reproducibility_scoring",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.manifest.diagnostics.finalization"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.workflow",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.services.control_plane.workflow.inspection_service",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.services.control_plane.workflow.ledger_service",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.services.control_plane.workflow.manifest_models",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.application.services.control_plane.workflow.manifest_service"
+            ]
+          },
+          {
+            "module": "bioetl.application.services.control_plane.workflow.manifest_service",
+            "fan_in": 0,
+            "runtime_importers": []
+          }
+        ],
+        "max_fan_in": 2,
+        "max_modules": [
+          "bioetl.application.services.control_plane.effective_config.serialization",
+          "bioetl.application.services.control_plane.effective_config.support",
+          "bioetl.application.services.control_plane.ledger.diagnostic_support",
+          "bioetl.application.services.control_plane.ledger.idempotency",
+          "bioetl.application.services.control_plane.ledger.service",
+          "bioetl.application.services.control_plane.manifest._service_support",
+          "bioetl.application.services.control_plane.manifest.artifact_payloads",
+          "bioetl.application.services.control_plane.manifest.diagnostics",
+          "bioetl.application.services.control_plane.manifest.diagnostics.artifact_support",
+          "bioetl.application.services.control_plane.manifest.diagnostics.base_effective_config_diagnostics",
+          "bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections",
+          "bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context",
+          "bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection",
+          "bioetl.application.services.control_plane.manifest.diagnostics.diagnostic_context",
+          "bioetl.application.services.control_plane.manifest.diagnostics.dq_details",
+          "bioetl.application.services.control_plane.manifest.diagnostics.nested_mapping",
+          "bioetl.application.services.control_plane.manifest.diagnostics.operator_replay_mode",
+          "bioetl.application.services.control_plane.manifest.diagnostics.persistence",
+          "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.checkpoint_policy",
+          "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.nested_mapping",
+          "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_blockers",
+          "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family",
+          "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context",
+          "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_parentage",
+          "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.required_persistence_profile",
+          "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection",
+          "bioetl.application.services.control_plane.manifest.diagnostics.replay_readiness",
+          "bioetl.application.services.control_plane.manifest.diagnostics.reproducibility_assessment",
+          "bioetl.application.services.control_plane.manifest.diagnostics.resume_contract",
+          "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_ledger",
+          "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_materialization",
+          "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_refs",
+          "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_status",
+          "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_summary",
+          "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support",
+          "bioetl.application.services.control_plane.manifest.diagnostics.source_refs",
+          "bioetl.application.services.control_plane.manifest.diagnostics.summary_support",
+          "bioetl.application.services.control_plane.manifest.execution_identity_support",
+          "bioetl.application.services.control_plane.manifest.identity_graph_assembly",
+          "bioetl.application.services.control_plane.manifest.inspection_helpers",
+          "bioetl.application.services.control_plane.manifest.inspection_models",
+          "bioetl.application.services.control_plane.manifest.inspection_result_model",
+          "bioetl.application.services.control_plane.manifest.inspection_service",
+          "bioetl.application.services.control_plane.manifest.inspection_verification",
+          "bioetl.application.services.control_plane.manifest.models",
+          "bioetl.application.services.control_plane.manifest.replay_family_contract_payload",
+          "bioetl.application.services.control_plane.manifest.replay_taxonomy",
+          "bioetl.application.services.control_plane.manifest.service_scaffold",
+          "bioetl.application.services.control_plane.manifest.snapshot_payloads",
+          "bioetl.application.services.control_plane.replay._historical_certification_models",
+          "bioetl.application.services.control_plane.replay._historical_record_payload",
+          "bioetl.application.services.control_plane.replay._historical_snapshot_certification_modes",
+          "bioetl.application.services.control_plane.replay._historical_snapshot_materialization_modes",
+          "bioetl.application.services.control_plane.replay.historical_certification",
+          "bioetl.application.services.control_plane.replay.historical_closure_models",
+          "bioetl.application.services.control_plane.replay.historical_corpus_models",
+          "bioetl.application.services.control_plane.replay.historical_corpus_service",
+          "bioetl.application.services.control_plane.replay.historical_identity_models",
+          "bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories"
+        ]
+      },
       "budget_warnings": [],
       "budget_review_notes": [
         "at_budget:max_internal_fan_in=2/2"
-      ]
+      ],
+      "at_budget_modules": [
+        {
+          "module": "bioetl.application.services.control_plane.effective_config.serialization",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.effective_config.runtime_overrides",
+            "bioetl.application.services.control_plane.effective_config.support"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.effective_config.support",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.effective_config.context",
+            "bioetl.application.services.control_plane.effective_config.service"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.ledger.diagnostic_support",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.ledger.core_events",
+            "bioetl.application.services.control_plane.ledger.entry_diagnostic_details"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.ledger.idempotency",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.ledger.entry_support",
+            "bioetl.application.services.control_plane.workflow.ledger_service"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.ledger.service",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.ledger",
+            "bioetl.application.services.control_plane.replay._historical_certification_support"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest._service_support",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.identity_graph_assembly",
+            "bioetl.application.services.control_plane.manifest.service"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.artifact_payloads",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.artifact_support",
+            "bioetl.application.services.control_plane.manifest.diagnostics.ledger_processing"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.inspection_service",
+            "bioetl.application.services.control_plane.replay._historical_certification_models"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.artifact_support",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.summary",
+            "bioetl.application.services.control_plane.manifest.diagnostics.summary_support"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.base_effective_config_diagnostics",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.base",
+            "bioetl.application.services.control_plane.manifest.diagnostics.main_helpers"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.base",
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.base",
+            "bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.base",
+            "bioetl.application.services.control_plane.manifest.diagnostics.main_helpers"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.diagnostic_context",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.composite_projection",
+            "bioetl.application.services.control_plane.manifest.diagnostics.ledger_processing"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.dq_details",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.finalization",
+            "bioetl.application.services.control_plane.manifest.diagnostics.ledger_processing"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.nested_mapping",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.nested_mapping",
+            "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.operator_replay_mode",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections",
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.persistence",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload",
+            "bioetl.application.services.control_plane.manifest.diagnostics.summary_support"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.checkpoint_policy",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy",
+            "bioetl.application.services.control_plane.manifest.diagnostics.resume_contract"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.nested_mapping",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_blockers",
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.required_persistence_profile"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_blockers",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections",
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay_state"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay",
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context",
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_parentage",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections",
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay_state"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.required_persistence_profile",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy",
+            "bioetl.application.services.control_plane.manifest.diagnostics.reproducibility_assessment"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context",
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_readiness",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay",
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.reproducibility_assessment",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context",
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.resume_contract",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context",
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_ledger",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_summary",
+            "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_materialization",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support",
+            "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_summary"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_refs",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_summary",
+            "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_status",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections",
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_summary",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.finalization",
+            "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context",
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_parentage"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.source_refs",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.finalization",
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.diagnostics.summary_support",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.base",
+            "bioetl.application.services.control_plane.manifest.diagnostics.summary"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.execution_identity_support",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest._service_support",
+            "bioetl.application.services.control_plane.manifest.inspection_dossier"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.identity_graph_assembly",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest._inspection_support",
+            "bioetl.application.services.control_plane.manifest.diagnostics.summary_support"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.inspection_helpers",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.inspection_service",
+            "bioetl.application.services.control_plane.manifest.inspection_verification"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.inspection_models",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest._inspection_compare_support",
+            "bioetl.application.services.control_plane.manifest.inspection_verification"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.inspection_result_model",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.inspection_models",
+            "bioetl.application.services.control_plane.replay._bundle_descriptor_payloads"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.inspection_service",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.forensic.diagnostics_support",
+            "bioetl.application.services.control_plane.forensic_diff_service"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.inspection_verification",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest._inspection_compare_support",
+            "bioetl.application.services.control_plane.manifest.inspection_service"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.models",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.contract_evidence",
+            "bioetl.application.services.control_plane.manifest.validation"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.replay_family_contract_payload",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context",
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.replay_taxonomy",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload",
+            "bioetl.application.services.control_plane.manifest.identity_graph_assembly"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.service_scaffold",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.service",
+            "bioetl.application.services.control_plane.workflow.manifest_service"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.manifest.snapshot_payloads",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest._service_support",
+            "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_refs"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.replay._historical_certification_models",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.replay._historical_certification_support",
+            "bioetl.application.services.control_plane.replay._historical_certification_upstream"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.replay._historical_record_payload",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.replay.historical_corpus_models",
+            "bioetl.application.services.control_plane.replay.historical_corpus_service"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.replay._historical_snapshot_certification_modes",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.replay.historical_certification",
+            "bioetl.application.services.control_plane.replay.historical_certification_service"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.replay._historical_snapshot_materialization_modes",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_ledger",
+            "bioetl.application.services.control_plane.replay.historical_certification"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.replay.historical_certification",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.snapshot_envelope",
+            "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_materialization"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.replay.historical_closure_models",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.replay.closure_claims",
+            "bioetl.application.services.control_plane.replay.historical_closure_service"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.replay.historical_corpus_models",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.replay.historical_certification_service",
+            "bioetl.application.services.control_plane.replay.historical_closure_policy"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.replay.historical_corpus_service",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.replay.historical_closure_service",
+            "bioetl.application.services.control_plane.replay.historical_universe_service"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.replay.historical_identity_models",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.replay._historical_record_payload",
+            "bioetl.application.services.control_plane.replay.historical_universe_service"
+          ]
+        },
+        {
+          "module": "bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories",
+          "fan_in": 2,
+          "runtime_importers": [
+            "bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation",
+            "bioetl.application.services.control_plane.run_manifest_reproducibility_score_cards"
+          ]
+        }
+      ],
+      "at_budget_module_count": 59
     },
     {
       "name": "composition_runtime_builders",
@@ -121,10 +3769,580 @@
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 3
       },
+      "internal_fan_in_census": {
+        "distribution": {
+          "0": 2,
+          "1": 28,
+          "2": 15,
+          "3": 12
+        },
+        "modules": [
+          {
+            "module": "bioetl.composition.runtime_builders",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._config_access_loaders",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.config_access"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._context_field_binding",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.runner_control_plane_assembly"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._effective_config_artifact_builder_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.effective_config_artifact_builder"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._effective_config_graph_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._effective_config_artifact_builder_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._effective_config_runtime_snapshot_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._effective_config_artifact_builder_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._effective_config_secret_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._effective_config_runtime_snapshot_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._effective_config_source_refs_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._effective_config_artifact_builder_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._exact_replay_cached_bronze_context",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._runner_input_preparation"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._inputs_resolution_support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._runner_input_preparation",
+              "bioetl.composition.runtime_builders.inputs_runtime_assembly"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._ledger_metadata_candidates",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.ledger_collaborator"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._manifest_publication_context_support",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.control_plane",
+              "bioetl.composition.runtime_builders.effective_config_artifact_builder",
+              "bioetl.composition.runtime_builders.run_manifest_builder"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._run_context_values",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._effective_config_artifact_builder_support",
+              "bioetl.composition.runtime_builders.run_manifest_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._run_manifest_attr_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._run_manifest_creation_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._run_manifest_builder_policy",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._manifest_publication_context_support",
+              "bioetl.composition.runtime_builders._run_manifest_creation_support",
+              "bioetl.composition.runtime_builders.run_manifest_builder"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._run_manifest_context_updates",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.run_manifest_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._run_manifest_control_plane_paths",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._exact_replay_cached_bronze_context",
+              "bioetl.composition.runtime_builders._run_manifest_planned_artifacts",
+              "bioetl.composition.runtime_builders.input_snapshot_resolution"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._run_manifest_creation_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.run_manifest_builder"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._run_manifest_creation_support_helpers",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._run_manifest_creation_support",
+              "bioetl.composition.runtime_builders.run_manifest_builder"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._run_manifest_data_roots",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._effective_config_runtime_snapshot_support",
+              "bioetl.composition.runtime_builders._run_manifest_control_plane_paths",
+              "bioetl.composition.runtime_builders._runner_control_plane_data_root_policy"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._run_manifest_identity_ref_values",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._run_manifest_context_updates",
+              "bioetl.composition.runtime_builders._run_manifest_refs",
+              "bioetl.composition.runtime_builders.run_manifest_contract_identity"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._run_manifest_planned_artifacts",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._run_manifest_creation_support_helpers"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._run_manifest_publication_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.run_manifest_builder"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._run_manifest_refs",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._run_manifest_creation_support_helpers",
+              "bioetl.composition.runtime_builders.run_manifest_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._run_manifest_replay_support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._run_manifest_creation_support",
+              "bioetl.composition.runtime_builders.run_manifest_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._run_manifest_sink_policy",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._run_manifest_builder_policy",
+              "bioetl.composition.runtime_builders.run_manifest_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._run_manifest_snapshot_resolution",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._run_manifest_replay_support",
+              "bioetl.composition.runtime_builders._run_manifest_snapshot_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._run_manifest_snapshot_support",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._manifest_publication_context_support",
+              "bioetl.composition.runtime_builders._run_manifest_replay_support",
+              "bioetl.composition.runtime_builders.run_manifest_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._runner_builder_orchestration",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.runner_builder"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._runner_control_plane_artifact_policy",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._runner_builder_orchestration",
+              "bioetl.composition.runtime_builders._runner_control_plane_policy_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._runner_control_plane_data_root_policy",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._runner_control_plane_policy_support",
+              "bioetl.composition.runtime_builders.inputs_resolution_orchestration",
+              "bioetl.composition.runtime_builders.runner_control_plane_assembly"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._runner_control_plane_policy",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.runner_control_plane_assembly"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._runner_control_plane_policy_support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._runner_control_plane_policy",
+              "bioetl.composition.runtime_builders.run_manifest_builder"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._runner_input_preparation",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.inputs_resolver"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._runtime_launch_context_fields",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._effective_config_artifact_builder_support",
+              "bioetl.composition.runtime_builders._run_manifest_snapshot_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders._snapshot_mapping_support",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._effective_config_artifact_builder_support",
+              "bioetl.composition.runtime_builders._run_manifest_creation_support_helpers",
+              "bioetl.composition.runtime_builders._run_manifest_snapshot_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders.cached_bronze_snapshot_support",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.input_snapshot_resolution"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders.config_access",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.inputs_resolver",
+              "bioetl.composition.runtime_builders.runner_builder",
+              "bioetl.composition.runtime_builders.runner_builder_wiring"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders.control_plane",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.runner_control_plane_assembly"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders.effective_config_artifact_builder",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.control_plane"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders.input_snapshot_resolution",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._run_manifest_refs",
+              "bioetl.composition.runtime_builders.control_plane",
+              "bioetl.composition.runtime_builders.run_manifest_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders.inputs_resolution_orchestration",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._runner_input_preparation"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders.inputs_resolver",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.runner_builder",
+              "bioetl.composition.runtime_builders.runner_input_assembly"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders.inputs_runtime_assembly",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.inputs_resolver",
+              "bioetl.composition.runtime_builders.runner_builder_wiring",
+              "bioetl.composition.runtime_builders.runner_input_assembly"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders.inputs_runtime_helpers",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.inputs_resolution_orchestration",
+              "bioetl.composition.runtime_builders.inputs_resolver",
+              "bioetl.composition.runtime_builders.inputs_runtime_assembly"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders.inputs_runtime_models",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.inputs_resolver",
+              "bioetl.composition.runtime_builders.inputs_runtime_assembly"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders.ledger_collaborator",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._runner_builder_orchestration"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders.observability_builder",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.runner_input_assembly"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders.registry_manifest",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders.run_manifest_builder",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.control_plane"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders.run_manifest_contract_identity",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders._manifest_publication_context_support",
+              "bioetl.composition.runtime_builders.run_manifest_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders.run_manifest_support",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.control_plane",
+              "bioetl.composition.runtime_builders.run_manifest_builder"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders.runner_builder",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.composition.runtime_builders.runner_builder_wiring",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.runner_builder"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders.runner_control_plane_assembly",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.runner_builder"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders.runner_input_assembly",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.runner_builder"
+            ]
+          },
+          {
+            "module": "bioetl.composition.runtime_builders.runner_inputs",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.runtime_builders.inputs_resolver",
+              "bioetl.composition.runtime_builders.runner_input_assembly"
+            ]
+          }
+        ],
+        "max_fan_in": 3,
+        "max_modules": [
+          "bioetl.composition.runtime_builders._manifest_publication_context_support",
+          "bioetl.composition.runtime_builders._run_manifest_builder_policy",
+          "bioetl.composition.runtime_builders._run_manifest_control_plane_paths",
+          "bioetl.composition.runtime_builders._run_manifest_data_roots",
+          "bioetl.composition.runtime_builders._run_manifest_identity_ref_values",
+          "bioetl.composition.runtime_builders._run_manifest_snapshot_support",
+          "bioetl.composition.runtime_builders._runner_control_plane_data_root_policy",
+          "bioetl.composition.runtime_builders._snapshot_mapping_support",
+          "bioetl.composition.runtime_builders.config_access",
+          "bioetl.composition.runtime_builders.input_snapshot_resolution",
+          "bioetl.composition.runtime_builders.inputs_runtime_assembly",
+          "bioetl.composition.runtime_builders.inputs_runtime_helpers"
+        ]
+      },
       "budget_warnings": [],
       "budget_review_notes": [
         "at_budget:max_internal_fan_in=3/3"
-      ]
+      ],
+      "at_budget_modules": [
+        {
+          "module": "bioetl.composition.runtime_builders._manifest_publication_context_support",
+          "fan_in": 3,
+          "runtime_importers": [
+            "bioetl.composition.runtime_builders.control_plane",
+            "bioetl.composition.runtime_builders.effective_config_artifact_builder",
+            "bioetl.composition.runtime_builders.run_manifest_builder"
+          ]
+        },
+        {
+          "module": "bioetl.composition.runtime_builders._run_manifest_builder_policy",
+          "fan_in": 3,
+          "runtime_importers": [
+            "bioetl.composition.runtime_builders._manifest_publication_context_support",
+            "bioetl.composition.runtime_builders._run_manifest_creation_support",
+            "bioetl.composition.runtime_builders.run_manifest_builder"
+          ]
+        },
+        {
+          "module": "bioetl.composition.runtime_builders._run_manifest_control_plane_paths",
+          "fan_in": 3,
+          "runtime_importers": [
+            "bioetl.composition.runtime_builders._exact_replay_cached_bronze_context",
+            "bioetl.composition.runtime_builders._run_manifest_planned_artifacts",
+            "bioetl.composition.runtime_builders.input_snapshot_resolution"
+          ]
+        },
+        {
+          "module": "bioetl.composition.runtime_builders._run_manifest_data_roots",
+          "fan_in": 3,
+          "runtime_importers": [
+            "bioetl.composition.runtime_builders._effective_config_runtime_snapshot_support",
+            "bioetl.composition.runtime_builders._run_manifest_control_plane_paths",
+            "bioetl.composition.runtime_builders._runner_control_plane_data_root_policy"
+          ]
+        },
+        {
+          "module": "bioetl.composition.runtime_builders._run_manifest_identity_ref_values",
+          "fan_in": 3,
+          "runtime_importers": [
+            "bioetl.composition.runtime_builders._run_manifest_context_updates",
+            "bioetl.composition.runtime_builders._run_manifest_refs",
+            "bioetl.composition.runtime_builders.run_manifest_contract_identity"
+          ]
+        },
+        {
+          "module": "bioetl.composition.runtime_builders._run_manifest_snapshot_support",
+          "fan_in": 3,
+          "runtime_importers": [
+            "bioetl.composition.runtime_builders._manifest_publication_context_support",
+            "bioetl.composition.runtime_builders._run_manifest_replay_support",
+            "bioetl.composition.runtime_builders.run_manifest_support"
+          ]
+        },
+        {
+          "module": "bioetl.composition.runtime_builders._runner_control_plane_data_root_policy",
+          "fan_in": 3,
+          "runtime_importers": [
+            "bioetl.composition.runtime_builders._runner_control_plane_policy_support",
+            "bioetl.composition.runtime_builders.inputs_resolution_orchestration",
+            "bioetl.composition.runtime_builders.runner_control_plane_assembly"
+          ]
+        },
+        {
+          "module": "bioetl.composition.runtime_builders._snapshot_mapping_support",
+          "fan_in": 3,
+          "runtime_importers": [
+            "bioetl.composition.runtime_builders._effective_config_artifact_builder_support",
+            "bioetl.composition.runtime_builders._run_manifest_creation_support_helpers",
+            "bioetl.composition.runtime_builders._run_manifest_snapshot_support"
+          ]
+        },
+        {
+          "module": "bioetl.composition.runtime_builders.config_access",
+          "fan_in": 3,
+          "runtime_importers": [
+            "bioetl.composition.runtime_builders.inputs_resolver",
+            "bioetl.composition.runtime_builders.runner_builder",
+            "bioetl.composition.runtime_builders.runner_builder_wiring"
+          ]
+        },
+        {
+          "module": "bioetl.composition.runtime_builders.input_snapshot_resolution",
+          "fan_in": 3,
+          "runtime_importers": [
+            "bioetl.composition.runtime_builders._run_manifest_refs",
+            "bioetl.composition.runtime_builders.control_plane",
+            "bioetl.composition.runtime_builders.run_manifest_support"
+          ]
+        },
+        {
+          "module": "bioetl.composition.runtime_builders.inputs_runtime_assembly",
+          "fan_in": 3,
+          "runtime_importers": [
+            "bioetl.composition.runtime_builders.inputs_resolver",
+            "bioetl.composition.runtime_builders.runner_builder_wiring",
+            "bioetl.composition.runtime_builders.runner_input_assembly"
+          ]
+        },
+        {
+          "module": "bioetl.composition.runtime_builders.inputs_runtime_helpers",
+          "fan_in": 3,
+          "runtime_importers": [
+            "bioetl.composition.runtime_builders.inputs_resolution_orchestration",
+            "bioetl.composition.runtime_builders.inputs_resolver",
+            "bioetl.composition.runtime_builders.inputs_runtime_assembly"
+          ]
+        }
+      ],
+      "at_budget_module_count": 12
     }
   ]
 }
