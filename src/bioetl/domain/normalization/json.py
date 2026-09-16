@@ -188,18 +188,43 @@ def lookup_mapping_path(
     return current
 
 
+def _convert_datetime(value: datetime) -> str:
+    """Convert datetime to ISO format string."""
+    return value.isoformat()
+
+
+def _convert_dq_disposition(value: DQDisposition) -> str:
+    """Convert DQDisposition to its value."""
+    return value.value
+
+
+def _convert_dataclass(value: object) -> dict[str, object]:
+    """Convert dataclass to dictionary with recursive conversion."""
+    return {key: to_jsonable(item) for key, item in asdict(value).items()}
+
+
+def _convert_mapping(value: Mapping) -> dict[str, object]:
+    """Convert mapping to dictionary with string keys and recursive conversion."""
+    return {str(key): to_jsonable(item) for key, item in sorted(value.items())}
+
+
+def _convert_sequence(value: Sequence) -> list[object]:
+    """Convert sequence to list with recursive conversion."""
+    return [to_jsonable(item) for item in value]
+
+
 def to_jsonable(value: object) -> object:
     """Convert nested dataclasses, datetimes, and mappings into JSON-safe values."""
     if isinstance(value, datetime):
-        return value.isoformat()
+        return _convert_datetime(value)
     if isinstance(value, DQDisposition):
-        return value.value
+        return _convert_dq_disposition(value)
     if is_dataclass(value) and not isinstance(value, type):
-        return {key: to_jsonable(item) for key, item in asdict(value).items()}
+        return _convert_dataclass(value)
     if isinstance(value, Mapping):
-        return {str(key): to_jsonable(item) for key, item in sorted(value.items())}
+        return _convert_mapping(value)
     if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
-        return [to_jsonable(item) for item in value]
+        return _convert_sequence(value)
     return value
 
 

@@ -86,16 +86,12 @@ def _domain_rows(
     rows.append(
         _observed_row(WORKFLOW, observations)
         if identity.get("workflow_run_id")
-        else _row(
-            WORKFLOW, _NA, "standalone_pipeline", "#/identity/workflow_run_id"
-        )
+        else _row(WORKFLOW, _NA, "standalone_pipeline", "#/identity/workflow_run_id")
     )
     rows.append(_observed_row(DATA_QUALITY, observations))
     io = _mapping(report.get("io"))
     rows.append(
-        _row(
-            PROVIDER, _NA, "cached_bronze_no_remote_probe", "#/io/use_cached_bronze"
-        )
+        _row(PROVIDER, _NA, "cached_bronze_no_remote_probe", "#/io/use_cached_bronze")
         if io.get("use_cached_bronze") is True
         else _observed_row(PROVIDER, observations)
     )

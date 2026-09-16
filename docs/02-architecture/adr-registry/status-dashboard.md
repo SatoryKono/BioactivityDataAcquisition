@@ -2,51 +2,52 @@
 
 Quick overview of ADR status and distribution.
 
-**Last Updated**: 2026-08-30 21:14:41
+**Last Updated**: 2026-09-16 11:31:34
 
 ## 📈 Status Distribution
 
 | Status | Count | Percentage |
 |--------|-------|------------|
-| `accepted` | 58 | 96.7% |
+| `accepted` | 58 | 95.1% |
+| `proposed` | 1 | 1.6% |
 | `superseded` | 2 | 3.3% |
 
 ## 🏷️  Category Distribution
 
 | Category | Count | Percentage |
 |----------|-------|------------|
-| `Architecture` | 15 | 25.0% |
-| `Configuration` | 5 | 8.3% |
-| `Data Contracts` | 1 | 1.7% |
+| `Architecture` | 15 | 24.6% |
+| `Configuration` | 5 | 8.2% |
+| `Data Contracts` | 1 | 1.6% |
 | `Data Fetching` | 2 | 3.3% |
 | `Data Loading` | 2 | 3.3% |
-| `Data Modeling` | 3 | 5.0% |
-| `Data Quality` | 6 | 10.0% |
-| `Deployment` | 1 | 1.7% |
-| `Documentation` | 3 | 5.0% |
-| `Domain Model` | 1 | 1.7% |
-| `Governance` | 1 | 1.7% |
-| `HTTP/Networking` | 1 | 1.7% |
+| `Data Modeling` | 3 | 4.9% |
+| `Data Quality` | 6 | 9.8% |
+| `Deployment` | 1 | 1.6% |
+| `Documentation` | 3 | 4.9% |
+| `Domain Model` | 1 | 1.6% |
+| `Governance` | 1 | 1.6% |
+| `HTTP/Networking` | 1 | 1.6% |
 | `Lifecycle` | 2 | 3.3% |
-| `Locking` | 1 | 1.7% |
-| `Observability` | 6 | 10.0% |
-| `Reproducibility` | 4 | 6.7% |
+| `Locking` | 1 | 1.6% |
+| `Observability` | 7 | 11.5% |
+| `Reproducibility` | 4 | 6.6% |
 | `Resilience` | 2 | 3.3% |
-| `Storage` | 3 | 5.0% |
-| `Testing` | 1 | 1.7% |
+| `Storage` | 3 | 4.9% |
+| `Testing` | 1 | 1.6% |
 
 ## 🕒 Recent Activity
 
 Last 5 updated ADRs:
 
+- **ADR-061**: Persisted Selected Run Assessment (2026-09-16)
 - **ADR-060**: Prompt Kernel and Overlay Architecture (2026-08-28)
 - **ADR-058**: Layered Port Registries (2026-08-25)
 - **ADR-059**: Package Cohesion Budgets (2026-08-25)
 - **ADR-057**: Deterministic Runtime Config Authority and Identity (2026-08-10)
-- **ADR-051**: QuarantineEntry Wide Constructor as Intentional Aggregate Surface (2026-08-09)
 
 ## 🎯 Health Metrics
 
-- **Accepted ADRs**: 58/60 (96.7%)
-- **Maintenance Ratio**: 58:2
-- **Average ADRs/Year**: 20.0 (assuming 3-year project)
+- **Accepted ADRs**: 58/61 (95.1%)
+- **Maintenance Ratio**: 58:3
+- **Average ADRs/Year**: 20.3 (assuming 3-year project)

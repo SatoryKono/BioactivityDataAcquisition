@@ -320,6 +320,7 @@ def _report_link(row: dict[str, object], root: Path | None) -> dict[str, object]
 
 
 def _has_terminal_identity(row: dict[str, object]) -> bool:
-    return _timestamp(row.get("started_at")) != datetime.min.replace(
-        tzinfo=UTC
-    ) and row.get("status") in _TERMINAL_STATUSES
+    return (
+        _timestamp(row.get("started_at")) != datetime.min.replace(tzinfo=UTC)
+        and row.get("status") in _TERMINAL_STATUSES
+    )

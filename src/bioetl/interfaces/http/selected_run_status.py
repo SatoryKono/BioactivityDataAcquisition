@@ -167,7 +167,10 @@ def _load_report_assessment(
     path: Path, pipeline: str, run_id: str
 ) -> tuple[dict[str, object], dict[str, object], dict[str, object], str, str]:
     report = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(report, dict) or report.get("schema_version") not in _REPORT_SCHEMAS:
+    if (
+        not isinstance(report, dict)
+        or report.get("schema_version") not in _REPORT_SCHEMAS
+    ):
         raise ValueError("report_schema_invalid")
     identity = report.get("identity")
     if (

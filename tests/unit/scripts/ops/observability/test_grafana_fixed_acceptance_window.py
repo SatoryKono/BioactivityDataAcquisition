@@ -36,7 +36,11 @@ def test_exact_prometheus_evaluation_and_macro_window(monkeypatch):
     )
     result = live._audit_prometheus_panel(
         spec,
-        {"targets": [{"expr": "increase(x[$__range]) / ${__range_s}", "instant": True}]},
+        {
+            "targets": [
+                {"expr": "increase(x[$__range]) / ${__range_s}", "instant": True}
+            ]
+        },
         config,
     )
     query = parse_qs(urlsplit(calls[0]).query)

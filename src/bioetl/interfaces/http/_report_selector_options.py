@@ -48,7 +48,10 @@ def _checked_identity(entry: ReportIndexEntry, root: Path) -> dict[str, object]:
     identity = report.get("identity")
     if not isinstance(identity, dict):
         raise ValueError("Persisted selector report has no identity")
-    if identity.get("run_id") != entry.run_id or identity.get("pipeline_name") != entry.owner:
+    if (
+        identity.get("run_id") != entry.run_id
+        or identity.get("pipeline_name") != entry.owner
+    ):
         raise ValueError("Persisted selector report identity does not match its path")
     return identity
 
