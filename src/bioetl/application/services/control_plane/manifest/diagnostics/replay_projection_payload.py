@@ -7,13 +7,14 @@ from typing import TYPE_CHECKING, TypedDict
 from bioetl.application.services.control_plane.manifest.diagnostics.operator_replay_mode import (
     _resolve_operator_replay_mode,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.persistence import (
+from bioetl.domain.control_plane.reproducibility_profiles import (
     build_lineage_closure_boundary,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_readiness import (
     _resolve_manifest_replay_readiness_verdict,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_state import (
+    _build_replay_parentage,
     _build_replay_state_projection,
     _collect_append_mode_semantic_sinks,
     _resolve_continuation_mode,
@@ -193,12 +194,18 @@ def _build_operator_replay_projection_payload(
         "exact_replay_blockers": replay_inputs["exact_replay_blockers"],
         "replay_readiness_verdict": replay_inputs["replay_readiness_verdict"],
         "append_mode_semantic_sinks": _collect_append_mode_semantic_sinks(manifest),
+        "replay_parentage": _build_replay_parentage(manifest),
         "resume_contract": None,
         "resume_diagnostics": None,
         "lineage_closure_boundary": build_lineage_closure_boundary(
             provider=manifest.provider,
             entity=manifest.entity,
             contract_ref=manifest.code_provenance.contract_ref,
+            execution_context=(
+                "composite"
+                if str(manifest.provider or "").strip() == "composite"
+                else "source"
+            ),
         ),
     }
 

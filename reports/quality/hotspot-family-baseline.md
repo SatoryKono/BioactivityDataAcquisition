@@ -11,7 +11,7 @@
 | `application_core` | 194 | 23443 | 0 | 0.374 | 0 | 5 | `bioetl.application.core.record_processor_config` | `files_ge_250_loc=0, max_internal_fan_in=7` | `-` | `-` |
 | `composition_bootstrap_runtime` | 52 | 6172 | 0 | 0.328 | 0 | 2 | `bioetl.composition.bootstrap.runtime.tracing_bootstrap` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
 | `composition_factories_pipeline` | 35 | 3934 | 0 | 0.358 | 0 | 2 | `bioetl.composition.factories.pipeline.transformer_builder` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
-| `application_services_control_plane` | 128 | 15024 | 0 | 0.376 | 0 | 2 | `bioetl.application.services.control_plane.replay.historical_identity_models` | `files_ge_250_loc=0, max_internal_fan_in=2` | `-` | `at_budget:max_internal_fan_in=2/2` |
+| `application_services_control_plane` | 112 | 14334 | 0 | 0.385 | 0 | 1 | `bioetl.application.services.control_plane.workflow.manifest_models` | `files_ge_250_loc=0, max_internal_fan_in=2` | `-` | `-` |
 | `composition_runtime_builders` | 55 | 7100 | 0 | 0.375 | 0 | 2 | `bioetl.composition.runtime_builders.runner_inputs` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
 
 ## `application_core` internal fan-in
@@ -37,67 +37,10 @@ No modules currently sit at the fan-in cap.
 
 ## `application_services_control_plane` internal fan-in
 
-- distribution: `0:17, 1:55, 2:56`
-- at_budget_module_count: `56` (cap `2`)
+- distribution: `0:21, 1:91`
+- at_budget_module_count: `0` (cap `2`)
 
-| Module | Fan-in | Runtime importers |
-| --- | ---: | --- |
-| `bioetl.application.services.control_plane.effective_config.serialization` | 2 | `bioetl.application.services.control_plane.effective_config.runtime_overrides`, `bioetl.application.services.control_plane.effective_config.support` |
-| `bioetl.application.services.control_plane.effective_config.support` | 2 | `bioetl.application.services.control_plane.effective_config.context`, `bioetl.application.services.control_plane.effective_config.service` |
-| `bioetl.application.services.control_plane.ledger.diagnostic_support` | 2 | `bioetl.application.services.control_plane.ledger.core_events`, `bioetl.application.services.control_plane.ledger.entry_diagnostic_details` |
-| `bioetl.application.services.control_plane.ledger.idempotency` | 2 | `bioetl.application.services.control_plane.ledger.entry_support`, `bioetl.application.services.control_plane.workflow.ledger_service` |
-| `bioetl.application.services.control_plane.ledger.service` | 2 | `bioetl.application.services.control_plane.ledger`, `bioetl.application.services.control_plane.replay._historical_certification_support` |
-| `bioetl.application.services.control_plane.manifest._service_support` | 2 | `bioetl.application.services.control_plane.manifest.identity_graph_assembly`, `bioetl.application.services.control_plane.manifest.service` |
-| `bioetl.application.services.control_plane.manifest.artifact_payloads` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.artifact_support`, `bioetl.application.services.control_plane.manifest.diagnostics.ledger_processing` |
-| `bioetl.application.services.control_plane.manifest.diagnostics` | 2 | `bioetl.application.services.control_plane.manifest.inspection_service`, `bioetl.application.services.control_plane.replay._historical_certification_models` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.artifact_support` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.summary`, `bioetl.application.services.control_plane.manifest.diagnostics.summary_support` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.base_effective_config_diagnostics` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.base`, `bioetl.application.services.control_plane.manifest.diagnostics.main_helpers` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.base`, `bioetl.application.services.control_plane.manifest.diagnostics.replay` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.base`, `bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.base`, `bioetl.application.services.control_plane.manifest.diagnostics.main_helpers` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.diagnostic_context` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.composite_projection`, `bioetl.application.services.control_plane.manifest.diagnostics.ledger_processing` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.dq_details` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.finalization`, `bioetl.application.services.control_plane.manifest.diagnostics.ledger_processing` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.nested_mapping` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.nested_mapping`, `bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.operator_replay_mode` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections`, `bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.persistence` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload`, `bioetl.application.services.control_plane.manifest.diagnostics.summary_support` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.checkpoint_policy` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy`, `bioetl.application.services.control_plane.manifest.diagnostics.resume_contract` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.nested_mapping` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_blockers`, `bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.required_persistence_profile` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_blockers` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections`, `bioetl.application.services.control_plane.manifest.diagnostics.replay_state` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.replay`, `bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context`, `bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_parentage` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections`, `bioetl.application.services.control_plane.manifest.diagnostics.replay_state` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.required_persistence_profile` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy`, `bioetl.application.services.control_plane.manifest.diagnostics.reproducibility_assessment` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.replay_projection` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context`, `bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.replay_readiness` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.replay`, `bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.reproducibility_assessment` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context`, `bioetl.application.services.control_plane.manifest.diagnostics.replay` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.resume_contract` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context`, `bioetl.application.services.control_plane.manifest.diagnostics.replay` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.snapshot_ledger` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.snapshot_summary`, `bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.snapshot_materialization` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support`, `bioetl.application.services.control_plane.manifest.diagnostics.snapshot_summary` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.snapshot_refs` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.snapshot_summary`, `bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.snapshot_status` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections`, `bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.snapshot_summary` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.finalization`, `bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context`, `bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_parentage` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.source_refs` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.finalization`, `bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support` |
-| `bioetl.application.services.control_plane.manifest.diagnostics.summary_support` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.base`, `bioetl.application.services.control_plane.manifest.diagnostics.summary` |
-| `bioetl.application.services.control_plane.manifest.execution_identity_support` | 2 | `bioetl.application.services.control_plane.manifest._service_support`, `bioetl.application.services.control_plane.manifest.inspection_dossier` |
-| `bioetl.application.services.control_plane.manifest.identity_graph_assembly` | 2 | `bioetl.application.services.control_plane.manifest._inspection_support`, `bioetl.application.services.control_plane.manifest.diagnostics.summary_support` |
-| `bioetl.application.services.control_plane.manifest.inspection_helpers` | 2 | `bioetl.application.services.control_plane.manifest.inspection_service`, `bioetl.application.services.control_plane.manifest.inspection_verification` |
-| `bioetl.application.services.control_plane.manifest.inspection_models` | 2 | `bioetl.application.services.control_plane.manifest._inspection_compare_support`, `bioetl.application.services.control_plane.manifest.inspection_verification` |
-| `bioetl.application.services.control_plane.manifest.inspection_result_model` | 2 | `bioetl.application.services.control_plane.manifest.inspection_models`, `bioetl.application.services.control_plane.replay._bundle_descriptor_payloads` |
-| `bioetl.application.services.control_plane.manifest.inspection_service` | 2 | `bioetl.application.services.control_plane.forensic.diagnostics_support`, `bioetl.application.services.control_plane.forensic_diff_service` |
-| `bioetl.application.services.control_plane.manifest.inspection_verification` | 2 | `bioetl.application.services.control_plane.manifest._inspection_compare_support`, `bioetl.application.services.control_plane.manifest.inspection_service` |
-| `bioetl.application.services.control_plane.manifest.models` | 2 | `bioetl.application.services.control_plane.manifest.contract_evidence`, `bioetl.application.services.control_plane.manifest.validation` |
-| `bioetl.application.services.control_plane.manifest.replay_family_contract_payload` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context`, `bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support` |
-| `bioetl.application.services.control_plane.manifest.replay_taxonomy` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload`, `bioetl.application.services.control_plane.manifest.identity_graph_assembly` |
-| `bioetl.application.services.control_plane.manifest.service_scaffold` | 2 | `bioetl.application.services.control_plane.manifest.service`, `bioetl.application.services.control_plane.workflow.manifest_service` |
-| `bioetl.application.services.control_plane.manifest.snapshot_payloads` | 2 | `bioetl.application.services.control_plane.manifest._service_support`, `bioetl.application.services.control_plane.manifest.diagnostics.snapshot_refs` |
-| `bioetl.application.services.control_plane.replay._historical_certification_models` | 2 | `bioetl.application.services.control_plane.replay._historical_certification_support`, `bioetl.application.services.control_plane.replay._historical_certification_upstream` |
-| `bioetl.application.services.control_plane.replay._historical_record_payload` | 2 | `bioetl.application.services.control_plane.replay.historical_corpus_models`, `bioetl.application.services.control_plane.replay.historical_corpus_service` |
-| `bioetl.application.services.control_plane.replay.historical_certification` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.snapshot_envelope`, `bioetl.application.services.control_plane.manifest.diagnostics.snapshot_materialization` |
-| `bioetl.application.services.control_plane.replay.historical_closure_models` | 2 | `bioetl.application.services.control_plane.replay.closure_claims`, `bioetl.application.services.control_plane.replay.historical_closure_service` |
-| `bioetl.application.services.control_plane.replay.historical_corpus_models` | 2 | `bioetl.application.services.control_plane.replay.historical_certification_service`, `bioetl.application.services.control_plane.replay.historical_closure_policy` |
-| `bioetl.application.services.control_plane.replay.historical_corpus_service` | 2 | `bioetl.application.services.control_plane.replay.historical_closure_service`, `bioetl.application.services.control_plane.replay.historical_universe_service` |
-| `bioetl.application.services.control_plane.replay.historical_identity_models` | 2 | `bioetl.application.services.control_plane.replay._historical_record_payload`, `bioetl.application.services.control_plane.replay.historical_universe_service` |
+No modules currently sit at the fan-in cap.
 
 ## `composition_runtime_builders` internal fan-in
 

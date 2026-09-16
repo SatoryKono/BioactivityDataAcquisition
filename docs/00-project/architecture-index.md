@@ -77,19 +77,16 @@ the composition wiring seam.
 | Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Live modules with a resolvable hexagonal layer + group (currently 2472). Excludes package-root `bioetl` and `bioetl.__main__` (no hexagonal layer tag). |
 | import-linter | `lint-imports --no-cache` (`.importlinter`) | Importable files in the `bioetl` package graph (2423 files in the 2026-09-15 W0 closeout pass). Excludes stubs / non-imported modules |
 
-`families_at_budget` on the architecture scorecard (currently
-`application_services_control_plane` fan-in 2/2 and
-`composition_runtime_builders` fan-in 3/3) is a tracked residual,
-not a budget-growth event. Do not raise the fan-in or loc caps; keep new
-internal imports and oversized files flat. `composition_factories_pipeline`
-`files_ge_250_loc` is 0/2 (budget unchanged). `application_core` live LOC is
-23444 with `files=194` (budget unchanged).
+`families_at_budget` on the architecture scorecard is currently empty after
+`#10468`: `application_services_control_plane` fan-in is 1/2 and
+`composition_runtime_builders` fan-in is 2/3. `module_boundaries_coupling` is
+10.0. Do not raise the fan-in or loc caps; keep new internal imports and
+oversized files flat. `composition_factories_pipeline` `files_ge_250_loc` is
+0/0 (budget unchanged). `application_core` live LOC is 23443 with `files=194`
+(budget unchanged).
 
-Named-hub reductions (2026-09-15) do not create family headroom: W2 `#10448`
-left `run_manifest_support` at 2 intra-family importers while family max stays
-`inputs_runtime_helpers` 3/3; W3 `#10444` left
-`reproducibility_score_cards_category_scores` at 1 importer while family max
-stays `reproducibility_score_cards_categories` 2/2.
+Closeout evidence: `tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py`
+and `reports/quality/hotspot-family-baseline.json`.
 
 ## Architecture scorecard semantics
 

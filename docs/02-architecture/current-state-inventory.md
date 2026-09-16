@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-09-11'
+  Last verified: '2026-09-16'
 
 ______________________________________________________________________
 
 # Current State Inventory
 
-This inventory is synchronized against the current worktree on 2026-09-11.
+This inventory is synchronized against the current worktree on 2026-09-16.
 Code, configs, domain contracts, ADRs, and tests are the source of
 truth; existing documentation is evidence only when it matches those sources.
 
@@ -36,13 +36,14 @@ Current committed quality artifacts agree on the following architecture evidence
 
 | Artifact | Current value | Source |
 | --- | ---: | --- |
-| Architecture quality score | `9.36` (`good_targeted_improvements`) | `reports/quality/debt-governance-gates.json`, `reports/quality/architecture-quality-scorecard.json` |
+| Architecture quality score | `9.47` (`good_targeted_improvements`) | `reports/quality/debt-governance-gates.json`, `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2484` | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2469` | `reports/quality/module-coverage-inventory.json` |
 | Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json`, `reports/quality/debt-governance-gates.json` |
-| Coverage inventory status counts | `1622` fully covered, `858` partially covered, `4` with no executable lines | `reports/quality/module-coverage-inventory.json` |
+| Coverage inventory status counts | `1607` fully covered, `858` partially covered, `4` with no executable lines | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
-| Families at fan-in budget | `1` (`application_services_control_plane`) | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
+| Families at fan-in budget | `0` | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
+| Module-boundaries coupling | `10.0` (`control-plane` fan-in `1/2`, `runtime_builders` fan-in `2/3`) | `reports/quality/architecture-quality-scorecard.json`, `tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py` |
 | Debt-governance gates | `45` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
 | Full-app duplication hotspot baseline | `0` actionable / `58` raw excluded clusters | `reports/quality/full-app-duplication-baseline.json` |
 
@@ -301,7 +302,7 @@ by storage technology. Current owner boundaries:
 | Runtime Gold Pandera strictness had no production-path non-strict guard | `tests/architecture/test_gold_validator_strict_runtime_paths.py` scans `src/bioetl` for `PanderaGoldValidator(..., strict=False)` and `ContractAwareGoldValidator(..., strict=False)`. | `src/bioetl/infrastructure/storage/silver/merged_operations.py`; `src/bioetl/infrastructure/validation/pandera_validator.py`. | Replaced the Silver merged-write non-strict Gold validator with `PanderaSilverValidator(strict=False)` and added the runtime guard. |
 | Quarantine payload immutability evidence stopped at aggregate/mock level | `tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineUpdateStatus::test_update_status_preserves_persisted_payload_and_hash` writes a real Delta table, updates status, and checks persisted `payload`, `payload_hash`, and `metadata`. | `src/bioetl/infrastructure/quarantine/unified.py`. | Added persisted immutability coverage and a read fallback for Delta string-view filter failures after status updates. |
 | Test governance refined assertless residuals are now fully eliminated while compatibility coverage stays bounded | `reports/quality/test-governance-current.json` now reports `assertless_total_candidates=87`, `refined_assertless_tests=0`, `compatibility_test_files=0`, and zero budget violations. | Contract schema tests under `tests/contract/**` plus governance inventory under `tests/architecture/**`. | Tightened observable assertions and governance classification so the refined assertless residual count is zero without regrowing compatibility-test scope. |
-| Current-state architecture evidence table lagged live quality reports | `reports/quality/debt-governance-gates.json` reports score `9.36`, `45` passing gates, and zero failing gates; `reports/quality/module-coverage-inventory.json` reports `2484` source modules with `0` unmeasured, `0` uncovered, and `858` partially covered modules; `reports/quality/full-app-duplication-baseline.json` reports `0` actionable / `58` raw excluded clusters. | Current committed `reports/quality/*.json` artifacts and `reports/quality/total-tech-debt-audit-main-current.md`. | Refreshed the current-state table while keeping module inventory distinct from full line/branch coverage and preserving shrink-only budgets. |
+| Current-state architecture evidence table lagged live quality reports | `reports/quality/debt-governance-gates.json` reports score `9.47`, `45` passing gates, and zero failing gates; `reports/quality/module-coverage-inventory.json` reports `2469` source modules with `0` unmeasured, `0` uncovered, and `858` partially covered modules; `module_boundaries_coupling` is `10.0` with `families_at_budget_count=0`. | Current committed `reports/quality/*.json` artifacts and `tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py`. | Refreshed the current-state table for #10468 closeout while keeping module inventory distinct from full line/branch coverage and preserving shrink-only budgets. |
 
 ## Open Questions
 
@@ -309,11 +310,10 @@ by storage technology. Current owner boundaries:
   in `reports/quality/module-coverage-inventory.json`, while `858` modules remain
   partially covered. The inventory is current release evidence for module
   measurement status; do not describe it as complete line/branch coverage.
-- Hotspot family `application_services_control_plane` remains at
-  `max_internal_fan_in` budget (2/2); the #10304 replay types/extended hub
-  is gone, residual fan-in-2 nodes stay under RF-023. `application_core` is
-  below budget (5/7). Reduce fan-in via focused extraction, never by
-  raising budgets.
+- Hotspot family `application_services_control_plane` is below the
+  `max_internal_fan_in` cap (1/2) after #10468/#10472–#10475; `files_ge_250_loc`
+  remains 0. `composition_runtime_builders` stays at 2/3. `application_core` is
+  below budget (5/7). Do not raise fan-in or loc caps.
 - Diagram bundles and rendered artifacts have been refreshed for the known
   `QuarantineEntry` transition wording drift. `PipelineStorageProtocol` remains
   valid only as an application-owned aggregate protocol and must not be listed as

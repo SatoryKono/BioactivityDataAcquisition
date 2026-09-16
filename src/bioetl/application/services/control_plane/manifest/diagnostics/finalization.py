@@ -7,12 +7,8 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane.manifest.diagnostics.dq_details import (
-    DQDetailsSummary,
-    build_dq_details_summary,
-)
 from bioetl.application.services.control_plane.manifest.diagnostics.ledger_processing import (
-    _process_ledger_entries,
+    build_ledger_dq_details_summary,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.main_helpers import (
     _build_unified_reproducibility_diagnostics,
@@ -20,20 +16,26 @@ from bioetl.application.services.control_plane.manifest.diagnostics.main_helpers
 from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_summary import (
     merge_ledger_input_snapshots_into_summary,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.source_refs import (
-    _attach_rich_composite_replay_support,
-)
 from bioetl.application.services.control_plane.manifest.diagnostics.summary import (
     _build_final_summary,
     _build_runtime_views,
     _FinalSummaryRequest,
     _RuntimeViewsRequest,
+    attach_base_summary_artifact_defaults,
 )
 from bioetl.application.services.control_plane.run_manifest_reproducibility_scoring import (
     build_reproducibility_audit_scoring,
 )
+from bioetl.domain.control_plane.run_ledger import (
+    COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
+    COMPOSITE_ENRICHER_COMPLETED_EVENT,
+    COMPOSITE_MERGE_COMPLETED_EVENT,
+)
 
 if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.manifest.diagnostics.dq_details import (
+        DQDetailsSummary,
+    )
     from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 
 
@@ -80,6 +82,7 @@ def attach_base_summary_runtime_views(
     summary: dict[str, object],
 ) -> None:
     """Attach persistence, alert, and scoring overlays to base summary."""
+    attach_base_summary_artifact_defaults(manifest=manifest, summary=summary)
     persistence_profile, alert_signals, next_steps = _build_runtime_views(
         _RuntimeViewsRequest(
             manifest=manifest,
@@ -97,6 +100,32 @@ def attach_base_summary_runtime_views(
     summary["alert_signals"] = alert_signals
     summary["next_steps"] = next_steps
     attach_summary_reproducibility_views(summary)
+
+
+_RICH_COMPOSITE_REPLAY_EVENTS = frozenset(
+    {
+        COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
+        COMPOSITE_ENRICHER_COMPLETED_EVENT,
+        COMPOSITE_MERGE_COMPLETED_EVENT,
+    }
+)
+
+
+def _attach_rich_composite_replay_support(
+    summary: dict[str, object],
+    ledger_entries: tuple[RunLedgerEntry, ...],
+) -> dict[str, object]:
+    """Mark composite rich replay support only when ledger evidence is present."""
+    observed_events = {
+        entry.event_type
+        for entry in ledger_entries
+        if entry.event_type in _RICH_COMPOSITE_REPLAY_EVENTS
+    }
+    if not _RICH_COMPOSITE_REPLAY_EVENTS.issubset(observed_events):
+        return summary
+    updated = dict(summary)
+    updated["composite_resume_rich_replay_supported"] = True
+    return updated
 
 
 def _build_ledger_enriched_summary(
@@ -126,44 +155,33 @@ def _process_ledger_diagnostics(
     ledger_entries: tuple[RunLedgerEntry, ...],
 ) -> _ProcessedLedgerDiagnostics:
     """Return typed ledger diagnostics inputs for final-summary assembly."""
+    processed, dq_details = build_ledger_dq_details_summary(ledger_entries)
     (
         family_counter,
         type_counter,
         artifact_refs,
         lineage_fragment_ids,
-        dq_rule_ids,
-        dq_dispositions,
-        dq_report_paths,
-        dq_violation_kinds,
-        cross_validation_rule_ids,
-        cross_validation_config_paths,
-        cross_validation_quarantine_policies,
-        cross_validation_replay_contracts,
-        occurrence_only_diagnostic_scopes,
-        dq_signal_present,
-        cross_validation_signal_present,
+        _dq_rule_ids,
+        _dq_dispositions,
+        _dq_report_paths,
+        _dq_violation_kinds,
+        _cross_validation_rule_ids,
+        _cross_validation_config_paths,
+        _cross_validation_quarantine_policies,
+        _cross_validation_replay_contracts,
+        _occurrence_only_diagnostic_scopes,
+        _dq_signal_present,
+        _cross_validation_signal_present,
         missing_link_count,
         correlation_anchor_gaps,
         resume_diagnostics,
-    ) = _process_ledger_entries(ledger_entries)
+    ) = processed
     return _ProcessedLedgerDiagnostics(
         family_counter=family_counter,
         type_counter=type_counter,
         artifact_refs=artifact_refs,
         lineage_fragment_ids=lineage_fragment_ids,
-        dq_details=build_dq_details_summary(
-            rule_ids=dq_rule_ids,
-            dispositions=dq_dispositions,
-            report_paths=dq_report_paths,
-            violation_kinds=dq_violation_kinds,
-            cross_validation_rule_ids=cross_validation_rule_ids,
-            cross_validation_config_paths=cross_validation_config_paths,
-            cross_validation_quarantine_policies=(cross_validation_quarantine_policies),
-            cross_validation_replay_contracts=cross_validation_replay_contracts,
-            occurrence_only_diagnostic_scopes=(occurrence_only_diagnostic_scopes),
-            has_signal=dq_signal_present,
-            has_cross_validation_signal=cross_validation_signal_present,
-        ),
+        dq_details=dq_details,
         missing_link_count=missing_link_count,
         correlation_anchor_gaps=correlation_anchor_gaps,
         resume_diagnostics=resume_diagnostics,

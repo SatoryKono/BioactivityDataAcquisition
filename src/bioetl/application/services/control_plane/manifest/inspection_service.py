@@ -5,12 +5,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
-from bioetl.application.services.control_plane.manifest._inspection_compare_support import (
+from bioetl.application.services.control_plane.manifest.inspection_verification import (
     RunManifestInspectionCompareMixin,
 )
 from bioetl.application.services.control_plane.manifest._inspection_support import (
     RunManifestInspectionDiffClassificationMixin,
-    RunManifestInspectionIdentityGraphMixin,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics import (
     build_diagnostics_summary,
@@ -18,7 +17,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics import (
 from bioetl.application.services.control_plane.manifest.diagnostics.finalization import (
     refresh_reproducibility_audit_score,
 )
-from bioetl.application.services.control_plane.manifest.inspection_helpers import (
+from bioetl.application.services.control_plane.manifest.inspection_dossier import (
     build_authoritative_replay_dossier,
 )
 from bioetl.application.services.control_plane.manifest.inspection_verification import (
@@ -61,7 +60,6 @@ class _HistoricalReplayUniverseReportLoader(Protocol):
 
 @dataclass(slots=True)
 class RunManifestInspectionService(
-    RunManifestInspectionIdentityGraphMixin,
     RunManifestInspectionDiffClassificationMixin,
     RunManifestInspectionCompareMixin,
 ):
@@ -83,7 +81,12 @@ class RunManifestInspectionService(
         diagnostics = build_diagnostics_summary(manifest, ledger_entries)
         self._attach_historical_replay_universe_claim(diagnostics)
         self._attach_reproducibility_claim_views(diagnostics)
-        identity_graph = self._build_identity_graph(manifest, diagnostics)
+        existing_identity_graph = diagnostics.get("identity_graph")
+        identity_graph = (
+            dict(existing_identity_graph)
+            if isinstance(existing_identity_graph, dict)
+            else {}
+        )
         dossier = build_authoritative_replay_dossier(
             manifest=manifest,
             diagnostics=diagnostics,

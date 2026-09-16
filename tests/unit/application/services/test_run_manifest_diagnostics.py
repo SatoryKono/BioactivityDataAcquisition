@@ -41,7 +41,7 @@ from bioetl.application.services.control_plane import RunLedgerService
 from bioetl.application.services.control_plane.manifest.diagnostics import (
     build_diagnostics_summary,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.base_effective_config_diagnostics import (
+from bioetl.application.services.control_plane.manifest.diagnostics.base import (
     _build_effective_config_diagnostics,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections import (
@@ -57,7 +57,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.base_replay_
 from bioetl.application.services.control_plane.manifest.diagnostics.operator_replay_mode import (
     _resolve_operator_replay_mode,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_status import (
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection import (
     _resolve_snapshot_status,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.source_posture import (

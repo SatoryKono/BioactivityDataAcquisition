@@ -537,17 +537,18 @@ hotspot_family_ratchets:
       max_internal_fan_in: 2
     metrics:
       duplication_clusters: 0
-      files: 128
-      total_loc: 15024
+      files: 112
+      total_loc: 14334
       files_ge_250_loc: 0
-      helper_function_ratio: 0.376
-      max_internal_fan_in: 2
-      max_internal_fan_in_module: bioetl.application.services.control_plane.replay.historical_identity_models
+      helper_function_ratio: 0.385
+      max_internal_fan_in: 1
+      max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_models
     trend:
-      status: reduced_2026-08-25_issue_9618_workflow_rehome
-      next_action: '2026-08-25 #9618 moved workflow state-transition orchestration to its workflow owner,
-        reducing this family from 142 to 133 files and from 16438 to 15076 LOC (8.29%); bounded-growth
-        budgets remain unchanged and no technical-debt budget is increased.
+      status: reduced_2026-09-16_issue_10468_coupling_closeout
+      next_action: '2026-09-16 #10468/#10472-#10475: control-plane max_internal_fan_in
+        2->1 and files 128->112 with files_ge_250_loc remaining 0. Bounded-growth
+        budgets stay 0 files_ge_250_loc and max_internal_fan_in 2; no technical-debt
+        budget is increased.
 
         '
   - name: composition_runtime_builders

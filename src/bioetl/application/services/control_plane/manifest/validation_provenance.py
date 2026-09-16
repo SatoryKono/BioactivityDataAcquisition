@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.contract_evidence import (
-    RunManifestCreateSpec,
+from typing import Protocol
+
+from bioetl.domain.control_plane import (
+    ReplayCapability,
+    RunArtifactRef,
+    RunCodeProvenance,
+    RunSourceRef,
 )
-from bioetl.domain.control_plane import RunCodeProvenance
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
     normalize_required_persistence_profile,
@@ -16,6 +20,7 @@ from bioetl.domain.control_plane.run_manifest import (
 )
 
 __all__ = [
+    "_RunManifestCreateRequest",
     "_format_strict_code_provenance_profile_context",
     "_validate_canonical_config_identity",
     "_validate_documented_code_provenance",
@@ -24,8 +29,34 @@ __all__ = [
 ]
 
 
+class _RunManifestCreateRequest(Protocol):
+    @property
+    def launch_context(self) -> dict[str, object]: ...
+
+    @property
+    def source_refs(self) -> tuple[RunSourceRef, ...]: ...
+
+    @property
+    def planned_artifacts(self) -> tuple[RunArtifactRef, ...]: ...
+
+    @property
+    def replay_capability(self) -> ReplayCapability: ...
+
+    @property
+    def provider(self) -> str: ...
+
+    @property
+    def entity(self) -> str: ...
+
+    @property
+    def contract_ref(self) -> str | None: ...
+
+    @property
+    def pipeline_name(self) -> str: ...
+
+
 def _validate_production_provenance_gate(
-    request: RunManifestCreateSpec,
+    request: _RunManifestCreateRequest,
     code_provenance: RunCodeProvenance,
 ) -> None:
     """Fail closed when production runs omit the required provenance set."""
@@ -49,7 +80,7 @@ def _validate_production_provenance_gate(
 
 
 def _validate_executable_code_provenance(
-    request: RunManifestCreateSpec,
+    request: _RunManifestCreateRequest,
     code_provenance: RunCodeProvenance,
 ) -> None:
     """Fail closed when executable runs cannot pin code and dependency state."""
@@ -100,7 +131,7 @@ def _validate_canonical_config_identity(
 
 
 def _format_strict_code_provenance_profile_context(
-    request: RunManifestCreateSpec,
+    request: _RunManifestCreateRequest,
 ) -> str:
     """Return operator-facing profile context for strict dirty-source failures."""
     raw_required_profile = (

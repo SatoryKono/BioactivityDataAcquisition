@@ -98525,6 +98525,34 @@
       "lifecycle": "working_report",
       "outbound_links": 0,
       "owner": "BioETL Team",
+      "path": "reports/quality/sonar/live-issues-20260916-rf009-full.json",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".json",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
       "path": "reports/quality/sonar/live-snapshot-20260728-postmerge-summary.json",
       "recommended_action": "archive-after-migration",
       "root_doc_kind": null,
@@ -98638,6 +98666,34 @@
       "outbound_links": 0,
       "owner": "BioETL Team",
       "path": "reports/quality/sonar/live-snapshot-20260820-rf009-summary.json",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".json",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/quality/sonar/live-snapshot-20260916-rf009-summary.json",
       "recommended_action": "archive-after-migration",
       "root_doc_kind": null,
       "section": "reports",
@@ -103180,11 +103236,11 @@
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 21,
       "reports_workspace_entrypoint": 1,
-      "working_report": 980
+      "working_report": 982
     },
     "by_recommended_action": {
       "archive-after-github-state-check": 337,
-      "archive-after-migration": 992,
+      "archive-after-migration": 994,
       "generate-automatically": 1044,
       "keep": 1273,
       "reconcile-with-github-state": 8,
@@ -103216,7 +103272,7 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
-      "reports": 1183,
+      "reports": 1185,
       "reports-migration-analysis.md": 1,
       "security": 2
     },
@@ -103226,7 +103282,7 @@
       "Canonical": 74,
       "Deprecated": 2,
       "Generated": 1044,
-      "Working": 1496
+      "Working": 1498
     },
     "by_surface_family": {
       "active": 748,
@@ -103234,10 +103290,10 @@
       "canonical": 74,
       "duplicate": 2,
       "generated": 1044,
-      "working": 1496
+      "working": 1498
     },
     "by_tracking_state": {
-      "tracked": 3656
+      "tracked": 3658
     },
     "docs_reports_local_count": 39,
     "duplicate_group_count": 7,
@@ -103253,8 +103309,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3656,
+    "total_doc_like": 3658,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3656
+    "total_doc_like_tracked": 3658
   }
 }

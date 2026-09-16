@@ -45,6 +45,9 @@ from bioetl.application.services.control_plane.replay.historical_corpus_service 
     HistoricalReplayBulkCertificationSpec,
     HistoricalReplayCorpusService,
 )
+from bioetl.application.services.control_plane.manifest.diagnostics import (
+    build_diagnostics_summary,
+)
 from bioetl.application.services.control_plane.replay.historical_certification_service import (
     HistoricalReplayCertificationService,
     HistoricalReplaySnapshotCertification,
@@ -136,6 +139,7 @@ def test_closure_report_blocks_claim_without_explicit_residual_dispositions() ->
                 manifest_port=manifest_store,
                 ledger_port=ledger_store,
                 entry_id_factory=_closure_entry_id_factory("entry-closure-gap"),
+                summary_builder=build_diagnostics_summary,
             ),
         ),
         now_factory=_fixed_closure_time,
@@ -166,6 +170,7 @@ def test_closure_report_supports_global_claim_after_bulk_certification() -> None
             manifest_port=manifest_store,
             ledger_port=ledger_store,
             entry_id_factory=_closure_entry_id_factory("entry-closure-certification"),
+            summary_builder=build_diagnostics_summary,
         ),
     )
     closure_service = HistoricalReplayClosureService(
@@ -251,6 +256,7 @@ def test_closure_report_classifies_irrecoverable_legacy_subset() -> None:
                 manifest_port=manifest_store,
                 ledger_port=ledger_store,
                 entry_id_factory=_closure_entry_id_factory("entry-closure-residual"),
+                summary_builder=build_diagnostics_summary,
             ),
         ),
         now_factory=_fixed_closure_time,
@@ -287,6 +293,7 @@ def test_closure_report_can_flip_claim_for_narrowed_certifiable_scope() -> None:
                 manifest_port=manifest_store,
                 ledger_port=ledger_store,
                 entry_id_factory=_closure_entry_id_factory("entry-closure-complete"),
+                summary_builder=build_diagnostics_summary,
             ),
         ),
         now_factory=_fixed_closure_time,

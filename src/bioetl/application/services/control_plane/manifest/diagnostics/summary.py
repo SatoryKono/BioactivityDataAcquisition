@@ -8,12 +8,14 @@ from collections import Counter
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane.manifest.diagnostics.artifact_support import (
-    apply_artifact_publication_closure_policy,
-    build_produced_artifact_trace,
-)
 from bioetl.application.services.control_plane.manifest.diagnostics.composite_projection import (
     build_composite_dossier_projection,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
+    assemble_identity_graph,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
+    apply_artifact_publication_closure_policy,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
     build_exact_replay_anchors as _build_exact_replay_anchors,
@@ -23,6 +25,9 @@ from bioetl.application.services.control_plane.manifest.diagnostics.summary_supp
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
     build_identity_graph as _build_identity_graph,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
+    build_produced_artifact_trace,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
     build_runtime_views,
@@ -123,3 +128,32 @@ def _build_final_summary(request: _FinalSummaryRequest) -> dict[str, object]:
         )
     )
     return apply_artifact_publication_closure_policy(summary)
+
+
+def attach_base_summary_artifact_defaults(
+    *,
+    manifest: RunManifest,
+    summary: dict[str, object],
+) -> dict[str, object]:
+    """Attach empty-ledger artifact defaults used by the base summary path."""
+    summary["artifact_refs"] = []
+    summary["lineage_fragment_ids"] = []
+    summary["published_artifact_count"] = 0
+    summary["exact_replay_anchors"] = _build_exact_replay_anchors(
+        manifest=manifest,
+        summary=summary,
+        artifact_refs=[],
+        lineage_fragment_ids=frozenset(),
+    )
+    produced_artifact_trace = build_produced_artifact_trace(
+        manifest=manifest,
+        ledger_entries_present=False,
+        artifact_refs=[],
+    )
+    summary["produced_artifact_trace"] = produced_artifact_trace
+    summary["artifact_publication_closure"] = produced_artifact_trace.get(
+        "artifact_publication_closure"
+    )
+    summary["identity_graph_complete"] = None
+    summary["identity_graph"] = assemble_identity_graph(manifest, summary)
+    return summary

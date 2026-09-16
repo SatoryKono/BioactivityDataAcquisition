@@ -32,12 +32,12 @@ from __future__ import annotations
 import pytest
 
 from bioetl.application.services.control_plane.forensic.diagnostics_support import (
-    _artifact_completeness,
-    _checkpoint_compatibility_payload,
-    _forensic_diff_payload,
-    _lineage_closure_payload,
-    _missing_evidence,
-    _replay_capability_payload,
+    artifact_completeness,
+    checkpoint_compatibility_payload,
+    forensic_diff_payload,
+    lineage_closure_payload,
+    missing_evidence,
+    replay_capability_payload,
 )
 from bioetl.application.services.control_plane.manifest.inspection_models import (
     RunManifestDiffResult,
@@ -81,7 +81,7 @@ def test_artifact_completeness_marks_complete_when_artifacts_are_fully_linked() 
         }
     )
 
-    payload = _artifact_completeness(result)
+    payload = artifact_completeness(result)
 
     assert payload["manifest_id"] == "manifest-forensic-1"
     assert payload["published_artifact_count"] == 2
@@ -110,7 +110,7 @@ def test_lineage_closure_payload_classifies_boundary_support(
         else {"lineage_closure_boundary": {"supported": supported, "mode": "strict"}}
     )
 
-    payload = _lineage_closure_payload(_inspection_result(diagnostics=diagnostics))
+    payload = lineage_closure_payload(_inspection_result(diagnostics=diagnostics))
 
     assert payload["manifest_id"] == "manifest-forensic-1"
     assert payload["status"] == expected_status
@@ -137,7 +137,7 @@ def test_replay_capability_payload_compares_left_and_right_snapshots() -> None:
         },
     )
 
-    payload = _replay_capability_payload(left=left, right=right)
+    payload = replay_capability_payload(left=left, right=right)
 
     assert payload["left"]["manifest_id"] == "manifest-left"
     assert payload["left"]["replay_capability"] == "exact_replay_ready"
@@ -165,8 +165,8 @@ def test_checkpoint_compatibility_payload_and_forensic_verdict_use_checkpoint_an
         },
     )
 
-    compatibility = _checkpoint_compatibility_payload(diff.cross_surface_replay_diff)
-    forensic = _forensic_diff_payload(diff)
+    compatibility = checkpoint_compatibility_payload(diff.cross_surface_replay_diff)
+    forensic = forensic_diff_payload(diff)
 
     assert compatibility == {
         "available": True,
@@ -188,7 +188,7 @@ def test_missing_evidence_reports_expected_forensic_gaps() -> None:
         },
     )
 
-    assert _missing_evidence(result) == (
+    assert missing_evidence(result) == (
         "run_ledger_entries_missing",
         "published_artifacts_missing",
         "artifact_links_incomplete",

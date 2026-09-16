@@ -5,10 +5,6 @@ from __future__ import annotations
 from dataclasses import replace
 from typing import cast
 
-from bioetl.application.services.control_plane.manifest.diagnostics.replay import (
-    _build_resume_contract,
-    build_replay_family_context,
-)
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection import (
     _build_replay_projection_bundle,
 )
@@ -17,17 +13,11 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_refre
     _ReplayRefreshProjection,
     _ReplayRefreshSummaryUpdate,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_materialization import (
+from bioetl.domain.control_plane.snapshot_materialization import (
     resolve_post_manifest_input_snapshot_materialization_mode,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_status import (
-    _resolve_snapshot_status,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.source_refs import (
     _build_effective_source_refs,
-)
-from bioetl.application.services.control_plane.manifest.replay_family_contract_payload import (
-    build_replay_family_contract_payload as _build_replay_family_contract_payload,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
@@ -92,20 +82,12 @@ def _build_refresh_replay_projection(
     effective_manifest = refresh_context.effective_manifest
     policy_assessment = refresh_context.policy_assessment
     input_snapshots = refresh_context.input_snapshots
-    replay_family_context = build_replay_family_context(effective_manifest)
-    replay_family_contract = replay_family_context.replay_family_contract
-    replay_family_contract_payload = _build_replay_family_contract_payload(
-        replay_family_contract
-    )
     replay_projection_bundle = _build_replay_projection_bundle(
         manifest=effective_manifest,
         input_snapshots=input_snapshots,
         requested_exact_replay=refresh_context.requested_exact_replay,
         resume_requested=refresh_context.resume_requested,
         policy_assessment=policy_assessment,
-        replay_family_context=replay_family_context,
-        replay_family_contract=replay_family_contract,
-        replay_family_contract_payload=replay_family_contract_payload,
     )
     return _ReplayRefreshProjection(
         replay_payload={
@@ -114,20 +96,22 @@ def _build_refresh_replay_projection(
             "replay_capability_assessment": policy_assessment.to_dict(),
             **replay_projection_bundle.operator_projection,
             **replay_projection_bundle.replay_state_projection,
+            "resume_contract": replay_projection_bundle.resume_contract,
         },
         exact_replay_eligible=replay_projection_bundle.exact_replay_eligible,
         replay_mode=str(replay_projection_bundle.operator_projection["replay_mode"]),
         continuation_mode=str(
             replay_projection_bundle.operator_projection["continuation_mode"]
         ),
+        snapshot_status=replay_projection_bundle.snapshot_status,
+        resume_contract=replay_projection_bundle.resume_contract,
     )
 
 
 def _refresh_replay_summary_update_snapshot_fields(
     updated: dict[str, object],
     refresh_context: _ReplayRefreshContext,
-    exact_replay_eligible: bool,
-    replay_mode: str,
+    snapshot_status: str,
 ) -> dict[str, object]:
     """Update snapshot-related fields in summary."""
     input_snapshots = refresh_context.input_snapshots
@@ -146,11 +130,7 @@ def _refresh_replay_summary_update_snapshot_fields(
     updated["input_snapshot_missing_source_refs"] = list(
         policy_assessment.snapshot_envelope.missing_snapshot_source_refs
     )
-    updated["snapshot_status"] = _resolve_snapshot_status(
-        input_snapshots=input_snapshots,
-        exact_replay_eligible=exact_replay_eligible,
-        replay_mode=replay_mode,
-    )
+    updated["snapshot_status"] = snapshot_status
     return updated
 
 
@@ -172,20 +152,9 @@ def _build_refresh_summary_update(
     updated = _refresh_replay_summary_update_snapshot_fields(
         updated=updated,
         refresh_context=refresh_context,
-        exact_replay_eligible=replay_projection.exact_replay_eligible,
-        replay_mode=replay_projection.replay_mode,
+        snapshot_status=replay_projection.snapshot_status,
     )
-    replay_family_context = build_replay_family_context(
-        refresh_context.effective_manifest
-    )
-    updated["resume_contract"] = _build_resume_contract(
-        manifest=refresh_context.effective_manifest,
-        requested_exact_replay=refresh_context.requested_exact_replay,
-        resume_requested=refresh_context.resume_requested,
-        continuation_mode=replay_projection.continuation_mode,
-        policy_assessment=refresh_context.policy_assessment,
-        replay_family_context=replay_family_context,
-    )
+    updated["resume_contract"] = replay_projection.resume_contract
     return _ReplayRefreshSummaryUpdate(payload=updated)
 
 
@@ -216,6 +185,7 @@ def _refresh_replay_summary_from_materialized_snapshots(
     ).payload
 
 
-__all__ = ["_refresh_replay_summary_from_materialized_snapshots"]
-
-__all__ = ["_refresh_replay_summary_from_materialized_snapshots"]
+__all__ = [
+    "_build_replay_projection_bundle",
+    "_refresh_replay_summary_from_materialized_snapshots",
+]

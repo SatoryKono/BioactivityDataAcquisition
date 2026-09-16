@@ -29,6 +29,10 @@ class _ReplayRefreshProjection:
     exact_replay_eligible: bool
     replay_mode: str
     continuation_mode: str
+    snapshot_status: str
+    resume_contract: dict[str, object]
+    snapshot_status: str
+    resume_contract: dict[str, object]
 
 
 @dataclass(frozen=True, slots=True)
