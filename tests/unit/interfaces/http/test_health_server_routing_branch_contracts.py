@@ -324,7 +324,11 @@ async def test_workflow_report_handles_found_and_missing_payloads(
         },
     )
 
-    expected = {"schema_version": "workflow_run_report_v1", "steps": [], "totals_rows": []}
+    expected = {
+        "schema_version": "workflow_run_report_v1",
+        "steps": [],
+        "totals_rows": [],
+    }
     monkeypatch.setattr(
         observability_routing,
         "load_workflow_run_report_payload",

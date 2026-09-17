@@ -5,7 +5,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.domain.control_plane import execution_identity as _execution_identity_support
+from bioetl.domain.control_plane import (
+    execution_identity as _execution_identity_support,
+)
 from bioetl.application.services.control_plane.manifest._service_hydration import (
     RunManifestHydrationMixin as RunManifestHydrationMixin,
 )

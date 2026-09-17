@@ -126,8 +126,7 @@ async def test_dependency_runner_method_delegates_to_timeout_guard() -> None:
     keys = pl.DataFrame({"id": [1]})
     factory = MagicMock()
     with patch(
-        "bioetl.application.composite.dependency_coordinator."
-        "execute_dependency_runner",
+        "bioetl.application.composite.dependency_coordinator.execute_dependency_runner",
         new=AsyncMock(return_value=expected),
     ) as execute:
         result = await DependencyCoordinatorService._execute_dependency_runner(
@@ -265,7 +264,10 @@ def test_pre_silver_structural_policy_can_drop_record() -> None:
         apply_structural_policy=lambda *_args: None,
     )
 
-    assert finalize_pre_silver_record(normalizer, record, context=object(), index=0) is None
+    assert (
+        finalize_pre_silver_record(normalizer, record, context=object(), index=0)
+        is None
+    )
 
 
 def test_unknown_hash_datetime_policy_fails_closed() -> None:
@@ -355,10 +357,13 @@ def test_resolve_produced_nodes_ignores_non_production_edges() -> None:
         ),
     )
 
-    assert resolve_produced_nodes(
-        fragments=(fragment,),
-        node_type=LineageNodeType.DATASET,
-    ) == ()
+    assert (
+        resolve_produced_nodes(
+            fragments=(fragment,),
+            node_type=LineageNodeType.DATASET,
+        )
+        == ()
+    )
 
 
 def test_lineage_persistence_profile_is_ok_with_complete_fragments() -> None:

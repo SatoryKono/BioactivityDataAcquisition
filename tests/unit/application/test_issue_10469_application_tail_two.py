@@ -36,14 +36,20 @@ from bioetl.application.pipelines.crossref._publication_field_extractors import 
     extract_license_url,
 )
 from bioetl.application.pipelines.openalex._extractors_common import _resolve_funder_id
-from bioetl.application.pipelines.openalex._extractors_topics_grants import extract_topics
+from bioetl.application.pipelines.openalex._extractors_topics_grants import (
+    extract_topics,
+)
 from bioetl.application.pipelines.openalex.transformer import (
     OpenAlexPublicationTransformer,
 )
 from bioetl.application.pipelines.pubmed.extractors.abstract import AbstractExtractor
 from bioetl.application.services.ops.bronze_cleanup_service import BronzeCleanupService
-from bioetl.application.services.run_reports.paths import write_report_root_source_identity
-from bioetl.application.services.control_plane.effective_config.serialization import to_jsonable
+from bioetl.application.services.run_reports.paths import (
+    write_report_root_source_identity,
+)
+from bioetl.application.services.control_plane.effective_config.serialization import (
+    to_jsonable,
+)
 from bioetl.application.services.control_plane.ledger.service import (
     _missing_occurred_at_factory,
 )

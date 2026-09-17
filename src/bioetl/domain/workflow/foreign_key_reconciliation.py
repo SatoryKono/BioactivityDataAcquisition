@@ -239,7 +239,9 @@ class ForeignKeyReconciliationRequest:
         require_optional_str(
             self.reference_snapshot_version, "reference_snapshot_version"
         )
-        require_optional_str(self.completeness_evidence_ref, "completeness_evidence_ref")
+        require_optional_str(
+            self.completeness_evidence_ref, "completeness_evidence_ref"
+        )
         if completeness == "complete" and (
             self.reference_identity is None or self.completeness_evidence_ref is None
         ):

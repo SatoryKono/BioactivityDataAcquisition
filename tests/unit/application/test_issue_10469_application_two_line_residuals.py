@@ -86,7 +86,9 @@ def test_conflict_resolver_unknown_policy_has_no_handler() -> None:
 
 
 def test_generic_key_resolver_factory_builds_requested_type() -> None:
-    resolver = _create_key_resolver(SeedKeyResolver, MagicMock(), normalization_policies={})
+    resolver = _create_key_resolver(
+        SeedKeyResolver, MagicMock(), normalization_policies={}
+    )
 
     assert isinstance(resolver, SeedKeyResolver)
 
@@ -105,9 +107,7 @@ def test_optionality_collectors_ignore_blank_and_nullable_rules() -> None:
         )
     )
 
-    assert _collect_dq_fields(domain_config, validation_type="required") == {
-        "title"
-    }
+    assert _collect_dq_fields(domain_config, validation_type="required") == {"title"}
     assert _collect_nonnullable_key_fields(domain_config) == {"entity_id"}
 
 
@@ -174,7 +174,9 @@ def test_batch_tracing_none_result_spans_are_noops() -> None:
     )
 
 
-def test_fetched_metrics_update_bound_stage_accounting(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_fetched_metrics_update_bound_stage_accounting(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     accounting = MagicMock()
     monkeypatch.setattr(
         "bioetl.application.core.batch_metrics.get_stage_accounting",
