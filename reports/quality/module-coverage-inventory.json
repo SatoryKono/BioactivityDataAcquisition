@@ -49613,7 +49613,19 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-16",
+<<<<<<< Updated upstream
   "source_tree_sha256": "07879bbcf200faa8f3f75d16c47873a86fef7aaa5726b6dba7607a4b8bba2aeb",
+||||||| Stash base
+  "source_tree_sha256": "5d563198ff63688ec4a86cc9c25d833ffc0f45c9fa7ce9db09a6d6e052fe7cb3",
+=======
+<<<<<<< HEAD
+  "source_tree_sha256": "5d563198ff63688ec4a86cc9c25d833ffc0f45c9fa7ce9db09a6d6e052fe7cb3",
+||||||| f1a8a4ae52e
+  "source_tree_sha256": "0ca47402d825a3d2ace59b965b269adacfa04f83ef424ae2bfd22a7dadca557d",
+=======
+  "source_tree_sha256": "07879bbcf200faa8f3f75d16c47873a86fef7aaa5726b6dba7607a4b8bba2aeb",
+>>>>>>> master20260916-5
+>>>>>>> Stashed changes
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
