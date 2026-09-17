@@ -292,12 +292,13 @@ def test_delta_facade_uses_injected_loader() -> None:
 @pytest.mark.asyncio
 async def test_silver_csv_export_is_optional() -> None:
     host = SimpleNamespace(_csv_exporter=None)
-    await SilverMaintenanceOperations.maybe_export_csv(
+    result = await SilverMaintenanceOperations.maybe_export_csv(
         host,
         "table",
         object(),
         "table.csv",
     )
+    assert result is None
 
 
 def test_foreign_key_reconciliation_rejects_missing_scd2_column() -> None:

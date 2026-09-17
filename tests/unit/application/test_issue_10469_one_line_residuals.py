@@ -524,6 +524,7 @@ def test_quarantine_operator_metrics_are_optional() -> None:
         status="ok",
         duration_seconds=0.1,
     )
+    assert host.metrics is None
 
 
 def test_audit_workflow_result_serializes_absent_manifest() -> None:
