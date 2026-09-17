@@ -263,6 +263,7 @@ async def test_pipeline_run_report_returns_unresolved_and_missing_shells(
             "stage_timings": [],
             "identity_rows": [],
             "timings_and_failure": [],
+            "rejection_details_display": [],
             "schema_version": "pipeline_run_report_v1",
         },
     )
@@ -323,7 +324,11 @@ async def test_workflow_report_handles_found_and_missing_payloads(
         },
     )
 
-    expected = {"schema_version": "workflow_run_report_v1", "steps": []}
+    expected = {
+        "schema_version": "workflow_run_report_v1",
+        "steps": [],
+        "totals_rows": [],
+    }
     monkeypatch.setattr(
         observability_routing,
         "load_workflow_run_report_payload",
