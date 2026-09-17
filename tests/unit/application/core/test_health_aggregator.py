@@ -562,3 +562,21 @@ class TestHealthAggregatorIntegration:
         ds_result = next(r for r in report.results if r.component == "data_source")
         assert ds_result.status == HealthStatus.UNHEALTHY
         assert "timed out" in ds_result.error_message
+
+
+@pytest.mark.unit
+class TestCachedBronzeHealthIsNotProviderHealth:
+    """Cached Bronze local HEALTHY must not look like a live provider probe."""
+
+    @pytest.mark.asyncio
+    async def test_cached_bronze_marks_api_not_exercised(
+        self, health_aggregator, mock_services, mock_data_source
+    ) -> None:
+        mock_data_source.source_health_kind = "cached_bronze"
+        mock_data_source.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
+        report = await health_aggregator.check_all(mock_services)
+        ds_result = next(r for r in report.results if r.component == "data_source")
+        assert ds_result.status == HealthStatus.HEALTHY
+        assert ds_result.provider is None
+        assert ds_result.probe_fallback_reason == "cached_bronze_api_not_exercised"
+        assert "provider API not exercised" in (ds_result.error_message or "")

@@ -38,6 +38,16 @@ def _empty_attachment_result() -> ArtifactRecorderAttachmentResult:
     )
 
 
+def _canonical_lineage_fragment_id(raw: object) -> str | None:
+    """Reject layer aliases such as ``bronze`` as fragment identifiers."""
+    if raw is None:
+        return None
+    value = str(raw).strip()
+    if not value or value.lower() in {"bronze", "silver", "gold"}:
+        return None
+    return value
+
+
 def _record_artifact(
     service: RunLedgerService,
     *,
@@ -52,9 +62,7 @@ def _record_artifact(
         raw_dataset_ref = details.get("dataset_ref")
         raw_lineage_fragment_id = details.get("lineage_fragment_id")
         dataset_ref = None if raw_dataset_ref is None else str(raw_dataset_ref)
-        lineage_fragment_id = (
-            None if raw_lineage_fragment_id is None else str(raw_lineage_fragment_id)
-        )
+        lineage_fragment_id = _canonical_lineage_fragment_id(raw_lineage_fragment_id)
         artifact_content_hash = str(
             details.get("artifact_content_hash") or details.get("content_hash") or ""
         )

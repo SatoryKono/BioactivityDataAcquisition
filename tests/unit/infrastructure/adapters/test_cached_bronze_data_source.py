@@ -344,3 +344,24 @@ def test_cached_bronze_health_check_does_not_emit_chembl_counters() -> None:
     assert "bioetl_health_check_success_total" not in (
         source.health_check.__code__.co_consts or ()
     )
+
+
+def test_cached_bronze_declares_consumption_source_metadata(
+    base_logger: MagicMock,
+) -> None:
+    reader = _FakeBronzeReader(
+        base_path=str(BRONZE_ROOT),
+        flat_structure=False,
+        batches=[],
+        records_by_batch={},
+    )
+    source = CachedBronzeDataSource(
+        bronze_reader=reader,
+        provider="chembl",
+        entity_type="activity",
+        logger=base_logger,
+    )
+    assert source.source_health_kind == "cached_bronze"
+    metadata = source.get_source_metadata()
+    assert metadata.type == "cached_bronze"
+    assert metadata.file_path == str(BRONZE_ROOT)

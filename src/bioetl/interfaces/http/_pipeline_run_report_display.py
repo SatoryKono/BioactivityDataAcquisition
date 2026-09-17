@@ -121,6 +121,32 @@ def _artifact_row(item: dict[str, object]) -> dict[str, object]:
     return row
 
 
+def _shape_rejection_details(payload: dict[str, object]) -> list[dict[str, object]]:
+    """Project contract rejection_details to field/rule rows for Grafana."""
+    contract = payload.get("contract_summary")
+    if not isinstance(contract, dict):
+        return []
+    details = contract.get("rejection_details")
+    if not isinstance(details, list):
+        return []
+    rows: list[dict[str, object]] = []
+    for item in details:
+        if not isinstance(item, dict):
+            continue
+        code = str(item.get("reason_code") or "").strip()
+        rows.append(
+            {
+                "reason_code": code,
+                "rule_type": str(item.get("rule_type") or ""),
+                "field": str(item.get("field") or ""),
+                "operator": str(item.get("operator") or ""),
+                "count": item.get("count"),
+                "reason_label": _reason_operator_label(code) if code else "",
+            }
+        )
+    return rows
+
+
 def _shape_artifacts_display(payload: dict[str, object]) -> list[dict[str, object]]:
     artifacts = payload.get("artifacts")
     if not isinstance(artifacts, list) or not artifacts:

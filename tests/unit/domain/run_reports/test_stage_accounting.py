@@ -265,6 +265,55 @@ def test_workflow_report_extracted_rollup() -> None:
     assert payload["index"]["chembl_activity"]["records_extracted"] == 1000
 
 
+def test_workflow_report_reconciliation_totals_are_additive() -> None:
+    report = build_workflow_run_report(
+        identity={
+            "workflow_name": "demo",
+            "status": "success",
+            "workflow_run_id": "wf-1",
+        },
+        plan_steps=[
+            {
+                "step_id": "reconcile",
+                "kind": "transform",
+                "depends_on": [],
+            }
+        ],
+        execution_steps=[
+            {
+                "step_id": "reconcile",
+                "kind": "transform",
+                "status": "success",
+                "gold_excluded_by_contract": 2,
+                "payload": {
+                    "transform_name": "reconcile_foreign_keys",
+                    "records_gold": 10,
+                    "source_layer": "gold",
+                    "source_table": "activity",
+                    "source_scope": "all_current",
+                    "mutation_mode": "gold_scd2_expiry",
+                    "orphan_rows_deleted": 3,
+                    "source_snapshot": {
+                        "physical_rows": 13,
+                        "current_rows": 10,
+                    },
+                },
+            }
+        ],
+    )
+    totals = report.to_dict()["totals"]
+    assert totals["written_by_pipeline"] == 10
+    assert totals["contract_excluded"] == 2
+    assert totals["reconciliation_deactivated"] == 3
+    assert totals["final_current_by_table"] == {"activity": 10}
+    assert totals["historical_by_table"] == {"activity": 3}
+    assert (
+        totals["historical_by_table"]["activity"]
+        + totals["final_current_by_table"]["activity"]
+        == 13
+    )
+
+
 def test_golden_pipeline_fixture_shape() -> None:
     path = (
         Path(__file__).resolve().parents[3]

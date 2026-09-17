@@ -65,7 +65,10 @@ class _ObserverHealthEmissionMixin:
             metric_value,
             {"component": component},
         )
-        if provider is not None:
+        if (
+            provider is not None
+            and fallback_reason != "cached_bronze_api_not_exercised"
+        ):
             self._metrics.set_gauge(
                 "bioetl_provider_health_status",
                 metric_value,
@@ -91,7 +94,10 @@ class _ObserverHealthEmissionMixin:
                     latency_seconds,
                     {"provider": provider, "mode": health_check_mode},
                 )
-        if fallback_reason is not None:
+        if (
+            fallback_reason is not None
+            and fallback_reason != "cached_bronze_api_not_exercised"
+        ):
             self._metrics.increment_counter(
                 self.PROBE_MODE_FALLBACK_COUNTER,
                 1,

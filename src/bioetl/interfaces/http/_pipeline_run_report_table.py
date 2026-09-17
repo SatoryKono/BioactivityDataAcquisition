@@ -12,12 +12,14 @@ from bioetl.interfaces.http._pipeline_run_report_display import (
     _shape_artifacts_display,
     _shape_funnel_rows,
     _shape_reasons_display,
+    _shape_rejection_details,
 )
 from bioetl.interfaces.http._pipeline_run_report_sections import (
     _FAILURE_ROW_ORDER,
     _IDENTITY_ROW_ORDER,
     _LAYER_ROW_ORDER,
     _RECONCILIATION_ROW_ORDER,
+    _WORKFLOW_TOTALS_ROW_ORDER,
 )
 from bioetl.interfaces.http._processed_records_value_support import (
     _coverage_chip,
@@ -216,10 +218,26 @@ def _table_shape_pipeline_run_report(
     shaped["artifacts_display"] = (
         _shape_artifacts_display(shaped) or shaped["artifacts_display"]
     )
+    shaped["rejection_details_display"] = _shape_rejection_details(payload)
     shaped["timings_and_failure"] = [
         *_section_param_value_rows("failure", shaped.get("failure")),
         *_section_param_value_rows("stage_timings", shaped.get("stage_timings")),
     ]
+    return shaped
+
+
+def _table_shape_workflow_run_report(
+    payload: dict[str, object],
+) -> dict[str, object]:
+    """Expose workflow totals as stable parameter/value rows for Grafana tables."""
+    shaped = dict(payload)
+    totals = payload.get("totals")
+    if isinstance(totals, dict):
+        shaped["totals_rows"] = _param_value_rows(
+            totals, key_order=_WORKFLOW_TOTALS_ROW_ORDER
+        )
+    else:
+        shaped["totals_rows"] = []
     return shaped
 
 

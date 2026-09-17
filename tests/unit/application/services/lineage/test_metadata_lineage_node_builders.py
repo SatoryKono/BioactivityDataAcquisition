@@ -507,6 +507,20 @@ class TestBronzeBatchNodeFromInput:
             "compressed_size",
         ):
             assert downstream.attributes[key] == result.attributes[key]
+        from bioetl.application.observability.control_plane_evidence.lineage_graph_validation import (
+            conflicting_node_ids,
+        )
+        from bioetl.domain.lineage import LineageGraphFragment
+
+        bronze_fragment = LineageGraphFragment(
+            fragment_id="bronze:test",
+            nodes=(result,),
+        )
+        silver_fragment = LineageGraphFragment(
+            fragment_id="silver:test",
+            nodes=(downstream,),
+        )
+        assert conflicting_node_ids((bronze_fragment, silver_fragment)) == []
 
 
 class TestSilverDatasetNode:

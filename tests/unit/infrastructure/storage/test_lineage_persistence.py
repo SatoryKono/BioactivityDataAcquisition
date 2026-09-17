@@ -320,3 +320,24 @@ def test_emit_composite_source_selection_metrics_aggregates_sources_and_fields()
         ],
         any_order=False,
     )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_persist_rejects_layer_alias_fragment_id_when_required() -> None:
+    from bioetl.domain.lineage import LineageGraphFragment, LineageNodeRef, LineageNodeType
+
+    fragment = LineageGraphFragment(
+        fragment_id="bronze",
+        nodes=(LineageNodeRef(LineageNodeType.RUN, "run:1"),),
+    )
+    store = MagicMock()
+    with pytest.raises(RuntimeError, match="layer_alias_fragment_id"):
+        await persist_lineage_fragment_if_present(
+            lineage_store=store,
+            lineage_fragment=fragment,
+            pipeline_name="chembl_activity",
+            layer="bronze",
+            required=True,
+        )
+    store.save.assert_not_called()
