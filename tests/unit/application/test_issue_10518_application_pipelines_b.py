@@ -299,7 +299,7 @@ def _pubmed_article_xml() -> Element:
 
 
 class TestPubmedClassificationExtractor:
-    def test_extract_none(self) -> None:
+    def test_extract_none__pipelines_b_1(self) -> None:
         assert ClassificationExtractor().extract(None) is None
 
     def test_extract_empty_shapes(self) -> None:
@@ -398,12 +398,12 @@ from bioetl.application.pipelines.semanticscholar._author_extractors import (
 
 
 class TestSemanticScholarAuthors:
-    def test_extract_authors(self) -> None:
+    def test_extract_authors__pipelines_b_1(self) -> None:
         assert extract_authors(None) == []
         assert extract_authors([]) == []
         assert extract_authors([{"name": " John "}, {"name": "  "}, {"name": ""}, {"name": None}, {}]) == ["John"]
 
-    def test_extract_author_ids(self) -> None:
+    def test_extract_author_ids__pipelines_b_1(self) -> None:
         assert extract_author_ids(None) == []
         assert extract_author_ids([]) == []
         authors = [{"authorId": "123", "name": "A"}, {"name": "B"}, {"authorId": "", "name": "C"}, {"authorId": 456}]
@@ -414,7 +414,7 @@ class TestSemanticScholarAuthors:
         authors = [{"authorId": " abc "}, {"authorId": ""}, {"authorId": None}, {"authorId": 7}]
         assert extract_author_s2_ids(authors) == ["abc"]
 
-    def test_extract_author_orcids(self) -> None:
+    def test_extract_author_orcids__pipelines_b_1(self) -> None:
         assert extract_author_orcids(None) == []
         authors = [
             {"name": "A", "externalIds": {"ORCID": " 0000-1 "}},
@@ -519,7 +519,7 @@ from bioetl.application.pipelines.openalex._extractors_authors import (
 
 
 class TestOpenAlexAuthors:
-    def test_extract_authors(self) -> None:
+    def test_extract_authors__pipelines_b_2(self) -> None:
         authorships = [
             {"author": {"display_name": " Alice "}},
             {"author": "nope"},
@@ -529,7 +529,7 @@ class TestOpenAlexAuthors:
         ]
         assert oa_authors(authorships) == ["Alice"]
 
-    def test_extract_author_ids(self) -> None:
+    def test_extract_author_ids__pipelines_b_2(self) -> None:
         authorships = [
             {"author": {"id": "https://openalex.org/A1"}},
             {"author": "nope"},
@@ -537,7 +537,7 @@ class TestOpenAlexAuthors:
         ]
         assert oa_author_ids(authorships) == ["A1", "", ""]
 
-    def test_extract_author_orcids(self) -> None:
+    def test_extract_author_orcids__pipelines_b_2(self) -> None:
         authorships = [
             {"author": {"orcid": "https://orcid.org/0000-0001-2345-6789"}},
             {"author": "nope"},

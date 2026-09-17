@@ -104,7 +104,7 @@ class TestListFilteredRecords:
         logger.info.assert_called_once()
         port.list_filtered_records.assert_called_once()
 
-    async def test_operator_error_propagates(self):
+    async def test_operator_error_propagates__svc1b_1(self):
         port = AsyncMock()
         port.list_filtered_records = AsyncMock(side_effect=OSError("store down"))
         with pytest.raises(OSError, match="store down"):
@@ -131,7 +131,7 @@ class TestGetFilteredRecord:
         assert await service.get_filtered_record(payload_hash="h") is None
         logger.warning.assert_called_once()
 
-    async def test_operator_error_propagates(self):
+    async def test_operator_error_propagates__svc1b_2(self):
         port = AsyncMock()
         port.get_filtered_record = AsyncMock(side_effect=ValueError("bad filter"))
         with pytest.raises(ValueError, match="bad filter"):
@@ -148,7 +148,7 @@ class TestGetFilteredStats:
         assert result["total"] == 4
         logger.info.assert_called_once()
 
-    async def test_operator_error_propagates(self):
+    async def test_operator_error_propagates__svc1b_3(self):
         port = AsyncMock()
         port.get_filtered_stats = AsyncMock(side_effect=RuntimeError("stats down"))
         with pytest.raises(RuntimeError, match="stats down"):
@@ -167,7 +167,7 @@ class TestGetFilteredFilterOptions:
         assert result == {"run_types": ["incremental"]}
         logger.info.assert_called_once()
 
-    async def test_operator_error_propagates(self):
+    async def test_operator_error_propagates__svc1b_4(self):
         port = AsyncMock()
         port.get_filtered_filter_options = AsyncMock(
             side_effect=TypeError("bad options")
@@ -188,7 +188,7 @@ class TestGetFilteredTimeseries:
         assert result["bucket"] == "1h"
         logger.info.assert_called_once()
 
-    async def test_operator_error_propagates(self):
+    async def test_operator_error_propagates__svc1b_5(self):
         port = AsyncMock()
         port.get_filtered_timeseries = AsyncMock(side_effect=OSError("ts down"))
         with pytest.raises(OSError, match="ts down"):
@@ -718,7 +718,7 @@ class TestHealthProbeContext:
         assert await context.__aenter__() is context
         assert await context.__aexit__(None, None, None) is None
 
-    def test_list_available_providers(self):
+    def test_list_available_providers__svc1b_1(self):
         factory = MagicMock()
         factory.list_providers.return_value = ["p1", "p2"]
         assert _health_service(factory=factory).list_available_providers() == [
@@ -1225,7 +1225,7 @@ class TestResolveReplayCapabilityReason:
 
 
 class TestResolveReplayOccurrenceKind:
-    def test_historical_composite_incomplete(self):
+    def test_historical_composite_incomplete__svc1b_1(self):
         kind = _rs._resolve_replay_occurrence_kind(
             manifest=RunManifest(),
             input_snapshots=[
@@ -1255,7 +1255,7 @@ class TestResolveReplayOccurrenceKind:
         )
         assert kind == "historical_source_replay_certified_parent"
 
-    def test_historical_source_incomplete(self):
+    def test_historical_source_incomplete__svc1b_1(self):
         kind = _rs._resolve_replay_occurrence_kind(
             manifest=RunManifest(),
             input_snapshots=[
@@ -1312,7 +1312,7 @@ class TestResolveHistoricalLiveRunUpgradeState:
         )
         assert state == "not_applicable"
 
-    def test_historical_source_certified(self):
+    def test_historical_source_certified__svc1b_1(self):
         state = _rs._resolve_historical_live_run_upgrade_state(
             manifest=RunManifest(),
             input_snapshots=[
@@ -1323,7 +1323,7 @@ class TestResolveHistoricalLiveRunUpgradeState:
         )
         assert state == "historical_source_replay_certified"
 
-    def test_historical_source_incomplete(self):
+    def test_historical_source_incomplete__svc1b_2(self):
         state = _rs._resolve_historical_live_run_upgrade_state(
             manifest=RunManifest(),
             input_snapshots=[
@@ -1380,13 +1380,13 @@ class TestResolveBroaderHistoricalExactReplayState:
             True,
         ) == "historical_composite_replay_certified"
 
-    def test_historical_composite_incomplete(self):
+    def test_historical_composite_incomplete__svc1b_2(self):
         assert self._state(
             [{"materialization_mode": HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED}],
             False,
         ) == "historical_composite_certification_incomplete"
 
-    def test_historical_source_certified(self):
+    def test_historical_source_certified__svc1b_2(self):
         assert self._state(
             [{"materialization_mode": HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED}], True
         ) == "historical_source_replay_certified"
@@ -1404,7 +1404,7 @@ class TestResolveBroaderHistoricalExactReplayState:
 
 
 class TestResolveReplayMode:
-    def test_exact_replay(self):
+    def test_exact_replay__svc1b_1(self):
         mode = _rs._resolve_replay_mode(
             manifest=RunManifest(
                 replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED
@@ -1455,7 +1455,7 @@ class TestResolveReplayMode:
 
 
 class TestResolveContinuationMode:
-    def test_exact_replay(self):
+    def test_exact_replay__svc1b_2(self):
         mode = _rs._resolve_continuation_mode(
             manifest=RunManifest(
                 replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED
@@ -1627,7 +1627,7 @@ class _GatewayHost(_MetricsGatewayMixin):
 
 
 class TestPushToGateway:
-    def test_unconfigured_publisher_reports_unavailable(self):
+    def test_unconfigured_publisher_reports_unavailable__svc1b_1(self):
         host = _GatewayHost()
         result = host.push_to_gateway(gateway="http://pushgateway:9091")
         assert result.success is False
@@ -1640,7 +1640,7 @@ class TestPushToGateway:
         _, kwargs = host.logger.warning.call_args
         assert kwargs["gateway_class"] == "https"
 
-    def test_publisher_exception_reports_failure(self):
+    def test_publisher_exception_reports_failure__svc1b_1(self):
         publisher = MagicMock()
         publisher.push_to_gateway.side_effect = OSError("conn refused")
         host = _GatewayHost(publisher=publisher)
@@ -1649,7 +1649,7 @@ class TestPushToGateway:
         assert result.error == "conn refused"
         assert result.run_label == "r1"
 
-    def test_publisher_success(self):
+    def test_publisher_success__svc1b_1(self):
         publisher = MagicMock()
         publisher.push_to_gateway.return_value = True
         host = _GatewayHost(publisher=publisher)
@@ -1666,7 +1666,7 @@ class TestPushToGateway:
             metric_names=("m",),
         )
 
-    def test_publisher_unsuccessful_result(self):
+    def test_publisher_unsuccessful_result__svc1b_1(self):
         publisher = MagicMock()
         publisher.push_to_gateway.return_value = False
         host = _GatewayHost(publisher=publisher)
@@ -1720,13 +1720,13 @@ class TestMetricsProtocolStubs:
 
 
 class TestDeleteFromGateway:
-    def test_unconfigured_publisher_reports_unavailable(self):
+    def test_unconfigured_publisher_reports_unavailable__svc1b_2(self):
         host = _GatewayHost()
         result = host.delete_from_gateway(gateway="http://pushgateway:9091")
         assert result.success is False
         assert result.error == "Metrics publisher is not configured"
 
-    def test_publisher_exception_reports_failure(self):
+    def test_publisher_exception_reports_failure__svc1b_2(self):
         publisher = MagicMock()
         publisher.delete_from_gateway.side_effect = ValueError("bad gateway")
         host = _GatewayHost(publisher=publisher)
@@ -1736,7 +1736,7 @@ class TestDeleteFromGateway:
         _, kwargs = host.logger.warning.call_args
         assert kwargs["gateway_class"] == "https"
 
-    def test_publisher_success(self):
+    def test_publisher_success__svc1b_2(self):
         publisher = MagicMock()
         publisher.delete_from_gateway.return_value = True
         host = _GatewayHost(publisher=publisher)
@@ -1746,7 +1746,7 @@ class TestDeleteFromGateway:
         assert result.success is True
         host.logger.info.assert_called_once()
 
-    def test_publisher_unsuccessful_result(self):
+    def test_publisher_unsuccessful_result__svc1b_2(self):
         publisher = MagicMock()
         publisher.delete_from_gateway.return_value = False
         host = _GatewayHost(publisher=publisher)

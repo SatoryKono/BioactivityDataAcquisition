@@ -45,12 +45,12 @@ def _make_term_transformer() -> PublicationTermTransformer:
 
 
 class TestNormalizeXrefSource:
-    def test_non_string_returns_none(self) -> None:
+    def test_non_string_returns_none__pipelines_a_1(self) -> None:
         assert XrefHelper.normalize_xref_source(None) is None
         assert XrefHelper.normalize_xref_source(123) is None
         assert XrefHelper.normalize_xref_source(["PDB"]) is None
 
-    def test_blank_returns_none(self) -> None:
+    def test_blank_returns_none__pipelines_a_1(self) -> None:
         assert XrefHelper.normalize_xref_source("") is None
         assert XrefHelper.normalize_xref_source("   ") is None
         assert XrefHelper.normalize_xref_source("---") is None
@@ -66,11 +66,11 @@ class TestNormalizeXrefSource:
 
 
 class TestCleanPipeValue:
-    def test_non_string_returns_none(self) -> None:
+    def test_non_string_returns_none__pipelines_a_2(self) -> None:
         assert XrefHelper.clean_pipe_value(None) is None
         assert XrefHelper.clean_pipe_value(42) is None
 
-    def test_blank_returns_none(self) -> None:
+    def test_blank_returns_none__pipelines_a_2(self) -> None:
         assert XrefHelper.clean_pipe_value("") is None
         assert XrefHelper.clean_pipe_value("  ") is None
 
@@ -94,7 +94,7 @@ class TestAppendUniquePipeValue:
 
 
 class TestCollectComponentXrefs:
-    def test_none_and_empty(self) -> None:
+    def test_none_and_empty__pipelines_a_1(self) -> None:
         assert XrefHelper.collect_component_xrefs(None) == []
         assert XrefHelper.collect_component_xrefs([]) == []
 
@@ -183,13 +183,13 @@ class TestSynonymTargetField:
         assert SynonymHelper.synonym_target_field("") is None
         assert SynonymHelper.synonym_target_field("   ") is None
 
-    def test_known_types(self) -> None:
+    def test_known_types__pipelines_a_1(self) -> None:
         assert SynonymHelper.synonym_target_field("uniprot") == "target_protein_synonyms"
         assert SynonymHelper.synonym_target_field("EC_NUMBER") == "target_ec_numbers"
         assert SynonymHelper.synonym_target_field("gene_symbol") == "target_gene_synonyms"
         assert SynonymHelper.synonym_target_field("GENE_SYMBOL_HUMAN") == "target_gene_synonyms"
 
-    def test_unknown_returns_none(self) -> None:
+    def test_unknown_returns_none__pipelines_a_1(self) -> None:
         assert SynonymHelper.synonym_target_field("OTHER") is None
 
 

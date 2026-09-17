@@ -1452,7 +1452,7 @@ class TestCoerceRuntimeOverrideLayer:
         assert coerce_runtime_override_layer({}, "cli") == {}
         assert coerce_runtime_override_layer({"cli": None}, "cli") == {}
 
-    def test_non_mapping_raises(self):
+    def test_non_mapping_raises__svc1a_1(self):
         with pytest.raises(TypeError, match="runtime_overrides.cli must be a mapping"):
             coerce_runtime_override_layer({"cli": ["x"]}, "cli")
 
