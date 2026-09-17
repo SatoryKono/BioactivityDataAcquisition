@@ -1,12 +1,6 @@
 {
   "schema_version": 1,
   "linked_issue": "9602",
-<<<<<<< Updated upstream
-  "source_tree_sha256": "07879bbcf200faa8f3f75d16c47873a86fef7aaa5726b6dba7607a4b8bba2aeb",
-||||||| Stash base
-  "source_tree_sha256": "c6f9e2bdd310d1c634a84ba274da33f84c10ba73e597dcef31cdcf3b01bb98ed",
-=======
-  "source_tree_sha256": "49be9431c20c761e9ac7221a8527769bd351f7f4e6952382db83178baac29823",
->>>>>>> Stashed changes
+  "source_tree_sha256": "179023b5e16d838a54d71c6ca15b558f17d5bf62646540c5aa58a6a3f918fd25",
   "generated_from_manifest": true
 }
