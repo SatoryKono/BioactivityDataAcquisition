@@ -334,6 +334,7 @@ class TestBootstrapObservability:
                 "src/bioetl/composition/execution_api.py",
                 "src/bioetl/application/services/control_plane/evidence/service.py",
                 "src/bioetl/application/services/control_plane/evidence/service_support.py",
+                "src/bioetl/application/services/lineage/metadata_lineage_dataset_nodes.py",
             )
         ]
         assert offenders == [], (
