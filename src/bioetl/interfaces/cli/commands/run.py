@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, NoReturn
 import click
 
 from bioetl.interfaces.cli.commands._typed_option_values import (
+    option_or_default,
     optional_option,
     require_option,
 )
@@ -293,6 +294,9 @@ def _build_run_command_input_from_options(
         exact_replay=require_option(options, "exact_replay", bool),
         required_persistence_profile=optional_option(
             options, "required_persistence_profile", str
+        ),
+        no_control_plane_archive=option_or_default(
+            options, "no_control_plane_archive", False, bool
         ),
     )
 

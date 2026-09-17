@@ -1,11 +1,9 @@
 id,path,line,type,evidence,age,risk,blast_radius,effort,owner,priority
-AUD-TD-001,reports/quality/architecture-debt-remote-main-baseline.json,108,ci,remote-main pin 4aa9f5e7 vs origin/main 5c4243c9; gates 2465 vs inventory 2466,2026-09-14,stale_release_gate,debt-governance-gates,S,@bioetl-architecture,P2
-AUD-TD-002,configs/quality/lazy_import_ratchet.yaml,5,architecture,freeze lazy 77/77 private 15/15 config 27/419 fan-in 2+3 facades 4,linked_10303,change_cost,composition/application,L,@bioetl-architecture,P2
-AUD-TD-003,configs/quality/debt_scorecard.yaml,509,architecture,leftover factories files_ge_250_loc 2 vs live 0; core fan-in 7 vs 5,2026-09-14,leftover_cap,hotspot families,S,@bioetl-platform,P2
-AUD-TD-004,configs/quality/assertless_ratchet.yaml,5,tests,yaml max 87 vs live candidates 88; S9 max<=102 only,linked_9605,ratchet_gap,test-governance,M,@bioetl-architecture,P2
-AUD-TD-005,configs/quality/constructor_waivers.yaml,7,architecture,QuarantineEntry max_args=9 expiry 2026-12-31,ADR-051,local_freeze,domain aggregate,M,@bioetl-domain,P3
-AUD-TD-006,configs/quality/technical_debt_audit_registry.yaml,2,documentation,current audit SHA 09ab9ac vs origin/main 5c4243c9,2026-08-20,stale_register,total-tech-debt-audit,S,@bioetl-architecture,P3
-AUD-TD-007,reports/quality/debt-governance-gates.json,40,ci,budget_increase_count not_evaluated_without_changed_from_ref,2026-09-14,no_growth_proof_gap,scorecard freeze,S,@bioetl-architecture,P3
-AUD-TD-008,src/bioetl/interfaces/cli/commands/domains/health/_observability_backend_startup.py,124,code,83 type:ignore / 11 in health startup; 0 TODO/FIXME,2026-09-14,typing_suppression,CLI health,M,@bioetl-cli,P3
-AUD-TD-009,configs/quality/duplication_complexity_exemptions.yaml,14,architecture,15 xenon path exemptions expiry 2026-12-31,#5815,complexity_exemption,hot packages,L,@bioetl-architecture,P3
-AUD-TD-010,configs/quality/public_lazy_facade_inventory.yaml,5,architecture,lazy facades 52 review_by 2026-10-27; shims 2026-10-21,#6624,review_window,public API,S,@bioetl-architecture,P3
+TD-B105-01,src/bioetl/application/pipelines/chembl/molecule_transformer.py,64-65;82,security,dict keys full_molformula/ro3_pass opened,unknown,none,none,XS,unassigned,P3
+TD-B105-02,src/bioetl/domain/composite/cross_validation.py; src/bioetl/domain/types/dq_contracts.py; src/bioetl/domain/value_objects/dq_report_enums.py,41;19;19+27,security,PASS=pass enums opened,unknown,none,none,XS,unassigned,P3
+TD-B405-01,src/bioetl/application/pipelines/pubmed/transformer.py; src/bioetl/infrastructure/adapters/pubmed/xml_processor.py,149;37,security,defused_ET.fromstring opened,unknown,none,none,XS,unassigned,P3
+TD-01,src/bioetl/application/services/ops/observability_backend_startup.py,122-147,code,~70 type-ignore opened sample,unknown,medium,local,S,unassigned,P2
+TD-02,src/bioetl/application/core/transformer_runtime/__init__.py,4-21,architecture,noqa F403 re-exports,unknown,medium,medium,M,unassigned,P2
+TD-03,src/bioetl/application/services/execution/_pipeline_runner_support.py; src/bioetl/infrastructure/storage/silver/delta_write_execution.py,98;99-100,code,except Exception opened justified,unknown,low,local,XS,unassigned,P3
+TD-04 VARIOUS,src/bioetl (4 files),—,observability,NOSONAR with rationale,unknown,low,local,XS,unassigned,P3
+TD-05,src/bioetl/application/pipelines/pubmed/xml_parser.py,29-67,documentation,docstring ET.fromstring opened,unknown,low,local,XS,unassigned,P3

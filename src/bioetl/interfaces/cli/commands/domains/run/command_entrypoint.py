@@ -255,6 +255,14 @@ def _add_persistence_profile_options() -> CommandDecorator:
                 "Override the required control-plane persistence profile for this run"
             ),
         )(cmd)
+        cmd = click.option(
+            "--no-control-plane-archive",
+            is_flag=True,
+            default=False,
+            help=(
+                "Skip local control-plane archive pack creation after a successful run"
+            ),
+        )(cmd)
         return cmd
 
     return decorator

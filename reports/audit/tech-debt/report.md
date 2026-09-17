@@ -1,85 +1,43 @@
-# Technical debt audit (full)
+# Аудит технического долга — src/bioetl (full, MODE=audit)
 
-Дата: 2026-09-14
-`prompt_id`: `prompt.audit.tech-debt`
-`SCOPE`: `reports/quality/` `configs/quality/` `src/`
-`MODE`: audit · `AUDIT_MODE`: full · `LANGUAGE`: ru
-`REQUIRE_GH_TRACKING`: false
-База: `origin/main` = `5c4243c9adad87f4a8eb4a6b0228e4b65841810e`
+Дата: 2026-09-17. Язык: ru. Scope: src/bioetl. Режим: read-only (без патчей).
 
-`surface_score`: **2** (scorecard/gates работают, exemptions=0, integral 9.14; freeze на потолке, leftover caps, stale remote-main pin)
+## Итог
+- surface_score: 2 — основной долг контролируется, часть подавлений неформальна.
+- Проверено по заданию: nosec B105/B405 (были «только grep, тела не открыты») — тела открыты, вердикт ниже.
+- TODO/FIXME/HACK/XXX в src/bioetl поиском не найдены (пустая выдача).
+- Бюджет долга/качества не повышался. .env не трогался. Коммитов нет.
 
-## Метод
+## Резолюция B105 (hardcoded password — NOT_PROVEN как уязвимость)
+Открыты тела:
+- src/bioetl/application/pipelines/chembl/molecule_transformer.py:64-65,82 — ключи словарей `full_molformula`, `ro3_pass` (ChEMBL-названия полей), не пароли.
+- src/bioetl/domain/composite/cross_validation.py:41 — `PASS = "pass"` (CrossValidationVerdict), не credential.
+- src/bioetl/domain/types/dq_contracts.py:19 — `PASS = "pass"` (DQDisposition), не credential.
+- src/bioetl/domain/value_objects/dq_report_enums.py:19,27 — `PASS = "pass"` (DQCheckStatus, DQReportStatus), не credential.
+Вердикт: все 4 — ложноположительные срабатывания Bandit B105; `nosec B105` обоснован. Долг: шумные супрессии без централизованного exemption-реестра (P3).
 
-1. Регистры: `configs/quality/debt_scorecard.yaml`, ratchets, exemptions, constructor waivers, skip/assertless, shim/lazy inventories.
-2. Evidence: `reports/quality/debt-governance-gates.json`, `architecture-quality-scorecard.json`, `hotspot-family-baseline.json`, `module-coverage-inventory.json`, `architecture-debt-remote-main-baseline.json`, `test-governance-current.json`, `total-tech-debt-audit-main-current.md`.
-3. Сэмпл маркеров в `src/bioetl`: TODO/FIXME/HACK — 0; `type: ignore` / `noqa` / `pragma: no cover`.
-4. Тренд vs budgets: over / at / under. **REJECTED_POLICY:** любой рост max_count / exemptions / hotspot caps.
-5. Grafana/http WIP проигнорирован, кроме hash-only правки `module-coverage-inventory.json` в working tree.
+## Резолюция B405 (xml.etree — NOT_PROVEN как уязвимость)
+Открыты тела:
+- src/bioetl/application/pipelines/pubmed/transformer.py:10,13,149 — `import xml.etree.ElementTree as ET  # nosec B405` только для типов/ParseError; реальный парсинг `defused_ET.fromstring(raw_xml)` (строка 149) с обработкой EntitiesForbidden.
+- src/bioetl/infrastructure/adapters/pubmed/xml_processor.py:16,18,37 — аналогично: типы через ET, парсинг через `defused_ET.fromstring(xml_text)`.
+- src/bioetl/application/pipelines/pubmed/extractors/base.py:12 — только `from xml.etree.ElementTree import Element` для аннотаций, парсинга нет.
+- src/bioetl/application/pipelines/pubmed/xml_parser.py:11,29,34,59,64,67 — `ET.fromstring` только в docstring-примерах; продуктивного парсинга нет.
+Поиск `fromstring` по src/bioetl подтверждает: продуктивные вызовы только `defused_ET.fromstring` (2 места выше).
+Вердикт: XXE-уязвимости нет; `nosec B405` обоснован. Долг: ~14 супрессий B405 без реестра (P3); опция — алиас типа вместо импорта ET.
 
-## Тренд бюджетов (не предлагать повышение)
+## Прочий долг (с файловыми доказательствами)
+1. TD-01 (P2, code): концентрация `# type: ignore` (~70 совпадений поиском). Пример открыт: src/bioetl/application/services/ops/observability_backend_startup.py:122-147 — `hooks[...]` без типов, серия `type: ignore[operator]`. Blast radius: локальный; effort: S (ввести TypedDict/Protocol для hooks).
+2. TD-02 (P2, architecture): `noqa: F403` star-реэкспорты в фасадах (`application/core/transformer_runtime/__init__.py`, `application/core/field_transforms/__init__.py`, `application/pipelines/openalex/extractors.py` и др.). Blast radius: средний (публичные API); effort: M (явные __all__ уже частично есть).
+3. TD-03 (P3, code): широкие `except Exception` — открыты src/bioetl/application/services/execution/_pipeline_runner_support.py:98 (`_result_duration_seconds` → return None, безопасно) и src/bioetl/infrastructure/storage/silver/delta_write_execution.py:99-100 (thread boundary, с NOSONAR-обоснованием). Остальные ~11 мест не открыты — кандидаты, не доказанный долг.
+4. TD-04 (P3, observability): 4 `NOSONAR` с обоснованием (aggregation_filters.py:9, cross_validation.py:69, delta_write_execution.py:99, workflow_foreign_key_reconciliation_quarantine_keys.py:27) — приемлемо, но без реестра.
+5. TD-05 (P3, docs): docstring-примеры xml_parser используют незащищённый ET.fromstring — копипаст-риск; effort: XS (заменить на defusedxml в примерах).
 
-| Метрика | Live | Max | Target | Trend |
-| --- | ---: | ---: | ---: | --- |
-| architecture_metric_exemptions | 0 | 0 | 0 | at (Q3 met) |
-| ruff/mypy/arch skip | 0 | 0 | 0 | at |
-| transition/sunset/expired compat | 0/0/0 | 0 | 0 | at |
-| uncovered/unmeasured modules | 0/0 | 0 | 0 | at |
-| lazy_import | 77 | 77 | 60 | **at freeze** |
-| private_import pairs | 15 | 15 | shrink | **at freeze** |
-| config_count / unique_params | 27 / 419 | 27 / 419 | hold | **at freeze** |
-| control_plane fan-in | 2 | 2 | hold | **at freeze** |
-| runtime_builders fan-in | 3 | 3 | hold | **at freeze** |
-| public export facades | 4 | 4 | hold | **at freeze** |
-| composition modules | 295 | 300 | hold | under (5 slots) |
-| factories files_ge_250_loc | 0 | 2 | 0 | **leftover under** |
-| application_core fan-in | 5 | 7 | hold | leftover under |
-| bootstrap fan-in | 2 | 3 | hold | leftover under |
-| assertless_total_candidates | 88 | yaml 87 | 77 | **over yaml** |
-| refined_assertless_tests | 0 | 0 | 0 | at |
-| constructor waivers | 1 | shrink-only | 0 | at 1 |
-| supporting_scripts zero-ref | 0 | 0 | 0 | at |
-| flaky / uuid4 prod | 0 | 0 | 0 | at |
-| debt-governance-gates snapshot | 45 pass | — | — | committed pass; live dirty fail |
+## Top-20 / quick-wins vs strategic
+- Quick wins (XS/S): TD-05 (docstring), консолидация B105/B405-супрессий в реестр, типизация hooks (TD-01 частично).
+- Strategic (M): TD-02 (явные реэкспорты), типизация duck-type мест (TD-01 остаток).
+- Зависимостный долг: не выявлен в scope (defusedxml уже используется).
 
-Integral architecture quality: **9.14** (`good_targeted_improvements`). composition_di **6.0**. debt_burden **7.0**.
-
-## Findings (10 PROVEN, P0/P1 = 0)
-
-| ID | P | Наблюдение |
-| --- | --- | --- |
-| AUD-TD-001 | P2 | Stale remote-main pin 4aa9f5e7 vs origin/main 5c4243c9; gates snapshot 2465 vs inventory 2466 |
-| AUD-TD-002 | P2 | Freeze cluster at cap (lazy/private/config/fan-in/facades) |
-| AUD-TD-003 | P2 | Leftover hotspot caps (factories 2 vs live 0; core 7 vs 5; bootstrap 3 vs 2) |
-| AUD-TD-004 | P2 | assertless yaml 87 < live 88; S9 не сравнивает live |
-| AUD-TD-005 | P3 | Constructor waiver ×1 до 2026-12-31 |
-| AUD-TD-006 | P3 | Total-tech-debt registry SHA 09ab9ac vs HEAD 5c4243c9 |
-| AUD-TD-007 | P3 | Committed gates `budget_increase_count=not_evaluated_without_changed_from_ref` |
-| AUD-TD-008 | P3 | 83 `type: ignore` (hotspot health startup ×11); TODO/FIXME нет |
-| AUD-TD-009 | P3 | 15 xenon path exemptions, expiry 2026-12-31 |
-| AUD-TD-010 | P3 | Lazy facade / shim review_by 2026-10-27 / 2026-10-21 |
-
-Не считались долгом: 31 reviewed skip inventory (permanent_policy), grafana/http WIP, каждый TODO (их нет).
-
-## Live check
-
-Команда: `python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main`
-exit 1: `module_coverage_scorecard_coherence`, `generated_artifact_drift` (`architecture_quality_scorecard`).
-
-Причина fail: working tree сменил только `source_tree_sha256` в `module-coverage-inventory.json` (WIP http/grafana). HEAD-доказательство stale pin — AUD-TD-001.
-
-## Paydown (shrink-only)
-
-1. На чистом дереве re-pin remote-main baseline + gates `--update/--check --changed-from-ref origin/main`.
-2. Снять ≥1 assertless candidate, чтобы live ≤ 87; привязать S9 к live. **Не** поднимать yaml.
-3. Ratchet leftover: factories `files_ge_250_loc` 2→0; опционально core fan-in 7→5, bootstrap 3→2 при подтверждённом live.
-4. Live-shrink freeze cluster (lazy к 60, private pairs) до любой фичи на этих швах.
-5. Hygiene review shim/lazy до 2026-10-21/27; затем обновить total-tech-debt registry SHA.
-
-## REJECTED_POLICY
-
-- assertless `max_assertless_tests` 87→88
-- lazy 77, private 15, config 27/419, fan-in 2/3, facades 4
-- factories leftover держать 2 «на всякий случай»
-- новые architecture_metric_exemptions / constructor waivers
-- продление xenon expiry без сужения path_entries
+## Remediation (без повышения бюджетов)
+1. Завести реестр супрессий (nosec/NOSONAR/type-ignore) с owner и сроком пересмотра.
+2. TD-05: поправить docstring в xml_parser.py.
+3. TD-01: TypedDict для hooks в observability_backend_startup.py.

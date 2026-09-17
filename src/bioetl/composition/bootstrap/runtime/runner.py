@@ -7,6 +7,12 @@ from any orchestration layer (CLI, REST API, etc.).
 
 from __future__ import annotations
 
+from pathlib import Path
+
+from bioetl.application.observability.control_plane_archive import (
+    archive_successful_run,
+    resolve_control_plane_archive_root,
+)
 from bioetl.composition.bootstrap.runtime.run_status import create_run_status_capture
 
 from bioetl.application.services.execution.pipeline_run_context_service import (
@@ -63,6 +69,9 @@ def bootstrap_pipeline_runner_service(
     """
 
     settings = get_settings()
+    archive_root = resolve_control_plane_archive_root(
+        Path(settings.archive_root) if settings.archive_root is not None else None
+    )
     service_run_id = create_runtime_occurrence_run_id("pipeline_runner_service")
     observability = bootstrap_observability_bundle(
         pipeline="pipeline_runner_service",
@@ -78,7 +87,18 @@ def bootstrap_pipeline_runner_service(
     return PipelineRunnerService(
         report_store=FileRunReportStoreAdapter(),
         report_root=settings.report_root,
-        capture_control_plane=create_run_status_capture(settings.data_dir),
+        capture_control_plane=create_run_status_capture(
+            settings.data_dir,
+            archive_root=archive_root,
+            report_root=settings.report_root,
+        ),
+        archive_control_plane=lambda result, options: archive_successful_run(
+            result=result,
+            options=options,
+            data_root=Path(settings.data_dir),
+            archive_root=archive_root,
+            report_root=settings.report_root,
+        ),
         runner_factory=runner_factory,
         metrics_extractor=metrics_extractor,
         logger=observability.logger,

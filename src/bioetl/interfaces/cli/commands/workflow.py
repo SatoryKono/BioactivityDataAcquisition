@@ -209,6 +209,12 @@ def workflow() -> None:
     help="Override the debug-export root directory for workflow pipeline steps",
 )
 @typed_click_option(
+    "--no-control-plane-archive",
+    is_flag=True,
+    default=False,
+    help="Skip local control-plane archive pack creation after successful pipeline steps",
+)
+@typed_click_option(
     "--resume-last",
     is_flag=True,
     help="Resume the latest incomplete or failed execution for this workflow",

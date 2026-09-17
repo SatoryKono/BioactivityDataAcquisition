@@ -83,6 +83,7 @@ class WorkflowRunOptionsSchema(BaseModel):
     debug_export_formats: list[str] | None = None
     debug_export_dir: str | None = None
     workflow_id: str | None = None
+    no_control_plane_archive: bool | None = None
 
     def to_domain(self) -> WorkflowRunOptionsConfig:
         """Convert validated overrides into immutable domain config."""
@@ -132,6 +133,7 @@ class WorkflowRunOptionsSchema(BaseModel):
             ),
             debug_export_dir=self.debug_export_dir,
             workflow_id=self.workflow_id,
+            no_control_plane_archive=self.no_control_plane_archive,
         )
 
 
