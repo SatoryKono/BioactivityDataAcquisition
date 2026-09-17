@@ -6,6 +6,8 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Literal
 
+from bioetl.application.observability.reason_aliases import display_reason
+
 EvidenceStatus = Literal["OK", "WARNING", "ERROR", "UNKNOWN"]
 TrustStatus = Literal["OK", "WARNING", "ERROR", "INCOMPLETE"]
 ProcessingStatus = Literal["success", "failed", "shutdown", "unknown"]
@@ -35,6 +37,7 @@ class EvidenceCheckResult:
             "check": self.check,
             "status": self.status,
             "reason": self.reason,
+            "reason_display": display_reason(self.reason),
             "detail": self.detail,
         }
 

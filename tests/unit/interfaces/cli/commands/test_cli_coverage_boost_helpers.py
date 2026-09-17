@@ -909,7 +909,7 @@ def test_backend_process_helpers_cover_listener_parsing_and_detached_start(
     monkeypatch.setattr(
         backend_process,
         "_build_detached_backend_env",
-        lambda: {"PYTHONPATH": "src"},
+        lambda current_env: {"PYTHONPATH": "src"},
     )
 
     def _fake_popen(command, **kwargs):
@@ -921,6 +921,7 @@ def test_backend_process_helpers_cover_listener_parsing_and_detached_start(
         bind_host="127.0.0.1",
         port=7777,
         python_executable="python-custom",
+        current_env={},
         popen_factory=_fake_popen,
     )
 
