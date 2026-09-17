@@ -587,9 +587,16 @@ def test_main_uses_workspace_root_for_generated_server_paths(
         assert qodo_payload["mcpServers"]["filesystem"]["args"][0].endswith(".sh")
     assert not REMOVED_FULL_PROFILE_SERVERS.intersection(servers)
     assert not REMOVED_FULL_PROFILE_SERVERS.intersection(gemini_settings["mcpServers"])
+    # The tracked .mcp.json intentionally drops Codex-only
+    # startup_timeout_sec (Muse rejects unknown fields), so correlate the
+    # Gemini timeout against the canonical inventory instead.
+    canonical_servers = setup_mcp._apply_shared_transport(
+        setup_mcp._canonical_servers(workspace_root, profile="full"),
+        transport_mode="stdio",
+    )
     for server_name, gemini_server in gemini_settings["mcpServers"].items():
         assert "startup_timeout_sec" not in gemini_server
-        startup_timeout = servers[server_name].get("startup_timeout_sec")
+        startup_timeout = canonical_servers[server_name].get("startup_timeout_sec")
         if startup_timeout is None:
             assert "timeout" not in gemini_server
         else:
@@ -699,12 +706,13 @@ def test_main_uses_workspace_root_for_generated_server_paths(
     assert servers["deepwiki"]["type"] == "streamable-http"
     assert servers["ref"]["type"] == "streamable-http"
     assert servers["ref"]["url"] == "https://api.ref.tools/mcp"
-    # Tracked portable JSON must stay Muse-parseable: every entry is optional
-    # so one failing server cannot fault the whole file (mcp.startup
-    # fail-closed "MCP configuration error ...; MCP is disabled" otherwise).
+    # Tracked portable JSON must stay Muse-parseable: Codex-only fields
+    # (mode, startup_timeout_sec, env_http_headers) are stripped by
+    # _apply_tracked_json_compat, otherwise Muse fails the whole file
+    # closed ("MCP configuration error ...; MCP is disabled").
     assert servers
     for server_name, server in servers.items():
-        assert server["mode"] == "optional", server_name
+        assert "mode" not in server, server_name
     assert zed_payload["mcpServers"] == servers
     assert (
         gemini_settings["mcpServers"]["ref"]["httpUrl"] == "https://api.ref.tools/mcp"

@@ -208,6 +208,7 @@ def test_trust_query_failure_has_displayable_row_without_claiming_run_evidence(
         "processing_status": "UNKNOWN",
         "trust_status": "QUERY ERROR",
         "reasons_text": f"{reason}; Trust not evaluated. Retry the query.",
+        "reasons_display": f"{reason}; Trust not evaluated. Retry the query.",
         "reasons_count": 1,
         "evidence_observed_at": None,
         "evidence_freshness": "unavailable",

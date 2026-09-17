@@ -66,6 +66,9 @@ ALLOWED_USES: dict[str, set[str]] = {
     "SonarSource/sonarqube-scan-action": {
         "fd88b7d7ccbaefd23d8f36f73b59db7a3d246602",
     },
+    "anomalyco/opencode/github": {
+        "77fc88c8ade8e5a620ebbe1197f3a572d29ae91a",  # latest as of 2026-09-17
+    },
     "anchore/sbom-action": {
         "e22c389904149dbc22b58101806040fa8d37a610",  # v0.24.0
     },
