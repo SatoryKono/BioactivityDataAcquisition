@@ -865,16 +865,16 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "duration_seconds"
+              "options": "Duration"
             },
             "properties": [
               {
                 "id": "unit",
-                "value": "s"
+                "value": "none"
               },
               {
                 "id": "custom.width",
-                "value": 85
+                "value": 140
               },
               {
                 "id": "noValue",
@@ -986,7 +986,7 @@
                 "pipeline",
                 "workflow_id",
                 "run_id",
-                "duration_seconds",
+                "duration_display",
                 "event_age_display",
                 "status",
                 "report_label",
@@ -1007,7 +1007,7 @@
               "pipeline": 2,
               "workflow_id": 3,
               "run_id": 4,
-              "duration_seconds": 5,
+              "duration_display": 5,
               "status": 7,
               "report_label": 8,
               "report_url": 9,
@@ -1022,7 +1022,7 @@
               "pipeline": "Pipeline",
               "workflow_id": "Workflow",
               "run_id": "Run",
-              "duration_seconds": "Duration",
+              "duration_display": "Duration",
               "status": "Status",
               "report_label": "Report",
               "event_age_display": "Event age"

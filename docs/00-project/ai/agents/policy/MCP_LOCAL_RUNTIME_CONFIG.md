@@ -29,7 +29,7 @@ This policy applies to:
 
 | Surface | Tracked on `main` | Runtime class | Notes |
 | --- | --- | --- | --- |
-| `.mcp.json` | yes | tracked exact-root workspace MCP entrypoint | generated from `scripts/ai/codex/setup_mcp.py`; MUST stay repo-relative and must not embed machine-local absolute paths; tracked JSON projection stays Muse-parseable (`type: streamable-http` for remotes, `"mode": "optional"` on every server) while preserving Codex-only `env_http_headers` names |
+| `.mcp.json` | yes | tracked exact-root workspace MCP entrypoint | generated from `scripts/ai/codex/setup_mcp.py`; MUST stay repo-relative and must not embed machine-local absolute paths; tracked JSON projection stays Muse-parseable by keeping only the Agent Plugins entry vocabulary (`type`/`command`/`args`/`env`/`cwd`/`url`/`headers`, `streamable-http` for remotes, exact `$schema`) while Codex-only `mode`, `startup_timeout_sec`, and `env_http_headers` are stripped by `_apply_tracked_json_compat` (sibling projections translate them per consumer) |
 | `scripts/ai/.mcp.json` | yes | tracked workspace MCP mirror | generated with the same portable payload as `.mcp.json` for AI runtime/script consumers |
 | `.zed/mcp.json` | yes | tracked Zed workspace MCP mirror | generated with the same portable payload as `.mcp.json` |
 | `.codex/settings.json` | no | local-only/generated runtime config | may exist in local checkouts; ignored by `.gitignore`; may contain machine-local absolute paths |

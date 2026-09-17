@@ -59,9 +59,12 @@ not imply zero accounting.
 
 Find Run ID filters by exact UUID before the ten-row limit, within the selected
 Workflow/Pipeline/Run Type. Clearing it restores the recent list. Duration uses
-persisted start/completion timestamps. Event age uses the last ledger event
-only for running launches; missing or future timestamps stay UNKNOWN. Neither
-file mtime nor scrape time can substitute for event evidence.
+persisted start/completion timestamps and the same compact duration as Event
+age (`10 s`, `1 m 30 s`, `16 h 53 m`). Missing start or end stays UNKNOWN;
+running is not a live elapsed timer. Event age uses the last ledger event
+only for running launches. Terminal launches show `completed` for Event age.
+Missing or future timestamps stay UNKNOWN. Neither file mtime nor scrape time
+can substitute for event evidence.
 
 ## Empty and failure states
 

@@ -228,37 +228,44 @@ def test_local_http_server_rejects_non_localhost_url() -> None:
 
 
 def test_tracked_json_compat_projection_is_muse_parseable() -> None:
-    """Tracked trio must use Muse's transport vocabulary with optional mode."""
+    """Tracked trio keeps only the Agent Plugins entry vocabulary Muse loads.
+
+    Muse Code fails the whole project file closed (``MCP configuration error
+    ...; MCP is disabled for this runtime``) when an entry carries a field
+    outside its bundled schema, so Codex-only ``mode``,
+    ``startup_timeout_sec``, and ``env_http_headers`` must not reach the trio.
+    """
     canonical = {
-        "memory": {"command": "bash", "args": ["x.sh"]},
+        "memory": {
+            "command": "bash",
+            "args": ["x.sh"],
+            "startup_timeout_sec": 120,
+            "mode": "required",
+        },
         "ref": {
             "type": "http",
             "url": "https://api.ref.tools/mcp",
             "env_http_headers": {"x-ref-api-key": "REF_TOOL_API_KEY"},
             "startup_timeout_sec": 120,
+            "mode": "optional",
         },
     }
     projected = setup_mcp._apply_tracked_json_compat(canonical)
-    # Input is not mutated; stdio entries keep their shape plus optional mode.
-    assert canonical["memory"] == {"command": "bash", "args": ["x.sh"]}
-    assert projected["memory"] == {
+    # Input is not mutated; stdio entries keep their shape minus Codex fields.
+    assert canonical["memory"] == {
         "command": "bash",
         "args": ["x.sh"],
-        "mode": "optional",
+        "startup_timeout_sec": 120,
+        "mode": "required",
     }
+    assert projected["memory"] == {"command": "bash", "args": ["x.sh"]}
     # Remote entries move to the Muse transport name; Codex-only header names
-    # stay for the TOML writer and the shared-plane materializer.
-    assert projected["ref"]["type"] == "streamable-http"
-    assert projected["ref"]["url"] == "https://api.ref.tools/mcp"
-    assert projected["ref"]["env_http_headers"] == {
-        "x-ref-api-key": "REF_TOOL_API_KEY"
+    # are dropped (the TOML writer and sibling projections still translate
+    # them from the canonical inventory per consumer).
+    assert projected["ref"] == {
+        "type": "streamable-http",
+        "url": "https://api.ref.tools/mcp",
     }
-    assert projected["ref"]["mode"] == "optional"
-    # An explicitly set mode is respected, never overwritten.
-    keep = setup_mcp._apply_tracked_json_compat(
-        {"memory": {"command": "bash", "mode": "required"}}
-    )
-    assert keep["memory"]["mode"] == "required"
 
 
 def test_shared_endpoints_sync_with_catalog() -> None:

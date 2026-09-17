@@ -342,6 +342,21 @@ def _local_http_server(url: str, *, startup_timeout_sec: int = 30) -> dict[str, 
     }
 
 
+# Exact Agent Plugins 1.0.0 MCP schema Muse Code requires the tracked
+# project-level JSON to declare (fail-closed when absent or mismatched).
+MUSE_TRACKED_MCP_SCHEMA_URL = (
+    "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json"
+)
+
+# Only vocabulary Muse's strict project-file loader accepts per MCP entry.
+# Anything outside this set (Codex ``mode``, ``startup_timeout_sec``,
+# ``env_http_headers``, ...) faults the whole file closed
+# (``MCP configuration error ...; MCP is disabled for this runtime``).
+_TRACKED_JSON_ALLOWED_ENTRY_FIELDS = frozenset(
+    {"type", "command", "args", "env", "cwd", "url", "headers"}
+)
+
+
 def _apply_tracked_json_compat(
     servers: dict[str, dict[str, Any]],
 ) -> dict[str, dict[str, Any]]:
@@ -350,26 +365,31 @@ def _apply_tracked_json_compat(
     The tracked trio (``.mcp.json``, ``scripts/ai/.mcp.json``, ``.zed/mcp.json``)
     is loaded directly by Muse Code as a project-level ``mcpServers`` map, and
     Muse fails the whole file closed (``MCP configuration error ...; MCP is
-    disabled for this runtime``) when a required entry does not match its
-    loader:
+    disabled for this runtime``) when an entry carries a field outside its
+    bundled Agent Plugins 1.0.0 schema:
 
-    * remote transport must be ``streamable-http`` — Muse only knows ``stdio``
-      and ``streamable_http``, so the canonical Codex ``http`` alias is
-      rewritten for the tracked JSON only (local IDE/Codex projections keep
-      the Codex alias they already understand);
-    * every entry carries ``"mode": "optional"`` so a single failing server is
-      skipped instead of faulting the entire MCP surface.
-
-    Codex-only ``env_http_headers`` (env *names*, never values) is preserved:
-    the Codex TOML writer and the shared-plane materializer derive credentials
-    from it, and sibling projections (Gemini ``headers``, Devin ``headers``)
-    already translate it per consumer.
+    * remote transport must be ``streamable-http`` — the canonical Codex
+      ``http`` alias is rewritten for the tracked JSON only (local IDE/Codex
+      projections keep the Codex alias they already understand);
+    * Codex-only ``mode``, ``startup_timeout_sec``, and ``env_http_headers``
+      are dropped: Muse's project loader rejects unknown entry fields, has no
+      ``${VAR}`` indirection for headers, and tracked files must never embed
+      literal secrets. Remote SaaS auth stays out of the tracked payload
+      (``ref`` supports ``muse mcp login`` OAuth; ``deepwiki`` is reachable
+      unauthenticated). Sibling projections (Gemini ``headers``, Devin
+      ``headers``, Codex TOML) keep translating ``env_http_headers`` from the
+      canonical inventory per consumer.
     """
-    projected = deepcopy(servers)
-    for server in projected.values():
-        if server.get("type") == "http":
-            server["type"] = "streamable-http"
-        server.setdefault("mode", "optional")
+    projected: dict[str, dict[str, Any]] = {}
+    for name, server in servers.items():
+        entry = {
+            key: deepcopy(value)
+            for key, value in server.items()
+            if key in _TRACKED_JSON_ALLOWED_ENTRY_FIELDS
+        }
+        if entry.get("type") == "http":
+            entry["type"] = "streamable-http"
+        projected[name] = entry
     return projected
 
 
@@ -746,11 +766,15 @@ def _write_configs(
         transport_mode=transport_mode,
     )
     portable_servers = _apply_tracked_json_compat(full_servers)
-    codex_payload = {"mcpServers": deepcopy(portable_servers)}
+    tracked_payload = {
+        "$schema": MUSE_TRACKED_MCP_SCHEMA_URL,
+        "mcpServers": deepcopy(portable_servers),
+    }
+    codex_payload = deepcopy(tracked_payload)
     vscode_payload = {"servers": deepcopy(local_servers)}
     cursor_payload = {"mcpServers": deepcopy(local_servers)}
     qodo_payload = {"mcpServers": deepcopy(local_servers)}
-    zed_payload = {"mcpServers": deepcopy(portable_servers)}
+    zed_payload = deepcopy(tracked_payload)
 
     mcp_path = output_root / DOT_MCP_JSON_FILENAME
     scripts_ai_mcp_path = output_root / "scripts" / "ai" / DOT_MCP_JSON_FILENAME
@@ -1308,7 +1332,10 @@ def _render_portable_mcp_payload(workspace_root: Path) -> dict[str, Any]:
         profile="full",
         wrapper_platform="posix",
     )
-    return {"mcpServers": _apply_tracked_json_compat(full_servers)}
+    return {
+        "$schema": MUSE_TRACKED_MCP_SCHEMA_URL,
+        "mcpServers": _apply_tracked_json_compat(full_servers),
+    }
 
 
 def _render_devin_mcp_payload(workspace_root: Path) -> dict[str, Any]:
