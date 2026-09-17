@@ -342,6 +342,37 @@ def _local_http_server(url: str, *, startup_timeout_sec: int = 30) -> dict[str, 
     }
 
 
+def _apply_tracked_json_compat(
+    servers: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    """Project canonical servers onto the tracked portable JSON shape.
+
+    The tracked trio (``.mcp.json``, ``scripts/ai/.mcp.json``, ``.zed/mcp.json``)
+    is loaded directly by Muse Code as a project-level ``mcpServers`` map, and
+    Muse fails the whole file closed (``MCP configuration error ...; MCP is
+    disabled for this runtime``) when a required entry does not match its
+    loader:
+
+    * remote transport must be ``streamable-http`` — Muse only knows ``stdio``
+      and ``streamable_http``, so the canonical Codex ``http`` alias is
+      rewritten for the tracked JSON only (local IDE/Codex projections keep
+      the Codex alias they already understand);
+    * every entry carries ``"mode": "optional"`` so a single failing server is
+      skipped instead of faulting the entire MCP surface.
+
+    Codex-only ``env_http_headers`` (env *names*, never values) is preserved:
+    the Codex TOML writer and the shared-plane materializer derive credentials
+    from it, and sibling projections (Gemini ``headers``, Devin ``headers``)
+    already translate it per consumer.
+    """
+    projected = deepcopy(servers)
+    for server in projected.values():
+        if server.get("type") == "http":
+            server["type"] = "streamable-http"
+        server.setdefault("mode", "optional")
+    return projected
+
+
 def _apply_shared_transport(
     servers: dict[str, dict[str, Any]],
     *,
@@ -714,11 +745,12 @@ def _write_configs(
         ),
         transport_mode=transport_mode,
     )
-    codex_payload = {"mcpServers": deepcopy(full_servers)}
+    portable_servers = _apply_tracked_json_compat(full_servers)
+    codex_payload = {"mcpServers": deepcopy(portable_servers)}
     vscode_payload = {"servers": deepcopy(local_servers)}
     cursor_payload = {"mcpServers": deepcopy(local_servers)}
     qodo_payload = {"mcpServers": deepcopy(local_servers)}
-    zed_payload = {"mcpServers": deepcopy(full_servers)}
+    zed_payload = {"mcpServers": deepcopy(portable_servers)}
 
     mcp_path = output_root / DOT_MCP_JSON_FILENAME
     scripts_ai_mcp_path = output_root / "scripts" / "ai" / DOT_MCP_JSON_FILENAME
@@ -1265,14 +1297,18 @@ def _resolve_local_check_selection(
 
 
 def _render_portable_mcp_payload(workspace_root: Path) -> dict[str, Any]:
-    """Canonical tracked portable inventory (full profile, POSIX wrappers)."""
+    """Canonical tracked portable inventory (full profile, POSIX wrappers).
+
+    Applies the tracked-JSON compat projection so ``--check`` enforces the
+    same Muse-parseable shape that ``_write_configs`` materializes.
+    """
     full_servers = _canonical_servers(
         workspace_root,
         portable_workspace_paths=True,
         profile="full",
         wrapper_platform="posix",
     )
-    return {"mcpServers": deepcopy(full_servers)}
+    return {"mcpServers": _apply_tracked_json_compat(full_servers)}
 
 
 def _render_devin_mcp_payload(workspace_root: Path) -> dict[str, Any]:

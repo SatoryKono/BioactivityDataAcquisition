@@ -227,6 +227,40 @@ def test_local_http_server_rejects_non_localhost_url() -> None:
         setup_mcp._local_http_server("https://evil.example/mcp")
 
 
+def test_tracked_json_compat_projection_is_muse_parseable() -> None:
+    """Tracked trio must use Muse's transport vocabulary with optional mode."""
+    canonical = {
+        "memory": {"command": "bash", "args": ["x.sh"]},
+        "ref": {
+            "type": "http",
+            "url": "https://api.ref.tools/mcp",
+            "env_http_headers": {"x-ref-api-key": "REF_TOOL_API_KEY"},
+            "startup_timeout_sec": 120,
+        },
+    }
+    projected = setup_mcp._apply_tracked_json_compat(canonical)
+    # Input is not mutated; stdio entries keep their shape plus optional mode.
+    assert canonical["memory"] == {"command": "bash", "args": ["x.sh"]}
+    assert projected["memory"] == {
+        "command": "bash",
+        "args": ["x.sh"],
+        "mode": "optional",
+    }
+    # Remote entries move to the Muse transport name; Codex-only header names
+    # stay for the TOML writer and the shared-plane materializer.
+    assert projected["ref"]["type"] == "streamable-http"
+    assert projected["ref"]["url"] == "https://api.ref.tools/mcp"
+    assert projected["ref"]["env_http_headers"] == {
+        "x-ref-api-key": "REF_TOOL_API_KEY"
+    }
+    assert projected["ref"]["mode"] == "optional"
+    # An explicitly set mode is respected, never overwritten.
+    keep = setup_mcp._apply_tracked_json_compat(
+        {"memory": {"command": "bash", "mode": "required"}}
+    )
+    assert keep["memory"]["mode"] == "required"
+
+
 def test_shared_endpoints_sync_with_catalog() -> None:
     """MCP_SHARED_SERVER_ENDPOINTS must match shared-servers.json ports/paths."""
     catalog_path = (
@@ -655,8 +689,16 @@ def test_main_uses_workspace_root_for_generated_server_paths(
     assert servers["mutmut"]["env"]["MUTMUT_PROJECT_PATH"] == "."
     assert servers["code-analyzer"]["env"]["PROJECT_PATH"] == "."
     assert servers["deepwiki"]["url"] == "https://mcp.deepwiki.com/mcp"
-    assert servers["ref"]["type"] == "http"
+    assert servers["deepwiki"]["type"] == "streamable-http"
+    assert servers["ref"]["type"] == "streamable-http"
     assert servers["ref"]["url"] == "https://api.ref.tools/mcp"
+    # Tracked portable JSON must stay Muse-parseable: every entry is optional
+    # so one failing server cannot fault the whole file (mcp.startup
+    # fail-closed "MCP configuration error ...; MCP is disabled" otherwise).
+    assert servers
+    for server_name, server in servers.items():
+        assert server["mode"] == "optional", server_name
+    assert zed_payload["mcpServers"] == servers
     assert (
         gemini_settings["mcpServers"]["ref"]["httpUrl"] == "https://api.ref.tools/mcp"
     )

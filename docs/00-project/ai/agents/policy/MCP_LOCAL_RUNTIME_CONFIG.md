@@ -29,7 +29,7 @@ This policy applies to:
 
 | Surface | Tracked on `main` | Runtime class | Notes |
 | --- | --- | --- | --- |
-| `.mcp.json` | yes | tracked exact-root workspace MCP entrypoint | generated from `scripts/ai/codex/setup_mcp.py`; MUST stay repo-relative and must not embed machine-local absolute paths |
+| `.mcp.json` | yes | tracked exact-root workspace MCP entrypoint | generated from `scripts/ai/codex/setup_mcp.py`; MUST stay repo-relative and must not embed machine-local absolute paths; tracked JSON projection stays Muse-parseable (`type: streamable-http` for remotes, `"mode": "optional"` on every server) while preserving Codex-only `env_http_headers` names |
 | `scripts/ai/.mcp.json` | yes | tracked workspace MCP mirror | generated with the same portable payload as `.mcp.json` for AI runtime/script consumers |
 | `.zed/mcp.json` | yes | tracked Zed workspace MCP mirror | generated with the same portable payload as `.mcp.json` |
 | `.codex/settings.json` | no | local-only/generated runtime config | may exist in local checkouts; ignored by `.gitignore`; may contain machine-local absolute paths |
@@ -207,7 +207,10 @@ Rules:
 
 1. Tracked `.mcp.json` / `scripts/ai/.mcp.json` / `.zed/mcp.json` remain the
    portable **full** inventory SSOT unless a separate reviewed change says
-   otherwise.
+   otherwise. They MUST stay loadable by the Muse strict project-file loader
+   (fail-closed on the first required entry that mismatches): the generator
+   applies the tracked-JSON compat projection (`_apply_tracked_json_compat`)
+   and `--check` enforces it byte-exact.
 2. Tracked `.devin/mcp_config.json` keeps the **full** sanctioned set (shared
    HTTP). `.devin/mcp_config.local.json` may disable optional servers for daily
    use. Profiles filter **local IDE** projections (`.cursor/mcp.json`,

@@ -79,7 +79,10 @@ repo root or replace `args` with absolute paths):
 Extension servers (`brave-search`, `deepwiki`, `ref`, `mermaid`,
 `adr-analysis`, `code-analyzer`, `prometheus`, `grafana`, `neo4j-*`,
 `docker`, `mutmut`, `code-interpreter`, `github-actions`) follow the same
-shape — see `.mcp.json`. Remote servers needing keys (`DEEPWIKI_API_KEY`,
+shape — see `.mcp.json`. The tracked file is generated Muse-parseable by
+`scripts/ai/codex/setup_mcp.py`: every entry carries `"mode": "optional"`
+so one failing server cannot disable all of MCP, and remote entries use
+`"type": "streamable-http"`. Remote servers needing keys (`DEEPWIKI_API_KEY`,
 `REF_TOOL_API_KEY`, GitHub tokens from `.env`) are added only after the user
 supplies the values; placeholders are never written. The shared-localhost
 HTTP projection (ports `8813`–`8828`, `transport_mode: shared`) is an
