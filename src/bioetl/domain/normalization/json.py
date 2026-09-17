@@ -223,18 +223,36 @@ def _should_convert_as_sequence(value: object) -> bool:
     return isinstance(value, Sequence) and not _is_primitive_sequence(value)
 
 
-def to_jsonable(value: object) -> object:
-    """Convert nested dataclasses, datetimes, and mappings into JSON-safe values."""
+def _convert_special_types(value: object) -> object | None:
+    """Convert special types (datetime, DQDisposition) if applicable."""
     if isinstance(value, datetime):
         return _convert_datetime(value)
     if isinstance(value, DQDisposition):
         return _convert_dq_disposition(value)
+    return None
+
+
+def _convert_complex_types(value: object) -> object | None:
+    """Convert complex types (dataclass, mapping, sequence) if applicable."""
     if is_dataclass(value) and not isinstance(value, type):
         return _convert_dataclass(value)
     if isinstance(value, Mapping):
         return _convert_mapping(value)
     if _should_convert_as_sequence(value):
         return _convert_sequence(value)
+    return None
+
+
+def to_jsonable(value: object) -> object:
+    """Convert nested dataclasses, datetimes, and mappings into JSON-safe values."""
+    converted = _convert_special_types(value)
+    if converted is not None:
+        return converted
+
+    converted = _convert_complex_types(value)
+    if converted is not None:
+        return converted
+
     return value
 
 
