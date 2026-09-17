@@ -106,8 +106,6 @@ def _is_current_flag_value(value: object) -> bool:
         return True
     if value is False or value is None:
         return False
-    if isinstance(value, bool):
-        return value
     if isinstance(value, (int, float)):
         return value == 1
     if isinstance(value, str):

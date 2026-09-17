@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.filterable_mixin import (
@@ -18,10 +18,19 @@ if TYPE_CHECKING:
 _PUBLICATION_ONLY_ERROR = "PubMedAdapter only supports 'publication'"
 
 
-async def empty_async_iterator() -> AsyncIterator[BronzeRecord]:
+class _EmptyBronzeAsyncIterator:
+    """Empty BronzeRecord stream used when PubMed has nothing to yield."""
+
+    def __aiter__(self) -> _EmptyBronzeAsyncIterator:
+        return self
+
+    async def __anext__(self) -> BronzeRecord:
+        raise StopAsyncIteration
+
+
+def empty_async_iterator() -> AsyncIterator[BronzeRecord]:
     """Return an empty async iterator matching BronzeRecord stream contract."""
-    for record in cast(tuple[BronzeRecord, ...], ()):
-        yield record
+    return _EmptyBronzeAsyncIterator()
 
 
 class PubMedAdapterFilterFetchHost(Protocol):

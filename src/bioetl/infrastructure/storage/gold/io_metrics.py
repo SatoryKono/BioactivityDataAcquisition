@@ -30,8 +30,6 @@ def _split_gold_merged_table_label(table_name: str) -> tuple[str, str]:
     if not normalized:
         return "unknown", "unknown"
     parts = [part for part in normalized.split("/") if part]
-    if not parts:
-        return "unknown", "unknown"
     if len(parts) >= 2:
         pipeline, table = parts[0], parts[-1]
     elif "." in parts[0]:

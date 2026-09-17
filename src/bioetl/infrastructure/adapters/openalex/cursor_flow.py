@@ -128,8 +128,6 @@ class OpenAlexCursorFlow:
         found = 0
         effective_titles = titles[:limit] if limit is not None else titles
         for title in effective_titles:
-            if limit is not None and fetched >= limit:
-                break
             if not title or not title.strip():
                 continue
             results = await self.search_by_title(title, limit=1)
