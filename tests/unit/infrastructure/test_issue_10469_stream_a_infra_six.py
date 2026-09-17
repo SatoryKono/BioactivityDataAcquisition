@@ -15,7 +15,9 @@ from bioetl.infrastructure.adapters.chembl._entity_mapping_lookup import (
     is_known_entity_type,
 )
 from bioetl.infrastructure.adapters.chembl.entity_mapper import ChemblEntityMapper
-from bioetl.infrastructure.adapters.chembl.fetch_paging_mixin import ChemblFetchPagingMixin
+from bioetl.infrastructure.adapters.chembl.fetch_paging_mixin import (
+    ChemblFetchPagingMixin,
+)
 from bioetl.infrastructure.adapters.common.composable_fallback import (
     _get_optional_str_attr,
 )
@@ -26,7 +28,7 @@ from bioetl.infrastructure.adapters.crossref._client_ops import (
 from bioetl.infrastructure.adapters.crossref._client_port_surface import (
     _CrossRefPortSurfaceMixin,
 )
-from bioetl.infrastructure.adapters.crossref.client import CrossRefAdapter
+from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
 from bioetl.infrastructure.adapters.crossref.query_builder import (
     validate_crossref_entity_type,
 )
@@ -46,7 +48,7 @@ from bioetl.infrastructure.adapters.openalex.health_adapter_mixin import (
 from bioetl.infrastructure.adapters.pubchem._client_fetch_surface import (
     _PubChemClientFetchMixin,
 )
-from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
+from bioetl.infrastructure.adapters.pubchem import PubChemAdapter
 from bioetl.infrastructure.adapters.pubmed._fetch import PubMedFetchMixin
 from bioetl.infrastructure.adapters.pubmed.adapter_filter_fetch_mixin import (
     PubMedAdapterFilterFetchMixin,
@@ -78,7 +80,9 @@ class _OpenAlexFetchHost(OpenAlexAdapterFilterFetchMixin):
 
 class _PagingHost(ChemblFetchPagingMixin):
     def __init__(self) -> None:
-        self._mapper = SimpleNamespace(get_resource_url=lambda _entity: "https://x/activity")
+        self._mapper = SimpleNamespace(
+            get_resource_url=lambda _entity: "https://x/activity"
+        )
 
     def _build_params(self, offset: int, entity_type: str) -> dict[str, int]:
         del offset, entity_type
@@ -239,7 +243,9 @@ async def test_openalex_filter_flow_query_and_health_aclose() -> None:
     assert queried == [{"query": "kinase", "limit": 2}]
 
     fetch_host = _OpenAlexFetchHost()
-    by_query = [row async for row in fetch_host._fetch_by_query(query="kinase", limit=1)]
+    by_query = [
+        row async for row in fetch_host._fetch_by_query(query="kinase", limit=1)
+    ]
     assert by_query == [{"id": "oa"}]
 
     http = SimpleNamespace(closed=False)
@@ -310,7 +316,10 @@ def test_pubmed_xml_parse_error_and_entity_lookup() -> None:
     assert is_known_entity_type("activity") is True
     assert ChemblEntityMapper.is_known_entity("activity") is True
     assert ChemblEntityMapper.is_known_entity("unknown_entity") is False
-    assert _get_optional_str_attr(SimpleNamespace(name=None), "name", "fallback") == "fallback"
+    assert (
+        _get_optional_str_attr(SimpleNamespace(name=None), "name", "fallback")
+        == "fallback"
+    )
 
     request = httpx.Request("GET", "https://example.test")
     response = httpx.Response(503, request=request)
@@ -346,7 +355,9 @@ async def test_pubmed_fetch_parse_error_limit_and_filter_mixin(
             self.http_client = SimpleNamespace(
                 get=AsyncMock(return_value=SimpleNamespace(text="<<<"))
             )
-            self._error_handler = SimpleNamespace(handle_error=lambda **_k: RuntimeError("x"))
+            self._error_handler = SimpleNamespace(
+                handle_error=lambda **_k: RuntimeError("x")
+            )
 
     fetch_host = _FetchHost()
     assert await fetch_host._fetch_batch(["1"]) == []
@@ -356,7 +367,9 @@ async def test_pubmed_fetch_parse_error_limit_and_filter_mixin(
         return [{"pmid": "1"}, {"pmid": "2"}]
 
     fetch_host._fetch_batch = _batch  # type: ignore[method-assign]
-    limited = [row async for row in fetch_host._yield_articles_from_pmids(["1", "2"], limit=1)]
+    limited = [
+        row async for row in fetch_host._yield_articles_from_pmids(["1", "2"], limit=1)
+    ]
     assert limited == [{"pmid": "1"}]
 
     async def _records(*_args: object, **_kwargs: object):
@@ -380,7 +393,7 @@ async def test_pubmed_fetch_parse_error_limit_and_filter_mixin(
 
 
 def test_chembl_client_request_helpers_delegate() -> None:
-    from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+    from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 
     host = SimpleNamespace(
         _mapper=MagicMock(),
@@ -390,9 +403,12 @@ def test_chembl_client_request_helpers_delegate() -> None:
     assert ChemblAdapter._build_filter_in_params(host, {"a": ["1", "2"]}) == {  # type: ignore[arg-type]
         "a__in": "1,2"
     }
-    assert ChemblAdapter._get_projected_url_length(  # type: ignore[arg-type]
-        host, "https://example.test/x", {"limit": 1}
-    ) > 0
+    assert (
+        ChemblAdapter._get_projected_url_length(  # type: ignore[arg-type]
+            host, "https://example.test/x", {"limit": 1}
+        )
+        > 0
+    )
     seen: set[str] = set()
     duplicate = ChemblAdapter._is_duplicate_record_composite(  # type: ignore[arg-type]
         host,
@@ -402,10 +418,13 @@ def test_chembl_client_request_helpers_delegate() -> None:
         "activity",
     )
     assert duplicate is False
-    assert ChemblAdapter._is_duplicate_record_composite(  # type: ignore[arg-type]
-        host,
-        {"activity_id": "A1"},
-        ("activity_id",),
-        seen,
-        "activity",
-    ) is True
+    assert (
+        ChemblAdapter._is_duplicate_record_composite(  # type: ignore[arg-type]
+            host,
+            {"activity_id": "A1"},
+            ("activity_id",),
+            seen,
+            "activity",
+        )
+        is True
+    )

@@ -42,10 +42,21 @@ from bioetl.application.services.workflow.workflow_runner_reports import (
     _require_workflow_result,
     attach_workflow_run_report,
 )
-from bioetl.domain.workflow import TransformStepConfig, WorkflowConfig, WorkflowStepConfig
-from bioetl.infrastructure.storage.run_report_store_adapter import FileRunReportStoreAdapter
+from bioetl.domain.workflow import (
+    TransformStepConfig,
+    WorkflowConfig,
+    WorkflowStepConfig,
+)
 
 pytestmark = pytest.mark.unit
+
+
+def _file_run_report_store() -> object:
+    from bioetl.infrastructure.storage.run_report_store_adapter import (
+        FileRunReportStoreAdapter,
+    )
+
+    return FileRunReportStoreAdapter()
 
 
 def test_forensic_diff_to_dict_and_compare_scopes() -> None:
@@ -86,7 +97,9 @@ def test_forensic_diff_to_dict_and_compare_scopes() -> None:
         manifest_port=MagicMock(),
         inspection_service_factory=lambda: inspection,
     ).compare("left", "right")
-    assert no_port.artifact_byte_equivalence["comparison_scope"] == "unavailable_no_port"
+    assert (
+        no_port.artifact_byte_equivalence["comparison_scope"] == "unavailable_no_port"
+    )
 
     empty_show = SimpleNamespace(
         manifest=SimpleNamespace(manifest_id="left", run_id="run-left"),
@@ -144,7 +157,7 @@ def test_artifact_ref_semantic_diff_branches() -> None:
 
 
 def test_run_report_query_load_list_diff_prune(tmp_path: Path) -> None:
-    store = FileRunReportStoreAdapter()
+    store = _file_run_report_store()
     assert load_latest_pointer(kind="pipeline", owner="missing", store=store) is None
 
     bad_pointer = tmp_path / "pipeline" / "broken" / "_latest.json"
@@ -188,7 +201,9 @@ def test_run_report_query_load_list_diff_prune(tmp_path: Path) -> None:
     wf_dir = tmp_path / "workflow" / "nightly" / "wf-1"
     wf_dir.mkdir(parents=True)
     wf_report = wf_dir / "workflow-run-report.json"
-    wf_report.write_text(json.dumps({"identity": {"status": "success"}}), encoding="utf-8")
+    wf_report.write_text(
+        json.dumps({"identity": {"status": "success"}}), encoding="utf-8"
+    )
     (tmp_path / "workflow" / "nightly" / "_latest.json").write_text(
         json.dumps({"json_path": str(wf_report)}), encoding="utf-8"
     )
@@ -242,7 +257,7 @@ def test_run_report_query_load_list_diff_prune(tmp_path: Path) -> None:
 def test_list_reports_skips_unreadable_mtime(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    store = FileRunReportStoreAdapter()
+    store = _file_run_report_store()
     run_dir = tmp_path / "pipeline" / "chembl_assay" / "run-1"
     run_dir.mkdir(parents=True)
     (run_dir / "pipeline-run-report.json").write_text("{}", encoding="utf-8")
@@ -273,7 +288,7 @@ def test_workflow_runner_reports_helpers(tmp_path: Path) -> None:
     with pytest.raises(TypeError):
         _require_workflow_result(object())
 
-    store = FileRunReportStoreAdapter()
+    store = _file_run_report_store()
     assert _load_child_report_slice(None, store=store) == ((), None)
     assert _load_child_report_slice(str(tmp_path / "missing.json"), store=store) == (
         (),

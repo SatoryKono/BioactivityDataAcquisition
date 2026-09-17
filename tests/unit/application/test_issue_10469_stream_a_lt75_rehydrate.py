@@ -25,9 +25,16 @@ from bioetl.application.observability.rehydrate_models import (
     WorkflowRunSnapshot,
 )
 from bioetl.application.services.run_reports.query import ReportIndexEntry
-from bioetl.infrastructure.storage.run_report_store_adapter import FileRunReportStoreAdapter
 
 pytestmark = pytest.mark.unit
+
+
+def _file_run_report_store() -> object:
+    from bioetl.infrastructure.storage.run_report_store_adapter import (
+        FileRunReportStoreAdapter,
+    )
+
+    return FileRunReportStoreAdapter()
 
 
 def _pipeline_report(
@@ -86,13 +93,14 @@ def test_reset_and_persisted_unix() -> None:
     reset_rehydrate_seed_state()
     assert _persisted_unix("", 12.5) == 12.5
     assert _persisted_unix("not-iso", 9.0) == 9.0
-    assert _persisted_unix("2026-01-01T00:00:00+00:00", 0.0) == datetime(
-        2026, 1, 1, tzinfo=UTC
-    ).timestamp()
+    assert (
+        _persisted_unix("2026-01-01T00:00:00+00:00", 0.0)
+        == datetime(2026, 1, 1, tzinfo=UTC).timestamp()
+    )
 
 
 def test_anchor_rejects_invalid_payloads(tmp_path: Path) -> None:
-    store = FileRunReportStoreAdapter()
+    store = _file_run_report_store()
     missing = ReportIndexEntry(
         kind="pipeline",
         owner="chembl_assay",
@@ -130,15 +138,13 @@ def test_anchor_rejects_invalid_payloads(tmp_path: Path) -> None:
         ),
         encoding="utf-8",
     )
-    running_entry = replace(
-        missing, json_path=running, run_id="r1", status="running"
-    )
+    running_entry = replace(missing, json_path=running, run_id="r1", status="running")
     assert _anchor_from_report_entry(running_entry, store=store) is None
 
 
 def test_collect_and_rehydrate(tmp_path: Path) -> None:
     reset_rehydrate_seed_state()
-    store = FileRunReportStoreAdapter()
+    store = _file_run_report_store()
     _pipeline_report(tmp_path, pipeline="chembl_assay", run_id="older")
     _pipeline_report(tmp_path, pipeline="chembl_assay", run_id="newer")
     _pipeline_report(

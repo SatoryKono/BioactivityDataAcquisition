@@ -24,10 +24,14 @@ from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 from bioetl.infrastructure.adapters.chembl._client_request_helpers import (
     check_duplicate_record,
 )
-from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
-from bioetl.infrastructure.adapters.crossref._doi_batch_processor import DoiBatchProcessor
-from bioetl.infrastructure.adapters.crossref.client import CrossRefAdapter
-from bioetl.infrastructure.adapters.decorators._retry_operations import retry_health_check
+from bioetl.infrastructure.adapters.chembl import ChemblAdapter
+from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
+from bioetl.infrastructure.adapters.crossref._doi_batch_processor import (
+    DoiBatchProcessor,
+)
+from bioetl.infrastructure.adapters.decorators._retry_operations import (
+    retry_health_check,
+)
 from bioetl.infrastructure.adapters.decorators._retry_support import (
     default_retry_config,
     is_retryable_exception,
@@ -36,8 +40,10 @@ from bioetl.infrastructure.adapters.openalex.cursor_flow import OpenAlexCursorFl
 from bioetl.infrastructure.adapters.pubchem._fetch_strategy_identifiers import (
     _PubChemIdentifierFetchMixin,
 )
-from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
-from bioetl.infrastructure.adapters.pubmed._filter_fetch_support import empty_async_iterator
+from bioetl.infrastructure.adapters.pubchem import PubChemAdapter
+from bioetl.infrastructure.adapters.pubmed._filter_fetch_support import (
+    empty_async_iterator,
+)
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
 from bioetl.infrastructure.adr.fs_adr_service import FilesystemAdrCatalog
 from bioetl.infrastructure.config._base import _get_pipeline_config_root
@@ -48,7 +54,9 @@ from bioetl.infrastructure.config.chembl_policy_registry_loader import (
 from bioetl.infrastructure.config.publication_controlled_vocabulary_loader import (
     PublicationControlledVocabularyLoader,
 )
-from bioetl.infrastructure.config.reason_catalog_loader import load_default_reason_catalog
+from bioetl.infrastructure.config.reason_catalog_loader import (
+    load_default_reason_catalog,
+)
 from bioetl.infrastructure.control_plane.file_workflow_execution_state_store import (
     FileWorkflowExecutionStateStore,
 )
@@ -81,7 +89,9 @@ from bioetl.infrastructure.quarantine.filtered_read_support import (
     _matches_values_filter,
     _parse_time_bound,
 )
-from bioetl.infrastructure.schemas._composite_config_merge_schema import MergeSortBySchema
+from bioetl.infrastructure.schemas._composite_config_merge_schema import (
+    MergeSortBySchema,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -160,7 +170,9 @@ def test_anomaly_detector_inf_inf_baseline() -> None:
     assert anomaly.baseline_stddev == 0.0
 
 
-def test_find_posix_listener_pids_when_ss_found(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_find_posix_listener_pids_when_ss_found(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setattr(
         "bioetl.infrastructure.observability.observability_backend_process._resolve_system_executable",
         lambda _cmd: "/usr/bin/ss",
@@ -196,7 +208,9 @@ async def test_empty_async_iterator_yields_nothing() -> None:
     assert [row async for row in empty_async_iterator()] == []
 
 
-def test_pipeline_config_root_explicit(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_pipeline_config_root_explicit(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     seen: list[Path] = []
 
     def _resolve(path: Path | None = None) -> Path:
@@ -428,7 +442,9 @@ async def test_doi_batch_processor_runtime_fallback() -> None:
     processor = DoiBatchProcessor(
         http=SimpleNamespace(get=AsyncMock(return_value=None)),
         logger=MagicMock(),
-        metrics=SimpleNamespace(measure_request=lambda *_a, **_k: __import__("contextlib").nullcontext()),
+        metrics=SimpleNamespace(
+            measure_request=lambda *_a, **_k: __import__("contextlib").nullcontext()
+        ),
         mailto="a@b.c",
         api_base="https://api.crossref.org",
         headers_fn=lambda: {},
@@ -448,9 +464,15 @@ async def test_doi_batch_processor_runtime_fallback() -> None:
 
 
 def test_crossref_fallback_decorator_missing(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(CrossRefAdapter, "_bootstrap_dataclass_http_adapter", lambda self: None)
-    monkeypatch.setattr(CrossRefAdapter, "_bind_fallback_fetch_service", lambda self, _svc: None)
-    monkeypatch.setattr(CrossRefAdapter, "configure_fallback_policy", lambda self, _policy: None)
+    monkeypatch.setattr(
+        CrossRefAdapter, "_bootstrap_dataclass_http_adapter", lambda self: None
+    )
+    monkeypatch.setattr(
+        CrossRefAdapter, "_bind_fallback_fetch_service", lambda self, _svc: None
+    )
+    monkeypatch.setattr(
+        CrossRefAdapter, "configure_fallback_policy", lambda self, _policy: None
+    )
     monkeypatch.setattr(
         "bioetl.infrastructure.adapters.crossref.client.build_crossref_runtime_services",
         lambda **_kwargs: SimpleNamespace(
@@ -515,8 +537,7 @@ async def test_openalex_doi_batch_limit_inner_return(
 
     monkeypatch.setattr(OpenAlexCursorFlow, "iter_by_dois", _iter_by_dois)
     rows = [
-        row
-        async for row in flow.iter_doi_batches_for_fallback(["a", "b"], limit=1)
+        row async for row in flow.iter_doi_batches_for_fallback(["a", "b"], limit=1)
     ]
     assert rows == [{"doi": "a"}]
 
@@ -567,7 +588,9 @@ def test_pubchem_adapter_requires_request_collector() -> None:
         pool.shutdown(wait=False)
 
 
-def test_fs_adr_service_skips_when_text_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_fs_adr_service_skips_when_text_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     catalog = FilesystemAdrCatalog()
     monkeypatch.setattr(
         "bioetl.infrastructure.adr.fs_adr_service.validate_filename",
@@ -624,14 +647,22 @@ def test_filtered_read_support_non_str_and_naive_timestamp() -> None:
 def test_filtered_record_empty_rows(monkeypatch: pytest.MonkeyPatch) -> None:
     from bioetl.infrastructure.quarantine import filtered_reads
 
-    monkeypatch.setattr(filtered_reads, "DeltaTable", lambda *_args, **_kwargs: object())
+    monkeypatch.setattr(
+        filtered_reads, "DeltaTable", lambda *_args, **_kwargs: object()
+    )
     monkeypatch.setattr(
         filtered_reads,
         "_load_scoped_pyarrow_table",
-        lambda *_args, **_kwargs: SimpleNamespace(to_pylist=lambda: [{"payload_hash": "x"}]),
+        lambda *_args, **_kwargs: SimpleNamespace(
+            to_pylist=lambda: [{"payload_hash": "x"}]
+        ),
     )
-    monkeypatch.setattr(filtered_reads, "_build_run_type_lookup", lambda *_args, **_kwargs: {})
-    monkeypatch.setattr(filtered_reads, "_iter_filtered_rows", lambda *_args, **_kwargs: [])
+    monkeypatch.setattr(
+        filtered_reads, "_build_run_type_lookup", lambda *_args, **_kwargs: {}
+    )
+    monkeypatch.setattr(
+        filtered_reads, "_iter_filtered_rows", lambda *_args, **_kwargs: []
+    )
     assert (
         filtered_reads.get_filtered_record(
             "table",
