@@ -168,7 +168,9 @@ async def test_retry_fetch_does_not_restart_after_emit_and_opens_circuit(
 
 
 @pytest.mark.asyncio
-async def test_retry_health_check_retries_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_retry_health_check_retries_timeout(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     states = {"n": 0}
 
     async def _health() -> object:
@@ -418,7 +420,12 @@ def test_governance_validation_reports_structural_errors() -> None:
     )
 
     errors: list[str] = []
-    assert _validate_governance_section({}, baseline_registry_names=set(), group_names=set(), errors=errors) is False
+    assert (
+        _validate_governance_section(
+            {}, baseline_registry_names=set(), group_names=set(), errors=errors
+        )
+        is False
+    )
     assert "governance: required mapping" in errors
 
     errors = []
@@ -448,7 +455,10 @@ def test_governance_validation_reports_structural_errors() -> None:
     assert any("growth_section_gate_rollout" in item for item in errors)
     assert _burn_down_priority_registries(raw) == {"hotspot"}
     assert _burn_down_priority_registries({"governance": "x"}) == set()
-    assert _burn_down_priority_registries({"governance": {"burn_down_priorities": []}}) == set()
+    assert (
+        _burn_down_priority_registries({"governance": {"burn_down_priorities": []}})
+        == set()
+    )
 
     errors = []
     _validate_governance_section(
@@ -519,4 +529,3 @@ def test_governance_validation_reports_structural_errors() -> None:
     assert any("stale cutoff" in item for item in errors)
     assert any("duplicate hotspot name" in item for item in errors)
     assert any("missing coverage" in item for item in errors)
-
