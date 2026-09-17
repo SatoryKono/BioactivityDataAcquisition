@@ -7,6 +7,9 @@ import argparse
 import json
 from pathlib import Path
 
+from bioetl.application.services.control_plane.manifest.diagnostics import (
+    build_diagnostics_summary,
+)
 from bioetl.application.services.control_plane.replay.historical_certification_service import (
     HistoricalReplayCertificationService,
 )
@@ -136,6 +139,7 @@ def main() -> int:
             entry_id_factory=lambda: create_runtime_occurrence_id(
                 "historical_replay_certification_ledger_entry"
             ),
+            summary_builder=build_diagnostics_summary,
         ),
     )
     universe_service = HistoricalReplayUniverseService(

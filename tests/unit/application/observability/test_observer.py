@@ -905,6 +905,37 @@ class TestObserverHealthCheckEvents:
             },
         )
 
+    def test_cached_bronze_does_not_publish_provider_health(
+        self, metrics_mock, logger_mock, run_id
+    ) -> None:
+        observer = PipelineObserver(
+            pipeline_name="test_pipeline",
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            metrics=metrics_mock,
+            logger=logger_mock,
+        )
+        observer.emit_health_check_result(
+            component="data_source",
+            healthy=True,
+            duration_ms=5.0,
+            provider="chembl",
+            fallback_reason="cached_bronze_api_not_exercised",
+            health_status="HEALTHY",
+        )
+        provider_calls = [
+            call
+            for call in metrics_mock.set_gauge.call_args_list
+            if call.args and call.args[0] == "bioetl_provider_health_status"
+        ]
+        assert provider_calls == []
+        fallback_calls = [
+            call
+            for call in metrics_mock.increment_counter.call_args_list
+            if call.args and call.args[0] == "bioetl_probe_mode_fallback_total"
+        ]
+        assert fallback_calls == []
+
 
 class TestObserverDQEvents:
     """Tests for data quality anomaly event emission."""

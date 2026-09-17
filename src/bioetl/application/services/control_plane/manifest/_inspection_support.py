@@ -4,9 +4,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane.manifest.identity_graph_assembly import (
-    RunManifestIdentityGraphAssembler,
-)
 from bioetl.domain.control_plane import RunManifest
 
 if TYPE_CHECKING:
@@ -15,17 +12,6 @@ if TYPE_CHECKING:
     )
 
 _OCCURRENCE_ONLY_DIFF_FIELDS = frozenset({"manifest_id", "run_id", "created_at"})
-
-
-class RunManifestInspectionIdentityGraphMixin:
-    """Build operator-facing identity graph payloads for inspection output."""
-
-    @staticmethod
-    def _build_identity_graph(
-        manifest: RunManifest,
-        diagnostics: dict[str, object],
-    ) -> dict[str, object]:
-        return RunManifestIdentityGraphAssembler.build(manifest, diagnostics)
 
 
 class RunManifestInspectionDiffClassificationMixin:

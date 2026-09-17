@@ -41,6 +41,9 @@ from bioetl.application.services.control_plane.replay.historical_corpus_service 
     HistoricalReplayBulkCertificationSpec,
     HistoricalReplayCorpusService,
 )
+from bioetl.application.services.control_plane.manifest.diagnostics import (
+    build_diagnostics_summary,
+)
 from bioetl.application.services.control_plane.replay.historical_certification_service import (
     HistoricalReplayCertificationService,
     HistoricalReplaySnapshotCertification,
@@ -126,6 +129,7 @@ def test_inventory_distinguishes_pending_and_certified_historical_records() -> N
             manifest_port=manifest_store,
             ledger_port=ledger_store,
             entry_id_factory=_corpus_entry_id_factory("entry-corpus-certification"),
+            summary_builder=build_diagnostics_summary,
         ),
     )
 
@@ -159,6 +163,7 @@ def test_bulk_certification_orders_source_before_composite_and_closes_inventory(
             manifest_port=manifest_store,
             ledger_port=ledger_store,
             entry_id_factory=_corpus_entry_id_factory("entry-corpus-closure"),
+            summary_builder=build_diagnostics_summary,
         ),
     )
 

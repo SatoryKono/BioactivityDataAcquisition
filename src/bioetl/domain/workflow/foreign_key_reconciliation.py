@@ -11,6 +11,7 @@ __all__ = [
     "ForeignKeyReconciliationMutationMode",
     "ForeignKeyReconciliationRequest",
     "ForeignKeyReconciliationResult",
+    "ReferenceCompletenessStatus",
     "normalize_layer",
     "normalize_request_layers",
     "normalize_source_run_ids",
@@ -26,6 +27,7 @@ __all__ = [
 
 ForeignKeyReconciliationLayer = Literal["silver", "gold"]
 ForeignKeyReconciliationAction = Literal["delete_orphans"]
+ReferenceCompletenessStatus = Literal["complete", "unproven"]
 ForeignKeyReconciliationMutationMode = Literal[
     "unknown",
     "delete_orphans",
@@ -189,6 +191,10 @@ class ForeignKeyReconciliationRequest:
     source_layer: ForeignKeyReconciliationLayer = "silver"
     reference_layer: ForeignKeyReconciliationLayer = "silver"
     mutation_layer: ForeignKeyReconciliationLayer | None = None
+    reference_completeness: ReferenceCompletenessStatus = "unproven"
+    reference_identity: str | None = None
+    reference_snapshot_version: str | None = None
+    completeness_evidence_ref: str | None = None
 
     def __post_init__(self) -> None:
         require_non_empty_str(self.source_table, "source_table")
@@ -222,6 +228,25 @@ class ForeignKeyReconciliationRequest:
             "source_run_ids",
             normalize_source_run_ids(self.source_run_ids),
         )
+        completeness = str(self.reference_completeness).strip().lower()
+        if completeness not in {"complete", "unproven"}:
+            raise ValueError(
+                "reference_completeness must be 'complete' or 'unproven', "
+                f"got {self.reference_completeness!r}"
+            )
+        object.__setattr__(self, "reference_completeness", completeness)
+        require_optional_str(self.reference_identity, "reference_identity")
+        require_optional_str(
+            self.reference_snapshot_version, "reference_snapshot_version"
+        )
+        require_optional_str(self.completeness_evidence_ref, "completeness_evidence_ref")
+        if completeness == "complete" and (
+            self.reference_identity is None or self.completeness_evidence_ref is None
+        ):
+            raise ValueError(
+                "reference_completeness='complete' requires reference_identity "
+                "and completeness_evidence_ref"
+            )
 
     @property
     def effective_source_keys(self) -> tuple[str, ...]:
@@ -259,6 +284,9 @@ class ForeignKeyReconciliationResult:
     quarantine_rows_written: int = 0
     quarantine_error_code: str | None = None
     source_snapshot: dict[str, int] | None = None
+    mutation_blocked_reason: str | None = None
+    unproven_unmatched_rows: int = 0
+    reference_completeness: ReferenceCompletenessStatus = "unproven"
     _: KW_ONLY
     source_layer: ForeignKeyReconciliationLayer = "silver"
     reference_layer: ForeignKeyReconciliationLayer = "silver"

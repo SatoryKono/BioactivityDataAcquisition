@@ -41,7 +41,7 @@ from bioetl.application.services.control_plane import RunLedgerService
 from bioetl.application.services.control_plane.manifest.diagnostics import (
     build_diagnostics_summary,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.base_effective_config_diagnostics import (
+from bioetl.application.services.control_plane.manifest.diagnostics.base import (
     _build_effective_config_diagnostics,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections import (
@@ -57,7 +57,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.base_replay_
 from bioetl.application.services.control_plane.manifest.diagnostics.operator_replay_mode import (
     _resolve_operator_replay_mode,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_status import (
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection import (
     _resolve_snapshot_status,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.source_posture import (
@@ -943,6 +943,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
             "reproducibility_audit_score",
             "reproducibility_diagnostics",
             "replay_capability_assessment",
+            "identity_graph",
         }
     }
     assert summary_without_score == _expected_provenance_only_summary_without_score(
@@ -1434,7 +1435,7 @@ def _assert_required_operator_identity_graph(
             build_published_silver_artifact(
                 artifact_path="data/output/silver/chembl/activity",
                 include_dataset_ref=True,
-                include_artifact_id=False,
+                include_artifact_id=True,
                 publication_status="published",
             )
         ],

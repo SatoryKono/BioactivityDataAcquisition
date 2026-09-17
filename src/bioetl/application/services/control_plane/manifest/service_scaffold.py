@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Protocol
 
-from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
+from bioetl.domain.context_time import resolve_manifest_created_at
 
 __all__ = ["ManifestServiceScaffoldMixin"]
 
@@ -23,11 +23,10 @@ def _resolve_manifest_created_at(
     clock: ManifestClockProtocol | None,
     created_at_factory: Callable[[], datetime] | None,
 ) -> datetime:
-    if clock is not None:
-        return clock.now()
-    if created_at_factory is not None:
-        return created_at_factory()
-    return MISSING_RUNTIME_TIMESTAMP
+    return resolve_manifest_created_at(
+        clock=clock,
+        created_at_factory=created_at_factory,
+    )
 
 
 def _missing_manifest_id_factory() -> str:

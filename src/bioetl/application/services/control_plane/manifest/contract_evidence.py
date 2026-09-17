@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.models import (
-    RunManifestCreateSpec,
-)
+from typing import Protocol
+
 from bioetl.domain.ports import ContractEvidenceRecorderPort
 
 CONTRACT_EVIDENCE_SCHEMA_VERSION = "contract_evidence_v1"
@@ -12,10 +11,20 @@ CONTRACT_EVIDENCE_SCHEMA_VERSION = "contract_evidence_v1"
 __all__ = [
     "CONTRACT_EVIDENCE_SCHEMA_VERSION",
     "ContractEvidenceRecorderPort",
-    "RunManifestCreateSpec",
     "build_contract_evidence",
     "build_runtime_contract_evidence",
 ]
+
+
+class _ContractEvidenceRequest(Protocol):
+    @property
+    def launch_context(self) -> dict[str, object]: ...
+
+    @property
+    def contract_ref(self) -> str | None: ...
+
+    @property
+    def contract_schema_hash(self) -> str | None: ...
 
 
 def build_runtime_contract_evidence(
@@ -63,7 +72,7 @@ def build_runtime_contract_evidence(
     }
 
 
-def build_contract_evidence(request: RunManifestCreateSpec) -> dict[str, object]:
+def build_contract_evidence(request: _ContractEvidenceRequest) -> dict[str, object]:
     """Derive comparison/resume evidence from create inputs without lock claims."""
     lock_owner = request.launch_context.get("lock_owner_id")
     owner = lock_owner.strip() if isinstance(lock_owner, str) else None

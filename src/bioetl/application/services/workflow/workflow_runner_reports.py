@@ -73,20 +73,29 @@ def _pipeline_name_for_step(
     return None
 
 
-def _load_child_top_reasons(report_ref: object, *, store: RunReportStorePort) -> object:
-    """Best-effort load of reason rows at the application filesystem boundary."""
+def _load_child_report_slice(
+    report_ref: object, *, store: RunReportStorePort
+) -> tuple[object, int | None]:
+    """Load child reasons and exact gold-exclusion counters from a report file."""
     if not isinstance(report_ref, str) or not report_ref:
-        return ()
+        return (), None
     try:
         path = Path(report_ref)
         if not store.is_file(str(path)):
-            return ()
+            return (), None
         payload = json.loads(store.read_text(str(path)))
     except (OSError, json.JSONDecodeError, TypeError, ValueError):
-        return ()
+        return (), None
     if not isinstance(payload, Mapping):
-        return ()
-    return payload.get("reasons_top_n") or ()
+        return (), None
+    reasons = payload.get("reasons_top_n") or ()
+    layers = payload.get("layers")
+    excluded: int | None = None
+    if isinstance(layers, Mapping):
+        raw_excluded = layers.get("gold_excluded_by_contract")
+        if isinstance(raw_excluded, int):
+            excluded = raw_excluded
+    return reasons, excluded
 
 
 def _execution_rows_from_result(
@@ -105,6 +114,7 @@ def _execution_rows_from_result(
             if payload is not None
             else None
         )
+        top_reasons, gold_excluded = _load_child_report_slice(report_ref, store=store)
         execution_rows.append(
             {
                 "step_id": step.step_id,
@@ -117,7 +127,8 @@ def _execution_rows_from_result(
                 "child_run_id": step.child_run_id,
                 "child_manifest_id": step.child_manifest_id,
                 "pipeline_report_ref": report_ref,
-                "top_reasons": _load_child_top_reasons(report_ref, store=store),
+                "top_reasons": top_reasons,
+                "gold_excluded_by_contract": gold_excluded,
                 "error_type": step.error_type,
                 "error_message": step.error_message,
             }

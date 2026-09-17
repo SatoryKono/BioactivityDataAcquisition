@@ -55,6 +55,9 @@ def _emit_lineage_fragment_metric(
 
 def _lineage_fragment_preflight_error(fragment: LineageGraphFragment) -> str | None:
     """Return a stable publish-time reason when a fragment is not closed."""
+    fragment_id = str(fragment.fragment_id or "").strip()
+    if fragment_id.lower() in {"bronze", "silver", "gold"}:
+        return f"layer_alias_fragment_id:{fragment_id.lower()}"
     node_ids = {node.node_id for node in fragment.nodes}
     dangling = sorted(
         {

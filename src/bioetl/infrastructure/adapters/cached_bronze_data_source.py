@@ -21,6 +21,7 @@ import asyncio
 from types import TracebackType
 from typing import TYPE_CHECKING, Self
 
+from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.infrastructure.adapters._cached_bronze_support import (
@@ -94,6 +95,7 @@ class CachedBronzeDataSource:
             entity_type=entity_type,
         )
         self._bronze_date = bronze_date
+        self.source_health_kind = "cached_bronze"
 
     @property
     def provider_name(self) -> str:
@@ -115,15 +117,23 @@ class CachedBronzeDataSource:
         await asyncio.sleep(0)
 
     async def health_check(self) -> HealthStatus:
-        """Check health of the cached Bronze data source.
+        """Check local cached-Bronze files only.
 
-        Always returns HEALTHY since this is a local file-based source.
+        Does not probe the remote provider. Preflight must not map this
+        HEALTHY result onto ``bioetl_provider_health_status``.
 
         Returns:
             The HealthStatus result.
         """
         await asyncio.sleep(0)
         return HealthStatus.HEALTHY
+
+    def get_source_metadata(self) -> SourceMetadata:
+        """Declare this fetch as cached-Bronze consumption, not a live API occurrence."""
+        return SourceMetadata(
+            type="cached_bronze",
+            file_path=str(self._reader.base_path),
+        )
 
     async def aclose(self) -> None:
         """Close the data source (no-op for file-based source)."""

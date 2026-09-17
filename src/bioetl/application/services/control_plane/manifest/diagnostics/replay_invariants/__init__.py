@@ -4,7 +4,6 @@ from __future__ import annotations
 
 __all__: list[str] = [
     "checkpoint_policy",
-    "nested_mapping",
     "replay_blockers",
     "replay_family",
     "replay_family_context",

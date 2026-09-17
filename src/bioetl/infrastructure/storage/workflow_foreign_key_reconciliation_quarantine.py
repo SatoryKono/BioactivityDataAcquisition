@@ -39,6 +39,7 @@ from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_quarantin
     VALID_TO_COLUMNS,
     build_orphan_key_rows,
     require_sql_identifier,
+    resolve_mutation_identity_keys,
     resolve_present_column,
 )
 
@@ -123,13 +124,21 @@ async def delete_silver_orphan_rows(
     primary_keys = tuple(
         require_sql_identifier(key, "primary_keys") for key in request.primary_keys
     )
+    identity_keys = tuple(
+        require_sql_identifier(key, "identity_keys")
+        for key in resolve_mutation_identity_keys(
+            orphan_rows,
+            primary_keys,
+            source_scope=request.source_scope,
+        )
+    )
     key_rows = build_orphan_key_rows(
         orphan_rows,
-        primary_keys,
+        identity_keys,
         operation="Silver foreign-key reconciliation cannot delete",
     )
     merge_condition = " AND ".join(
-        f"target.{key} = source.{key}" for key in primary_keys
+        f"target.{key} = source.{key}" for key in identity_keys
     )
     await asyncio.to_thread(
         _delete_silver_orphan_rows_once,
@@ -186,6 +195,14 @@ async def expire_gold_orphan_rows(
     primary_keys = tuple(
         require_sql_identifier(key, "primary_keys") for key in request.primary_keys
     )
+    identity_keys = tuple(
+        require_sql_identifier(key, "identity_keys")
+        for key in resolve_mutation_identity_keys(
+            orphan_rows,
+            primary_keys,
+            source_scope=request.source_scope,
+        )
+    )
     current_flag_col = require_sql_identifier(
         resolve_present_column(
             orphan_rows,
@@ -204,14 +221,14 @@ async def expire_gold_orphan_rows(
     )
     key_rows = build_orphan_key_rows(
         orphan_rows,
-        primary_keys,
+        identity_keys,
         operation="Gold foreign-key reconciliation cannot expire",
     )
     if not key_rows:
         return
 
     merge_condition = " AND ".join(
-        f"target.{key} = source.{key}" for key in primary_keys
+        f"target.{key} = source.{key}" for key in identity_keys
     )
     merge_condition += f" AND target.{current_flag_col} = true"
     ts_iso = host.clock.now().isoformat()

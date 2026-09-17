@@ -610,9 +610,17 @@ class ADRRegistryGenerator:
         *,
         decision_link_prefix: str,
     ) -> None:
-        status_order = ["accepted", "draft", "deprecated", "superseded", "archived"]
+        status_order = [
+            "accepted",
+            "proposed",
+            "draft",
+            "deprecated",
+            "superseded",
+            "archived",
+        ]
         status_icons = {
             "accepted": "🟢",
+            "proposed": "🟡",
             "draft": "🟡",
             "deprecated": "🟠",
             "superseded": "🔵",
@@ -683,6 +691,7 @@ class ADRRegistryGenerator:
         lines.append(
             "- **Accepted ADRs**: Currently applicable architectural decisions"
         )
+        lines.append("- **Proposed ADRs**: Proposed decisions awaiting acceptance")
         lines.append("- **Draft ADRs**: Proposed decisions under review")
         lines.append(
             "- **Deprecated ADRs**: No longer recommended but may still be in use"
@@ -960,6 +969,7 @@ graph LR
 ## Status Definitions
 
 - **🟢 Accepted**: Currently applicable architectural decision
+- **🟡 Proposed**: Proposed decision awaiting acceptance
 - **🟡 Draft**: Proposed decision under review
 - **🟠 Deprecated**: No longer recommended but may still be in use
 - **🔵 Superseded**: Replaced by a newer decision

@@ -4,9 +4,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.nested_mapping import (
-    lookup_mapping_path,
-)
 from bioetl.application.services.control_plane.run_manifest_exact_replay_blockers import (
     append_mode_exact_replay_blockers as _append_mode_exact_replay_blockers,
 )
@@ -23,6 +20,7 @@ from bioetl.domain.control_plane import ReplayCapability, RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
     ReproducibilityPolicyAssessment,
 )
+from bioetl.domain.normalization import lookup_mapping_path
 
 if TYPE_CHECKING:
     from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context import (

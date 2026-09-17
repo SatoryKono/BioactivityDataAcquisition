@@ -84,9 +84,9 @@ def test_manifest_replay_payload_helpers_are_not_flat_root_modules() -> None:
     assert not (
         CONTROL_PLANE_ROOT / "_run_manifest_replay_family_contract_payload.py"
     ).exists()
-    assert (
+    assert not (
         CONTROL_PLANE_ROOT / "manifest" / "replay_family_contract_payload.py"
-    ).is_file()
+    ).exists()
     assert not (CONTROL_PLANE_ROOT / "run_manifest_replay_taxonomy.py").exists()
     assert (CONTROL_PLANE_ROOT / "manifest" / "replay_taxonomy.py").is_file()
     assert not (CONTROL_PLANE_ROOT / "_run_manifest_replay_taxonomy_fields.py").exists()
@@ -128,6 +128,37 @@ def test_manifest_validation_implementation_is_not_flat_root_module() -> None:
 def test_historical_replay_closure_claims_are_replay_owned() -> None:
     """Historical replay closure claim helpers must live under replay seam."""
     assert (CONTROL_PLANE_ROOT / "replay" / "closure_claims.py").is_file()
+    assert not (
+        CONTROL_PLANE_ROOT / "replay" / "historical_certification.py"
+    ).exists()
+    assert not (
+        CONTROL_PLANE_ROOT / "replay" / "_historical_record_payload.py"
+    ).exists()
+    assert not (
+        CONTROL_PLANE_ROOT / "replay" / "_historical_certification_models.py"
+    ).exists()
+    assert not (
+        CONTROL_PLANE_ROOT / "manifest" / "diagnostics" / "nested_mapping.py"
+    ).exists()
+    assert not (
+        CONTROL_PLANE_ROOT
+        / "manifest"
+        / "diagnostics"
+        / "replay_invariants"
+        / "nested_mapping.py"
+    ).exists()
+    assert not (
+        CONTROL_PLANE_ROOT
+        / "manifest"
+        / "diagnostics"
+        / "base_effective_config_diagnostics.py"
+    ).exists()
+    assert not (
+        CONTROL_PLANE_ROOT / "manifest" / "diagnostics" / "checkpoint_projection.py"
+    ).exists()
+    assert not (
+        CONTROL_PLANE_ROOT / "manifest" / "diagnostics" / "snapshot_support.py"
+    ).exists()
 
 
 @pytest.mark.architecture
@@ -171,6 +202,9 @@ def test_manifest_diagnostics_replay_helpers_facade_stays_removed() -> None:
     """The zero-import replay_helpers compatibility facade must stay removed."""
     assert not (
         CONTROL_PLANE_ROOT / "manifest" / "diagnostics" / "replay_helpers.py"
+    ).exists()
+    assert not (
+        CONTROL_PLANE_ROOT / "manifest" / "diagnostics" / "replay.py"
     ).exists()
 
 

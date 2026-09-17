@@ -245,6 +245,9 @@ async def test_gold_dry_run_does_not_mutate_or_quarantine() -> None:
             reference_key="target_id",
             primary_keys=("assay_id",),
             dry_run=True,
+            reference_completeness="complete",
+            reference_identity="chembl.target",
+            completeness_evidence_ref="tests/unit/fk-reference-complete",
         )
     )
 
@@ -463,3 +466,129 @@ async def test_gold_snapshot_pins_version_and_distinguishes_physical_rows(
     second = await reader.read_reconciliation_snapshot("fixture")
     assert second == {"version": 1, "physical_rows": 3, "current_rows": 1}
     assert first["current_rows"] == 2
+
+
+def _complete_request(**kwargs: object) -> ForeignKeyReconciliationRequest:
+    reference_table = str(kwargs.get("reference_table", "chembl.target"))
+    kwargs.setdefault("reference_completeness", "complete")
+    kwargs.setdefault("reference_identity", reference_table)
+    kwargs.setdefault(
+        "completeness_evidence_ref", "tests/unit/fk-reference-complete"
+    )
+    return ForeignKeyReconciliationRequest(**kwargs)  # type: ignore[arg-type]
+
+
+@pytest.mark.asyncio
+async def test_unproven_reference_completeness_blocks_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    mutation = AsyncMock()
+    monkeypatch.setattr(
+        "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation.apply_reconciliation_mutation",
+        mutation,
+    )
+    quarantine = _Quarantine()
+    adapter = SilverForeignKeyReconciliationAdapter(
+        silver_writer=_SilverWriter(),
+        gold_writer=_GoldReader(
+            {
+                "chembl.assay": [
+                    {
+                        "assay_id": "CHEMBL_A1",
+                        "target_id": "CHEMBL_T999",
+                        "_is_current": True,
+                    }
+                ],
+                "chembl.target": [],
+            }
+        ),
+        logger=_Logger(),
+        quarantine=quarantine,
+    )
+    result = await adapter.reconcile_foreign_keys(
+        ForeignKeyReconciliationRequest(
+            source_layer="gold",
+            reference_layer="gold",
+            mutation_layer="gold",
+            source_table="chembl.assay",
+            reference_table="chembl.target",
+            source_key="target_id",
+            reference_key="target_id",
+            primary_keys=("assay_id",),
+        )
+    )
+    mutation.assert_not_awaited()
+    assert quarantine.writes == []
+    assert result.mutation_mode == "blocked"
+    assert result.mutated is False
+    assert result.orphan_rows_deleted == 0
+    assert result.unproven_unmatched_rows == 1
+    assert result.mutation_blocked_reason == "reference_completeness_unproven"
+
+
+@pytest.mark.asyncio
+async def test_mixed_run_mutates_only_selected_run_orphans(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: list[list[dict[str, object]]] = []
+
+    async def _capture(host, request, *, orphan_rows):
+        del host, request
+        captured.append(list(orphan_rows))
+        return type(
+            "_Summary",
+            (),
+            {
+                "mutation_mode": "gold_scd2_expiry",
+                "quarantine_batch_id": None,
+                "quarantine_rows_written": 0,
+                "quarantine_error_code": None,
+            },
+        )()
+
+    monkeypatch.setattr(
+        "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation.apply_reconciliation_mutation",
+        _capture,
+    )
+    adapter = SilverForeignKeyReconciliationAdapter(
+        silver_writer=_SilverWriter(),
+        gold_writer=_GoldReader(
+            {
+                "chembl.assay": [
+                    {
+                        "assay_id": "CHEMBL_A1",
+                        "target_id": "CHEMBL_T999",
+                        "run_id": "selected-run",
+                        "_is_current": True,
+                    },
+                    {
+                        "assay_id": "CHEMBL_A2",
+                        "target_id": "CHEMBL_T888",
+                        "run_id": "other-run",
+                        "_is_current": True,
+                    },
+                ],
+                "chembl.target": [],
+            }
+        ),
+        logger=_Logger(),
+        quarantine=_Quarantine(),
+    )
+    result = await adapter.reconcile_foreign_keys(
+        _complete_request(
+            source_layer="gold",
+            reference_layer="gold",
+            mutation_layer="gold",
+            source_table="chembl.assay",
+            reference_table="chembl.target",
+            source_key="target_id",
+            reference_key="target_id",
+            primary_keys=("assay_id",),
+            source_scope="current_run",
+            source_run_ids=("selected-run",),
+        )
+    )
+    assert result.mutated is True
+    assert len(captured) == 1
+    assert [row["assay_id"] for row in captured[0]] == ["CHEMBL_A1"]
+

@@ -38,21 +38,19 @@ from unittest.mock import MagicMock
 
 from bioetl.application.services.control_plane.forensic import ForensicRunDiffService
 from bioetl.application.services.control_plane.forensic.diagnostics_support import (
-    _artifact_refs,
-    _coerce_int,
-    _dict_or_empty,
-    _forensic_diff_payload,
-    _lineage_closure_payload,
-    _metadata_sidecar_missing_count,
-    _missing_evidence,
-    _resolve_forensic_verdict,
-    _string_list,
-    _string_list_or_empty,
-    _trace_complete,
-    _trace_missing_requirements,
-)
-from bioetl.application.services.control_plane.forensic_diff_service import (
-    _inspection_service_factory_from_ports,
+    artifact_refs,
+    coerce_int,
+    dict_or_empty,
+    forensic_diff_payload,
+    inspection_service_factory_from_ports,
+    lineage_closure_payload,
+    metadata_sidecar_missing_count,
+    missing_evidence,
+    resolve_forensic_verdict,
+    string_list,
+    string_list_or_empty,
+    trace_complete,
+    trace_missing_requirements,
 )
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.types import RunType
@@ -425,51 +423,51 @@ class TestHelperFunctions:
     """Test helper functions for better coverage."""
 
     def test_dict_or_empty_with_dict(self):
-        """Test _dict_or_empty with dict input."""
-        result = _dict_or_empty({"key": "value"})
+        """Test dict_or_empty with dict input."""
+        result = dict_or_empty({"key": "value"})
         assert result == {"key": "value"}
 
     def test_dict_or_empty_with_non_dict(self):
-        """Test _dict_or_empty with non-dict input."""
-        result = _dict_or_empty("not_a_dict")
+        """Test dict_or_empty with non-dict input."""
+        result = dict_or_empty("not_a_dict")
         assert result == {}
 
     def test_dict_or_empty_with_none(self):
-        """Test _dict_or_empty with None."""
-        result = _dict_or_empty(None)
+        """Test dict_or_empty with None."""
+        result = dict_or_empty(None)
         assert result == {}
 
     def test_dict_or_empty_with_list(self):
-        """Test _dict_or_empty with list."""
-        result = _dict_or_empty(["item1", "item2"])
+        """Test dict_or_empty with list."""
+        result = dict_or_empty(["item1", "item2"])
         assert result == {}
 
     def test_artifact_refs_with_valid_list(self):
-        """Test _artifact_refs with valid artifact refs."""
+        """Test artifact_refs with valid artifact refs."""
         diagnostics = {
             "artifact_refs": [
                 {"artifact_path": "/path1", "metadata_path": "/meta1"},
                 {"artifact_path": "/path2", "metadata_path": "/meta2"},
             ]
         }
-        result = _artifact_refs(diagnostics)
+        result = artifact_refs(diagnostics)
         assert len(result) == 2
         assert result[0]["artifact_path"] == "/path1"
 
     def test_artifact_refs_with_non_list(self):
-        """Test _artifact_refs with non-list input."""
+        """Test artifact_refs with non-list input."""
         diagnostics = {"artifact_refs": "not_a_list"}
-        result = _artifact_refs(diagnostics)
+        result = artifact_refs(diagnostics)
         assert result == []
 
     def test_artifact_refs_with_missing_key(self):
-        """Test _artifact_refs when key is missing."""
+        """Test artifact_refs when key is missing."""
         diagnostics = {}
-        result = _artifact_refs(diagnostics)
+        result = artifact_refs(diagnostics)
         assert result == []
 
     def test_artifact_refs_with_mixed_types(self):
-        """Test _artifact_refs with mixed ref types."""
+        """Test artifact_refs with mixed ref types."""
         diagnostics = {
             "artifact_refs": [
                 {"artifact_path": "/path1"},
@@ -477,11 +475,11 @@ class TestHelperFunctions:
                 {"artifact_path": "/path2"},
             ]
         }
-        result = _artifact_refs(diagnostics)
+        result = artifact_refs(diagnostics)
         assert len(result) == 2  # Only valid dicts
 
     def test_metadata_sidecar_missing_count(self):
-        """Test _metadata_sidecar_missing_count."""
+        """Test metadata_sidecar_missing_count."""
         diagnostics = {
             "artifact_refs": [
                 {"artifact_path": "/path1", "metadata_path": "/meta1"},
@@ -489,150 +487,150 @@ class TestHelperFunctions:
                 {"artifact_path": "/path3", "metadata_path": "/meta3"},
             ]
         }
-        result = _metadata_sidecar_missing_count(diagnostics)
+        result = metadata_sidecar_missing_count(diagnostics)
         assert result == 1
 
     def test_metadata_sidecar_missing_count_empty_refs(self):
-        """Test _metadata_sidecar_missing_count with empty refs."""
+        """Test metadata_sidecar_missing_count with empty refs."""
         diagnostics = {"artifact_refs": []}
-        result = _metadata_sidecar_missing_count(diagnostics)
+        result = metadata_sidecar_missing_count(diagnostics)
         assert result == 0
 
     def test_coerce_int_with_int(self):
-        """Test _coerce_int with integer."""
-        assert _coerce_int(42) == 42
+        """Test coerce_int with integer."""
+        assert coerce_int(42) == 42
 
     def test_coerce_int_with_float(self):
-        """Test _coerce_int with float."""
-        assert _coerce_int(42.7) == 42
+        """Test coerce_int with float."""
+        assert coerce_int(42.7) == 42
 
     def test_coerce_int_with_string(self):
-        """Test _coerce_int with valid string."""
-        assert _coerce_int("42") == 42
+        """Test coerce_int with valid string."""
+        assert coerce_int("42") == 42
 
     def test_coerce_int_with_invalid_string(self):
-        """Test _coerce_int with invalid string."""
-        assert _coerce_int("not_a_number") == 0
+        """Test coerce_int with invalid string."""
+        assert coerce_int("not_a_number") == 0
 
     def test_coerce_int_with_bool(self):
-        """Test _coerce_int with boolean."""
-        assert _coerce_int(True) == 1
-        assert _coerce_int(False) == 0
+        """Test coerce_int with boolean."""
+        assert coerce_int(True) == 1
+        assert coerce_int(False) == 0
 
     def test_coerce_int_with_none(self):
-        """Test _coerce_int with None."""
-        assert _coerce_int(None) == 0
+        """Test coerce_int with None."""
+        assert coerce_int(None) == 0
 
     def test_trace_missing_requirements_with_list(self):
-        """Test _trace_missing_requirements with list."""
+        """Test trace_missing_requirements with list."""
         diagnostics = {
             "produced_artifact_trace": {
                 "missing_requirements": ["req1", "req2", "req3"]
             }
         }
-        result = _trace_missing_requirements(diagnostics)
+        result = trace_missing_requirements(diagnostics)
         assert result == ("req1", "req2", "req3")
 
     def test_trace_missing_requirements_with_non_list(self):
-        """Test _trace_missing_requirements with non-list."""
+        """Test trace_missing_requirements with non-list."""
         diagnostics = {
             "produced_artifact_trace": {"missing_requirements": "not_a_list"}
         }
-        result = _trace_missing_requirements(diagnostics)
+        result = trace_missing_requirements(diagnostics)
         assert result == ()
 
     def test_trace_missing_requirements_missing_key(self):
-        """Test _trace_missing_requirements when key is missing."""
+        """Test trace_missing_requirements when key is missing."""
         diagnostics = {"produced_artifact_trace": {}}
-        result = _trace_missing_requirements(diagnostics)
+        result = trace_missing_requirements(diagnostics)
         assert result == ()
 
     def test_string_list_or_empty_with_list(self):
-        """Test _string_list_or_empty with list."""
-        result = _string_list_or_empty(["item1", "item2"])
+        """Test string_list_or_empty with list."""
+        result = string_list_or_empty(["item1", "item2"])
         assert result == ["item1", "item2"]
 
     def test_string_list_or_empty_with_non_list(self):
-        """Test _string_list_or_empty with non-list."""
-        result = _string_list_or_empty("not_a_list")
+        """Test string_list_or_empty with non-list."""
+        result = string_list_or_empty("not_a_list")
         assert result == []
 
     def test_string_list_or_empty_with_mixed_types(self):
-        """Test _string_list_or_empty with mixed types."""
-        result = _string_list_or_empty([1, "item", None, 2.5])
+        """Test string_list_or_empty with mixed types."""
+        result = string_list_or_empty([1, "item", None, 2.5])
         assert result == ["1", "item", "None", "2.5"]
 
     def test_string_list_with_tuple(self):
-        """Test _string_list with tuple."""
-        result = _string_list(("item1", "item2", "item3"))
+        """Test string_list with tuple."""
+        result = string_list(("item1", "item2", "item3"))
         assert result == ["item1", "item2", "item3"]
         assert isinstance(result, list)
 
     def test_string_list_with_empty_tuple(self):
-        """Test _string_list with empty tuple."""
-        result = _string_list(())
+        """Test string_list with empty tuple."""
+        result = string_list(())
         assert result == []
 
     def test_trace_complete_with_true(self):
-        """Test _trace_complete when complete is True."""
+        """Test trace_complete when complete is True."""
         diagnostics = {"produced_artifact_trace": {"complete": True}}
-        assert _trace_complete(diagnostics) is True
+        assert trace_complete(diagnostics) is True
 
     def test_trace_complete_with_false(self):
-        """Test _trace_complete when complete is False."""
+        """Test trace_complete when complete is False."""
         diagnostics = {"produced_artifact_trace": {"complete": False}}
-        assert _trace_complete(diagnostics) is False
+        assert trace_complete(diagnostics) is False
 
     def test_trace_complete_missing_key(self):
-        """Test _trace_complete when key is missing."""
+        """Test trace_complete when key is missing."""
         diagnostics = {"produced_artifact_trace": {}}
-        assert _trace_complete(diagnostics) is False
+        assert trace_complete(diagnostics) is False
 
     def test_lineage_closure_payload_supported(self):
-        """Test _lineage_closure_payload with supported boundary."""
+        """Test lineage_closure_payload with supported boundary."""
         mock_result = MagicMock()
         mock_result.manifest.manifest_id = "test-manifest"
         mock_result.diagnostics = {"lineage_closure_boundary": {"supported": True}}
 
-        result = _lineage_closure_payload(mock_result)
+        result = lineage_closure_payload(mock_result)
         assert result["status"] == "supported"
         assert result["supported"] is True
 
     def test_lineage_closure_payload_unsupported(self):
-        """Test _lineage_closure_payload with unsupported boundary."""
+        """Test lineage_closure_payload with unsupported boundary."""
         mock_result = MagicMock()
         mock_result.manifest.manifest_id = "test-manifest"
         mock_result.diagnostics = {"lineage_closure_boundary": {"supported": False}}
 
-        result = _lineage_closure_payload(mock_result)
+        result = lineage_closure_payload(mock_result)
         assert result["status"] == "unsupported"
         assert result["supported"] is False
 
     def test_lineage_closure_payload_missing(self):
-        """Test _lineage_closure_payload with missing boundary."""
+        """Test lineage_closure_payload with missing boundary."""
         mock_result = MagicMock()
         mock_result.manifest.manifest_id = "test-manifest"
         mock_result.diagnostics = {"lineage_closure_boundary": {}}
 
-        result = _lineage_closure_payload(mock_result)
+        result = lineage_closure_payload(mock_result)
         assert result["status"] == "missing"
         assert result["supported"] is None
 
     def test_lineage_closure_payload_missing_boundary_key(self):
-        """Test _lineage_closure_payload when boundary key is missing."""
+        """Test lineage_closure_payload when boundary key is missing."""
         mock_result = MagicMock()
         mock_result.manifest.manifest_id = "test-manifest"
         mock_result.diagnostics = {}
 
-        result = _lineage_closure_payload(mock_result)
+        result = lineage_closure_payload(mock_result)
         assert result["status"] == "missing"
 
     def test_inspection_service_factory_with_provided_factory(self):
-        """Test _inspection_service_factory_from_ports with provided factory."""
+        """Test inspection_service_factory_from_ports with provided factory."""
         mock_factory = MagicMock()
         mock_port = MagicMock()
 
-        result = _inspection_service_factory_from_ports(
+        result = inspection_service_factory_from_ports(
             manifest_port=mock_port,
             ledger_port=None,
             provided_factory=mock_factory,
@@ -641,10 +639,10 @@ class TestHelperFunctions:
         assert result == mock_factory
 
     def test_inspection_service_factory_without_provided_factory(self):
-        """Test _inspection_service_factory_from_ports without provided factory."""
+        """Test inspection_service_factory_from_ports without provided factory."""
         mock_port = MagicMock()
 
-        result = _inspection_service_factory_from_ports(
+        result = inspection_service_factory_from_ports(
             manifest_port=mock_port,
             ledger_port=None,
             provided_factory=None,
@@ -653,7 +651,7 @@ class TestHelperFunctions:
         assert callable(result)
 
     def test_missing_evidence_with_all_missing(self):
-        """Test _missing_evidence when all evidence is missing."""
+        """Test missing_evidence when all evidence is missing."""
         mock_result = MagicMock()
         mock_result.ledger_entries = []
         mock_result.diagnostics = {
@@ -663,7 +661,7 @@ class TestHelperFunctions:
             "lineage_closure_boundary": {},
         }
 
-        result = _missing_evidence(mock_result)
+        result = missing_evidence(mock_result)
         assert "run_ledger_entries_missing" in result
         assert "published_artifacts_missing" in result
         assert "artifact_links_incomplete" in result
@@ -671,7 +669,7 @@ class TestHelperFunctions:
         assert "lineage_closure_boundary_missing" in result
 
     def test_missing_evidence_with_complete_evidence(self):
-        """Test _missing_evidence when evidence is complete."""
+        """Test missing_evidence when evidence is complete."""
         mock_result = MagicMock()
         mock_result.ledger_entries = [MagicMock()]
         mock_result.diagnostics = {
@@ -681,11 +679,11 @@ class TestHelperFunctions:
             "lineage_closure_boundary": {"supported": True},
         }
 
-        result = _missing_evidence(mock_result)
+        result = missing_evidence(mock_result)
         assert len(result) == 0
 
     def test_missing_evidence_with_partial_evidence(self):
-        """Test _missing_evidence with partial evidence."""
+        """Test missing_evidence with partial evidence."""
         mock_result = MagicMock()
         mock_result.ledger_entries = [MagicMock()]
         mock_result.diagnostics = {
@@ -695,7 +693,7 @@ class TestHelperFunctions:
             "lineage_closure_boundary": {"supported": False},
         }
 
-        result = _missing_evidence(mock_result)
+        result = missing_evidence(mock_result)
         assert "lineage_closure_boundary_unsupported" in result
         assert "run_ledger_entries_missing" not in result
 
@@ -706,7 +704,7 @@ class TestHelperFunctions:
             occurrence_only=False,
         )
 
-        verdict = _resolve_forensic_verdict(
+        verdict = resolve_forensic_verdict(
             manifest_diff=manifest_diff,
             forensic_diff={"checkpoint_anchors": {"compatible": False}},
         )
@@ -720,7 +718,7 @@ class TestHelperFunctions:
             occurrence_only=False,
         )
 
-        verdict = _resolve_forensic_verdict(
+        verdict = resolve_forensic_verdict(
             manifest_diff=manifest_diff,
             forensic_diff={"checkpoint_anchors": {"compatible": True}},
         )
@@ -734,7 +732,7 @@ class TestHelperFunctions:
             occurrence_only=True,
         )
 
-        verdict = _resolve_forensic_verdict(
+        verdict = resolve_forensic_verdict(
             manifest_diff=manifest_diff,
             forensic_diff={"checkpoint_anchors": {"compatible": True}},
         )
@@ -748,7 +746,7 @@ class TestHelperFunctions:
             occurrence_only=False,
         )
 
-        verdict = _resolve_forensic_verdict(
+        verdict = resolve_forensic_verdict(
             manifest_diff=manifest_diff,
             forensic_diff={},
         )
@@ -763,7 +761,7 @@ class TestHelperFunctions:
             cross_surface_replay_diff={"checkpoint_anchors": {"compatible": True}},
         )
 
-        payload = _forensic_diff_payload(manifest_diff)
+        payload = forensic_diff_payload(manifest_diff)
 
         assert payload["verdict"] == "occurrence_only_replay"
 

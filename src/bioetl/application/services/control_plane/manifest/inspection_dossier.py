@@ -4,9 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from bioetl.application.services.control_plane.manifest.execution_identity_support import (
-    build_contract_identity_anchor_fields,
-)
 from bioetl.domain.control_plane import RunManifest
 
 _AUTHORITATIVE_REPLAY_ARTIFACTS = (
@@ -61,10 +58,13 @@ def _checkpoint_identity_payload(
     checkpoint_identity = {
         "required_persistence_profile": diagnostics.get("required_persistence_profile"),
         "execution_fingerprint": manifest.execution_fingerprint,
-        **build_contract_identity_anchor_fields(
-            code_provenance,
-            include_effective_config_hash=True,
-        ),
+        "contract_ref": code_provenance.contract_ref,
+        "contract_version": code_provenance.contract_version,
+        "normalization_profile_ref": code_provenance.normalization_profile_ref,
+        "normalization_profile_version": code_provenance.normalization_profile_version,
+        "normalization_profile_hash": code_provenance.normalization_profile_hash,
+        "effective_config_hash": code_provenance.effective_config_hash,
+        "effective_config_artifact_id": code_provenance.effective_config_artifact_id,
         "input_snapshot_identity_fingerprint": diagnostics.get(
             "input_snapshot_identity_fingerprint"
         ),

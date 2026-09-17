@@ -12,7 +12,6 @@ from bioetl.application.services.control_plane.manifest._inspection_json import 
 from bioetl.application.services.control_plane.manifest.inspection_result_model import (
     RunManifestInspectionResult as RunManifestInspectionResult,
 )
-from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.types import RunID
 
 
@@ -121,60 +120,12 @@ _RUN_MANIFEST_INSPECTION_MODEL_EXPORTS = (
     "RunManifestInspectionCorruptionError",
     "RunManifestInspectionResult",
     "RunManifestVerifyResult",
-    "effective_config_artifact_anchor",
-    "effective_config_missing_evidence",
     "json_equal",
-    "manifest_effective_config_anchor",
     "parse_run_id",
     "resolve_verify_verdict",
 )
 
 __all__ = list(_RUN_MANIFEST_INSPECTION_MODEL_EXPORTS)
-
-
-def effective_config_missing_evidence(
-    *,
-    left_artifact: dict[str, object] | None,
-    right_artifact: dict[str, object] | None,
-    left_occurrence: dict[str, object] | None,
-    right_occurrence: dict[str, object] | None,
-) -> tuple[str, ...]:
-    """Return missing-evidence codes for effective-config store verification."""
-    missing: list[str] = []
-    if left_artifact is None:
-        missing.append("left_effective_config_artifact_missing")
-    if right_artifact is None:
-        missing.append("right_effective_config_artifact_missing")
-    if left_occurrence is None:
-        missing.append("left_effective_config_occurrence_missing")
-    if right_occurrence is None:
-        missing.append("right_effective_config_occurrence_missing")
-    return tuple(missing)
-
-
-def manifest_effective_config_anchor(manifest: RunManifest) -> dict[str, object]:
-    """Project the effective-config anchor fields from a run manifest."""
-    code_provenance = manifest.code_provenance
-    return {
-        "artifact_id": code_provenance.effective_config_artifact_id,
-        "effective_config_hash": code_provenance.effective_config_hash,
-    }
-
-
-def effective_config_artifact_anchor(
-    artifact: dict[str, object] | None,
-) -> dict[str, object]:
-    """Project the effective-config anchor fields from a stored artifact payload."""
-    if artifact is None:
-        return {"artifact_id": None, "effective_config_hash": None}
-    semantic_artifact = artifact.get("semantic_artifact")
-    if not isinstance(semantic_artifact, dict):
-        semantic_artifact = artifact
-    return {
-        "artifact_id": artifact.get("artifact_id")
-        or semantic_artifact.get("artifact_id"),
-        "effective_config_hash": semantic_artifact.get("effective_config_hash"),
-    }
 
 
 def resolve_verify_verdict(

@@ -204,6 +204,21 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             )
 
         reference_rows = await self._read_reference_rows(request)
+        if (
+            request.reference_completeness == "complete"
+            and request.reference_identity is not None
+            and request.reference_identity != request.reference_table
+        ):
+            return build_reconciliation_result(
+                request,
+                scanned_rows=len(source_rows),
+                retained_rows=len(source_rows),
+                orphan_rows_deleted=0,
+                mutated=False,
+                would_mutate=False,
+                mutation_mode="blocked",
+                mutation_blocked_reason="reference_completeness_identity_mismatch",
+            )
         result = await self._reconcile_loaded_rows(
             request,
             source_rows=source_rows,
@@ -335,6 +350,30 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
         )
         retained_rows_count = len(retained_rows)
         orphan_rows_deleted = len(orphan_rows)
+        if request.reference_completeness != "complete":
+            self._record_metrics(
+                scanned=scanned_rows,
+                retained=retained_rows_count + orphan_rows_deleted,
+                deleted=0,
+            )
+            result = build_reconciliation_result(
+                request,
+                scanned_rows=scanned_rows,
+                retained_rows=retained_rows_count + orphan_rows_deleted,
+                orphan_rows_deleted=0,
+                mutated=False,
+                would_mutate=False,
+                mutation_mode="blocked",
+                mutation_blocked_reason="reference_completeness_unproven",
+                unproven_unmatched_rows=orphan_rows_deleted,
+            )
+            self._write_debug_artifacts(
+                request,
+                result,
+                retained_rows=retained_rows + orphan_rows,
+                orphan_rows=[],
+            )
+            return result
         self._record_metrics(
             scanned=scanned_rows,
             retained=retained_rows_count,

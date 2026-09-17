@@ -248,6 +248,10 @@ async def test_reconcile_foreign_keys_is_idempotent(
             "reference_key": "target_id",
             "primary_keys": ["assay_id"],
             "action": "delete_orphans",
+            "reference_completeness_evidence": {
+                "status": "complete",
+                "evidence_ref": "tests/integration/workflow/fk-reference-complete",
+            },
         },
     )
 
@@ -347,6 +351,10 @@ async def test_reconcile_foreign_keys_sends_orphans_to_quarantine(
             "reference_key": "target_id",
             "primary_keys": ["assay_id"],
             "action": "delete_orphans",
+            "reference_completeness_evidence": {
+                "status": "complete",
+                "evidence_ref": "tests/integration/workflow/fk-reference-complete",
+            },
         },
     )
 
@@ -451,6 +459,10 @@ async def test_reconcile_foreign_keys_supports_composite_keys_and_null_policy(
             "reference_keys": ["target_id", "target_type"],
             "primary_keys": ["assay_id"],
             "action": "delete_orphans",
+            "reference_completeness_evidence": {
+                "status": "complete",
+                "evidence_ref": "tests/integration/workflow/fk-reference-complete",
+            },
             "nulls_equal": True,
         },
     )
@@ -557,6 +569,10 @@ async def test_reconcile_foreign_keys_dry_run_previews_without_mutation(
             "reference_key": "target_id",
             "primary_keys": ["assay_id"],
             "action": "delete_orphans",
+            "reference_completeness_evidence": {
+                "status": "complete",
+                "evidence_ref": "tests/integration/workflow/fk-reference-complete",
+            },
         },
     )
 
@@ -647,6 +663,10 @@ async def test_reconcile_foreign_keys_expires_gold_orphans_without_dropping_hist
             "reference_key": "target_id",
             "primary_keys": ["assay_id"],
             "action": "delete_orphans",
+            "reference_completeness_evidence": {
+                "status": "complete",
+                "evidence_ref": "tests/integration/workflow/fk-reference-complete",
+            },
         },
     )
 
@@ -742,6 +762,10 @@ async def test_reconcile_foreign_keys_persists_result_and_debug_artifacts(
             "reference_key": "target_id",
             "primary_keys": ["target_id"],
             "action": "delete_orphans",
+            "reference_completeness_evidence": {
+                "status": "complete",
+                "evidence_ref": "tests/integration/workflow/fk-reference-complete",
+            },
         },
     )
 
@@ -902,6 +926,10 @@ async def test_inverse_reconcile_foreign_keys_expires_unused_gold_dimensions(
             "reference_key": reference_key,
             "primary_keys": [source_primary_key],
             "action": "delete_orphans",
+            "reference_completeness_evidence": {
+                "status": "complete",
+                "evidence_ref": "tests/integration/workflow/fk-reference-complete",
+            },
         },
     )
 

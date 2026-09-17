@@ -5,12 +5,15 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.services.control_plane.manifest.diagnostics.artifact_support import (
+    apply_artifact_publication_closure_policy,
     build_produced_artifact_trace,
     sorted_text_items,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.persistence import (
+from bioetl.application.services.control_plane.manifest.diagnostics.persistence_alerts import (
     build_alert_signals,
     build_next_steps,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.persistence_profiles import (
     build_persistence_profile,
 )
 from bioetl.application.services.control_plane.manifest.identity_graph_assembly import (
@@ -27,7 +30,7 @@ if TYPE_CHECKING:
         _RuntimeViewsRequest,
     )
 
-_build_produced_artifact_trace = build_produced_artifact_trace
+assemble_identity_graph = RunManifestIdentityGraphAssembler.build
 
 
 def _resolve_policy_value(values: set[str]) -> str | None:
@@ -105,10 +108,14 @@ def build_identity_graph(
         "resume_diagnostics": request.resume_diagnostics,
         "total_events": len(request.ledger_entries),
     }
-    return RunManifestIdentityGraphAssembler.build(
-        request.manifest,
-        diagnostics_seed,
-    )
+    diagnostics_seed.pop("identity_graph", None)
+    identity_graph = assemble_identity_graph(request.manifest, diagnostics_seed)
+    identity_graph["published_artifacts"] = [
+        dict(artifact_ref)
+        for artifact_ref in request.artifact_refs
+        if isinstance(artifact_ref, dict)
+    ]
+    return identity_graph
 
 
 def build_alert_bundle(
@@ -222,10 +229,8 @@ def build_final_summary_updates(
             "has_cross_validation_signal"
         ],
         "correlation_anchor_gaps": request.correlation_anchor_gaps,
-        "identity_graph_complete": (
-            request.missing_link_count == 0
-            and not any(request.correlation_anchor_gaps.values())
-        ),
+        "identity_graph_complete": request.missing_link_count == 0
+        and not any(request.correlation_anchor_gaps.values()),
         "identity_graph": identity_graph,
         "persistence_profile": persistence_profile,
         "alert_signals": alert_signals,
@@ -234,9 +239,11 @@ def build_final_summary_updates(
 
 
 __all__ = [
+    "apply_artifact_publication_closure_policy",
     "build_alert_bundle",
     "build_exact_replay_anchors",
     "build_final_summary_updates",
     "build_identity_graph",
+    "build_produced_artifact_trace",
     "build_runtime_views",
 ]

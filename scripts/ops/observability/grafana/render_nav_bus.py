@@ -1029,7 +1029,7 @@ def _stamp_current_readiness(by_id: dict[object, dict[str, object]]) -> None:
     readiness["description"] = (
         "CURRENT · Latest fresh pipeline/run_type telemetry. Run ID does not filter "
         "this panel. Palette: 0=OK, 1=WARN, 2=CRIT, 3=INCOMPLETE, "
-        "null=UNKNOWN. This CURRENT "
+        "null=UNKNOWN. UNKNOWN means evidence incomplete. This CURRENT "
         "verdict is not exact-run processing_status or trust_status. OK here does "
         "not authorize replay: selected-run trust_status INCOMPLETE or UNKNOWN "
         "still blocks replay."
@@ -1048,7 +1048,17 @@ def _stamp_retention_copy(by_id: dict[object, dict[str, object]]) -> None:
     if note not in retention.get("description", ""):
         retention["description"] = retention.get("description", "") + note
     for override in retention.get("fieldConfig", {}).get("overrides", []):
-        if override.get("matcher", {}).get("options") != "reason":
+        field = override.get("matcher", {}).get("options")
+        if field == "check":
+            for prop in override.get("properties", []):
+                if prop.get("id") == "mappings":
+                    prop["value"][0]["options"].update(
+                        {
+                            "scope_resolution": {"text": "Scope"},
+                        }
+                    )
+            continue
+        if field != "reason":
             continue
         for prop in override.get("properties", []):
             if prop.get("id") == "mappings":
@@ -1065,8 +1075,46 @@ def _stamp_retention_copy(by_id: dict[object, dict[str, object]]) -> None:
                         "snapshot_lifecycle_evidence_present": {
                             "text": "Snapshots present"
                         },
+                        "selected_run_id_not_found": {"text": "Run not found"},
+                        "deadline_exceeded": {"text": "Deadline exceeded"},
+                        "capacity_exhausted": {"text": "At capacity"},
                     }
                 )
+
+
+def _stamp_retention_readability(by_id: dict[object, dict[str, object]]) -> None:
+    """Keep check/reason readable at 1600x900 without widening Status."""
+    panel = by_id.get(9416)
+    if not isinstance(panel, dict):
+        return
+    field_config = panel.setdefault("fieldConfig", {})
+    defaults = field_config.setdefault("defaults", {})
+    custom = defaults.setdefault("custom", {})
+    if isinstance(custom, dict):
+        custom["inspect"] = True
+        cell = custom.get("cellOptions")
+        if not isinstance(cell, dict):
+            cell = {"type": "auto", "wrapText": False}
+            custom["cellOptions"] = cell
+        cell["wrapText"] = False
+    widths = {"check": 150, "Check": 150, "reason": 150, "Reason": 150}
+    wrap_fields = {"check", "Check", "reason", "Reason"}
+    overrides = field_config.get("overrides")
+    if not isinstance(overrides, list):
+        return
+    for override in overrides:
+        if not isinstance(override, dict):
+            continue
+        matcher = override.get("matcher")
+        field = matcher.get("options") if isinstance(matcher, dict) else None
+        if field in widths:
+            _set_override_value(override, CUSTOM_WIDTH, widths[field])
+        if field in wrap_fields:
+            _set_override_value(
+                override,
+                "custom.cellOptions",
+                {"type": "auto", "wrapText": True},
+            )
 
 
 def _stamp_aggregate_trust(by_id: dict[object, dict[str, object]]) -> None:
@@ -1131,6 +1179,11 @@ def _stamp_trust_override(override: dict[str, object]) -> None:
         _set_override_value(override, CUSTOM_WIDTH, width)
     if field == "reasons_text":
         _set_override_value(override, "noValue", "—")
+        _set_override_value(
+            override,
+            "custom.cellOptions",
+            {"type": "auto", "wrapText": True},
+        )
 
 
 def _layout_uid_detail_panels(panels: list[object], *, current_uid: str) -> None:
@@ -1173,6 +1226,7 @@ def _layout_control_plane_first_window(panels: list[object]) -> None:
     _stamp_recovery_copy(by_id)
     _stamp_current_readiness(by_id)
     _stamp_retention_copy(by_id)
+    _stamp_retention_readability(by_id)
     _stamp_aggregate_trust(by_id)
     if 906 in by_id:
         _stamp_control_plane_recovery_cta(by_id[906])

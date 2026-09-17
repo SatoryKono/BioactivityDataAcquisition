@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import copy
-from dataclasses import dataclass
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from datetime import datetime
 
-from bioetl.application.services.control_plane.manifest.service_scaffold import (
-    ManifestServiceScaffoldMixin,
-)
+from bioetl.domain.context_time import ClockLike, resolve_manifest_created_at
 from bioetl.application.services.control_plane.workflow.manifest_models import (
     WorkflowManifestCreateSpec as WorkflowManifestCreateSpec,
 )
@@ -34,11 +34,28 @@ _EXECUTION_FINGERPRINT_IGNORED_LAUNCH_KEYS = frozenset(
 )
 
 
+def _missing_manifest_id_factory() -> str:
+    raise RuntimeError("manifest_id_factory must be supplied by composition root")
+
+
 @dataclass(slots=True, kw_only=True)
-class WorkflowManifestService(ManifestServiceScaffoldMixin):
+class WorkflowManifestService:
     """Create and persist immutable workflow manifests."""
 
     manifest_port: WorkflowManifestPort
+    clock: ClockLike | None = None
+    created_at_factory: Callable[[], datetime] | None = None
+    schema_version: str = "1.0"
+    _manifest_id_factory: Callable[[], str] = field(
+        default_factory=lambda: _missing_manifest_id_factory
+    )
+
+    def _resolve_created_at(self) -> datetime:
+        """Resolve workflow manifest creation time through the configured seam."""
+        return resolve_manifest_created_at(
+            clock=self.clock,
+            created_at_factory=self.created_at_factory,
+        )
 
     def create_manifest(self, request: WorkflowManifestCreateSpec) -> WorkflowManifest:
         """Build fingerprinted workflow manifest and persist it through the port."""

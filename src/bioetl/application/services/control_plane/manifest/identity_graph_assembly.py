@@ -2,13 +2,10 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest._service_support import (
+from bioetl.application.services.control_plane.manifest.execution_identity_support import (
     build_degraded_runtime_anchor_payload,
     build_execution_identity_payload_from_code_provenance,
     build_identity_graph_core,
-)
-from bioetl.application.services.control_plane.manifest.replay_taxonomy import (
-    resolve_replay_taxonomy_projection,
 )
 from bioetl.domain.config.runtime import CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE
 from bioetl.domain.control_plane import RunManifest
@@ -118,19 +115,46 @@ class RunManifestIdentityGraphAssembler:
         manifest: RunManifest,
         diagnostics: dict[str, object],
     ) -> dict[str, object]:
-        return resolve_replay_taxonomy_projection(
-            diagnostics,
-            defaults={
-                "replay_capability": manifest.replay_capability.value,
-                "requested_exact_replay": bool(
-                    manifest.launch_context.get("exact_replay")
-                ),
-                "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
-                "exact_replay_eligible": (
-                    manifest.replay_capability.value == "exact_replay_supported"
-                ),
-            },
-        )
+        payload: dict[str, object] = {
+            "replay_capability": manifest.replay_capability.value,
+            "requested_exact_replay": bool(manifest.launch_context.get("exact_replay")),
+            "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+            "exact_replay_eligible": (
+                manifest.replay_capability.value == "exact_replay_supported"
+            ),
+        }
+        for key, value in diagnostics.items():
+            if key in payload or key in {
+                "replay_family_contract",
+                "replay_support_state",
+                "post_capture_replayable_parent_supported",
+                "post_capture_replayable_parent_boundary",
+                "historical_live_run_upgrade_policy",
+                "historical_live_run_upgrade_boundary",
+                "historical_live_run_upgrade_reason",
+                "broader_historical_exact_replay_policy",
+                "broader_historical_exact_replay_boundary",
+                "broader_historical_exact_replay_reason",
+                "broader_historical_exact_replay_state",
+                "historical_live_run_upgrade_state",
+                "replay_occurrence_kind",
+                "source_posture",
+                "input_snapshot_missing_source_refs",
+                "replay_capability_reason",
+                "replay_mode",
+                "continuation_mode",
+                "operator_replay_mode",
+                "replay_resume_rebuild_verdict",
+                "replay_next_action",
+                "exact_replay_blockers",
+                "replay_readiness_verdict",
+                "append_mode_semantic_sinks",
+                "resume_contract",
+                "resume_diagnostics",
+                "lineage_closure_boundary",
+            }:
+                payload[key] = value
+        return payload
 
     @staticmethod
     def _build_identity_graph_snapshot_section(
