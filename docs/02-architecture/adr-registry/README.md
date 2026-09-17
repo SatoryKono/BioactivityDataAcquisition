@@ -69,6 +69,7 @@ graph LR
 ## Status Definitions
 
 - **🟢 Accepted**: Currently applicable architectural decision
+- **🟡 Proposed**: Proposed decision awaiting acceptance
 - **🟡 Draft**: Proposed decision under review
 - **🟠 Deprecated**: No longer recommended but may still be in use
 - **🔵 Superseded**: Replaced by a newer decision

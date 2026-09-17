@@ -424,7 +424,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Latest fresh pipeline/run_type telemetry. Run ID does not filter this panel. Palette: 0=OK, 1=WARN, 2=CRIT, 3=INCOMPLETE, null=UNKNOWN. This CURRENT verdict is not exact-run processing_status or trust_status. OK here does not authorize replay: selected-run trust_status INCOMPLETE or UNKNOWN still blocks replay.",
+      "description": "CURRENT · Latest fresh pipeline/run_type telemetry. Run ID does not filter this panel. Palette: 0=OK, 1=WARN, 2=CRIT, 3=INCOMPLETE, null=UNKNOWN. UNKNOWN means evidence incomplete. This CURRENT verdict is not exact-run processing_status or trust_status. OK here does not authorize replay: selected-run trust_status INCOMPLETE or UNKNOWN still blocks replay.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -693,7 +693,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": true
                 }
               }
             ]
@@ -922,7 +923,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 }
               },
               {
@@ -949,6 +950,9 @@
                       },
                       "archive": {
                         "text": "Archive"
+                      },
+                      "scope_resolution": {
+                        "text": "Scope"
                       }
                     }
                   }
@@ -985,7 +989,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 }
               },
               {
@@ -1047,6 +1051,15 @@
                       },
                       "snapshot_lifecycle_evidence_present": {
                         "text": "Snapshots present"
+                      },
+                      "selected_run_id_not_found": {
+                        "text": "Run not found"
+                      },
+                      "deadline_exceeded": {
+                        "text": "Deadline exceeded"
+                      },
+                      "capacity_exhausted": {
+                        "text": "At capacity"
                       }
                     }
                   }

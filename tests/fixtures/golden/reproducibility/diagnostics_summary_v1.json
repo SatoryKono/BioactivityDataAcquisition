@@ -80,6 +80,266 @@
   "historical_live_run_upgrade_policy": "input_snapshot_published_ledger_evidence_only",
   "historical_live_run_upgrade_reason": "historical_live_runs_require_input_snapshot_published_ledger_evidence_before_parent_promotion",
   "historical_live_run_upgrade_state": "not_needed_snapshot_backed_at_launch",
+  "identity_graph": {
+    "append_mode_semantic_sinks": [],
+    "broader_historical_exact_replay_boundary": "historical_source_snapshot_certification",
+    "broader_historical_exact_replay_policy": "certified_historical_exact_replay_tranche_supported",
+    "broader_historical_exact_replay_reason": "retained_historical_source_runs_can_gain_certified_exact_replay_parent_evidence_via_backfilled_snapshot_certification",
+    "broader_historical_exact_replay_state": "within_launch_time_snapshot_boundary",
+    "canonical_execution_identity": {
+      "execution_fingerprint": "fp-golden-001",
+      "payload": {
+        "contract_ref": "chembl.activity",
+        "contract_version": "1.2.0",
+        "dq_contract_compatibility_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "effective_config_artifact_id": "eca-golden-001",
+        "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "exact_replay": "true",
+        "git_commit": "abc1234",
+        "input_snapshot_fingerprint": "2f847242c9547e889e852f7a4dc132293b43ba0e72d766fa2b7a91166decd6a9",
+        "normalization_profile_hash": null,
+        "normalization_profile_ref": null,
+        "normalization_profile_version": null,
+        "pipeline_name": "chembl_activity",
+        "pipeline_version": "1.0.0",
+        "run_type": "incremental",
+        "silver_filter_compatibility_mode": "structural_only_compat"
+      }
+    },
+    "code_provenance_state": {
+      "dependency_lock_state": "missing",
+      "git_commit": "abc1234",
+      "source_revision_state": "clean",
+      "strict_code_provenance_blockers": [
+        "dependency_lock_hash_missing"
+      ],
+      "strict_code_provenance_ready": false
+    },
+    "config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "continuation_mode": "exact_replay",
+    "contract_ref": "chembl.activity",
+    "contract_version": "1.2.0",
+    "degraded_runtime_anchor": {
+      "compatibility_scope": "legacy_fallback_only",
+      "fingerprint": "d2fef0732a32c17b48ae6af19d12f6f59a6e3044ad893689cf753e6c75b6a466",
+      "payload": {
+        "contract_ref": "chembl.activity",
+        "contract_version": "1.2.0",
+        "effective_config_artifact_id": "eca-golden-001",
+        "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "manifest_id": "manifest-golden-001"
+      }
+    },
+    "dependency_lock_state": "missing",
+    "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "exact_replay_anchors": {
+      "contract_ref": "chembl.activity",
+      "contract_version": "1.2.0",
+      "dependency_lock_state": "missing",
+      "dq_contract_compatibility_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "effective_config_artifact_id": "eca-golden-001",
+      "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "execution_fingerprint": "fp-golden-001",
+      "git_commit": "abc1234",
+      "input_snapshot_content_hashes": [
+        "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      ],
+      "input_snapshot_identity_fingerprint": "2f847242c9547e889e852f7a4dc132293b43ba0e72d766fa2b7a91166decd6a9",
+      "input_snapshot_ids": [
+        "snapshot-golden-001"
+      ],
+      "lineage_fragment_ids": [],
+      "normalization_profile_hash": null,
+      "normalization_profile_ref": null,
+      "normalization_profile_version": null,
+      "pipeline_name": "chembl_activity",
+      "pipeline_version": "1.0.0",
+      "published_artifact_ids": [],
+      "published_artifact_paths": [],
+      "run_type": "incremental",
+      "semantic_identity_anchor": "execution_fingerprint"
+    },
+    "exact_replay_blockers": [
+      "dependency_lock_provenance_missing"
+    ],
+    "exact_replay_eligible": false,
+    "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+    "execution_fingerprint": "fp-golden-001",
+    "git_commit": "abc1234",
+    "historical_live_run_upgrade_boundary": "input_snapshot_published_ledger_evidence",
+    "historical_live_run_upgrade_policy": "input_snapshot_published_ledger_evidence_only",
+    "historical_live_run_upgrade_reason": "historical_live_runs_require_input_snapshot_published_ledger_evidence_before_parent_promotion",
+    "historical_live_run_upgrade_state": "not_needed_snapshot_backed_at_launch",
+    "input_snapshot_content_hashes": [
+      "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    ],
+    "input_snapshot_count": 1,
+    "input_snapshot_identity_fingerprint": "2f847242c9547e889e852f7a4dc132293b43ba0e72d766fa2b7a91166decd6a9",
+    "input_snapshot_ids": [
+      "snapshot-golden-001"
+    ],
+    "input_snapshot_missing_source_refs": [],
+    "input_snapshots": [
+      {
+        "captured_at": "2025-01-01T11:55:00+00:00",
+        "content_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "entity": "activity",
+        "etag": "etag-001",
+        "immutable_uri": "s3://bioetl-bronze/chembl/activity/batch-001.jsonl.zst",
+        "last_modified": "2025-01-01T11:55:00Z",
+        "object_bucket": "bioetl-bronze",
+        "object_key": "chembl/activity/batch-001.jsonl.zst",
+        "object_version_id": "version-001",
+        "pipeline_name": "chembl_activity",
+        "provider": "chembl",
+        "query": "assay_type=B",
+        "query_fingerprint": "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+        "snapshot_id": "snapshot-golden-001",
+        "storage_provider": "s3"
+      }
+    ],
+    "lineage_closure_boundary": {
+      "family": "chembl.activity",
+      "reason": "family_within_supported_boundary",
+      "support_scope": "operator_grade_trace_debug",
+      "supported": true,
+      "supported_families": [
+        "chembl.activity",
+        "chembl.assay",
+        "chembl.assay_parameters",
+        "chembl.cell_line",
+        "chembl.compound_record",
+        "chembl.molecule",
+        "chembl.protein_class",
+        "chembl.publication",
+        "chembl.publication_similarity",
+        "chembl.publication_term",
+        "chembl.subcellular_fraction",
+        "chembl.target",
+        "chembl.target_component",
+        "chembl.target_protein_classification",
+        "chembl.tissue",
+        "crossref.publication",
+        "openalex.publication",
+        "pubchem.compound",
+        "pubmed.publication",
+        "semanticscholar.publication",
+        "uniprot.idmapping",
+        "uniprot.protein"
+      ]
+    },
+    "manifest_id": "manifest-golden-001",
+    "normalization_profile_hash": null,
+    "normalization_profile_ref": null,
+    "normalization_profile_version": null,
+    "occurrence_only_diagnostics": [],
+    "operator_replay_mode": "Exact Replay Blocked",
+    "planned_artifacts": [
+      {
+        "layer": "silver",
+        "path": "silver/chembl/activity"
+      }
+    ],
+    "post_capture_replayable_parent_boundary": "ledger_materialized_live_capture_parent",
+    "post_capture_replayable_parent_supported": true,
+    "produced_artifact_trace": {
+      "artifact_count": 0,
+      "artifact_publication_closure": "disabled",
+      "artifacts": [],
+      "complete": false,
+      "lookup": "run_ledger_by_manifest_id",
+      "lookup_key": "manifest-golden-001",
+      "manifest_id": "manifest-golden-001",
+      "missing_requirements": [
+        "run_ledger_history",
+        "artifact_publication_event"
+      ]
+    },
+    "published_artifacts": [],
+    "replay_capability": "exact_replay_supported",
+    "replay_capability_reason": "full_immutable_input_snapshot_envelope_present",
+    "replay_family_contract": {
+      "broader_historical_exact_replay_boundary": "historical_source_snapshot_certification",
+      "broader_historical_exact_replay_policy": "certified_historical_exact_replay_tranche_supported",
+      "broader_historical_exact_replay_reason": "retained_historical_source_runs_can_gain_certified_exact_replay_parent_evidence_via_backfilled_snapshot_certification",
+      "contract": "snapshot_backed_exact_replay",
+      "default_required_persistence_profile": "replay_ready",
+      "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+      "execution_context": "source",
+      "family": "chembl.activity",
+      "historical_live_run_upgrade_boundary": "input_snapshot_published_ledger_evidence",
+      "historical_live_run_upgrade_policy": "input_snapshot_published_ledger_evidence_only",
+      "historical_live_run_upgrade_reason": "historical_live_runs_require_input_snapshot_published_ledger_evidence_before_parent_promotion",
+      "post_capture_replayable_parent_boundary": "ledger_materialized_live_capture_parent",
+      "post_capture_replayable_parent_reason": "family_can_promote_materialized_live_capture_into_replayable_parent_evidence",
+      "post_capture_replayable_parent_supported": true,
+      "reason": "family_within_supported_boundary",
+      "strict_exact_replay_supported": true,
+      "strict_replay_runtime_verdict": "allowed_with_snapshot_backed_source_refs",
+      "support_scope": "operator_grade_trace_debug",
+      "support_state": "exact_replay_supported",
+      "supported_families": [
+        "chembl.activity",
+        "chembl.assay",
+        "chembl.assay_parameters",
+        "chembl.cell_line",
+        "chembl.compound_record",
+        "chembl.molecule",
+        "chembl.protein_class",
+        "chembl.publication",
+        "chembl.publication_similarity",
+        "chembl.publication_term",
+        "chembl.subcellular_fraction",
+        "chembl.target",
+        "chembl.target_component",
+        "chembl.target_protein_classification",
+        "chembl.tissue",
+        "crossref.publication",
+        "openalex.publication",
+        "pubchem.compound",
+        "pubmed.publication",
+        "semanticscholar.publication",
+        "uniprot.idmapping",
+        "uniprot.protein"
+      ]
+    },
+    "replay_mode": "exact_replay",
+    "replay_next_action": "Do not replay; required control-plane evidence is missing or inconsistent.",
+    "replay_occurrence_kind": "launch_time_snapshot_backed_run",
+    "replay_of_manifest_id": null,
+    "replay_of_run_id": null,
+    "replay_parentage": {
+      "is_exact_replay": false,
+      "replay_of_manifest_id": null,
+      "replay_of_run_id": null
+    },
+    "replay_readiness_verdict": "exact_replay_blocked",
+    "replay_resume_rebuild_verdict": "non_replayable",
+    "replay_support_state": "exact_replay_supported",
+    "requested_exact_replay": true,
+    "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "resume_contract": {
+      "applied_checkpoint_compatibility_policy": "hard_fail",
+      "continuation_mode": "exact_replay",
+      "execution_context": "ordinary",
+      "ledger_suffix_replay": false,
+      "occurrence_identity_anchor": "run_id",
+      "requested_checkpoint_compatibility_policy": null,
+      "requested_exact_replay": true,
+      "resume_evidence_source": "manifest_input_snapshots_and_control_plane_anchors",
+      "resume_guarantee": "strict_evidence_boundary_exact_replay",
+      "resume_mode": "checkpoint_snapshot_only",
+      "resume_requested": false,
+      "semantic_identity_anchor": "execution_fingerprint",
+      "strict_replay_safe": false
+    },
+    "resume_diagnostics": null,
+    "run_id": "00000000-0000-0000-0000-000000000901",
+    "snapshot_status": "full",
+    "source_fingerprint": "1750d384e3efab89c50eff0b4808a22adc1f4023c3f023e011cc50d41a2431a9",
+    "source_posture": "immutable_snapshot_envelope",
+    "source_revision_state": "clean"
+  },
   "identity_graph_complete": null,
   "input_snapshot_content_hashes": [
     "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"

@@ -721,6 +721,21 @@ stay un...
 
 ---
 
+## 🟡 Proposed ADRs
+
+### 1 decisions
+
+### ADR-061: Persisted Selected Run Assessment
+
+**Status**: `proposed` | **Category**: `Observability` | **Owner**: `BioETL Team`
+
+**Context**: Prometheus freshness and dashboard ranges describe current telemetry and chart
+coverage. They cannot define the outcome of a completed run. A successf...
+
+[📄 View Full ADR](decisions/ADR-061-persisted-selected-run-assessment.md)
+
+---
+
 ## 🔵 Superseded ADRs
 
 ### 2 decisions
@@ -746,6 +761,7 @@ stay un...
 ## 🎯 Using the ADR Registry
 
 - **Accepted ADRs**: Currently applicable architectural decisions
+- **Proposed ADRs**: Proposed decisions awaiting acceptance
 - **Draft ADRs**: Proposed decisions under review
 - **Deprecated ADRs**: No longer recommended but may still be in use
 - **Superseded ADRs**: Replaced by newer decisions

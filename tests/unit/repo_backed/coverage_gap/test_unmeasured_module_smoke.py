@@ -146,19 +146,11 @@ def test_pipeline_bootstrap_lazy_dependencies_delegate() -> None:
     )
     from pathlib import Path
 
-    with patch(
-        "bioetl.composition.bootstrap.runtime.normalization_policy_init."
-        "initialize_chembl_policy_registry"
-    ) as init_chembl:
+    with patch.object(lazy, "initialize_chembl_policy_registry") as init_chembl:
         lazy.initialize_chembl_policy_registry(Path("configs"))
         init_chembl.assert_called_once_with(Path("configs"))
 
-    with patch(
-        "bioetl.composition.factories.pipeline.registry.register_all_pipelines"
-    ) as register_all:
+    with patch.object(lazy, "register_all_pipelines") as register_all:
         registry = object()
         lazy.register_all_pipelines(registry=registry)
-        register_all.assert_called_once_with(
-            registry=registry,
-            registration_state=None,
-        )
+        register_all.assert_called_once_with(registry=registry)
