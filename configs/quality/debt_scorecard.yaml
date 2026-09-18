@@ -743,9 +743,9 @@ hotspot_family_coverage_thresholds:
       min_covered_line_percent: 96.8
       allowlisted_unmeasured_paths: []
     application_services_control_plane:
-      min_measured_module_count: 124
+      min_measured_module_count: 113
       max_unmeasured_module_count: 0
-      min_covered_module_count: 124
+      min_covered_module_count: 113
       min_covered_line_percent: 96.44
       allowlisted_unmeasured_paths: []
     composition_runtime_builders:

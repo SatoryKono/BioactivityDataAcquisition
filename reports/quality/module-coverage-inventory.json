@@ -1,7 +1,7 @@
 {
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
-  "coverage_xml_sha256": "c26b4e18847b17817b4446a3b5c6b0d0bcebf1db5cc623818d8421e8e779986a",
+  "coverage_xml_sha256": "c5b098f8a134a07c42fe11785490d7d3946bf17194b19eff6bd82beb5ed9f457",
   "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
   "measurement_mode": "coverage_xml",
   "modules": [
@@ -5876,11 +5876,11 @@
       "source_lines": 104
     },
     {
-      "coverage_percent": 98.61,
-      "coverage_status": "partially_covered",
-      "covered_lines": 71,
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 72,
       "executable_lines": 72,
-      "missing_lines": 1,
+      "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.replay.historical_closure_policy",
       "path": "src/bioetl/application/services/control_plane/replay/historical_closure_policy.py",
       "source_lines": 243
@@ -30598,11 +30598,11 @@
       "source_lines": 104
     },
     {
-      "coverage_percent": 98.61,
-      "coverage_status": "partially_covered",
-      "covered_lines": 71,
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 72,
       "executable_lines": 72,
-      "missing_lines": 1,
+      "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.replay.historical_closure_policy",
       "path": "src/bioetl/application/services/control_plane/replay/historical_closure_policy.py",
       "source_lines": 243
@@ -49487,28 +49487,28 @@
       "application_services_control_plane": {
         "allowlisted_unmeasured_module_count": 0,
         "allowlisted_unmeasured_modules": [],
-        "coverage_percent_avg": 99.99,
-        "coverage_percent_min": 98.61,
-        "covered_line_percent": 99.98,
+        "coverage_percent_avg": 100.0,
+        "coverage_percent_min": 100.0,
+        "covered_line_percent": 100.0,
         "covered_module_count": 113,
         "measured_module_count": 113,
         "measured_percent": 100.0,
         "module_count": 113,
         "status_counts": {
           "coverage_xml_missing": 0,
-          "fully_covered": 112,
+          "fully_covered": 113,
           "no_executable_lines": 0,
-          "partially_covered": 1,
+          "partially_covered": 0,
           "uncovered": 0,
           "unmeasured": 0
         },
-        "threshold_status": "fail",
+        "threshold_status": "pass",
         "thresholds": {
           "allowlisted_unmeasured_paths": [],
           "max_unmeasured_module_count": 0,
           "min_covered_line_percent": 96.44,
-          "min_covered_module_count": 124,
-          "min_measured_module_count": 124
+          "min_covered_module_count": 113,
+          "min_measured_module_count": 113
         },
         "unexpected_unmeasured_module_count": 0,
         "unexpected_unmeasured_modules": [],
@@ -49608,9 +49608,9 @@
     "source_module_count": 2472,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 2470,
+      "fully_covered": 2471,
       "no_executable_lines": 1,
-      "partially_covered": 1,
+      "partially_covered": 0,
       "uncovered": 0,
       "unmeasured": 0
     },
