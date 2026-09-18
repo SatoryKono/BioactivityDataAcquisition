@@ -605,6 +605,20 @@ def test_run_option_label_treats_naive_started_at_as_utc() -> None:
     assert str(records[0].run_id) in label
 
 
+def test_run_option_label_uses_dashboard_timezone() -> None:
+    records = subject.build_selector_records((_manifest(13),), None)
+    aware = replace(
+        records[0], started_at=datetime(2026, 9, 17, 15, 23, tzinfo=UTC)
+    )
+    label = selector_context._run_option_label(
+        str(records[0].run_id), aware, timezone="Europe/Kyiv"
+    )
+    assert "18:23" in label
+    assert "UTC ·" not in label
+    assert records[0].pipeline in label
+    assert str(records[0].run_id) in label
+
+
 def test_run_option_labels_mark_unknown_when_catalog_record_is_missing() -> None:
     payload = selector_context.build_selector_filter_options_payload(
         manifests=(),

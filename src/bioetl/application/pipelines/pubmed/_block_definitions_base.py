@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+# B405 justification: ET used for type/traversal of defusedxml-parsed trees only
+# (no direct parsing of untrusted XML; XXE/billion-laughs safe). Reviewed 2026-09-18; re-review by 2027-03-18.
 import xml.etree.ElementTree as ET  # nosec B405
 from collections.abc import Callable
 

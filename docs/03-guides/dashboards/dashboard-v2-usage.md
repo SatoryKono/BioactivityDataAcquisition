@@ -808,8 +808,10 @@ Replay Safety и Manifest/Ledger также сохраняют UNKNOWN при п
 Run Explorer показывает последние десять запусков с длительностью и ссылками
 Report. Find Run ID ищет точный UUID, включая более старые запуски, внутри
 выбранных Workflow/Pipeline/Run Type. Пустое поле возвращает обычный список.
-Event age — возраст последнего события ledger для running; время scrape и
-mtime файла не используются. Отсутствующее время остаётся UNKNOWN.
+Event age — возраст последнего события ledger для running в compact duration
+(`16 h 53 m`, `45 m`, `10 s`); терминальные строки показывают `completed`.
+Время scrape и mtime файла не используются. Отсутствующее время остаётся
+UNKNOWN.
 
 Overview сначала показывает CURRENT health и First Action, затем SELECTED RUN.
 Все шесть доменов видны в матрице; VERIFY означает проверку отсутствующего

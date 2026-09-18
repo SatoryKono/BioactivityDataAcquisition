@@ -68,7 +68,9 @@ def test_base_transformer_serialization_facades_delegate() -> None:
     assert _BaseTransformerRecordHelpersMixin._serialize_list([1, 2]) == "[1,2]"
 
 
-def test_publication_vocabulary_helpers_ignore_unsupported_metric_and_blank_text() -> None:
+def test_publication_vocabulary_helpers_ignore_unsupported_metric_and_blank_text() -> (
+    None
+):
     emit_unknown_publication_vocab_metrics(
         metrics=SimpleNamespace(),
         pipeline_name="crossref_publication",
@@ -90,9 +92,12 @@ def test_uniprot_extractors_ignore_invalid_comment_and_alternative_name_items() 
         "FUNCTION": [{"commentType": "FUNCTION"}]
     }
     assert ExtractorHelper.count_list("invalid") is None
-    assert ExtractorHelper.extract_alternative_names(
-        {"alternativeNames": ["invalid", {"fullName": {"value": "Name"}}]}
-    ) == '["Name"]'
+    assert (
+        ExtractorHelper.extract_alternative_names(
+            {"alternativeNames": ["invalid", {"fullName": {"value": "Name"}}]}
+        )
+        == '["Name"]'
+    )
 
 
 def test_contract_migration_helpers_deduplicate_and_report_absent_guide() -> None:
@@ -115,9 +120,7 @@ def test_manifest_verdict_distinguishes_effective_config_and_verified_cases() ->
         "occurrence_only": False,
     }
     assert (
-        resolve_verify_verdict(
-            **common, effective_config_semantic_equivalent=False
-        )
+        resolve_verify_verdict(**common, effective_config_semantic_equivalent=False)
         == "effective_config_semantic_drift"
     )
     assert (
@@ -169,7 +172,9 @@ def test_debug_export_and_empty_composite_lineage_helpers() -> None:
     assert _build_provider_field_map(()) == {}
 
 
-def test_checkpoint_replay_helpers_cover_absent_and_non_mapping_launch_context() -> None:
+def test_checkpoint_replay_helpers_cover_absent_and_non_mapping_launch_context() -> (
+    None
+):
     assert _replay_capability(None) is None
     inspection = SimpleNamespace(
         diagnostics={}, manifest=SimpleNamespace(launch_context="invalid")

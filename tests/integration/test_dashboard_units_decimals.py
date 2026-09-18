@@ -176,3 +176,19 @@ def test_fraction_panels_have_consistent_units():
                 ), (
                     f"{dashboard_path.name}:{title} should use percentunit, percent, short, time unit, or None, got {unit!r}"
                 )
+
+
+def test_global_read_latency_axis_stays_seconds_without_one_second_ceiling():
+    """Panel 111 must auto-scale seconds; 0.5/1s thresholds flatten millisecond reads."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panel = next(item for item in get_dashboard_panels(dashboard) if item.get("id") == 111)
+    defaults = panel["fieldConfig"]["defaults"]
+    assert defaults["unit"] == "s"
+    threshold_values = [
+        step.get("value")
+        for step in defaults.get("thresholds", {}).get("steps", [])
+        if step.get("value") is not None
+    ]
+    assert 0.5 not in threshold_values
+    assert 1 not in threshold_values
+    assert defaults.get("custom", {}).get("axisSoftMax") is None

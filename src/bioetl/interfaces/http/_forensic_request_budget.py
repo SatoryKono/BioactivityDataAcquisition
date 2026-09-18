@@ -67,6 +67,7 @@ def forensic_unavailable_table_payload(
             "processing_status": "UNKNOWN",
             "trust_status": "QUERY ERROR",
             "reasons_text": f"{reason}; Trust not evaluated. Retry the query.",
+            "reasons_display": f"{reason}; Trust not evaluated. Retry the query.",
             "reasons_count": 1,
             "evidence_observed_at": None,
             "evidence_freshness": "unavailable",

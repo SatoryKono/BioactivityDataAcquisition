@@ -255,6 +255,7 @@ async def test_pipeline_run_report_returns_unresolved_and_missing_shells(
                     "message": "run_id not selected; pick a run from Inspect Recent Runs",
                 }
             ],
+            "rejection_details_display": [],
             "reasons_top_n": [],
             "reconciliation": [],
             "artifacts": [],

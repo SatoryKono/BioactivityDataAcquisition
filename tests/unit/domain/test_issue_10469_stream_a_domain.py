@@ -103,7 +103,6 @@ def test_gold_rule_from_mapping_covers_errors_and_optional_fields() -> None:
         GoldBusinessRuleSpec(column="x", condition="range", minimum=10, maximum=1)
 
 
-
 def test_frozen_containers_cover_copy_eq_hash_and_thaw() -> None:
     frozen_list = FrozenList([1, {"k": 2}])
     assert frozen_list[0] == 1
@@ -232,16 +231,14 @@ def test_observability_pipeline_labels_collapse_unbounded_values() -> None:
         normalize_observability_pipeline_label,
     )
 
-    assert normalize_observability_pipeline_label(r"E:\pipelines\chembl_activity__v1_2_3") == (
-        "chembl_activity"
-    )
+    assert normalize_observability_pipeline_label(
+        r"E:\pipelines\chembl_activity__v1_2_3"
+    ) == ("chembl_activity")
     assert (
         normalize_observability_pipeline_label("550e8400-e29b-41d4-a716-446655440000")
         == "unknown"
     )
-    assert (
-        normalize_observability_pipeline_label("sha256:" + ("ab" * 16)) == "unknown"
-    )
+    assert normalize_observability_pipeline_label("sha256:" + ("ab" * 16)) == "unknown"
     assert normalize_observability_pipeline_label("///") == "unknown"
     payload = build_observability_contract_payload(
         event_name="run_started",
@@ -254,4 +251,3 @@ def test_observability_pipeline_labels_collapse_unbounded_values() -> None:
     assert payload.metric_labels["pipeline"] == "chembl_activity"
     assert payload.metric_labels["error_type"] == "unknown"
     assert is_observability_contract_valid(payload.context)
-

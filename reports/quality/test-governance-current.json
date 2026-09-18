@@ -55,6 +55,48 @@
     },
     {
       "category": "intentional_no_exception_contract",
+      "line": "43",
+      "path": "tests/unit/application/test_issue_10518_application_coreobs_b.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_record_batch_lifecycle_event_without_metrics_is_noop"
+    },
+    {
+      "category": "intentional_no_exception_contract",
+      "line": "50",
+      "path": "tests/unit/application/test_issue_10518_application_coreobs_b.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_guarded_recorders_without_metrics_are_noop"
+    },
+    {
+      "category": "intentional_no_exception_contract",
+      "line": "610",
+      "path": "tests/unit/application/test_issue_10518_application_pipelines_a.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_noop_without_counter"
+    },
+    {
+      "category": "intentional_no_exception_contract",
+      "line": "852",
+      "path": "tests/unit/application/test_issue_10518_application_svc1a.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_skips_rows_without_identity"
+    },
+    {
+      "category": "intentional_no_exception_contract",
+      "line": "1365",
+      "path": "tests/unit/application/test_issue_10518_application_svc2.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_checkpoint_record_metrics_noop_without_sink"
+    },
+    {
+      "category": "intentional_no_exception_contract",
+      "line": "1009",
+      "path": "tests/unit/application/test_issue_10518_application_tail1a.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_increment_counter_without_metrics_api_is_noop"
+    },
+    {
+      "category": "intentional_no_exception_contract",
       "line": "48",
       "path": "tests/unit/application/core/test_batch_metrics_accounting.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -125,14 +167,14 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "420",
+      "line": "421",
       "path": "tests/unit/composition/test_observability_contract.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_noop_metrics_all_methods_are_noop"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "430",
+      "line": "431",
       "path": "tests/unit/composition/test_observability_contract.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_noop_metrics_close_is_idempotent"
@@ -213,6 +255,13 @@
       "path": "tests/unit/domain/schemas/chembl/test_schemas.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_target_schema_accepts_derived_xref_fields"
+    },
+    {
+      "category": "intentional_no_exception_contract",
+      "line": "159",
+      "path": "tests/unit/domain/workflow/test_delete_orphans_scope.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_reject_passes_without_delete_orphans_or_limits"
     },
     {
       "category": "intentional_no_exception_contract",
@@ -646,13 +695,19 @@
     "architecture_helper_guard": 1,
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
-    "intentional_no_exception_contract": 86,
+    "intentional_no_exception_contract": 93,
     "weak_no_value": 0
   },
   "assertless_examples": [
     "tests/architecture/test_quality_debt_scorecard.py:1127",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
     "tests/integration/infrastructure/storage/test_delta_reader.py:586",
+    "tests/unit/application/test_issue_10518_application_coreobs_b.py:43",
+    "tests/unit/application/test_issue_10518_application_coreobs_b.py:50",
+    "tests/unit/application/test_issue_10518_application_pipelines_a.py:610",
+    "tests/unit/application/test_issue_10518_application_svc1a.py:852",
+    "tests/unit/application/test_issue_10518_application_svc2.py:1365",
+    "tests/unit/application/test_issue_10518_application_tail1a.py:1009",
     "tests/unit/application/core/test_batch_metrics_accounting.py:48",
     "tests/unit/application/core/test_batch_tracing.py:137",
     "tests/unit/application/core/test_batch_writer_tracing_mixin.py:106",
@@ -663,18 +718,12 @@
     "tests/unit/application/observability/test_pipeline_metrics.py:297",
     "tests/unit/application/pipelines/crossref/test_crossref_transformer.py:319",
     "tests/unit/application/services/test_checkpoint_telemetry_helpers.py:68",
-    "tests/unit/composition/test_observability_contract.py:420",
-    "tests/unit/composition/test_observability_contract.py:430",
+    "tests/unit/composition/test_observability_contract.py:421",
+    "tests/unit/composition/test_observability_contract.py:431",
     "tests/unit/composition/factories/storage/test_health_mixin.py:72",
     "tests/unit/composition/factories/storage/test_health_mixin.py:103",
     "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:617",
-    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:638",
-    "tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py:178",
-    "tests/unit/domain/ports/test_noop_audit.py:90",
-    "tests/unit/domain/ports/test_protocol_stubs.py:235",
-    "tests/unit/domain/schemas/chembl/test_schemas.py:263",
-    "tests/unit/domain/schemas/chembl/test_schemas.py:280",
-    "tests/unit/domain/schemas/chembl/test_schemas.py:296"
+    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:638"
   ],
   "assertless_families": {
     "tests/architecture/test_quality_debt_scorecard.py": {
@@ -749,6 +798,36 @@
         "intentional_no_exception_contract": 1
       }
     },
+    "tests/unit/application/test_issue_10518_application_coreobs_b.py": {
+      "assertless_tests": 2,
+      "categories": {
+        "intentional_no_exception_contract": 2
+      }
+    },
+    "tests/unit/application/test_issue_10518_application_pipelines_a.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/application/test_issue_10518_application_svc1a.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/application/test_issue_10518_application_svc2.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/application/test_issue_10518_application_tail1a.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
     "tests/unit/composition/factories/storage/test_health_mixin.py": {
       "assertless_tests": 2,
       "categories": {
@@ -789,6 +868,12 @@
       "assertless_tests": 4,
       "categories": {
         "intentional_no_exception_contract": 4
+      }
+    },
+    "tests/unit/domain/workflow/test_delete_orphans_scope.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
       }
     },
     "tests/unit/infrastructure/adapters/decorators/test_circuit_breaker_decorator.py": {
@@ -948,8 +1033,33 @@
       }
     }
   },
-  "assertless_total_candidates": 87,
-  "budget_violations": [],
+  "assertless_total_candidates": 94,
+  "budget_violations": [
+    {
+      "actual": 45,
+      "budget": "duplicate_test_names_max",
+      "expected_max": 0,
+      "metric": "duplicate_test_names"
+    },
+    {
+      "actual": 90,
+      "budget": "duplicate_test_name_occurrences_max",
+      "expected_max": 0,
+      "metric": "duplicate_test_name_occurrences"
+    },
+    {
+      "actual": 30,
+      "budget": "markerless_test_functions_max",
+      "expected_max": 0,
+      "metric": "markerless_test_functions"
+    },
+    {
+      "actual": 1,
+      "budget": "uuid4_call_sites_max",
+      "expected_max": 0,
+      "metric": "uuid4_call_sites"
+    }
+  ],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1094,16 +1204,602 @@
     }
   },
   "date_today_call_sites": 0,
-  "duplicate_test_name_inventory": [],
+  "duplicate_test_name_inventory": [
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:119",
+        "tests/unit/infrastructure/test_issue_10469_tail.py:97"
+      ],
+      "name": "test_adr_filename_parser_rejects_noncanonical_name",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/test_issue_10469_lazy_facades.py:17",
+        "tests/unit/composition/test_issue_10469_lazy_facades.py:17"
+      ],
+      "name": "test_application_composite_resolves_caches_and_lists_lazy_export",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:57",
+        "tests/unit/application/composite/test_issue_10469_tail.py:57"
+      ],
+      "name": "test_blank_expected_composite_identity_disables_identity_check",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/domain/test_issue_10469_domain_tail.py:137",
+        "tests/unit/domain/test_issue_10469_tail.py:93"
+      ],
+      "name": "test_blank_idempotency_contract_normalizes_to_none",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/core/test_issue_10469_application_core_tail.py:39",
+        "tests/unit/application/core/test_issue_10469_tail.py:39"
+      ],
+      "name": "test_checkpoint_payload_uses_plain_count_for_empty_memory_trace",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/core/test_issue_10469_application_core_tail.py:59",
+        "tests/unit/application/core/test_issue_10469_tail.py:59"
+      ],
+      "name": "test_checkpoint_policy_rejects_unknown_value",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:67",
+        "tests/unit/application/composite/test_issue_10469_tail.py:67"
+      ],
+      "name": "test_checkpoint_with_merge_completed_updates_state_and_payload",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:69",
+        "tests/unit/infrastructure/test_issue_10469_tail.py:47"
+      ],
+      "name": "test_chembl_composite_key_helpers_delegate_registry_answer",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:44",
+        "tests/unit/application/composite/test_issue_10469_tail.py:44"
+      ],
+      "name": "test_coalesce_and_drop_returns_result_when_no_secondary_column_remains",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/domain/test_issue_10469_domain_tail.py:118",
+        "tests/unit/domain/test_issue_10469_tail.py:74"
+      ],
+      "name": "test_collect_blocker_issues_filters_other_severities",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/test_issue_10469_lazy_facades.py:39",
+        "tests/unit/composition/test_issue_10469_lazy_facades.py:39"
+      ],
+      "name": "test_composition_bootstrap_resolves_runtime_module_and_lists_exports",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/domain/test_issue_10469_domain_tail.py:128",
+        "tests/unit/domain/test_issue_10469_tail.py:84"
+      ],
+      "name": "test_cross_validation_threshold_rejects_bool",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:80",
+        "tests/unit/infrastructure/test_issue_10469_tail.py:58"
+      ],
+      "name": "test_crossref_runtime_service_rejects_missing_dependency",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:74",
+        "tests/unit/infrastructure/test_issue_10469_tail.py:52"
+      ],
+      "name": "test_default_fallback_service_preserves_metrics_dependency",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:82",
+        "tests/unit/application/composite/test_issue_10469_tail.py:82"
+      ],
+      "name": "test_dependency_duration_seconds_uses_wall_clock_delta",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/core/test_issue_10469_application_core_tail.py:73",
+        "tests/unit/application/core/test_issue_10469_tail.py:73"
+      ],
+      "name": "test_disallowed_idempotency_contract_is_reported",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/domain/test_issue_10469_domain_tail.py:99",
+        "tests/unit/domain/test_issue_10469_tail.py:55"
+      ],
+      "name": "test_domain_lazy_facade_directory_contains_public_exports",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/domain/test_issue_10469_domain_tail.py:124",
+        "tests/unit/domain/test_issue_10469_tail.py:80"
+      ],
+      "name": "test_dq_metrics_empty_batch_has_no_incoming_fields",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/core/test_issue_10469_application_core_tail.py:48",
+        "tests/unit/application/core/test_issue_10469_tail.py:48"
+      ],
+      "name": "test_dq_threshold_classification_returns_none_without_breach",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:137",
+        "tests/unit/infrastructure/test_issue_10469_tail.py:115"
+      ],
+      "name": "test_dq_threshold_normalization_replaces_non_mapping_container",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/domain/test_issue_10469_domain_tail.py:107",
+        "tests/unit/domain/test_issue_10469_tail.py:63"
+      ],
+      "name": "test_empty_composite_cv_summary_is_explicitly_signal_free",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/core/test_issue_10469_application_core_tail.py:44",
+        "tests/unit/application/core/test_issue_10469_tail.py:44"
+      ],
+      "name": "test_extract_record_id_returns_none_without_supported_identifier",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:78",
+        "tests/unit/application/composite/test_issue_10469_tail.py:78"
+      ],
+      "name": "test_find_column_case_insensitive_returns_none_without_match",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:127",
+        "tests/unit/application/composite/test_issue_10469_tail.py:127"
+      ],
+      "name": "test_find_schema_class_returns_none_when_module_has_no_schema_type",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:89",
+        "tests/unit/infrastructure/test_issue_10469_tail.py:67"
+      ],
+      "name": "test_http_metrics_noop_when_metrics_are_disabled",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/test_issue_10469_lazy_facades.py:54",
+        "tests/unit/composition/test_issue_10469_lazy_facades.py:54"
+      ],
+      "name": "test_infrastructure_observability_resolves_caches_and_lists_lazy_export",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:131",
+        "tests/unit/application/composite/test_issue_10469_tail.py:131"
+      ],
+      "name": "test_join_key_expression_applies_lowercase_policy",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:98",
+        "tests/unit/application/composite/test_issue_10469_tail.py:98"
+      ],
+      "name": "test_layer_filter_without_selection_preserves_columns",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/core/test_issue_10469_application_core_tail.py:85",
+        "tests/unit/application/core/test_issue_10469_tail.py:85"
+      ],
+      "name": "test_lazy_export_directory_merges_namespace_and_exports",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/domain/test_issue_10469_domain_tail.py:133",
+        "tests/unit/domain/test_issue_10469_tail.py:89"
+      ],
+      "name": "test_lineage_error_message_stringifies_non_string_value",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/domain/test_issue_10469_domain_tail.py:161",
+        "tests/unit/domain/test_issue_10469_tail.py:117"
+      ],
+      "name": "test_metadata_datetime_rejects_naive_value",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/domain/test_issue_10469_domain_tail.py:141",
+        "tests/unit/domain/test_issue_10469_tail.py:97"
+      ],
+      "name": "test_missing_silver_filter_mode_uses_compatibility_default",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:112",
+        "tests/unit/application/composite/test_issue_10469_tail.py:112"
+      ],
+      "name": "test_nullify_enricher_columns_returns_same_frame_without_prefixed_columns",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:94",
+        "tests/unit/infrastructure/test_issue_10469_tail.py:72"
+      ],
+      "name": "test_openalex_query_executor_maps_non_object_json_to_empty_mapping",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:114",
+        "tests/unit/infrastructure/test_issue_10469_tail.py:92"
+      ],
+      "name": "test_pubchem_transport_bag_rejects_unknown_legacy_keyword",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/domain/test_issue_10469_domain_tail.py:148",
+        "tests/unit/domain/test_issue_10469_tail.py:104"
+      ],
+      "name": "test_publication_vocabulary_reports_registry_lifecycle",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:87",
+        "tests/unit/application/composite/test_issue_10469_tail.py:87"
+      ],
+      "name": "test_resume_phase_routes_completed_merge_to_cross_validation",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/domain/test_issue_10469_domain_tail.py:166",
+        "tests/unit/domain/test_issue_10469_tail.py:122"
+      ],
+      "name": "test_scd_config_rejects_non_positive_type",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/core/test_issue_10469_application_core_tail.py:64",
+        "tests/unit/application/core/test_issue_10469_tail.py:64"
+      ],
+      "name": "test_shutdown_service_factory_preserves_collaborators",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/core/test_issue_10469_application_core_tail.py:34",
+        "tests/unit/application/core/test_issue_10469_tail.py:34"
+      ],
+      "name": "test_transformer_bags_reject_unknown_legacy_keyword",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:123",
+        "tests/unit/infrastructure/test_issue_10469_tail.py:101"
+      ],
+      "name": "test_unified_quality_layer_returns_flat_legacy_payload",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:85",
+        "tests/unit/infrastructure/test_issue_10469_tail.py:63"
+      ],
+      "name": "test_unknown_health_status_code_is_unhealthy",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:53",
+        "tests/unit/application/composite/test_issue_10469_tail.py:53"
+      ],
+      "name": "test_unknown_lifecycle_severity_uses_info_contract_value",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:143",
+        "tests/unit/infrastructure/test_issue_10469_tail.py:121"
+      ],
+      "name": "test_validation_list_merge_replaces_heterogeneous_override",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/domain/test_issue_10469_domain_tail.py:103",
+        "tests/unit/domain/test_issue_10469_tail.py:59"
+      ],
+      "name": "test_yaml_scalar_falls_back_to_string_representation",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    }
+  ],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 0,
-    "duplicate_occurrences": 0,
+    "cross_file_groups": 45,
+    "duplicate_occurrences": 90,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 0
+    "total_duplicate_names": 45
   },
-  "duplicate_test_name_occurrences": 0,
-  "duplicate_test_names": 0,
+  "duplicate_test_name_occurrences": 90,
+  "duplicate_test_names": 45,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1122,9 +1818,40 @@
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 86,
-  "markerless_examples": [],
-  "markerless_test_functions": 0,
+  "intentional_no_exception_contract": 93,
+  "markerless_examples": [
+    "tests/unit/application/test_issue_10469_application_tail_three.py:46",
+    "tests/unit/application/test_issue_10469_application_tail_three.py:136",
+    "tests/unit/application/test_issue_10469_application_tail_three.py:165",
+    "tests/unit/application/test_issue_10469_application_tail_three.py:173",
+    "tests/unit/application/test_issue_10469_application_tail_three.py:184",
+    "tests/unit/application/test_issue_10469_application_tail_three.py:197",
+    "tests/unit/application/test_issue_10469_application_tail_three.py:203",
+    "tests/unit/application/test_issue_10469_application_tail_three.py:216",
+    "tests/unit/application/test_issue_10469_application_tail_three.py:224",
+    "tests/unit/application/test_issue_10469_application_tail_three.py:235",
+    "tests/unit/application/test_issue_10469_application_tail_three.py:251",
+    "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:53",
+    "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:60",
+    "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:67",
+    "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:76",
+    "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:87",
+    "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:95",
+    "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:105",
+    "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:125",
+    "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:134",
+    "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:149",
+    "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:156",
+    "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:163",
+    "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:172",
+    "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:184",
+    "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:189",
+    "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:201",
+    "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:215",
+    "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:239",
+    "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:256"
+  ],
+  "markerless_test_functions": 30,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -1190,6 +1917,48 @@
         "path": "tests/integration/infrastructure/storage/test_delta_reader.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_is_noop"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "43",
+        "path": "tests/unit/application/test_issue_10518_application_coreobs_b.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_record_batch_lifecycle_event_without_metrics_is_noop"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "50",
+        "path": "tests/unit/application/test_issue_10518_application_coreobs_b.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_guarded_recorders_without_metrics_are_noop"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "610",
+        "path": "tests/unit/application/test_issue_10518_application_pipelines_a.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_noop_without_counter"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "852",
+        "path": "tests/unit/application/test_issue_10518_application_svc1a.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_skips_rows_without_identity"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "1365",
+        "path": "tests/unit/application/test_issue_10518_application_svc2.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_checkpoint_record_metrics_noop_without_sink"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "1009",
+        "path": "tests/unit/application/test_issue_10518_application_tail1a.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_increment_counter_without_metrics_api_is_noop"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -1263,14 +2032,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "420",
+        "line": "421",
         "path": "tests/unit/composition/test_observability_contract.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_noop_metrics_all_methods_are_noop"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "430",
+        "line": "431",
         "path": "tests/unit/composition/test_observability_contract.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_noop_metrics_close_is_idempotent"
@@ -1351,6 +2120,13 @@
         "path": "tests/unit/domain/schemas/chembl/test_schemas.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_target_schema_accepts_derived_xref_fields"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "159",
+        "path": "tests/unit/domain/workflow/test_delete_orphans_scope.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_reject_passes_without_delete_orphans_or_limits"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -1784,13 +2560,19 @@
       "architecture_helper_guard": 1,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
-      "intentional_no_exception_contract": 86,
+      "intentional_no_exception_contract": 93,
       "weak_no_value": 0
     },
     "assertless_examples": [
       "tests/architecture/test_quality_debt_scorecard.py:1127",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
       "tests/integration/infrastructure/storage/test_delta_reader.py:586",
+      "tests/unit/application/test_issue_10518_application_coreobs_b.py:43",
+      "tests/unit/application/test_issue_10518_application_coreobs_b.py:50",
+      "tests/unit/application/test_issue_10518_application_pipelines_a.py:610",
+      "tests/unit/application/test_issue_10518_application_svc1a.py:852",
+      "tests/unit/application/test_issue_10518_application_svc2.py:1365",
+      "tests/unit/application/test_issue_10518_application_tail1a.py:1009",
       "tests/unit/application/core/test_batch_metrics_accounting.py:48",
       "tests/unit/application/core/test_batch_tracing.py:137",
       "tests/unit/application/core/test_batch_writer_tracing_mixin.py:106",
@@ -1801,20 +2583,14 @@
       "tests/unit/application/observability/test_pipeline_metrics.py:297",
       "tests/unit/application/pipelines/crossref/test_crossref_transformer.py:319",
       "tests/unit/application/services/test_checkpoint_telemetry_helpers.py:68",
-      "tests/unit/composition/test_observability_contract.py:420",
-      "tests/unit/composition/test_observability_contract.py:430",
+      "tests/unit/composition/test_observability_contract.py:421",
+      "tests/unit/composition/test_observability_contract.py:431",
       "tests/unit/composition/factories/storage/test_health_mixin.py:72",
       "tests/unit/composition/factories/storage/test_health_mixin.py:103",
       "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:617",
-      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:638",
-      "tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py:178",
-      "tests/unit/domain/ports/test_noop_audit.py:90",
-      "tests/unit/domain/ports/test_protocol_stubs.py:235",
-      "tests/unit/domain/schemas/chembl/test_schemas.py:263",
-      "tests/unit/domain/schemas/chembl/test_schemas.py:280",
-      "tests/unit/domain/schemas/chembl/test_schemas.py:296"
+      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:638"
     ],
-    "assertless_total_candidates": 87,
+    "assertless_total_candidates": 94,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -1959,16 +2735,602 @@
       }
     },
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [],
+    "duplicate_test_name_inventory": [
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:119",
+          "tests/unit/infrastructure/test_issue_10469_tail.py:97"
+        ],
+        "name": "test_adr_filename_parser_rejects_noncanonical_name",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/test_issue_10469_lazy_facades.py:17",
+          "tests/unit/composition/test_issue_10469_lazy_facades.py:17"
+        ],
+        "name": "test_application_composite_resolves_caches_and_lists_lazy_export",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:57",
+          "tests/unit/application/composite/test_issue_10469_tail.py:57"
+        ],
+        "name": "test_blank_expected_composite_identity_disables_identity_check",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/domain/test_issue_10469_domain_tail.py:137",
+          "tests/unit/domain/test_issue_10469_tail.py:93"
+        ],
+        "name": "test_blank_idempotency_contract_normalizes_to_none",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/core/test_issue_10469_application_core_tail.py:39",
+          "tests/unit/application/core/test_issue_10469_tail.py:39"
+        ],
+        "name": "test_checkpoint_payload_uses_plain_count_for_empty_memory_trace",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/core/test_issue_10469_application_core_tail.py:59",
+          "tests/unit/application/core/test_issue_10469_tail.py:59"
+        ],
+        "name": "test_checkpoint_policy_rejects_unknown_value",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:67",
+          "tests/unit/application/composite/test_issue_10469_tail.py:67"
+        ],
+        "name": "test_checkpoint_with_merge_completed_updates_state_and_payload",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:69",
+          "tests/unit/infrastructure/test_issue_10469_tail.py:47"
+        ],
+        "name": "test_chembl_composite_key_helpers_delegate_registry_answer",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:44",
+          "tests/unit/application/composite/test_issue_10469_tail.py:44"
+        ],
+        "name": "test_coalesce_and_drop_returns_result_when_no_secondary_column_remains",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/domain/test_issue_10469_domain_tail.py:118",
+          "tests/unit/domain/test_issue_10469_tail.py:74"
+        ],
+        "name": "test_collect_blocker_issues_filters_other_severities",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/test_issue_10469_lazy_facades.py:39",
+          "tests/unit/composition/test_issue_10469_lazy_facades.py:39"
+        ],
+        "name": "test_composition_bootstrap_resolves_runtime_module_and_lists_exports",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/domain/test_issue_10469_domain_tail.py:128",
+          "tests/unit/domain/test_issue_10469_tail.py:84"
+        ],
+        "name": "test_cross_validation_threshold_rejects_bool",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:80",
+          "tests/unit/infrastructure/test_issue_10469_tail.py:58"
+        ],
+        "name": "test_crossref_runtime_service_rejects_missing_dependency",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:74",
+          "tests/unit/infrastructure/test_issue_10469_tail.py:52"
+        ],
+        "name": "test_default_fallback_service_preserves_metrics_dependency",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:82",
+          "tests/unit/application/composite/test_issue_10469_tail.py:82"
+        ],
+        "name": "test_dependency_duration_seconds_uses_wall_clock_delta",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/core/test_issue_10469_application_core_tail.py:73",
+          "tests/unit/application/core/test_issue_10469_tail.py:73"
+        ],
+        "name": "test_disallowed_idempotency_contract_is_reported",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/domain/test_issue_10469_domain_tail.py:99",
+          "tests/unit/domain/test_issue_10469_tail.py:55"
+        ],
+        "name": "test_domain_lazy_facade_directory_contains_public_exports",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/domain/test_issue_10469_domain_tail.py:124",
+          "tests/unit/domain/test_issue_10469_tail.py:80"
+        ],
+        "name": "test_dq_metrics_empty_batch_has_no_incoming_fields",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/core/test_issue_10469_application_core_tail.py:48",
+          "tests/unit/application/core/test_issue_10469_tail.py:48"
+        ],
+        "name": "test_dq_threshold_classification_returns_none_without_breach",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:137",
+          "tests/unit/infrastructure/test_issue_10469_tail.py:115"
+        ],
+        "name": "test_dq_threshold_normalization_replaces_non_mapping_container",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/domain/test_issue_10469_domain_tail.py:107",
+          "tests/unit/domain/test_issue_10469_tail.py:63"
+        ],
+        "name": "test_empty_composite_cv_summary_is_explicitly_signal_free",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/core/test_issue_10469_application_core_tail.py:44",
+          "tests/unit/application/core/test_issue_10469_tail.py:44"
+        ],
+        "name": "test_extract_record_id_returns_none_without_supported_identifier",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:78",
+          "tests/unit/application/composite/test_issue_10469_tail.py:78"
+        ],
+        "name": "test_find_column_case_insensitive_returns_none_without_match",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:127",
+          "tests/unit/application/composite/test_issue_10469_tail.py:127"
+        ],
+        "name": "test_find_schema_class_returns_none_when_module_has_no_schema_type",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:89",
+          "tests/unit/infrastructure/test_issue_10469_tail.py:67"
+        ],
+        "name": "test_http_metrics_noop_when_metrics_are_disabled",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/test_issue_10469_lazy_facades.py:54",
+          "tests/unit/composition/test_issue_10469_lazy_facades.py:54"
+        ],
+        "name": "test_infrastructure_observability_resolves_caches_and_lists_lazy_export",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:131",
+          "tests/unit/application/composite/test_issue_10469_tail.py:131"
+        ],
+        "name": "test_join_key_expression_applies_lowercase_policy",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:98",
+          "tests/unit/application/composite/test_issue_10469_tail.py:98"
+        ],
+        "name": "test_layer_filter_without_selection_preserves_columns",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/core/test_issue_10469_application_core_tail.py:85",
+          "tests/unit/application/core/test_issue_10469_tail.py:85"
+        ],
+        "name": "test_lazy_export_directory_merges_namespace_and_exports",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/domain/test_issue_10469_domain_tail.py:133",
+          "tests/unit/domain/test_issue_10469_tail.py:89"
+        ],
+        "name": "test_lineage_error_message_stringifies_non_string_value",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/domain/test_issue_10469_domain_tail.py:161",
+          "tests/unit/domain/test_issue_10469_tail.py:117"
+        ],
+        "name": "test_metadata_datetime_rejects_naive_value",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/domain/test_issue_10469_domain_tail.py:141",
+          "tests/unit/domain/test_issue_10469_tail.py:97"
+        ],
+        "name": "test_missing_silver_filter_mode_uses_compatibility_default",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:112",
+          "tests/unit/application/composite/test_issue_10469_tail.py:112"
+        ],
+        "name": "test_nullify_enricher_columns_returns_same_frame_without_prefixed_columns",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:94",
+          "tests/unit/infrastructure/test_issue_10469_tail.py:72"
+        ],
+        "name": "test_openalex_query_executor_maps_non_object_json_to_empty_mapping",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:114",
+          "tests/unit/infrastructure/test_issue_10469_tail.py:92"
+        ],
+        "name": "test_pubchem_transport_bag_rejects_unknown_legacy_keyword",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/domain/test_issue_10469_domain_tail.py:148",
+          "tests/unit/domain/test_issue_10469_tail.py:104"
+        ],
+        "name": "test_publication_vocabulary_reports_registry_lifecycle",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:87",
+          "tests/unit/application/composite/test_issue_10469_tail.py:87"
+        ],
+        "name": "test_resume_phase_routes_completed_merge_to_cross_validation",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/domain/test_issue_10469_domain_tail.py:166",
+          "tests/unit/domain/test_issue_10469_tail.py:122"
+        ],
+        "name": "test_scd_config_rejects_non_positive_type",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/core/test_issue_10469_application_core_tail.py:64",
+          "tests/unit/application/core/test_issue_10469_tail.py:64"
+        ],
+        "name": "test_shutdown_service_factory_preserves_collaborators",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/core/test_issue_10469_application_core_tail.py:34",
+          "tests/unit/application/core/test_issue_10469_tail.py:34"
+        ],
+        "name": "test_transformer_bags_reject_unknown_legacy_keyword",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:123",
+          "tests/unit/infrastructure/test_issue_10469_tail.py:101"
+        ],
+        "name": "test_unified_quality_layer_returns_flat_legacy_payload",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:85",
+          "tests/unit/infrastructure/test_issue_10469_tail.py:63"
+        ],
+        "name": "test_unknown_health_status_code_is_unhealthy",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:53",
+          "tests/unit/application/composite/test_issue_10469_tail.py:53"
+        ],
+        "name": "test_unknown_lifecycle_severity_uses_info_contract_value",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:143",
+          "tests/unit/infrastructure/test_issue_10469_tail.py:121"
+        ],
+        "name": "test_validation_list_merge_replaces_heterogeneous_override",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/domain/test_issue_10469_domain_tail.py:103",
+          "tests/unit/domain/test_issue_10469_tail.py:59"
+        ],
+        "name": "test_yaml_scalar_falls_back_to_string_representation",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      }
+    ],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 0,
-      "duplicate_occurrences": 0,
+      "cross_file_groups": 45,
+      "duplicate_occurrences": 90,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 0
+      "total_duplicate_names": 45
     },
-    "duplicate_test_name_occurrences": 0,
-    "duplicate_test_names": 0,
+    "duplicate_test_name_occurrences": 90,
+    "duplicate_test_names": 45,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -1987,8 +3349,39 @@
         ".yml"
       ]
     },
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/unit/application/test_issue_10469_application_tail_three.py:46",
+      "tests/unit/application/test_issue_10469_application_tail_three.py:136",
+      "tests/unit/application/test_issue_10469_application_tail_three.py:165",
+      "tests/unit/application/test_issue_10469_application_tail_three.py:173",
+      "tests/unit/application/test_issue_10469_application_tail_three.py:184",
+      "tests/unit/application/test_issue_10469_application_tail_three.py:197",
+      "tests/unit/application/test_issue_10469_application_tail_three.py:203",
+      "tests/unit/application/test_issue_10469_application_tail_three.py:216",
+      "tests/unit/application/test_issue_10469_application_tail_three.py:224",
+      "tests/unit/application/test_issue_10469_application_tail_three.py:235",
+      "tests/unit/application/test_issue_10469_application_tail_three.py:251",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:53",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:60",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:67",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:76",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:87",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:95",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:105",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:125",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:134",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:149",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:156",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:163",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:172",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:184",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:189",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:201",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:215",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:239",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:256"
+    ],
+    "markerless_test_functions": 30,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2006,8 +3399,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2474,
-      "test_python_file_count": 2708,
+      "test_glob_file_count": 2525,
+      "test_python_file_count": 2759,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2047,35 +3440,267 @@
       "top_level_directory_count": 16,
       "top_level_directory_count_including_pycache": 16
     },
-    "top_duplicate_test_names": [],
-    "total_test_files": 2474,
-    "total_test_functions": 26004,
+    "top_duplicate_test_names": [
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:119",
+          "tests/unit/infrastructure/test_issue_10469_tail.py:97"
+        ],
+        "name": "test_adr_filename_parser_rejects_noncanonical_name"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/test_issue_10469_lazy_facades.py:17",
+          "tests/unit/composition/test_issue_10469_lazy_facades.py:17"
+        ],
+        "name": "test_application_composite_resolves_caches_and_lists_lazy_export"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:57",
+          "tests/unit/application/composite/test_issue_10469_tail.py:57"
+        ],
+        "name": "test_blank_expected_composite_identity_disables_identity_check"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/domain/test_issue_10469_domain_tail.py:137",
+          "tests/unit/domain/test_issue_10469_tail.py:93"
+        ],
+        "name": "test_blank_idempotency_contract_normalizes_to_none"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/application/core/test_issue_10469_application_core_tail.py:39",
+          "tests/unit/application/core/test_issue_10469_tail.py:39"
+        ],
+        "name": "test_checkpoint_payload_uses_plain_count_for_empty_memory_trace"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/application/core/test_issue_10469_application_core_tail.py:59",
+          "tests/unit/application/core/test_issue_10469_tail.py:59"
+        ],
+        "name": "test_checkpoint_policy_rejects_unknown_value"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:67",
+          "tests/unit/application/composite/test_issue_10469_tail.py:67"
+        ],
+        "name": "test_checkpoint_with_merge_completed_updates_state_and_payload"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:69",
+          "tests/unit/infrastructure/test_issue_10469_tail.py:47"
+        ],
+        "name": "test_chembl_composite_key_helpers_delegate_registry_answer"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:44",
+          "tests/unit/application/composite/test_issue_10469_tail.py:44"
+        ],
+        "name": "test_coalesce_and_drop_returns_result_when_no_secondary_column_remains"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/domain/test_issue_10469_domain_tail.py:118",
+          "tests/unit/domain/test_issue_10469_tail.py:74"
+        ],
+        "name": "test_collect_blocker_issues_filters_other_severities"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/test_issue_10469_lazy_facades.py:39",
+          "tests/unit/composition/test_issue_10469_lazy_facades.py:39"
+        ],
+        "name": "test_composition_bootstrap_resolves_runtime_module_and_lists_exports"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/domain/test_issue_10469_domain_tail.py:128",
+          "tests/unit/domain/test_issue_10469_tail.py:84"
+        ],
+        "name": "test_cross_validation_threshold_rejects_bool"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:80",
+          "tests/unit/infrastructure/test_issue_10469_tail.py:58"
+        ],
+        "name": "test_crossref_runtime_service_rejects_missing_dependency"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:74",
+          "tests/unit/infrastructure/test_issue_10469_tail.py:52"
+        ],
+        "name": "test_default_fallback_service_preserves_metrics_dependency"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:82",
+          "tests/unit/application/composite/test_issue_10469_tail.py:82"
+        ],
+        "name": "test_dependency_duration_seconds_uses_wall_clock_delta"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/application/core/test_issue_10469_application_core_tail.py:73",
+          "tests/unit/application/core/test_issue_10469_tail.py:73"
+        ],
+        "name": "test_disallowed_idempotency_contract_is_reported"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/domain/test_issue_10469_domain_tail.py:99",
+          "tests/unit/domain/test_issue_10469_tail.py:55"
+        ],
+        "name": "test_domain_lazy_facade_directory_contains_public_exports"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/domain/test_issue_10469_domain_tail.py:124",
+          "tests/unit/domain/test_issue_10469_tail.py:80"
+        ],
+        "name": "test_dq_metrics_empty_batch_has_no_incoming_fields"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/application/core/test_issue_10469_application_core_tail.py:48",
+          "tests/unit/application/core/test_issue_10469_tail.py:48"
+        ],
+        "name": "test_dq_threshold_classification_returns_none_without_breach"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:137",
+          "tests/unit/infrastructure/test_issue_10469_tail.py:115"
+        ],
+        "name": "test_dq_threshold_normalization_replaces_non_mapping_container"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/domain/test_issue_10469_domain_tail.py:107",
+          "tests/unit/domain/test_issue_10469_tail.py:63"
+        ],
+        "name": "test_empty_composite_cv_summary_is_explicitly_signal_free"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/application/core/test_issue_10469_application_core_tail.py:44",
+          "tests/unit/application/core/test_issue_10469_tail.py:44"
+        ],
+        "name": "test_extract_record_id_returns_none_without_supported_identifier"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:78",
+          "tests/unit/application/composite/test_issue_10469_tail.py:78"
+        ],
+        "name": "test_find_column_case_insensitive_returns_none_without_match"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:127",
+          "tests/unit/application/composite/test_issue_10469_tail.py:127"
+        ],
+        "name": "test_find_schema_class_returns_none_when_module_has_no_schema_type"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:89",
+          "tests/unit/infrastructure/test_issue_10469_tail.py:67"
+        ],
+        "name": "test_http_metrics_noop_when_metrics_are_disabled"
+      }
+    ],
+    "total_test_files": 2525,
+    "total_test_functions": 27475,
     "unreviewed_assertion_bypass_count": 0,
-    "uuid4_call_sites": 0
+    "uuid4_call_sites": 1
   },
   "root": ".",
-  "source_tree_sha256": "37fa1a0d51a5c3b3131924da51ccd0a56cde849d98cd7b0b22f521dbf30c0421",
+  "source_tree_sha256": "e47db4dbae867adf4dea78367e3e65f58152818c1c19a2d2960eac3326a07dad",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 87,
+    "assertless_total_candidates": 94,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 0,
-    "duplicate_test_names": 0,
-    "intentional_no_exception_contract": 86,
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "duplicate_test_name_occurrences": 90,
+    "duplicate_test_names": 45,
+    "intentional_no_exception_contract": 93,
+    "markerless_examples": [
+      "tests/unit/application/test_issue_10469_application_tail_three.py:46",
+      "tests/unit/application/test_issue_10469_application_tail_three.py:136",
+      "tests/unit/application/test_issue_10469_application_tail_three.py:165",
+      "tests/unit/application/test_issue_10469_application_tail_three.py:173",
+      "tests/unit/application/test_issue_10469_application_tail_three.py:184",
+      "tests/unit/application/test_issue_10469_application_tail_three.py:197",
+      "tests/unit/application/test_issue_10469_application_tail_three.py:203",
+      "tests/unit/application/test_issue_10469_application_tail_three.py:216",
+      "tests/unit/application/test_issue_10469_application_tail_three.py:224",
+      "tests/unit/application/test_issue_10469_application_tail_three.py:235",
+      "tests/unit/application/test_issue_10469_application_tail_three.py:251",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:53",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:60",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:67",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:76",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:87",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:95",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:105",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:125",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:134",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:149",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:156",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:163",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:172",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:184",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:189",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:201",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:215",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:239",
+      "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py:256"
+    ],
+    "markerless_test_functions": 30,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
-    "uuid4_call_sites": 0
+    "uuid4_call_sites": 1
   },
   "test_file_inventory": {
     "pytest_python_files": [
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2474,
-    "test_python_file_count": 2708,
+    "test_glob_file_count": 2525,
+    "test_python_file_count": 2759,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2115,9 +3740,210 @@
     "top_level_directory_count": 16,
     "top_level_directory_count_including_pycache": 16
   },
-  "top_duplicate_test_names": [],
-  "total_test_files": 2474,
-  "total_test_functions": 26004,
+  "top_duplicate_test_names": [
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:119",
+        "tests/unit/infrastructure/test_issue_10469_tail.py:97"
+      ],
+      "name": "test_adr_filename_parser_rejects_noncanonical_name"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/test_issue_10469_lazy_facades.py:17",
+        "tests/unit/composition/test_issue_10469_lazy_facades.py:17"
+      ],
+      "name": "test_application_composite_resolves_caches_and_lists_lazy_export"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:57",
+        "tests/unit/application/composite/test_issue_10469_tail.py:57"
+      ],
+      "name": "test_blank_expected_composite_identity_disables_identity_check"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/domain/test_issue_10469_domain_tail.py:137",
+        "tests/unit/domain/test_issue_10469_tail.py:93"
+      ],
+      "name": "test_blank_idempotency_contract_normalizes_to_none"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/application/core/test_issue_10469_application_core_tail.py:39",
+        "tests/unit/application/core/test_issue_10469_tail.py:39"
+      ],
+      "name": "test_checkpoint_payload_uses_plain_count_for_empty_memory_trace"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/application/core/test_issue_10469_application_core_tail.py:59",
+        "tests/unit/application/core/test_issue_10469_tail.py:59"
+      ],
+      "name": "test_checkpoint_policy_rejects_unknown_value"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:67",
+        "tests/unit/application/composite/test_issue_10469_tail.py:67"
+      ],
+      "name": "test_checkpoint_with_merge_completed_updates_state_and_payload"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:69",
+        "tests/unit/infrastructure/test_issue_10469_tail.py:47"
+      ],
+      "name": "test_chembl_composite_key_helpers_delegate_registry_answer"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:44",
+        "tests/unit/application/composite/test_issue_10469_tail.py:44"
+      ],
+      "name": "test_coalesce_and_drop_returns_result_when_no_secondary_column_remains"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/domain/test_issue_10469_domain_tail.py:118",
+        "tests/unit/domain/test_issue_10469_tail.py:74"
+      ],
+      "name": "test_collect_blocker_issues_filters_other_severities"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/test_issue_10469_lazy_facades.py:39",
+        "tests/unit/composition/test_issue_10469_lazy_facades.py:39"
+      ],
+      "name": "test_composition_bootstrap_resolves_runtime_module_and_lists_exports"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/domain/test_issue_10469_domain_tail.py:128",
+        "tests/unit/domain/test_issue_10469_tail.py:84"
+      ],
+      "name": "test_cross_validation_threshold_rejects_bool"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:80",
+        "tests/unit/infrastructure/test_issue_10469_tail.py:58"
+      ],
+      "name": "test_crossref_runtime_service_rejects_missing_dependency"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:74",
+        "tests/unit/infrastructure/test_issue_10469_tail.py:52"
+      ],
+      "name": "test_default_fallback_service_preserves_metrics_dependency"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:82",
+        "tests/unit/application/composite/test_issue_10469_tail.py:82"
+      ],
+      "name": "test_dependency_duration_seconds_uses_wall_clock_delta"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/application/core/test_issue_10469_application_core_tail.py:73",
+        "tests/unit/application/core/test_issue_10469_tail.py:73"
+      ],
+      "name": "test_disallowed_idempotency_contract_is_reported"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/domain/test_issue_10469_domain_tail.py:99",
+        "tests/unit/domain/test_issue_10469_tail.py:55"
+      ],
+      "name": "test_domain_lazy_facade_directory_contains_public_exports"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/domain/test_issue_10469_domain_tail.py:124",
+        "tests/unit/domain/test_issue_10469_tail.py:80"
+      ],
+      "name": "test_dq_metrics_empty_batch_has_no_incoming_fields"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/application/core/test_issue_10469_application_core_tail.py:48",
+        "tests/unit/application/core/test_issue_10469_tail.py:48"
+      ],
+      "name": "test_dq_threshold_classification_returns_none_without_breach"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:137",
+        "tests/unit/infrastructure/test_issue_10469_tail.py:115"
+      ],
+      "name": "test_dq_threshold_normalization_replaces_non_mapping_container"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/domain/test_issue_10469_domain_tail.py:107",
+        "tests/unit/domain/test_issue_10469_tail.py:63"
+      ],
+      "name": "test_empty_composite_cv_summary_is_explicitly_signal_free"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/application/core/test_issue_10469_application_core_tail.py:44",
+        "tests/unit/application/core/test_issue_10469_tail.py:44"
+      ],
+      "name": "test_extract_record_id_returns_none_without_supported_identifier"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:78",
+        "tests/unit/application/composite/test_issue_10469_tail.py:78"
+      ],
+      "name": "test_find_column_case_insensitive_returns_none_without_match"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/application/composite/test_issue_10469_application_composite_tail.py:127",
+        "tests/unit/application/composite/test_issue_10469_tail.py:127"
+      ],
+      "name": "test_find_schema_class_returns_none_when_module_has_no_schema_type"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/infrastructure/test_issue_10469_infrastructure_tail.py:89",
+        "tests/unit/infrastructure/test_issue_10469_tail.py:67"
+      ],
+      "name": "test_http_metrics_noop_when_metrics_are_disabled"
+    }
+  ],
+  "total_test_files": 2525,
+  "total_test_functions": 27475,
   "unreviewed_assertion_bypass_count": 0,
-  "uuid4_call_sites": 0
+  "uuid4_call_sites": 1
 }

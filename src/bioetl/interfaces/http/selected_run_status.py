@@ -7,6 +7,10 @@ import json
 from pathlib import Path
 from typing import cast
 
+from bioetl.application.observability.reason_aliases import (
+    display_reason,
+    display_reasons_text,
+)
 from bioetl.domain.run_reports.selected_status import (
     DOMAINS,
     RULES_VERSION,
@@ -52,6 +56,7 @@ def unavailable_status(
             "domain": domain,
             "verdict": state,
             "reason": reason,
+            "reason_display": display_reason(reason),
             "run_id": run_id,
             "pipeline": pipeline,
             "action": "Select run or inspect evidence",
@@ -77,6 +82,7 @@ def unavailable_status(
         "processing_status": "UNKNOWN",
         "trust_status": state,
         "reasons_text": reason,
+        "reasons_display": display_reason(reason),
         "evidence_observed_at": None,
     }
     return {
@@ -103,10 +109,12 @@ def _saved_trust(
         "reasons_text",
     ):
         reasons = reasons.get(key) if isinstance(reasons, dict) else None
+    reasons_text = reasons if isinstance(reasons, str) else str(control["reason"])
     return {
         "processing_status": str(summary["execution_state"]).lower(),
         "trust_status": control["verdict"],
-        "reasons_text": reasons if isinstance(reasons, str) else control["reason"],
+        "reasons_text": reasons_text,
+        "reasons_display": display_reasons_text(reasons_text),
         "evidence_observed_at": summary["evaluation_at"],
         "pipeline": summary["pipeline"],
         "run_id": summary["run_id"],
@@ -241,7 +249,13 @@ def load_selected_run_status(
     domain_rows = assessment["domains"]
     assert isinstance(domain_rows, list)  # Produced by the verified assessment.
     rows = [
-        {**summary, **row, "run_verdict": summary["verdict"]} for row in domain_rows
+        {
+            **summary,
+            **row,
+            "run_verdict": summary["verdict"],
+            "reason_display": display_reason(str(row.get("reason", ""))),
+        }
+        for row in domain_rows
     ]
     return {
         **summary,

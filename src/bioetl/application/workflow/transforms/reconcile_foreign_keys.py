@@ -337,9 +337,7 @@ def _resolve_reference_completeness(
     status = str(evidence.get("status") or "unproven").strip().lower()
     identity_raw = evidence.get("reference_identity")
     identity = (
-        str(identity_raw).strip()
-        if identity_raw not in (None, "")
-        else reference_table
+        str(identity_raw).strip() if identity_raw not in (None, "") else reference_table
     ) or None
     version_raw = evidence.get("snapshot_version")
     snapshot_version = (
@@ -347,11 +345,7 @@ def _resolve_reference_completeness(
     )
     ref_raw = evidence.get("evidence_ref")
     evidence_ref = str(ref_raw).strip() if ref_raw not in (None, "") else None
-    if (
-        status != "complete"
-        or identity != reference_table
-        or not evidence_ref
-    ):
+    if status != "complete" or identity != reference_table or not evidence_ref:
         return "unproven", identity, snapshot_version, evidence_ref
     return "complete", identity, snapshot_version, evidence_ref
 

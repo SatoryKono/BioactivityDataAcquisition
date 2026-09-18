@@ -66,7 +66,7 @@
   ],
   "outcomes": {
     "5847": {
-      "allowlist_entries_after": 37,
+      "allowlist_entries_after": 38,
       "retired_root_entries": [
         ".wsl_proxy_env.sh",
         "Dockerfile.mcp-fetch",

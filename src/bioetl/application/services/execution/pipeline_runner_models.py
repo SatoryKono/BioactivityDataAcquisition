@@ -103,6 +103,7 @@ class RunOptions:
     workflow_run_id: str | None = None
     workflow_name: str | None = None
     workflow_step_id: str | None = None
+    no_control_plane_archive: bool = False
 
 
 class PipelineNotFoundError(ValueError):

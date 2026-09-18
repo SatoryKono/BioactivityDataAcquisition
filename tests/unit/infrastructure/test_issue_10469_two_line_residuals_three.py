@@ -37,9 +37,12 @@ pytestmark = pytest.mark.unit
 def test_chembl_non_200_health_response_is_degraded() -> None:
     response = SimpleNamespace(status_code=503)
     logger = MagicMock()
-    assert handle_chembl_health_response(
-        response=response, provider_name="chembl", logger=logger
-    ) is HealthStatus.DEGRADED
+    assert (
+        handle_chembl_health_response(
+            response=response, provider_name="chembl", logger=logger
+        )
+        is HealthStatus.DEGRADED
+    )
     logger.warning.assert_called_once_with(
         "health_check_degraded",
         provider="chembl",

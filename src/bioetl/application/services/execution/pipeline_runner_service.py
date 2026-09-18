@@ -103,6 +103,9 @@ class PipelineRunnerService:
     run_id_factory: Callable[[], RunID | UUID | str] = _missing_run_id_factory
     report_root: Path | None = None
     capture_control_plane: Callable[[str, str, datetime], None] | None = None
+    archive_control_plane: (
+        Callable[[RunResult, RunOptions | None], None] | None
+    ) = None
 
     async def run(
         self,
@@ -359,11 +362,23 @@ class PipelineRunnerService:
     def _finalize_report(
         self, result: RunResult, options: RunOptions | None
     ) -> RunResult:
-        """Capture control-plane evidence and persist the run report."""
+        """Capture control-plane evidence, persist the run report, then archive."""
         capture_run_completion(self.capture_control_plane, result, options)
-        return finalize_pipeline_run_report(
+        finalized = finalize_pipeline_run_report(
             result=result,
             options=options,
             report_root=self.report_root,
             store=self.report_store,
         )
+        self._archive_control_plane(finalized, options)
+        return finalized
+
+    def _archive_control_plane(
+        self, result: RunResult, options: RunOptions | None
+    ) -> None:
+        if self.archive_control_plane is None:
+            return
+        try:
+            self.archive_control_plane(result, options)
+        except (OSError, RuntimeError, TypeError, ValueError):
+            return

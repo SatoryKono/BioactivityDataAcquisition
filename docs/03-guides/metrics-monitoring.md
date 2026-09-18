@@ -952,13 +952,13 @@ not reuse a verdict solely by manifest ID: snapshots can be corrupted or removed
 and the retention cutoff changes with time. Keep the existing forensic endpoint
 deadline; measure cold and repeated requests separately when diagnosing latency.
 
-Local archive verification is opt-in through `BIOETL_ARCHIVE_ROOT`, pointing to a
-separate directory readable by the Ops process. Set it in the process environment
-or deployment configuration; no `.env` edit is required. The default is no archive
-reader and an honest UNKNOWN. Produce a new pack with
-Implementation: `scripts/ops/observability/archive_control_plane.py`. Invoke it as
+Local archive verification defaults to `reports/local/gf14-archive/verified`
+(container: `/app/reports/local/gf14-archive/verified`). Override with
+`BIOETL_ARCHIVE_ROOT`; no `.env` edit is required. A missing pack stays UNKNOWN.
+Successful `bioetl run` / workflow pipeline steps create a pack unless
+`--no-control-plane-archive`. Manual packs remain available via
 `python -m scripts.ops archive-control-plane --data-root <data> --archive-root <archive> --manifest <manifest.json>`;
-use the same command with `--verify-only` to recheck it. An existing pack is never
+use `--verify-only` to recheck. An existing pack is never
 overwritten, and the producer never removes source files. Interrupted packs remain
 unverified and require inspection. Each pack contains the selected lifecycle
 inventory, manifest identity, hashes, archive copies and restored copies. Ops

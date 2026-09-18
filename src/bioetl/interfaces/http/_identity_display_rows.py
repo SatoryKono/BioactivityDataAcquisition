@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from math import isfinite
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
@@ -32,10 +32,20 @@ def identity_display_rows(rows: object, timezone: str) -> list[dict[str, str]]:
     return result
 
 
+def format_timestamp_label(moment: datetime, timezone: str) -> str:
+    """Format an aware timestamp in the dashboard zone with an explicit %Z suffix."""
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=UTC)
+    return moment.astimezone(_resolve_zone(timezone)).strftime("%Y-%m-%d %H:%M %Z")
+
+
 def _resolve_zone(timezone: str) -> ZoneInfo:
     token = timezone.strip() or "UTC"
-    if token.lower() in {"utc", "browser", "default"}:
+    lowered = token.lower()
+    if lowered in {"utc", "browser", "default"}:
         return ZoneInfo("UTC")
+    if token == "Europe/Kiev":
+        token = "Europe/Kyiv"
     try:
         return ZoneInfo(token)
     except (ZoneInfoNotFoundError, ValueError):

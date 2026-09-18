@@ -18,7 +18,9 @@ from bioetl.interfaces.cli.commands.domains.quarantine import server_backend
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
     _parse_observability_backend_port,
 )
-from bioetl.interfaces.cli.commands.domains.run import command_policy as run_command_policy
+from bioetl.interfaces.cli.commands.domains.run import (
+    command_policy as run_command_policy,
+)
 from bioetl.interfaces.cli.commands.domains.run import runtime_helpers
 from bioetl.interfaces.cli.commands.domains.run_all import (
     command_policy as run_all_command_policy,
@@ -383,7 +385,9 @@ def test_run_composite_disables_transient_server_when_backend_owns_port(
     )
     monkeypatch.setattr(run_composite_command, "_echo_composite_startup", startup)
     monkeypatch.setattr(run_composite_command, "_run_composite_with_cli_policy", runner)
-    monkeypatch.setattr(run_composite_command, "_exit_with_composite_result", exit_result)
+    monkeypatch.setattr(
+        run_composite_command, "_exit_with_composite_result", exit_result
+    )
 
     callback = getattr(
         run_composite_command.run_composite,

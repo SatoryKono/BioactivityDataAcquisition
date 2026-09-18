@@ -12,7 +12,9 @@ import pytest
 from bioetl.domain.composite.field_groups import FieldGroupId
 from bioetl.infrastructure.config import config_root
 from bioetl.infrastructure.config import contract_registry_loader as contract_loader
-from bioetl.infrastructure.config import pipeline_payload_normalization as payload_normalization
+from bioetl.infrastructure.config import (
+    pipeline_payload_normalization as payload_normalization,
+)
 from bioetl.infrastructure.config._base import Settings
 from bioetl.infrastructure.config._composite_gold_schema_registry import (
     DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY,
@@ -145,7 +147,10 @@ def test_pubchem_filter_schema_converts_multiple_columns() -> None:
 
 
 def test_source_profile_accepts_absent_extraction_hash() -> None:
-    assert SourceProfileYamlConfig(extraction_params_sha256=None).extraction_params_sha256 is None
+    assert (
+        SourceProfileYamlConfig(extraction_params_sha256=None).extraction_params_sha256
+        is None
+    )
 
 
 def test_unknown_layer_has_explicit_unknown_artifact_semantics() -> None:
@@ -216,7 +221,9 @@ def test_metrics_adapter_delegates_delete_with_logger(
         metrics_publisher_adapter, "delete_metrics_from_gateway", delegated
     )
 
-    result = metrics_publisher_adapter.MetricsPublisherAdapter(logger).delete_from_gateway(
+    result = metrics_publisher_adapter.MetricsPublisherAdapter(
+        logger
+    ).delete_from_gateway(
         gateway="http://push.test", run_label="run-1", grouping_key={"provider": "demo"}
     )
 

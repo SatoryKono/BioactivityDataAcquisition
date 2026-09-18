@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from types import SimpleNamespace
 from uuid import UUID
 
 import pytest
@@ -150,41 +149,76 @@ def test_publication_type_classification_edge_paths() -> None:
     review = _PubType("review", "article", "02", 20)
     lookup = {"journal-article": journal, "review": review}
 
-    assert classify_provider_type(lookup=None, raw_type="x", raw_types_list=None) is None
-    assert classify_provider_type(lookup=lookup, raw_type=" Journal-Article ", raw_types_list=None) is journal
-    assert classify_provider_type(lookup=lookup, raw_type=None, raw_types_list=["review"]) is review
-    assert classify_provider_type(lookup=lookup, raw_type=None, raw_types_list=None) is None
-    assert classify_chembl_type(raw_type=None, raw_types_list=None, entry_by_unified_type={}) is None
-    assert classify_chembl_type(
-        raw_type=None,
-        raw_types_list=["", "nope"],
-        entry_by_unified_type={"journal": journal},
-    ) is None
+    assert (
+        classify_provider_type(lookup=None, raw_type="x", raw_types_list=None) is None
+    )
+    assert (
+        classify_provider_type(
+            lookup=lookup, raw_type=" Journal-Article ", raw_types_list=None
+        )
+        is journal
+    )
+    assert (
+        classify_provider_type(lookup=lookup, raw_type=None, raw_types_list=["review"])
+        is review
+    )
+    assert (
+        classify_provider_type(lookup=lookup, raw_type=None, raw_types_list=None)
+        is None
+    )
+    assert (
+        classify_chembl_type(
+            raw_type=None, raw_types_list=None, entry_by_unified_type={}
+        )
+        is None
+    )
+    assert (
+        classify_chembl_type(
+            raw_type=None,
+            raw_types_list=["", "nope"],
+            entry_by_unified_type={"journal": journal},
+        )
+        is None
+    )
 
     assert raw_publication_type(raw_type="  ", raw_types_list=None) is None
     assert raw_publication_type(raw_type=None, raw_types_list=[" a ", "", "b"]) == "a|b"
     assert raw_publication_type(raw_type=None, raw_types_list=[]) is None
-    assert find_matching_classification_value("Journal", frozenset({"journal"})) == "journal"
+    assert (
+        find_matching_classification_value("Journal", frozenset({"journal"}))
+        == "journal"
+    )
     assert find_matching_classification_value("x", frozenset({"journal"})) is None
-    assert classification_values("publication_subclass", [journal]) == frozenset({"article"})
+    assert classification_values("publication_subclass", [journal]) == frozenset(
+        {"article"}
+    )
     with pytest.raises(ValueError, match="Unknown publication classification field"):
         classification_values("nope", [journal])
-    assert normalize_publication_classification_value(
-        field_name="publication_type_unified",
-        value=None,
-        entries=[journal],
-    ) is None
-    assert normalize_publication_classification_value(
-        field_name="publication_type_unified",
-        value=" JOURNAL ",
-        entries=[journal],
-    ) == "journal"
+    assert (
+        normalize_publication_classification_value(
+            field_name="publication_type_unified",
+            value=None,
+            entries=[journal],
+        )
+        is None
+    )
+    assert (
+        normalize_publication_classification_value(
+            field_name="publication_type_unified",
+            value=" JOURNAL ",
+            entries=[journal],
+        )
+        == "journal"
+    )
 
 
 def test_author_helpers_cover_json_delimited_and_surname_formats() -> None:
     assert hash_author_name(" Ada ", "salt") == hash_author_name("ada", "salt")
     assert parse_author_names(123) == []  # type: ignore[arg-type]
-    assert parse_author_names([" Ada ", {"name": "Bob"}, {"name": " "}, 1]) == ["Ada", "Bob"]
+    assert parse_author_names([" Ada ", {"name": "Bob"}, {"name": " "}, 1]) == [
+        "Ada",
+        "Bob",
+    ]
     assert parse_author_string("") == []
     assert parse_author_string("[not-json") == ["[not-json"]
     assert try_parse_json_authors('{"name": "Ada"}') is None
@@ -212,7 +246,9 @@ def test_profile_value_normalizers_cover_unknown_and_coerce_paths() -> None:
     allowed = frozenset({"open", "closed"})
     assert normalize_profile_governed_vocabulary(1, allowed_values=allowed) == 1
     assert normalize_profile_governed_vocabulary("  ", allowed_values=allowed) is None
-    assert normalize_profile_governed_vocabulary("OPEN", allowed_values=allowed) == "open"
+    assert (
+        normalize_profile_governed_vocabulary("OPEN", allowed_values=allowed) == "open"
+    )
     assert (
         normalize_profile_governed_vocabulary(
             "weird", allowed_values=allowed, preserve_unknown=True
@@ -225,10 +261,28 @@ def test_profile_value_normalizers_cover_unknown_and_coerce_paths() -> None:
         )
         == "WEIRD"
     )
-    assert normalize_profile_json_string_list_vocabulary_strict(1, allowed_values=allowed) is None
-    assert normalize_profile_json_string_list_vocabulary_strict("not-json", allowed_values=allowed) is None
-    assert normalize_profile_json_string_list_vocabulary_strict('{"a":1}', allowed_values=allowed) is None
-    assert normalize_profile_json_string_list_vocabulary_strict('["open","nope"]', allowed_values=allowed) is None
+    assert (
+        normalize_profile_json_string_list_vocabulary_strict(1, allowed_values=allowed)
+        is None
+    )
+    assert (
+        normalize_profile_json_string_list_vocabulary_strict(
+            "not-json", allowed_values=allowed
+        )
+        is None
+    )
+    assert (
+        normalize_profile_json_string_list_vocabulary_strict(
+            '{"a":1}', allowed_values=allowed
+        )
+        is None
+    )
+    assert (
+        normalize_profile_json_string_list_vocabulary_strict(
+            '["open","nope"]', allowed_values=allowed
+        )
+        is None
+    )
     serialized = normalize_profile_json_string_list_vocabulary_strict(
         '["OPEN"]', allowed_values=allowed
     )
@@ -303,7 +357,9 @@ def test_run_ledger_replay_covers_invalid_payload_branches() -> None:
                     "status": "success",
                 },
             ),
-            _entry("e5", COMPOSITE_ENRICHER_COMPLETED_EVENT, details={"enricher_name": ""}),
+            _entry(
+                "e5", COMPOSITE_ENRICHER_COMPLETED_EVENT, details={"enricher_name": ""}
+            ),
             _entry("e6", COMPOSITE_MERGE_COMPLETED_EVENT, details={}),
             _entry(
                 "e7",
@@ -383,4 +439,3 @@ def test_reason_catalog_resolve_unknown_and_mapping_roundtrip() -> None:
     dumped = catalog_as_mapping(parsed)
     assert dumped["unknown_code"] == "CUSTOM_UNKNOWN"
     assert any(item["code"] == "MY_CODE" for item in dumped["reasons"])
-

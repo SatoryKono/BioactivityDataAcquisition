@@ -209,6 +209,7 @@ async def handle_control_plane_filter_options(
         selected_run_id=selected_run_id,
         exact_run_only=exact_run_only,
         fallback_value=fallback_value,
+        timezone=query.get("timezone") or "UTC",
     )
     if not exact_run_only or selected_run_id is not None:
         payload = await asyncio.to_thread(

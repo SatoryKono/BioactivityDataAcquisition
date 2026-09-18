@@ -909,7 +909,7 @@ def test_backend_process_helpers_cover_listener_parsing_and_detached_start(
     monkeypatch.setattr(
         backend_process,
         "_build_detached_backend_env",
-        lambda: {"PYTHONPATH": "src"},
+        lambda current_env: {"PYTHONPATH": "src"},
     )
 
     def _fake_popen(command, **kwargs):
@@ -921,6 +921,7 @@ def test_backend_process_helpers_cover_listener_parsing_and_detached_start(
         bind_host="127.0.0.1",
         port=7777,
         python_executable="python-custom",
+        current_env={},
         popen_factory=_fake_popen,
     )
 
@@ -1486,6 +1487,7 @@ def test_prepare_run_request_marks_non_terminating_exit_as_unreachable() -> None
         required_persistence_profile=None,
         health_server=False,
         health_port=8000,
+        no_control_plane_archive=False,
     )
 
     with pytest.raises(RuntimeError, match="exit_func is expected to terminate"):
