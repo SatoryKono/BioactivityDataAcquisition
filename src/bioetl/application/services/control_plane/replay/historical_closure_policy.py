@@ -120,10 +120,10 @@ def resolve_closure_verdict(
             "some_historical_runs_remain_irrecoverable_without_trustworthy_immutable_evidence",
         )
     if inventory.unsupported_count:
-        return (
-            "outside_supported_scope_present",
-            "some_retained_runs_remain_outside_the_current_supported_historical_replay_scope",
+        reason = (
+            "some_retained_runs_remain_outside_the_current_supported_historical_replay_scope"
         )
+        return "outside_supported_scope_present", reason
     return (
         "residual_resolution_program_in_progress",
         "all_remaining_blocked_runs_have_explicit_resolution_tracks_but_not_yet_closed",
