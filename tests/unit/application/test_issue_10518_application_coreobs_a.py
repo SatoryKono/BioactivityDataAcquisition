@@ -9,7 +9,6 @@ _runner_support, batch_executor_state_flow, control_plane_evidence.models.
 
 from __future__ import annotations
 
-import uuid
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -34,7 +33,7 @@ def _success_result(**overrides):
     base = {
         "status": PipelineRunResult.SUCCESS,
         "pipeline_name": "pipe",
-        "run_id": str(uuid.uuid4()),
+        "run_id": str(UUID(int=4001)),
         "run_type": "incremental",
         "manifest_id": "m1",
     }

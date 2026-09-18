@@ -51,6 +51,8 @@ Orphan temp / dynamic hosted workflows are out of scope here (#10265, #10268).
 | `e2e-matrix-health.yml` | E2E Matrix Health | End-to-end matrix health |
 | `github-settings-quarterly-review.yml` | Quarterly GitHub Settings Review | Read-only quarterly GitHub settings review |
 | `import-linter.yml` | Lint and Architecture Gates | import-linter + layer architecture |
+| `opencode-pr-review.yml` | opencode-pr-review | OpenCode review agent (Muse Spark): read-only PR review comments |
+| `opencode-triage.yml` | opencode-triage | OpenCode triage agent: classifies and labels new issues |
 | `pr-required.yml` | PR Gate Complete | Fail-closed coordinator; GitHub required context `pr-gate-complete` (ruleset 13643213, #10267) |
 | `root-hygiene.yml` | Root Hygiene | Root allowlist / clutter gates |
 | `schema-governance.yml` | Schema Governance | Schema governance checks |

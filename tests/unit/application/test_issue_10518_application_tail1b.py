@@ -10,7 +10,7 @@ from datetime import UTC, datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from uuid import UUID
 
 import pytest
 
@@ -423,7 +423,7 @@ def _make_debug_service(
 ) -> DebugExportService:
     return DebugExportService(
         config=DebugExportConfig(enabled=enabled),
-        run_id=uuid4(),
+        run_id=UUID(int=3001),
         pipeline_id="pipe",
         provider_id="chembl",
         writer=writer,  # type: ignore[arg-type]

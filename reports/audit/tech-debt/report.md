@@ -1,43 +1,62 @@
-# Аудит технического долга — src/bioetl (full, MODE=audit)
+# Аудит технического долга — BioactivityDataAcquisition
 
-Дата: 2026-09-17. Язык: ru. Scope: src/bioetl. Режим: read-only (без патчей).
+- Промпт: prompt.audit.tech-debt v1.2.0, MODE=audit
+- Источник: ТОЛЬКО компактные свидетельства (prior result 1–3); новых измерений не проводилось
+- Находок: 12 (AUD-001…AUD-012), все PROVEN; NOT_PROVEN нет
+- Поверхностная оценка (surface_score, шкала 0–3): **общий 2** (макс. 3 у P0; средний 1,8)
+- Повышение бюджетов/порогов (exemptions, jscpd threshold, mypy-поблажки) — **НЕ предлагается** ни по одной находке
 
-## Итог
-- surface_score: 2 — основной долг контролируется, часть подавлений неформальна.
-- Проверено по заданию: nosec B105/B405 (были «только grep, тела не открыты») — тела открыты, вердикт ниже.
-- TODO/FIXME/HACK/XXX в src/bioetl поиском не найдены (пустая выдача).
-- Бюджет долга/качества не повышался. .env не трогался. Коммитов нет.
+## Реестр по риску
 
-## Резолюция B105 (hardcoded password — NOT_PROVEN как уязвимость)
-Открыты тела:
-- src/bioetl/application/pipelines/chembl/molecule_transformer.py:64-65,82 — ключи словарей `full_molformula`, `ro3_pass` (ChEMBL-названия полей), не пароли.
-- src/bioetl/domain/composite/cross_validation.py:41 — `PASS = "pass"` (CrossValidationVerdict), не credential.
-- src/bioetl/domain/types/dq_contracts.py:19 — `PASS = "pass"` (DQDisposition), не credential.
-- src/bioetl/domain/value_objects/dq_report_enums.py:19,27 — `PASS = "pass"` (DQCheckStatus, DQReportStatus), не credential.
-Вердикт: все 4 — ложноположительные срабатывания Bandit B105; `nosec B105` обоснован. Долг: шумные супрессии без централизованного exemption-реестра (P3).
+### P0 — критично
 
-## Резолюция B405 (xml.etree — NOT_PROVEN как уязвимость)
-Открыты тела:
-- src/bioetl/application/pipelines/pubmed/transformer.py:10,13,149 — `import xml.etree.ElementTree as ET  # nosec B405` только для типов/ParseError; реальный парсинг `defused_ET.fromstring(raw_xml)` (строка 149) с обработкой EntitiesForbidden.
-- src/bioetl/infrastructure/adapters/pubmed/xml_processor.py:16,18,37 — аналогично: типы через ET, парсинг через `defused_ET.fromstring(xml_text)`.
-- src/bioetl/application/pipelines/pubmed/extractors/base.py:12 — только `from xml.etree.ElementTree import Element` для аннотаций, парсинга нет.
-- src/bioetl/application/pipelines/pubmed/xml_parser.py:11,29,34,59,64,67 — `ET.fromstring` только в docstring-примерах; продуктивного парсинга нет.
-Поиск `fromstring` по src/bioetl подтверждает: продуктивные вызовы только `defused_ET.fromstring` (2 места выше).
-Вердикт: XXE-уязвимости нет; `nosec B405` обоснован. Долг: ~14 супрессий B405 без реестра (P3); опция — алиас типа вместо импорта ET.
+| ID | Находка | Surface | Путь |
+|----|---------|---------|------|
+| AUD-001 | God-module `sync_pkg/_core.py`: 18179 строк / 576676 Б, смешение argparse/ast/subprocess/threading/tempfile/http/Neo4j; разрыв ~10x со следующим файлом | 3 | `src/memory/graph/sync_pkg/_core.py:1` |
+| AUD-002 | Синхронизированный обрыв quality-gate exemptions 2026-12-31: весь `src/memory/` + 15 путей тяжёлых подсистем + 4 CC-лимита (25/20/15) на retry/fallback | 3 | `configs/quality/duplication_complexity_exemptions.yaml:17` |
 
-## Прочий долг (с файловыми доказательствами)
-1. TD-01 (P2, code): концентрация `# type: ignore` (~70 совпадений поиском). Пример открыт: src/bioetl/application/services/ops/observability_backend_startup.py:122-147 — `hooks[...]` без типов, серия `type: ignore[operator]`. Blast radius: локальный; effort: S (ввести TypedDict/Protocol для hooks).
-2. TD-02 (P2, architecture): `noqa: F403` star-реэкспорты в фасадах (`application/core/transformer_runtime/__init__.py`, `application/core/field_transforms/__init__.py`, `application/pipelines/openalex/extractors.py` и др.). Blast radius: средний (публичные API); effort: M (явные __all__ уже частично есть).
-3. TD-03 (P3, code): широкие `except Exception` — открыты src/bioetl/application/services/execution/_pipeline_runner_support.py:98 (`_result_duration_seconds` → return None, безопасно) и src/bioetl/infrastructure/storage/silver/delta_write_execution.py:99-100 (thread boundary, с NOSONAR-обоснованием). Остальные ~11 мест не открыты — кандидаты, не доказанный долг.
-4. TD-04 (P3, observability): 4 `NOSONAR` с обоснованием (aggregation_filters.py:9, cross_validation.py:69, delta_write_execution.py:99, workflow_foreign_key_reconciliation_quarantine_keys.py:27) — приемлемо, но без реестра.
-5. TD-05 (P3, docs): docstring-примеры xml_parser используют незащищённый ET.fromstring — копипаст-риск; effort: XS (заменить на defusedxml в примерах).
+### P1 — высокий
 
-## Top-20 / quick-wins vs strategic
-- Quick wins (XS/S): TD-05 (docstring), консолидация B105/B405-супрессий в реестр, типизация hooks (TD-01 частично).
-- Strategic (M): TD-02 (явные реэкспорты), типизация duck-type мест (TD-01 остаток).
-- Зависимостный долг: не выявлен в scope (defusedxml уже используется).
+| ID | Находка | Surface | Путь |
+|----|---------|---------|------|
+| AUD-003 | Query-слой расколот: `graph/query.py` (1968 строк) + `query.py` (1700 строк), владение не зафиксировано | 2 | `src/memory/graph/query.py:1` |
+| AUD-004 | Типовой долг: 11x `type:ignore` в startup-пути (строки 122–177) + весь `src/memory/` вне mypy strict + `warn_unused_ignores=false`, `warn_unreachable=false` | 2 | `src/bioetl/application/services/ops/observability_backend_startup.py:122` |
+| AUD-005 | FK-reconciliation в трёх местах: infra-адаптер (~471) + application-трансформ (~464) + `_support`/`_quarantine` хелперы | 2 | `src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py:1` |
+| AUD-006 | Хрупкие пины: `arro3-core==0.6.5`, `pandas<2.3`, `deltalake<1.0`, `mypy==2.3.1` (Windows-wheel комментарии) | 2 | `pyproject.toml:25` |
 
-## Remediation (без повышения бюджетов)
-1. Завести реестр супрессий (nosec/NOSONAR/type-ignore) с owner и сроком пересмотра.
-2. TD-05: поправить docstring в xml_parser.py.
-3. TD-01: TypedDict для hooks в observability_backend_startup.py.
+### P2 — средний
+
+| ID | Находка | Surface | Путь |
+|----|---------|---------|------|
+| AUD-007 | Перефрагментация `composite/`: 66 записей, merger-mixin x8, coordinator x3, lifecycle/dependency_join/preflight кластеры; jscpd-порог 5 подтверждает давление дублирования | 2 | `src/bioetl/application/composite/` |
+| AUD-008 | Star-реэкспорты `noqa F403` в 4 фасадах (factory_wiring, field_transforms, transformer_runtime, openalex extractors) | 1 | `src/bioetl/application/core/transformer_runtime/__init__.py:11` |
+| AUD-009 | 37x `pragma: no cover` в runner/fallback wiring и lazy-export путях | 1 | `src/bioetl/application/` |
+| AUD-010 | Legacy/compat-шимы без sunset: `Metrics*Result` (deprecated с 2026-08-26), pandera-shim `strict=False`, `strip_legacy_keys`, memory_monitor re-export, legacy string IDs | 1 | `src/bioetl/application/ports/metrics.py:116` |
+| AUD-011 | 12 постоянных CLI entrypoints, sunset только через breaking change (`external_breaking_change_required=true`) | 2 | `configs/quality/compatibility_facade_inventory.yaml:23` |
+
+### P3 — низкий
+
+| ID | Находка | Surface | Путь |
+|----|---------|---------|------|
+| AUD-012 | Принятые `nosec`-подавления без реестра (subprocess B404/B603 + 7x ET B405); гигиена маркеров хорошая (TODO/FIXME/HACK: 0) | 1 | `src/bioetl/infrastructure/storage/silver/delta_write_execution.py:8` |
+
+## Quick wins (малые усилия, быстрый эффект)
+
+- AUD-008: явные `__all__` и прямые реэкспорты, убрать `noqa F403` (S).
+- AUD-010: зафиксировать sunset-даты шимов, начать с `Metrics*Result` (S).
+- AUD-012: завести реестр подавлений `nosec` с обоснованием и сроком пересмотра (XS).
+- AUD-009: к каждому `pragma: no cover` привязать issue-ссылку; runner-пути покрыть интеграционными тестами (M).
+
+## Стратегические (структурные)
+
+- AUD-001 → AUD-003: декомпозиция memory-sidecar (god-module → cohesive модули <500 строк; единый query-слой). Снимает и AUD-002 для `src/memory/`.
+- AUD-002: рассредоточить сроки exemptions, привязать каждую запись к removal_step с прогрессом; CI должен падать при истечении без review.
+- AUD-004: типизировать DI-seam startup-пути, включить `src/memory/` в mypy strict, включить `warn_unused_ignores`/`warn_unreachable`.
+- AUD-005: одно каноническое место FK-reconciliation + тесты паритета.
+- AUD-006: снять жёсткие пины (диапазоны + Windows-CI), план апгрейда deltalake/pandas/arro3.
+- AUD-007: граф владения composite-пакета, укрупнение миксинов >200 строк.
+- AUD-011: реестр entrypoints с deprecation-окном и миграционным гайдом.
+
+## Примечание о полноте
+
+Синтез ограничен переданными свидетельствами; независимых замеров (прогон xenon/jscpd/mypy/pytest) в рамках задачи не выполнялось — команды регрессии зафиксированы в `findings.json` (`validation_commands`) для исполнения владельцами.

@@ -1,17 +1,23 @@
-# Debt heatmap — src/bioetl
+# Тепловая карта технического долга
 
-| Зона | Сигнал | Нагрев |
-|---|---|---|
-| application/pipelines/pubmed | 14× nosec B405 (обоснованы, defusedxml) | тёплая (шум супрессий) |
-| application/services/ops | концентрация type: ignore (hooks) | тёплая |
-| application/core + pipelines facades | noqa F403 star-реэкспорты | умеренная |
-| infrastructure/storage/silver | except Exception + NOSONAR (обоснованы) | низкая |
-| domain (enums) | nosec B105 ложные срабатывания | низкая |
+Шкала surface_score: 0 — нет поверхности, 1 — локальная, 2 — средняя (подсистема), 3 — максимальная (ядро/гейты).
 
-## Top-20
-В scope доказанных единиц < 20; полный список — findings.json (8 записей: 3 NOT_PROVEN, 5 PROVEN P2/P3).
+| Зона | Находки | Surface | Приоритет |
+|------|---------|---------|-----------|
+| `src/memory/` sidecar (god-module, query-раскол, mypy-exclude, exemptions) | AUD-001, AUD-002*, AUD-003, AUD-004* | ███ 3 | P0/P1 |
+| Quality gates (exemptions cliff, jscpd-5, mypy-поблажки) | AUD-002, AUD-007* | ███ 3 | P0/P2 |
+| Startup/observability DI-seam | AUD-004 | ██ 2 | P1 |
+| FK-reconciliation (infra + application) | AUD-005 | ██ 2 | P1 |
+| Зависимости/пины | AUD-006 | ██ 2 | P1 |
+| `application/composite/` God-пакет | AUD-007 | ██ 2 | P2 |
+| CLI-поверхность (12 entrypoints) | AUD-011 | ██ 2 | P2 |
+| Фасады/реэкспорты | AUD-008 | █ 1 | P2 |
+| Покрытие (pragma no cover) | AUD-009 | █ 1 | P2 |
+| Legacy/compat-шимы | AUD-010 | █ 1 | P2 |
+| Подавления nosec/subprocess | AUD-012 | █ 1 | P3 |
 
-## Quick wins vs strategic
-- Quick wins: TD-05, реестр супрессий, docstring-правки.
-- Strategic: TD-02 (явные реэкспорты), TD-01 (типизация hooks/duck-type).
-- Зависимостный: нет (defusedxml на месте).
+\* сквозные находки: затрагивают несколько зон.
+
+## Вывод
+
+Жара сконцентрирована в двух местах: **memory-sidecar** (размер + нетипизированность + освобождение от гейтов) и **точка синхронизации exemptions 2026-12-31**. Их снятие (декомпозиция + рассредоточение сроков) даёт наибольшее снижение риска. Остальное — распределённый средний/низкий фон: типы, фрагментация, шимы, покрытие, подавления.

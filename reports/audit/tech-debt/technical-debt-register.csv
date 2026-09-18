@@ -1,9 +1,13 @@
-id,path,line,type,evidence,age,risk,blast_radius,effort,owner,priority
-TD-B105-01,src/bioetl/application/pipelines/chembl/molecule_transformer.py,64-65;82,security,dict keys full_molformula/ro3_pass opened,unknown,none,none,XS,unassigned,P3
-TD-B105-02,src/bioetl/domain/composite/cross_validation.py; src/bioetl/domain/types/dq_contracts.py; src/bioetl/domain/value_objects/dq_report_enums.py,41;19;19+27,security,PASS=pass enums opened,unknown,none,none,XS,unassigned,P3
-TD-B405-01,src/bioetl/application/pipelines/pubmed/transformer.py; src/bioetl/infrastructure/adapters/pubmed/xml_processor.py,149;37,security,defused_ET.fromstring opened,unknown,none,none,XS,unassigned,P3
-TD-01,src/bioetl/application/services/ops/observability_backend_startup.py,122-147,code,~70 type-ignore opened sample,unknown,medium,local,S,unassigned,P2
-TD-02,src/bioetl/application/core/transformer_runtime/__init__.py,4-21,architecture,noqa F403 re-exports,unknown,medium,medium,M,unassigned,P2
-TD-03,src/bioetl/application/services/execution/_pipeline_runner_support.py; src/bioetl/infrastructure/storage/silver/delta_write_execution.py,98;99-100,code,except Exception opened justified,unknown,low,local,XS,unassigned,P3
-TD-04 VARIOUS,src/bioetl (4 files),—,observability,NOSONAR with rationale,unknown,low,local,XS,unassigned,P3
-TD-05,src/bioetl/application/pipelines/pubmed/xml_parser.py,29-67,documentation,docstring ET.fromstring opened,unknown,low,local,XS,unassigned,P3
+id;priority;surface_score;title;path_line;rule_ref;remediation;regression_check;status
+AUD-001;P0;3;God-module sync_pkg/_core.py 18179 строк;src/memory/graph/sync_pkg/_core.py:1;xenon absolute / critical_check;декомпозиция на модули <500 строк;wc -l + xenon --max-absolute B;PROVEN
+AUD-002;P0;3;Синхронизированный обрыв exemptions 2026-12-31;configs/quality/duplication_complexity_exemptions.yaml:17;duplication_complexity gate;рассредоточить сроки + removal_step с прогрессом;rg 2026-12-31 configs/quality/;PROVEN
+AUD-003;P1;2;Раскол query-слоя 1968+1700 строк;src/memory/graph/query.py:1;jscpd threshold 5 (.jscpd.json:2);единый канонический query-слой;jscpd src/memory/;PROVEN
+AUD-004;P1;2;11x type:ignore в startup + src/memory вне mypy;src/bioetl/application/services/ops/observability_backend_startup.py:122;mypy strict (pyproject.toml:311-344);типизировать DI-seam + включить memory в strict;rg type:ignore + mypy src/bioetl/application/services/ops/;PROVEN
+AUD-005;P1;2;FK-reconciliation в трёх слоях;src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py:1;jscpd duplication gate;одно каноническое место + тесты паритета;jscpd storage + workflow/transforms;PROVEN
+AUD-006;P1;2;Хрупкие пины arro3/pandas/deltalake;pyproject.toml:25;dependency pin policy;диапазоны + Windows-CI + план апгрейда;sed -n 20,35p pyproject.toml;PROVEN
+AUD-007;P2;2;Перефрагментация composite 66 записей;src/bioetl/application/composite/;jscpd + xenon complexity;граф владения + укрупнение миксинов;jscpd src/bioetl/application/composite/;PROVEN
+AUD-008;P2;1;Star-реэкспорты noqa F403;src/bioetl/application/core/transformer_runtime/__init__.py:11;ruff F403;явные __all__ + прямые реэкспорты;ruff check --select F403 src/bioetl/;PROVEN
+AUD-009;P2;1;37x pragma no cover в runner/lazy-export;src/bioetl/application/;coverage gate;issue-ссылки + интеграционные тесты;rg pragma:no cover + pytest --cov;PROVEN
+AUD-010;P2;1;Legacy/compat-шимы без sunset;src/bioetl/application/ports/metrics.py:116;deprecation policy;sunset-даты + codemod;rg deprecat|legacy|compat|shim;PROVEN
+AUD-011;P2;2;12 постоянных CLI entrypoints;configs/quality/compatibility_facade_inventory.yaml:23;compatibility facade inventory;deprecation-окно + миграционный гайд;sed -n 20,80p inventory;PROVEN
+AUD-012;P3;1;nosec-кластер без реестра (TODO: 0);src/bioetl/infrastructure/storage/silver/delta_write_execution.py:8;bandit nosec registry;реестр подавлений с пересмотром;rg nosec B40x/B60x src/bioetl/;PROVEN

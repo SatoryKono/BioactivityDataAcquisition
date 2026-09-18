@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import uuid4
+from uuid import UUID
 
 import pytest
 
@@ -149,7 +149,7 @@ def test_snapshot_manifest_missing_records_incomplete() -> None:
     capture = CaptureControlPlaneSnapshot(manifests=manifests, evidence=evidence)
     token = _obs.bind_run_observations()
     try:
-        capture("pipe", str(uuid4()), _NOW)
+        capture("pipe", str(UUID(int=1001)), _NOW)
         entry = _obs.run_observations()["Control Plane"]
     finally:
         _obs.reset_run_observations(token)
@@ -163,13 +163,13 @@ def test_snapshot_pipeline_mismatch_records_incomplete() -> None:
     manifests.get_by_run_id.return_value = _manifest("other")
     evidence = MagicMock()
     CaptureControlPlaneSnapshot(manifests=manifests, evidence=evidence)(
-        "pipe", str(uuid4()), _NOW
+        "pipe", str(UUID(int=1002)), _NOW
     )
     evidence.trust_summary.assert_not_called()
 
 
 def test_snapshot_success_maps_warning_to_warn() -> None:
-    run_id = str(uuid4())
+    run_id = str(UUID(int=1003))
     manifests = MagicMock()
     manifests.get_by_run_id.return_value = _manifest("pipe")
     evidence = MagicMock()
@@ -439,7 +439,7 @@ def _ledger_entry(event_type: str):
     return RunLedgerEntry(
         entry_id=f"e-{event_type}",
         manifest_id="m",
-        run_id=RunID(uuid4()),
+        run_id=RunID(UUID(int=1004)),
         event_type=event_type,
         occurred_at=_NOW,
     )
@@ -619,7 +619,7 @@ def test_resolve_manifest_by_run_id_lookup_failure() -> None:
     port.get_by_run_id.side_effect = ValueError("bad ledger row")
     svc = RunManifestInspectionService(manifest_port=port)
     with pytest.raises(RunManifestInspectionCorruptionError):
-        svc._resolve_manifest(str(uuid4()))
+        svc._resolve_manifest(str(UUID(int=1005)))
 
 
 def test_resolve_manifest_by_run_id_success() -> None:
@@ -628,7 +628,7 @@ def test_resolve_manifest_by_run_id_success() -> None:
     port.get.return_value = None
     port.get_by_run_id.return_value = manifest
     svc = RunManifestInspectionService(manifest_port=port)
-    assert svc._resolve_manifest(str(uuid4())) is manifest
+    assert svc._resolve_manifest(str(UUID(int=1006))) is manifest
 
 
 def test_resolve_manifest_not_found() -> None:
@@ -637,7 +637,7 @@ def test_resolve_manifest_not_found() -> None:
     port.get_by_run_id.return_value = None
     svc = RunManifestInspectionService(manifest_port=port)
     with pytest.raises(ValueError, match="not found"):
-        svc._resolve_manifest(str(uuid4()))
+        svc._resolve_manifest(str(UUID(int=1007)))
     with pytest.raises(ValueError, match="not found"):
         svc._resolve_manifest("not-a-uuid-at-all")
 
@@ -684,7 +684,7 @@ def test_cert_load_manifest_requires_exactly_one() -> None:
     with pytest.raises(ValueError, match="exactly one"):
         validator.load_manifest(manifest_id=None, run_id=None)
     with pytest.raises(ValueError, match="exactly one"):
-        validator.load_manifest(manifest_id="m", run_id=RunID(uuid4()))
+        validator.load_manifest(manifest_id="m", run_id=RunID(UUID(int=1008)))
 
 
 def test_cert_load_manifest_not_found() -> None:
@@ -701,7 +701,7 @@ def test_cert_load_manifest_ok_both_paths() -> None:
     port.get_by_run_id.return_value = manifest
     validator = _validator(manifest_port=port)
     assert validator.load_manifest(manifest_id="m", run_id=None) is manifest
-    assert validator.load_manifest(manifest_id=None, run_id=RunID(uuid4())) is manifest
+    assert validator.load_manifest(manifest_id=None, run_id=RunID(UUID(int=1009))) is manifest
 
 
 def test_cert_validate_source_context() -> None:
@@ -807,7 +807,7 @@ def _run_result(**kwargs) -> RunResult:
     base = {
         "status": PipelineRunResult.SUCCESS,
         "pipeline_name": "prov_ent",
-        "run_id": str(uuid4()),
+        "run_id": str(UUID(int=1010)),
         "run_type": "incremental",
         "started_at": _NOW,
         "completed_at": _NOW,
@@ -864,14 +864,14 @@ def test_build_run_result_write_report_branches() -> None:
     ) as finalize:
         out = _prs.build_pipeline_run_result(
             outcome=outcome, runner=runner, pipeline_name="p",
-            run_id=RunID(uuid4()), run_type="incremental",
+            run_id=RunID(UUID(int=1011)), run_type="incremental",
             started_at=_NOW, write_report=True, store=MagicMock(),
         )
         finalize.assert_called_once()
     with patch.object(_prs, "finalize_pipeline_run_report") as finalize2:
         out2 = _prs.build_pipeline_run_result(
             outcome=outcome, runner=runner, pipeline_name="p",
-            run_id=RunID(uuid4()), run_type="incremental",
+            run_id=RunID(UUID(int=1012)), run_type="incremental",
             started_at=_NOW, write_report=False, store=MagicMock(),
         )
         finalize2.assert_not_called()
@@ -1021,7 +1021,7 @@ from bioetl.application.services.workflow.control_plane._execution_resume_suppor
 
 def _wf_state(**kwargs) -> WorkflowExecutionState:
     base = {
-        "workflow_run_id": RunID(uuid4()),
+        "workflow_run_id": RunID(UUID(int=1013)),
         "manifest_id": "wf-manifest",
         "workflow_name": "wf",
         "execution_fingerprint": "fp",
@@ -1043,7 +1043,7 @@ def test_load_resume_state_run_id_missing() -> None:
     with pytest.raises(RuntimeError, match="no persisted execution state"):
         load_resume_state(
             workflow_state_port=port, workflow_name="wf",
-            resume_manifest_id=None, resume_run_id=str(uuid4()),
+            resume_manifest_id=None, resume_run_id=str(UUID(int=1014)),
         )
 
 
@@ -1055,7 +1055,7 @@ def test_load_resume_state_paths() -> None:
     port.get_latest.return_value = state
     assert load_resume_state(
         workflow_state_port=port, workflow_name="wf",
-        resume_manifest_id=None, resume_run_id=str(uuid4()),
+        resume_manifest_id=None, resume_run_id=str(UUID(int=1015)),
     ) is state
     assert load_resume_state(
         workflow_state_port=port, workflow_name="wf",
@@ -1084,7 +1084,7 @@ def test_load_resume_state_manifest_and_latest_missing() -> None:
 
 
 def test_coerce_resume_run_id() -> None:
-    rid = uuid4()
+    rid = UUID(int=1016)
     assert coerce_resume_run_id(RunID(rid)) == RunID(rid)
     assert coerce_resume_run_id(str(rid)) == RunID(rid)
 
@@ -1218,13 +1218,13 @@ async def test_get_for_run_operator_error() -> None:
     host = _rt_host(port=port)
     with pytest.raises(OSError):
         await get_checkpoint_for_run_impl(
-            host, pipeline_name="p", run_id=str(uuid4()), start_time=0.0
+            host, pipeline_name="p", run_id=str(UUID(int=1017)), start_time=0.0
         )
     assert "failed" in host.metric_calls
 
 
 async def test_get_for_run_success_and_missing() -> None:
-    run_id = RunID(uuid4())
+    run_id = RunID(UUID(int=1018))
     port = MagicMock()
     port.load_for_run = AsyncMock(return_value=(run_id, {"k": 1}))
     host = _rt_host(port=port)
@@ -1235,7 +1235,7 @@ async def test_get_for_run_success_and_missing() -> None:
     port2.load_for_run = AsyncMock(return_value=None)
     host2 = _rt_host(port=port2)
     assert await get_checkpoint_for_run_impl(
-        host2, pipeline_name="p", run_id=str(uuid4()), start_time=0.0
+        host2, pipeline_name="p", run_id=str(UUID(int=1019)), start_time=0.0
     ) is None
     assert "missing" in host2.metric_calls
 
@@ -1378,7 +1378,7 @@ def test_checkpoint_record_metrics_with_sink() -> None:
 
 
 async def test_checkpoint_list_no_tracer() -> None:
-    run_id = RunID(uuid4())
+    run_id = RunID(UUID(int=1020))
     port = MagicMock()
     port.list_all = AsyncMock(return_value=["p1", "p2"])
     port.load = AsyncMock(side_effect=[None, (run_id, {"k": 1})])
@@ -1389,7 +1389,7 @@ async def test_checkpoint_list_no_tracer() -> None:
 
 
 async def test_checkpoint_get_no_tracer() -> None:
-    run_id = RunID(uuid4())
+    run_id = RunID(UUID(int=1021))
     port = MagicMock()
     port.load = AsyncMock(return_value=(run_id, {"k": 1}))
     assert (await _ckpt_svc(port=port).get_checkpoint("p")).run_id == str(run_id)
@@ -1399,7 +1399,7 @@ async def test_checkpoint_get_no_tracer() -> None:
 
 
 async def test_checkpoint_get_for_run_no_tracer() -> None:
-    run_id = RunID(uuid4())
+    run_id = RunID(UUID(int=1022))
     port = MagicMock()
     port.load_for_run = AsyncMock(return_value=(run_id, {"k": 1}))
     out = await _ckpt_svc(port=port).get_checkpoint_for_run("p", str(run_id))
@@ -1407,7 +1407,7 @@ async def test_checkpoint_get_for_run_no_tracer() -> None:
 
 
 async def test_checkpoint_get_for_manifest_no_tracer() -> None:
-    run_id = RunID(uuid4())
+    run_id = RunID(UUID(int=1023))
     port = MagicMock()
     port.load_for_manifest_id = AsyncMock(return_value=(run_id, {"pipeline_name": "p"}))
     out = await _ckpt_svc(port=port).get_checkpoint_for_manifest_id("p", "m-1")
@@ -1419,7 +1419,7 @@ async def test_checkpoint_delete_no_tracer() -> None:
     port.load = AsyncMock(return_value=None)
     assert await _ckpt_svc(port=port).delete_checkpoint("p") is False
     port2 = MagicMock()
-    port2.load = AsyncMock(return_value=(RunID(uuid4()), {}))
+    port2.load = AsyncMock(return_value=(RunID(UUID(int=1024)), {}))
     port2.delete = AsyncMock(return_value=None)
     assert await _ckpt_svc(port=port2).delete_checkpoint("p") is True
 

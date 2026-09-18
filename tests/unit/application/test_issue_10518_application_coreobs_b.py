@@ -10,7 +10,7 @@ record_processor_config, control_plane_integrity_metrics, replay_write_risk.
 from __future__ import annotations
 
 import sys
-import uuid
+from uuid import UUID
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -420,7 +420,7 @@ from bioetl.domain.types import RunID
 def _checkpoint_service(**overrides):
     params = CheckpointRuntimeParams(
         pipeline_name="pipe",
-        run_id=RunID(uuid.uuid4()),
+        run_id=RunID(UUID(int=2001)),
         resume=True,
     )
     kwargs = {
@@ -447,7 +447,7 @@ async def test_load_checkpoint_data_by_manifest_id():
 
 
 async def test_load_checkpoint_data_by_run_id():
-    run_id = RunID(uuid.uuid4())
+    run_id = RunID(UUID(int=2002))
     port = AsyncMock()
     port.load_for_run = AsyncMock(return_value=("run", {"a": 1}))
     svc = _checkpoint_service(checkpoint_port=port)
