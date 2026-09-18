@@ -69,19 +69,19 @@ class CompositeRunnerMergeStageMixin:
         self: _CompositeRunnerMergeStageHostProtocol,
         state: CompositeCheckpointState,
         operation: str,
-    ) -> bool:  # pragma: no cover - implemented by support mixin
+    ) -> bool:  # pragma: no cover - declaration-only contract (#10534, review 2026-12-31)
         raise NotImplementedError
 
     async def _generate_dq_reports(
         self: _CompositeRunnerMergeStageHostProtocol,
         merge_result: MergeResult,
-    ) -> None:  # pragma: no cover - implemented by support mixin
+    ) -> None:  # pragma: no cover - declaration-only contract (#10534, review 2026-12-31)
         raise NotImplementedError
 
     async def _write_cv_quarantine(
         self: _CompositeRunnerMergeStageHostProtocol,
         merge_result: MergeResult,
-    ) -> None:  # pragma: no cover - implemented by support mixin
+    ) -> None:  # pragma: no cover - declaration-only contract (#10534, review 2026-12-31)
         raise NotImplementedError
 
     async def _call_save_checkpoint_safe(
