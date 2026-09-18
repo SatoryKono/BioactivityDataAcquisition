@@ -27,9 +27,6 @@ def parse_go_term_value(go_term_value: object) -> tuple[str | None, str | None]:
         return None, None
 
     parts = go_term_value.split(":", 1)
-    if len(parts) != 2:
-        return None, None
-
     aspect_candidate = parts[0].strip()
     aspect = aspect_candidate if aspect_candidate in GO_ASPECTS else None
     term_candidate = parts[1].strip()

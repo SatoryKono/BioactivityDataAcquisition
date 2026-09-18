@@ -152,9 +152,6 @@ class EnricherDeduplicatorService:
         columns_with_conflicts: list[str] = []
         columns_without_conflicts: list[str] = []
 
-        if not non_key_columns:
-            return columns_with_conflicts, columns_without_conflicts
-
         # One select/.any() pass instead of N filter().height FFI crossings.
         conflict_exprs = [
             (

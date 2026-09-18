@@ -103,9 +103,9 @@ def preview_value(
     if any(token in normalized_field_name for token in _SENSITIVE_FIELD_NAME_TOKENS):
         return "<redacted>"
     preview = repr(value)
-    if len(preview) <= max_length:
-        return preview
-    return f"{preview[: max_length - 3]}..."
+    if len(preview) > max_length:
+        return f"{preview[: max_length - 3]}..."
+    return preview
 
 
 __all__ = [

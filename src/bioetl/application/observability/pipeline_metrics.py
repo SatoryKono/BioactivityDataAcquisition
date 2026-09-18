@@ -292,17 +292,16 @@ class _PipelineMetricsRecorderCore:
         count: int = 1,
     ) -> None:
         """Increment bounded output artifact publication outcomes."""
-        if self.metrics is None or count <= 0:
-            return
-        self.metrics.increment_counter(
-            "bioetl_output_artifact_publication_events_total",
-            count,
-            {
-                "pipeline": self.pipeline,
-                "stage": stage,
-                "status": status,
-            },
-        )
+        if self.metrics is not None and count > 0:
+            self.metrics.increment_counter(
+                "bioetl_output_artifact_publication_events_total",
+                count,
+                {
+                    "pipeline": self.pipeline,
+                    "stage": stage,
+                    "status": status,
+                },
+            )
 
 
 class _CompositePhaseMetricsRecorderMixin:
