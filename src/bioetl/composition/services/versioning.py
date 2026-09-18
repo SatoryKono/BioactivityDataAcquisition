@@ -14,7 +14,7 @@ from __future__ import annotations
 import hashlib
 import os
 import re
-import subprocess  # nosec B404
+import subprocess  # nosec B404 - see suppression registry
 from dataclasses import dataclass
 from functools import lru_cache
 from importlib.metadata import PackageNotFoundError
@@ -92,7 +92,7 @@ def _run_git_command(
     last_result: subprocess.CompletedProcess[str] | None = None
     if git_executable:
         try:
-            last_result = subprocess.run(  # nosec B603 - Git path resolved via which()
+            last_result = subprocess.run(  # nosec B603 - Git path resolved via which(); see suppression registry
                 [git_executable, *arguments],
                 cwd=_REPO_ROOT,
                 capture_output=True,
@@ -109,7 +109,7 @@ def _run_git_command(
         return last_result
     for executable in _iter_windows_git_fallback_executables():
         try:
-            candidate_result = subprocess.run(  # nosec B603
+            candidate_result = subprocess.run(  # nosec B603 - see suppression registry
                 [executable, *arguments],
                 cwd=_REPO_ROOT,
                 capture_output=True,

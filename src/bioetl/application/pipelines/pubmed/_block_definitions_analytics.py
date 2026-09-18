@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET  # nosec B405
+import xml.etree.ElementTree as ET  # nosec B405 - see suppression registry
 from collections.abc import Callable, Sequence
 
 from bioetl.application.pipelines.pubmed._block_definitions_base import _PubMedXmlBlock

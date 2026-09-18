@@ -9,7 +9,7 @@ __all__ = ["BaseFieldExtractor"]
 
 
 from abc import ABC, abstractmethod
-from xml.etree.ElementTree import Element  # nosec B405
+from xml.etree.ElementTree import Element  # nosec B405 - see suppression registry
 
 
 class BaseFieldExtractor(ABC):

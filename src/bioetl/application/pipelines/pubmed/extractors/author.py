@@ -19,7 +19,7 @@ __all__ = ["EMAIL_PATTERN", "AuthorExtractor", "RawAuthor", "StructuredAffiliati
 
 import re
 from typing import TypedDict, cast, override
-from xml.etree.ElementTree import Element  # nosec B405
+from xml.etree.ElementTree import Element  # nosec B405 - see suppression registry
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
 from bioetl.application.pipelines.pubmed.xml_parser import get_text

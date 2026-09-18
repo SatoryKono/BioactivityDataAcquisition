@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
-import subprocess  # nosec B404
+import subprocess  # nosec B404 - see suppression registry
 import sys
 import tempfile
 import threading
@@ -206,7 +206,7 @@ def _run_plain_delta_write_subprocess(
     try:
         try:
             # No shell or user-controlled command is involved.
-            completed = subprocess.run(  # nosec B603
+            completed = subprocess.run(  # nosec B603 - see suppression registry
                 [
                     sys.executable,
                     "-c",
