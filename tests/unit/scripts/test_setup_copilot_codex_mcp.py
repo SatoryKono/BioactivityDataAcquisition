@@ -90,6 +90,20 @@ def _to_bash_path(path: Path) -> str:
     return value
 
 
+def _assert_gemini_timeouts_match_canonical(
+    gemini_settings: dict[str, object], workspace_root: Path
+) -> None:
+    """Gemini timeout must equal canonical startup_timeout_sec (ms)."""
+    canonical = setup_mcp._apply_shared_transport(
+        setup_mcp._canonical_servers(workspace_root, profile="full"),
+        transport_mode="stdio",
+    )
+    for name, entry in gemini_settings["mcpServers"].items():
+        assert "startup_timeout_sec" not in entry
+        expected = canonical[name].get("startup_timeout_sec")
+        assert entry.get("timeout") == (None if expected is None else expected * 1000)
+
+
 def _seed_workspace_mcp(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> tuple[Path, Path]:
@@ -587,20 +601,9 @@ def test_main_uses_workspace_root_for_generated_server_paths(
         assert qodo_payload["mcpServers"]["filesystem"]["args"][0].endswith(".sh")
     assert not REMOVED_FULL_PROFILE_SERVERS.intersection(servers)
     assert not REMOVED_FULL_PROFILE_SERVERS.intersection(gemini_settings["mcpServers"])
-    # The tracked .mcp.json intentionally drops Codex-only
-    # startup_timeout_sec (Muse rejects unknown fields), so correlate the
-    # Gemini timeout against the canonical inventory instead.
-    canonical_servers = setup_mcp._apply_shared_transport(
-        setup_mcp._canonical_servers(workspace_root, profile="full"),
-        transport_mode="stdio",
-    )
-    for server_name, gemini_server in gemini_settings["mcpServers"].items():
-        assert "startup_timeout_sec" not in gemini_server
-        startup_timeout = canonical_servers[server_name].get("startup_timeout_sec")
-        if startup_timeout is None:
-            assert "timeout" not in gemini_server
-        else:
-            assert gemini_server["timeout"] == startup_timeout * 1000
+    # Tracked .mcp.json drops Codex-only startup_timeout_sec by design;
+    # correlate the Gemini timeout against the canonical inventory.
+    _assert_gemini_timeouts_match_canonical(gemini_settings, workspace_root)
     assert gemini_settings["mcpServers"]["ref"]["headers"] == {
         "x-ref-api-key": "$REF_TOOL_API_KEY"
     }

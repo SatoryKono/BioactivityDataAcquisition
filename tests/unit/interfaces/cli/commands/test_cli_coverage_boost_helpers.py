@@ -1487,6 +1487,7 @@ def test_prepare_run_request_marks_non_terminating_exit_as_unreachable() -> None
         required_persistence_profile=None,
         health_server=False,
         health_port=8000,
+        no_control_plane_archive=False,
     )
 
     with pytest.raises(RuntimeError, match="exit_func is expected to terminate"):

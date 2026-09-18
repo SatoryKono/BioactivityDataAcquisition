@@ -133,6 +133,7 @@ async def test_legacy_non_object_metadata_maps_to_bounded_endpoint_error(
             "check": "parse",
             "status": "ERROR",
             "reason": "checkpoint_parse_error",
+            "reason_display": "checkpoint_parse_error",
             "detail": "Persisted control-plane evidence could not be read or parsed.",
         }
     ]
