@@ -774,3 +774,22 @@ def test_src_outside_composition_avoids_internal_composition_entrypoint_modules(
         "composition APIs instead of internal composition entrypoint modules:\n"
         + "\n".join(sorted(violations))
     )
+
+
+@pytest.mark.architecture
+def test_deprecation_policy_declares_window_and_migration_gate() -> None:
+    """Retained entrypoints sunset only through a deprecation window (AUD-011)."""
+    payload = yaml.safe_load(REGISTRY_YAML.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    policy = payload.get("deprecation_policy")
+    assert isinstance(policy, dict), "Missing deprecation_policy block (AUD-011)"
+    assert policy["linked_issue"] == "#10536"
+    assert policy["owner"] == "@bioetl-architecture"
+    assert date.fromisoformat(str(policy["review_date"])) >= POLICY_REVIEW_DATE
+    assert int(policy["min_deprecation_window_days"]) >= 90
+    assert policy["silent_removal"] == "forbidden"
+    assert policy["migration_guide_required"] is True
+    required_steps = policy["required_steps"]
+    assert isinstance(required_steps, list) and len(required_steps) >= 5
+    assert "publish_migration_guide" in required_steps
+    assert "remove_only_after_importer_census_zero" in required_steps

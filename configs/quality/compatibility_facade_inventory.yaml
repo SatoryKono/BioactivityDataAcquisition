@@ -19,6 +19,19 @@ tracked_docstring_prefixes:
   - Composition-level compatibility
   - Pipeline factory compatibility-only facade
   - Storage compatibility-only facade
+deprecation_policy:
+  linked_issue: "#10536"
+  owner: "@bioetl-architecture"
+  review_date: "2026-12-31"
+  min_deprecation_window_days: 90
+  silent_removal: forbidden
+  migration_guide_required: true
+  required_steps:
+    - announce_intent_with_linked_issue
+    - emit_deprecation_warning_for_two_quarterly_reviews
+    - refresh_compatibility_importer_census
+    - publish_migration_guide
+    - remove_only_after_importer_census_zero
 transition_debt: []
 retained_entrypoints:
   - path: src/bioetl/interfaces/cli/commands/run.py
