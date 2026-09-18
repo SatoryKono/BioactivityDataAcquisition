@@ -20,6 +20,9 @@ __all__ = ["DateExtractor", "MedlineDateParser", "NormalizedDate", "RawDate"]
 import calendar
 import re
 from typing import ClassVar, TypedDict, cast
+
+# B405 justification: Element used for type annotations/traversal only; parsing is
+# via defusedxml (XXE/billion-laughs safe). Reviewed 2026-09-18; re-review by 2027-03-18.
 from xml.etree.ElementTree import Element  # nosec B405
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
