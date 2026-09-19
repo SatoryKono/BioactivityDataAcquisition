@@ -34,6 +34,9 @@ from collections.abc import AsyncIterator, Awaitable, Callable
 import pytest
 
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.pubmed import (
+    _fetch_records_support as records_support,
+)
 from bioetl.infrastructure.adapters.pubmed import _filter_fetch_support as support
 
 
@@ -259,7 +262,7 @@ async def test_pubmed_filter_fetch_support_query_resume_and_filter_id_paths() ->
     host = _PubMedHost()
 
     filtered = await _collect(
-        support.fetch_records(
+        records_support.fetch_records(
             host,
             entity_type="publication",
             limit=2,
@@ -274,7 +277,7 @@ async def test_pubmed_filter_fetch_support_query_resume_and_filter_id_paths() ->
 
     with pytest.raises(ValueError, match="only supports 'publication'"):
         await _collect(
-            support.fetch_records(
+            records_support.fetch_records(
                 host,
                 entity_type="gene",
                 limit=1,
@@ -287,7 +290,7 @@ async def test_pubmed_filter_fetch_support_query_resume_and_filter_id_paths() ->
 
     assert (
         await _collect(
-            support.fetch_records(
+            records_support.fetch_records(
                 host,
                 entity_type="publication",
                 limit=2,
@@ -304,7 +307,7 @@ async def test_pubmed_filter_fetch_support_query_resume_and_filter_id_paths() ->
     host.pmids_for_query = []
     assert (
         await _collect(
-            support.fetch_records(
+            records_support.fetch_records(
                 host,
                 entity_type="publication",
                 limit=2,
@@ -319,7 +322,7 @@ async def test_pubmed_filter_fetch_support_query_resume_and_filter_id_paths() ->
 
     host.pmids_for_query = ["1", "2", "3", "4"]
     records = await _collect(
-        support.fetch_records(
+        records_support.fetch_records(
             host,
             entity_type="publication",
             limit=3,

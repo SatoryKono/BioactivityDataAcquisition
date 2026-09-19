@@ -42,7 +42,9 @@ from bioetl.application.pipelines.crossref.author_extractors import (
 from bioetl.application.pipelines.openalex._extractors_authors import (
     extract_institution_country_codes,
 )
-from bioetl.application.pipelines.pubmed.extractors.identifier import IdentifierExtractor
+from bioetl.application.pipelines.pubmed.extractors.identifier import (
+    IdentifierExtractor,
+)
 from bioetl.application.pipelines.uniprot.extractors._comment_structured_facets import (
     _extract_cofactors_raw,
 )
@@ -71,9 +73,7 @@ def test_schema_null_policy_and_start_index() -> None:
         boolean_true_values=(),
         boolean_false_values=(),
     )
-    assert (
-        evaluate_null_value(contract=contract, working_record={}, events=[]) is None
-    )
+    assert evaluate_null_value(contract=contract, working_record={}, events=[]) is None
     assert build_start_index(records_fetched=10, batch=[{}]) == 9
     assert _scope_kind(resolved_via="manifest_id", manifest=object()) == "exact_run"
 
@@ -87,7 +87,9 @@ def test_findings_json_success_and_metrics_noop() -> None:
         provider="chembl",
         entity_type="activity",
     ) == {"id": 1}
-    rule = SimpleNamespace(notes="stores json", normalizer=SimpleNamespace(__name__="as_json"))
+    rule = SimpleNamespace(
+        notes="stores json", normalizer=SimpleNamespace(__name__="as_json")
+    )
     assert (
         profile_json_runtime_finding(
             rule,  # type: ignore[arg-type]
@@ -108,9 +110,7 @@ def test_findings_json_success_and_metrics_noop() -> None:
 def test_extractor_skip_and_empty_paths() -> None:
     assert _normalize_orcid("   ") is None
     assert _extract_author_affiliations_list({"affiliation": "lab"}) == []
-    assert extract_institution_country_codes(
-        [{"institutions": ["not-a-dict"]}]
-    ) == []
+    assert extract_institution_country_codes([{"institutions": ["not-a-dict"]}]) == []
     root = Element("PubmedArticle")
     article = Element("Article")
     eloc = Element("ELocationID")
@@ -162,6 +162,8 @@ def test_checkpoint_overrides_and_legacy_sinks() -> None:
             required_persistence_profile="replay_ready",
         )
     modes: set[tuple[str, str]] = set()
-    _add_legacy_sink_modes({"silver_write_mode": "append", "gold_mode": "overwrite"}, modes)
+    _add_legacy_sink_modes(
+        {"silver_write_mode": "append", "gold_mode": "overwrite"}, modes
+    )
     assert ("silver", "append") in modes
     assert ("gold", "overwrite") in modes

@@ -104,9 +104,7 @@ def test_manifest_launch_context_marks_full_scan_rebuild() -> None:
 
 
 def test_snapshot_summary_ignores_duplicate_with_same_content_hash() -> None:
-    existing = {
-        "snapshot-1": {"snapshot_id": "snapshot-1", "content_hash": "sha256:a"}
-    }
+    existing = {"snapshot-1": {"snapshot_id": "snapshot-1", "content_hash": "sha256:a"}}
 
     conflicts = _merge_ledger_snapshots_by_id(
         existing,

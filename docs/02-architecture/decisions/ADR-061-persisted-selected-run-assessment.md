@@ -1,7 +1,7 @@
 ______________________________________________________________________
 
 Version: 1.0.0
-Status: Proposed
+Status: Accepted (Implemented #10490)
 Class: published
 Owner: BioETL Team
 Last verified: '2026-09-16'
@@ -11,7 +11,7 @@ ______________________________________________________________________
 # ADR-061: Persisted selected-run assessment
 
 **Date:** 2026-09-16
-**Status:** Proposed (implemented by PR #10490, acceptance still pending)
+**Status:** Accepted (implemented by PR #10490)
 **Linked issues:** #10486, #10487, #10488, #10489
 
 ## Context

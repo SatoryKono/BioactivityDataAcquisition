@@ -12,7 +12,9 @@ import pytest
 from bioetl.infrastructure.adapters.http.client_context_mixin import (
     HTTPClientContextMixin,
 )
-from bioetl.infrastructure.adapters.pubmed import adapter_filter_fetch_mixin as pubmed_filter
+from bioetl.infrastructure.adapters.pubmed import (
+    adapter_filter_fetch_mixin as pubmed_filter,
+)
 from bioetl.infrastructure.adapters.semanticscholar._search_fetch_flow import (
     _SemanticScholarSearchFetchMixin,
 )
@@ -142,7 +144,9 @@ async def test_semantic_scholar_fetch_search_page_swallows_collector_errors() ->
     assert nxt == 7
 
 
-def test_external_composite_dq_skips_when_override_file_is_absent(tmp_path: Path) -> None:
+def test_external_composite_dq_skips_when_override_file_is_absent(
+    tmp_path: Path,
+) -> None:
     config = tmp_path / "composite.yaml"
     merge_external_dq_overrides({}, config)
     merge_external_dq_overrides({"composite": []}, config)  # type: ignore[arg-type]

@@ -100,16 +100,16 @@ def test_s4_composition_dynamic_imports_are_frozen() -> None:
 
 
 def test_s6_source_tree_manifest_is_the_pinned_sha() -> None:
-    from scripts.engineering.qa.report_source_tree_manifest import (
-        build_manifest,
-        main as manifest_main,
-    )
+    # build_manifest() hashes the whole source tree; hash once and reuse
+    # `live` so the test stays within the 60s per-test timeout.
+    # manifest --check compares the same live hash against the same
+    # committed artifact, so a second call would only re-hash the tree.
+    from scripts.engineering.qa.report_source_tree_manifest import build_manifest
 
     live = build_manifest()
     payload = load_quality_json("source-tree-manifest.json")
     assert payload["source_tree_sha256"] == live["source_tree_sha256"]
     assert payload["generated_from_manifest"] is True
-    assert manifest_main(["--check"]) == 0
     helper_users = [
         path
         for path in (ROOT / "tests/architecture").rglob("*.py")

@@ -5,7 +5,7 @@ from __future__ import annotations
 import inspect
 from collections.abc import Awaitable, Iterable, Mapping, Sequence
 from dataclasses import dataclass, replace
-from typing import Any, Protocol, cast, runtime_checkable
+from typing import Protocol, cast, runtime_checkable
 
 from deltalake.exceptions import DeltaError
 
@@ -19,20 +19,19 @@ from bioetl.domain.ports import (
     QuarantinePort,
 )
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
-from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_quarantine import (
-    apply_reconciliation_mutation,
+from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_loaded import (
+    reconcile_loaded_rows,
 )
 from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support import (
     build_reconciliation_result,
-    complete_dry_run,
-    complete_without_mutation,
     emit_reconcile_debug_artifacts,
     filter_source_rows_to_current_run,
     log_reconciliation,
     log_reconciliation_started,
-    partition_source_rows,
     record_reconciliation_metrics,
-    reference_value_set,
+)
+from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support import (
+    filter_current_rows as filter_current_rows,
 )
 
 __all__ = [
@@ -47,7 +46,6 @@ _RECONCILIATION_ROWS_RETAINED_TOTAL = (
     "bioetl_workflow_reconciliation_rows_retained_total"
 )
 _RECONCILIATION_ROWS_DELETED_TOTAL = "bioetl_workflow_reconciliation_rows_deleted_total"
-_CURRENT_FLAG_COLUMNS = ("_is_current", "is_current")
 
 
 @runtime_checkable
@@ -88,52 +86,6 @@ class ReconcileDebugArtifactSinkProtocol(Protocol):
     ) -> object:
         """Persist row-level debug artifacts for one reconcile result."""
         ...
-
-
-def _current_flag_column(rows: Sequence[Mapping[str, object]]) -> str | None:
-    """Return the SCD current-flag column present in row payloads."""
-    if not rows:
-        return None
-    for candidate in _CURRENT_FLAG_COLUMNS:
-        if any(candidate in row for row in rows):
-            return candidate
-    return None
-
-
-def _is_current_flag_value(value: object) -> bool:
-    """Return True for truthy SCD current flags (bool True / 1 / 'true')."""
-    if value is True:
-        return True
-    if value is False or value is None:
-        return False
-    if isinstance(value, (int, float)):
-        return value == 1
-    if isinstance(value, str):
-        return value.strip().lower() in {"true", "1", "t", "yes"}
-    return False
-
-
-def filter_current_rows(
-    rows: list[dict[str, object]],
-    *,
-    current_only: bool,
-    layer: str,
-) -> list[dict[str, object]]:
-    """Filter rows to current SCD versions when a current-flag column is present.
-
-    Silver is normally a current-state medallion layer without SCD2 flags. When
-    ``current_only`` is requested and no flag column exists, all rows are
-    retained (they are already current-state). When a flag column exists, only
-    rows with a true current flag are retained so Silver cannot silently ignore
-    the flag when present.
-    """
-    del layer  # layer reserved for future layer-specific policies
-    if not current_only or not rows:
-        return rows
-    flag_column = _current_flag_column(rows)
-    if flag_column is None:
-        return rows
-    return [row for row in rows if _is_current_flag_value(row.get(flag_column))]
 
 
 @dataclass(slots=True)
@@ -339,115 +291,13 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
         source_rows: list[dict[str, object]],
         reference_rows: list[dict[str, object]],
     ) -> ForeignKeyReconciliationResult:
-        scanned_rows = len(source_rows)
-        reference_values = reference_value_set(request, reference_rows)
-        retained_rows, orphan_rows = partition_source_rows(
+        """Delegate loaded-rows orchestration to the extracted module."""
+        return await reconcile_loaded_rows(
+            self,
             request,
             source_rows=source_rows,
-            reference_values=reference_values,
+            reference_rows=reference_rows,
         )
-        retained_rows_count = len(retained_rows)
-        orphan_rows_deleted = len(orphan_rows)
-        if request.reference_completeness != "complete":
-            self._record_metrics(
-                scanned=scanned_rows,
-                retained=retained_rows_count + orphan_rows_deleted,
-                deleted=0,
-            )
-            result = build_reconciliation_result(
-                request,
-                scanned_rows=scanned_rows,
-                retained_rows=retained_rows_count + orphan_rows_deleted,
-                orphan_rows_deleted=0,
-                mutated=False,
-                would_mutate=False,
-                mutation_mode="blocked",
-                mutation_blocked_reason="reference_completeness_unproven",
-                unproven_unmatched_rows=orphan_rows_deleted,
-            )
-            self._write_debug_artifacts(
-                request,
-                result,
-                retained_rows=retained_rows + orphan_rows,
-                orphan_rows=[],
-            )
-            return result
-        self._record_metrics(
-            scanned=scanned_rows,
-            retained=retained_rows_count,
-            deleted=orphan_rows_deleted,
-        )
-
-        if orphan_rows_deleted == 0:
-            result = complete_without_mutation(
-                self,
-                request,
-                scanned_rows=scanned_rows,
-                retained_rows=retained_rows_count,
-                orphan_rows_deleted=0,
-            )
-            self._write_debug_artifacts(
-                request,
-                result,
-                retained_rows=retained_rows,
-                orphan_rows=orphan_rows,
-            )
-            return result
-
-        if request.dry_run:
-            result = complete_dry_run(
-                self,
-                request,
-                scanned_rows=scanned_rows,
-                retained_rows=retained_rows_count,
-                orphan_rows_deleted=orphan_rows_deleted,
-            )
-            self._write_debug_artifacts(
-                request,
-                result,
-                retained_rows=retained_rows,
-                orphan_rows=orphan_rows,
-            )
-            return result
-
-        mutation_summary = await apply_reconciliation_mutation(
-            cast(Any, self),  # Any: reconciliation mutation helper uses structural host
-            request,
-            orphan_rows=orphan_rows,
-        )
-        self._log(
-            "info",
-            "workflow foreign-key reconciliation completed with mutation",
-            source_table=request.source_table,
-            reference_table=request.reference_table,
-            source_layer=request.source_layer,
-            reference_layer=request.reference_layer,
-            mutation_layer=request.effective_mutation_layer,
-            scanned_rows=scanned_rows,
-            retained_rows=retained_rows_count,
-            orphan_rows_deleted=orphan_rows_deleted,
-        )
-        result = build_reconciliation_result(
-            request,
-            scanned_rows=scanned_rows,
-            retained_rows=retained_rows_count,
-            orphan_rows_deleted=orphan_rows_deleted,
-            mutated=True,
-            would_mutate=False,
-            mutation_mode=cast(
-                Any, mutation_summary.mutation_mode
-            ),  # Any: external mutation summary compatibility
-            quarantine_batch_id=mutation_summary.quarantine_batch_id,
-            quarantine_rows_written=mutation_summary.quarantine_rows_written,
-            quarantine_error_code=mutation_summary.quarantine_error_code,
-        )
-        self._write_debug_artifacts(
-            request,
-            result,
-            retained_rows=retained_rows,
-            orphan_rows=orphan_rows,
-        )
-        return result
 
     def _write_debug_artifacts(
         self,

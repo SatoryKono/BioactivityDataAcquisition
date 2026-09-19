@@ -75,7 +75,9 @@ def _category(payload: dict[str, Any], category_id: str) -> dict[str, Any]:
 
 
 def _live_families() -> dict[str, dict[str, Any]]:
-    return {family.name: family.to_dict() for family in collect_hotspot_family_metrics()}
+    return {
+        family.name: family.to_dict() for family in collect_hotspot_family_metrics()
+    }
 
 
 def test_issue_10468_generated_scorecard_proves_coupling_10() -> None:
@@ -137,18 +139,23 @@ def test_issue_10468_hotspot_family_maxima_and_caps_hold() -> None:
     assert live_control_plane["files_ge_250_loc"] == 0
     assert live_builders["files_ge_250_loc"] == 0
 
-    assert control_plane["max_internal_fan_in"] == live_control_plane["max_internal_fan_in"]
+    assert (
+        control_plane["max_internal_fan_in"]
+        == live_control_plane["max_internal_fan_in"]
+    )
     assert builders["max_internal_fan_in"] == live_builders["max_internal_fan_in"]
     assert control_plane["files"] == live_control_plane["files"]
     assert builders["files"] == live_builders["files"]
     assert control_plane["files_ge_250_loc"] == 0
     assert builders["files_ge_250_loc"] == 0
 
-    assert debt_control_plane["metrics"]["max_internal_fan_in"] == (
-        live_control_plane["max_internal_fan_in"]
+    assert (
+        debt_control_plane["metrics"]["max_internal_fan_in"]
+        == (live_control_plane["max_internal_fan_in"])
     )
-    assert debt_builders["metrics"]["max_internal_fan_in"] == (
-        live_builders["max_internal_fan_in"]
+    assert (
+        debt_builders["metrics"]["max_internal_fan_in"]
+        == (live_builders["max_internal_fan_in"])
     )
     assert debt_control_plane["metrics"]["files"] == live_control_plane["files"]
     assert debt_builders["metrics"]["files"] == live_builders["files"]

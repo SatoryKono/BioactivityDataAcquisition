@@ -29,7 +29,9 @@ from bioetl.infrastructure.storage.bronze.pipeline_helpers import (
 from bioetl.infrastructure.storage.bronze.side_effects_mixin import (
     BronzeWriterSideEffectsMixin,
 )
-from bioetl.infrastructure.storage.bronze.validation_mixin import BronzeWriterValidationMixin
+from bioetl.infrastructure.storage.bronze.validation_mixin import (
+    BronzeWriterValidationMixin,
+)
 from bioetl.infrastructure.storage.bronze.write_execution import (
     run_bronze_post_write_actions,
 )
@@ -107,13 +109,13 @@ class TestBronzeValidationAndPrepare:
         with pytest.raises(BronzeValidationError, match="Invalid JSON"):
             list(host._validate_json_records(iter([b"not-json"])))
         assert list(host._validate_json_records(iter([b'{"id":1}']))) == [b'{"id":1}']
-        assert host._resolve_bronze_path("chembl", "activity", "2024-01-01", "f.jsonl") == (
-            "chembl/activity/2024-01-01/f.jsonl"
-        )
+        assert host._resolve_bronze_path(
+            "chembl", "activity", "2024-01-01", "f.jsonl"
+        ) == ("chembl/activity/2024-01-01/f.jsonl")
         host._flat_structure = True
-        assert host._resolve_bronze_path("chembl", "activity", "2024-01-01", "f.jsonl") == (
-            "2024-01-01/f.jsonl"
-        )
+        assert host._resolve_bronze_path(
+            "chembl", "activity", "2024-01-01", "f.jsonl"
+        ) == ("2024-01-01/f.jsonl")
 
     def test_prepare_bronze_write_without_json_copy(self, tmp_path: Path) -> None:
         run_id, batch_id = _ids()
@@ -238,7 +240,9 @@ class TestBronzeMetricsSideEffectsAndWriter:
         writer = BronzeWriter(tmp_path, NoOpLogger(), NoOpMetrics())
         run_id, batch_id = _ids()
         now = datetime(2024, 1, 1, tzinfo=UTC)
-        prepared = SimpleNamespace(relative_path="p.jsonl.zst", full_path=tmp_path / "p")
+        prepared = SimpleNamespace(
+            relative_path="p.jsonl.zst", full_path=tmp_path / "p"
+        )
         artifacts = BronzeWriteArtifacts(
             record_count=1, uncompressed_size=2, compressed_size=1
         )

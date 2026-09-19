@@ -103,7 +103,9 @@ async def test_streaming_processor_clamps_monitor_recommendation_to_one() -> Non
 async def test_wrapped_data_source_rejects_invalid_enhanced_health_result() -> None:
     class Wrapper(_WrappedDataSourceDelegationMixin):
         def __init__(self) -> None:
-            self._data_source = SimpleNamespace(check_health=AsyncMock(return_value="ok"))
+            self._data_source = SimpleNamespace(
+                check_health=AsyncMock(return_value="ok")
+            )
 
         def _after_wrapped_data_source_enter(self) -> None:
             return None

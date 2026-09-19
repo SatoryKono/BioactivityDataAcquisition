@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.lineage._fragment_finalization import (
@@ -59,28 +60,61 @@ def build_bronze_lineage_fragment(
         nodes.append(manifest)
     if source_request is not None:
         nodes.append(source_request)
-        edges.extend(
-            [
-                LineageEdge(
-                    edge_type=LineageEdgeType.DERIVED_FROM,
-                    source=source_request,
-                    target=source_system,
-                    run_id=str(run_context.run_id),
-                    manifest_id=run_context.manifest_id,
-                    created_at=created_at,
-                ),
-                LineageEdge(
-                    edge_type=LineageEdgeType.DERIVED_FROM,
-                    source=bronze_batch,
-                    target=source_request,
-                    run_id=str(run_context.run_id),
-                    manifest_id=run_context.manifest_id,
-                    created_at=created_at,
-                ),
-            ]
+    edges.extend(
+        _request_derivation_edges(
+            run_context=run_context,
+            created_at=created_at,
+            source_request=source_request,
+            source_system=source_system,
+            bronze_batch=bronze_batch,
         )
-    else:
-        edges.append(
+    )
+    if _is_cached_bronze_source(input_data):
+        consumption = _cached_bronze_consumption_node(
+            run_context=run_context,
+            bronze_batch=bronze_batch,
+        )
+        nodes.append(consumption)
+        edges.extend(
+            _cached_consumption_edges(
+                run_context=run_context,
+                created_at=created_at,
+                bronze_batch=bronze_batch,
+                consumption=consumption,
+                run=run,
+            )
+        )
+    # Cached consumption still writes a new Bronze batch for this run. Trust
+    # sidecars require PRODUCED_BY on that written batch; CONSUMED_BY above
+    # records cache use without cloning the original cache occurrence.
+    edges.append(
+        _produced_by_edge(
+            run_context=run_context,
+            created_at=created_at,
+            bronze_batch=bronze_batch,
+            run=run,
+        )
+    )
+    return finalize_lineage_fragment(
+        fragment_name="bronze",
+        run_context=run_context,
+        nodes=nodes,
+        edges=edges,
+        created_at=created_at,
+    )
+
+
+def _request_derivation_edges(
+    *,
+    run_context: RunContext,
+    created_at: datetime,
+    source_request: LineageNodeRef | None,
+    source_system: LineageNodeRef,
+    bronze_batch: LineageNodeRef,
+) -> list[LineageEdge]:
+    """DERIVED_FROM edges binding the batch to its request or system."""
+    if source_request is None:
+        return [
             LineageEdge(
                 edge_type=LineageEdgeType.DERIVED_FROM,
                 source=bronze_batch,
@@ -89,51 +123,70 @@ def build_bronze_lineage_fragment(
                 manifest_id=run_context.manifest_id,
                 created_at=created_at,
             )
-        )
-    if _is_cached_bronze_source(input_data):
-        consumption = _cached_bronze_consumption_node(
-            run_context=run_context,
-            bronze_batch=bronze_batch,
-        )
-        nodes.append(consumption)
-        edges.extend(
-            [
-                LineageEdge(
-                    edge_type=LineageEdgeType.CONSUMED_BY,
-                    source=bronze_batch,
-                    target=consumption,
-                    run_id=str(run_context.run_id),
-                    manifest_id=run_context.manifest_id,
-                    created_at=created_at,
-                ),
-                LineageEdge(
-                    edge_type=LineageEdgeType.EXECUTED_IN,
-                    source=consumption,
-                    target=run,
-                    run_id=str(run_context.run_id),
-                    manifest_id=run_context.manifest_id,
-                    created_at=created_at,
-                ),
-            ]
-        )
-    # Cached consumption still writes a new Bronze batch for this run. Trust
-    # sidecars require PRODUCED_BY on that written batch; CONSUMED_BY above
-    # records cache use without cloning the original cache occurrence.
-    edges.append(
+        ]
+    return [
         LineageEdge(
-            edge_type=LineageEdgeType.PRODUCED_BY,
+            edge_type=LineageEdgeType.DERIVED_FROM,
+            source=source_request,
+            target=source_system,
+            run_id=str(run_context.run_id),
+            manifest_id=run_context.manifest_id,
+            created_at=created_at,
+        ),
+        LineageEdge(
+            edge_type=LineageEdgeType.DERIVED_FROM,
             source=bronze_batch,
+            target=source_request,
+            run_id=str(run_context.run_id),
+            manifest_id=run_context.manifest_id,
+            created_at=created_at,
+        ),
+    ]
+
+
+def _cached_consumption_edges(
+    *,
+    run_context: RunContext,
+    created_at: datetime,
+    bronze_batch: LineageNodeRef,
+    consumption: LineageNodeRef,
+    run: LineageNodeRef,
+) -> list[LineageEdge]:
+    """CONSUMED_BY/EXECUTED_IN edges for cached-Bronze consumption."""
+    return [
+        LineageEdge(
+            edge_type=LineageEdgeType.CONSUMED_BY,
+            source=bronze_batch,
+            target=consumption,
+            run_id=str(run_context.run_id),
+            manifest_id=run_context.manifest_id,
+            created_at=created_at,
+        ),
+        LineageEdge(
+            edge_type=LineageEdgeType.EXECUTED_IN,
+            source=consumption,
             target=run,
             run_id=str(run_context.run_id),
             manifest_id=run_context.manifest_id,
             created_at=created_at,
-        )
-    )
-    return finalize_lineage_fragment(
-        fragment_name="bronze",
-        run_context=run_context,
-        nodes=nodes,
-        edges=edges,
+        ),
+    ]
+
+
+def _produced_by_edge(
+    *,
+    run_context: RunContext,
+    created_at: datetime,
+    bronze_batch: LineageNodeRef,
+    run: LineageNodeRef,
+) -> LineageEdge:
+    """PRODUCED_BY edge for the batch written by this run."""
+    return LineageEdge(
+        edge_type=LineageEdgeType.PRODUCED_BY,
+        source=bronze_batch,
+        target=run,
+        run_id=str(run_context.run_id),
+        manifest_id=run_context.manifest_id,
         created_at=created_at,
     )
 

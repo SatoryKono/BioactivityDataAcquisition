@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
@@ -126,21 +125,3 @@ async def test_execute_merged_silver_empty_and_full() -> None:
     executor._write_silver_merged_delta.assert_awaited()
     executor._export_silver_merged_csv.assert_awaited()
     executor._write_silver_merged_metadata.assert_awaited()
-
-
-def test_pubmed_create_with_email(monkeypatch: pytest.MonkeyPatch) -> None:
-    built = MagicMock()
-    monkeypatch.setattr(
-        "bioetl.infrastructure.adapters.pubmed.adapter.PubMedAdapter",
-        built,
-    )
-    from bioetl.infrastructure.adapters.pubmed._adapter_support import _create_pubmed_adapter
-
-    _create_pubmed_adapter(
-        MagicMock(),
-        MagicMock(),
-        None,
-        email="a@b.c",
-        fallback_fetch_service=object(),
-    )
-    built.assert_called()

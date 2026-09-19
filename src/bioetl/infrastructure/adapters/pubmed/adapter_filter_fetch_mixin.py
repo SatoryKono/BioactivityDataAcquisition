@@ -8,13 +8,15 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.pubmed._fetch_records_support import (
+    fetch_records,
+)
 from bioetl.infrastructure.adapters.pubmed._filter_fetch_support import (
     PubMedAdapterFilterFetchHost,
     apply_resume_offset,
     fetch_filtered_records,
     fetch_filtered_with_fallback_records,
     fetch_from_filter_ids,
-    fetch_records,
     resolve_pmids_for_fetch,
     resolve_resume_offset,
     validate_publication_entity,

@@ -285,7 +285,11 @@ def test_health_factory_status_skip_and_create(monkeypatch: pytest.MonkeyPatch) 
         settings=MagicMock(),
     )
     factory.record_health_result(
-        HealthResult(provider="chembl", status="unknown", checked_at=datetime.now(UTC))
+        HealthResult(
+            provider="chembl",
+            status="unknown",
+            checked_at=datetime(2026, 9, 16, 12, 0, tzinfo=UTC),
+        )
     )
     factory.record_health_result(
         HealthResult(provider="chembl", status="healthy", checked_at=None)

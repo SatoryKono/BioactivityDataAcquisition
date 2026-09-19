@@ -35,7 +35,9 @@ from bioetl.application.core._runner_finalize import (
     finalize_debug_export,
 )
 from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
-from bioetl.application.core.batch_processing_support import BatchProcessingSupportService
+from bioetl.application.core.batch_processing_support import (
+    BatchProcessingSupportService,
+)
 from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
 from bioetl.application.core.preflight.health_aggregator import HealthAggregator
 from bioetl.application.observability.control_plane_evidence.manifest_validation import (
@@ -199,7 +201,9 @@ def test_record_normalization_handles_blank_text_and_delegates_smiles() -> None:
 
 
 @pytest.mark.asyncio
-async def test_runner_finalizers_fail_closed_without_context_and_skip_absent_hook() -> None:
+async def test_runner_finalizers_fail_closed_without_context_and_skip_absent_hook() -> (
+    None
+):
     with pytest.raises(RuntimeError, match="manifest-bound launch context"):
         finalize_contract_evidence(
             SimpleNamespace(
@@ -222,7 +226,9 @@ def test_batch_memory_exposes_trace_and_handles_missing_runtime_policy() -> None
 
 
 @pytest.mark.asyncio
-async def test_batch_processing_rejects_unknown_runtime_and_records_debug_bronze() -> None:
+async def test_batch_processing_rejects_unknown_runtime_and_records_debug_bronze() -> (
+    None
+):
     with pytest.raises(TypeError, match="unexpected keyword"):
         BatchProcessingSupportService(
             services=MagicMock(), logger=MagicMock(), unknown=True
@@ -319,13 +325,13 @@ def test_lineage_boundary_selects_composite_support_scope() -> None:
         provider="composite", entity="publication", contract_ref="contract"
     )
     assert boundary["support_scope"] == "bounded_composite_rebuild_resume_debug"
-    assert boundary["reason"] == "composite_execution_outside_strict_exact_replay_boundary"
+    assert (
+        boundary["reason"] == "composite_execution_outside_strict_exact_replay_boundary"
+    )
 
 
 def test_lineage_fragment_lookup_errors_name_missing_nodes() -> None:
-    context = SimpleNamespace(
-        run_id="run-1", provider="chembl", entity="publication"
-    )
+    context = SimpleNamespace(run_id="run-1", provider="chembl", entity="publication")
     with pytest.raises(ValueError, match="Run node missing from gold"):
         _find_gold_run_node(nodes=[], run_context=context)
     with pytest.raises(ValueError, match="Gold dataset node missing"):
@@ -333,9 +339,7 @@ def test_lineage_fragment_lookup_errors_name_missing_nodes() -> None:
     with pytest.raises(ValueError, match="Run node missing from silver"):
         _find_silver_run_node(nodes=[], run_context=context)
     with pytest.raises(ValueError, match="Silver dataset node missing"):
-        _find_silver_dataset_node(
-            nodes=[], run_context=context, version_after=None
-        )
+        _find_silver_dataset_node(nodes=[], run_context=context, version_after=None)
 
 
 @pytest.mark.asyncio

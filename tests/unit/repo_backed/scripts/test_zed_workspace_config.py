@@ -136,7 +136,7 @@ def test_zed_language_settings_delegate_to_project_sources_of_truth() -> None:
     assert settings["redact_private_values"] is True
     assert python_settings["hard_tabs"] is False
     assert python_settings["tab_size"] == 4
-    assert python_settings["format_on_save"] == "off"
+    assert python_settings["format_on_save"] == "on"
     assert "indent_style" not in python_settings
     assert "source.fixAll.ruff" not in python_settings["code_actions_on_format"]
     assert python_settings["language_servers"] == [

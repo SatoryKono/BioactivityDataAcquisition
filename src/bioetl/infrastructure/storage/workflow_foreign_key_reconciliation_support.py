@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from math import isnan
 from typing import Protocol
 
@@ -34,6 +34,55 @@ _RUN_IDENTITY_COLUMNS = (
     "_composite_run_id",
     "workflow_run_id",
 )
+
+
+_CURRENT_FLAG_COLUMNS = ("_is_current", "is_current")
+
+
+def _current_flag_column(rows: Sequence[Mapping[str, object]]) -> str | None:
+    """Return the SCD current-flag column present in row payloads."""
+    if not rows:
+        return None
+    for candidate in _CURRENT_FLAG_COLUMNS:
+        if any(candidate in row for row in rows):
+            return candidate
+    return None
+
+
+def _is_current_flag_value(value: object) -> bool:
+    """Return True for truthy SCD current flags (bool True / 1 / 'true')."""
+    if value is True:
+        return True
+    if value is False or value is None:
+        return False
+    if isinstance(value, (int, float)):
+        return value == 1
+    if isinstance(value, str):
+        return value.strip().lower() in {"true", "1", "t", "yes"}
+    return False
+
+
+def filter_current_rows(
+    rows: list[dict[str, object]],
+    *,
+    current_only: bool,
+    layer: str,
+) -> list[dict[str, object]]:
+    """Filter rows to current SCD versions when a current-flag column is present.
+
+    Silver is normally a current-state medallion layer without SCD2 flags. When
+    ``current_only`` is requested and no flag column exists, all rows are
+    retained (they are already current-state). When a flag column exists, only
+    rows with a true current flag are retained so Silver cannot silently ignore
+    the flag when present.
+    """
+    del layer  # layer reserved for future layer-specific policies
+    if not current_only or not rows:
+        return rows
+    flag_column = _current_flag_column(rows)
+    if flag_column is None:
+        return rows
+    return [row for row in rows if _is_current_flag_value(row.get(flag_column))]
 
 
 def filter_source_rows_to_current_run(

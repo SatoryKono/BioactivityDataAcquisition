@@ -46,6 +46,23 @@
     "allow_concurrent_runs": false
   },
   {
+    "label": "Check: format",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
+    "args": [
+      "scripts/engineering/dev/zed_run.py",
+      "-m",
+      "ruff",
+      "format",
+      "--check",
+      "."
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "reveal": "no_focus",
+    "hide": "never",
+    "save": "all",
+    "allow_concurrent_runs": false
+  },
+  {
     "label": "Check: types",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [

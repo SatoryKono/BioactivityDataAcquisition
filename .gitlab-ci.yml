@@ -1,0 +1,89 @@
+# GitLab CI — пилот миграции с GitHub Actions (Фаза 3 плана).
+# Маппинг: .github/workflows/tests.yml + .github/actions/setup-python-uv/action.yml
+# Базовый Python 3.12 — baseline BioETL (Makefile / action.yml default).
+# Полный перевод ~50 workflow — волнами по плану; сюда входит только пилот:
+# проверка lock-файла, быстрые тесты, линт + SAST (замена CodeQL).
+# Duo и Dependency Scanning не включаем (платные, решение: отложить).
+
+# Замена .github/workflows/codeql.yml (languages: python, actions):
+# GitLab SAST автоопределит Python (semgrep, bandit). Сканирования YAML
+# GitHub Actions-аналога в SAST нет — .gitlab-ci.yml ревьюится вручную.
+# Еженедельный запуск (cron codeql.yml) переносится не кодом, а настройкой
+# Pipeline schedules в UI проекта. Security Dashboard — тариф Ultimate,
+# находки SAST при этом всегда доступны как артефакты pipeline.
+include:
+  - template: Jobs/SAST.gitlab-ci.yml
+
+stages:
+  - validate
+  - test
+  - lint
+
+variables:
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUNBUFFERED: "1"
+  HYPOTHESIS_PROFILE: "ci"
+  UV_VERSION: "0.11.26"
+  UV_FROZEN: "1"
+  UV_NO_BUILD: "1"
+  UV_NO_SYNC: "1"
+  UV_CACHE_DIR: "$CI_PROJECT_DIR/.cache/uv"
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+# Аналог .github/actions/setup-python-uv: установка uv + sync + кеш.
+.setup-python-uv:
+  image: python:3.12
+  cache:
+    - key:
+        files:
+          - uv.lock
+          - pyproject.toml
+      paths:
+        - .cache/uv/
+        - .venv/
+      policy: pull-push
+  before_script:
+    - python --version
+    - pip install --cache-dir "$PIP_CACHE_DIR" "uv==$UV_VERSION"
+    - uv sync --frozen --extra dev --extra tracing
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+validate:lockfile:
+  extends: .setup-python-uv
+  stage: validate
+  script:
+    - mkdir -p reports/ci
+    - uv lock --check 2>&1 | tee reports/ci/dependency-preflight.log
+  artifacts:
+    when: always
+    expire_in: 3 days
+    paths:
+      - reports/ci/dependency-preflight.log
+
+test:pilot:
+  extends: .setup-python-uv
+  stage: test
+  script:
+    - mkdir -p reports/ci
+    - make test-fast 2>&1 | tee reports/ci/test-pilot.log
+  artifacts:
+    when: always
+    expire_in: 7 days
+    paths:
+      - reports/ci/test-pilot.log
+  timeout: 30m
+
+lint:pilot:
+  extends: .setup-python-uv
+  stage: lint
+  script:
+    - mkdir -p reports/ci
+    - make lint 2>&1 | tee reports/ci/lint-pilot.log
+  artifacts:
+    when: always
+    expire_in: 7 days
+    paths:
+      - reports/ci/lint-pilot.log
+  timeout: 15m

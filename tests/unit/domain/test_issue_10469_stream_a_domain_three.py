@@ -175,7 +175,9 @@ def test_json_helpers_cover_lookup_to_jsonable_and_stdlib_fallback(
         json_normalization.deserialize_json_value("{")
 
 
-def test_workflow_execution_state_from_dict_covers_optional_and_invalid_payloads() -> None:
+def test_workflow_execution_state_from_dict_covers_optional_and_invalid_payloads() -> (
+    None
+):
     started = datetime(2026, 1, 1, tzinfo=UTC)
     step = WorkflowStepState(
         step_id="extract",
@@ -210,7 +212,11 @@ def test_workflow_execution_state_from_dict_covers_optional_and_invalid_payloads
     payload["completed_transform_fingerprints"] = "skip"
     payload["selected_step_ids"] = "extract"
     payload["ambiguous_step_ids"] = None
-    payload["steps"] = [step.to_dict(), "skip", {"step_id": 1, "step_kind": 2, "status": 3}]
+    payload["steps"] = [
+        step.to_dict(),
+        "skip",
+        {"step_id": 1, "step_kind": 2, "status": 3},
+    ]
     payload["last_event_id"] = None
     hydrated = WorkflowExecutionState.from_dict(payload)
     assert hydrated.last_start_offset is None
@@ -272,12 +278,22 @@ def test_stage_accounting_covers_overflow_zero_counts_and_seed_guards() -> None:
 
     for index in range(64):
         acc.record_gold_filter_rejection(
-            {"reason_code": f"r{index}", "rule_type": "range", "field": "x", "operator": ">"}
+            {
+                "reason_code": f"r{index}",
+                "rule_type": "range",
+                "field": "x",
+                "operator": ">",
+            }
         )
     acc.record_gold_filter_rejection({"reason_code": "overflow"})
     snapshot = acc.snapshot_gold_filter_rejections()
     assert any(item["reason_code"] == "other" for item in snapshot)
-    assert snapshot == sorted(snapshot, key=lambda item: tuple(item[k] for k in ("reason_code", "rule_type", "field", "operator")))
+    assert snapshot == sorted(
+        snapshot,
+        key=lambda item: tuple(
+            item[k] for k in ("reason_code", "rule_type", "field", "operator")
+        ),
+    )
 
 
 def test_workflow_builder_covers_object_payload_and_report_ref_defaults() -> None:

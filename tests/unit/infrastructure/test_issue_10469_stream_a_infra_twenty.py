@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
-from bioetl.infrastructure.config.dq_contract_config_loader import DQContractConfigLoader
+from bioetl.infrastructure.config.dq_contract_config_loader import (
+    DQContractConfigLoader,
+)
 from bioetl.infrastructure.config.pipeline_config_api import _load_base_config
 from bioetl.infrastructure.quality.architecture_debt_reduction import _project_root
 from bioetl.infrastructure.schemas.pipeline_config_common_schemas import (
@@ -34,10 +36,13 @@ def test_dq_registry_valueerror_reraise(tmp_path: Path) -> None:
     def _raise(_path: Path) -> object:
         raise ValueError("unexpected registry shape")
 
-    with patch(
-        "bioetl.infrastructure.config.dq_contract_config_loader.load_contract_registry_entries",
-        _raise,
-    ), pytest.raises(ValueError, match="unexpected registry shape"):
+    with (
+        patch(
+            "bioetl.infrastructure.config.dq_contract_config_loader.load_contract_registry_entries",
+            _raise,
+        ),
+        pytest.raises(ValueError, match="unexpected registry shape"),
+    ):
         loader._lookup_registry_entry("chembl.activity")
 
 

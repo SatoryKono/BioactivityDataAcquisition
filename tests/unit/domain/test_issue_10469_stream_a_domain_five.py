@@ -22,7 +22,10 @@ from bioetl.domain.filtering._filter_primitives import (
     to_string_set,
 )
 from bioetl.domain.filtering.column_filter import FilterOperator, GoldColumnFilter
-from bioetl.domain.filtering.list_filters import GoldListContainsFilter, GoldListLengthFilter
+from bioetl.domain.filtering.list_filters import (
+    GoldListContainsFilter,
+    GoldListLengthFilter,
+)
 from bioetl.domain.filtering.range_filter import GoldRangeFilter
 from bioetl.domain.medallion import Layer
 from bioetl.domain.normalization._control_plane_identity import (
@@ -46,7 +49,9 @@ from bioetl.domain.normalization.profiles._profile_reference_normalizers import 
     normalize_profile_inchi_key,
     normalize_profile_uniprot_accessions_ordered,
 )
-from bioetl.domain.normalization.profiles._profile_validation import _normalize_profile_contract
+from bioetl.domain.normalization.profiles._profile_validation import (
+    _normalize_profile_contract,
+)
 from bioetl.domain.normalization.profiles.base import FieldRule
 from bioetl.domain.run_reports.models import WorkflowExecutionRow
 from bioetl.domain.run_reports.workflow_totals import (
@@ -66,7 +71,10 @@ from bioetl.domain.types._gold_contracts_support import (
     normalize_contract_version as normalize_gold_contract_version,
     normalize_semantic_scope,
 )
-from bioetl.domain.value_objects.bronze_result import BronzeWriteResult, _parse_provider_entity
+from bioetl.domain.value_objects.bronze_result import (
+    BronzeWriteResult,
+    _parse_provider_entity,
+)
 from bioetl.domain.value_objects.dq_report_builder import (
     BronzeDQReport,
     DQReportSummary,
@@ -125,7 +133,10 @@ def test_control_plane_identity_covers_hash_contract_and_bool_token_errors() -> 
 
 def test_hash_identity_covers_json_string_sets_and_field_filters() -> None:
     assert normalize_hash_identity_value("{", sort_nested_sequences=True) == "{"
-    assert normalize_hash_identity_value("{not-json}", sort_nested_sequences=True) == "{not-json}"
+    assert (
+        normalize_hash_identity_value("{not-json}", sort_nested_sequences=True)
+        == "{not-json}"
+    )
     assert normalize_hash_identity_value((2, 1), sort_nested_sequences=True) == [1, 2]
     assert normalize_hash_identity_value({2, 1}, sort_nested_sequences=False) == [1, 2]
     record = normalize_hash_identity_record(
@@ -158,7 +169,9 @@ def test_profile_reference_and_validation_cover_invalid_and_empty_contracts() ->
 
     rules = {"name": FieldRule(field_name="name")}
     with pytest.raises(ValueError, match="cannot be empty"):
-        _normalize_profile_contract(field_rules={}, field_aliases={}, meta_fields=frozenset())
+        _normalize_profile_contract(
+            field_rules={}, field_aliases={}, meta_fields=frozenset()
+        )
     with pytest.raises(ValueError, match="does not match field_name"):
         _normalize_profile_contract(
             field_rules={"other": FieldRule(field_name="name")},
@@ -166,13 +179,23 @@ def test_profile_reference_and_validation_cover_invalid_and_empty_contracts() ->
             meta_fields=frozenset(),
         )
     with pytest.raises(ValueError, match="cannot shadow"):
-        _normalize_profile_contract(field_rules=rules, field_aliases={"name": "name"}, meta_fields=frozenset())
+        _normalize_profile_contract(
+            field_rules=rules, field_aliases={"name": "name"}, meta_fields=frozenset()
+        )
     with pytest.raises(ValueError, match="missing from field_rules"):
-        _normalize_profile_contract(field_rules=rules, field_aliases={"alias": "missing"}, meta_fields=frozenset())
+        _normalize_profile_contract(
+            field_rules=rules,
+            field_aliases={"alias": "missing"},
+            meta_fields=frozenset(),
+        )
     with pytest.raises(ValueError, match="must be present"):
-        _normalize_profile_contract(field_rules=rules, field_aliases={}, meta_fields=frozenset({"missing"}))
+        _normalize_profile_contract(
+            field_rules=rules, field_aliases={}, meta_fields=frozenset({"missing"})
+        )
     normalized, aliases = _normalize_profile_contract(
-        field_rules=rules, field_aliases={"alias": "name"}, meta_fields=frozenset({"name"})
+        field_rules=rules,
+        field_aliases={"alias": "name"},
+        meta_fields=frozenset({"name"}),
     )
     assert list(normalized) == ["name"]
     assert aliases["alias"] == "name"
@@ -186,10 +209,13 @@ def test_workflow_totals_and_serialization_cover_invalid_counts_and_stdlib() -> 
     assert _optional_sum([empty], "records_silver") is None
     assert _snapshot_current({"source_snapshot": "x"}) is None
     assert _measured_current(empty, {"dry_run": True}) is None
-    assert _measured_current(
-        WorkflowExecutionRow(step_id="a", status="success", records_extracted=1),
-        {"source_scope": "limited", "mutation_mode": "gold_scd2_expiry"},
-    ) is None
+    assert (
+        _measured_current(
+            WorkflowExecutionRow(step_id="a", status="success", records_extracted=1),
+            {"source_scope": "limited", "mutation_mode": "gold_scd2_expiry"},
+        )
+        is None
+    )
     assert _expired_count({"mutation_mode": "no_op"}) == 0
     totals = _build_totals(
         (
@@ -219,7 +245,10 @@ def test_workflow_totals_and_serialization_cover_invalid_counts_and_stdlib() -> 
     original = serialization._orjson_available
     serialization._orjson_available = False
     try:
-        assert serialize_to_json({"b": 1, "a": 2}, sort_keys=False) in {'{"b":1,"a":2}', '{"a":2,"b":1}'}
+        assert serialize_to_json({"b": 1, "a": 2}, sort_keys=False) in {
+            '{"b":1,"a":2}',
+            '{"a":2,"b":1}',
+        }
         with pytest.raises(ValueError, match="NaN or Infinity"):
             serialize_to_json({"nested": [float("nan")]})
     finally:
@@ -236,15 +265,33 @@ def test_redaction_filter_support_and_gold_helpers_cover_edge_branches() -> None
     assert is_empty_value({}) is True
     assert is_empty_value(b"x") is False
     assert check_required_fields(("id",), {"id": " "}) is False
-    assert check_single_column({"status": "open"}, GoldColumnFilter("status", FilterOperator.IN, frozenset({"open"})))
+    assert check_single_column(
+        {"status": "open"},
+        GoldColumnFilter("status", FilterOperator.IN, frozenset({"open"})),
+    )
     unknown = SimpleNamespace(column="status", operator="nope", values=frozenset({"x"}))
     assert check_single_column({"status": "open"}, unknown) is False  # type: ignore[arg-type]
-    assert check_single_range({"n": "x"}, GoldRangeFilter("n", min_value=1.0, include_min=False)) is False
-    assert check_single_range({"n": 2}, GoldRangeFilter("n", min_value=2.0, include_min=False)) is False
+    assert (
+        check_single_range(
+            {"n": "x"}, GoldRangeFilter("n", min_value=1.0, include_min=False)
+        )
+        is False
+    )
+    assert (
+        check_single_range(
+            {"n": 2}, GoldRangeFilter("n", min_value=2.0, include_min=False)
+        )
+        is False
+    )
     assert get_list_length("[") == 1
     assert get_list_length("[1,2]") == 2
     assert to_string_set("not-list") == {"not-list"}
-    assert check_single_list_length({"tags": None}, GoldListLengthFilter("tags", min_length=0)) is True
+    assert (
+        check_single_list_length(
+            {"tags": None}, GoldListLengthFilter("tags", min_length=0)
+        )
+        is True
+    )
     contains = GoldListContainsFilter("tags", frozenset({"a"}), mode="any")
     assert check_single_list_contains({}, contains) is True
     assert check_single_list_contains({"tags": None}, contains) is True

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.required_persistence_profile import (
-    _resolve_required_persistence_profile,
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants import (
+    required_persistence_profile as _required_persistence_profile_module,
 )
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.execution_context import (
@@ -36,7 +36,9 @@ def _assess_manifest_reproducibility_policy(
     )
     return assess_reproducibility_policy(
         source_refs=manifest.source_refs,
-        required_persistence_profile=_resolve_required_persistence_profile(manifest),
+        required_persistence_profile=_required_persistence_profile_module._resolve_required_persistence_profile(
+            manifest
+        ),
         strict_exact_replay_supported=bool(
             replay_family_contract.get("strict_exact_replay_supported", False)
         ),

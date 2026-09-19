@@ -23,7 +23,9 @@ from bioetl.application.services.control_plane.replay.historical_identity_models
     build_historical_certified_identity_payload_from_record,
 )
 from bioetl.application.services.dq._checks_basic import _extract_freshness_timestamp
-from bioetl.application.services.quality import _quarantine_service_filtered_helpers as filtered
+from bioetl.application.services.quality import (
+    _quarantine_service_filtered_helpers as filtered,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -33,12 +35,15 @@ async def test_merge_io_returns_unchanged_frames_without_joinable_inputs() -> No
     host = MergeIOMixin()
     frame = pl.DataFrame({"id": [1]})
     dependencies = [SimpleNamespace(pipeline="chembl_target")]
-    assert await host._apply_dependency_joins_if_needed(
-        frame,
-        {"chembl_assay": frame},
-        dependencies,  # type: ignore[arg-type]
-        "chembl_assay",
-    ) is frame
+    assert (
+        await host._apply_dependency_joins_if_needed(
+            frame,
+            {"chembl_assay": frame},
+            dependencies,  # type: ignore[arg-type]
+            "chembl_assay",
+        )
+        is frame
+    )
 
     host._cross_validator = MagicMock()
     output, stats, rows = host._run_cross_validation(
@@ -70,7 +75,9 @@ def test_historical_bulk_validation_names_missing_manifest_and_inventory() -> No
         )
     with pytest.raises(ValueError, match="inventory is missing"):
         service.validate_bulk_manifests(
-            (spec,), manifest_by_id={"manifest-1": MagicMock()}, status_by_manifest_id={}
+            (spec,),
+            manifest_by_id={"manifest-1": MagicMock()},
+            status_by_manifest_id={},
         )
 
 
@@ -122,11 +129,17 @@ def test_filtered_helpers_handle_unselectable_manifest_and_missing_show(
         manifest_port=SimpleNamespace(list_all=lambda: (manifest,)), ledger_port=None
     )
     monkeypatch.setattr(filtered, "_pick_latest_scope_manifest", lambda **_kw: None)
-    assert filtered._resolve_latest_scope_run_id(
-        pipeline="chembl_activity", run_type=None, run_manifest_service=service
-    ) is None
-    assert filtered._resolve_bronze_for_run(
-        "run-1",
-        list_entries_by_run_id=None,
-        run_manifest_service=SimpleNamespace(),
-    ) is None
+    assert (
+        filtered._resolve_latest_scope_run_id(
+            pipeline="chembl_activity", run_type=None, run_manifest_service=service
+        )
+        is None
+    )
+    assert (
+        filtered._resolve_bronze_for_run(
+            "run-1",
+            list_entries_by_run_id=None,
+            run_manifest_service=SimpleNamespace(),
+        )
+        is None
+    )

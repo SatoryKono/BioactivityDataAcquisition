@@ -38,8 +38,12 @@ class TestTableOps:
     def test_path_and_uri_helpers(self, tmp_path: Path) -> None:
         assert _can_use_pyarrow_dataset_scanner(platform="win32") is False
         assert _can_use_pyarrow_dataset_scanner(platform="linux") is True
-        assert resolve_parquet_file_uri("s3://bucket/a.parquet") == "s3://bucket/a.parquet"
-        assert resolve_parquet_file_uri("file:///C:/tmp/a.parquet") == "C:/tmp/a.parquet"
+        assert (
+            resolve_parquet_file_uri("s3://bucket/a.parquet") == "s3://bucket/a.parquet"
+        )
+        assert (
+            resolve_parquet_file_uri("file:///C:/tmp/a.parquet") == "C:/tmp/a.parquet"
+        )
         assert resolve_parquet_file_uri("file:///tmp/a.parquet") == "/tmp/a.parquet"
         remote = normalize_delta_filesystem_path("s3://bucket/table/")
         assert remote == "s3://bucket/table"
@@ -56,7 +60,9 @@ class TestTableOps:
             table_name="ignored",
             flat_structure=True,
         )
-        assert Path(flat) == tmp_path or flat.replace("\\", "/").endswith(tmp_path.as_posix())
+        assert Path(flat) == tmp_path or flat.replace("\\", "/").endswith(
+            tmp_path.as_posix()
+        )
         remote_nested = resolve_delta_table_path(
             base_path="s3://bucket/root/",
             table_name="chembl.activity",
@@ -95,7 +101,9 @@ class TestTableOps:
 
     def test_clear_delta_tables(self, tmp_path: Path) -> None:
         missing = tmp_path / "nope"
-        assert clear_delta_tables(base_path=missing, table_path=None, dry_run=False) == 0
+        assert (
+            clear_delta_tables(base_path=missing, table_path=None, dry_run=False) == 0
+        )
         table_dir = tmp_path / "chembl"
         table_dir.mkdir()
         (table_dir / "_delta_log").mkdir()
@@ -228,7 +236,12 @@ class TestDeltaReaderHelpers:
             )
             == 2
         )
-        assert count_delta_rows(_GoodCount(), tmp_path, delta_table_factory=lambda _p: _Fresh()) == 7
+        assert (
+            count_delta_rows(
+                _GoodCount(), tmp_path, delta_table_factory=lambda _p: _Fresh()
+            )
+            == 7
+        )
 
 
 class TestRetentionDedup:
@@ -287,7 +300,9 @@ class TestRetentionDedup:
                 return _Dataset()
 
             def schema(self) -> object:
-                return SimpleNamespace(to_arrow=lambda: pa.schema([("id", pa.string())]))
+                return SimpleNamespace(
+                    to_arrow=lambda: pa.schema([("id", pa.string())])
+                )
 
         monkeypatch.setattr("deltalake.DeltaTable", lambda _path: _Empty())
         monkeypatch.setattr(

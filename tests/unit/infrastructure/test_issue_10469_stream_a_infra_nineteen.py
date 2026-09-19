@@ -8,9 +8,15 @@ from types import SimpleNamespace
 import pytest
 
 from bioetl.domain.models.metadata import InputSnapshotRef, SourceMetadata
-from bioetl.infrastructure.control_plane.file_artifact_lifecycle_payloads import _artifact_id
-from bioetl.infrastructure.control_plane.file_artifact_lifecycle_reasons import _protected_by
-from bioetl.infrastructure.control_plane.file_artifact_lifecycle_types import _ProtectedRefs
+from bioetl.infrastructure.control_plane.file_artifact_lifecycle_payloads import (
+    _artifact_id,
+)
+from bioetl.infrastructure.control_plane.file_artifact_lifecycle_reasons import (
+    _protected_by,
+)
+from bioetl.infrastructure.control_plane.file_artifact_lifecycle_types import (
+    _ProtectedRefs,
+)
 from bioetl.infrastructure.quality.architecture_debt_reduction import _layer_for_target
 from bioetl.infrastructure.schemas.composite_config_base import EnricherSchema
 from bioetl.infrastructure.schemas.pipeline_config_common_schemas import (
@@ -22,7 +28,9 @@ from bioetl.infrastructure.storage.bronze.metadata_snapshot_refs import (
     attach_live_snapshot_to_source_metadata,
     build_bronze_source_metadata_with_live_snapshot,
 )
-from bioetl.infrastructure.storage.delta_reader_helpers import try_native_delta_row_count
+from bioetl.infrastructure.storage.delta_reader_helpers import (
+    try_native_delta_row_count,
+)
 from bioetl.infrastructure.storage.silver.operations.validation_operations import (
     _resolve_payload_runtime_host,
 )
@@ -61,17 +69,25 @@ def test_unknown_artifact_surface_defaults() -> None:
 
 
 def test_snapshot_attach_existing_and_new() -> None:
-    snap = InputSnapshotRef(snapshot_id="s1", content_hash="h1", immutable_uri="file://a")
+    snap = InputSnapshotRef(
+        snapshot_id="s1", content_hash="h1", immutable_uri="file://a"
+    )
     source = SourceMetadata(type="api", input_snapshots=[])
     built = build_bronze_source_metadata_with_live_snapshot(
         source_metadata=source,
         snapshot=snap,
     )
     assert built is source
-    same = attach_live_snapshot_to_source_metadata(source_metadata=source, snapshot=snap)
+    same = attach_live_snapshot_to_source_metadata(
+        source_metadata=source, snapshot=snap
+    )
     assert same is source
-    other = InputSnapshotRef(snapshot_id="s2", content_hash="h2", immutable_uri="file://b")
-    attached = attach_live_snapshot_to_source_metadata(source_metadata=source, snapshot=other)
+    other = InputSnapshotRef(
+        snapshot_id="s2", content_hash="h2", immutable_uri="file://b"
+    )
+    attached = attach_live_snapshot_to_source_metadata(
+        source_metadata=source, snapshot=other
+    )
     assert attached is source
     assert len(source.input_snapshots) >= 2
 
@@ -108,7 +124,9 @@ def test_delta_count_reraises_keyboardinterrupt() -> None:
         try_native_delta_row_count(_Boom())  # type: ignore[arg-type]
 
 
-def test_workflow_config_wraps_domain_valueerror(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_workflow_config_wraps_domain_valueerror(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     def _boom(self: WorkflowConfigSchema) -> object:
         raise ValueError("cycle")
 

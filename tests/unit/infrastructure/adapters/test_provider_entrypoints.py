@@ -30,6 +30,7 @@
 from __future__ import annotations
 
 from importlib import import_module
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -99,3 +100,24 @@ def test_uniprot_package_root_stays_adapter_first() -> None:
     assert not hasattr(package_module, "UniProtIDMappingClient")
     assert not hasattr(package_module, "IDMappingJobError")
     assert not hasattr(package_module, "IDMappingTimeoutError")
+
+
+def test_pubmed_create_with_email(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Canonical PubMed factory should construct the adapter with email."""
+    built = MagicMock()
+    monkeypatch.setattr(
+        "bioetl.infrastructure.adapters.pubmed.adapter.PubMedAdapter",
+        built,
+    )
+    from bioetl.infrastructure.adapters.pubmed._adapter_support import (
+        _create_pubmed_adapter,
+    )
+
+    _create_pubmed_adapter(
+        MagicMock(),
+        MagicMock(),
+        None,
+        email="a@b.c",
+        fallback_fetch_service=object(),
+    )
+    built.assert_called()

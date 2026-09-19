@@ -10,7 +10,9 @@ import pytest
 
 import bioetl.domain._observability_contract_core as observability_core
 import bioetl.domain.mapping.publication_type_classification as publication_classification
-from bioetl.domain._observability_contract_core import enforce_observability_contract_context
+from bioetl.domain._observability_contract_core import (
+    enforce_observability_contract_context,
+)
 from bioetl.domain.behavior._author_helpers import (
     _collect_affiliation_values,
     _surname_initial_from_comma,
@@ -23,7 +25,7 @@ from bioetl.domain.behavior.value_validator_rules import (
     _percent_type_error,
     validate_percent_value,
 )
-from bioetl.domain.composite.config_merge import MergeConfig
+from bioetl.domain.composite.config import MergeConfig
 from bioetl.domain.composite.field_groups_models import (
     FieldGroupDefinition,
     FieldGroupId,
@@ -40,7 +42,9 @@ from bioetl.domain.control_plane._run_manifest_serialization import (
     freeze_manifest_payload,
 )
 from bioetl.domain.control_plane.contract_registry_service import ContractRegistry
-from bioetl.domain.entities.chembl_structures_foundation import TargetProteinClassification
+from bioetl.domain.entities.chembl_structures_foundation import (
+    TargetProteinClassification,
+)
 from bioetl.domain.exceptions._redaction import _redact_structured, _redact_url
 from bioetl.domain.exceptions.storage._storage import StorageQuotaExceededError
 from bioetl.domain.filtering._filter_primitives import (
@@ -60,7 +64,7 @@ from bioetl.domain.mapping.publication_type_classification import (
     classify_publication_type,
 )
 from bioetl.domain.types import ContentHash, EntityID, RunID, RunType
-from bioetl.domain.value_objects.pchembl_value import PChemblValue
+from bioetl.domain.value_objects import PChemblValue
 
 pytestmark = pytest.mark.unit
 
@@ -78,7 +82,12 @@ def test_observability_repair_path_when_missing_fields_forced(
     )
     repaired = enforce_observability_contract_context(
         event_name="pipeline_failed",
-        context={"event": "", "provider": "", "pipeline": "chembl_activity", "run_id": "r1"},
+        context={
+            "event": "",
+            "provider": "",
+            "pipeline": "chembl_activity",
+            "run_id": "r1",
+        },
         default_provider="chembl",
         default_pipeline="chembl_activity__v1",
         default_run_id="r1",
@@ -171,7 +180,9 @@ def test_field_group_registry_gold_fallback_mapped_extract_and_unknown_provider(
         fields=(mapping,),
     )
     registry = FieldGroupRegistry((group,))
-    assert registry.is_gold_field("unknown_column") is FieldGroupId.TRASH.include_in_gold
+    assert (
+        registry.is_gold_field("unknown_column") is FieldGroupId.TRASH.include_in_gold
+    )
     monkeypatch.setattr(registry, "get_group", lambda _column: FieldGroupId.TRASH)
     classified = registry.validate_columns(["chembl.publication.title", "_sys"])
     assert "chembl.publication.title" in classified["mapped"]
@@ -210,7 +221,9 @@ def test_manifest_snapshots_immutable_mapping_and_invalid_registry_entry() -> No
     with pytest.raises(TypeError, match="immutable"):
         frozen.setdefault("b", 2)
     with pytest.raises(ValueError):
-        ContractRegistry.from_dict({"entries": {"c.ref": {"identity": "not-an-object"}}})
+        ContractRegistry.from_dict(
+            {"entries": {"c.ref": {"identity": "not-an-object"}}}
+        )
 
 
 def test_contract_registry_version_change_returns_empty_issues(
@@ -240,9 +253,10 @@ def test_redaction_url_errors_and_structured_passthrough() -> None:
     assert _redact_url("not-a-url") == "not-a-url"
     assert _redact_url("http:") == "http:"
     redacted_bad_port = _redact_url("http://example.com:999999/path")
-    assert redacted_bad_port in {"[REDACTED URL]", "http://example.com:999999/path"} or (
-        "example.com" in redacted_bad_port
-    )
+    assert redacted_bad_port in {
+        "[REDACTED URL]",
+        "http://example.com:999999/path",
+    } or ("example.com" in redacted_bad_port)
     assert _redact_structured(object(), "", seen=set()) is not None
 
 
@@ -256,7 +270,9 @@ def test_storage_quota_path_required_and_filter_literal_none() -> None:
 
 def test_lineage_output_contract_and_schema_ref_to_dict() -> None:
     with pytest.raises(ValueError, match="output metadata"):
-        _validate_output_identity_contract(SimpleNamespace(), SimpleNamespace(), "artifact")
+        _validate_output_identity_contract(
+            SimpleNamespace(), SimpleNamespace(), "artifact"
+        )
     payload = SchemaRef(contract_path="contracts/gold.yaml", version="1.0.0").to_dict()
     assert payload["contract_path"] == "contracts/gold.yaml"
     assert payload["version"] == "1.0.0"
@@ -275,14 +291,11 @@ def test_publication_classification_uninitialized_and_support_fallbacks(
     )
     with pytest.raises(ValueError, match="Unknown publication classification field"):
         classification_values("unified_type", ())
-    assert (
-        normalize_publication_classification_value(
-            field_name="publication_type_unified",
-            value="Journal article",
-            entries=(),
-        )
-        in {"Journal article", None}
-    )
+    assert normalize_publication_classification_value(
+        field_name="publication_type_unified",
+        value="Journal article",
+        entries=(),
+    ) in {"Journal article", None}
     assert _normalized_raw_type_part(None) is None
     monkeypatch.setattr(publication_classification, "_PROVIDER_LOOKUPS", {})
     with pytest.raises(RuntimeError, match="not initialized"):

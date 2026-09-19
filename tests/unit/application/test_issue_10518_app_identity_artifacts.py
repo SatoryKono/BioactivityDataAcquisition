@@ -126,7 +126,9 @@ async def test_runner_support_delegates_and_metrics_close(
     class _Host(PipelineRunnerSupportMixin):
         _logger = MagicMock()
         _services = SimpleNamespace(
-            metrics=SimpleNamespace(close=lambda: (_ for _ in ()).throw(RuntimeError("x")))
+            metrics=SimpleNamespace(
+                close=lambda: (_ for _ in ()).throw(RuntimeError("x"))
+            )
         )
 
     host = _Host()
@@ -209,7 +211,9 @@ def test_replay_remaining_incomplete_and_composite_paths(
         snapshot_envelope=SimpleNamespace(full_snapshot_envelope=False)
     )
     monkeypatch.setattr(replay, "_collect_append_mode_semantic_sinks", lambda _m: False)
-    monkeypatch.setattr(replay, "_has_partial_input_snapshot_envelope", lambda _e: False)
+    monkeypatch.setattr(
+        replay, "_has_partial_input_snapshot_envelope", lambda _e: False
+    )
     monkeypatch.setattr(
         replay, "_has_historical_composite_certified_snapshots", lambda _s: True
     )

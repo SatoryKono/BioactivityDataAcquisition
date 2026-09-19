@@ -175,7 +175,9 @@ def test_bound_dq_loader_uses_resolved_config_root(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     load = Mock(return_value={"rules": []})
-    monkeypatch.setattr(_config_access_loaders, "resolve_configs_root", lambda _root: tmp_path)
+    monkeypatch.setattr(
+        _config_access_loaders, "resolve_configs_root", lambda _root: tmp_path
+    )
     monkeypatch.setattr(_config_access_loaders, "_load_dq_config_for_pipeline", load)
 
     bound = _config_access_loaders.create_dq_config_loader(tmp_path / "input")

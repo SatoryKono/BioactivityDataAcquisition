@@ -7,6 +7,10 @@ import json
 from pathlib import Path
 from typing import cast
 
+from bioetl.application.services.run_reports.query import (
+    find_pipeline_report_owner_names,
+)
+from bioetl.composition.observability_runtime import create_run_report_store
 from bioetl.domain.run_reports.selected_status import (
     DOMAINS,
     RULES_VERSION,
@@ -125,9 +129,11 @@ def _selected_pipeline(pipeline: str, run_id: str, root: Path | None) -> str | N
         raise ValueError("invalid_run_id")
     base = run_report_ops._effective_root(root).resolve() / "pipeline"
     matches = [
-        path.parent.parent.name
-        for path in base.glob(f"*/{run_id}/pipeline-run-report.json")
-        if path.is_file() and (owners is None or path.parent.parent.name in owners)
+        owner
+        for owner in find_pipeline_report_owner_names(
+            base=base, run_id=run_id, store=create_run_report_store()
+        )
+        if owners is None or owner in owners
     ]
     if len(matches) > 1:
         raise ValueError("run_id_ambiguous")

@@ -436,6 +436,10 @@ def test_exact_replay_and_small_seams(monkeypatch: pytest.MonkeyPatch) -> None:
     )
     assert factory_id == run_id
 
+
+def test_exact_replay_config_and_service_seams(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setattr(
         "bioetl.composition.runtime_builders.config_access.resolve_configs_root",
         lambda _root: Path("configs"),
@@ -469,6 +473,10 @@ def test_exact_replay_and_small_seams(monkeypatch: pytest.MonkeyPatch) -> None:
     )
     assert "uniprot_idmapping" in _DATA_SOURCE_CREATOR_HEALTH_PROVIDERS
 
+
+def test_exact_replay_bootstrap_and_runner_seams(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     from bioetl.composition import _pipeline_execution as pe
 
     monkeypatch.setattr(pe, "build_pipeline_context", lambda *_a, **_k: object())
@@ -511,6 +519,10 @@ def test_exact_replay_and_small_seams(monkeypatch: pytest.MonkeyPatch) -> None:
         is sentinel
     )
 
+
+def test_exact_replay_contract_identity_seams(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     from bioetl.composition.bootstrap.runtime._composite_control_plane_builder_support import (
         _composite_contract_identity_field_values,
         _composite_manifest_contract_identity_kwargs,
@@ -558,6 +570,10 @@ def test_exact_replay_and_small_seams(monkeypatch: pytest.MonkeyPatch) -> None:
         == "activity"
     )
 
+
+def test_exact_replay_assembly_and_factory_seams(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     from bioetl.composition.factories.pipeline import runner_assembly as assembly
 
     monkeypatch.setattr(assembly, "_build_preflight_service_impl", lambda _ctx: "pre")

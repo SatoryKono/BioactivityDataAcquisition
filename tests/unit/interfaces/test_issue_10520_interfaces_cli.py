@@ -62,7 +62,9 @@ def test_run_manifest_command_error_paths(monkeypatch: pytest.MonkeyPatch) -> No
         def show(self, identifier: str) -> object:
             raise ValueError("not found")
 
-    monkeypatch.setattr(run_manifest_cmd, "get_run_manifest_service", lambda: _ValueShow())
+    monkeypatch.setattr(
+        run_manifest_cmd, "get_run_manifest_service", lambda: _ValueShow()
+    )
     runner.invoke(cli, ["run-manifest", "score", "m1"])
     runner.invoke(cli, ["run-manifest", "diff", "a", "b"])
 
@@ -122,7 +124,10 @@ def test_run_manifest_output_and_lineage_text_helpers() -> None:
         {
             "left_manifest_id": "a",
             "right_manifest_id": "b",
-            "differences": ["raw", {"field": "x", "left": 1, "right": {"nested": True}}],
+            "differences": [
+                "raw",
+                {"field": "x", "left": 1, "right": {"nested": True}},
+            ],
         }
     )
     assert "differences" in diff_text
@@ -188,7 +193,9 @@ def test_identity_routing_timeout_and_port_guard() -> None:
 
 @pytest.mark.asyncio
 async def test_identity_handlers_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
-    from bioetl.interfaces.http import _health_server_identity_routing_support as routing
+    from bioetl.interfaces.http import (
+        _health_server_identity_routing_support as routing,
+    )
 
     host = SimpleNamespace(
         _run_manifest_port=object(),
@@ -204,12 +211,16 @@ async def test_identity_handlers_timeout(monkeypatch: pytest.MonkeyPatch) -> Non
 
     monkeypatch.setattr(routing.asyncio, "wait_for", _timeout)
     await routing.handle_control_plane_identity_table(
-        host, writer, {"pipeline": "p"}  # type: ignore[arg-type]
+        host,
+        writer,
+        {"pipeline": "p"},  # type: ignore[arg-type]
     )
     host._send_payload_response.assert_called()
     host._send_payload_response.reset_mock()
     await routing.handle_control_plane_identity_evidence(
-        host, writer, {"pipeline": "p"}  # type: ignore[arg-type]
+        host,
+        writer,
+        {"pipeline": "p"},  # type: ignore[arg-type]
     )
     host._send_payload_response.assert_called()
 

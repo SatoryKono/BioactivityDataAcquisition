@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import MagicMock
 
 import pytest
 
@@ -127,9 +126,10 @@ def test_dq_contract_identity_and_payload_edges(tmp_path: Path) -> None:
     monkey_loader = dq_loader.DQContractConfigLoader(tmp_path)
     from unittest.mock import patch
 
-    with patch.object(
-        dq_loader, "load_contract_registry_entries", _raise_mapping
-    ), pytest.raises(ValueError, match="entries must be a mapping"):
+    with (
+        patch.object(dq_loader, "load_contract_registry_entries", _raise_mapping),
+        pytest.raises(ValueError, match="entries must be a mapping"),
+    ):
         monkey_loader._lookup_registry_entry("chembl.activity")
 
 
@@ -158,10 +158,10 @@ async def test_retention_dedup_timeout(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     policy = RetentionPolicy(tmp_path, deduplicate_timeout_seconds=0.01)
-    monkeypatch.setattr(retention_mod, "get_table_path", lambda *_a, **_k: str(tmp_path))
     monkeypatch.setattr(
-        retention_mod, "deduplicate_delta_rows", lambda *_a, **_k: 0
+        retention_mod, "get_table_path", lambda *_a, **_k: str(tmp_path)
     )
+    monkeypatch.setattr(retention_mod, "deduplicate_delta_rows", lambda *_a, **_k: 0)
     times = iter([0.0, 1.0])
     monkeypatch.setattr(retention_mod.time, "perf_counter", lambda: next(times))
 

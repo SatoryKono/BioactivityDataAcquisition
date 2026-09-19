@@ -156,7 +156,9 @@ def test_manifest_policy_rejects_missing_family_and_strict_context_gap(
     monkeypatch.setattr(
         policy, "is_critical_reproducibility_runtime", lambda **_kwargs: False
     )
-    monkeypatch.setattr(policy, "is_degraded_opt_down_eligible", lambda **_kwargs: False)
+    monkeypatch.setattr(
+        policy, "is_degraded_opt_down_eligible", lambda **_kwargs: False
+    )
     monkeypatch.setattr(
         policy,
         "resolve_effective_required_persistence_profile",

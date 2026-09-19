@@ -237,9 +237,12 @@ def test_latest_scope_index_catalog_and_restore(tmp_path: Path) -> None:
     catalog_path = latest_scope_catalog_path(tmp_path)
     index_path = latest_scope_index_path(tmp_path, "chembl_activity", RunType.BACKFILL)
     assert load_latest_scope_catalog(catalog_path) is None
-    assert load_latest_scope_index(
-        index_path, pipeline_name="chembl_activity", run_type=RunType.BACKFILL
-    ) is None
+    assert (
+        load_latest_scope_index(
+            index_path, pipeline_name="chembl_activity", run_type=RunType.BACKFILL
+        )
+        is None
+    )
 
     catalog = LatestScopeIndexCatalog(
         complete=True,
@@ -435,21 +438,29 @@ def test_observability_backend_process_parse_drop_and_popen_kwargs(
     assert backend._run_taskkill(9).returncode == 1
 
     monkeypatch.setattr(backend, "_find_listening_backend_pids_by_port", lambda _p: ())
-    assert backend.drop_listening_backend_on_port(8000, sleep_fn=lambda _s: None) is True
+    assert (
+        backend.drop_listening_backend_on_port(8000, sleep_fn=lambda _s: None) is True
+    )
     monkeypatch.setattr(
         backend, "_find_listening_backend_pids_by_port", lambda _p: (11,)
     )
     monkeypatch.setattr(backend, "_drop_listener_pids", lambda _p, _ids: False)
-    assert backend.drop_listening_backend_on_port(8000, sleep_fn=lambda _s: None) is False
+    assert (
+        backend.drop_listening_backend_on_port(8000, sleep_fn=lambda _s: None) is False
+    )
     monkeypatch.setattr(backend, "_drop_listener_pids", lambda _p, _ids: True)
     monkeypatch.setattr(
         backend,
         "_find_listening_backend_pids_by_port",
         lambda _p: (),
     )
-    assert backend.drop_listening_backend_on_port(8000, sleep_fn=lambda _s: None) is True
+    assert (
+        backend.drop_listening_backend_on_port(8000, sleep_fn=lambda _s: None) is True
+    )
 
-    monkeypatch.setattr(backend.os, "kill", lambda *_a, **_k: (_ for _ in ()).throw(OSError()))
+    monkeypatch.setattr(
+        backend.os, "kill", lambda *_a, **_k: (_ for _ in ()).throw(OSError())
+    )
     monkeypatch.setattr(backend, "_pid_still_listening", lambda *_a, **_k: False)
     assert backend._terminate_pid_with_sigterm(1, 2) is True
     assert backend._drop_posix_listener_pid(1, 2) is True
@@ -469,9 +480,7 @@ def test_observability_backend_process_parse_drop_and_popen_kwargs(
         ),
     )
     assert nt_kwargs["creationflags"] == 7
-    env = backend._build_detached_backend_env(
-        current_env={"PYTHONPATH": "existing"}
-    )
+    env = backend._build_detached_backend_env(current_env={"PYTHONPATH": "existing"})
     assert "existing" in env["PYTHONPATH"]
 
     launched: dict[str, object] = {}
@@ -502,7 +511,9 @@ def test_architecture_debt_reduction_classifies_remaining_categories(
     reports.mkdir(parents=True)
     latest = reports / "tasks_architecture_metric_exemptions_2026-09-17-01.json"
     latest.write_text("{}", encoding="utf-8")
-    assert debt.find_latest_architecture_debt_tasks_file(project_root=tmp_path) == latest
+    assert (
+        debt.find_latest_architecture_debt_tasks_file(project_root=tmp_path) == latest
+    )
     empty = tmp_path / "empty"
     empty.mkdir()
     legacy = empty / "tasks_architecture_metric_exemptions_legacy.json"
@@ -737,7 +748,9 @@ def test_pipeline_normalizers_hash_policy_and_chembl_ordering() -> None:
     assert projected["content_hash_policy"]["algorithm"] == "sha256"
 
 
-def _archive_fixture(tmp_path: Path) -> tuple[FileArchiveStore, RunManifest, ControlPlaneArtifactLifecyclePlan]:
+def _archive_fixture(
+    tmp_path: Path,
+) -> tuple[FileArchiveStore, RunManifest, ControlPlaneArtifactLifecyclePlan]:
     data = tmp_path / "data"
     data.mkdir()
     manifest = RunManifest(
@@ -753,7 +766,9 @@ def _archive_fixture(tmp_path: Path) -> tuple[FileArchiveStore, RunManifest, Con
         launch_context={"archive_policy": {"required": True, "policy_ref": "local-v1"}},
         code_provenance=RunCodeProvenance(),
     )
-    (data / "manifest.json").write_text(json.dumps(manifest.to_dict()), encoding="utf-8")
+    (data / "manifest.json").write_text(
+        json.dumps(manifest.to_dict()), encoding="utf-8"
+    )
     (data / "ledger.jsonl").write_text("ledger evidence\n", encoding="utf-8")
     artifacts = tuple(
         ControlPlaneArtifactRef(
@@ -777,7 +792,9 @@ def _archive_fixture(tmp_path: Path) -> tuple[FileArchiveStore, RunManifest, Con
     return FileArchiveStore(data, tmp_path / "archive"), manifest, plan
 
 
-def test_file_archive_store_rejects_incomplete_and_corrupt_index(tmp_path: Path) -> None:
+def test_file_archive_store_rejects_incomplete_and_corrupt_index(
+    tmp_path: Path,
+) -> None:
     store, manifest, plan = _archive_fixture(tmp_path)
     blocked = ControlPlaneArtifactLifecyclePlan(
         generated_at=plan.generated_at,
@@ -801,11 +818,17 @@ def test_file_archive_store_rejects_incomplete_and_corrupt_index(tmp_path: Path)
     payload = json.loads(index.read_text(encoding="utf-8"))
     payload["schema"] = "wrong"
     index.write_text(json.dumps(payload), encoding="utf-8")
-    assert store.verify(manifest=manifest, plan=plan) == (False, "archive_index_invalid")
+    assert store.verify(manifest=manifest, plan=plan) == (
+        False,
+        "archive_index_invalid",
+    )
     payload["schema"] = archive_module._SCHEMA
     payload["files"] = []
     index.write_text(json.dumps(payload), encoding="utf-8")
-    assert store.verify(manifest=manifest, plan=plan) == (False, "archive_index_invalid")
+    assert store.verify(manifest=manifest, plan=plan) == (
+        False,
+        "archive_index_invalid",
+    )
     payload["files"] = {"path": "x"}
     index.write_text(json.dumps(payload), encoding="utf-8")
     assert store.verify(manifest=manifest, plan=plan)[0] is False
@@ -814,7 +837,9 @@ def test_file_archive_store_rejects_incomplete_and_corrupt_index(tmp_path: Path)
         store.create(manifest=manifest, plan=plan)
 
 
-def test_provider_health_evidence_freshness_and_invalid_payloads(tmp_path: Path) -> None:
+def test_provider_health_evidence_freshness_and_invalid_payloads(
+    tmp_path: Path,
+) -> None:
     store = FileProviderHealthEvidenceStore(tmp_path / "health")
     assert store.list_all() == ()
     now = datetime(2026, 9, 17, 12, 0, tzinfo=UTC)
@@ -836,12 +861,15 @@ def test_provider_health_evidence_freshness_and_invalid_payloads(tmp_path: Path)
         endpoint="/status",
     )
     assert stale.is_fresh(now=now) is False
-    assert ProviderHealthEvidenceRecord(
-        provider="chembl",
-        status=1,
-        observed_at="not-a-date",
-        endpoint="/status",
-    ).observed_unix() is None
+    assert (
+        ProviderHealthEvidenceRecord(
+            provider="chembl",
+            status=1,
+            observed_at="not-a-date",
+            endpoint="/status",
+        ).observed_unix()
+        is None
+    )
     bad = tmp_path / "health" / "bad.json"
     bad.write_text("{", encoding="utf-8")
     listed = tmp_path / "health" / "other.json"
@@ -922,13 +950,16 @@ def test_workflow_transform_artifact_store_debug_and_helpers(
         debug_export_enabled=False,
         created_at="not-dt",
     )
-    assert store.write_reconcile_debug_artifacts(
-        context=context,
-        request=SimpleNamespace(),
-        result=SimpleNamespace(),
-        retained_rows=(),
-        orphan_rows=(),
-    ) == ()
+    assert (
+        store.write_reconcile_debug_artifacts(
+            context=context,
+            request=SimpleNamespace(),
+            result=SimpleNamespace(),
+            retained_rows=(),
+            orphan_rows=(),
+        )
+        == ()
+    )
     with pytest.raises(ValueError, match="requires"):
         _required_attr(SimpleNamespace(workflow_run_id=" "), "workflow_run_id")
     with pytest.raises(RuntimeError, match="clock"):
@@ -983,7 +1014,9 @@ def test_exemptions_registry_targets_symbol_and_registry_errors(
         "load_exemptions_registry",
         lambda _path=None: {"registries": []},
     )
-    assert targets.validate_exemption_target_references() == ["registries: expected mapping"]
+    assert targets.validate_exemption_target_references() == [
+        "registries: expected mapping"
+    ]
     monkeypatch.setattr(
         targets,
         "load_exemptions_registry",
@@ -994,7 +1027,9 @@ def test_exemptions_registry_targets_symbol_and_registry_errors(
     ]
     module = tmp_path / "src" / "bioetl" / "mod.py"
     module.parent.mkdir(parents=True)
-    module.write_text("class Foo:\n    pass\n\ndef bar():\n    pass\n", encoding="utf-8")
+    module.write_text(
+        "class Foo:\n    pass\n\ndef bar():\n    pass\n", encoding="utf-8"
+    )
     other = tmp_path / "src" / "bioetl" / "other.py"
     other.write_text("class Foo:\n    pass\n", encoding="utf-8")
     broken = tmp_path / "src" / "bioetl" / "broken.py"
@@ -1121,18 +1156,28 @@ def test_pipeline_contract_policy_rollout_and_merge_key_guards() -> None:
     with pytest.raises(ValueError, match="overlap"):
         _policy(merge_keys=["other"])
     with pytest.raises(ValueError, match="rollout.mode"):
-        _policy(rollout={"mode": "triple", "read_order": ["v1"], "write_versions": ["v1"]})
+        _policy(
+            rollout={"mode": "triple", "read_order": ["v1"], "write_versions": ["v1"]}
+        )
     with pytest.raises(ValueError, match="contract_ref"):
         _policy(contract_ref=" ")
     with pytest.raises(ValueError, match="active_version"):
         _policy(active_version=" ")
     with pytest.raises(ValueError, match="read_order"):
         _policy(
-            rollout={"mode": "dual_read", "read_order": ["v2"], "write_versions": ["v1"]}
+            rollout={
+                "mode": "dual_read",
+                "read_order": ["v2"],
+                "write_versions": ["v1"],
+            }
         )
     with pytest.raises(ValueError, match="write_versions"):
         _policy(
-            rollout={"mode": "dual_write", "read_order": ["v1"], "write_versions": ["v2"]}
+            rollout={
+                "mode": "dual_write",
+                "read_order": ["v1"],
+                "write_versions": ["v2"],
+            }
         )
     with pytest.raises(ValueError, match="duplicate"):
         _policy(

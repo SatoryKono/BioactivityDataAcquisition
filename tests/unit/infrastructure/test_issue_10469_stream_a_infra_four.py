@@ -199,9 +199,7 @@ class _ScopeStore:
             raise ValueError("catalog corrupt")
         return self._catalog
 
-    def _load_latest_scope_manifest(
-        self, pipeline_name: str, run_type: RunType
-    ) -> Any:
+    def _load_latest_scope_manifest(self, pipeline_name: str, run_type: RunType) -> Any:
         if self._raise:
             raise ValueError("index corrupt")
         return self._current.get((pipeline_name, run_type))
@@ -290,7 +288,9 @@ def test_raw_manifest_inspection_and_contract_evidence(tmp_path: Path) -> None:
 
 def test_provider_health_monitor_persist_and_rehydrate(tmp_path: Path) -> None:
     inner = SimpleNamespace(
-        update_from_health_check_result=lambda result, logger=None: HealthStatus.DEGRADED,
+        update_from_health_check_result=lambda result, logger=None: (
+            HealthStatus.DEGRADED
+        ),
         record_success=lambda provider: HealthStatus.HEALTHY,
         record_error=lambda provider: HealthStatus.UNHEALTHY,
         get_all_states=lambda: {"chembl": "state"},
@@ -410,9 +410,9 @@ def test_artifact_lifecycle_payload_helpers(tmp_path: Path) -> None:
     assert _manifest_or_run_is_protected(
         {"manifest_id": "m"}, manifest_ids=frozenset({"m"}), run_ids=frozenset()
     )
-    assert _resolve_lifecycle_reason(stale=True, protected_by=("evidence_floor:x",)) == (
-        "reproducibility_evidence_floor"
-    )
+    assert _resolve_lifecycle_reason(
+        stale=True, protected_by=("evidence_floor:x",)
+    ) == ("reproducibility_evidence_floor")
     assert _resolve_lifecycle_reason(stale=True, protected_by=("ref",)) == (
         "protected_reference"
     )
@@ -458,18 +458,22 @@ def test_manifest_protection_helpers() -> None:
     assert required_persistence_profile(payload) == "strict"
     assert payload_execution_context(payload) == "composite"
     assert payload_execution_context({"provider": "composite"}) == "composite"
-    assert payload_execution_context({"launch_context": {"execution_context": "source"}}) == (
-        "source"
-    )
+    assert payload_execution_context(
+        {"launch_context": {"execution_context": "source"}}
+    ) == ("source")
     assert supports_historical_replay_floor({"provider": None}) is False
     assert supports_historical_replay_floor({"provider": "chembl"}) is False
     assert requires_evidence_floor({"required_persistence_profile": ""}) is False
 
 
-def test_exemptions_policy_and_validation(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_exemptions_policy_and_validation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     from bioetl.infrastructure.quality import exemptions_registry_policy as policy
 
-    monkeypatch.setattr(policy, "load_exemptions_registry", lambda _path=None: {"registries": []})
+    monkeypatch.setattr(
+        policy, "load_exemptions_registry", lambda _path=None: {"registries": []}
+    )
     assert validate_exemption_key_normalization() == ["registries: expected mapping"]
     monkeypatch.setattr(
         policy,
@@ -503,7 +507,9 @@ def test_exemptions_policy_and_validation(tmp_path: Path, monkeypatch: pytest.Mo
     get_policy_required_fields({"policy": {"required_fields": []}}, metadata_ok)
     assert metadata_ok
     metadata_blank: list[str] = []
-    get_policy_required_fields({"policy": {"required_fields": [" ", "owner"]}}, metadata_blank)
+    get_policy_required_fields(
+        {"policy": {"required_fields": [" ", "owner"]}}, metadata_blank
+    )
     entry_errors: list[str] = []
     expired: list[str] = []
     validate_exemption_entry(
@@ -559,20 +565,28 @@ def test_exemptions_policy_and_validation(tmp_path: Path, monkeypatch: pytest.Mo
 
 def test_quality_helpers_and_report_formatter(tmp_path: Path) -> None:
     errors: list[str] = []
-    assert _validate_registry_counts_mapping(field_name="x", raw_mapping={}, errors=errors) is None
+    assert (
+        _validate_registry_counts_mapping(field_name="x", raw_mapping={}, errors=errors)
+        is None
+    )
     counts = _validate_registry_counts_mapping(
         field_name="x",
         raw_mapping={"": 1, "ok": -1, "good": 2},
         errors=errors,
     )
     assert counts == {"good": 2}
-    assert _validate_baseline_mapping(field_name="b", baseline=[], errors=errors) is None
+    assert (
+        _validate_baseline_mapping(field_name="b", baseline=[], errors=errors) is None
+    )
     _validate_baseline_mapping(
         field_name="b",
         baseline={"total_exemptions": 3, "by_registry": {"a": 1, "c": 1}},
         errors=errors,
     )
-    assert _validate_registry_group_entry(group_name="g", group_data=[], errors=errors) is None
+    assert (
+        _validate_registry_group_entry(group_name="g", group_data=[], errors=errors)
+        is None
+    )
     assert (
         _validate_registry_group_entry(
             group_name="g", group_data={"registries": []}, errors=errors
@@ -626,16 +640,20 @@ def test_quality_helpers_and_report_formatter(tmp_path: Path) -> None:
     complexities = function_complexities(tree_src)
     assert "f" in complexities
     today = date(2026, 9, 17)
-    assert _extract_growth_violation_section("registry 'file_size_limits' count 2 exceeds budget 1") == (
-        "registry:file_size_limits"
+    assert _extract_growth_violation_section(
+        "registry 'file_size_limits' count 2 exceeds budget 1"
+    ) == ("registry:file_size_limits")
+    assert (
+        _extract_growth_violation_section("group 'hot' count 2 exceeds budget 1")
+        == "group:hot"
     )
-    assert _extract_growth_violation_section("group 'hot' count 2 exceeds budget 1") == "group:hot"
     assert _extract_growth_violation_section("total exemptions 3 exceeds budget 1") == (
         "total_exemptions"
     )
-    assert _extract_growth_violation_section(
-        "integral debt score 0.1 is below target 0.9"
-    ) == "integral_score"
+    assert (
+        _extract_growth_violation_section("integral debt score 0.1 is below target 0.9")
+        == "integral_score"
+    )
     assert _extract_growth_violation_section("other") == "unknown"
     assert _is_rollout_cutoff_stale("2020-01-01", today=today) is True
     assert _is_active_grace_window({"approved": True}, today=today) is False
@@ -656,7 +674,12 @@ def test_quality_helpers_and_report_formatter(tmp_path: Path) -> None:
     )
     assert warning
     assert blocking == ["other"]
-    assert current_quarter_target({"quarterly_targets": [{"quarter": "2099Q1"}]}, today=today) is None
+    assert (
+        current_quarter_target(
+            {"quarterly_targets": [{"quarter": "2099Q1"}]}, today=today
+        )
+        is None
+    )
     allowances = resolve_grace_allowances(
         {
             "grace_windows": [
@@ -690,7 +713,11 @@ def test_quality_helpers_and_report_formatter(tmp_path: Path) -> None:
 def test_composite_and_fk_schema_validators() -> None:
     with pytest.raises(ValidationError, match="empty column"):
         AggregationSchema.model_validate(
-            {"group_by": "id", "order_by": [" "], "fields": {"x": {"source": "s", "agg": "first"}}}
+            {
+                "group_by": "id",
+                "order_by": [" "],
+                "fields": {"x": {"source": "s", "agg": "first"}},
+            }
         )
     with pytest.raises(ValidationError, match="duplicate"):
         AggregationSchema.model_validate(
@@ -734,7 +761,10 @@ def test_composite_and_fk_schema_validators() -> None:
             "pipeline": "p",
             "join_keys": ["id"],
             "cardinality": "many_to_one",
-            "aggregation": {"group_by": "id", "fields": {"x": {"source": "s", "agg": "first"}}},
+            "aggregation": {
+                "group_by": "id",
+                "fields": {"x": {"source": "s", "agg": "first"}},
+            },
         }
     )
     assert enricher.to_domain().aggregation is not None
@@ -793,7 +823,9 @@ def test_composite_and_fk_schema_validators() -> None:
             reference_keys=["ref"],
         )
     with pytest.raises(ValidationError):
-        DQYamlConfig.model_validate({"soft_fail_threshold": 2, "hard_fail_threshold": 0.1})
+        DQYamlConfig.model_validate(
+            {"soft_fail_threshold": 2, "hard_fail_threshold": 0.1}
+        )
 
 
 def test_dq_loader_helpers_and_externalization(tmp_path: Path) -> None:
@@ -801,17 +833,23 @@ def test_dq_loader_helpers_and_externalization(tmp_path: Path) -> None:
         _resolve_identity_data({"identity": []}, contract_ref="c")
     assert _resolve_identity_data({"identity": {"x": 1}}, contract_ref="c") == {"x": 1}
     assert _resolve_threshold({"soft_fail_threshold": 0.2}, "soft_fail", 0.05) == 0.2
-    assert _resolve_threshold({"thresholds": {"soft_fail": 0.3}}, "soft_fail", 0.05) == 0.3
+    assert (
+        _resolve_threshold({"thresholds": {"soft_fail": 0.3}}, "soft_fail", 0.05) == 0.3
+    )
     assert _resolve_threshold({}, "soft_fail", 0.05) == 0.05
     assert _resolve_contract_strict_dq_validation({"strict_validation": True}) is True
-    assert _resolve_contract_strict_dq_validation({"strict_dq_validation": False}) is False
+    assert (
+        _resolve_contract_strict_dq_validation({"strict_dq_validation": False}) is False
+    )
     with pytest.raises(ValueError, match="strictness"):
         _parse_strictness_mode("nope")
     assert _parse_strictness_mode("strict") == "strict"
     assert _parse_disposition_overrides(None) == {}
     report = _create_report_config({"enabled": False, "format": "yaml"})
     assert report.enabled is False
-    _validate_identity_field(merged={"contract_version": "1"}, field_name="contract_version", expected="1")
+    _validate_identity_field(
+        merged={"contract_version": "1"}, field_name="contract_version", expected="1"
+    )
     with pytest.raises(ValueError, match="mismatch"):
         _validate_identity_field(
             merged={"contract_version": "2"},
@@ -984,13 +1022,16 @@ def test_observability_probes_and_label_normalizers() -> None:
         calls["n"] += 1
         return calls["n"] > 1
 
-    assert wait_for_observability_backend_ready(
-        "http://x/health",
-        timeout_seconds=1.0,
-        poll_seconds=0.0,
-        probe_fn=later,
-        sleep_fn=lambda _s: None,
-    ) is True
+    assert (
+        wait_for_observability_backend_ready(
+            "http://x/health",
+            timeout_seconds=1.0,
+            poll_seconds=0.0,
+            probe_fn=later,
+            sleep_fn=lambda _s: None,
+        )
+        is True
+    )
     assert wait_for_observability_backend_required_paths_ready(
         "http://x/health",
         required_probe_paths=(),
@@ -1046,7 +1087,10 @@ def test_run_ledger_helpers(tmp_path: Path) -> None:
     )
 
     assert resolve_ledger_pipeline(SimpleNamespace(details=None)) == "unknown"
-    assert resolve_ledger_pipeline(SimpleNamespace(details={"_diagnostic": []})) == "unknown"
+    assert (
+        resolve_ledger_pipeline(SimpleNamespace(details={"_diagnostic": []}))
+        == "unknown"
+    )
     assert (
         resolve_ledger_pipeline(
             SimpleNamespace(details={"_diagnostic": {"pipeline": "  "}})
@@ -1069,13 +1113,19 @@ def test_run_ledger_helpers(tmp_path: Path) -> None:
     )
     emit_ledger_append_metric(metrics, pipeline="p", event_type="e", status="success")  # type: ignore[arg-type]
     emit_ledger_append_duration_metric(
-        metrics, pipeline="p", event_type="e", status="ok", duration_seconds=0.1  # type: ignore[arg-type]
+        metrics,
+        pipeline="p",
+        event_type="e",
+        status="ok",
+        duration_seconds=0.1,  # type: ignore[arg-type]
     )
     emit_terminal_event_metric(metrics, pipeline="p", event_type=RUN_FINISHED_EVENT)  # type: ignore[arg-type]
     emit_terminal_event_metric(metrics, pipeline="p", event_type=RUN_FAILED_EVENT)  # type: ignore[arg-type]
     emit_terminal_event_metric(metrics, pipeline="p", event_type=RUN_SHUTDOWN_EVENT)  # type: ignore[arg-type]
     assert has_idempotent_duplicate([], idempotency_key=None) is False
-    entry = SimpleNamespace(idempotency_key="k", manifest_id="m", run_id=RunID(UUID(int=1)))
+    entry = SimpleNamespace(
+        idempotency_key="k", manifest_id="m", run_id=RunID(UUID(int=1))
+    )
     assert has_idempotent_duplicate([entry], idempotency_key="k") is True  # type: ignore[arg-type]
     ensure_entries_match_manifest_and_run_identity(entries=[], manifest_id="m")
     with pytest.raises(RunLedgerCorruptionError, match="different manifest_id"):
@@ -1104,7 +1154,10 @@ def test_run_ledger_helpers(tmp_path: Path) -> None:
             manifest_id="m",
             run_id=run_id,
         )
-    assert iter_jsonl_payloads_strict(ledger_path=tmp_path / "l.jsonl", raw_text="  ") == []
+    assert (
+        iter_jsonl_payloads_strict(ledger_path=tmp_path / "l.jsonl", raw_text="  ")
+        == []
+    )
     with pytest.raises(RunLedgerCorruptionError, match="truncated"):
         iter_jsonl_payloads_strict(ledger_path=tmp_path / "l.jsonl", raw_text="{}\n{")
     with pytest.raises(RunLedgerCorruptionError, match="JSON object"):
@@ -1112,6 +1165,6 @@ def test_run_ledger_helpers(tmp_path: Path) -> None:
     with pytest.raises(RunLedgerCorruptionError, match="corrupted at line"):
         iter_jsonl_payloads_strict(ledger_path=tmp_path / "l.jsonl", raw_text="{no}\n")
     payloads = iter_jsonl_payloads_strict(
-        ledger_path=tmp_path / "l.jsonl", raw_text="{}\n\n{\"a\": 1}\n"
+        ledger_path=tmp_path / "l.jsonl", raw_text='{}\n\n{"a": 1}\n'
     )
     assert payloads[-1]["a"] == 1

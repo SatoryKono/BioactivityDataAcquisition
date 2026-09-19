@@ -9,9 +9,10 @@ from io import StringIO
 from uuid import UUID
 
 import pytest
-import yaml
 
-from bioetl.domain.behavior.chemical_standardization import standardize_chemical_structure
+from bioetl.domain.behavior.chemical_standardization import (
+    standardize_chemical_structure,
+)
 from bioetl.domain.composite.aggregation import (
     AggregationConfig,
     AggregationFieldSpec,
@@ -38,7 +39,12 @@ from bioetl.domain.control_plane.config_source_hashing import (
     compute_canonical_yaml_sha256,
     compute_config_source_hashes,
 )
-from bioetl.domain.lineage.refs import DatasetRef, LineageNodeRef, SchemaRef, TransformRef
+from bioetl.domain.lineage.refs import (
+    DatasetRef,
+    LineageNodeRef,
+    SchemaRef,
+    TransformRef,
+)
 from bioetl.domain.medallion import Layer
 from bioetl.domain.value_objects.protein_class_hierarchy import (
     ProteinClassHierarchy,
@@ -124,7 +130,9 @@ def test_protein_class_hierarchy_path_leaf_and_validation_branches() -> None:
         )
 
 
-def test_chemical_standardization_covers_invalid_blank_and_deferred_parent_paths() -> None:
+def test_chemical_standardization_covers_invalid_blank_and_deferred_parent_paths() -> (
+    None
+):
     missing = standardize_chemical_structure(
         canonical_smiles="  ",
         isomeric_smiles=None,
@@ -151,7 +159,9 @@ def test_chemical_standardization_covers_invalid_blank_and_deferred_parent_paths
         charge=1,
     )
     assert deferred.chemical_standardization_status in {"partial", "invalid"}
-    assert "multi_component_parent_deferred" in deferred.chemical_standardization_warnings
+    assert (
+        "multi_component_parent_deferred" in deferred.chemical_standardization_warnings
+    )
     assert "charge_normalization_deferred" in deferred.chemical_standardization_warnings
     assert "inchi_invalid" in deferred.chemical_standardization_warnings
     assert "inchi_key_invalid" in deferred.chemical_standardization_warnings
@@ -163,7 +173,10 @@ def test_chemical_standardization_covers_invalid_blank_and_deferred_parent_paths
         inchi_key=None,
     )
     assert from_smiles.structure_parent_key == "smiles:CCO"
-    assert "parent_key_from_smiles_without_inchi_key" in from_smiles.chemical_standardization_warnings
+    assert (
+        "parent_key_from_smiles_without_inchi_key"
+        in from_smiles.chemical_standardization_warnings
+    )
 
 
 def test_aggregation_config_coercion_and_validation_errors() -> None:
@@ -177,18 +190,36 @@ def test_aggregation_config_coercion_and_validation_errors() -> None:
 
     config = AggregationConfig(
         group_by="document_chembl_id",
-        fields=[{"source_field": "term", "agg_function": "collect_list", "output_field": " terms "}],
+        fields=[
+            {
+                "source_field": "term",
+                "agg_function": "collect_list",
+                "output_field": " terms ",
+            }
+        ],
         order_by="term",
     )
     assert config.order_by == ("term",)
     assert config.fields[0].output_field == "terms"
 
     with pytest.raises(TypeError, match="string or sequence"):
-        AggregationConfig(group_by="k", fields=[AggregationFieldSpec("a", AggregationFunction.FIRST)], order_by=1)
+        AggregationConfig(
+            group_by="k",
+            fields=[AggregationFieldSpec("a", AggregationFunction.FIRST)],
+            order_by=1,
+        )
     with pytest.raises(ValueError, match="cannot contain empty"):
-        AggregationConfig(group_by="k", fields=[AggregationFieldSpec("a", AggregationFunction.FIRST)], order_by=[" "])
+        AggregationConfig(
+            group_by="k",
+            fields=[AggregationFieldSpec("a", AggregationFunction.FIRST)],
+            order_by=[" "],
+        )
     with pytest.raises(ValueError, match="cannot contain duplicate"):
-        AggregationConfig(group_by="k", fields=[AggregationFieldSpec("a", AggregationFunction.FIRST)], order_by=["a", "a"])
+        AggregationConfig(
+            group_by="k",
+            fields=[AggregationFieldSpec("a", AggregationFunction.FIRST)],
+            order_by=["a", "a"],
+        )
     with pytest.raises(ValueError, match="must be a sequence"):
         AggregationConfig(group_by="k", fields="term")  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="cannot be empty"):
@@ -207,20 +238,41 @@ def test_aggregation_config_coercion_and_validation_errors() -> None:
         AggregationFieldSpec("term", AggregationFunction.FIRST, output_field=1)  # type: ignore[arg-type]
 
 
-def test_reproducibility_profile_builders_cover_family_resolution_and_support_states() -> None:
-    assert resolve_reproducibility_family(provider=None, entity=None, contract_ref="  ") is None
-    assert resolve_reproducibility_family(provider="chembl", entity="activity", contract_ref=None) == (
-        "chembl.activity"
+def test_reproducibility_profile_builders_cover_family_resolution_and_support_states() -> (
+    None
+):
+    assert (
+        resolve_reproducibility_family(provider=None, entity=None, contract_ref="  ")
+        is None
     )
-    assert resolve_reproducibility_family(provider="", entity="", contract_ref="chembl.assay") == "chembl.assay"
-    assert _resolve_source_profile_reason(supported=True, published=True) == "family_within_supported_boundary"
-    assert _resolve_source_profile_reason(supported=False, published=True).startswith("family_within_published")
-    assert _resolve_source_profile_reason(supported=False, published=False).startswith("family_outside")
+    assert resolve_reproducibility_family(
+        provider="chembl", entity="activity", contract_ref=None
+    ) == ("chembl.activity")
+    assert (
+        resolve_reproducibility_family(
+            provider="", entity="", contract_ref="chembl.assay"
+        )
+        == "chembl.assay"
+    )
+    assert (
+        _resolve_source_profile_reason(supported=True, published=True)
+        == "family_within_supported_boundary"
+    )
+    assert _resolve_source_profile_reason(supported=False, published=True).startswith(
+        "family_within_published"
+    )
+    assert _resolve_source_profile_reason(supported=False, published=False).startswith(
+        "family_outside"
+    )
     assert _source_support_state(supported=False, published=True) == "rebuild_only"
     assert _source_support_state(supported=False, published=False) == "debug_only"
-    source = _build_source_reproducibility_family_profile(family="unknown.family", execution_context="source")
+    source = _build_source_reproducibility_family_profile(
+        family="unknown.family", execution_context="source"
+    )
     assert source.strict_exact_replay_supported is False
-    composite = _build_composite_reproducibility_family_profile(family="composite.activity", execution_context="composite")
+    composite = _build_composite_reproducibility_family_profile(
+        family="composite.activity", execution_context="composite"
+    )
     assert composite.replay_family_contract == "rebuild_only"
 
 
@@ -234,7 +286,9 @@ def test_run_manifest_serialization_freezes_and_normalizes_nested_payloads() -> 
         ident: UUID
         when: datetime
 
-    frozen = freeze_manifest_payload({"items": [{"n": 1}, {"n": 2}], "tags": {"b", "a"}})
+    frozen = freeze_manifest_payload(
+        {"items": [{"n": 1}, {"n": 2}], "tags": {"b", "a"}}
+    )
     assert isinstance(frozen, _FrozenManifestMapping)
     with pytest.raises(TypeError, match="immutable"):
         frozen["x"] = 1  # type: ignore[index]
@@ -252,7 +306,11 @@ def test_run_manifest_serialization_freezes_and_normalizes_nested_payloads() -> 
     assert normalize_manifest_created_at(naive).tzinfo is UTC
     assert normalize_manifest_created_at(aware).hour == 12
     encoded = normalize_manifest_serializable(
-        _Row(kind=_Kind.LIVE, ident=UUID("12345678-1234-5678-1234-567812345678"), when=aware)
+        _Row(
+            kind=_Kind.LIVE,
+            ident=UUID("12345678-1234-5678-1234-567812345678"),
+            when=aware,
+        )
     )
     assert encoded["kind"] == "live"
     assert encoded["ident"] == "12345678-1234-5678-1234-567812345678"
@@ -263,16 +321,22 @@ def test_config_source_hashing_covers_unhashable_keys_enum_and_yml_suffix() -> N
     class _Mode(Enum):
         A = "a"
 
-    assert _to_canonical_jsonable((_Mode.A, datetime(2026, 1, 1, tzinfo=UTC))) == ["a", "2026-01-01T00:00:00+00:00"]
+    assert _to_canonical_jsonable((_Mode.A, datetime(2026, 1, 1, tzinfo=UTC))) == [
+        "a",
+        "2026-01-01T00:00:00+00:00",
+    ]
     with pytest.raises(ValueError, match="must be hashable"):
         compute_canonical_yaml_sha256(b"? [1, 2]: value\n")
     with pytest.raises(ValueError, match="key collision"):
         _to_canonical_jsonable({1: "a", "1": "b"})
-    hashes = compute_config_source_hashes(source_path="configs/base/pipeline.YML", raw_bytes=b"a: 1\n")
+    hashes = compute_config_source_hashes(
+        source_path="configs/base/pipeline.YML", raw_bytes=b"a: 1\n"
+    )
     assert hashes.hash_strategy == "canonical_yaml"
-    sequence_node = yaml.compose("[1, 2]")
+    sequence_node = _UniqueKeySafeLoader(StringIO("[1, 2]")).get_single_node()
+    assert sequence_node is not None
     loader = _UniqueKeySafeLoader(StringIO(""))
-    with pytest.raises((TypeError, AttributeError, yaml.YAMLError)):
+    with pytest.raises(Exception, match="expected a mapping node"):
         _construct_unique_mapping(loader, sequence_node)
 
 
@@ -296,7 +360,12 @@ def test_lineage_refs_cover_encoding_defaults_and_from_dict_optional_fields() ->
     assert TransformRef.from_dict(transform.to_dict()).name == "normalize"
 
     schema = SchemaRef.from_dict(
-        {"contract_path": "contracts/gold.yaml", "version": None, "validation_mode": None, "dataset_name": None}
+        {
+            "contract_path": "contracts/gold.yaml",
+            "version": None,
+            "validation_mode": None,
+            "dataset_name": None,
+        }
     )
     assert schema.node_id.endswith("unknown_version")
     assert schema.to_node_ref().label == "contracts/gold.yaml"

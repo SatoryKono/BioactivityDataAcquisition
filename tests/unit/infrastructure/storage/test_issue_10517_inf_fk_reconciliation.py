@@ -80,7 +80,7 @@ async def test_reconcile_loaded_rows_dry_run_and_mutation(
         quarantine_error_code=None,
     )
     monkeypatch.setattr(
-        "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation.apply_reconciliation_mutation",
+        "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_loaded.apply_reconciliation_mutation",
         AsyncMock(return_value=summary),
     )
     mutated = await adapter._reconcile_loaded_rows(

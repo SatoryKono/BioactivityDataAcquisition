@@ -305,5 +305,5 @@ row, and CLI `bioetl quarantine inspect` respectively.
 ## 2026-09-16 — persisted Selected Run
 
 Six domains use saved exact-run evidence; CURRENT remains separate. See the
-[UX check](../../reports/dashboard-ux-checks/2026-09-16.md)
-(`docs/reports/dashboard-ux-checks/2026-09-16.md`) for observed checks and open boundaries.
+UX check `docs/reports/dashboard-ux-checks/2026-09-16.md` for observed checks
+and open boundaries.

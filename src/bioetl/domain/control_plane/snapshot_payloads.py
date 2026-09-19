@@ -60,24 +60,33 @@ def manifest_input_snapshot_trace_refs(
     refs: list[dict[str, object]] = []
     for source_ref in manifest.source_refs:
         for snapshot in source_ref.input_snapshots:
-            refs.append(
-                {
-                    "provider": source_ref.provider,
-                    "entity": source_ref.entity,
-                    "pipeline_name": source_ref.pipeline_name,
-                    "query": source_ref.query,
-                    **input_snapshot_payload(snapshot, serialize_captured_at=True),
-                }
-            )
-    refs.sort(
-        key=lambda item: (
-            str(item.get("provider") or ""),
-            str(item.get("entity") or ""),
-            str(item.get("pipeline_name") or ""),
-            str(item.get("snapshot_id") or ""),
-        )
-    )
+            refs.append(_trace_ref_row(source_ref, snapshot))
+    refs.sort(key=_trace_ref_sort_key)
     return refs
+
+
+def _trace_ref_row(
+    source_ref: RunSourceRef,
+    snapshot: RunInputSnapshotRef,
+) -> dict[str, object]:
+    """Build one flattened snapshot trace ref row."""
+    return {
+        "provider": source_ref.provider,
+        "entity": source_ref.entity,
+        "pipeline_name": source_ref.pipeline_name,
+        "query": source_ref.query,
+        **input_snapshot_payload(snapshot, serialize_captured_at=True),
+    }
+
+
+def _trace_ref_sort_key(item: dict[str, object]) -> tuple[str, str, str, str]:
+    """Return the deterministic ordering key for snapshot trace refs."""
+    return (
+        str(item.get("provider") or ""),
+        str(item.get("entity") or ""),
+        str(item.get("pipeline_name") or ""),
+        str(item.get("snapshot_id") or ""),
+    )
 
 
 def collect_input_snapshot_refs(manifest: RunManifest) -> list[dict[str, object]]:

@@ -63,7 +63,9 @@ from bioetl.infrastructure.storage.silver.runtime_helpers import (
     _build_validation_operations,
     _resolve_operation_logger,
 )
-from bioetl.infrastructure.storage.silver.validation_record_support import _validate_records
+from bioetl.infrastructure.storage.silver.validation_record_support import (
+    _validate_records,
+)
 from bioetl.infrastructure.storage.silver.writer_metadata_facade import (
     SilverWriterMetadataFacade,
 )
@@ -99,7 +101,9 @@ class _FacadeHost(SilverWriterRuntimeFacade):
         return False
 
 
-def test_delta_write_execution_edges(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_delta_write_execution_edges(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     with pytest.raises(TypeError, match="_DeltaWriteRequest"):
         _require_delta_write_request(object())
 
@@ -227,11 +231,14 @@ async def test_runtime_helpers_and_invocation_compat() -> None:
     assert isinstance(_resolve_operation_logger(None), NoOpLogger)
     request = SilverWriterRuntimeServicesRequest()
     assert _build_merged_operations(request) is None
-    assert _build_validation_operations(
-        request,
-        write_policy=MagicMock(),
-        silver_validator=MagicMock(),
-    ) is None
+    assert (
+        _build_validation_operations(
+            request,
+            write_policy=MagicMock(),
+            silver_validator=MagicMock(),
+        )
+        is None
+    )
 
     with_path = SilverWriterRuntimeServicesRequest(
         base_path=".",
@@ -363,9 +370,12 @@ async def test_metadata_facades_audit_and_skip(
         "bioetl.infrastructure.storage.silver.operations.metadata_dq_operations.should_skip_silver_metadata_write",
         lambda *_a, **_k: True,
     )
-    assert should_skip_silver_metadata_write_operation(
-        ops, records=[], table_path="p", event_name="e"
-    ) is True
+    assert (
+        should_skip_silver_metadata_write_operation(
+            ops, records=[], table_path="p", event_name="e"
+        )
+        is True
+    )
 
     logged = AsyncMock()
     monkeypatch.setattr(
@@ -427,7 +437,10 @@ def test_silver_writer_dual_write_and_maintenance_preview(tmp_path: Path) -> Non
     )
     host = SimpleNamespace(_contract_rollout_policy=policy)
     assert SilverWriter._should_dual_write(host) is True  # type: ignore[arg-type]
-    assert SilverWriter._should_dual_write(SimpleNamespace(_contract_rollout_policy=None)) is False  # type: ignore[arg-type]
+    assert (
+        SilverWriter._should_dual_write(SimpleNamespace(_contract_rollout_policy=None))
+        is False
+    )  # type: ignore[arg-type]
 
     table_dir = tmp_path / "activity"
     table_dir.mkdir()
@@ -469,7 +482,9 @@ def test_quarantine_filtered_and_unified_missing_tables(
         "bioetl.infrastructure.quarantine.filtered_reads.DeltaTable",
         _missing,
     )
-    assert get_filtered_record("path", None, payload_hash="abc", pipeline="chembl") is None
+    assert (
+        get_filtered_record("path", None, payload_hash="abc", pipeline="chembl") is None
+    )
 
     monkeypatch.setattr(
         "bioetl.infrastructure.quarantine.unified.DeltaTable",

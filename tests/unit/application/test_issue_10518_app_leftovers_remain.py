@@ -150,7 +150,9 @@ async def test_chained_resolver_read_fallbacks_and_key_filter(
         silver_table="chembl/molecule",
     )
     seed = pl.DataFrame({"id": [1]})
-    reader = SimpleNamespace(read_table=AsyncMock(side_effect=FileNotFoundError("missing")))
+    reader = SimpleNamespace(
+        read_table=AsyncMock(side_effect=FileNotFoundError("missing"))
+    )
     out = await resolver.resolve(dependency, seed, {"chembl_molecule": source}, reader)  # type: ignore[arg-type]
     assert out.equals(seed)
 
@@ -172,7 +174,9 @@ async def test_chained_resolver_read_fallbacks_and_key_filter(
         "bioetl.application.composite.helpers.dependency_chained_key_resolver.normalize_join_key_dataframe_columns",
         lambda df, **_k: df,
     )
-    filtered = await resolver.resolve(dependency, seed, {"chembl_molecule": source}, reader)  # type: ignore[arg-type]
+    filtered = await resolver.resolve(
+        dependency, seed, {"chembl_molecule": source}, reader
+    )  # type: ignore[arg-type]
     assert "id" in filtered.columns
     helper.log_info.assert_called()
 
@@ -188,7 +192,9 @@ async def test_chained_resolver_read_fallbacks_and_key_filter(
 @pytest.mark.asyncio
 async def test_runner_stage_skips_and_handles_dependency_errors() -> None:
     class _Host(CompositeRunnerStageMixin):
-        async def _skip_dependencies_phase(self, state: object) -> tuple[object, dict[str, object]]:
+        async def _skip_dependencies_phase(
+            self, state: object
+        ) -> tuple[object, dict[str, object]]:
             return state, {}
 
         def _has_dependencies_configured(self) -> bool:
@@ -211,7 +217,9 @@ async def test_runner_stage_skips_and_handles_dependency_errors() -> None:
         def _prepare_dependencies_run_context(self) -> object:
             return object()
 
-        async def _start_dependencies_phase(self, state: object, *, context: object) -> object:
+        async def _start_dependencies_phase(
+            self, state: object, *, context: object
+        ) -> object:
             del context
             return state
 
