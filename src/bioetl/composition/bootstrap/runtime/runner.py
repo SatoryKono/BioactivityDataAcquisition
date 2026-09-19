@@ -10,9 +10,9 @@ from __future__ import annotations
 from pathlib import Path
 
 from bioetl.application.observability.control_plane_archive import (
-    archive_successful_run,
     resolve_control_plane_archive_root,
 )
+from bioetl.composition.control_plane_archive import archive_successful_run
 from bioetl.composition.bootstrap.runtime.run_status import create_run_status_capture
 
 from bioetl.application.services.execution.pipeline_run_context_service import (
@@ -20,6 +20,10 @@ from bioetl.application.services.execution.pipeline_run_context_service import (
 )
 from bioetl.application.services.execution.pipeline_run_execution_service import (
     PipelineRunExecutionService,
+)
+from bioetl.application.services.execution.pipeline_runner_models import (
+    RunOptions,
+    RunResult,
 )
 from bioetl.application.services.execution.pipeline_runner_service import (
     PipelineRunnerService,
@@ -84,6 +88,16 @@ def bootstrap_pipeline_runner_service(
     runner_factory = create_runner_factory(registry=registry)
     metrics_extractor = create_metrics_extractor()
 
+    def _archive_control_plane(result: RunResult, options: RunOptions | None) -> None:
+        # The runner seam ignores the archive outcome; keep the call total.
+        archive_successful_run(
+            result=result,
+            options=options,
+            data_root=Path(settings.data_dir),
+            archive_root=archive_root,
+            report_root=settings.report_root,
+        )
+
     return PipelineRunnerService(
         report_store=FileRunReportStoreAdapter(),
         report_root=settings.report_root,
@@ -92,13 +106,7 @@ def bootstrap_pipeline_runner_service(
             archive_root=archive_root,
             report_root=settings.report_root,
         ),
-        archive_control_plane=lambda result, options: archive_successful_run(
-            result=result,
-            options=options,
-            data_root=Path(settings.data_dir),
-            archive_root=archive_root,
-            report_root=settings.report_root,
-        ),
+        archive_control_plane=_archive_control_plane,
         runner_factory=runner_factory,
         metrics_extractor=metrics_extractor,
         logger=observability.logger,

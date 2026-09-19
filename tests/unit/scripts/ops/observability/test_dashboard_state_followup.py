@@ -54,5 +54,5 @@ def test_trust_measures_only_reasons_for_multiline_row_height():
             for p in o["properties"]
         )
     ]
-    assert not wrapped
+    assert wrapped == ["reasons_text"]
     assert panel["fieldConfig"]["defaults"]["custom"]["cellOptions"]["wrapText"]

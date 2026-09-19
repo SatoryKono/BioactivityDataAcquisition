@@ -15,21 +15,19 @@
   "summary": {
     "triaged_entry_count": 18,
     "triaged_entries_below_min_importers": 0,
-    "repo_wide_zero_import_candidate_count": 3,
-    "repo_wide_classified_zero_import_candidate_count": 3,
+    "repo_wide_zero_import_candidate_count": 2,
+    "repo_wide_classified_zero_import_candidate_count": 2,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
-    "repo_wide_owner_test_anchored_candidate_count": 3,
+    "repo_wide_owner_test_anchored_candidate_count": 2,
     "repo_wide_candidates_without_owner_tests_count": 0,
-    "repo_wide_non_static_reachability_candidate_count": 2,
+    "repo_wide_non_static_reachability_candidate_count": 1,
     "repo_wide_disposition_counts": {
       "retain_canonical_owner_module": 1,
-      "retain_dynamic_entrypoint": 1,
       "retain_public_facade": 1
     },
     "repo_wide_evidence_lane_counts": {
       "canonical_owner_contract": 1,
-      "compatibility_facade_contract": 1,
-      "dynamic_runtime_entrypoint": 1
+      "compatibility_facade_contract": 1
     },
     "triaged_retained_owner_test_anchored_count": 14,
     "triaged_retained_without_owner_tests_count": 0,
@@ -192,7 +190,7 @@
       "module_path": "src/bioetl/application/composite/column_priority_orderer.py",
       "module_name": "bioetl.application.composite.column_priority_orderer",
       "src_importer_count": 2,
-      "test_importer_count": 2,
+      "test_importer_count": 3,
       "min_src_importers": 1,
       "verification_status": "satisfied",
       "evidence_lane": "retained_module_owner_suite",
@@ -209,7 +207,7 @@
       "module_path": "src/bioetl/application/composite/merger_input_mixin.py",
       "module_name": "bioetl.application.composite.merger_input_mixin",
       "src_importer_count": 2,
-      "test_importer_count": 2,
+      "test_importer_count": 3,
       "min_src_importers": 2,
       "verification_status": "satisfied",
       "evidence_lane": "retained_module_owner_suite",
@@ -226,7 +224,7 @@
       "module_path": "src/bioetl/application/composite/runner_pkg/runner_support_flow.py",
       "module_name": "bioetl.application.composite.runner_pkg.runner_support_flow",
       "src_importer_count": 1,
-      "test_importer_count": 0,
+      "test_importer_count": 1,
       "min_src_importers": 1,
       "verification_status": "satisfied",
       "evidence_lane": "retained_module_owner_suite",
@@ -315,7 +313,7 @@
       "module_path": "src/bioetl/application/composite/runtime_models.py",
       "module_name": "bioetl.application.composite.runtime_models",
       "src_importer_count": 39,
-      "test_importer_count": 12,
+      "test_importer_count": 13,
       "min_src_importers": 3,
       "verification_status": "satisfied",
       "evidence_lane": "retained_module_owner_suite",
@@ -346,26 +344,6 @@
     }
   ],
   "repo_wide_zero_import_candidates": [
-    {
-      "module_name": "bioetl.application.services.control_plane.manifest.diagnostics.base",
-      "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/base.py",
-      "is_private_module": false,
-      "src_importer_count": 0,
-      "test_importer_count": 0,
-      "classification_status": "classified",
-      "disposition": "retain_dynamic_entrypoint",
-      "reviewed_on": "2026-07-28",
-      "review_by": "2026-10-26",
-      "linked_issue": "#6786",
-      "rationale": "Loaded via importlib from diagnostics/__init__.py for ARCH-REF fan-in control; static import scans stay at zero by design.",
-      "owner": "@bioetl-architecture",
-      "evidence_lane": "dynamic_runtime_entrypoint",
-      "owner_tests": [
-        "tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py"
-      ],
-      "owner_test_count": 1,
-      "owner_test_paths_exist_count": 1
-    },
     {
       "module_name": "bioetl.interfaces.cli.commands.maintenance",
       "path": "src/bioetl/interfaces/cli/commands/maintenance.py",

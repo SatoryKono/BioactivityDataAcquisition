@@ -21,7 +21,7 @@ pytestmark = pytest.mark.unit
 # control_plane_archive (missing: 63, 64, 71, 88-106)
 # ---------------------------------------------------------------------------
 
-from bioetl.application.observability import control_plane_archive as cpa
+from bioetl.composition import control_plane_archive as cpa
 from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
     RunResult,

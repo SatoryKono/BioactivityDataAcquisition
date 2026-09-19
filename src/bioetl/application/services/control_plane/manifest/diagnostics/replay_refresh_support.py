@@ -13,15 +13,15 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_refre
     _ReplayRefreshProjection,
     _ReplayRefreshSummaryUpdate,
 )
-from bioetl.domain.control_plane.snapshot_materialization import (
-    resolve_post_manifest_input_snapshot_materialization_mode,
-)
 from bioetl.application.services.control_plane.manifest.diagnostics.source_refs import (
     _build_effective_source_refs,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
     assess_reproducibility_policy,
+)
+from bioetl.domain.control_plane.snapshot_materialization import (
+    resolve_post_manifest_input_snapshot_materialization_mode,
 )
 
 

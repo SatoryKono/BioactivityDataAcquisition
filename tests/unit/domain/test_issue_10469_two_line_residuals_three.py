@@ -94,6 +94,13 @@ def test_dq_policy_none_overrides_and_strict_contract_escalation() -> None:
         strictness_mode="strict",
     )
 
+    with pytest.raises(TypeError, match="disposition_overrides"):
+        resolver._get_disposition_overrides_dict()
+
+    resolver.config = SimpleNamespace(
+        disposition_overrides=(),
+        strictness_mode="strict",
+    )
     assert resolver._get_disposition_overrides_dict() == {}
     assert (
         resolver._apply_contract_adjustments(

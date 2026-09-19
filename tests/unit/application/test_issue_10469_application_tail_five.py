@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import Mock
-from uuid import uuid4
 
 import pytest
 
@@ -121,7 +120,7 @@ def test_workflow_inspection_returns_none_for_unknown_run_id() -> None:
     service = WorkflowInspectionService(
         manifest_port=Mock(), ledger_port=Mock(), state_port=state_port
     )
-    run_id = str(uuid4())
+    run_id = "run-unknown-1"
 
     assert service.inspect_run_id(run_id) is None
     state_port.get_by_run_id.assert_called_once()

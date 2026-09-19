@@ -9,6 +9,7 @@ __all__ = ["check_business_rules"]
 
 
 from collections.abc import Mapping, Sequence
+from typing import cast
 
 import polars as pl
 
@@ -77,7 +78,9 @@ def _evaluate_single_rule(
 ) -> tuple[bool, int | None]:
     """Evaluate a single business rule."""
     column = rule.column
-    condition = rule.condition
+    # from_mapping() does not validate condition membership, so raw payloads
+    # may carry arbitrary strings; unknown conditions stay non-blocking.
+    condition = cast("str", rule.condition)
 
     if not column or column not in df.columns:
         return True, 0

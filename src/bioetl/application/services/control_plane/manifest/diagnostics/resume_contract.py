@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.checkpoint_policy import (
     _resolve_requested_checkpoint_compatibility_policy,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.checkpoint_policy import (
     resolve_applied_checkpoint_compatibility_policy as _resolve_applied_checkpoint_compatibility_policy,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunManifest

@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, cast
+from typing import Any, cast
 
 from bioetl.composition.runtime_builders._run_manifest_identity_ref_values import (
     CONTRACT_IDENTITY_FIELD_NAMES,
@@ -13,9 +13,6 @@ from bioetl.composition.runtime_builders._run_manifest_identity_ref_values impor
     build_control_plane_identity_ref_values,
 )
 from bioetl.domain.normalization import normalize_runtime_anchor_payload
-
-if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineRunContext
 
 __all__ = [
     "CONTRACT_IDENTITY_FIELD_NAMES",
@@ -114,7 +111,7 @@ def extract_optional_updates_from_refs(
 
 
 def build_dataclass_manifest_updates(
-    ctx: PipelineRunContext,
+    ctx: object,
     manifest_id: str,
     *,
     optional_updates: tuple[tuple[str, str], ...],

@@ -7,6 +7,7 @@ from typing import Protocol
 
 from bioetl.application.observability.control_plane_evidence.checks import (
     EvidenceCheckResult,
+    EvidenceStatus,
 )
 from bioetl.application.observability.control_plane_evidence.retention_checks import (
     retention_evidence_checks,
@@ -69,7 +70,7 @@ def build_retention_checks(
     return checks, relevant
 
 
-def _archive_status(verified: bool | None) -> str:
+def _archive_status(verified: bool | None) -> EvidenceStatus:
     if verified is True:
         return "OK"
     if verified is False:

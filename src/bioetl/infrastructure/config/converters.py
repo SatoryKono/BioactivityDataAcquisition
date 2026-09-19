@@ -32,9 +32,7 @@ def _extract_source_fields(yaml_config: PipelineYamlConfig) -> list[str]:
     source_fields = yaml_config.source.fields
     if not source_fields:
         return []
-    if isinstance(source_fields[0], dict):
-        return [field["name"] for field in source_fields if "name" in field]
-    return [str(field) for field in source_fields]
+    return [field["name"] for field in source_fields if "name" in field]
 
 
 def _extract_write_modes(

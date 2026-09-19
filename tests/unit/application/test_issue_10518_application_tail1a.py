@@ -171,7 +171,7 @@ def test_emit_domain_event_logs_emitter_failure() -> None:
 
 
 def test_emit_batch_failed_without_run_id_is_noop() -> None:
-    from datetime import datetime, timezone
+    from datetime import UTC, datetime
 
     from bioetl.application.core._batch_write_support import emit_batch_failed
 
@@ -182,13 +182,13 @@ def test_emit_batch_failed_without_run_id_is_noop() -> None:
         batch_id="b1",  # type: ignore[arg-type]
         layer="silver",
         error=RuntimeError("x"),
-        occurred_at=datetime.now(timezone.utc),
+        occurred_at=datetime(2026, 1, 1, tzinfo=UTC),
     )
     emitter.emit_domain_event.assert_not_called()
 
 
 async def test_safe_write_layer_rejects_unknown_layer() -> None:
-    from datetime import datetime, timezone
+    from datetime import UTC, datetime
 
     from bioetl.application.core._batch_write_support import safe_write_layer
 
@@ -203,7 +203,7 @@ async def test_safe_write_layer_rejects_unknown_layer() -> None:
             layer="bronze",
             records=[],
             batch_id="b1",  # type: ignore[arg-type]
-            ingestion_ts=datetime.now(timezone.utc),
+            ingestion_ts=datetime(2026, 1, 1, tzinfo=UTC),
             bronze_refs=None,
             operation_errors=(RuntimeError,),
         )

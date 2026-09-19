@@ -20,6 +20,7 @@ from bioetl.application.services.ops.observability_backend_startup_types import 
     _ObservabilityBackendStartupKwargs,
     _ProbeFn,
     _RequiredProbeFn,
+    _StartedBackendProcess,
     _StartFn,
     _WaitFn,
     _WaitRequiredPathsFn,
@@ -90,7 +91,7 @@ def start_detached_quarantine_backend(
     bind_host: str = "0.0.0.0",
     port: int = DEFAULT_HEALTH_SERVER_PORT,
     **kwargs: object,
-) -> object:
+) -> _StartedBackendProcess:
     if kwargs.get("current_env") is None:
         kwargs["current_env"] = os_environ
     return _composition_start_detached_quarantine_backend(

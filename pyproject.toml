@@ -21,9 +21,6 @@ dependencies = [
     "pydantic-settings>=2.14.2",
     "pyyaml>=6.0",
     "polars>=1.0",
-    # deltalake<1.0: upper bound holds the 0.x API/ABI that the pinned arro3-core
-    # Windows wheel below was validated against; lift only after deltalake 1.x +
-    # compatible arro3-core Windows wheels are verified. Reviewed 2026-09-18; re-review by 2027-03-18.
     # <1.0: deltalake 1.x API migration is unvalidated here; keep the range and
     # revisit only with a migration plan. Reviewed 2026-09-19; re-review by 2027-03-19. (AUD-006)
     "deltalake>=0.18,<1.0",
@@ -333,21 +330,20 @@ disallow_incomplete_defs = true
 check_untyped_defs = true
 no_implicit_optional = true
 warn_redundant_casts = true
-warn_unused_ignores = false  # Different envs have different type stubs; avoids CI/local mismatch
+warn_unused_ignores = true  # AUD-004: stale suppressions must fail loudly
 show_error_codes = true
 # Additional strict checks
 disallow_any_generics = false  # Allow generic types for external libraries
 disallow_subclassing_any = false  # Allow subclassing pydantic BaseModel and pandera DataFrameModel
-warn_unreachable = false  # Disable for unreachable code warnings in type narrowing
+warn_unreachable = true  # AUD-004: dead branches after narrowing must fail loudly
 strict_equality = true
 extra_checks = true
-# Exclude non-product trees from default discovery. Product gate is src/bioetl
-# only (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py).
-# memory is an approved sidecar (configs/quality/repo_structure_catalog.yaml).
-exclude = [
-]
-
-# TEMP-SIZING-AUD-004 (will finalize after measurement).
+# No default-discovery exclusions (AUD-004): src/memory/ is type-checked like
+# product code. The mypy product gate stays path-explicit
+# (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py); memory
+# remains a sidecar only for coverage/lint catalogs
+# (configs/quality/repo_structure_catalog.yaml).
+exclude = []
 
 [[tool.mypy.overrides]]
 module = [
@@ -385,6 +381,8 @@ module = [
     "botocore.*",
     "s3transfer",
     "s3transfer.*",
+    "jsonschema",
+    "jsonschema.*",
 ]
 ignore_missing_imports = true
 

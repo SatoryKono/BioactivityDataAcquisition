@@ -122,7 +122,7 @@ class TestProjectComponentXrefs:
             {"xref_src_db": None, "xref_id": "X3"},
             "not-a-dict",
         ]
-        projected = XrefHelper.project_component_xrefs(xrefs)  # type: ignore[list-item]
+        projected = XrefHelper.project_component_xrefs(xrefs)
         assert set(projected) == set(XrefHelper._XREF_DERIVED_COLUMNS)
         assert all(value == "unknown" for value in projected.values())
 
@@ -219,7 +219,7 @@ class TestSynonymProjection:
                 ]
             },
         ]
-        payloads = list(SynonymHelper.iter_component_synonym_payloads(components))  # type: ignore[list-item]
+        payloads = list(SynonymHelper.iter_component_synonym_payloads(components))
         assert payloads == [{"syn_type": "UNIPROT", "component_synonym": "P1"}]
 
     def test_project_single_synonym_unknown_field(self) -> None:
@@ -279,7 +279,7 @@ class TestSynonymProjection:
             },
             "junk",
         ]
-        assert SynonymHelper.project_component_synonyms(components) == {  # type: ignore[list-item]
+        assert SynonymHelper.project_component_synonyms(components) == {
             "target_protein_synonyms": "P1",
             "target_gene_synonyms": "TP53",
             "target_ec_numbers": "1.1.1.1",

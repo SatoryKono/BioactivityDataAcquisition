@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import UTC
 
 from bioetl.domain.control_plane import RunManifest, WorkflowManifest
-from bioetl.interfaces.http._identity_display_rows import format_timestamp_label
 from bioetl.interfaces.http._control_plane_selector_filters import (
     filter_records,
     latest_record,
@@ -28,6 +27,7 @@ from bioetl.interfaces.http._control_plane_selector_records import (
     narrow_manifest_catalog,
     selected_pipeline_scope,
 )
+from bioetl.interfaces.http._identity_display_rows import format_timestamp_label
 
 __all__ = (
     "RUN_ID_NO_SELECTION",

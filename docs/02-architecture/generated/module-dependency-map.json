@@ -1,54 +1,54 @@
 {
   "summary": {
-    "scanned_modules": 2484,
-    "total_internal_imports": 7785,
+    "scanned_modules": 2473,
+    "total_internal_imports": 7743,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 328,
+    "cross_layer_group_edges_total": 335,
     "violations": 0,
-    "source_fingerprint": "3f52e1f0559366100573051e5dcee93d5420b8eb7b0d6e90799fba110874a37b"
+    "source_fingerprint": "447c0fa8fc55c75905c95cc0ed5061db7779d7e237ecb3c00dd64d3c7807d30b"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1578,
+      "imports": 1492,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1001,
+      "imports": 1017,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "application",
-      "imports": 195,
+      "imports": 202,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 664,
+      "imports": 665,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 285,
+      "imports": 287,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 253,
+      "imports": 258,
       "allowed": true
     },
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1242,
+      "imports": 1247,
       "allowed": true
     },
     {
@@ -66,13 +66,13 @@
     {
       "source": "interfaces",
       "target": "application",
-      "imports": 55,
+      "imports": 57,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "composition",
-      "imports": 56,
+      "imports": 57,
       "allowed": true
     },
     {
@@ -84,7 +84,7 @@
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 412,
+      "imports": 417,
       "allowed": true
     }
   ],
@@ -92,7 +92,7 @@
     {
       "source": "application.services",
       "target": "domain.control_plane",
-      "imports": 118
+      "imports": 129
     },
     {
       "source": "infrastructure.adapters",
@@ -112,7 +112,7 @@
     {
       "source": "application.services",
       "target": "domain.types",
-      "imports": 85
+      "imports": 83
     },
     {
       "source": "infrastructure.storage",
@@ -152,7 +152,7 @@
     {
       "source": "composition.bootstrap",
       "target": "application.services",
-      "imports": 38
+      "imports": 40
     },
     {
       "source": "composition.factories",
@@ -235,6 +235,11 @@
       "imports": 22
     },
     {
+      "source": "composition.bootstrap",
+      "target": "infrastructure.control_plane",
+      "imports": 21
+    },
+    {
       "source": "interfaces.cli",
       "target": "composition.control_plane_service_access",
       "imports": 21
@@ -250,13 +255,13 @@
       "imports": 20
     },
     {
-      "source": "composition.bootstrap",
-      "target": "application.composite",
+      "source": "application.services",
+      "target": "domain.normalization",
       "imports": 20
     },
     {
       "source": "composition.bootstrap",
-      "target": "infrastructure.control_plane",
+      "target": "application.composite",
       "imports": 20
     },
     {
@@ -315,6 +320,11 @@
       "imports": 16
     },
     {
+      "source": "application.services",
+      "target": "domain.run_reports",
+      "imports": 15
+    },
+    {
       "source": "composition.factories",
       "target": "infrastructure.storage",
       "imports": 15
@@ -333,16 +343,6 @@
       "source": "infrastructure.storage",
       "target": "domain.exceptions",
       "imports": 15
-    },
-    {
-      "source": "application.services",
-      "target": "domain.normalization",
-      "imports": 14
-    },
-    {
-      "source": "application.services",
-      "target": "domain.run_reports",
-      "imports": 14
     },
     {
       "source": "composition.bootstrap",

@@ -524,7 +524,7 @@ class TestQuarantineStatusSync:
     def test_operator_error_records_metrics_and_reraises(self) -> None:
         host = _make_quarantine_host()
         host.quarantine_port.update_status.side_effect = OSError("store down")
-        started_at = datetime.now(timezone.utc)
+        started_at = datetime(2026, 1, 1, tzinfo=UTC)
         with pytest.raises(OSError, match="store down"):
             QuarantineServiceStatusSyncMixin._update_status_impl(
                 host,

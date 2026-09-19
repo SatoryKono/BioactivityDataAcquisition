@@ -14,6 +14,7 @@ from bioetl.domain.workflow.foreign_key_reconciliation import (
     ForeignKeyReconciliationMutationMode,
     ForeignKeyReconciliationRequest,
     ForeignKeyReconciliationResult,
+    ReferenceCompletenessStatus,
 )
 
 __all__ = [
@@ -23,6 +24,7 @@ __all__ = [
     "ForeignKeyReconciliationPort",
     "ForeignKeyReconciliationRequest",
     "ForeignKeyReconciliationResult",
+    "ReferenceCompletenessStatus",
 ]
 
 

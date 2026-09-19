@@ -9,10 +9,10 @@ import pytest
 
 from bioetl.application.observability.control_plane_archive import (
     DEFAULT_CONTROL_PLANE_ARCHIVE_ROOT,
-    archive_successful_run,
     resolve_control_plane_archive_root,
     should_archive_control_plane,
 )
+from bioetl.composition.control_plane_archive import archive_successful_run
 from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
     RunOptions,

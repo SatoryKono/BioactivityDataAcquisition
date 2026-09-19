@@ -9,8 +9,8 @@ without loading this legacy all-in-one public module.
 from __future__ import annotations
 
 from memory.graph import sync_pkg as _sync_pkg
+from memory.graph.sync_pkg.cli import main as main
 
-main = _sync_pkg.main
 __all__ = list(_sync_pkg.__all__)
 
 # Re-export public sync_pkg symbols without a star-import (python:S2208).

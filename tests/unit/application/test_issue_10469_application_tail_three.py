@@ -42,6 +42,8 @@ from bioetl.application.pipelines.uniprot.extractors._comment_helpers import (
     _extract_isoform_synonym_values,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_structural_policy_falls_back_when_schema_has_no_contracts(
     monkeypatch: pytest.MonkeyPatch,

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 from bioetl.application.pipelines.uniprot.extractors._comment_helpers import (
     _extract_texts_from_dict,
 )
@@ -106,7 +108,9 @@ _COMMENT_ANNOTATION_OUTPUT_KEYS: tuple[str, ...] = (
 )
 
 
-def _normalize_comments(comments: list[JsonDict] | None) -> list[JsonDict] | None:
+def _normalize_comments(
+    comments: Sequence[object] | None,
+) -> Sequence[object] | None:
     """Validate and normalize comments input."""
     if not comments or not isinstance(comments, list):
         return None
@@ -114,7 +118,7 @@ def _normalize_comments(comments: list[JsonDict] | None) -> list[JsonDict] | Non
 
 
 def _build_comment_index(
-    comments: list[JsonDict] | None,
+    comments: Sequence[object] | None,
 ) -> dict[str, list[JsonDict]] | None:
     """Build index grouped by commentType in a single pass."""
     normalized = _normalize_comments(comments)

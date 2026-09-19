@@ -6,6 +6,7 @@ import hashlib
 import json
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import assert_never
 
 from bioetl.domain.control_plane import ControlPlaneArtifactSurface
 
@@ -109,7 +110,7 @@ def _artifact_id(
         )
     if surface is ControlPlaneArtifactSurface.CACHED_BRONZE:
         return _content_addressed_file_snapshot_id(path)
-    return path.stem
+    assert_never(surface)
 
 
 def _effective_config_artifact_id(payload: dict[str, object]) -> str | None:

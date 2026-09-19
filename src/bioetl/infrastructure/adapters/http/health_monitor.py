@@ -238,8 +238,6 @@ class ProviderHealthMonitor:
 
 def __getattr__(name: str) -> object:  # pragma: no cover
     """Resolve compatibility re-exports without eager tracker imports."""
-    if TYPE_CHECKING:
-        raise AttributeError
     if name != "ProviderHealthTracker":
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
     from bioetl.infrastructure.adapters.http.health_tracker import ProviderHealthTracker

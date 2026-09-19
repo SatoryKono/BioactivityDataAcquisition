@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+from collections.abc import Mapping
 from pathlib import Path
 from typing import cast
 
@@ -168,7 +169,10 @@ def _snapshot_assessment(
         raise _RevisionMissingError("revision_missing")
     if json.loads(revision_path.read_text(encoding="utf-8")) != snapshot:
         raise ValueError("revision_corrupt")
-    return dict(snapshot["assessment"]), "AVAILABLE", revision
+    assessment = snapshot["assessment"]
+    if not isinstance(assessment, Mapping):
+        raise ValueError("assessment_invalid")
+    return dict(assessment), "AVAILABLE", revision
 
 
 def _load_report_assessment(

@@ -3,7 +3,7 @@
   "linked_issue": "#6891",
   "follow_up_issue": "#7464",
   "parent_epic": "#6890",
-  "snapshot_date": "2026-09-16",
+  "snapshot_date": "2026-09-19",
   "generated_by": "scripts.engineering.qa.report_live_residual_snapshot",
   "policy": {
     "direction": "shrink_only",
@@ -16,16 +16,16 @@
       "max_internal_fan_in": 5,
       "helper_function_ratio": 0.374,
       "files": 194,
-      "total_loc": 23443,
+      "total_loc": 23633,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 7
     },
     "composition_bootstrap_runtime": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 2,
-      "helper_function_ratio": 0.328,
+      "helper_function_ratio": 0.332,
       "files": 52,
-      "total_loc": 6172,
+      "total_loc": 6214,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
@@ -40,27 +40,27 @@
     },
     "application_services_control_plane": {
       "files_ge_250_loc": 0,
-      "max_internal_fan_in": 1,
-      "helper_function_ratio": 0.381,
+      "max_internal_fan_in": 3,
+      "helper_function_ratio": 0.375,
       "files": 113,
-      "total_loc": 14516,
+      "total_loc": 14512,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 2
     },
     "composition_runtime_builders": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 2,
-      "helper_function_ratio": 0.378,
+      "helper_function_ratio": 0.38,
       "files": 55,
-      "total_loc": 7118,
+      "total_loc": 7122,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     }
   },
   "dead_code": {
-    "repo_wide_zero_import_candidate_count": 3,
+    "repo_wide_zero_import_candidate_count": 2,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
-    "repo_wide_classified_zero_import_candidate_count": 3,
+    "repo_wide_classified_zero_import_candidate_count": 2,
     "repo_wide_candidates_without_owner_tests_count": 0
   },
   "config_surface": {
@@ -73,7 +73,7 @@
   "closeout_program": {
     "tech_debt_closeout_test_file_count": 51,
     "tech_debt_closeout_test_function_count": 262,
-    "tech_debt_closeout_test_loc": 10475,
+    "tech_debt_closeout_test_loc": 10477,
     "closeout_files_using_live_residual_helpers": 8,
     "fold_into_generic_inventory_count": 60,
     "retained_public_entrypoint_count": 12,

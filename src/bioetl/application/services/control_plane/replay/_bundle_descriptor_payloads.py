@@ -9,17 +9,35 @@ from typing import Protocol
 
 
 class _InspectionManifest(Protocol):
-    manifest_id: str
-    run_id: object
-    schema_version: object
-    execution_fingerprint: object
-    code_provenance: object
+    """Read-only manifest view (properties keep protocol members covariant)."""
+
+    @property
+    def manifest_id(self) -> str: ...
+
+    @property
+    def run_id(self) -> object: ...
+
+    @property
+    def schema_version(self) -> object: ...
+
+    @property
+    def execution_fingerprint(self) -> object: ...
+
+    @property
+    def code_provenance(self) -> object: ...
 
 
 class _InspectionBundleSource(Protocol):
-    identity_graph: dict[str, object]
-    ledger_entries: tuple[object, ...]
-    manifest: _InspectionManifest
+    """Read-only bundle-source view (properties satisfy frozen sources)."""
+
+    @property
+    def identity_graph(self) -> dict[str, object]: ...
+
+    @property
+    def ledger_entries(self) -> tuple[object, ...]: ...
+
+    @property
+    def manifest(self) -> _InspectionManifest: ...
 
 
 def resolve_replay_taxonomy_projection(

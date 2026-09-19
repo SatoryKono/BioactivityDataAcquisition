@@ -1,4 +1,14 @@
-"""Infrastructure adapter for workflow foreign-key reconciliation."""
+"""Canonical implementation of workflow foreign-key reconciliation (AUD-005).
+
+This module owns the reconcile algorithm
+(``SilverForeignKeyReconciliationAdapter`` /
+``StorageForeignKeyReconciliationAdapter``); the sibling
+``workflow_foreign_key_reconciliation_{support,quarantine,quarantine_keys,identity}``
+modules are its internal implementation detail. The application workflow
+transform (``application/workflow/transforms/reconcile_foreign_keys.py``) is a
+documented facade that orchestrates this adapter through
+``ForeignKeyReconciliationPort`` and must not duplicate storage logic.
+"""
 
 from __future__ import annotations
 
@@ -224,11 +234,12 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             source_rows=source_rows,
             reference_rows=reference_rows,
         )
+        gold_reader: object = self.gold_writer
         if request.source_layer == "gold" and isinstance(
-            self.gold_writer, GoldSnapshotReaderProtocol
+            gold_reader, GoldSnapshotReaderProtocol
         ):
             try:
-                snapshot = await self.gold_writer.read_reconciliation_snapshot(
+                snapshot = await gold_reader.read_reconciliation_snapshot(
                     request.source_table
                 )
                 result = replace(result, source_snapshot=snapshot)

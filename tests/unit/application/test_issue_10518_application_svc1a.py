@@ -1016,9 +1016,11 @@ class TestRuntimePaths:
         assert _sid.runtime_path_to_local_path("", root=tmp_path) == Path(tmp_path)
 
     def test_local_path_maps_windows_spelling(self, tmp_path):
-        assert _sid.runtime_path_to_local_path("E:/repo/file", root=tmp_path) == Path(
-            "/mnt/e/repo/file"
-        )
+        result = _sid.runtime_path_to_local_path("E:/repo/file", root=tmp_path)
+        if os.name == "nt":
+            assert result == Path("E:/repo/file")
+        else:
+            assert result == Path("/mnt/e/repo/file")
 
     def test_local_path_relative_resolves_under_root(self, tmp_path):
         assert (
