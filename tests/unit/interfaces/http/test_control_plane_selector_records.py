@@ -607,9 +607,7 @@ def test_run_option_label_treats_naive_started_at_as_utc() -> None:
 
 def test_run_option_label_uses_dashboard_timezone() -> None:
     records = subject.build_selector_records((_manifest(13),), None)
-    aware = replace(
-        records[0], started_at=datetime(2026, 9, 17, 15, 23, tzinfo=UTC)
-    )
+    aware = replace(records[0], started_at=datetime(2026, 9, 17, 15, 23, tzinfo=UTC))
     label = selector_context._run_option_label(
         str(records[0].run_id), aware, timezone="Europe/Kyiv"
     )

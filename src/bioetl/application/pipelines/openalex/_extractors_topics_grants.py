@@ -27,9 +27,10 @@ def extract_topics(
 
     result: list[JsonDict] = []  # Any: untyped JSON fragment from OpenAlex API
     for topic in topics[:max_count]:
-        if not isinstance(topic, dict):
+        raw_topic: object = topic
+        if not isinstance(raw_topic, dict):
             continue
-        parsed = _parse_topic_dict(topic)
+        parsed = _parse_topic_dict(raw_topic)
         if parsed:
             result.append(parsed)
 
@@ -70,9 +71,10 @@ def extract_grants(
 
     result: list[JsonDict] = []  # Any: untyped JSON fragment from OpenAlex API
     for grant in grants:
-        if not isinstance(grant, dict):
+        raw_grant: object = grant
+        if not isinstance(raw_grant, dict):
             continue
-        parsed = _parse_grant_dict(grant)
+        parsed = _parse_grant_dict(raw_grant)
         if parsed:
             result.append(parsed)
 

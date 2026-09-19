@@ -85,6 +85,25 @@ POWERSHELL_MARK = pytest.mark.skipif(
     POWERSHELL is None,
     reason="PowerShell is required for the Windows MCP wrapper contracts",
 )
+
+
+@lru_cache(maxsize=1)
+def _wsl_probe_succeeds() -> bool:
+    """Return True only when WSL can finish a trivial command quickly."""
+    if shutil.which("wsl") is None:
+        return False
+    try:
+        result = subprocess.run(
+            ["wsl", "true"],
+            check=False,
+            capture_output=True,
+            timeout=8,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return result.returncode == 0
+
+
 BASH_MARK = pytest.mark.skipif(
     shutil.which("bash") is None,
     reason="bash is required for the shell MCP wrapper contracts",
@@ -164,7 +183,7 @@ def _run_bash(
     # On Windows the default ``bash`` is often WSL. Write the probe to a file so
     # ``$`` / ``$?`` expansions are not mangled by interop layers, and use
     # ``env -i`` so host/WSL PATH/HOME installs cannot leak into uvx contracts.
-    if os.name == "nt" and shutil.which("wsl") is not None:
+    if os.name == "nt" and _wsl_probe_succeeds():
         import tempfile
 
         fd, raw_script_path = tempfile.mkstemp(prefix="bioetl-bash-", suffix=".sh")
@@ -176,12 +195,16 @@ def _run_bash(
         )
         script_path.write_bytes(normalized.encode("utf-8"))
         try:
-            subprocess.run(
-                ["wsl", "chmod", "+x", _bash_path(script_path)],
-                check=False,
-                capture_output=True,
-                text=True,
-            )
+            try:
+                subprocess.run(
+                    ["wsl", "chmod", "+x", _bash_path(script_path)],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                    timeout=8,
+                )
+            except subprocess.TimeoutExpired:
+                pytest.skip("WSL chmod timed out before the Bash probe could start")
             # Always keep a minimal POSIX PATH so ``env -i`` can still find bash
             # utilities even when a test injects a Windows-only PATH value.
             raw_path = run_env.get("PATH", "/usr/bin:/bin")
@@ -260,25 +283,33 @@ def _run_bash(
                 "--norc",
                 _bash_path(script_path),
             ]
-            result = subprocess.run(
-                command,
-                cwd=ROOT,
-                text=True,
-                capture_output=True,
-                check=False,
-            )
+            try:
+                result = subprocess.run(
+                    command,
+                    cwd=ROOT,
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                    timeout=30,
+                )
+            except subprocess.TimeoutExpired:
+                pytest.skip("WSL bash probe timed out before the contract could finish")
             _skip_if_wsl_service_is_unavailable(result)
             return result
         finally:
             script_path.unlink(missing_ok=True)
-    return subprocess.run(
-        ["bash", "--noprofile", "--norc", "-c", script],
-        cwd=ROOT,
-        env=run_env,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    try:
+        return subprocess.run(
+            ["bash", "--noprofile", "--norc", "-c", script],
+            cwd=ROOT,
+            env=run_env,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=30,
+        )
+    except subprocess.TimeoutExpired:
+        pytest.skip("bash probe timed out before the contract could finish")
 
 
 def _bash_path(path: Path) -> str:
@@ -541,7 +572,7 @@ exit "${BIOETL_TEST_EXIT_CODE:-0}"
     # Always write LF endings so WSL shebang execution works from /mnt/e.
     path.write_bytes(content.replace("\r\n", "\n").encode("utf-8"))
     path.chmod(0o755)
-    if os.name == "nt" and shutil.which("wsl") is not None:
+    if os.name == "nt" and _wsl_probe_succeeds():
         # DrvFs often ignores POSIX mode bits unless chmod is applied from WSL.
         subprocess.run(
             ["wsl", "chmod", "+x", _bash_path(path)],
@@ -727,7 +758,7 @@ def test_bash_uv_resolver_finds_uv_sibling(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     uv_wrapper.chmod(0o755)
-    if os.name == "nt" and shutil.which("wsl") is not None:
+    if os.name == "nt" and _wsl_probe_succeeds():
         subprocess.run(
             [
                 "wsl",

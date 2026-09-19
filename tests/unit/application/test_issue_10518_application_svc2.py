@@ -46,7 +46,9 @@ def test_debug_mixin_disabled_bronze_batch_noop() -> None:
 
 def test_debug_mixin_disabled_transform_success_noop() -> None:
     host = _RecordingHost(False)
-    host.record_transform_success(raw_record=_bronze(), record_index=0, silver_record=_bronze())
+    host.record_transform_success(
+        raw_record=_bronze(), record_index=0, silver_record=_bronze()
+    )
     host._collector.record_transform_success.assert_not_called()
 
 
@@ -78,7 +80,11 @@ def test_debug_mixin_disabled_filtered_out_noop() -> None:
 def test_debug_mixin_enabled_filtered_out_with_details() -> None:
     host = _RecordingHost(True)
     host.record_filtered_out(
-        raw_record=_bronze(), record_index=0, reason="skip", details={"k": "v"}, policy="p"
+        raw_record=_bronze(),
+        record_index=0,
+        reason="skip",
+        details={"k": "v"},
+        policy="p",
     )
     kwargs = host._collector.record_transform_failure.call_args.kwargs
     assert kwargs["details"].startswith("skip: ")
@@ -87,8 +93,11 @@ def test_debug_mixin_enabled_filtered_out_with_details() -> None:
 def test_debug_mixin_disabled_data_quality_failure_noop() -> None:
     host = _RecordingHost(False)
     host.record_data_quality_failure(
-        raw_record=_bronze(), record_index=0, error_type=None,
-        error_details="e", policy="p",
+        raw_record=_bronze(),
+        record_index=0,
+        error_type=None,
+        error_details="e",
+        policy="p",
     )
     host._collector.record_transform_failure.assert_not_called()
 
@@ -107,7 +116,9 @@ def test_debug_mixin_disabled_gold_validation_failure_noop() -> None:
 
 def test_debug_mixin_disabled_lineage_noop() -> None:
     host = _RecordingHost(False)
-    host.record_lineage(fragment_id="f", edge_type="e", node_id="n", raw_record=_bronze())
+    host.record_lineage(
+        fragment_id="f", edge_type="e", node_id="n", raw_record=_bronze()
+    )
     host._collector.record_lineage.assert_not_called()
 
 
@@ -245,7 +256,10 @@ def test_requires_critical_none_is_false() -> None:
 
 
 def test_requires_critical_flag() -> None:
-    assert requires_critical_dossier_evidence(_inspect_result({"critical_pipeline": True})) is True
+    assert (
+        requires_critical_dossier_evidence(_inspect_result({"critical_pipeline": True}))
+        is True
+    )
 
 
 def test_requires_critical_via_profile() -> None:
@@ -279,9 +293,12 @@ def test_classify_checkpoint_mismatched() -> None:
     )
     assert classify_checkpoint_status(info) == ["checkpoint_mismatched_run"]
     assert classify_checkpoint_status(None) == ["checkpoint"]
-    assert classify_checkpoint_status(
-        CheckpointInfo(pipeline_name="p", run_id="r", metadata={})
-    ) == []
+    assert (
+        classify_checkpoint_status(
+            CheckpointInfo(pipeline_name="p", run_id="r", metadata={})
+        )
+        == []
+    )
 
 
 def test_traceability_gaps() -> None:
@@ -372,7 +389,9 @@ def _src_manifest() -> RunManifest:
         pipeline_name="pl",
         provider="p",
         entity="e",
-        source_refs=(RunSourceRef(provider="p", entity="e", pipeline_name="pl", query="q"),),
+        source_refs=(
+            RunSourceRef(provider="p", entity="e", pipeline_name="pl", query="q"),
+        ),
     )
 
 
@@ -385,7 +404,9 @@ def test_effective_refs_empty_snapshots_returns_declared() -> None:
 
 def test_effective_refs_skips_non_dict_snapshots() -> None:
     manifest = _src_manifest()
-    out = _build_effective_source_refs(manifest=manifest, input_snapshots=["nope", 42, None])
+    out = _build_effective_source_refs(
+        manifest=manifest, input_snapshots=["nope", 42, None]
+    )
     assert out == manifest.source_refs
 
 
@@ -422,10 +443,21 @@ def test_effective_refs_queryless_manifest_matches_any_query() -> None:
     out = _build_effective_source_refs(
         manifest=manifest,
         input_snapshots=[
-            {"provider": "p", "entity": "e", "pipeline_name": "pl",
-             "query": "q1", "snapshot_id": "s", "content_hash": "h"},
-            {"provider": "other", "entity": "e", "pipeline_name": "pl",
-             "snapshot_id": "s2", "content_hash": "h2"},
+            {
+                "provider": "p",
+                "entity": "e",
+                "pipeline_name": "pl",
+                "query": "q1",
+                "snapshot_id": "s",
+                "content_hash": "h",
+            },
+            {
+                "provider": "other",
+                "entity": "e",
+                "pipeline_name": "pl",
+                "snapshot_id": "s2",
+                "content_hash": "h2",
+            },
         ],
     )
     assert len(out) == 2
@@ -519,7 +551,10 @@ def test_inspection_historical_claim_attaches() -> None:
     diagnostics: dict[str, object] = {}
     svc._attach_historical_replay_universe_claim(diagnostics)
     assert diagnostics["historical_replay_universe_claim"] == {"u": 1}
-    assert diagnostics["historical_replay_universe_claim_source"] == "/artifacts/report.json"
+    assert (
+        diagnostics["historical_replay_universe_claim_source"]
+        == "/artifacts/report.json"
+    )
     assert diagnostics["historical_replay_universe_durable_evidence_claimed"] is True
 
 
@@ -546,7 +581,8 @@ def test_inspection_reproducibility_views_attach() -> None:
 def test_resolve_artifacts_trace_not_dict() -> None:
     svc = _inspection_svc()
     with patch.object(
-        svc, "show",
+        svc,
+        "show",
         return_value=SimpleNamespace(diagnostics={"produced_artifact_trace": [1, 2]}),
     ):
         assert svc.resolve_produced_artifacts("m") == ()
@@ -555,7 +591,8 @@ def test_resolve_artifacts_trace_not_dict() -> None:
 def test_resolve_artifacts_list_not_list() -> None:
     svc = _inspection_svc()
     with patch.object(
-        svc, "show",
+        svc,
+        "show",
         return_value=SimpleNamespace(
             diagnostics={"produced_artifact_trace": {"artifacts": "nope"}}
         ),
@@ -566,7 +603,8 @@ def test_resolve_artifacts_list_not_list() -> None:
 def test_resolve_artifacts_filters_non_dicts() -> None:
     svc = _inspection_svc()
     with patch.object(
-        svc, "show",
+        svc,
+        "show",
         return_value=SimpleNamespace(
             diagnostics={"produced_artifact_trace": {"artifacts": [{"a": 1}, "x", 3]}}
         ),
@@ -661,8 +699,12 @@ def _validator(**kwargs) -> HistoricalReplayCertificationValidator:
 
 def _cert(**kwargs) -> SimpleNamespace:
     base = {
-        "provider": "p", "entity": "e", "pipeline_name": "pl",
-        "query": None, "upstream_run_id": None, "upstream_manifest_id": None,
+        "provider": "p",
+        "entity": "e",
+        "pipeline_name": "pl",
+        "query": None,
+        "upstream_run_id": None,
+        "upstream_manifest_id": None,
     }
     base.update(kwargs)
     return SimpleNamespace(**base)
@@ -675,7 +717,9 @@ def _cert_manifest() -> RunManifest:
         pipeline_name="pl",
         provider="p",
         entity="e",
-        source_refs=(RunSourceRef(provider="p", entity="e", pipeline_name="pl", query="q1"),),
+        source_refs=(
+            RunSourceRef(provider="p", entity="e", pipeline_name="pl", query="q1"),
+        ),
     )
 
 
@@ -701,20 +745,30 @@ def test_cert_load_manifest_ok_both_paths() -> None:
     port.get_by_run_id.return_value = manifest
     validator = _validator(manifest_port=port)
     assert validator.load_manifest(manifest_id="m", run_id=None) is manifest
-    assert validator.load_manifest(manifest_id=None, run_id=RunID(UUID(int=1009))) is manifest
+    assert (
+        validator.load_manifest(manifest_id=None, run_id=RunID(UUID(int=1009)))
+        is manifest
+    )
 
 
 def test_cert_validate_source_context() -> None:
     validator = _validator()
     composite_ctx = RunManifest(
-        manifest_id="m", execution_fingerprint="f", pipeline_name="p",
-        provider="p", entity="e", launch_context={"execution_context": "composite"},
+        manifest_id="m",
+        execution_fingerprint="f",
+        pipeline_name="p",
+        provider="p",
+        entity="e",
+        launch_context={"execution_context": "composite"},
     )
     with pytest.raises(ValueError, match="source context"):
         validator.validate_source_context(composite_ctx)
     composite_provider = RunManifest(
-        manifest_id="m", execution_fingerprint="f", pipeline_name="p",
-        provider="composite", entity="e",
+        manifest_id="m",
+        execution_fingerprint="f",
+        pipeline_name="p",
+        provider="composite",
+        entity="e",
     )
     with pytest.raises(ValueError, match="source context"):
         validator.validate_source_context(composite_provider)
@@ -726,15 +780,21 @@ def test_cert_validate_composite_context() -> None:
     with pytest.raises(ValueError, match="composite context"):
         validator.validate_composite_context(_manifest())
     composite_ctx = RunManifest(
-        manifest_id="m", execution_fingerprint="f", pipeline_name="p",
-        provider="p", entity="e", launch_context={"execution_context": "composite"},
+        manifest_id="m",
+        execution_fingerprint="f",
+        pipeline_name="p",
+        provider="p",
+        entity="e",
+        launch_context={"execution_context": "composite"},
     )
     validator.validate_composite_context(composite_ctx)
 
 
 def test_cert_coverage_requires_snapshots() -> None:
     with pytest.raises(ValueError, match="At least one"):
-        _validator().validate_certification_coverage(manifest=_manifest(), certifications=())
+        _validator().validate_certification_coverage(
+            manifest=_manifest(), certifications=()
+        )
 
 
 def test_cert_coverage_missing_sources() -> None:
@@ -766,8 +826,11 @@ def test_cert_resolve_query_single_match() -> None:
 
 def test_cert_resolve_query_ambiguous() -> None:
     manifest = RunManifest(
-        manifest_id="m", execution_fingerprint="fp", pipeline_name="pl",
-        provider="p", entity="e",
+        manifest_id="m",
+        execution_fingerprint="fp",
+        pipeline_name="pl",
+        provider="p",
+        entity="e",
         source_refs=(
             RunSourceRef(provider="p", entity="e", pipeline_name="pl", query="qa"),
             RunSourceRef(provider="p", entity="e", pipeline_name="pl", query="qb"),
@@ -781,8 +844,11 @@ def test_cert_resolve_query_ambiguous() -> None:
 
 def test_cert_resolve_query_none() -> None:
     manifest = RunManifest(
-        manifest_id="m", execution_fingerprint="fp", pipeline_name="pl",
-        provider="p", entity="e",
+        manifest_id="m",
+        execution_fingerprint="fp",
+        pipeline_name="pl",
+        provider="p",
+        entity="e",
     )
     assert (
         _validator().resolve_certification_query(
@@ -854,25 +920,41 @@ def test_package_version_none_on_broken_dunder() -> None:
 
 def test_build_run_result_write_report_branches() -> None:
     outcome = SimpleNamespace(
-        status="success", metrics={}, completed_at=_NOW,
-        error_message=None, error_type=None,
+        status="success",
+        metrics={},
+        completed_at=_NOW,
+        error_message=None,
+        error_type=None,
     )
-    runner = SimpleNamespace(manifest_id="m", debug_export_uri=None, debug_export_hash=None)
+    runner = SimpleNamespace(
+        manifest_id="m", debug_export_uri=None, debug_export_hash=None
+    )
     with patch.object(
-        _prs, "finalize_pipeline_run_report",
+        _prs,
+        "finalize_pipeline_run_report",
         side_effect=lambda *, result, options=None, **_: result,
     ) as finalize:
         out = _prs.build_pipeline_run_result(
-            outcome=outcome, runner=runner, pipeline_name="p",
-            run_id=RunID(UUID(int=1011)), run_type="incremental",
-            started_at=_NOW, write_report=True, store=MagicMock(),
+            outcome=outcome,
+            runner=runner,
+            pipeline_name="p",
+            run_id=RunID(UUID(int=1011)),
+            run_type="incremental",
+            started_at=_NOW,
+            write_report=True,
+            store=MagicMock(),
         )
         finalize.assert_called_once()
     with patch.object(_prs, "finalize_pipeline_run_report") as finalize2:
         out2 = _prs.build_pipeline_run_result(
-            outcome=outcome, runner=runner, pipeline_name="p",
-            run_id=RunID(UUID(int=1012)), run_type="incremental",
-            started_at=_NOW, write_report=False, store=MagicMock(),
+            outcome=outcome,
+            runner=runner,
+            pipeline_name="p",
+            run_id=RunID(UUID(int=1012)),
+            run_type="incremental",
+            started_at=_NOW,
+            write_report=False,
+            store=MagicMock(),
         )
         finalize2.assert_not_called()
     assert out.manifest_id == "m"
@@ -905,7 +987,9 @@ def test_config_yaml_mapping_and_model_dump() -> None:
     svc = _config_svc(_pipeline_config_loader=MagicMock(return_value={"a": 1}))
     assert svc.get_pipeline_yaml_config("pipe") == {"a": 1}
     loader = MagicMock(return_value=SimpleNamespace(model_dump=lambda: {"b": 2}))
-    assert _config_svc(_pipeline_config_loader=loader).get_pipeline_yaml_config("p") == {"b": 2}
+    assert _config_svc(_pipeline_config_loader=loader).get_pipeline_yaml_config(
+        "p"
+    ) == {"b": 2}
 
 
 def test_config_yaml_bad_type_raises() -> None:
@@ -971,10 +1055,17 @@ def _quarantine_port(rows=None, error=None):
 
 async def test_quarantine_inspect_no_tracer_success() -> None:
     host = _QuarantineHost(
-        _quarantine_port(rows=[{
-            "error_code": "E1", "payload": {"a": 1}, "bronze_batch_id": "b",
-            "ingestion_ts": "t", "metadata": {"m": 1},
-        }])
+        _quarantine_port(
+            rows=[
+                {
+                    "error_code": "E1",
+                    "payload": {"a": 1},
+                    "bronze_batch_id": "b",
+                    "ingestion_ts": "t",
+                    "metadata": {"m": 1},
+                }
+            ]
+        )
     )
     records = await host.inspect("pipe")
     assert len(records) == 1
@@ -1030,7 +1121,9 @@ def _wf_state(**kwargs) -> WorkflowExecutionState:
         "updated_at": _NOW,
         "completed_at": None,
         "selected_step_ids": ("s1",),
-        "steps": (WorkflowStepState(step_id="s1", step_kind="extract", status="success"),),
+        "steps": (
+            WorkflowStepState(step_id="s1", step_kind="extract", status="success"),
+        ),
         "completed_transform_fingerprints": {"s1": "h1"},
     }
     base.update(kwargs)
@@ -1042,8 +1135,10 @@ def test_load_resume_state_run_id_missing() -> None:
     port.get_by_run_id.return_value = None
     with pytest.raises(RuntimeError, match="no persisted execution state"):
         load_resume_state(
-            workflow_state_port=port, workflow_name="wf",
-            resume_manifest_id=None, resume_run_id=str(UUID(int=1014)),
+            workflow_state_port=port,
+            workflow_name="wf",
+            resume_manifest_id=None,
+            resume_run_id=str(UUID(int=1014)),
         )
 
 
@@ -1053,18 +1148,33 @@ def test_load_resume_state_paths() -> None:
     port.get_by_run_id.return_value = state
     port.get_by_manifest_id.return_value = state
     port.get_latest.return_value = state
-    assert load_resume_state(
-        workflow_state_port=port, workflow_name="wf",
-        resume_manifest_id=None, resume_run_id=str(UUID(int=1015)),
-    ) is state
-    assert load_resume_state(
-        workflow_state_port=port, workflow_name="wf",
-        resume_manifest_id="m", resume_run_id=None,
-    ) is state
-    assert load_resume_state(
-        workflow_state_port=port, workflow_name="wf",
-        resume_manifest_id=None, resume_run_id=None,
-    ) is state
+    assert (
+        load_resume_state(
+            workflow_state_port=port,
+            workflow_name="wf",
+            resume_manifest_id=None,
+            resume_run_id=str(UUID(int=1015)),
+        )
+        is state
+    )
+    assert (
+        load_resume_state(
+            workflow_state_port=port,
+            workflow_name="wf",
+            resume_manifest_id="m",
+            resume_run_id=None,
+        )
+        is state
+    )
+    assert (
+        load_resume_state(
+            workflow_state_port=port,
+            workflow_name="wf",
+            resume_manifest_id=None,
+            resume_run_id=None,
+        )
+        is state
+    )
 
 
 def test_load_resume_state_manifest_and_latest_missing() -> None:
@@ -1073,13 +1183,17 @@ def test_load_resume_state_manifest_and_latest_missing() -> None:
     port.get_latest.return_value = None
     with pytest.raises(RuntimeError, match="resume-manifest-id"):
         load_resume_state(
-            workflow_state_port=port, workflow_name="wf",
-            resume_manifest_id="m", resume_run_id=None,
+            workflow_state_port=port,
+            workflow_name="wf",
+            resume_manifest_id="m",
+            resume_run_id=None,
         )
     with pytest.raises(RuntimeError, match="resume-last"):
         load_resume_state(
-            workflow_state_port=port, workflow_name="wf",
-            resume_manifest_id=None, resume_run_id=None,
+            workflow_state_port=port,
+            workflow_name="wf",
+            resume_manifest_id=None,
+            resume_run_id=None,
         )
 
 
@@ -1108,14 +1222,18 @@ def test_validate_resume_name_mismatch() -> None:
 
 def test_validate_resume_identity_fields() -> None:
     with pytest.raises(RuntimeError, match="identity fields"):
-        validate_resume_state(**_valid_resume_kwargs(latest_state=_wf_state(manifest_id=" ")))
+        validate_resume_state(
+            **_valid_resume_kwargs(latest_state=_wf_state(manifest_id=" "))
+        )
 
 
 def test_validate_resume_step_integrity() -> None:
-    bad = _wf_state(steps=(
-        WorkflowStepState(step_id="s1", step_kind="k", status="success"),
-        WorkflowStepState(step_id="s1", step_kind="k", status="success"),
-    ))
+    bad = _wf_state(
+        steps=(
+            WorkflowStepState(step_id="s1", step_kind="k", status="success"),
+            WorkflowStepState(step_id="s1", step_kind="k", status="success"),
+        )
+    )
     with pytest.raises(RuntimeError, match="step identities"):
         validate_resume_state(**_valid_resume_kwargs(latest_state=bad))
 
@@ -1136,11 +1254,15 @@ def test_validate_resume_lifecycle_and_fingerprint() -> None:
 
 def test_validate_resume_completed_and_repair() -> None:
     with pytest.raises(RuntimeError, match="already completed"):
-        validate_resume_state(**_valid_resume_kwargs(latest_state=_wf_state(status="success")))
+        validate_resume_state(
+            **_valid_resume_kwargs(latest_state=_wf_state(status="success"))
+        )
     repair = _wf_state(repair_required=True, repair_hint="fix s1")
     with pytest.raises(RuntimeError, match="fix s1"):
         validate_resume_state(**_valid_resume_kwargs(latest_state=repair))
-    validate_resume_state(**_valid_resume_kwargs(latest_state=repair, repair_steps=("s1",)))
+    validate_resume_state(
+        **_valid_resume_kwargs(latest_state=repair, repair_steps=("s1",))
+    )
     validate_resume_state(**_valid_resume_kwargs())
 
 
@@ -1154,23 +1276,40 @@ def test_load_resume_manifest() -> None:
     port2 = MagicMock()
     port2.get.return_value = sentinel
     svc2 = SimpleNamespace(manifest_port=port2)
-    assert load_resume_manifest(manifest_service=svc2, latest_state=_wf_state()) is sentinel
+    assert (
+        load_resume_manifest(manifest_service=svc2, latest_state=_wf_state())
+        is sentinel
+    )
 
 
 def test_normalize_and_resolvers() -> None:
     state = _wf_state()
-    assert normalize_resume_state(state, workflow_state_port=MagicMock(),
-                                  now_factory=lambda: _NOW) is state
+    assert (
+        normalize_resume_state(
+            state, workflow_state_port=MagicMock(), now_factory=lambda: _NOW
+        )
+        is state
+    )
     running = _wf_state(status="running")
     port = MagicMock()
-    out = normalize_resume_state(running, workflow_state_port=port,
-                                 now_factory=lambda: _NOW)
+    out = normalize_resume_state(
+        running, workflow_state_port=port, now_factory=lambda: _NOW
+    )
     assert out.status == "incomplete"
     port.save.assert_called_once()
-    assert resolve_skipped_step_ids(state=state, force_steps=("s1",), repair_steps=()) == frozenset()
-    assert resolve_skipped_step_ids(state=state, force_steps=(), repair_steps=()) == frozenset({"s1"})
-    assert resolve_completed_transform_fingerprints(
-        state=state, force_steps=(), repair_steps=("s1",)) == {}
+    assert (
+        resolve_skipped_step_ids(state=state, force_steps=("s1",), repair_steps=())
+        == frozenset()
+    )
+    assert resolve_skipped_step_ids(
+        state=state, force_steps=(), repair_steps=()
+    ) == frozenset({"s1"})
+    assert (
+        resolve_completed_transform_fingerprints(
+            state=state, force_steps=(), repair_steps=("s1",)
+        )
+        == {}
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -1197,15 +1336,23 @@ def _rt_host(port=None, info=None):
 
 
 def test_resolve_owner_from_run_context() -> None:
-    assert _resolve_checkpoint_owner_pipeline(
-        caller_pipeline_name="owner", metadata={"run_context": {"pipeline_name": "owner"}}
-    ) == "owner"
-    assert _resolve_checkpoint_owner_pipeline(
-        caller_pipeline_name="caller", metadata={"pipeline_name": "caller"}
-    ) == "caller"
-    assert _resolve_checkpoint_owner_pipeline(
-        caller_pipeline_name="caller", metadata={}
-    ) == "caller"
+    assert (
+        _resolve_checkpoint_owner_pipeline(
+            caller_pipeline_name="owner",
+            metadata={"run_context": {"pipeline_name": "owner"}},
+        )
+        == "owner"
+    )
+    assert (
+        _resolve_checkpoint_owner_pipeline(
+            caller_pipeline_name="caller", metadata={"pipeline_name": "caller"}
+        )
+        == "caller"
+    )
+    assert (
+        _resolve_checkpoint_owner_pipeline(caller_pipeline_name="caller", metadata={})
+        == "caller"
+    )
     with pytest.raises(ValueError, match="owner mismatch"):
         _resolve_checkpoint_owner_pipeline(
             caller_pipeline_name="a", metadata={"pipeline_name": "b"}
@@ -1228,15 +1375,21 @@ async def test_get_for_run_success_and_missing() -> None:
     port = MagicMock()
     port.load_for_run = AsyncMock(return_value=(run_id, {"k": 1}))
     host = _rt_host(port=port)
-    assert await get_checkpoint_for_run_impl(
-        host, pipeline_name="p", run_id=str(run_id), start_time=0.0
-    ) is host._info
+    assert (
+        await get_checkpoint_for_run_impl(
+            host, pipeline_name="p", run_id=str(run_id), start_time=0.0
+        )
+        is host._info
+    )
     port2 = MagicMock()
     port2.load_for_run = AsyncMock(return_value=None)
     host2 = _rt_host(port=port2)
-    assert await get_checkpoint_for_run_impl(
-        host2, pipeline_name="p", run_id=str(UUID(int=1019)), start_time=0.0
-    ) is None
+    assert (
+        await get_checkpoint_for_run_impl(
+            host2, pipeline_name="p", run_id=str(UUID(int=1019)), start_time=0.0
+        )
+        is None
+    )
     assert "missing" in host2.metric_calls
 
 
@@ -1244,9 +1397,12 @@ async def test_get_for_manifest_missing_and_error() -> None:
     port = MagicMock()
     port.load_for_manifest_id = AsyncMock(return_value=None)
     host = _rt_host(port=port)
-    assert await get_checkpoint_for_manifest_id_impl(
-        host, pipeline_name="p", manifest_id="m", start_time=0.0
-    ) is None
+    assert (
+        await get_checkpoint_for_manifest_id_impl(
+            host, pipeline_name="p", manifest_id="m", start_time=0.0
+        )
+        is None
+    )
     assert "missing" in host.metric_calls
     port_err = MagicMock()
     port_err.load_for_manifest_id = AsyncMock(side_effect=ValueError("bad"))
@@ -1284,20 +1440,32 @@ def test_trace_artifact_ref_filters_and_sorts() -> None:
 
 
 def test_produced_trace_closure_failed() -> None:
-    manifest = RunManifest(manifest_id="m", execution_fingerprint="f",
-                           pipeline_name="p", provider="p", entity="e")
+    manifest = RunManifest(
+        manifest_id="m",
+        execution_fingerprint="f",
+        pipeline_name="p",
+        provider="p",
+        entity="e",
+    )
     trace = build_produced_artifact_trace(
-        manifest=manifest, ledger_entries_present=True,
+        manifest=manifest,
+        ledger_entries_present=True,
         artifact_refs=[{"stage": "gold", "publication_status": "FAILED"}],
     )
     assert trace["artifact_publication_closure"] == "failed"
 
 
 def test_produced_trace_closure_partial_and_disabled() -> None:
-    manifest = RunManifest(manifest_id="m", execution_fingerprint="f",
-                           pipeline_name="p", provider="p", entity="e")
+    manifest = RunManifest(
+        manifest_id="m",
+        execution_fingerprint="f",
+        pipeline_name="p",
+        provider="p",
+        entity="e",
+    )
     partial = build_produced_artifact_trace(
-        manifest=manifest, ledger_entries_present=False,
+        manifest=manifest,
+        ledger_entries_present=False,
         artifact_refs=[{"stage": "gold", "artifact_id": "a"}],
     )
     assert partial["artifact_publication_closure"] == "partial"
@@ -1312,25 +1480,35 @@ def test_produced_trace_closure_planned_count_partial() -> None:
     from bioetl.domain.control_plane import RunArtifactRef
 
     manifest = RunManifest(
-        manifest_id="m", execution_fingerprint="f", pipeline_name="p",
-        provider="p", entity="e",
+        manifest_id="m",
+        execution_fingerprint="f",
+        pipeline_name="p",
+        provider="p",
+        entity="e",
         planned_artifacts=(
             RunArtifactRef(layer="gold", path="/a"),
             RunArtifactRef(layer="gold", path="/b"),
         ),
     )
     trace = build_produced_artifact_trace(
-        manifest=manifest, ledger_entries_present=True,
+        manifest=manifest,
+        ledger_entries_present=True,
         artifact_refs=[{"stage": "gold", "artifact_id": "a"}],
     )
     assert trace["artifact_publication_closure"] == "partial"
 
 
 def test_produced_trace_closure_closed() -> None:
-    manifest = RunManifest(manifest_id="m", execution_fingerprint="f",
-                           pipeline_name="p", provider="p", entity="e")
+    manifest = RunManifest(
+        manifest_id="m",
+        execution_fingerprint="f",
+        pipeline_name="p",
+        provider="p",
+        entity="e",
+    )
     trace = build_produced_artifact_trace(
-        manifest=manifest, ledger_entries_present=True,
+        manifest=manifest,
+        ledger_entries_present=True,
         artifact_refs=[{"stage": "gold", "artifact_id": "a"}],
     )
     assert trace["artifact_publication_closure"] == "closed"
@@ -1338,13 +1516,22 @@ def test_produced_trace_closure_closed() -> None:
 
 
 def test_apply_closure_policy_branches() -> None:
-    assert apply_artifact_publication_closure_policy(
-        {"produced_artifact_trace": {"artifact_publication_closure": "partial"}}
-    )["artifact_publication_closure"] == "partial"
-    assert apply_artifact_publication_closure_policy(
-        {"artifact_publication_closure": "closed"}
-    )["artifact_publication_closure"] == "closed"
-    assert apply_artifact_publication_closure_policy({})["artifact_publication_closure"] == "disabled"
+    assert (
+        apply_artifact_publication_closure_policy(
+            {"produced_artifact_trace": {"artifact_publication_closure": "partial"}}
+        )["artifact_publication_closure"]
+        == "partial"
+    )
+    assert (
+        apply_artifact_publication_closure_policy(
+            {"artifact_publication_closure": "closed"}
+        )["artifact_publication_closure"]
+        == "closed"
+    )
+    assert (
+        apply_artifact_publication_closure_policy({})["artifact_publication_closure"]
+        == "disabled"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -1422,4 +1609,3 @@ async def test_checkpoint_delete_no_tracer() -> None:
     port2.load = AsyncMock(return_value=(RunID(UUID(int=1024)), {}))
     port2.delete = AsyncMock(return_value=None)
     assert await _ckpt_svc(port=port2).delete_checkpoint("p") is True
-

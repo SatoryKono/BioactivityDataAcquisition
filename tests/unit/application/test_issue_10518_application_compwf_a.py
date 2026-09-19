@@ -65,15 +65,14 @@ def _composite_config(**merge_kw: Any) -> CompositeConfig:
         seed=seed,
         enrichers=(),
         dependencies=(
-            DependencyConfig(
-                pipeline="pubmed_article", join_keys=("molecule_id",)
-            ),
+            DependencyConfig(pipeline="pubmed_article", join_keys=("molecule_id",)),
         ),
         merge=merge,
     )
 
 
 # --- _preflight_orchestration: identity parsing ---
+
 
 def test_parse_identity_rejects_missing_separator() -> None:
     assert _orch_host()._parse_pipeline_identity("noseparator") is None
@@ -113,14 +112,13 @@ def test_register_aliases_seed_and_dependency() -> None:
     assert result["chembl_activity"] is fields
     assert result["chembl.activity"] is fields
     other: object = object()
-    host._register_source_aliases(
-        result, pipeline_name="pubmed_article", fields=other
-    )
+    host._register_source_aliases(result, pipeline_name="pubmed_article", fields=other)
     assert result["pubmed"] is not other or True  # dependency path set
     assert result["pubmed_article"] is other
 
 
 # --- _preflight_orchestration: loaders ---
+
 
 def test_load_source_fields_fans_out_to_seed_dependency_enricher() -> None:
     from bioetl.domain.composite.config_models import (
@@ -279,9 +277,7 @@ def test_load_pipeline_profile_branches() -> None:
     ):
         assert host._load_pipeline_profile("chembl_activity") is None
         host._logger.debug.assert_called()  # type: ignore[attr-defined]
-    identity = SimpleNamespace(
-        profile_name="p", profile_version="v", profile_hash="h"
-    )
+    identity = SimpleNamespace(profile_name="p", profile_version="v", profile_hash="h")
     profile = SimpleNamespace(
         identity=identity,
         fields={"title": SimpleNamespace()},
@@ -312,6 +308,7 @@ def test_get_schema_registry_caches() -> None:
 
 # --- preflight_validator ---
 
+
 def test_get_valid_sources_covers_seed_dependency_enricher() -> None:
     from bioetl.domain.composite.config_models import (
         DependencyConfig as DepCfg,
@@ -320,7 +317,9 @@ def test_get_valid_sources_covers_seed_dependency_enricher() -> None:
 
     config = _composite_config()
     object.__setattr__(
-        config, "dependencies", (DepCfg(pipeline="pubmed_article", join_keys=("pmid",)),)
+        config,
+        "dependencies",
+        (DepCfg(pipeline="pubmed_article", join_keys=("pmid",)),),
     )
     object.__setattr__(
         config,
@@ -427,9 +426,7 @@ def test_validate_resolved_and_aggregation_issues() -> None:
     config = _composite_config(field_priorities={"title": ("chembl",)})
     svc = _preflight_service()
     svc._load_source_fields = MagicMock(  # type: ignore[method-assign]
-        return_value={
-            "chembl": {"title": FieldInfo("title", "str", True, "chembl")}
-        }
+        return_value={"chembl": {"title": FieldInfo("title", "str", True, "chembl")}}
     )
     svc._load_source_profiles = MagicMock(return_value={})  # type: ignore[method-assign]
     svc._log_schema_loading_summary = MagicMock()  # type: ignore[method-assign]
@@ -445,6 +442,7 @@ def test_validate_resolved_and_aggregation_issues() -> None:
 
 
 # --- preflight_schema_field_extraction ---
+
 
 def test_simplify_dtype_variants() -> None:
     assert simplify_dtype("pandas.Int64Dtype()") == "int"
@@ -524,6 +522,7 @@ def test_extract_fields_handles_bioetl_error_subclass() -> None:
 
 # --- dependency_chained_key_resolver ---
 
+
 def _chained(helper: MagicMock | None = None) -> tuple[ChainedKeyResolver, MagicMock]:
     from bioetl.application.composite.helpers.resolver_helper import ResolverHelper
 
@@ -548,9 +547,7 @@ def test_chained_requires_delta_reader() -> None:
     with pytest.raises(ValueError, match="requires delta_reader"):
         import asyncio
 
-        asyncio.run(
-            resolver.resolve(_dep(), pl.DataFrame({"a": [1]}), {}, None)
-        )
+        asyncio.run(resolver.resolve(_dep(), pl.DataFrame({"a": [1]}), {}, None))
 
 
 def test_chained_unknown_key_source() -> None:
@@ -558,11 +555,7 @@ def test_chained_unknown_key_source() -> None:
     with pytest.raises(ValueError, match="unknown"):
         import asyncio
 
-        asyncio.run(
-            resolver.resolve(
-                _dep(), pl.DataFrame({"a": [1]}), {}, MagicMock()
-            )
-        )
+        asyncio.run(resolver.resolve(_dep(), pl.DataFrame({"a": [1]}), {}, MagicMock()))
 
 
 def test_chained_missing_silver_table() -> None:
@@ -577,11 +570,13 @@ def test_chained_missing_silver_table() -> None:
             resolver.resolve(
                 _dep(),
                 pl.DataFrame({"a": [1]}),
-                {"dep_a": DependencyConfig(
-                    pipeline="dep_a",
-                    join_keys=("molecule_id",),
-                    silver_table=None,
-                )},
+                {
+                    "dep_a": DependencyConfig(
+                        pipeline="dep_a",
+                        join_keys=("molecule_id",),
+                        silver_table=None,
+                    )
+                },
                 MagicMock(),
             )
         )
@@ -617,7 +612,10 @@ def test_chained_value_error_reraises() -> None:
     with pytest.raises(ValueError, match="bad read"):
         asyncio.run(
             resolver.resolve(
-                _dep(), pl.DataFrame({"a": [1]}), {"dep_a": _dep(pipeline="dep_a")}, reader
+                _dep(),
+                pl.DataFrame({"a": [1]}),
+                {"dep_a": _dep(pipeline="dep_a")},
+                reader,
             )
         )
 
@@ -634,7 +632,10 @@ def test_chained_read_error_wraps_value_error() -> None:
     with pytest.raises(ValueError, match="Failed to read keys"):
         asyncio.run(
             resolver.resolve(
-                _dep(), pl.DataFrame({"a": [1]}), {"dep_a": _dep(pipeline="dep_a")}, reader
+                _dep(),
+                pl.DataFrame({"a": [1]}),
+                {"dep_a": _dep(pipeline="dep_a")},
+                reader,
             )
         )
     helper.log_error.assert_called_once()
@@ -668,7 +669,10 @@ def test_chained_non_arrow_table_raises_type_error() -> None:
     with pytest.raises(TypeError, match="PyArrow"):
         asyncio.run(
             resolver.resolve(
-                _dep(), pl.DataFrame({"a": [1]}), {"dep_a": _dep(pipeline="dep_a")}, reader
+                _dep(),
+                pl.DataFrame({"a": [1]}),
+                {"dep_a": _dep(pipeline="dep_a")},
+                reader,
             )
         )
 
@@ -699,7 +703,12 @@ def test_chained_success_and_missing_join_key() -> None:
 
     reader.read_table = _ok  # type: ignore[method-assign]
     out = asyncio.run(
-        resolver.resolve(_dep(), pl.DataFrame({"molecule_id": [9]}), {"dep_a": _dep(pipeline="dep_a")}, reader)
+        resolver.resolve(
+            _dep(),
+            pl.DataFrame({"molecule_id": [9]}),
+            {"dep_a": _dep(pipeline="dep_a")},
+            reader,
+        )
     )
     assert out.height == 2
     helper.log_info.assert_called()

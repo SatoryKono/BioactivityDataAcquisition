@@ -342,7 +342,12 @@ class _FsStore:
 
 
 def _write_pipeline_report(
-    root: Path, store: _FsStore, owner: str, run_id: str, *, mtime: float,
+    root: Path,
+    store: _FsStore,
+    owner: str,
+    run_id: str,
+    *,
+    mtime: float,
     identity: dict | None = None,
 ) -> Path:
     report = {
@@ -395,9 +400,7 @@ class TestLoadLatestPointer:
             tmp_path, store, "pipe1", "run1", mtime=1_700_000_000.0
         )
         pointer = tmp_path / "pipeline" / "pipe1" / "_latest.json"
-        store.write_text(
-            str(pointer), json.dumps({"json_path": str(report_path)})
-        )
+        store.write_text(str(pointer), json.dumps({"json_path": str(report_path)}))
         payload = _query.load_latest_pointer(
             kind="pipeline", owner="pipe1", root=tmp_path, store=store
         )
@@ -474,7 +477,9 @@ class TestLoadReports:
         payload_path = (
             tmp_path / "workflow" / "wf1" / "run9" / "workflow-run-report.json"
         )
-        store.write_text(str(payload_path), json.dumps({"identity": {"run_id": "run9"}}))
+        store.write_text(
+            str(payload_path), json.dumps({"identity": {"run_id": "run9"}})
+        )
         payload = _query.load_workflow_report(
             workflow_name="wf1", workflow_run_id="run9", root=tmp_path, store=store
         )
@@ -538,16 +543,16 @@ class TestListReports:
         )
         assert [entry.run_id for entry in entries] == ["run1"]
         assert (
-            _query.list_workflow_reports(
-                workflow_name=None, root=tmp_path, store=store
-            )
+            _query.list_workflow_reports(workflow_name=None, root=tmp_path, store=store)
             == []
         )
 
     def test_skips_hidden_and_incomplete_candidates(self, tmp_path):
         store = _FsStore()
         _write_pipeline_report(tmp_path, store, "pipe1", "run1", mtime=1_700_000_100.0)
-        hidden = tmp_path / "pipeline" / "pipe1" / ".hidden" / "pipeline-run-report.json"
+        hidden = (
+            tmp_path / "pipeline" / "pipe1" / ".hidden" / "pipeline-run-report.json"
+        )
         store.write_text(str(hidden), "{}")
         empty_dir = tmp_path / "pipeline" / "pipe1" / "emptyrun"
         empty_dir.mkdir(parents=True)
@@ -567,7 +572,9 @@ class TestListReports:
 
         store = _FlakyMtime()
         _write_pipeline_report(tmp_path, store, "pipe1", "run1", mtime=1_700_000_100.0)
-        _write_pipeline_report(tmp_path, store, "pipe1", "run-bad", mtime=1_700_000_200.0)
+        _write_pipeline_report(
+            tmp_path, store, "pipe1", "run-bad", mtime=1_700_000_200.0
+        )
         entries = _query.list_pipeline_reports(
             pipeline_name="pipe1", root=tmp_path, store=store
         )
@@ -594,9 +601,11 @@ class TestListReports:
         (report_path.parent / "pipeline-run-report.md").write_text(
             "# report", encoding="utf-8"
         )
-        (entries := _query.list_pipeline_reports(
-            pipeline_name="pipe1", root=tmp_path, store=store
-        ))
+        (
+            entries := _query.list_pipeline_reports(
+                pipeline_name="pipe1", root=tmp_path, store=store
+            )
+        )
         assert len(entries) == 1
         entry = entries[0]
         assert entry.markdown_path is not None
@@ -608,9 +617,11 @@ class TestListReports:
     def test_entry_without_markdown(self, tmp_path):
         store = _FsStore()
         _write_pipeline_report(tmp_path, store, "pipe1", "run1", mtime=1_700_000_100.0)
-        (entries := _query.list_pipeline_reports(
-            pipeline_name="pipe1", root=tmp_path, store=store
-        ))
+        (
+            entries := _query.list_pipeline_reports(
+                pipeline_name="pipe1", root=tmp_path, store=store
+            )
+        )
         assert entries[0].markdown_path is None
         assert entries[0].workflow_id is None
 
@@ -620,15 +631,30 @@ class TestDiffReports:
         left = {
             "identity": {"run_id": "a"},
             "funnel": [
-                {"stage_id": "s1", "records_in": 10, "records_out": 8, "removed_total": 2},
-                {"stage_id": "s2", "records_in": 8, "records_out": 8, "removed_total": 0},
+                {
+                    "stage_id": "s1",
+                    "records_in": 10,
+                    "records_out": 8,
+                    "removed_total": 2,
+                },
+                {
+                    "stage_id": "s2",
+                    "records_in": 8,
+                    "records_out": 8,
+                    "removed_total": 0,
+                },
             ],
             "reasons_top_n": [{"reason_code": "r1", "count": 2}],
         }
         right = {
             "identity": {"run_id": "b"},
             "funnel": [
-                {"stage_id": "s1", "records_in": 12, "records_out": 8, "removed_total": 4},
+                {
+                    "stage_id": "s1",
+                    "records_in": 12,
+                    "records_out": 8,
+                    "removed_total": 4,
+                },
             ],
             "reasons_top_n": [
                 {"reason_code": "r1", "count": 3},
@@ -641,7 +667,9 @@ class TestDiffReports:
         s1 = next(row for row in result["funnel_delta"] if row["stage_id"] == "s1")
         assert s1["records_in_delta"] == 2
         assert s1["removed_total_delta"] == 2
-        deltas = {row["reason_code"]: row["count_delta"] for row in result["reasons_delta"]}
+        deltas = {
+            row["reason_code"]: row["count_delta"] for row in result["reasons_delta"]
+        }
         assert deltas == {"r1": 1, "r2": 1}
 
     def test_empty_payloads_diff_to_empty(self):
@@ -667,7 +695,9 @@ class TestDiffReports:
 class TestPruneReports:
     def test_invalid_kind_rejected(self, tmp_path):
         with pytest.raises(ValueError, match="kind must be"):
-            _query.prune_reports(kind="bogus", max_count=1, root=tmp_path, store=_FsStore())
+            _query.prune_reports(
+                kind="bogus", max_count=1, root=tmp_path, store=_FsStore()
+            )
 
     def test_missing_options_rejected(self, tmp_path):
         with pytest.raises(ValueError, match="provide max_count"):
@@ -686,7 +716,9 @@ class TestPruneReports:
         old = _write_pipeline_report(
             tmp_path, store, "pipe1", "run-old", mtime=1_700_000_000.0
         )
-        _write_pipeline_report(tmp_path, store, "pipe1", "run-new", mtime=1_800_000_000.0)
+        _write_pipeline_report(
+            tmp_path, store, "pipe1", "run-new", mtime=1_800_000_000.0
+        )
         now = datetime.fromtimestamp(1_800_000_000.0, tz=UTC)
         victims = _query.prune_reports(
             kind="pipeline",
@@ -766,7 +798,13 @@ def _publish_verified_child(store, root, row, workflow_run_id="wrun1", **extra_c
         "evidence_field": "kept",
     }
     child.update(extra_child)
-    path = root / "pipeline" / row.pipeline_name / row.pipeline_run_id / "pipeline-run-report.json"
+    path = (
+        root
+        / "pipeline"
+        / row.pipeline_name
+        / row.pipeline_run_id
+        / "pipeline-run-report.json"
+    )
     payload = publish_snapshot(child, path, store=store)
     store.write_text(str(path), json.dumps(payload, indent=2, sort_keys=True) + "\n")
     return path
@@ -792,7 +830,9 @@ class TestChildPath:
 class TestVerifiedChild:
     def test_missing_file_returns_none(self, tmp_path):
         assert (
-            _verified_child(tmp_path / "absent.json", _obs_row(), "wrun1", store=_FsStore())
+            _verified_child(
+                tmp_path / "absent.json", _obs_row(), "wrun1", store=_FsStore()
+            )
             is None
         )
 
@@ -954,9 +994,7 @@ class TestRuntimePaths:
         assert _sid.normalize_runtime_path("E:", root="/x") == "/mnt/e"
 
     def test_interior_double_slashes_collapsed(self):
-        assert (
-            _sid.normalize_runtime_path("a//b//c", root="/r") == "/r/a/b/c"
-        )
+        assert _sid.normalize_runtime_path("a//b//c", root="/r") == "/r/a/b/c"
 
     def test_canonical_comparison_with_mapped_spelling(self):
         assert _sid._canonical_comparison_path("E:/Repo/File") == "/mnt/e/repo/file"
@@ -978,14 +1016,17 @@ class TestRuntimePaths:
         assert _sid.runtime_path_to_local_path("", root=tmp_path) == Path(tmp_path)
 
     def test_local_path_maps_windows_spelling(self, tmp_path):
-        assert _sid.runtime_path_to_local_path(
-            "E:/repo/file", root=tmp_path
-        ) == Path("/mnt/e/repo/file")
+        result = _sid.runtime_path_to_local_path("E:/repo/file", root=tmp_path)
+        if os.name == "nt":
+            assert result == Path("E:/repo/file")
+        else:
+            assert result == Path("/mnt/e/repo/file")
 
     def test_local_path_relative_resolves_under_root(self, tmp_path):
-        assert _sid.runtime_path_to_local_path(
-            "sub/file", root=tmp_path
-        ) == (tmp_path / "sub" / "file").resolve()
+        assert (
+            _sid.runtime_path_to_local_path("sub/file", root=tmp_path)
+            == (tmp_path / "sub" / "file").resolve()
+        )
 
 
 class TestComputeRuntimeSourceId:
@@ -1102,7 +1143,9 @@ class TestCompareRuntimeSourceIdentity:
         assert not result.is_aligned
 
     def test_invalid_when_malformed(self):
-        result = _sid.compare_runtime_source_identity(expected="bogus", actual=_digest("a"))
+        result = _sid.compare_runtime_source_identity(
+            expected="bogus", actual=_digest("a")
+        )
         assert result.state == _sid.IDENTITY_STATE_INVALID
 
     def test_foreign_on_mismatch(self):
@@ -1162,7 +1205,7 @@ class TestLoadRepositorySourceEnvironment:
             "# comment\n"
             "NOEQUALS\n"
             "MY_KEY='single quoted'\n"
-            "MY_OTHER=\"double quoted\"\n"
+            'MY_OTHER="double quoted"\n'
             "MY_THIRD=plain # trailing comment\n"
             "MY_HASH=keep#hash\n",
             encoding="utf-8",
@@ -1264,10 +1307,9 @@ class TestLoadChildReportSlice:
         assert _load_child_report_slice("", store=MagicMock()) == ((), None)
 
     def test_missing_file_returns_empty(self, tmp_path):
-        assert (
-            _load_child_report_slice(str(tmp_path / "absent.json"), store=_FsStore())
-            == ((), None)
-        )
+        assert _load_child_report_slice(
+            str(tmp_path / "absent.json"), store=_FsStore()
+        ) == ((), None)
 
     def test_corrupt_file_returns_empty(self, tmp_path):
         store = _FsStore()
@@ -1303,8 +1345,7 @@ class TestLoadChildReportSlice:
         store.write_text(
             str(path),
             json.dumps(
-                {"layers": {"gold_excluded_by_contract": "many"},
-                 "reasons_top_n": None}
+                {"layers": {"gold_excluded_by_contract": "many"}, "reasons_top_n": None}
             ),
         )
         assert _load_child_report_slice(str(path), store=store) == ((), None)
@@ -1544,8 +1585,7 @@ class TestNormalizeSemanticIdentityBranches:
         normalized = normalize_runtime_overrides_for_semantic_identity(overrides)
         assert normalized["runtime"]["settings_snapshot"] == "not-a-mapping"
         assert (
-            "settings_snapshot_hash"
-            not in normalized["env"]["execution_environment"]
+            "settings_snapshot_hash" not in normalized["env"]["execution_environment"]
         )
 
     def test_non_dict_execution_environment_skipped(self):
@@ -1586,7 +1626,9 @@ class TestRuntimeOverrideSnapshots:
             "runtime": {"cached_bronze": {"bronze_path": "/secret/other"}},
         }
         normalized = normalize_runtime_overrides_for_semantic_identity(overrides)
-        assert normalized["cli"]["cached_bronze"]["bronze_path"] == "<cached-bronze-path>"
+        assert (
+            normalized["cli"]["cached_bronze"]["bronze_path"] == "<cached-bronze-path>"
+        )
         assert (
             normalized["runtime"]["cached_bronze"]["bronze_path"]
             == "<cached-bronze-path>"
@@ -1599,9 +1641,10 @@ class TestRuntimeOverrideSnapshots:
         }
         normalized = normalize_runtime_overrides_for_semantic_identity(overrides)
         env = normalized["env"]["execution_environment"]
-        assert env["settings_snapshot_hash"] == normalized["runtime"][
-            "settings_snapshot"
-        ]["snapshot_hash"]
+        assert (
+            env["settings_snapshot_hash"]
+            == normalized["runtime"]["settings_snapshot"]["snapshot_hash"]
+        )
 
     def test_normalize_drops_stale_environment_hash(self):
         overrides = {
@@ -1609,7 +1652,9 @@ class TestRuntimeOverrideSnapshots:
             "env": {"execution_environment": {"settings_snapshot_hash": "old"}},
         }
         normalized = normalize_runtime_overrides_for_semantic_identity(overrides)
-        assert "settings_snapshot_hash" not in normalized["env"]["execution_environment"]
+        assert (
+            "settings_snapshot_hash" not in normalized["env"]["execution_environment"]
+        )
 
     def test_execution_environment_materialized(self):
         from bioetl.application.services.control_plane.effective_config import (  # noqa

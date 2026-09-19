@@ -62,10 +62,8 @@ class DQPolicyResolver:
             return overrides
         if isinstance(overrides, (tuple, list)):
             return dict(overrides)
-        if overrides is None:
-            return {}
         raise TypeError(
-            "disposition_overrides must be a dict, list, tuple, or None; "
+            "disposition_overrides must be a dict, list, or tuple; "
             f"got {type(overrides).__name__}"
         )
 

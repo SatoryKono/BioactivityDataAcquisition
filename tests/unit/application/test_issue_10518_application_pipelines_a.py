@@ -100,7 +100,13 @@ class TestCollectComponentXrefs:
 
     def test_drops_non_dict_items(self) -> None:
         components = [
-            {"target_component_xrefs": [{"xref_src_db": "PDB", "xref_id": "1ABC"}, "junk", None]},
+            {
+                "target_component_xrefs": [
+                    {"xref_src_db": "PDB", "xref_id": "1ABC"},
+                    "junk",
+                    None,
+                ]
+            },
             "not-a-dict",
         ]
         assert XrefHelper.collect_component_xrefs(components) == [
@@ -116,7 +122,7 @@ class TestProjectComponentXrefs:
             {"xref_src_db": None, "xref_id": "X3"},
             "not-a-dict",
         ]
-        projected = XrefHelper.project_component_xrefs(xrefs)  # type: ignore[list-item]
+        projected = XrefHelper.project_component_xrefs(xrefs)
         assert set(projected) == set(XrefHelper._XREF_DERIVED_COLUMNS)
         assert all(value == "unknown" for value in projected.values())
 
@@ -184,10 +190,17 @@ class TestSynonymTargetField:
         assert SynonymHelper.synonym_target_field("   ") is None
 
     def test_known_types__pipelines_a_1(self) -> None:
-        assert SynonymHelper.synonym_target_field("uniprot") == "target_protein_synonyms"
+        assert (
+            SynonymHelper.synonym_target_field("uniprot") == "target_protein_synonyms"
+        )
         assert SynonymHelper.synonym_target_field("EC_NUMBER") == "target_ec_numbers"
-        assert SynonymHelper.synonym_target_field("gene_symbol") == "target_gene_synonyms"
-        assert SynonymHelper.synonym_target_field("GENE_SYMBOL_HUMAN") == "target_gene_synonyms"
+        assert (
+            SynonymHelper.synonym_target_field("gene_symbol") == "target_gene_synonyms"
+        )
+        assert (
+            SynonymHelper.synonym_target_field("GENE_SYMBOL_HUMAN")
+            == "target_gene_synonyms"
+        )
 
     def test_unknown_returns_none__pipelines_a_1(self) -> None:
         assert SynonymHelper.synonym_target_field("OTHER") is None
@@ -199,19 +212,34 @@ class TestSynonymProjection:
             "nope",
             {"other": 1},
             {"target_component_synonyms": "nope"},
-            {"target_component_synonyms": ["nope", {"syn_type": "UNIPROT", "component_synonym": "P1"}]},
+            {
+                "target_component_synonyms": [
+                    "nope",
+                    {"syn_type": "UNIPROT", "component_synonym": "P1"},
+                ]
+            },
         ]
-        payloads = list(SynonymHelper.iter_component_synonym_payloads(components))  # type: ignore[list-item]
+        payloads = list(SynonymHelper.iter_component_synonym_payloads(components))
         assert payloads == [{"syn_type": "UNIPROT", "component_synonym": "P1"}]
 
     def test_project_single_synonym_unknown_field(self) -> None:
-        buckets = {"target_protein_synonyms": [], "target_gene_synonyms": [], "target_ec_numbers": []}
+        buckets = {
+            "target_protein_synonyms": [],
+            "target_gene_synonyms": [],
+            "target_ec_numbers": [],
+        }
         seen: dict[str, set[str]] = {key: set() for key in buckets}
-        SynonymHelper.project_single_synonym({"syn_type": "NOPE", "component_synonym": "x"}, buckets, seen)
+        SynonymHelper.project_single_synonym(
+            {"syn_type": "NOPE", "component_synonym": "x"}, buckets, seen
+        )
         assert all(not values for values in buckets.values())
 
     def test_project_single_synonym_applies(self) -> None:
-        buckets = {"target_protein_synonyms": [], "target_gene_synonyms": [], "target_ec_numbers": []}
+        buckets = {
+            "target_protein_synonyms": [],
+            "target_gene_synonyms": [],
+            "target_ec_numbers": [],
+        }
         seen: dict[str, set[str]] = {key: set() for key in buckets}
         SynonymHelper.project_single_synonym(
             {"syn_type": "GENE_SYMBOL", "component_synonym": " TP53 "}, buckets, seen
@@ -228,8 +256,14 @@ class TestSynonymProjection:
         assert SynonymHelper.pipe_or_unknown(["a"]) == "a"
 
     def test_project_component_synonyms_degenerate(self) -> None:
-        assert SynonymHelper.project_component_synonyms(None) == SynonymHelper.empty_synonym_projection()
-        assert SynonymHelper.project_component_synonyms("nope") == SynonymHelper.empty_synonym_projection()  # type: ignore[arg-type]
+        assert (
+            SynonymHelper.project_component_synonyms(None)
+            == SynonymHelper.empty_synonym_projection()
+        )
+        assert (
+            SynonymHelper.project_component_synonyms("nope")
+            == SynonymHelper.empty_synonym_projection()
+        )  # type: ignore[arg-type]
 
     def test_project_component_synonyms_full(self) -> None:
         components = [
@@ -245,7 +279,7 @@ class TestSynonymProjection:
             },
             "junk",
         ]
-        assert SynonymHelper.project_component_synonyms(components) == {  # type: ignore[list-item]
+        assert SynonymHelper.project_component_synonyms(components) == {
             "target_protein_synonyms": "P1",
             "target_gene_synonyms": "TP53",
             "target_ec_numbers": "1.1.1.1",
@@ -254,15 +288,29 @@ class TestSynonymProjection:
 
 class TestComponentHelper:
     def test_flatten_degenerate(self) -> None:
-        assert ComponentHelper.flatten_target_components(None, MagicMock()) == ComponentHelper.empty_component_result()
-        assert ComponentHelper.flatten_target_components("nope", MagicMock()) == ComponentHelper.empty_component_result()  # type: ignore[arg-type]
+        assert (
+            ComponentHelper.flatten_target_components(None, MagicMock())
+            == ComponentHelper.empty_component_result()
+        )
+        assert (
+            ComponentHelper.flatten_target_components("nope", MagicMock())
+            == ComponentHelper.empty_component_result()
+        )  # type: ignore[arg-type]
 
     def test_flatten_delegates_to_basic_fields(self) -> None:
         def fake_extract(components, field, converter):
-            assert field in {"accession", "component_id", "component_type", "relationship", "component_description"}
+            assert field in {
+                "accession",
+                "component_id",
+                "component_type",
+                "relationship",
+                "component_description",
+            }
             return [field]
 
-        result = ComponentHelper.flatten_target_components([{"accession": "P1"}], fake_extract)
+        result = ComponentHelper.flatten_target_components(
+            [{"accession": "P1"}], fake_extract
+        )
         assert result == {
             "component_accessions": ["accession"],
             "component_ids": ["component_id"],
@@ -280,7 +328,9 @@ class TestComponentHelper:
             seen.append((field, converter))
             return None
 
-        ComponentHelper.extract_basic_component_fields([{"accession": "P1"}], fake_extract)
+        ComponentHelper.extract_basic_component_fields(
+            [{"accession": "P1"}], fake_extract
+        )
         by_field = dict(seen)
         assert by_field["component_id"] is safe_int
         assert by_field["accession"] is None
@@ -311,10 +361,12 @@ class TestPublicationTermRecordHelpers:
     def test_resolve_entity_id_matches_compute(self) -> None:
         transformer = _make_term_transformer()
         business = {"publication_id": "CHEMBL1", "term_type": "MESH", "term": "Aspirin"}
-        assert _resolve_publication_term_entity_id(transformer, business) == transformer.compute_term_entity_id(
-            "CHEMBL1", "MESH", "Aspirin"
-        )
-        assert transformer.compute_term_entity_id("A", "B", "c") == transformer.compute_term_entity_id("A", "B", "c")
+        assert _resolve_publication_term_entity_id(
+            transformer, business
+        ) == transformer.compute_term_entity_id("CHEMBL1", "MESH", "Aspirin")
+        assert transformer.compute_term_entity_id(
+            "A", "B", "c"
+        ) == transformer.compute_term_entity_id("A", "B", "c")
 
     def test_has_extractable(self) -> None:
         assert _has_extractable_publication_term({"term": "t", "term_type": "y"})
@@ -327,7 +379,13 @@ class TestPublicationTermExtractBusinessData:
     def test_direct_branch_full(self) -> None:
         transformer = _make_term_transformer()
         out = transformer._extract_business_data(
-            {"publication_id": "CHEMBL1", "term": "  Aspirin ", "term_type": " MESH ", "mesh_id": " D1 ", "qualifier": " q "},
+            {
+                "publication_id": "CHEMBL1",
+                "term": "  Aspirin ",
+                "term_type": " MESH ",
+                "mesh_id": " D1 ",
+                "qualifier": " q ",
+            },
             "CHEMBL1",
         )
         assert out == {
@@ -347,22 +405,49 @@ class TestPublicationTermExtractBusinessData:
         assert out["qualifier"] is None
 
     def test_fallback_empty_terms(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setattr(ptt_mod, "extract_terms_from_publication", lambda record, pid: [])
+        monkeypatch.setattr(
+            ptt_mod, "extract_terms_from_publication", lambda record, pid: []
+        )
         transformer = _make_term_transformer()
-        out = transformer._extract_business_data({"publication_id": "CHEMBL1"}, "CHEMBL1")
-        assert out == {"publication_id": "CHEMBL1", "term": "", "term_type": "", "mesh_id": None, "qualifier": None}
+        out = transformer._extract_business_data(
+            {"publication_id": "CHEMBL1"}, "CHEMBL1"
+        )
+        assert out == {
+            "publication_id": "CHEMBL1",
+            "term": "",
+            "term_type": "",
+            "mesh_id": None,
+            "qualifier": None,
+        }
 
     def test_fallback_first_term(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        term = {"publication_id": "CHEMBL1", "term": "t", "term_type": "y", "mesh_id": None, "qualifier": None}
-        monkeypatch.setattr(ptt_mod, "extract_terms_from_publication", lambda record, pid: [dict(term, entity_id="E")])
-        transformer = _make_term_transformer()
-        assert transformer._extract_business_data({"publication_id": "CHEMBL1"}, "CHEMBL1") == term
-
-    def test_extract_terms_from_document_maps(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        term = {
+            "publication_id": "CHEMBL1",
+            "term": "t",
+            "term_type": "y",
+            "mesh_id": None,
+            "qualifier": None,
+        }
         monkeypatch.setattr(
             ptt_mod,
             "extract_terms_from_publication",
-            lambda record, pid: [{"publication_id": pid, "term": "t", "entity_id": "E"}],
+            lambda record, pid: [dict(term, entity_id="E")],
+        )
+        transformer = _make_term_transformer()
+        assert (
+            transformer._extract_business_data({"publication_id": "CHEMBL1"}, "CHEMBL1")
+            == term
+        )
+
+    def test_extract_terms_from_document_maps(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(
+            ptt_mod,
+            "extract_terms_from_publication",
+            lambda record, pid: [
+                {"publication_id": pid, "term": "t", "entity_id": "E"}
+            ],
         )
         transformer = _make_term_transformer()
         assert transformer.extract_terms_from_document({"a": 1}, "CHEMBL9") == [
@@ -371,10 +456,17 @@ class TestPublicationTermExtractBusinessData:
 
 
 class TestPublicationTermPrepareAndStages:
-    def test_prepare_returns_none_without_term(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setattr(ptt_mod, "extract_terms_from_publication", lambda record, pid: [])
+    def test_prepare_returns_none_without_term(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(
+            ptt_mod, "extract_terms_from_publication", lambda record, pid: []
+        )
         transformer = _make_term_transformer()
-        assert transformer._prepare_term_business_data({"publication_id": "CHEMBL1"}) is None
+        assert (
+            transformer._prepare_term_business_data({"publication_id": "CHEMBL1"})
+            is None
+        )
 
     def test_prepare_returns_business_data(self) -> None:
         transformer = _make_term_transformer()
@@ -396,15 +488,31 @@ class TestPublicationTermPrepareAndStages:
         assert staged is not None
         assert staged.business_data["term"] == "t"
 
-    async def test_transform_pre_silver_none(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setattr(ptt_mod, "extract_terms_from_publication", lambda record, pid: [])
+    async def test_transform_pre_silver_none(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(
+            ptt_mod, "extract_terms_from_publication", lambda record, pid: []
+        )
         transformer = _make_term_transformer()
-        assert await transformer.transform_pre_silver(MagicMock(), {"publication_id": "CHEMBL1"}, 0) is None
+        assert (
+            await transformer.transform_pre_silver(
+                MagicMock(), {"publication_id": "CHEMBL1"}, 0
+            )
+            is None
+        )
 
     async def test_transform_impl_none(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setattr(ptt_mod, "extract_terms_from_publication", lambda record, pid: [])
+        monkeypatch.setattr(
+            ptt_mod, "extract_terms_from_publication", lambda record, pid: []
+        )
         transformer = _make_term_transformer()
-        assert await transformer._transform_impl(MagicMock(), {"publication_id": "CHEMBL1"}, 0) is None
+        assert (
+            await transformer._transform_impl(
+                MagicMock(), {"publication_id": "CHEMBL1"}, 0
+            )
+            is None
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -436,7 +544,9 @@ def _crossref_stubs(**overrides: object) -> dict[str, object]:
             "publication_type": value,
             "publication_type_raw": value,
         },
-        "serialize_json": lambda value: json.dumps(value, sort_keys=True) if value is not None else None,
+        "serialize_json": lambda value: (
+            json.dumps(value, sort_keys=True) if value is not None else None
+        ),
         "serialize_json_list": lambda value: json.dumps(list(value)) if value else None,
         "hash_pii_value": lambda value: f"HASH:{value}" if value else None,
     }
@@ -492,19 +602,48 @@ class TestHashAuthorDetails:
 
 class TestExtractPublicationYearCandidate:
     def test_int_year(self) -> None:
-        assert extract_publication_year_candidate({"published-print": {"date-parts": [[2021, 5]]}}) == 2021
+        assert (
+            extract_publication_year_candidate(
+                {"published-print": {"date-parts": [[2021, 5]]}}
+            )
+            == 2021
+        )
 
     def test_digit_string_year(self) -> None:
-        assert extract_publication_year_candidate({"issued": {"date-parts": [["2019"]]}}) == 2019
+        assert (
+            extract_publication_year_candidate({"issued": {"date-parts": [["2019"]]}})
+            == 2019
+        )
 
     def test_skips_malformed(self) -> None:
         assert extract_publication_year_candidate({}) is None
         assert extract_publication_year_candidate({"published-print": "nope"}) is None
-        assert extract_publication_year_candidate({"published-print": {"date-parts": "bad"}}) is None
-        assert extract_publication_year_candidate({"published-print": {"date-parts": []}}) is None
-        assert extract_publication_year_candidate({"published-print": {"date-parts": [[]]}}) is None
-        assert extract_publication_year_candidate({"published-print": {"date-parts": ["2020"]}}) is None
-        assert extract_publication_year_candidate({"issued": {"date-parts": [[None]]}}) is None
+        assert (
+            extract_publication_year_candidate(
+                {"published-print": {"date-parts": "bad"}}
+            )
+            is None
+        )
+        assert (
+            extract_publication_year_candidate({"published-print": {"date-parts": []}})
+            is None
+        )
+        assert (
+            extract_publication_year_candidate(
+                {"published-print": {"date-parts": [[]]}}
+            )
+            is None
+        )
+        assert (
+            extract_publication_year_candidate(
+                {"published-print": {"date-parts": ["2020"]}}
+            )
+            is None
+        )
+        assert (
+            extract_publication_year_candidate({"issued": {"date-parts": [[None]]}})
+            is None
+        )
 
 
 class TestExtractAffiliationsInput:
@@ -577,7 +716,9 @@ class TestCrossrefBuilders:
         assert out["_dq_error"] is False
 
     def test_full_build_non_string_serialized(self) -> None:
-        stubs = _crossref_stubs(serialize_json=lambda value: 123, serialize_json_list=lambda value: 456)
+        stubs = _crossref_stubs(
+            serialize_json=lambda value: 123, serialize_json_list=lambda value: 456
+        )
         record = {"DOI": "10.1/x", "reference": [{"key": "r"}]}
         out = build_crossref_business_data(record, **stubs)  # type: ignore[arg-type]
         assert out["references"] is None
@@ -594,7 +735,9 @@ class TestCrossrefBuilders:
 # common/publication_vocab_observability.py
 # ---------------------------------------------------------------------------
 
-from bioetl.application.pipelines.common import publication_vocab_observability as vocab_obs
+from bioetl.application.pipelines.common import (
+    publication_vocab_observability as vocab_obs,
+)
 from bioetl.application.pipelines.common.publication_vocab_observability import (
     _allowed_publication_vocab,
     _field_tokens,
@@ -618,20 +761,34 @@ class TestEmitUnknownVocabMetrics:
     def test_unknown_provider_emits_nothing(self) -> None:
         metrics = SimpleNamespace(increment_counter=MagicMock())
         emit_unknown_publication_vocab_metrics(
-            metrics=metrics, pipeline_name="p", provider="nope", normalized_business_data={"publication_type": "x"}
+            metrics=metrics,
+            pipeline_name="p",
+            provider="nope",
+            normalized_business_data={"publication_type": "x"},
         )
         metrics.increment_counter.assert_not_called()
 
     def test_known_token_emits_nothing(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setattr(vocab_obs, "_allowed_publication_vocab", lambda provider, field: frozenset({"known"}))
+        monkeypatch.setattr(
+            vocab_obs,
+            "_allowed_publication_vocab",
+            lambda provider, field: frozenset({"known"}),
+        )
         metrics = SimpleNamespace(increment_counter=MagicMock())
         emit_unknown_publication_vocab_metrics(
-            metrics=metrics, pipeline_name="p", provider="crossref", normalized_business_data={"publication_type": "known"}
+            metrics=metrics,
+            pipeline_name="p",
+            provider="crossref",
+            normalized_business_data={"publication_type": "known"},
         )
         metrics.increment_counter.assert_not_called()
 
     def test_unknown_token_increments(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setattr(vocab_obs, "_allowed_publication_vocab", lambda provider, field: frozenset({"known"}))
+        monkeypatch.setattr(
+            vocab_obs,
+            "_allowed_publication_vocab",
+            lambda provider, field: frozenset({"known"}),
+        )
         metrics = SimpleNamespace(increment_counter=MagicMock())
         emit_unknown_publication_vocab_metrics(
             metrics=metrics,
@@ -651,10 +808,15 @@ class TestEmitUnknownVocabMetrics:
         }
 
     def test_empty_allowed_skips_field(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setattr(vocab_obs, "_allowed_publication_vocab", lambda provider, field: frozenset())
+        monkeypatch.setattr(
+            vocab_obs, "_allowed_publication_vocab", lambda provider, field: frozenset()
+        )
         metrics = SimpleNamespace(increment_counter=MagicMock())
         emit_unknown_publication_vocab_metrics(
-            metrics=metrics, pipeline_name="p", provider="crossref", normalized_business_data={"publication_type": "x"}
+            metrics=metrics,
+            pipeline_name="p",
+            provider="crossref",
+            normalized_business_data={"publication_type": "x"},
         )
         metrics.increment_counter.assert_not_called()
 
@@ -687,7 +849,9 @@ class TestVocabTokenHelpers:
         assert _normalized_string_tokens([" a ", None, "  ", 3]) == ("a",)
 
     def test_allowed_vocab_real_fn(self) -> None:
-        assert isinstance(_allowed_publication_vocab("crossref", "publication_type"), frozenset)
+        assert isinstance(
+            _allowed_publication_vocab("crossref", "publication_type"), frozenset
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -724,7 +888,9 @@ def _summary_row(**overrides: object) -> dict[str, object]:
     return row
 
 
-def _patch_summary_derivation(monkeypatch: pytest.MonkeyPatch, *, multifunctional: bool = False) -> None:
+def _patch_summary_derivation(
+    monkeypatch: pytest.MonkeyPatch, *, multifunctional: bool = False
+) -> None:
     def fake_derive(rows: object, mapping_data: object) -> SimpleNamespace:
         items = list(rows)  # type: ignore[arg-type]
         kind = "multifunctional" if multifunctional else "single"
@@ -754,7 +920,9 @@ def _patch_summary_derivation(monkeypatch: pytest.MonkeyPatch, *, multifunctiona
 
     monkeypatch.setattr(summ, "derive_protein_class_target_type", fake_derive)
     monkeypatch.setattr(summ, "derive_major_families", lambda rows: ("FAM",))
-    monkeypatch.setattr(summ, "current_protein_class_target_type_mapping", lambda: object())
+    monkeypatch.setattr(
+        summ, "current_protein_class_target_type_mapping", lambda: object()
+    )
 
 
 class TestSummarizeDependency:
@@ -780,7 +948,9 @@ class TestSummarizeDependency:
         result = summarize_target_protein_classification_dependency(df)
         assert result["target_id"].to_list() == ["T1"]
 
-    def test_representative_falls_back_to_first_row(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_representative_falls_back_to_first_row(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         # Multi-row derive reports primary TOP, but no single row counts as TOP.
         _patch_summary_derivation(monkeypatch)
         summary = summarize_target_protein_classification_rows(
@@ -789,21 +959,35 @@ class TestSummarizeDependency:
         assert summary["target_id"] == "T1"
         assert summary["target_protein_class_name_L1"] == "Kinase"
 
-    def test_multifunctional_origin_multi_component(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_multifunctional_origin_multi_component(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         _patch_summary_derivation(monkeypatch, multifunctional=True)
         summary = summarize_target_protein_classification_rows(
-            "T1", [_summary_row(component_id=1, leaf_id=10), _summary_row(component_id=2, leaf_id=11)]
+            "T1",
+            [
+                _summary_row(component_id=1, leaf_id=10),
+                _summary_row(component_id=2, leaf_id=11),
+            ],
         )
         assert summary["multifunctional_origin"] == "multi_component_heterogeneity"
 
-    def test_multifunctional_origin_single_component(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_multifunctional_origin_single_component(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         _patch_summary_derivation(monkeypatch, multifunctional=True)
         summary = summarize_target_protein_classification_rows(
-            "T1", [_summary_row(component_id=1, leaf_id=10), _summary_row(component_id=1, leaf_id=11)]
+            "T1",
+            [
+                _summary_row(component_id=1, leaf_id=10),
+                _summary_row(component_id=1, leaf_id=11),
+            ],
         )
         assert summary["multifunctional_origin"] == "multiple_informative_top_levels"
 
-    def test_no_resolved_rows_returns_base_summary(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_no_resolved_rows_returns_base_summary(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         _patch_summary_derivation(monkeypatch)
         summary = summarize_target_protein_classification_rows(
             "T1", [_summary_row(classification_status="quarantined", leaf_id=10)]
@@ -811,7 +995,9 @@ class TestSummarizeDependency:
         assert summary["target_id"] == "T1"
         assert summary["protein_classifications"] is None
 
-    def test_missing_primary_marks_multifunctional(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_missing_primary_marks_multifunctional(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         def fake_derive(rows: object, mapping_data: object) -> SimpleNamespace:
             return SimpleNamespace(
                 target_protein_class_type="multifunctional",
@@ -827,12 +1013,18 @@ class TestSummarizeDependency:
 
         monkeypatch.setattr(summ, "derive_protein_class_target_type", fake_derive)
         monkeypatch.setattr(summ, "derive_major_families", lambda rows: ("FAM",))
-        monkeypatch.setattr(summ, "current_protein_class_target_type_mapping", lambda: object())
+        monkeypatch.setattr(
+            summ, "current_protein_class_target_type_mapping", lambda: object()
+        )
         summary = summarize_target_protein_classification_rows(
             "T1", [_summary_row(leaf_id=10), _summary_row(leaf_id=11)]
         )
-        assert summary["target_protein_class_name_L1"] == summ.MULTIFUNCTIONAL_TARGET_NAME
-        assert summary["target_protein_class_name_L2"] == summ.MULTIFUNCTIONAL_TARGET_NAME
+        assert (
+            summary["target_protein_class_name_L1"] == summ.MULTIFUNCTIONAL_TARGET_NAME
+        )
+        assert (
+            summary["target_protein_class_name_L2"] == summ.MULTIFUNCTIONAL_TARGET_NAME
+        )
         assert summary["target_protein_class_name_L3"] == ""
 
     def test_empty_summary_defaults(self) -> None:
@@ -860,7 +1052,9 @@ class TestSummaryRowHelpers:
 
     def test_sort_key_orders_unresolved_last(self) -> None:
         first = _classification_sort_key(_summary_row(leaf_id=1))
-        last = _classification_sort_key(_summary_row(leaf_id=1, classification_status="quarantined"))
+        last = _classification_sort_key(
+            _summary_row(leaf_id=1, classification_status="quarantined")
+        )
         assert first < last
 
     def test_text_or_none(self) -> None:
@@ -921,8 +1115,14 @@ class TestGeneExtractor:
         assert GeneExtractor.extract_gene_names(None) == []
 
     def test_extract_primary_gene(self) -> None:
-        assert GeneExtractor.extract_primary_gene([{"geneName": {"value": "TP53"}}]) == "TP53"
-        assert GeneExtractor.extract_primary_gene([{"geneName": "nope"}, {"geneName": {}}]) is None
+        assert (
+            GeneExtractor.extract_primary_gene([{"geneName": {"value": "TP53"}}])
+            == "TP53"
+        )
+        assert (
+            GeneExtractor.extract_primary_gene([{"geneName": "nope"}, {"geneName": {}}])
+            is None
+        )
         assert GeneExtractor.extract_primary_gene(None) is None
         assert GeneExtractor.extract_primary_gene([{"geneName": {"value": ""}}]) is None
 
@@ -961,14 +1161,18 @@ def _make_classification_transformer() -> TargetProteinClassificationTransformer
 class TestTargetClassificationTransformer:
     async def test_transform_pre_silver(self) -> None:
         transformer = _make_classification_transformer()
-        staged = await transformer.transform_pre_silver(MagicMock(), {"target_id": "T1"}, 0)
+        staged = await transformer.transform_pre_silver(
+            MagicMock(), {"target_id": "T1"}, 0
+        )
         assert staged is not None
         assert staged.entity_id == "T1:missing_classification"
         assert staged.business_data["target_id"] == "T1"
 
     def test_extract_business_data_defaults(self) -> None:
         transformer = _make_classification_transformer()
-        out = transformer._extract_business_data({"target_id": "T1", "component_id": "3"}, "T1")
+        out = transformer._extract_business_data(
+            {"target_id": "T1", "component_id": "3"}, "T1"
+        )
         assert out["component_id"] == 3
         assert out["classification_status"] == "missing_classification"
         assert out["leaf_id"] is None
@@ -993,16 +1197,40 @@ class TestTargetClassificationTransformer:
         assert silver["target_id"] == "CHEMBL123"
 
     def test_entity_id_resolved(self) -> None:
-        assert _target_classification_entity_id({"target_id": "T", "classification_status": "resolved", "component_id": 1, "leaf_id": 2}) == "T:1:2"
+        assert (
+            _target_classification_entity_id(
+                {
+                    "target_id": "T",
+                    "classification_status": "resolved",
+                    "component_id": 1,
+                    "leaf_id": 2,
+                }
+            )
+            == "T:1:2"
+        )
 
     def test_entity_id_resolved_requires_ids(self) -> None:
         with pytest.raises(ValueError):
-            _target_classification_entity_id({"target_id": "T", "classification_status": "resolved", "component_id": None, "leaf_id": 2})
+            _target_classification_entity_id(
+                {
+                    "target_id": "T",
+                    "classification_status": "resolved",
+                    "component_id": None,
+                    "leaf_id": 2,
+                }
+            )
         with pytest.raises(ValueError):
-            _target_classification_entity_id({"target_id": "T", "classification_status": "resolved"})
+            _target_classification_entity_id(
+                {"target_id": "T", "classification_status": "resolved"}
+            )
 
     def test_entity_id_non_resolved(self) -> None:
-        assert _target_classification_entity_id({"target_id": "T", "classification_status": "quarantined"}) == "T:quarantined"
+        assert (
+            _target_classification_entity_id(
+                {"target_id": "T", "classification_status": "quarantined"}
+            )
+            == "T:quarantined"
+        )
 
     def test_classification_status(self) -> None:
         assert _classification_status(None) == "missing_classification"

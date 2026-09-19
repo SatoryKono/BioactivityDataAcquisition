@@ -110,7 +110,8 @@ def create_metrics_service(
 ) -> MetricsService:
     """Compat seam for runtime tests patching metrics-service creation."""
     impl = import_module("bioetl.composition.bootstrap.assembly.metrics_service")
-    return impl.create_metrics_service(logger=logger, tracer=tracer)
+    factory: Callable[..., MetricsService] = impl.create_metrics_service
+    return factory(logger=logger, tracer=tracer)
 
 
 def maybe_start_metrics_server(

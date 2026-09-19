@@ -12,8 +12,9 @@ from memory.notes import (
     utc_now_iso,
     write_markdown_note,
 )
+from memory.records import TrustLevel
 from memory.resources import discover_memory_root, load_yaml_resource
-from memory.security import TrustLevel, assert_safe_for_persistence
+from memory.security import assert_safe_for_persistence
 
 
 def _curated_targets() -> dict[str, Path]:

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-from typing import Protocol
 
 from bioetl.application.services.control_plane.replay.closure_claims import (
     RESIDUAL_BLOCKED_STATUSES as RESIDUAL_BLOCKED_STATUSES,
@@ -22,6 +21,10 @@ from bioetl.application.services.control_plane.replay.closure_claims import (
     build_narrowed_scope_global_claim,
     build_universal_scope_global_claim,
 )
+from bioetl.application.services.control_plane.replay.historical_corpus_models import (
+    HistoricalReplayCertifiabilityInventory,
+    HistoricalReplayCertifiabilityRecord,
+)
 
 __all__ = [
     "RESIDUAL_BLOCKED_STATUSES",
@@ -36,23 +39,6 @@ __all__ = [
     "resolve_closure_verdict",
     "validate_residual_dispositions",
 ]
-
-
-class HistoricalReplayCertifiabilityRecord(Protocol):
-    manifest_id: str
-    run_id: str
-    certification_status: str
-    blocking_reasons: tuple[str, ...]
-
-
-class HistoricalReplayCertifiabilityInventory(Protocol):
-    manifest_count: int
-    certified_count: int
-    replayable_count: int
-    unsupported_count: int
-    remaining_uncertified_count: int
-
-    def to_dict(self) -> dict[str, object]: ...
 
 
 def validate_residual_dispositions(

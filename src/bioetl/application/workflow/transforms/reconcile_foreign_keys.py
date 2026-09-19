@@ -1,5 +1,13 @@
 # Boundary object/payload typing residual at this module.
-"""Built-in workflow transform for foreign-key reconciliation."""
+"""Facade workflow transform for foreign-key reconciliation (AUD-005).
+
+This module only orchestrates the canonical implementation
+(``infrastructure/storage/workflow_foreign_key_reconciliation.py``) through
+``ForeignKeyReconciliationPort``: it builds the request, shapes the result
+payload, and persists artifacts. Storage/mutation logic must not be duplicated
+here; parity with the canonical adapter is enforced by
+``tests/unit/application/workflow/test_reconcile_fk_parity.py``.
+"""
 
 from __future__ import annotations
 
@@ -19,6 +27,7 @@ from bioetl.domain.ports import (
     ForeignKeyReconciliationLayer,
     ForeignKeyReconciliationPort,
     ForeignKeyReconciliationRequest,
+    ReferenceCompletenessStatus,
 )
 from bioetl.domain.workflow import WorkflowTransformSpec
 
@@ -327,7 +336,7 @@ def _resolve_reference_completeness(
     upstream_outputs: Mapping[str, object],
     *,
     reference_table: str,
-) -> tuple[str, str | None, str | None, str | None]:
+) -> tuple[ReferenceCompletenessStatus, str | None, str | None, str | None]:
     """Return completeness only from typed evidence bound to the reference table."""
     evidence = config.get("reference_completeness_evidence")
     if not isinstance(evidence, Mapping):

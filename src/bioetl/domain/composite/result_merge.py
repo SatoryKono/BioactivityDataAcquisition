@@ -80,11 +80,13 @@ class MergeResult:
     def __post_init__(self) -> None:
         """Freeze nested mappings/payloads so callers cannot mutate state."""
         self._validate_counts()
-        if isinstance(self.sources_used, list):
-            object.__setattr__(self, "sources_used", tuple(self.sources_used))
+        raw_sources_used: object = self.sources_used
+        if isinstance(raw_sources_used, list):
+            object.__setattr__(self, "sources_used", tuple(raw_sources_used))
+        raw_quarantine_payloads: object = self.quarantine_payloads
         payloads = (
-            tuple(self.quarantine_payloads)
-            if isinstance(self.quarantine_payloads, list)
+            tuple(raw_quarantine_payloads)
+            if isinstance(raw_quarantine_payloads, list)
             else self.quarantine_payloads
         )
         object.__setattr__(

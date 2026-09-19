@@ -1693,7 +1693,6 @@ def main(argv: list[str] | None = None) -> int:
         print(str(exc), file=sys.stderr)
         return 1
     parser.error(f"unsupported command: {args.command}")
-    return 2
 
 
 if __name__ == "__main__":

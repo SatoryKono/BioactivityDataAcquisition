@@ -152,3 +152,13 @@ class _ObservabilityBackendFailureHandlers(TypedDict):
     describe_required_probe_failure_fn: _DescribeRequiredProbeFailureFn
     append_backend_startup_diagnostic_fn: _AppendBackendStartupDiagnosticFn
     python_executable_to_tuple_fn: _PythonExecutableToTupleFn
+
+
+class _StartDetachedHooks(
+    _ObservabilityBackendRuntimeHooks, _ObservabilityBackendFailureHandlers
+):
+    """Merged hook table for the detached-start step (AUD-004).
+
+    The two parents hold disjoint keys; the merge in
+    ``ensure_observability_backend_started_impl`` provably yields this shape.
+    """

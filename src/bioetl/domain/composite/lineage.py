@@ -53,8 +53,9 @@ class CompositeLineageMetadata:
         """Convert types for immutability."""
         from bioetl.domain.immutability import freeze_fields
 
-        if isinstance(self.source_providers, list):
-            object.__setattr__(self, "source_providers", tuple(self.source_providers))
+        raw_source_providers: object = self.source_providers
+        if isinstance(raw_source_providers, list):
+            object.__setattr__(self, "source_providers", tuple(raw_source_providers))
         freeze_fields(
             self,
             ("enrichment_status", "enrichment_timestamps", "field_sources"),

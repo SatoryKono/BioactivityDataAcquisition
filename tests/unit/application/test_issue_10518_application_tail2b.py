@@ -72,9 +72,7 @@ def test_log_profile_loading_summary_emits_debug() -> None:
     )
     from bioetl.application.composite._preflight_types import ProfileInfo
 
-    host = PreflightValidationReportingMixin.__new__(
-        PreflightValidationReportingMixin
-    )
+    host = PreflightValidationReportingMixin.__new__(PreflightValidationReportingMixin)
     host._logger = MagicMock()
     host._log_profile_loading_summary(
         {
@@ -228,12 +226,8 @@ def test_monotonic_invariant_status_unknown_when_unobserved() -> None:
         _monotonic_invariant_status,
     )
 
-    assert (
-        _monotonic_invariant_status(upper=1, lower=2, observed=False) == "unknown"
-    )
-    assert (
-        _monotonic_invariant_status(upper=2, lower=1, observed=True) == "passed"
-    )
+    assert _monotonic_invariant_status(upper=1, lower=2, observed=False) == "unknown"
+    assert _monotonic_invariant_status(upper=2, lower=1, observed=True) == "passed"
 
 
 # --- service_support (70) ---
@@ -297,9 +291,7 @@ def test_resolve_compound_identifier_prefers_cid() -> None:
     )
 
     assert _resolve_compound_identifier({"cid": 2244}) == 2244
-    assert (
-        _resolve_compound_identifier({"molecule_id": "CID2244"}) == "CID2244"
-    )
+    assert _resolve_compound_identifier({"molecule_id": "CID2244"}) == "CID2244"
     assert _resolve_compound_identifier({}) is None
 
 
@@ -419,9 +411,7 @@ def test_merge_input_snapshots_dedupes_repeated_identities() -> None:
     from bioetl.domain.models._metadata_bronze import InputSnapshotRef
 
     snapshot = InputSnapshotRef(snapshot_id="s-1", content_hash="hash-1")
-    merged = _merge_input_snapshots(
-        source=None, input_snapshots=(snapshot, snapshot)
-    )
+    merged = _merge_input_snapshots(source=None, input_snapshots=(snapshot, snapshot))
     assert merged == [snapshot]
 
 
@@ -551,9 +541,7 @@ def test_record_destructive_commit_invokes_callback() -> None:
     )
 
     seen: list = []
-    context = WorkflowTransformRuntimeContext(
-        destructive_commit_callback=seen.append
-    )
+    context = WorkflowTransformRuntimeContext(destructive_commit_callback=seen.append)
     context.record_destructive_commit(
         step_id="step-1",
         transform_name="pass_through",

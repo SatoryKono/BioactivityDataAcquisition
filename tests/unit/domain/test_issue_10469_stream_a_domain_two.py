@@ -215,7 +215,7 @@ def test_publication_type_classification_edge_paths() -> None:
 
 def test_author_helpers_cover_json_delimited_and_surname_formats() -> None:
     assert hash_author_name(" Ada ", "salt") == hash_author_name("ada", "salt")
-    assert parse_author_names(123) == []  # type: ignore[arg-type]
+    assert parse_author_names(123) == []
     assert parse_author_names([" Ada ", {"name": "Bob"}, {"name": " "}, 1]) == [
         "Ada",
         "Bob",

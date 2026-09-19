@@ -1,4 +1,8 @@
-"""Support helpers for workflow foreign-key reconciliation."""
+"""Support helpers for workflow foreign-key reconciliation.
+
+Internal implementation detail owned by the canonical
+``workflow_foreign_key_reconciliation`` adapter module (AUD-005).
+"""
 
 from __future__ import annotations
 

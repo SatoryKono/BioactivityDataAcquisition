@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from datetime import date
 from typing import TypeVar
 
@@ -43,7 +43,7 @@ def flatten_nested_dict(
 
 
 def extract_list_field[T](
-    items: list[JsonDict] | None,  # Any: dict values vary by field type
+    items: Sequence[object] | None,
     field: str,
     converter: Callable[[object], T]  # object: converter accepts heterogeneous input
     | None = None,

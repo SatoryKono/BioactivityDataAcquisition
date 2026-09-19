@@ -70,7 +70,7 @@ def build_dq_components(
         policy_hash=policy_ref.policy_hash or "",
         default_disposition=dq_config.default_disposition_policy,
         disposition_overrides=dict(dq_config.disposition_overrides),
-        strictness_mode=dq_config.strictness_mode or "standard",
+        strictness_mode=dq_config.strictness_mode,
     )
     dq_rule_bundle_versions: dict[str, str] = {}
     if policy_ref.contract_ref and policy_ref.rule_bundle_version:

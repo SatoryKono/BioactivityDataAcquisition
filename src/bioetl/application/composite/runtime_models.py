@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.composite.merger_orchestration import MergeExecutionRequest
 from bioetl.application.runtime_clock import RuntimeClock
@@ -97,8 +97,9 @@ class CompositeRuntimeConfig:
                 "boundary; use source-run exact replay or composite rebuild/resume "
                 "semantics instead."
             )
-        if isinstance(self.enrich_only, list):
-            object.__setattr__(self, "enrich_only", tuple(self.enrich_only))
+        raw_enrich_only = cast("tuple[str, ...] | list[str] | None", self.enrich_only)
+        if isinstance(raw_enrich_only, list):
+            object.__setattr__(self, "enrich_only", tuple(raw_enrich_only))
 
 
 @dataclass(frozen=True, slots=True)

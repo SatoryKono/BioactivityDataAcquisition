@@ -79,8 +79,6 @@ def normalize_pmid(pmid: str | int | None) -> str | None:
     if isinstance(pmid, str):
         return _normalize_pmid_from_str(pmid)
 
-    return None
-
 
 def normalize_pmc_id(pmc_id: str | None) -> str | None:
     """Normalize PMC ID to uppercase with ``PMC`` prefix."""
@@ -171,7 +169,7 @@ def _normalize_obo_iri_format(value: str) -> str | None:
     return None
 
 
-def _validate_input(value: str) -> str | None:
+def _validate_input(value: object) -> str | None:
     """Validate and preprocess input value."""
     if value is None:
         return None
@@ -242,15 +240,15 @@ def _get_prefix_from_colon(id_value: str) -> str | None:
     return None
 
 
-def get_ontology_prefix(id_value: str) -> str | None:
+def get_ontology_prefix(id_value: object) -> str | None:
     """Extract ontology prefix from an ID string."""
-    if id_value is None:
+    if not isinstance(id_value, str):
         return None
 
     return _get_prefix_from_canonical(id_value) or _get_prefix_from_colon(id_value)
 
 
-def is_valid_ontology_id(id_value: str) -> bool:
+def is_valid_ontology_id(id_value: object) -> bool:
     """Check whether a string is a valid ontology ID."""
     if id_value is None or not isinstance(id_value, str):
         return False
