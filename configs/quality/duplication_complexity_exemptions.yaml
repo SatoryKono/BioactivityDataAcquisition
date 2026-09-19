@@ -11,8 +11,8 @@ path_entries:
   scopes:
   - xenon
   owner: '@bioetl-test-platform'
-  expiry: '2026-12-31'
-  removal_step: Keep test-only code on the dedicated test-complexity lane.
+  expiry: '2026-09-30'
+  removal_step: Keep test-only code on the dedicated test-complexity lane. Progress 2026-09-18 - permanent test-lane carve-out reconfirmed; no src impact.
   rationale: Production xenon budget tracks src-only maintainability, not test scaffolding.
 - path: src/memory/
   scopes:
@@ -20,7 +20,7 @@ path_entries:
   - critical_check
   owner: '@bioetl-memory'
   expiry: '2026-12-31'
-  removal_step: Continue memory graph decomposition before removing the exemption.
+  removal_step: Continue memory graph decomposition before removing the exemption. Progress 2026-09-18 - sync_pkg facade slice done (#10533/#10528); god-file split roadmap next.
   rationale: Memory maintenance flows carry orchestration branches unrelated to BioETL
     runtime paths.
 - path: src/bioetl/infrastructure/adapters/input/
@@ -28,56 +28,56 @@ path_entries:
   - xenon
   - critical_check
   owner: '@bioetl-config'
-  expiry: '2026-12-31'
-  removal_step: Collapse CSV fallback parsing behind smaller normalization helpers.
+  expiry: '2026-10-31'
+  removal_step: Collapse CSV fallback parsing behind smaller normalization helpers. Progress 2026-09-18 - stream-A INF wave owns (#10517); collapse after coverage.
   rationale: Input adapter fallback readers remain compatibility-heavy.
 - path: src/bioetl/application/services/dq/
   scopes:
   - xenon
   - critical_check
   owner: '@bioetl-dq'
-  expiry: '2026-12-31'
-  removal_step: Extract validation rule bundles from monolithic analyzer methods.
+  expiry: '2026-10-31'
+  removal_step: Extract validation rule bundles from monolithic analyzer methods. Progress 2026-09-18 - APP wave in flight (#10518); bundle extraction queued after.
   rationale: DQ analyzers still aggregate many policy checks in single routines.
 - path: src/bioetl/application/composite/
   scopes:
   - xenon
   - critical_check
   owner: '@bioetl-composite'
-  expiry: '2026-12-31'
+  expiry: '2026-11-30'
   removal_step: Continue splitting merge/checkpoint collaborators out of orchestration
-    services.
+    services. Progress 2026-09-18 - ownership graph due in AUD-007 slice (#10532).
   rationale: Composite orchestration still carries wide branching and dependency surfaces.
 - path: src/bioetl/application/pipelines/
   scopes:
   - critical_check
   owner: '@bioetl-application'
-  expiry: '2026-12-31'
-  removal_step: Move extractor parsing branches into dedicated parsing helpers.
+  expiry: '2026-10-31'
+  removal_step: Move extractor parsing branches into dedicated parsing helpers. Progress 2026-09-18 - extractor coverage in flight (#10518); helper split queued after.
   rationale: Pipeline-specific extractors still exceed the strict CC guard in isolated
     spots.
 - path: src/bioetl/application/pipelines/*/extractors/*
   scopes:
   - xenon
   owner: '@bioetl-application'
-  expiry: '2026-12-31'
-  removal_step: Break extraction/parsing flows into bounded parsing policies.
+  expiry: '2026-10-31'
+  removal_step: Break extraction/parsing flows into bounded parsing policies. Progress 2026-09-18 - extractor coverage in flight (#10518); helper split queued after.
   rationale: Extractor modules remain broader than the global xenon baseline allows.
 - path: src/bioetl/interfaces/cli/
   scopes:
   - xenon
   - critical_check
   owner: '@bioetl-cli'
-  expiry: '2026-12-31'
-  removal_step: Trim presentation branching from runtime-command helpers.
+  expiry: '2026-11-30'
+  removal_step: Trim presentation branching from runtime-command helpers. Progress 2026-09-18 - CLI coverage wave in flight (#10520); presentation trim queued after.
   rationale: CLI formatting and command presentation code still carry branching noise.
 - path: src/bioetl/composition/runtime_builders/
   scopes:
   - xenon
   - critical_check
   owner: '@bioetl-composition'
-  expiry: '2026-12-31'
-  removal_step: Split runtime builder orchestration into smaller assembly helpers.
+  expiry: '2026-11-30'
+  removal_step: Split runtime builder orchestration into smaller assembly helpers. Progress 2026-09-18 - CMP wave in flight (#10521); assembly split queued after.
   rationale: Runtime assembly still contains multi-source extraction and policy wiring
     branches.
 - path: src/bioetl/composition/factories/services/
@@ -85,8 +85,8 @@ path_entries:
   - xenon
   - critical_check
   owner: '@bioetl-composition'
-  expiry: '2026-12-31'
-  removal_step: Reduce factory branch counts through service-specific assemblers.
+  expiry: '2026-11-30'
+  removal_step: Reduce factory branch counts through service-specific assemblers. Progress 2026-09-18 - CMP wave in flight (#10521); assembler split queued after.
   rationale: Service factory wiring still exceeds the generic xenon ratchet.
 - path: src/bioetl/infrastructure/storage/silver/
   scopes:
@@ -94,7 +94,7 @@ path_entries:
   - critical_check
   owner: '@bioetl-storage'
   expiry: '2026-12-31'
-  removal_step: Continue splitting metadata write coercion from IO orchestration.
+  removal_step: Continue splitting metadata write coercion from IO orchestration. Progress 2026-09-18 - stream-A storage wave owns; coercion split queued after.
   rationale: Silver storage write paths still mix coercion, validation, and persistence.
 - path: src/bioetl/infrastructure/control_plane/
   scopes:
@@ -102,7 +102,7 @@ path_entries:
   - critical_check
   owner: '@bioetl-control-plane'
   expiry: '2026-12-31'
-  removal_step: Extract ID/fragment resolution helpers from control-plane artifacts.
+  removal_step: Extract ID/fragment resolution helpers from control-plane artifacts. Progress 2026-09-18 - control-plane coverage in flight; helper extraction queued after.
   rationale: Control-plane artifact orchestration still contains broad branching.
 - path: src/bioetl/infrastructure/quarantine/
   scopes:
@@ -110,7 +110,7 @@ path_entries:
   - critical_check
   owner: '@bioetl-quarantine'
   expiry: '2026-12-31'
-  removal_step: Decompose row normalization and filtering branches.
+  removal_step: Decompose row normalization and filtering branches. Progress 2026-09-18 - coverage in flight; normalization split queued after.
   rationale: Quarantine normalization helpers still exceed the global baseline.
 - path: src/bioetl/infrastructure/observability/
   scopes:
@@ -118,7 +118,7 @@ path_entries:
   - critical_check
   owner: '@bioetl-observability'
   expiry: '2026-12-31'
-  removal_step: Extract label normalization and dispatch policies into smaller helpers.
+  removal_step: Extract label normalization and dispatch policies into smaller helpers. Progress 2026-09-18 - coverage in flight; dispatch split queued after.
   rationale: Observability dispatch paths remain branch-heavy and cardinality-sensitive.
 - path: src/bioetl/infrastructure/quality/
   scopes:
@@ -126,7 +126,7 @@ path_entries:
   - critical_check
   owner: '@bioetl-architecture'
   expiry: '2026-12-31'
-  removal_step: Continue decomposing registry validation helpers by policy family.
+  removal_step: Continue decomposing registry validation helpers by policy family. Progress 2026-09-18 - coverage in flight; validator split queued after.
   rationale: Quality governance validators intentionally centralize many review rules
     today.
 function_entries:
@@ -135,30 +135,30 @@ function_entries:
   - critical_check
   max_complexity: 25
   owner: '@bioetl-platform'
-  expiry: '2026-12-31'
-  removal_step: Split DOI/title fallback and batch routing into helper strategies.
+  expiry: '2026-11-30'
+  removal_step: Split DOI/title fallback and batch routing into helper strategies. Progress 2026-09-18 - provider fallback coverage in flight (#10517/#10518); strategy split queued after.
   rationale: Provider-specific fallback fetchers still need a temporary higher cap.
 - name: _request_with_retry
   scopes:
   - critical_check
   max_complexity: 20
   owner: '@bioetl-platform'
-  expiry: '2026-12-31'
-  removal_step: Extract retry/circuit-breaker branches into retry policies.
+  expiry: '2026-10-31'
+  removal_step: Extract retry/circuit-breaker branches into retry policies. Progress 2026-09-18 - adapter coverage in flight (#10517); retry-policy split queued after.
   rationale: Retry wrappers remain shared infrastructure choke points.
 - name: fetch_batch
   scopes:
   - critical_check
   max_complexity: 15
   owner: '@bioetl-platform'
-  expiry: '2026-12-31'
-  removal_step: Separate batch planning from fallback item execution.
+  expiry: '2026-09-30'
+  removal_step: Separate batch planning from fallback item execution. Progress 2026-09-18 - batch coverage in flight (#10517); planning split queued after.
   rationale: Batch fetchers still mix aggregation and fallback execution.
 - name: load_filter_with_fallback
   scopes:
   - critical_check
   max_complexity: 15
   owner: '@bioetl-config'
-  expiry: '2026-12-31'
-  removal_step: Isolate file parsing fallbacks behind dedicated readers.
+  expiry: '2026-09-30'
+  removal_step: Isolate file parsing fallbacks behind dedicated readers. Progress 2026-09-18 - config coverage in flight; reader split queued after.
   rationale: Config fallback loading remains compatibility-driven.
