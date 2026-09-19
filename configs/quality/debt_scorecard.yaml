@@ -484,7 +484,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 52
-      total_loc: 6214
+      total_loc: 6216
       files_ge_250_loc: 0
       helper_function_ratio: 0.332
       max_internal_fan_in: 2
@@ -907,9 +907,9 @@ retirement_governance_metrics:
       max_count: 2
       linked_issue: '#6791'
       owner: '@bioetl-architecture'
-      rationale: 'Reviewed 2026-08-25, rebaselined 2026-09-19: two fully classified zero-import surfaces (stage_accounting,
-        maintenance.py external re-export); the diagnostics dynamic loader gained a static importer during the
-        #10509 fan-in collapse. Not actionable dead-code debt.'
+      rationale: 'Reviewed 2026-08-25, rebaselined 2026-09-19: two fully classified zero-import surfaces
+        (stage_accounting, maintenance.py external re-export); the diagnostics dynamic loader gained a
+        static importer during the #10509 fan-in collapse. Not actionable dead-code debt.'
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh updates the classified
         candidate set intentionally.
     repo_wide_classified_zero_import_candidate_count:
@@ -917,8 +917,7 @@ retirement_governance_metrics:
       max_count: 2
       linked_issue: '#6791'
       owner: '@bioetl-architecture'
-      rationale: Both repo-wide zero-import candidates remain covered by explicit disposition ledger
-        entries.
+      rationale: Both repo-wide zero-import candidates remain covered by explicit disposition ledger entries.
       ratchet_policy: Non-growth fail-fast unless the repo-wide classification ledger is intentionally
         rebaselined during review.
     repo_wide_untriaged_zero_import_candidate_count:
@@ -952,7 +951,7 @@ retirement_governance_metrics:
       linked_issue: '#6786'
       owner: '@bioetl-architecture'
       rationale: Non-static reachability residue is the maintenance public re-export (the diagnostics
-        dynamic loader gained a static importer in #10509); must not grow silently.
+        dynamic loader gained a static importer in
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh intentionally
         expands the classified non-static residue.
     triaged_retained_owner_test_anchored_count:
