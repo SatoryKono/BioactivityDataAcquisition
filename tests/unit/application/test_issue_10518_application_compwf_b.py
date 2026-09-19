@@ -55,6 +55,7 @@ def _logger() -> MagicMock:
 
 # --- column_service ---
 
+
 def test_order_column_names_empty_returns_empty() -> None:
     svc = ColumnOrderService(logger=_logger())
     assert svc.order_column_names([]) == []
@@ -87,7 +88,9 @@ def test_order_column_names_semantic_branch() -> None:
 def test_column_service_static_delegates() -> None:
     assert ColumnOrderService._apply_renames(["a"], {"a": "b"}) == ["b"]
     assert ColumnOrderService._apply_renames_stage(["a"], {"a": "b"}) == ["b"]
-    assert ColumnOrderService.get_enricher_prefix("chembl_activity") == "chembl.activity."
+    assert (
+        ColumnOrderService.get_enricher_prefix("chembl_activity") == "chembl.activity."
+    )
     assert ColumnOrderService.get_enricher_prefix("badname") == "badname_"
     assert ColumnOrderService._parse_pipeline_name("chembl_activity") == (
         "chembl",
@@ -102,6 +105,7 @@ def test_filter_by_layer_config_delegates() -> None:
 
 
 # --- join_planner_identity ---
+
 
 def test_try_parse_identity_invalid() -> None:
     assert try_parse_pipeline_identity("badname") is None
@@ -163,6 +167,7 @@ def test_extract_base_column() -> None:
 
 # --- preflight_type_and_aggregation ---
 
+
 def test_dtype_in_group_case_insensitive() -> None:
     assert dtype_in_group("STR", frozenset({"str"})) is True
     assert dtype_in_group("int", frozenset({"str"})) is False
@@ -181,9 +186,7 @@ def _agg_config(**kw: Any) -> CompositeConfig:
     )
     seed = SimpleNamespace(pipeline="chembl_activity")
     enrichers = kw.pop("enrichers", ())
-    return SimpleNamespace(
-        enrichers=enrichers, merge=merge, seed=seed, dependencies=()
-    )
+    return SimpleNamespace(enrichers=enrichers, merge=merge, seed=seed, dependencies=())
 
 
 def _many_to_one_enricher(**kw: Any) -> SimpleNamespace:
@@ -199,12 +202,8 @@ def test_validate_aggregation_no_enrichers() -> None:
 
 
 def test_validate_aggregation_skips_one_to_one_and_missing() -> None:
-    one_to_one = SimpleNamespace(
-        pipeline="e", is_many_to_one=False, aggregation=None
-    )
-    missing_agg = SimpleNamespace(
-        pipeline="e", is_many_to_one=True, aggregation=None
-    )
+    one_to_one = SimpleNamespace(pipeline="e", is_many_to_one=False, aggregation=None)
+    missing_agg = SimpleNamespace(pipeline="e", is_many_to_one=True, aggregation=None)
     config = _agg_config(enrichers=(one_to_one, missing_agg))
     assert validate_aggregation_ordering(config) == []  # type: ignore[arg-type]
 
@@ -212,9 +211,11 @@ def test_validate_aggregation_skips_one_to_one_and_missing() -> None:
 def test_validate_aggregation_flags_order_sensitive_without_order() -> None:
     agg = AggregationConfig(
         group_by="molecule_id",
-        fields=(AggregationFieldSpec(
-            source_field="term", agg_function=AggregationFunction.COLLECT_LIST
-        ),),
+        fields=(
+            AggregationFieldSpec(
+                source_field="term", agg_function=AggregationFunction.COLLECT_LIST
+            ),
+        ),
     )
     config = _agg_config(enrichers=(_many_to_one_enricher(aggregation=agg),))
     issues = validate_aggregation_ordering(config)  # type: ignore[arg-type]
@@ -225,16 +226,20 @@ def test_validate_aggregation_flags_order_sensitive_without_order() -> None:
 def test_validate_aggregation_ok_with_order_by_or_insensitive() -> None:
     agg_ordered = AggregationConfig(
         group_by="molecule_id",
-        fields=(AggregationFieldSpec(
-            source_field="term", agg_function=AggregationFunction.COLLECT_LIST
-        ),),
+        fields=(
+            AggregationFieldSpec(
+                source_field="term", agg_function=AggregationFunction.COLLECT_LIST
+            ),
+        ),
         order_by=("term",),
     )
     agg_count = AggregationConfig(
         group_by="molecule_id",
-        fields=(AggregationFieldSpec(
-            source_field="n", agg_function=AggregationFunction.COUNT
-        ),),
+        fields=(
+            AggregationFieldSpec(
+                source_field="n", agg_function=AggregationFunction.COUNT
+            ),
+        ),
     )
     config = _agg_config(
         enrichers=(
@@ -262,6 +267,7 @@ def test_real_aggregation_models_cover_branches() -> None:
 
 # --- join_key_normalization ---
 
+
 def _join_config() -> CompositeConfig:
     seed = SeedConfig(
         pipeline="chembl_activity",
@@ -280,12 +286,8 @@ def _join_config() -> CompositeConfig:
         name="c",
         version="1",
         seed=seed,
-        enrichers=(
-            EnricherConfig(pipeline="e1_x", join_keys=("doi",)),
-        ),
-        dependencies=(
-            DependencyConfig(pipeline="d1_y", join_keys=("pmid",)),
-        ),
+        enrichers=(EnricherConfig(pipeline="e1_x", join_keys=("doi",)),),
+        dependencies=(DependencyConfig(pipeline="d1_y", join_keys=("pmid",)),),
         merge=merge,
     )
 
@@ -297,9 +299,7 @@ def test_iter_configured_join_keys() -> None:
 def test_validate_policies_ok_and_missing() -> None:
     validate_join_key_normalization_policies(_join_config())
     bad = _join_config()
-    object.__setattr__(
-        bad.enrichers[0], "join_keys", ("no_such_key_xyz",)
-    )
+    object.__setattr__(bad.enrichers[0], "join_keys", ("no_such_key_xyz",))
     with pytest.raises(ValueError, match="without normalization policy"):
         validate_join_key_normalization_policies(bad)
 
@@ -310,14 +310,14 @@ def test_build_expr_none_for_unknown_and_noop() -> None:
 
 
 def test_build_expr_trim_only_and_canonicalizer() -> None:
-    expr = build_join_key_normalization_expr(column="canonical_smiles", key="canonical_smiles")
+    expr = build_join_key_normalization_expr(
+        column="canonical_smiles", key="canonical_smiles"
+    )
     assert expr is not None
     expr2 = build_join_key_normalization_expr(column="doi", key="doi")
     assert expr2 is not None
     df = pl.DataFrame({"doi": ["  HTTPS://DOI.ORG/10.1/X  "]})
-    out = normalize_join_key_dataframe_columns(
-        df=df, join_keys=["doi"]
-    )
+    out = normalize_join_key_dataframe_columns(df=df, join_keys=["doi"])
     assert out["doi"][0] != "  HTTPS://DOI.ORG/10.1/X  "
 
 
@@ -343,6 +343,7 @@ def test_normalize_passthrough_when_no_expressions() -> None:
 
 
 # --- runner_stage_mixin ---
+
 
 class _Host(CompositeRunnerStageMixin):
     pass

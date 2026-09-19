@@ -32,13 +32,9 @@ def resolve_control_plane_archive_root(archive_root: Path | None) -> Path:
     return DEFAULT_CONTROL_PLANE_ARCHIVE_ROOT
 
 
-def should_archive_control_plane(
-    result: RunResult, options: RunOptions | None
-) -> bool:
+def should_archive_control_plane(result: RunResult, options: RunOptions | None) -> bool:
     """Archive only successful, non-dry-run pipeline completions with a manifest."""
-    if options is not None and (
-        options.no_control_plane_archive or options.dry_run
-    ):
+    if options is not None and (options.no_control_plane_archive or options.dry_run):
         return False
     return (
         result.status is PipelineRunResult.SUCCESS
@@ -88,9 +84,7 @@ def _create_or_verify_pack(
     archive_root.mkdir(parents=True, exist_ok=True)
     planner = FileControlPlaneArtifactLifecycleStore(base_path=control_root)
     plan = planner.plan_for_manifest(
-        ControlPlaneArtifactLifecyclePolicy(
-            retention_days=90, now=datetime.now(UTC)
-        ),
+        ControlPlaneArtifactLifecyclePolicy(retention_days=90, now=datetime.now(UTC)),
         manifest=manifest,
     )
     if plan.resolution_issues or not plan.artifacts:

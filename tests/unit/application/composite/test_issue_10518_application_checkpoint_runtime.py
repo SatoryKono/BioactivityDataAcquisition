@@ -43,9 +43,7 @@ def _storage(files: dict[str, str | None], exists: bool = False) -> MagicMock:
 def test_latest_returns_none_when_no_matches() -> None:
     storage = _storage({})
 
-    assert (
-        latest_checkpoint_filename(storage=storage, glob_pattern="*.json") is None
-    )
+    assert latest_checkpoint_filename(storage=storage, glob_pattern="*.json") is None
 
 
 def test_latest_returns_single_match_without_reading() -> None:
@@ -68,8 +66,7 @@ def test_latest_ranks_by_newest_stamp() -> None:
     )
 
     assert (
-        latest_checkpoint_filename(storage=storage, glob_pattern="*.json")
-        == "c.json"
+        latest_checkpoint_filename(storage=storage, glob_pattern="*.json") == "c.json"
     )
 
 
@@ -84,8 +81,7 @@ def test_latest_skips_unreadable_payloads_and_falls_back_to_sorted() -> None:
     }[path]
 
     assert (
-        latest_checkpoint_filename(storage=storage, glob_pattern="*.json")
-        == "c.json"
+        latest_checkpoint_filename(storage=storage, glob_pattern="*.json") == "c.json"
     )
 
 
@@ -98,8 +94,7 @@ def test_latest_falls_back_to_sorted_when_states_carry_no_stamps() -> None:
     )
 
     assert (
-        latest_checkpoint_filename(storage=storage, glob_pattern="*.json")
-        == "b.json"
+        latest_checkpoint_filename(storage=storage, glob_pattern="*.json") == "b.json"
     )
 
 
@@ -127,8 +122,7 @@ def test_latest_falls_back_to_sorted_on_mixed_naive_aware_stamps(
     )
 
     assert (
-        latest_checkpoint_filename(storage=storage, glob_pattern="*.json")
-        == "b.json"
+        latest_checkpoint_filename(storage=storage, glob_pattern="*.json") == "b.json"
     )
 
 
@@ -340,9 +334,7 @@ def test_load_reports_unexpected_bioetl_error() -> None:
         is None
     )
     logger.warning.assert_called_once()
-    assert (
-        logger.warning.call_args.kwargs["reason_code"] == "unexpected_bioetl_error"
-    )
+    assert logger.warning.call_args.kwargs["reason_code"] == "unexpected_bioetl_error"
 
 
 def test_load_reports_unexpected_bioetl_error_with_failed_counter() -> None:

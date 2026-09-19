@@ -37,7 +37,9 @@ def _result(**overrides: object) -> RunResult:
 
 
 def test_resolve_archive_root_defaults_and_override(tmp_path: Path) -> None:
-    assert resolve_control_plane_archive_root(None) == DEFAULT_CONTROL_PLANE_ARCHIVE_ROOT
+    assert (
+        resolve_control_plane_archive_root(None) == DEFAULT_CONTROL_PLANE_ARCHIVE_ROOT
+    )
     custom = tmp_path / "archive"
     assert resolve_control_plane_archive_root(custom) == custom
 
@@ -46,9 +48,7 @@ def test_should_archive_skips_flag_dry_run_and_failures() -> None:
     success = _result()
     assert should_archive_control_plane(success, None) is True
     assert (
-        should_archive_control_plane(
-            success, RunOptions(no_control_plane_archive=True)
-        )
+        should_archive_control_plane(success, RunOptions(no_control_plane_archive=True))
         is False
     )
     assert should_archive_control_plane(success, RunOptions(dry_run=True)) is False

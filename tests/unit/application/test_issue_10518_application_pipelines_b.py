@@ -85,14 +85,19 @@ class TestCommentFacetsDegenerate:
 
     def test_isoform_paths_with_unindexed_comments(self) -> None:
         comments = [{"no_comment_type": True}]
-        assert count_isoforms(comments) is None or isinstance(count_isoforms(comments), int)
+        assert count_isoforms(comments) is None or isinstance(
+            count_isoforms(comments), int
+        )
         details = extract_isoform_details(comments)
         assert isinstance(details, dict)
         assert details and all(value is None for value in details.values())
 
     def test_text_values_positive(self) -> None:
         comments = [
-            {"commentType": "FUNCTION", "texts": [{"value": "catalyzes X"}, {"value": ""}]},
+            {
+                "commentType": "FUNCTION",
+                "texts": [{"value": "catalyzes X"}, {"value": ""}],
+            },
             {"commentType": "OTHER", "texts": [{"value": "zzz"}]},
         ]
         assert extract_text_values(comments, "FUNCTION") == ["catalyzes X"]
@@ -133,14 +138,20 @@ class TestCoercePublicationTransformerInit:
     def test_fields_provider_and_di_passthrough(self) -> None:
         tracer = MagicMock()
         ctx = coerce_publication_transformer_init(
-            None, provider="openalex", entity_type="work", tracer=tracer, record_normalizer=MagicMock()
+            None,
+            provider="openalex",
+            entity_type="work",
+            tracer=tracer,
+            record_normalizer=MagicMock(),
         )
         assert ctx.provider == "openalex"
         assert ctx.entity_type == "work"
         assert ctx.tracer is tracer
 
     def test_default_provider_fallback(self) -> None:
-        ctx = coerce_publication_transformer_init(None, default_provider="semanticscholar")
+        ctx = coerce_publication_transformer_init(
+            None, default_provider="semanticscholar"
+        )
         assert ctx.provider == "semanticscholar"
 
     def test_missing_provider_raises(self) -> None:
@@ -163,16 +174,28 @@ class TestCoercePublicationTransformerInit:
             "self": None,
         }
         assert publication_transformer_kwargs(init_locals) == {
-            key: None for key in (
-                "entity_type", "silver_filters", "gold_filters", "tracer",
-                "metrics", "identity_service", "pii_hasher", "dependencies",
+            key: None
+            for key in (
+                "entity_type",
+                "silver_filters",
+                "gold_filters",
+                "tracer",
+                "metrics",
+                "identity_service",
+                "pii_hasher",
+                "dependencies",
             )
         } | {"entity_type": "publication"}
 
     def test_build_runtime_init(self) -> None:
-        runtime_init = build_runtime_publication_transformer_init(default_provider="pubmed")
+        runtime_init = build_runtime_publication_transformer_init(
+            default_provider="pubmed"
+        )
         assert callable(runtime_init)
-        assert runtime_init.__doc__ == "Shared runtime-generated publication transformer constructor."
+        assert (
+            runtime_init.__doc__
+            == "Shared runtime-generated publication transformer constructor."
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -194,7 +217,9 @@ def _mock_transformer() -> MagicMock:
     transformer = MagicMock()
     transformer.compute_entity_id = MagicMock(return_value="ENTITY-1")
     transformer.compute_content_hash = MagicMock(return_value="HASH-1")
-    transformer._apply_structural_policy = MagicMock(side_effect=lambda context, record, index: record)
+    transformer._apply_structural_policy = MagicMock(
+        side_effect=lambda context, record, index: record
+    )
     transformer._apply_silver_filter = MagicMock(return_value=None)
     transformer._record_normalizer = MagicMock()
     transformer._record_normalizer.project_normalization_findings = MagicMock(
@@ -221,7 +246,9 @@ class TestPublicationRecords:
         )
 
     def test_prepare_content_hash_payload(self) -> None:
-        assert prepare_content_hash_payload({"a": 1, "_source": "x", "_dq": 1}) == {"a": 1}
+        assert prepare_content_hash_payload({"a": 1, "_source": "x", "_dq": 1}) == {
+            "a": 1
+        }
 
     def test_compute_identifiers(self) -> None:
         transformer = _mock_transformer()
@@ -229,11 +256,17 @@ class TestPublicationRecords:
             transformer, "doi", "10.1/x", {"title": "t", "_source": "s"}
         )
         assert (entity_id, content_hash) == ("ENTITY-1", "HASH-1")
-        transformer.compute_content_hash.assert_called_once_with({"title": "t"}, exclude_none=True)
+        transformer.compute_content_hash.assert_called_once_with(
+            {"title": "t"}, exclude_none=True
+        )
 
-    def test_build_pre_silver_record_callbacks(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_build_pre_silver_record_callbacks(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         monkeypatch.setattr(
-            pub_records, "build_publication_silver_record", lambda *args: {"built": True}
+            pub_records,
+            "build_publication_silver_record",
+            lambda *args: {"built": True},
         )
         transformer = _mock_transformer()
         prepared = SimpleNamespace(
@@ -243,7 +276,9 @@ class TestPublicationRecords:
         assert staged.entity_id == "ENTITY-1"
         assert staged.business_data == {"title": "t"}
         context = MagicMock()
-        assert staged.build_silver_record(context, "E", "H", 0, {"title": "t"}) == {"built": True}
+        assert staged.build_silver_record(context, "E", "H", 0, {"title": "t"}) == {
+            "built": True
+        }
         record: dict[str, object] = {"title": "t"}
         assert staged.apply_structural_policy is not None
         assert staged.apply_structural_policy(context, record, 0) == {"title": "t"}  # type: ignore[misc]
@@ -252,7 +287,9 @@ class TestPublicationRecords:
 
     def test_assemble_silver_record(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setattr(
-            pub_records, "build_publication_silver_record", lambda *args: {"silver": True}
+            pub_records,
+            "build_publication_silver_record",
+            lambda *args: {"silver": True},
         )
         transformer = _mock_transformer()
         prepared = SimpleNamespace(
@@ -272,11 +309,15 @@ class TestPublicationRecords:
 # pubmed/extractors/classification.py
 # ---------------------------------------------------------------------------
 
-from bioetl.application.pipelines.pubmed.extractors.classification import ClassificationExtractor
+from bioetl.application.pipelines.pubmed.extractors.classification import (
+    ClassificationExtractor,
+)
 
 
 def _pubmed_article_xml() -> Element:
-    root = fromstring("<PubmedArticle><MedlineCitation><Article></Article></MedlineCitation></PubmedArticle>")
+    root = fromstring(
+        "<PubmedArticle><MedlineCitation><Article></Article></MedlineCitation></PubmedArticle>"
+    )
     medline = root.find(".//MedlineCitation")
     assert medline is not None
     keyword_list = SubElement(medline, "KeywordList")
@@ -315,9 +356,17 @@ class TestPubmedClassificationExtractor:
 
     def test_normalize(self) -> None:
         normalized = ClassificationExtractor().normalize(
-            {"keywords": [" a ", "", None], "mesh_terms": [" b "], "publication_types": ["  ", "c"]}
+            {
+                "keywords": [" a ", "", None],
+                "mesh_terms": [" b "],
+                "publication_types": ["  ", "c"],
+            }
         )
-        assert normalized == {"keywords": ["a"], "mesh_terms": ["b"], "publication_types": ["c"]}
+        assert normalized == {
+            "keywords": ["a"],
+            "mesh_terms": ["b"],
+            "publication_types": ["c"],
+        }
 
     def test_pub_types_missing_list(self) -> None:
         extractor = ClassificationExtractor()
@@ -335,13 +384,18 @@ class TestPubmedClassificationExtractor:
 
     def test_parse_helpers(self) -> None:
         medline = _pubmed_article_xml().find(".//MedlineCitation")
-        assert ClassificationExtractor.parse_keywords(medline) == ["kinase", "inhibitor"]
+        assert ClassificationExtractor.parse_keywords(medline) == [
+            "kinase",
+            "inhibitor",
+        ]
         assert ClassificationExtractor.parse_mesh_terms(medline) == ["Neoplasms"]
         assert ClassificationExtractor.parse_keywords(None) == []
         assert ClassificationExtractor.parse_mesh_terms(None) == []
         article = _pubmed_article_xml().find(".//Article")
         assert article is not None
-        assert ClassificationExtractor.parse_publication_types(article) == ["Journal Article"]
+        assert ClassificationExtractor.parse_publication_types(article) == [
+            "Journal Article"
+        ]
 
     def test_parse_chemicals(self) -> None:
         medline = fromstring(
@@ -353,7 +407,10 @@ class TestPubmedClassificationExtractor:
         )
         assert ClassificationExtractor.parse_chemicals(medline) == ["Aspirin"]
         assert ClassificationExtractor.parse_chemicals(None) == []
-        assert ClassificationExtractor.parse_chemicals(fromstring("<MedlineCitation/>")) == []
+        assert (
+            ClassificationExtractor.parse_chemicals(fromstring("<MedlineCitation/>"))
+            == []
+        )
 
     def test_parse_gene_symbols(self) -> None:
         medline = fromstring(
@@ -364,7 +421,10 @@ class TestPubmedClassificationExtractor:
         )
         assert ClassificationExtractor.parse_gene_symbols(medline) == ["TP53", "BRCA1"]
         assert ClassificationExtractor.parse_gene_symbols(None) == []
-        assert ClassificationExtractor.parse_gene_symbols(fromstring("<MedlineCitation/>")) == []
+        assert (
+            ClassificationExtractor.parse_gene_symbols(fromstring("<MedlineCitation/>"))
+            == []
+        )
 
     def test_parse_databanks(self) -> None:
         medline = fromstring(
@@ -380,7 +440,10 @@ class TestPubmedClassificationExtractor:
             {"databank_name": "ClinicalTrials.gov", "accession_numbers": ["NCT123"]}
         ]
         assert ClassificationExtractor.parse_databanks(None) == []
-        assert ClassificationExtractor.parse_databanks(fromstring("<MedlineCitation/>")) == []
+        assert (
+            ClassificationExtractor.parse_databanks(fromstring("<MedlineCitation/>"))
+            == []
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -401,17 +464,29 @@ class TestSemanticScholarAuthors:
     def test_extract_authors__pipelines_b_1(self) -> None:
         assert extract_authors(None) == []
         assert extract_authors([]) == []
-        assert extract_authors([{"name": " John "}, {"name": "  "}, {"name": ""}, {"name": None}, {}]) == ["John"]
+        assert extract_authors(
+            [{"name": " John "}, {"name": "  "}, {"name": ""}, {"name": None}, {}]
+        ) == ["John"]
 
     def test_extract_author_ids__pipelines_b_1(self) -> None:
         assert extract_author_ids(None) == []
         assert extract_author_ids([]) == []
-        authors = [{"authorId": "123", "name": "A"}, {"name": "B"}, {"authorId": "", "name": "C"}, {"authorId": 456}]
+        authors = [
+            {"authorId": "123", "name": "A"},
+            {"name": "B"},
+            {"authorId": "", "name": "C"},
+            {"authorId": 456},
+        ]
         assert extract_author_ids(authors) == ["123", "456"]
 
     def test_extract_author_s2_ids(self) -> None:
         assert extract_author_s2_ids(None) == []
-        authors = [{"authorId": " abc "}, {"authorId": ""}, {"authorId": None}, {"authorId": 7}]
+        authors = [
+            {"authorId": " abc "},
+            {"authorId": ""},
+            {"authorId": None},
+            {"authorId": 7},
+        ]
         assert extract_author_s2_ids(authors) == ["abc"]
 
     def test_extract_author_orcids__pipelines_b_1(self) -> None:
@@ -444,7 +519,9 @@ class TestSemanticScholarAuthors:
 # chembl/publication_transformer.py
 # ---------------------------------------------------------------------------
 
-from bioetl.application.pipelines.chembl.publication_transformer import PublicationTransformer
+from bioetl.application.pipelines.chembl.publication_transformer import (
+    PublicationTransformer,
+)
 from bioetl.application.core.base_transformer import TransformationError
 
 
@@ -457,8 +534,13 @@ def _make_publication_transformer() -> PublicationTransformer:
 class TestChemblPublicationTransformer:
     def test_resolve_primary_id_prefers_canonical(self) -> None:
         transformer = _make_publication_transformer()
-        assert transformer._resolve_primary_id({"publication_id": "CHEMBL1"}) == "CHEMBL1"
-        assert transformer._resolve_primary_id({"document_chembl_id": "CHEMBL2"}) == "CHEMBL2"
+        assert (
+            transformer._resolve_primary_id({"publication_id": "CHEMBL1"}) == "CHEMBL1"
+        )
+        assert (
+            transformer._resolve_primary_id({"document_chembl_id": "CHEMBL2"})
+            == "CHEMBL2"
+        )
 
     def test_resolve_primary_id_missing_raises(self) -> None:
         transformer = _make_publication_transformer()
@@ -468,7 +550,12 @@ class TestChemblPublicationTransformer:
     def test_extract_business_data_smoke(self) -> None:
         transformer = _make_publication_transformer()
         out = transformer._extract_business_data(
-            {"publication_id": "CHEMBL1", "title": "T", "year": "2020", "citation_count": "4"},
+            {
+                "publication_id": "CHEMBL1",
+                "title": "T",
+                "year": "2020",
+                "citation_count": "4",
+            },
             "CHEMBL1",
         )
         assert out["publication_id"] == "CHEMBL1"
@@ -568,7 +655,14 @@ class TestOpenAlexAuthors:
 
     def test_extract_country_codes(self) -> None:
         authorships = [
-            {"institutions": [{"country_code": "us"}, 7, {"country_code": ""}, {"country_code": None}]},
+            {
+                "institutions": [
+                    {"country_code": "us"},
+                    7,
+                    {"country_code": ""},
+                    {"country_code": None},
+                ]
+            },
             {"institutions": "nope"},
         ]
         assert extract_institution_country_codes(authorships) == ["US"]

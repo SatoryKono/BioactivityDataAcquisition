@@ -78,9 +78,7 @@ def test_archive_successful_run_delegates_to_pack(tmp_path, monkeypatch):
             return plan
 
     monkeypatch.setattr(cpa, "FileRunManifestStore", FakeManifests)
-    monkeypatch.setattr(
-        cpa, "FileControlPlaneArtifactLifecycleStore", FakePlanner
-    )
+    monkeypatch.setattr(cpa, "FileControlPlaneArtifactLifecycleStore", FakePlanner)
     ok, reason = cpa.archive_successful_run(
         result=result,
         options=None,
@@ -112,9 +110,7 @@ def test_create_or_verify_pack_incomplete_plan(tmp_path, monkeypatch):
         def plan_for_manifest(self, *args, **kwargs):
             return SimpleNamespace(resolution_issues=[], artifacts=[])
 
-    monkeypatch.setattr(
-        cpa, "FileControlPlaneArtifactLifecycleStore", FakePlanner
-    )
+    monkeypatch.setattr(cpa, "FileControlPlaneArtifactLifecycleStore", FakePlanner)
     ok, reason = cpa._create_or_verify_pack(**_pack_kwargs(tmp_path, manifest))
     assert (ok, reason) == (None, "archive_source_evidence_incomplete")
 
@@ -133,9 +129,7 @@ def test_create_or_verify_pack_returns_existing_verification(tmp_path, monkeypat
         verify=MagicMock(return_value=(True, "archive_verified")),
         create=MagicMock(),
     )
-    monkeypatch.setattr(
-        cpa, "FileControlPlaneArtifactLifecycleStore", FakePlanner
-    )
+    monkeypatch.setattr(cpa, "FileControlPlaneArtifactLifecycleStore", FakePlanner)
     monkeypatch.setattr(cpa, "FileArchiveStore", lambda *a, **k: store)
     ok, reason = cpa._create_or_verify_pack(**_pack_kwargs(tmp_path, manifest))
     assert (ok, reason) == (True, "archive_verified")
@@ -159,9 +153,7 @@ def test_create_or_verify_pack_create_failure(tmp_path, monkeypatch):
         verify=MagicMock(return_value=(None, "archive_evidence_not_recorded")),
         create=MagicMock(side_effect=_boom),
     )
-    monkeypatch.setattr(
-        cpa, "FileControlPlaneArtifactLifecycleStore", FakePlanner
-    )
+    monkeypatch.setattr(cpa, "FileControlPlaneArtifactLifecycleStore", FakePlanner)
     monkeypatch.setattr(cpa, "FileArchiveStore", lambda *a, **k: store)
     ok, reason = cpa._create_or_verify_pack(**_pack_kwargs(tmp_path, manifest))
     assert (ok, reason) == (False, "archive_create_failed")
@@ -186,9 +178,7 @@ def test_create_or_verify_pack_create_then_verify(tmp_path, monkeypatch):
         ),
         create=MagicMock(),
     )
-    monkeypatch.setattr(
-        cpa, "FileControlPlaneArtifactLifecycleStore", FakePlanner
-    )
+    monkeypatch.setattr(cpa, "FileControlPlaneArtifactLifecycleStore", FakePlanner)
     monkeypatch.setattr(cpa, "FileArchiveStore", lambda *a, **k: store)
     ok, reason = cpa._create_or_verify_pack(**_pack_kwargs(tmp_path, manifest))
     assert (ok, reason) == (True, "archive_verified")
@@ -449,9 +439,7 @@ def test_evaluate_contract_null_optional_nonnullable_quarantines():
 
 def test_evaluate_contract_null_nullable_passes():
     events: list = []
-    outcome = evaluate_contract(
-        _int_spec(nullable=True), {"age": None}, events
-    )
+    outcome = evaluate_contract(_int_spec(nullable=True), {"age": None}, events)
     assert outcome is None
     assert events == []
 
@@ -540,9 +528,7 @@ async def test_yield_terms_limit_zero_without_aclose():
         async def __anext__(self):
             raise StopAsyncIteration
 
-    seen = [
-        t async for t in host._yield_terms_from_publications(_NoCloseStream(), 0)
-    ]
+    seen = [t async for t in host._yield_terms_from_publications(_NoCloseStream(), 0)]
     assert seen == []
 
 
@@ -666,9 +652,7 @@ def test_bounded_retention_plan_legacy_planner_fallback():
     sentinel = object()
     planner = SimpleNamespace(plan=lambda *args, **kwargs: sentinel)
     svc = ControlPlaneEvidenceService(lifecycle_planner=planner)
-    assert (
-        svc._bounded_retention_plan(RunManifest(), MagicMock()) is sentinel
-    )
+    assert svc._bounded_retention_plan(RunManifest(), MagicMock()) is sentinel
 
 
 # ---------------------------------------------------------------------------
@@ -680,20 +664,14 @@ from bioetl.application.core._runner_support import PipelineRunnerSupportMixin
 
 
 async def test_runner_support_delegates_execution_cycle():
-    with patch.object(
-        rsupport, "run_execution_cycle", new=AsyncMock()
-    ) as cycle:
+    with patch.object(rsupport, "run_execution_cycle", new=AsyncMock()) as cycle:
         await PipelineRunnerSupportMixin()._run_execution_cycle()
     cycle.assert_awaited_once()
 
 
 def test_runner_support_extract_checkpoint_offset():
-    with patch.object(
-        rsupport, "extract_checkpoint_offset", return_value=7
-    ) as extract:
-        assert (
-            PipelineRunnerSupportMixin()._extract_checkpoint_offset({"x": 1}) == 7
-        )
+    with patch.object(rsupport, "extract_checkpoint_offset", return_value=7) as extract:
+        assert PipelineRunnerSupportMixin()._extract_checkpoint_offset({"x": 1}) == 7
     extract.assert_called_once()
 
 
@@ -701,9 +679,7 @@ async def test_runner_support_delegates_pipeline_and_postrun():
     with (
         patch.object(rsupport, "execute_pipeline", new=AsyncMock()) as exe,
         patch.object(rsupport, "run_postrun_phase", new=AsyncMock()) as post,
-        patch.object(
-            rsupport, "validate_infrastructure", new=AsyncMock()
-        ) as valid,
+        patch.object(rsupport, "validate_infrastructure", new=AsyncMock()) as valid,
     ):
         host = PipelineRunnerSupportMixin()
         await host._execute_pipeline(offset=3)
@@ -767,9 +743,7 @@ async def test_process_stateful_batch_process_failure_transitions():
     ]
     with pytest.raises(ValueError, match="bad"):
         await stateflow.process_stateful_batch(host, [{"a": 1}], 0)
-    failure_events = [
-        call.args[1] for call in host._fsm.advance.call_args_list
-    ]
+    failure_events = [call.args[1] for call in host._fsm.advance.call_args_list]
     assert BatchExecutionEvent.PROCESS_FAILED in failure_events
 
 
@@ -806,9 +780,7 @@ async def test_process_stateful_batch_commit_failure_transitions():
     ]
     with pytest.raises(ValueError, match="commit"):
         await stateflow.process_stateful_batch(host, [{"a": 1}], 0)
-    failure_events = [
-        call.args[1] for call in host._fsm.advance.call_args_list
-    ]
+    failure_events = [call.args[1] for call in host._fsm.advance.call_args_list]
     assert BatchExecutionEvent.STATE_COMMIT_FAILED in failure_events
 
 
@@ -830,9 +802,7 @@ def _ledger_entry(event_type):
         manifest_id="legacy-manifest",
         run_id=RunID(UUID(int=1)),
         event_type=event_type,
-        occurred_at=datetime.datetime(
-            2024, 1, 1, tzinfo=datetime.timezone.utc
-        ),
+        occurred_at=datetime.datetime(2024, 1, 1, tzinfo=datetime.timezone.utc),
     )
 
 
@@ -874,8 +844,7 @@ def test_scope_kind_branches():
         == "pipeline_current"
     )
     assert (
-        evmodels._scope_kind(resolved_via="exact_run", manifest=manifest)
-        == "exact_run"
+        evmodels._scope_kind(resolved_via="exact_run", manifest=manifest) == "exact_run"
     )
 
 
