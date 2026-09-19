@@ -27,7 +27,9 @@ from typing import TYPE_CHECKING, Any
 from bioetl.domain.config import MemoryConfig
 from bioetl.domain.mixin_host import as_mixin_host
 
-# Re-export MemoryStats from domain for backward compatibility
+# Re-export MemoryStats from domain for backward compatibility.
+# Sunset date: 2026-12-31 (#10535) — remove this re-export once external
+# consumers migrate. Codemod: import MemoryStats from bioetl.domain.ports.
 from bioetl.domain.ports import MemoryStats
 
 if TYPE_CHECKING:
