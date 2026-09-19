@@ -17657,7 +17657,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 11,
+      "inbound_links": 12,
       "lifecycle": null,
       "outbound_links": 4,
       "owner": "BioETL Team",
@@ -45589,6 +45589,34 @@
       "canonical_successor": null,
       "catalog_lifecycle": null,
       "commit_policy": null,
+      "declared_class": "published",
+      "declared_status": "active",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": null,
+      "outbound_links": 2,
+      "owner": "BioETL Team",
+      "path": "docs/03-guides/compatibility-entrypoint-migration-guide.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "03-guides",
+      "status": "Active",
+      "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
       "declared_class": null,
       "declared_status": null,
       "diagram_kind": null,
@@ -49381,7 +49409,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 28,
+      "inbound_links": 29,
       "lifecycle": null,
       "outbound_links": 16,
       "owner": "BioETL Team",
@@ -103326,7 +103354,7 @@
       "archive-after-github-state-check": 337,
       "archive-after-migration": 995,
       "generate-automatically": 1045,
-      "keep": 1274,
+      "keep": 1275,
       "reconcile-with-github-state": 8,
       "replace-with-link": 2
     },
@@ -103336,7 +103364,7 @@
       "01-requirements": 4,
       "02-architecture": 992,
       "03-data-model": 2,
-      "03-guides": 125,
+      "03-guides": 126,
       "04-reference": 331,
       "05-engineering": 2,
       "05-operations": 91,
@@ -103361,7 +103389,7 @@
       "security": 2
     },
     "by_status": {
-      "Active": 749,
+      "Active": 750,
       "Archived": 292,
       "Canonical": 74,
       "Deprecated": 2,
@@ -103369,7 +103397,7 @@
       "Working": 1499
     },
     "by_surface_family": {
-      "active": 749,
+      "active": 750,
       "archive": 292,
       "canonical": 74,
       "duplicate": 2,
@@ -103377,7 +103405,7 @@
       "working": 1499
     },
     "by_tracking_state": {
-      "tracked": 3661
+      "tracked": 3662
     },
     "docs_reports_local_count": 39,
     "duplicate_group_count": 7,
@@ -103393,8 +103421,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3661,
+    "total_doc_like": 3662,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3661
+    "total_doc_like_tracked": 3662
   }
 }
