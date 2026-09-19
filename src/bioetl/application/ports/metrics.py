@@ -113,6 +113,11 @@ class MetricsService(Protocol):
         ...
 
 
-# Deprecated aliases for backward compatibility (deprecated since 2026-08-26)
-MetricsStartResult = StartResult  # Use StartResult instead
-MetricsGatewayResult = PushResult  # Use PushResult or DeleteResult instead
+# Deprecated aliases for backward compatibility (deprecated since 2026-08-26).
+# Sunset date: 2026-12-31 — remove these aliases after this date once external
+# consumers have migrated. First-party code MUST use the canonical names below.
+# Codemod: replace MetricsStartResult -> StartResult;
+#          replace MetricsGatewayResult -> PushResult (gateway pushes)
+#          or DeleteResult (gateway deletes).
+MetricsStartResult = StartResult
+MetricsGatewayResult = PushResult

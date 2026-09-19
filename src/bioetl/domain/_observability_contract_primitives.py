@@ -87,7 +87,14 @@ def normalize_severity(value: object | None, *, fallback: str) -> str:
 
 
 def strip_legacy_keys(normalized: dict[str, object]) -> None:
-    """Drop legacy aliases from output context after canonicalization."""
+    """Drop legacy aliases from output context after canonicalization.
+
+    Legacy compatibility shim — sunset date: 2026-12-31. Remove this helper
+    (and OBSERVABILITY_LEGACY_TO_CANONICAL) after external emitters migrate.
+    Codemod: emit canonical keys (event/provider/pipeline/run_id/severity)
+    instead of legacy aliases (event_name/provider_name/pipeline_name/
+    correlation_id/log_level), then delete this call.
+    """
     for legacy_key in OBSERVABILITY_LEGACY_TO_CANONICAL:
         normalized.pop(legacy_key, None)
 

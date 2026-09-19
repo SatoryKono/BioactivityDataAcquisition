@@ -25,6 +25,10 @@ if TYPE_CHECKING:
 
     # Prefer pandera.pandas: top-level pandera.DataFrameSchema is the deprecated
     # shim (pandera._pandas_deprecated) and is a different type under 0.31+.
+    # Sunset review date: 2026-12-31 — re-check whether the top-level shim
+    # still exists upstream; this module already uses the canonical path.
+    # Codemod: keep `import pandera.pandas as pa`; do NOT reintroduce
+    # top-level `pandera.DataFrameSchema` references.
     import pandera.pandas as pa
 
 
