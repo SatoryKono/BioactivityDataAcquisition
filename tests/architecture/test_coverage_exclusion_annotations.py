@@ -16,7 +16,7 @@ ISSUE_MARKER = "(#10534"
 # (path, allowed pragma count): lazy-export hooks are covered by behavioral
 # tests, so only declaration-only stubs and defensive guards may remain.
 ALLOWED_PRAGMAS = {
-    "src/bioetl/application/composite/runner_pkg/runner_merge_stage_mixin.py": 3,
+    "src/bioetl/application/composite/runner_pkg/runner_merge_stage_dispatch_mixin.py": 3,
     "src/bioetl/application/composite/runner_pkg/runner_stage_support_dispatch_mixin.py": 4,
     "src/bioetl/application/core/record_processor_config.py": 1,
 }
