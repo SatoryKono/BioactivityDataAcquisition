@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import replace
+from typing import cast
 
 from bioetl.domain.behavior.aggregation_validator import AggregationValidator
 from bioetl.domain.behavior.composite_validation_config import CompositeValidationConfig
@@ -72,7 +73,10 @@ class CompositeValidator:
     ) -> CompositeValidationReport:
         """Run structural and deep-preflight validation for one composite config."""
         structural_result = self._run_structural_validation(config)
-        if isinstance(config.composite_config, dict):
+        # Raw payloads may violate the declared mapping type; probe the shape
+        # before touching .get / membership (fail-closed callers).
+        raw_composite_config = cast("object", config.composite_config)
+        if isinstance(raw_composite_config, dict):
             deep_preflight_result = self._run_deep_preflight_validation(config)
         else:
             # Fail closed: do not probe a non-mapping payload with .get / membership.
@@ -130,20 +134,21 @@ class CompositeValidator:
     def _deep_preflight_issues(
         self, composite_config: JsonDict
     ) -> list[ValidationIssue]:
-        if not isinstance(composite_config, dict):
+        raw_config = cast("object", composite_config)
+        if not isinstance(raw_config, dict):
             return [
                 _create_issue(
                     IssueCode.CMP_STR_SCHEMA_001,
                     ValidationSeverity.BLOCKER,
                     "Composite config must be a dictionary",
-                    {"actual_type": type(composite_config).__name__},
+                    {"actual_type": type(raw_config).__name__},
                 )
             ]
-        issues = self._aggregation_preflight_issues(composite_config)
-        issues.extend(self._cross_validation_preflight_issues(composite_config))
+        issues = self._aggregation_preflight_issues(raw_config)
+        issues.extend(self._cross_validation_preflight_issues(raw_config))
         append_invalid_config_section(
             issues=issues,
-            composite_config=composite_config,
+            composite_config=raw_config,
             config_key="field_priorities",
             validator=_is_valid_field_priorities,
             code=IssueCode.CMP_PF_FIELD_001,

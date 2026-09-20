@@ -325,7 +325,11 @@ def test_emit_composite_source_selection_metrics_aggregates_sources_and_fields()
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_persist_rejects_layer_alias_fragment_id_when_required() -> None:
-    from bioetl.domain.lineage import LineageGraphFragment, LineageNodeRef, LineageNodeType
+    from bioetl.domain.lineage import (
+        LineageGraphFragment,
+        LineageNodeRef,
+        LineageNodeType,
+    )
 
     fragment = LineageGraphFragment(
         fragment_id="bronze",

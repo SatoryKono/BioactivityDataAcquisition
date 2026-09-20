@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
+from typing import cast
 
 from .config_merge import ColumnGroupConfig
 from .config_validators import (
@@ -37,8 +39,11 @@ class LayerColumnConfig:
         coerce_to_tuple(self, "include_groups")
         coerce_to_tuple(self, "exclude_fields")
         coerce_to_typed_tuple(self, "column_groups", ColumnGroupConfig)
-        if not isinstance(self.rename_fields, dict):
-            object.__setattr__(self, "rename_fields", dict(self.rename_fields))
+        raw_rename_fields: object = self.rename_fields
+        if not isinstance(raw_rename_fields, dict):
+            object.__setattr__(
+                self, "rename_fields", dict(cast(Mapping[str, str], raw_rename_fields))
+            )
         # Always detach/freeze rename_fields so frozen configs cannot mutate.
         freeze_fields(self, ("rename_fields",))
         self._validate()
@@ -71,10 +76,12 @@ class DataSchemaConfig:
 
     def __post_init__(self) -> None:
         coerce_to_typed_tuple(self, "column_groups", ColumnGroupConfig)
-        if isinstance(self.silver, dict):
-            object.__setattr__(self, "silver", LayerColumnConfig(**self.silver))
-        if isinstance(self.gold, dict):
-            object.__setattr__(self, "gold", LayerColumnConfig(**self.gold))
+        raw_silver: object = self.silver
+        if isinstance(raw_silver, dict):
+            object.__setattr__(self, "silver", LayerColumnConfig(**raw_silver))
+        raw_gold: object = self.gold
+        if isinstance(raw_gold, dict):
+            object.__setattr__(self, "gold", LayerColumnConfig(**raw_gold))
 
     def _resolve_layer(self, layer: str) -> LayerColumnConfig | None:
         """Resolve a supported Medallion layer config or raise."""

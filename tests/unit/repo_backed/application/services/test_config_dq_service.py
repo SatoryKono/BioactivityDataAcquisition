@@ -242,6 +242,21 @@ def test_parse_disposition_rejects_invalid_value() -> None:
         service_mod._parse_disposition("bad")
 
 
+def test_parse_disposition_rejects_non_string_value() -> None:
+    with pytest.raises(ValueError, match="Invalid DQ disposition value"):
+        service_mod._parse_disposition(123)
+
+
+def test_parse_source_hash_strategy_accepts_known_modes() -> None:
+    assert service_mod._parse_source_hash_strategy(None) is None
+    assert service_mod._parse_source_hash_strategy("raw_bytes") == "raw_bytes"
+
+
+def test_parse_source_hash_strategy_rejects_unknown_mode() -> None:
+    with pytest.raises(ValueError, match="Invalid config source hash strategy"):
+        service_mod._parse_source_hash_strategy("bogus")
+
+
 def test_parse_strictness_helpers_validate_allowed_values() -> None:
     assert service_mod._parse_strictness_mode("strict") == "strict"
     assert service_mod._parse_snapshot_strictness_mode("standard") == "standard"

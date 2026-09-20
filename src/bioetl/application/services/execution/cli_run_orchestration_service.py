@@ -155,6 +155,7 @@ class CliRunOrchestrationService:
             debug_export_enabled=request.debug_export_enabled,
             debug_export_formats=request.debug_export_formats,
             debug_export_dir=request.debug_export_dir,
+            no_control_plane_archive=request.no_control_plane_archive,
         )
 
     def prepare_execution_request(

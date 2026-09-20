@@ -76,10 +76,12 @@ class SchemaDriftInfo:
 
     def __post_init__(self) -> None:
         """Convert lists to tuples for immutability."""
-        if isinstance(self.new_fields, list):
-            object.__setattr__(self, "new_fields", tuple(self.new_fields))
-        if isinstance(self.missing_fields, list):
-            object.__setattr__(self, "missing_fields", tuple(self.missing_fields))
+        raw_new_fields: object = self.new_fields
+        if isinstance(raw_new_fields, list):
+            object.__setattr__(self, "new_fields", tuple(raw_new_fields))
+        raw_missing_fields: object = self.missing_fields
+        if isinstance(raw_missing_fields, list):
+            object.__setattr__(self, "missing_fields", tuple(raw_missing_fields))
 
     def to_schema_drift(self) -> SchemaDrift:
         """Convert to SchemaDrift model for metadata.
@@ -130,8 +132,9 @@ class BatchDQMetrics:
         """Validate and ensure immutability."""
         from types import MappingProxyType
 
-        if isinstance(self.validation_errors, list):
-            object.__setattr__(self, "validation_errors", tuple(self.validation_errors))
+        raw_validation_errors: object = self.validation_errors
+        if isinstance(raw_validation_errors, list):
+            object.__setattr__(self, "validation_errors", tuple(raw_validation_errors))
         # Snapshot mapping so callers cannot mutate metrics after construction.
         object.__setattr__(
             self,

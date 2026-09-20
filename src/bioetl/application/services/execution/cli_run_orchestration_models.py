@@ -53,6 +53,7 @@ class CliRunOptionsSpec:
     debug_export_enabled: bool = False
     debug_export_formats: tuple[str, ...] | None = None
     debug_export_dir: str | None = None
+    no_control_plane_archive: bool = False
 
 
 @dataclass(frozen=True, slots=True)

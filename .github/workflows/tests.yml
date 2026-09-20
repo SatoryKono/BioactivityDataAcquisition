@@ -400,6 +400,9 @@ jobs:
             --temp-window-mode "${QUALITY_EXEMPTIONS_TEMP_WINDOW_MODE}" \
             --max-grace-window-days "${QUALITY_EXEMPTIONS_MAX_GRACE_WINDOW_DAYS}"
 
+      - name: Validate duplication/complexity exemption renewals (no expiry cliff)
+        run: uv run --frozen --no-build python -m scripts.engineering.qa check-duplication-complexity-exemptions
+
       - name: Validate scripts inventory + lifecycle governance
         run: |
           uv run --frozen --no-build python -m scripts.engineering.repo check-inventory \

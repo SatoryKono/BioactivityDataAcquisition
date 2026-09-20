@@ -149,7 +149,14 @@ def _optional_str_value(
 
 
 def _run_id_value(values: Mapping[str, object]) -> RunID:
-    """Return the nominal run identifier while preserving legacy string IDs."""
+    """Return the nominal run identifier while preserving legacy string IDs.
+
+    Legacy compatibility shim — sunset date: 2026-12-31. First-party callers
+    MUST pass a UUID RunID (see RunContextFactory.create); plain-string IDs
+    are accepted here only for historical external callers.
+    Codemod: replace string run_id arguments with UUID RunID values, then
+    narrow this seam to UUID-only.
+    """
     value = values["run_id"]
     if not isinstance(value, UUID | str):
         raise TypeError(

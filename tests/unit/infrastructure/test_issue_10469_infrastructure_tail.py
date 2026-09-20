@@ -27,7 +27,9 @@ from bioetl.infrastructure.adapters.health_status_policy import (
 from bioetl.infrastructure.adapters.decorators._data_source_delegation import (
     DataSourceFetchRequest,
 )
-from bioetl.infrastructure.adapters.http.health import assess_health_from_circuit_breaker
+from bioetl.infrastructure.adapters.http.health import (
+    assess_health_from_circuit_breaker,
+)
 from bioetl.infrastructure.adapters.http._client_retry_policy import (
     _record_request_metrics,
 )
@@ -49,12 +51,16 @@ from bioetl.infrastructure.control_plane.archive_run_reports import _identity_ma
 from bioetl.infrastructure.control_plane.file_historical_replay_universe_store import (
     FileHistoricalReplayUniverseStore,
 )
-from bioetl.infrastructure.observability.required_publication_series import _child_exists
+from bioetl.infrastructure.observability.required_publication_series import (
+    _child_exists,
+)
 from bioetl.infrastructure.quality.architecture_debt_task_policy import (
     load_yaml_if_present,
 )
 from bioetl.infrastructure.quality.architecture_quality_scoring import _lazy_import_util
-from bioetl.infrastructure.quality.exemptions_registry_paths import build_module_path_key
+from bioetl.infrastructure.quality.exemptions_registry_paths import (
+    build_module_path_key,
+)
 from bioetl.infrastructure.storage.audit_normalization import require_audit_timestamp
 
 pytestmark = pytest.mark.unit

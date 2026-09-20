@@ -136,8 +136,10 @@ def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> Non
     assert ".devin" in approved_tooling_roots
     # Devin and Zed were accepted as governed tooling roots after this debt
     # baseline; neither represents the root clutter measured by #5847.
+    # OpenCode (.opencode) was accepted the same way as an owner-approved
+    # Phase 1 review/triage surface (Muse Spark); it is tooling, not clutter.
     assert (
-        len(root_dirs - {".devin", ".zed"})
+        len(root_dirs - {".devin", ".zed", ".opencode"})
         == payload["outcomes"]["5847"]["tracked_root_dirs_after"]
     )
     assert (

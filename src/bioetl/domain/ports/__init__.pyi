@@ -377,6 +377,9 @@ from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
 from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
     ForeignKeyReconciliationResult as ForeignKeyReconciliationResult,
 )
+from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
+    ReferenceCompletenessStatus as ReferenceCompletenessStatus,
+)
 from bioetl.domain.ports.workflow_row_reconciliation import (
     RowReconciliationConfig as RowReconciliationConfig,
 )

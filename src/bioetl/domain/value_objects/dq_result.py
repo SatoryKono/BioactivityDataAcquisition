@@ -77,10 +77,12 @@ class DQResult:
 
     def __post_init__(self) -> None:
         """Validate and ensure immutability of anomalies and rule outcomes."""
-        if isinstance(self.anomalies, list):
-            object.__setattr__(self, "anomalies", tuple(self.anomalies))
-        if isinstance(self.rule_outcomes, list):
-            object.__setattr__(self, "rule_outcomes", tuple(self.rule_outcomes))
+        raw_anomalies: object = self.anomalies
+        if isinstance(raw_anomalies, list):
+            object.__setattr__(self, "anomalies", tuple(raw_anomalies))
+        raw_rule_outcomes: object = self.rule_outcomes
+        if isinstance(raw_rule_outcomes, list):
+            object.__setattr__(self, "rule_outcomes", tuple(raw_rule_outcomes))
         if not math.isfinite(self.error_rate) or not 0.0 <= self.error_rate <= 1.0:
             raise ValueError(
                 f"error_rate must be finite in [0.0, 1.0], got {self.error_rate}"

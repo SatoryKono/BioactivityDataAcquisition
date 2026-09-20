@@ -21,6 +21,10 @@
 .mcp.json
 .npmrc
 .pr_agent.toml
+# OpenCode discovery contract (Phase 1): opencode.json MUST live at the exact
+# root filename — OpenCode resolves provider/model config from the checkout
+# root. Added 2026-09-17 with .github/workflows/opencode-{pr-review,triage}.yml.
+opencode.json
 .pre-commit-config.yaml
 .python-version
 .secrets.baseline

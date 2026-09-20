@@ -243,16 +243,41 @@ def list_recent_pipeline_runs(
     }
 
 
+def _round_nonneg_half_up(value: float) -> int:
+    """Round a non-negative value half away from zero (not banker's rounding)."""
+    return int(value + 0.5)
+
+
+def _format_compact_duration(seconds: float) -> str:
+    """Format a non-negative age as compact duration with spaced units."""
+    total = max(0, _round_nonneg_half_up(seconds))
+    hours, remainder = divmod(total, 3600)
+    if hours:
+        minutes = _round_nonneg_half_up(remainder / 60)
+        if minutes == 60:
+            hours += 1
+            minutes = 0
+        if minutes:
+            return f"{hours} h {minutes} m"
+        return f"{hours} h"
+    minutes, secs = divmod(remainder, 60)
+    if minutes and secs:
+        return f"{minutes} m {secs} s"
+    if minutes:
+        return f"{minutes} m"
+    return f"{secs} s"
+
+
 def _event_age_display(
     row: dict[str, object], now: datetime, last: datetime, minimum: datetime
 ) -> str:
     status = row.get("status")
     if status == "running":
         if minimum < last <= now:
-            return f"{(now - last).total_seconds():.0f} s"
+            return _format_compact_duration((now - last).total_seconds())
         return "UNKNOWN"
     if status in _TERMINAL_STATUSES:
-        return "N/A — completed"
+        return "completed"
     return "UNKNOWN"
 
 
@@ -269,6 +294,9 @@ def _timing_fields(row: dict[str, object], now: datetime) -> dict[str, object]:
         last_event_age = (now - last).total_seconds()
     return {
         "duration_seconds": duration,
+        "duration_display": (
+            _format_compact_duration(duration) if duration is not None else None
+        ),
         "last_event_age_seconds": last_event_age,
         "event_age_display": _event_age_display(row, now, last, minimum),
     }

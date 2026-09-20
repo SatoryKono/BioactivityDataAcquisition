@@ -472,9 +472,7 @@ def _complete_request(**kwargs: object) -> ForeignKeyReconciliationRequest:
     reference_table = str(kwargs.get("reference_table", "chembl.target"))
     kwargs.setdefault("reference_completeness", "complete")
     kwargs.setdefault("reference_identity", reference_table)
-    kwargs.setdefault(
-        "completeness_evidence_ref", "tests/unit/fk-reference-complete"
-    )
+    kwargs.setdefault("completeness_evidence_ref", "tests/unit/fk-reference-complete")
     return ForeignKeyReconciliationRequest(**kwargs)  # type: ignore[arg-type]
 
 
@@ -591,4 +589,3 @@ async def test_mixed_run_mutates_only_selected_run_orphans(
     assert result.mutated is True
     assert len(captured) == 1
     assert [row["assay_id"] for row in captured[0]] == ["CHEMBL_A1"]
-

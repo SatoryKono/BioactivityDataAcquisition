@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from typing import Protocol
+from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.replay.closure_claims import (
     RESIDUAL_BLOCKED_STATUSES as RESIDUAL_BLOCKED_STATUSES,
@@ -23,6 +23,14 @@ from bioetl.application.services.control_plane.replay.closure_claims import (
     build_universal_scope_global_claim,
 )
 
+if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.replay.historical_corpus_models import (
+        HistoricalReplayCertifiabilityInventory as HistoricalReplayCertifiabilityInventory,
+    )
+    from bioetl.application.services.control_plane.replay.historical_corpus_models import (
+        HistoricalReplayCertifiabilityRecord as HistoricalReplayCertifiabilityRecord,
+    )
+
 __all__ = [
     "RESIDUAL_BLOCKED_STATUSES",
     "HistoricalReplayClaimScopeMode",
@@ -36,23 +44,6 @@ __all__ = [
     "resolve_closure_verdict",
     "validate_residual_dispositions",
 ]
-
-
-class HistoricalReplayCertifiabilityRecord(Protocol):
-    manifest_id: str
-    run_id: str
-    certification_status: str
-    blocking_reasons: tuple[str, ...]
-
-
-class HistoricalReplayCertifiabilityInventory(Protocol):
-    manifest_count: int
-    certified_count: int
-    replayable_count: int
-    unsupported_count: int
-    remaining_uncertified_count: int
-
-    def to_dict(self) -> dict[str, object]: ...
 
 
 def validate_residual_dispositions(
@@ -231,9 +222,7 @@ def build_closure_report_id(
     return f"historical-replay-closure-{digest[:16]}"
 
 
-def _suggested_disposition(
-    record: HistoricalReplayCertifiabilityRecord,
-) -> str:
+def _suggested_disposition(record: HistoricalReplayCertifiabilityRecord) -> str:
     if record.certification_status == "awaiting_source_snapshot_certification":
         return "reconstruct_immutable_evidence"
     if record.certification_status == "awaiting_certified_source_lineage":

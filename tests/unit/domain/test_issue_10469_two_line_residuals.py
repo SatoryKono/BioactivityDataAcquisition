@@ -148,9 +148,7 @@ def test_rule_component_accepts_callable_and_rejects_invalid_shape() -> None:
     def normalizer(value: object) -> object:
         return value
 
-    resolved, _notes = _coerce_rule_component(
-        field_name="field", component=normalizer
-    )
+    resolved, _notes = _coerce_rule_component(field_name="field", component=normalizer)
     assert resolved is normalizer
     with pytest.raises(ValueError, match="invalid component"):
         _coerce_rule_component(field_name="field", component=object())

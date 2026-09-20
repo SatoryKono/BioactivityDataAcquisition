@@ -48,6 +48,7 @@ class WorkflowRunOptionsConfig:
     debug_export_formats: tuple[str, ...] | None = None
     debug_export_dir: str | None = None
     workflow_id: str | None = None
+    no_control_plane_archive: bool | None = None
 
     def __post_init__(self) -> None:
         if self.multi_filter_ids is not None:
@@ -160,6 +161,10 @@ class WorkflowRunOptionsConfig:
                 override.debug_export_dir,
             ),
             workflow_id=prefer_override(self.workflow_id, override.workflow_id),
+            no_control_plane_archive=prefer_override(
+                self.no_control_plane_archive,
+                override.no_control_plane_archive,
+            ),
         )
 
     def to_mapping(self) -> JsonDict:

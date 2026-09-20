@@ -3,9 +3,9 @@
 
 CI (``.github/workflows/type-checking.yml``) runs::
 
-    mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
+    mypy --config-file pyproject.toml --strict --no-incremental src/bioetl src/memory
 
-``src/memory/**`` is a separate package with a large historical graph-sync core.
+``src/memory/**`` is type-checked like product code (AUD-004).
 Prefer this wrapper from Zed Type check so results match the merge gate.
 """
 
@@ -27,8 +27,7 @@ def main(argv: list[str] | None = None) -> int:
     del argv
     os.chdir(REPO_ROOT)
     ensure_ready(modules=("mypy",))
-    # Match CI type-checking.yml product gate. Never pass bare ``src`` — that
-    # pulls the memory sidecar graph tooling (hundreds of historical errors).
+    # Match CI type-checking.yml product gate (AUD-004: memory included).
     cmd = [
         sys.executable,
         "-m",
@@ -37,11 +36,11 @@ def main(argv: list[str] | None = None) -> int:
         "pyproject.toml",
         "--no-pretty",
         "src/bioetl",
+        "src/memory",
     ]
     print("[zed_mypy] CI-aligned type gate:", " ".join(cmd), flush=True)
     print(
-        "[zed_mypy] scope=src/bioetl only "
-        "(memory.* is ignore_errors in pyproject.toml)",
+        "[zed_mypy] scope=src/bioetl + src/memory (AUD-004 strict)",
         flush=True,
     )
     completed = subprocess.run(cmd, cwd=REPO_ROOT, check=False)

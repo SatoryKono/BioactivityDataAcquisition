@@ -42,6 +42,8 @@ from bioetl.application.pipelines.uniprot.extractors._comment_helpers import (
     _extract_isoform_synonym_values,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_structural_policy_falls_back_when_schema_has_no_contracts(
     monkeypatch: pytest.MonkeyPatch,
@@ -103,7 +105,9 @@ async def test_streaming_processor_clamps_monitor_recommendation_to_one() -> Non
 async def test_wrapped_data_source_rejects_invalid_enhanced_health_result() -> None:
     class Wrapper(_WrappedDataSourceDelegationMixin):
         def __init__(self) -> None:
-            self._data_source = SimpleNamespace(check_health=AsyncMock(return_value="ok"))
+            self._data_source = SimpleNamespace(
+                check_health=AsyncMock(return_value="ok")
+            )
 
         def _after_wrapped_data_source_enter(self) -> None:
             return None

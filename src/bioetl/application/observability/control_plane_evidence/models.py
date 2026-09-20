@@ -11,6 +11,7 @@ from bioetl.application.observability.control_plane_evidence.checks import (
     TrustStatus,
     aggregate_trust_status,
 )
+from bioetl.application.observability.reason_aliases import display_reasons_text
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import (
     RUN_FAILED_EVENT,
@@ -78,6 +79,7 @@ def evidence_payload(
             "reasons": reasons[:12],
             "reasons_count": len(reasons),
             "reasons_text": reasons_text,
+            "reasons_display": display_reasons_text(reasons_text),
             "reasons_truncated": reasons_truncated,
             "evidence_observed_at": (
                 manifest.created_at.isoformat() if manifest is not None else None

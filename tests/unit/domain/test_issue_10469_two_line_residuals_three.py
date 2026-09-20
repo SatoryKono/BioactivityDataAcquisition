@@ -63,9 +63,10 @@ def test_contract_alignment_shortcuts_and_missing_reference() -> None:
 def test_preflight_override_helpers_preserve_unconfigured_issues() -> None:
     issues = [object()]
 
-    assert apply_overrides_to_issues(
-        issues, SimpleNamespace(issue_code_overrides=None)
-    ) is issues
+    assert (
+        apply_overrides_to_issues(issues, SimpleNamespace(issue_code_overrides=None))
+        is issues
+    )
     assert apply_issue_override(issues[0], None) is issues[0]
 
 
@@ -93,6 +94,13 @@ def test_dq_policy_none_overrides_and_strict_contract_escalation() -> None:
         strictness_mode="strict",
     )
 
+    with pytest.raises(TypeError, match="disposition_overrides"):
+        resolver._get_disposition_overrides_dict()
+
+    resolver.config = SimpleNamespace(
+        disposition_overrides=(),
+        strictness_mode="strict",
+    )
     assert resolver._get_disposition_overrides_dict() == {}
     assert (
         resolver._apply_contract_adjustments(
@@ -110,8 +118,7 @@ def test_preflight_governor_uses_first_available_timestamp() -> None:
     )
 
     assert (
-        PreflightGovernor._resolve_execution_timestamp(report)
-        == "2026-09-17T00:00:00Z"
+        PreflightGovernor._resolve_execution_timestamp(report) == "2026-09-17T00:00:00Z"
     )
 
 
@@ -140,12 +147,14 @@ def test_schema_classifier_handles_policy_fallback_and_nested_explanation() -> N
         non_breaking_changes=[],
         unknown_changes=[],
     )
-    assert classifier._generate_explanation(inconsistent_diff, nested).summary.startswith(
-        explanation.summary
-    )
+    assert classifier._generate_explanation(
+        inconsistent_diff, nested
+    ).summary.startswith(explanation.summary)
 
 
-def test_activity_aggregator_rejects_unknown_enum_and_handles_nonpositive_logs() -> None:
+def test_activity_aggregator_rejects_unknown_enum_and_handles_nonpositive_logs() -> (
+    None
+):
     aggregator = ActivityAggregator()
 
     with pytest.raises(ValueError, match="Unsupported aggregation method"):

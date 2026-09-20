@@ -102,6 +102,7 @@ bioetl run --pipeline <NAME> [OPTIONS]
 - `--use-cached-bronze` — использовать Bronze cache
 - `--exact-replay` — strict exact replay (требует snapshot-backed Bronze)
 - `--required-persistence-profile` — `degraded_observable` | `replay_ready` | `forensic_grade`
+- `--no-control-plane-archive` — не создавать local archive pack после успеха
 
 **Профили персистентности (control-plane):**
 

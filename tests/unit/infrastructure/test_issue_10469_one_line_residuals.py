@@ -166,7 +166,9 @@ async def test_pubmed_health_includes_real_api_key() -> None:
         status = await PubMedHealthMixin._probe_health(host)
 
     assert status.value == "HEALTHY"
-    assert host.http_client.get_once.call_args.kwargs["params"]["api_key"] == "secret-key"
+    assert (
+        host.http_client.get_once.call_args.kwargs["params"]["api_key"] == "secret-key"
+    )
 
 
 @pytest.mark.asyncio
@@ -208,7 +210,9 @@ def test_lineage_protection_scan_skips_empty_payload(tmp_path: Path) -> None:
     assert refs.lineage_fragment_ids == set()
 
 
-def test_jsonl_append_preserves_original_error_when_rollback_fails(tmp_path: Path) -> None:
+def test_jsonl_append_preserves_original_error_when_rollback_fails(
+    tmp_path: Path,
+) -> None:
     os_module = MagicMock()
     os_module.open.return_value = 7
     os_module.fstat.return_value = SimpleNamespace(st_size=3)
@@ -463,11 +467,7 @@ def test_row_reconciliation_rejects_non_strict_type_policy() -> None:
 def test_owner_decomposition_skips_invalid_allocations_after_valid_quarter() -> None:
     errors: list[str] = []
     _validate_owner_decomposition_targets_section(
-        {
-            "owner_decomposition_targets": [
-                {"quarter": "2026-Q4", "allocations": {}}
-            ]
-        },
+        {"owner_decomposition_targets": [{"quarter": "2026-Q4", "allocations": {}}]},
         quarter_budget_map={"2026-Q4": 0},
         owner_diversification_start=None,
         min_distinct_owners=1,

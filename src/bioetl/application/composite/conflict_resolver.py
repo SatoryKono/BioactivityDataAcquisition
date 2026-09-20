@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
+from typing import cast
 
 import polars as pl
 
@@ -142,7 +143,9 @@ class ConflictResolverService:
         seed_pipeline: str | None,
     ) -> Callable[[], pl.DataFrame] | None:
         """Map configured conflict policy to coalesce-policy execution callable."""
-        policy = self._config.conflict_resolution
+        # Raw configs may carry unvalidated strings; unknown policies have no
+        # handler and leave the frame unchanged (fail-open by design).
+        policy = cast("str", self._config.conflict_resolution)
         match policy:
             case ConflictResolution.SEED_PRIORITY:
                 return lambda: self._coalesce_policy.coalesce_prefer_seed(

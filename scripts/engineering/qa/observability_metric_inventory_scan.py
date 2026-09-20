@@ -792,8 +792,6 @@ def _helper_metric_candidates(
             if metric_name is not None:
                 candidates.add(metric_name)
     for keyword in node.keywords:
-        if keyword.value is None:
-            continue
         metric_name = _resolve_metric_name_expr(
             keyword.value,
             string_bindings=string_bindings,

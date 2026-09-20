@@ -12,6 +12,8 @@ docs/02-architecture/ @SatoryKono
 AGENTS.md @SatoryKono
 .codex/ @SatoryKono
 .devin/ @SatoryKono
+.opencode/ @SatoryKono
+opencode.json @SatoryKono
 .github/copilot-instructions.md @SatoryKono
 .github/instructions/ @SatoryKono
 scripts/ai/ @SatoryKono

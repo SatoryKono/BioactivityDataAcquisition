@@ -77,9 +77,10 @@ def test_resolve_reproducibility_profile_uses_source_execution_context(
         ),
     )
 
-    assert replay_family_context_module.build_replay_family_context(
-        _manifest()
-    ).profile is profile
+    assert (
+        replay_family_context_module.build_replay_family_context(_manifest()).profile
+        is profile
+    )
 
 
 def test_resolve_replay_family_contract_uses_composite_execution_context(

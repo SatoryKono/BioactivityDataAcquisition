@@ -7,9 +7,6 @@ from typing import TYPE_CHECKING, TypedDict
 from bioetl.application.services.control_plane.manifest.diagnostics.operator_replay_mode import (
     _resolve_operator_replay_mode,
 )
-from bioetl.domain.control_plane.reproducibility_profiles import (
-    build_lineage_closure_boundary,
-)
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_readiness import (
     _resolve_manifest_replay_readiness_verdict,
 )
@@ -32,6 +29,9 @@ from bioetl.application.services.control_plane.manifest.replay_taxonomy import (
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
     ReproducibilityPolicyAssessment,
+)
+from bioetl.domain.control_plane.reproducibility_profiles import (
+    build_lineage_closure_boundary,
 )
 
 if TYPE_CHECKING:

@@ -496,7 +496,11 @@ def _parse_observed_series_count_rows(
 
 
 def _local_observed_series_counts(report: MetricInventoryReport) -> dict[str, int]:
-    raw_local_observed_series = report.get("runtime_cardinality_observed_series", {})
+    # Local-fallback reports carry int counts where generated reports carry
+    # row lists; keep the value dynamically typed and narrow per branch.
+    raw_local_observed_series: object = report.get(
+        "runtime_cardinality_observed_series", {}
+    )
     if not isinstance(raw_local_observed_series, dict):
         return {}
     counts: dict[str, int] = {}

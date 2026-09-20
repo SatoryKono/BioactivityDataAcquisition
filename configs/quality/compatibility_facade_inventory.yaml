@@ -20,10 +20,25 @@ tracked_docstring_prefixes:
   - Pipeline factory compatibility-only facade
   - Storage compatibility-only facade
 transition_debt: []
+compatibility_contract_policy:
+  linked_issue: "#10536"
+  deprecation_window: 90d
+  migration_guide: docs/03-guides/compatibility-entrypoint-migration-guide.md
+  review_cadence: quarterly
+  rules:
+    - Silent removal stays forbidden; any future deprecation of a retained entrypoint
+      requires a 90-day deprecation window with DeprecationWarning, importer-census
+      proof, and a migration-guide update before removal.
+    - Every retained entrypoint carries its own compatibility_contract restating the
+      window length and the migration guide pointer.
 retained_entrypoints:
   - path: src/bioetl/interfaces/cli/commands/run.py
     compatibility_role: Permanent public run command seam over the retained domain helper package under `bioetl.interfaces.cli.commands.domains.run`.
     canonical_target: bioetl.interfaces.cli.commands.run
+    compatibility_contract:
+      deprecation_window: 90d
+      migration_guide: docs/03-guides/compatibility-entrypoint-migration-guide.md
+      review_cadence: quarterly
     status: public-entrypoint
     owner: bioetl.interfaces.cli.commands
     consumer_class: public_cli_entrypoint
@@ -44,6 +59,10 @@ retained_entrypoints:
   - path: src/bioetl/interfaces/cli/commands/run_all.py
     compatibility_role: Permanent public run-all command seam over the retained domain helper package under `bioetl.interfaces.cli.commands.domains.run_all`.
     canonical_target: bioetl.interfaces.cli.commands.run_all
+    compatibility_contract:
+      deprecation_window: 90d
+      migration_guide: docs/03-guides/compatibility-entrypoint-migration-guide.md
+      review_cadence: quarterly
     status: public-entrypoint
     owner: bioetl.interfaces.cli.commands
     consumer_class: public_cli_entrypoint
@@ -65,6 +84,10 @@ retained_entrypoints:
   - path: src/bioetl/interfaces/cli/commands/run_composite.py
     compatibility_role: Permanent public run-composite command seam over the reviewed owner package `bioetl.interfaces.cli.commands.domains.composite`.
     canonical_target: bioetl.interfaces.cli.commands.run_composite
+    compatibility_contract:
+      deprecation_window: 90d
+      migration_guide: docs/03-guides/compatibility-entrypoint-migration-guide.md
+      review_cadence: quarterly
     status: public-entrypoint
     owner: bioetl.interfaces.cli.commands
     consumer_class: public_cli_entrypoint
@@ -87,6 +110,10 @@ retained_entrypoints:
   - path: src/bioetl/interfaces/cli/commands/health.py
     compatibility_role: Permanent public health command seam over the internal owner module `bioetl.interfaces.cli.commands.domains.health.command`.
     canonical_target: bioetl.interfaces.cli.commands.health
+    compatibility_contract:
+      deprecation_window: 90d
+      migration_guide: docs/03-guides/compatibility-entrypoint-migration-guide.md
+      review_cadence: quarterly
     status: public-entrypoint
     owner: bioetl.interfaces.cli.commands
     consumer_class: public_cli_entrypoint
@@ -109,6 +136,10 @@ retained_entrypoints:
   - path: src/bioetl/interfaces/cli/commands/diagnostics.py
     compatibility_role: Permanent public diagnostics command seam over the internal owner module `bioetl.interfaces.cli.commands.domains.diagnostics.command`.
     canonical_target: bioetl.interfaces.cli.commands.diagnostics
+    compatibility_contract:
+      deprecation_window: 90d
+      migration_guide: docs/03-guides/compatibility-entrypoint-migration-guide.md
+      review_cadence: quarterly
     status: public-entrypoint
     owner: bioetl.interfaces.cli.commands
     consumer_class: public_cli_entrypoint
@@ -132,6 +163,10 @@ retained_entrypoints:
   - path: src/bioetl/interfaces/cli/commands/quarantine.py
     compatibility_role: Permanent public quarantine command seam over the internal owner module `bioetl.interfaces.cli.commands.domains.quarantine.command`.
     canonical_target: bioetl.interfaces.cli.commands.quarantine
+    compatibility_contract:
+      deprecation_window: 90d
+      migration_guide: docs/03-guides/compatibility-entrypoint-migration-guide.md
+      review_cadence: quarterly
     status: public-entrypoint
     owner: bioetl.interfaces.cli.commands
     consumer_class: public_cli_entrypoint
@@ -156,6 +191,10 @@ retained_entrypoints:
       Permanent public composition entrypoint that intentionally shields internal `_pipeline_execution`, `_resource_management`,
       and `_services` module paths.
     canonical_target: bioetl.composition.entrypoints
+    compatibility_contract:
+      deprecation_window: 90d
+      migration_guide: docs/03-guides/compatibility-entrypoint-migration-guide.md
+      review_cadence: quarterly
     status: public-entrypoint
     owner: bioetl.composition
     consumer_class: public_composition_entrypoint
@@ -186,6 +225,10 @@ retained_entrypoints:
       Permanent logic-free public health lazy re-export facade that shields split services/bootstrap/resource
       owners while keeping a reviewed export budget.
     canonical_target: bioetl.composition.health_api
+    compatibility_contract:
+      deprecation_window: 90d
+      migration_guide: docs/03-guides/compatibility-entrypoint-migration-guide.md
+      review_cadence: quarterly
     status: public-entrypoint
     owner: bioetl.composition
     consumer_class: public_composition_entrypoint
@@ -214,6 +257,10 @@ retained_entrypoints:
       Permanent logic-free public maintenance lazy re-export facade that shields maintenance/resource owners
       behind a reviewed export budget.
     canonical_target: bioetl.composition.maintenance_api
+    compatibility_contract:
+      deprecation_window: 90d
+      migration_guide: docs/03-guides/compatibility-entrypoint-migration-guide.md
+      review_cadence: quarterly
     status: public-entrypoint
     owner: bioetl.composition
     consumer_class: public_composition_entrypoint
@@ -241,6 +288,10 @@ retained_entrypoints:
       Permanent public infrastructure config package-root convenience facade that intentionally shields split
       config loader APIs behind a reviewed export budget.
     canonical_target: bioetl.infrastructure.config
+    compatibility_contract:
+      deprecation_window: 90d
+      migration_guide: docs/03-guides/compatibility-entrypoint-migration-guide.md
+      review_cadence: quarterly
     status: public-entrypoint
     owner: bioetl.infrastructure.config
     consumer_class: public_config_facade
@@ -265,6 +316,10 @@ retained_entrypoints:
   - path: src/bioetl/domain/composite/config.py
     compatibility_role: Permanent public entrypoint for composite config models that shields split config internals.
     canonical_target: bioetl.domain.composite.config
+    compatibility_contract:
+      deprecation_window: 90d
+      migration_guide: docs/03-guides/compatibility-entrypoint-migration-guide.md
+      review_cadence: quarterly
     status: public-entrypoint
     owner: bioetl.domain.composite
     consumer_class: public_domain_facade
@@ -289,6 +344,10 @@ retained_entrypoints:
       Permanent public composite merge module that requires `MergeCollaboratorGroup` bundle; legacy per-collaborator
       keyword wiring removed in RF-009.2.
     canonical_target: bioetl.application.composite.merger
+    compatibility_contract:
+      deprecation_window: 90d
+      migration_guide: docs/03-guides/compatibility-entrypoint-migration-guide.md
+      review_cadence: quarterly
     status: public-entrypoint
     owner: bioetl.application.composite
     consumer_class: public_application_facade

@@ -6,7 +6,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from bioetl.domain.exceptions import BioETLError, DataQualityError, StorageError
 from bioetl.domain.types import GoldBusinessRuleSpec, JsonDict, ScdConfig
@@ -116,11 +116,14 @@ class DQReportContext:
                     for rule in self.gold_business_rules
                 ],
             )
-        if isinstance(self.gold_scd_config, Mapping):
+        raw_scd_config = cast(
+            "ScdConfig | Mapping[str, Any] | None", self.gold_scd_config
+        )
+        if isinstance(raw_scd_config, Mapping):
             object.__setattr__(
                 self,
                 "gold_scd_config",
-                ScdConfig.from_mapping(self.gold_scd_config),
+                ScdConfig.from_mapping(raw_scd_config),
             )
 
 

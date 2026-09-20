@@ -208,6 +208,6 @@ def test_recent_timing_null_does_not_inherit_empty_catalog_message() -> None:
         o["matcher"]["options"]: {v["id"]: v["value"] for v in o["properties"]}
         for o in panel["fieldConfig"]["overrides"]
     }
-    for field in ("duration_seconds", "last_event_age_seconds"):
+    for field in ("Duration", "Event age"):
         assert properties[field]["noValue"] == "UNKNOWN"
     assert panel["fieldConfig"]["defaults"]["noValue"].startswith("VALID EMPTY")

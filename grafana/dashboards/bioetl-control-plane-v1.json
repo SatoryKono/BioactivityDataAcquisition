@@ -165,7 +165,7 @@
           "value": "-"
         },
         "datasource": "BioETL Ops HTTP",
-        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
+        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}",
         "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
         "hide": 0,
         "includeAll": false,
@@ -192,7 +192,7 @@
               "method": "GET",
               "data": ""
             },
-            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
+            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}",
             "columns": [
               {
                 "selector": "text",
@@ -684,7 +684,7 @@
               },
               {
                 "id": "custom.hidden",
-                "value": false
+                "value": true
               },
               {
                 "id": "noValue",
@@ -747,6 +747,42 @@
               {
                 "id": "custom.width",
                 "value": 80
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "success": {
+                        "text": "success",
+                        "color": "green"
+                      },
+                      "failed": {
+                        "text": "failed",
+                        "color": "red"
+                      },
+                      "shutdown": {
+                        "text": "shutdown",
+                        "color": "orange"
+                      },
+                      "unknown": {
+                        "text": "unknown",
+                        "color": "#555555"
+                      },
+                      "UNKNOWN": {
+                        "text": "UNKNOWN",
+                        "color": "#555555"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -759,6 +795,62 @@
               {
                 "id": "custom.width",
                 "value": 130
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "OK": {
+                        "text": "OK",
+                        "color": "green"
+                      },
+                      "WARN": {
+                        "text": "WARN",
+                        "color": "orange"
+                      },
+                      "WARNING": {
+                        "text": "WARN",
+                        "color": "orange"
+                      },
+                      "ERROR": {
+                        "text": "ERROR",
+                        "color": "red"
+                      },
+                      "CRIT": {
+                        "text": "ERROR",
+                        "color": "red"
+                      },
+                      "QUERY ERROR": {
+                        "text": "QUERY ERROR",
+                        "color": "red"
+                      },
+                      "INCOMPLETE": {
+                        "text": "INCOMPLETE",
+                        "color": "#555555"
+                      },
+                      "UNKNOWN": {
+                        "text": "UNKNOWN",
+                        "color": "#555555"
+                      },
+                      "N/A": {
+                        "text": "N/A",
+                        "color": "#555555"
+                      },
+                      "SELECT RUN": {
+                        "text": "SELECT RUN",
+                        "color": "#555555"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -841,6 +933,7 @@
               "names": [
                 "processing_status",
                 "trust_status",
+                "reasons_display",
                 "reasons_text",
                 "evidence_observed_at",
                 "reasons_count",
@@ -855,7 +948,7 @@
             "indexByName": {
               "processing_status": 0,
               "trust_status": 1,
-              "reasons_text": 2,
+              "reasons_display": 2,
               "evidence_observed_at": 3,
               "reasons_count": 4,
               "evidence_freshness": 5
@@ -863,7 +956,7 @@
             "renameByName": {
               "processing_status": "Result",
               "trust_status": "Trust",
-              "reasons_text": "Reasons",
+              "reasons_display": "Reasons",
               "evidence_observed_at": "Observed"
             }
           }
@@ -967,15 +1060,49 @@
             },
             "properties": [
               {
+                "id": "displayName",
+                "value": "Status"
+              },
+              {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto",
+                  "type": "color-text",
                   "wrapText": false
                 }
               },
               {
-                "id": "displayName",
-                "value": "Status"
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "OK": {
+                        "text": "OK",
+                        "color": "green"
+                      },
+                      "WARN": {
+                        "text": "WARN",
+                        "color": "orange"
+                      },
+                      "WARNING": {
+                        "text": "WARN",
+                        "color": "orange"
+                      },
+                      "ERROR": {
+                        "text": "ERROR",
+                        "color": "red"
+                      },
+                      "INCOMPLETE": {
+                        "text": "INCOMPLETE",
+                        "color": "#555555"
+                      },
+                      "UNKNOWN": {
+                        "text": "UNKNOWN",
+                        "color": "#555555"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -1030,6 +1157,15 @@
                       },
                       "archive_restore_verified": {
                         "text": "Archive verified"
+                      },
+                      "reproducibility_evidence_floor_satisfied": {
+                        "text": "Evidence floor met"
+                      },
+                      "snapshot_evidence_not_required": {
+                        "text": "Snapshots not required"
+                      },
+                      "lineage_closure_gap": {
+                        "text": "Lineage closure gap"
                       },
                       "archive_identity_mismatch": {
                         "text": "Identity mismatch"
@@ -4101,7 +4237,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Default p95 read latency by store and operation; change Read latency to p50 or p99. Excludes failed reads (status!=\"failed\"). Filters do not apply. No data means no latency samples were recorded in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Default p95 read latency by store and operation; change Read latency to p50 or p99. Excludes failed reads (status!=\"failed\"). Filters do not apply. Values are seconds; the axis auto-scales (milliseconds display as ms). No data means no latency samples were recorded in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -4121,21 +4257,14 @@
                   {
                     "color": "green",
                     "value": null
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 0.5
-                  },
-                  {
-                    "color": "red",
-                    "value": 1
                   }
                 ]
               },
               "unit": "s",
+              "decimals": 3,
               "noValue": "No optional latency samples in range. Treat this as telemetry absence, not proof of a healthy control-plane path.",
               "custom": {
-                "axisLabel": "seconds"
+                "axisLabel": ""
               }
             },
             "overrides": []
@@ -8837,7 +8966,72 @@
                 "minWidth": 50
               }
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "OK": {
+                            "text": "OK",
+                            "color": "green"
+                          },
+                          "WARN": {
+                            "text": "WARN",
+                            "color": "orange"
+                          },
+                          "WARNING": {
+                            "text": "WARN",
+                            "color": "orange"
+                          },
+                          "ERROR": {
+                            "text": "ERROR",
+                            "color": "red"
+                          },
+                          "QUERY ERROR": {
+                            "text": "QUERY ERROR",
+                            "color": "red"
+                          },
+                          "INCOMPLETE": {
+                            "text": "INCOMPLETE",
+                            "color": "#555555"
+                          },
+                          "UNKNOWN": {
+                            "text": "UNKNOWN",
+                            "color": "#555555"
+                          },
+                          "N/A": {
+                            "text": "N/A",
+                            "color": "#555555"
+                          },
+                          "SELECT RUN": {
+                            "text": "SELECT RUN",
+                            "color": "#555555"
+                          },
+                          "RUNNING": {
+                            "text": "RUNNING",
+                            "color": "orange"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           },
           "targets": [
             {
@@ -8868,7 +9062,7 @@
                   "names": [
                     "domain",
                     "verdict",
-                    "reason",
+                    "reason_display",
                     "action",
                     "evidence_ref"
                   ]
@@ -8881,7 +9075,7 @@
                 "indexByName": {
                   "domain": 0,
                   "verdict": 1,
-                  "reason": 2,
+                  "reason_display": 2,
                   "action": 3,
                   "evidence_ref": 4
                 },
@@ -8891,7 +9085,7 @@
                   "execution_state": "Result",
                   "evidence_completeness": "Evidence",
                   "rules_version": "Rules",
-                  "reason": "Reason",
+                  "reason_display": "Reason",
                   "action": "Action",
                   "evidence_ref": "Evidence reference",
                   "pipeline": "Pipeline",

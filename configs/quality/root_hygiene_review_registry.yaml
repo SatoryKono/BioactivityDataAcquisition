@@ -6,8 +6,8 @@ last_verified: "2026-08-05"
 current_live_root_baseline:
   tracked_root_audit_status: pass
   strict_untracked_root_audit_status: pass
-  tracked_root_file_count: 37
-  allowlist_entry_count: 37
+  tracked_root_file_count: 38
+  allowlist_entry_count: 38
   verification_command: >-
     .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py
     --strict-untracked
@@ -319,9 +319,13 @@ review_lanes:
     retention_action: retain_only_when_the_exact_root_filename_is_required_by_a_tool_contract_or_public_entrypoint
     cleanup_policy: move_to_docs_or_config_subtree_only_after_the_external_contract_is_retired_or_repointed
     verification:
-      - git ls-files .coderabbit.yaml commitlint.config.mjs mint.json sonar-project.properties
-      - rg -n "\\.coderabbit\\.yaml|commitlint\\.config\\.mjs|mint\\.json|sonar-project\\.properties" .github docs scripts tests configs README.md package.json
+      - git ls-files .coderabbit.yaml commitlint.config.mjs mint.json sonar-project.properties opencode.json
+      - rg -n "\\.coderabbit\\.yaml|commitlint\\.config\\.mjs|mint\\.json|sonar-project\\.properties|opencode\\.json" .github docs scripts tests configs README.md package.json AGENTS.md
     candidates:
+      - path: opencode.json
+        current_live_state: present_approved_root_surface
+        canonical_path: opencode.json
+        action_if_reintroduced: retain_as_exact_root_opencode_configuration_while_opencode_github_agent_requires_the_standard_filename
       - path: .coderabbit.yaml
         current_live_state: present_approved_root_surface
         canonical_path: .coderabbit.yaml

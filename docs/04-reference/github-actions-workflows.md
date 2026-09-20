@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-09-10'
+  Last verified: '2026-09-17'
 
 ______________________________________________________________________
 
@@ -15,21 +15,21 @@ ______________________________________________________________________
 
 ## Purpose
 
-This page is the canonical published inventory of the **48** live GitHub Actions
+This page is the canonical published inventory of the **50** live GitHub Actions
 workflow files tracked under `.github/workflows/` on the default branch.
 The count is derived from those tracked `*.yml` files; it is not a separately
 maintained target and it is **not** equal to the GitHub Actions API
-`total_count`. Do not claim that 48 equals every workflow object GitHub returns.
+`total_count`. Do not claim that 50 equals every workflow object GitHub returns.
 
-Live GET `2026-09-10`: API `total_count` is **77**.
+Live GET `2026-09-17`: API `total_count` is **79**.
 
 | Bucket | Count | Meaning |
 | --- | --- | --- |
-| Tracked `.github/workflows/*.yml` | 48 | Canonical inventory on `main`; this page |
+| Tracked `.github/workflows/*.yml` | 50 | Canonical inventory on `main`; this page |
 | GitHub-hosted `dynamic/**` | 10 | Dependabot, CodeQL default, agent reviewers; not PR gates |
 | GitHub-only orphan temp/codex IDs | 16 | Files left `main`; `disabled_manually` after #10265 |
 | GitHub-only residual deleted files | 3 | Former tracked workflows; `disabled_manually`; not gates |
-| API `total_count` | 77 | 48 + 10 + 16 + 3 |
+| API `total_count` | 79 | 50 + 10 + 16 + 3 |
 
 GitHub live `state` in the tables below is the Actions UI/API value
 (`active` or `disabled_manually`) after the #10263 map. `deprecated` reusable
@@ -77,6 +77,8 @@ new spend/safety decision.
 | `duplication-complexity.yml` | `Duplication and Complexity Checks` | `workflow_call`, `push` | `active` | `active` | Duplication, constructor-args, and complexity gates |
 | `e2e-matrix-health.yml` | `E2E Matrix Health` | `push`, `pull_request`, `schedule`, `workflow_dispatch` | `active` | `active` | Blocking and nightly E2E matrix smoke lanes |
 | `import-linter.yml` | `Lint and Architecture Gates` | `workflow_call`, `push`, `workflow_dispatch` | `active` | `active` | Ruff/import-linter/architecture fast gates |
+| `opencode-pr-review.yml` | `opencode-pr-review` | `pull_request` | `active` | `active` | OpenCode review agent (Muse Spark): read-only PR review comments, never approves or merges |
+| `opencode-triage.yml` | `opencode-triage` | `issues` | `active` | `active` | OpenCode triage agent: classifies and labels new issues, never closes |
 | `pr-required.yml` | `PR Gate Complete` | `pull_request`, `workflow_dispatch` | `active` | `active` | Always-materialized fail-closed coordinator; GitHub required context is job `pr-gate-complete` (ruleset 13643213) |
 | `port-contracts.yml` | `Port Contract Tests` | `push`, `pull_request`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Port-protocol and hypothesis contract tests |
 | `provider-contract-drift.yml` | `Provider Contract Drift` | `push`, `pull_request`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Provider contract replay/drift gate |

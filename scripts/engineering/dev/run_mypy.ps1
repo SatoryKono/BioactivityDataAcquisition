@@ -16,7 +16,7 @@ foreach ($Arg in $args) {
 }
 
 if ($ArgsList.Count -eq 0) {
-    $ArgsList = @("--config-file", "pyproject.toml", "--strict", "src/bioetl")
+    $ArgsList = @("--config-file", "pyproject.toml", "--strict", "src/bioetl", "src/memory")
 }
 
 if ($MypyNarrow) {

@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import Mock
-from uuid import uuid4
 
 import pytest
 
@@ -104,9 +103,7 @@ def test_manifest_launch_context_marks_full_scan_rebuild() -> None:
 
 
 def test_snapshot_summary_ignores_duplicate_with_same_content_hash() -> None:
-    existing = {
-        "snapshot-1": {"snapshot_id": "snapshot-1", "content_hash": "sha256:a"}
-    }
+    existing = {"snapshot-1": {"snapshot_id": "snapshot-1", "content_hash": "sha256:a"}}
 
     conflicts = _merge_ledger_snapshots_by_id(
         existing,
@@ -123,7 +120,7 @@ def test_workflow_inspection_returns_none_for_unknown_run_id() -> None:
     service = WorkflowInspectionService(
         manifest_port=Mock(), ledger_port=Mock(), state_port=state_port
     )
-    run_id = str(uuid4())
+    run_id = "run-unknown-1"
 
     assert service.inspect_run_id(run_id) is None
     state_port.get_by_run_id.assert_called_once()

@@ -1,85 +1,62 @@
-# Technical debt audit (full)
+# Аудит технического долга — BioactivityDataAcquisition
 
-Дата: 2026-09-14
-`prompt_id`: `prompt.audit.tech-debt`
-`SCOPE`: `reports/quality/` `configs/quality/` `src/`
-`MODE`: audit · `AUDIT_MODE`: full · `LANGUAGE`: ru
-`REQUIRE_GH_TRACKING`: false
-База: `origin/main` = `5c4243c9adad87f4a8eb4a6b0228e4b65841810e`
+- Промпт: prompt.audit.tech-debt v1.2.0, MODE=audit
+- Источник: ТОЛЬКО компактные свидетельства (prior result 1–3); новых измерений не проводилось
+- Находок: 12 (AUD-001…AUD-012), все PROVEN; NOT_PROVEN нет
+- Поверхностная оценка (surface_score, шкала 0–3): **общий 2** (макс. 3 у P0; средний 1,8)
+- Повышение бюджетов/порогов (exemptions, jscpd threshold, mypy-поблажки) — **НЕ предлагается** ни по одной находке
 
-`surface_score`: **2** (scorecard/gates работают, exemptions=0, integral 9.14; freeze на потолке, leftover caps, stale remote-main pin)
+## Реестр по риску
 
-## Метод
+### P0 — критично
 
-1. Регистры: `configs/quality/debt_scorecard.yaml`, ratchets, exemptions, constructor waivers, skip/assertless, shim/lazy inventories.
-2. Evidence: `reports/quality/debt-governance-gates.json`, `architecture-quality-scorecard.json`, `hotspot-family-baseline.json`, `module-coverage-inventory.json`, `architecture-debt-remote-main-baseline.json`, `test-governance-current.json`, `total-tech-debt-audit-main-current.md`.
-3. Сэмпл маркеров в `src/bioetl`: TODO/FIXME/HACK — 0; `type: ignore` / `noqa` / `pragma: no cover`.
-4. Тренд vs budgets: over / at / under. **REJECTED_POLICY:** любой рост max_count / exemptions / hotspot caps.
-5. Grafana/http WIP проигнорирован, кроме hash-only правки `module-coverage-inventory.json` в working tree.
+| ID | Находка | Surface | Путь |
+|----|---------|---------|------|
+| AUD-001 | God-module `sync_pkg/_core.py`: 18179 строк / 576676 Б, смешение argparse/ast/subprocess/threading/tempfile/http/Neo4j; разрыв ~10x со следующим файлом | 3 | `src/memory/graph/sync_pkg/_core.py:1` |
+| AUD-002 | Синхронизированный обрыв quality-gate exemptions 2026-12-31: весь `src/memory/` + 15 путей тяжёлых подсистем + 4 CC-лимита (25/20/15) на retry/fallback | 3 | `configs/quality/duplication_complexity_exemptions.yaml:17` |
 
-## Тренд бюджетов (не предлагать повышение)
+### P1 — высокий
 
-| Метрика | Live | Max | Target | Trend |
-| --- | ---: | ---: | ---: | --- |
-| architecture_metric_exemptions | 0 | 0 | 0 | at (Q3 met) |
-| ruff/mypy/arch skip | 0 | 0 | 0 | at |
-| transition/sunset/expired compat | 0/0/0 | 0 | 0 | at |
-| uncovered/unmeasured modules | 0/0 | 0 | 0 | at |
-| lazy_import | 77 | 77 | 60 | **at freeze** |
-| private_import pairs | 15 | 15 | shrink | **at freeze** |
-| config_count / unique_params | 27 / 419 | 27 / 419 | hold | **at freeze** |
-| control_plane fan-in | 2 | 2 | hold | **at freeze** |
-| runtime_builders fan-in | 3 | 3 | hold | **at freeze** |
-| public export facades | 4 | 4 | hold | **at freeze** |
-| composition modules | 295 | 300 | hold | under (5 slots) |
-| factories files_ge_250_loc | 0 | 2 | 0 | **leftover under** |
-| application_core fan-in | 5 | 7 | hold | leftover under |
-| bootstrap fan-in | 2 | 3 | hold | leftover under |
-| assertless_total_candidates | 88 | yaml 87 | 77 | **over yaml** |
-| refined_assertless_tests | 0 | 0 | 0 | at |
-| constructor waivers | 1 | shrink-only | 0 | at 1 |
-| supporting_scripts zero-ref | 0 | 0 | 0 | at |
-| flaky / uuid4 prod | 0 | 0 | 0 | at |
-| debt-governance-gates snapshot | 45 pass | — | — | committed pass; live dirty fail |
+| ID | Находка | Surface | Путь |
+|----|---------|---------|------|
+| AUD-003 | Query-слой расколот: `graph/query.py` (1968 строк) + `query.py` (1700 строк), владение не зафиксировано | 2 | `src/memory/graph/query.py:1` |
+| AUD-004 | Типовой долг: 11x `type:ignore` в startup-пути (строки 122–177) + весь `src/memory/` вне mypy strict + `warn_unused_ignores=false`, `warn_unreachable=false` | 2 | `src/bioetl/application/services/ops/observability_backend_startup.py:122` |
+| AUD-005 | FK-reconciliation в трёх местах: infra-адаптер (~471) + application-трансформ (~464) + `_support`/`_quarantine` хелперы | 2 | `src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py:1` |
+| AUD-006 | Хрупкие пины: `arro3-core==0.6.5`, `pandas<2.3`, `deltalake<1.0`, `mypy==2.3.1` (Windows-wheel комментарии) | 2 | `pyproject.toml:25` |
 
-Integral architecture quality: **9.14** (`good_targeted_improvements`). composition_di **6.0**. debt_burden **7.0**.
+### P2 — средний
 
-## Findings (10 PROVEN, P0/P1 = 0)
+| ID | Находка | Surface | Путь |
+|----|---------|---------|------|
+| AUD-007 | Перефрагментация `composite/`: 66 записей, merger-mixin x8, coordinator x3, lifecycle/dependency_join/preflight кластеры; jscpd-порог 5 подтверждает давление дублирования | 2 | `src/bioetl/application/composite/` |
+| AUD-008 | Star-реэкспорты `noqa F403` в 4 фасадах (factory_wiring, field_transforms, transformer_runtime, openalex extractors) | 1 | `src/bioetl/application/core/transformer_runtime/__init__.py:11` |
+| AUD-009 | 37x `pragma: no cover` в runner/fallback wiring и lazy-export путях | 1 | `src/bioetl/application/` |
+| AUD-010 | Legacy/compat-шимы без sunset: `Metrics*Result` (deprecated с 2026-08-26), pandera-shim `strict=False`, `strip_legacy_keys`, memory_monitor re-export, legacy string IDs | 1 | `src/bioetl/application/ports/metrics.py:116` |
+| AUD-011 | 12 постоянных CLI entrypoints, sunset только через breaking change (`external_breaking_change_required=true`) | 2 | `configs/quality/compatibility_facade_inventory.yaml:23` |
 
-| ID | P | Наблюдение |
-| --- | --- | --- |
-| AUD-TD-001 | P2 | Stale remote-main pin 4aa9f5e7 vs origin/main 5c4243c9; gates snapshot 2465 vs inventory 2466 |
-| AUD-TD-002 | P2 | Freeze cluster at cap (lazy/private/config/fan-in/facades) |
-| AUD-TD-003 | P2 | Leftover hotspot caps (factories 2 vs live 0; core 7 vs 5; bootstrap 3 vs 2) |
-| AUD-TD-004 | P2 | assertless yaml 87 < live 88; S9 не сравнивает live |
-| AUD-TD-005 | P3 | Constructor waiver ×1 до 2026-12-31 |
-| AUD-TD-006 | P3 | Total-tech-debt registry SHA 09ab9ac vs HEAD 5c4243c9 |
-| AUD-TD-007 | P3 | Committed gates `budget_increase_count=not_evaluated_without_changed_from_ref` |
-| AUD-TD-008 | P3 | 83 `type: ignore` (hotspot health startup ×11); TODO/FIXME нет |
-| AUD-TD-009 | P3 | 15 xenon path exemptions, expiry 2026-12-31 |
-| AUD-TD-010 | P3 | Lazy facade / shim review_by 2026-10-27 / 2026-10-21 |
+### P3 — низкий
 
-Не считались долгом: 31 reviewed skip inventory (permanent_policy), grafana/http WIP, каждый TODO (их нет).
+| ID | Находка | Surface | Путь |
+|----|---------|---------|------|
+| AUD-012 | Принятые `nosec`-подавления без реестра (subprocess B404/B603 + 7x ET B405); гигиена маркеров хорошая (TODO/FIXME/HACK: 0) | 1 | `src/bioetl/infrastructure/storage/silver/delta_write_execution.py:8` |
 
-## Live check
+## Quick wins (малые усилия, быстрый эффект)
 
-Команда: `python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main`
-exit 1: `module_coverage_scorecard_coherence`, `generated_artifact_drift` (`architecture_quality_scorecard`).
+- AUD-008: явные `__all__` и прямые реэкспорты, убрать `noqa F403` (S).
+- AUD-010: зафиксировать sunset-даты шимов, начать с `Metrics*Result` (S).
+- AUD-012: завести реестр подавлений `nosec` с обоснованием и сроком пересмотра (XS).
+- AUD-009: к каждому `pragma: no cover` привязать issue-ссылку; runner-пути покрыть интеграционными тестами (M).
 
-Причина fail: working tree сменил только `source_tree_sha256` в `module-coverage-inventory.json` (WIP http/grafana). HEAD-доказательство stale pin — AUD-TD-001.
+## Стратегические (структурные)
 
-## Paydown (shrink-only)
+- AUD-001 → AUD-003: декомпозиция memory-sidecar (god-module → cohesive модули <500 строк; единый query-слой). Снимает и AUD-002 для `src/memory/`.
+- AUD-002: рассредоточить сроки exemptions, привязать каждую запись к removal_step с прогрессом; CI должен падать при истечении без review.
+- AUD-004: типизировать DI-seam startup-пути, включить `src/memory/` в mypy strict, включить `warn_unused_ignores`/`warn_unreachable`.
+- AUD-005: одно каноническое место FK-reconciliation + тесты паритета.
+- AUD-006: снять жёсткие пины (диапазоны + Windows-CI), план апгрейда deltalake/pandas/arro3.
+- AUD-007: граф владения composite-пакета, укрупнение миксинов >200 строк.
+- AUD-011: реестр entrypoints с deprecation-окном и миграционным гайдом.
 
-1. На чистом дереве re-pin remote-main baseline + gates `--update/--check --changed-from-ref origin/main`.
-2. Снять ≥1 assertless candidate, чтобы live ≤ 87; привязать S9 к live. **Не** поднимать yaml.
-3. Ratchet leftover: factories `files_ge_250_loc` 2→0; опционально core fan-in 7→5, bootstrap 3→2 при подтверждённом live.
-4. Live-shrink freeze cluster (lazy к 60, private pairs) до любой фичи на этих швах.
-5. Hygiene review shim/lazy до 2026-10-21/27; затем обновить total-tech-debt registry SHA.
+## Примечание о полноте
 
-## REJECTED_POLICY
-
-- assertless `max_assertless_tests` 87→88
-- lazy 77, private 15, config 27/419, fan-in 2/3, facades 4
-- factories leftover держать 2 «на всякий случай»
-- новые architecture_metric_exemptions / constructor waivers
-- продление xenon expiry без сужения path_entries
+Синтез ограничен переданными свидетельствами; независимых замеров (прогон xenon/jscpd/mypy/pytest) в рамках задачи не выполнялось — команды регрессии зафиксированы в `findings.json` (`validation_commands`) для исполнения владельцами.

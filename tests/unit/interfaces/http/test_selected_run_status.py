@@ -351,6 +351,11 @@ async def test_current_telemetry_is_not_consulted(tmp_path, monkeypatch, current
 async def test_late_previous_request_keeps_its_own_identity(tmp_path, monkeypatch):
     import threading
 
+    if asyncio.to_thread.__module__ != "asyncio.threads":
+        pytest.skip(
+            reason="requires real asyncio.to_thread worker offload; "
+            "the WSL safeguard in tests/conftest.py runs it inline"
+        )
     persist(tmp_path)
     persist(tmp_path, report(run_id="run-b", status="failed"))
     first_entered = threading.Event()

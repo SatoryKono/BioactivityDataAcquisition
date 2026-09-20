@@ -1,11 +1,10 @@
-# Boundary object/payload typing residual at this module.
 """Private startup orchestration for the detached observability backend."""
 
 from __future__ import annotations
 
 import os
-from collections.abc import Mapping
 from pathlib import Path
+from typing import cast
 
 from bioetl.application.services.ops.observability_backend_startup_types import (
     _AppendBackendStartupDiagnosticFn,
@@ -20,6 +19,7 @@ from bioetl.application.services.ops.observability_backend_startup_types import 
     _ObservabilityBackendStartupKwargs,
     _ProbeFn,
     _RequiredProbeFn,
+    _StartDetachedHooks,
     _StartedBackendProcess,
 )
 
@@ -98,7 +98,7 @@ def _start_observability_backend_detached[ResultT](
     bind_host: str,
     timing: tuple[float, float, float],
     required_probe_paths: tuple[str, ...],
-    hooks: Mapping[str, object],
+    hooks: _StartDetachedHooks,
     result_factory: _BackendResultConstructor[ResultT],
 ) -> ResultT:
     """Start a detached backend and wait for capability probes.
@@ -119,10 +119,10 @@ def _start_observability_backend_detached[ResultT](
     append_backend_startup_diagnostic_fn = hooks["append_backend_startup_diagnostic_fn"]
     python_executable_to_tuple_fn = hooks["python_executable_to_tuple_fn"]
     try:
-        process = start_fn(bind_host=bind_host, port=port)  # type: ignore[operator]  # pyright: ignore[reportCallIssue]
+        process = start_fn(bind_host=bind_host, port=port)
     except OSError as exc:
-        startup_detail = build_startup_failure_detail_fn(startup_log_path)  # type: ignore[operator]  # pyright: ignore[reportCallIssue]
-        warning_printer(  # type: ignore[operator]  # pyright: ignore[reportCallIssue]
+        startup_detail = build_startup_failure_detail_fn(startup_log_path)
+        warning_printer(
             "Observability backend: failed to start detached BioETL Ops HTTP "
             f"(health server) backend on port {port} ({exc}). {startup_detail} "
             "Ops HTTP ID panels may remain empty."
@@ -133,18 +133,16 @@ def _start_observability_backend_detached[ResultT](
             message=f"{exc}. {startup_detail}",
         )
 
-    ready = wait_fn(  # type: ignore[operator]  # pyright: ignore[reportCallIssue]
+    ready = wait_fn(
         health_url,
         timeout_seconds=ready_timeout_seconds,
         poll_seconds=poll_seconds,
         probe_fn=probe_fn,
     )
     command = (
-        python_executable_to_tuple_fn(process.args)  # type: ignore[operator]  # pyright: ignore[reportCallIssue]
-        if hasattr(process, "args")
-        else ()
+        python_executable_to_tuple_fn(process.args) if hasattr(process, "args") else ()
     )
-    if ready and wait_required_paths_fn(  # type: ignore[operator]  # pyright: ignore[reportCallIssue]
+    if ready and wait_required_paths_fn(
         health_url,
         required_probe_paths=required_probe_paths,
         timeout_seconds=max(
@@ -159,7 +157,7 @@ def _start_observability_backend_detached[ResultT](
             health_url=health_url,
             process=process,
             command=command,
-            info_printer=info_printer,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+            info_printer=info_printer,
             result_factory=result_factory,
         )
 
@@ -170,11 +168,11 @@ def _start_observability_backend_detached[ResultT](
         command=command,
         required_probe_paths=required_probe_paths,
         required_probe_timeout_seconds=required_probe_timeout_seconds,
-        warning_printer=warning_printer,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        warning_printer=warning_printer,
         result_factory=result_factory,
-        build_startup_failure_detail_fn=build_startup_failure_detail_fn,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        describe_required_probe_failure_fn=describe_required_probe_failure_fn,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        append_backend_startup_diagnostic_fn=append_backend_startup_diagnostic_fn,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        build_startup_failure_detail_fn=build_startup_failure_detail_fn,
+        describe_required_probe_failure_fn=describe_required_probe_failure_fn,
+        append_backend_startup_diagnostic_fn=append_backend_startup_diagnostic_fn,
     )
 
 
@@ -290,10 +288,9 @@ def ensure_observability_backend_started_impl[ResultT](
             startup_kwargs["poll_seconds"],
         ),
         required_probe_paths=startup_kwargs["required_probe_paths"],
-        hooks={
-            **runtime_hooks,
-            **failure_handlers,
-        },
+        # Both operands are TypedDicts with disjoint keys (AUD-004), so the
+        # merge provably yields _StartDetachedHooks; the cast only names it.
+        hooks=cast(_StartDetachedHooks, {**runtime_hooks, **failure_handlers}),
         result_factory=result_factory,
     )
 

@@ -63,6 +63,8 @@ def _entry_metadata_errors(
         errors.append(f"{label} {key[0]} missing @bioetl-* owner")
     if not str(entry.get("removal_step", "")).strip():
         errors.append(f"{label} {key[0]} missing removal_step")
+    if not str(entry.get("progress_note", "")).strip():
+        errors.append(f"{label} {key[0]} missing progress_note")
     if not str(entry.get("rationale", "")).strip():
         errors.append(f"{label} {key[0]} missing rationale")
     expiry = str(entry.get("expiry", "")).strip()
@@ -71,7 +73,11 @@ def _entry_metadata_errors(
     except ValueError:
         return [*errors, f"{label} {key[0]} has invalid expiry {expiry!r}"]
     if expiry_date < today:
-        errors.append(f"{label} {key[0]} expiry is stale: {expiry}")
+        errors.append(
+            f"{label} {key[0]} exemption expired on {expiry} without review renewal: "
+            "renew via a dated owner review (extend expiry and refresh "
+            "removal_step/progress_note) or remove the entry"
+        )
     return errors
 
 
@@ -84,6 +90,26 @@ def _validate_metadata(entries: list[dict[str, object]], *, label: str) -> list[
             _entry_metadata_errors(entry, label=label, today=today, seen=seen)
         )
     return errors
+
+
+MAX_SHARED_EXPIRY_ENTRIES = 6
+
+
+def _validate_expiry_spread(entries: list[dict[str, object]]) -> list[str]:
+    """Fail when exemptions re-form a synchronized expiry cliff (#10527)."""
+    counts: dict[str, int] = {}
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        expiry = str(entry.get("expiry", "")).strip()
+        if expiry:
+            counts[expiry] = counts.get(expiry, 0) + 1
+    return [
+        f"synchronized exemption cliff: {count} entries share expiry {expiry} "
+        f"(max {MAX_SHARED_EXPIRY_ENTRIES}); stagger expiries per owner group"
+        for expiry, count in sorted(counts.items())
+        if count > MAX_SHARED_EXPIRY_ENTRIES
+    ]
 
 
 def main() -> None:
@@ -104,6 +130,10 @@ def main() -> None:
         *_validate_metadata(typed_path_entries, label="path"),
         *_validate_metadata(typed_function_entries, label="function"),
     ]
+
+    errors.extend(
+        _validate_expiry_spread([*typed_path_entries, *typed_function_entries])
+    )
 
     workflow_xenon_paths = _extract_xenon_excludes(workflow_text)
     raw_critical_paths = _extract_literal(workflow_text, "EXEMPT_PATHS")
