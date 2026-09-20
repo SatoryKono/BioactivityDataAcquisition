@@ -1,5 +1,5 @@
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
-"""Support-layer dispatch stubs and recording seams for stage orchestration."""
+"""Support-layer dispatchers and recording seams for stage orchestration."""
 
 from __future__ import annotations
 
@@ -20,39 +20,7 @@ __all__ = ["_CompositeRunnerStageSupportDispatchMixin"]
 
 
 class _CompositeRunnerStageSupportDispatchMixin:
-    """Declaration stubs, dispatchers, and recording seams."""
-
-    async def _save_checkpoint_safe(
-        self: _CompositeRunnerStageSupportHostProtocol,
-        state: CompositeCheckpointState,
-        operation: str,
-    ) -> (
-        bool
-    ):  # pragma: no cover - declaration-only contract (#10534, review 2026-12-31)
-        raise NotImplementedError
-
-    async def _run_seed(
-        self: _CompositeRunnerStageSupportHostProtocol,
-    ) -> (
-        SeedResult
-    ):  # pragma: no cover - declaration-only contract (#10534, review 2026-12-31)
-        raise NotImplementedError
-
-    def _get_enrichers_to_run(
-        self: _CompositeRunnerStageSupportHostProtocol,
-        state: CompositeCheckpointState,
-    ) -> list[
-        EnricherConfig
-    ]:  # pragma: no cover - declaration-only contract (#10534, review 2026-12-31)
-        raise NotImplementedError
-
-    def _check_required_enrichers(
-        self: _CompositeRunnerStageSupportHostProtocol,
-        enrichment_results: dict[str, EnrichmentResult],
-    ) -> (
-        None
-    ):  # pragma: no cover - declaration-only contract (#10534, review 2026-12-31)
-        raise NotImplementedError
+    """Dispatchers and recording seams (host methods via Protocol/MRO)."""
 
     async def _call_save_checkpoint_safe(
         self: _CompositeRunnerStageSupportHostProtocol,

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -12,12 +13,12 @@ pytestmark = pytest.mark.architecture
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "src" / "bioetl"
 ISSUE_MARKER = "(#10534"
+REVIEW_DATE_RE = re.compile(r"review\s+\d{4}-\d{2}-\d{2}")
 
-# (path, allowed pragma count): lazy-export hooks are covered by behavioral
-# tests, so only declaration-only stubs and defensive guards may remain.
+# Only the defensive ContentHashPolicyGroup guard may remain excluded.
+# Runner dispatch mixins no longer carry NotImplementedError stubs; host
+# methods resolve through Protocol + MRO to covered implementations.
 ALLOWED_PRAGMAS = {
-    "src/bioetl/application/composite/runner_pkg/runner_merge_stage_dispatch_mixin.py": 3,
-    "src/bioetl/application/composite/runner_pkg/runner_stage_support_dispatch_mixin.py": 4,
     "src/bioetl/application/core/record_processor_config.py": 1,
 }
 COVERED_NO_PRAGMA = (
@@ -25,6 +26,16 @@ COVERED_NO_PRAGMA = (
     "src/bioetl/composition/lazy_exports.py",
     "src/bioetl/composition/runtime_builders/_run_manifest_refs.py",
     "src/bioetl/composition/runtime_builders/inputs_resolver.py",
+    "src/bioetl/application/composite/runner_pkg/runner_merge_stage_dispatch_mixin.py",
+    "src/bioetl/application/composite/runner_pkg/runner_stage_support_dispatch_mixin.py",
+)
+# Acceptance for #10534: runner host paths exercised by focused tests.
+RUNNER_PATH_COVERAGE_ANCHORS = (
+    "tests/unit/application/composite/test_runner_observability_mixin.py",
+    "tests/unit/application/composite/test_runner_fsm.py",
+    "tests/unit/application/composite/test_runner_required_flag.py",
+    "tests/unit/application/composite/runner_pkg/test_runner_stage_mixin.py",
+    "tests/integration/application/core/test_record_processor.py",
 )
 B_SCOPES = ("application", "interfaces", "composition")
 
@@ -68,8 +79,8 @@ def test_b_scope_pragmas_match_allowlist_and_carry_issue_link() -> None:
                     f"expected {ALLOWED_PRAGMAS[rel]}"
                 )
             for line in pragma_lines:
-                if ISSUE_MARKER not in line or "review" not in line:
-                    offenders.append(f"{rel}: missing issue link: {line.strip()}")
+                if ISSUE_MARKER not in line or REVIEW_DATE_RE.search(line) is None:
+                    offenders.append(f"{rel}: missing issue link/date: {line.strip()}")
     assert offenders == []
 
 
@@ -77,3 +88,14 @@ def test_b_scope_pragmas_match_allowlist_and_carry_issue_link() -> None:
 def test_covered_lazy_hooks_carry_no_pragma() -> None:
     offenders = [rel for rel in COVERED_NO_PRAGMA if _pragma_lines(ROOT / rel)]
     assert offenders == []
+
+
+@pytest.mark.architecture
+def test_issue_10534_runner_path_coverage_anchors_exist() -> None:
+    missing = [
+        rel for rel in RUNNER_PATH_COVERAGE_ANCHORS if not (ROOT / rel).is_file()
+    ]
+    assert missing == [], (
+        "AUD-009/#10534 runner-path coverage anchors missing:\n"
+        + "\n".join(missing)
+    )
