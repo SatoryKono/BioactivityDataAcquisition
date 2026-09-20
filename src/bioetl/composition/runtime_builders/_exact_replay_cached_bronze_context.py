@@ -8,9 +8,7 @@ from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, Any, cast
 from uuid import UUID
 
-from bioetl.composition.control_plane_paths import (
-    control_plane_root,
-)
+from bioetl.composition.control_plane_paths import control_plane_root
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import INPUT_SNAPSHOT_PUBLISHED_EVENT
