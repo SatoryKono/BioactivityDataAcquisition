@@ -1319,11 +1319,7 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
 
     for path in test_files:
         relative = _normalize_repo_relative_path(path.relative_to(root).as_posix())
-        # Architecture governance locks (e.g. shim-sunset policy tests) police
-        # compatibility scope; they are not product compatibility surface.
-        if COMPATIBILITY_FILE_RE.search(relative) and not relative.startswith(
-            "tests/architecture/"
-        ):
+        if COMPATIBILITY_FILE_RE.search(relative):
             compatibility_files.append(relative)
         tree, parse_error = _parse_test_module_source(path, relative=relative)
         if parse_error is not None:
