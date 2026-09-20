@@ -5,11 +5,8 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
-from bioetl.application.services.control_plane.replay.historical_corpus_models import (
-    HistoricalReplayCertifiabilityInventory,
-)
 from bioetl.application.services.control_plane.replay.historical_identity_models import (
     HistoricalReplayUniverseExternalRecord,
     HistoricalReplayUniverseRecord,
@@ -21,6 +18,11 @@ from bioetl.application.services.control_plane.replay.historical_universe_policy
     build_universal_claim,
     build_universe_report_id,
 )
+
+if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.replay.historical_corpus_models import (
+        HistoricalReplayCertifiabilityInventory as HistoricalReplayCertifiabilityInventory,
+    )
 
 __all__ = [
     "HistoricalReplayUniverseClosureReport",

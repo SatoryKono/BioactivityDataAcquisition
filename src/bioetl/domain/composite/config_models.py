@@ -160,7 +160,8 @@ class EnricherConfig:
                 EnricherCardinality.from_string(self.cardinality),
             )
         raw_aggregation = cast(
-            "AggregationConfig | dict[str, Any] | None", self.aggregation
+            "AggregationConfig | dict[str, Any] | None",  # Any: runtime config mapping normalization
+            self.aggregation,
         )
         if isinstance(raw_aggregation, dict):
             object.__setattr__(

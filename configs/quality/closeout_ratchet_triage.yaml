@@ -663,3 +663,10 @@ entries:
   live_guard: Wave 4 complexity budget and extracted seams remain enforced.
   rationale: Retains a live complexity ratchet instead of historical-only closeout
     evidence.
+- path: tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py
+  disposition: retain_active
+  classification: live_inventory_ratchet
+  live_guard: Generated scorecard must keep proving module-boundary coupling and
+    hotspot family maxima against live control-plane fan-in census.
+  rationale: 'Keeps the #10468/#10509 coupling and fan-in closeout evidence anchored
+    to executable live-graph checks instead of historical-only signoff.'

@@ -201,16 +201,20 @@ def _convert_dq_disposition(value: DQDisposition) -> str:
 def _convert_dataclass(value: object) -> dict[str, object]:
     """Convert dataclass to dictionary with recursive conversion."""
     # Caller guarantees a dataclass instance; asdict has no public input type.
-    dataclass_value = cast(Any, value)
+    dataclass_value = cast(Any, value)  # Any: asdict over caller-guaranteed dataclass
     return {key: to_jsonable(item) for key, item in asdict(dataclass_value).items()}
 
 
-def _convert_mapping(value: Mapping[Any, Any]) -> dict[str, object]:
+def _convert_mapping(
+    value: Mapping[Any, Any],  # Any: JSON normalization accepts arbitrary mappings
+) -> dict[str, object]:
     """Convert mapping to dictionary with string keys and recursive conversion."""
     return {str(key): to_jsonable(item) for key, item in sorted(value.items())}
 
 
-def _convert_sequence(value: Sequence[Any]) -> list[object]:
+def _convert_sequence(
+    value: Sequence[Any],  # Any: JSON normalization accepts arbitrary sequences
+) -> list[object]:
     """Convert sequence to list with recursive conversion."""
     return [to_jsonable(item) for item in value]
 
@@ -220,7 +224,9 @@ def _is_primitive_sequence(value: object) -> bool:
     return isinstance(value, (str, bytes, bytearray))
 
 
-def _should_convert_as_sequence(value: object) -> TypeGuard[Sequence[Any]]:
+def _should_convert_as_sequence(
+    value: object,
+) -> TypeGuard[Sequence[Any]]:  # Any: JSON normalization accepts arbitrary sequences
     """Check if value should be converted as a sequence."""
     return isinstance(value, Sequence) and not _is_primitive_sequence(value)
 

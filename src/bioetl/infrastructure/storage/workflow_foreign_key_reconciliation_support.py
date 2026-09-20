@@ -7,13 +7,20 @@ Internal implementation detail owned by the canonical
 from __future__ import annotations
 
 from collections.abc import Mapping
-from math import isnan
-from typing import Protocol
+from typing import Any, Protocol, cast
 
 from bioetl.domain.ports import (
     ForeignKeyReconciliationMutationMode,
     ForeignKeyReconciliationRequest,
     ForeignKeyReconciliationResult,
+)
+from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_normalization import (
+    normalize_row_key,
+    normalize_value,
+    row_has_null_foreign_key,
+)
+from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_quarantine import (
+    apply_reconciliation_mutation,
 )
 
 
@@ -28,8 +35,6 @@ class _ReconcileDebugArtifactSink(Protocol):
         orphan_rows: tuple[Mapping[str, object], ...],
     ) -> object: ...
 
-
-NULL_TOKEN = object()
 
 _RUN_IDENTITY_COLUMNS = (
     "_run_id",
@@ -79,6 +84,19 @@ class ReconciliationLoggingHost(Protocol):
     """Adapter logging surface required by completion helpers."""
 
     def _log(self, level: str, message: str, **context: object) -> None: ...
+
+
+class ReconciliationMutationCompletionHost(ReconciliationLoggingHost, Protocol):
+    """Adapter surface required by mutation completion helpers."""
+
+    def _write_debug_artifacts(
+        self,
+        request: ForeignKeyReconciliationRequest,
+        result: ForeignKeyReconciliationResult,
+        *,
+        retained_rows: list[dict[str, object]],
+        orphan_rows: list[dict[str, object]],
+    ) -> None: ...
 
 
 def build_reconciliation_result(
@@ -246,69 +264,10 @@ def complete_dry_run(
     )
 
 
-def row_has_null_foreign_key(
-    row: dict[str, object],
-    keys: tuple[str, ...],
-) -> bool:
-    """Return True when any foreign-key component is null, blank, or NaN."""
-    return any(normalize_value(row.get(key)) is None for key in keys)
-
-
-def normalize_row_key(
-    row: dict[str, object],
-    keys: tuple[str, ...],
-    *,
-    nulls_equal: bool,
-) -> tuple[object, ...] | None:
-    """Normalize a row key for foreign-key comparison."""
-    normalized: list[object] = []
-    for key in keys:
-        value = row.get(key)
-        normalized_value = normalize_value(value)
-        if normalized_value is None:
-            if nulls_equal:
-                normalized.append(NULL_TOKEN)
-                continue
-            return None
-        normalized.append(normalized_value)
-    return tuple(normalized)
-
-
-def normalize_value(value: object) -> object | None:
-    """Normalize one foreign-key value for comparison.
-
-    Invariants:
-    - ``None``, blank strings, and NaN are null (``None``).
-    - Strings stay distinct from numeric values (``"5"`` != ``5``).
-    - Integral numbers that differ only by float form match (``5`` == ``5.0``).
-    - Booleans are not collapsed into integers.
-    """
-    if value is None:
-        return None
-    if isinstance(value, bool):
-        return ("bool", value)
-    if isinstance(value, float):
-        if isnan(value):
-            return None
-        if value.is_integer():
-            return ("int", int(value))
-        return ("float", value)
-    if isinstance(value, int):
-        return ("int", value)
-    if isinstance(value, str):
-        stripped = value.strip()
-        if not stripped:
-            return None
-        return ("str", stripped)
-    rendered = str(value).strip()
-    if not rendered:
-        return None
-    return ("other", type(value).__name__, rendered)
-
-
 __all__ = [
     "build_reconciliation_result",
     "complete_dry_run",
+    "complete_with_mutation",
     "complete_without_mutation",
     "emit_reconcile_debug_artifacts",
     "filter_source_rows_to_current_run",
@@ -393,3 +352,54 @@ def emit_reconcile_debug_artifacts(
         retained_rows=tuple(retained_rows),
         orphan_rows=tuple(orphan_rows),
     )
+
+
+async def complete_with_mutation(
+    host: ReconciliationMutationCompletionHost,
+    request: ForeignKeyReconciliationRequest,
+    *,
+    scanned_rows: int,
+    retained_rows_count: int,
+    orphan_rows_deleted: int,
+    retained_rows: list[dict[str, object]],
+    orphan_rows: list[dict[str, object]],
+) -> ForeignKeyReconciliationResult:
+    """Apply the mutation path and complete one reconciliation pass."""
+    mutation_summary = await apply_reconciliation_mutation(
+        cast(Any, host),  # Any: reconciliation mutation helper uses structural host
+        request,
+        orphan_rows=orphan_rows,
+    )
+    host._log(
+        "info",
+        "workflow foreign-key reconciliation completed with mutation",
+        source_table=request.source_table,
+        reference_table=request.reference_table,
+        source_layer=request.source_layer,
+        reference_layer=request.reference_layer,
+        mutation_layer=request.effective_mutation_layer,
+        scanned_rows=scanned_rows,
+        retained_rows=retained_rows_count,
+        orphan_rows_deleted=orphan_rows_deleted,
+    )
+    result = build_reconciliation_result(
+        request,
+        scanned_rows=scanned_rows,
+        retained_rows=retained_rows_count,
+        orphan_rows_deleted=orphan_rows_deleted,
+        mutated=True,
+        would_mutate=False,
+        mutation_mode=cast(
+            Any, mutation_summary.mutation_mode
+        ),  # Any: external mutation summary compatibility
+        quarantine_batch_id=mutation_summary.quarantine_batch_id,
+        quarantine_rows_written=mutation_summary.quarantine_rows_written,
+        quarantine_error_code=mutation_summary.quarantine_error_code,
+    )
+    host._write_debug_artifacts(
+        request,
+        result,
+        retained_rows=retained_rows,
+        orphan_rows=orphan_rows,
+    )
+    return result

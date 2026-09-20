@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.replay.closure_claims import (
     RESIDUAL_BLOCKED_STATUSES as RESIDUAL_BLOCKED_STATUSES,
@@ -21,10 +22,14 @@ from bioetl.application.services.control_plane.replay.closure_claims import (
     build_narrowed_scope_global_claim,
     build_universal_scope_global_claim,
 )
-from bioetl.application.services.control_plane.replay.historical_corpus_models import (
-    HistoricalReplayCertifiabilityInventory,
-    HistoricalReplayCertifiabilityRecord,
-)
+
+if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.replay.historical_corpus_models import (
+        HistoricalReplayCertifiabilityInventory as HistoricalReplayCertifiabilityInventory,
+    )
+    from bioetl.application.services.control_plane.replay.historical_corpus_models import (
+        HistoricalReplayCertifiabilityRecord as HistoricalReplayCertifiabilityRecord,
+    )
 
 __all__ = [
     "RESIDUAL_BLOCKED_STATUSES",
@@ -217,9 +222,7 @@ def build_closure_report_id(
     return f"historical-replay-closure-{digest[:16]}"
 
 
-def _suggested_disposition(
-    record: HistoricalReplayCertifiabilityRecord,
-) -> str:
+def _suggested_disposition(record: HistoricalReplayCertifiabilityRecord) -> str:
     if record.certification_status == "awaiting_source_snapshot_certification":
         return "reconstruct_immutable_evidence"
     if record.certification_status == "awaiting_certified_source_lineage":

@@ -1,5 +1,5 @@
 {
-  "duplicate_basename_count": 71,
+  "duplicate_basename_count": 73,
   "duplicate_basenames": {
     "test_adapter.py": [
       "tests/integration/adapters/openalex/test_adapter.py",
@@ -150,6 +150,18 @@
       "tests/unit/composition/bootstrap/cli/test_init.py",
       "tests/unit/composition/factories/test_init.py",
       "tests/unit/domain/behavior/activity_aggregator/test_init.py"
+    ],
+    "test_issue_10469_one_line_residuals.py": [
+      "tests/unit/application/test_issue_10469_one_line_residuals.py",
+      "tests/unit/composition/test_issue_10469_one_line_residuals.py",
+      "tests/unit/infrastructure/test_issue_10469_one_line_residuals.py",
+      "tests/unit/interfaces/test_issue_10469_one_line_residuals.py"
+    ],
+    "test_issue_10469_two_line_residuals_three.py": [
+      "tests/unit/composition/test_issue_10469_two_line_residuals_three.py",
+      "tests/unit/domain/test_issue_10469_two_line_residuals_three.py",
+      "tests/unit/infrastructure/test_issue_10469_two_line_residuals_three.py",
+      "tests/unit/interfaces/test_issue_10469_two_line_residuals_three.py"
     ],
     "test_lazy_exports.py": [
       "tests/unit/composition/runtime_builders/test_lazy_exports.py",

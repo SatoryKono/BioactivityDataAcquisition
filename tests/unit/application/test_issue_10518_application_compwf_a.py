@@ -27,7 +27,7 @@ from bioetl.application.composite.preflight_validator import (
     CompositePreflightValidationService,
 )
 from bioetl.domain.composite import CompositeConfig, DependencyConfig, MergeConfig
-from bioetl.domain.composite.config_models import SeedConfig
+from bioetl.domain.composite.config import SeedConfig
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 from bioetl.domain.exceptions import BioETLError, DataQualityError
 
@@ -121,7 +121,7 @@ def test_register_aliases_seed_and_dependency() -> None:
 
 
 def test_load_source_fields_fans_out_to_seed_dependency_enricher() -> None:
-    from bioetl.domain.composite.config_models import (
+    from bioetl.domain.composite.config import (
         DependencyConfig as DepCfg,
         EnricherConfig as EnrCfg,
     )
@@ -151,7 +151,7 @@ def test_load_source_fields_fans_out_to_seed_dependency_enricher() -> None:
 
 
 def test_load_source_profiles_registers_seed_dependency_enricher() -> None:
-    from bioetl.domain.composite.config_models import (
+    from bioetl.domain.composite.config import (
         DependencyConfig as DepCfg,
         EnricherConfig as EnrCfg,
     )
@@ -186,7 +186,7 @@ def test_load_source_profiles_registers_seed_dependency_enricher() -> None:
 
 def test_load_source_profiles_registers_non_none_profiles() -> None:
     from bioetl.application.composite._preflight_types import ProfileInfo
-    from bioetl.domain.composite.config_models import (
+    from bioetl.domain.composite.config import (
         DependencyConfig as DepCfg,
         EnricherConfig as EnrCfg,
     )
@@ -310,7 +310,7 @@ def test_get_schema_registry_caches() -> None:
 
 
 def test_get_valid_sources_covers_seed_dependency_enricher() -> None:
-    from bioetl.domain.composite.config_models import (
+    from bioetl.domain.composite.config import (
         DependencyConfig as DepCfg,
         EnricherConfig as EnrCfg,
     )

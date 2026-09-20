@@ -12,6 +12,8 @@ from bioetl.application.observability.reason_aliases import (
     display_reason,
     display_reasons_text,
 )
+from bioetl.application.services.run_reports.query import list_pipeline_reports
+from bioetl.composition.observability_runtime import create_run_report_store
 from bioetl.domain.run_reports.selected_status import (
     DOMAINS,
     RULES_VERSION,
@@ -132,11 +134,17 @@ def _selected_pipeline(pipeline: str, run_id: str, root: Path | None) -> str | N
         return next(iter(owners))
     if run_report_ops._safe_segment(run_id) != run_id:
         raise ValueError("invalid_run_id")
-    base = run_report_ops._effective_root(root).resolve() / "pipeline"
+    base = run_report_ops._effective_root(root)
+    entries = list_pipeline_reports(
+        pipeline_name=None,
+        limit=None,
+        root=base,
+        store=create_run_report_store(),
+    )
     matches = [
-        path.parent.parent.name
-        for path in base.glob(f"*/{run_id}/pipeline-run-report.json")
-        if path.is_file() and (owners is None or path.parent.parent.name in owners)
+        entry.owner
+        for entry in entries
+        if entry.run_id == run_id and (owners is None or entry.owner in owners)
     ]
     if len(matches) > 1:
         raise ValueError("run_id_ambiguous")

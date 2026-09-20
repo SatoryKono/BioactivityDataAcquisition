@@ -139,13 +139,16 @@ def test_foreign_key_reconciliation_vo_lives_in_domain_workflow() -> None:
     workflow = (
         PROJECT_ROOT / "src/bioetl/domain/workflow/foreign_key_reconciliation.py"
     ).read_text(encoding="utf-8")
+    models = (
+        PROJECT_ROOT / "src/bioetl/domain/workflow/foreign_key_reconciliation_models.py"
+    ).read_text(encoding="utf-8")
     assert "class ForeignKeyReconciliationPort" in ports
     assert "class ForeignKeyReconciliationRequest" not in ports
     assert "class ForeignKeyReconciliationResult" not in ports
     assert "workflow._foreign_key_reconciliation_guards" not in ports
-    assert "class ForeignKeyReconciliationRequest" in workflow
-    assert "class ForeignKeyReconciliationResult" in workflow
-    assert "def normalize_layer" in workflow
+    assert "class ForeignKeyReconciliationRequest" in models
+    assert "class ForeignKeyReconciliationResult" in models
+    assert "def normalize_layer" in workflow + models
     assert not (
         PROJECT_ROOT
         / "src/bioetl/domain/workflow/_foreign_key_reconciliation_guards.py"

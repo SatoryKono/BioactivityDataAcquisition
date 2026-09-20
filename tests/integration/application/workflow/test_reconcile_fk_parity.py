@@ -54,7 +54,7 @@ from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation import (
     SilverForeignKeyReconciliationAdapter,
 )
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.integration
 
 
 def _spec() -> WorkflowTransformSpec:

@@ -201,7 +201,7 @@ class MergeConfig:
         """Convert list/tuple of column groups to tuple of ColumnGroupConfig."""
         if isinstance(self.column_groups, list | tuple):
             converted = tuple(
-                ColumnGroupConfig(**cast(Any, g))
+                ColumnGroupConfig(**cast(Any, g))  # Any: runtime config mapping unpack
                 if isinstance(cast(object, g), dict)
                 else g
                 for g in self.column_groups

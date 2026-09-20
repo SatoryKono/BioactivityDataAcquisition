@@ -224,7 +224,7 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
         str(target["url"]).startswith(("/ops/", "/health/")) for target in http_targets
     )
     assert report["typed_target_counts"] == {
-        "promql": 172,  # Selected-run domain summary moved to persisted HTTP evidence.
+        "promql": 176,  # Selected-run domain summary moved to persisted HTTP evidence.
         "http": 43,
         "loki": 0,
         "tempo": 0,

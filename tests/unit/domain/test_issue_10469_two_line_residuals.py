@@ -47,7 +47,7 @@ from bioetl.domain.value_objects._chemical_identifiers import (
 )
 from bioetl.domain.value_objects._publication_year import PublicationYear
 from bioetl.domain.value_objects.activity_confidence import ConfidenceScore
-from bioetl.domain.value_objects.pchembl_value import PChemblValue
+from bioetl.domain.value_objects import PChemblValue
 from bioetl.domain.workflow.dag import (
     WorkflowDagValidationError,
     _assert_workflow_has_steps,

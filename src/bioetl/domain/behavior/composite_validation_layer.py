@@ -28,7 +28,10 @@ from bioetl.domain.behavior.preflight_governance import (
     PreflightGovernanceConfig,
     PreflightGovernor,
 )
-from bioetl.domain.behavior.validation_result_envelopes import build_validation_result
+from bioetl.domain.behavior.validation_result_envelopes import (
+    _require_composite_validation_report,
+    build_validation_result,
+)
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.validation_result import (
     CompositeValidationReport,
@@ -40,17 +43,6 @@ from bioetl.domain.types.validation_severity import (
     ValidationLayer,
     ValidationSeverity,
 )
-
-
-def _require_composite_validation_report(
-    value: object,
-) -> CompositeValidationReport:
-    """Return a concrete report after validating replacement output."""
-    if not isinstance(value, CompositeValidationReport):
-        raise TypeError(
-            "dataclass replacement did not preserve CompositeValidationReport"
-        )
-    return value
 
 
 class CompositeValidator:

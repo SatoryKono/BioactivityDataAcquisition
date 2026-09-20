@@ -19,10 +19,15 @@ from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
-from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import DQMonitorPort
+    from bioetl.domain.ports import (
+        AuditPort,
+        DQMonitorPort,
+        LoggerPort,
+        MetricsPort,
+        TracingPort,
+    )
 
 from bioetl.composition.contracts.factories import (
     LoggerBindableObservability as _LoggerBindableObservability,

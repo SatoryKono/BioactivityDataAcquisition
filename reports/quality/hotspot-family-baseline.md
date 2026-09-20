@@ -11,7 +11,7 @@
 | `application_core` | 194 | 23633 | 0 | 0.374 | 0 | 5 | `bioetl.application.core.record_processor_config` | `files_ge_250_loc=0, max_internal_fan_in=7` | `-` | `-` |
 | `composition_bootstrap_runtime` | 52 | 6216 | 0 | 0.332 | 0 | 2 | `bioetl.composition.bootstrap.runtime.tracing_bootstrap` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
 | `composition_factories_pipeline` | 35 | 3934 | 0 | 0.358 | 0 | 2 | `bioetl.composition.factories.pipeline.transformer_builder` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
-| `application_services_control_plane` | 113 | 14512 | 0 | 0.375 | 0 | 3 | `bioetl.application.services.control_plane.replay.historical_corpus_models` | `files_ge_250_loc=0, max_internal_fan_in=2` | `over_budget:max_internal_fan_in=3/2` | `near_budget:max_internal_fan_in=3/2` |
+| `application_services_control_plane` | 113 | 14513 | 0 | 0.375 | 0 | 2 | `bioetl.application.services.control_plane.manifest.inspection_service` | `files_ge_250_loc=0, max_internal_fan_in=2` | `-` | `at_budget:max_internal_fan_in=2/2` |
 | `composition_runtime_builders` | 55 | 7122 | 0 | 0.380 | 0 | 2 | `bioetl.composition.runtime_builders.runner_inputs` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
 
 ## `application_core` internal fan-in
@@ -37,7 +37,7 @@ No modules currently sit at the fan-in cap.
 
 ## `application_services_control_plane` internal fan-in
 
-- distribution: `0:20, 1:91, 2:1, 3:1`
+- distribution: `0:20, 1:92, 2:1`
 - at_budget_module_count: `1` (cap `2`)
 
 | Module | Fan-in | Runtime importers |

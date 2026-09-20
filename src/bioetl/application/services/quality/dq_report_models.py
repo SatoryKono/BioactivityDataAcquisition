@@ -117,7 +117,8 @@ class DQReportContext:
                 ],
             )
         raw_scd_config = cast(
-            "ScdConfig | Mapping[str, Any] | None", self.gold_scd_config
+            "ScdConfig | Mapping[str, Any] | None",  # Any: runtime config mapping normalization
+            self.gold_scd_config,
         )
         if isinstance(raw_scd_config, Mapping):
             object.__setattr__(

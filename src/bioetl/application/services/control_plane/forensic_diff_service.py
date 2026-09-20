@@ -6,6 +6,9 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 
 from bioetl.application.services.control_plane.forensic.diagnostics_support import (
+    RunManifestDiffResult,
+    RunManifestInspectionResult,
+    RunManifestInspectionService,
     artifact_completeness,
     artifact_refs,
     checkpoint_compatibility_payload,
@@ -16,11 +19,6 @@ from bioetl.application.services.control_plane.forensic.diagnostics_support impo
     missing_evidence,
     replay_capability_payload,
     string_list,
-)
-from bioetl.application.services.control_plane.manifest.inspection_service import (
-    RunManifestDiffResult,
-    RunManifestInspectionResult,
-    RunManifestInspectionService,
 )
 from bioetl.domain.ports import (
     ArtifactByteComparisonPort,
@@ -150,23 +148,18 @@ class ForensicRunDiffService:
         """Return byte-level artifact equivalence when a comparison port exists."""
         left_refs = artifact_refs(left.diagnostics)
         right_refs = artifact_refs(right.diagnostics)
-        if self.artifact_byte_comparison_port is None:
+        if self.artifact_byte_comparison_port is None or not left_refs or not right_refs:
             return {
                 "available": False,
                 "equivalent": None,
                 "compared_artifacts": [],
                 "missing_artifacts": [],
                 "mismatched_artifacts": [],
-                "comparison_scope": "unavailable_no_port",
-            }
-        if not left_refs or not right_refs:
-            return {
-                "available": False,
-                "equivalent": None,
-                "compared_artifacts": [],
-                "missing_artifacts": [],
-                "mismatched_artifacts": [],
-                "comparison_scope": "unavailable_missing_refs",
+                "comparison_scope": (
+                    "unavailable_no_port"
+                    if self.artifact_byte_comparison_port is None
+                    else "unavailable_missing_refs"
+                ),
             }
         return dict(
             self.artifact_byte_comparison_port.compare_artifacts(left_refs, right_refs)

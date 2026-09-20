@@ -391,76 +391,6 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "62",
-      "path": "tests/unit/infrastructure/observability/test_unified_logger.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_unified_logger_info_with_stage"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "69",
-      "path": "tests/unit/infrastructure/observability/test_unified_logger.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_unified_logger_info_defaults_stage_to_init"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "76",
-      "path": "tests/unit/infrastructure/observability/test_unified_logger.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_unified_logger_info_ignores_event_kwarg_conflict"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "82",
-      "path": "tests/unit/infrastructure/observability/test_unified_logger.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_unified_logger_error_with_stage_and_error_type"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "102",
-      "path": "tests/unit/infrastructure/observability/test_unified_logger.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_unified_logger_with_optional_fields"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "122",
-      "path": "tests/unit/infrastructure/observability/test_unified_logger.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_unified_logger_all_stages_accepted"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "132",
-      "path": "tests/unit/infrastructure/observability/test_unified_logger.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_unified_logger_debug_with_stage"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "139",
-      "path": "tests/unit/infrastructure/observability/test_unified_logger.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_unified_logger_debug_defaults_stage_to_init"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "146",
-      "path": "tests/unit/infrastructure/observability/test_unified_logger.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_unified_logger_exception_with_stage_and_error_type"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "156",
-      "path": "tests/unit/infrastructure/observability/test_unified_logger.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_unified_logger_exception_defaults_stage_to_init"
-    },
-    {
-      "category": "intentional_no_exception_contract",
       "line": "1293",
       "path": "tests/unit/infrastructure/quarantine/test_unified_quarantine.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -695,7 +625,7 @@
     "architecture_helper_guard": 1,
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
-    "intentional_no_exception_contract": 93,
+    "intentional_no_exception_contract": 83,
     "weak_no_value": 0
   },
   "assertless_examples": [
@@ -930,12 +860,6 @@
         "intentional_no_exception_contract": 2
       }
     },
-    "tests/unit/infrastructure/observability/test_unified_logger.py": {
-      "assertless_tests": 10,
-      "categories": {
-        "intentional_no_exception_contract": 10
-      }
-    },
     "tests/unit/infrastructure/quarantine/test_unified_quarantine.py": {
       "assertless_tests": 1,
       "categories": {
@@ -1033,7 +957,7 @@
       }
     }
   },
-  "assertless_total_candidates": 94,
+  "assertless_total_candidates": 84,
   "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
@@ -1207,7 +1131,7 @@
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 93,
+  "intentional_no_exception_contract": 83,
   "markerless_examples": [],
   "markerless_test_functions": 0,
   "parse_errors": [],
@@ -1614,76 +1538,6 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "62",
-        "path": "tests/unit/infrastructure/observability/test_unified_logger.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_unified_logger_info_with_stage"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "69",
-        "path": "tests/unit/infrastructure/observability/test_unified_logger.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_unified_logger_info_defaults_stage_to_init"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "76",
-        "path": "tests/unit/infrastructure/observability/test_unified_logger.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_unified_logger_info_ignores_event_kwarg_conflict"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "82",
-        "path": "tests/unit/infrastructure/observability/test_unified_logger.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_unified_logger_error_with_stage_and_error_type"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "102",
-        "path": "tests/unit/infrastructure/observability/test_unified_logger.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_unified_logger_with_optional_fields"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "122",
-        "path": "tests/unit/infrastructure/observability/test_unified_logger.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_unified_logger_all_stages_accepted"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "132",
-        "path": "tests/unit/infrastructure/observability/test_unified_logger.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_unified_logger_debug_with_stage"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "139",
-        "path": "tests/unit/infrastructure/observability/test_unified_logger.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_unified_logger_debug_defaults_stage_to_init"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "146",
-        "path": "tests/unit/infrastructure/observability/test_unified_logger.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_unified_logger_exception_with_stage_and_error_type"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "156",
-        "path": "tests/unit/infrastructure/observability/test_unified_logger.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_unified_logger_exception_defaults_stage_to_init"
-      },
-      {
-        "category": "intentional_no_exception_contract",
         "line": "1293",
         "path": "tests/unit/infrastructure/quarantine/test_unified_quarantine.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -1918,7 +1772,7 @@
       "architecture_helper_guard": 1,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
-      "intentional_no_exception_contract": 93,
+      "intentional_no_exception_contract": 83,
       "weak_no_value": 0
     },
     "assertless_examples": [
@@ -1948,7 +1802,7 @@
       "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:617",
       "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:638"
     ],
-    "assertless_total_candidates": 94,
+    "assertless_total_candidates": 84,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -2188,15 +2042,15 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "e738788e57b4c0ab7c1f0f613f76eb10db168efdfd1c79a37e03256b59698698",
+  "source_tree_sha256": "7e52048459c3932d3e911703238ca4ac51dad4d55d5fc2c4238ea9dc5f8d9715",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 94,
+    "assertless_total_candidates": 84,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
-    "intentional_no_exception_contract": 93,
+    "intentional_no_exception_contract": 83,
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,

@@ -17,7 +17,7 @@ from bioetl.domain.behavior.composite_validation_helpers import (
 from bioetl.domain.behavior.dq_policy_resolver import DQPolicyResolver
 from bioetl.domain.behavior.preflight_governance import PreflightGovernor
 from bioetl.domain.behavior.schema_classifier import SchemaClassifier
-from bioetl.domain.composite.config_dq import CompositeDQConfig, DQOverrideConfig
+from bioetl.domain.composite.config import CompositeDQConfig, DQOverrideConfig
 from bioetl.domain.composite.result_composite import CompositeResult
 from bioetl.domain.context_validation import (
     _validate_dq_contract_alignment,
@@ -42,7 +42,7 @@ from bioetl.domain.value_objects.dq_report_results_core import (
     _as_tuple,
     _freeze_type_change,
 )
-from bioetl.domain.workflow.foreign_key_reconciliation import (
+from bioetl.domain.workflow.foreign_key_reconciliation_models import (
     ForeignKeyReconciliationRequest,
 )
 

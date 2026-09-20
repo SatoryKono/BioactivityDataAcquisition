@@ -874,7 +874,7 @@ def test_handle_enricher_timeout_reraises_for_required_enricher() -> None:
         EnricherExecutionContext,
         handle_enricher_timeout,
     )
-    from bioetl.domain.composite.config_models import EnricherConfig
+    from bioetl.domain.composite.config import EnricherConfig
 
     enricher = EnricherConfig(
         pipeline="chembl_activity",

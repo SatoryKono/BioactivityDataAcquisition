@@ -40,7 +40,7 @@ from bioetl.domain.composite.aggregation import (
     AggregationFunction,
     EnricherCardinality,
 )
-from bioetl.domain.composite.config_models import EnricherConfig, SeedConfig
+from bioetl.domain.composite.config import EnricherConfig, SeedConfig
 from bioetl.domain.composite.config_schema import LayerColumnConfig
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 from bioetl.domain.exceptions import BioETLError
@@ -274,7 +274,7 @@ def _join_config() -> CompositeConfig:
         output_keys=("molecule_id", "doi", "pmid"),
         silver_table="silver/chembl/activity",
     )
-    from bioetl.domain.composite.config_models import MergeConfig
+    from bioetl.domain.composite.config import MergeConfig
 
     merge = MergeConfig(
         strategy=MergeStrategy.LEFT_OUTER,
