@@ -1970,5 +1970,8 @@ def graph_query_main(argv: list[str] | None = None) -> int:
     return 0
 
 
+main = graph_query_main
+
+
 if __name__ == "__main__":
     raise SystemExit(graph_query_main())
