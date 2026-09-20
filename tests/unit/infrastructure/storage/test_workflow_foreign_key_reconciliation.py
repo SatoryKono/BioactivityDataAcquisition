@@ -59,7 +59,7 @@ async def test_unbound_current_run_blocks_before_mutation(
     """Missing provenance must never widen a destructive request to all rows."""
     mutation = AsyncMock()
     monkeypatch.setattr(
-        "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation.apply_reconciliation_mutation",
+        "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support.apply_reconciliation_mutation",
         mutation,
     )
     quarantine = _Quarantine()
@@ -482,7 +482,7 @@ async def test_unproven_reference_completeness_blocks_mutation(
 ) -> None:
     mutation = AsyncMock()
     monkeypatch.setattr(
-        "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation.apply_reconciliation_mutation",
+        "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support.apply_reconciliation_mutation",
         mutation,
     )
     quarantine = _Quarantine()
@@ -545,7 +545,7 @@ async def test_mixed_run_mutates_only_selected_run_orphans(
         )()
 
     monkeypatch.setattr(
-        "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation.apply_reconciliation_mutation",
+        "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support.apply_reconciliation_mutation",
         _capture,
     )
     adapter = SilverForeignKeyReconciliationAdapter(

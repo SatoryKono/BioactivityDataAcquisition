@@ -339,7 +339,9 @@ class TestChemblSchemas:
             "target_xref_uniprot_ids": "P01589",
         }
 
-        TargetSchema.validate(pd.DataFrame([record]))
+        validated = TargetSchema.validate(pd.DataFrame([record]))
+        assert len(validated) == 1
+        assert validated.iloc[0]["target_xref_uniprot_ids"] == "P01589"
 
     @pytest.mark.parametrize(
         ("field_name", "invalid_value"),

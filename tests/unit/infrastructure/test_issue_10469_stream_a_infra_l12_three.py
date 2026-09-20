@@ -290,6 +290,12 @@ def test_metrics_server_already_started_inside_lock(
         "bioetl.infrastructure.observability._metrics_server_startup._SERVER_RUNTIME",
         _FlipRuntime(),
     )
+    # State now lives in _metrics_server_state: simulate another thread having
+    # started the server while acquiring the lock.
+    monkeypatch.setattr(
+        "bioetl.infrastructure.observability._metrics_server_startup.is_metrics_server_running",
+        lambda: True,
+    )
     started = start_metrics_server_runtime(
         start_http_server_fn=lambda *_args, **_kwargs: (_ for _ in ()).throw(
             AssertionError("should not start")

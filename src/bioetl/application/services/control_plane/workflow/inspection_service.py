@@ -59,7 +59,11 @@ class WorkflowInspectionService:
 
     def inspect_run_id(self, workflow_run_id: str) -> WorkflowInspectionResult | None:
         """Return workflow inspection payload for one workflow run identifier."""
-        state = self.state_port.get_by_run_id(RunID(UUID(workflow_run_id)))
+        try:
+            run_uuid = UUID(workflow_run_id)
+        except ValueError:
+            return None
+        state = self.state_port.get_by_run_id(RunID(run_uuid))
         if state is None:
             return None
         return self._build_result(state)

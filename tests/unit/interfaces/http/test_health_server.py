@@ -578,7 +578,8 @@ class TestHealthServerHTTP:
             # Send empty request and close
             writer.write_eof()
             await writer.drain()
-            # Should not raise, server handles gracefully
+            # Server handles gracefully: connection stays open, no crash
+            assert writer.is_closing() is False
         finally:
             writer.close()
             await writer.wait_closed()
@@ -1129,6 +1130,10 @@ class TestHealthServerErrorHandling:
         error = RuntimeError("Test error")
         await server._handle_request_error(mock_writer, error)
 
+        mock_writer.write.assert_called_once()
+        (payload,), _ = mock_writer.write.call_args
+        assert b"500" in payload
+
     @pytest.mark.asyncio
     async def test_request_error_logging(self) -> None:
         """Test that request errors are logged."""
@@ -1170,6 +1175,8 @@ class TestHealthServerErrorHandling:
 
         # Should not raise
         await server._close_writer(mock_writer)
+
+        mock_writer.close.assert_called_once_with()
 
     @pytest.mark.asyncio
     async def test_close_writer_handles_wait_closed_timeout(self) -> None:

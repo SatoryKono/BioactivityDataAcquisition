@@ -57,7 +57,9 @@ from bioetl.infrastructure.adapters.common._title_fallback_flow import (
     iter_title_only_fallback_records,
     truncate_title,
 )
-from bioetl.infrastructure.adapters.circuit_breaker_contract import CircuitBreakerSnapshot
+from bioetl.infrastructure.adapters.circuit_breaker_contract import (
+    CircuitBreakerSnapshot,
+)
 from bioetl.infrastructure.adapters.decorators._circuit_breaker_support import (
     log_failure_recorded,
     log_manual_reset,
@@ -186,7 +188,9 @@ def test_protein_classification_coerce_and_row_parsers() -> None:
     assert coerce_str(None) is None
     assert coerce_str("  ") is None
     node = SimpleNamespace(class_level=None, protein_class_id=9)
-    with pytest.raises(ProteinClassificationResolutionError, match="missing class_level"):
+    with pytest.raises(
+        ProteinClassificationResolutionError, match="missing class_level"
+    ):
         validated_class_level(node, leaf_id=9)
     node.class_level = 0
     with pytest.raises(ProteinClassificationResolutionError, match="must be >= 1"):
@@ -351,10 +355,14 @@ async def test_chembl_standard_fetch_stops_at_limit() -> None:
         def _get_api_dedup_fields(self, _entity_type: str) -> tuple[str, ...]:
             return ("activity_id",)
 
-        def _compute_composite_key(self, record: dict[str, Any], pk_fields: tuple[str, ...]) -> str:
+        def _compute_composite_key(
+            self, record: dict[str, Any], pk_fields: tuple[str, ...]
+        ) -> str:
             return str(record[pk_fields[0]])
 
-        async def _page_iterator(self, _entity_type: str, _limit: int | None, start_offset: int = 0):
+        async def _page_iterator(
+            self, _entity_type: str, _limit: int | None, start_offset: int = 0
+        ):
             del start_offset
             yield [
                 {"activity_id": "1"},
@@ -386,15 +394,18 @@ def test_adapter_error_classifier_fallback_and_wrappers() -> None:
     from bioetl.domain.error_classifier import ErrorClassifier
 
     real = AdapterErrorClassifier(classifier=ErrorClassifier(), logger=logger)
-    assert classify_exception(ValueError("bad"), classifier=ErrorClassifier(), logger=logger) is (
-        ErrorCategory.DATA_QUALITY
-    )
+    assert classify_exception(
+        ValueError("bad"), classifier=ErrorClassifier(), logger=logger
+    ) is (ErrorCategory.DATA_QUALITY)
     assert real.classify(error=ValueError("bad")) is ErrorCategory.DATA_QUALITY
 
 
 def test_retry_and_circuit_support_helpers() -> None:
     config = RetryConfig(retryable_exceptions=(TimeoutError,))
-    assert is_retryable_exception(CircuitBreakerOpenError("chembl", retry_after=1), config) is False
+    assert (
+        is_retryable_exception(CircuitBreakerOpenError("chembl", retry_after=1), config)
+        is False
+    )
     assert is_retryable_exception(RecoverableError("retry"), config) is True
     assert Exception in retryable_exception_types(
         RetryConfig(retryable_exceptions=(Exception,))
@@ -436,11 +447,14 @@ def test_retry_and_circuit_support_helpers() -> None:
         provider_name="chembl",
         error=RuntimeError("x"),
     )
-    assert unhealthy_status_if_circuit_open(
-        circuit_breaker=_ClosedBreaker(),  # type: ignore[arg-type]
-        provider_name="chembl",
-        logger=logger,
-    ) is None
+    assert (
+        unhealthy_status_if_circuit_open(
+            circuit_breaker=_ClosedBreaker(),  # type: ignore[arg-type]
+            provider_name="chembl",
+            logger=logger,
+        )
+        is None
+    )
     assert (
         unhealthy_status_if_circuit_open(
             circuit_breaker=_OpenBreaker(),  # type: ignore[arg-type]
@@ -489,7 +503,9 @@ async def test_circuit_breaker_decorator_success_race_and_health() -> None:
 
 @pytest.mark.asyncio
 async def test_http_retry_observability_and_http_circuit_snapshot() -> None:
-    noop = start_request_span(None, provider="chembl", run_id=None, method="GET", url="http://x")
+    noop = start_request_span(
+        None, provider="chembl", run_id=None, method="GET", url="http://x"
+    )
     mark_span_error(noop, "timeout")
     span = _Span()
     mark_span_error(span, "boom", RuntimeError("x"))
@@ -568,7 +584,11 @@ async def test_health_check_mixin_and_sync_base_leftovers() -> None:
     assert adapter._get_metrics() is None
     ctx = adapter._start_health_check()
     status = await adapter._probe_health()
-    assert status in {HealthStatus.HEALTHY, HealthStatus.DEGRADED, HealthStatus.UNHEALTHY}
+    assert status in {
+        HealthStatus.HEALTHY,
+        HealthStatus.DEGRADED,
+        HealthStatus.UNHEALTHY,
+    }
     adapter._handle_health_check_result(ctx, HealthStatus.HEALTHY)
     adapter._get_error_context("fetch")
     result = await adapter.check_health()
