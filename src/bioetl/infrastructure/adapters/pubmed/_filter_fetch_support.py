@@ -19,8 +19,6 @@ _PUBLICATION_ONLY_ERROR = "PubMedAdapter only supports 'publication'"
 
 
 class _EmptyBronzeAsyncIterator:
-    """Empty BronzeRecord stream used when PubMed has nothing to yield."""
-
     def __aiter__(self) -> _EmptyBronzeAsyncIterator:
         return self
 
@@ -216,9 +214,7 @@ def resolve_resume_offset(
     resume_offset = max(0, offset or 0)
     if limit is not None and resume_offset >= limit:
         host._logger.info(
-            "pubmed_resume_offset_reached_limit",
-            offset=resume_offset,
-            limit=limit,
+            "pubmed_resume_offset_reached_limit", offset=resume_offset, limit=limit
         )
         return None
     return resume_offset
