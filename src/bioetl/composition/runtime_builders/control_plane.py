@@ -6,7 +6,9 @@ from collections.abc import Mapping
 from dataclasses import is_dataclass, replace
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.composition.runtime_builders._manifest_publication_context_support import resolve_manifest_publication_context
+from bioetl.composition.runtime_builders._manifest_publication_context_support import (
+    resolve_manifest_publication_context,
+)
 from bioetl.composition.runtime_builders.effective_config_artifact_builder import (
     create_and_persist_effective_config_artifact,
 )
@@ -41,7 +43,6 @@ def attach_manifest_id[T](
     optional_fields: Mapping[str, object] | None = None,
 ) -> T:
     """Return context with full refs or compact optional provenance (Sonar S107)."""
-
     if control_plane_refs is not None:
         manifest_id = control_plane_refs.manifest_id
         optional_updates = extract_optional_updates_from_refs(control_plane_refs)
@@ -110,7 +111,6 @@ def create_run_manifest_with_effective_config(
         ctx=ctx,
         inputs=inputs,
     )
-    # Validate immutable input snapshots before any control-plane persistence.
     _preflight_pipeline_input_snapshots(
         ctx=ctx,
         inputs=inputs,

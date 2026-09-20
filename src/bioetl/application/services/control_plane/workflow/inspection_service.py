@@ -6,9 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from uuid import UUID
 
-from bioetl.domain.control_plane import (
-    WorkflowExecutionState,
-)
+from bioetl.domain.control_plane import WorkflowExecutionState
 from bioetl.domain.ports import (
     WorkflowExecutionStatePort,
     WorkflowLedgerPort,
@@ -68,10 +66,7 @@ class WorkflowInspectionService:
             return None
         return self._build_result(state)
 
-    def _build_result(
-        self,
-        state: WorkflowExecutionState,
-    ) -> WorkflowInspectionResult:
+    def _build_result(self, state: WorkflowExecutionState) -> WorkflowInspectionResult:
         manifest = self.manifest_port.get(state.manifest_id)
         if manifest is None:
             raise RuntimeError(
