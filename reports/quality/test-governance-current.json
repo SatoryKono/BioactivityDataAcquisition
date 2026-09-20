@@ -56,7 +56,7 @@
     {
       "category": "intentional_no_exception_contract",
       "line": "100",
-      "path": "tests/unit/application/test_issue_10518_app_leftovers_compat.py",
+      "path": "tests/unit/application/test_issue_10518_app_leftovers_branches.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_pipeline_metrics_noop_without_backend"
     },
@@ -730,7 +730,7 @@
     "tests/architecture/test_quality_debt_scorecard.py:1127",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
     "tests/integration/infrastructure/storage/test_delta_reader.py:586",
-    "tests/unit/application/test_issue_10518_app_leftovers_compat.py:100",
+    "tests/unit/application/test_issue_10518_app_leftovers_branches.py:100",
     "tests/unit/application/test_issue_10518_app_runner_debug_evidence.py:70",
     "tests/unit/application/test_issue_10518_application_coreobs_b.py:43",
     "tests/unit/application/test_issue_10518_application_coreobs_b.py:50",
@@ -826,7 +826,7 @@
         "intentional_no_exception_contract": 1
       }
     },
-    "tests/unit/application/test_issue_10518_app_leftovers_compat.py": {
+    "tests/unit/application/test_issue_10518_app_leftovers_branches.py": {
       "assertless_tests": 1,
       "categories": {
         "intentional_no_exception_contract": 1
@@ -1131,37 +1131,15 @@
       "metric": "refined_assertless_tests"
     },
     {
-      "actual": 7,
-      "budget": "duplicate_test_names_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_names"
-    },
-    {
-      "actual": 14,
-      "budget": "duplicate_test_name_occurrences_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_name_occurrences"
-    },
-    {
-      "actual": 1,
-      "budget": "compatibility_test_file_max",
-      "expected_max": 0,
-      "metric": "compatibility_test_files"
-    },
-    {
       "actual": 15,
       "budget": "uuid4_call_sites_max",
       "expected_max": 0,
       "metric": "uuid4_call_sites"
     }
   ],
-  "compatibility_examples": [
-    "tests/unit/application/test_issue_10518_app_leftovers_compat.py"
-  ],
-  "compatibility_files": [
-    "tests/unit/application/test_issue_10518_app_leftovers_compat.py"
-  ],
-  "compatibility_test_files": 1,
+  "compatibility_examples": [],
+  "compatibility_files": [],
+  "compatibility_test_files": 0,
   "critical_behavior_envelope_assertion_gap_count": 0,
   "critical_behavior_envelope_count": 6,
   "critical_behavior_envelopes": {
@@ -1303,111 +1281,16 @@
     }
   },
   "date_today_call_sites": 0,
-  "duplicate_test_name_inventory": [
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "integration": 1,
-        "unit": 1
-      },
-      "locations": [
-        "tests/integration/application/workflow/test_reconcile_fk_parity.py:269",
-        "tests/unit/application/workflow/test_reconcile_fk_parity.py:269"
-      ],
-      "name": "test_dry_run_blocked_reason_parity",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "unit": 2
-      },
-      "locations": [
-        "tests/unit/application/test_issue_10469_stream_a_l12_two.py:304",
-        "tests/unit/application/test_issue_10518_application_tail2a.py:1212"
-      ],
-      "name": "test_explicit_degraded_opt_down_rejects_exact_replay",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "integration": 1,
-        "unit": 1
-      },
-      "locations": [
-        "tests/integration/application/workflow/test_reconcile_fk_parity.py:226",
-        "tests/unit/application/workflow/test_reconcile_fk_parity.py:226"
-      ],
-      "name": "test_facade_payload_mirrors_canonical_result_fields",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "integration": 1,
-        "unit": 1
-      },
-      "locations": [
-        "tests/integration/application/workflow/test_reconcile_fk_parity.py:185",
-        "tests/unit/application/workflow/test_reconcile_fk_parity.py:185"
-      ],
-      "name": "test_facade_request_is_valid_canonical_adapter_input",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "unit": 2
-      },
-      "locations": [
-        "tests/unit/application/test_issue_10518_app_leftovers_next.py:317",
-        "tests/unit/application/test_issue_10518_application_tail1a.py:991"
-      ],
-      "name": "test_legacy_increment_kwargs_signature_failure",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "unit": 2
-      },
-      "locations": [
-        "tests/unit/application/test_issue_10469_stream_a_l12_two.py:229",
-        "tests/unit/application/test_issue_10518_application_tail2b.py:224"
-      ],
-      "name": "test_monotonic_invariant_status_unknown_when_unobserved",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "unit": 2
-      },
-      "locations": [
-        "tests/unit/application/test_issue_10469_stream_a_l12_two.py:276",
-        "tests/unit/application/test_issue_10518_application_tail2a.py:224"
-      ],
-      "name": "test_record_manifest_created_rejects_run_id_mismatch",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    }
-  ],
+  "duplicate_test_name_inventory": [],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 7,
-    "duplicate_occurrences": 14,
+    "cross_file_groups": 0,
+    "duplicate_occurrences": 0,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 7
+    "total_duplicate_names": 0
   },
-  "duplicate_test_name_occurrences": 14,
-  "duplicate_test_names": 7,
+  "duplicate_test_name_occurrences": 0,
+  "duplicate_test_names": 0,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1498,7 +1381,7 @@
       {
         "category": "intentional_no_exception_contract",
         "line": "100",
-        "path": "tests/unit/application/test_issue_10518_app_leftovers_compat.py",
+        "path": "tests/unit/application/test_issue_10518_app_leftovers_branches.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_pipeline_metrics_noop_without_backend"
       },
@@ -2172,7 +2055,7 @@
       "tests/architecture/test_quality_debt_scorecard.py:1127",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
       "tests/integration/infrastructure/storage/test_delta_reader.py:586",
-      "tests/unit/application/test_issue_10518_app_leftovers_compat.py:100",
+      "tests/unit/application/test_issue_10518_app_leftovers_branches.py:100",
       "tests/unit/application/test_issue_10518_app_runner_debug_evidence.py:70",
       "tests/unit/application/test_issue_10518_application_coreobs_b.py:43",
       "tests/unit/application/test_issue_10518_application_coreobs_b.py:50",
@@ -2196,13 +2079,9 @@
       "tests/unit/composition/factories/storage/test_health_mixin.py:103"
     ],
     "assertless_total_candidates": 98,
-    "compatibility_examples": [
-      "tests/unit/application/test_issue_10518_app_leftovers_compat.py"
-    ],
-    "compatibility_files": [
-      "tests/unit/application/test_issue_10518_app_leftovers_compat.py"
-    ],
-    "compatibility_test_files": 1,
+    "compatibility_examples": [],
+    "compatibility_files": [],
+    "compatibility_test_files": 0,
     "critical_behavior_envelope_assertion_gap_count": 0,
     "critical_behavior_envelope_count": 6,
     "critical_behavior_envelopes": {
@@ -2344,111 +2223,16 @@
       }
     },
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "integration": 1,
-          "unit": 1
-        },
-        "locations": [
-          "tests/integration/application/workflow/test_reconcile_fk_parity.py:269",
-          "tests/unit/application/workflow/test_reconcile_fk_parity.py:269"
-        ],
-        "name": "test_dry_run_blocked_reason_parity",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "unit": 2
-        },
-        "locations": [
-          "tests/unit/application/test_issue_10469_stream_a_l12_two.py:304",
-          "tests/unit/application/test_issue_10518_application_tail2a.py:1212"
-        ],
-        "name": "test_explicit_degraded_opt_down_rejects_exact_replay",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "integration": 1,
-          "unit": 1
-        },
-        "locations": [
-          "tests/integration/application/workflow/test_reconcile_fk_parity.py:226",
-          "tests/unit/application/workflow/test_reconcile_fk_parity.py:226"
-        ],
-        "name": "test_facade_payload_mirrors_canonical_result_fields",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "integration": 1,
-          "unit": 1
-        },
-        "locations": [
-          "tests/integration/application/workflow/test_reconcile_fk_parity.py:185",
-          "tests/unit/application/workflow/test_reconcile_fk_parity.py:185"
-        ],
-        "name": "test_facade_request_is_valid_canonical_adapter_input",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "unit": 2
-        },
-        "locations": [
-          "tests/unit/application/test_issue_10518_app_leftovers_next.py:317",
-          "tests/unit/application/test_issue_10518_application_tail1a.py:991"
-        ],
-        "name": "test_legacy_increment_kwargs_signature_failure",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "unit": 2
-        },
-        "locations": [
-          "tests/unit/application/test_issue_10469_stream_a_l12_two.py:229",
-          "tests/unit/application/test_issue_10518_application_tail2b.py:224"
-        ],
-        "name": "test_monotonic_invariant_status_unknown_when_unobserved",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "unit": 2
-        },
-        "locations": [
-          "tests/unit/application/test_issue_10469_stream_a_l12_two.py:276",
-          "tests/unit/application/test_issue_10518_application_tail2a.py:224"
-        ],
-        "name": "test_record_manifest_created_rejects_run_id_mismatch",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      }
-    ],
+    "duplicate_test_name_inventory": [],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 7,
-      "duplicate_occurrences": 14,
+      "cross_file_groups": 0,
+      "duplicate_occurrences": 0,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 7
+      "total_duplicate_names": 0
     },
-    "duplicate_test_name_occurrences": 14,
-    "duplicate_test_names": 7,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -2527,78 +2311,21 @@
       "top_level_directory_count": 16,
       "top_level_directory_count_including_pycache": 16
     },
-    "top_duplicate_test_names": [
-      {
-        "count": 2,
-        "examples": [
-          "tests/integration/application/workflow/test_reconcile_fk_parity.py:269",
-          "tests/unit/application/workflow/test_reconcile_fk_parity.py:269"
-        ],
-        "name": "test_dry_run_blocked_reason_parity"
-      },
-      {
-        "count": 2,
-        "examples": [
-          "tests/unit/application/test_issue_10469_stream_a_l12_two.py:304",
-          "tests/unit/application/test_issue_10518_application_tail2a.py:1212"
-        ],
-        "name": "test_explicit_degraded_opt_down_rejects_exact_replay"
-      },
-      {
-        "count": 2,
-        "examples": [
-          "tests/integration/application/workflow/test_reconcile_fk_parity.py:226",
-          "tests/unit/application/workflow/test_reconcile_fk_parity.py:226"
-        ],
-        "name": "test_facade_payload_mirrors_canonical_result_fields"
-      },
-      {
-        "count": 2,
-        "examples": [
-          "tests/integration/application/workflow/test_reconcile_fk_parity.py:185",
-          "tests/unit/application/workflow/test_reconcile_fk_parity.py:185"
-        ],
-        "name": "test_facade_request_is_valid_canonical_adapter_input"
-      },
-      {
-        "count": 2,
-        "examples": [
-          "tests/unit/application/test_issue_10518_app_leftovers_next.py:317",
-          "tests/unit/application/test_issue_10518_application_tail1a.py:991"
-        ],
-        "name": "test_legacy_increment_kwargs_signature_failure"
-      },
-      {
-        "count": 2,
-        "examples": [
-          "tests/unit/application/test_issue_10469_stream_a_l12_two.py:229",
-          "tests/unit/application/test_issue_10518_application_tail2b.py:224"
-        ],
-        "name": "test_monotonic_invariant_status_unknown_when_unobserved"
-      },
-      {
-        "count": 2,
-        "examples": [
-          "tests/unit/application/test_issue_10469_stream_a_l12_two.py:276",
-          "tests/unit/application/test_issue_10518_application_tail2a.py:224"
-        ],
-        "name": "test_record_manifest_created_rejects_run_id_mismatch"
-      }
-    ],
+    "top_duplicate_test_names": [],
     "total_test_files": 2608,
     "total_test_functions": 28132,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 15
   },
   "root": ".",
-  "source_tree_sha256": "e5d3d8bedf1a5ab12b8e9ec8cd600e5c153d26bec46c2a796f71d3ea2317637f",
+  "source_tree_sha256": "625b2aa74f251fac3ec7558f9ad3d1267153f5887b66cb866d625903ae3a4637",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 98,
-    "compatibility_test_files": 1,
+    "compatibility_test_files": 0,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 14,
-    "duplicate_test_names": 7,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
     "intentional_no_exception_contract": 91,
     "markerless_examples": [],
     "markerless_test_functions": 0,
@@ -2652,64 +2379,7 @@
     "top_level_directory_count": 16,
     "top_level_directory_count_including_pycache": 16
   },
-  "top_duplicate_test_names": [
-    {
-      "count": 2,
-      "examples": [
-        "tests/integration/application/workflow/test_reconcile_fk_parity.py:269",
-        "tests/unit/application/workflow/test_reconcile_fk_parity.py:269"
-      ],
-      "name": "test_dry_run_blocked_reason_parity"
-    },
-    {
-      "count": 2,
-      "examples": [
-        "tests/unit/application/test_issue_10469_stream_a_l12_two.py:304",
-        "tests/unit/application/test_issue_10518_application_tail2a.py:1212"
-      ],
-      "name": "test_explicit_degraded_opt_down_rejects_exact_replay"
-    },
-    {
-      "count": 2,
-      "examples": [
-        "tests/integration/application/workflow/test_reconcile_fk_parity.py:226",
-        "tests/unit/application/workflow/test_reconcile_fk_parity.py:226"
-      ],
-      "name": "test_facade_payload_mirrors_canonical_result_fields"
-    },
-    {
-      "count": 2,
-      "examples": [
-        "tests/integration/application/workflow/test_reconcile_fk_parity.py:185",
-        "tests/unit/application/workflow/test_reconcile_fk_parity.py:185"
-      ],
-      "name": "test_facade_request_is_valid_canonical_adapter_input"
-    },
-    {
-      "count": 2,
-      "examples": [
-        "tests/unit/application/test_issue_10518_app_leftovers_next.py:317",
-        "tests/unit/application/test_issue_10518_application_tail1a.py:991"
-      ],
-      "name": "test_legacy_increment_kwargs_signature_failure"
-    },
-    {
-      "count": 2,
-      "examples": [
-        "tests/unit/application/test_issue_10469_stream_a_l12_two.py:229",
-        "tests/unit/application/test_issue_10518_application_tail2b.py:224"
-      ],
-      "name": "test_monotonic_invariant_status_unknown_when_unobserved"
-    },
-    {
-      "count": 2,
-      "examples": [
-        "tests/unit/application/test_issue_10469_stream_a_l12_two.py:276",
-        "tests/unit/application/test_issue_10518_application_tail2a.py:224"
-      ],
-      "name": "test_record_manifest_created_rejects_run_id_mismatch"
-    }
-  ],
+  "top_duplicate_test_names": [],
   "total_test_files": 2608,
   "total_test_functions": 28132,
   "unreviewed_assertion_bypass_count": 0,

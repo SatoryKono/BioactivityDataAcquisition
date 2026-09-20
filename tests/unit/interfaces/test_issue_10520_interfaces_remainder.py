@@ -648,5 +648,10 @@ def test_cli_main_dunder_main(monkeypatch: pytest.MonkeyPatch) -> None:
     import importlib
 
     main_mod = importlib.import_module("bioetl.interfaces.cli.main")
-    monkeypatch.setattr("click.core.Group.__call__", lambda *_a, **_k: None)
-    runpy.run_path(str(Path(main_mod.__file__)), run_name="__main__")
+    calls: list[tuple[tuple[object, ...], dict[str, object]]] = []
+    monkeypatch.setattr(
+        "click.core.Group.__call__", lambda *_a, **_k: calls.append((_a, _k))
+    )
+    result = runpy.run_path(str(Path(main_mod.__file__)), run_name="__main__")
+    assert result["__name__"] == "__main__"
+    assert len(calls) == 1

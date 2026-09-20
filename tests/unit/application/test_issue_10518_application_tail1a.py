@@ -988,7 +988,7 @@ def test_increment_counter_without_metrics_api_is_noop() -> None:
     handler._increment_counter("errors_total", 1)
 
 
-def test_legacy_increment_kwargs_signature_failure(
+def test_legacy_increment_kwargs_signature_failure_inspect(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     import inspect as inspect_module

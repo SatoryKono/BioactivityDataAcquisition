@@ -221,7 +221,7 @@ def test_stage_optional_business_data_returns_none_when_absent() -> None:
 # --- runner_flow_metrics (186) ---
 
 
-def test_monotonic_invariant_status_unknown_when_unobserved() -> None:
+def test_monotonic_invariant_status_matrix_when_observed() -> None:
     from bioetl.application.core.runner_flow_metrics import (
         _monotonic_invariant_status,
     )

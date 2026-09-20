@@ -76,7 +76,7 @@
     },
     {
       "evidence_metrics": {
-        "compatibility_test_file_count": 0,
+        "compatibility_test_file_count": 1,
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -189,7 +189,7 @@
     "accepted_adr_count": 58,
     "adr_enforcement_blocking_gap_count": 0,
     "adr_enforcement_manual_exception_count": 0,
-    "compatibility_test_file_count": 0,
+    "compatibility_test_file_count": 1,
     "composition_module_cap": 300,
     "composition_module_count": 298,
     "composition_util": 0.9933,
@@ -277,7 +277,7 @@
       "path": "reports/observability/runtime_cardinality_inventory.json"
     },
     "test_governance_report": {
-      "compatibility_test_files": 0,
+      "compatibility_test_files": 1,
       "path": "reports/quality/test-governance-current.json"
     }
   },

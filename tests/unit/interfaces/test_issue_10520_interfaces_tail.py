@@ -736,7 +736,10 @@ def test_checkpoint_lineage_quarantine_and_policy_residuals(
 
 
 def test_run_cleanup_preview_error_branches(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(run_support, "echo_error", lambda *_a, **_k: None)
+    seen: list[tuple[tuple[object, ...], dict[str, object]]] = []
+    monkeypatch.setattr(
+        run_support, "echo_error", lambda *_a, **_k: seen.append((_a, _k))
+    )
     monkeypatch.setattr(
         run_support.asyncio,
         "run",
@@ -749,6 +752,8 @@ def test_run_cleanup_preview_error_branches(monkeypatch: pytest.MonkeyPatch) -> 
         lambda _coro: (_ for _ in ()).throw(RuntimeError("typed")),
     )
     run_support.show_cleanup_preview("chembl_activity")
+    assert len(seen) == 2
+    assert all(args and args[0] == "Error previewing cleanup" for args, _ in seen)
 
 
 def test_backend_excerpt_probe_and_contract_dicts(tmp_path: Path) -> None:
@@ -806,7 +811,9 @@ async def test_mixin_generic_exception_path() -> None:
             return None
 
     mixin = _Mixin()
-    await mixin._handle_connection(object(), _Writer())  # type: ignore[arg-type]
+    writer = _Writer()
+    await mixin._handle_connection(object(), writer)  # type: ignore[arg-type]
+    assert b"500" in writer.payload
 
 
 def test_maintenance_lazy_loader(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -221,7 +221,7 @@ def test_coalesce_missing_prefers_current_value() -> None:
     assert _coalesce_missing(None, "default") == "default"
 
 
-def test_record_manifest_created_rejects_run_id_mismatch() -> None:
+def test_record_manifest_created_rejects_run_id_mismatch_core_events() -> None:
     from bioetl.application.services.control_plane.ledger import core_events
 
     service = _run_ledger_service(_run_id("core-a"))
@@ -1209,7 +1209,7 @@ def test_strict_replay_provenance_requires_planned_artifacts() -> None:
         _validate_strict_replay_provenance(request, provenance)
 
 
-def test_explicit_degraded_opt_down_rejects_exact_replay() -> None:
+def test_explicit_degraded_opt_down_rejects_exact_replay_manifest() -> None:
     from bioetl.application.services.control_plane.manifest.validation import (
         _is_explicit_degraded_profile_opt_down,
     )

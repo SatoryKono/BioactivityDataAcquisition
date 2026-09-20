@@ -182,7 +182,7 @@ _MIRRORED_RESULT_FIELDS = (
 
 
 @pytest.mark.asyncio
-async def test_facade_request_is_valid_canonical_adapter_input() -> None:
+async def test_facade_request_is_valid_canonical_adapter_input_integration() -> None:
     """Facade-built requests must be accepted by the canonical adapter."""
     port_holder: dict[str, ForeignKeyReconciliationRequest | None] = {"request": None}
 
@@ -223,7 +223,7 @@ async def test_facade_request_is_valid_canonical_adapter_input() -> None:
 
 
 @pytest.mark.asyncio
-async def test_facade_payload_mirrors_canonical_result_fields() -> None:
+async def test_facade_payload_mirrors_canonical_result_fields_integration() -> None:
     """Facade payloads must mirror canonical result fields without drift."""
     adapter = SilverForeignKeyReconciliationAdapter(
         silver_writer=_SilverReader(
@@ -266,7 +266,7 @@ async def test_facade_payload_mirrors_canonical_result_fields() -> None:
 
 
 @pytest.mark.asyncio
-async def test_dry_run_blocked_reason_parity() -> None:
+async def test_dry_run_blocked_reason_parity_integration() -> None:
     """Canonical dry-run results must surface the facade dry-run marker."""
     adapter = SilverForeignKeyReconciliationAdapter(
         silver_writer=_SilverReader(
