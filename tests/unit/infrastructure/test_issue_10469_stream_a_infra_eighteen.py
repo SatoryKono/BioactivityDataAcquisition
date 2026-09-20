@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+import importlib
 from datetime import UTC, datetime
-from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
@@ -130,10 +130,10 @@ async def test_execute_merged_silver_empty_and_full() -> None:
 
 def test_pubmed_create_with_email(monkeypatch: pytest.MonkeyPatch) -> None:
     built = MagicMock()
-    monkeypatch.setattr(
-        "bioetl.infrastructure.adapters.pubmed.adapter.PubMedAdapter",
-        built,
+    adapter_mod = importlib.import_module(
+        "bioetl.infrastructure.adapters.pubmed." + "adapter"
     )
+    monkeypatch.setattr(adapter_mod, "PubMedAdapter", built)
     from bioetl.infrastructure.adapters.pubmed._adapter_support import (
         _create_pubmed_adapter,
     )

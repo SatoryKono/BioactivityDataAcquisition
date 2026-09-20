@@ -233,7 +233,7 @@ async def test_pubmed_adapter_models_and_factory() -> None:
     from bioetl.infrastructure.adapters.pubmed._filter_fetch_support import (
         fetch_from_filter_ids,
     )
-    from bioetl.infrastructure.adapters.pubmed.adapter import PubMedAdapter
+    from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
 
     logger = MagicMock()
     http = AsyncMock()
