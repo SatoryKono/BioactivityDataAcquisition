@@ -2,12 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Literal, cast
+from typing import TYPE_CHECKING, Literal, cast
+
+if TYPE_CHECKING:
+    from bioetl.domain.workflow.foreign_key_reconciliation_models import (
+        ForeignKeyReconciliationRequest as ForeignKeyReconciliationRequest,
+    )
 
 __all__ = [
     "ForeignKeyReconciliationAction",
     "ForeignKeyReconciliationLayer",
     "ForeignKeyReconciliationMutationMode",
+    "ForeignKeyReconciliationRequest",
     "ReferenceCompletenessStatus",
     "normalize_layer",
     "normalize_request_layers",
@@ -159,3 +165,14 @@ def require_source_scope(source_scope: str) -> None:
 def normalize_source_run_ids(source_run_ids: tuple[str, ...]) -> tuple[str, ...]:
     """Drop blank source run ids and freeze the remainder."""
     return tuple(str(item) for item in source_run_ids if str(item).strip())
+
+
+def __getattr__(name: str) -> object:
+    """Lazily re-export names moved to the models split (cycle-safe)."""
+    if name == "ForeignKeyReconciliationRequest":
+        from bioetl.domain.workflow.foreign_key_reconciliation_models import (
+            ForeignKeyReconciliationRequest,
+        )
+
+        return ForeignKeyReconciliationRequest
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
