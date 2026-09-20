@@ -46,7 +46,7 @@ _RUNTIME_CONFIG_ACCESS = (
 )
 
 
-def __getattr__(name: str) -> object:  # pragma: no cover
+def __getattr__(name: str) -> object:
     """Lazily expose compatibility symbols from the public resolver facade."""
     if name == "ResolvedVacuumSettings":
         return ResolvedVacuumSettings

@@ -5,10 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
-
-# B404 justification: subprocess is only invoked with sys.executable plus an inline
-# -c payload (no shell=True, no user-controlled command). Reviewed 2026-09-18; re-review by 2027-03-18.
-import subprocess  # nosec B404
+import subprocess  # nosec B404 - see suppression registry
 import sys
 import tempfile
 import threading
@@ -98,7 +95,7 @@ async def _await_blocking_deltalake_call[BlockingResult](
     def _worker() -> None:
         try:
             result = call()
-        # pragma: no cover - justification: surfaced through await; reviewed 2026-09-18, re-review by 2027-03-18.
+        # pragma: no cover - surfaced through await
         # NOSONAR python:S5754 - thread boundary must capture all call failures
         except Exception as exc:
             with suppress(RuntimeError):
@@ -208,10 +205,8 @@ def _run_plain_delta_write_subprocess(
     metadata["arrow_path"] = payload_path.as_posix()
     try:
         try:
-            # B603 justification: argv is fixed (sys.executable + inline -c code +
-            # JSON metadata); no shell and no user-controlled command.
-            # Reviewed 2026-09-18; re-review by 2027-03-18.
-            completed = subprocess.run(  # nosec B603
+            # No shell or user-controlled command is involved.
+            completed = subprocess.run(  # nosec B603 - see suppression registry
                 [
                     sys.executable,
                     "-c",

@@ -1,0 +1,213 @@
+# Composite package ownership graph (AUD-007, #10532).
+# Every src/bioetl/application/composite/**/*.py module MUST be listed
+# in exactly one area; tests/architecture/test_composite_ownership.py enforces it.
+version: 1
+policy_scope: composite_ownership
+linked_issue: "#10532"
+owner: "@org/team-composite-runtime"
+review_date: "2026-12-31"
+areas:
+  - name: package_root
+    responsibility: "Public surface: protocols, runtime models, wiring API."
+    depends_on: []
+    modules:
+      - src/bioetl/application/composite/__init__.py
+      - src/bioetl/application/composite/protocols.py
+      - src/bioetl/application/composite/runtime_models.py
+      - src/bioetl/application/composite/runtime_wiring_api.py
+  - name: runner
+    responsibility: "Pipeline runner: stage orchestration, merge, enrichment, control plane."
+    depends_on: [merger, coordinator, checkpoint, lifecycle, preflight]
+    modules:
+      - src/bioetl/application/composite/fsm_helper.py
+      - src/bioetl/application/composite/runner_pkg/__init__.py
+      - src/bioetl/application/composite/runner_pkg/runner.py
+      - src/bioetl/application/composite/runner_pkg/runner_checkpoint_contracts.py
+      - src/bioetl/application/composite/runner_pkg/runner_checkpoint_save_observability.py
+      - src/bioetl/application/composite/runner_pkg/runner_completion_helpers.py
+      - src/bioetl/application/composite/runner_pkg/runner_constants.py
+      - src/bioetl/application/composite/runner_pkg/runner_control_plane_lifecycle.py
+      - src/bioetl/application/composite/runner_pkg/runner_control_plane_mixin.py
+      - src/bioetl/application/composite/runner_pkg/runner_control_plane_phase_completion.py
+      - src/bioetl/application/composite/runner_pkg/runner_control_plane_phase_followup.py
+      - src/bioetl/application/composite/runner_pkg/runner_control_plane_support.py
+      - src/bioetl/application/composite/runner_pkg/runner_cv_quarantine_helpers.py
+      - src/bioetl/application/composite/runner_pkg/runner_execution_orchestrator.py
+      - src/bioetl/application/composite/runner_pkg/runner_helpers.py
+      - src/bioetl/application/composite/runner_pkg/runner_key_flow.py
+      - src/bioetl/application/composite/runner_pkg/runner_lifecycle_flow.py
+      - src/bioetl/application/composite/runner_pkg/runner_merge_request_flow.py
+      - src/bioetl/application/composite/runner_pkg/runner_merge_stage_dispatch_mixin.py
+      - src/bioetl/application/composite/runner_pkg/runner_merge_stage_execution_mixin.py
+      - src/bioetl/application/composite/runner_pkg/runner_merge_stage_mixin.py
+      - src/bioetl/application/composite/runner_pkg/runner_merge_stage_runtime.py
+      - src/bioetl/application/composite/runner_pkg/runner_merge_stage_types.py
+      - src/bioetl/application/composite/runner_pkg/runner_mergeability_helpers.py
+      - src/bioetl/application/composite/runner_pkg/runner_observability_helpers.py
+      - src/bioetl/application/composite/runner_pkg/runner_observability_mixin.py
+      - src/bioetl/application/composite/runner_pkg/runner_result_types.py
+      - src/bioetl/application/composite/runner_pkg/runner_runtime_helpers.py
+      - src/bioetl/application/composite/runner_pkg/runner_stage_completion_mixin.py
+      - src/bioetl/application/composite/runner_pkg/runner_stage_dependency_flow.py
+      - src/bioetl/application/composite/runner_pkg/runner_stage_dependency_state_flow.py
+      - src/bioetl/application/composite/runner_pkg/runner_stage_enrichment_completion_mixin.py
+      - src/bioetl/application/composite/runner_pkg/runner_stage_enrichment_execution_mixin.py
+      - src/bioetl/application/composite/runner_pkg/runner_stage_enrichment_mixin.py
+      - src/bioetl/application/composite/runner_pkg/runner_stage_enrichment_types.py
+      - src/bioetl/application/composite/runner_pkg/runner_stage_execution_mixin.py
+      - src/bioetl/application/composite/runner_pkg/runner_stage_mixin.py
+      - src/bioetl/application/composite/runner_pkg/runner_stage_payloads.py
+      - src/bioetl/application/composite/runner_pkg/runner_stage_seed_flow.py
+      - src/bioetl/application/composite/runner_pkg/runner_stage_start_flow.py
+      - src/bioetl/application/composite/runner_pkg/runner_stage_state_flow.py
+      - src/bioetl/application/composite/runner_pkg/runner_stage_support_dispatch_mixin.py
+      - src/bioetl/application/composite/runner_pkg/runner_stage_support_flow_mixin.py
+      - src/bioetl/application/composite/runner_pkg/runner_stage_support_mixin.py
+      - src/bioetl/application/composite/runner_pkg/runner_stage_support_types.py
+      - src/bioetl/application/composite/runner_pkg/runner_stage_types.py
+      - src/bioetl/application/composite/runner_pkg/runner_summary_helpers.py
+      - src/bioetl/application/composite/runner_pkg/runner_support_flow.py
+      - src/bioetl/application/composite/runner_pkg/runner_support_mixin.py
+      - src/bioetl/application/composite/runner_pkg/runner_support_policy.py
+      - src/bioetl/application/composite/runner_pkg/runner_support_result_mixin.py
+      - src/bioetl/application/composite/runner_pkg/runner_support_run_mixin.py
+      - src/bioetl/application/composite/runner_pkg/runner_support_runtime.py
+      - src/bioetl/application/composite/runner_pkg/runner_support_types.py
+  - name: checkpoint
+    responsibility: "Checkpoint state, persistence, replay, transitions."
+    depends_on: []
+    modules:
+      - src/bioetl/application/composite/checkpoint/__init__.py
+      - src/bioetl/application/composite/checkpoint/_anchor_context.py
+      - src/bioetl/application/composite/checkpoint/_checkpoint_replay_projection.py
+      - src/bioetl/application/composite/checkpoint/_checkpoint_runtime.py
+      - src/bioetl/application/composite/checkpoint/_checkpoint_warnings.py
+      - src/bioetl/application/composite/checkpoint/_load_validation.py
+      - src/bioetl/application/composite/checkpoint/_state_support.py
+      - src/bioetl/application/composite/checkpoint/load_service.py
+      - src/bioetl/application/composite/checkpoint/persistence_service.py
+      - src/bioetl/application/composite/checkpoint/service.py
+      - src/bioetl/application/composite/checkpoint/state.py
+      - src/bioetl/application/composite/checkpoint/state_parsing.py
+      - src/bioetl/application/composite/checkpoint/state_serialization.py
+      - src/bioetl/application/composite/checkpoint/transition_service.py
+  - name: merger
+    responsibility: "Merge orchestration, inputs/outputs, metrics, post-join."
+    depends_on: [columns, conflict, dedup, join]
+    modules:
+      - src/bioetl/application/composite/merger.py
+      - src/bioetl/application/composite/merger_collaborators.py
+      - src/bioetl/application/composite/merger_input_mixin.py
+      - src/bioetl/application/composite/merger_io_mixin.py
+      - src/bioetl/application/composite/merger_metrics_mixin.py
+      - src/bioetl/application/composite/merger_orchestration.py
+      - src/bioetl/application/composite/merger_output_mixin.py
+      - src/bioetl/application/composite/merger_post_join.py
+      - src/bioetl/application/composite/merge_service.py
+      - src/bioetl/application/composite/aggregator.py
+      - src/bioetl/application/composite/target_protein_classification_summary.py
+      - src/bioetl/application/composite/helpers/merger_orchestration_types.py
+  - name: coordinator
+    responsibility: "Enrichment coordination, planning, result handling."
+    depends_on: [dependency, join]
+    modules:
+      - src/bioetl/application/composite/coordinator.py
+      - src/bioetl/application/composite/coordinator_planning.py
+      - src/bioetl/application/composite/coordinator_result_mixin.py
+      - src/bioetl/application/composite/helpers/coordinator_execution.py
+  - name: dependency
+    responsibility: "Dependency coordination, joins, resolvers, tracking."
+    depends_on: [join]
+    modules:
+      - src/bioetl/application/composite/dependency_coordinator.py
+      - src/bioetl/application/composite/dependency_join_context_builders.py
+      - src/bioetl/application/composite/dependency_join_execution.py
+      - src/bioetl/application/composite/dependency_join_models.py
+      - src/bioetl/application/composite/dependency_join_support.py
+      - src/bioetl/application/composite/dependency_joiner.py
+      - src/bioetl/application/composite/dependency_key_resolvers.py
+      - src/bioetl/application/composite/dependency_progress_tracker.py
+      - src/bioetl/application/composite/dependency_result_mapper.py
+      - src/bioetl/application/composite/helpers/dependency_chained_key_resolver.py
+      - src/bioetl/application/composite/helpers/dependency_coordinator_execution.py
+      - src/bioetl/application/composite/helpers/dependency_join_apply_ops.py
+      - src/bioetl/application/composite/helpers/dependency_join_service_ops.py
+  - name: join
+    responsibility: "Join planning/execution, key extraction and resolution."
+    depends_on: [columns]
+    modules:
+      - src/bioetl/application/composite/join_execution.py
+      - src/bioetl/application/composite/join_key_normalization.py
+      - src/bioetl/application/composite/join_key_resolution.py
+      - src/bioetl/application/composite/join_key_resolution_helpers.py
+      - src/bioetl/application/composite/join_planner.py
+      - src/bioetl/application/composite/join_planner_delegation_mixin.py
+      - src/bioetl/application/composite/join_planner_helpers.py
+      - src/bioetl/application/composite/key_extractor.py
+      - src/bioetl/application/composite/enricher_join_execution.py
+      - src/bioetl/application/composite/helpers/join_planner_identity.py
+  - name: columns
+    responsibility: "Column services, ordering, renaming, layer filters."
+    depends_on: []
+    modules:
+      - src/bioetl/application/composite/column_orderer_group_flow.py
+      - src/bioetl/application/composite/column_orderer_semantic.py
+      - src/bioetl/application/composite/column_priority_orderer.py
+      - src/bioetl/application/composite/column_renamer.py
+      - src/bioetl/application/composite/column_service.py
+      - src/bioetl/application/composite/column_service_priority.py
+      - src/bioetl/application/composite/column_service_support.py
+      - src/bioetl/application/composite/helpers/column_service_layer_filter.py
+  - name: conflict
+    responsibility: "Conflict resolution across merged records."
+    depends_on: []
+    modules:
+      - src/bioetl/application/composite/conflict_resolver.py
+  - name: dedup
+    responsibility: "Deduplication of composite records."
+    depends_on: []
+    modules:
+      - src/bioetl/application/composite/deduplication.py
+  - name: validation
+    responsibility: "Cross-validation and finalization."
+    depends_on: []
+    modules:
+      - src/bioetl/application/composite/cross_validator.py
+      - src/bioetl/application/composite/cross_validator_helpers.py
+      - src/bioetl/application/composite/helpers/cross_validator_finalize.py
+  - name: coalesce
+    responsibility: "Coalesce policy and timestamp support."
+    depends_on: [columns]
+    modules:
+      - src/bioetl/application/composite/coalesce_policy.py
+      - src/bioetl/application/composite/_coalesce_policy_support.py
+      - src/bioetl/application/composite/_coalesce_timestamp_support.py
+  - name: lifecycle
+    responsibility: "Lifecycle observation, spans, terminal events."
+    depends_on: []
+    modules:
+      - src/bioetl/application/composite/lifecycle_observer_service.py
+      - src/bioetl/application/composite/_lifecycle_observer_event_metrics.py
+      - src/bioetl/application/composite/_lifecycle_observer_span_management.py
+      - src/bioetl/application/composite/_lifecycle_observer_tracing_helpers.py
+      - src/bioetl/application/composite/_lifecycle_observer_tracing_mixin.py
+      - src/bioetl/application/composite/_lifecycle_observer_tracing_types.py
+      - src/bioetl/application/composite/helpers/lifecycle_observer_terminal_emit.py
+  - name: preflight
+    responsibility: "Preflight validation, schema registry, reporting."
+    depends_on: [columns]
+    modules:
+      - src/bioetl/application/composite/preflight_validator.py
+      - src/bioetl/application/composite/_preflight_field_priority.py
+      - src/bioetl/application/composite/_preflight_orchestration.py
+      - src/bioetl/application/composite/_preflight_reporting.py
+      - src/bioetl/application/composite/_preflight_types.py
+      - src/bioetl/application/composite/helpers/preflight_schema_field_extraction.py
+      - src/bioetl/application/composite/helpers/preflight_schema_registry.py
+      - src/bioetl/application/composite/helpers/preflight_type_and_aggregation.py
+  - name: shared
+    responsibility: "Cross-cutting helper factories."
+    depends_on: []
+    modules:
+      - src/bioetl/application/composite/helpers/__init__.py
+      - src/bioetl/application/composite/helpers/resolver_helper.py

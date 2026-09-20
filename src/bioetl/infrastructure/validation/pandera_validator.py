@@ -57,7 +57,10 @@ class BasePanderaValidator:
             schema: Pandera DataFrameSchema for validation. If None and strict=False,
                 validation is skipped. If None and strict=True, validation fails.
             strict: If True, requires schema to be provided. Default False for
-                backward compatibility.
+                backward compatibility. Sunset review 2026-12-31 (#10535):
+                flip the default to strict validation once callers migrate
+                (codemod: pass strict=True explicitly where a schema is
+                required).
 
         """
         self._schema = schema

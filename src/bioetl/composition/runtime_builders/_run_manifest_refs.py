@@ -110,7 +110,7 @@ def build_run_source_refs(
     )
 
 
-def __getattr__(name: str) -> object:  # pragma: no cover
+def __getattr__(name: str) -> object:
     """Lazily expose data-root mode helpers without static fan-in."""
     if name in {
         "DataRootMode",

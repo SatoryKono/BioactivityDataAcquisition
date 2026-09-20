@@ -3,10 +3,7 @@
 from __future__ import annotations
 
 from typing import cast
-
-# B405 justification: Element used for type annotations/traversal only; parsing is
-# via defusedxml (XXE/billion-laughs safe). Reviewed 2026-09-18; re-review by 2027-03-18.
-from xml.etree.ElementTree import Element  # nosec B405
+from xml.etree.ElementTree import Element  # nosec B405 - see suppression registry
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
 from bioetl.application.pipelines.pubmed.extractors.identifier_types import (

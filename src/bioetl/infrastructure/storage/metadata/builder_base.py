@@ -35,7 +35,7 @@ def _get_git_commit_cached() -> str | None:
         return None
 
     try:
-        result = subprocess.run(  # nosec B603 - Git path resolved via which()
+        result = subprocess.run(  # nosec B603 - Git path resolved via which(); see suppression registry
             [git_executable, "rev-parse", "--short", "HEAD"],
             capture_output=True,
             text=True,
