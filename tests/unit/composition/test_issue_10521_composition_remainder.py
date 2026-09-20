@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock
-from uuid import uuid4
 
 import pytest
 
@@ -198,7 +197,10 @@ def test_exact_replay_setattr_and_parent_manifest(
     store = SimpleNamespace(get=lambda _mid: None, get_by_run_id=lambda _rid: "by-run")
     monkeypatch.setattr(exact_replay, "FileRunManifestStore", lambda **_k: store)
     monkeypatch.setattr(exact_replay, "control_plane_root", lambda *_a, **_k: Path("x"))
-    ctx = SimpleNamespace(replay_of_manifest_id=None, replay_of_run_id=str(uuid4()))
+    ctx = SimpleNamespace(
+        replay_of_manifest_id=None,
+        replay_of_run_id="12345678-1234-5678-1234-567812345678",
+    )
     assert (
         exact_replay._resolve_replay_parent_manifest(ctx=ctx, settings=object())  # type: ignore[arg-type]
         == "by-run"

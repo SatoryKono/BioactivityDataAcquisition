@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from uuid import UUID, uuid4
+from uuid import UUID
 
 import pytest
 
@@ -162,7 +162,7 @@ def test_control_plane_payloads_and_normalization_helpers() -> None:
     assert spec["code_provenance"]["effective_config_artifact_id"] is None
     ledger = normalize_run_ledger_payload(
         {
-            "run_id": str(uuid4()),
+            "run_id": "12345678-1234-5678-1234-567812345678",
             "occurred_at": "2026-01-01T00:00:00+00:00",
             "metrics_snapshot": {"n": 1},
             "details": {"k": "v"},
@@ -297,7 +297,7 @@ def test_three_line_filters_merge_ledger_manifest_and_registry() -> None:
     entry = RunLedgerEntry(
         entry_id="e1",
         manifest_id="m",
-        run_id=RunID(uuid4()),
+        run_id=RunID(UUID("12345678-1234-5678-1234-567812345678")),
         event_type="  ",
         occurred_at=datetime(2026, 1, 1, tzinfo=UTC),
     )
@@ -309,7 +309,7 @@ def test_three_line_filters_merge_ledger_manifest_and_registry() -> None:
         RunLedgerEntry(
             entry_id="e2",
             manifest_id="m",
-            run_id=RunID(uuid4()),
+            run_id=RunID(UUID("12345678-1234-5678-1234-567812345678")),
             event_type=STAGE_STARTED_EVENT,
             occurred_at=datetime(2026, 1, 1, tzinfo=UTC),
             stage="nope",

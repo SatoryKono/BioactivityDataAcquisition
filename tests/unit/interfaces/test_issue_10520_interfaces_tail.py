@@ -7,7 +7,6 @@ import inspect
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
 
 import pytest
 from click.testing import CliRunner
@@ -868,4 +867,3 @@ def test_workflow_status_config_error(monkeypatch: pytest.MonkeyPatch) -> None:
     runner = CliRunner()
     result = runner.invoke(wf.workflow, ["status", "missing"])
     assert result.exit_code != 0
-    _ = uuid4()

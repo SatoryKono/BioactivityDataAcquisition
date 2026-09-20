@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
-from uuid import UUID, uuid4
+from uuid import UUID
 
 import pyarrow as pa
 import pytest
@@ -264,8 +264,8 @@ async def test_bronze_post_write_saves_metadata() -> None:
         provider="chembl",
         entity="activity",
         date=datetime(2026, 1, 1, tzinfo=UTC),
-        batch_id=BatchID(uuid4()),
-        run_id=RunID(uuid4()),
+        batch_id=BatchID(UUID("12345678-1234-5678-1234-567812345678")),
+        run_id=RunID(UUID("12345678-1234-5678-1234-567812345678")),
         run_type=RunType.INCREMENTAL,
         ingestion_ts=datetime(2026, 1, 1, tzinfo=UTC),
     )

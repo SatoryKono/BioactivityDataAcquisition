@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from uuid import UUID
 
 import pytest
 
@@ -388,7 +388,7 @@ def test_leftover_eight_remaining_one_and_three_line_clusters() -> None:
     emit_batch_failed(
         emitter=MagicMock(),
         run_id=None,
-        batch_id=BatchID(uuid4()),
+        batch_id=BatchID(UUID("12345678-1234-5678-1234-567812345678")),
         layer="silver",
         error=RuntimeError("write"),
         occurred_at=datetime.now(UTC),

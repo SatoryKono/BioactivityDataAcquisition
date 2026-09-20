@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
 
 import pytest
 
@@ -218,7 +217,7 @@ async def test_checkpoint_service_tracerless_and_runtime_gaps() -> None:
     svc._record_operator_metrics(operation="list", status="ok", duration_seconds=0.01)
 
     svc.checkpoint_port.load_for_run = AsyncMock(return_value=None)
-    run_id = str(uuid4())
+    run_id = "12345678-1234-5678-1234-567812345678"
     missing_run = await svc.get_checkpoint_for_run("chembl_activity", run_id)
     assert missing_run is None
 

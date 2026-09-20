@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
 from xml.etree import ElementTree as ET
 
 import polars as pl
@@ -88,7 +87,7 @@ def test_inspection_historical_claim_and_resolve_gaps() -> None:
     svc._attach_historical_replay_universe_claim(diagnostics)
     assert diagnostics["historical_replay_universe_durable_evidence_claimed"] is False
     svc._attach_reproducibility_claim_views({"reproducibility_audit_score": "not-dict"})
-    run_id = str(uuid4())
+    run_id = "12345678-1234-5678-1234-567812345678"
     assert parse_run_id(run_id) is not None
     with pytest.raises(RunManifestInspectionCorruptionError):
         svc._resolve_manifest(run_id)

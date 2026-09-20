@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from uuid import UUID
 from xml.etree.ElementTree import Element
 
 import pytest
@@ -162,7 +162,7 @@ def test_workflow_provider_gauge_and_resume_errors() -> None:
             workflow_state_port=port,
             workflow_name="wf",
             resume_manifest_id=None,
-            resume_run_id=str(uuid4()),
+            resume_run_id="12345678-1234-5678-1234-567812345678",
         )
     with pytest.raises(RuntimeError, match="different workflow"):
         _validate_workflow_name(SimpleNamespace(workflow_name="other"), "expected")  # type: ignore[arg-type]
@@ -223,7 +223,7 @@ def test_ledger_provenance_source_refs_and_upstream(
     ledger = WorkflowLedgerService(
         ledger_port=MagicMock(),
         manifest_id="m1",
-        workflow_run_id=RunID(uuid4()),
+        workflow_run_id=RunID(UUID("12345678-1234-5678-1234-567812345678")),
         workflow_name="wf",
         _entry_id_factory=lambda: "e1",
         _occurred_at_factory=lambda: datetime.now(UTC),
