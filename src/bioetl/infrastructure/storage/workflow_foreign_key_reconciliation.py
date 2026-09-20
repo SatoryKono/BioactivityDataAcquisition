@@ -34,6 +34,15 @@ from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_reads imp
     read_reference_rows,
     read_source_rows,
 )
+from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_reads import (
+    _current_flag_column as _current_flag_column,
+)
+from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_reads import (
+    _is_current_flag_value as _is_current_flag_value,
+)
+from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_reads import (
+    filter_current_rows as filter_current_rows,
+)
 from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support import (
     build_reconciliation_result,
     complete_dry_run,
@@ -52,6 +61,7 @@ __all__ = [
     "ReconcileDebugArtifactSinkProtocol",
     "SilverForeignKeyReconciliationAdapter",
     "StorageForeignKeyReconciliationAdapter",
+    "filter_current_rows",
 ]
 _RECONCILIATION_ROWS_SCANNED_TOTAL = "bioetl_workflow_reconciliation_rows_scanned_total"
 _RECONCILIATION_ROWS_RETAINED_TOTAL = (
