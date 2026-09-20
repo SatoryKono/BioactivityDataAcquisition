@@ -54,7 +54,7 @@ class EnricherDeduplicatorService:
         missing_cols = [c for c in key_columns if c not in df.columns]
         if missing_cols:
             return False
-        unique_count: int = df.select(key_columns).n_unique()
+        unique_count: int = df.select(key_columns).unique(maintain_order=False).height
         has_duplicates: bool = unique_count < len(df)
         return has_duplicates
 
