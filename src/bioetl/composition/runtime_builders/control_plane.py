@@ -107,10 +107,7 @@ def create_run_manifest_with_effective_config(
     ledger_enabled: bool,
 ) -> tuple[_ManifestControlPlaneRefs, RunLedgerService | None]:
     """Create immutable manifest before pipeline assembly begins."""
-    publication_context = resolve_manifest_publication_context(
-        ctx=ctx,
-        inputs=inputs,
-    )
+    publication_context = resolve_manifest_publication_context(ctx=ctx, inputs=inputs)
     _preflight_pipeline_input_snapshots(
         ctx=ctx,
         inputs=inputs,
