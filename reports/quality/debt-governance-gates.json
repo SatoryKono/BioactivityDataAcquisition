@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "50831b387f90868a6acb64b9e6cc5519e5400e09a038b7d9fa7998b0c885d1b3",
-      "limit": "50831b387f90868a6acb64b9e6cc5519e5400e09a038b7d9fa7998b0c885d1b3",
+      "current": "b36473214ec617167b70f383a8500d7a66d97720b7b76b60e8162565d18fcb50",
+      "limit": "b36473214ec617167b70f383a8500d7a66d97720b7b76b60e8162565d18fcb50",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -57,13 +57,13 @@
     {
       "current": {
         "source_module_count": 2474,
-        "source_tree_sha256": "50831b387f90868a6acb64b9e6cc5519e5400e09a038b7d9fa7998b0c885d1b3",
+        "source_tree_sha256": "b36473214ec617167b70f383a8500d7a66d97720b7b76b60e8162565d18fcb50",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2474,
-        "source_tree_sha256": "50831b387f90868a6acb64b9e6cc5519e5400e09a038b7d9fa7998b0c885d1b3",
+        "source_tree_sha256": "b36473214ec617167b70f383a8500d7a66d97720b7b76b60e8162565d18fcb50",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -253,22 +253,22 @@
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": 5,
       "limit": 0,
       "metric": "budget_violations",
       "name": "test_governance_budget_violations",
       "remediation": "Fix test governance budget violations before closeout.",
       "source_artifact": "reports/quality/test-governance-current.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
-      "current": 0,
+      "current": 15,
       "limit": 0,
       "metric": "uuid4_call_sites",
       "name": "test_governance_uuid4_call_sites",
       "remediation": "Replace uuid4 tests with deterministic factories or explicit IDs.",
       "source_artifact": "reports/quality/test-governance-current.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": 0,
@@ -370,7 +370,7 @@
       "status": "pass"
     },
     {
-      "current": 2,
+      "current": 3,
       "limit": 21,
       "metric": "generated_at_age_days",
       "name": "observability_release_review_freshness",
@@ -416,15 +416,18 @@
     },
     {
       "current": {
-        "artifacts": [],
-        "count": 0
+        "artifacts": [
+          "architecture_quality_scorecard",
+          "remote_main_baseline"
+        ],
+        "count": 2
       },
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
-      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: none",
+      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: architecture_quality_scorecard, remote_main_baseline",
       "source_artifact": "reports/quality/*.json",
-      "status": "pass"
+      "status": "fail"
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
@@ -450,26 +453,30 @@
   "schema_version": 1,
   "stale_artifacts": {
     "adr_enforcement_matrix": false,
-    "architecture_quality_scorecard": false,
+    "architecture_quality_scorecard": true,
     "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
     "hotspot_family_baseline": false,
     "module_coverage_inventory": false,
-    "remote_main_baseline": false
+    "remote_main_baseline": true
   },
   "status_counts": {
-    "fail": 0,
-    "pass": 45,
+    "fail": 3,
+    "pass": 42,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 9.47,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 0,
-    "failing_gates": [],
+    "fail_count": 3,
+    "failing_gates": [
+      "test_governance_budget_violations",
+      "test_governance_uuid4_call_sites",
+      "generated_artifact_drift"
+    ],
     "gate_count": 45,
-    "pass_count": 45,
-    "release_gate_status": "passing",
+    "pass_count": 42,
+    "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []
   }
