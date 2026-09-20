@@ -121,9 +121,7 @@ def _bind_resolved_cached_bronze_context[T](
     if current == resolved:
         return ctx
     if is_dataclass(ctx):
-        return cast(
-            "T", replace(cast("Any", ctx), cached_bronze=resolved)
-        )  # Any: replace() host
+        return cast("T", replace(cast(Any, ctx), cached_bronze=resolved))  # Any:
     payload = dict(vars(ctx))
     payload["cached_bronze"] = resolved
     return cast("T", SimpleNamespace(**payload))

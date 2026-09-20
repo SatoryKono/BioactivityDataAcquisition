@@ -21,7 +21,7 @@ from bioetl.application.services.control_plane.replay.historical_universe_policy
 
 if TYPE_CHECKING:
     from bioetl.application.services.control_plane.replay.historical_corpus_models import (
-        HistoricalReplayCertifiabilityInventory as HistoricalReplayCertifiabilityInventory,
+        HistoricalReplayCertifiabilityInventory as _CertInventory,
     )
 
 __all__ = [
@@ -36,9 +36,7 @@ _CLOSED_CERTIFICATION_STATUSES = frozenset({"already_replayable", "already_certi
 
 
 class _HistoricalCorpusReader(Protocol):
-    def build_certifiability_inventory(
-        self,
-    ) -> HistoricalReplayCertifiabilityInventory: ...
+    def build_certifiability_inventory(self) -> _CertInventory: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -173,7 +171,7 @@ class HistoricalReplayUniverseService:
 
     def _build_local_records(
         self,
-        inventory: HistoricalReplayCertifiabilityInventory,
+        inventory: _CertInventory,
     ) -> list[HistoricalReplayUniverseRecord]:
         return [
             HistoricalReplayUniverseRecord(
