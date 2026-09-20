@@ -144,6 +144,39 @@ async def iter_batch_records(
                 await aclose_fn()
 
 
+async def fetch_cached_bronze_records(
+    reader: BronzeBatchReader,
+    logger: LoggerPort,
+    batches: list[str],
+    *,
+    bronze_date: str | None,
+    limit: int | None,
+) -> AsyncIterator[JsonDict]:
+    """Yield cached Bronze records with start/limit/complete logging."""
+    logger.info(
+        "cached_bronze_fetch_start",
+        batch_count=len(batches),
+        date_filter=bronze_date,
+        limit=limit,
+    )
+    count = 0
+    async for record in iter_batch_records(reader, logger, batches):
+        yield record
+        count += 1
+        if limit is not None and count >= limit:
+            logger.info(
+                "cached_bronze_fetch_limit_reached",
+                records_yielded=count,
+                limit=limit,
+            )
+            return
+    logger.info(
+        "cached_bronze_fetch_complete",
+        records_yielded=count,
+        batches_processed=len(batches),
+    )
+
+
 async def count_batch_records(
     reader: BronzeBatchReader,
     logger: LoggerPort,

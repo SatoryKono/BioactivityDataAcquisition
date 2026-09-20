@@ -431,7 +431,9 @@ def _make_debug_service(
 
 
 class TestDebugExportService:
-    def test_set_debug_root_selects_output_root(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_set_debug_root_selects_output_root(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         captured: dict[str, object] = {}
         monkeypatch.setattr(
             dbg_mod,
@@ -456,7 +458,9 @@ class TestDebugExportService:
         )
         writer = MagicMock()
         writer.write_pack.return_value = expected
-        assert await _make_debug_service(enabled=True, writer=writer).persist() is expected
+        assert (
+            await _make_debug_service(enabled=True, writer=writer).persist() is expected
+        )
 
     def test_finalize_without_writer_returns_none(self) -> None:
         assert (
@@ -520,7 +524,7 @@ class TestQuarantineStatusSync:
     def test_operator_error_records_metrics_and_reraises(self) -> None:
         host = _make_quarantine_host()
         host.quarantine_port.update_status.side_effect = OSError("store down")
-        started_at = datetime.now(timezone.utc)
+        started_at = datetime(2026, 1, 1, tzinfo=UTC)
         with pytest.raises(OSError, match="store down"):
             QuarantineServiceStatusSyncMixin._update_status_impl(
                 host,
@@ -589,7 +593,9 @@ def _ledger_manifest(*snapshots: object) -> RunManifestInspectionResult:
 
 class TestQuarantineWorkflowSupport:
     def test_bronze_count_skips_invalid_snapshots(self) -> None:
-        manifest = _ledger_manifest("junk", {"records_bronze": 0}, {"records_bronze": 5})
+        manifest = _ledger_manifest(
+            "junk", {"records_bronze": 0}, {"records_bronze": 5}
+        )
         assert quarantine_support.resolve_bronze_record_count(manifest) == 5
 
     async def test_failing_stats_service_resolves_none(self) -> None:
@@ -633,7 +639,9 @@ class TestObservabilityWorkflowService:
     async def test_audit_run_without_tracer_delegates(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        monkeypatch.setattr(ows_mod, "inspect_audit_run_impl", AsyncMock(return_value="AUDIT"))
+        monkeypatch.setattr(
+            ows_mod, "inspect_audit_run_impl", AsyncMock(return_value="AUDIT")
+        )
         assert await _make_workflow_service().inspect_audit_run("run-1") == "AUDIT"
 
     async def test_run_dossier_without_tracer_delegates(
@@ -646,9 +654,9 @@ class TestObservabilityWorkflowService:
 
     async def test_manifest_dossier_requires_service(self) -> None:
         with pytest.raises(ValueError, match="run manifest service is required"):
-            await _make_workflow_service(run_manifest_service=None).inspect_manifest_dossier(
-                "m-1"
-            )
+            await _make_workflow_service(
+                run_manifest_service=None
+            ).inspect_manifest_dossier("m-1")
 
     async def test_checkpoint_workflow_rejects_both_ids(self) -> None:
         with pytest.raises(ValueError, match="either run_id or manifest_id"):
@@ -668,12 +676,8 @@ from bioetl.application.composite.checkpoint._checkpoint_warnings import (
 from bioetl.domain.exceptions import BioETLError
 
 
-def _warn_call(
-    monkeypatch: pytest.MonkeyPatch, *, content: str | None
-) -> MagicMock:
-    monkeypatch.setattr(
-        warn_mod, "latest_checkpoint_filename", lambda **k: "ckpt.json"
-    )
+def _warn_call(monkeypatch: pytest.MonkeyPatch, *, content: str | None) -> MagicMock:
+    monkeypatch.setattr(warn_mod, "latest_checkpoint_filename", lambda **k: "ckpt.json")
     storage = MagicMock()
     storage.exists.return_value = True
     storage.read.return_value = content
@@ -685,7 +689,9 @@ def _warn_call(
 
 
 class TestCheckpointWarnings:
-    def test_empty_content_returns_silently(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_empty_content_returns_silently(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         logger = _warn_call(monkeypatch, content=None)
         logger.warning.assert_not_called()
         logger.debug.assert_not_called()
@@ -891,7 +897,9 @@ class TestStructuralPolicyEvents:
     def test_boolean_value_sets_reported(self) -> None:
         details = build_structural_details(
             reason_code="rc",
-            contract=_make_spec(boolean_true_values=("Y",), boolean_false_values=("N",)),
+            contract=_make_spec(
+                boolean_true_values=("Y",), boolean_false_values=("N",)
+            ),
             actual_value="maybe",
             action_taken="warn",
         )
@@ -995,7 +1003,9 @@ from bioetl.application.core.data_sources.subcellular_fraction import (
 
 
 class TestSubcellularFractionDelegation:
-    def test_normalize_fraction_delegates(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_normalize_fraction_delegates(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         monkeypatch.setattr(fraction_support, "normalize_fraction", lambda v: "NORM")
         assert SubcellularFractionDataSource._normalize_fraction("raw") == "NORM"
 
@@ -1041,7 +1051,9 @@ class TestPipelineRunnerManifest:
         runner = _make_runner()
         recorder = MagicMock()
         launch_context = SimpleNamespace(manifest_id="m-10")
-        runner.attach_contract_evidence_recorder(recorder, launch_context=launch_context)
+        runner.attach_contract_evidence_recorder(
+            recorder, launch_context=launch_context
+        )
         assert runner._contract_evidence_recorder is recorder
         assert runner._contract_evidence_context is launch_context
 

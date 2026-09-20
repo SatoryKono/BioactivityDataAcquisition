@@ -11,15 +11,15 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_refre
 from bioetl.application.services.control_plane.manifest.diagnostics.reproducibility_assessment import (
     _assess_manifest_reproducibility_policy,
 )
+from bioetl.domain.control_plane import RunManifest
+from bioetl.domain.control_plane.reproducibility_policy import (
+    ReproducibilityPolicyAssessment,
+)
 from bioetl.domain.control_plane.snapshot_payloads import (
     collect_input_snapshot_content_hashes,
     collect_input_snapshot_ids,
     collect_input_snapshot_refs,
     compute_snapshot_identity_fingerprint,
-)
-from bioetl.domain.control_plane import RunManifest
-from bioetl.domain.control_plane.reproducibility_policy import (
-    ReproducibilityPolicyAssessment,
 )
 
 if TYPE_CHECKING:

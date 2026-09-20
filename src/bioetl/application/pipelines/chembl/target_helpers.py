@@ -9,7 +9,7 @@ from bioetl.application.core.dict_transformers import aggregate_nested_lists
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
+    from collections.abc import Callable, Iterator, Sequence
 
 
 class XrefHelper:
@@ -97,7 +97,7 @@ class XrefHelper:
         return [item for item in xrefs if isinstance(item, dict)]
 
     @classmethod
-    def project_component_xrefs(cls, xrefs: list[JsonDict]) -> dict[str, str]:
+    def project_component_xrefs(cls, xrefs: Sequence[object]) -> dict[str, str]:
         """Project whitelisted xref sources into pipe-separated derived columns."""
         buckets: dict[str, list[str]] = {
             column: [] for column in cls._XREF_DERIVED_COLUMNS
@@ -190,7 +190,7 @@ class SynonymHelper:
 
     @staticmethod
     def iter_component_synonym_payloads(
-        components: list[JsonDict],
+        components: Sequence[object],
     ) -> Iterator[Mapping[str, object]]:
         """Yield validated synonym payload dicts from target components."""
         for component in components:
@@ -240,7 +240,7 @@ class SynonymHelper:
     @classmethod
     def project_component_synonyms(
         cls,
-        components: list[JsonDict] | None,
+        components: Sequence[object] | None,
     ) -> dict[str, str]:
         """Project categorized synonym strings from raw target component payloads."""
         if not components or not isinstance(components, list):

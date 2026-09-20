@@ -21,14 +21,17 @@ dependencies = [
     "pydantic-settings>=2.14.2",
     "pyyaml>=6.0",
     "polars>=1.0",
-    # deltalake<1.0: upper bound holds the 0.x API/ABI that the pinned arro3-core
-    # Windows wheel below was validated against; lift only after deltalake 1.x +
-    # compatible arro3-core Windows wheels are verified. Reviewed 2026-09-18; re-review by 2027-03-18.
+    # <1.0: deltalake 1.x API migration is unvalidated here; keep the range and
+    # revisit only with a migration plan. Reviewed 2026-09-19; re-review by 2027-03-19. (AUD-006)
     "deltalake>=0.18,<1.0",
-    "arro3-core==0.6.5",  # Pin for Windows compatibility with deltalake 1.4.x (exposes arro3.core.types). Reviewed 2026-09-18; re-review by 2027-03-18.
+    # NOTE (AUD-006): no arro3-core pin. deltalake<1.0 does not require arro3
+    # and nothing in src/scripts/tests imports it (verified 2026-09-19).
+    # Re-add only as part of a deltalake>=1.0 migration with Windows-CI proof.
     "pyarrow>=15.0,<26.0",
     "zstandard>=0.22",
-    "pandas>=2.0,<2.3",  # Pin to 2.2.x series for reliable pre-built wheels on Windows (2.3.x requires Meson build). Reviewed 2026-09-18; re-review by 2027-03-18.
+    # <2.3 holds back pandas 3.x behavioral breaks (CoW/strings); 2.3.x is
+    # unvalidated in this repo. Reviewed 2026-09-19; re-review by 2027-03-19. (AUD-006)
+    "pandas>=2.0,<2.3",
     # Validation
     "pandera>=0.20",
     # Providers (RULES.md Appendix A)
@@ -163,6 +166,8 @@ dev = [
     # Code duplication detection
     "pylint>=3.0",
     "detect-secrets>=1.4",
+    # Exact pins: reproducible sdist/wheel build + upload toolchain.
+    # Reviewed 2026-09-19; re-review by 2027-03-19. (AUD-006)
     "build==1.2.2.post1",
     "twine==6.1.0",
     # Dead code detection
@@ -325,28 +330,20 @@ disallow_incomplete_defs = true
 check_untyped_defs = true
 no_implicit_optional = true
 warn_redundant_casts = true
-warn_unused_ignores = false  # Different envs have different type stubs; avoids CI/local mismatch
+warn_unused_ignores = true  # AUD-004: stale suppressions must fail loudly
 show_error_codes = true
 # Additional strict checks
 disallow_any_generics = false  # Allow generic types for external libraries
 disallow_subclassing_any = false  # Allow subclassing pydantic BaseModel and pandera DataFrameModel
-warn_unreachable = false  # Disable for unreachable code warnings in type narrowing
+warn_unreachable = true  # AUD-004: dead branches after narrowing must fail loudly
 strict_equality = true
 extra_checks = true
-# Exclude non-product trees from default discovery. Product gate is src/bioetl
-# only (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py).
-# memory is an approved sidecar (configs/quality/repo_structure_catalog.yaml).
-exclude = [
-    "src/memory/",
-]
-
-# Belt-and-suspenders when memory modules are named explicitly on the CLI.
-[[tool.mypy.overrides]]
-module = [
-    "memory",
-    "memory.*",
-]
-ignore_errors = true
+# No default-discovery exclusions (AUD-004): src/memory/ is type-checked like
+# product code. The mypy product gate stays path-explicit
+# (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py); memory
+# remains a sidecar only for coverage/lint catalogs
+# (configs/quality/repo_structure_catalog.yaml).
+exclude = []
 
 [[tool.mypy.overrides]]
 module = [
@@ -384,6 +381,8 @@ module = [
     "botocore.*",
     "s3transfer",
     "s3transfer.*",
+    "jsonschema",
+    "jsonschema.*",
 ]
 ignore_missing_imports = true
 

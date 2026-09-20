@@ -132,7 +132,7 @@ class DebugExportService(DebugExportServiceRecordingMixin):
         self._collector.attach_manifest_id(manifest_id)
 
     def set_debug_root(self, path: str | Path) -> None:
-        self._debug_root = str(path)
+        self._debug_root = Path(path).as_posix()
 
     def build_pack(self, *, status: str = "complete") -> DebugExportPack:
         """Build the in-memory audit pack from collected rows."""

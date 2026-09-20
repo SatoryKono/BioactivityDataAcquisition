@@ -44,15 +44,15 @@ class SchemaSnapshotResult:
 
     def __post_init__(self) -> None:
         """Convert lists to tuples for immutability."""
-        if isinstance(self.new_fields_since_last_run, list):
-            object.__setattr__(
-                self, "new_fields_since_last_run", tuple(self.new_fields_since_last_run)
-            )
-        if isinstance(self.missing_fields_since_last_run, list):
+        raw_new_fields: object = self.new_fields_since_last_run
+        if isinstance(raw_new_fields, list):
+            object.__setattr__(self, "new_fields_since_last_run", tuple(raw_new_fields))
+        raw_missing_fields: object = self.missing_fields_since_last_run
+        if isinstance(raw_missing_fields, list):
             object.__setattr__(
                 self,
                 "missing_fields_since_last_run",
-                tuple(self.missing_fields_since_last_run),
+                tuple(raw_missing_fields),
             )
         object.__setattr__(self, "schema", MappingProxyType(dict(self.schema)))
 
@@ -67,9 +67,10 @@ class EncodingValidationResult:
 
     def __post_init__(self) -> None:
         """Convert lists to tuples for immutability."""
-        if isinstance(self.invalid_utf8_records, list):
+        raw_invalid_utf8_records: object = self.invalid_utf8_records
+        if isinstance(raw_invalid_utf8_records, list):
             object.__setattr__(
-                self, "invalid_utf8_records", tuple(self.invalid_utf8_records)
+                self, "invalid_utf8_records", tuple(raw_invalid_utf8_records)
             )
 
 
@@ -107,8 +108,9 @@ class TypeConformanceResult:
 
     def __post_init__(self) -> None:
         """Convert lists to tuples for immutability."""
-        if isinstance(self.errors, list):
-            object.__setattr__(self, "errors", tuple(self.errors))
+        raw_errors: object = self.errors
+        if isinstance(raw_errors, list):
+            object.__setattr__(self, "errors", tuple(raw_errors))
 
 
 @dataclass(frozen=True, slots=True)
@@ -135,8 +137,9 @@ class CategoricalDistribution:
 
     def __post_init__(self) -> None:
         """Convert lists to tuples for immutability."""
-        if isinstance(self.top_values, list):
-            object.__setattr__(self, "top_values", tuple(self.top_values))
+        raw_top_values: object = self.top_values
+        if isinstance(raw_top_values, list):
+            object.__setattr__(self, "top_values", tuple(raw_top_values))
 
 
 @dataclass(frozen=True, slots=True)

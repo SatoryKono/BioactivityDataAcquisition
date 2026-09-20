@@ -37,8 +37,9 @@ class FieldMapping:
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
-        if isinstance(self.provider_columns, list):
-            object.__setattr__(self, "provider_columns", tuple(self.provider_columns))
+        raw_provider_columns: object = self.provider_columns
+        if isinstance(raw_provider_columns, list):
+            object.__setattr__(self, "provider_columns", tuple(raw_provider_columns))
         if not self.base_name:
             raise ValueError("base_name cannot be empty")
 
@@ -103,8 +104,9 @@ class FieldGroupDefinition:
         """Validate and convert types."""
         if not self.display_name:
             raise ValueError("display_name cannot be empty")
-        if isinstance(self.fields, list):
-            object.__setattr__(self, "fields", tuple(self.fields))
+        raw_fields: object = self.fields
+        if isinstance(raw_fields, list):
+            object.__setattr__(self, "fields", tuple(raw_fields))
 
     @property
     def base_field_names(self) -> tuple[str, ...]:

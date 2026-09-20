@@ -292,10 +292,7 @@ def test_stringify_value_serializes_nested():
 
 def test_build_dataframe_from_records_empty():
     assert (
-        dqhelpers.build_dataframe_from_records(
-            records=[], logger=MagicMock()
-        )
-        is None
+        dqhelpers.build_dataframe_from_records(records=[], logger=MagicMock()) is None
     )
 
 
@@ -322,9 +319,7 @@ def test_build_dq_report_context_requires_started_at():
         run_id="r1", started_at=None, replay_timestamp_anchor=None
     )
     config = SimpleNamespace(
-        table_config=SimpleNamespace(
-            primary_keys=[], silver_table="s", gold_table="g"
-        ),
+        table_config=SimpleNamespace(primary_keys=[], silver_table="s", gold_table="g"),
         dq_config=None,
         entity_type="e",
         pipeline_name="p",
@@ -392,9 +387,7 @@ def test_reset_batch_after_flush_recovers():
     loop_state.batch.append({"a": 1})
     memory = MagicMock()
     memory.maybe_recover = lambda size: 5
-    loophelpers.reset_batch_after_flush(
-        loop_state=loop_state, memory_manager=memory
-    )
+    loophelpers.reset_batch_after_flush(loop_state=loop_state, memory_manager=memory)
     assert loop_state.batch == []
     assert loop_state.current_batch_size == 5
 
@@ -541,7 +534,9 @@ def test_hash_policy_group_requires_projected_hashes():
 # control_plane_integrity_metrics (missing: 63, 64, 89, 120, 121, 154)
 # ---------------------------------------------------------------------------
 
-from bioetl.application.observability import control_plane_integrity_metrics as integrity
+from bioetl.application.observability import (
+    control_plane_integrity_metrics as integrity,
+)
 from bioetl.domain.control_plane import RunManifest
 
 
@@ -561,9 +556,7 @@ def test_manifest_expects_ledger_string_flags():
 
 
 def test_manifest_expects_ledger_nested_config():
-    manifest = RunManifest(
-        launch_context={"pipeline": {"ledger_enabled": "off"}}
-    )
+    manifest = RunManifest(launch_context={"pipeline": {"ledger_enabled": "off"}})
     assert integrity.manifest_expects_ledger(manifest) is False
 
 

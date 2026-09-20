@@ -67,7 +67,8 @@ async def validate_infrastructure(host: _PreflightExecutionHostProtocol) -> None
     start_time = time.perf_counter()
     validate_fn = host._preflight_service.validate_infrastructure
     if _supports_raise_on_unhealthy(validate_fn):
-        report = await validate_fn(
+        # Legacy doubles may return None instead of a HealthReport.
+        report: HealthReport | None = await validate_fn(
             host._services,
             raise_on_unhealthy=False,
         )

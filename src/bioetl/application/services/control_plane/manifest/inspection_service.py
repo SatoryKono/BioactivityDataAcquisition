@@ -5,9 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
-from bioetl.application.services.control_plane.manifest.inspection_verification import (
-    RunManifestInspectionCompareMixin,
-)
 from bioetl.application.services.control_plane.manifest._inspection_support import (
     RunManifestInspectionDiffClassificationMixin,
 )
@@ -30,6 +27,10 @@ from bioetl.application.services.control_plane.manifest.inspection_verification 
     RunManifestDiffResult as RunManifestDiffResult,
 )
 from bioetl.application.services.control_plane.manifest.inspection_verification import (
+    RunManifestInspectionCompareMixin,
+    parse_run_id,
+)
+from bioetl.application.services.control_plane.manifest.inspection_verification import (
     RunManifestInspectionCorruptionError as RunManifestInspectionCorruptionError,
 )
 from bioetl.application.services.control_plane.manifest.inspection_verification import (
@@ -37,9 +38,6 @@ from bioetl.application.services.control_plane.manifest.inspection_verification 
 )
 from bioetl.application.services.control_plane.manifest.inspection_verification import (
     RunManifestVerifyResult as RunManifestVerifyResult,
-)
-from bioetl.application.services.control_plane.manifest.inspection_verification import (
-    parse_run_id,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.ports import (

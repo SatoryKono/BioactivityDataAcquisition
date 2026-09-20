@@ -43,6 +43,7 @@ _PUSHGATEWAY_FALLBACK = "localhost:9091"
 
 if TYPE_CHECKING:
     from bioetl.application.services.quality.quarantine_service import QuarantineService
+    from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.application.services.workflow.observability_workflow_service import (
         RunForensicDossierResult,
     )
@@ -176,7 +177,7 @@ def _seed_run_type(run_type: str | None, workflow_name: str | None) -> str:
 
 def _ensure_publication_seeds(
     *,
-    settings: object,
+    settings: Settings,
     pipeline_name: str | None,
     run_type: str | None,
     pipeline_names: tuple[str, ...],

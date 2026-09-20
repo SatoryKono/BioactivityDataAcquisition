@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any, cast
 
 from bioetl.domain.composite.aggregation import (
     AggregationConfig,
@@ -158,11 +159,14 @@ class EnricherConfig:
                 "cardinality",
                 EnricherCardinality.from_string(self.cardinality),
             )
-        if isinstance(self.aggregation, dict):
+        raw_aggregation = cast(
+            "AggregationConfig | dict[str, Any] | None", self.aggregation
+        )
+        if isinstance(raw_aggregation, dict):
             object.__setattr__(
                 self,
                 "aggregation",
-                AggregationConfig(**self.aggregation),
+                AggregationConfig(**raw_aggregation),
             )
         self._validate()
 

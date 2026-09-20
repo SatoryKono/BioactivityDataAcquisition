@@ -7,6 +7,9 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Protocol
 
+from bioetl.application.services.control_plane.replay.historical_corpus_models import (
+    HistoricalReplayCertifiabilityInventory,
+)
 from bioetl.application.services.control_plane.replay.historical_identity_models import (
     HistoricalReplayUniverseExternalRecord,
     HistoricalReplayUniverseRecord,
@@ -30,24 +33,8 @@ __all__ = [
 _CLOSED_CERTIFICATION_STATUSES = frozenset({"already_replayable", "already_certified"})
 
 
-class _LocalCertifiabilityRecord(Protocol):
-    manifest_id: str
-    run_id: str
-    pipeline_name: str
-    provider: str
-    entity: str
-    execution_context: str
-    certification_status: str
-    replay_occurrence_kind: str
-    blocking_reasons: tuple[str, ...]
-
-
-class _LocalCertifiabilityInventory(Protocol):
-    records: tuple[_LocalCertifiabilityRecord, ...]
-
-
-class HistoricalCorpusReader(Protocol):
-    def build_certifiability_inventory(self) -> _LocalCertifiabilityInventory: ...
+class _HistoricalCorpusReader(Protocol):
+    def build_certifiability_inventory(self) -> HistoricalReplayCertifiabilityInventory: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -123,7 +110,7 @@ class HistoricalReplayUniverseClosureReportRecord:
 class HistoricalReplayUniverseService:
     """Build full-universe replay inventories beyond the local retained corpus."""
 
-    corpus_service: HistoricalCorpusReader
+    corpus_service: _HistoricalCorpusReader
     now_factory: Callable[[], datetime]
 
     def build_universe_inventory(
@@ -182,7 +169,7 @@ class HistoricalReplayUniverseService:
 
     def _build_local_records(
         self,
-        inventory: _LocalCertifiabilityInventory,
+        inventory: HistoricalReplayCertifiabilityInventory,
     ) -> list[HistoricalReplayUniverseRecord]:
         return [
             HistoricalReplayUniverseRecord(

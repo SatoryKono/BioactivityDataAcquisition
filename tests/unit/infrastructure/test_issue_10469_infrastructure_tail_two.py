@@ -49,6 +49,8 @@ from bioetl.infrastructure.storage.versioned_table_resolver import (
     resolve_versioned_table_name,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_settings_normalizes_blank_optional_runtime_paths() -> None:
     settings = Settings(report_root="  ", runtime_source_id="", _env_file=None)

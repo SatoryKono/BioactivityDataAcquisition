@@ -23,8 +23,9 @@ class CompletenessResult:
 
     def __post_init__(self) -> None:
         """Convert lists to tuples and freeze mappings."""
-        if isinstance(self.reject_reasons, list):
-            object.__setattr__(self, "reject_reasons", tuple(self.reject_reasons))
+        raw_reject_reasons: object = self.reject_reasons
+        if isinstance(raw_reject_reasons, list):
+            object.__setattr__(self, "reject_reasons", tuple(raw_reject_reasons))
         object.__setattr__(
             self,
             "required_fields",
@@ -61,8 +62,9 @@ class BusinessRulesResult:
 
     def __post_init__(self) -> None:
         """Convert lists to tuples for immutability."""
-        if isinstance(self.rules, list):
-            object.__setattr__(self, "rules", tuple(self.rules))
+        raw_rules: object = self.rules
+        if isinstance(raw_rules, list):
+            object.__setattr__(self, "rules", tuple(raw_rules))
 
 
 @dataclass(frozen=True, slots=True)
@@ -149,12 +151,14 @@ class AnomalyDetectionResult:
 
     def __post_init__(self) -> None:
         """Convert lists to tuples for immutability."""
-        if isinstance(self.anomalies_detected, list):
+        raw_anomalies_detected: object = self.anomalies_detected
+        if isinstance(raw_anomalies_detected, list):
             object.__setattr__(
-                self, "anomalies_detected", tuple(self.anomalies_detected)
+                self, "anomalies_detected", tuple(raw_anomalies_detected)
             )
-        if isinstance(self.metrics_monitored, list):
-            object.__setattr__(self, "metrics_monitored", tuple(self.metrics_monitored))
+        raw_metrics_monitored: object = self.metrics_monitored
+        if isinstance(raw_metrics_monitored, list):
+            object.__setattr__(self, "metrics_monitored", tuple(raw_metrics_monitored))
 
 
 @dataclass(frozen=True, slots=True)

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import assert_never
 
 from bioetl.domain.control_plane import ControlPlaneArtifactSurface
 from bioetl.infrastructure.control_plane.file_artifact_lifecycle_payloads import (
@@ -63,7 +64,7 @@ def _protected_by(
             protected_refs=protected_refs,
         )
         return _dedupe_reasons(reasons)
-    return ()
+    assert_never(surface)
 
 
 def _manifest_or_ledger_protected_reasons(
