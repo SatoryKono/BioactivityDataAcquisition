@@ -3,7 +3,7 @@
   "linked_issue": "#6891",
   "follow_up_issue": "#7464",
   "parent_epic": "#6890",
-  "snapshot_date": "2026-09-19",
+  "snapshot_date": "2026-09-20",
   "generated_by": "scripts.engineering.qa.report_live_residual_snapshot",
   "policy": {
     "direction": "shrink_only",
@@ -40,10 +40,10 @@
     },
     "application_services_control_plane": {
       "files_ge_250_loc": 0,
-      "max_internal_fan_in": 3,
+      "max_internal_fan_in": 1,
       "helper_function_ratio": 0.375,
       "files": 113,
-      "total_loc": 14512,
+      "total_loc": 14510,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 2
     },
@@ -52,7 +52,7 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.38,
       "files": 55,
-      "total_loc": 7122,
+      "total_loc": 7118,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     }
