@@ -6,7 +6,7 @@ This module only orchestrates the canonical implementation
 ``ForeignKeyReconciliationPort``: it builds the request, shapes the result
 payload, and persists artifacts. Storage/mutation logic must not be duplicated
 here; parity with the canonical adapter is enforced by
-``tests/unit/application/workflow/test_reconcile_fk_parity.py``.
+``tests/integration/application/workflow/test_reconcile_fk_parity.py``.
 """
 
 from __future__ import annotations
