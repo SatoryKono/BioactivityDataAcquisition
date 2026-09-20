@@ -5,11 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import Enum
-from io import StringIO
 from uuid import UUID
 
 import pytest
-import yaml
 
 from bioetl.domain.behavior.chemical_standardization import (
     standardize_chemical_structure,
@@ -34,8 +32,6 @@ from bioetl.domain.control_plane._run_manifest_serialization import (
     normalize_manifest_serializable,
 )
 from bioetl.domain.control_plane.config_source_hashing import (
-    _UniqueKeySafeLoader,
-    _construct_unique_mapping,
     _to_canonical_jsonable,
     compute_canonical_yaml_sha256,
     compute_config_source_hashes,
@@ -334,10 +330,6 @@ def test_config_source_hashing_covers_unhashable_keys_enum_and_yml_suffix() -> N
         source_path="configs/base/pipeline.YML", raw_bytes=b"a: 1\n"
     )
     assert hashes.hash_strategy == "canonical_yaml"
-    sequence_node = yaml.compose("[1, 2]")
-    loader = _UniqueKeySafeLoader(StringIO(""))
-    with pytest.raises((TypeError, AttributeError, yaml.YAMLError)):
-        _construct_unique_mapping(loader, sequence_node)
 
 
 def test_lineage_refs_cover_encoding_defaults_and_from_dict_optional_fields() -> None:

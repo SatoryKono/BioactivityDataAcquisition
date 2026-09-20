@@ -25,7 +25,7 @@ from bioetl.domain.behavior.value_validator_rules import (
     _percent_type_error,
     validate_percent_value,
 )
-from bioetl.domain.composite.config_merge import MergeConfig
+from bioetl.domain.composite import MergeConfig
 from bioetl.domain.composite.field_groups_models import (
     FieldGroupDefinition,
     FieldGroupId,
@@ -64,7 +64,7 @@ from bioetl.domain.mapping.publication_type_classification import (
     classify_publication_type,
 )
 from bioetl.domain.types import ContentHash, EntityID, RunID, RunType
-from bioetl.domain.value_objects.pchembl_value import PChemblValue
+from bioetl.domain.value_objects import PChemblValue
 
 pytestmark = pytest.mark.unit
 

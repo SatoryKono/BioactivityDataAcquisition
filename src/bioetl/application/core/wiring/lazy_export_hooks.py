@@ -21,7 +21,7 @@ def resolve_lazy_export(
     public_exports: Mapping[str, LazyExportTarget],
     name: str,
     namespace: dict[str, object],
-) -> object:  # pragma: no cover
+) -> object:
     """Resolve one lazily exported symbol for a wiring facade module."""
     target = public_exports.get(name)
     if target is None:
@@ -49,7 +49,7 @@ def install_lazy_export_facade(
     export_names = list(public_exports)
     namespace["__all__"] = export_names
 
-    def _module_getattr(name: str) -> object:  # pragma: no cover
+    def _module_getattr(name: str) -> object:
         return resolve_lazy_export(
             module_name=module_name,
             public_exports=public_exports,
@@ -57,7 +57,7 @@ def install_lazy_export_facade(
             namespace=namespace,
         )
 
-    def _module_dir() -> list[str]:  # pragma: no cover
+    def _module_dir() -> list[str]:
         return lazy_export_dir(namespace, export_names)
 
     namespace["__getattr__"] = _module_getattr

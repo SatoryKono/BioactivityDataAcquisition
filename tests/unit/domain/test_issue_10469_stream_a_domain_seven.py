@@ -7,11 +7,11 @@ from uuid import UUID, uuid4
 
 import pytest
 
+from bioetl.domain.composite import ColumnGroupConfig, MergeConfig
 from bioetl.domain.composite.aggregation_filters import (
     _try_comparison_operator,
     _validate_aggregation_filter_condition,
 )
-from bioetl.domain.composite.config_merge import ColumnGroupConfig, MergeConfig
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 from bioetl.domain.control_plane._run_ledger_runtime import (
     STAGE_STARTED_EVENT,
@@ -106,13 +106,10 @@ from bioetl.domain.types.gold_schema_policy import (
     GoldSchemaPolicyByVersion,
     GoldSchemaVersionPolicy,
 )
+from bioetl.domain.value_objects import Concentration, ConcentrationUnit
 from bioetl.domain.value_objects._publication_field_group_config import FieldGroupConfig
 from bioetl.domain.value_objects._run_context_create_support import (
     coerce_run_context_create_input,
-)
-from bioetl.domain.value_objects.activity_concentration import (
-    Concentration,
-    ConcentrationUnit,
 )
 from bioetl.domain.value_objects.compound_ids import AssayId, CompoundId
 from bioetl.domain.value_objects.dq_report_enums import DQCheckStatus

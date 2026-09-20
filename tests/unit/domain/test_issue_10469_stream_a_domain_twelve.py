@@ -104,15 +104,12 @@ from bioetl.domain.types.gold_schema_policy import (
     GoldSchemaPolicyByVersion,
     GoldSchemaVersionPolicy,
 )
+from bioetl.domain.value_objects import Concentration, ConcentrationUnit
 from bioetl.domain.value_objects._publication_field_group_config import FieldGroupConfig
 from bioetl.domain.value_objects._run_context_create_support import (
     _optional_str_value,
     _require_value,
     _run_id_value,
-)
-from bioetl.domain.value_objects.activity_concentration import (
-    Concentration,
-    ConcentrationUnit,
 )
 from bioetl.domain.value_objects.bronze_result import (
     _has_provider_entity,
