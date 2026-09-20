@@ -3,19 +3,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
-
-import polars as pl
-
 from bioetl.application.composite.checkpoint import (
-    CompositeCheckpointService,
     CompositeCheckpointState,
 )
-from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
-from bioetl.application.composite.dependency_coordinator import (
-    DependencyCoordinatorService,
-)
-from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.runner_pkg.runner_stage_state_flow import (
     complete_seed_phase,
     fail_required_dependencies,
@@ -29,14 +19,11 @@ from bioetl.application.composite.runner_pkg.runner_stage_state_flow import (
 from bioetl.application.composite.runner_pkg.runner_stage_support_types import (
     _CompositeRunnerStageSupportHostProtocol,
 )
-from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.composite.result import (
     DependencyResult,
     SeedResult,
 )
 from bioetl.domain.composite.state import CompositePipelineState
-from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
 
 __all__ = ["_CompositeRunnerStageSupportFlowMixin"]
 
@@ -44,18 +31,6 @@ __all__ = ["_CompositeRunnerStageSupportFlowMixin"]
 class _CompositeRunnerStageSupportFlowMixin:
     """Guards, transitions, and seed/dependency phase flows."""
 
-    _config: CompositeConfig  # pyright: ignore[reportUninitializedInstanceVariable]
-    _runtime: CompositeRuntimeConfig  # pyright: ignore[reportUninitializedInstanceVariable]
-    _logger: LoggerPort  # pyright: ignore[reportUninitializedInstanceVariable]
-    _run_id_str: str  # pyright: ignore[reportUninitializedInstanceVariable]
-    _fsm: FSMStateHelperService  # pyright: ignore[reportUninitializedInstanceVariable]
-    _checkpoint_manager: CompositeCheckpointService  # pyright: ignore[reportUninitializedInstanceVariable]
-    _dependency_coordinator: DependencyCoordinatorService | None  # pyright: ignore[reportUninitializedInstanceVariable]
-    _dependencies_runner_factory: (  # pyright: ignore[reportUninitializedInstanceVariable]
-        Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort] | None
-    )
-    _coordinator: EnrichmentCoordinatorService  # pyright: ignore[reportUninitializedInstanceVariable]
-    _enricher_runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort]  # pyright: ignore[reportUninitializedInstanceVariable]
 
     def _has_dependencies_configured(
         self: _CompositeRunnerStageSupportHostProtocol,

@@ -3,17 +3,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from datetime import datetime
-
-from bioetl.application.composite.checkpoint import CompositeCheckpointService
-from bioetl.application.composite.fsm_helper import FSMStateHelperService
-from bioetl.application.composite.lifecycle_observer_service import (
-    CompositeLifecycleObserverService,
-)
-from bioetl.application.composite.preflight_validator import (
-    CompositePreflightValidationService,
-)
 from bioetl.application.composite.runner_pkg.runner_completion_helpers import (
     CompositeResultBuildRequest,
     build_composite_result,
@@ -33,17 +22,8 @@ from bioetl.application.composite.runner_pkg.runner_support_types import (
 )
 from bioetl.application.composite.runtime_models import (
     CompositeExecutionContext,
-    CompositeRuntimeConfig,
 )
-from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.composite.result import CompositeResult
-from bioetl.domain.ports import (
-    ClockPort,
-    ExecutionMetricsRunnerPort,
-    LoggerPort,
-    MetricsPort,
-    TracingPort,
-)
 
 __all__ = ["_CompositeRunnerSupportResultMixin"]
 
@@ -51,21 +31,6 @@ __all__ = ["_CompositeRunnerSupportResultMixin"]
 class _CompositeRunnerSupportResultMixin:
     """Correlation context and final result assembly."""
 
-    _config: CompositeConfig
-    _runtime: CompositeRuntimeConfig
-    _seed_runner_factory: Callable[[], ExecutionMetricsRunnerPort]
-    _checkpoint_manager: CompositeCheckpointService
-    _logger: LoggerPort
-    _metrics: MetricsPort | None
-    _tracing: TracingPort | None
-    _observer: CompositeLifecycleObserverService
-    _run_id_str: str
-    _clock: ClockPort | None
-    _start_time: float | None
-    _started_at: datetime | None
-    _original_run_id: str | None
-    _preflight_validator: CompositePreflightValidationService | None
-    _fsm: FSMStateHelperService
 
     def _build_correlation_log_context(self, **extra: object) -> dict[str, object]:
         """Build a stable correlation envelope for composite critical logs."""

@@ -4,20 +4,12 @@
 from __future__ import annotations
 
 from bioetl.application.composite.checkpoint import (
-    CompositeCheckpointService,
     CompositeCheckpointState,
 )
-from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.runner_pkg.runner_merge_stage_types import (
     _CompositeRunnerMergeStageHostProtocol,
 )
-from bioetl.application.composite.runtime_models import (
-    CompositeMergerProtocol,
-    CompositeRuntimeConfig,
-)
-from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.composite.result import MergeResult
-from bioetl.domain.ports import LoggerPort
 
 __all__ = ["_CompositeRunnerMergeStageDispatchMixin"]
 
@@ -25,13 +17,6 @@ __all__ = ["_CompositeRunnerMergeStageDispatchMixin"]
 class _CompositeRunnerMergeStageDispatchMixin:
     """Declaration stubs, dispatchers, and recording seams for merge."""
 
-    _runtime: CompositeRuntimeConfig
-    _fsm: FSMStateHelperService
-    _logger: LoggerPort
-    _config: CompositeConfig
-    _run_id_str: str
-    _merger: CompositeMergerProtocol
-    _checkpoint_manager: CompositeCheckpointService
 
     async def _save_checkpoint_safe(
         self: _CompositeRunnerMergeStageHostProtocol,

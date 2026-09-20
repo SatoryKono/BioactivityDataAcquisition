@@ -3,19 +3,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from datetime import datetime
-
 from bioetl.application.composite.checkpoint import (
-    CompositeCheckpointService,
     CompositeCheckpointState,
-)
-from bioetl.application.composite.fsm_helper import FSMStateHelperService
-from bioetl.application.composite.lifecycle_observer_service import (
-    CompositeLifecycleObserverService,
-)
-from bioetl.application.composite.preflight_validator import (
-    CompositePreflightValidationService,
 )
 from bioetl.application.composite.runner_pkg.runner_support_flow import (
     run_preflight_validation,
@@ -36,17 +25,9 @@ from bioetl.application.composite.runner_pkg.runner_support_types import (
     _CompositeRunnerSupportHostProtocol,
     _PreparedPreflightValidationContext,
 )
-from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-from bioetl.domain.composite import CompositeConfig, EnricherConfig
+from bioetl.domain.composite import EnricherConfig
 from bioetl.domain.composite.result import EnrichmentResult, SeedResult
 from bioetl.domain.exceptions import InvalidStateError
-from bioetl.domain.ports import (
-    ClockPort,
-    ExecutionMetricsRunnerPort,
-    LoggerPort,
-    MetricsPort,
-    TracingPort,
-)
 
 __all__ = ["_CompositeRunnerSupportRunMixin"]
 
@@ -54,21 +35,6 @@ __all__ = ["_CompositeRunnerSupportRunMixin"]
 class _CompositeRunnerSupportRunMixin:
     """Preflight gates, seed execution, and enricher runtime policy."""
 
-    _config: CompositeConfig
-    _runtime: CompositeRuntimeConfig
-    _seed_runner_factory: Callable[[], ExecutionMetricsRunnerPort]
-    _checkpoint_manager: CompositeCheckpointService
-    _logger: LoggerPort
-    _metrics: MetricsPort | None
-    _tracing: TracingPort | None
-    _observer: CompositeLifecycleObserverService
-    _run_id_str: str
-    _clock: ClockPort | None
-    _start_time: float | None
-    _started_at: datetime | None
-    _original_run_id: str | None
-    _preflight_validator: CompositePreflightValidationService | None
-    _fsm: FSMStateHelperService
 
     def _validate_config_consistency(
         self: _CompositeRunnerSupportHostProtocol,

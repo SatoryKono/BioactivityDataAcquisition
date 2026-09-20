@@ -4,10 +4,8 @@
 from __future__ import annotations
 
 from bioetl.application.composite.checkpoint import (
-    CompositeCheckpointService,
     CompositeCheckpointState,
 )
-from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.merger_orchestration import (
     MergeExecutionRequest,
 )
@@ -35,17 +33,11 @@ from bioetl.application.composite.runner_pkg.runner_merge_stage_types import (
     _CompositeRunnerMergeStageHostProtocol,
     _PreparedMergeInputs,
 )
-from bioetl.application.composite.runtime_models import (
-    CompositeMergerProtocol,
-    CompositeRuntimeConfig,
-)
-from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.composite.result import (
     DependencyResult,
     EnrichmentResult,
     MergeResult,
 )
-from bioetl.domain.ports import LoggerPort
 
 __all__ = ["_CompositeRunnerMergeStageExecutionMixin"]
 
@@ -53,13 +45,6 @@ __all__ = ["_CompositeRunnerMergeStageExecutionMixin"]
 class _CompositeRunnerMergeStageExecutionMixin:
     """Merge execution, dry-run handling, and pipeline finalization."""
 
-    _runtime: CompositeRuntimeConfig
-    _fsm: FSMStateHelperService
-    _logger: LoggerPort
-    _config: CompositeConfig
-    _run_id_str: str
-    _merger: CompositeMergerProtocol
-    _checkpoint_manager: CompositeCheckpointService
 
     def _transition_to_merging_state(
         self: _CompositeRunnerMergeStageHostProtocol,
