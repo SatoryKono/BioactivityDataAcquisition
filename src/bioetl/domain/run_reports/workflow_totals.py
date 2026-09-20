@@ -89,8 +89,38 @@ def _gold_outcomes(rows: Sequence[WorkflowExecutionRow]) -> list[WorkflowExecuti
     ]
 
 
+def _accumulate_snapshot_history(
+    details: dict[str, object],
+    table: str,
+    historical_by_table: dict[str, int | None],
+) -> None:
+    """Record physical-minus-current history when snapshot counts are ints."""
+    snapshot = details.get("source_snapshot")
+    if not isinstance(snapshot, dict):
+        return
+    physical = snapshot.get("physical_rows")
+    current = snapshot.get("current_rows")
+    if isinstance(physical, int) and isinstance(current, int):
+        historical_by_table[table] = physical - current
+
+
+def _has_reconciliation(rows: Sequence[WorkflowExecutionRow]) -> bool:
+    """Return True when any row carries reconciliation details."""
+    return any(row.reconciliation is not None for row in rows)
+
+
+def _excluded_total(rows: Sequence[WorkflowExecutionRow]) -> int | None:
+    """Return the contract-excluded sum (None when no exclusions)."""
+    excluded_values = [
+        row.gold_excluded_by_contract
+        for row in rows
+        if row.gold_excluded_by_contract is not None
+    ]
+    return sum(excluded_values) if excluded_values else None
+
+
 def _reconciliation_totals(rows: Sequence[WorkflowExecutionRow]) -> dict[str, object]:
-    if not any(row.reconciliation is not None for row in rows):
+    if not _has_reconciliation(rows):
         return {}
     final_by_table: dict[str, int | None] = {}
     historical_by_table: dict[str, int | None] = {}
@@ -100,19 +130,9 @@ def _reconciliation_totals(rows: Sequence[WorkflowExecutionRow]) -> dict[str, ob
         table = str(details.get("source_table") or "unknown")
         final_by_table[table] = _measured_current(row, details)
         expired += _expired_count(details)
-        snapshot = details.get("source_snapshot")
-        if isinstance(snapshot, dict):
-            physical = snapshot.get("physical_rows")
-            current = snapshot.get("current_rows")
-            if isinstance(physical, int) and isinstance(current, int):
-                historical_by_table[table] = physical - current
+        _accumulate_snapshot_history(details, table, historical_by_table)
     loaded = _optional_sum(rows, "records_gold")
-    excluded_values = [
-        row.gold_excluded_by_contract
-        for row in rows
-        if row.gold_excluded_by_contract is not None
-    ]
-    excluded = sum(excluded_values) if excluded_values else None
+    excluded = _excluded_total(rows)
     return {
         "records_gold_loaded_sum": loaded,
         "records_gold_expired_sum": expired,

@@ -18,13 +18,21 @@ from bioetl.infrastructure.storage.bronze.pipeline_helpers import (
     BronzeWritePrepared,
     BronzeWriteRequest,
 )
-from bioetl.infrastructure.storage.bronze.read_cleanup_mixin import BronzeWriterReadCleanupMixin
-from bioetl.infrastructure.storage.bronze.side_effects_mixin import BronzeWriterSideEffectsMixin
-from bioetl.infrastructure.storage.bronze.write_execution import run_bronze_post_write_actions
+from bioetl.infrastructure.storage.bronze.read_cleanup_mixin import (
+    BronzeWriterReadCleanupMixin,
+)
+from bioetl.infrastructure.storage.bronze.side_effects_mixin import (
+    BronzeWriterSideEffectsMixin,
+)
+from bioetl.infrastructure.storage.bronze.write_execution import (
+    run_bronze_post_write_actions,
+)
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
 from bioetl.infrastructure.storage.delta.resilience import AdaptiveRetryPolicy
-from bioetl.infrastructure.storage.delta_reader_helpers import try_native_delta_row_count
+from bioetl.infrastructure.storage.delta_reader_helpers import (
+    try_native_delta_row_count,
+)
 from bioetl.infrastructure.storage.metadata.builder_base import _MetadataBuilderBase
 from bioetl.infrastructure.storage.metadata_writer_public import MetadataWriter
 from bioetl.infrastructure.storage.support import atomic_ops
@@ -46,7 +54,9 @@ from bioetl.infrastructure.storage.workflow_row_reconciliation import _supported
 pytestmark = pytest.mark.unit
 
 
-def test_atomic_ops_unlink_oserror(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_atomic_ops_unlink_oserror(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     target = tmp_path / "out.bin"
 
     def _boom(*_args: object, **_kwargs: object) -> None:
@@ -305,7 +315,9 @@ def test_retention_dedup_skips_duplicate_primary_key(
 
     class _Handle:
         def to_pyarrow_dataset(self) -> SimpleNamespace:
-            return SimpleNamespace(scanner=lambda: SimpleNamespace(head=lambda _n: arrow))
+            return SimpleNamespace(
+                scanner=lambda: SimpleNamespace(head=lambda _n: arrow)
+            )
 
         def schema(self) -> object:
             return object()

@@ -318,5 +318,29 @@
       "",
       "    ${3:column_name}: Series[${4:str}] = pa.Field(description=\"${5:description}\")"
     ]
+  },
+  "BioETL Click Command": {
+    "prefix": "bioetl-cli",
+    "description": "Click command scaffold (EXC-008: Click over Typer)",
+    "body": [
+      "from __future__ import annotations",
+      "",
+      "import click",
+      "",
+      "",
+      "@click.command(\"${1:command-name}\")",
+      "@click.option(",
+      "    \"--${2:option_name}\",",
+      "    default=${3:None},",
+      "    show_default=True,",
+      "    help='${4:Option description}.',",
+      ")",
+      "def ${5:command_name}(${2:option_name}: ${6:str | None}) -> None:",
+      "    \"\"\"${7:Command description}.\"\"\"",
+      "    click.echo(f\"${1:command-name}: {${2:option_name}}\")",
+      "",
+      "",
+      "__all__ = [\"${5:command_name}\"]"
+    ]
   }
 }

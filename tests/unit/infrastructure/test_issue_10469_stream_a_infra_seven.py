@@ -18,7 +18,9 @@ from bioetl.infrastructure.adr._adr_validators import (
     validate_title,
 )
 from bioetl.infrastructure.adr.fs_adr_service import FilesystemAdrCatalog
-from bioetl.infrastructure.checkpoint._local_checkpoint_sync import LocalCheckpointSyncMixin
+from bioetl.infrastructure.checkpoint._local_checkpoint_sync import (
+    LocalCheckpointSyncMixin,
+)
 from bioetl.infrastructure.errors.exception_mapper import (
     DomainErrorMappingInput,
     DomainInfraExceptionMapper,
@@ -81,7 +83,9 @@ def test_exception_mapper_data_quality_generic_http_and_critical() -> None:
 def test_dq_report_config_enum_helpers() -> None:
     bronze = BronzeDQReportConfig()
     assert bronze.get_format_enum() is DQReportFormat.JSON
-    gold = GoldDQReportConfig(checks=[GoldDQCheckType.COMPLETENESS.value, "not-a-check"])
+    gold = GoldDQReportConfig(
+        checks=[GoldDQCheckType.COMPLETENESS.value, "not-a-check"]
+    )
     assert gold.get_format_enum() is DQReportFormat.JSON
     assert gold.get_checks_enums() == [GoldDQCheckType.COMPLETENESS]
 

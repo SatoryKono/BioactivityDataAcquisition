@@ -199,7 +199,10 @@ class TestSchemaDriftAndReplay:
         )
         await _check_schema_drift(host, "t", [{"id": "1"}], "error")
         assert _diff_schema_fields(None, [{"id": "1"}]) is None
-        assert _build_silver_schema_drift_diff(pa.schema([("id", pa.string())]), []) is None
+        assert (
+            _build_silver_schema_drift_diff(pa.schema([("id", pa.string())]), [])
+            is None
+        )
         existing = pa.schema([("id", pa.string()), ("gone", pa.string())])
         drift_host = SimpleNamespace(
             logger=MagicMock(),

@@ -46,7 +46,7 @@ class _LocalCertifiabilityInventory(Protocol):
     records: tuple[_LocalCertifiabilityRecord, ...]
 
 
-class HistoricalCorpusReader(Protocol):
+class HistoricalCorpusReaderProtocol(Protocol):
     def build_certifiability_inventory(self) -> _LocalCertifiabilityInventory: ...
 
 
@@ -123,7 +123,7 @@ class HistoricalReplayUniverseClosureReportRecord:
 class HistoricalReplayUniverseService:
     """Build full-universe replay inventories beyond the local retained corpus."""
 
-    corpus_service: HistoricalCorpusReader
+    corpus_service: HistoricalCorpusReaderProtocol
     now_factory: Callable[[], datetime]
 
     def build_universe_inventory(

@@ -14,17 +14,24 @@ from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.types import BatchID, RunID, RunType
-from bioetl.domain.workflow.foreign_key_reconciliation import ForeignKeyReconciliationRequest
+from bioetl.domain.workflow.foreign_key_reconciliation import (
+    ForeignKeyReconciliationRequest,
+)
 from bioetl.infrastructure.storage.bronze.io_mixin import (
     BronzeWriterIOMixin,
     write_bytes_if_absent_or_same,
 )
-from bioetl.infrastructure.storage.bronze.metadata_mixin import BronzeWriterMetadataMixin
-from bioetl.infrastructure.storage.bronze.read_cleanup_mixin import BronzeWriterReadCleanupMixin
-from bioetl.infrastructure.storage.silver.metadata_mixin import SilverWriterMetadataMixin
+from bioetl.infrastructure.storage.bronze.metadata_mixin import (
+    BronzeWriterMetadataMixin,
+)
+from bioetl.infrastructure.storage.silver.metadata_mixin import (
+    SilverWriterMetadataMixin,
+)
 from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation import (
     SilverForeignKeyReconciliationAdapter,
     filter_current_rows,
+)
+from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support import (
     _current_flag_column,
     _is_current_flag_value,
 )
@@ -108,7 +115,10 @@ class TestBronzeMixins:
         checksum = await host._calculate_checksum(stale)
         assert isinstance(checksum, str)
         cleaned = await host.cleanup_old_files(
-            datetime(2021, 1, 1, tzinfo=UTC), dry_run=True, provider="chembl", entity="activity"
+            datetime(2021, 1, 1, tzinfo=UTC),
+            dry_run=True,
+            provider="chembl",
+            entity="activity",
         )
         assert cleaned["files_removed"] == 1
 
@@ -168,9 +178,12 @@ class TestSilverMetadataMixin:
                 records=[{"id": "1"}], table_path="/t", event_name="skip"
             )
         host._metadata_coordinator = object()
-        assert host._should_skip_silver_metadata_write(
-            records=[{"id": "1"}], table_path="/t", event_name="ok"
-        ) is False
+        assert (
+            host._should_skip_silver_metadata_write(
+                records=[{"id": "1"}], table_path="/t", event_name="ok"
+            )
+            is False
+        )
 
     async def test_get_delta_version_and_audit_guard(
         self, monkeypatch: pytest.MonkeyPatch
@@ -293,7 +306,10 @@ class TestForeignKeyAdapter:
                 completeness_evidence_ref="ev-1",
             )
         )
-        assert mismatch.mutation_blocked_reason == "reference_completeness_identity_mismatch"
+        assert (
+            mismatch.mutation_blocked_reason
+            == "reference_completeness_identity_mismatch"
+        )
 
         request = _fk_request()
         object.__setattr__(request, "action", "flag_orphans")

@@ -11,7 +11,9 @@ from unittest.mock import MagicMock
 import pytest
 import zstandard as zstd
 
-from bioetl.domain.workflow.foreign_key_reconciliation import ForeignKeyReconciliationRequest
+from bioetl.domain.workflow.foreign_key_reconciliation import (
+    ForeignKeyReconciliationRequest,
+)
 from bioetl.infrastructure.adapters.crossref.fetch_flow import CrossRefFetchFlow
 from bioetl.infrastructure.observability.anomaly.detector import AnomalyDetector
 from bioetl.infrastructure.observability.prometheus_metrics import (
@@ -24,7 +26,9 @@ from bioetl.infrastructure.observability.prometheus_metrics import (
     _reject_unexpected_labels,
 )
 from bioetl.infrastructure.quarantine import _pyarrow_helpers as pyarrow_helpers
-from bioetl.infrastructure.storage.bronze.read_cleanup_mixin import BronzeWriterReadCleanupMixin
+from bioetl.infrastructure.storage.bronze.read_cleanup_mixin import (
+    BronzeWriterReadCleanupMixin,
+)
 from bioetl.infrastructure.storage.delta.resilience import AdaptiveRetryPolicy
 from bioetl.infrastructure.storage.support._atomic_replace import (
     AtomicWriteError,
@@ -223,7 +227,9 @@ async def test_crossref_fetch_flow_honors_limit() -> None:
             yield {"doi": item}
             yield {"doi": f"{item}-extra"}
 
-    mapper = SimpleNamespace(with_lookup_method=lambda publication, _method: publication)
+    mapper = SimpleNamespace(
+        with_lookup_method=lambda publication, _method: publication
+    )
 
     async def _execute(**kwargs: object):
         fetcher = kwargs["primary_record_fetcher"]
@@ -291,7 +297,10 @@ def test_fk_support_leftovers(monkeypatch: pytest.MonkeyPatch) -> None:
     assert normalize_value(_Blank()) is None
     other = normalize_value(_Named())
     assert other is not None and other[0] == "other"
-    assert normalize_row_key({"parent_id": None}, ("parent_id",), nulls_equal=True) is not None
+    assert (
+        normalize_row_key({"parent_id": None}, ("parent_id",), nulls_equal=True)
+        is not None
+    )
     record_reconciliation_metrics(
         SimpleNamespace(increment_counter="not-callable"),
         scanned=1,

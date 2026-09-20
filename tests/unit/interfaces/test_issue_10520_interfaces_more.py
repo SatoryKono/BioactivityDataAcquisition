@@ -45,17 +45,20 @@ pytestmark = pytest.mark.unit
 
 def test_checkpoint_and_quarantine_renderers() -> None:
     assert _render_audit_entry_lines([]) == ["  - none"]
-    assert "records=" in _render_audit_entry_lines(
-        [
-            {
-                "timestamp": "t",
-                "layer": "silver",
-                "table_name": "t",
-                "operation": "write",
-                "records_count": 1,
-            }
-        ]
-    )[0]
+    assert (
+        "records="
+        in _render_audit_entry_lines(
+            [
+                {
+                    "timestamp": "t",
+                    "layer": "silver",
+                    "table_name": "t",
+                    "operation": "write",
+                    "records_count": 1,
+                }
+            ]
+        )[0]
+    )
     assert _render_audit_entry_lines(["raw"])[0] == "  - raw"
     manifest, view = _resolve_replay_view(
         {
@@ -84,7 +87,9 @@ def test_checkpoint_and_quarantine_renderers() -> None:
         }
     )
     assert "Checkpoint Workflow" in text
-    empty = _render_checkpoint_workflow_payload({"pipeline_name": "p", "checkpoint": "x"})
+    empty = _render_checkpoint_workflow_payload(
+        {"pipeline_name": "p", "checkpoint": "x"}
+    )
     assert "checkpoint: none" in empty
     assert _coerce_total_count(True) == 1
     assert _coerce_total_count(1.5) == 1
@@ -119,7 +124,9 @@ def test_diagnostics_health_and_cli_policy(monkeypatch: pytest.MonkeyPatch) -> N
         "bioetl.interfaces.cli.commands.domains.shared.execution_policy.handle_cli_failure",
         lambda *_a, **_k: None,
     )
-    _handle_boundary_failure(BioETLError("x"), policy=policy, reason_suffix="DOMAIN_ERROR")
+    _handle_boundary_failure(
+        BioETLError("x"), policy=policy, reason_suffix="DOMAIN_ERROR"
+    )
     assert (
         run_sync_with_cli_failure_policy(
             lambda: (_ for _ in ()).throw(BioETLError("x")),
@@ -189,8 +196,12 @@ async def test_latest_complete_scope_errors() -> None:
         await _latest_complete_payload(host, {})  # type: ignore[arg-type]
 
 
-def test_composite_metrics_and_run_support_seams(monkeypatch: pytest.MonkeyPatch) -> None:
-    from bioetl.interfaces.cli.commands.domains.composite import support as composite_support
+def test_composite_metrics_and_run_support_seams(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from bioetl.interfaces.cli.commands.domains.composite import (
+        support as composite_support,
+    )
     from bioetl.interfaces.cli.commands.domains.run import support as run_support
     from bioetl.interfaces.cli.commands.run_manifest_output_support import (
         append_section,
@@ -201,16 +212,23 @@ def test_composite_metrics_and_run_support_seams(monkeypatch: pytest.MonkeyPatch
         "bioetl.composition.observability_runtime.push_metrics_to_gateway",
         lambda **_k: (_ for _ in ()).throw(RuntimeError("down")),
     )
-    assert composite_support.push_metrics_to_gateway(pipeline_name="chembl_activity") is False
+    assert (
+        composite_support.push_metrics_to_gateway(pipeline_name="chembl_activity")
+        is False
+    )
     assert run_support._resolve_populated_default_registry() is None
     assert run_support.resolve_context_registry(None) is None
 
     lines: list[str] = []
-    append_section(lines, "Title", (("a", None), ("b", [])), json_renderer=lambda _v: ["x"])
+    append_section(
+        lines, "Title", (("a", None), ("b", [])), json_renderer=lambda _v: ["x"]
+    )
     assert lines == []
     append_section(lines, "Title", (("a", "v"),), json_renderer=lambda _v: ["x"])
     assert "Title" in lines
-    ledger = render_ledger_section(["raw", {"occurred_at": "t", "event_type": "e", "stage": "s", "status": "ok"}])
+    ledger = render_ledger_section(
+        ["raw", {"occurred_at": "t", "event_type": "e", "stage": "s", "status": "ok"}]
+    )
     assert any("stage=s" in item for item in ledger)
 
 

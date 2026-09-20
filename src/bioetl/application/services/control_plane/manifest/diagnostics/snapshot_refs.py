@@ -6,6 +6,8 @@ from bioetl.domain.control_plane.snapshot_payloads import (
     collect_input_snapshot_content_hashes,
     collect_input_snapshot_ids,
     collect_input_snapshot_refs,
+)
+from bioetl.domain.control_plane.snapshot_payloads import (
     compute_snapshot_identity_fingerprint as compute_input_snapshot_identity_fingerprint,
 )
 

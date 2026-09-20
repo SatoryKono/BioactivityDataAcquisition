@@ -8,6 +8,7 @@ This directory contains Zed editor configuration optimized for BioETL developmen
 
 - `settings.json` - Main editor settings, LSP configuration, tasks, and agent profiles
 - `keymap.json` - Keyboard shortcuts and bindings
+- `snippets/` - BioETL scaffolds (prefix `bioetl-`: value objects, ports, pipeline stages, tests, Click commands, YAML configs)
 
 ## Recent Improvements
 
@@ -18,9 +19,10 @@ This directory contains Zed editor configuration optimized for BioETL developmen
 - `YAML/JSON/Docker Compose: on` — consistent with `.editorconfig indent_size 2` for those types
 
 ### 2. Project-Specific Tasks (SSOT: `.zed/tasks.json`)
-SSOT — `.zed/tasks.json` (25 lanes). `settings.json:tasks` removed in Wave 1 (Zed merges both, `tasks.json` wins). Access via `Ctrl+Shift+P` → "Tasks" or `Ctrl+Shift+T`:
+SSOT — `.zed/tasks.json` (24 lanes). `settings.json` holds no `tasks` section (Zed merges both, `tasks.json` wins). Access via `Ctrl+Shift+P` → "Tasks" or `Ctrl+Shift+T`:
 
-- **Format: code / Check: lint / Check: types / Test: current file** + full lanes: `smoke`, `unit-fast`, `architecture-fast`, `integration-replay`, `contracts`, `security`, `e2e-smoke`, `coverage-local`, `architecture imports`, `dead code`, `complexity`, `dependencies`, `MCP manifests`
+- **Format: code / Check: lint / Check: format / Check: types / Test: current file** + full lanes: `smoke`, `unit-fast`, `architecture-fast`, `integration-replay`, `contracts`, `security`, `e2e-smoke`, `coverage-local`, `architecture imports`, `dead code`, `complexity`, `dependencies`, `MCP manifests`
+- `Check: format` is read-only (`ruff format --check .`): fast pre-commit gate, unlike mutating `Format: code`
 - Legacy short list in `settings.json` kept for back-compat until 2026-08, now `tasks.json` only
 
 ### 3. Code Lenses Enabled
@@ -41,7 +43,7 @@ Comprehensive keymap with:
 - Navigation shortcuts (Alt+Left/Right for back/forward)
 - Multi-cursor editing (Ctrl+Alt+Up/Down)
 - Terminal toggles (Ctrl+Enter, Ctrl+`)
-- Task management (F9 rerun, Ctrl+F9 cancel)
+- Task management (F9 rerun, Ctrl+F9 cancel, `Ctrl+K T` test current file, `Ctrl+K L` lint, `Ctrl+K Y` types, `Ctrl+K F` format selection)
 
 ## Agent Profiles
 
@@ -70,7 +72,7 @@ Comprehensive keymap with:
 ## Terminal Configuration
 
 - Environment variables set automatically:
-  - `PYTHONDONTWRITEBYTECODE=1`, `VCR_RECORD_MODE=none` (Wave 1: `VIRTUAL_ENV=.venv-win` removed — `detect_venv` resolves per-OS: `.venv-win` / `.venv` / `.venv-wsl`)
+  - `PYTHONDONTWRITEBYTECODE=1`, `VCR_RECORD_MODE=none`, `VIRTUAL_ENV=.venv-win` (Windows-first resolution; `detect_venv` still lists per-OS dirs: `.venv-win` / `.venv` / `.venv-wsl`)
 - Font: JetBrains Mono, size 14 — Line height: Comfortable — Auto-detects virtual environments (see `AGENTS.md` routes)
 
 ## File Scan Exclusions
@@ -79,8 +81,8 @@ Large directories and caches are excluded from file scanning for performance (Wa
 - `.git`, `.svn`, `.hg`, `.jj`, `CVS`
 - `node_modules`, `__pycache__`, `.pytest_cache`, `.mypy_cache`, `.ruff_cache`
 - `.venv*`, `venv`, `env`, `.env*`
-- `dist`, `build`, `coverage`, `htmlcov` (single entry), `reports/coverage`, `reports`, `reports/audit-runs` (80+ dirs), `logs`, `data`, `.codex`, `.claude`, `.junie`, `.devin`
-- `target`, `generated`, `data/debug_exports`
+- `dist`, `build`, `coverage`, `htmlcov` (single entry), `reports/coverage`, `reports`, `reports/audit-runs` (80+ dirs), `logs`, `data`, `.codex`, `.claude`, `.junie`, `.devin`, `.opencode`, `.cursor`, `.gemini`, `.grok`, `.qodo`, `.muse`
+- `target`, `generated`, `data/debug_exports`, `.benchmarks`, `test-output`, `.import_linter_cache`
 
 ## Helper Scripts
 
@@ -100,8 +102,12 @@ The following scripts in `scripts/engineering/dev/` are Zed-safe wrappers:
 3. Or use `Ctrl+Shift+T` → "Test: Current File"
 
 ### Type Checking
-1. Use `Ctrl+Shift+T` → "Type Check (mypy)"
+1. Use `Ctrl+Shift+T` → "Type Check (mypy)" (or `Ctrl+K Y`)
 2. Results match CI gate: `mypy --config-file pyproject.toml --strict --no-incremental src/bioetl`
+
+### Verify Before Commit
+Fast read-only sequence, no mutations: `Check: format` → `Check: lint` → `Check: types` → `Test: unit-fast`.
+Rerun the last task with `F9` instead of reopening the picker.
 
 ### Import Organization
 - Automatic on save via Ruff
@@ -133,13 +139,13 @@ fetch from a native NTFS worktree or wait for the scan to finish.
 ## Troubleshooting
 
 ### Tasks Not Showing
-- Ensure `tasks` section is present in `settings.json`
-- Check that `$ZED_PROJECT` environment variable is set
+- Ensure `.zed/tasks.json` is valid JSON (SSOT for tasks; no `tasks` section in `settings.json`)
+- Check that `$ZED_WORKTREE_ROOT` resolves to the project root (`$ZED_FILE` / `$ZED_SYMBOL` for file tasks)
 
 ### LSP Not Working
-- Verify `.venv-win` exists and is activated
+- Verify a venv exists (`.venv-win` / `.venv` / `.venv-wsl`) — `terminal.detect_venv` resolves per-OS
 - Check that `basedpyright` and `ruff` are installed
-- Run `python -m scripts.engineering.dev.zed_env_doctor` to diagnose
+- Run `python -m scripts.engineering.dev.zed_env_doctor` to diagnose (or the `Environment: verify` task)
 
 ### Format on Save Not Working
 - Check that `format_on_save` is set to `on` for the language
@@ -148,16 +154,24 @@ fetch from a native NTFS worktree or wait for the scan to finish.
 
 ## Further Customization
 
-To add more tasks, edit the `tasks` section in `settings.json`:
+To add more tasks, edit `.zed/tasks.json`:
 
 ```json
 {
   "label": "My Custom Task",
-  "command": "python",
-  "args": ["-m", "my.module"],
-  "cwd": "$ZED_PROJECT"
+  "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
+  "args": ["scripts/engineering/dev/zed_run.py", "-m", "my.module"],
+  "cwd": "$ZED_WORKTREE_ROOT",
+  "reveal": "no_focus",
+  "hide": "never",
+  "save": "all",
+  "allow_concurrent_runs": false
 }
 ```
+
+New tasks must keep the repo contract (`tests/unit/repo_backed/scripts/test_zed_workspace_config.py`):
+unique `label`, `cwd` = `$ZED_WORKTREE_ROOT`, venv-python `command`, explicit
+`save`/`reveal`/`hide`/`allow_concurrent_runs`.
 
 To add more keybindings, edit `keymap.json`:
 

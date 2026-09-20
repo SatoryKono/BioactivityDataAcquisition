@@ -12,6 +12,7 @@
 
 from __future__ import annotations
 
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -153,7 +154,7 @@ def _iter_python_file_mentions_fallback(
         with py_file.open(encoding="utf-8") as handle:
             for lineno, line in enumerate(handle, start=1):
                 for module_path in module_paths:
-                    if module_path in line:
+                    if re.search(re.escape(module_path) + r"\b", line):
                         violations.append(f"{rel_path}:{lineno} mentions {module_path}")
     return violations
 
@@ -185,6 +186,7 @@ def _iter_module_mentions(
                 rg_executable,
                 "-n",
                 "-F",
+                "-w",
                 "--glob",
                 "*.py",
                 "--path-separator",

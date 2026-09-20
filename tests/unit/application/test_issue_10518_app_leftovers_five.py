@@ -297,7 +297,12 @@ def test_replay_risk_retention_and_checkpoint_schema() -> None:
     assert _artifact_matches_manifest(artifact, manifest) is True  # type: ignore[arg-type]
     invalid = _checkpoint_schema_check({"checkpoint_saved_at_epoch_seconds": "bad"})
     assert invalid.reason == "checkpoint_saved_at_invalid"
-    assert _metadata_text({"run_context": {"pipeline_name": "chembl_activity"}}, "pipeline_name") == "chembl_activity"
+    assert (
+        _metadata_text(
+            {"run_context": {"pipeline_name": "chembl_activity"}}, "pipeline_name"
+        )
+        == "chembl_activity"
+    )
 
 
 def test_extractors_runtime_overrides_and_diagnostics() -> None:
@@ -315,7 +320,9 @@ def test_extractors_runtime_overrides_and_diagnostics() -> None:
     with pytest.raises(TypeError, match="must be a mapping"):
         coerce_runtime_override_layer({"env": ["x"]}, "env")
     factory = inspection_service_factory_from_ports(
-        MagicMock(), None, lambda: "ready"  # type: ignore[arg-type, return-value]
+        MagicMock(),
+        None,
+        lambda: "ready",  # type: ignore[arg-type, return-value]
     )
     assert factory() == "ready"
     assert coerce_int(1.5) == 1
@@ -400,7 +407,12 @@ def test_historical_models_policy_integrity_and_paths() -> None:
         pl.DataFrame({"a": [1], "b": [2]}), entity_keys=("a", "b")
     )
     assert name == "__scd_entity_key" and "__scd_entity_key" in keyed.columns
-    assert _normalize_scd_config(pl.DataFrame({"a": [1]}), SimpleNamespace(business_keys=())) is None  # type: ignore[arg-type]
+    assert (
+        _normalize_scd_config(
+            pl.DataFrame({"a": [1]}), SimpleNamespace(business_keys=())
+        )
+        is None
+    )  # type: ignore[arg-type]
     assert _mapped_runtime_path("//wsl$/Ubuntu/home/data") == "/home/data"
 
 

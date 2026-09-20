@@ -14,7 +14,9 @@ from bioetl.application.core.batch_writer import BatchWriter
 from bioetl.application.core.config import LockConfig
 from bioetl.application.core.lifecycle.lock_lifecycle import acquire_lock, release_lock
 from bioetl.application.core.pipeline_services import PipelineService
-from bioetl.application.core.postrun._phase_descriptions import describe_compaction_phase
+from bioetl.application.core.postrun._phase_descriptions import (
+    describe_compaction_phase,
+)
 from bioetl.application.core.postrun.compact_orchestrator import (
     CompactionResult,
     PostrunCompactService,
@@ -243,11 +245,15 @@ def test_raw_manifest_checks_parse_error_uses_schema_error_or_fallback() -> None
 def test_rehydrate_collect_skips_unparseable_anchors(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(rehydrate, "list_pipeline_reports", lambda **_kwargs: [object()])
+    monkeypatch.setattr(
+        rehydrate, "list_pipeline_reports", lambda **_kwargs: [object()]
+    )
     monkeypatch.setattr(rehydrate, "_anchor_from_report_entry", lambda *_a, **_k: None)
     assert rehydrate.collect_latest_terminal_anchors(store=MagicMock()) == ()
 
-    monkeypatch.setattr(rehydrate, "list_workflow_reports", lambda **_kwargs: [object()])
+    monkeypatch.setattr(
+        rehydrate, "list_workflow_reports", lambda **_kwargs: [object()]
+    )
     monkeypatch.setattr(rehydrate, "anchor_from_workflow_entry", lambda *_a, **_k: None)
     assert rehydrate.collect_latest_terminal_workflow_anchors(store=MagicMock()) == ()
 

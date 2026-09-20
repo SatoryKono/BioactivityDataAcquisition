@@ -75,7 +75,9 @@ from bioetl.interfaces.http.control_plane_identity.types import (
 pytestmark = pytest.mark.unit
 
 
-def test_prometheus_query_and_parse_error_paths(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_prometheus_query_and_parse_error_paths(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     def _raise(*_a: object, **_k: object) -> object:
         raise URLError("down")
 
@@ -222,9 +224,12 @@ def test_workflow_option_conflicts_and_result_helpers() -> None:
         run_type_context=None,
     )
     assert _workflow_metrics_run_type(empty_name) is None  # type: ignore[arg-type]
-    assert _workflow_metrics_pipeline_name(SimpleNamespace(single_pipeline_name=1)) is None  # type: ignore[arg-type]
     assert (
-        _workflow_failure_message(SimpleNamespace(error_message="top", steps=())) == "top"
+        _workflow_metrics_pipeline_name(SimpleNamespace(single_pipeline_name=1)) is None
+    )  # type: ignore[arg-type]
+    assert (
+        _workflow_failure_message(SimpleNamespace(error_message="top", steps=()))
+        == "top"
     )
     step_err = SimpleNamespace(
         error_message=None,
@@ -299,9 +304,10 @@ def test_plan_and_lineage_renderers(monkeypatch: pytest.MonkeyPatch) -> None:
     assert _render_json_block({"a": 1})
     assert "Contract Migration Plan" in _render_plan_payload({"pipeline_name": "p"})
     assert _render_node_lines([]) == ["  - none"]
-    assert "label=L" in _render_node_lines(
-        [{"node_type": "run", "node_id": "r1", "label": "L"}]
-    )[0]
+    assert (
+        "label=L"
+        in _render_node_lines([{"node_type": "run", "node_id": "r1", "label": "L"}])[0]
+    )
     assert _render_node_lines(["x"])[0] == "  - x"
     rel = _render_relation_lines(
         [
@@ -358,9 +364,7 @@ def test_backend_log_excerpt_probes_and_url(tmp_path: Path) -> None:
     assert excerpt is not None
     assert _build_backend_base_url("http://h/health") == "http://h"
     assert _build_backend_base_url("http://h/ready/") == "http://h/ready"
-    detail = _build_startup_failure_detail(
-        log, process=SimpleNamespace(poll=lambda: 2)
-    )
+    detail = _build_startup_failure_detail(log, process=SimpleNamespace(poll=lambda: 2))
     assert "Exit code" in detail
     _append_backend_startup_diagnostic(
         log,
@@ -376,7 +380,10 @@ def test_backend_log_excerpt_probes_and_url(tmp_path: Path) -> None:
         command=("cmd",),
         diagnostic_lines=["note"],
     )
-    assert _describe_required_probe_failure("http://h/health", required_probe_paths=()) is None
+    assert (
+        _describe_required_probe_failure("http://h/health", required_probe_paths=())
+        is None
+    )
 
     class _Bad:
         status = 500

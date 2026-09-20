@@ -11,7 +11,9 @@ import pyarrow as pa
 import pytest
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
-from bioetl.domain.workflow.foreign_key_reconciliation import ForeignKeyReconciliationRequest
+from bioetl.domain.workflow.foreign_key_reconciliation import (
+    ForeignKeyReconciliationRequest,
+)
 from bioetl.infrastructure.storage.delta.arrow_converter import (
     ArrowDataConverter,
     build_arrow_schema_preparation_context,
@@ -110,7 +112,9 @@ class TestQuarantineMutationLeftovers:
             lambda: module,
         )
         host = SimpleNamespace(
-            silver_writer=SimpleNamespace(_resolve_table_path=lambda name: f"/silver/{name}"),
+            silver_writer=SimpleNamespace(
+                _resolve_table_path=lambda name: f"/silver/{name}"
+            ),
             gold_writer=None,
             logger=MagicMock(),
             clock=SimpleNamespace(now=lambda: datetime(2024, 1, 1, tzinfo=UTC)),
@@ -150,7 +154,9 @@ class TestQuarantineMutationLeftovers:
             _run_in_executor=_run_in_executor,
         )
         host = SimpleNamespace(
-            silver_writer=SimpleNamespace(_resolve_table_path=lambda name: f"/silver/{name}"),
+            silver_writer=SimpleNamespace(
+                _resolve_table_path=lambda name: f"/silver/{name}"
+            ),
             gold_writer=gold,
             logger=MagicMock(),
             clock=SimpleNamespace(now=lambda: datetime(2024, 1, 1, tzinfo=UTC)),
@@ -170,7 +176,9 @@ class TestQuarantineMutationLeftovers:
             }
         ]
         await expire_gold_orphan_rows(host, request, orphan_rows=orphans)
-        summary = await apply_reconciliation_mutation(host, request, orphan_rows=orphans)
+        summary = await apply_reconciliation_mutation(
+            host, request, orphan_rows=orphans
+        )
         assert summary.mutation_mode == "gold_scd2_expiry"
 
 
@@ -194,11 +202,15 @@ class TestForeignKeyAdapterLeftovers:
         assert result.orphan_rows_deleted == 0
 
         class _GoldSnap:
-            async def read_gold(self, table_name: str, columns=None, current_only: bool = True):
+            async def read_gold(
+                self, table_name: str, columns=None, current_only: bool = True
+            ):
                 del columns, current_only
                 return [{"id": "1", "parent_id": "p", "_is_current": True}]
 
-            async def read_reconciliation_snapshot(self, table_name: str) -> dict[str, int]:
+            async def read_reconciliation_snapshot(
+                self, table_name: str
+            ) -> dict[str, int]:
                 del table_name
                 raise ValueError("snapshot unavailable")
 
@@ -217,11 +229,15 @@ class TestForeignKeyAdapterLeftovers:
         )
 
         class _GoldOk:
-            async def read_gold(self, table_name: str, columns=None, current_only: bool = True):
+            async def read_gold(
+                self, table_name: str, columns=None, current_only: bool = True
+            ):
                 del columns, current_only
                 return [{"id": "1", "parent_id": "p", "_is_current": True}]
 
-            async def read_reconciliation_snapshot(self, table_name: str) -> dict[str, int]:
+            async def read_reconciliation_snapshot(
+                self, table_name: str
+            ) -> dict[str, int]:
                 del table_name
                 return {"version": 3, "physical_rows": 2, "current_rows": 1}
 
@@ -380,7 +396,9 @@ class TestDeltaReaderAndTableOpsLeftovers:
 
         import sys
 
-        monkeypatch.setattr(sys.modules["deltalake"], "write_deltalake", _write, raising=False)
+        monkeypatch.setattr(
+            sys.modules["deltalake"], "write_deltalake", _write, raising=False
+        )
         records = pa.table({"id": ["1"], "content_hash": ["abc"]})
         execute = _build_merge_execute_callable(
             dt=SimpleNamespace(),  # type: ignore[arg-type]

@@ -311,6 +311,7 @@ shards:
       - tests/architecture/test_architecture_closeout_inventory.py
       - tests/architecture/test_closeout_json_artifacts_generic.py
       - tests/architecture/test_gha_8618_8619_closeout.py
+      - tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py
       - tests/architecture/test_issue_5053_pipeline_transformer_closeout.py
       - tests/architecture/test_observability_export_dashboard_rollout_closeout.py
       - tests/architecture/test_refactoring_followups_6097_6100_closeout.py

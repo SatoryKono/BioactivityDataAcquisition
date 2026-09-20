@@ -349,6 +349,14 @@ async def test_current_telemetry_is_not_consulted(tmp_path, monkeypatch, current
 
 
 async def test_late_previous_request_keeps_its_own_identity(tmp_path, monkeypatch):
+    if (
+        Path("/proc/version").exists()
+        and "microsoft" in Path("/proc/version").read_text(encoding="utf-8").lower()
+    ):
+        pytest.skip(
+            "WSL test runtime intentionally replaces asyncio.to_thread "
+            "with inline execution to avoid lost executor callbacks"
+        )
     import threading
 
     if asyncio.to_thread.__module__ != "asyncio.threads":

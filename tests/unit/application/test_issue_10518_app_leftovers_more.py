@@ -84,7 +84,9 @@ def test_structural_optional_nonnullable_null() -> None:
     )
     events: list[object] = []
     outcome = evaluate_null_value(
-        contract=contract, working_record={"activity_id": None}, events=events  # type: ignore[arg-type]
+        contract=contract,
+        working_record={"activity_id": None},
+        events=events,  # type: ignore[arg-type]
     )
     assert outcome is not None
     assert outcome.should_quarantine is True
@@ -112,7 +114,8 @@ def test_markdown_skip_reason_and_samples() -> None:
     )
     sample_lines: list[str] = []
     md._append_samples_section(
-        sample_lines, SimpleNamespace(funnel=[funnel_row])  # type: ignore[arg-type]
+        sample_lines,
+        SimpleNamespace(funnel=[funnel_row]),  # type: ignore[arg-type]
     )
     assert any("Top samples" in line for line in sample_lines)
 
@@ -144,7 +147,11 @@ def test_retention_snapshot_ids_and_reconcile_completeness() -> None:
     assert ident == "activity"
     assert eref == "ev-1"
     evidence = rec._upstream_completeness_evidence(
-        {"step": {"reference_completeness_evidence": {"reference_identity": "activity"}}},
+        {
+            "step": {
+                "reference_completeness_evidence": {"reference_identity": "activity"}
+            }
+        },
         "activity",
     )
     assert evidence is not None

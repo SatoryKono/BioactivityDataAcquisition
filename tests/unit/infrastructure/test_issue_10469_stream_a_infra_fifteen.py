@@ -11,7 +11,7 @@ import pytest
 
 from bioetl.domain.exceptions import BioETLError
 from bioetl.infrastructure.adapters.crossref.exceptions import CrossRefApiError
-from bioetl.domain.models.metadata import InputSnapshotRef, SourceMetadata
+from bioetl.domain.models.metadata import InputSnapshotRef
 from bioetl.infrastructure.adapters.crossref._search_paginator import SearchPaginator
 from bioetl.infrastructure.adapters.decorators._data_source_delegation import (
     DataSourceFetchRequest,
@@ -179,7 +179,9 @@ def test_csv_append_cleans_temp_on_error(
     def boom(*_args: object, **_kwargs: object) -> None:
         raise RuntimeError("write failed")
 
-    monkeypatch.setattr("bioetl.infrastructure.export.csv_exporter_io_ops.pv.write_csv", boom)
+    monkeypatch.setattr(
+        "bioetl.infrastructure.export.csv_exporter_io_ops.pv.write_csv", boom
+    )
     with pytest.raises(RuntimeError, match="write failed"):
         append_to_csv(table, target, ",", MagicMock())
 

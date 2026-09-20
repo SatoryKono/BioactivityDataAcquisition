@@ -15,7 +15,9 @@ from bioetl.application.composite.column_service_support import _collect_alias_m
 from bioetl.application.composite.coordinator_result_mixin import (
     EnrichmentCoordinatorResultMixin,
 )
-from bioetl.application.composite.helpers.join_planner_identity import infer_silver_table
+from bioetl.application.composite.helpers.join_planner_identity import (
+    infer_silver_table,
+)
 from bioetl.application.composite.runner_pkg.runner_merge_stage_mixin import (
     CompositeRunnerMergeStageMixin,
 )
@@ -39,7 +41,9 @@ from bioetl.application.core.batch_transformer_attempt_failures import (
     handle_data_quality_transform_error,
     handle_filtered_out_error,
 )
-from bioetl.application.observability import current_metrics_reconciliation as metrics_rec
+from bioetl.application.observability import (
+    current_metrics_reconciliation as metrics_rec,
+)
 from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
 from bioetl.application.pipelines.chembl.protein_class_transformer import (
     ProteinClassTransformer,
@@ -61,7 +65,9 @@ from bioetl.application.pipelines.uniprot.extractors._crossref_structured import
 from bioetl.application.services.control_plane.replay._historical_certification_support import (
     HistoricalReplayCertificationValidator,
 )
-from bioetl.application.services.control_plane.manifest import snapshot_payloads as _snapshot_payloads
+from bioetl.application.services.control_plane.manifest import (
+    snapshot_payloads as _snapshot_payloads,
+)
 from bioetl.application.services.export_lineage.export_execution import (
     _should_redact_columns,
     export_existing_table,
@@ -218,9 +224,10 @@ def test_tpc_int_parse_and_multifunctional_origin(
     assert _int_or_none("nope") is None
     assert _int_or_none(1.5) is None
     assert _int_or_none(object()) is None
-    assert _multifunctional_origin(
-        [{"component_id": 1}, {"component_id": 2}]
-    ) == "multi_component_heterogeneity"
+    assert (
+        _multifunctional_origin([{"component_id": 1}, {"component_id": 2}])
+        == "multi_component_heterogeneity"
+    )
     monkeypatch.setattr(
         "bioetl.application.pipelines.chembl.target_protein_classification_summary.derive_protein_class_target_type",
         lambda *_a, **_k: SimpleNamespace(counted_top_levels=("other",)),
@@ -307,8 +314,10 @@ async def test_coordinator_threshold_and_runner_mixins(
     mixin = EnrichmentCoordinatorResultMixin.__new__(EnrichmentCoordinatorResultMixin)
     mixin._logger = MagicMock()
     mixin._dq_config = SimpleNamespace(get_enricher_hard_threshold=lambda _p: 0.01)
-    now = datetime.now(UTC)
-    runner = SimpleNamespace(execution_metrics={"records_silver": 1, "records_quarantined": 9})
+    now = datetime(2026, 9, 16, 12, 0, tzinfo=UTC)
+    runner = SimpleNamespace(
+        execution_metrics={"records_silver": 1, "records_quarantined": 9}
+    )
     via_builder = mixin._build_enricher_result(
         enricher=SimpleNamespace(pipeline="chembl_activity"),  # type: ignore[arg-type]
         runner=runner,  # type: ignore[arg-type]
@@ -371,21 +380,18 @@ async def test_coordinator_threshold_and_runner_mixins(
 def test_leftover_eight_remaining_one_and_three_line_clusters() -> None:
     assert "input_snapshot_payload" in _snapshot_payloads.__all__
     assert infer_silver_table("chembl_activity") == "silver/chembl/activity"
-    assert (
-        _collect_alias_matches(
-            field_to_cols={"title": ["seed.title", "chembl.title"]},
-            aliases={"title"},
-            used={"seed.title"},
-        )
-        == ["chembl.title"]
-    )
+    assert _collect_alias_matches(
+        field_to_cols={"title": ["seed.title", "chembl.title"]},
+        aliases={"title"},
+        used={"seed.title"},
+    ) == ["chembl.title"]
     emit_batch_failed(
         emitter=MagicMock(),
         run_id=None,
         batch_id=BatchID(uuid4()),
         layer="silver",
         error=RuntimeError("write"),
-        occurred_at=datetime.now(UTC),
+        occurred_at=datetime(2026, 9, 16, 12, 0, tzinfo=UTC),
     )
     assert build_interpro_entry({}) is None
     assert build_pfam_entry({}) is None

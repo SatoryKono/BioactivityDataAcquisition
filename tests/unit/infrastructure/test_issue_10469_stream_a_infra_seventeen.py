@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import MagicMock
 
 import pytest
 
@@ -22,13 +21,17 @@ from bioetl.infrastructure.control_plane.file_artifact_lifecycle_types import (
 from bioetl.infrastructure.observability._metrics_gateway_publication import (
     _normalize_grouping_label_value,
 )
-from bioetl.infrastructure.quality.architecture_debt_reduction import _within_limit_category
+from bioetl.infrastructure.quality.architecture_debt_reduction import (
+    _within_limit_category,
+)
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.pipeline_config_common import DQYamlConfig
-from bioetl.infrastructure.storage.delta_reader_helpers import try_native_delta_row_count
+from bioetl.infrastructure.storage.delta_reader_helpers import (
+    try_native_delta_row_count,
+)
 from bioetl.infrastructure.storage.gold.io_metrics import _split_gold_merged_table_label
 from bioetl.infrastructure.storage.gold.writer_metrics import _split_gold_table_label
-from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation import (
+from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support import (
     _is_current_flag_value,
 )
 
@@ -43,8 +46,13 @@ def test_record_dropped_duplicates_without_metrics() -> None:
 def test_grouping_label_empty_and_unknown_key() -> None:
     assert _normalize_grouping_label_value("pipeline", "   ") == "unknown"
     assert _normalize_grouping_label_value("pipeline", "!!!") == "unknown"
-    assert _normalize_grouping_label_value("pipeline", "chembl_activity") == "chembl_activity"
-    assert _normalize_grouping_label_value("other", "chembl_activity") == "chembl_activity"
+    assert (
+        _normalize_grouping_label_value("pipeline", "chembl_activity")
+        == "chembl_activity"
+    )
+    assert (
+        _normalize_grouping_label_value("other", "chembl_activity") == "chembl_activity"
+    )
 
 
 def test_cached_bronze_identity_and_reasons(tmp_path: Path) -> None:

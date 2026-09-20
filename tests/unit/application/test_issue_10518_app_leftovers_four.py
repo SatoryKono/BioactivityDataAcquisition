@@ -11,7 +11,10 @@ from unittest.mock import MagicMock
 import polars as pl
 import pytest
 
-from bioetl.application.composite.aggregator import EnricherAggregator, _deduplicate_columns
+from bioetl.application.composite.aggregator import (
+    EnricherAggregator,
+    _deduplicate_columns,
+)
 from bioetl.application.composite.checkpoint.persistence_service import (
     CompositeCheckpointPersistenceService,
 )
@@ -147,7 +150,9 @@ def test_control_plane_mixin_delegates(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 class _TinyTransformer(BaseTransformer):
-    async def _transform_impl(self, context: object, record: object, index: int) -> object:
+    async def _transform_impl(
+        self, context: object, record: object, index: int
+    ) -> object:
         return None
 
 
@@ -346,7 +351,7 @@ def test_quarantine_status_update_operator_error() -> None:
         def _derive_operator_completion(
             self, *, started_at: datetime, started_monotonic: float
         ) -> tuple[datetime, float]:
-            return datetime.now(UTC), 0.01
+            return datetime(2026, 9, 16, 12, 0, tzinfo=UTC), 0.01
 
         def _record_operator_metrics(self, **_kwargs: object) -> None:
             return None
@@ -355,7 +360,7 @@ def test_quarantine_status_update_operator_error() -> None:
         _Host()._update_status_impl(
             payload_hash="abc",
             new_status=QuarantineRecordStatus.NEW,
-            started_at=datetime.now(UTC),
+            started_at=datetime(2026, 9, 16, 12, 0, tzinfo=UTC),
             started_monotonic=0.0,
         )
 
@@ -369,7 +374,9 @@ def test_run_report_query_missing_pointer_and_bad_json(
         lambda **_k: None,
     )
     assert (
-        _load_latest_report(kind="pipeline", owner="chembl", root=Path("reports"), store=store)
+        _load_latest_report(
+            kind="pipeline", owner="chembl", root=Path("reports"), store=store
+        )
         is None
     )
     store.is_file.return_value = True
