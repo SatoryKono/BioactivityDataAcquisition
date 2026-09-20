@@ -66,7 +66,9 @@ class PubMedAdapterFilterFetchHost(Protocol):
     @staticmethod
     def _validate_publication_entity(entity_type: str) -> None: ...
 
-    def _resolve_resume_offset(self, *, limit: int | None, offset: int | None) -> int | None: ...
+    def _resolve_resume_offset(
+        self, *, limit: int | None, offset: int | None
+    ) -> int | None: ...
 
     async def _resolve_pmids_for_fetch(
         self,
