@@ -4,11 +4,10 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
 import polars as pl
 
-from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.dependency_coordinator import (
     DependencyCoordinatorService,
 )
@@ -20,6 +19,9 @@ from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.composite.result import DependencyResult, SeedResult
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.ports import ClockPort, ExecutionMetricsRunnerPort, LoggerPort
+
+if TYPE_CHECKING:
+    from bioetl.application.composite.checkpoint import CompositeCheckpointState
 
 
 class _CompositeRunnerStageHostProtocol(Protocol):
