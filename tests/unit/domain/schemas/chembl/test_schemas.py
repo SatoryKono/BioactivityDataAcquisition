@@ -275,7 +275,9 @@ class TestChemblSchemas:
             "uberon_id": "UBERON_0002107",
         }
 
-        TissueSchema.validate(pd.DataFrame([record]))
+        validated = TissueSchema.validate(pd.DataFrame([record]))
+        assert len(validated) == 1
+        assert validated.iloc[0]["tissue_id"] == "CHEMBL3638177"
 
     def test_target_schema_accepts_minimal_required_record(
         self,
@@ -291,7 +293,9 @@ class TestChemblSchemas:
             "species_group_flag": False,
         }
 
-        TargetSchema.validate(pd.DataFrame([record]))
+        validated = TargetSchema.validate(pd.DataFrame([record]))
+        assert len(validated) == 1
+        assert validated.iloc[0]["target_id"] == "CHEMBL1862"
 
     def test_target_schema_accepts_derived_synonym_fields(
         self,
@@ -310,7 +314,9 @@ class TestChemblSchemas:
             "target_ec_numbers": "1.14.99.1",
         }
 
-        TargetSchema.validate(pd.DataFrame([record]))
+        validated = TargetSchema.validate(pd.DataFrame([record]))
+        assert len(validated) == 1
+        assert validated.iloc[0]["target_protein_synonyms"] == "PTGS2|COX-2"
 
     def test_target_schema_accepts_derived_xref_fields(
         self,
