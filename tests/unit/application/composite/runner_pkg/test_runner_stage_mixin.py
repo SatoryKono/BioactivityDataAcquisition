@@ -437,3 +437,80 @@ async def test_finalize_dependencies_phase_when_required_failure_then_raises() -
 
     harness._persist_failed_state.assert_awaited_once()
     harness._complete_dependencies_phase.assert_not_awaited()
+
+
+# ---------------------------------------------------------------------------
+# _execute_dependencies_phase ? configured path
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_execute_dependencies_phase_when_configured_then_runs_started_phase() -> (
+    None
+):
+    harness = _StageMixinHarness()
+    harness._has_dependencies_configured = MagicMock(return_value=True)
+    context = MagicMock()
+    harness._prepare_dependencies_run_context = MagicMock(return_value=context)
+    state = make_runner_state()
+    started = make_runner_state()
+    expected = (started, {"dep_a": success_dep("dep_a")})
+    harness._start_dependencies_phase = AsyncMock(return_value=started)
+    harness._execute_started_dependencies_phase = AsyncMock(return_value=expected)
+    keys_df = MagicMock()
+
+    result = await harness._execute_dependencies_phase(state, keys_df)
+
+    assert result == expected
+    harness._prepare_dependencies_run_context.assert_called_once()
+    harness._start_dependencies_phase.assert_awaited_once_with(state, context=context)
+    harness._execute_started_dependencies_phase.assert_awaited_once_with(
+        started, context=context, keys_df=keys_df
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_execute_started_dependencies_phase_when_run_succeeds_then_postprocesses() -> (
+    None
+):
+    harness = _StageMixinHarness()
+    state = make_runner_state()
+    dependency_results = {"dep_a": success_dep("dep_a")}
+    harness._run_dependencies = AsyncMock(return_value=dependency_results)
+    harness._postprocess_dependency_results = AsyncMock(
+        return_value=(state, dependency_results)
+    )
+    context = MagicMock()
+    keys_df = MagicMock()
+
+    result = await harness._execute_started_dependencies_phase(
+        state, context=context, keys_df=keys_df
+    )
+
+    assert result == (state, dependency_results)
+    harness._run_dependencies.assert_awaited_once_with(
+        context=context, keys_df=keys_df, state=state
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_execute_started_dependencies_phase_when_run_raises_then_handles_and_reraises() -> (
+    None
+):
+    harness = _StageMixinHarness()
+    state = make_runner_state()
+    error = InvalidStateError("dependencies exploded")
+    harness._run_dependencies = AsyncMock(side_effect=error)
+    harness._handle_dependencies_phase_exception = AsyncMock()
+    harness._postprocess_dependency_results = AsyncMock()
+
+    with pytest.raises(InvalidStateError, match="dependencies exploded"):
+        await harness._execute_started_dependencies_phase(
+            state, context=MagicMock(), keys_df=MagicMock()
+        )
+
+    harness._handle_dependencies_phase_exception.assert_awaited_once_with(state, error)
+    harness._postprocess_dependency_results.assert_not_awaited()

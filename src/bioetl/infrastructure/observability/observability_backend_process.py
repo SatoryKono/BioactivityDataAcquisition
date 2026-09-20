@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import os
 import signal
-import subprocess  # nosec B404
+import subprocess  # nosec B404 - see suppression registry
 import sys
 import tempfile
 import time
@@ -85,7 +85,7 @@ def _posix_ss_listener_process_field(line: str, *, suffix: str) -> str | None:
 
 def _run_listener_probe(command: list[str]) -> str:
     try:
-        result = subprocess.run(  # nosec B603
+        result = subprocess.run(  # nosec B603 - see suppression registry
             command,
             check=False,
             capture_output=True,
@@ -164,7 +164,7 @@ def _run_taskkill(pid: int) -> subprocess.CompletedProcess[str]:
         return subprocess.CompletedProcess(args=(), returncode=1)
     command = [taskkill, "/PID", str(pid), "/T", "/F"]
     try:
-        return subprocess.run(  # nosec B603
+        return subprocess.run(  # nosec B603 - see suppression registry
             command,
             check=False,
             capture_output=True,

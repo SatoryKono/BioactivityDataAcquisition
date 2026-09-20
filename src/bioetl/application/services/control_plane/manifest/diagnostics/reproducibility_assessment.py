@@ -14,6 +14,7 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     assess_reproducibility_policy,
 )
 from bioetl.domain.control_plane.reproducibility_profiles import (
+    ReproducibilityExecutionContext,
     build_replay_family_contract,
 )
 
@@ -25,7 +26,7 @@ def _assess_manifest_reproducibility_policy(
     resume_requested: bool,
 ) -> ReproducibilityPolicyAssessment:
     """Return the central reproducibility policy verdict for one manifest."""
-    execution_context = (
+    execution_context: ReproducibilityExecutionContext = (
         "composite" if is_composite_execution_context(manifest) else "source"
     )
     replay_family_contract = build_replay_family_contract(

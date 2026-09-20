@@ -64,8 +64,9 @@ class LineageConfig:
 
     def __post_init__(self) -> None:
         """Freeze nested mappings/sequences so callers cannot mutate state."""
-        if isinstance(self.track_source_for_fields, list):
+        raw_track_source_for_fields: object = self.track_source_for_fields
+        if isinstance(raw_track_source_for_fields, list):
             object.__setattr__(
-                self, "track_source_for_fields", tuple(self.track_source_for_fields)
+                self, "track_source_for_fields", tuple(raw_track_source_for_fields)
             )
         freeze_fields(self, ("provider_lookup_fields",))

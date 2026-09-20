@@ -419,7 +419,7 @@ def test_exact_replay_and_small_seams(monkeypatch: pytest.MonkeyPatch) -> None:
     assert mode in {"private_cache", "tmp"}
     assert path == preferred or mode == "tmp"
 
-    run_id = uuid4()
+    run_id = UUID("12345678-1234-5678-1234-567812345678")
     assert _coerce_run_id(run_id) == run_id
     assert isinstance(
         _resolve_pipeline_run_id(

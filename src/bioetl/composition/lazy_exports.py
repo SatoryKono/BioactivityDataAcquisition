@@ -79,7 +79,7 @@ def build_lazy_export_hooks(
 ) -> tuple[Callable[[str], object], Callable[[], list[str]]]:
     """Build module-level ``__getattr__`` and ``__dir__`` hooks for lazy exports."""
 
-    def _module_getattr(name: str) -> object:  # pragma: no cover
+    def _module_getattr(name: str) -> object:
         if TYPE_CHECKING:
             raise AttributeError
         return resolve_lazy_export(
@@ -90,7 +90,7 @@ def build_lazy_export_hooks(
             cache=cache,
         )
 
-    def _module_dir() -> list[str]:  # pragma: no cover
+    def _module_dir() -> list[str]:
         if TYPE_CHECKING:
             raise AttributeError
         return lazy_export_dir(

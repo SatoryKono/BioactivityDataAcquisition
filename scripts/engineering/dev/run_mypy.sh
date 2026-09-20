@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 cd "$REPO_ROOT"
 
-DEFAULT_ARGS=(--config-file pyproject.toml --strict src/bioetl)
+DEFAULT_ARGS=(--config-file pyproject.toml --strict src/bioetl src/memory)
 ARGS=("$@")
 MYPY_NARROW="${BIOETL_MYPY_NARROW:-0}"
 FILTERED_ARGS=()

@@ -681,13 +681,23 @@ async def test_title_fallback_flow_errors_and_title_only_limits() -> None:
 
 def test_base_metrics_none_port_and_zero_fallback() -> None:
     recorder = AdapterMetricsRecorder(metrics=None, provider="chembl")
-    recorder.record_batch_size("/activity", 10)
-    recorder.record_dropped_duplicates("activity", 2)
-    recorder.record_fallback_outcome("title", candidates=0, hits=3)
-    recorder.record_fallback_outcome("title", candidates=-1, hits=1)
+    assert recorder.record_batch_size("/activity", 10) is None
+    assert recorder.record_dropped_duplicates("activity", 2) is None
+    assert recorder.record_fallback_outcome("title", candidates=0, hits=3) is None
+    assert recorder.record_fallback_outcome("title", candidates=-1, hits=1) is None
     metrics = MagicMock()
     with_metrics = AdapterMetricsRecorder(metrics=metrics, provider="chembl")
     with_metrics.record_fallback_outcome("title", candidates=2, hits=0)
+    metrics.increment_counter.assert_called_once_with(
+        "bioetl_adapter_fallback_attempts_total",
+        2,
+        {"provider": "chembl", "operation": "title"},
+    )
+    metrics.set_gauge.assert_called_once_with(
+        "bioetl_adapter_fallback_hit_rate",
+        0.0,
+        {"provider": "chembl", "operation": "title"},
+    )
 
 
 @pytest.mark.asyncio

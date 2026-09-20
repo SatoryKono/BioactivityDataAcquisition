@@ -1,4 +1,8 @@
-"""Deterministic identity helpers for FK reconciliation quarantine writes."""
+"""Deterministic identity helpers for FK reconciliation quarantine writes.
+
+Internal implementation detail owned by the canonical
+``workflow_foreign_key_reconciliation`` adapter module (AUD-005).
+"""
 
 from __future__ import annotations
 

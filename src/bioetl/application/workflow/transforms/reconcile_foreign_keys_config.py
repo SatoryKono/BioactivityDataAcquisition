@@ -1,14 +1,10 @@
-"""Private support helpers for the reconcile_foreign_keys transform.
-
-Keeps the facade module within the application-layer size budget while
-preserving exact payload, artifact, and evidence semantics.
-"""
+"""Config readers and runtime support for the reconcile_foreign_keys transform."""
 
 from __future__ import annotations
 
 import asyncio
 from collections.abc import Mapping
-from typing import Any, cast
+from typing import cast
 
 from bioetl.application.services.workflow.workflow_transform_artifacts import (
     WorkflowTransformArtifactContext,
@@ -17,9 +13,25 @@ from bioetl.application.services.workflow.workflow_transform_artifacts import (
 from bioetl.application.workflow.transforms import WorkflowTransformRuntimeContext
 from bioetl.domain.ports import (
     ForeignKeyReconciliationLayer,
-    ForeignKeyReconciliationRequest,
+    ReferenceCompletenessStatus,
 )
 from bioetl.domain.workflow import WorkflowTransformSpec
+
+__all__ = [
+    "_optional_key_tuple",
+    "_optional_layer",
+    "_optional_runtime_str",
+    "_payload_run_ids",
+    "_persist_reconcile_result_artifact",
+    "_require_delete_orphans_action",
+    "_required_primary_keys",
+    "_required_str",
+    "_resolve_reference_completeness",
+    "_resolve_reference_keys",
+    "_run_ids_from_upstream",
+    "_source_scope",
+    "_upstream_completeness_evidence",
+]
 
 
 def _optional_runtime_str(
@@ -30,80 +42,6 @@ def _optional_runtime_str(
         return None
     value = getattr(runtime_context, attribute_name, None)
     return None if value is None else str(value)
-
-
-def _build_reconcile_payload(
-    *,
-    spec: WorkflowTransformSpec,
-    request: ForeignKeyReconciliationRequest,
-    result: object,
-    workflow_name: object,
-) -> dict[str, object]:
-    # Port result is structural; keep boundary free of concrete infra result types.
-    r = cast(Any, result)  # Any: structural FK reconcile result port
-    payload = {
-        "transform_name": spec.transform_name,
-        "fingerprint": spec.fingerprint,
-        "workflow_name": workflow_name,
-        "workflow_run_id": request.workflow_run_id,
-        "manifest_id": request.manifest_id,
-        "step_id": spec.step_id,
-        "source_table": r.source_table,
-        "reference_table": r.reference_table,
-        "source_key": r.source_key,
-        "reference_key": r.reference_key,
-        "source_layer": r.source_layer,
-        "reference_layer": r.reference_layer,
-        "mutation_layer": r.mutation_layer,
-        "source_keys": list(request.source_keys or (request.source_key,)),
-        "source_run_ids": list(request.source_run_ids),
-        "source_scope": request.source_scope,
-        "reference_keys": list(request.reference_keys or (request.reference_key,)),
-        "action": r.action,
-        "nulls_equal": request.nulls_equal,
-        "scanned_rows": r.scanned_rows,
-        "retained_rows": r.retained_rows,
-        "orphan_rows_deleted": r.orphan_rows_deleted,
-        "mutated": r.mutated,
-        "dry_run": r.dry_run,
-        "would_mutate": r.would_mutate,
-        "mutation_mode": r.mutation_mode,
-        "quarantine_batch_id": r.quarantine_batch_id,
-        "quarantine_rows_written": r.quarantine_rows_written,
-        "quarantine_error_code": r.quarantine_error_code,
-        "reference_completeness": request.reference_completeness,
-        "unproven_unmatched_rows": getattr(r, "unproven_unmatched_rows", 0),
-    }
-    blocked_reason = getattr(r, "mutation_blocked_reason", None)
-    if blocked_reason:
-        payload["mutation_blocked_reason"] = blocked_reason
-    if r.dry_run and r.would_mutate:
-        payload["mutation_blocked_reason"] = "workflow_dry_run"
-    if getattr(r, "source_snapshot", None) is not None:
-        payload["source_snapshot"] = dict(r.source_snapshot)
-    return payload
-
-
-def _record_reconcile_destructive_commit(
-    runtime_context: WorkflowTransformRuntimeContext | None,
-    *,
-    spec: WorkflowTransformSpec,
-    result: object,
-    payload: dict[str, object],
-) -> None:
-    r = cast(Any, result)  # Any: structural FK reconcile result port
-    if not r.mutated or r.dry_run:
-        return
-    if runtime_context is None or not hasattr(
-        runtime_context, "record_destructive_commit"
-    ):
-        return
-    runtime_context.record_destructive_commit(
-        step_id=spec.step_id,
-        transform_name=spec.transform_name,
-        fingerprint=spec.fingerprint,
-        details=payload,
-    )
 
 
 async def _persist_reconcile_result_artifact(
@@ -174,15 +112,32 @@ def _payload_run_ids(payload: object) -> tuple[object, ...]:
     return (getattr(payload, "run_id", None),)
 
 
-def _evidence_field_text(value: object, *, default: str | None) -> str | None:
-    """Return stripped evidence text (``default`` for missing fields).
+def _run_ids_from_upstream(
+    upstream_outputs: Mapping[str, object],
+    *,
+    workflow_run_id: str | None,
+    depends_on: tuple[str, ...] = (),
+) -> tuple[str, ...]:
+    selected = upstream_outputs
+    if depends_on:
+        allowed = set(depends_on)
+        selected = {
+            step_id: payload
+            for step_id, payload in upstream_outputs.items()
+            if step_id in allowed
+        }
+    candidates: list[object] = [workflow_run_id]
+    for payload in selected.values():
+        candidates.extend(_payload_run_ids(payload))
+    normalized = [str(value).strip() for value in candidates if value]
+    return tuple(dict.fromkeys(value for value in normalized if value))
 
-    Whitespace-only values strip to ``""`` exactly like the inline version
-    this helper replaces; callers apply their own empty fallback.
-    """
+
+def _clean_evidence_str(value: object, default: str | None) -> str | None:
+    """Strip string-like evidence, falling back to default for missing entries."""
     if value in (None, ""):
-        return default
-    return str(value).strip()
+        return default or None
+    return str(value).strip() or None
 
 
 def _resolve_reference_completeness(
@@ -190,7 +145,7 @@ def _resolve_reference_completeness(
     upstream_outputs: Mapping[str, object],
     *,
     reference_table: str,
-) -> tuple[str, str | None, str | None, str | None]:
+) -> tuple[ReferenceCompletenessStatus, str | None, str | None, str | None]:
     """Return completeness only from typed evidence bound to the reference table."""
     evidence = config.get("reference_completeness_evidence")
     if not isinstance(evidence, Mapping):
@@ -198,16 +153,9 @@ def _resolve_reference_completeness(
     if not isinstance(evidence, Mapping):
         return "unproven", None, None, None
     status = str(evidence.get("status") or "unproven").strip().lower()
-    identity = (
-        _evidence_field_text(
-            evidence.get("reference_identity"), default=reference_table
-        )
-        or None
-    )
-    snapshot_version = _evidence_field_text(
-        evidence.get("snapshot_version"), default=None
-    )
-    evidence_ref = _evidence_field_text(evidence.get("evidence_ref"), default=None)
+    identity = _clean_evidence_str(evidence.get("reference_identity"), reference_table)
+    snapshot_version = _clean_evidence_str(evidence.get("snapshot_version"), None)
+    evidence_ref = _clean_evidence_str(evidence.get("evidence_ref"), None)
     if status != "complete" or identity != reference_table or not evidence_ref:
         return "unproven", identity, snapshot_version, evidence_ref
     return "complete", identity, snapshot_version, evidence_ref
@@ -287,6 +235,23 @@ def _required_str(config: Mapping[str, object], key: str) -> str:
     return str(value).strip()
 
 
+def _optional_layer(
+    config: Mapping[str, object],
+    key: str,
+    *,
+    default: ForeignKeyReconciliationLayer | None,
+) -> ForeignKeyReconciliationLayer | None:
+    value = config.get(key, default)
+    if value is None:
+        return None
+    rendered = str(value).strip().lower()
+    if rendered not in {"silver", "gold"}:
+        raise ValueError(
+            f"reconcile_foreign_keys requires config.{key} as 'silver' or 'gold'"
+        )
+    return cast("ForeignKeyReconciliationLayer", rendered)
+
+
 def _optional_key_tuple(
     config: Mapping[str, object],
     key: str,
@@ -308,20 +273,3 @@ def _optional_key_tuple(
     if any(not item for item in keys):
         raise ValueError(f"reconcile_foreign_keys {key} cannot contain blank entries")
     return keys
-
-
-def _optional_layer(
-    config: Mapping[str, object],
-    key: str,
-    *,
-    default: ForeignKeyReconciliationLayer | None,
-) -> ForeignKeyReconciliationLayer | None:
-    value = config.get(key, default)
-    if value is None:
-        return None
-    rendered = str(value).strip().lower()
-    if rendered not in {"silver", "gold"}:
-        raise ValueError(
-            f"reconcile_foreign_keys requires config.{key} as 'silver' or 'gold'"
-        )
-    return cast("ForeignKeyReconciliationLayer", rendered)

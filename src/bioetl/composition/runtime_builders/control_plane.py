@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import is_dataclass, replace
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.composition.runtime_builders._manifest_publication_context_support import (
     resolve_manifest_publication_context,
@@ -35,15 +35,14 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
 
 
-def attach_manifest_id(
-    ctx: PipelineRunContext,
+def attach_manifest_id[T](
+    ctx: T,
     manifest_id: str | None = None,
     *,
     control_plane_refs: _ManifestControlPlaneRefs | None = None,
     optional_fields: Mapping[str, object] | None = None,
-) -> PipelineRunContext:
+) -> T:
     """Return context with full refs or compact optional provenance (Sonar S107)."""
-
     if control_plane_refs is not None:
         manifest_id = control_plane_refs.manifest_id
         optional_updates = extract_optional_updates_from_refs(control_plane_refs)
@@ -57,7 +56,7 @@ def attach_manifest_id(
         )
     if is_dataclass(ctx):
         return cast(
-            "PipelineRunContext",
+            "T",
             replace(
                 cast("DataclassInstance", ctx),
                 **build_dataclass_manifest_updates(
@@ -69,10 +68,10 @@ def attach_manifest_id(
         )
     if hasattr(ctx, "__dict__"):
         return cast(
-            "PipelineRunContext",
+            "T",
             apply_manifest_updates_to_mutable_context(
-                ctx,
-                cast(str, manifest_id),
+                cast("Any", ctx),  # Any: mutable context host
+                manifest_id,
                 optional_updates=optional_updates,
             ),
         )
@@ -108,11 +107,7 @@ def create_run_manifest_with_effective_config(
     ledger_enabled: bool,
 ) -> tuple[_ManifestControlPlaneRefs, RunLedgerService | None]:
     """Create immutable manifest before pipeline assembly begins."""
-    publication_context = resolve_manifest_publication_context(
-        ctx=ctx,
-        inputs=inputs,
-    )
-    # Validate immutable input snapshots before any control-plane persistence.
+    publication_context = resolve_manifest_publication_context(ctx=ctx, inputs=inputs)
     _preflight_pipeline_input_snapshots(
         ctx=ctx,
         inputs=inputs,

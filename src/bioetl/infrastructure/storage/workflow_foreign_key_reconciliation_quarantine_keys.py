@@ -1,4 +1,8 @@
-"""Pure key/column helpers for workflow FK reconciliation quarantine path."""
+"""Pure key/column helpers for workflow FK reconciliation quarantine path.
+
+Internal implementation detail owned by the canonical
+``workflow_foreign_key_reconciliation`` adapter module (AUD-005).
+"""
 
 from __future__ import annotations
 

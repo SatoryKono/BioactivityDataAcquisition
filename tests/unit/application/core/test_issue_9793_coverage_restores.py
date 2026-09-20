@@ -395,8 +395,10 @@ def test_registry_iter_entity_files_empty_when_missing(tmp_path: Any) -> None:
 
 
 def test_foreign_key_reconciliation_validators() -> None:
-    from bioetl.domain.workflow.foreign_key_reconciliation import (
+    from bioetl.domain.workflow.foreign_key_reconciliation_models import (
         ForeignKeyReconciliationResult,
+    )
+    from bioetl.domain.workflow.foreign_key_reconciliation import (
         normalize_layer,
         require_equal_key_tuple_lengths,
         require_first_keys_match,

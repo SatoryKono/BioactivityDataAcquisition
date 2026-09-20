@@ -22,7 +22,7 @@ import bioetl.domain.mapping.publication_controlled_vocabulary as publication_vo
 import bioetl.domain.normalization.profiles as profiles_facade
 import bioetl.domain.registry.publication_data as publication_data
 from bioetl.domain.behavior._dq_serializer_yaml import format_yaml_scalar
-from bioetl.domain.behavior.composite_validation_layer import (
+from bioetl.domain.behavior.validation_result_envelopes import (
     _require_composite_validation_report,
 )
 from bioetl.domain.behavior.composite_validation_shapes import (

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from datetime import datetime
 
 from bioetl.domain.control_plane import RunInputSnapshotRef, RunManifest, RunSourceRef
@@ -52,6 +53,16 @@ def source_refs_payload(
     source_refs: tuple[RunSourceRef, ...],
 ) -> list[dict[str, object]]:
     return [source_ref_payload(source_ref) for source_ref in source_refs]
+
+
+def _trace_ref_sort_key(item: Mapping[str, object]) -> tuple[str, str, str, str]:
+    """Return the deterministic ordering key for snapshot trace refs."""
+    return (
+        str(item.get("provider") or ""),
+        str(item.get("entity") or ""),
+        str(item.get("pipeline_name") or ""),
+        str(item.get("snapshot_id") or ""),
+    )
 
 
 def manifest_input_snapshot_trace_refs(

@@ -13,7 +13,8 @@ __all__ = [
     "transition_state_with_fsm_log",
 ]
 
-from bioetl.application.composite.checkpoint import CompositeCheckpointState
+from typing import TYPE_CHECKING
+
 from bioetl.application.composite.checkpoint.transition_service import (
     apply_recovery_checkpoint_transition,
     apply_validated_checkpoint_transition,
@@ -27,6 +28,9 @@ from bioetl.application.composite.runner_pkg.runner_stage_support_types import (
 from bioetl.domain.composite.result import DependencyResult, SeedResult
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import BioETLError, InvalidStateError
+
+if TYPE_CHECKING:
+    from bioetl.application.composite.checkpoint import CompositeCheckpointState
 
 
 def find_required_failures(

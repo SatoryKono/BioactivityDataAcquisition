@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Operator-facing shortcuts for querying canonical deterministic Neo4j graph paths."""
+"""Operator-facing shortcuts for querying canonical deterministic Neo4j graph paths.
+
+Ownership: Neo4j-backed analytical graph queries (statements, rows, formatters).
+The canonical programmatic entry is memory.query, which imports this module as
+graph_query; the canonical graph CLI is `python -m memory.graph.query`
+(also reachable via `python -m scripts.memory query`).
+"""
 
 from __future__ import annotations
 
@@ -1953,7 +1959,7 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
     return formatter(title, name, rows)
 
 
-def main(argv: list[str] | None = None) -> int:
+def graph_query_main(argv: list[str] | None = None) -> int:
     parser = _parser()
     args = parser.parse_args(argv)
     rows = _run_query(args.root, args.profile, args.name, args.http_uri)
@@ -1964,5 +1970,8 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
+main = graph_query_main
+
+
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(graph_query_main())

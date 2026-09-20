@@ -774,3 +774,28 @@ def test_src_outside_composition_avoids_internal_composition_entrypoint_modules(
         "composition APIs instead of internal composition entrypoint modules:\n"
         + "\n".join(sorted(violations))
     )
+
+
+@pytest.mark.architecture
+def test_compatibility_contract_policy_declares_window_and_guide() -> None:
+    """Retained entrypoints sunset only through a deprecation window (AUD-011)."""
+    payload = yaml.safe_load(REGISTRY_YAML.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    policy = payload.get("compatibility_contract_policy")
+    assert isinstance(policy, dict), "Missing compatibility_contract_policy (AUD-011)"
+    assert policy["linked_issue"] == "#10536"
+    assert policy["deprecation_window"] == "90d"
+    assert policy["review_cadence"] == "quarterly"
+    guide = policy["migration_guide"]
+    assert (ROOT / str(guide)).exists(), f"Missing migration guide: {guide}"
+    assert any(
+        "forbidden" in str(rule).lower() and "silent" in str(rule).lower()
+        for rule in policy["rules"]
+    )
+    rows = payload.get("retained_entrypoints") or []
+    assert len(rows) == 12
+    for row in rows:
+        contract = row.get("compatibility_contract")
+        assert isinstance(contract, dict), row.get("path")
+        assert contract["deprecation_window"] == "90d", row.get("path")
+        assert contract["migration_guide"] == guide, row.get("path")

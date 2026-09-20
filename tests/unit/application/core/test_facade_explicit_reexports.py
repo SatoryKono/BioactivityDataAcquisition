@@ -36,9 +36,7 @@ FACADE_SOURCES = {
         "bioetl.application.core.entity_id",
         "bioetl.application.core.field_specs",
     ),
-    "bioetl.application.core.preflight": (
-        "bioetl.application.core.preflight.service",
-    ),
+    "bioetl.application.core.preflight": ("bioetl.application.core.preflight.service",),
     "bioetl.application.core.transformer_runtime": (
         "bioetl.application.core.transformer_runtime.finalization",
         "bioetl.application.core.transformer_runtime.orchestration",

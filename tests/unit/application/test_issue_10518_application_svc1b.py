@@ -17,7 +17,9 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-from bioetl.application.services.control_plane.forensic import diagnostics_support as _ds  # noqa: E402
+from bioetl.application.services.control_plane.forensic import (
+    diagnostics_support as _ds,
+)  # noqa: E402
 from bioetl.application.services.control_plane.manifest.diagnostics import (  # noqa: E402
     replay_state as _rs,
 )
@@ -244,9 +246,7 @@ class TestInspectionServiceFactory:
     def test_provided_factory_returned(self):
         factory = MagicMock()
         assert (
-            _ds.inspection_service_factory_from_ports(
-                MagicMock(), None, factory
-            )
+            _ds.inspection_service_factory_from_ports(MagicMock(), None, factory)
             is factory
         )
 
@@ -692,9 +692,7 @@ class TestHealthProbeContext:
     def test_nested_client_without_http_client(self):
         service = _health_service()
         adapter = SimpleNamespace(_client=SimpleNamespace())
-        assert isinstance(
-            service._health_probe_context(adapter), _NullAsyncContext
-        )
+        assert isinstance(service._health_probe_context(adapter), _NullAsyncContext)
 
     def test_fallback_null_context(self):
         service = _health_service()
@@ -768,7 +766,9 @@ class TestArtifactRefLabels:
 
     def test_pair_label(self):
         assert (
-            _artifact_ref_pair_label({"artifact_id": "a"}, {"artifact_id": "b"}, index=0)
+            _artifact_ref_pair_label(
+                {"artifact_id": "a"}, {"artifact_id": "b"}, index=0
+            )
             == "a == b"
         )
 
@@ -834,7 +834,9 @@ class TestBuildArtifactRefSemanticDiff:
             left_artifact_refs=({"stage": "s"},),
             right_artifact_refs=({"stage": "s"}, {"stage": "t"}),
         )
-        assert "artifact_ref_count" in payload["artifact_ref_semantic_difference_fields"]
+        assert (
+            "artifact_ref_count" in payload["artifact_ref_semantic_difference_fields"]
+        )
         assert payload["left_artifact_ref_count"] == 1
         assert payload["right_artifact_ref_count"] == 2
         assert payload["artifact_ref_semantic_equivalent"] is False
@@ -1371,30 +1373,52 @@ class TestResolveBroaderHistoricalExactReplayState:
         return _rs._resolve_broader_historical_exact_replay_state(
             manifest=RunManifest(),
             input_snapshots=snapshots,
-            policy_assessment=_assessment(_envelope(any_input=bool(snapshots), full=full)),
+            policy_assessment=_assessment(
+                _envelope(any_input=bool(snapshots), full=full)
+            ),
         )
 
     def test_historical_composite_certified(self):
-        assert self._state(
-            [{"materialization_mode": HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED}],
-            True,
-        ) == "historical_composite_replay_certified"
+        assert (
+            self._state(
+                [
+                    {
+                        "materialization_mode": HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED
+                    }
+                ],
+                True,
+            )
+            == "historical_composite_replay_certified"
+        )
 
     def test_historical_composite_incomplete__svc1b_2(self):
-        assert self._state(
-            [{"materialization_mode": HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED}],
-            False,
-        ) == "historical_composite_certification_incomplete"
+        assert (
+            self._state(
+                [
+                    {
+                        "materialization_mode": HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED
+                    }
+                ],
+                False,
+            )
+            == "historical_composite_certification_incomplete"
+        )
 
     def test_historical_source_certified__svc1b_2(self):
-        assert self._state(
-            [{"materialization_mode": HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED}], True
-        ) == "historical_source_replay_certified"
+        assert (
+            self._state(
+                [{"materialization_mode": HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED}], True
+            )
+            == "historical_source_replay_certified"
+        )
 
     def test_within_post_capture_boundary(self):
-        assert self._state(
-            [{"materialization_mode": LIVE_CAPTURE_SNAPSHOT_MATERIALIZED}], False
-        ) == "within_post_capture_parent_boundary"
+        assert (
+            self._state(
+                [{"materialization_mode": LIVE_CAPTURE_SNAPSHOT_MATERIALIZED}], False
+            )
+            == "within_post_capture_parent_boundary"
+        )
 
     def test_within_launch_time_boundary(self):
         assert self._state([], True) == "within_launch_time_snapshot_boundary"
@@ -1468,9 +1492,7 @@ class TestResolveContinuationMode:
 
     def test_full_scan_idempotent_rebuild(self):
         mode = _rs._resolve_continuation_mode(
-            manifest=RunManifest(
-                launch_context={"full_scan_idempotent_rebuild": True}
-            ),
+            manifest=RunManifest(launch_context={"full_scan_idempotent_rebuild": True}),
             requested_exact_replay=False,
             resume_requested=False,
             replay_family_context=_family_context(),
@@ -1508,9 +1530,7 @@ class TestResolveContinuationMode:
 class TestReplayStateResidualBranches:
     def test_append_mode_sinks_block_exact_replay(self):
         reason = _rs._resolve_replay_capability_reason(
-            manifest=RunManifest(
-                runtime_config={"sink": {"gold": {"mode": "append"}}}
-            ),
+            manifest=RunManifest(runtime_config={"sink": {"gold": {"mode": "append"}}}),
             input_snapshots=[],
             resume_requested=False,
             policy_assessment=_assessment(_envelope()),
@@ -1699,12 +1719,8 @@ class TestMetricsProtocolStubs:
         )
 
         host = _GatewayHost()
-        assert (
-            _MetricsTracingHost._build_span_attributes(host, operation="x") is None
-        )
-        assert (
-            _MetricsTracingHost._set_result_attributes(host, success=True) is None
-        )
+        assert _MetricsTracingHost._build_span_attributes(host, operation="x") is None
+        assert _MetricsTracingHost._set_result_attributes(host, success=True) is None
         assert (
             _MetricsGatewayHost._push_to_gateway_impl(
                 host, gateway="g", run_label="r", labels={}, metric_names=None

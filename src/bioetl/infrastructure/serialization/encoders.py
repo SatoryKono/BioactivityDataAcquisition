@@ -27,9 +27,11 @@ import json
 import os
 import types
 from functools import lru_cache
+from typing import TYPE_CHECKING
 
-from bioetl.domain.ports import JsonEncoderPort
-from bioetl.domain.types import JsonDict
+if TYPE_CHECKING:
+    from bioetl.domain.ports import JsonEncoderPort
+    from bioetl.domain.types import JsonDict
 
 # Optional orjson import
 try:

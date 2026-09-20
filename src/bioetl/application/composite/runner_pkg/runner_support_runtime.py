@@ -5,8 +5,8 @@ from __future__ import annotations
 __all__ = ["run_seed", "save_checkpoint_safe"]
 
 import time
+from typing import TYPE_CHECKING
 
-from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.runner_pkg.runner_checkpoint_save_observability import (
     checkpoint_saved_at_epoch_seconds,
     close_checkpoint_save_span,
@@ -27,6 +27,9 @@ from bioetl.application.runtime_timestamps import (
 )
 from bioetl.domain.composite.result import SeedResult
 from bioetl.domain.exceptions import BioETLError
+
+if TYPE_CHECKING:
+    from bioetl.application.composite.checkpoint import CompositeCheckpointState
 
 
 async def save_checkpoint_safe(

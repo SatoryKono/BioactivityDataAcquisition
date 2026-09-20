@@ -111,8 +111,9 @@ class EnricherFieldPairing:
 
     def __post_init__(self) -> None:
         """Normalize then validate pairing."""
-        if isinstance(self.fields, list):
-            object.__setattr__(self, "fields", tuple(self.fields))
+        raw_fields: object = self.fields
+        if isinstance(raw_fields, list):
+            object.__setattr__(self, "fields", tuple(raw_fields))
         if not self.enricher_pipeline:
             raise ValueError("enricher_pipeline cannot be empty")
         if not self.fields:
@@ -159,8 +160,9 @@ class RecordCrossValidationResult:
 
     def __post_init__(self) -> None:
         """Convert lists to tuples."""
-        if isinstance(self.mismatches, list):
-            object.__setattr__(self, "mismatches", tuple(self.mismatches))
+        raw_mismatches: object = self.mismatches
+        if isinstance(raw_mismatches, list):
+            object.__setattr__(self, "mismatches", tuple(raw_mismatches))
 
 
 @dataclass(frozen=True, slots=True)
@@ -206,5 +208,6 @@ class CrossValidationStats:
 
     def __post_init__(self) -> None:
         """Convert lists to tuples."""
-        if isinstance(self.enricher_stats, list):
-            object.__setattr__(self, "enricher_stats", tuple(self.enricher_stats))
+        raw_enricher_stats: object = self.enricher_stats
+        if isinstance(raw_enricher_stats, list):
+            object.__setattr__(self, "enricher_stats", tuple(raw_enricher_stats))

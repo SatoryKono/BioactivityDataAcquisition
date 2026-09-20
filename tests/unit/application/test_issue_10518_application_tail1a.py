@@ -66,9 +66,7 @@ def test_record_deduplicated_emits_accounting_removal(
     )
 
     accounting = MagicMock()
-    monkeypatch.setattr(
-        dedup_module, "get_stage_accounting", lambda: accounting
-    )
+    monkeypatch.setattr(dedup_module, "get_stage_accounting", lambda: accounting)
     EnricherDeduplicatorService._record_deduplicated(3)
     accounting.record_removal.assert_called_once_with(
         "silver",
@@ -86,9 +84,7 @@ def test_classify_columns_empty_frame_returns_all_non_key() -> None:
     )
 
     service = EnricherDeduplicatorService(logger=MagicMock())
-    df = pl.DataFrame(
-        {"k": [], "v": []}, schema={"k": pl.String, "v": pl.String}
-    )
+    df = pl.DataFrame({"k": [], "v": []}, schema={"k": pl.String, "v": pl.String})
     assert service._classify_columns(df, ["k"], ["v"]) == ([], ["v"])
 
 
@@ -175,7 +171,7 @@ def test_emit_domain_event_logs_emitter_failure() -> None:
 
 
 def test_emit_batch_failed_without_run_id_is_noop() -> None:
-    from datetime import datetime, timezone
+    from datetime import UTC, datetime
 
     from bioetl.application.core._batch_write_support import emit_batch_failed
 
@@ -186,13 +182,13 @@ def test_emit_batch_failed_without_run_id_is_noop() -> None:
         batch_id="b1",  # type: ignore[arg-type]
         layer="silver",
         error=RuntimeError("x"),
-        occurred_at=datetime.now(timezone.utc),
+        occurred_at=datetime(2026, 1, 1, tzinfo=UTC),
     )
     emitter.emit_domain_event.assert_not_called()
 
 
 async def test_safe_write_layer_rejects_unknown_layer() -> None:
-    from datetime import datetime, timezone
+    from datetime import UTC, datetime
 
     from bioetl.application.core._batch_write_support import safe_write_layer
 
@@ -207,7 +203,7 @@ async def test_safe_write_layer_rejects_unknown_layer() -> None:
             layer="bronze",
             records=[],
             batch_id="b1",  # type: ignore[arg-type]
-            ingestion_ts=datetime.now(timezone.utc),
+            ingestion_ts=datetime(2026, 1, 1, tzinfo=UTC),
             bronze_refs=None,
             operation_errors=(RuntimeError,),
         )
@@ -277,9 +273,7 @@ def test_missing_context_result_loaded_reports_loaded(
 def test_extract_checkpoint_offset_from_dataclass() -> None:
     from bioetl.application.core.runner_flow import extract_checkpoint_offset
 
-    assert (
-        extract_checkpoint_offset(SimpleNamespace(records_processed=7)) == 7
-    )
+    assert extract_checkpoint_offset(SimpleNamespace(records_processed=7)) == 7
 
 
 def test_extract_checkpoint_offset_from_mapping() -> None:
@@ -316,9 +310,7 @@ def test_record_run_shutdown_invariants_failure_warns(
     def _boom(host: object, current_time_fn: object) -> None:
         raise ArithmeticError("invariants down")
 
-    monkeypatch.setattr(
-        flow_module, "_record_flow_invariants_impl", _boom
-    )
+    monkeypatch.setattr(flow_module, "_record_flow_invariants_impl", _boom)
     host = SimpleNamespace(
         _logger=MagicMock(),
         _context=SimpleNamespace(run_id="run-1"),
@@ -328,10 +320,7 @@ def test_record_run_shutdown_invariants_failure_warns(
     )
     record_run_shutdown(host)  # type: ignore[arg-type]
     host._logger.warning.assert_called_once()
-    assert (
-        host._logger.warning.call_args.args[0]
-        == "shutdown_flow_invariants_failed"
-    )
+    assert host._logger.warning.call_args.args[0] == "shutdown_flow_invariants_failed"
 
 
 # --- 5: lineage_identity ---
@@ -388,9 +377,7 @@ def _retention_manifest(config_id: str | None):
     from bioetl.domain.control_plane import RunCodeProvenance, RunManifest
 
     return RunManifest(
-        code_provenance=RunCodeProvenance(
-            effective_config_artifact_id=config_id
-        )
+        code_provenance=RunCodeProvenance(effective_config_artifact_id=config_id)
     )
 
 
@@ -432,10 +419,7 @@ def test_artifact_without_match_falls_through_to_snapshots() -> None:
 
     manifest = _retention_manifest(None)
     assert _manifest_snapshot_ids(manifest) == set()
-    assert (
-        _artifact_matches_manifest(_retention_artifact("zzz"), manifest)
-        is False
-    )
+    assert _artifact_matches_manifest(_retention_artifact("zzz"), manifest) is False
 
 
 # --- 7: base_chembl_transformer ---
@@ -486,14 +470,14 @@ async def test_chembl_transform_pre_silver_orchestrates_steps() -> None:
     transformer = _make_chembl_transformer()
     record = {"chembl_id": "CHEMBL1"}
     result = await transformer.transform_pre_silver(
-        MagicMock(), record, 0  # type: ignore[arg-type]
+        MagicMock(),
+        record,
+        0,  # type: ignore[arg-type]
     )
     assert result == {"staged": True}
     transformer._prepare_record.assert_called_once_with(record)
     transformer._resolve_primary_id.assert_called_once_with(record)
-    transformer._extract_business_data.assert_called_once_with(
-        record, "CHEMBL1"
-    )
+    transformer._extract_business_data.assert_called_once_with(record, "CHEMBL1")
     transformer._stage_identity_business_data.assert_called_once_with(
         source_id="CHEMBL1",
         identity_field="chembl_id",
@@ -583,10 +567,7 @@ def test_parse_month_day_empty_raw_date() -> None:
     extractor = MagicMock()
     extractor.extract.return_value = {}
     node = ET.fromstring("<PubDate><Year>2020</Year></PubDate>")
-    assert (
-        parse_month_day(node, date_extractor=extractor, month_map={})
-        == (None, None)
-    )
+    assert parse_month_day(node, date_extractor=extractor, month_map={}) == (None, None)
 
 
 # --- 10: _checkpoint_compatibility_execution_validation ---
@@ -599,7 +580,7 @@ def _checkpoint_pair(**overrides: object):
     checkpoint_kwargs: dict[str, object] = {"records_processed": 0}
     for key, value in overrides.items():
         if key.startswith("current_"):
-            current_kwargs[key[len("current_"):]] = value
+            current_kwargs[key[len("current_") :]] = value
         else:
             checkpoint_kwargs[key] = value
     return (
@@ -624,8 +605,7 @@ def test_mismatch_reasons_fallback_appends_fingerprints() -> None:
         messages,
     )
     assert messages == [
-        "Checkpoint execution identity fallback mismatch: "
-        "current=a, checkpoint=b"
+        "Checkpoint execution identity fallback mismatch: current=a, checkpoint=b"
     ]
 
 
@@ -639,9 +619,7 @@ def test_exact_replay_mismatch_marks_incompatible() -> None:
     )
     messages: list[str] = []
     assert (
-        _validate_exact_replay_and_snapshots(
-            current, checkpoint, messages, True
-        )
+        _validate_exact_replay_and_snapshots(current, checkpoint, messages, True)
         is False
     )
     assert any("Exact replay mismatch" in message for message in messages)
@@ -662,14 +640,10 @@ def test_snapshot_identity_mismatch_marks_incompatible() -> None:
     )
     messages: list[str] = []
     assert (
-        _validate_exact_replay_and_snapshots(
-            current, checkpoint, messages, True
-        )
+        _validate_exact_replay_and_snapshots(current, checkpoint, messages, True)
         is False
     )
-    assert any(
-        "Input snapshot identity mismatch" in message for message in messages
-    )
+    assert any("Input snapshot identity mismatch" in message for message in messages)
 
 
 # --- 11: checkpoint_compatibility_policy ---
@@ -792,8 +766,7 @@ def test_narrowed_scope_claim_with_blockers() -> None:
     )
     assert claim["claimed"] is False
     assert (
-        claim["reason"]
-        == "retained_certifiable_scope_still_contains_in_scope_blockers"
+        claim["reason"] == "retained_certifiable_scope_still_contains_in_scope_blockers"
     )
 
 
@@ -1015,7 +988,7 @@ def test_increment_counter_without_metrics_api_is_noop() -> None:
     handler._increment_counter("errors_total", 1)
 
 
-def test_legacy_increment_kwargs_signature_failure(
+def test_legacy_increment_kwargs_signature_failure_inspect(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     import inspect as inspect_module
@@ -1344,9 +1317,7 @@ def test_ledger_mixin_delegates_metrics_event(
         lambda host, **_: calls.append("metrics"),
     )
     host = _ledger_mixin_host()
-    host._record_run_metrics_event(
-        metrics_snapshot={}, recorder=lambda *args: None
-    )
+    host._record_run_metrics_event(metrics_snapshot={}, recorder=lambda *args: None)
     assert calls == ["metrics"]
 
 
@@ -1398,13 +1369,9 @@ def test_is_missing_value_string_branches() -> None:
     )
 
     assert (
-        is_missing_value("hello", logical_type="string", empty_as_missing=None)
-        is False
+        is_missing_value("hello", logical_type="string", empty_as_missing=None) is False
     )
-    assert (
-        is_missing_value([], logical_type="string", empty_as_missing=True)
-        is True
-    )
+    assert is_missing_value([], logical_type="string", empty_as_missing=True) is True
 
 
 # --- 26: base_transformer base ---
@@ -1456,8 +1423,7 @@ def test_dataframe_error_types_returns_tuple() -> None:
     error_types = _BatchExecutorDQMixin._dataframe_error_types()
     assert isinstance(error_types, tuple)
     assert all(
-        isinstance(item, type) and issubclass(item, Exception)
-        for item in error_types
+        isinstance(item, type) and issubclass(item, Exception) for item in error_types
     )
 
 
@@ -1467,9 +1433,9 @@ def test_stringify_value_delegates_to_helper() -> None:
         _BatchExecutorDQMixin,
     )
 
-    assert _BatchExecutorDQMixin._stringify_value(
+    assert _BatchExecutorDQMixin._stringify_value("v", {"k"}, "k") == stringify_value(
         "v", {"k"}, "k"
-    ) == stringify_value("v", {"k"}, "k")
+    )
 
 
 # --- 28: batch_writer_columns_mixin ---
@@ -1615,5 +1581,3 @@ def test_raw_manifest_checks_schema_errors() -> None:
     )
     assert checks[0].reason == "manifest_parse_ok"
     assert [check.reason for check in checks[1:]] == ["e1", "e2"]
-
-

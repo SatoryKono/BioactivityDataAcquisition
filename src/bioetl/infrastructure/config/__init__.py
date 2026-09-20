@@ -21,6 +21,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from bioetl.infrastructure.config.composite_config_api import (
+        load_composite_config,
+    )
+    from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
+    from bioetl.infrastructure.config.pipeline_config_loader import (
+        PipelineConfigLoader,
+    )
+    from bioetl.infrastructure.config.source_config_loader import load_source_config
+    from bioetl.infrastructure.config.workflow_config_api import load_workflow_config
+
 # Re-export runtime settings/config mapping from _base.py.
 from bioetl.infrastructure.config._base import (
     ObservabilitySettings,
@@ -45,10 +56,8 @@ from bioetl.infrastructure.config.publication_type_classification_loader import 
 )
 
 
-def __getattr__(name: str) -> type:  # pragma: no cover
+def __getattr__(name: str) -> object:  # pragma: no cover
     """Lazy imports to keep the public config package cycle-safe."""
-    if TYPE_CHECKING:
-        raise AttributeError
     if name == "PipelineConfigLoader":
         from bioetl.infrastructure.config.pipeline_config_loader import (
             PipelineConfigLoader,

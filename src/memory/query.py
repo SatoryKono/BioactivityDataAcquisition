@@ -1,4 +1,9 @@
-"""Unified query facade for local memory-layer retrieval and graph passthrough."""
+"""Unified query facade for local memory-layer retrieval and graph passthrough.
+
+Ownership: file-index/RAG/timeline retrieval plus a graph passthrough to
+memory.graph.query (imported as graph_query). This module is the canonical
+query facade; memory.graph.query owns Neo4j-backed analytical queries.
+"""
 
 from __future__ import annotations
 
@@ -1693,7 +1698,6 @@ def main(argv: list[str] | None = None) -> int:
         print(str(exc), file=sys.stderr)
         return 1
     parser.error(f"unsupported command: {args.command}")
-    return 2
 
 
 if __name__ == "__main__":

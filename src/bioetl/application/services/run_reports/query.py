@@ -250,25 +250,6 @@ def _owner_directories(
     ]
 
 
-def find_pipeline_report_owner_names(
-    *, base: Path, run_id: str, store: RunReportStorePort
-) -> list[str]:
-    """Return sorted owner names holding ``run_id``'s pipeline report.
-
-    Discovery goes through the storage port (``iterdir``/``is_file``) so
-    driving adapters never traverse the filesystem directly (REQ-ARCH-001).
-    """
-    if not store.is_dir(str(base)):
-        return []
-    safe_run_id = _safe_segment(run_id)
-    owners = []
-    for owner_dir in _owner_directories(base, None, store=store):
-        candidate = owner_dir / safe_run_id / "pipeline-run-report.json"
-        if store.is_file(str(candidate)):
-            owners.append(owner_dir.name)
-    return sorted(owners)
-
-
 def prune_reports(
     *,
     kind: str,

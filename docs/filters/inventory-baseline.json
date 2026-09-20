@@ -1549,7 +1549,7 @@
       "symbol": "--silver-filter-only",
       "path": "docs/04-reference/cli.md",
       "occurrence_count": 3,
-      "first_line": 1027,
+      "first_line": 1029,
       "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
       "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
       "notes": ""
@@ -1626,7 +1626,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "docs/04-reference/cli.md",
       "occurrence_count": 3,
-      "first_line": 1222,
+      "first_line": 1224,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -2176,7 +2176,7 @@
       "symbol": "source_profile",
       "path": "src/bioetl/infrastructure/config/converters.py",
       "occurrence_count": 2,
-      "first_line": 209,
+      "first_line": 214,
       "role": "Versioned source-profile metadata",
       "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
       "notes": ""

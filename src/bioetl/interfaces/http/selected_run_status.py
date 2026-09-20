@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+from collections.abc import Mapping
 from pathlib import Path
 from typing import cast
 
@@ -11,9 +12,7 @@ from bioetl.application.observability.reason_aliases import (
     display_reason,
     display_reasons_text,
 )
-from bioetl.application.services.run_reports.query import (
-    find_pipeline_report_owner_names,
-)
+from bioetl.application.services.run_reports.query import list_pipeline_reports
 from bioetl.composition.observability_runtime import create_run_report_store
 from bioetl.domain.run_reports.selected_status import (
     DOMAINS,
@@ -135,13 +134,17 @@ def _selected_pipeline(pipeline: str, run_id: str, root: Path | None) -> str | N
         return next(iter(owners))
     if run_report_ops._safe_segment(run_id) != run_id:
         raise ValueError("invalid_run_id")
-    base = run_report_ops._effective_root(root).resolve() / "pipeline"
+    base = run_report_ops._effective_root(root)
+    entries = list_pipeline_reports(
+        pipeline_name=None,
+        limit=None,
+        root=base,
+        store=create_run_report_store(),
+    )
     matches = [
-        owner
-        for owner in find_pipeline_report_owner_names(
-            base=base, run_id=run_id, store=create_run_report_store()
-        )
-        if owners is None or owner in owners
+        entry.owner
+        for entry in entries
+        if entry.run_id == run_id and (owners is None or entry.owner in owners)
     ]
     if len(matches) > 1:
         raise ValueError("run_id_ambiguous")
@@ -174,7 +177,10 @@ def _snapshot_assessment(
         raise _RevisionMissingError("revision_missing")
     if json.loads(revision_path.read_text(encoding="utf-8")) != snapshot:
         raise ValueError("revision_corrupt")
-    return dict(snapshot["assessment"]), "AVAILABLE", revision
+    assessment = snapshot["assessment"]
+    if not isinstance(assessment, Mapping):
+        raise ValueError("assessment_invalid")
+    return dict(assessment), "AVAILABLE", revision
 
 
 def _load_report_assessment(

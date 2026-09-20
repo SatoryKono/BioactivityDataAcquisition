@@ -60,7 +60,7 @@ class ContentHashPolicyGroup:
     def active_policy(self) -> ContentHashVersionPolicy:
         """Return the active-version content hash policy."""
         policy = self.for_version(self.active_version)
-        if policy is None:  # pragma: no cover - guarded by __post_init__
+        if policy is None:  # pragma: no cover (#10534 review)
             raise ValueError("active_version must be present in hash policies")
         return policy
 

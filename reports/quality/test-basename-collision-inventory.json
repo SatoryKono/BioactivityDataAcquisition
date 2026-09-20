@@ -1,5 +1,5 @@
 {
-  "duplicate_basename_count": 78,
+  "duplicate_basename_count": 73,
   "duplicate_basenames": {
     "test_adapter.py": [
       "tests/integration/adapters/openalex/test_adapter.py",
@@ -151,35 +151,11 @@
       "tests/unit/composition/factories/test_init.py",
       "tests/unit/domain/behavior/activity_aggregator/test_init.py"
     ],
-    "test_issue_10469_lazy_facades.py": [
-      "tests/unit/composition/test_issue_10469_lazy_facades.py",
-      "tests/unit/test_issue_10469_lazy_facades.py"
-    ],
     "test_issue_10469_one_line_residuals.py": [
       "tests/unit/application/test_issue_10469_one_line_residuals.py",
       "tests/unit/composition/test_issue_10469_one_line_residuals.py",
       "tests/unit/infrastructure/test_issue_10469_one_line_residuals.py",
       "tests/unit/interfaces/test_issue_10469_one_line_residuals.py"
-    ],
-    "test_issue_10469_stream_a_l12.py": [
-      "tests/unit/application/test_issue_10469_stream_a_l12.py",
-      "tests/unit/composition/test_issue_10469_stream_a_l12.py",
-      "tests/unit/interfaces/test_issue_10469_stream_a_l12.py"
-    ],
-    "test_issue_10469_stream_a_l12_two.py": [
-      "tests/unit/application/test_issue_10469_stream_a_l12_two.py",
-      "tests/unit/composition/test_issue_10469_stream_a_l12_two.py",
-      "tests/unit/interfaces/test_issue_10469_stream_a_l12_two.py"
-    ],
-    "test_issue_10469_stream_a_lt75.py": [
-      "tests/unit/composition/test_issue_10469_stream_a_lt75.py",
-      "tests/unit/infrastructure/test_issue_10469_stream_a_lt75.py"
-    ],
-    "test_issue_10469_tail.py": [
-      "tests/unit/application/composite/test_issue_10469_tail.py",
-      "tests/unit/application/core/test_issue_10469_tail.py",
-      "tests/unit/domain/test_issue_10469_tail.py",
-      "tests/unit/infrastructure/test_issue_10469_tail.py"
     ],
     "test_issue_10469_two_line_residuals_three.py": [
       "tests/unit/composition/test_issue_10469_two_line_residuals_three.py",

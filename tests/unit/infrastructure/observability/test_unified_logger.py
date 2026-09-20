@@ -62,32 +62,47 @@ class TestUnifiedLogger:
     def test_unified_logger_info_with_stage(self) -> None:
         """Test that info() works with explicit stage parameter."""
         logger = UnifiedLogger(pipeline="test", run_id="abc-123")
+        logger._logger = MagicMock()
 
-        # Should work with stage
         logger.info("Test message", stage="extract")
+
+        logger._logger.info.assert_called_once_with("Test message", stage="extract")
 
     def test_unified_logger_info_defaults_stage_to_init(self) -> None:
         """Test that info() defaults stage to 'init' for LoggerPort compatibility."""
         logger = UnifiedLogger(pipeline="test", run_id="abc-123")
+        logger._logger = MagicMock()
 
-        # Without stage should not raise, stage defaults to "init"
         logger.info("Test message")
+
+        logger._logger.info.assert_called_once_with("Test message", stage="init")
 
     def test_unified_logger_info_ignores_event_kwarg_conflict(self) -> None:
         """Test that kwargs['event'] does not conflict with structlog signature."""
         logger = UnifiedLogger(pipeline="test", run_id="abc-123")
+        logger._logger = MagicMock()
 
         logger.info("pipeline_started", event="pipeline_started", stage="extract")
+
+        logger._logger.info.assert_called_once_with("pipeline_started", stage="extract")
 
     def test_unified_logger_error_with_stage_and_error_type(self) -> None:
         """Test that error() works with stage and error_type."""
         logger = UnifiedLogger(pipeline="test", run_id="abc-123")
+        logger._logger = MagicMock()
 
-        # Should work with both parameters
         logger.error("Error occurred", stage="transform", error_type="validation")
+
+        logger._logger.error.assert_called_once_with(
+            "Error occurred", stage="transform", error_type="validation"
+        )
 
         # Should also work without error_type (optional for LoggerPort compatibility)
         logger.error("Error occurred", stage="transform")
+
+        assert logger._logger.error.call_count == 2
+        _, kwargs = logger._logger.error.call_args
+        assert kwargs == {"stage": "transform"}
 
     def test_unified_logger_bind_preserves_context(self) -> None:
         """Test that bind() returns new logger with additional context."""
@@ -102,9 +117,16 @@ class TestUnifiedLogger:
     def test_unified_logger_with_optional_fields(self) -> None:
         """Test that optional fields can be passed."""
         logger = UnifiedLogger(pipeline="test", run_id="abc-123")
+        logger._logger = MagicMock()
 
-        # Should accept optional dataset and record_count
         logger.info(
+            "Fetched records",
+            stage="extract",
+            dataset="chembl_activity",
+            record_count=100,
+        )
+
+        logger._logger.info.assert_called_once_with(
             "Fetched records",
             stage="extract",
             dataset="chembl_activity",
@@ -119,46 +141,76 @@ class TestUnifiedLogger:
             actual_count=100,
         )
 
+        logger._logger.warning.assert_called_once_with(
+            "Low record count",
+            stage="extract",
+            dataset="chembl_activity",
+            expected_count=1000,
+            actual_count=100,
+        )
+
     def test_unified_logger_all_stages_accepted(self) -> None:
         """Test that all valid stage values are accepted."""
         logger = UnifiedLogger(pipeline="test", run_id="abc-123")
+        logger._logger = MagicMock()
 
         valid_stages = ["extract", "transform", "load", "validate", "init", "cleanup"]
 
         for stage in valid_stages:
-            # Should not raise
             logger.info(f"Testing stage {stage}", stage=stage)  # type: ignore[arg-type]
+
+        assert logger._logger.info.call_count == len(valid_stages)
+        seen_stages = [
+            call.kwargs.get("stage") for call in logger._logger.info.call_args_list
+        ]
+        assert seen_stages == valid_stages
 
     def test_unified_logger_debug_with_stage(self) -> None:
         """Test that debug() works with explicit stage parameter."""
         logger = UnifiedLogger(pipeline="test", run_id="abc-123")
+        logger._logger = MagicMock()
 
-        # Should work with stage
         logger.debug("Debug message", stage="extract")
+
+        logger._logger.debug.assert_called_once_with("Debug message", stage="extract")
 
     def test_unified_logger_debug_defaults_stage_to_init(self) -> None:
         """Test that debug() defaults stage to 'init' for LoggerPort compatibility."""
         logger = UnifiedLogger(pipeline="test", run_id="abc-123")
+        logger._logger = MagicMock()
 
-        # Without stage should not raise, defaults to "init"
         logger.debug("Debug message")
+
+        logger._logger.debug.assert_called_once_with("Debug message", stage="init")
 
     def test_unified_logger_exception_with_stage_and_error_type(self) -> None:
         """Test that exception() works with stage and error_type."""
         logger = UnifiedLogger(pipeline="test", run_id="abc-123")
+        logger._logger = MagicMock()
 
-        # Should work with both parameters
         logger.exception("Exception occurred", stage="load", error_type="io_error")
+
+        logger._logger.exception.assert_called_once_with(
+            "Exception occurred", stage="load", error_type="io_error"
+        )
 
         # Should also work without error_type (optional for LoggerPort compatibility)
         logger.exception("Exception occurred", stage="load")
 
+        assert logger._logger.exception.call_count == 2
+        _, kwargs = logger._logger.exception.call_args
+        assert kwargs == {"stage": "load"}
+
     def test_unified_logger_exception_defaults_stage_to_init(self) -> None:
         """Test that exception() defaults stage to 'init' for LoggerPort compatibility."""
         logger = UnifiedLogger(pipeline="test", run_id="abc-123")
+        logger._logger = MagicMock()
 
-        # Without stage should not raise, defaults to "init"
         logger.exception("Exception occurred")
+
+        logger._logger.exception.assert_called_once_with(
+            "Exception occurred", stage="init"
+        )
 
     def test_unified_logger_flattens_extra_context(self) -> None:
         """Nested extra payloads should be flattened into the top-level event."""

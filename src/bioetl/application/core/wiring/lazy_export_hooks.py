@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from importlib import import_module
-from typing import TYPE_CHECKING
 
 type LazyExportTarget = str | tuple[str, str]
 
@@ -22,10 +21,8 @@ def resolve_lazy_export(
     public_exports: Mapping[str, LazyExportTarget],
     name: str,
     namespace: dict[str, object],
-) -> object:  # pragma: no cover
+) -> object:
     """Resolve one lazily exported symbol for a wiring facade module."""
-    if TYPE_CHECKING:
-        raise AttributeError
     target = public_exports.get(name)
     if target is None:
         raise AttributeError(f"module {module_name!r} has no attribute {name!r}")
@@ -52,9 +49,7 @@ def install_lazy_export_facade(
     export_names = list(public_exports)
     namespace["__all__"] = export_names
 
-    def _module_getattr(name: str) -> object:  # pragma: no cover
-        if TYPE_CHECKING:
-            raise AttributeError
+    def _module_getattr(name: str) -> object:
         return resolve_lazy_export(
             module_name=module_name,
             public_exports=public_exports,
@@ -62,9 +57,7 @@ def install_lazy_export_facade(
             namespace=namespace,
         )
 
-    def _module_dir() -> list[str]:  # pragma: no cover
-        if TYPE_CHECKING:
-            raise AttributeError
+    def _module_dir() -> list[str]:
         return lazy_export_dir(namespace, export_names)
 
     namespace["__getattr__"] = _module_getattr

@@ -25,7 +25,7 @@ from bioetl.domain.behavior.value_validator_rules import (
     _percent_type_error,
     validate_percent_value,
 )
-from bioetl.domain.composite.config import MergeConfig
+from bioetl.domain.composite import MergeConfig
 from bioetl.domain.composite.field_groups_models import (
     FieldGroupDefinition,
     FieldGroupId,

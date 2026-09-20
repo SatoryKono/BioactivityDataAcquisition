@@ -103,9 +103,7 @@ class PipelineRunnerService:
     run_id_factory: Callable[[], RunID | UUID | str] = _missing_run_id_factory
     report_root: Path | None = None
     capture_control_plane: Callable[[str, str, datetime], None] | None = None
-    archive_control_plane: (
-        Callable[[RunResult, RunOptions | None], None] | None
-    ) = None
+    archive_control_plane: Callable[[RunResult, RunOptions | None], None] | None = None
 
     async def run(
         self,

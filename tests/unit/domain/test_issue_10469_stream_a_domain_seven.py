@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from uuid import UUID, uuid4
+from uuid import UUID
 
 import pytest
 
+from bioetl.domain.composite import ColumnGroupConfig, MergeConfig
 from bioetl.domain.composite.aggregation_filters import (
     _try_comparison_operator,
     _validate_aggregation_filter_condition,
 )
-from bioetl.domain.composite.config import ColumnGroupConfig, MergeConfig
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 from bioetl.domain.control_plane._run_ledger_runtime import (
     STAGE_STARTED_EVENT,
@@ -106,11 +106,11 @@ from bioetl.domain.types.gold_schema_policy import (
     GoldSchemaPolicyByVersion,
     GoldSchemaVersionPolicy,
 )
+from bioetl.domain.value_objects import Concentration, ConcentrationUnit
 from bioetl.domain.value_objects._publication_field_group_config import FieldGroupConfig
 from bioetl.domain.value_objects._run_context_create_support import (
     coerce_run_context_create_input,
 )
-from bioetl.domain.value_objects import Concentration, ConcentrationUnit
 from bioetl.domain.value_objects.compound_ids import AssayId, CompoundId
 from bioetl.domain.value_objects.dq_report_enums import DQCheckStatus
 from bioetl.domain.value_objects.dq_report_results_quality import CompletenessResult
@@ -162,7 +162,7 @@ def test_control_plane_payloads_and_normalization_helpers() -> None:
     assert spec["code_provenance"]["effective_config_artifact_id"] is None
     ledger = normalize_run_ledger_payload(
         {
-            "run_id": str(uuid4()),
+            "run_id": "12345678-1234-5678-1234-567812345678",
             "occurred_at": "2026-01-01T00:00:00+00:00",
             "metrics_snapshot": {"n": 1},
             "details": {"k": "v"},
@@ -297,7 +297,7 @@ def test_three_line_filters_merge_ledger_manifest_and_registry() -> None:
     entry = RunLedgerEntry(
         entry_id="e1",
         manifest_id="m",
-        run_id=RunID(uuid4()),
+        run_id=RunID(UUID("12345678-1234-5678-1234-567812345678")),
         event_type="  ",
         occurred_at=datetime(2026, 1, 1, tzinfo=UTC),
     )
@@ -309,7 +309,7 @@ def test_three_line_filters_merge_ledger_manifest_and_registry() -> None:
         RunLedgerEntry(
             entry_id="e2",
             manifest_id="m",
-            run_id=RunID(uuid4()),
+            run_id=RunID(UUID("12345678-1234-5678-1234-567812345678")),
             event_type=STAGE_STARTED_EVENT,
             occurred_at=datetime(2026, 1, 1, tzinfo=UTC),
             stage="nope",

@@ -49,10 +49,10 @@ from bioetl.infrastructure.adapters.pubchem._client_fetch_surface import (
     _PubChemClientFetchMixin,
 )
 from bioetl.infrastructure.adapters.pubchem import PubChemAdapter
-from bioetl.infrastructure.adapters.pubmed._fetch import PubMedFetchMixin
-from bioetl.infrastructure.adapters.pubmed.adapter_filter_fetch_mixin import (
-    PubMedAdapterFilterFetchMixin,
+from bioetl.infrastructure.adapters.pubmed import (
+    adapter_filter_fetch_mixin as _pubmed_filter_fetch,
 )
+from bioetl.infrastructure.adapters.pubmed._fetch import PubMedFetchMixin
 from bioetl.infrastructure.adapters.pubmed.xml_processor import PubMedXmlProcessor
 
 pytestmark = pytest.mark.unit
@@ -375,15 +375,9 @@ async def test_pubmed_fetch_parse_error_limit_and_filter_mixin(
     async def _records(*_args: object, **_kwargs: object):
         yield {"pmid": "9"}
 
-    monkeypatch.setattr(
-        "bioetl.infrastructure.adapters.pubmed.adapter_filter_fetch_mixin.fetch_filtered_records",
-        _records,
-    )
-    monkeypatch.setattr(
-        "bioetl.infrastructure.adapters.pubmed.adapter_filter_fetch_mixin.fetch_records",
-        _records,
-    )
-    mixin = PubMedAdapterFilterFetchMixin()
+    monkeypatch.setattr(_pubmed_filter_fetch, "fetch_filtered_records", _records)
+    monkeypatch.setattr(_pubmed_filter_fetch, "fetch_records", _records)
+    mixin = _pubmed_filter_fetch.PubMedAdapterFilterFetchMixin()
     filtered = [
         row async for row in mixin.fetch_filtered("publication", ["9"], "pmid", limit=1)
     ]

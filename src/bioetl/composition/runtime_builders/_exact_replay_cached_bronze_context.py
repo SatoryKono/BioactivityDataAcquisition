@@ -5,12 +5,10 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import is_dataclass, replace
 from pathlib import Path, PurePosixPath
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 from uuid import UUID
 
-from bioetl.composition.control_plane_paths import (
-    control_plane_root,
-)
+from bioetl.composition.control_plane_paths import control_plane_root
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import INPUT_SNAPSHOT_PUBLISHED_EVENT
@@ -54,24 +52,25 @@ def resolve_exact_replay_cached_bronze_context(
     )
 
 
-def bind_cached_bronze_context(
-    ctx: PipelineRunContext,
+def bind_cached_bronze_context[T](
+    ctx: T,
     cached_bronze: CachedBronzeContext,
-) -> PipelineRunContext:
+) -> T:
     """Attach cached Bronze inputs while preserving the concrete context type."""
     current = getattr(ctx, "cached_bronze", None)
     if current == cached_bronze:
         return ctx
     if is_dataclass(ctx):
-        return replace(ctx, cached_bronze=cached_bronze)
+        return cast("T", replace(cast(Any, ctx), cached_bronze=cached_bronze))  # Any:
     # Bind in place so callers retain the original context type and methods.
+    ctx_any = cast("Any", ctx)  # Any: mutable context host
     try:
-        object.__setattr__(ctx, "cached_bronze", cached_bronze)
+        object.__setattr__(ctx_any, "cached_bronze", cached_bronze)
         return ctx
     except (AttributeError, TypeError):
         pass
     try:
-        ctx.cached_bronze = cached_bronze
+        ctx_any.cached_bronze = cached_bronze
         return ctx
     except (AttributeError, TypeError) as exc:
         raise TypeError(

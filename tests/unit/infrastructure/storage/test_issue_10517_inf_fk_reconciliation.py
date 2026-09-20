@@ -13,6 +13,9 @@ from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
 from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation import (
     SilverForeignKeyReconciliationAdapter,
 )
+from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_reads import (
+    read_reference_rows,
+)
 from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support import (
     build_reconciliation_result,
 )
@@ -45,13 +48,11 @@ def _adapter() -> SilverForeignKeyReconciliationAdapter:
 @pytest.mark.asyncio
 async def test_read_reference_rows_wraps_missing_table() -> None:
     adapter = _adapter()
-
-    async def _missing(**_k: object) -> list[dict[str, object]]:
-        raise FileNotFoundError("missing")
-
-    adapter._read_rows = _missing  # type: ignore[method-assign]
+    adapter.silver_writer.read_silver = AsyncMock(
+        side_effect=FileNotFoundError("missing")
+    )
     with pytest.raises(ValueError, match="reference table not found"):
-        await adapter._read_reference_rows(_request())
+        await read_reference_rows(adapter, _request())
 
 
 @pytest.mark.asyncio

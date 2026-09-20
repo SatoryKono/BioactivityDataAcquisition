@@ -41,6 +41,11 @@ def build_execution_identity_payload_from_code_provenance(
     )
 
 
+def _drop_null_values(payload: dict[str, object]) -> dict[str, object]:
+    """Return payload without None values."""
+    return {key: value for key, value in payload.items() if value is not None}
+
+
 def build_contract_identity_anchor_fields(
     code_provenance: RunCodeProvenance,
     *,
@@ -64,11 +69,6 @@ def build_contract_identity_anchor_fields(
     if include_null_values:
         return payload
     return _drop_null_values(payload)
-
-
-def _drop_null_values(payload: dict[str, object]) -> dict[str, object]:
-    """Return payload entries with non-null values."""
-    return {key: value for key, value in payload.items() if value is not None}
 
 
 def build_code_provenance_dict(
@@ -97,52 +97,21 @@ def build_code_provenance_dict(
     if include_execution_anchors:
         payload["source_revision_state"] = code_provenance.source_revision_state
         payload["source_fingerprint"] = code_provenance.source_fingerprint
-    return {key: value for key, value in payload.items() if value is not None}
+    return _drop_null_values(payload)
 
 
-def fallback_code_provenance_state(
-    code_provenance: RunCodeProvenance,
-) -> dict[str, object]:
-    """Build operator-facing code-provenance state for identity-graph fallbacks."""
-    git_commit_present, dependency_lock_present, source_clean = _provenance_presence(
-        code_provenance
-    )
-    payload: dict[str, object] = {
-        "git_commit": code_provenance.git_commit,
-        "source_revision_state": code_provenance.source_revision_state,
-        "dependency_lock_state": ("present" if dependency_lock_present else "missing"),
-        "strict_code_provenance_ready": (
-            git_commit_present and source_clean and dependency_lock_present
-        ),
-        "strict_code_provenance_blockers": _strict_code_provenance_blockers(
-            git_commit_present, source_clean, dependency_lock_present
-        ),
-    }
-    if dependency_lock_present:
-        payload["dependency_lock_hash"] = code_provenance.dependency_lock_hash
-    return payload
+def _is_present_text(value: object) -> bool:
+    """Return True for non-blank string-like values."""
+    return bool(str(value or "").strip())
 
 
-def _provenance_presence(
-    code_provenance: RunCodeProvenance,
-) -> tuple[bool, bool, bool]:
-    """Return (git_commit, dependency_lock, source_clean) presence flags."""
-    git_commit_present = bool(str(code_provenance.git_commit or "").strip())
-    dependency_lock_present = bool(
-        str(code_provenance.dependency_lock_hash or "").strip()
-    )
-    source_clean = (
-        str(code_provenance.source_revision_state or "").strip().lower() == "clean"
-    )
-    return git_commit_present, dependency_lock_present, source_clean
-
-
-def _strict_code_provenance_blockers(
+def _provenance_blockers(
+    *,
     git_commit_present: bool,
-    source_clean: bool,
     dependency_lock_present: bool,
+    source_clean: bool,
 ) -> list[str]:
-    """Return blocker codes for missing strict code-provenance inputs."""
+    """List code-provenance blockers for identity-graph fallbacks."""
     return [
         blocker
         for blocker, enabled in (
@@ -152,6 +121,36 @@ def _strict_code_provenance_blockers(
         )
         if enabled
     ]
+
+
+def _is_clean_revision(state: object) -> bool:
+    """Return True for clean source revision states."""
+    return str(state or "").strip().lower() == "clean"
+
+
+def fallback_code_provenance_state(
+    code_provenance: RunCodeProvenance,
+) -> dict[str, object]:
+    """Build operator-facing code-provenance state for identity-graph fallbacks."""
+    git_commit_present = _is_present_text(code_provenance.git_commit)
+    dependency_lock_present = _is_present_text(code_provenance.dependency_lock_hash)
+    source_clean = _is_clean_revision(code_provenance.source_revision_state)
+    payload: dict[str, object] = {
+        "git_commit": code_provenance.git_commit,
+        "source_revision_state": code_provenance.source_revision_state,
+        "dependency_lock_state": ("present" if dependency_lock_present else "missing"),
+        "strict_code_provenance_ready": (
+            git_commit_present and source_clean and dependency_lock_present
+        ),
+        "strict_code_provenance_blockers": _provenance_blockers(
+            git_commit_present=git_commit_present,
+            dependency_lock_present=dependency_lock_present,
+            source_clean=source_clean,
+        ),
+    }
+    if dependency_lock_present:
+        payload["dependency_lock_hash"] = code_provenance.dependency_lock_hash
+    return payload
 
 
 def build_degraded_runtime_anchor_payload(

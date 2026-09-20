@@ -144,14 +144,21 @@ async def iter_batch_records(
                 await aclose_fn()
 
 
-async def yield_limited_batch_records(
+async def fetch_cached_bronze_records(
     reader: BronzeBatchReader,
     logger: LoggerPort,
     batches: list[str],
     *,
+    bronze_date: str | None,
     limit: int | None,
 ) -> AsyncIterator[JsonDict]:
-    """Yield batch records with limit/complete telemetry (Wave 4 seam)."""
+    """Yield cached Bronze records with start/limit/complete logging."""
+    logger.info(
+        "cached_bronze_fetch_start",
+        batch_count=len(batches),
+        date_filter=bronze_date,
+        limit=limit,
+    )
     count = 0
     async for record in iter_batch_records(reader, logger, batches):
         yield record

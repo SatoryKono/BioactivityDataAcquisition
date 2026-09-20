@@ -14,7 +14,7 @@ import json
 import os
 import queue
 import re
-import shutil
+import shutil as shutil  # re-exported via __all__
 import subprocess
 import sys
 import tempfile
@@ -34,11 +34,134 @@ from bioetl.infrastructure.config.contract_registry_loader import (
     load_contract_registry_payload,
 )
 
-type JsonScalar = str | int | float | bool | None
+# AUD-001 slice 1: extracted kernels, re-exported to preserve the public surface.
+from memory.graph.sync_pkg._core_cli import (
+    _normalization_operation_count as _normalization_operation_count,
+)
+from memory.graph.sync_pkg._core_cli import _parser as _parser
+from memory.graph.sync_pkg._core_cli import (
+    _run_apply_normalization_evidence_only as _run_apply_normalization_evidence_only,
+)
+from memory.graph.sync_pkg._core_cli import _run_snapshot_cli as _run_snapshot_cli
+from memory.graph.sync_pkg._core_cli import (
+    _snapshot_operation_count as _snapshot_operation_count,
+)
+from memory.graph.sync_pkg._core_cli import _validate_cli_args as _validate_cli_args
+from memory.graph.sync_pkg._core_cli import _write_json as _write_json
+from memory.graph.sync_pkg._core_cli import main as main
+from memory.graph.sync_pkg._core_convert import (
+    _DOCS_DRIFT_EXCLUDED_PREFIXES as _DOCS_DRIFT_EXCLUDED_PREFIXES,
+)
+from memory.graph.sync_pkg._core_convert import GITHUB_DIR as GITHUB_DIR
+from memory.graph.sync_pkg._core_convert import GITHUB_PATH_PREFIX as GITHUB_PATH_PREFIX
+from memory.graph.sync_pkg._core_convert import YAML_SUFFIX as YAML_SUFFIX
+from memory.graph.sync_pkg._core_convert import _as_iterable as _as_iterable
+from memory.graph.sync_pkg._core_convert import _as_mapping as _as_mapping
+from memory.graph.sync_pkg._core_convert import _as_string_list as _as_string_list
+from memory.graph.sync_pkg._core_convert import _coerce_float as _coerce_float
+from memory.graph.sync_pkg._core_convert import _coerce_int as _coerce_int
+from memory.graph.sync_pkg._core_convert import (
+    _git_cached_commit_ages as _git_cached_commit_ages,
+)
+from memory.graph.sync_pkg._core_convert import (
+    _is_claim_candidate as _is_claim_candidate,
+)
+from memory.graph.sync_pkg._core_convert import (
+    _is_dataframe_model_base as _is_dataframe_model_base,
+)
+from memory.graph.sync_pkg._core_convert import (
+    _is_doc_artifact_file as _is_doc_artifact_file,
+)
+from memory.graph.sync_pkg._core_convert import (
+    _is_excluded_docs_drift_prefix as _is_excluded_docs_drift_prefix,
+)
+from memory.graph.sync_pkg._core_convert import (
+    _is_ignored_repo_path as _is_ignored_repo_path,
+)
+from memory.graph.sync_pkg._core_convert import _is_protocol_base as _is_protocol_base
+from memory.graph.sync_pkg._core_convert import (
+    _module_dotted_name as _module_dotted_name,
+)
+from memory.graph.sync_pkg._core_convert import (
+    _normalize_cli_command_name as _normalize_cli_command_name,
+)
+from memory.graph.sync_pkg._core_convert import (
+    _normalize_docs_glob_candidate as _normalize_docs_glob_candidate,
+)
+from memory.graph.sync_pkg._core_convert import (
+    _normalize_env_value as _normalize_env_value,
+)
+from memory.graph.sync_pkg._core_convert import (
+    _normalize_repo_relative_path as _normalize_repo_relative_path,
+)
+from memory.graph.sync_pkg._core_convert import (
+    _normalize_workflow_matrix_axis_name as _normalize_workflow_matrix_axis_name,
+)
+from memory.graph.sync_pkg._core_convert import (
+    _normalized_alert_selector as _normalized_alert_selector,
+)
+from memory.graph.sync_pkg._core_convert import (
+    _normalized_text_list as _normalized_text_list,
+)
+from memory.graph.sync_pkg._core_convert import _optional_text as _optional_text
+from memory.graph.sync_pkg._core_convert import _read_text as _read_text
+from memory.graph.sync_pkg._core_convert import _rel_path as _rel_path
+from memory.graph.sync_pkg._core_convert import (
+    _resolve_git_executable as _resolve_git_executable,
+)
+from memory.graph.sync_pkg._core_convert import _resolve_repo_path as _resolve_repo_path
+from memory.graph.sync_pkg._core_models import (
+    AlertDashboardConfig as AlertDashboardConfig,
+)
+from memory.graph.sync_pkg._core_models import AlertRuleContext as AlertRuleContext
+from memory.graph.sync_pkg._core_models import (
+    AlertRuleGroupContext as AlertRuleGroupContext,
+)
+from memory.graph.sync_pkg._core_models import AlertRuleSettings as AlertRuleSettings
+from memory.graph.sync_pkg._core_models import (
+    AlertRunbookContext as AlertRunbookContext,
+)
+from memory.graph.sync_pkg._core_models import AlertTargetInputs as AlertTargetInputs
+from memory.graph.sync_pkg._core_models import AnalysisLabelSets as AnalysisLabelSets
+from memory.graph.sync_pkg._core_models import ClaimLineContext as ClaimLineContext
+from memory.graph.sync_pkg._core_models import (
+    ComplexityAnalysisConfig as ComplexityAnalysisConfig,
+)
+from memory.graph.sync_pkg._core_models import ComplexityMetrics as ComplexityMetrics
+from memory.graph.sync_pkg._core_models import (
+    ComplexityScoreInputs as ComplexityScoreInputs,
+)
+from memory.graph.sync_pkg._core_models import (
+    ContractMappingConfig as ContractMappingConfig,
+)
+from memory.graph.sync_pkg._core_models import (
+    ControlPlaneArtifactSpec as ControlPlaneArtifactSpec,
+)
+from memory.graph.sync_pkg._core_models import EntityScope as EntityScope
+from memory.graph.sync_pkg._core_models import (
+    GroupedStatementFailureContext as GroupedStatementFailureContext,
+)
+from memory.graph.sync_pkg._core_models import JsonScalar as JsonScalar
+from memory.graph.sync_pkg._core_models import JsonValue as JsonValue
+from memory.graph.sync_pkg._core_models import NodeKey as NodeKey
+from memory.graph.sync_pkg._core_models import (
+    PortSurfaceDescriptor as PortSurfaceDescriptor,
+)
+from memory.graph.sync_pkg._core_models import (
+    RetirementAnalysisConfig as RetirementAnalysisConfig,
+)
+from memory.graph.sync_pkg._core_models import (
+    RetirementScoreInputs as RetirementScoreInputs,
+)
+from memory.graph.sync_pkg._core_models import SchemaFieldSpec as SchemaFieldSpec
+from memory.graph.sync_pkg._core_models import SnapshotSelection as SnapshotSelection
+from memory.graph.sync_pkg._core_models import StorageSurfaceSpec as StorageSurfaceSpec
+from memory.graph.sync_pkg._core_models import SyncApplyOptions as SyncApplyOptions
+from memory.graph.sync_pkg._core_models import _ShapeNormalizer as _ShapeNormalizer
+
 # Graph assembly ingests heterogeneous YAML/JSON and AST-derived values. Keep
 # that pre-serialization boundary explicit; serializers below narrow values to
 # the scalar/list shapes accepted by Neo4j and JSON.
-type JsonValue = object
 type RelationSpec = tuple[str, frozenset[str], frozenset[str]]
 type ShardFilterSpec = tuple[frozenset[str], tuple[RelationSpec, ...]]
 # Relation / shard filter keys used by snapshot filtering helpers.
@@ -47,54 +170,6 @@ type RelationKey = tuple[NodeKey, str, NodeKey]
 type ShardFilter = ShardFilterSpec
 T = TypeVar("T")
 BIOETL_METRIC_PATTERN = re.compile(r"\bbioetl_[a-zA-Z0-9_:]+")
-
-
-def _as_mapping(value: object) -> dict[str, object]:
-    if isinstance(value, dict):
-        return {str(k): v for k, v in value.items()}
-    return {}
-
-
-def _as_iterable(value: object) -> list[object]:
-    if isinstance(value, list):
-        return list(value)
-    if isinstance(value, tuple):
-        return list(value)
-    if isinstance(value, set):
-        return list(value)
-    return []
-
-
-def _coerce_int(value: object, default: int = 0) -> int:
-    """Coerce mapping/JSON payload values to int for static checkers and runtime."""
-    if value is None:
-        return default
-    if isinstance(value, bool):
-        return int(value)
-    if isinstance(value, int):
-        return value
-    if isinstance(value, float):
-        return int(value)
-    if isinstance(value, str):
-        try:
-            return int(value)
-        except ValueError:
-            return default
-    return default
-
-
-def _coerce_float(value: object, default: float = 0.0) -> float:
-    if isinstance(value, bool):
-        return float(value)
-    if isinstance(value, int | float):
-        return float(value)
-    if isinstance(value, str):
-        try:
-            return float(value)
-        except ValueError:
-            return default
-    return default
-
 
 SRC_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_ROOT = Path(__file__).resolve().parents[4]
@@ -110,9 +185,6 @@ LEGACY_MEMORY_MAPPING_PATH = "configs/quality/neo4j_memory_mapping.yaml"
 ANALYSIS_SOURCE_READ_TIMEOUT_SECONDS = 2.0
 INIT_PY = "__init__.py"
 MAIN_PY = "__main__.py"
-YAML_SUFFIX = ".yaml"
-GITHUB_DIR = ".github"
-GITHUB_PATH_PREFIX = f"{GITHUB_DIR}/"
 GITHUB_WORKFLOWS_PREFIX = f"{GITHUB_DIR}/workflows/"
 PORTS_MODULE_PREFIX = "bioetl.domain.ports"
 PORTS_FACADE_SOURCE_PATH = f"src/bioetl/domain/ports/{INIT_PY}"
@@ -1159,12 +1231,6 @@ CURATED_SCRIPT_CLUSTERS: tuple[dict[str, object], ...] = (
 )
 
 
-@dataclass(frozen=True)
-class NodeKey:
-    label: str
-    name: str
-
-
 @dataclass
 class GraphNode:
     key: NodeKey
@@ -1290,7 +1356,7 @@ def _selected_shard_filters(
 def _allowed_analysis_relation_types(
     selection: SnapshotSelection,
 ) -> set[str]:
-    allowed = set()
+    allowed: set[str] = set()
     if selection.only_analysis_layer:
         allowed.update(ANALYSIS_RELATION_TYPES)
     if selection.only_retirement_layer:
@@ -1497,74 +1563,6 @@ def _include_shard_filtered_relation(
 
 
 @dataclass(frozen=True)
-class PortSurfaceDescriptor:
-    surface_name: str
-    class_name: str
-    module_name: str
-    source_path: str
-
-
-@dataclass(frozen=True)
-class EntityScope:
-    provider: str | None = None
-    entity: str | None = None
-    pipeline_name: str | None = None
-
-
-@dataclass(frozen=True)
-class SnapshotSelection:
-    only_labels: tuple[str, ...] = ()
-    only_analysis_layer: bool = False
-    only_retirement_layer: bool = False
-    only_complexity_layer: bool = False
-    only_storage_layer: bool = False
-    only_runtime_evidence_layer: bool = False
-    only_workflow_graph: bool = False
-    only_docs_drift: bool = False
-
-    def has_targeted_filters(self) -> bool:
-        return any(
-            (
-                self.only_analysis_layer,
-                self.only_retirement_layer,
-                self.only_complexity_layer,
-                self.only_storage_layer,
-                self.only_runtime_evidence_layer,
-                self.only_workflow_graph,
-                self.only_docs_drift,
-            )
-        )
-
-    def targeted_mode(self) -> bool:
-        return self.has_targeted_filters() or bool(self.only_labels)
-
-    def mode_description(self) -> str:
-        if self.only_complexity_layer:
-            return "complexity-layer targeted sync"
-        if self.only_retirement_layer:
-            return "retirement-layer targeted sync"
-        if self.only_analysis_layer:
-            return "analysis-layer targeted sync"
-        if self.only_storage_layer:
-            return "storage-layer targeted sync"
-        if self.only_runtime_evidence_layer:
-            return "runtime-evidence targeted sync"
-        if self.only_workflow_graph:
-            return "workflow-graph targeted sync"
-        if self.only_docs_drift:
-            return "docs-drift targeted sync"
-        return "targeted sync"
-
-
-@dataclass(frozen=True)
-class SyncApplyOptions:
-    batch_size: int
-    prune_stale: bool = False
-    full_reset_managed_wave: bool = False
-    prune_legacy_unmanaged: bool = False
-
-
-@dataclass(frozen=True)
 class WorkflowContext:
     workflow_name: str
     title: str
@@ -1608,64 +1606,6 @@ class CompositePipelineContext:
 
 
 @dataclass(frozen=True)
-class SchemaFieldSpec:
-    contract_ref: str | None = None
-    scope: EntityScope = EntityScope()
-    required_in_quality: bool | None = None
-    validation_types: list[str] | None = None
-    drift_classification: str | None = None
-    source_storage_refs: list[str] | None = None
-
-
-@dataclass(frozen=True)
-class StorageSurfaceSpec:
-    ref: str
-    summary: str
-    layer: str
-    today: str
-    storage_kind: str
-    scope: EntityScope = EntityScope()
-    format_name: str | None = None
-    mode: str | None = None
-    enabled: bool | None = None
-    retention_days: int | None = None
-    config_version: str | None = None
-    quality_version: str | None = None
-    partition_by: list[str] | None = None
-    sort_by: list[str] | None = None
-    on_schema_mismatch: str | None = None
-    versioning_mode: str | None = None
-    version_column: str | None = None
-    current_flag_column: str | None = None
-    valid_from_column: str | None = None
-    valid_to_column: str | None = None
-    merge_strategy: str | None = None
-    semantic_properties: dict[str, JsonValue] = field(default_factory=dict)
-
-
-@dataclass(frozen=True)
-class ControlPlaneArtifactSpec:
-    artifact_name: str
-    summary: str
-    today: str
-    artifact_family: str
-    artifact_kind: str
-    storage_ref: str
-    artifact_format: str | None = None
-    key_template: str | None = None
-
-
-@dataclass(frozen=True)
-class GroupedStatementFailureContext:
-    kind: str
-    group_name: str
-    batch_index: int
-    batch_count: int
-    statement_index: int
-    statement_count: int
-
-
-@dataclass(frozen=True)
 class AlertTargetContext:
     snapshot: GraphSnapshot
     pipeline_nodes: dict[str, NodeKey]
@@ -1690,19 +1630,6 @@ class CompositeOutputConfig:
     group_fields: list[tuple[str, str]]
     source_storage_refs: list[str]
     schema_fields_by_storage: dict[str, dict[str, NodeKey]]
-
-
-@dataclass(frozen=True)
-class ContractMappingConfig:
-    source_prefixes: tuple[str, ...]
-    control_plane_modules: list[str]
-    control_plane_runtime_modules: list[str]
-    lineage_modules: list[str]
-    lineage_runtime_modules: list[str]
-    control_plane_docs: list[str]
-    lineage_docs: list[str]
-    control_plane_anchor_fields: list[str]
-    lineage_anchor_fields: list[str]
 
 
 @dataclass(frozen=True)
@@ -1764,29 +1691,6 @@ class ClassDescriptor:
 
 
 @dataclass(frozen=True)
-class RetirementAnalysisConfig:
-    enabled: bool
-    family_names: tuple[str, ...]
-    current_cycle_age_days: int
-    stale_age_days: int
-    dead_score_threshold: int
-    wip_markers: tuple[str, ...]
-    deprecation_markers: tuple[str, ...]
-
-
-@dataclass(frozen=True)
-class ComplexityAnalysisConfig:
-    enabled: bool
-    family_names: tuple[str, ...]
-    complexity_score_threshold: int
-    removable_score_threshold: int
-    indirection_markers: tuple[str, ...]
-    stateful_markers: tuple[str, ...]
-    deprecation_markers: tuple[str, ...]
-    blocker_anchor_limit: int
-
-
-@dataclass(frozen=True)
 class SurfaceRelationIndexes:
     incoming: dict[NodeKey, list[GraphRelation]]
     outgoing: dict[NodeKey, list[GraphRelation]]
@@ -1801,28 +1705,9 @@ class AnalysisAnchors:
     tests: tuple[NodeKey, ...]
 
 
-@dataclass(frozen=True)
-class ComplexityMetrics:
-    branch_count: int
-    nesting_depth: int
-    call_count: int
-    helper_call_count: int
-    abstraction_fanout: int
-    api_surface_to_logic_ratio: float
-
-
 # Canonical names used by complexity/retirement analysis surfaces (PD-C01).
 type SurfaceAnchorSets = AnalysisAnchors
 type SurfaceComplexityMetrics = ComplexityMetrics
-
-
-@dataclass(frozen=True)
-class AnalysisLabelSets:
-    ignored_relation_types: set[str]
-    runtime_labels: set[str]
-    config_labels: set[str]
-    doc_labels: set[str]
-    test_labels: set[str]
 
 
 @dataclass
@@ -1843,29 +1728,6 @@ class ComplexityAnalysisContext:
     text_cache: dict[str, str] = field(default_factory=dict)
     family_cache: dict[str, DuplicateFamilyConfig | None] = field(default_factory=dict)
     family_names: set[str] = field(default_factory=set)
-
-
-@dataclass(frozen=True)
-class RetirementScoreInputs:
-    runtime_count: int
-    config_count: int
-    doc_count: int
-    test_count: int
-    recent_age_days: int | None
-    wip_markers: list[str]
-    deprecation_markers: list[str]
-
-
-@dataclass(frozen=True)
-class ComplexityScoreInputs:
-    indirection_markers: tuple[str, ...]
-    stateful_markers: tuple[str, ...]
-    deprecation_markers: tuple[str, ...]
-    runtime_count: int
-    config_count: int
-    doc_count: int
-    test_count: int
-    blocked_by_current_cycle: bool
 
 
 def _build_surface_relation_indexes(snapshot: GraphSnapshot) -> SurfaceRelationIndexes:
@@ -2275,19 +2137,6 @@ def _link_existing_targets(
             snapshot.add_relation(source, relation_type, target, provenance=provenance)
 
 
-def _parser() -> argparse.ArgumentParser:
-    from memory.graph.sync_pkg import cli as _cli
-
-    return _cli._parser()
-
-
-def _read_text(path: Path) -> str:
-    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
-
-    path = resolve_output_path(path, root=REPO_ROOT)
-    return path.read_text(encoding="utf-8")
-
-
 def _read_yaml(path: Path) -> dict[str, object]:
     loaded = yaml.safe_load(_read_text(path))
     if isinstance(loaded, dict):
@@ -2532,21 +2381,6 @@ def _complexity_analysis_config(
     )
 
 
-def _as_string_list(value: object) -> list[str]:
-    if not isinstance(value, (list, tuple)):
-        return []
-    return [str(item) for item in value if isinstance(item, str)]
-
-
-def _rel_path(root: Path, path: Path) -> str:
-    return path.relative_to(root).as_posix()
-
-
-def _module_dotted_name(relative_path: str) -> str:
-    without_suffix = relative_path.removesuffix(".py")
-    return without_suffix.replace("/", ".")
-
-
 def _python_surface_name(relative_path: str) -> str:
     init_suffix = f"/{INIT_PY}"
     if relative_path.endswith(init_suffix):
@@ -2554,14 +2388,6 @@ def _python_surface_name(relative_path: str) -> str:
     else:
         dotted = _module_dotted_name(relative_path)
     return dotted.removeprefix("src.")
-
-
-def _is_ignored_repo_path(path: Path) -> bool:
-    return "__pycache__" in path.parts
-
-
-def _normalize_repo_relative_path(relative_path: str) -> str:
-    return relative_path.replace("\\", "/").strip().strip("/")
 
 
 def _coerce_repo_relative_path(root: Path, raw_path: str) -> str:
@@ -2640,19 +2466,6 @@ def _supplemental_directory_hubs_for_node(
     return ()
 
 
-def _resolve_repo_path(root: Path, base_path: Path, raw_path: str) -> Path | None:
-    candidate = Path(raw_path)
-    if not candidate.is_absolute():
-        candidate = (base_path.parent / candidate).resolve()
-    try:
-        candidate.relative_to(root.resolve())
-    except ValueError:
-        return None
-    if candidate.exists():
-        return candidate
-    return None
-
-
 def _git_last_commit_age_days(
     root: Path,
     relative_path: str,
@@ -2727,13 +2540,6 @@ def _git_last_commit_age_days_bulk(
         cache.update(chunk_results)
         resolved.update(chunk_results)
     return {path: resolved.get(path) for path in unique_paths}
-
-
-def _git_cached_commit_ages(
-    unique_paths: list[str],
-    cache: dict[str, int | None],
-) -> dict[str, int | None]:
-    return {path: cache[path] for path in unique_paths if path in cache}
 
 
 def _run_git_history_subprocess(
@@ -2857,22 +2663,6 @@ def _parse_git_chunk_age_output(
     return chunk_results
 
 
-def _resolve_git_executable() -> str:
-    git_path = shutil.which("git")
-    if git_path:
-        return git_path
-    windows_candidates = (
-        "/mnt/c/Program Files/Git/cmd/git.exe",
-        "/mnt/c/Program Files/Git/bin/git.exe",
-        r"C:\Program Files\Git\cmd\git.exe",
-        r"C:\Program Files\Git\bin\git.exe",
-    )
-    for candidate in windows_candidates:
-        if Path(candidate).exists():
-            return candidate
-    return "git"
-
-
 def _path_contains_any_token(path: Path, tokens: list[str]) -> bool:
     normalized = _read_text(path).lower()
     return any(token.lower() in normalized for token in tokens)
@@ -2970,40 +2760,6 @@ def _signature_hash(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
     encoded = json.dumps(payload, sort_keys=True)
     # Deterministic structural fingerprint used for clustering, not for secrets.
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
-
-
-class _ShapeNormalizer(ast.NodeTransformer):
-    def visit_arg(self, node: ast.arg) -> ast.arg:
-        replacement = ast.arg(arg="ARG", annotation=None, type_comment=None)
-        replacement.lineno = node.lineno
-        replacement.col_offset = node.col_offset
-        replacement.end_lineno = node.end_lineno
-        replacement.end_col_offset = node.end_col_offset
-        return replacement
-
-    def visit_Name(self, node: ast.Name) -> ast.AST:
-        return ast.copy_location(ast.Name(id="VAR", ctx=node.ctx), node)
-
-    def visit_Attribute(self, node: ast.Attribute) -> ast.AST:
-        value = self.visit(node.value)
-        return ast.copy_location(
-            ast.Attribute(value=value, attr="ATTR", ctx=node.ctx), node
-        )
-
-    def visit_Constant(self, node: ast.Constant) -> ast.AST:
-        value = node.value
-        if value is None or isinstance(value, bool):
-            return node
-        replacement: JsonScalar
-        if isinstance(value, str):
-            replacement = "STR"
-        elif isinstance(value, (int, float, complex)):
-            replacement = 0
-        elif isinstance(value, bytes):
-            replacement = "BYTES"
-        else:
-            replacement = "CONST"
-        return ast.copy_location(ast.Constant(value=replacement), node)
 
 
 def _normalized_callable_hash(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
@@ -3137,26 +2893,6 @@ def _family_matches_relative_path(
 
 def _family_root_priority(family: DuplicateFamilyConfig) -> int:
     return max(len(root) for root in family.roots)
-
-
-def _is_protocol_base(node: ast.expr) -> bool:
-    if isinstance(node, ast.Name):
-        return node.id == "Protocol"
-    if isinstance(node, ast.Attribute):
-        return node.attr == "Protocol"
-    if isinstance(node, ast.Subscript):
-        return _is_protocol_base(node.value)
-    return False
-
-
-def _is_dataframe_model_base(node: ast.expr) -> bool:
-    if isinstance(node, ast.Name):
-        return node.id == "DataFrameModel"
-    if isinstance(node, ast.Attribute):
-        return node.attr == "DataFrameModel"
-    if isinstance(node, ast.Subscript):
-        return _is_dataframe_model_base(node.value)
-    return False
 
 
 def _protocol_class_names(path: Path) -> list[str]:
@@ -3454,14 +3190,6 @@ _RUNTIME_DIMENSIONS = (
 )
 
 
-@dataclass(frozen=True)
-class AlertRuleSettings:
-    pipeline_mode: str
-    pipeline_kind: str
-    provider_mode: str
-    contract_mode: str
-
-
 def _alert_rule_settings(
     memory_mapping: dict[str, object],
     *,
@@ -3715,10 +3443,6 @@ def _raw_alert_targets(
     return pipeline_targets, provider_targets, contract_targets
 
 
-def _normalized_alert_selector(group_name: str, expr: str) -> str:
-    return f"{group_name} {expr}".lower()
-
-
 def _sorted_alert_targets(
     pipeline_targets: list[NodeKey],
     provider_targets: list[NodeKey],
@@ -3779,13 +3503,6 @@ def _sorted_node_keys(nodes: Iterable[NodeKey]) -> list[NodeKey]:
     return sorted(nodes, key=lambda node: node.name)
 
 
-@dataclass(frozen=True)
-class AlertDashboardConfig:
-    alert_rule: dict[str, object]
-    dashboard_fallbacks: dict[str, object]
-    fallback_groups: dict[str, object]
-
-
 def _alert_dashboard_config(
     memory_mapping: dict[str, object],
     *,
@@ -3843,10 +3560,6 @@ def _metric_dashboard_targets(
         for dashboard, dashboard_metric_names in dashboard_metrics.items()
         if metrics & dashboard_metric_names
     }
-
-
-def _normalize_env_value(raw: str) -> str:
-    return raw.strip().strip('"').strip("'")
 
 
 def _read_env_file(path: Path) -> dict[str, str]:
@@ -5415,14 +5128,6 @@ def _impact_analysis_context(
     return port_nodes, adapter_nodes, contract_nodes, pipeline_nodes
 
 
-def _is_doc_artifact_file(relative_file: str, file_extension: str) -> bool:
-    return file_extension in {".md", ".yml", YAML_SUFFIX} and (
-        relative_file in {"README.md", "mkdocs.yml"}
-        or relative_file.startswith("docs/")
-        or relative_file.startswith(GITHUB_PATH_PREFIX)
-    )
-
-
 def _repo_zone_for_path(
     source_path_value: str, zone_roots: dict[str, tuple[str, ...]]
 ) -> str | None:
@@ -6105,20 +5810,6 @@ def _storage_ref_from_output_path(raw_path: str) -> str:
     normalized = raw_path.strip().strip("/")
     if normalized.startswith("data/output/"):
         normalized = normalized.removeprefix("data/output/")
-    return normalized
-
-
-def _optional_text(value: object) -> str | None:
-    if value is None:
-        return None
-    text = str(value).strip()
-    return text or None
-
-
-def _normalized_text_list(value: object) -> list[str] | None:
-    if not isinstance(value, list | tuple):
-        return None
-    normalized = [str(item).strip() for item in value if str(item).strip()]
     return normalized
 
 
@@ -8407,13 +8098,6 @@ def _workflow_matrix_axes(job_payload: dict[str, object]) -> tuple[str, ...]:
     )
 
 
-def _normalize_workflow_matrix_axis_name(axis_name: str) -> str:
-    """Stabilize workflow matrix axis names across workflow refactors."""
-    if axis_name == "test-group":
-        return "suite"
-    return axis_name
-
-
 def _workflow_matrix_variants(
     job_payload: dict[str, object],
 ) -> tuple[dict[str, str], ...]:
@@ -8611,28 +8295,6 @@ def _workflow_artifact_specs(
             else f"{job_id}-artifact"
         )
     return ((f"{workflow_name}::{artifact_name}", relation_type, artifact_path),)
-
-
-def _normalize_cli_command_name(raw_command: str) -> str | None:
-    lowered = raw_command.lower()
-    if " -m bioetl " in lowered:
-        match = re.search(r"-m\s+bioetl\s+([\w-]+)", raw_command)
-        if match:
-            return f"bioetl {match.group(1)}"
-        return "bioetl"
-    script_module_match = re.search(
-        r"-m\s+scripts\.(\w+)(?:\s+([\w.-]+))?", raw_command
-    )
-    if script_module_match:
-        module_name = script_module_match.group(1)
-        subcommand = script_module_match.group(2)
-        if subcommand and not subcommand.startswith("-"):
-            return f"scripts.{module_name} {subcommand}"
-        return f"scripts.{module_name}"
-    script_path_match = re.search(r"scripts/(\w+)/([\w.-]+)", raw_command)
-    if script_path_match:
-        return f"scripts.{script_path_match.group(1)} {script_path_match.group(2)}"
-    return None
 
 
 def _extract_cli_options(raw_command: str) -> tuple[str, ...]:
@@ -9508,16 +9170,6 @@ _DOCS_REFERENCE_ALLOWED_PREFIXES = (
 
 _DOC_LIKE_LABELS = {"doc_source_surface", "doc_artifact", "policy_surface"}
 _DOCS_DRIFT_TEXT_EXTENSIONS = {".md", ".rst", ".txt", YAML_SUFFIX, ".yml"}
-_DOCS_DRIFT_EXCLUDED_PREFIXES = (
-    ".github/ISSUES",
-    ".github/ISSUE_TEMPLATE",
-    ".github/actions",
-    ".github/workflows",
-    "docs/00-project/ai",
-    "docs/02-architecture/diagrams/descriptions",
-    "docs/reports/evidence",
-    "docs/reports",
-)
 
 
 def _is_docs_drift_source_candidate(node: GraphNode) -> bool:
@@ -9536,16 +9188,6 @@ def _is_docs_drift_source_candidate(node: GraphNode) -> bool:
 
 def _trim_docs_reference_candidate(raw_ref: str) -> str:
     return raw_ref.strip().strip("`").rstrip(".,:;)]}")
-
-
-def _normalize_docs_glob_candidate(candidate: str) -> str:
-    if candidate.endswith("/**"):
-        return candidate[: -len("/**")]
-    if "/*." in candidate:
-        return candidate.rsplit("/", 1)[0]
-    if candidate.endswith("/*"):
-        return candidate[: -len("/*")]
-    return candidate
 
 
 def _heading_anchor_slug(title: str) -> str:
@@ -9883,14 +9525,6 @@ def _docs_command_pattern() -> re.Pattern[str]:
     )
 
 
-def _is_excluded_docs_drift_prefix(normalized_source_path: str) -> bool:
-    return any(
-        normalized_source_path == prefix
-        or normalized_source_path.startswith(f"{prefix}/")
-        for prefix in _DOCS_DRIFT_EXCLUDED_PREFIXES
-    )
-
-
 def _normalize_docs_drift_source_path(
     root: Path,
     source_path: object,
@@ -10048,16 +9682,6 @@ def _add_doc_describes_relation(
     )
 
 
-def _is_claim_candidate(stripped_line: str) -> bool:
-    if not stripped_line or len(stripped_line) < 12:
-        return False
-    lowered = stripped_line.lower()
-    return any(
-        token in lowered
-        for token in ("must", "never", "must not", "should not", "required")
-    )
-
-
 def _add_doc_claim_edges(
     snapshot: GraphSnapshot,
     source_node: NodeKey,
@@ -10116,12 +9740,6 @@ def _add_doc_claim_edges(
                 section_anchor=section_anchor,
                 line_number=line_number,
             )
-
-
-@dataclass(frozen=True)
-class ClaimLineContext:
-    stripped: str
-    clean_text: str
 
 
 def _claim_line_context(raw_line: str) -> ClaimLineContext | None:
@@ -14353,12 +13971,6 @@ def _alert_group_rules(group: dict[str, object]) -> tuple[dict[str, object], ...
     return tuple(rule for rule in rules if isinstance(rule, dict))
 
 
-@dataclass(frozen=True)
-class AlertRuleGroupContext:
-    group_name: str
-    rules: tuple[dict[str, object], ...]
-
-
 def _alert_rule_group_context(
     group: dict[str, object],
     rules_path: Path,
@@ -14447,13 +14059,6 @@ def _add_alert_surface_from_rule(
     )
 
 
-@dataclass(frozen=True)
-class AlertRuleContext:
-    alert_name: str
-    annotations: dict[str, object]
-    labels: dict[str, object]
-
-
 def _alert_rule_context(rule: dict[str, object]) -> AlertRuleContext | None:
     alert_name = rule.get("alert")
     if not isinstance(alert_name, str):
@@ -14494,12 +14099,6 @@ def _link_alert_targets(
         dashboard_metrics,
         memory_mapping,
     )
-
-
-@dataclass(frozen=True)
-class AlertTargetInputs:
-    expr: str
-    dimensions: set[str]
 
 
 @dataclass(frozen=True)
@@ -14640,11 +14239,6 @@ def _link_alert_runbook(
         return
     doc = _add_alert_runbook_doc(snapshot, alert_name, runbook_context.runbook, today)
     snapshot.add_relation(alert, "DESCRIBED_IN", doc, provenance="impact_alerts")
-
-
-@dataclass(frozen=True)
-class AlertRunbookContext:
-    runbook: str
 
 
 def _alert_runbook_context(
@@ -15067,6 +14661,10 @@ class Neo4jHttpClient:
                 )
             )
         body = json.loads(raw)
+        if not isinstance(body, dict):
+            raise RuntimeError(
+                f"{self._context_prefix(context)}Neo4j response is not a JSON object"
+            )
         errors = body.get("errors", [])
         if errors:
             prefix = self._context_prefix(context)
@@ -15082,7 +14680,8 @@ class Neo4jHttpClient:
         )
         response_cm = request.urlopen(req, timeout=60)
         with response_cm as response:
-            return response.read().decode("utf-8")
+            raw_body: bytes = response.read()
+            return raw_body.decode("utf-8")
 
     def _handle_http_error(
         self,
@@ -16537,14 +16136,6 @@ def _write_export(path: Path, snapshot: GraphSnapshot) -> None:
     path.write_text(json.dumps(snapshot.to_dict(), indent=2) + "\n", encoding="utf-8")
 
 
-def _write_json(path: Path, payload: JsonValue) -> None:
-    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
-
-    path = resolve_output_path(path, root=REPO_ROOT)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-
-
 def snapshot_orphans(snapshot: GraphSnapshot) -> list[NodeKey]:
     degrees = dict.fromkeys(snapshot.nodes, 0)
     for relation in snapshot.relations.values():
@@ -16615,6 +16206,16 @@ def _relation_requirement_keys(
     }
 
 
+def _bind_support_predicate(
+    predicate: Callable[[_SnapshotRelationIndex, NodeKey], bool],
+    relation_index: _SnapshotRelationIndex,
+) -> Callable[[NodeKey], bool]:
+    def _is_supported(key: NodeKey) -> bool:
+        return predicate(relation_index, key)
+
+    return _is_supported
+
+
 def _append_snapshot_support_issues(
     issues: list[str],
     snapshot: GraphSnapshot,
@@ -16626,7 +16227,7 @@ def _append_snapshot_support_issues(
             issues,
             prefix,
             _missing_node_support_names(
-                snapshot, label, lambda key, fn=predicate: fn(relation_index, key)
+                snapshot, label, _bind_support_predicate(predicate, relation_index)
             ),
         )
 
@@ -18077,14 +17678,6 @@ def _selection_from_args(args: argparse.Namespace) -> SnapshotSelection:
     return _cli._selection_from_args(args)
 
 
-def _validate_cli_args(
-    parser: argparse.ArgumentParser, args: argparse.Namespace
-) -> None:
-    from memory.graph.sync_pkg import cli as _cli
-
-    _cli._validate_cli_args(parser, args)
-
-
 def _print_snapshot_stats(snapshot: GraphSnapshot) -> None:
     from memory.graph.sync_pkg import cli as _cli
 
@@ -18140,40 +17733,7 @@ def _write_report_if_requested(
     )
 
 
-def _normalization_operation_count(summary: dict[str, JsonValue]) -> int:
-    from memory.graph.sync_pkg import cli as _cli
-
-    return _cli._normalization_operation_count(summary)
-
-
-def _snapshot_operation_count(args: argparse.Namespace) -> int:
-    from memory.graph.sync_pkg import cli as _cli
-
-    return _cli._snapshot_operation_count(args)
-
-
-def _run_apply_normalization_evidence_only(args: argparse.Namespace) -> int:
-    """Execute normalization-evidence-only mode and return the CLI exit code."""
-    from memory.graph.sync_pkg import cli as _cli
-
-    return _cli._run_apply_normalization_evidence_only(args)
-
-
-def _run_snapshot_cli(args: argparse.Namespace) -> int:
-    """Execute the standard snapshot/sync CLI flow and return the exit code."""
-    from memory.graph.sync_pkg import cli as _cli
-
-    return _cli._run_snapshot_cli(args)
-
-
-def main(argv: list[str] | None = None) -> int:
-    from memory.graph.sync_pkg import cli as _cli
-
-    return _cli.main(argv)
-
-
 __all__ = [name for name in globals() if not name.startswith("__")]
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

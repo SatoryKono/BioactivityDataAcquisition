@@ -65,36 +65,35 @@ class _ObserverHealthEmissionMixin:
             metric_value,
             {"component": component},
         )
-        self._emit_provider_status_gauge(
+        self._emit_provider_health_gauge(
             provider=provider,
             metric_value=metric_value,
             fallback_reason=fallback_reason,
         )
-        if health_check_mode is not None:
-            self._metrics.set_gauge(
-                "bioetl_health_check_mode_status",
-                metric_value,
-                {"component": component, "mode": health_check_mode},
-            )
-        observed_latency_ms = latency_ms if latency_ms is not None else duration_ms
-        self._emit_latency_histograms(
-            provider=provider,
-            observed_latency_ms=observed_latency_ms,
+        self._emit_mode_health_gauge(
             health_check_mode=health_check_mode,
-        )
-        self._emit_probe_fallback_counter(
+            metric_value=metric_value,
             component=component,
+        )
+        self._observe_health_latency(
+            provider=provider,
+            health_check_mode=health_check_mode,
+            latency_ms=latency_ms,
+            duration_ms=duration_ms,
+        )
+        self._increment_probe_fallback_counter(
             fallback_reason=fallback_reason,
+            component=component,
         )
 
-    def _emit_provider_status_gauge(
+    def _emit_provider_health_gauge(
         self,
         *,
         provider: str | None,
         metric_value: float,
         fallback_reason: str | None,
     ) -> None:
-        """Emit the provider health gauge unless the probe was not exercised."""
+        """Emit the provider health gauge unless the fallback is excluded."""
         if (
             provider is not None
             and fallback_reason != "cached_bronze_api_not_exercised"
@@ -105,36 +104,52 @@ class _ObserverHealthEmissionMixin:
                 {"provider": provider},
             )
 
-    def _emit_latency_histograms(
+    def _emit_mode_health_gauge(
+        self,
+        *,
+        health_check_mode: str | None,
+        metric_value: float,
+        component: str,
+    ) -> None:
+        """Emit the health-check mode gauge when a mode is reported."""
+        if health_check_mode is not None:
+            self._metrics.set_gauge(
+                "bioetl_health_check_mode_status",
+                metric_value,
+                {"component": component, "mode": health_check_mode},
+            )
+
+    def _observe_health_latency(
         self,
         *,
         provider: str | None,
-        observed_latency_ms: float | None,
         health_check_mode: str | None,
+        latency_ms: float | None,
+        duration_ms: float | None,
     ) -> None:
-        """Emit latency histograms for provider probes with timing data."""
-        if provider is None or observed_latency_ms is None:
-            return
-        latency_seconds = observed_latency_ms / 1000.0
-        self._metrics.observe_histogram(
-            "bioetl_health_check_latency_seconds",
-            latency_seconds,
-            {"provider": provider},
-        )
-        if health_check_mode is not None:
+        """Observe health-check latency histograms when inputs allow."""
+        observed_latency_ms = latency_ms if latency_ms is not None else duration_ms
+        if provider is not None and observed_latency_ms is not None:
+            latency_seconds = observed_latency_ms / 1000.0
             self._metrics.observe_histogram(
-                "bioetl_health_check_mode_latency_seconds",
+                "bioetl_health_check_latency_seconds",
                 latency_seconds,
-                {"provider": provider, "mode": health_check_mode},
+                {"provider": provider},
             )
+            if health_check_mode is not None:
+                self._metrics.observe_histogram(
+                    "bioetl_health_check_mode_latency_seconds",
+                    latency_seconds,
+                    {"provider": provider, "mode": health_check_mode},
+                )
 
-    def _emit_probe_fallback_counter(
+    def _increment_probe_fallback_counter(
         self,
         *,
-        component: str,
         fallback_reason: str | None,
+        component: str,
     ) -> None:
-        """Count probe-mode fallbacks, skipping non-exercised cached probes."""
+        """Count probe-mode fallbacks excluding the cached-bronze exemption."""
         if (
             fallback_reason is not None
             and fallback_reason != "cached_bronze_api_not_exercised"

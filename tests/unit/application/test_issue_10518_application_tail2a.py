@@ -221,7 +221,7 @@ def test_coalesce_missing_prefers_current_value() -> None:
     assert _coalesce_missing(None, "default") == "default"
 
 
-def test_record_manifest_created_rejects_run_id_mismatch() -> None:
+def test_record_manifest_created_rejects_run_id_mismatch_core_events() -> None:
     from bioetl.application.services.control_plane.ledger import core_events
 
     service = _run_ledger_service(_run_id("core-a"))
@@ -327,9 +327,7 @@ def test_collect_append_mode_sinks_prefers_declared_sinks() -> None:
     )
 
     manifest = SimpleNamespace(
-        launch_context={
-            "append_mode_semantic_sinks": [" sink.x.mode=append ", "", 42]
-        },
+        launch_context={"append_mode_semantic_sinks": [" sink.x.mode=append ", "", 42]},
         runtime_config={},
         resolved_config={},
     )
@@ -590,9 +588,7 @@ def test_should_not_redact_when_no_sensitive_columns() -> None:
     )
     from bioetl.application.services.export_lineage.export_models import ExportOptions
 
-    assert (
-        _should_redact_columns((), options=ExportOptions(role="viewer")) is False
-    )
+    assert _should_redact_columns((), options=ExportOptions(role="viewer")) is False
 
 
 def test_retained_columns_rejects_only_sensitive_table() -> None:
@@ -639,9 +635,7 @@ async def test_preview_rejects_table_without_preview_support() -> None:
 
     class _Schema:
         def __iter__(self):
-            return iter(
-                [SimpleNamespace(name="a", type="string", nullable=True)]
-            )
+            return iter([SimpleNamespace(name="a", type="string", nullable=True)])
 
     reader.get_schema = AsyncMock(return_value=_Schema())
     reader.get_row_count = AsyncMock(return_value=3)
@@ -726,9 +720,7 @@ def _lineage_service():
     manifest_port = MagicMock()
     manifest_port.get = MagicMock(return_value=None)
     manifest_port.get_by_run_id = MagicMock(return_value=None)
-    return LineageInspectionService(
-        lineage_store=store, manifest_port=manifest_port
-    )
+    return LineageInspectionService(lineage_store=store, manifest_port=manifest_port)
 
 
 def test_resolve_via_manifest_returns_none_for_unknown_identifier() -> None:
@@ -737,9 +729,7 @@ def test_resolve_via_manifest_returns_none_for_unknown_identifier() -> None:
 
 def test_resolve_via_manifest_returns_none_for_unknown_run_id() -> None:
     assert (
-        _lineage_service()._resolve_via_manifest(
-            "11111111-1111-1111-1111-111111111111"
-        )
+        _lineage_service()._resolve_via_manifest("11111111-1111-1111-1111-111111111111")
         is None
     )
 
@@ -884,7 +874,7 @@ def test_handle_enricher_timeout_reraises_for_required_enricher() -> None:
         EnricherExecutionContext,
         handle_enricher_timeout,
     )
-    from bioetl.domain.composite.config_models import EnricherConfig
+    from bioetl.domain.composite.config import EnricherConfig
 
     enricher = EnricherConfig(
         pipeline="chembl_activity",
@@ -898,9 +888,7 @@ def test_handle_enricher_timeout_reraises_for_required_enricher() -> None:
         started_at=datetime(2026, 1, 1, tzinfo=UTC),
         started_monotonic_at=1.0,
     )
-    host = SimpleNamespace(
-        _logger=MagicMock(), _build_timeout_result=MagicMock()
-    )
+    host = SimpleNamespace(_logger=MagicMock(), _build_timeout_result=MagicMock())
     with pytest.raises(TimeoutError, match="Required enricher timed out"):
         handle_enricher_timeout(host, context, TimeoutError("slow"))
     assert host._logger.error.called
@@ -943,9 +931,7 @@ def test_record_dependency_completion_delegates_to_ledger() -> None:
     ledger = MagicMock()
     ledger.record_composite_dependency_completed = MagicMock(return_value="entry")
     assert (
-        _record_dependency_completion(
-            ledger, name="dep", data={"records": 2}
-        )
+        _record_dependency_completion(ledger, name="dep", data={"records": 2})
         == "entry"
     )
     ledger.record_composite_dependency_completed.assert_called_once_with(
@@ -999,9 +985,7 @@ def test_record_structural_policy_metrics_delegates_to_helper() -> None:
         mixin._BaseTransformerExecutionMixin._record_structural_policy_metrics(
             host, action="kept", shadow_comparison="match"
         )
-    record.assert_called_once_with(
-        host, action="kept", shadow_comparison="match"
-    )
+    record.assert_called_once_with(host, action="kept", shadow_comparison="match")
 
 
 # --- lock_lifecycle (58, 87) ---
@@ -1192,9 +1176,7 @@ def test_assert_manifest_persisted_rejects_run_id_conflict() -> None:
     manifest = SimpleNamespace(manifest_id="m-1", run_id="run-1")
     port = SimpleNamespace(
         get=lambda manifest_id: manifest,
-        get_by_run_id=lambda run_id: SimpleNamespace(
-            manifest_id="m-2", run_id="run-1"
-        ),
+        get_by_run_id=lambda run_id: SimpleNamespace(manifest_id="m-2", run_id="run-1"),
     )
     with pytest.raises(RuntimeError, match="different manifest_id"):
         RunManifestService._assert_manifest_persisted(
@@ -1227,7 +1209,7 @@ def test_strict_replay_provenance_requires_planned_artifacts() -> None:
         _validate_strict_replay_provenance(request, provenance)
 
 
-def test_explicit_degraded_opt_down_rejects_exact_replay() -> None:
+def test_explicit_degraded_opt_down_rejects_exact_replay_manifest() -> None:
     from bioetl.application.services.control_plane.manifest.validation import (
         _is_explicit_degraded_profile_opt_down,
     )

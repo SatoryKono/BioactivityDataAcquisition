@@ -1,32 +1,36 @@
 # Boundary object/payload typing residual at this module.
-"""Built-in workflow transform for foreign-key reconciliation."""
+"""Facade workflow transform for foreign-key reconciliation (AUD-005).
+
+This module only orchestrates the canonical implementation
+(``infrastructure/storage/workflow_foreign_key_reconciliation.py``) through
+``ForeignKeyReconciliationPort``: it builds the request, shapes the result
+payload, and persists artifacts. Storage/mutation logic must not be duplicated
+here; parity with the canonical adapter is enforced by
+``tests/integration/application/workflow/test_reconcile_fk_parity.py``.
+"""
 
 from __future__ import annotations
 
 from collections.abc import Mapping
+from typing import Any, cast
 
 from bioetl.application.workflow.transforms import (
     WorkflowTransformCallable,
     WorkflowTransformRuntimeContext,
 )
-from bioetl.application.workflow.transforms._reconcile_foreign_keys_support import (
-    _build_reconcile_payload,
+from bioetl.application.workflow.transforms.reconcile_foreign_keys_config import (
+    _optional_key_tuple as _optional_key_tuple,
     _optional_layer,
     _optional_runtime_str,
-    _payload_run_ids,
+    _payload_run_ids as _payload_run_ids,
     _persist_reconcile_result_artifact,
-    _record_reconcile_destructive_commit,
     _require_delete_orphans_action,
     _required_primary_keys,
     _required_str,
     _resolve_reference_completeness,
     _resolve_reference_keys,
+    _run_ids_from_upstream,
     _source_scope,
-)
-from bioetl.application.workflow.transforms._reconcile_foreign_keys_support import (
-    _optional_key_tuple as _optional_key_tuple,
-)
-from bioetl.application.workflow.transforms._reconcile_foreign_keys_support import (
     _upstream_completeness_evidence as _upstream_completeness_evidence,
 )
 from bioetl.domain.ports import (
@@ -44,6 +48,80 @@ def _runtime_flag(
     if runtime_context is None:
         return default
     return bool(getattr(runtime_context, name, default))
+
+
+def _build_reconcile_payload(
+    *,
+    spec: WorkflowTransformSpec,
+    request: ForeignKeyReconciliationRequest,
+    result: object,
+    workflow_name: object,
+) -> dict[str, object]:
+    # Port result is structural; keep boundary free of concrete infra result types.
+    r = cast(Any, result)  # Any: structural FK reconcile result port
+    payload = {
+        "transform_name": spec.transform_name,
+        "fingerprint": spec.fingerprint,
+        "workflow_name": workflow_name,
+        "workflow_run_id": request.workflow_run_id,
+        "manifest_id": request.manifest_id,
+        "step_id": spec.step_id,
+        "source_table": r.source_table,
+        "reference_table": r.reference_table,
+        "source_key": r.source_key,
+        "reference_key": r.reference_key,
+        "source_layer": r.source_layer,
+        "reference_layer": r.reference_layer,
+        "mutation_layer": r.mutation_layer,
+        "source_keys": list(request.source_keys or (request.source_key,)),
+        "source_run_ids": list(request.source_run_ids),
+        "source_scope": request.source_scope,
+        "reference_keys": list(request.reference_keys or (request.reference_key,)),
+        "action": r.action,
+        "nulls_equal": request.nulls_equal,
+        "scanned_rows": r.scanned_rows,
+        "retained_rows": r.retained_rows,
+        "orphan_rows_deleted": r.orphan_rows_deleted,
+        "mutated": r.mutated,
+        "dry_run": r.dry_run,
+        "would_mutate": r.would_mutate,
+        "mutation_mode": r.mutation_mode,
+        "quarantine_batch_id": r.quarantine_batch_id,
+        "quarantine_rows_written": r.quarantine_rows_written,
+        "quarantine_error_code": r.quarantine_error_code,
+        "reference_completeness": request.reference_completeness,
+        "unproven_unmatched_rows": getattr(r, "unproven_unmatched_rows", 0),
+    }
+    blocked_reason = getattr(r, "mutation_blocked_reason", None)
+    if blocked_reason:
+        payload["mutation_blocked_reason"] = blocked_reason
+    if r.dry_run and r.would_mutate:
+        payload["mutation_blocked_reason"] = "workflow_dry_run"
+    if getattr(r, "source_snapshot", None) is not None:
+        payload["source_snapshot"] = dict(r.source_snapshot)
+    return payload
+
+
+def _record_reconcile_destructive_commit(
+    runtime_context: WorkflowTransformRuntimeContext | None,
+    *,
+    spec: WorkflowTransformSpec,
+    result: object,
+    payload: dict[str, object],
+) -> None:
+    r = cast(Any, result)  # Any: structural FK reconcile result port
+    if not r.mutated or r.dry_run:
+        return
+    if runtime_context is None or not hasattr(
+        runtime_context, "record_destructive_commit"
+    ):
+        return
+    runtime_context.record_destructive_commit(
+        step_id=spec.step_id,
+        transform_name=spec.transform_name,
+        fingerprint=spec.fingerprint,
+        details=payload,
+    )
 
 
 def build_reconcile_foreign_keys_executor(
@@ -160,24 +238,3 @@ def _build_request(
         reference_snapshot_version=snapshot_version,
         completeness_evidence_ref=evidence_ref,
     )
-
-
-def _run_ids_from_upstream(
-    upstream_outputs: Mapping[str, object],
-    *,
-    workflow_run_id: str | None,
-    depends_on: tuple[str, ...] = (),
-) -> tuple[str, ...]:
-    selected = upstream_outputs
-    if depends_on:
-        allowed = set(depends_on)
-        selected = {
-            step_id: payload
-            for step_id, payload in upstream_outputs.items()
-            if step_id in allowed
-        }
-    candidates: list[object] = [workflow_run_id]
-    for payload in selected.values():
-        candidates.extend(_payload_run_ids(payload))
-    normalized = [str(value).strip() for value in candidates if value]
-    return tuple(dict.fromkeys(value for value in normalized if value))

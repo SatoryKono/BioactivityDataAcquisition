@@ -6,7 +6,7 @@ import asyncio
 from pathlib import Path
 from types import SimpleNamespace
 from urllib.error import HTTPError, URLError
-from uuid import uuid4
+from uuid import UUID
 
 import click
 import pytest
@@ -154,7 +154,7 @@ def test_workflow_option_conflicts_and_result_helpers() -> None:
             incremental=False,
             resume_last=True,
             resume_manifest_id=None,
-            resume_run_id=uuid4(),
+            resume_run_id=UUID("12345678-1234-5678-1234-567812345678"),
             start_offset=None,
         )
     with pytest.raises(click.exceptions.Exit):
@@ -162,7 +162,7 @@ def test_workflow_option_conflicts_and_result_helpers() -> None:
             incremental=False,
             resume_last=False,
             resume_manifest_id="m1",
-            resume_run_id=uuid4(),
+            resume_run_id=UUID("12345678-1234-5678-1234-567812345678"),
             start_offset=None,
         )
     with pytest.raises(click.exceptions.Exit):

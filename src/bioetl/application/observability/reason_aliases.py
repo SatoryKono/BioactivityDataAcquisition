@@ -31,4 +31,6 @@ def display_reason(code: str) -> str:
 
 def display_reasons_text(text: str) -> str:
     """Map each newline-separated reason code; preserve blank lines."""
-    return "\n".join(display_reason(part) if part.strip() else part for part in text.split("\n"))
+    return "\n".join(
+        display_reason(part) if part.strip() else part for part in text.split("\n")
+    )

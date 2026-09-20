@@ -1,11 +1,20 @@
-"""Infrastructure adapter for workflow foreign-key reconciliation."""
+"""Canonical implementation of workflow foreign-key reconciliation (AUD-005).
+
+This module owns the reconcile algorithm
+(``SilverForeignKeyReconciliationAdapter`` /
+``StorageForeignKeyReconciliationAdapter``); the sibling
+``workflow_foreign_key_reconciliation_{support,quarantine,quarantine_keys,identity}``
+modules are its internal implementation detail. The application workflow
+transform (``application/workflow/transforms/reconcile_foreign_keys.py``) is a
+documented facade that orchestrates this adapter through
+``ForeignKeyReconciliationPort`` and must not duplicate storage logic.
+"""
 
 from __future__ import annotations
 
-import inspect
-from collections.abc import Awaitable, Iterable, Mapping, Sequence
+from collections.abc import Mapping
 from dataclasses import dataclass, replace
-from typing import Protocol, cast, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 from deltalake.exceptions import DeltaError
 
@@ -22,6 +31,13 @@ from bioetl.infrastructure.storage.silver_writer import SilverWriter
 from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_loaded import (
     reconcile_loaded_rows,
 )
+from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_reads import (
+    GoldReconciliationReaderProtocol,
+    GoldSnapshotReaderProtocol,
+    filter_current_rows as filter_current_rows,
+    read_reference_rows,
+    read_source_rows,
+)
 from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support import (
     build_reconciliation_result,
     emit_reconcile_debug_artifacts,
@@ -30,12 +46,8 @@ from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support i
     log_reconciliation_started,
     record_reconciliation_metrics,
 )
-from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support import (
-    filter_current_rows as filter_current_rows,
-)
 
 __all__ = [
-    "GoldReconciliationReaderProtocol",
     "ReconcileDebugArtifactSinkProtocol",
     "SilverForeignKeyReconciliationAdapter",
     "StorageForeignKeyReconciliationAdapter",
@@ -46,29 +58,6 @@ _RECONCILIATION_ROWS_RETAINED_TOTAL = (
     "bioetl_workflow_reconciliation_rows_retained_total"
 )
 _RECONCILIATION_ROWS_DELETED_TOTAL = "bioetl_workflow_reconciliation_rows_deleted_total"
-
-
-@runtime_checkable
-class GoldReconciliationReaderProtocol(Protocol):
-    """Narrow gold reader seam required by foreign-key reconciliation.
-
-    Implementations may expose a sync or async ``read_gold``; the adapter
-    awaits awaitable results.
-    """
-
-    def read_gold(
-        self,
-        table_name: str,
-        columns: list[str] | None = None,
-        current_only: bool = True,
-    ) -> Sequence[Mapping[str, object]] | Awaitable[Sequence[Mapping[str, object]]]:
-        """Read Gold rows, optionally restricted to current SCD2 versions."""
-        ...
-
-
-@runtime_checkable
-class GoldSnapshotReaderProtocol(Protocol):
-    async def read_reconciliation_snapshot(self, table_name: str) -> dict[str, int]: ...
 
 
 @runtime_checkable
@@ -109,7 +98,7 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             )
         log_reconciliation_started(self, request)
 
-        source_rows = await self._read_source_rows(request)
+        source_rows = await read_source_rows(self, request)
         if source_rows is None:
             return build_reconciliation_result(
                 request,
@@ -153,7 +142,7 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
                 mutation_mode="no_op",
             )
 
-        reference_rows = await self._read_reference_rows(request)
+        reference_rows = await read_reference_rows(self, request)
         if (
             request.reference_completeness == "complete"
             and request.reference_identity is not None
@@ -174,11 +163,12 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             source_rows=source_rows,
             reference_rows=reference_rows,
         )
+        gold_reader: object = self.gold_writer
         if request.source_layer == "gold" and isinstance(
-            self.gold_writer, GoldSnapshotReaderProtocol
+            gold_reader, GoldSnapshotReaderProtocol
         ):
             try:
-                snapshot = await self.gold_writer.read_reconciliation_snapshot(
+                snapshot = await gold_reader.read_reconciliation_snapshot(
                     request.source_table
                 )
                 result = replace(result, source_snapshot=snapshot)
@@ -203,86 +193,6 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
 
     def _log(self, level: str, message: str, **context: object) -> None:
         log_reconciliation(self.logger, level, message, **context)
-
-    async def _read_source_rows(
-        self,
-        request: ForeignKeyReconciliationRequest,
-    ) -> list[dict[str, object]] | None:
-        try:
-            return await self._read_rows(
-                layer=request.source_layer,
-                table_name=request.source_table,
-                columns=None,
-                current_only=True,
-            )
-        except FileNotFoundError:
-            self._record_metrics(scanned=0, retained=0, deleted=0)
-            self._log(
-                "warning",
-                "workflow foreign-key reconciliation skipped missing source table",
-                source_table=request.source_table,
-                reference_table=request.reference_table,
-                source_layer=request.source_layer,
-                reference_layer=request.reference_layer,
-                mutation_layer=request.effective_mutation_layer,
-            )
-            return None
-
-    async def _read_reference_rows(
-        self,
-        request: ForeignKeyReconciliationRequest,
-    ) -> list[dict[str, object]]:
-        try:
-            return await self._read_rows(
-                layer=request.reference_layer,
-                table_name=request.reference_table,
-                columns=list(request.effective_reference_keys),
-                current_only=True,
-            )
-        except FileNotFoundError as exc:
-            raise ValueError(
-                "foreign-key reconciliation reference table not found: "
-                f"{request.reference_table} ({request.reference_layer})"
-            ) from exc
-
-    async def _read_rows(
-        self,
-        *,
-        layer: str,
-        table_name: str,
-        columns: list[str] | None,
-        current_only: bool,
-    ) -> list[dict[str, object]]:
-        if layer == "silver":
-            rows = await self.silver_writer.read_silver(table_name, columns=columns)
-            materialized = [dict(row) for row in rows]
-            return filter_current_rows(
-                materialized,
-                current_only=current_only,
-                layer="silver",
-            )
-
-        if self.gold_writer is None:
-            raise ValueError(
-                "Gold foreign-key reconciliation requires a configured gold_writer"
-            )
-        value = self.gold_writer.read_gold(
-            table_name,
-            columns=columns,
-            current_only=current_only,
-        )
-        if inspect.isawaitable(value):
-            value = await value
-        materialized = [
-            dict(row) for row in cast(Iterable[Mapping[str, object]], value)
-        ]
-        # Gold readers apply current_only internally; re-apply as a safety net when
-        # payloads still carry SCD flags (sync fakes / partial adapters).
-        return filter_current_rows(
-            materialized,
-            current_only=current_only,
-            layer="gold",
-        )
 
     async def _reconcile_loaded_rows(
         self,

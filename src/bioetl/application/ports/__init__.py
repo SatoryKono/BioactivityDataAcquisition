@@ -24,10 +24,10 @@ from bioetl.application.ports.health import HealthServiceProtocol
 from bioetl.application.ports.metrics import (
     DeleteResult,
     MetricsFactoryProtocol,
-    MetricsGatewayResult,
+    MetricsGatewayResult,  # deprecated alias, sunset 2026-12-31 (#10535)
     MetricsServerStatus,
     MetricsService,
-    MetricsStartResult,
+    MetricsStartResult,  # deprecated alias, sunset 2026-12-31 (#10535)
     PushResult,
     StartResult,
     WorkflowMetricsFactoryProtocol,
@@ -99,10 +99,10 @@ __all__ = [
     "LineageInspectionServiceProtocol",
     "LockServiceProtocol",
     "MetricsFactoryProtocol",
-    "MetricsGatewayResult",
+    "MetricsGatewayResult",  # deprecated alias, sunset 2026-12-31 (#10535)
     "MetricsServerStatus",
     "MetricsService",
-    "MetricsStartResult",
+    "MetricsStartResult",  # deprecated alias, sunset 2026-12-31 (#10535)
     "ObservabilitySettingsProtocol",
     "ObservabilityWorkflowServiceProtocol",
     "PipelineRegistryProtocol",

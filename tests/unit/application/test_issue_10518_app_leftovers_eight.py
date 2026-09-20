@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from uuid import UUID
 
 import pytest
 
@@ -345,23 +345,23 @@ async def test_coordinator_threshold_and_runner_mixins(
     support._record_enrichment_stage_completed({})
     state = CompositeCheckpointState(composite_name="chembl_activity", run_id="run-1")
     monkeypatch.setattr(
-        "bioetl.application.composite.runner_pkg.runner_merge_stage_mixin.start_merge_phase",
+        "bioetl.application.composite.runner_pkg.runner_merge_stage_execution_mixin.start_merge_phase",
         AsyncMock(return_value=state),
     )
     monkeypatch.setattr(
-        "bioetl.application.composite.runner_pkg.runner_merge_stage_mixin.handle_merge_phase_exception",
+        "bioetl.application.composite.runner_pkg.runner_merge_stage_execution_mixin.handle_merge_phase_exception",
         AsyncMock(),
     )
     monkeypatch.setattr(
-        "bioetl.application.composite.runner_pkg.runner_merge_stage_mixin.handle_dry_run_merge_skip",
+        "bioetl.application.composite.runner_pkg.runner_merge_stage_execution_mixin.handle_dry_run_merge_skip",
         lambda self, checkpoint: checkpoint,
     )
     monkeypatch.setattr(
-        "bioetl.application.composite.runner_pkg.runner_merge_stage_mixin.run_prepared_merge_request",
+        "bioetl.application.composite.runner_pkg.runner_merge_stage_execution_mixin.run_prepared_merge_request",
         AsyncMock(return_value="merged"),
     )
     monkeypatch.setattr(
-        "bioetl.application.composite.runner_pkg.runner_merge_stage_mixin.execute_started_merge_phase",
+        "bioetl.application.composite.runner_pkg.runner_merge_stage_execution_mixin.execute_started_merge_phase",
         AsyncMock(return_value="executed"),
     )
     host = CompositeRunnerMergeStageMixin()
@@ -388,7 +388,7 @@ def test_leftover_eight_remaining_one_and_three_line_clusters() -> None:
     emit_batch_failed(
         emitter=MagicMock(),
         run_id=None,
-        batch_id=BatchID(uuid4()),
+        batch_id=BatchID(UUID("12345678-1234-5678-1234-567812345678")),
         layer="silver",
         error=RuntimeError("write"),
         occurred_at=datetime(2026, 9, 16, 12, 0, tzinfo=UTC),

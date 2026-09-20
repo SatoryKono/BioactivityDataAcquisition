@@ -249,8 +249,6 @@ __all__ = [
 
 def __getattr__(name: str) -> object:  # pragma: no cover
     """Resolve public value-object facade exports lazily."""
-    if TYPE_CHECKING:
-        raise AttributeError
     try:
         module_name, attribute_name = _LAZY_ATTRIBUTE_EXPORTS[name]
     except KeyError as exc:  # pragma: no cover - standard attribute path
