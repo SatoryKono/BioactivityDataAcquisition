@@ -61,9 +61,11 @@ def bind_cached_bronze_context[T](
     if current == cached_bronze:
         return ctx
     if is_dataclass(ctx):
-        return cast("T", replace(cast("Any", ctx), cached_bronze=cached_bronze))
+        return cast(
+            "T", replace(cast("Any", ctx), cached_bronze=cached_bronze)
+        )  # Any: replace() host
     # Bind in place so callers retain the original context type and methods.
-    ctx_any = cast("Any", ctx)
+    ctx_any = cast("Any", ctx)  # Any: mutable context host
     try:
         object.__setattr__(ctx_any, "cached_bronze", cached_bronze)
         return ctx

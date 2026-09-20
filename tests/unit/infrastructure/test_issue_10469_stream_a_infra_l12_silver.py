@@ -73,7 +73,9 @@ def test_resolve_manifest_and_version_wrappers() -> None:
 async def test_resolve_version_after_wrapper() -> None:
     ops = SimpleNamespace(_host=None, _get_delta_version=None, _logger=MagicMock())
     monkeypatch_result = AsyncMock(return_value=7)
-    from bioetl.infrastructure.storage.silver.operations import metadata_dq_operations as dq
+    from bioetl.infrastructure.storage.silver.operations import (
+        metadata_dq_operations as dq,
+    )
 
     original = dq.resolve_version_after
     dq.resolve_version_after = monkeypatch_result  # type: ignore[assignment]
@@ -172,7 +174,9 @@ async def test_detect_schema_drift_no_diff(monkeypatch: pytest.MonkeyPatch) -> N
 
 
 @pytest.mark.asyncio
-async def test_writer_metadata_facade_skip_and_file(monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_writer_metadata_facade_skip_and_file(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     facade = SilverWriterMetadataFacade()
     facade._metadata = SimpleNamespace()  # type: ignore[assignment]
     facade._should_skip_silver_metadata_write = lambda **_kwargs: True  # type: ignore[method-assign]

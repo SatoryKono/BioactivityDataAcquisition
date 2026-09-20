@@ -76,31 +76,51 @@ from bioetl.domain.normalization.profiles.chembl_activity import create_case_nor
 from bioetl.domain.normalization.reference_ids import (
     normalize_uniprot_mixed_mapping_reference_id,
 )
-from bioetl.domain.normalization.rules import _apply_case_strategy, normalize_cross_pipeline_case
+from bioetl.domain.normalization.rules import (
+    _apply_case_strategy,
+    normalize_cross_pipeline_case,
+)
 from bioetl.domain.ports.export import ExportFileFingerprint
 from bioetl.domain.ports.workflow_row_reconciliation import (
     RowReconciliationConfig,
     RowReconciliationConfigError,
     RowReconciliationLayer,
 )
-from bioetl.domain.registry.semantic_fields import SemanticFieldCluster, SemanticFieldRegistry
+from bioetl.domain.registry.semantic_fields import (
+    SemanticFieldCluster,
+    SemanticFieldRegistry,
+)
 from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
 from bioetl.domain.run_reports.accounting_snapshots import (
     _is_degraded_balance,
     _is_unknown_balance,
     _prefer_mapped_count,
 )
-from bioetl.domain.run_reports.models import BalanceStatus, StageFunnelRow, TrackingCoverage
+from bioetl.domain.run_reports.models import (
+    BalanceStatus,
+    StageFunnelRow,
+    TrackingCoverage,
+)
 from bioetl.domain.types import RunID, RunType
-from bioetl.domain.types.gold_schema_policy import GoldSchemaPolicyByVersion, GoldSchemaVersionPolicy
+from bioetl.domain.types.gold_schema_policy import (
+    GoldSchemaPolicyByVersion,
+    GoldSchemaVersionPolicy,
+)
 from bioetl.domain.value_objects._publication_field_group_config import FieldGroupConfig
-from bioetl.domain.value_objects._run_context_create_support import coerce_run_context_create_input
-from bioetl.domain.value_objects.activity_concentration import Concentration, ConcentrationUnit
+from bioetl.domain.value_objects._run_context_create_support import (
+    coerce_run_context_create_input,
+)
+from bioetl.domain.value_objects.activity_concentration import (
+    Concentration,
+    ConcentrationUnit,
+)
 from bioetl.domain.value_objects.compound_ids import AssayId, CompoundId
 from bioetl.domain.value_objects.dq_report_enums import DQCheckStatus
 from bioetl.domain.value_objects.dq_report_results_quality import CompletenessResult
 from bioetl.domain.value_objects.identifiers import PubChemCid, UniProtId
-from bioetl.domain.value_objects.publication_field_group_types import PublicationFieldGroup
+from bioetl.domain.value_objects.publication_field_group_types import (
+    PublicationFieldGroup,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -303,7 +323,10 @@ def test_three_line_filters_merge_ledger_manifest_and_registry() -> None:
     with pytest.raises(ValueError, match="must be an object"):
         _load_source_refs([1], source_ref_type=dict, snapshot_ref_type=dict)
     assert _load_object_mapping("x") == {}
-    assert _load_replay_capability(None, capability_type=str, rebuild_only="rebuild") == "rebuild"
+    assert (
+        _load_replay_capability(None, capability_type=str, rebuild_only="rebuild")
+        == "rebuild"
+    )
     with pytest.raises(ValueError, match="missing 'entries'"):
         ContractRegistry.from_dict({})
     with pytest.raises(ValueError, match="Invalid entry payload"):
@@ -325,7 +348,9 @@ def test_three_line_filters_merge_ledger_manifest_and_registry() -> None:
 
 def test_three_line_errors_ids_dates_export_and_context() -> None:
     classifier = ErrorClassifier(strict_mode=True)
-    assert classifier.classify(type("RateLimitError", (Exception,), {})("x")) is not None
+    assert (
+        classifier.classify(type("RateLimitError", (Exception,), {})("x")) is not None
+    )
     with pytest.raises(ValueError, match="Unknown exception type"):
         classifier.classify(RuntimeError("x"))
     classifier.reset_fallback_count()
@@ -335,7 +360,10 @@ def test_three_line_errors_ids_dates_export_and_context() -> None:
         get_domain_exception_context(RecoverableError("x"))
         is DomainExceptionContext.EXTERNAL_INTEGRATION
     )
-    assert get_domain_exception_context(ValidationError("x")) is DomainExceptionContext.VALIDATION
+    assert (
+        get_domain_exception_context(ValidationError("x"))
+        is DomainExceptionContext.VALIDATION
+    )
     assert get_domain_exception_context(BioETLError) is DomainExceptionContext.PLATFORM
     quota = StorageQuotaExceededError(path="/tmp", quota_bytes=10, used_bytes=11)
     assert quota.quota_bytes == 10
@@ -436,4 +464,3 @@ def test_three_line_errors_ids_dates_export_and_context() -> None:
     with pytest.raises(ValueError, match="must be int"):
         PubChemCid(True)  # type: ignore[arg-type]
     assert PubChemCid.from_raw(0) is None
-

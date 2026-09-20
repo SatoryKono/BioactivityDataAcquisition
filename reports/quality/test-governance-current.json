@@ -244,34 +244,6 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "263",
-      "path": "tests/unit/domain/schemas/chembl/test_schemas.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_tissue_schema_accepts_canonical_ontology_ids"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "280",
-      "path": "tests/unit/domain/schemas/chembl/test_schemas.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_target_schema_accepts_minimal_required_record"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "296",
-      "path": "tests/unit/domain/schemas/chembl/test_schemas.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_target_schema_accepts_derived_synonym_fields"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "315",
-      "path": "tests/unit/domain/schemas/chembl/test_schemas.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_target_schema_accepts_derived_xref_fields"
-    },
-    {
-      "category": "intentional_no_exception_contract",
       "line": "159",
       "path": "tests/unit/domain/workflow/test_delete_orphans_scope.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -292,13 +264,6 @@
       "test_name": "test_local_checkpoint__aclose__91c52df6"
     },
     {
-      "category": "weak_no_value",
-      "line": "662",
-      "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_adapters.py",
-      "rationale": "candidate tests that need later assertion strengthening or removal review",
-      "test_name": "test_base_metrics_none_port_and_zero_fallback"
-    },
-    {
       "category": "intentional_no_exception_contract",
       "line": "44",
       "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_fifteen.py",
@@ -307,35 +272,21 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "213",
+      "line": "217",
       "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_silver.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_merged_metadata_skips_when_flagged"
     },
     {
-      "category": "weak_no_value",
-      "line": "201",
-      "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_three.py",
-      "rationale": "candidate tests that need later assertion strengthening or removal review",
-      "test_name": "test_adapter_metrics_dropped_duplicates_when_metrics_none"
-    },
-    {
-      "category": "weak_no_value",
-      "line": "260",
-      "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_three.py",
-      "rationale": "candidate tests that need later assertion strengthening or removal review",
-      "test_name": "test_merge_unit_companion_policies_non_dict"
-    },
-    {
       "category": "intentional_no_exception_contract",
-      "line": "38",
+      "line": "42",
       "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_seventeen.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_record_dropped_duplicates_without_metrics"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "470",
+      "line": "490",
       "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_expire_gold_empty_key_rows"
@@ -650,17 +601,10 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "140",
+      "line": "145",
       "path": "tests/unit/interfaces/test_issue_10520_interfaces_cli.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_formatters_optional_export_and_quarantine"
-    },
-    {
-      "category": "weak_no_value",
-      "line": "647",
-      "path": "tests/unit/interfaces/test_issue_10520_interfaces_remainder.py",
-      "rationale": "candidate tests that need later assertion strengthening or removal review",
-      "test_name": "test_cli_main_dunder_main"
     },
     {
       "category": "intentional_no_exception_contract",
@@ -668,20 +612,6 @@
       "path": "tests/unit/interfaces/test_issue_10520_interfaces_tail.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_quarantine_support_none_returns"
-    },
-    {
-      "category": "weak_no_value",
-      "line": "738",
-      "path": "tests/unit/interfaces/test_issue_10520_interfaces_tail.py",
-      "rationale": "candidate tests that need later assertion strengthening or removal review",
-      "test_name": "test_run_cleanup_preview_error_branches"
-    },
-    {
-      "category": "weak_no_value",
-      "line": "781",
-      "path": "tests/unit/interfaces/test_issue_10520_interfaces_tail.py",
-      "rationale": "candidate tests that need later assertion strengthening or removal review",
-      "test_name": "test_mixin_generic_exception_path"
     },
     {
       "category": "intentional_no_exception_contract",
@@ -692,28 +622,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "573",
-      "path": "tests/unit/interfaces/http/test_health_server.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_http_empty_request"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "1118",
-      "path": "tests/unit/interfaces/http/test_health_server.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_handle_request_error_without_logger"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "1161",
-      "path": "tests/unit/interfaces/http/test_health_server.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_close_writer_handles_exceptions"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "1245",
+      "line": "1252",
       "path": "tests/unit/interfaces/http/test_health_server.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_consume_headers"
@@ -723,8 +632,8 @@
     "architecture_helper_guard": 1,
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
-    "intentional_no_exception_contract": 91,
-    "weak_no_value": 6
+    "intentional_no_exception_contract": 84,
+    "weak_no_value": 0
   },
   "assertless_examples": [
     "tests/architecture/test_quality_debt_scorecard.py:1127",
@@ -904,12 +813,6 @@
         "intentional_no_exception_contract": 1
       }
     },
-    "tests/unit/domain/schemas/chembl/test_schemas.py": {
-      "assertless_tests": 4,
-      "categories": {
-        "intentional_no_exception_contract": 4
-      }
-    },
     "tests/unit/domain/workflow/test_delete_orphans_scope.py": {
       "assertless_tests": 1,
       "categories": {
@@ -1048,12 +951,6 @@
         "intentional_no_exception_contract": 2
       }
     },
-    "tests/unit/infrastructure/test_issue_10469_stream_a_infra_adapters.py": {
-      "assertless_tests": 1,
-      "categories": {
-        "weak_no_value": 1
-      }
-    },
     "tests/unit/infrastructure/test_issue_10469_stream_a_infra_fifteen.py": {
       "assertless_tests": 1,
       "categories": {
@@ -1064,12 +961,6 @@
       "assertless_tests": 1,
       "categories": {
         "intentional_no_exception_contract": 1
-      }
-    },
-    "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_three.py": {
-      "assertless_tests": 2,
-      "categories": {
-        "weak_no_value": 2
       }
     },
     "tests/unit/infrastructure/test_issue_10469_stream_a_infra_seventeen.py": {
@@ -1097,9 +988,9 @@
       }
     },
     "tests/unit/interfaces/http/test_health_server.py": {
-      "assertless_tests": 4,
+      "assertless_tests": 1,
       "categories": {
-        "intentional_no_exception_contract": 4
+        "intentional_no_exception_contract": 1
       }
     },
     "tests/unit/interfaces/test_issue_10520_interfaces_cli.py": {
@@ -1108,27 +999,32 @@
         "intentional_no_exception_contract": 1
       }
     },
-    "tests/unit/interfaces/test_issue_10520_interfaces_remainder.py": {
+    "tests/unit/interfaces/test_issue_10520_interfaces_tail.py": {
       "assertless_tests": 1,
       "categories": {
-        "weak_no_value": 1
-      }
-    },
-    "tests/unit/interfaces/test_issue_10520_interfaces_tail.py": {
-      "assertless_tests": 3,
-      "categories": {
-        "intentional_no_exception_contract": 1,
-        "weak_no_value": 2
+        "intentional_no_exception_contract": 1
       }
     }
   },
-  "assertless_total_candidates": 98,
+  "assertless_total_candidates": 85,
   "budget_violations": [
     {
-      "actual": 6,
-      "budget": "refined_assertless_max",
+      "actual": 2,
+      "budget": "duplicate_test_names_max",
       "expected_max": 0,
-      "metric": "refined_assertless_tests"
+      "metric": "duplicate_test_names"
+    },
+    {
+      "actual": 4,
+      "budget": "duplicate_test_name_occurrences_max",
+      "expected_max": 0,
+      "metric": "duplicate_test_name_occurrences"
+    },
+    {
+      "actual": 1,
+      "budget": "compatibility_test_file_max",
+      "expected_max": 0,
+      "metric": "compatibility_test_files"
     },
     {
       "actual": 15,
@@ -1137,9 +1033,13 @@
       "metric": "uuid4_call_sites"
     }
   ],
-  "compatibility_examples": [],
-  "compatibility_files": [],
-  "compatibility_test_files": 0,
+  "compatibility_examples": [
+    "tests/architecture/test_compat_shim_sunset.py"
+  ],
+  "compatibility_files": [
+    "tests/architecture/test_compat_shim_sunset.py"
+  ],
+  "compatibility_test_files": 1,
   "critical_behavior_envelope_assertion_gap_count": 0,
   "critical_behavior_envelope_count": 6,
   "critical_behavior_envelopes": {
@@ -1281,16 +1181,43 @@
     }
   },
   "date_today_call_sites": 0,
-  "duplicate_test_name_inventory": [],
+  "duplicate_test_name_inventory": [
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/core/test_wiring_lazy_export_hooks.py:56",
+        "tests/unit/composition/test_lazy_export_hooks.py:79"
+      ],
+      "name": "test_lazy_export_dir_unions_and_sorts",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/core/test_wiring_lazy_export_hooks.py:33",
+        "tests/unit/composition/test_lazy_export_hooks.py:51"
+      ],
+      "name": "test_resolve_lazy_export_unknown_name_raises",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    }
+  ],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 0,
-    "duplicate_occurrences": 0,
+    "cross_file_groups": 2,
+    "duplicate_occurrences": 4,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 0
+    "total_duplicate_names": 2
   },
-  "duplicate_test_name_occurrences": 0,
-  "duplicate_test_names": 0,
+  "duplicate_test_name_occurrences": 4,
+  "duplicate_test_names": 2,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1309,11 +1236,11 @@
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 91,
+  "intentional_no_exception_contract": 84,
   "markerless_examples": [],
   "markerless_test_functions": 0,
   "parse_errors": [],
-  "refined_assertless_tests": 6,
+  "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
@@ -1569,34 +1496,6 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "263",
-        "path": "tests/unit/domain/schemas/chembl/test_schemas.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_tissue_schema_accepts_canonical_ontology_ids"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "280",
-        "path": "tests/unit/domain/schemas/chembl/test_schemas.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_target_schema_accepts_minimal_required_record"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "296",
-        "path": "tests/unit/domain/schemas/chembl/test_schemas.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_target_schema_accepts_derived_synonym_fields"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "315",
-        "path": "tests/unit/domain/schemas/chembl/test_schemas.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_target_schema_accepts_derived_xref_fields"
-      },
-      {
-        "category": "intentional_no_exception_contract",
         "line": "159",
         "path": "tests/unit/domain/workflow/test_delete_orphans_scope.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -1617,13 +1516,6 @@
         "test_name": "test_local_checkpoint__aclose__91c52df6"
       },
       {
-        "category": "weak_no_value",
-        "line": "662",
-        "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_adapters.py",
-        "rationale": "candidate tests that need later assertion strengthening or removal review",
-        "test_name": "test_base_metrics_none_port_and_zero_fallback"
-      },
-      {
         "category": "intentional_no_exception_contract",
         "line": "44",
         "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_fifteen.py",
@@ -1632,35 +1524,21 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "213",
+        "line": "217",
         "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_silver.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_merged_metadata_skips_when_flagged"
       },
       {
-        "category": "weak_no_value",
-        "line": "201",
-        "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_three.py",
-        "rationale": "candidate tests that need later assertion strengthening or removal review",
-        "test_name": "test_adapter_metrics_dropped_duplicates_when_metrics_none"
-      },
-      {
-        "category": "weak_no_value",
-        "line": "260",
-        "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_three.py",
-        "rationale": "candidate tests that need later assertion strengthening or removal review",
-        "test_name": "test_merge_unit_companion_policies_non_dict"
-      },
-      {
         "category": "intentional_no_exception_contract",
-        "line": "38",
+        "line": "42",
         "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_seventeen.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_record_dropped_duplicates_without_metrics"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "470",
+        "line": "490",
         "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_expire_gold_empty_key_rows"
@@ -1975,17 +1853,10 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "140",
+        "line": "145",
         "path": "tests/unit/interfaces/test_issue_10520_interfaces_cli.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_formatters_optional_export_and_quarantine"
-      },
-      {
-        "category": "weak_no_value",
-        "line": "647",
-        "path": "tests/unit/interfaces/test_issue_10520_interfaces_remainder.py",
-        "rationale": "candidate tests that need later assertion strengthening or removal review",
-        "test_name": "test_cli_main_dunder_main"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -1993,20 +1864,6 @@
         "path": "tests/unit/interfaces/test_issue_10520_interfaces_tail.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_quarantine_support_none_returns"
-      },
-      {
-        "category": "weak_no_value",
-        "line": "738",
-        "path": "tests/unit/interfaces/test_issue_10520_interfaces_tail.py",
-        "rationale": "candidate tests that need later assertion strengthening or removal review",
-        "test_name": "test_run_cleanup_preview_error_branches"
-      },
-      {
-        "category": "weak_no_value",
-        "line": "781",
-        "path": "tests/unit/interfaces/test_issue_10520_interfaces_tail.py",
-        "rationale": "candidate tests that need later assertion strengthening or removal review",
-        "test_name": "test_mixin_generic_exception_path"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -2017,28 +1874,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "573",
-        "path": "tests/unit/interfaces/http/test_health_server.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_http_empty_request"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "1118",
-        "path": "tests/unit/interfaces/http/test_health_server.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_handle_request_error_without_logger"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "1161",
-        "path": "tests/unit/interfaces/http/test_health_server.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_close_writer_handles_exceptions"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "1245",
+        "line": "1252",
         "path": "tests/unit/interfaces/http/test_health_server.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_consume_headers"
@@ -2048,8 +1884,8 @@
       "architecture_helper_guard": 1,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
-      "intentional_no_exception_contract": 91,
-      "weak_no_value": 6
+      "intentional_no_exception_contract": 84,
+      "weak_no_value": 0
     },
     "assertless_examples": [
       "tests/architecture/test_quality_debt_scorecard.py:1127",
@@ -2078,10 +1914,14 @@
       "tests/unit/composition/factories/storage/test_health_mixin.py:72",
       "tests/unit/composition/factories/storage/test_health_mixin.py:103"
     ],
-    "assertless_total_candidates": 98,
-    "compatibility_examples": [],
-    "compatibility_files": [],
-    "compatibility_test_files": 0,
+    "assertless_total_candidates": 85,
+    "compatibility_examples": [
+      "tests/architecture/test_compat_shim_sunset.py"
+    ],
+    "compatibility_files": [
+      "tests/architecture/test_compat_shim_sunset.py"
+    ],
+    "compatibility_test_files": 1,
     "critical_behavior_envelope_assertion_gap_count": 0,
     "critical_behavior_envelope_count": 6,
     "critical_behavior_envelopes": {
@@ -2223,16 +2063,43 @@
       }
     },
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [],
+    "duplicate_test_name_inventory": [
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/core/test_wiring_lazy_export_hooks.py:56",
+          "tests/unit/composition/test_lazy_export_hooks.py:79"
+        ],
+        "name": "test_lazy_export_dir_unions_and_sorts",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/core/test_wiring_lazy_export_hooks.py:33",
+          "tests/unit/composition/test_lazy_export_hooks.py:51"
+        ],
+        "name": "test_resolve_lazy_export_unknown_name_raises",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      }
+    ],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 0,
-      "duplicate_occurrences": 0,
+      "cross_file_groups": 2,
+      "duplicate_occurrences": 4,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 0
+      "total_duplicate_names": 2
     },
-    "duplicate_test_name_occurrences": 0,
-    "duplicate_test_names": 0,
+    "duplicate_test_name_occurrences": 4,
+    "duplicate_test_names": 2,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -2254,7 +2121,7 @@
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "parse_errors": [],
-    "refined_assertless_tests": 6,
+    "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
@@ -2270,8 +2137,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2608,
-      "test_python_file_count": 2842,
+      "test_glob_file_count": 2619,
+      "test_python_file_count": 2853,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2311,25 +2178,42 @@
       "top_level_directory_count": 16,
       "top_level_directory_count_including_pycache": 16
     },
-    "top_duplicate_test_names": [],
-    "total_test_files": 2608,
-    "total_test_functions": 28132,
+    "top_duplicate_test_names": [
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/application/core/test_wiring_lazy_export_hooks.py:56",
+          "tests/unit/composition/test_lazy_export_hooks.py:79"
+        ],
+        "name": "test_lazy_export_dir_unions_and_sorts"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/application/core/test_wiring_lazy_export_hooks.py:33",
+          "tests/unit/composition/test_lazy_export_hooks.py:51"
+        ],
+        "name": "test_resolve_lazy_export_unknown_name_raises"
+      }
+    ],
+    "total_test_files": 2619,
+    "total_test_functions": 28178,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 15
   },
   "root": ".",
-  "source_tree_sha256": "625b2aa74f251fac3ec7558f9ad3d1267153f5887b66cb866d625903ae3a4637",
+  "source_tree_sha256": "970c70f38c614ac8ee329fe99de2d35f783d7aa1c09414c90750bbe8e43d66d0",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 98,
-    "compatibility_test_files": 0,
+    "assertless_total_candidates": 85,
+    "compatibility_test_files": 1,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 0,
-    "duplicate_test_names": 0,
-    "intentional_no_exception_contract": 91,
+    "duplicate_test_name_occurrences": 4,
+    "duplicate_test_names": 2,
+    "intentional_no_exception_contract": 84,
     "markerless_examples": [],
     "markerless_test_functions": 0,
-    "refined_assertless_tests": 6,
+    "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 15
   },
@@ -2338,8 +2222,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2608,
-    "test_python_file_count": 2842,
+    "test_glob_file_count": 2619,
+    "test_python_file_count": 2853,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2379,9 +2263,26 @@
     "top_level_directory_count": 16,
     "top_level_directory_count_including_pycache": 16
   },
-  "top_duplicate_test_names": [],
-  "total_test_files": 2608,
-  "total_test_functions": 28132,
+  "top_duplicate_test_names": [
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/application/core/test_wiring_lazy_export_hooks.py:56",
+        "tests/unit/composition/test_lazy_export_hooks.py:79"
+      ],
+      "name": "test_lazy_export_dir_unions_and_sorts"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/application/core/test_wiring_lazy_export_hooks.py:33",
+        "tests/unit/composition/test_lazy_export_hooks.py:51"
+      ],
+      "name": "test_resolve_lazy_export_unknown_name_raises"
+    }
+  ],
+  "total_test_files": 2619,
+  "total_test_functions": 28178,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 15
 }

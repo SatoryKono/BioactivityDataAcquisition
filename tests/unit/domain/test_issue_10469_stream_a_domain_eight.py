@@ -186,9 +186,7 @@ def test_observability_mapping_and_contract_repair() -> None:
             pipeline_name="chembl_activity",
             records_processed=0,
         ),
-        BatchCreated(
-            occurred_at=_NOW, run_id=_RUN, batch_id=_BATCH, record_count=1
-        ),
+        BatchCreated(occurred_at=_NOW, run_id=_RUN, batch_id=_BATCH, record_count=1),
         BatchSealed(
             occurred_at=_NOW,
             run_id=_RUN,

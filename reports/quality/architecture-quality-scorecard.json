@@ -76,7 +76,7 @@
     },
     {
       "evidence_metrics": {
-        "compatibility_test_file_count": 1,
+        "compatibility_test_file_count": 0,
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -189,7 +189,7 @@
     "accepted_adr_count": 58,
     "adr_enforcement_blocking_gap_count": 0,
     "adr_enforcement_manual_exception_count": 0,
-    "compatibility_test_file_count": 1,
+    "compatibility_test_file_count": 0,
     "composition_module_cap": 300,
     "composition_module_count": 298,
     "composition_util": 0.9933,
@@ -269,7 +269,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "7184937818099a4c3d38b8fe4bd91613c81562af068ac278d680b5aba09c99e9",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "b36473214ec617167b70f383a8500d7a66d97720b7b76b60e8162565d18fcb50"
+      "source_tree_sha256": "75d5da5e9450c497d95e4281dad7466f723a47ac9a7a00178c312abb935bf0f9"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,
@@ -277,7 +277,7 @@
       "path": "reports/observability/runtime_cardinality_inventory.json"
     },
     "test_governance_report": {
-      "compatibility_test_files": 1,
+      "compatibility_test_files": 0,
       "path": "reports/quality/test-governance-current.json"
     }
   },

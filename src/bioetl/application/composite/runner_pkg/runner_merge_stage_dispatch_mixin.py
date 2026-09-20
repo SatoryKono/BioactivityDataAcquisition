@@ -17,24 +17,29 @@ __all__ = ["_CompositeRunnerMergeStageDispatchMixin"]
 class _CompositeRunnerMergeStageDispatchMixin:
     """Declaration stubs, dispatchers, and recording seams for merge."""
 
-
     async def _save_checkpoint_safe(
         self: _CompositeRunnerMergeStageHostProtocol,
         state: CompositeCheckpointState,
         operation: str,
-    ) -> bool:  # pragma: no cover - declaration-only contract (#10534, review 2026-12-31)
+    ) -> (
+        bool
+    ):  # pragma: no cover - declaration-only contract (#10534, review 2026-12-31)
         raise NotImplementedError
 
     async def _generate_dq_reports(
         self: _CompositeRunnerMergeStageHostProtocol,
         merge_result: MergeResult,
-    ) -> None:  # pragma: no cover - declaration-only contract (#10534, review 2026-12-31)
+    ) -> (
+        None
+    ):  # pragma: no cover - declaration-only contract (#10534, review 2026-12-31)
         raise NotImplementedError
 
     async def _write_cv_quarantine(
         self: _CompositeRunnerMergeStageHostProtocol,
         merge_result: MergeResult,
-    ) -> None:  # pragma: no cover - declaration-only contract (#10534, review 2026-12-31)
+    ) -> (
+        None
+    ):  # pragma: no cover - declaration-only contract (#10534, review 2026-12-31)
         raise NotImplementedError
 
     async def _call_save_checkpoint_safe(

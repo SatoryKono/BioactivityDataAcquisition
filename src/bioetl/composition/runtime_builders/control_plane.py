@@ -70,7 +70,7 @@ def attach_manifest_id[T](
         return cast(
             "T",
             apply_manifest_updates_to_mutable_context(
-                cast("Any", ctx),
+                cast("Any", ctx),  # Any: mutable context host
                 manifest_id,
                 optional_updates=optional_updates,
             ),

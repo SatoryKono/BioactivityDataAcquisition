@@ -50,11 +50,7 @@ def test_shims_declare_sunset_and_codemod() -> None:
     for rel in SHIM_MARKERS:
         text = (ROOT / rel).read_text(encoding="utf-8")
         lowered = text.lower()
-        if not (
-            "sunset" in lowered
-            and "2026-12-31" in text
-            and "codemod" in lowered
-        ):
+        if not ("sunset" in lowered and "2026-12-31" in text and "codemod" in lowered):
             missing.append(rel)
     assert missing == [], (
         "Every compat shim needs a sunset date and a codemod (AUD-010):\n"

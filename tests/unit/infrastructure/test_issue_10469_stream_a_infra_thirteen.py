@@ -10,7 +10,9 @@ import pytest
 
 from bioetl.infrastructure.quality import architecture_debt_artifact_tasks as debt_tasks
 from bioetl.infrastructure.quality import architecture_debt_reduction as debt_reduction
-from bioetl.infrastructure.quality import architecture_quality_scorecard as scorecard_mod
+from bioetl.infrastructure.quality import (
+    architecture_quality_scorecard as scorecard_mod,
+)
 from bioetl.infrastructure.quality import budget_evaluator as budget_mod
 from bioetl.infrastructure.quality import exemptions_registry_policy as policy
 from bioetl.infrastructure.quality import exemptions_registry_targets as targets
@@ -44,7 +46,9 @@ from bioetl.infrastructure.quality.exemptions_registry_policy import (
 from bioetl.infrastructure.quality.exemptions_registry_validation import (
     validate_exemption_entry,
 )
-from bioetl.infrastructure.quality.report_formatter import _resolve_rollout_mode_for_section
+from bioetl.infrastructure.quality.report_formatter import (
+    _resolve_rollout_mode_for_section,
+)
 from bioetl.infrastructure.quality._baseline_validation import (
     _normalize_registry_groups,
     _validate_historical_baseline_metadata,
@@ -64,9 +68,14 @@ class TestScorecardAndBudgetEvaluator:
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         assert scorecard_mod._current_compatibility_debt_metrics("bad") == {}
-        assert scorecard_mod._current_compatibility_debt_metrics({"metrics": "no"}) == {}
+        assert (
+            scorecard_mod._current_compatibility_debt_metrics({"metrics": "no"}) == {}
+        )
         assert scorecard_mod._scorecard_metric_count({"s": "no"}, "s", "m") == 0
-        assert scorecard_mod._scorecard_metric_count({"s": {"metrics": "no"}}, "s", "m") == 0
+        assert (
+            scorecard_mod._scorecard_metric_count({"s": {"metrics": "no"}}, "s", "m")
+            == 0
+        )
         assert (
             scorecard_mod._scorecard_metric_count(
                 {"s": {"metrics": {"m": "no"}}}, "s", "m"
@@ -87,14 +96,19 @@ class TestScorecardAndBudgetEvaluator:
         assert (
             budget_mod._is_owner_decomposition_active(
                 scorecard={
-                    "governance": {"owner_diversification": {"starts_quarter": "not-a-quarter"}}
+                    "governance": {
+                        "owner_diversification": {"starts_quarter": "not-a-quarter"}
+                    }
                 },
                 quarter="also-bad",
             )
             is True
         )
         assert budget_mod._parse_hotspot_entry({"name": 1}) is None
-        assert budget_mod._parse_hotspot_entry({"name": "hot", "path_prefixes": []}) is None
+        assert (
+            budget_mod._parse_hotspot_entry({"name": "hot", "path_prefixes": []})
+            is None
+        )
         assert (
             budget_mod._parse_hotspot_entry(
                 {"name": "hot", "path_prefixes": ["src/"], "registry_budgets": "no"}
@@ -108,7 +122,10 @@ class TestScorecardAndBudgetEvaluator:
             registry_budgets={"file_size_limits": 1},
         )
         assert counts["file_size_limits"] == 1
-        assert evaluate_hotspot_budget_violations(raw_registry={}, scorecard={}) == ([], {})
+        assert evaluate_hotspot_budget_violations(raw_registry={}, scorecard={}) == (
+            [],
+            {},
+        )
         violations, _by_hotspot = evaluate_hotspot_budget_violations(
             raw_registry={"registries": "bad"},
             scorecard={
@@ -204,7 +221,11 @@ class TestBaselineGovernanceAndDebtTasks:
                     "targets": [
                         "skip",
                         {"target": "src/a.py", "duplicate_count": 0},
-                        {"target": "src/b.py", "duplicate_count": 2, "actionability": "no"},
+                        {
+                            "target": "src/b.py",
+                            "duplicate_count": 2,
+                            "actionability": "no",
+                        },
                     ]
                 }
             if path == paths["hotspot_baseline"]:
@@ -212,7 +233,10 @@ class TestBaselineGovernanceAndDebtTasks:
                     "families": [
                         "skip",
                         {"budget_warnings": []},
-                        {"budget_warnings": ["too-big"], "path_prefixes": ["src/bioetl/"]},
+                        {
+                            "budget_warnings": ["too-big"],
+                            "path_prefixes": ["src/bioetl/"],
+                        },
                     ]
                 }
             if path == paths["dead_code_inventory"]:
@@ -250,12 +274,16 @@ class TestExemptionsDebtReductionAndFormatter:
         monkeypatch.setattr(
             policy,
             "load_exemptions_registry",
-            lambda _path=None: {"registries": {"file_size_limits": {"src/bioetl/mod.py": {}}}},
+            lambda _path=None: {
+                "registries": {"file_size_limits": {"src/bioetl/mod.py": {}}}
+            },
         )
         errors = validate_exemption_key_normalization()
         assert any("inside src/ tree" in item for item in errors)
 
-        monkeypatch.setattr(policy, "REQUIRED_EXEMPTION_REGISTRIES", ("file_size_limits", "custom"))
+        monkeypatch.setattr(
+            policy, "REQUIRED_EXEMPTION_REGISTRIES", ("file_size_limits", "custom")
+        )
         monkeypatch.setattr(policy, "EXEMPTION_REGISTRIES_ALLOW_EMPTY", frozenset())
         metadata: list[str] = []
         policy._validate_required_registries(
@@ -307,7 +335,9 @@ class TestExemptionsDebtReductionAndFormatter:
         )
         assert any("classification must be non-empty" in item for item in entry_errors)
         assert any("linked_rf must be non-empty" in item for item in entry_errors)
-        validation._validate_classification("p", {"classification": "nope"}, entry_errors)
+        validation._validate_classification(
+            "p", {"classification": "nope"}, entry_errors
+        )
         assert any("must be one of" in item for item in entry_errors)
 
     def test_exemptions_targets_skip_non_mapping_and_non_str_keys(self) -> None:

@@ -30,7 +30,14 @@ pytestmark = pytest.mark.unit
 
 def test_pubmed_author_skip_collective_and_month_digits() -> None:
     authors = pubmed.build_authors_with_affiliations(
-        [{"last_name": None, "initials": None, "fore_name": None, "collective_name": None}],
+        [
+            {
+                "last_name": None,
+                "initials": None,
+                "fore_name": None,
+                "collective_name": None,
+            }
+        ],
         pii_hasher=None,
     )
     assert authors == []
@@ -47,7 +54,9 @@ def test_pubmed_author_skip_collective_and_month_digits() -> None:
         pii_hasher=None,
     )
     assert hashed[0]["name_hash"] is None
-    assert pubmed._resolve_author_name({"collective_name": "Consortium"}) == "Consortium"
+    assert (
+        pubmed._resolve_author_name({"collective_name": "Consortium"}) == "Consortium"
+    )
     assert pubmed.parse_month(None, {}) is None
     assert pubmed.parse_month("03", {}) == 3
     month, day = pubmed.parse_month_day(

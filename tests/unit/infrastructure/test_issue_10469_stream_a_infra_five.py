@@ -21,13 +21,19 @@ from bioetl.infrastructure.control_plane._file_artifact_lifecycle_refs import (
     _append_lineage_candidates,
     resolve_replay_impact,
 )
-from bioetl.infrastructure.control_plane._file_lineage_queries import FileLineageQueriesMixin
-from bioetl.infrastructure.control_plane._file_run_ledger_queries import FileRunLedgerQueriesMixin
+from bioetl.infrastructure.control_plane._file_lineage_queries import (
+    FileLineageQueriesMixin,
+)
+from bioetl.infrastructure.control_plane._file_run_ledger_queries import (
+    FileRunLedgerQueriesMixin,
+)
 from bioetl.infrastructure.control_plane.file_artifact_lifecycle_reasons import (
     _dedupe_reasons,
     _protected_by,
 )
-from bioetl.infrastructure.control_plane.file_artifact_lifecycle_types import _ProtectedRefs
+from bioetl.infrastructure.control_plane.file_artifact_lifecycle_types import (
+    _ProtectedRefs,
+)
 from bioetl.infrastructure.control_plane.file_contract_registry_store import (
     FileContractRegistryStore,
     RegistryLoadError,
@@ -40,7 +46,9 @@ from bioetl.infrastructure.control_plane.file_lineage_store import FileLineageSt
 from bioetl.infrastructure.control_plane.file_workflow_execution_state_store import (
     FileWorkflowExecutionStateStore,
 )
-from bioetl.infrastructure.control_plane.file_workflow_ledger_store import FileWorkflowLedgerStore
+from bioetl.infrastructure.control_plane.file_workflow_ledger_store import (
+    FileWorkflowLedgerStore,
+)
 from bioetl.infrastructure.control_plane.file_workflow_manifest_store import (
     FileWorkflowManifestStore,
 )
@@ -156,28 +164,40 @@ class TestLifecycleReasonsAndRefs:
         bronze = tmp_path / "batch.jsonl"
         bronze.write_bytes(b"abc")
         empty_refs = _empty_protected()
-        assert _protected_by(
-            surface=ControlPlaneArtifactSurface.CACHED_BRONZE,
-            path=bronze,
-            payload={},
-            protected_refs=empty_refs,
-        ) == ()
+        assert (
+            _protected_by(
+                surface=ControlPlaneArtifactSurface.CACHED_BRONZE,
+                path=bronze,
+                payload={},
+                protected_refs=empty_refs,
+            )
+            == ()
+        )
         assert _dedupe_reasons(["a", "a", "b"]) == ("a", "b")
-        assert resolve_replay_impact(
-            surface=ControlPlaneArtifactSurface.RUN_MANIFEST,
-            decision=ControlPlaneArtifactLifecycleDecision.RETAIN,
-            protected_by=("evidence_floor:manifest:m1",),
-        ) is ControlPlaneArtifactReplayImpact.STRICT_REPLAY_EVIDENCE_PROTECTED
-        assert resolve_replay_impact(
-            surface=ControlPlaneArtifactSurface.RUN_MANIFEST,
-            decision=ControlPlaneArtifactLifecycleDecision.RETAIN,
-            protected_by=("manifest:m1",),
-        ) is ControlPlaneArtifactReplayImpact.RECOVERY_EVIDENCE_PROTECTED
-        assert resolve_replay_impact(
-            surface=ControlPlaneArtifactSurface.RUN_MANIFEST,
-            decision=ControlPlaneArtifactLifecycleDecision.DELETE,
-            protected_by=(),
-        ) is ControlPlaneArtifactReplayImpact.UNPROTECTED_REPLAY_EVIDENCE_DELETE_CANDIDATE
+        assert (
+            resolve_replay_impact(
+                surface=ControlPlaneArtifactSurface.RUN_MANIFEST,
+                decision=ControlPlaneArtifactLifecycleDecision.RETAIN,
+                protected_by=("evidence_floor:manifest:m1",),
+            )
+            is ControlPlaneArtifactReplayImpact.STRICT_REPLAY_EVIDENCE_PROTECTED
+        )
+        assert (
+            resolve_replay_impact(
+                surface=ControlPlaneArtifactSurface.RUN_MANIFEST,
+                decision=ControlPlaneArtifactLifecycleDecision.RETAIN,
+                protected_by=("manifest:m1",),
+            )
+            is ControlPlaneArtifactReplayImpact.RECOVERY_EVIDENCE_PROTECTED
+        )
+        assert (
+            resolve_replay_impact(
+                surface=ControlPlaneArtifactSurface.RUN_MANIFEST,
+                decision=ControlPlaneArtifactLifecycleDecision.DELETE,
+                protected_by=(),
+            )
+            is ControlPlaneArtifactReplayImpact.UNPROTECTED_REPLAY_EVIDENCE_DELETE_CANDIDATE
+        )
 
     def test_manifest_candidate_helpers(self, tmp_path: Path) -> None:
         candidates: list[tuple[ControlPlaneArtifactSurface, Path]] = []
@@ -196,7 +216,10 @@ class TestControlPlaneStores:
     def test_workflow_manifest_miss_and_rollback(self, tmp_path: Path) -> None:
         store = FileWorkflowManifestStore(tmp_path)
         assert store.get("missing") is None
-        assert store.get_by_run_id(RunID(UUID("00000000-0000-4000-8000-000000000001"))) is None
+        assert (
+            store.get_by_run_id(RunID(UUID("00000000-0000-4000-8000-000000000001")))
+            is None
+        )
         assert store.list_all() == ()
         empty_index = tmp_path / "_by_run_id"
         empty_index.mkdir()
@@ -240,21 +263,28 @@ class TestControlPlaneStores:
     def test_run_ledger_queries_miss(self, tmp_path: Path) -> None:
         host = _LedgerHost(tmp_path)
         assert host.list_entries("m1") == []
-        assert host.list_entries_by_run_id(
-            RunID(UUID("00000000-0000-4000-8000-000000000001"))
-        ) == []
+        assert (
+            host.list_entries_by_run_id(
+                RunID(UUID("00000000-0000-4000-8000-000000000001"))
+            )
+            == []
+        )
         assert host.list_entries_after("m1", None) == []
 
     def test_workflow_ledger_and_execution_miss(self, tmp_path: Path) -> None:
         ledger = FileWorkflowLedgerStore(tmp_path)
         assert ledger.list_entries("m1") == []
-        assert ledger.list_entries_by_run_id(
-            RunID(UUID("00000000-0000-4000-8000-000000000001"))
-        ) == []
+        assert (
+            ledger.list_entries_by_run_id(
+                RunID(UUID("00000000-0000-4000-8000-000000000001"))
+            )
+            == []
+        )
         state = FileWorkflowExecutionStateStore(tmp_path)
-        assert state.get_by_run_id(
-            RunID(UUID("00000000-0000-4000-8000-000000000001"))
-        ) is None
+        assert (
+            state.get_by_run_id(RunID(UUID("00000000-0000-4000-8000-000000000001")))
+            is None
+        )
         assert state.get_by_manifest_id("m1") is None
         assert state.get_latest("wf") is None
         (tmp_path / "_latest_by_workflow").mkdir()
@@ -287,9 +317,9 @@ class TestPipelineAndWorkflowConfig:
         with pytest.raises(ValueError, match="provider>_<entity>"):
             pipeline_api.read_pipeline_config_payload("nounderscore")
         assert pipeline_api._get_unified_section({"pipeline": []}, "pipeline") is None
-        assert pipeline_api._get_unified_section({"pipeline": {"x": 1}}, "pipeline") == {
-            "x": 1
-        }
+        assert pipeline_api._get_unified_section(
+            {"pipeline": {"x": 1}}, "pipeline"
+        ) == {"x": 1}
         missing = tmp_path / "gone.yaml"
         assert pipeline_api._load_yaml_mapping(missing) is None
         not_mapping = tmp_path / "list.yaml"

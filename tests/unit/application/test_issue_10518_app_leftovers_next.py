@@ -8,7 +8,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.core._record_processor_span_support import RecordProcessorSpanExecutor
+from bioetl.application.core._record_processor_span_support import (
+    RecordProcessorSpanExecutor,
+)
 from bioetl.application.core.batch_executor_loop_helpers import (
     append_record_and_update_batch_size,
     create_batch_extraction_loop_state,
@@ -254,7 +256,10 @@ def test_replay_taxonomy_and_closure_claim_reasons() -> None:
         unresolved_records=(),
         narrowed_scope_blockers=("m1",),
     )
-    assert blockers["reason"] == "retained_certifiable_scope_still_contains_in_scope_blockers"
+    assert (
+        blockers["reason"]
+        == "retained_certifiable_scope_still_contains_in_scope_blockers"
+    )
     reason = claims.universal_scope_claim_block_reason(
         unresolved_records=(),
         has_irrecoverable=False,

@@ -48,7 +48,11 @@ from bioetl.domain.normalization._chembl_organisms import (
     normalize_chembl_organism_name,
 )
 from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
-from bioetl.domain.run_reports.models import BalanceStatus, LayerCounts, TrackingCoverage
+from bioetl.domain.run_reports.models import (
+    BalanceStatus,
+    LayerCounts,
+    TrackingCoverage,
+)
 from bioetl.domain.run_reports.pipeline_builder import (
     PipelineRunReportOptionalBlocks,
     _derive_performance,
@@ -121,7 +125,9 @@ def test_bioactivity_normalizer_invalid_convert_and_potency_buckets() -> None:
 
 def test_bioactivity_normalizer_batch_and_concentrations() -> None:
     normalizer = BioactivityNormalizer()
-    listed = normalizer.normalize_multiple([100.0, 200.0], "nM", "IC50", aggregate=False)
+    listed = normalizer.normalize_multiple(
+        [100.0, 200.0], "nM", "IC50", aggregate=False
+    )
     assert isinstance(listed, list) and len(listed) == 2
     aggregated = normalizer.normalize_multiple([100.0, 200.0], "nM", "IC50")
     assert aggregated.is_valid is True
@@ -209,7 +215,9 @@ def test_pipeline_builder_reasons_contract_tracking_and_build() -> None:
 
 
 def test_dq_coercion_and_aggregation_group_helpers() -> None:
-    rule = FieldValidation(field="x", validation_type="range", min_value=1.0, max_value=10.0)
+    rule = FieldValidation(
+        field="x", validation_type="range", min_value=1.0, max_value=10.0
+    )
     assert _is_present(0) is True
     assert _coerce_list_like([1]) == [1]
     assert _coerce_list_like({2}) == [2]
@@ -334,4 +342,3 @@ def test_chembl_organism_display_aliases_and_annotations() -> None:
     assert _annotation_is_invalid("") is True
     nested = normalize_chembl_organism_name("Name (outer (inner))")
     assert nested is not None and nested.startswith("Name")
-

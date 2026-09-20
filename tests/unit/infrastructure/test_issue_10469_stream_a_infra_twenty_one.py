@@ -16,8 +16,12 @@ import pyarrow as pa
 import pytest
 
 from bioetl.domain.medallion import SilverWriteMode, WriteModePolicy
-from bioetl.domain.workflow.foreign_key_reconciliation import ForeignKeyReconciliationRequest
-from bioetl.infrastructure.control_plane._file_run_ledger_helpers import append_jsonl_payload
+from bioetl.domain.workflow.foreign_key_reconciliation import (
+    ForeignKeyReconciliationRequest,
+)
+from bioetl.infrastructure.control_plane._file_run_ledger_helpers import (
+    append_jsonl_payload,
+)
 from bioetl.infrastructure.control_plane.file_contract_registry_store import (
     FileContractRegistryStore,
 )
@@ -48,11 +52,15 @@ from bioetl.infrastructure.storage.silver.merge_resilience_helpers import (
     _handle_merge_execution_error,
     _maybe_pre_evolve_on_duplicate_field_error,
 )
-from bioetl.infrastructure.storage.silver.metadata_mixin import SilverWriterMetadataMixin
+from bioetl.infrastructure.storage.silver.metadata_mixin import (
+    SilverWriterMetadataMixin,
+)
 from bioetl.infrastructure.storage.silver.metadata_write_models import (
     _SilverMetadataWriteRequest,
 )
-from bioetl.infrastructure.storage.silver.operations import metadata_write_operations as mwo
+from bioetl.infrastructure.storage.silver.operations import (
+    metadata_write_operations as mwo,
+)
 from bioetl.infrastructure.storage.silver.operations import validation_operations as vo
 from bioetl.infrastructure.storage.silver.operations.validation_operations import (
     SilverValidationOperations,
@@ -184,7 +192,9 @@ async def test_merge_resilience_evolve_and_commit_delay(
     assert slept and slept[0] > 0.0
 
 
-def test_delta_merge_log_skip_inline_timeout(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_delta_merge_log_skip_inline_timeout(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     table = tmp_path / "delta"
     (table / "_delta_log").mkdir(parents=True)
     (table / "_delta_log" / "000.json").write_text("{}", encoding="utf-8")
@@ -199,10 +209,14 @@ def test_delta_merge_log_skip_inline_timeout(tmp_path: Path, monkeypatch: pytest
 
     monkeypatch.setattr(time, "perf_counter", _now)
     with pytest.raises(_MergeExecutionTimeoutError):
-        _execute_merge_inline_with_timeout(merge_callable=lambda: None, timeout_seconds=0.1)
+        _execute_merge_inline_with_timeout(
+            merge_callable=lambda: None, timeout_seconds=0.1
+        )
 
 
-def test_bronze_chunk_flush_and_eexist_link(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_bronze_chunk_flush_and_eexist_link(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     class _Host(BronzeWriterIOMixin):
         COMPRESSION_LEVEL = 1
         COMPRESSION_THREADS = 0
@@ -241,7 +255,9 @@ def test_bronze_chunk_flush_and_eexist_link(tmp_path: Path, monkeypatch: pytest.
         _publish_new_file_exclusive(source, dest)
 
 
-def test_debt_safe_text_none_and_complexity(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_debt_safe_text_none_and_complexity(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(
         "bioetl.infrastructure.quality.architecture_debt_task_support.iter_source_modules",
         lambda _root: [tmp_path / "gone.py"],
@@ -414,7 +430,9 @@ def test_ledger_nested_truncate_oserror(tmp_path: Path) -> None:
         O_RDWR=os.O_RDWR,
         open=lambda *_a, **_k: 7,
         fstat=lambda _fd: SimpleNamespace(st_size=0),
-        write=lambda *_a, payload: 2 if payload else (_ for _ in ()).throw(OSError("fail")),
+        write=lambda *_a, payload: (
+            2 if payload else (_ for _ in ()).throw(OSError("fail"))
+        ),
         ftruncate=lambda *_a, **_k: (_ for _ in ()).throw(OSError("trunc")),
         close=lambda _fd: None,
     )
@@ -437,7 +455,9 @@ def test_ledger_nested_truncate_oserror(tmp_path: Path) -> None:
         )
 
 
-def test_registry_existing_artifact_and_lineage_without_stored_id(tmp_path: Path) -> None:
+def test_registry_existing_artifact_and_lineage_without_stored_id(
+    tmp_path: Path,
+) -> None:
     store = FileContractRegistryStore(tmp_path / "reg.yaml")
     source = tmp_path / "src.yaml"
     source.write_text("ok", encoding="utf-8")

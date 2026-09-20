@@ -35,7 +35,6 @@ __all__ = ["_CompositeRunnerSupportRunMixin"]
 class _CompositeRunnerSupportRunMixin:
     """Preflight gates, seed execution, and enricher runtime policy."""
 
-
     def _validate_config_consistency(
         self: _CompositeRunnerSupportHostProtocol,
     ) -> None:

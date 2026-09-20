@@ -17,7 +17,6 @@ from bioetl.domain.workflow.foreign_key_reconciliation import (
 from bioetl.domain.workflow.foreign_key_reconciliation_models import (
     ForeignKeyReconciliationRequest,
     ForeignKeyReconciliationResult,
-    ReferenceCompletenessStatus,
 )
 
 __all__ = [

@@ -36,7 +36,9 @@ _CLOSED_CERTIFICATION_STATUSES = frozenset({"already_replayable", "already_certi
 
 
 class _HistoricalCorpusReader(Protocol):
-    def build_certifiability_inventory(self) -> HistoricalReplayCertifiabilityInventory: ...
+    def build_certifiability_inventory(
+        self,
+    ) -> HistoricalReplayCertifiabilityInventory: ...
 
 
 @dataclass(frozen=True, slots=True)

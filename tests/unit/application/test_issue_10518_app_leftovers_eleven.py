@@ -107,11 +107,14 @@ def test_workflow_replay_and_diagnostics_leftovers() -> None:
         is factory
     )
     assert coerce_int("nope") == 0
-    assert universal_scope_claim_block_reason(
-        unresolved_records=(),
-        has_irrecoverable=False,
-        unsupported_count=0,
-    ) == "historical_replay_closure_program_not_yet_completed"
+    assert (
+        universal_scope_claim_block_reason(
+            unresolved_records=(),
+            has_irrecoverable=False,
+            unsupported_count=0,
+        )
+        == "historical_replay_closure_program_not_yet_completed"
+    )
     assert (
         _suggested_disposition(
             SimpleNamespace(certification_status="outside_certified_historical_scope")  # type: ignore[arg-type]

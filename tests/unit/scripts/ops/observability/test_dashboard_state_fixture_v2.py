@@ -83,8 +83,10 @@ def test_stub_server_serves_selected_response() -> None:
     host, port = server.server_address
     thread = threading.Thread(target=server.handle_request, daemon=True)
     thread.start()
+    # Bypass proxy env vars: the stub binds loopback and must be reached directly.
+    direct_opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
     try:
-        urllib.request.urlopen(f"http://{host}:{port}/prom", timeout=3)
+        direct_opener.open(f"http://{host}:{port}/prom", timeout=3)
         raise AssertionError("expected HTTP 503")
     except urllib.error.HTTPError as exc:
         assert exc.code == 503

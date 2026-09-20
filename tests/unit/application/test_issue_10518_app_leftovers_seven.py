@@ -11,7 +11,9 @@ from xml.etree.ElementTree import Element
 import pytest
 
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
-from bioetl.application.pipelines.pubmed.extractors.identifier import IdentifierExtractor
+from bioetl.application.pipelines.pubmed.extractors.identifier import (
+    IdentifierExtractor,
+)
 from bioetl.application.services.control_plane.manifest.diagnostics.source_refs import (
     _attach_rich_composite_replay_support,
 )
@@ -175,7 +177,9 @@ def test_audit_lineage_export_and_filtered(monkeypatch: pytest.MonkeyPatch) -> N
     store = MagicMock()
     store.list_by_manifest_id.return_value = ()
     service = LineageInspectionService(lineage_store=store, manifest_port=None)
-    monkeypatch.setattr(LineageInspectionService, "_parse_run_id", lambda self, ident: None)
+    monkeypatch.setattr(
+        LineageInspectionService, "_parse_run_id", lambda self, ident: None
+    )
     assert service._resolve_via_direct_indexes("missing") is None
     options = ExportOptions(role="admin")
     assert _should_redact_columns(("email",), options=options) is False
@@ -199,8 +203,13 @@ async def test_filtered_quarantine_not_found_and_success() -> None:
 
     host = _Host()
     host.quarantine_port.get_filtered_record.return_value = None
-    assert await host.get_filtered_record(payload_hash="h", pipeline="chembl_activity") is None
-    host.quarantine_port.get_filtered_record.return_value = {"pipeline": "chembl_activity"}
+    assert (
+        await host.get_filtered_record(payload_hash="h", pipeline="chembl_activity")
+        is None
+    )
+    host.quarantine_port.get_filtered_record.return_value = {
+        "pipeline": "chembl_activity"
+    }
     found = await host.get_filtered_record(payload_hash="h", pipeline="chembl_activity")
     assert found == {"pipeline": "chembl_activity"}
 
@@ -261,5 +270,7 @@ def test_ledger_provenance_source_refs_and_upstream(
         validate_upstream_certification_state(
             ledger_port=MagicMock(list_entries=lambda _mid: ()),
             upstream_manifest=SimpleNamespace(manifest_id="m1"),  # type: ignore[arg-type]
-            summary_builder=lambda *_a, **_k: {"broader_historical_exact_replay_state": "open"},
+            summary_builder=lambda *_a, **_k: {
+                "broader_historical_exact_replay_state": "open"
+            },
         )

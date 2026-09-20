@@ -113,7 +113,9 @@ def test_lineage_preflight_and_replay_refresh(monkeypatch: pytest.MonkeyPatch) -
     store = MagicMock()
     port = MagicMock()
     service = LineageInspectionService(lineage_store=store, manifest_port=port)
-    monkeypatch.setattr(LineageInspectionService, "_parse_run_id", lambda self, ident: "run-1")
+    monkeypatch.setattr(
+        LineageInspectionService, "_parse_run_id", lambda self, ident: "run-1"
+    )
     port.get.return_value = None
     port.get_by_run_id.return_value = None
     assert service._resolve_via_manifest("missing") is None
@@ -122,7 +124,9 @@ def test_lineage_preflight_and_replay_refresh(monkeypatch: pytest.MonkeyPatch) -
         def _load_pipeline_profile(self, pipeline_name: str) -> object:
             return {"ok": True} if pipeline_name == "chembl_document" else None
 
-        def _register_source_aliases(self, result: dict[str, object], **kwargs: object) -> None:
+        def _register_source_aliases(
+            self, result: dict[str, object], **kwargs: object
+        ) -> None:
             result[str(kwargs.get("pipeline_name"))] = kwargs.get("fields")
 
     host = _Host()

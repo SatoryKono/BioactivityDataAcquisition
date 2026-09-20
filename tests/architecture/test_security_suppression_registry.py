@@ -53,9 +53,9 @@ def test_suppression_registry_has_expected_shape() -> None:
         assert entry["rule"] in payload["scope"]["rules"], entry["id"]
         assert str(entry["rationale"]).strip(), entry["id"]
         assert entry["owner"] in ALLOWED_OWNERS, entry["id"]
-        assert date.fromisoformat(str(entry["review_date"])) >= POLICY_TODAY, (
-            entry["id"]
-        )
+        assert date.fromisoformat(str(entry["review_date"])) >= POLICY_TODAY, entry[
+            "id"
+        ]
 
 
 @pytest.mark.architecture
@@ -90,6 +90,6 @@ def test_suppression_lines_point_at_registry() -> None:
         for (path, rule), lines in live.items()
         if not any(POINTER_TEXT in line for line in lines)
     )
-    assert missing == [], (
-        "Suppression lines must point at the registry:\n" + "\n".join(missing)
+    assert missing == [], "Suppression lines must point at the registry:\n" + "\n".join(
+        missing
     )

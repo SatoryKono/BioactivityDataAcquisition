@@ -34,12 +34,16 @@ from bioetl.infrastructure.control_plane._file_artifact_lifecycle_manifest_prote
 from bioetl.infrastructure.control_plane._file_artifact_lifecycle_refs import (
     _append_lineage_candidates,
 )
-from bioetl.infrastructure.control_plane._file_lineage_queries import FileLineageQueriesMixin
+from bioetl.infrastructure.control_plane._file_lineage_queries import (
+    FileLineageQueriesMixin,
+)
 from bioetl.infrastructure.control_plane._file_run_ledger_helpers import (
     append_jsonl_payload,
     truncate_ledger_to_offset,
 )
-from bioetl.infrastructure.control_plane._file_run_ledger_queries import FileRunLedgerQueriesMixin
+from bioetl.infrastructure.control_plane._file_run_ledger_queries import (
+    FileRunLedgerQueriesMixin,
+)
 from bioetl.infrastructure.control_plane._raw_run_manifest_inspection import (
     ContractEvidenceConflictError,
     RawRunManifestInspectionMixin,
@@ -60,8 +64,12 @@ from bioetl.infrastructure.control_plane.file_artifact_lifecycle_payloads import
     _input_snapshot_ids,
     _is_payload_stale,
 )
-from bioetl.infrastructure.control_plane.file_artifact_lifecycle_reasons import _protected_by
-from bioetl.infrastructure.control_plane.file_artifact_lifecycle_types import _ProtectedRefs
+from bioetl.infrastructure.control_plane.file_artifact_lifecycle_reasons import (
+    _protected_by,
+)
+from bioetl.infrastructure.control_plane.file_artifact_lifecycle_types import (
+    _ProtectedRefs,
+)
 from bioetl.infrastructure.control_plane.file_contract_registry_store import (
     FileContractRegistryStore,
     RegistryLoadError,
@@ -72,7 +80,9 @@ from bioetl.infrastructure.control_plane.file_effective_config_artifact_store im
     _normalize_semantic_payload_for_conflict_check,
 )
 from bioetl.infrastructure.control_plane.file_lineage_store import FileLineageStore
-from bioetl.infrastructure.control_plane.file_provider_health_evidence import _record_from_path
+from bioetl.infrastructure.control_plane.file_provider_health_evidence import (
+    _record_from_path,
+)
 from bioetl.infrastructure.control_plane.file_workflow_ledger_store import (
     FileWorkflowLedgerStore,
     _append_jsonl_payload,
@@ -99,7 +109,9 @@ def _empty_protected() -> _ProtectedRefs:
     )
 
 
-def _archive_case(tmp_path: Path) -> tuple[FileArchiveStore, RunManifest, ControlPlaneArtifactLifecyclePlan]:
+def _archive_case(
+    tmp_path: Path,
+) -> tuple[FileArchiveStore, RunManifest, ControlPlaneArtifactLifecyclePlan]:
     data = tmp_path / "data"
     data.mkdir()
     manifest = RunManifest(
@@ -115,7 +127,9 @@ def _archive_case(tmp_path: Path) -> tuple[FileArchiveStore, RunManifest, Contro
         launch_context={"archive_policy": {"required": True, "policy_ref": "local-v1"}},
         code_provenance=RunCodeProvenance(),
     )
-    (data / "manifest.json").write_text(json.dumps(manifest.to_dict()), encoding="utf-8")
+    (data / "manifest.json").write_text(
+        json.dumps(manifest.to_dict()), encoding="utf-8"
+    )
     (data / "ledger.jsonl").write_text("ledger evidence\n", encoding="utf-8")
     artifacts = tuple(
         ControlPlaneArtifactRef(
@@ -167,13 +181,23 @@ class _LedgerHost(FileRunLedgerQueriesMixin):
 
 
 class TestFileArchiveStoreLeftovers:
-    def test_inventory_and_entry_helpers_reject_invalid_shapes(self, tmp_path: Path) -> None:
+    def test_inventory_and_entry_helpers_reject_invalid_shapes(
+        self, tmp_path: Path
+    ) -> None:
         sources = {"a.txt": tmp_path / "a.txt"}
         sources["a.txt"].write_text("ok", encoding="utf-8")
-        assert archive_module._inventory_error("not-list", sources) == "archive_index_invalid"
-        assert archive_module._inventory_error(["not-dict"], sources) == "archive_index_invalid"
         assert (
-            archive_module._entry_error("not-dict", sources=sources, seen=set(), pack=tmp_path)
+            archive_module._inventory_error("not-list", sources)
+            == "archive_index_invalid"
+        )
+        assert (
+            archive_module._inventory_error(["not-dict"], sources)
+            == "archive_index_invalid"
+        )
+        assert (
+            archive_module._entry_error(
+                "not-dict", sources=sources, seen=set(), pack=tmp_path
+            )
             == "archive_index_invalid"
         )
         assert (
@@ -300,7 +324,9 @@ class TestManifestProtectionsAndInspection:
             lambda **_kwargs: (_ for _ in ()).throw(ValueError("unknown family")),
         )
         assert (
-            supports_historical_replay_floor({"provider": "chembl", "entity": "activity"})
+            supports_historical_replay_floor(
+                {"provider": "chembl", "entity": "activity"}
+            )
             is False
         )
         assert payload_contract_ref({"code_provenance": "bad"}) is None
@@ -397,7 +423,9 @@ class TestArtifactComparisonAndPayloads:
 
 
 class TestLineageLedgerManifestStores:
-    def test_lineage_rollback_restore_and_stored_id_mismatch(self, tmp_path: Path) -> None:
+    def test_lineage_rollback_restore_and_stored_id_mismatch(
+        self, tmp_path: Path
+    ) -> None:
         store = FileLineageStore(tmp_path)
         fragment_path = store._fragment_path("frag-1")
         fragment_path.parent.mkdir(parents=True)
@@ -408,7 +436,10 @@ class TestLineageLedgerManifestStores:
             existing_fragment_payload='{"fragment_id": "frag-1"}',
             index_rollbacks=[(index_dir, 0)],
         )
-        assert json.loads(fragment_path.read_text(encoding="utf-8"))["fragment_id"] == "frag-1"
+        assert (
+            json.loads(fragment_path.read_text(encoding="utf-8"))["fragment_id"]
+            == "frag-1"
+        )
         fragment_path.write_text(
             json.dumps(
                 {
@@ -442,7 +473,9 @@ class TestLineageLedgerManifestStores:
             raise OSError("write failed")
 
         monkeypatch.setattr(os, "write", partial_write)
-        monkeypatch.setattr(os, "ftruncate", lambda *_args: (_ for _ in ()).throw(OSError("trunc")))
+        monkeypatch.setattr(
+            os, "ftruncate", lambda *_args: (_ for _ in ()).throw(OSError("trunc"))
+        )
         with pytest.raises(OSError, match="write failed"):
             _append_jsonl_payload(target, b"abcdef\n")
 
@@ -547,7 +580,9 @@ class TestContractRegistryHealthConfigAndRefs:
             store.save(registry)  # type: ignore[arg-type]
         source = tmp_path / "src.yaml"
         source.write_text("ok", encoding="utf-8")
-        entry = SimpleNamespace(source_path=str(source), published_artifacts=["missing.art"])
+        entry = SimpleNamespace(
+            source_path=str(source), published_artifacts=["missing.art"]
+        )
         result = store.validate_filesystem_consistency(
             SimpleNamespace(entries={"c.e": entry})  # type: ignore[arg-type]
         )
@@ -599,7 +634,9 @@ class TestContractRegistryHealthConfigAndRefs:
         )
         assert _record_from_path(payload) is None
 
-    def test_effective_config_empty_index_and_semantic_normalize(self, tmp_path: Path) -> None:
+    def test_effective_config_empty_index_and_semantic_normalize(
+        self, tmp_path: Path
+    ) -> None:
         store = FileEffectiveConfigArtifactStore(tmp_path)
         index_dir = tmp_path / "_by_run_id"
         index_dir.mkdir()
@@ -624,12 +661,18 @@ class TestContractRegistryHealthConfigAndRefs:
     def test_lineage_index_corrupt_and_cached_bronze_reasons(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        from bioetl.infrastructure.control_plane import _file_artifact_lifecycle_refs as refs_mod
-        from bioetl.infrastructure.control_plane._file_lineage_index import stable_key_filename
+        from bioetl.infrastructure.control_plane import (
+            _file_artifact_lifecycle_refs as refs_mod,
+        )
+        from bioetl.infrastructure.control_plane._file_lineage_index import (
+            stable_key_filename,
+        )
 
         index_dir = tmp_path / "lineage" / "_by_manifest_id"
         index_dir.mkdir(parents=True)
-        (index_dir / f"{stable_key_filename('m1')}.jsonl").write_text("x\n", encoding="utf-8")
+        (index_dir / f"{stable_key_filename('m1')}.jsonl").write_text(
+            "x\n", encoding="utf-8"
+        )
         monkeypatch.setattr(
             refs_mod,
             "load_fragment_ids",

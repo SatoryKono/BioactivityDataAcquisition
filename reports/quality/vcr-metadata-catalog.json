@@ -1842,6 +1842,7 @@
         "tests/unit/infrastructure/adapters/test_sync_base.py",
         "tests/unit/infrastructure/adapters/uniprot/test_adapter.py",
         "tests/unit/infrastructure/factories/test_storage_adapter.py",
+        "tests/unit/infrastructure/test_issue_10469_stream_a_infra_adapters.py",
         "tests/unit/infrastructure/test_storage_factory.py",
         "tests/unit/interfaces/cli/commands/test_health.py"
       ]

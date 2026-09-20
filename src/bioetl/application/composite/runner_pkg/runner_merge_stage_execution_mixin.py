@@ -45,7 +45,6 @@ __all__ = ["_CompositeRunnerMergeStageExecutionMixin"]
 class _CompositeRunnerMergeStageExecutionMixin:
     """Merge execution, dry-run handling, and pipeline finalization."""
 
-
     def _transition_to_merging_state(
         self: _CompositeRunnerMergeStageHostProtocol,
         state: CompositeCheckpointState,

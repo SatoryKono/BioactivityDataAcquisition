@@ -20,8 +20,7 @@ def test_sync_pkg_init_has_no_star_imports() -> None:
         for lineno, line in enumerate(
             INIT.read_text(encoding="utf-8").splitlines(), start=1
         )
-        if re.search(r"^\s*from\s+\S+\s+import\s+\*", line)
-        or "noqa: F403" in line
+        if re.search(r"^\s*from\s+\S+\s+import\s+\*", line) or "noqa: F403" in line
     ]
     assert offenders == []
 
@@ -42,9 +41,7 @@ def test_sync_pkg_lazy_exports_resolve_and_reject_unknown() -> None:
     import memory.graph.sync_pkg as pkg
     from memory.graph.sync_pkg import _core as core_mod
 
-    assert getattr(pkg, core_mod.__all__[0]) is getattr(
-        core_mod, core_mod.__all__[0]
-    )
+    assert getattr(pkg, core_mod.__all__[0]) is getattr(core_mod, core_mod.__all__[0])
     assert pkg.CLI_FLAG_DEFINITIONS is not None
     with pytest.raises(AttributeError):
         pkg.definitely_not_an_export_zzz
