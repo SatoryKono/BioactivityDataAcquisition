@@ -538,11 +538,11 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 113
-      total_loc: 14512
+      total_loc: 14510
       files_ge_250_loc: 0
       helper_function_ratio: 0.375
-      max_internal_fan_in: 3
-      max_internal_fan_in_module: bioetl.application.services.control_plane.replay.historical_corpus_models
+      max_internal_fan_in: 1
+      max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_models
     trend:
       status: reduced_2026-09-16_issue_10468_coupling_closeout
       next_action: '2026-09-16 #10468/#10472-#10475: control-plane max_internal_fan_in 2->1 and files
@@ -566,7 +566,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 55
-      total_loc: 7122
+      total_loc: 7118
       files_ge_250_loc: 0
       helper_function_ratio: 0.38
       max_internal_fan_in: 2
