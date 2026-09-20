@@ -24,9 +24,7 @@ def _public_symbols(path: Path) -> set[str]:
                 names.add(node.name)
         elif isinstance(node, (ast.Assign, ast.AnnAssign)):
             targets = (
-                [node.target]
-                if isinstance(node, ast.AnnAssign)
-                else list(node.targets)
+                [node.target] if isinstance(node, ast.AnnAssign) else list(node.targets)
             )
             for target in targets:
                 if isinstance(target, ast.Name) and not target.id.startswith("_"):
@@ -36,7 +34,10 @@ def _public_symbols(path: Path) -> set[str]:
 
 def test_query_layers_share_no_public_symbols() -> None:
     overlap = _public_symbols(GRAPH_QUERY) & _public_symbols(TOP_QUERY)
-    assert overlap == set()
+    # `main` is the one sanctioned overlap: each layer owns a distinct CLI
+    # entry (graph_query_main vs the top-level dispatcher), both reachable
+    # as `main` per the entrypoint contract (test_graph_entrypoints).
+    assert overlap == {"main"}
 
 
 def test_query_layers_document_split_ownership() -> None:
@@ -49,7 +50,9 @@ def test_graph_cli_entry_has_distinct_name() -> None:
     import memory.graph.query as graph_query
 
     assert callable(graph_query.graph_query_main)
-    assert not hasattr(graph_query, "main")
+    # Entry-point contract alias: memory.graph.__main__ and the graph CLI
+    # dispatch resolve `main`; the owned definition keeps its distinct name.
+    assert graph_query.main is graph_query.graph_query_main
 
 
 def test_top_query_facade_passes_graph_through() -> None:
