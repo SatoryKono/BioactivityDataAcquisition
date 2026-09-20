@@ -22,18 +22,30 @@ POST_MANIFEST_SNAPSHOT_MATERIALIZATION_MODES = frozenset(
 )
 
 
+def _snapshot_materialization_mode(snapshot: Mapping[str, object]) -> str:
+    """Return the stripped materialization mode or empty string."""
+    return str(snapshot.get("materialization_mode") or "").strip()
+
+
+def _collect_materialization_modes(
+    input_snapshots: list[dict[str, object]],
+) -> list[str]:
+    """Collect distinct non-empty materialization modes in sorted order."""
+    collected: list[str] = []
+    for snapshot in input_snapshots:
+        if not isinstance(snapshot, Mapping):
+            continue
+        mode = _snapshot_materialization_mode(snapshot)
+        if mode:
+            collected.append(mode)
+    return sorted(set(collected))
+
+
 def resolve_post_manifest_input_snapshot_materialization_mode(
     input_snapshots: list[dict[str, object]],
 ) -> str | None:
     """Return the deterministic post-manifest materialization mode summary."""
-    modes = sorted(
-        {
-            str(snapshot.get("materialization_mode") or "").strip()
-            for snapshot in input_snapshots
-            if isinstance(snapshot, Mapping)
-            and str(snapshot.get("materialization_mode") or "").strip()
-        }
-    )
+    modes = _collect_materialization_modes(input_snapshots)
     if not modes:
         return None
     if len(modes) == 1:

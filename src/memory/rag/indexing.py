@@ -131,13 +131,15 @@ def _resolve_rag_sources(
 
 def _section_symbol_name(section: Any) -> str | None:
     if section.symbol_kind in {"class", "function", "async_function"}:
-        return section.title
+        title = section.title
+        return title if isinstance(title, str) else None
     return None
 
 
 def _section_symbol_display(section: Any) -> str | None:
     if section.symbol_kind not in {None, "markdown_section", "config_document"}:
-        return section.title
+        title = section.title
+        return title if isinstance(title, str) else None
     return None
 
 

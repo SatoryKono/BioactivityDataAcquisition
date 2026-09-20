@@ -32,9 +32,9 @@ services:
       # Must match Grafana BIOETL_EXPECTED_RUNTIME_SOURCE_ID (runtime_manager injects).
       - BIOETL_RUNTIME_SOURCE_ID=${BIOETL_RUNTIME_SOURCE_ID:-unmanaged}
       - BIOETL_REPORT_ROOT=${BIOETL_REPORT_ROOT:-/app/reports/run-reports}
-      # Optional container-visible archive path, explicitly supplied by operator.
-      # Unset means omitted, preserving the application's None default.
-      - BIOETL_ARCHIVE_ROOT
+      # Local archive reader. Default lives inside the reports bind so host
+      # producer packs are visible; an empty pack tree stays UNKNOWN.
+      - BIOETL_ARCHIVE_ROOT=${BIOETL_ARCHIVE_ROOT:-/app/reports/local/gf14-archive/verified}
       - BIOETL_ENFORCE_REPORT_ROOT_MARKER=${BIOETL_ENFORCE_REPORT_ROOT_MARKER:-1}
     labels:
       io.bioetl.dashboard-source-id: ${BIOETL_RUNTIME_SOURCE_ID:-unmanaged}

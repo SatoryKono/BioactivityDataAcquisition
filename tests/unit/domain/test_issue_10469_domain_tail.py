@@ -22,7 +22,7 @@ import bioetl.domain.mapping.publication_controlled_vocabulary as publication_vo
 import bioetl.domain.normalization.profiles as profiles_facade
 import bioetl.domain.registry.publication_data as publication_data
 from bioetl.domain.behavior._dq_serializer_yaml import format_yaml_scalar
-from bioetl.domain.behavior.composite_validation_layer import (
+from bioetl.domain.behavior.validation_result_envelopes import (
     _require_composite_validation_report,
 )
 from bioetl.domain.behavior.composite_validation_shapes import (
@@ -208,9 +208,9 @@ def test_hard_fail_verdict_reports_threshold_crossing() -> None:
         warning_threshold=0.25,
         failure_threshold=0.5,
     )
-    stage, message = StagedEnforcementEngine({"coverage": policy}).get_enforcement_verdict(
-        "coverage", failure_count=3, total_count=4
-    )
+    stage, message = StagedEnforcementEngine(
+        {"coverage": policy}
+    ).get_enforcement_verdict("coverage", failure_count=3, total_count=4)
 
     assert stage is EnforcementStage.HARD_FAIL
     assert message == "Hard fail threshold exceeded (75.0% >= 50.0%)"
@@ -231,7 +231,9 @@ def test_dq_config_rejects_unsupported_disposition_override_container() -> None:
 
 
 def test_bioactivity_alias_extractor_returns_first_truthy_value() -> None:
-    assert _first_truthy_value({"primary": "", "fallback": 7}, "primary", "fallback") == 7
+    assert (
+        _first_truthy_value({"primary": "", "fallback": 7}, "primary", "fallback") == 7
+    )
 
 
 def test_chembl_tissue_text_helper_preserves_non_strings() -> None:
@@ -280,7 +282,12 @@ def test_unknown_legacy_publication_alias_has_no_rewrite_message(
 
 
 def test_checkpoint_without_execution_identity_has_no_fingerprint() -> None:
-    assert CheckpointMetadata(records_processed=0).checkpoint_execution_identity_fingerprint() is None
+    assert (
+        CheckpointMetadata(
+            records_processed=0
+        ).checkpoint_execution_identity_fingerprint()
+        is None
+    )
 
 
 def test_issn_rejects_checksum_mismatch() -> None:

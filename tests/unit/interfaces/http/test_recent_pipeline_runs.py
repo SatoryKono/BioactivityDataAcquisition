@@ -350,6 +350,27 @@ def test_exact_lookup_precedes_recent_limit_and_respects_scope(tmp_path):
     assert len(_list(tmp_path, lookup_run_id=" ")["items"]) == 10
 
 
+@pytest.mark.parametrize(
+    ("seconds", "expected"),
+    [
+        (0, "0 s"),
+        (10, "10 s"),
+        (59.4, "59 s"),
+        (59.6, "1 m"),
+        (60, "1 m"),
+        (90, "1 m 30 s"),
+        (2700, "45 m"),
+        (3600, "1 h"),
+        (7200, "2 h"),
+        (60750, "16 h 53 m"),
+    ],
+)
+def test_format_compact_duration(seconds: float, expected: str) -> None:
+    from bioetl.interfaces.http.recent_pipeline_runs import _format_compact_duration
+
+    assert _format_compact_duration(seconds) == expected
+
+
 def test_elapsed_fields_use_event_evidence_only():
     from bioetl.interfaces.http.recent_pipeline_runs import _timing_fields
 
@@ -360,14 +381,16 @@ def test_elapsed_fields_use_event_evidence_only():
     }
     assert _timing_fields(row, NOW) == {
         "duration_seconds": None,
+        "duration_display": None,
         "last_event_age_seconds": 10,
         "event_age_display": "10 s",
     }
     row.update(status="success", completed_at=NOW.isoformat())
     assert _timing_fields(row, NOW) == {
         "duration_seconds": 60,
+        "duration_display": "1 m",
         "last_event_age_seconds": None,
-        "event_age_display": "N/A — completed",
+        "event_age_display": "completed",
     }
     row.update(
         status="running",
@@ -376,6 +399,7 @@ def test_elapsed_fields_use_event_evidence_only():
     )
     assert _timing_fields(row, NOW) == {
         "duration_seconds": None,
+        "duration_display": None,
         "last_event_age_seconds": None,
         "event_age_display": "UNKNOWN",
     }

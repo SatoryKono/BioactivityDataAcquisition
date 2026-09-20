@@ -159,6 +159,24 @@ Minimum expectation:
 - For Prometheus alert or recording-rule edits, tests, or query diagnosis,
   agents **SHOULD** use `.codex/skills/observability-prometheus/`.
 
+## OpenCode GitHub Repo Agent (Phase 1, subordinate surface)
+
+- `opencode.json`, `.opencode/agent/**`, `.opencode/command/**` — OpenCode
+  discovery surface, wired to the Meta Model API (`model_api/muse-spark-1.3-contributor`,
+  key from `MUSE_API_KEY` (GitHub secret in CI, `.env` locally — значение
+  никогда не копируется в репозиторий).
+- `.github/workflows/opencode-pr-review.yml`, `opencode-triage.yml` — Phase 1
+  only (read-only review + triage). Write paths (`/oc`, `agent-fix`) stay
+  disabled until Phase 1 is validated on real PRs/issues.
+- This surface is subordinate to the canonical precedence above; it MUST NOT
+  redefine runtime behavior. BioETL guardrails (`.env` untouched, no Docker/Redis,
+  tech-debt budgets only down, root hygiene) apply to every OpenCode agent.
+- Key files agents should read: `README.md`, `CONTRIBUTING.md`,
+  `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`, accepted
+  ADRs in `docs/02-architecture/decisions/`.
+- Provenance: `meta-model-cookbook/03_use_cases/11_github_repo_agent`
+  (agent prompts verbatim, `AGENTS.md` SECURITY model merged here, not replaced).
+
 ## Related Files
 
 - `docs/00-project/NORMATIVE_SOURCES.md`

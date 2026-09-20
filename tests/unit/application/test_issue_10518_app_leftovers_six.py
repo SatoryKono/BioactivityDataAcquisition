@@ -79,7 +79,9 @@ def test_openalex_journal_and_abstract_fallbacks() -> None:
     assert reconstruct_abstract({"word": []}) is None
 
 
-def test_schema_missing_join_identity_and_sinks(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_schema_missing_join_identity_and_sinks(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     assert resolve_pandera_schema(None) is None
     schema = SimpleNamespace(columns={"id": object()})
     assert resolve_pandera_schema(schema) is schema

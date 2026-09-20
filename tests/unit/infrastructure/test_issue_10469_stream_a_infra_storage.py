@@ -14,7 +14,9 @@ import pytest
 from bioetl.domain.models.metadata import InputSnapshotRef, SourceMetadata
 from bioetl.domain.ports import RowReconciliationConfig, RowReconciliationLayer
 from bioetl.domain.types import BatchID, RunID, RunType
-from bioetl.domain.workflow.foreign_key_reconciliation import ForeignKeyReconciliationRequest
+from bioetl.domain.workflow.foreign_key_reconciliation import (
+    ForeignKeyReconciliationRequest,
+)
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.bronze.metadata_builders import (
     BronzeLineageMetadataRequest,
@@ -134,7 +136,9 @@ class TestBuilderBase:
             lambda *_a, **_k: (_ for _ in ()).throw(FileNotFoundError("git")),
         )
         assert _get_git_commit_cached() is None
-        builder = _MetadataBuilderBase(transform_version="9.0.0", transform_steps=("a",))
+        builder = _MetadataBuilderBase(
+            transform_version="9.0.0", transform_steps=("a",)
+        )
         runtime, pipeline, lineage = builder._build_composite_runtime_pipeline_lineage(
             table_name="chembl.activity",
             now=datetime(2024, 1, 1, tzinfo=UTC),
@@ -203,13 +207,23 @@ class TestForeignKeySupport:
         )
         assert dry.would_mutate is True
         record_reconciliation_metrics(
-            None, scanned=1, retained=1, deleted=0,
-            scanned_metric="s", retained_metric="r", deleted_metric="d",
+            None,
+            scanned=1,
+            retained=1,
+            deleted=0,
+            scanned_metric="s",
+            retained_metric="r",
+            deleted_metric="d",
         )
         metrics = MagicMock()
         record_reconciliation_metrics(
-            metrics, scanned=1, retained=1, deleted=0,
-            scanned_metric="s", retained_metric="r", deleted_metric="d",
+            metrics,
+            scanned=1,
+            retained=1,
+            deleted=0,
+            scanned_metric="s",
+            retained_metric="r",
+            deleted_metric="d",
         )
         metrics.increment_counter.assert_called()
         emit_reconcile_debug_artifacts(
@@ -238,7 +252,9 @@ class TestForeignKeySupport:
         with pytest.raises(ValueError, match="safe SQL identifier"):
             require_sql_identifier("1bad", "col")
         rows = [{"_is_current": True, "id": "1"}]
-        assert resolve_present_column(rows, ("_is_current", "is_current")) == "_is_current"
+        assert (
+            resolve_present_column(rows, ("_is_current", "is_current")) == "_is_current"
+        )
         with pytest.raises(ValueError, match="SCD2 metadata column"):
             resolve_present_column([{"id": "1"}], ("_is_current",))
         keys = resolve_mutation_identity_keys(
@@ -302,9 +318,12 @@ class TestBronzeMetadata:
             query_fingerprint=None,
             captured_at=None,
         )
-        assert build_bronze_source_metadata_with_live_snapshot(
-            source_metadata=None, snapshot=None
-        ) is None
+        assert (
+            build_bronze_source_metadata_with_live_snapshot(
+                source_metadata=None, snapshot=None
+            )
+            is None
+        )
         created = build_bronze_source_metadata_with_live_snapshot(
             source_metadata=None, snapshot=snapshot
         )
@@ -315,9 +334,12 @@ class TestBronzeMetadata:
             source_metadata=source, snapshot=snapshot
         )
         assert same is source
-        assert build_live_input_snapshot_ref_if_available(
-            base_path=tmp_path, relative_path="missing.jsonl", query_string=None
-        ) is None
+        assert (
+            build_live_input_snapshot_ref_if_available(
+                base_path=tmp_path, relative_path="missing.jsonl", query_string=None
+            )
+            is None
+        )
         batch = tmp_path / "batch.jsonl"
         batch.write_bytes(b"abc")
         live = build_live_input_snapshot_ref(
@@ -375,12 +397,18 @@ class TestLineagePersistence:
     def test_publication_required_and_metrics(self) -> None:
         assert lineage_fragment_publication_required(None) is False
         coordinator = SimpleNamespace(
-            run_context=SimpleNamespace(exact_replay=True, required_persistence_profile="")
+            run_context=SimpleNamespace(
+                exact_replay=True, required_persistence_profile=""
+            )
         )
         assert lineage_fragment_publication_required(coordinator) is True
         metrics = MagicMock()
         emit_lineage_refs_missing_metric(
-            metrics, pipeline_name=None, layer="gold", ref_type="silver", missing_count=0
+            metrics,
+            pipeline_name=None,
+            layer="gold",
+            ref_type="silver",
+            missing_count=0,
         )
         metrics.increment_counter.assert_not_called()
         emit_lineage_refs_missing_metric(
@@ -391,7 +419,9 @@ class TestLineagePersistence:
             pipeline_name="p",
             layer="gold",
             sources_used=["chembl"],
-            records=[{"_source_providers": ["pubmed"], "_field_sources": {"id": "chembl"}}],
+            records=[
+                {"_source_providers": ["pubmed"], "_field_sources": {"id": "chembl"}}
+            ],
         )
         metadata, fragment = resolve_metadata_and_lineage_fragment(
             coordinator=None,
@@ -489,7 +519,9 @@ class TestCheckpointAndRowReconciliation:
         metrics = MagicMock()
 
         class _Silver:
-            async def read_silver(self, table: str, limit: int | None = None, columns=None):
+            async def read_silver(
+                self, table: str, limit: int | None = None, columns=None
+            ):
                 return [{"id": "1"}, {"id": "2"}] if table == "left" else [{"id": "1"}]
 
         adapter = StorageRowReconciliationAdapter(

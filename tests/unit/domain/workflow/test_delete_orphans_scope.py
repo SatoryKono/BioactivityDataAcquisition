@@ -23,7 +23,9 @@ from bioetl.domain.workflow._delete_orphans_scope import (
 pytestmark = pytest.mark.unit
 
 
-def _pipeline(step_id: str, *, limit: int | None = None, depends_on: tuple[str, ...] = ()) -> WorkflowStepConfig:
+def _pipeline(
+    step_id: str, *, limit: int | None = None, depends_on: tuple[str, ...] = ()
+) -> WorkflowStepConfig:
     return WorkflowStepConfig(
         step_id=step_id,
         pipeline_name=f"pipe_{step_id}",

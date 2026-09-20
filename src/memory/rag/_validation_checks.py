@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -280,7 +281,7 @@ def _validate_chunk_content_hash(
 
 
 def validate_chunks(
-    chunks: list[dict[str, Any]],
+    chunks: Sequence[object],
     sources: dict[str, dict[str, Any]],
     issues: list[RagValidationIssue],
 ) -> tuple[dict[str, int], dict[int, str | None], set[int]]:

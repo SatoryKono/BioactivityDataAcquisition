@@ -269,9 +269,7 @@ async def test_pubmed_adapter_models_and_factory() -> None:
 
     assert _resolve_pubmed_email(None, {"email": "kw@example.com"}) == "kw@example.com"
     assert _resolve_pubmed_email(None, {}) is None
-    assert (
-        _resolve_pubmed_email(SimpleNamespace(default_email=None), {}) is None
-    )
+    assert _resolve_pubmed_email(SimpleNamespace(default_email=None), {}) is None
     assert (
         _resolve_pubmed_email(SimpleNamespace(default_email="s@example.com"), {})
         == "s@example.com"
@@ -532,9 +530,7 @@ def test_memory_monitor_leftover_fallback_and_pressure_branches(
         def __exit__(self, *_args: object) -> bool:
             return False
 
-    monkeypatch.setattr(
-        memory_monitor_module.Path, "open", lambda *_a, **_k: _Boom()
-    )
+    monkeypatch.setattr(memory_monitor_module.Path, "open", lambda *_a, **_k: _Boom())
     estimated = monitor._get_stats_resource()
     assert estimated.process_mb == pytest.approx(256.0)
 

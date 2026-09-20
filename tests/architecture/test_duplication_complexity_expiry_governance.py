@@ -13,9 +13,7 @@ import yaml
 pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
-REGISTRY_YAML = (
-    ROOT / "configs" / "quality" / "duplication_complexity_exemptions.yaml"
-)
+REGISTRY_YAML = ROOT / "configs" / "quality" / "duplication_complexity_exemptions.yaml"
 CHECK_SCRIPT = (
     ROOT
     / "scripts"
@@ -51,8 +49,7 @@ def test_every_exemption_carries_progress_note() -> None:
         if "2026-" not in str(entry.get("progress_note", ""))
     ]
     assert missing == [], (
-        "Every exemption needs a dated progress_note (AUD-002):\n"
-        + "\n".join(missing)
+        "Every exemption needs a dated progress_note (AUD-002):\n" + "\n".join(missing)
     )
 
 

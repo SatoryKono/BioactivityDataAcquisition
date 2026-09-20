@@ -58,6 +58,7 @@ class WorkflowCommandOptions:
     incremental: bool
     ensure_observability_backend: bool
     observability_backend_port: int
+    no_control_plane_archive: bool
 
     @classmethod
     def from_click_kwargs(
@@ -108,6 +109,9 @@ class WorkflowCommandOptions:
                 DEFAULT_HEALTH_SERVER_PORT,
                 int,
             ),
+            no_control_plane_archive=option_or_default(
+                raw, "no_control_plane_archive", False, bool
+            ),
         )
 
     def as_override_mapping(self, *, name: str) -> dict[str, object]:
@@ -147,4 +151,5 @@ class WorkflowCommandOptions:
             "incremental": self.incremental,
             "ensure_observability_backend": self.ensure_observability_backend,
             "observability_backend_port": self.observability_backend_port,
+            "no_control_plane_archive": self.no_control_plane_archive,
         }

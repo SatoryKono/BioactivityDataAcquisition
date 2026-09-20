@@ -11,10 +11,13 @@ __all__ = ["MemoryLock"]
 import asyncio
 import contextlib
 import time
+from typing import TYPE_CHECKING
 
 from bioetl.domain.locking import FencingToken
 from bioetl.domain.ports import LockPort
-from bioetl.domain.types import RunID
+
+if TYPE_CHECKING:
+    from bioetl.domain.types import RunID
 
 # Default TTL check interval in seconds
 _TTL_CHECK_INTERVAL = 1.0

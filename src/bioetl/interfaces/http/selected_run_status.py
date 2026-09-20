@@ -4,9 +4,16 @@ from __future__ import annotations
 
 import asyncio
 import json
+from collections.abc import Mapping
 from pathlib import Path
 from typing import cast
 
+from bioetl.application.observability.reason_aliases import (
+    display_reason,
+    display_reasons_text,
+)
+from bioetl.application.services.run_reports.query import list_pipeline_reports
+from bioetl.composition.observability_runtime import create_run_report_store
 from bioetl.domain.run_reports.selected_status import (
     DOMAINS,
     RULES_VERSION,
@@ -52,6 +59,7 @@ def unavailable_status(
             "domain": domain,
             "verdict": state,
             "reason": reason,
+            "reason_display": display_reason(reason),
             "run_id": run_id,
             "pipeline": pipeline,
             "action": "Select run or inspect evidence",
@@ -77,6 +85,7 @@ def unavailable_status(
         "processing_status": "UNKNOWN",
         "trust_status": state,
         "reasons_text": reason,
+        "reasons_display": display_reason(reason),
         "evidence_observed_at": None,
     }
     return {
@@ -103,10 +112,12 @@ def _saved_trust(
         "reasons_text",
     ):
         reasons = reasons.get(key) if isinstance(reasons, dict) else None
+    reasons_text = reasons if isinstance(reasons, str) else str(control["reason"])
     return {
         "processing_status": str(summary["execution_state"]).lower(),
         "trust_status": control["verdict"],
-        "reasons_text": reasons if isinstance(reasons, str) else control["reason"],
+        "reasons_text": reasons_text,
+        "reasons_display": display_reasons_text(reasons_text),
         "evidence_observed_at": summary["evaluation_at"],
         "pipeline": summary["pipeline"],
         "run_id": summary["run_id"],
@@ -123,11 +134,17 @@ def _selected_pipeline(pipeline: str, run_id: str, root: Path | None) -> str | N
         return next(iter(owners))
     if run_report_ops._safe_segment(run_id) != run_id:
         raise ValueError("invalid_run_id")
-    base = run_report_ops._effective_root(root).resolve() / "pipeline"
+    base = run_report_ops._effective_root(root)
+    entries = list_pipeline_reports(
+        pipeline_name=None,
+        limit=None,
+        root=base,
+        store=create_run_report_store(),
+    )
     matches = [
-        path.parent.parent.name
-        for path in base.glob(f"*/{run_id}/pipeline-run-report.json")
-        if path.is_file() and (owners is None or path.parent.parent.name in owners)
+        entry.owner
+        for entry in entries
+        if entry.run_id == run_id and (owners is None or entry.owner in owners)
     ]
     if len(matches) > 1:
         raise ValueError("run_id_ambiguous")
@@ -160,7 +177,10 @@ def _snapshot_assessment(
         raise _RevisionMissingError("revision_missing")
     if json.loads(revision_path.read_text(encoding="utf-8")) != snapshot:
         raise ValueError("revision_corrupt")
-    return dict(snapshot["assessment"]), "AVAILABLE", revision
+    assessment = snapshot["assessment"]
+    if not isinstance(assessment, Mapping):
+        raise ValueError("assessment_invalid")
+    return dict(assessment), "AVAILABLE", revision
 
 
 def _load_report_assessment(
@@ -241,7 +261,13 @@ def load_selected_run_status(
     domain_rows = assessment["domains"]
     assert isinstance(domain_rows, list)  # Produced by the verified assessment.
     rows = [
-        {**summary, **row, "run_verdict": summary["verdict"]} for row in domain_rows
+        {
+            **summary,
+            **row,
+            "run_verdict": summary["verdict"],
+            "reason_display": display_reason(str(row.get("reason", ""))),
+        }
+        for row in domain_rows
     ]
     return {
         **summary,

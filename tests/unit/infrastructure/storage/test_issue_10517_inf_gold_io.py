@@ -175,9 +175,7 @@ async def test_write_gold_merged_dispatches_execute(
         "bioetl.infrastructure.storage.gold.io_execution._execute_gold_merged_write",
         _execute,
     )
-    await host.write_gold_merged(
-        "chembl/activity", [{"id": 1}], schema=MagicMock()
-    )
+    await host.write_gold_merged("chembl/activity", [{"id": 1}], schema=MagicMock())
     assert executed and executed[0][1] == "chembl/activity"
 
 

@@ -1,5 +1,9 @@
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
-"""Mutation and quarantine helpers for workflow FK reconciliation."""
+"""Mutation and quarantine helpers for workflow FK reconciliation.
+
+Internal implementation detail owned by the canonical
+``workflow_foreign_key_reconciliation`` adapter module (AUD-005).
+"""
 
 from __future__ import annotations
 

@@ -11,7 +11,10 @@ from unittest.mock import MagicMock
 import polars as pl
 import pytest
 
-from bioetl.application.composite.aggregator import EnricherAggregator, _deduplicate_columns
+from bioetl.application.composite.aggregator import (
+    EnricherAggregator,
+    _deduplicate_columns,
+)
 from bioetl.application.composite.checkpoint.persistence_service import (
     CompositeCheckpointPersistenceService,
 )
@@ -147,7 +150,9 @@ def test_control_plane_mixin_delegates(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 class _TinyTransformer(BaseTransformer):
-    async def _transform_impl(self, context: object, record: object, index: int) -> object:
+    async def _transform_impl(
+        self, context: object, record: object, index: int
+    ) -> object:
         return None
 
 
@@ -369,7 +374,9 @@ def test_run_report_query_missing_pointer_and_bad_json(
         lambda **_k: None,
     )
     assert (
-        _load_latest_report(kind="pipeline", owner="chembl", root=Path("reports"), store=store)
+        _load_latest_report(
+            kind="pipeline", owner="chembl", root=Path("reports"), store=store
+        )
         is None
     )
     store.is_file.return_value = True

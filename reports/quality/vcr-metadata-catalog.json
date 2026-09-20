@@ -1829,6 +1829,7 @@
         "tests/unit/composition/test_observability_contract.py",
         "tests/unit/domain/ports/test_health_check_result_branches.py",
         "tests/unit/domain/test_events.py",
+        "tests/unit/domain/test_issue_10469_two_line_residuals.py",
         "tests/unit/infrastructure/adapters/chembl/test_chembl_client.py",
         "tests/unit/infrastructure/adapters/crossref/test_crossref_client.py",
         "tests/unit/infrastructure/adapters/decorators/test_circuit_breaker_decorator.py",
@@ -1841,6 +1842,7 @@
         "tests/unit/infrastructure/adapters/test_sync_base.py",
         "tests/unit/infrastructure/adapters/uniprot/test_adapter.py",
         "tests/unit/infrastructure/factories/test_storage_adapter.py",
+        "tests/unit/infrastructure/test_issue_10469_stream_a_infra_adapters.py",
         "tests/unit/infrastructure/test_storage_factory.py",
         "tests/unit/interfaces/cli/commands/test_health.py"
       ]

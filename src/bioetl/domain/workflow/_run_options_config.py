@@ -48,6 +48,7 @@ class WorkflowRunOptionsConfig:
     debug_export_formats: tuple[str, ...] | None = None
     debug_export_dir: str | None = None
     workflow_id: str | None = None
+    no_control_plane_archive: bool | None = None
 
     def __post_init__(self) -> None:
         if self.multi_filter_ids is not None:
@@ -67,100 +68,18 @@ class WorkflowRunOptionsConfig:
         self, override: WorkflowRunOptionsConfig
     ) -> WorkflowRunOptionsConfig:
         """Return a merged config where non-null override values win."""
-        return WorkflowRunOptionsConfig(
-            run_type=prefer_override(self.run_type, override.run_type),
-            resume=prefer_override(self.resume, override.resume),
-            start_offset=prefer_override(self.start_offset, override.start_offset),
-            limit=prefer_override(self.limit, override.limit),
-            dry_run=prefer_override(self.dry_run, override.dry_run),
-            input_csv=prefer_override(self.input_csv, override.input_csv),
-            filter_column=prefer_override(
-                self.filter_column,
-                override.filter_column,
-            ),
-            filter_field=prefer_override(self.filter_field, override.filter_field),
-            filter_ids=prefer_override(self.filter_ids, override.filter_ids),
-            multi_filter_ids=prefer_override(
-                self.multi_filter_ids,
-                override.multi_filter_ids,
-            ),
-            fallback_column=prefer_override(
-                self.fallback_column,
-                override.fallback_column,
-            ),
-            fallback_mapping=prefer_override(
-                self.fallback_mapping,
-                override.fallback_mapping,
-            ),
-            vacuum_after_run=prefer_override(
-                self.vacuum_after_run,
-                override.vacuum_after_run,
-            ),
-            vacuum_retention_days=prefer_override(
-                self.vacuum_retention_days,
-                override.vacuum_retention_days,
-            ),
-            log_level=prefer_override(self.log_level, override.log_level),
-            ignore_yaml_filter=prefer_override(
-                self.ignore_yaml_filter,
-                override.ignore_yaml_filter,
-            ),
-            skip_gold=prefer_override(self.skip_gold, override.skip_gold),
-            execution_context=prefer_override(
-                self.execution_context,
-                override.execution_context,
-            ),
-            use_cached_bronze=prefer_override(
-                self.use_cached_bronze,
-                override.use_cached_bronze,
-            ),
-            cached_bronze_path=prefer_override(
-                self.cached_bronze_path,
-                override.cached_bronze_path,
-            ),
-            cached_bronze_date=prefer_override(
-                self.cached_bronze_date,
-                override.cached_bronze_date,
-            ),
-            replay_of_run_id=prefer_override(
-                self.replay_of_run_id,
-                override.replay_of_run_id,
-            ),
-            replay_of_manifest_id=prefer_override(
-                self.replay_of_manifest_id,
-                override.replay_of_manifest_id,
-            ),
-            resume_run_id=prefer_override(
-                self.resume_run_id,
-                override.resume_run_id,
-            ),
-            resume_manifest_id=prefer_override(
-                self.resume_manifest_id,
-                override.resume_manifest_id,
-            ),
-            exact_replay=prefer_override(self.exact_replay, override.exact_replay),
-            required_persistence_profile=prefer_stricter_persistence_profile(
-                self.required_persistence_profile,
-                override.required_persistence_profile,
-            ),
-            enable_tracing=prefer_override(
-                self.enable_tracing,
-                override.enable_tracing,
-            ),
-            debug_export_enabled=prefer_override(
-                self.debug_export_enabled,
-                override.debug_export_enabled,
-            ),
-            debug_export_formats=prefer_override(
-                self.debug_export_formats,
-                override.debug_export_formats,
-            ),
-            debug_export_dir=prefer_override(
-                self.debug_export_dir,
-                override.debug_export_dir,
-            ),
-            workflow_id=prefer_override(self.workflow_id, override.workflow_id),
+        values: dict[str, object] = {
+            field.name: prefer_override(
+                getattr(self, field.name), getattr(override, field.name)
+            )
+            for field in fields(self)
+        }
+        values["required_persistence_profile"] = prefer_stricter_persistence_profile(
+            self.required_persistence_profile,
+            override.required_persistence_profile,
         )
+        # Dynamic per-field merge uses dataclass field names.
+        return WorkflowRunOptionsConfig(**values)  # type: ignore[arg-type]
 
     def to_mapping(self) -> JsonDict:
         """Return non-null options as a plain mapping."""

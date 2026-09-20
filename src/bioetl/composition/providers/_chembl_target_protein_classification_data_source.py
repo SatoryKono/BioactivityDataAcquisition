@@ -206,11 +206,18 @@ class TargetProteinClassificationSnapshotDataSource:
                 if limit is not None and emitted >= limit:
                     return
 
+    def _is_loaded(self) -> bool:
+        """Return whether the reference rows are already loaded."""
+        return self._loaded
+
     async def _ensure_loaded(self) -> None:
         if self._loaded:
             return
         async with self._load_lock:
-            if self._loaded:
+            # Re-read via helper: the outer fast-path check narrows
+            # self._loaded for mypy, but another coroutine may have loaded
+            # while awaiting the lock.
+            if self._is_loaded():
                 return
             target_rows = await self._read_rows(
                 _TARGET_TABLE,

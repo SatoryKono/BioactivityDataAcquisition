@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.composition.bootstrap_contexts import (
     CircuitBreakerConfig,
@@ -241,16 +241,13 @@ def _wrap_with_filter(
         csv_filter_reader_factory: Callable[..., object] = resolve_lazy_callable(
             _CSV_FILTER_READER_MODULE, "CsvFilterReader"
         )
-        return cast(  # pyright: ignore[reportInvalidCast]
-            DataSourcePort,
-            filtered_data_source_factory(
-                data_source=data_source,
-                filter_reader=csv_filter_reader_factory(logger=logger),
-                filter_config=filter_config,
-                metrics=metrics,
-                pipeline_name=pipeline_name,
-                logger=logger,
-            ),
+        return filtered_data_source_factory(
+            data_source=data_source,
+            filter_reader=csv_filter_reader_factory(logger=logger),
+            filter_config=filter_config,
+            metrics=metrics,
+            pipeline_name=pipeline_name,
+            logger=logger,
         )
     return data_source
 

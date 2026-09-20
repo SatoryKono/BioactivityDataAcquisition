@@ -90,6 +90,20 @@ def _to_bash_path(path: Path) -> str:
     return value
 
 
+def _assert_gemini_timeouts_match_canonical(
+    gemini_settings: dict[str, object], workspace_root: Path
+) -> None:
+    """Gemini timeout must equal canonical startup_timeout_sec (ms)."""
+    canonical = setup_mcp._apply_shared_transport(
+        setup_mcp._canonical_servers(workspace_root, profile="full"),
+        transport_mode="stdio",
+    )
+    for name, entry in gemini_settings["mcpServers"].items():
+        assert "startup_timeout_sec" not in entry
+        expected = canonical[name].get("startup_timeout_sec")
+        assert entry.get("timeout") == (None if expected is None else expected * 1000)
+
+
 def _seed_workspace_mcp(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> tuple[Path, Path]:
@@ -225,6 +239,47 @@ def test_shared_transport_mode_rewrites_local_projections_only(
 def test_local_http_server_rejects_non_localhost_url() -> None:
     with pytest.raises(ValueError, match="localhost prefixes"):
         setup_mcp._local_http_server("https://evil.example/mcp")
+
+
+def test_tracked_json_compat_projection_is_muse_parseable() -> None:
+    """Tracked trio keeps only the Agent Plugins entry vocabulary Muse loads.
+
+    Muse Code fails the whole project file closed (``MCP configuration error
+    ...; MCP is disabled for this runtime``) when an entry carries a field
+    outside its bundled schema, so Codex-only ``mode``,
+    ``startup_timeout_sec``, and ``env_http_headers`` must not reach the trio.
+    """
+    canonical = {
+        "memory": {
+            "command": "bash",
+            "args": ["x.sh"],
+            "startup_timeout_sec": 120,
+            "mode": "required",
+        },
+        "ref": {
+            "type": "http",
+            "url": "https://api.ref.tools/mcp",
+            "env_http_headers": {"x-ref-api-key": "REF_TOOL_API_KEY"},
+            "startup_timeout_sec": 120,
+            "mode": "optional",
+        },
+    }
+    projected = setup_mcp._apply_tracked_json_compat(canonical)
+    # Input is not mutated; stdio entries keep their shape minus Codex fields.
+    assert canonical["memory"] == {
+        "command": "bash",
+        "args": ["x.sh"],
+        "startup_timeout_sec": 120,
+        "mode": "required",
+    }
+    assert projected["memory"] == {"command": "bash", "args": ["x.sh"]}
+    # Remote entries move to the Muse transport name; Codex-only header names
+    # are dropped (the TOML writer and sibling projections still translate
+    # them from the canonical inventory per consumer).
+    assert projected["ref"] == {
+        "type": "streamable-http",
+        "url": "https://api.ref.tools/mcp",
+    }
 
 
 def test_shared_endpoints_sync_with_catalog() -> None:
@@ -546,13 +601,9 @@ def test_main_uses_workspace_root_for_generated_server_paths(
         assert qodo_payload["mcpServers"]["filesystem"]["args"][0].endswith(".sh")
     assert not REMOVED_FULL_PROFILE_SERVERS.intersection(servers)
     assert not REMOVED_FULL_PROFILE_SERVERS.intersection(gemini_settings["mcpServers"])
-    for server_name, gemini_server in gemini_settings["mcpServers"].items():
-        assert "startup_timeout_sec" not in gemini_server
-        startup_timeout = servers[server_name].get("startup_timeout_sec")
-        if startup_timeout is None:
-            assert "timeout" not in gemini_server
-        else:
-            assert gemini_server["timeout"] == startup_timeout * 1000
+    # Tracked .mcp.json drops Codex-only startup_timeout_sec by design;
+    # correlate the Gemini timeout against the canonical inventory.
+    _assert_gemini_timeouts_match_canonical(gemini_settings, workspace_root)
     assert gemini_settings["mcpServers"]["ref"]["headers"] == {
         "x-ref-api-key": "$REF_TOOL_API_KEY"
     }
@@ -655,8 +706,17 @@ def test_main_uses_workspace_root_for_generated_server_paths(
     assert servers["mutmut"]["env"]["MUTMUT_PROJECT_PATH"] == "."
     assert servers["code-analyzer"]["env"]["PROJECT_PATH"] == "."
     assert servers["deepwiki"]["url"] == "https://mcp.deepwiki.com/mcp"
-    assert servers["ref"]["type"] == "http"
+    assert servers["deepwiki"]["type"] == "streamable-http"
+    assert servers["ref"]["type"] == "streamable-http"
     assert servers["ref"]["url"] == "https://api.ref.tools/mcp"
+    # Tracked portable JSON must stay Muse-parseable: Codex-only fields
+    # (mode, startup_timeout_sec, env_http_headers) are stripped by
+    # _apply_tracked_json_compat, otherwise Muse fails the whole file
+    # closed ("MCP configuration error ...; MCP is disabled").
+    assert servers
+    for server_name, server in servers.items():
+        assert "mode" not in server, server_name
+    assert zed_payload["mcpServers"] == servers
     assert (
         gemini_settings["mcpServers"]["ref"]["httpUrl"] == "https://api.ref.tools/mcp"
     )

@@ -22,6 +22,8 @@ from bioetl.domain.workflow.foreign_key_reconciliation import (
     ForeignKeyReconciliationAction,
     ForeignKeyReconciliationLayer,
     ForeignKeyReconciliationMutationMode,
+)
+from bioetl.domain.workflow.foreign_key_reconciliation_models import (
     ForeignKeyReconciliationRequest,
     ForeignKeyReconciliationResult,
 )

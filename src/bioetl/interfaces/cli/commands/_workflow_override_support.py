@@ -46,6 +46,7 @@ _WORKFLOW_RUN_OPTIONS_OVERRIDE_FIELDS = (
     "debug_export_enabled",
     "debug_export_formats",
     "debug_export_dir",
+    "no_control_plane_archive",
 )
 
 
@@ -126,6 +127,9 @@ def build_workflow_run_options_override_from_mapping(
         ),
         debug_export_formats=debug_export_formats or None,
         debug_export_dir=_optional_str(override_values, "debug_export_dir"),
+        no_control_plane_archive=_optional_bool(
+            override_values, "no_control_plane_archive"
+        ),
     )
 
 

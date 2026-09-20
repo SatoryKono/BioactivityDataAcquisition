@@ -8,7 +8,8 @@ __all__ = [
     "start_dependencies_phase",
 ]
 
-from bioetl.application.composite.checkpoint import CompositeCheckpointState
+from typing import TYPE_CHECKING
+
 from bioetl.application.composite.runner_pkg.runner_stage_payloads import (
     build_dependency_stage_details,
 )
@@ -20,6 +21,9 @@ from bioetl.application.composite.runner_pkg.runner_stage_types import (
 )
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import BioETLError
+
+if TYPE_CHECKING:
+    from bioetl.application.composite.checkpoint import CompositeCheckpointState
 
 
 async def start_dependencies_phase(

@@ -11,9 +11,11 @@ from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
     ForeignKeyReconciliationRequest,
 )
 from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation import (
-    GoldReconciliationReaderProtocol,
     ReconcileDebugArtifactSinkProtocol,
     SilverForeignKeyReconciliationAdapter,
+)
+from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_reads import (
+    GoldReconciliationReaderProtocol,
     filter_current_rows,
 )
 

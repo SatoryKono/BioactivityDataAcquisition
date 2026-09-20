@@ -31,7 +31,6 @@ __all__ = ["_CompositeRunnerStageSupportFlowMixin"]
 class _CompositeRunnerStageSupportFlowMixin:
     """Guards, transitions, and seed/dependency phase flows."""
 
-
     def _has_dependencies_configured(
         self: _CompositeRunnerStageSupportHostProtocol,
     ) -> bool:

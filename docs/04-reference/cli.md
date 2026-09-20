@@ -94,6 +94,7 @@ bioetl workflow status <NAME> [OPTIONS]
 | `--cached-bronze-date` | Bronze cache date filter у pipeline steps |
 | `--exact-replay/--no-exact-replay` | Override strict exact replay request у pipeline steps |
 | `--required-persistence-profile <profile>` | Per-run override for the control-plane persistence profile (`degraded_observable`, `replay_ready`, `forensic_grade`) |
+| `--no-control-plane-archive` | Skip local control-plane archive pack after successful pipeline steps |
 | `--replay-of-run-id` | Explicit parent `run_id` for exact replay pipeline steps |
 | `--replay-of-manifest-id` | Explicit parent `manifest_id` for exact replay pipeline steps |
 | `--tracing/--no-tracing` | Override distributed tracing for pipeline steps |
@@ -240,6 +241,7 @@ bioetl run --pipeline <NAME> [OPTIONS]
 | `--cached-bronze-path`                   | path   | None          | Явный путь к каталогу Bronze cache                                                        |
 | `--exact-replay/--no-exact-replay`       | flag   | False         | Включить strict exact replay внутри опубликованной support boundary с fail-closed policy  |
 | `--required-persistence-profile`         | choice | None          | Per-run override для control-plane persistence profile (`degraded_observable`, `replay_ready`, `forensic_grade`) |
+| `--no-control-plane-archive`             | flag   | False         | Skip local control-plane archive pack after a successful run                              |
 | `--replay-of-run-id`                     | str    | None          | Явный parent `run_id` для exact replay                                                    |
 | `--replay-of-manifest-id`                | str    | None          | Явный parent `manifest_id` для exact replay                                               |
 

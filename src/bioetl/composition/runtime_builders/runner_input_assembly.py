@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import is_dataclass, replace
 from types import SimpleNamespace
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.composition.lazy_exports import resolve_lazy_callable
 from bioetl.composition.observability import ObservabilityBundle
@@ -111,20 +111,22 @@ def _prepare_runner_inputs_with_resolved_functions(
     )
 
 
-def _bind_resolved_cached_bronze_context(
-    ctx: PipelineRunContext,
+def _bind_resolved_cached_bronze_context[T](
+    ctx: T,
     inputs: _RunnerInputs,
-) -> PipelineRunContext:
+) -> T:
     """Propagate resolved cached Bronze replay context back into the run context."""
     current = getattr(ctx, "cached_bronze", None)
     resolved = inputs.cached_bronze
     if current == resolved:
         return ctx
     if is_dataclass(ctx):
-        return replace(ctx, cached_bronze=resolved)
+        return cast(
+            "T", replace(cast("Any", ctx), cached_bronze=resolved)
+        )  # Any: replace() host
     payload = dict(vars(ctx))
     payload["cached_bronze"] = resolved
-    return SimpleNamespace(**payload)
+    return cast("T", SimpleNamespace(**payload))
 
 
 def prepare_runner_context_and_inputs(

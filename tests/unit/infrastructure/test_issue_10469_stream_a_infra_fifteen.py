@@ -179,7 +179,9 @@ def test_csv_append_cleans_temp_on_error(
     def boom(*_args: object, **_kwargs: object) -> None:
         raise RuntimeError("write failed")
 
-    monkeypatch.setattr("bioetl.infrastructure.export.csv_exporter_io_ops.pv.write_csv", boom)
+    monkeypatch.setattr(
+        "bioetl.infrastructure.export.csv_exporter_io_ops.pv.write_csv", boom
+    )
     with pytest.raises(RuntimeError, match="write failed"):
         append_to_csv(table, target, ",", MagicMock())
 

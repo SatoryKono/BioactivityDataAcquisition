@@ -267,7 +267,7 @@ def _apply_case_strategy(normalized: str, strategy: str) -> str:
 
 
 def normalize_cross_pipeline_case(
-    value: str, strategy: str = "uppercase"
+    value: object, strategy: str = "uppercase"
 ) -> str | None:
     """Normalize case using one consistent strategy across pipelines."""
     if value is None or not isinstance(value, str):

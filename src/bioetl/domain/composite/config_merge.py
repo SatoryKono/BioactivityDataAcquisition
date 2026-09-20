@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from typing import Any, cast
 
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 from bioetl.domain.immutability import freeze_fields
@@ -54,10 +55,12 @@ class ColumnGroupConfig:
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
-        if isinstance(self.fields, list):
-            object.__setattr__(self, "fields", tuple(self.fields))
-        if isinstance(self.provider_order, list):
-            object.__setattr__(self, "provider_order", tuple(self.provider_order))
+        raw_fields: object = self.fields
+        if isinstance(raw_fields, list):
+            object.__setattr__(self, "fields", tuple(raw_fields))
+        raw_provider_order: object = self.provider_order
+        if isinstance(raw_provider_order, list):
+            object.__setattr__(self, "provider_order", tuple(raw_provider_order))
         if self.pattern is not None:
             try:
                 re.compile(self.pattern)
@@ -154,7 +157,7 @@ class MergeConfig:
         """Convert list values in field_priorities to tuples and freeze mapping."""
         if self.field_priorities:
             converted = {
-                k: tuple(v) if isinstance(v, list) else v
+                k: tuple(v) if isinstance(cast(object, v), list) else v
                 for k, v in dict(self.field_priorities).items()
             }
             object.__setattr__(self, "field_priorities", converted)
@@ -198,7 +201,9 @@ class MergeConfig:
         """Convert list/tuple of column groups to tuple of ColumnGroupConfig."""
         if isinstance(self.column_groups, list | tuple):
             converted = tuple(
-                ColumnGroupConfig(**g) if isinstance(g, dict) else g
+                ColumnGroupConfig(**cast(Any, g))  # Any: runtime config mapping unpack
+                if isinstance(cast(object, g), dict)
+                else g
                 for g in self.column_groups
             )
             object.__setattr__(self, "column_groups", converted)

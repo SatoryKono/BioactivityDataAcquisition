@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.composite.runtime_wiring_api import (
     JoinHow,
@@ -33,7 +33,9 @@ from bioetl.application.ports.storage import (
 
 
 def _resolve_join_how(strategy: MergeStrategy) -> JoinHow:
-    match strategy:
+    # Unknown strategies default to a left join (fail-open by design,
+    # covered by test_resolve_join_how_defaults_unknown_strategy_to_left_join).
+    match cast("str", strategy):
         case MergeStrategy.LEFT_OUTER:
             return "left"
         case MergeStrategy.INNER:

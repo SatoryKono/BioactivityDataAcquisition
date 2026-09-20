@@ -22,7 +22,7 @@ from bioetl.application.composite.runner_pkg.runner_runtime_helpers import (
 from bioetl.application.composite.runner_pkg.runner_stage_state_flow import (
     find_required_failures,
 )
-from bioetl.application.workflow.transforms.reconcile_foreign_keys import (
+from bioetl.application.workflow.transforms.reconcile_foreign_keys_config import (
     _optional_key_tuple,
     _required_primary_keys,
 )

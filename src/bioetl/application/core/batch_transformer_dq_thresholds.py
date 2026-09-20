@@ -93,7 +93,9 @@ def resolve_threshold_value(
         return None
     for attribute_name in attribute_names:
         value = getattr(dq_config, attribute_name, None)
-        if isinstance(value, Real) and not isinstance(value, bool):
+        if isinstance(value, bool):
+            continue
+        if isinstance(value, Real):
             return float(value)
     return None
 

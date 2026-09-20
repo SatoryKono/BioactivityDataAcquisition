@@ -30,7 +30,7 @@ def test_resolve_lazy_export_caches_into_namespace() -> None:
     assert namespace["pi"] == math.pi
 
 
-def test_resolve_lazy_export_unknown_name_raises() -> None:
+def test_resolve_lazy_export_unknown_name_raises_wiring() -> None:
     with pytest.raises(AttributeError, match="has no attribute"):
         resolve_lazy_export(
             module_name="sentinel_module",
@@ -53,5 +53,5 @@ def test_install_lazy_export_facade_wires_hooks() -> None:
         getattr_hook("does_not_exist")  # type: ignore[operator]
 
 
-def test_lazy_export_dir_unions_and_sorts() -> None:
+def test_lazy_export_dir_unions_and_sorts_wiring() -> None:
     assert lazy_export_dir({"b": 1}, ["a"]) == ["a", "b"]

@@ -37,7 +37,10 @@ def test_cellosaurus_normalizer_returns_original_when_regex_does_not_match() -> 
 
 def test_bao_format_mapping_status_falls_back_when_record_is_absent() -> None:
     assert normalize_profile_activity_bao_format_mapping_status("mapped") == "mapped"
-    assert normalize_profile_activity_bao_format_mapping_status("mapped", record=None) == "mapped"
+    assert (
+        normalize_profile_activity_bao_format_mapping_status("mapped", record=None)
+        == "mapped"
+    )
     assert normalize_profile_activity_bao_format_mapping_status("nope") is None
 
 

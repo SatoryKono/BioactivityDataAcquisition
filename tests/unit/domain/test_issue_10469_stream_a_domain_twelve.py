@@ -18,7 +18,9 @@ from bioetl.domain.normalization._chembl_organisms import (
     _strip_trailing_parenthetical_annotation,
     normalize_chembl_organism_name,
 )
-from bioetl.domain.normalization._control_plane_identity import _normalize_bool_text_token
+from bioetl.domain.normalization._control_plane_identity import (
+    _normalize_bool_text_token,
+)
 from bioetl.domain.normalization._control_plane_payloads import (
     _manifest_snapshot_sort_key,
     _normalize_manifest_source_ref,
@@ -33,7 +35,10 @@ from bioetl.domain.normalization._reference_id_support import (
     _json_fallback,
     _normalize_openalex_candidate,
 )
-from bioetl.domain.normalization.dates import _normalize_partial_month, _parse_year_month
+from bioetl.domain.normalization.dates import (
+    _normalize_partial_month,
+    _parse_year_month,
+)
 from bioetl.domain.normalization.profiles._normalization_helpers import (
     _normalizer_accepts_record_context,
     _require_stable_normalizer_identity,
@@ -75,7 +80,10 @@ from bioetl.domain.ports.workflow_row_reconciliation import (
     _normalize_workflow_name,
     _required_name,
 )
-from bioetl.domain.registry.semantic_fields import SemanticFieldCluster, SemanticFieldRegistry
+from bioetl.domain.registry.semantic_fields import (
+    SemanticFieldCluster,
+    SemanticFieldRegistry,
+)
 from bioetl.domain.run_reports._stage_bucket import _StageBucket
 from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
 from bioetl.domain.run_reports.models import TrackingCoverage, WorkflowExecutionRow
@@ -96,13 +104,13 @@ from bioetl.domain.types.gold_schema_policy import (
     GoldSchemaPolicyByVersion,
     GoldSchemaVersionPolicy,
 )
+from bioetl.domain.value_objects import Concentration, ConcentrationUnit
 from bioetl.domain.value_objects._publication_field_group_config import FieldGroupConfig
 from bioetl.domain.value_objects._run_context_create_support import (
     _optional_str_value,
     _require_value,
     _run_id_value,
 )
-from bioetl.domain.value_objects.activity_concentration import Concentration, ConcentrationUnit
 from bioetl.domain.value_objects.bronze_result import (
     _has_provider_entity,
     _normalized_path_parts,

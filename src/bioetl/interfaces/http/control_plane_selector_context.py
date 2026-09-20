@@ -27,6 +27,7 @@ from bioetl.interfaces.http._control_plane_selector_records import (
     narrow_manifest_catalog,
     selected_pipeline_scope,
 )
+from bioetl.interfaces.http._identity_display_rows import format_timestamp_label
 
 __all__ = (
     "RUN_ID_NO_SELECTION",
@@ -155,7 +156,9 @@ def _filter_options_response(
     }
 
 
-def _run_option_label(value: str, record: SelectorRecord | None) -> str:
+def _run_option_label(
+    value: str, record: SelectorRecord | None, *, timezone: str = "UTC"
+) -> str:
     """Readable catalog label; Grafana value stays the stable UUID."""
     if value == RUN_ID_NO_SELECTION:
         return "SELECT RUN"
@@ -164,16 +167,22 @@ def _run_option_label(value: str, record: SelectorRecord | None) -> str:
     timestamp = record.started_at
     if timestamp.tzinfo is None:
         timestamp = timestamp.replace(tzinfo=UTC)
-    started = timestamp.astimezone(UTC).strftime("%Y-%m-%d %H:%M")
-    return f"{started} UTC · {record.pipeline} · {record.run_status} · {record.run_id}"
+    started = format_timestamp_label(timestamp, timezone)
+    return f"{started} · {record.pipeline} · {record.run_status} · {record.run_id}"
 
 
 def _run_option_labels(
-    values: list[str], records: tuple[SelectorRecord, ...]
+    values: list[str],
+    records: tuple[SelectorRecord, ...],
+    *,
+    timezone: str = "UTC",
 ) -> dict[str, object]:
     by_id = {record.run_id: record for record in records}
     items = [
-        {"text": _run_option_label(value, by_id.get(value)), "value": value}
+        {
+            "text": _run_option_label(value, by_id.get(value), timezone=timezone),
+            "value": value,
+        }
         for value in values
     ]
     return {"items": items}
@@ -194,6 +203,7 @@ def build_selector_filter_options_payload(
     exact_run_only: bool = False,
     fallback_value: str | None = None,
     workflow_manifests: tuple[WorkflowManifest, ...] = (),
+    timezone: str = "UTC",
 ) -> dict[str, object]:
     """Build Grafana variable option responses from the selector catalog."""
     workflow_aliases = build_workflow_aliases(workflow_manifests)
@@ -237,7 +247,7 @@ def build_selector_filter_options_payload(
         fallback_value=fallback_value,
     )
     if response_shape == "options" and dimension == "run_id":
-        return _run_option_labels(values, option_records)
+        return _run_option_labels(values, option_records, timezone=timezone)
     return _filter_options_response(
         response_shape=response_shape,
         dimension=dimension,

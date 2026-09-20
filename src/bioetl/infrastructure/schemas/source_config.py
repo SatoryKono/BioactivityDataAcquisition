@@ -29,7 +29,6 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from bioetl.domain.constants import DEFAULT_BATCH_SIZE
 from bioetl.domain.resilience import AdapterConfig as DomainAdapterConfig
 from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreakerConfig
-from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.schemas.base_schemas import (
     BaseCircuitBreakerConfig,
     BaseRateLimitConfig,
@@ -134,8 +133,8 @@ class ProviderConfigYaml(BaseModel):
     @classmethod
     def _reject_retired_pagination_aliases(
         cls,
-        data: JsonDict,  # Any: YAML config has heterogeneous values
-    ) -> JsonDict:  # Any: YAML config has heterogeneous values
+        data: object,  # object: mode="before" validators receive raw input
+    ) -> object:  # object: mode="before" validators receive raw input
         """Fail fast on retired provider-level pagination aliases."""
         if not isinstance(data, dict):
             return data

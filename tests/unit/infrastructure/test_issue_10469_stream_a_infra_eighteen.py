@@ -134,7 +134,9 @@ def test_pubmed_create_with_email(monkeypatch: pytest.MonkeyPatch) -> None:
         "bioetl.infrastructure.adapters.pubmed.adapter.PubMedAdapter",
         built,
     )
-    from bioetl.infrastructure.adapters.pubmed._adapter_support import _create_pubmed_adapter
+    from bioetl.infrastructure.adapters.pubmed._adapter_support import (
+        _create_pubmed_adapter,
+    )
 
     _create_pubmed_adapter(
         MagicMock(),

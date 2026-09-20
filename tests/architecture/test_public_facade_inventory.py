@@ -782,9 +782,7 @@ def test_compatibility_contract_policy_declares_window_and_guide() -> None:
     payload = yaml.safe_load(REGISTRY_YAML.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
     policy = payload.get("compatibility_contract_policy")
-    assert isinstance(policy, dict), (
-        "Missing compatibility_contract_policy (AUD-011)"
-    )
+    assert isinstance(policy, dict), "Missing compatibility_contract_policy (AUD-011)"
     assert policy["linked_issue"] == "#10536"
     assert policy["deprecation_window"] == "90d"
     assert policy["review_cadence"] == "quarterly"

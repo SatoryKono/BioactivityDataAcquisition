@@ -75,9 +75,5 @@ def test_b_scope_pragmas_match_allowlist_and_carry_issue_link() -> None:
 
 @pytest.mark.architecture
 def test_covered_lazy_hooks_carry_no_pragma() -> None:
-    offenders = [
-        rel
-        for rel in COVERED_NO_PRAGMA
-        if _pragma_lines(ROOT / rel)
-    ]
+    offenders = [rel for rel in COVERED_NO_PRAGMA if _pragma_lines(ROOT / rel)]
     assert offenders == []

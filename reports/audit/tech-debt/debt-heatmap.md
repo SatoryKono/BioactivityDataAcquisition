@@ -1,12 +1,23 @@
-# Debt heatmap (2026-09-14)
+# Тепловая карта технического долга
 
-| Zone | Signal | vs budget | Priority |
-| --- | --- | --- | --- |
-| generated quality SSOT | remote-main pin lag | stale vs origin/main | P2 |
-| freeze cluster | lazy/private/config/fan-in | at cap | P2 |
-| hotspot leftover | factories/core/bootstrap slack | under (leftover) | P2 |
-| assertless yaml | 88 live vs 87 max | over yaml | P2 |
-| constructor / exemptions | 1 waiver; 0 metric exemptions | at | P3 |
-| typing suppressions | 83 type:ignore | unmanaged cluster | P3 |
-| xenon paths | 15 exemptions to 2026-12-31 | hold | P3 |
-| review calendar | shim 2026-10-21; lazy 2026-10-27 | upcoming | P3 |
+Шкала surface_score: 0 — нет поверхности, 1 — локальная, 2 — средняя (подсистема), 3 — максимальная (ядро/гейты).
+
+| Зона | Находки | Surface | Приоритет |
+|------|---------|---------|-----------|
+| `src/memory/` sidecar (god-module, query-раскол, mypy-exclude, exemptions) | AUD-001, AUD-002*, AUD-003, AUD-004* | ███ 3 | P0/P1 |
+| Quality gates (exemptions cliff, jscpd-5, mypy-поблажки) | AUD-002, AUD-007* | ███ 3 | P0/P2 |
+| Startup/observability DI-seam | AUD-004 | ██ 2 | P1 |
+| FK-reconciliation (infra + application) | AUD-005 | ██ 2 | P1 |
+| Зависимости/пины | AUD-006 | ██ 2 | P1 |
+| `application/composite/` God-пакет | AUD-007 | ██ 2 | P2 |
+| CLI-поверхность (12 entrypoints) | AUD-011 | ██ 2 | P2 |
+| Фасады/реэкспорты | AUD-008 | █ 1 | P2 |
+| Покрытие (pragma no cover) | AUD-009 | █ 1 | P2 |
+| Legacy/compat-шимы | AUD-010 | █ 1 | P2 |
+| Подавления nosec/subprocess | AUD-012 | █ 1 | P3 |
+
+\* сквозные находки: затрагивают несколько зон.
+
+## Вывод
+
+Жара сконцентрирована в двух местах: **memory-sidecar** (размер + нетипизированность + освобождение от гейтов) и **точка синхронизации exemptions 2026-12-31**. Их снятие (декомпозиция + рассредоточение сроков) даёт наибольшее снижение риска. Остальное — распределённый средний/низкий фон: типы, фрагментация, шимы, покрытие, подавления.

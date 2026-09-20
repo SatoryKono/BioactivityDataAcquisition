@@ -67,19 +67,22 @@ class CompositeDQConfig:
         """Validate and convert types."""
         from bioetl.domain.immutability import freeze_fields
 
-        if isinstance(self.required_fields, list):
-            object.__setattr__(self, "required_fields", tuple(self.required_fields))
-        if isinstance(self.field_validations, list):
+        raw_required_fields: object = self.required_fields
+        if isinstance(raw_required_fields, list):
+            object.__setattr__(self, "required_fields", tuple(raw_required_fields))
+        raw_field_validations: object = self.field_validations
+        if isinstance(raw_field_validations, list):
             object.__setattr__(
                 self,
                 "field_validations",
-                tuple(self.field_validations),
+                tuple(raw_field_validations),
             )
-        if isinstance(self.cross_field_validations, list):
+        raw_cross_field_validations: object = self.cross_field_validations
+        if isinstance(raw_cross_field_validations, list):
             object.__setattr__(
                 self,
                 "cross_field_validations",
-                tuple(self.cross_field_validations),
+                tuple(raw_cross_field_validations),
             )
         # Detach caller-owned override mapping for frozen determinism.
         freeze_fields(self, ("enricher_overrides",))

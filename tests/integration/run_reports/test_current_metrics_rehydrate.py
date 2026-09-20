@@ -562,3 +562,43 @@ def test_rehydrate_reports_metrics_failure_and_allows_retry(tmp_path: Path) -> N
     assert recovered.error is None
     assert recovered.pipeline_runs_seeded == 1
     metrics.increment_counter.assert_called_once()
+
+
+def test_skips_unreadable_and_non_terminal_pipeline_reports(
+    tmp_path: Path,
+) -> None:
+    bad_dir = tmp_path / "pipeline" / "chembl_assay" / "bad-json"
+    bad_dir.mkdir(parents=True, exist_ok=True)
+    (bad_dir / "pipeline-run-report.json").write_text("{nope", encoding="utf-8")
+
+    identity_dir = tmp_path / "pipeline" / "chembl_assay" / "bad-identity"
+    identity_dir.mkdir(parents=True, exist_ok=True)
+    (identity_dir / "pipeline-run-report.json").write_text(
+        json.dumps({"identity": "oops"}), encoding="utf-8"
+    )
+
+    _write_report(
+        tmp_path,
+        pipeline="chembl_assay",
+        run_id="running",
+        run_type="backfill",
+        status="running",
+    )
+
+    anchors = collect_latest_terminal_anchors(
+        root=tmp_path, limit=20, store=FileRunReportStoreAdapter()
+    )
+
+    assert anchors == ()
+
+
+def test_skips_unreadable_workflow_report(tmp_path: Path) -> None:
+    bad_dir = tmp_path / "workflow" / "chembl_baseline" / "bad-json"
+    bad_dir.mkdir(parents=True, exist_ok=True)
+    (bad_dir / "workflow-run-report.json").write_text("{nope", encoding="utf-8")
+
+    anchors = collect_latest_terminal_workflow_anchors(
+        root=tmp_path, limit=20, store=FileRunReportStoreAdapter()
+    )
+
+    assert anchors == ()

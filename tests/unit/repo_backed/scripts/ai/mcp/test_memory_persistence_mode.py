@@ -2,11 +2,17 @@
 
 from __future__ import annotations
 
+import platform
 import shlex
 import subprocess
 from pathlib import Path
 
 import pytest
+
+_WINDOWS_BASH_SKIP = pytest.mark.skipif(
+    platform.system() == "Windows",
+    reason="bash-based MCP memory wrapper is not reliable on native Windows shells",
+)
 
 WRAPPER = Path("scripts/ai/mcp/mcp_memory_wrapper.sh")
 
@@ -36,6 +42,7 @@ def _run_wrapper(mode: str | None) -> subprocess.CompletedProcess[str]:
     )
 
 
+@_WINDOWS_BASH_SKIP
 @pytest.mark.parametrize("mode", [None, "off", "read-only"])
 def test_mcp_memory_safe_modes_exit_before_server_start(mode: str | None) -> None:
     completed = _run_wrapper(mode)
@@ -45,6 +52,7 @@ def test_mcp_memory_safe_modes_exit_before_server_start(mode: str | None) -> Non
     assert "npx" not in completed.stderr
 
 
+@_WINDOWS_BASH_SKIP
 def test_mcp_memory_rejects_unknown_mode_without_server_start() -> None:
     completed = _run_wrapper("unsafe")
 

@@ -39,7 +39,9 @@ def test_runtime_composite_config_translates_validation_error(tmp_path: Path) ->
             )
 
 
-def test_composite_runtime_context_builds_enabled_cross_validator(tmp_path: Path) -> None:
+def test_composite_runtime_context_builds_enabled_cross_validator(
+    tmp_path: Path,
+) -> None:
     config = SimpleNamespace(
         name="composite",
         cross_validation=SimpleNamespace(enabled=True),

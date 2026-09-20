@@ -26,7 +26,7 @@ from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.infrastructure.adapters._cached_bronze_support import (
     count_batch_records,
-    iter_batch_records,
+    fetch_cached_bronze_records,
     list_sorted_batches,
     log_unsupported_fetch_params,
     raise_if_empty_batches,
@@ -192,12 +192,6 @@ class CachedBronzeDataSource:
             filter_ids=filter_ids,
         )
         batches = await self._list_batches_sorted()
-        self._logger.info(
-            "cached_bronze_fetch_start",
-            batch_count=len(batches),
-            date_filter=self._bronze_date,
-            limit=limit,
-        )
         raise_if_empty_batches(
             batches,
             reader=self._reader,
@@ -205,23 +199,14 @@ class CachedBronzeDataSource:
             entity_type=self._entity_type,
             bronze_date=self._bronze_date,
         )
-
-        count = 0
-        async for record in iter_batch_records(self._reader, self._logger, batches):
+        async for record in fetch_cached_bronze_records(
+            self._reader,
+            self._logger,
+            batches,
+            bronze_date=self._bronze_date,
+            limit=limit,
+        ):
             yield record
-            count += 1
-            if limit is not None and count >= limit:
-                self._logger.info(
-                    "cached_bronze_fetch_limit_reached",
-                    records_yielded=count,
-                    limit=limit,
-                )
-                return
-        self._logger.info(
-            "cached_bronze_fetch_complete",
-            records_yielded=count,
-            batches_processed=len(batches),
-        )
 
     async def get_total_records(self) -> int:
         """Get total number of records across all cached batches.

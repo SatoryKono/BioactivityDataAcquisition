@@ -27,10 +27,11 @@ def publish_snapshot(
         )
         + "\n"
     )
-    if store.is_file(str(revision_path)):
-        if store.read_text(str(revision_path)) != content:
+    revision_key = revision_path.as_posix()
+    if store.is_file(revision_key):
+        if store.read_text(revision_key) != content:
             raise ValueError("selected-run revision conflict or corruption")
     else:
-        store.mkdir(str(revision_path.parent))
-        store.write_text(str(revision_path), content)
+        store.mkdir(revision_path.parent.as_posix())
+        store.write_text(revision_key, content)
     return {**report, "selected_run_snapshot": snapshot}

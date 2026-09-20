@@ -7,21 +7,31 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.composite.helpers import preflight_schema_field_extraction as preflight
+from bioetl.application.composite.helpers import (
+    preflight_schema_field_extraction as preflight,
+)
 from bioetl.application.core.batch_executor_state_flow import process_stateful_batch
 from bioetl.application.core.lifecycle.batch_fsm import (
     BatchExecutionFSM,
     BatchExecutionState,
 )
 from bioetl.application.observability.control_plane_evidence import models as evidence
-from bioetl.application.observability.control_plane_evidence.checks import EvidenceCheckResult
-from bioetl.application.observability import control_plane_integrity_metrics as integrity
-from bioetl.application.services.execution import _pipeline_runner_support as runner_support
+from bioetl.application.observability.control_plane_evidence.checks import (
+    EvidenceCheckResult,
+)
+from bioetl.application.observability import (
+    control_plane_integrity_metrics as integrity,
+)
+from bioetl.application.services.execution import (
+    _pipeline_runner_support as runner_support,
+)
 from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
     RunResult,
 )
-from bioetl.application.services.ops import _metrics_service_gateway_support as metrics_gw
+from bioetl.application.services.ops import (
+    _metrics_service_gateway_support as metrics_gw,
+)
 from bioetl.domain.control_plane.run_ledger import (
     RUN_FAILED_EVENT,
     RUN_FINISHED_EVENT,
@@ -83,12 +93,20 @@ def test_evidence_models_status_scope_and_trust() -> None:
         (),
     )
     assert launched == "failed"
-    assert evidence._scope_kind(resolved_via="selected_run_id", manifest=object()) == "exact_run"
     assert (
-        evidence._scope_kind(resolved_via="selected_run_id_not_found", manifest=object())
+        evidence._scope_kind(resolved_via="selected_run_id", manifest=object())
+        == "exact_run"
+    )
+    assert (
+        evidence._scope_kind(
+            resolved_via="selected_run_id_not_found", manifest=object()
+        )
         == "unresolved"
     )
-    assert evidence._scope_kind(resolved_via="latest_success", manifest=object()) == "pipeline_current"
+    assert (
+        evidence._scope_kind(resolved_via="latest_success", manifest=object())
+        == "pipeline_current"
+    )
     assert evidence._overall_status(()) == "UNKNOWN"
     error = EvidenceCheckResult("c", "ERROR", "boom", "d")
     warn = EvidenceCheckResult("c", "WARNING", "warn", "d")
@@ -134,7 +152,9 @@ async def test_process_stateful_batch_process_and_commit_failures() -> None:
         _fsm = fsm
         _fsm_state = BatchExecutionState.STREAMING
         _query_string = None
-        _processing_port = SimpleNamespace(process_batch=AsyncMock(side_effect=ValueError("proc")))
+        _processing_port = SimpleNamespace(
+            process_batch=AsyncMock(side_effect=ValueError("proc"))
+        )
         _execution_state_service = SimpleNamespace(commit_successful_batch=MagicMock())
 
     host = _Host()
@@ -144,7 +164,9 @@ async def test_process_stateful_batch_process_and_commit_failures() -> None:
 
     host._fsm_state = BatchExecutionState.STREAMING
     host._processing_port.process_batch = AsyncMock(return_value=object())
-    host._execution_state_service.commit_successful_batch.side_effect = RuntimeError("commit")
+    host._execution_state_service.commit_successful_batch.side_effect = RuntimeError(
+        "commit"
+    )
     with pytest.raises(RuntimeError, match="commit"):
         await process_stateful_batch(host, [], 0)  # type: ignore[arg-type]
     assert host._fsm_state == BatchExecutionState.FAILED

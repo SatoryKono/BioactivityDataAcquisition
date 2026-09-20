@@ -20,7 +20,9 @@ from bioetl.infrastructure.storage.gold.io_delta_runtime import (
 )
 from bioetl.infrastructure.storage.gold.io_metrics import _split_gold_merged_table_label
 from bioetl.infrastructure.storage.gold.io_preparation import _prepare_gold_merged_table
-from bioetl.infrastructure.storage.gold.read_cleanup_mixin import GoldWriterReadCleanupMixin
+from bioetl.infrastructure.storage.gold.read_cleanup_mixin import (
+    GoldWriterReadCleanupMixin,
+)
 from bioetl.infrastructure.storage.gold.writer_metrics import _split_gold_table_label
 from bioetl.infrastructure.storage.gold_writer import write_deltalake
 
@@ -41,10 +43,13 @@ class _GoldReadHost(GoldWriterReadCleanupMixin):
 
 class TestGoldReadCleanupLeftovers:
     def test_projection_and_current_flag_helpers(self) -> None:
-        assert gold_cleanup._build_read_projection(columns=None, current_only=True) is None
-        assert gold_cleanup._build_read_projection(
-            columns=["id"], current_only=True
-        ) is None
+        assert (
+            gold_cleanup._build_read_projection(columns=None, current_only=True) is None
+        )
+        assert (
+            gold_cleanup._build_read_projection(columns=["id"], current_only=True)
+            is None
+        )
         assert gold_cleanup._build_read_projection(
             columns=["id", "name"], current_only=False
         ) == ["id", "name"]
@@ -94,9 +99,7 @@ class TestGoldReadCleanupLeftovers:
             lambda: SimpleNamespace(DeltaTable=_Delta),
         )
         host = _GoldReadHost(str(table_dir))
-        projected = await host.read_gold(
-            "activity", columns=["id"], current_only=False
-        )
+        projected = await host.read_gold("activity", columns=["id"], current_only=False)
         assert projected == [{"id": "1"}, {"id": "2"}]
         current = await host.read_gold("activity", current_only=True)
         assert [row["id"] for row in current] == ["1"]
@@ -218,7 +221,10 @@ class TestGoldRuntimeLeftovers:
             lambda: SimpleNamespace(coerce_null_types_for_delta=lambda table: table),
         )
         table = _prepare_gold_merged_table(
-            records=[{"id": "b", "_ingestion_ts": "ts"}, {"id": "a", "_ingestion_ts": "ts"}],
+            records=[
+                {"id": "b", "_ingestion_ts": "ts"},
+                {"id": "a", "_ingestion_ts": "ts"},
+            ],
             primary_keys=["id"],
             preserve_column_order=True,
         )

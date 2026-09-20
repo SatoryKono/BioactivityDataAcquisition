@@ -29,9 +29,7 @@ def _areas() -> list[dict]:
 
 @pytest.mark.architecture
 def test_every_composite_module_has_exactly_one_owner() -> None:
-    actual = {
-        path.relative_to(ROOT).as_posix() for path in COMPOSITE.rglob("*.py")
-    }
+    actual = {path.relative_to(ROOT).as_posix() for path in COMPOSITE.rglob("*.py")}
     listed: list[str] = []
     for area in _areas():
         assert area["name"] and area["responsibility"], area

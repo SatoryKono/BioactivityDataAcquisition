@@ -111,8 +111,9 @@ class SilverDQReport:
         _require_aware_timestamp(self.timestamp)
         if self.layer != MedallionLayer.SILVER:
             raise ValueError(f"SilverDQReport layer must be SILVER, got {self.layer}")
-        if isinstance(self.source_batch_ids, list):
-            object.__setattr__(self, "source_batch_ids", tuple(self.source_batch_ids))
+        raw_source_batch_ids: object = self.source_batch_ids
+        if isinstance(raw_source_batch_ids, list):
+            object.__setattr__(self, "source_batch_ids", tuple(raw_source_batch_ids))
 
 
 @dataclass(frozen=True, slots=True)

@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import polars as pl
 
-from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.dependency_coordinator import (
     DependencyCoordinatorService,
 )
@@ -19,6 +19,9 @@ from bioetl.application.runtime_clock import resolve_runtime_clock
 from bioetl.domain.composite.result import DependencyResult
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.ports import ExecutionMetricsRunnerPort
+
+if TYPE_CHECKING:
+    from bioetl.application.composite.checkpoint import CompositeCheckpointState
 
 __all__ = [
     "build_dependencies_run_context",
