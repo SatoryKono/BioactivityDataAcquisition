@@ -11,6 +11,7 @@
         "tests/architecture/test_config_topology_docs_drift.py",
         "tests/unit/infrastructure/adr/test_adr_metadata_extractors.py",
         "tests/unit/infrastructure/adr/test_fs_adr_service.py",
+        "tests/unit/infrastructure/test_issue_10469_stream_a_infra_seven.py",
         "tests/unit/interfaces/cli/commands/test_adr_commands.py",
         "tests/unit/memory/graph/importers/test_expanded_json.py",
         "tests/unit/scripts/docs/test_generate_adr_registry.py",
@@ -29,6 +30,7 @@
         "tests/architecture/test_config_topology_docs_drift.py",
         "tests/unit/infrastructure/adr/test_adr_metadata_extractors.py",
         "tests/unit/infrastructure/adr/test_fs_adr_service.py",
+        "tests/unit/infrastructure/test_issue_10469_stream_a_infra_seven.py",
         "tests/unit/interfaces/cli/commands/test_adr_commands.py",
         "tests/unit/memory/graph/importers/test_expanded_json.py",
         "tests/unit/scripts/docs/test_generate_adr_registry.py",
@@ -47,6 +49,7 @@
       "enforcement_owner_paths": [
         "scripts/diagrams/render/pipeline_dataflow_render.py",
         "tests/unit/infrastructure/adr/test_fs_adr_service.py",
+        "tests/unit/infrastructure/test_issue_10469_stream_a_infra_seven.py",
         "tests/unit/interfaces/cli/commands/test_adr_commands.py",
         "tests/unit/memory/graph/importers/test_expanded_json.py",
         "tests/unit/scripts/docs/test_generate_adr_registry.py"
@@ -67,6 +70,7 @@
         "docs/05-operations/vacuum-retention.md",
         "scripts/diagrams/render/pipeline_dataflow_render.py",
         "tests/unit/infrastructure/adr/test_fs_adr_service.py",
+        "tests/unit/infrastructure/test_issue_10469_stream_a_infra_seven.py",
         "tests/unit/interfaces/cli/commands/test_adr_commands.py",
         "tests/unit/memory/graph/importers/test_expanded_json.py",
         "tests/unit/scripts/docs/test_generate_adr_registry.py"
@@ -202,14 +206,16 @@
       "decision_date": "2025-12-22",
       "decision_path": "docs/02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md",
       "enforcement_owner_paths": [
-        "tests/architecture/test_adr_enforcement_matrix.py"
+        "tests/architecture/test_adr_enforcement_matrix.py",
+        "tests/unit/infrastructure/test_issue_10469_stream_a_infra_seven.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
         "docs/03-guides/cheatsheets/adr-matrix.md",
-        "tests/architecture/test_adr_enforcement_matrix.py"
+        "tests/architecture/test_adr_enforcement_matrix.py",
+        "tests/unit/infrastructure/test_issue_10469_stream_a_infra_seven.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",

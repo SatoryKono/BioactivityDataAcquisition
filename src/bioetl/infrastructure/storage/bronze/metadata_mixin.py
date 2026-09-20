@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, NoReturn, Protocol, cast
 
 from bioetl.domain.types import BatchID, JsonDict, RunID, RunType
 from bioetl.infrastructure.storage.bronze.metadata_builders import (
@@ -62,7 +62,7 @@ class BronzeWriterMetadataMixin:
         provider: str,
         entity: str,
         output_path: str,
-    ) -> None:
+    ) -> NoReturn:
         raise RuntimeError(
             "MetadataCoordinator with create_bronze_metadata_bundle is required "
             "for Bronze metadata publication: "
@@ -161,7 +161,6 @@ class BronzeWriterMetadataMixin:
             entity=entity,
             output_path=output_path,
         )
-        raise AssertionError("unreachable")
 
     def _build_bronze_metadata_payload(
         self,
@@ -211,7 +210,6 @@ class BronzeWriterMetadataMixin:
             entity=entity,
             output_path=output_path,
         )
-        raise AssertionError("unreachable")
 
 
 __all__ = ["BronzeWriterMetadataMixin"]

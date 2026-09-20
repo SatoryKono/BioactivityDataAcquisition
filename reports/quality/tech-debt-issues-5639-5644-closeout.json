@@ -10,7 +10,7 @@
       "action": "Governed effective config diagnostics with proper helper functions and diagnostic tracking.",
       "risk": "low",
       "evidence": [
-        "src/bioetl/application/services/control_plane/manifest/inspection_cross_surface.py",
+        "src/bioetl/application/services/control_plane/manifest/diagnostics/base.py",
         "src/bioetl/application/services/control_plane/manifest/diagnostics/main_helpers.py",
         "tests/architecture/test_tech_debt_issues_5639_5644_closeout.py"
       ]

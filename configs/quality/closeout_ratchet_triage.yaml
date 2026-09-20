@@ -83,6 +83,13 @@ entries:
   live_guard: pipeline transformer issue
   rationale: Retains a live transition guard for the transformer surface instead of
     historical-only evidence.
+- path: tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py
+  disposition: retain_active
+  classification: live_inventory_ratchet
+  live_guard: module-boundaries coupling 10.0 closeout must match live hotspot-family
+    metrics and architecture quality scorecard.
+  rationale: 'Keeps issue 10468/10475 coupling closeout evidence tied to executable
+    live hotspot-family maxima instead of a stale historical signoff.'
 - path: tests/architecture/test_issue_5265_domain_invariants_closeout.py
   disposition: retain_active
   classification: live_inventory_ratchet
