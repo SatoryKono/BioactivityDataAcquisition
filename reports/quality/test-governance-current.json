@@ -55,6 +55,20 @@
     },
     {
       "category": "intentional_no_exception_contract",
+      "line": "100",
+      "path": "tests/unit/application/test_issue_10518_app_leftovers_compat.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_pipeline_metrics_noop_without_backend"
+    },
+    {
+      "category": "intentional_no_exception_contract",
+      "line": "70",
+      "path": "tests/unit/application/test_issue_10518_app_runner_debug_evidence.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_debug_export_recording_is_noop_when_disabled"
+    },
+    {
+      "category": "intentional_no_exception_contract",
       "line": "43",
       "path": "tests/unit/application/test_issue_10518_application_coreobs_b.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -276,6 +290,55 @@
       "path": "tests/unit/infrastructure/test_checkpoint.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_local_checkpoint__aclose__91c52df6"
+    },
+    {
+      "category": "weak_no_value",
+      "line": "662",
+      "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_adapters.py",
+      "rationale": "candidate tests that need later assertion strengthening or removal review",
+      "test_name": "test_base_metrics_none_port_and_zero_fallback"
+    },
+    {
+      "category": "intentional_no_exception_contract",
+      "line": "44",
+      "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_fifteen.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_noop_span_methods"
+    },
+    {
+      "category": "intentional_no_exception_contract",
+      "line": "213",
+      "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_silver.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_write_merged_metadata_skips_when_flagged"
+    },
+    {
+      "category": "weak_no_value",
+      "line": "201",
+      "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_three.py",
+      "rationale": "candidate tests that need later assertion strengthening or removal review",
+      "test_name": "test_adapter_metrics_dropped_duplicates_when_metrics_none"
+    },
+    {
+      "category": "weak_no_value",
+      "line": "260",
+      "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_three.py",
+      "rationale": "candidate tests that need later assertion strengthening or removal review",
+      "test_name": "test_merge_unit_companion_policies_non_dict"
+    },
+    {
+      "category": "intentional_no_exception_contract",
+      "line": "38",
+      "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_seventeen.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_record_dropped_duplicates_without_metrics"
+    },
+    {
+      "category": "intentional_no_exception_contract",
+      "line": "470",
+      "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_expire_gold_empty_key_rows"
     },
     {
       "category": "intentional_no_exception_contract",
@@ -587,6 +650,41 @@
     },
     {
       "category": "intentional_no_exception_contract",
+      "line": "140",
+      "path": "tests/unit/interfaces/test_issue_10520_interfaces_cli.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_formatters_optional_export_and_quarantine"
+    },
+    {
+      "category": "weak_no_value",
+      "line": "647",
+      "path": "tests/unit/interfaces/test_issue_10520_interfaces_remainder.py",
+      "rationale": "candidate tests that need later assertion strengthening or removal review",
+      "test_name": "test_cli_main_dunder_main"
+    },
+    {
+      "category": "intentional_no_exception_contract",
+      "line": "333",
+      "path": "tests/unit/interfaces/test_issue_10520_interfaces_tail.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_quarantine_support_none_returns"
+    },
+    {
+      "category": "weak_no_value",
+      "line": "738",
+      "path": "tests/unit/interfaces/test_issue_10520_interfaces_tail.py",
+      "rationale": "candidate tests that need later assertion strengthening or removal review",
+      "test_name": "test_run_cleanup_preview_error_branches"
+    },
+    {
+      "category": "weak_no_value",
+      "line": "781",
+      "path": "tests/unit/interfaces/test_issue_10520_interfaces_tail.py",
+      "rationale": "candidate tests that need later assertion strengthening or removal review",
+      "test_name": "test_mixin_generic_exception_path"
+    },
+    {
+      "category": "intentional_no_exception_contract",
       "line": "35",
       "path": "tests/unit/interfaces/cli/commands/test_health_provider_health_rehydrate.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -625,13 +723,15 @@
     "architecture_helper_guard": 1,
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
-    "intentional_no_exception_contract": 83,
-    "weak_no_value": 0
+    "intentional_no_exception_contract": 91,
+    "weak_no_value": 6
   },
   "assertless_examples": [
     "tests/architecture/test_quality_debt_scorecard.py:1127",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
     "tests/integration/infrastructure/storage/test_delta_reader.py:586",
+    "tests/unit/application/test_issue_10518_app_leftovers_compat.py:100",
+    "tests/unit/application/test_issue_10518_app_runner_debug_evidence.py:70",
     "tests/unit/application/test_issue_10518_application_coreobs_b.py:43",
     "tests/unit/application/test_issue_10518_application_coreobs_b.py:50",
     "tests/unit/application/test_issue_10518_application_pipelines_a.py:753",
@@ -651,9 +751,7 @@
     "tests/unit/composition/test_observability_contract.py:421",
     "tests/unit/composition/test_observability_contract.py:431",
     "tests/unit/composition/factories/storage/test_health_mixin.py:72",
-    "tests/unit/composition/factories/storage/test_health_mixin.py:103",
-    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:617",
-    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:638"
+    "tests/unit/composition/factories/storage/test_health_mixin.py:103"
   ],
   "assertless_families": {
     "tests/architecture/test_quality_debt_scorecard.py": {
@@ -723,6 +821,18 @@
       }
     },
     "tests/unit/application/services/test_checkpoint_telemetry_helpers.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/application/test_issue_10518_app_leftovers_compat.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/application/test_issue_10518_app_runner_debug_evidence.py": {
       "assertless_tests": 1,
       "categories": {
         "intentional_no_exception_contract": 1
@@ -938,6 +1048,42 @@
         "intentional_no_exception_contract": 2
       }
     },
+    "tests/unit/infrastructure/test_issue_10469_stream_a_infra_adapters.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "weak_no_value": 1
+      }
+    },
+    "tests/unit/infrastructure/test_issue_10469_stream_a_infra_fifteen.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_silver.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_three.py": {
+      "assertless_tests": 2,
+      "categories": {
+        "weak_no_value": 2
+      }
+    },
+    "tests/unit/infrastructure/test_issue_10469_stream_a_infra_seventeen.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
     "tests/unit/infrastructure/test_storage_factory.py": {
       "assertless_tests": 2,
       "categories": {
@@ -955,13 +1101,67 @@
       "categories": {
         "intentional_no_exception_contract": 4
       }
+    },
+    "tests/unit/interfaces/test_issue_10520_interfaces_cli.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/interfaces/test_issue_10520_interfaces_remainder.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "weak_no_value": 1
+      }
+    },
+    "tests/unit/interfaces/test_issue_10520_interfaces_tail.py": {
+      "assertless_tests": 3,
+      "categories": {
+        "intentional_no_exception_contract": 1,
+        "weak_no_value": 2
+      }
     }
   },
-  "assertless_total_candidates": 84,
-  "budget_violations": [],
-  "compatibility_examples": [],
-  "compatibility_files": [],
-  "compatibility_test_files": 0,
+  "assertless_total_candidates": 98,
+  "budget_violations": [
+    {
+      "actual": 6,
+      "budget": "refined_assertless_max",
+      "expected_max": 0,
+      "metric": "refined_assertless_tests"
+    },
+    {
+      "actual": 7,
+      "budget": "duplicate_test_names_max",
+      "expected_max": 0,
+      "metric": "duplicate_test_names"
+    },
+    {
+      "actual": 14,
+      "budget": "duplicate_test_name_occurrences_max",
+      "expected_max": 0,
+      "metric": "duplicate_test_name_occurrences"
+    },
+    {
+      "actual": 1,
+      "budget": "compatibility_test_file_max",
+      "expected_max": 0,
+      "metric": "compatibility_test_files"
+    },
+    {
+      "actual": 15,
+      "budget": "uuid4_call_sites_max",
+      "expected_max": 0,
+      "metric": "uuid4_call_sites"
+    }
+  ],
+  "compatibility_examples": [
+    "tests/unit/application/test_issue_10518_app_leftovers_compat.py"
+  ],
+  "compatibility_files": [
+    "tests/unit/application/test_issue_10518_app_leftovers_compat.py"
+  ],
+  "compatibility_test_files": 1,
   "critical_behavior_envelope_assertion_gap_count": 0,
   "critical_behavior_envelope_count": 6,
   "critical_behavior_envelopes": {
@@ -1103,16 +1303,111 @@
     }
   },
   "date_today_call_sites": 0,
-  "duplicate_test_name_inventory": [],
+  "duplicate_test_name_inventory": [
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "integration": 1,
+        "unit": 1
+      },
+      "locations": [
+        "tests/integration/application/workflow/test_reconcile_fk_parity.py:269",
+        "tests/unit/application/workflow/test_reconcile_fk_parity.py:269"
+      ],
+      "name": "test_dry_run_blocked_reason_parity",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/test_issue_10469_stream_a_l12_two.py:304",
+        "tests/unit/application/test_issue_10518_application_tail2a.py:1212"
+      ],
+      "name": "test_explicit_degraded_opt_down_rejects_exact_replay",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "integration": 1,
+        "unit": 1
+      },
+      "locations": [
+        "tests/integration/application/workflow/test_reconcile_fk_parity.py:226",
+        "tests/unit/application/workflow/test_reconcile_fk_parity.py:226"
+      ],
+      "name": "test_facade_payload_mirrors_canonical_result_fields",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "integration": 1,
+        "unit": 1
+      },
+      "locations": [
+        "tests/integration/application/workflow/test_reconcile_fk_parity.py:185",
+        "tests/unit/application/workflow/test_reconcile_fk_parity.py:185"
+      ],
+      "name": "test_facade_request_is_valid_canonical_adapter_input",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/test_issue_10518_app_leftovers_next.py:317",
+        "tests/unit/application/test_issue_10518_application_tail1a.py:991"
+      ],
+      "name": "test_legacy_increment_kwargs_signature_failure",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/test_issue_10469_stream_a_l12_two.py:229",
+        "tests/unit/application/test_issue_10518_application_tail2b.py:224"
+      ],
+      "name": "test_monotonic_invariant_status_unknown_when_unobserved",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/test_issue_10469_stream_a_l12_two.py:276",
+        "tests/unit/application/test_issue_10518_application_tail2a.py:224"
+      ],
+      "name": "test_record_manifest_created_rejects_run_id_mismatch",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    }
+  ],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 0,
-    "duplicate_occurrences": 0,
+    "cross_file_groups": 7,
+    "duplicate_occurrences": 14,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 0
+    "total_duplicate_names": 7
   },
-  "duplicate_test_name_occurrences": 0,
-  "duplicate_test_names": 0,
+  "duplicate_test_name_occurrences": 14,
+  "duplicate_test_names": 7,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1131,11 +1426,11 @@
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 83,
+  "intentional_no_exception_contract": 91,
   "markerless_examples": [],
   "markerless_test_functions": 0,
   "parse_errors": [],
-  "refined_assertless_tests": 0,
+  "refined_assertless_tests": 6,
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
@@ -1199,6 +1494,20 @@
         "path": "tests/integration/infrastructure/storage/test_delta_reader.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_is_noop"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "100",
+        "path": "tests/unit/application/test_issue_10518_app_leftovers_compat.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_pipeline_metrics_noop_without_backend"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "70",
+        "path": "tests/unit/application/test_issue_10518_app_runner_debug_evidence.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_debug_export_recording_is_noop_when_disabled"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -1423,6 +1732,55 @@
         "path": "tests/unit/infrastructure/test_checkpoint.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_local_checkpoint__aclose__91c52df6"
+      },
+      {
+        "category": "weak_no_value",
+        "line": "662",
+        "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_adapters.py",
+        "rationale": "candidate tests that need later assertion strengthening or removal review",
+        "test_name": "test_base_metrics_none_port_and_zero_fallback"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "44",
+        "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_fifteen.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_noop_span_methods"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "213",
+        "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_silver.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_write_merged_metadata_skips_when_flagged"
+      },
+      {
+        "category": "weak_no_value",
+        "line": "201",
+        "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_three.py",
+        "rationale": "candidate tests that need later assertion strengthening or removal review",
+        "test_name": "test_adapter_metrics_dropped_duplicates_when_metrics_none"
+      },
+      {
+        "category": "weak_no_value",
+        "line": "260",
+        "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_three.py",
+        "rationale": "candidate tests that need later assertion strengthening or removal review",
+        "test_name": "test_merge_unit_companion_policies_non_dict"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "38",
+        "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_seventeen.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_record_dropped_duplicates_without_metrics"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "470",
+        "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_expire_gold_empty_key_rows"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -1734,6 +2092,41 @@
       },
       {
         "category": "intentional_no_exception_contract",
+        "line": "140",
+        "path": "tests/unit/interfaces/test_issue_10520_interfaces_cli.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_formatters_optional_export_and_quarantine"
+      },
+      {
+        "category": "weak_no_value",
+        "line": "647",
+        "path": "tests/unit/interfaces/test_issue_10520_interfaces_remainder.py",
+        "rationale": "candidate tests that need later assertion strengthening or removal review",
+        "test_name": "test_cli_main_dunder_main"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "333",
+        "path": "tests/unit/interfaces/test_issue_10520_interfaces_tail.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_quarantine_support_none_returns"
+      },
+      {
+        "category": "weak_no_value",
+        "line": "738",
+        "path": "tests/unit/interfaces/test_issue_10520_interfaces_tail.py",
+        "rationale": "candidate tests that need later assertion strengthening or removal review",
+        "test_name": "test_run_cleanup_preview_error_branches"
+      },
+      {
+        "category": "weak_no_value",
+        "line": "781",
+        "path": "tests/unit/interfaces/test_issue_10520_interfaces_tail.py",
+        "rationale": "candidate tests that need later assertion strengthening or removal review",
+        "test_name": "test_mixin_generic_exception_path"
+      },
+      {
+        "category": "intentional_no_exception_contract",
         "line": "35",
         "path": "tests/unit/interfaces/cli/commands/test_health_provider_health_rehydrate.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -1772,13 +2165,15 @@
       "architecture_helper_guard": 1,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
-      "intentional_no_exception_contract": 83,
-      "weak_no_value": 0
+      "intentional_no_exception_contract": 91,
+      "weak_no_value": 6
     },
     "assertless_examples": [
       "tests/architecture/test_quality_debt_scorecard.py:1127",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
       "tests/integration/infrastructure/storage/test_delta_reader.py:586",
+      "tests/unit/application/test_issue_10518_app_leftovers_compat.py:100",
+      "tests/unit/application/test_issue_10518_app_runner_debug_evidence.py:70",
       "tests/unit/application/test_issue_10518_application_coreobs_b.py:43",
       "tests/unit/application/test_issue_10518_application_coreobs_b.py:50",
       "tests/unit/application/test_issue_10518_application_pipelines_a.py:753",
@@ -1798,14 +2193,16 @@
       "tests/unit/composition/test_observability_contract.py:421",
       "tests/unit/composition/test_observability_contract.py:431",
       "tests/unit/composition/factories/storage/test_health_mixin.py:72",
-      "tests/unit/composition/factories/storage/test_health_mixin.py:103",
-      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:617",
-      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:638"
+      "tests/unit/composition/factories/storage/test_health_mixin.py:103"
     ],
-    "assertless_total_candidates": 84,
-    "compatibility_examples": [],
-    "compatibility_files": [],
-    "compatibility_test_files": 0,
+    "assertless_total_candidates": 98,
+    "compatibility_examples": [
+      "tests/unit/application/test_issue_10518_app_leftovers_compat.py"
+    ],
+    "compatibility_files": [
+      "tests/unit/application/test_issue_10518_app_leftovers_compat.py"
+    ],
+    "compatibility_test_files": 1,
     "critical_behavior_envelope_assertion_gap_count": 0,
     "critical_behavior_envelope_count": 6,
     "critical_behavior_envelopes": {
@@ -1947,16 +2344,111 @@
       }
     },
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [],
+    "duplicate_test_name_inventory": [
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "integration": 1,
+          "unit": 1
+        },
+        "locations": [
+          "tests/integration/application/workflow/test_reconcile_fk_parity.py:269",
+          "tests/unit/application/workflow/test_reconcile_fk_parity.py:269"
+        ],
+        "name": "test_dry_run_blocked_reason_parity",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/test_issue_10469_stream_a_l12_two.py:304",
+          "tests/unit/application/test_issue_10518_application_tail2a.py:1212"
+        ],
+        "name": "test_explicit_degraded_opt_down_rejects_exact_replay",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "integration": 1,
+          "unit": 1
+        },
+        "locations": [
+          "tests/integration/application/workflow/test_reconcile_fk_parity.py:226",
+          "tests/unit/application/workflow/test_reconcile_fk_parity.py:226"
+        ],
+        "name": "test_facade_payload_mirrors_canonical_result_fields",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "integration": 1,
+          "unit": 1
+        },
+        "locations": [
+          "tests/integration/application/workflow/test_reconcile_fk_parity.py:185",
+          "tests/unit/application/workflow/test_reconcile_fk_parity.py:185"
+        ],
+        "name": "test_facade_request_is_valid_canonical_adapter_input",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/test_issue_10518_app_leftovers_next.py:317",
+          "tests/unit/application/test_issue_10518_application_tail1a.py:991"
+        ],
+        "name": "test_legacy_increment_kwargs_signature_failure",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/test_issue_10469_stream_a_l12_two.py:229",
+          "tests/unit/application/test_issue_10518_application_tail2b.py:224"
+        ],
+        "name": "test_monotonic_invariant_status_unknown_when_unobserved",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/test_issue_10469_stream_a_l12_two.py:276",
+          "tests/unit/application/test_issue_10518_application_tail2a.py:224"
+        ],
+        "name": "test_record_manifest_created_rejects_run_id_mismatch",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      }
+    ],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 0,
-      "duplicate_occurrences": 0,
+      "cross_file_groups": 7,
+      "duplicate_occurrences": 14,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 0
+      "total_duplicate_names": 7
     },
-    "duplicate_test_name_occurrences": 0,
-    "duplicate_test_names": 0,
+    "duplicate_test_name_occurrences": 14,
+    "duplicate_test_names": 7,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -1978,7 +2470,7 @@
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "parse_errors": [],
-    "refined_assertless_tests": 0,
+    "refined_assertless_tests": 6,
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
@@ -1994,8 +2486,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2521,
-      "test_python_file_count": 2755,
+      "test_glob_file_count": 2608,
+      "test_python_file_count": 2842,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2035,35 +2527,92 @@
       "top_level_directory_count": 16,
       "top_level_directory_count_including_pycache": 16
     },
-    "top_duplicate_test_names": [],
-    "total_test_files": 2521,
-    "total_test_functions": 27433,
+    "top_duplicate_test_names": [
+      {
+        "count": 2,
+        "examples": [
+          "tests/integration/application/workflow/test_reconcile_fk_parity.py:269",
+          "tests/unit/application/workflow/test_reconcile_fk_parity.py:269"
+        ],
+        "name": "test_dry_run_blocked_reason_parity"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/application/test_issue_10469_stream_a_l12_two.py:304",
+          "tests/unit/application/test_issue_10518_application_tail2a.py:1212"
+        ],
+        "name": "test_explicit_degraded_opt_down_rejects_exact_replay"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/integration/application/workflow/test_reconcile_fk_parity.py:226",
+          "tests/unit/application/workflow/test_reconcile_fk_parity.py:226"
+        ],
+        "name": "test_facade_payload_mirrors_canonical_result_fields"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/integration/application/workflow/test_reconcile_fk_parity.py:185",
+          "tests/unit/application/workflow/test_reconcile_fk_parity.py:185"
+        ],
+        "name": "test_facade_request_is_valid_canonical_adapter_input"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/application/test_issue_10518_app_leftovers_next.py:317",
+          "tests/unit/application/test_issue_10518_application_tail1a.py:991"
+        ],
+        "name": "test_legacy_increment_kwargs_signature_failure"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/application/test_issue_10469_stream_a_l12_two.py:229",
+          "tests/unit/application/test_issue_10518_application_tail2b.py:224"
+        ],
+        "name": "test_monotonic_invariant_status_unknown_when_unobserved"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/application/test_issue_10469_stream_a_l12_two.py:276",
+          "tests/unit/application/test_issue_10518_application_tail2a.py:224"
+        ],
+        "name": "test_record_manifest_created_rejects_run_id_mismatch"
+      }
+    ],
+    "total_test_files": 2608,
+    "total_test_functions": 28132,
     "unreviewed_assertion_bypass_count": 0,
-    "uuid4_call_sites": 0
+    "uuid4_call_sites": 15
   },
   "root": ".",
-  "source_tree_sha256": "7e52048459c3932d3e911703238ca4ac51dad4d55d5fc2c4238ea9dc5f8d9715",
+  "source_tree_sha256": "e5d3d8bedf1a5ab12b8e9ec8cd600e5c153d26bec46c2a796f71d3ea2317637f",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 84,
-    "compatibility_test_files": 0,
+    "assertless_total_candidates": 98,
+    "compatibility_test_files": 1,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 0,
-    "duplicate_test_names": 0,
-    "intentional_no_exception_contract": 83,
+    "duplicate_test_name_occurrences": 14,
+    "duplicate_test_names": 7,
+    "intentional_no_exception_contract": 91,
     "markerless_examples": [],
     "markerless_test_functions": 0,
-    "refined_assertless_tests": 0,
+    "refined_assertless_tests": 6,
     "unreviewed_assertion_bypass_count": 0,
-    "uuid4_call_sites": 0
+    "uuid4_call_sites": 15
   },
   "test_file_inventory": {
     "pytest_python_files": [
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2521,
-    "test_python_file_count": 2755,
+    "test_glob_file_count": 2608,
+    "test_python_file_count": 2842,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2103,9 +2652,66 @@
     "top_level_directory_count": 16,
     "top_level_directory_count_including_pycache": 16
   },
-  "top_duplicate_test_names": [],
-  "total_test_files": 2521,
-  "total_test_functions": 27433,
+  "top_duplicate_test_names": [
+    {
+      "count": 2,
+      "examples": [
+        "tests/integration/application/workflow/test_reconcile_fk_parity.py:269",
+        "tests/unit/application/workflow/test_reconcile_fk_parity.py:269"
+      ],
+      "name": "test_dry_run_blocked_reason_parity"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/application/test_issue_10469_stream_a_l12_two.py:304",
+        "tests/unit/application/test_issue_10518_application_tail2a.py:1212"
+      ],
+      "name": "test_explicit_degraded_opt_down_rejects_exact_replay"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/integration/application/workflow/test_reconcile_fk_parity.py:226",
+        "tests/unit/application/workflow/test_reconcile_fk_parity.py:226"
+      ],
+      "name": "test_facade_payload_mirrors_canonical_result_fields"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/integration/application/workflow/test_reconcile_fk_parity.py:185",
+        "tests/unit/application/workflow/test_reconcile_fk_parity.py:185"
+      ],
+      "name": "test_facade_request_is_valid_canonical_adapter_input"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/application/test_issue_10518_app_leftovers_next.py:317",
+        "tests/unit/application/test_issue_10518_application_tail1a.py:991"
+      ],
+      "name": "test_legacy_increment_kwargs_signature_failure"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/application/test_issue_10469_stream_a_l12_two.py:229",
+        "tests/unit/application/test_issue_10518_application_tail2b.py:224"
+      ],
+      "name": "test_monotonic_invariant_status_unknown_when_unobserved"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/application/test_issue_10469_stream_a_l12_two.py:276",
+        "tests/unit/application/test_issue_10518_application_tail2a.py:224"
+      ],
+      "name": "test_record_manifest_created_rejects_run_id_mismatch"
+    }
+  ],
+  "total_test_files": 2608,
+  "total_test_functions": 28132,
   "unreviewed_assertion_bypass_count": 0,
-  "uuid4_call_sites": 0
+  "uuid4_call_sites": 15
 }
