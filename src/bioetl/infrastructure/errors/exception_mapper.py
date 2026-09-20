@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from bioetl.domain.exceptions import (
     BioETLError,
@@ -15,8 +15,10 @@ from bioetl.domain.exceptions import (
     get_domain_exception_context,
 )
 from bioetl.domain.exceptions.bounded_context import DomainExceptionContext
-from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import ErrorType
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import LoggerPort
 
 __all__ = [
     "DomainErrorMappingInput",

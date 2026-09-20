@@ -109,6 +109,7 @@ class RunCommandInput:
     required_persistence_profile: str | None = None
     ensure_observability_backend: bool = False
     observability_backend_port: int = 8000
+    no_control_plane_archive: bool = False
 
 
 def prepare_run_request(
@@ -150,6 +151,7 @@ def prepare_run_request(
                 required_persistence_profile=(
                     command_input.required_persistence_profile
                 ),
+                no_control_plane_archive=command_input.no_control_plane_archive,
             ),
             health_server=command_input.health_server,
             health_port=command_input.health_port,

@@ -465,7 +465,7 @@ def test_github_actions_workflow_inventory_matches_live_repo() -> None:
         encoding="utf-8"
     )
     assert "total_count" in inventory_doc
-    assert "Do not claim that 48 equals" in inventory_doc
+    assert "Do not claim that 50 equals" in inventory_doc
 
 
 def test_workflow_inventory_keeps_scheduled_only_workflows_out_of_pr_push_section() -> (

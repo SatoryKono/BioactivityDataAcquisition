@@ -55,7 +55,8 @@ def _query_defaults() -> tuple[Path, Path]:
 
 
 def _query_runtime() -> tuple[Any, Any, Any]:
-    from memory.query import TASK_PROFILES, query_all, query_catalog
+    from memory.query import query_all, query_catalog
+    from memory.rag.retrieval import TASK_PROFILES
 
     return TASK_PROFILES, query_all, query_catalog
 
@@ -324,7 +325,8 @@ def review_curated_notes(root: Path | None = None) -> dict[str, Any]:
 
 def _write_note(*, path: Path, metadata: dict[str, Any], body: str) -> None:
     from memory.notes import write_markdown_note
-    from memory.security import TrustLevel, assert_safe_for_persistence
+    from memory.records import TrustLevel
+    from memory.security import assert_safe_for_persistence
 
     persistent_payload = json.dumps(
         {"metadata": metadata, "body": body},
@@ -1390,7 +1392,6 @@ def main(argv: list[str] | None = None) -> int:
     handler = handlers.get(args.command)
     if handler is None:
         parser.error(f"unsupported command: {args.command}")
-        return 2
     return handler(args)
 
 

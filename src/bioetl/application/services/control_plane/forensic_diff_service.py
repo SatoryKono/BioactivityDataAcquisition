@@ -148,23 +148,18 @@ class ForensicRunDiffService:
         """Return byte-level artifact equivalence when a comparison port exists."""
         left_refs = artifact_refs(left.diagnostics)
         right_refs = artifact_refs(right.diagnostics)
-        if self.artifact_byte_comparison_port is None:
+        if self.artifact_byte_comparison_port is None or not left_refs or not right_refs:
             return {
                 "available": False,
                 "equivalent": None,
                 "compared_artifacts": [],
                 "missing_artifacts": [],
                 "mismatched_artifacts": [],
-                "comparison_scope": "unavailable_no_port",
-            }
-        if not left_refs or not right_refs:
-            return {
-                "available": False,
-                "equivalent": None,
-                "compared_artifacts": [],
-                "missing_artifacts": [],
-                "mismatched_artifacts": [],
-                "comparison_scope": "unavailable_missing_refs",
+                "comparison_scope": (
+                    "unavailable_no_port"
+                    if self.artifact_byte_comparison_port is None
+                    else "unavailable_missing_refs"
+                ),
             }
         return dict(
             self.artifact_byte_comparison_port.compare_artifacts(left_refs, right_refs)

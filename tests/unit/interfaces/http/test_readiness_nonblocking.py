@@ -11,6 +11,11 @@ from bioetl.interfaces.http import _health_server_readiness as readiness
 
 @pytest.mark.asyncio
 async def test_slow_reconciliation_allows_other_requests_to_progress(monkeypatch):
+    if asyncio.to_thread.__module__ != "asyncio.threads":
+        pytest.skip(
+            reason="requires real asyncio.to_thread worker offload; "
+            "the WSL safeguard in tests/conftest.py runs it inline"
+        )
     entered, release = Event(), Event()
     host = Mock(_health_monitor=None)
     host._response_timestamp.return_value = "2026-09-15T00:00:00+00:00"

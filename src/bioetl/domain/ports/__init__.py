@@ -184,6 +184,7 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "ForeignKeyReconciliationPort",
         "ForeignKeyReconciliationRequest",
         "ForeignKeyReconciliationResult",
+        "ReferenceCompletenessStatus",
     ),
     "bioetl.domain.ports.workflow_row_reconciliation": (
         "RowReconciliationConfig",
@@ -198,7 +199,6 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "RowReconciliationTypePolicyError",
     ),
 }
-
 
 _EXPORT_MODULES = build_export_modules(_EXPORT_GROUPS)
 

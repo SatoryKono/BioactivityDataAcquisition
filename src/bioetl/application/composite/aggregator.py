@@ -6,6 +6,8 @@ row before joining with seed data. See ADR-026.
 
 from __future__ import annotations
 
+from typing import cast
+
 import polars as pl
 
 from bioetl.domain.composite.aggregation import (
@@ -135,7 +137,10 @@ class EnricherAggregator:
             if filter_expr is not None:
                 base_col = base_col.filter(filter_expr)
 
-        match spec.agg_function:
+        # Unvalidated payloads may carry unknown function names; they pass
+        # through unchanged (fail-open by design, covered by
+        # test_build_aggregation_expr_unknown_function_passthrough).
+        match cast("str", spec.agg_function):
             case AggregationFunction.COLLECT_LIST:
                 expr = base_col.drop_nulls()
             case AggregationFunction.COLLECT_SET:

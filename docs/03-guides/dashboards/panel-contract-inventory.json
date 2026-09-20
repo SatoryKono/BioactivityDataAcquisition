@@ -854,14 +854,6 @@
         {
           "color": "green",
           "value": null
-        },
-        {
-          "color": "yellow",
-          "value": 0.5
-        },
-        {
-          "color": "red",
-          "value": 1
         }
       ],
       "unit": "s"
@@ -2451,7 +2443,7 @@
       "dashboard_uid": "bioetl-dq-v2",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
-      "documents_valid_empty": true,
+      "documents_valid_empty": false,
       "empty_state": "coverage_gap",
       "formula": "((sum((bioetl_dq_validation_score{pipeline=~\"$pipeline\"} * bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}))) / clamp_min(sum(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}), 1))",
       "kind": "promql",

@@ -199,11 +199,12 @@ class GoldMetadataInput:
 
     def __post_init__(self) -> None:
         """Coerce legacy mapping payloads into typed SCD config."""
-        if isinstance(self.scd_config, Mapping):
+        raw_scd_config: object = self.scd_config
+        if isinstance(raw_scd_config, Mapping):
             object.__setattr__(
                 self,
                 "scd_config",
-                ScdConfig.from_mapping(self.scd_config),
+                ScdConfig.from_mapping(raw_scd_config),
             )
 
 

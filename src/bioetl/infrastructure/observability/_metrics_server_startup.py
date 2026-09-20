@@ -14,6 +14,7 @@ from bioetl.infrastructure.observability._metrics_gateway_publication import (
 )
 from bioetl.infrastructure.observability._metrics_server_state import (
     _SERVER_RUNTIME,
+    is_metrics_server_running,
     mark_metrics_server_started,
 )
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
@@ -136,7 +137,10 @@ def start_metrics_server_runtime(
         return True
 
     with _SERVER_RUNTIME.lock:
-        if _SERVER_RUNTIME.started:
+        # Re-read via helper: the outer fast-path check narrows
+        # _SERVER_RUNTIME.started for mypy, but another thread may have
+        # started the server while acquiring the lock (RLock: reentrant).
+        if is_metrics_server_running():
             return True
 
         for attempt in range(retry_count):

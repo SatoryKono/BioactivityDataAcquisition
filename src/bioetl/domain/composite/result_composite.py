@@ -42,14 +42,14 @@ class CompositeResult:
 
     def __post_init__(self) -> None:
         """Freeze result maps so callers cannot mutate composite state."""
-        if not isinstance(self._required_enrichers, frozenset):
-            object.__setattr__(
-                self, "_required_enrichers", frozenset(self._required_enrichers)
-            )
-        if not isinstance(self._required_dependencies, frozenset):
-            object.__setattr__(
-                self, "_required_dependencies", frozenset(self._required_dependencies)
-            )
+        # frozenset() is idempotent (returns the same object for frozenset
+        # input), so this unconditionally upholds the frozen invariant.
+        object.__setattr__(
+            self, "_required_enrichers", frozenset(self._required_enrichers)
+        )
+        object.__setattr__(
+            self, "_required_dependencies", frozenset(self._required_dependencies)
+        )
         freeze_fields(self, ("dependency_results", "enrichment_results"))
 
     @property

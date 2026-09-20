@@ -32,7 +32,10 @@ from bioetl.composition.factories.pipeline.run_context_contract_identity import 
     _normalize_contract_identity_result,
     runtime_requires_strict_contract_identity,
 )
-from bioetl.composition.observability_runtime import _ensure_publication_seeds, _seed_run_type
+from bioetl.composition.observability_runtime import (
+    _ensure_publication_seeds,
+    _seed_run_type,
+)
 from bioetl.composition.providers._chembl_target_protein_classification_helpers import (
     coerce_positive_int,
     leaf_ids_from_component_row,
@@ -65,9 +68,7 @@ def test_marker_modules_are_importable(module_name: str) -> None:
 def test_workflow_metrics_factory_rejects_invalid_contract(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(
-        port_factories, "create_metrics", object(), raising=False
-    )
+    monkeypatch.setattr(port_factories, "create_metrics", object(), raising=False)
 
     with pytest.raises(TypeError, match="does not satisfy"):
         _workflow_services._create_workflow_metrics(MagicMock())
@@ -197,14 +198,17 @@ def test_publication_seed_refresh_skips_empty_workflow_run_type(
         ensure,
     )
 
-    assert _ensure_publication_seeds(
-        settings=object(),
-        pipeline_name="chembl_activity",
-        run_type=None,
-        pipeline_names=(),
-        workflow_name="workflow",
-        logger=None,
-    ) == {}
+    assert (
+        _ensure_publication_seeds(
+            settings=object(),
+            pipeline_name="chembl_activity",
+            run_type=None,
+            pipeline_names=(),
+            workflow_name="workflow",
+            logger=None,
+        )
+        == {}
+    )
     ensure.assert_not_called()
     refresh.assert_called_once()
 
@@ -225,9 +229,7 @@ def test_effective_config_graph_rejects_escape_and_non_yaml(tmp_path: Path) -> N
     file_path = tmp_path / "config.txt"
     file_path.write_text("ignored", encoding="utf-8")
     assert (
-        _load_config_graph_references(
-            relative_path="config.txt", repo_root=tmp_path
-        )
+        _load_config_graph_references(relative_path="config.txt", repo_root=tmp_path)
         == []
     )
 

@@ -138,8 +138,6 @@ _ATTRIBUTE_EXPORTS = {
 
 
 def __getattr__(name: str) -> object:  # pragma: no cover
-    if TYPE_CHECKING:
-        raise AttributeError
     module_name = _MODULE_EXPORTS.get(name)
     if module_name is not None:
         value = import_module(module_name)

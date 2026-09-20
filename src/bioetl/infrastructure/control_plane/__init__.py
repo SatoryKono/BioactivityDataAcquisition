@@ -118,8 +118,6 @@ __all__ = [
 
 def __getattr__(name: str) -> object:  # pragma: no cover
     """Resolve control-plane adapters lazily for operational startup paths."""
-    if TYPE_CHECKING:
-        raise AttributeError
     module_name = _EXPORT_MODULES.get(name)
     if module_name is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

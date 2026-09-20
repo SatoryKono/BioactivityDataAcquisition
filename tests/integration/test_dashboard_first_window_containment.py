@@ -121,7 +121,7 @@ def test_trust_9418_keeps_verdict_and_reason_count_visible() -> None:
         o["matcher"]["options"]: {p["id"]: p["value"] for p in o["properties"]}
         for o in panel["fieldConfig"]["overrides"]
     }
-    assert props["reasons_text"]["custom.hidden"] is False
+    assert props["reasons_text"]["custom.hidden"] is True
     assert props["reasons_text"]["custom.inspect"] is True
     assert props["reasons_count"]["custom.hidden"] is True
     assert props["evidence_observed_at"]["custom.hidden"] is False
@@ -227,6 +227,17 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
     assert reason_maps["deadline_exceeded"]["text"] == "Deadline exceeded"
     assert reason_maps["archive_not_applicable"]["text"] == "N/A: policy"
     assert reason_maps["archive_restore_verified"]["text"] == "Archive verified"
+    assert reason_maps["reproducibility_evidence_floor_satisfied"]["text"] == (
+        "Evidence floor met"
+    )
+    assert reason_maps["snapshot_evidence_not_required"]["text"] == (
+        "Snapshots not required"
+    )
+    status_maps = override_properties["status"]["mappings"][0]["options"]
+    assert status_maps["INCOMPLETE"]["color"] == "#555555"
+    assert status_maps["UNKNOWN"]["color"] == "#555555"
+    assert status_maps["ERROR"]["color"] == "red"
+    assert status_maps["OK"]["color"] == "green"
     for hidden in ("detail", "endpoint", "retryable", "observed_at"):
         assert override_properties[hidden]["custom.hidden"] is True
     y = int((panel.get("gridPos") or {})["y"])

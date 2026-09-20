@@ -4,7 +4,7 @@ from __future__ import annotations
 
 __all__ = ["FeatureExtractor"]
 
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from typing import ClassVar
 
 from bioetl.application.pipelines.uniprot.extractors._feature_wrappers_mixin import (
@@ -117,11 +117,12 @@ class FeatureExtractor(FeatureExtractionWrappersMixin):
     }
 
     @staticmethod
-    def extract_features(features: list[JsonDict] | None) -> str | None:
+    def extract_features(features: Sequence[object] | None) -> str | None:
         """Extract all sequence features as JSON.
 
         Args:
-            features: List of UniProt feature dicts from the API response, or None.
+            features: Raw UniProt feature entries from the API response
+                (non-dict entries are skipped), or None.
 
         Returns:
             JSON-serialized list of feature dicts (type, description, feature_id,
@@ -141,11 +142,12 @@ class FeatureExtractor(FeatureExtractionWrappersMixin):
         return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
 
     @staticmethod
-    def extract_keywords(keywords: list[JsonDict] | None) -> str | None:
+    def extract_keywords(keywords: Sequence[object] | None) -> str | None:
         """Extract UniProt keywords as JSON.
 
         Args:
-            keywords: List of UniProt keyword dicts from the API response, or None.
+            keywords: Raw UniProt keyword entries from the API response
+                (non-dict entries are skipped), or None.
 
         Returns:
             JSON-serialized list of keyword dicts (id, name, category),
@@ -167,13 +169,14 @@ class FeatureExtractor(FeatureExtractionWrappersMixin):
     @classmethod
     def extract_features_by_type(
         cls,
-        features: list[JsonDict] | None,
+        features: Sequence[object] | None,
         feature_type: str,
     ) -> str | None:
         """Extract sequence features matching the requested type.
 
         Args:
-            features: List of UniProt feature dicts from the API response, or None.
+            features: Raw UniProt feature entries from the API response
+                (non-dict entries are skipped), or None.
             feature_type: UniProt feature type string to filter on
                 (e.g. 'Transmembrane', 'Signal peptide').
 

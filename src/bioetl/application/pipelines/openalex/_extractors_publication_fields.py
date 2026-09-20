@@ -81,7 +81,8 @@ def reconstruct_abstract(inverted_index: dict[str, list[int]] | None) -> str | N
 
     word_positions: list[tuple[int, str]] = []
     for word, positions in inverted_index.items():
-        if not isinstance(positions, list):
+        raw_positions: object = positions
+        if not isinstance(raw_positions, list):
             continue
         for pos in positions:
             if isinstance(pos, int):
@@ -162,9 +163,10 @@ def extract_mesh_terms(
     result: list[str] = []
 
     for term in mesh:
-        if not isinstance(term, dict):
+        raw_term: object = term
+        if not isinstance(raw_term, dict):
             continue
-        name = term.get("descriptor_name")
+        name = raw_term.get("descriptor_name")
         if name and isinstance(name, str) and name not in seen:
             seen.add(name)
             result.append(name)
@@ -190,9 +192,10 @@ def extract_keywords(
 
     result: list[str] = []
     for kw in keywords:
-        if not isinstance(kw, dict):
+        raw_kw: object = kw
+        if not isinstance(raw_kw, dict):
             continue
-        name = kw.get("display_name")
+        name = raw_kw.get("display_name")
         if name and isinstance(name, str):
             result.append(name.strip())
 

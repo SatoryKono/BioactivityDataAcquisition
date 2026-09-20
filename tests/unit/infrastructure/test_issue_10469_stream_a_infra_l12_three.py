@@ -200,7 +200,7 @@ def test_pyarrow_compute_import_error(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_adapter_metrics_dropped_duplicates_when_metrics_none() -> None:
     recorder = AdapterMetricsRecorder(metrics=None, provider="chembl")
-    recorder.record_dropped_duplicates("activity", 4)
+    assert recorder.record_dropped_duplicates("activity", 4) is None
 
 
 @pytest.mark.asyncio
@@ -258,7 +258,14 @@ def test_interpretation_good_band() -> None:
 
 
 def test_merge_unit_companion_policies_non_dict() -> None:
-    ChemblPolicyRegistryLoader._merge_unit_companion_policies({}, "not-a-dict")
+    families: dict[str, dict[str, object]] = {}
+    assert (
+        ChemblPolicyRegistryLoader._merge_unit_companion_policies(
+            families, "not-a-dict"
+        )
+        is None
+    )
+    assert families == {}
 
 
 def test_composite_sort_by_duplicates() -> None:

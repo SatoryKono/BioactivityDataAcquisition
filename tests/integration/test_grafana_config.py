@@ -511,6 +511,7 @@ def _assert_overview_run_id_query_url(run_id_query_url: str) -> None:
     assert "workflow=${workflow}" in run_id_query_url
     assert "pipeline=${pipeline}" in run_id_query_url
     assert "run_type=${run_type:csv}" in run_id_query_url
+    assert "timezone=${__timezone}" in run_id_query_url
 
 
 def _assert_overview_run_id_infinity_query(run_id_query: dict) -> None:

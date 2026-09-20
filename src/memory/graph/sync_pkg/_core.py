@@ -1356,7 +1356,7 @@ def _selected_shard_filters(
 def _allowed_analysis_relation_types(
     selection: SnapshotSelection,
 ) -> set[str]:
-    allowed = set()
+    allowed: set[str] = set()
     if selection.only_analysis_layer:
         allowed.update(ANALYSIS_RELATION_TYPES)
     if selection.only_retirement_layer:
@@ -14661,6 +14661,10 @@ class Neo4jHttpClient:
                 )
             )
         body = json.loads(raw)
+        if not isinstance(body, dict):
+            raise RuntimeError(
+                f"{self._context_prefix(context)}Neo4j response is not a JSON object"
+            )
         errors = body.get("errors", [])
         if errors:
             prefix = self._context_prefix(context)
@@ -14676,7 +14680,8 @@ class Neo4jHttpClient:
         )
         response_cm = request.urlopen(req, timeout=60)
         with response_cm as response:
-            return response.read().decode("utf-8")
+            raw_body: bytes = response.read()
+            return raw_body.decode("utf-8")
 
     def _handle_http_error(
         self,
@@ -16201,6 +16206,16 @@ def _relation_requirement_keys(
     }
 
 
+def _bind_support_predicate(
+    predicate: Callable[[_SnapshotRelationIndex, NodeKey], bool],
+    relation_index: _SnapshotRelationIndex,
+) -> Callable[[NodeKey], bool]:
+    def _is_supported(key: NodeKey) -> bool:
+        return predicate(relation_index, key)
+
+    return _is_supported
+
+
 def _append_snapshot_support_issues(
     issues: list[str],
     snapshot: GraphSnapshot,
@@ -16212,7 +16227,7 @@ def _append_snapshot_support_issues(
             issues,
             prefix,
             _missing_node_support_names(
-                snapshot, label, lambda key, fn=predicate: fn(relation_index, key)
+                snapshot, label, _bind_support_predicate(predicate, relation_index)
             ),
         )
 

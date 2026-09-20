@@ -7,10 +7,10 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 
-from bioetl.domain.context_time import ClockLike, resolve_manifest_created_at
 from bioetl.application.services.control_plane.workflow.manifest_models import (
     WorkflowManifestCreateSpec as WorkflowManifestCreateSpec,
 )
+from bioetl.domain.context_time import ClockLike, resolve_manifest_created_at
 from bioetl.domain.control_plane import WorkflowManifest, WorkflowManifestStep
 from bioetl.domain.normalization import compute_execution_identity_fingerprint
 from bioetl.domain.ports import WorkflowManifestPort

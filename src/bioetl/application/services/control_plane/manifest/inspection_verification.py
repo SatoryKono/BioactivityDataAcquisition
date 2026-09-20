@@ -57,6 +57,10 @@ class _InspectionCompareHost(Protocol):
 
     def show(self, identifier: str) -> RunManifestInspectionResult: ...
 
+    def diff(
+        self, left_identifier: str, right_identifier: str
+    ) -> RunManifestDiffResult: ...
+
     def _classify_manifest_diff(
         self,
         *,

@@ -216,20 +216,29 @@ def apply_dashboard(dashboard: dict[str, Any]) -> None:
         applier(dashboard, panels)
 
 
+_TIMING_DISPLAY_FIELDS = {
+    "last_event_age_seconds": "event_age_display",
+    "duration_seconds": "duration_display",
+}
+
+
 def _rename_event_age_fields(panel: dict[str, Any]) -> None:
+    _rename_timing_display_fields(panel)
+
+
+def _rename_timing_display_fields(panel: dict[str, Any]) -> None:
     for transform in panel["transformations"]:
         options = transform["options"]
         if transform["id"] == "filterFieldsByName":
             options["include"]["names"] = [
-                "event_age_display" if name == "last_event_age_seconds" else name
+                _TIMING_DISPLAY_FIELDS.get(name, name)
                 for name in options["include"]["names"]
             ]
         if transform["id"] == "organize":
             for key in ("indexByName", "renameByName"):
-                if "last_event_age_seconds" in options[key]:
-                    options[key]["event_age_display"] = options[key].pop(
-                        "last_event_age_seconds"
-                    )
+                for source, display in _TIMING_DISPLAY_FIELDS.items():
+                    if source in options[key]:
+                        options[key][display] = options[key].pop(source)
 
 
 def _relabel_run_variables(dashboard: dict[str, Any]) -> None:
@@ -244,10 +253,15 @@ def _apply_run_explorer(
     dashboard: dict[str, Any], panels: dict[int, dict[str, Any]]
 ) -> None:
     panel = panels[3010]
-    _rename_event_age_fields(panel)
+    _rename_timing_display_fields(panel)
     override(
         panel,
         "Event age",
+        **{"unit": "none", CUSTOM_WIDTH: 140, "noValue": "UNKNOWN"},
+    )
+    override(
+        panel,
+        "Duration",
         **{"unit": "none", CUSTOM_WIDTH: 140, "noValue": "UNKNOWN"},
     )
     content = panels[1]["options"]["content"]

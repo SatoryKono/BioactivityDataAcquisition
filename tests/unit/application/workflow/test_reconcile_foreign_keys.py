@@ -35,8 +35,10 @@ import pytest
 
 from bioetl.application.workflow.transforms.reconcile_foreign_keys import (
     _build_request,
-    _run_ids_from_upstream,
     build_reconcile_foreign_keys_executor,
+)
+from bioetl.application.workflow.transforms.reconcile_foreign_keys_config import (
+    _run_ids_from_upstream,
 )
 from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
     ForeignKeyReconciliationRequest,

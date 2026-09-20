@@ -38,14 +38,12 @@ def hash_author_name(name: str, salt: str) -> str:
     return hashlib.sha256(f"{normalized}{salt}".encode()).hexdigest()
 
 
-def parse_author_names(
-    authors: list[str] | list[JsonDict] | str,
-) -> list[str]:
+def parse_author_names(authors: object) -> list[str]:
     """Parse various author formats to list of name strings.
 
     Args:
         authors: Author data as a list of strings, list of dicts with 'name' key,
-            or a delimited/JSON string.
+            or a delimited/JSON string. Anything else yields an empty list.
 
     Returns:
         List of author name strings extracted from the input.

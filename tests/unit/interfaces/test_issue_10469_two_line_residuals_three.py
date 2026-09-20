@@ -11,7 +11,9 @@ import pytest
 
 from bioetl.application.services.run_reports.query import ReportIndexEntry
 from bioetl.interfaces.cli.commands import cleanup, run
-from bioetl.interfaces.cli.commands import _run_manifest_historical_support as historical
+from bioetl.interfaces.cli.commands import (
+    _run_manifest_historical_support as historical,
+)
 from bioetl.interfaces.cli.commands.domains.maintenance import control_plane_lifecycle
 from bioetl.interfaces.cli.commands.domains.shared._execution_failure_support import (
     render_failure_context,
@@ -28,9 +30,12 @@ pytestmark = pytest.mark.unit
 
 
 def test_historical_helpers_reject_wrong_report_and_pack_shapes() -> None:
-    assert historical._has_required_universal_exact_replay_claim(
-        SimpleNamespace(governed_full_corpus_gate=())
-    ) is False
+    assert (
+        historical._has_required_universal_exact_replay_claim(
+            SimpleNamespace(governed_full_corpus_gate=())
+        )
+        is False
+    )
     with pytest.raises(ValueError, match="JSON objects"):
         historical._coerce_universe_external_record([], pack_ref="pack.json")
 
@@ -80,7 +85,9 @@ def test_control_plane_lifecycle_bootstrap_delegates(
 
 def test_failure_context_renders_empty_message_and_metadata_only() -> None:
     assert render_failure_context({"message": "plain"}) == "plain"
-    assert render_failure_context({"message": "", "reason": "broken"}) == "reason=broken"
+    assert (
+        render_failure_context({"message": "", "reason": "broken"}) == "reason=broken"
+    )
 
 
 @pytest.mark.asyncio
@@ -136,17 +143,20 @@ def test_report_selector_rejects_missing_identity_and_ignores_unknown_dimension(
     with pytest.raises(ValueError, match="no identity"):
         selector._checked_identity(entry, tmp_path)
     payload = {"items": ["kept"]}
-    assert selector.supplement_report_options(
-        payload,
-        dimension="unknown",
-        response_shape="values",
-        scopes={},
-        root=tmp_path,
-    ) is payload
+    assert (
+        selector.supplement_report_options(
+            payload,
+            dimension="unknown",
+            response_shape="values",
+            scopes={},
+            root=tmp_path,
+        )
+        is payload
+    )
 
 
 def test_identity_summary_handles_diagnostic_only_gap_and_warn_status() -> None:
     assert _identity_graph_status_text([], 2, None) == "incomplete (2 gaps)"
-    assert _summary_overall_status(
-        [{"ui_status": "WARN"}], manifest=MagicMock()
-    ) == "WARN"
+    assert (
+        _summary_overall_status([{"ui_status": "WARN"}], manifest=MagicMock()) == "WARN"
+    )

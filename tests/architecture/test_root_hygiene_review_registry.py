@@ -462,10 +462,15 @@ def test_root_review_contract_entrypoints_have_exact_filename_owners() -> None:
         ".coderabbit.yaml",
         "commitlint.config.mjs",
         "mint.json",
+        "opencode.json",
         "pr_compliance_checklist.yaml",
         "sonar-project.properties",
     }
-    present_contract_paths = {".coderabbit.yaml", "commitlint.config.mjs"}
+    present_contract_paths = {
+        ".coderabbit.yaml",
+        "commitlint.config.mjs",
+        "opencode.json",
+    }
     for path in present_contract_paths:
         candidate = by_path[path]
         assert candidate["current_live_state"] == "present_approved_root_surface"

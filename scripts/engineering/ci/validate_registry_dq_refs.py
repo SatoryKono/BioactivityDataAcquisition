@@ -260,7 +260,9 @@ def _collect_orphan_contract_files(
         provider = relative.parts[0]
         # Error catalog and other non-DQ registries live under configs/contracts
         # but are governed outside contract-registry parity checks.
-        if provider == "errors":
+        # Report payload schemas (reports.*) are versioned HTTP shapes governed
+        # by run-report contract tests and golden fixtures, not DQ policies.
+        if provider in ("errors", "reports"):
             continue
         entity = relative.stem
         contract_ref = f"{provider}.{entity}"

@@ -207,7 +207,7 @@
       "runtime_checkable": true
     },
     {
-      "line": 211,
+      "line": 212,
       "name": "MetadataCoordinatorPort",
       "path": "src/bioetl/domain/ports/metadata/coordinator.py",
       "runtime_checkable": true
@@ -525,7 +525,7 @@
       "runtime_checkable": true
     },
     {
-      "line": 30,
+      "line": 34,
       "name": "ForeignKeyReconciliationPort",
       "path": "src/bioetl/domain/ports/workflow_foreign_key_reconciliation.py",
       "runtime_checkable": true

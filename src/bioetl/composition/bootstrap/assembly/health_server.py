@@ -9,6 +9,9 @@ from pathlib import Path
 from bioetl.application.observability.control_plane_integrity_metrics import (
     ControlPlaneIntegrityMetricsService,
 )
+from bioetl.application.observability.control_plane_archive import (
+    resolve_control_plane_archive_root,
+)
 from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
 )
@@ -162,14 +165,14 @@ def create_health_server_dependencies(
         run_ledger_port=control_plane_ports.ledger_port,
         workflow_manifest_port=control_plane_ports.workflow_manifest_port,
         control_plane_evidence_service=ControlPlaneEvidenceService(
-            archive_verifier=(
-                FileArchiveStore(
-                    resolved_data_root,
-                    Path(settings.archive_root),
-                    settings.report_root,
-                )
-                if settings.archive_root is not None
-                else None
+            archive_verifier=FileArchiveStore(
+                resolved_data_root,
+                resolve_control_plane_archive_root(
+                    Path(settings.archive_root)
+                    if settings.archive_root is not None
+                    else None
+                ),
+                settings.report_root,
             ),
             ledger_port=control_plane_ports.ledger_port,
             lineage_store=control_plane_ports.lineage_port,

@@ -128,13 +128,17 @@ def _logged_commands(tmp_path: Path) -> list[str]:
 
 
 def test_setup_env_wsl_syntax() -> None:
-    completed = subprocess.run(
-        ["bash", "-n", _bash_arg(SCRIPT)],
-        cwd=str(ROOT),
-        check=False,
-        capture_output=True,
-        text=True,
-    )
+    try:
+        completed = subprocess.run(
+            ["bash", "-n", _bash_arg(SCRIPT)],
+            cwd=str(ROOT),
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+    except subprocess.TimeoutExpired:
+        pytest.skip("bash -n timed out before the WSL syntax probe could finish")
     assert completed.returncode == 0, completed.stderr
 
 

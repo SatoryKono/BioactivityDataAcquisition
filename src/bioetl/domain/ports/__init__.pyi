@@ -1,10 +1,6 @@
-from bioetl.domain.ports.adr import (
-    AdrDocument as AdrDocument,
-)
+from bioetl.domain.ports.adr import AdrDocument as AdrDocument
 from bioetl.domain.ports.adr import AdrInfo as AdrInfo
-from bioetl.domain.ports.adr import (
-    AdrIssueSeverity as AdrIssueSeverity,
-)
+from bioetl.domain.ports.adr import AdrIssueSeverity as AdrIssueSeverity
 from bioetl.domain.ports.adr import (
     AdrServicePort as AdrServicePort,
 )
@@ -376,6 +372,9 @@ from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
 )
 from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
     ForeignKeyReconciliationResult as ForeignKeyReconciliationResult,
+)
+from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
+    ReferenceCompletenessStatus as ReferenceCompletenessStatus,
 )
 from bioetl.domain.ports.workflow_row_reconciliation import (
     RowReconciliationConfig as RowReconciliationConfig,
