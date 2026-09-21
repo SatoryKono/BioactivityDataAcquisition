@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, fields
+from typing import Any, cast
 
 from bioetl.domain.types import JsonDict
 from bioetl.domain.workflow._run_options_support import (
@@ -79,7 +80,7 @@ class WorkflowRunOptionsConfig:
             override.required_persistence_profile,
         )
         # Dynamic per-field merge uses dataclass field names.
-        return WorkflowRunOptionsConfig(**values)  # type: ignore[arg-type]
+        return WorkflowRunOptionsConfig(**cast("Any", values))
 
     def to_mapping(self) -> JsonDict:
         """Return non-null options as a plain mapping."""

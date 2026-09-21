@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 from bioetl.domain.exceptions.base import CriticalError, RecoverableError
 from bioetl.domain.types import ErrorType
 
@@ -122,7 +124,10 @@ class StorageQuotaExceededError(CriticalError):
             if isinstance(used_bytes, int):
                 version = used_bytes
                 used_bytes = None
-        return quota_bytes, used_bytes, reason, version  # type: ignore[return-value]  # pyright: ignore[reportReturnType]
+        return cast(
+            "tuple[int | None, int | None, str | None, int | None]",
+            (quota_bytes, used_bytes, reason, version),
+        )
 
     @staticmethod
     def _resolve_path(path: str | None, table_path: str | None) -> str:

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from types import MappingProxyType
+from typing import cast
 
 from bioetl.domain.types import DriftLevel, JsonDict
 from bioetl.domain.value_objects.dq_report_enums import DQCheckStatus
@@ -158,7 +159,7 @@ def _as_tuple(value: object) -> tuple[object, ...]:
         return value
     if isinstance(value, list):
         return tuple(value)
-    return tuple(value)  # type: ignore[arg-type]
+    return cast("tuple[object, ...]", tuple(value))
 
 
 def _freeze_type_change(item: object) -> object:

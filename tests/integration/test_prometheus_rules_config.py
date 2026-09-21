@@ -1412,9 +1412,9 @@ def test_control_plane_current_status_rules_project_pipeline_signals_to_run_type
     assert "bioetl_control_plane_run_type_universe" in telemetry_expr
     assert "unless on (pipeline)" in telemetry_expr
     assert "time()" in checkpoint_age_expr
-    assert (
-        "max by (pipeline) (bioetl_checkpoint_saved_at_seconds)" in checkpoint_age_expr
-    )
+    assert "max by (pipeline)" in checkpoint_age_expr
+    assert "bioetl_checkpoint_saved_at_seconds > 0" in checkpoint_age_expr
+    assert "bioetl_checkpoint_saved_at_seconds <= time()" in checkpoint_age_expr
 
 
 def test_control_plane_rules_require_replay_risk_and_integrity_telemetry() -> None:

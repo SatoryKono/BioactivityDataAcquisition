@@ -9,6 +9,11 @@ from typing import TYPE_CHECKING, cast
 
 from bioetl.composition import _resource_management, _services
 from bioetl.composition.factories.pipeline import _preflight_health_monitor
+from bioetl.composition.runtime_builders.config_access import get_settings
+from bioetl.infrastructure.checkpoint.metrics_rehydrate import (
+    rehydrate_checkpoint_metrics,
+)
+from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
     from bioetl.composition.contracts.health import BronzeCleanupServiceProtocol
@@ -77,12 +82,6 @@ def rehydrate_provider_health_gauges(metrics: MetricsPort) -> int:
 
 def rehydrate_checkpoint_gauges(metrics: MetricsPort) -> int:
     """Restore checkpoint timestamps through the configured storage owner."""
-    from bioetl.composition.runtime_builders.config_access import get_settings
-    from bioetl.infrastructure.checkpoint.metrics_rehydrate import (
-        rehydrate_checkpoint_metrics,
-    )
-    from bioetl.infrastructure.time import SystemClock
-
     return rehydrate_checkpoint_metrics(
         metrics, get_settings().checkpoint_path, now=SystemClock().now()
     )

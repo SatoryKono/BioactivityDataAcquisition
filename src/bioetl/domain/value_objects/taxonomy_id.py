@@ -46,7 +46,7 @@ class TaxonomyId(ValueObject[int]):
         Raises:
             ValueError: If validation fails.
         """
-        super().__init__(value)  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        super().__init__(self._coerce_to_int(value))
 
     def _coerce_to_int(self, value: str | int) -> int:
         """Coerce value to integer, raising ValueError on failure."""

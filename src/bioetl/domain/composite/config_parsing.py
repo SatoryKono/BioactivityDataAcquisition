@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Mapping
+from typing import TypeGuard
 
 __all__ = [
     "optional_bool",
@@ -155,7 +156,7 @@ def require_int(value: object, field_name: str, default: int | None = None) -> i
     return _require_int_value(value, field_name)
 
 
-def _is_float_coercible(value: object) -> bool:
+def _is_float_coercible(value: object) -> TypeGuard[int | float | str]:
     if isinstance(value, bool):
         return False
     return isinstance(value, int | float | str)
@@ -165,7 +166,7 @@ def _coerce_float(value: object, field_name: str) -> float:
     if not _is_float_coercible(value):
         raise ValueError(f"{field_name} must be a number")
     try:
-        result = float(value)  # type: ignore[arg-type]
+        result = float(value)
     except (TypeError, ValueError) as exc:
         raise ValueError(f"{field_name} must be a number") from exc
     if not math.isfinite(result):

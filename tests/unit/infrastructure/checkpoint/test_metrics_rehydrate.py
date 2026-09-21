@@ -66,6 +66,7 @@ async def test_corrupt_latest_evidence_does_not_fall_back(tmp_path):
     assert metrics.set_gauge.call_args.args[1] == 0
 
 
+@pytest.mark.unit
 def test_missing_storage_does_not_invent_observation(tmp_path):
     metrics = Mock()
     assert rehydrate_checkpoint_metrics(metrics, tmp_path, now=NOW) == 0

@@ -193,7 +193,8 @@ class PubMedId(ValueObject[str]):
         if isinstance(raw, str) and not raw.strip():
             return None
         try:
-            # Let PubMedId coercion handle typing; avoid premature str() on ints only path
-            return cls(raw)  # type: ignore[arg-type]
+            # Normalize ints through str(); _validate applies the same coercion
+            # rules, so outcomes match cls(raw) for every input.
+            return cls(raw if isinstance(raw, str) else str(raw))
         except (TypeError, ValueError):
             return None

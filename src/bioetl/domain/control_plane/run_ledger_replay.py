@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass, field, fields, replace
 from datetime import datetime
+from typing import Any
 
 from bioetl.domain.composite.result import (
     DependencyResult,
@@ -58,11 +59,11 @@ _ProjectionFn = Callable[
 
 def _evolve_projection(
     projection: RunLedgerReplayProjection,
-    **changes: object,
+    **changes: Any,
 ) -> RunLedgerReplayProjection:
     evolved = replace(
         projection,
-        **changes,  # type: ignore[arg-type]  # Dynamic projector updates use dataclass field names.
+        **changes,  # Dynamic projector updates use dataclass field names.
     )
     # Reconstruct so the return type is the concrete dataclass (python:S5886).
     return RunLedgerReplayProjection(
