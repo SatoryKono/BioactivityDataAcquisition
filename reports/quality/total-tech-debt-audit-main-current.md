@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `80e54e349f014ad902307aca4f16ce0afeae9c6d1f37c69fd68cfc95cc511493`
+Evidence surface SHA-256: `02d4da74616801d0a6ba92beb178f51566450c02f8621110a4b834bc34a1a544`
 
 Evidence metadata refresh (2026-09-19): the canonical registry digest was
 recomputed after hotspot fan-in closeout, assertless-triage reduction,
@@ -18,9 +18,9 @@ ADR-matrix rebind, and module-coverage inventory rebind.
 Current headline evidence:
 Debt-governance gates: **45 pass / 0 fail**;
 Architecture quality integral score: **9.47** (`good_targeted_improvements`);
-source_module_count: **2474** with fully_covered: **2178**;
-partially_covered: **295**; no_executable_lines: **1**;
-uncovered: **0**; unmeasured: **0** (= 2474 == source_module_count).
+source_module_count: **2482** with fully_covered: **2441**;
+partially_covered: **40**; no_executable_lines: **1**;
+uncovered: **0**; unmeasured: **0** (= 2482 == source_module_count).
 The historical audited commit above is retained; this metadata refresh does
 not constitute a new repository-wide architecture audit.
 
@@ -50,7 +50,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "80e54e349f014ad902307aca4f16ce0afeae9c6d1f37c69fd68cfc95cc511493",
+  "evidence_surface_sha256": "02d4da74616801d0a6ba92beb178f51566450c02f8621110a4b834bc34a1a544",
   "metrics": {
     "architecture_integral_score": 9.47,
     "architecture_interpretation": "good_targeted_improvements",
@@ -61,11 +61,11 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 2178,
+    "fully_covered_module_count": 2441,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 1,
-    "partially_covered_module_count": 295,
-    "source_module_count": 2474,
+    "partially_covered_module_count": 40,
+    "source_module_count": 2482,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
@@ -84,13 +84,13 @@ Refresh reason: Reconcile the current evidence surface and semantic summary with
 1. Release status: **debt-governance gates passing**; no blocking gaps remain.
 1. Architecture quality integral score: **9.47** (`good_targeted_improvements`). Integral score `9.47`.
 1. Module inventory (from module-coverage-inventory.json only):
-   - source_module_count: **2474**
-   - fully_covered: **2178**
-   - partially_covered: **295**
+   - source_module_count: **2482**
+   - fully_covered: **2441**
+   - partially_covered: **40**
    - no_executable_lines: **1**
    - uncovered: **0**
    - unmeasured: **0**
-   - check: fully + partial + no_exec + uncovered + unmeasured = 2474 == source_module_count
+   - check: fully + partial + no_exec + uncovered + unmeasured = 2482 == source_module_count
 1. Contract coverage matrix schema: **contract-coverage-matrix-v3** (v3: strict Gold required for availability).
 1. Constructor waivers (shrink-only inventory): **1** entries.
 1. Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**.

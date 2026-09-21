@@ -96,6 +96,5 @@ def test_issue_10534_runner_path_coverage_anchors_exist() -> None:
         rel for rel in RUNNER_PATH_COVERAGE_ANCHORS if not (ROOT / rel).is_file()
     ]
     assert missing == [], (
-        "AUD-009/#10534 runner-path coverage anchors missing:\n"
-        + "\n".join(missing)
+        "AUD-009/#10534 runner-path coverage anchors missing:\n" + "\n".join(missing)
     )

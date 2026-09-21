@@ -34,9 +34,11 @@ from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_loaded im
 from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_reads import (
     GoldReconciliationReaderProtocol,
     GoldSnapshotReaderProtocol,
-    filter_current_rows as filter_current_rows,
     read_reference_rows,
     read_source_rows,
+)
+from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_reads import (
+    filter_current_rows as filter_current_rows,
 )
 from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support import (
     build_reconciliation_result,

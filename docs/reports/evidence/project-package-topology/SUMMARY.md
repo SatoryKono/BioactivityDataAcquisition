@@ -1,5 +1,14 @@
 # Сводка evidence: project-package-topology
 
+Refresh note (2026-09-21): hash-only reconcile after FK cycle break and
+coverage inventory rebind. Counts and the source fingerprint below come from
+`reports/quality/module-coverage-inventory.json`. Historical notes remain
+historical.
+
+`source_tree_sha256=abd5d626c1215b53f688556340464b8f3d7f6916238cc61a2885f52f72c251c6`
+
+`source_module_count=2482`
+
 Refresh note (2026-09-19): hash-only reconcile after FK normalization split
 and governance rebind loop. Counts and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain

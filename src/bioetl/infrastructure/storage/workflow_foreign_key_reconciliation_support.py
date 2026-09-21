@@ -77,15 +77,11 @@ def filter_current_rows(
     current_only: bool,
     layer: str,
 ) -> list[dict[str, object]]:
-    """Filter rows to current SCD versions when a current-flag column is present.
+    """Filter to current SCD rows when a current-flag column is present.
 
-    Silver is normally a current-state medallion layer without SCD2 flags. When
-    ``current_only`` is requested and no flag column exists, all rows are
-    retained (they are already current-state). When a flag column exists, only
-    rows with a true current flag are retained so Silver cannot silently ignore
-    the flag when present.
+    Without a flag column, Silver retains all rows as already current-state.
     """
-    del layer  # layer reserved for future layer-specific policies
+    del layer  # reserved for future layer-specific policies
     if not current_only or not rows:
         return rows
     flag_column = _current_flag_column(rows)
@@ -100,13 +96,7 @@ def filter_source_rows_to_current_run(
     source_scope: str,
     source_run_ids: tuple[str, ...],
 ) -> tuple[list[dict[str, object]], str]:
-    """Restrict source rows to the current run when CLI --limit scoped delete_orphans.
-
-    Returns (rows, disposition) where disposition is:
-    - ``all_current``: no extra filter
-    - ``current_run``: filtered to matching run ids
-    - ``blocked``: current_run requested but rows cannot be scoped safely
-    """
+    """Restrict source rows to the current run for CLI --limit scoped delete_orphans."""
     if source_scope != "current_run":
         return rows, "all_current"
     if not rows:
@@ -214,12 +204,7 @@ def partition_source_rows(
     source_rows: list[dict[str, object]],
     reference_values: set[tuple[object, ...]],
 ) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
-    """Partition source rows into retained and orphan rows.
-
-    Rows with any NULL / blank / NaN foreign-key component are always retained.
-    SQL-style foreign-key checks do not treat NULL as a missing parent, so
-    ``delete_orphans`` must never classify incomplete FK rows as orphans.
-    """
+    """Partition source rows into retained vs orphan; NULL/blank FK components stay retained."""
     retained_rows: list[dict[str, object]] = []
     orphan_rows: list[dict[str, object]] = []
     source_keys = request.effective_source_keys
@@ -232,11 +217,7 @@ def partition_source_rows(
             source_keys,
             nulls_equal=request.nulls_equal,
         )
-        if source_key is None:
-            # Defensive: incomplete keys after null-component check still retain.
-            retained_rows.append(row)
-            continue
-        if source_key in reference_values:
+        if source_key is None or source_key in reference_values:
             retained_rows.append(row)
             continue
         orphan_rows.append(row)

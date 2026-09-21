@@ -279,7 +279,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "42",
+      "line": "41",
       "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_seventeen.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_record_dropped_duplicates_without_metrics"
@@ -608,7 +608,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "333",
+      "line": "332",
       "path": "tests/unit/interfaces/test_issue_10520_interfaces_tail.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_quarantine_support_none_returns"
@@ -1007,14 +1007,7 @@
     }
   },
   "assertless_total_candidates": 85,
-  "budget_violations": [
-    {
-      "actual": 15,
-      "budget": "uuid4_call_sites_max",
-      "expected_max": 0,
-      "metric": "uuid4_call_sites"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1482,7 +1475,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "42",
+        "line": "41",
         "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_seventeen.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_record_dropped_duplicates_without_metrics"
@@ -1811,7 +1804,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "333",
+        "line": "332",
         "path": "tests/unit/interfaces/test_issue_10520_interfaces_tail.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_quarantine_support_none_returns"
@@ -2100,12 +2093,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2618,
-    "total_test_functions": 28175,
+    "total_test_functions": 28183,
     "unreviewed_assertion_bypass_count": 0,
-    "uuid4_call_sites": 15
+    "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "3305a17636e035e89268bd284e76fc4eb001c083c163f96f0d061593bace4305",
+  "source_tree_sha256": "772a2db8773e1b495a726b0276642fb0dde27ba1954d11f84b9ff203537c6e1e",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2118,7 +2111,7 @@
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
-    "uuid4_call_sites": 15
+    "uuid4_call_sites": 0
   },
   "test_file_inventory": {
     "pytest_python_files": [
@@ -2168,7 +2161,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2618,
-  "total_test_functions": 28175,
+  "total_test_functions": 28183,
   "unreviewed_assertion_bypass_count": 0,
-  "uuid4_call_sites": 15
+  "uuid4_call_sites": 0
 }

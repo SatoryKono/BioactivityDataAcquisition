@@ -28,15 +28,15 @@
 | `preflight_rules_removed` | `removed` | 0 | `not_applicable` |
 | `checkpoint_service_support_removed` | `removed` | 0 | `not_applicable` |
 | `checkpoint_state_codec_removed` | `removed` | 0 | `not_applicable` |
-| `fsm_helper_active` | `retain_active` | 10 | `satisfied` |
+| `fsm_helper_active` | `retain_active` | 9 | `satisfied` |
 | `runner_merge_stage_flow_removed` | `removed` | 0 | `not_applicable` |
 | `column_priority_orderer_active` | `retain_active` | 2 | `satisfied` |
 | `merger_input_mixin_active` | `retain_active` | 2 | `satisfied` |
-| `runner_support_flow_active` | `retain_active` | 1 | `satisfied` |
+| `runner_support_flow_active` | `retain_active` | 2 | `satisfied` |
 | `runner_support_mixin_active` | `retain_active` | 1 | `satisfied` |
-| `runner_support_policy_active` | `retain_active` | 1 | `satisfied` |
+| `runner_support_policy_active` | `retain_active` | 2 | `satisfied` |
 | `runner_support_runtime_active` | `retain_active` | 1 | `satisfied` |
-| `runner_support_types_active` | `retain_active` | 5 | `satisfied` |
+| `runner_support_types_active` | `retain_active` | 6 | `satisfied` |
 | `runtime_models_active` | `retain_active` | 39 | `satisfied` |
 | `runtime_wiring_api_active` | `retain_active` | 18 | `satisfied` |
 

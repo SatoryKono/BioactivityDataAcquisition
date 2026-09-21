@@ -20,9 +20,10 @@ from bioetl.application.workflow.transforms import (
 )
 from bioetl.application.workflow.transforms.reconcile_foreign_keys_config import (
     _optional_key_tuple as _optional_key_tuple,
+)
+from bioetl.application.workflow.transforms.reconcile_foreign_keys_config import (
     _optional_layer,
     _optional_runtime_str,
-    _payload_run_ids as _payload_run_ids,
     _persist_reconcile_result_artifact,
     _require_delete_orphans_action,
     _required_primary_keys,
@@ -31,6 +32,11 @@ from bioetl.application.workflow.transforms.reconcile_foreign_keys_config import
     _resolve_reference_keys,
     _run_ids_from_upstream,
     _source_scope,
+)
+from bioetl.application.workflow.transforms.reconcile_foreign_keys_config import (
+    _payload_run_ids as _payload_run_ids,
+)
+from bioetl.application.workflow.transforms.reconcile_foreign_keys_config import (
     _upstream_completeness_evidence as _upstream_completeness_evidence,
 )
 from bioetl.domain.ports import (
