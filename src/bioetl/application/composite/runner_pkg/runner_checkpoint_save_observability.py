@@ -2,15 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
-
-if TYPE_CHECKING:
-    from opentelemetry.trace import Span
+from typing import cast
 
 from bioetl.application.composite.runner_pkg.runner_support_types import (
     _CompositeRunnerSupportHostProtocol,
 )
-from bioetl.domain.ports import TracingPort
+from bioetl.domain.ports import SpanHandle, TracingPort
 
 _CHECKPOINT_TRACER_NAME = "bioetl.checkpoint"
 
@@ -96,13 +93,13 @@ def start_checkpoint_save_span(
     host: _CompositeRunnerSupportHostProtocol,
     *,
     operation: str,
-) -> Span | None:
+) -> SpanHandle | None:
     """Start distributed tracing span for checkpoint save operation."""
     tracer = cast("TracingPort | None", getattr(host, "_tracing", None))
     if tracer is None:
         return None
     span = cast(
-        "Span",
+        "SpanHandle",
         cast(
             object,
             tracer.get_tracer(_CHECKPOINT_TRACER_NAME).start_as_current_span(
@@ -121,7 +118,7 @@ def start_checkpoint_save_span(
 
 def close_checkpoint_save_span(
     host: _CompositeRunnerSupportHostProtocol,
-    span: Span | None,
+    span: SpanHandle | None,
     *,
     status: str,
     error: BaseException | None = None,

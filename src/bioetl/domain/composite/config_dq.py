@@ -120,14 +120,14 @@ class CompositeDQConfig:
 
     def _effective_override_thresholds(
         self,
-        override: object,
+        override: DQOverrideConfig,
     ) -> tuple[float, float]:
         soft = self._override_or_default(
-            override.soft_fail_threshold,  # type: ignore[attr-defined]
+            override.soft_fail_threshold,
             self.soft_fail_threshold,
         )
         hard = self._override_or_default(
-            override.hard_fail_threshold,  # type: ignore[attr-defined]
+            override.hard_fail_threshold,
             self.hard_fail_threshold,
         )
         return soft, hard

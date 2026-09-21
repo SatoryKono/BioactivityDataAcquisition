@@ -16,10 +16,13 @@ Usage in DataFrameModel schemas:
 from __future__ import annotations
 
 import json
+from typing import Any, cast
 
 import pandas as pd
+import pandera.extensions as pa_extensions
 import pandera.pandas as pa
-from pandera.extensions import register_check_method  # type: ignore[attr-defined]
+
+register_check_method = cast("Any", pa_extensions.register_check_method)
 
 __all__ = [
     "JSON_ARRAY_CHECK",

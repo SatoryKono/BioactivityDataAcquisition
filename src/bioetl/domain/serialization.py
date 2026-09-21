@@ -29,7 +29,7 @@ import math
 import re
 from collections.abc import Mapping, Sequence
 from functools import lru_cache
-from typing import TYPE_CHECKING, TypeGuard
+from typing import TYPE_CHECKING, Any, TypeGuard, cast
 
 from bioetl.domain.normalization.json import (
     canonicalize_json_string as _canonicalize_json_string,
@@ -51,7 +51,7 @@ try:
 
     _orjson_available = True
 except ImportError:
-    orjson = None  # type: ignore[assignment]
+    orjson = cast("Any", None)
     _orjson_available = False
 
 
