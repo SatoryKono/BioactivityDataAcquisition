@@ -76,6 +76,10 @@ async def finalize_batch_transform_result(
         soft_threshold=soft_threshold,
         hard_threshold=hard_threshold,
     )
+    # Persist rejected records before a hard threshold aborts the batch. Only
+    # successful quarantine writes may contribute durable removal accounting.
+    state.records_quarantine_failed += await _await_flush_count(flush_filtered_records)
+    state.records_quarantine_failed += await _await_flush_count(flush_dq_records)
     if threshold_result.breach == ThresholdBreachReason.HARD:
         assert threshold_result.hard_threshold is not None
         context.logger.error(
@@ -108,8 +112,6 @@ async def finalize_batch_transform_result(
             stage="threshold",
             severity="soft_fail",
         )
-    state.records_quarantine_failed += await _await_flush_count(flush_filtered_records)
-    state.records_quarantine_failed += await _await_flush_count(flush_dq_records)
     return build_transform_result(state)
 
 

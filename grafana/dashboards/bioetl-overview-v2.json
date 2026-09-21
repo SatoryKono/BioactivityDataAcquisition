@@ -3848,7 +3848,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -3870,7 +3870,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }

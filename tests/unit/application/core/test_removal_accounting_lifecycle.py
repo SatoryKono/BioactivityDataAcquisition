@@ -133,3 +133,61 @@ def test_failed_batch_retains_durable_bronze_before_transform() -> None:
         assert runner.execution_metrics["records_gold"] == 0
     finally:
         reset_stage_accounting(token)
+
+
+@pytest.mark.asyncio
+async def test_hard_threshold_persists_quarantine_before_abort() -> None:
+    from types import SimpleNamespace
+    from bioetl.application.core.batch_transformer_finalization import (
+        finalize_batch_transform_result,
+    )
+    from bioetl.application.core.batch_transformer_state import (
+        TransformAggregationState,
+    )
+    from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
+
+    accounting = StageAccountingAccumulator()
+    token = bind_stage_accounting(accounting)
+    metrics = BatchMetricsRecorderService(
+        None, "chembl_assay_parameters", "incremental"
+    )
+    port = MagicMock(write_many=AsyncMock())
+    quarantine = QuarantineRuntimeService(
+        port, "chembl_assay_parameters", batch_metrics=metrics
+    )
+    record = {"id": 1}
+    try:
+        outcome = handle_data_quality_transform_error(
+            ValueError("invalid"),
+            error_type=ErrorType.SCHEMA_VIOLATION,
+            batch_metrics=metrics,
+            dq_config=None,
+            raw_record=record,
+            debug_export_service=None,
+            index=0,
+        )
+
+        async def flush():
+            await quarantine.quarantine_records(
+                [outcome.dq_entry],
+                BatchID(UUID("11111111-1111-4111-8111-111111111111")),
+                ingestion_ts=datetime(2026, 9, 21, tzinfo=UTC),
+            )
+            return 0
+
+        with pytest.raises(DataQualityThresholdError):
+            await finalize_batch_transform_result(
+                context=SimpleNamespace(logger=MagicMock()),
+                config=SimpleNamespace(
+                    dq_config=SimpleNamespace(soft_threshold=0.1, hard_threshold=0.5)
+                ),
+                batch_metrics=metrics,
+                state=TransformAggregationState(silver_records=[], gold_records=[]),
+                records=[record],
+                flush_filtered_records=AsyncMock(return_value=0),
+                flush_dq_records=flush,
+            )
+        port.write_many.assert_awaited_once()
+        assert accounting.measured_record_metrics()["records_quarantined"] == 1
+    finally:
+        reset_stage_accounting(token)

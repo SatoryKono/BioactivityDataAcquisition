@@ -19,17 +19,28 @@ def _override(panel: dict, field: str, prop: str, value: object) -> None:
         entry = {"matcher": matcher, "properties": []}
         overrides.append(entry)
     if prop == "mappings":
-        existing = next(
-            (p["value"] for p in entry["properties"] if p["id"] == prop), []
-        )
+        existing = [
+            *panel["fieldConfig"].get("defaults", {}).get("mappings", []),
+            *(
+                mapping
+                for other in overrides
+                if other.get("matcher", {}).get("id") == "byName"
+                and str(other["matcher"].get("options", "")).casefold()
+                == field.casefold()
+                for item in other.get("properties", [])
+                if item["id"] == prop
+                for mapping in item["value"]
+            ),
+        ]
         incoming = value[0]["options"]
         previous = {}
         for mapping in existing:
             if mapping.get("type") == "value":
                 previous.update(mapping.get("options", {}))
-        value = [{"type": "value", "options": {**previous, **incoming}}] + [
-            mapping for mapping in existing if mapping.get("type") != "value"
-        ]
+        value = [{"type": "value", "options": {**previous, **incoming}}]
+        for mapping in existing:
+            if mapping.get("type") != "value" and mapping not in value:
+                value.append(mapping)
     entry["properties"] = [p for p in entry["properties"] if p["id"] != prop]
     entry["properties"].append({"id": prop, "value": value})
 
@@ -46,22 +57,6 @@ def apply_corrections(payload: dict) -> None:
             )
             and panel.get("type") == "table"
         ):
-            for field in ("Status", "status"):
-                if uid == "bioetl-control-plane-v1" and panel["id"] == 9416:
-                    _override(panel, field, "custom.width", 110)
-                _override(
-                    panel,
-                    field,
-                    "mappings",
-                    [
-                        {
-                            "type": "value",
-                            "options": {
-                                "ERROR": {"text": "QUERY ERROR", "color": "red"}
-                            },
-                        }
-                    ],
-                )
             for field in ("reason", "Reason"):
                 _override(
                     panel,

@@ -1069,10 +1069,6 @@
                 }
               },
               {
-                "id": "custom.width",
-                "value": 110
-              },
-              {
                 "id": "mappings",
                 "value": [
                   {
@@ -1091,7 +1087,7 @@
                         "color": "orange"
                       },
                       "ERROR": {
-                        "text": "QUERY ERROR",
+                        "text": "ERROR",
                         "color": "red"
                       },
                       "INCOMPLETE": {
@@ -1105,6 +1101,10 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 110
               }
             ]
           },
@@ -1363,6 +1363,60 @@
                   {
                     "type": "value",
                     "options": {
+                      "retention_policy_satisfied": {
+                        "text": "Retained by policy"
+                      },
+                      "reproducibility_evidence_within_retention": {
+                        "text": "Within retention"
+                      },
+                      "required_evidence_surfaces_present": {
+                        "text": "Evidence present"
+                      },
+                      "snapshot_lifecycle_evidence_incomplete": {
+                        "text": "Snapshot incomplete"
+                      },
+                      "archive_evidence_not_recorded": {
+                        "text": "Archive missing"
+                      },
+                      "archive_not_applicable": {
+                        "text": "N/A: policy"
+                      },
+                      "archive_restore_verified": {
+                        "text": "Archive verified"
+                      },
+                      "reproducibility_evidence_floor_satisfied": {
+                        "text": "Evidence floor met"
+                      },
+                      "snapshot_evidence_not_required": {
+                        "text": "Snapshots not required"
+                      },
+                      "lineage_closure_gap": {
+                        "text": "Lineage closure gap"
+                      },
+                      "archive_identity_mismatch": {
+                        "text": "Identity mismatch"
+                      },
+                      "archive_checksum_mismatch": {
+                        "text": "Checksum mismatch"
+                      },
+                      "archive_inventory_mismatch": {
+                        "text": "Files mismatch"
+                      },
+                      "archive_source_mismatch": {
+                        "text": "Source changed"
+                      },
+                      "archive_evidence_invalid": {
+                        "text": "Archive invalid"
+                      },
+                      "archive_index_invalid": {
+                        "text": "Index invalid"
+                      },
+                      "snapshot_lifecycle_evidence_present": {
+                        "text": "Snapshots present"
+                      },
+                      "selected_run_id_not_found": {
+                        "text": "Run not found"
+                      },
                       "deadline_exceeded": {
                         "text": "QUERY ERROR — deadline exceeded",
                         "color": "red"
@@ -1388,22 +1442,22 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 110
-              },
-              {
                 "id": "mappings",
                 "value": [
                   {
                     "type": "value",
                     "options": {
                       "ERROR": {
-                        "text": "QUERY ERROR",
+                        "text": "ERROR",
                         "color": "red"
                       }
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 110
               }
             ]
           }
@@ -2044,7 +2098,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -2171,7 +2225,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -3384,7 +3438,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -3466,7 +3520,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -4133,7 +4187,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -4215,7 +4269,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -5589,7 +5643,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -5779,7 +5833,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -6304,7 +6358,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -6326,7 +6380,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -6938,7 +6992,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -6960,7 +7014,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -7391,7 +7445,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -7549,7 +7603,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -8004,7 +8058,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -8139,7 +8193,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -8571,7 +8625,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -8729,7 +8783,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -9075,7 +9129,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -9097,7 +9151,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -9629,7 +9683,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -9813,7 +9867,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -9983,50 +10037,6 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Status"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "ERROR": {
-                            "text": "QUERY ERROR",
-                            "color": "red"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "status"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "ERROR": {
-                            "text": "QUERY ERROR",
-                            "color": "red"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
                   "options": "reason"
                 },
                 "properties": [
@@ -10036,6 +10046,15 @@
                       {
                         "type": "value",
                         "options": {
+                          "complete_run_scan_limit": {
+                            "text": "Search limit reached"
+                          },
+                          "no_complete_run_in_scope": {
+                            "text": "No complete run in scope"
+                          },
+                          "aggregate_complete_run_found": {
+                            "text": "Aggregate evidence complete"
+                          },
                           "deadline_exceeded": {
                             "text": "QUERY ERROR — deadline exceeded",
                             "color": "red"
