@@ -66,7 +66,6 @@ if TYPE_CHECKING:
 class BatchProcessingSupportService:
     """Encapsulate per-batch transform/write tracing choreography."""
 
-    # RF-005 shared failure policy binding (imported for architectural routing).
     _failure_policy = _SHARED_FAILURE_POLICY
 
     def __init__(
@@ -167,6 +166,7 @@ class BatchProcessingSupportService:
             layer="bronze",
             record_count=len(records),
             occurred_at=ingestion_ts,
+            logger=self._logger,
         )
         return result
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
+from weakref import ReferenceType, ref
 
 from bioetl.application.observability.current_metrics_rehydrate_payload import (
     anchor_from_workflow_entry,
@@ -30,18 +31,30 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
 
 _TERMINAL_STATUSES = frozenset({"success", "failed", "shutdown"})
-_SEEDED_RUN_KEYS: set[tuple[str, str, str]] = set()
-_SEEDED_PROVIDER_KEYS: set[str] = set()
-_SEEDED_WORKFLOW_KEYS: set[str] = set()
-_SEEDED_WORKFLOW_PIPELINE_KEYS: set[tuple[str, str, str, str]] = set()
+_SEEDED_BY_METRICS: dict[
+    int, tuple[ReferenceType[MetricsPort], set[tuple[str, ...]]]
+] = {}
 
 
 def reset_rehydrate_seed_state() -> None:
-    """Clear process-local seed memory (tests only)."""
-    _SEEDED_RUN_KEYS.clear()
-    _SEEDED_PROVIDER_KEYS.clear()
-    _SEEDED_WORKFLOW_KEYS.clear()
-    _SEEDED_WORKFLOW_PIPELINE_KEYS.clear()
+    """Clear all live metrics instances' seed state (tests only)."""
+    _SEEDED_BY_METRICS.clear()
+
+
+def _seeded_keys(metrics: MetricsPort) -> set[tuple[str, ...]]:
+    """Keep identity-scoped seed memory without retaining metrics backends."""
+    identity = id(metrics)
+    cached = _SEEDED_BY_METRICS.get(identity)
+    if cached is not None and cached[0]() is metrics:
+        return cached[1]
+    keys: set[tuple[str, ...]] = set()
+    try:
+        reference = ref(metrics, lambda _: _SEEDED_BY_METRICS.pop(identity, None))
+    except TypeError:
+        # Non-weakrefable ports can safely repeat presence-only writes.
+        return keys
+    _SEEDED_BY_METRICS[identity] = (reference, keys)
+    return keys
 
 
 def _persisted_unix(completed_at: str, fallback_mtime: float) -> float:
@@ -181,8 +194,9 @@ def rehydrate_current_pipeline_run_metrics(
 
 
 def _seed_pipeline_runs_total(metrics: MetricsPort, anchor: PipelineRunSnapshot) -> int:
-    key = (anchor.pipeline, anchor.run_type, anchor.status)
-    if key in _SEEDED_RUN_KEYS:
+    seeded_keys = _seeded_keys(metrics)
+    key = ("run", anchor.pipeline, anchor.run_type, anchor.status)
+    if key in seeded_keys:
         return 0
     labels = {"pipeline": anchor.pipeline, "run_type": anchor.run_type}
     metrics.set_gauge("bioetl_control_plane_manifest_present", 1.0, labels)
@@ -204,20 +218,24 @@ def _seed_pipeline_runs_total(metrics: MetricsPort, anchor: PipelineRunSnapshot)
             "status": anchor.status,
         },
     )
-    _SEEDED_RUN_KEYS.add(key)
+    seeded_keys.add(key)
     return 1
 
 
 def _seed_provider_universe(metrics: MetricsPort, anchor: PipelineRunSnapshot) -> int:
     provider = anchor.provider
-    if provider is None or provider in _SEEDED_PROVIDER_KEYS:
+    seeded_keys = _seeded_keys(metrics)
+    if provider is None:
+        return 0
+    key = ("provider", provider)
+    if key in seeded_keys:
         return 0
     metrics.set_gauge(
         "bioetl_provider_observed_universe",
         1.0,
         {"provider": provider},
     )
-    _SEEDED_PROVIDER_KEYS.add(provider)
+    seeded_keys.add(key)
     return 1
 
 
@@ -230,14 +248,16 @@ def _seed_workflow_expected(
     metrics: MetricsPort,
     anchor: WorkflowRunSnapshot,
 ) -> int:
-    if anchor.workflow in _SEEDED_WORKFLOW_KEYS:
+    seeded_keys = _seeded_keys(metrics)
+    key = ("workflow", anchor.workflow)
+    if key in seeded_keys:
         return 0
     metrics.set_gauge(
         "bioetl_workflow_expected",
         1.0,
         {"workflow": anchor.workflow, "provider": anchor.provider},
     )
-    _SEEDED_WORKFLOW_KEYS.add(anchor.workflow)
+    seeded_keys.add(key)
     return 1
 
 
@@ -246,9 +266,16 @@ def _seed_workflow_pipeline_expected(
     anchor: WorkflowRunSnapshot,
 ) -> int:
     seeded = 0
+    seeded_keys = _seeded_keys(metrics)
     for scope in anchor.pipelines:
-        key = (anchor.workflow, scope.pipeline, scope.run_type, scope.provider)
-        if key in _SEEDED_WORKFLOW_PIPELINE_KEYS:
+        key = (
+            "workflow_pipeline",
+            anchor.workflow,
+            scope.pipeline,
+            scope.run_type,
+            scope.provider,
+        )
+        if key in seeded_keys:
             continue
         metrics.set_gauge(
             "bioetl_workflow_pipeline_expected",
@@ -260,6 +287,6 @@ def _seed_workflow_pipeline_expected(
                 "provider": scope.provider,
             },
         )
-        _SEEDED_WORKFLOW_PIPELINE_KEYS.add(key)
+        seeded_keys.add(key)
         seeded += 1
     return seeded

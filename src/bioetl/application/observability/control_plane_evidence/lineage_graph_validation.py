@@ -41,36 +41,47 @@ def _merge_definition(previous: dict[str, object], incoming: dict[str, object]) 
     return conflict
 
 
-def cycle_nodes(fragments: tuple[LineageGraphFragment, ...]) -> list[str]:
-    """Return the stable set of node ids involved in directed cycles."""
+def _adjacency(fragments: tuple[LineageGraphFragment, ...]) -> dict[str, set[str]]:
+    """Index directed edges, including nodes with no outgoing edges."""
     adjacency: dict[str, set[str]] = {}
     for fragment in fragments:
         for edge in fragment.edges:
             adjacency.setdefault(edge.source.node_id, set()).add(edge.target.node_id)
             _ = adjacency.setdefault(edge.target.node_id, set())
+    return adjacency
+
+
+def cycle_nodes(fragments: tuple[LineageGraphFragment, ...]) -> list[str]:
+    """Return the stable set of node ids involved in directed cycles."""
+    adjacency = _adjacency(fragments)
 
     visiting: set[str] = set()
     visited: set[str] = set()
     cycle: set[str] = set()
 
-    def visit(node_id: str) -> bool:
-        if node_id in visiting:
-            cycle.add(node_id)
-            return True
-        if node_id in visited:
-            return False
-        visiting.add(node_id)
-        found = False
-        for target_id in sorted(adjacency.get(node_id, ())):
-            if visit(target_id):
-                cycle.update({node_id, target_id})
-                found = True
-        visiting.remove(node_id)
-        visited.add(node_id)
-        return found
-
     for candidate in sorted(adjacency):
-        _ = visit(candidate)
+        if candidate in visited:
+            continue
+        visiting.add(candidate)
+        stack = [(candidate, iter(sorted(adjacency[candidate])))]
+        found: set[str] = set()
+        while stack:
+            node_id, targets = stack[-1]
+            target_id = next(targets, None)
+            if target_id is None:
+                stack.pop()
+                visiting.remove(node_id)
+                visited.add(node_id)
+                if node_id in found and stack:
+                    parent = stack[-1][0]
+                    cycle.update({parent, node_id})
+                    found.add(parent)
+            elif target_id in visiting:
+                cycle.update({node_id, target_id})
+                found.add(node_id)
+            elif target_id not in visited:
+                visiting.add(target_id)
+                stack.append((target_id, iter(sorted(adjacency[target_id]))))
     return sorted(cycle)
 
 
