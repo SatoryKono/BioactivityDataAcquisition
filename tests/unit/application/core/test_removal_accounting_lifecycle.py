@@ -25,6 +25,62 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("with_batch_metrics", [True, False])
+async def test_gold_schema_quarantine_preserves_silver_and_zero_gold(
+    with_batch_metrics: bool,
+) -> None:
+    from bioetl.application.core._batch_processing_layer_write_support import (
+        write_silver_then_gold,
+    )
+    from bioetl.domain.exceptions import SchemaViolationError
+
+    accounting = StageAccountingAccumulator()
+    token = bind_stage_accounting(accounting)
+    metrics = BatchMetricsRecorderService(None, "pubmed_publication", "incremental")
+    port = MagicMock(write_many=AsyncMock())
+    quarantine = QuarantineRuntimeService(
+        port,
+        "pubmed_publication",
+        batch_metrics=metrics if with_batch_metrics else None,
+    )
+    writer = MagicMock(
+        write_silver=AsyncMock(return_value=True),
+        write_gold=AsyncMock(side_effect=SchemaViolationError("gold", ["invalid"])),
+    )
+
+    async def execute_span(name, operation, *args, **kwargs):
+        return await operation
+
+    try:
+        metrics.track_processed_records("bronze", 2)
+        await write_silver_then_gold(
+            execute_with_span=execute_span,
+            writer=writer,
+            quarantine_manager=quarantine,
+            logger=MagicMock(),
+            batch_metrics=metrics,
+            run_id=None,
+            domain_event_emitter=None,
+            transform_result=MagicMock(silver_records=[{}, {}], gold_records=[{}, {}]),
+            batch_id=BatchID(UUID("11111111-1111-4111-8111-111111111111")),
+            ingestion_ts=datetime(2026, 9, 21, tzinfo=UTC),
+            bronze_refs=None,
+        )
+        # Simulate the executor's prepared-record fallback; durable accounting
+        # must override it even when the successful write count is zero.
+        counters = {"records_gold": 2, **accounting.measured_record_metrics()}
+        layers = accounting.snapshot_layers_from_metrics(counters)
+        assert layers.bronze_records == layers.silver_valid == 2
+        assert layers.silver_quarantined == 0
+        assert layers.gold_written == 0
+        assert layers.gold_quarantined == 2
+        port.write_many.assert_awaited_once()
+        writer.track_batch_written.assert_called_once_with(stage="silver", count=2)
+    finally:
+        reset_stage_accounting(token)
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize("filtered", [True, False])
 async def test_rejection_and_durable_quarantine_count_once(filtered: bool) -> None:
     accounting = StageAccountingAccumulator()

@@ -111,11 +111,15 @@ class RecordProcessor:
             ingestion_ts=ingestion_ts,
             bronze_refs=bronze_refs,
         )
+        self._batch_metrics.track_processed_records(
+            "silver", len(result.silver_records)
+        )
         await self._write_gold_if_present(
             result=result,
             batch_id=batch_id,
             silver_refs=[silver_result] if silver_result is not None else None,
         )
+        self._batch_metrics.track_processed_records("gold", len(result.gold_records))
         return BatchResult(
             bronze_count=len(records),
             silver_count=len(result.silver_records),
@@ -127,10 +131,6 @@ class RecordProcessor:
         self._batch_metrics.track_processed_records(
             "quarantined", result.quarantined_count
         )
-        self._batch_metrics.track_processed_records(
-            "silver", len(result.silver_records)
-        )
-        self._batch_metrics.track_processed_records("gold", len(result.gold_records))
 
     def _build_bronze_refs(
         self, bronze_result: object

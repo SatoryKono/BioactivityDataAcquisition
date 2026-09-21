@@ -25,6 +25,7 @@ from bioetl.application.pipelines.pubmed._block_helpers import (
     extract_journal_data,
     is_valid_date_format,
     process_structured_affiliations,
+    structured_affiliation_fields,
 )
 from bioetl.application.pipelines.pubmed.blocks import (
     _PubMedAuthorBlock,
@@ -220,17 +221,17 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         return {
             "authors": self._data_normalizer.normalize_author_list(author_names),
             "author_keys": self._data_normalizer.normalize_author_keys(author_names),
-            "authors_with_affiliations": self.serialize_json_list(
-                authors_with_affiliations
-            )
-            if authors_with_affiliations
-            else None,
+            **structured_affiliation_fields(
+                self.serialize_json_list(authors_with_affiliations)
+                if authors_with_affiliations
+                else None,
+                self.serialize_json_list(structured_affiliations),
+            ),
             "affiliation_list": self._data_normalizer.normalize_affiliations(
                 affiliation_strings
             )
             if affiliation_strings
             else None,
-            "affiliation_structured": self.serialize_json_list(structured_affiliations),
             "author_count": len(author_names),
         }
 

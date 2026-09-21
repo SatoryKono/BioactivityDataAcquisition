@@ -337,6 +337,10 @@ class TestPubMedPublicationTransformer:
         assert "Software Testing" in result["subject_mesh"]
         # Authors (JSON-serialized list, may be hashed)
         assert result["authors"] is not None
+        assert result["authors_with_affiliations_raw_json"] is not None
+        assert result["authors_with_affiliations_canonical_json"] is not None
+        assert "affiliation_structured_raw_json" in result
+        assert "affiliation_structured_canonical_json" in result
         import json
 
         authors_list = json.loads(result["authors"])

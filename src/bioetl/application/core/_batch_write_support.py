@@ -246,4 +246,5 @@ async def _quarantine_schema_violation(
         ],
         batch_id,
         ingestion_ts=ingestion_ts,
+        stage=layer,
     )

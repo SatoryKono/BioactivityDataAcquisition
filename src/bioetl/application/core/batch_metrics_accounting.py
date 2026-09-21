@@ -31,13 +31,14 @@ def _record_silver_removal_accounting(
     outcome: str,
     reason_code: str,
     count: int,
+    stage: str = "silver",
 ) -> None:
-    """Record one positive Silver-stage removal in run accounting."""
+    """Record one positive removal; default transform failures belong to Silver."""
     accounting = get_stage_accounting()
     if accounting is None or count <= 0:
         return
     accounting.record_removal(
-        StageId.SILVER.value,
+        stage,
         outcome=outcome,
         reason_code=reason_code,
         count=count,

@@ -44,6 +44,7 @@ class QuarantineRuntimeDependencies:
     pipeline_metrics: PipelineMetricsRecorder
     batch_metrics: BatchMetricsRecorderService | None
     run_type: str = "unknown"
+    stage: str = "silver"
 
 
 def build_quarantine_runtime_ports(
@@ -98,6 +99,7 @@ async def persist_dq_quarantine_request(
         run_type=ports.run_type,
         error_type=error_type,
         count=1,
+        stage=ports.stage,
     )
     track_processed_quarantined(
         metrics=ports.metrics,
@@ -138,6 +140,7 @@ async def persist_dq_quarantine_requests(
             run_type=ports.run_type,
             error_type=reason,
             count=count,
+            stage=ports.stage,
         )
     track_processed_quarantined(
         metrics=ports.metrics,

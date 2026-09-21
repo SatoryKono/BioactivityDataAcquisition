@@ -31,6 +31,7 @@ def track_quarantine_metrics(
     run_type: str,
     error_type: ErrorType,
     count: int,
+    stage: str = "silver",
 ) -> None:
     """Emit quarantine metrics through batch, MetricsPort, and pipeline APIs.
 
@@ -38,7 +39,7 @@ def track_quarantine_metrics(
     the port is injected; batch metrics take precedence when present.
     """
     if batch_metrics is not None:
-        batch_metrics.track_quarantined_records(error_type, count)
+        batch_metrics.track_quarantined_records(error_type, count, stage=stage)
         return
     elif metrics is not None:
         metrics.increment_counter(
@@ -55,7 +56,7 @@ def track_quarantine_metrics(
         count=count,
     )
     _record_silver_removal_accounting(
-        outcome="quarantined", reason_code=error_type.value, count=count
+        outcome="quarantined", reason_code=error_type.value, count=count, stage=stage
     )
 
 
