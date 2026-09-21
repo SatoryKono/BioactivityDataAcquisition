@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
+from typing import Any, Protocol, cast
 
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.base_config_loader import _load_yaml_file
@@ -124,9 +125,19 @@ def load_source_config_from_root(
     return _load_source_config_cached(provider, str(resolve_configs_root(configs_root)))
 
 
-load_source_config.cache_clear = _load_source_config_cached.cache_clear  # type: ignore[attr-defined]
-load_source_config.cache_info = _load_source_config_cached.cache_info  # type: ignore[attr-defined]
-load_source_config.__wrapped__ = _load_source_config_cached  # type: ignore[attr-defined]
+class _CachedSourceConfigLoader(Protocol):
+    """Typed surface of the cached source-config entrypoint."""
+
+    def __call__(self, provider: str) -> SourceYamlConfig: ...
+    def cache_clear(self) -> None: ...
+    def cache_info(self) -> Any: ...  # Any: functools.lru_cache cache_info() return type
+    __wrapped__: Any  # Any: functools.lru_cache wrapped function attribute
+
+
+load_source_config = cast(_CachedSourceConfigLoader, load_source_config)
+load_source_config.cache_clear = _load_source_config_cached.cache_clear
+load_source_config.cache_info = _load_source_config_cached.cache_info
+load_source_config.__wrapped__ = _load_source_config_cached
 
 
 __all__ = [

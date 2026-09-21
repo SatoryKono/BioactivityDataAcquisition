@@ -103,26 +103,28 @@ def _load_maintenance_command(name: str) -> click.Command | click.Group | None:
     return _with_command_name(command, name)
 
 
-def _configure_lazy_maintenance_group(group: Group) -> Group:
-    """Attach lazy command resolution to the maintenance Click group."""
+class _LazyMaintenanceGroup(Group):
+    """Maintenance Click group with lazy command resolution."""
 
-    def list_commands(ctx: click.Context) -> list[str]:
+    def list_commands(self, ctx: click.Context) -> list[str]:
         del ctx
         return [*_EAGER_MAINTENANCE_COMMANDS, *_LAZY_MAINTENANCE_COMMANDS]
 
     def get_command(
+        self,
         ctx: click.Context,
         cmd_name: str,
     ) -> click.Command | click.Group | None:
         del ctx
-        if cmd_name in group.commands:
-            return group.commands[cmd_name]
+        if cmd_name in self.commands:
+            return self.commands[cmd_name]
         command = _load_maintenance_command(cmd_name)
         if command is not None:
-            group.commands[cmd_name] = command
+            self.commands[cmd_name] = command
         return command
 
     def format_commands(
+        self,
         ctx: click.Context,
         formatter: click.HelpFormatter,
     ) -> None:
@@ -134,15 +136,10 @@ def _configure_lazy_maintenance_group(group: Group) -> Group:
             lazy_commands=_LAZY_MAINTENANCE_COMMANDS,
         )
 
-    group.list_commands = list_commands  # type: ignore[method-assign]
-    group.get_command = get_command  # type: ignore[method-assign]
-    group.format_commands = format_commands  # type: ignore[method-assign]
-    return group
 
-
-@typed_click_group()
+@typed_click_group(cls=_LazyMaintenanceGroup)
 def _maintenance_group() -> None:
     """Maintenance operations for Delta tables."""
 
 
-maintenance: Group = _configure_lazy_maintenance_group(cast(Group, _maintenance_group))
+maintenance: Group = cast(Group, _maintenance_group)

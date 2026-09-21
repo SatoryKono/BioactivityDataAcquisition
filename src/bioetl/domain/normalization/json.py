@@ -24,7 +24,7 @@ try:
 
     _orjson_available = True
 except ImportError:
-    orjson = cast("Any", None)
+    orjson = cast("Any", None)  # Any: Optional dependency, type-safe sentinel
     _orjson_available = False
 
 __all__ = [

@@ -80,7 +80,7 @@ class WorkflowRunOptionsConfig:
             override.required_persistence_profile,
         )
         # Dynamic per-field merge uses dataclass field names.
-        return WorkflowRunOptionsConfig(**cast("Any", values))
+        return WorkflowRunOptionsConfig(**cast("Any", values))  # Any: Dynamic dataclass field names for merge
 
     def to_mapping(self) -> JsonDict:
         """Return non-null options as a plain mapping."""

@@ -7,6 +7,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from functools import lru_cache
 from pathlib import Path
+from typing import Any, Protocol, cast
 
 import yaml
 
@@ -260,9 +261,19 @@ def _clear_pipeline_config_caches() -> None:
     _load_base_config_cached.cache_clear()
 
 
-load_pipeline_config.cache_clear = _clear_pipeline_config_caches  # type: ignore[attr-defined]
-load_pipeline_config.cache_info = _load_pipeline_config_cached.cache_info  # type: ignore[attr-defined]
-load_pipeline_config.__wrapped__ = _load_pipeline_config_cached  # type: ignore[attr-defined]
+class _CachedPipelineConfigLoader(Protocol):
+    """Typed surface of the cached pipeline-config entrypoint."""
+
+    def __call__(self, pipeline_name: str) -> PipelineYamlConfig: ...
+    def cache_clear(self) -> None: ...
+    def cache_info(self) -> Any: ...  # Any: functools.lru_cache cache_info() return type
+    __wrapped__: Any  # Any: functools.lru_cache wrapped function attribute
+
+
+load_pipeline_config = cast(_CachedPipelineConfigLoader, load_pipeline_config)
+load_pipeline_config.cache_clear = _clear_pipeline_config_caches
+load_pipeline_config.cache_info = _load_pipeline_config_cached.cache_info
+load_pipeline_config.__wrapped__ = _load_pipeline_config_cached
 
 
 def load_pipeline_config_uncached(
