@@ -40,86 +40,98 @@ async def save_checkpoint_safe(
     """Save checkpoint with graceful error handling."""
     started_at = time.monotonic()
     span = start_checkpoint_save_span(host, operation=operation)
+    status = "failed"
+    span_error: BaseException | None = None
+    pending_error: BaseException | None = None
     try:
-        await host._checkpoint_manager.save(state)
-        duration_seconds = time.monotonic() - started_at
-        emit_checkpoint_save_event(
-            host,
-            operation=operation,
-            status="succeeded",
-        )
-        set_checkpoint_saved_at(host, checkpoint_saved_at_epoch_seconds(host))
-        observe_checkpoint_save_duration(
-            host,
-            operation=operation,
-            status="succeeded",
-            duration_seconds=duration_seconds,
-        )
-        close_checkpoint_save_span(
-            host,
-            span,
-            status="succeeded",
-        )
-        return True
-    except CHECKPOINT_NON_FATAL_ERRORS as error:
-        duration_seconds = time.monotonic() - started_at
-        emit_checkpoint_save_event(
-            host,
-            operation=operation,
-            status="failed",
-        )
-        observe_checkpoint_save_duration(
-            host,
-            operation=operation,
-            status="failed",
-            duration_seconds=duration_seconds,
-        )
-        close_checkpoint_save_span(
-            host,
-            span,
-            status="failed",
-            error=error,
-        )
-        host._logger.warning(
-            "checkpoint_save_failed",
-            **host._build_correlation_log_context(
+        try:
+            await host._checkpoint_manager.save(state)
+            duration_seconds = time.monotonic() - started_at
+            emit_checkpoint_save_event(
+                host,
                 operation=operation,
-                error=str(error),
-                error_type=type(error).__name__,
-                note="Resume capability may be affected",
-            ),
-        )
-        return False
-    except BioETLError as error:
-        duration_seconds = time.monotonic() - started_at
-        emit_checkpoint_save_event(
-            host,
-            operation=operation,
-            status="failed",
-        )
-        observe_checkpoint_save_duration(
-            host,
-            operation=operation,
-            status="failed",
-            duration_seconds=duration_seconds,
-        )
-        close_checkpoint_save_span(
-            host,
-            span,
-            status="failed",
-            error=error,
-        )
-        host._logger.warning(
-            "checkpoint_save_failed",
-            **host._build_correlation_log_context(
+                status="succeeded",
+            )
+            set_checkpoint_saved_at(host, checkpoint_saved_at_epoch_seconds(host))
+            observe_checkpoint_save_duration(
+                host,
                 operation=operation,
-                error=str(error),
-                error_type=type(error).__name__,
-                reason_code="unexpected_bioetl_error",
-                note="Resume capability may be affected",
-            ),
-        )
-        return False
+                status="succeeded",
+                duration_seconds=duration_seconds,
+            )
+            status = "succeeded"
+            return True
+        except CHECKPOINT_NON_FATAL_ERRORS as error:
+            span_error = error
+            duration_seconds = time.monotonic() - started_at
+            emit_checkpoint_save_event(
+                host,
+                operation=operation,
+                status="failed",
+            )
+            observe_checkpoint_save_duration(
+                host,
+                operation=operation,
+                status="failed",
+                duration_seconds=duration_seconds,
+            )
+            host._logger.warning(
+                "checkpoint_save_failed",
+                **host._build_correlation_log_context(
+                    operation=operation,
+                    error=str(error),
+                    error_type=type(error).__name__,
+                    note="Resume capability may be affected",
+                ),
+            )
+            return False
+        except BioETLError as error:
+            span_error = error
+            duration_seconds = time.monotonic() - started_at
+            emit_checkpoint_save_event(
+                host,
+                operation=operation,
+                status="failed",
+            )
+            observe_checkpoint_save_duration(
+                host,
+                operation=operation,
+                status="failed",
+                duration_seconds=duration_seconds,
+            )
+            host._logger.warning(
+                "checkpoint_save_failed",
+                **host._build_correlation_log_context(
+                    operation=operation,
+                    error=str(error),
+                    error_type=type(error).__name__,
+                    reason_code="unexpected_bioetl_error",
+                    note="Resume capability may be affected",
+                ),
+            )
+            return False
+    except BaseException as error:
+        pending_error = error
+        raise
+    finally:
+        try:
+            close_checkpoint_save_span(
+                host, span, status=status, error=pending_error or span_error
+            )
+        except Exception as cleanup_error:
+            if pending_error is None:
+                host._logger.warning(
+                    "checkpoint_span_cleanup_failed",
+                    **host._build_correlation_log_context(
+                        operation=operation,
+                        error=str(cleanup_error),
+                        error_type=type(cleanup_error).__name__,
+                    ),
+                )
+            else:
+                pending_error.add_note(
+                    f"Checkpoint span cleanup failed: {type(cleanup_error).__name__}"
+                )
 
 
 async def run_seed(host: _CompositeRunnerSupportHostProtocol) -> SeedResult:

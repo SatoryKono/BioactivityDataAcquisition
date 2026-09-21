@@ -59,7 +59,7 @@ _ProjectionFn = Callable[
 
 def _evolve_projection(
     projection: RunLedgerReplayProjection,
-    **changes: Any,
+    **changes: Any,  # Any: Dynamic dataclass field names for projector updates
 ) -> RunLedgerReplayProjection:
     evolved = replace(
         projection,

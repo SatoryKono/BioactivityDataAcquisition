@@ -5,7 +5,7 @@ from __future__ import annotations
 
 __all__ = ["UNIPROT_BATCH_SIZE", "UNIPROT_FETCH_ERRORS", "UniProtAdapter"]
 
-from typing import TYPE_CHECKING, override
+from typing import TYPE_CHECKING, cast, override
 
 from httpx import HTTPStatusError
 
@@ -40,7 +40,15 @@ from bioetl.infrastructure.adapters.uniprot.protein_fetch_adapter_mixin import (
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import (
+        ErrorHandlerPort,
+        LoggerPort,
+        MetricsPort,
+    )
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
+    from bioetl.infrastructure.adapters.common.api_request_collector import (
+        APIRequestCollector,
+    )
     from bioetl.infrastructure.adapters.common.dependency_context import (
         HttpAdapterDependencyContext,
     )
@@ -111,11 +119,11 @@ class UniProtAdapter(
         super().__init__(
             http_client,
             logger,
-            metrics=metrics,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+            metrics=cast("MetricsPort | None", metrics),
             dependency_context=dependency_context,
-            error_handler=error_handler,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-            adapter_metrics=adapter_metrics,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-            request_collector=request_collector,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+            error_handler=cast("ErrorHandlerPort | None", error_handler),
+            adapter_metrics=cast("AdapterMetricsRecorder | None", adapter_metrics),
+            request_collector=cast("APIRequestCollector | None", request_collector),
         )
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key

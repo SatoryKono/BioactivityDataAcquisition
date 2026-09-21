@@ -126,13 +126,17 @@ def close_checkpoint_save_span(
     """Close checkpoint save tracing span and record status."""
     if span is None:
         return
-    span.set_attribute("bioetl.checkpoint.status", status)
-    if error is not None:
-        span.set_attribute("error", True)
-        span.set_attribute("error.type", type(error).__name__)
-        if isinstance(error, Exception):
-            span.record_exception(error)
-    span.__exit__(None, None, None)
-    tracer = cast("TracingPort | None", getattr(host, "_tracing", None))
-    if tracer is not None:
-        tracer.flush()
+    try:
+        span.set_attribute("bioetl.checkpoint.status", status)
+        if error is not None:
+            span.set_attribute("error", True)
+            span.set_attribute("error.type", type(error).__name__)
+            if isinstance(error, Exception):
+                span.record_exception(error)
+    finally:
+        try:
+            span.__exit__(None, None, None)
+        finally:
+            tracer = cast("TracingPort | None", getattr(host, "_tracing", None))
+            if tracer is not None:
+                tracer.flush()

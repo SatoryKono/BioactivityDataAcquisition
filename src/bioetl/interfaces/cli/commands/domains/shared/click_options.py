@@ -40,7 +40,7 @@ def _cast_command[**CommandParams, CommandReturn](
     return func
 
 
-def typed_click_option(*args: str, **kwargs: Any) -> CommandDecorator:
+def typed_click_option(*args: str, **kwargs: Any) -> CommandDecorator:  # Any: Click library kwargs
     """Attach one Click option while preserving the wrapped callback type."""
 
     def decorator(func: CommandCallback) -> CommandCallback:
@@ -49,7 +49,7 @@ def typed_click_option(*args: str, **kwargs: Any) -> CommandDecorator:
     return decorator
 
 
-def typed_click_argument(*args: str, **kwargs: Any) -> CommandDecorator:
+def typed_click_argument(*args: str, **kwargs: Any) -> CommandDecorator:  # Any: Click library kwargs
     """Attach one Click argument while preserving the wrapped callback type."""
 
     def decorator(func: CommandCallback) -> CommandCallback:
@@ -58,7 +58,7 @@ def typed_click_argument(*args: str, **kwargs: Any) -> CommandDecorator:
     return decorator
 
 
-def typed_click_command(name: str | None = None, **attrs: Any) -> CommandDecorator:
+def typed_click_command(name: str | None = None, **attrs: Any) -> CommandDecorator:  # Any: Click library attrs
     """Register one standalone Click command while preserving callback types."""
 
     def decorator(func: CommandCallback) -> CommandCallback:
@@ -67,7 +67,7 @@ def typed_click_command(name: str | None = None, **attrs: Any) -> CommandDecorat
     return decorator
 
 
-def typed_click_group(**attrs: Any) -> CommandDecorator:
+def typed_click_group(**attrs: Any) -> CommandDecorator:  # Any: Click library attrs
     """Register one Click command group while preserving callback types."""
 
     def decorator(func: CommandCallback) -> CommandCallback:
@@ -100,7 +100,7 @@ def typed_pass_obj(func: CommandCallback) -> CommandCallback:
     return _cast_command(click.pass_obj(func))
 
 
-def typed_version_option(**kwargs: Any) -> CommandDecorator:
+def typed_version_option(**kwargs: Any) -> CommandDecorator:  # Any: Click library kwargs
     """Attach Click version metadata while preserving callback types."""
 
     def decorator(func: CommandCallback) -> CommandCallback:

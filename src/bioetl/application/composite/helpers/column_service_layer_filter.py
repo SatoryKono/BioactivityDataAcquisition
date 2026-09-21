@@ -25,7 +25,7 @@ def filter_columns_by_layer_config(
 ) -> list[str]:
     """Filter columns by layer config and apply renames."""
     if layer_config.columns:
-        filtered = filter_columns_by_explicit(
+        return filter_columns_by_explicit(
             columns=columns,
             layer_config=layer_config,
         )
@@ -37,6 +37,8 @@ def filter_columns_by_layer_config(
             collect_group_columns=collect_group_columns,
             logger=logger,
         )
+        if column_groups:
+            return filtered
     else:
         filtered = list(columns)
 

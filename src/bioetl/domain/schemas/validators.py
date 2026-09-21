@@ -22,7 +22,7 @@ import pandas as pd
 import pandera.extensions as pa_extensions
 import pandera.pandas as pa
 
-register_check_method = cast("Any", pa_extensions.register_check_method)
+register_check_method = cast("Any", pa_extensions.register_check_method)  # Any: Third-party library function with incomplete type stubs
 
 __all__ = [
     "JSON_ARRAY_CHECK",
