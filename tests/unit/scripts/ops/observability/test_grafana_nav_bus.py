@@ -197,9 +197,9 @@ def test_trust_layout_preserves_scalar_area_and_detail_rows() -> None:
     nav_bus._layout_control_plane_first_window(panels)
     nav_bus._normalize_collapsed_row_children(panels)
 
-    assert scope["gridPos"] == {"x": 0, "y": 3, "w": 16, "h": 3}
-    assert status["gridPos"] == {"x": 16, "y": 3, "w": 8, "h": 3}
-    assert status["gridPos"]["w"] * status["gridPos"]["h"] == 24
+    assert scope["gridPos"] == {"x": 0, "y": 3, "w": 18, "h": 3}
+    assert status["gridPos"] == {"x": 18, "y": 3, "w": 6, "h": 3}
+    assert status["gridPos"]["w"] == kpis[-1]["gridPos"]["w"]
     assert trust["gridPos"]["y"] == retention["gridPos"]["y"] == 6
     assert trust["gridPos"]["h"] == retention["gridPos"]["h"] == 7
     assert trust["targets"][0]["url"].count("error_as_row=1") == 1

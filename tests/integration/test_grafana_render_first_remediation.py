@@ -1317,7 +1317,7 @@ def test_cycle5_wrap_text_columns_restore_declared_widths() -> None:
             80,
             "trust_status",
         ),
-        ("bioetl-control-plane-v1.json", 9416, 12, "reason", 150, "status"),
+        ("bioetl-control-plane-v1.json", 9416, 12, "status", 110, "reason"),
         ("bioetl-overview-v2.json", 9003, 24, "Value", 100, "pipeline"),
         ("bioetl-overview-v2.json", 9004, 24, "Value", 100, "pipeline"),
         ("bioetl-overview-v2.json", 9005, 24, "Value", 100, "pipeline"),

@@ -372,7 +372,7 @@
       "title": "",
       "gridPos": {
         "h": 3,
-        "w": 16,
+        "w": 18,
         "x": 0,
         "y": 2
       },
@@ -416,8 +416,8 @@
       "title": "Monitor Current Readiness",
       "gridPos": {
         "h": 3,
-        "w": 8,
-        "x": 16,
+        "w": 6,
+        "x": 18,
         "y": 2
       },
       "datasource": {
@@ -746,7 +746,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 80
+                "value": 90
               },
               {
                 "id": "custom.cellOptions",
@@ -794,7 +794,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 130
+                "value": 110
               },
               {
                 "id": "custom.cellOptions",
@@ -859,12 +859,7 @@
               "id": "byName",
               "options": "Observed"
             },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 90
-              }
-            ]
+            "properties": []
           },
           {
             "matcher": {
@@ -1009,10 +1004,6 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 150
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
@@ -1050,6 +1041,10 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 170
               }
             ]
           },
@@ -1103,6 +1098,10 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 110
               }
             ]
           },
@@ -1122,10 +1121,6 @@
               {
                 "id": "custom.inspect",
                 "value": true
-              },
-              {
-                "id": "custom.width",
-                "value": 150
               },
               {
                 "id": "displayName",

@@ -401,9 +401,9 @@ def test_control_plane_trust_panels_follow_reference_widths() -> None:
     processed = panels["Review Processed Records"]["gridPos"]
     telemetry = panels["Monitor Telemetry"]["gridPos"]
 
-    assert scope == {"x": 0, "y": 2, "w": 16, "h": 3}
-    assert readiness == {"x": 16, "y": 2, "w": 8, "h": 3}
-    assert readiness["w"] * readiness["h"] == 24
+    assert scope == {"x": 0, "y": 2, "w": 18, "h": 3}
+    assert readiness == {"x": 18, "y": 2, "w": 6, "h": 3}
+    assert readiness["w"] == telemetry["w"]
     assert run_summary["w"] == 24
     assert processed["w"] == 24
     assert telemetry["w"] == 6

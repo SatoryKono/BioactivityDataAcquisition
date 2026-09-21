@@ -332,7 +332,7 @@
     {
       "gridPos": {
         "h": 3,
-        "w": 12,
+        "w": 16,
         "x": 0,
         "y": 2
       },
@@ -519,8 +519,8 @@
       },
       "gridPos": {
         "h": 3,
-        "w": 12,
-        "x": 12,
+        "w": 8,
+        "x": 16,
         "y": 2
       },
       "id": 214,
@@ -767,15 +767,15 @@
                 ]
               },
               {
-                "id": "custom.width",
-                "value": 210
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
                   "wrapText": true
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 160
               }
             ]
           },
@@ -811,6 +811,10 @@
                     "targetBlank": false
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 80
               }
             ]
           },
@@ -924,7 +928,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 150
+                "value": 120
               }
             ]
           }

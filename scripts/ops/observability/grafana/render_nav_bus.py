@@ -122,8 +122,8 @@ _FALLBACK_COMPACTION_HEIGHTS: dict[str, dict[int, int]] = {
     "bioetl-provider-health-v2": {9101: 4, 9107: 4},
 }
 _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    9400: (0, 3, 16, 3),
-    9401: (16, 3, 8, 3),
+    9400: (0, 3, 18, 3),
+    9401: (18, 3, 6, 3),
     9418: (0, 6, 12, 7),
     9416: (12, 6, 12, 7),
     891: (0, 13, 6, 4),
@@ -1083,7 +1083,7 @@ def _stamp_retention_copy(by_id: dict[object, dict[str, object]]) -> None:
 
 
 def _stamp_retention_readability(by_id: dict[object, dict[str, object]]) -> None:
-    """Keep check/reason readable at 1600x900 without widening Status."""
+    """Reserve compact status space and let the retention reason use the remainder."""
     panel = by_id.get(9416)
     if not isinstance(panel, dict):
         return
@@ -1097,7 +1097,7 @@ def _stamp_retention_readability(by_id: dict[object, dict[str, object]]) -> None
             cell = {"type": "auto", "wrapText": False}
             custom["cellOptions"] = cell
         cell["wrapText"] = False
-    widths = {"check": 150, "Check": 150, "reason": 150, "Reason": 150}
+    widths = {"check": 170, "Check": 170, "status": 110, "Status": 110}
     wrap_fields = {"check", "Check", "reason", "Reason"}
     overrides = field_config.get("overrides")
     if not isinstance(overrides, list):
@@ -1108,7 +1108,14 @@ def _stamp_retention_readability(by_id: dict[object, dict[str, object]]) -> None
         matcher = override.get("matcher")
         field = matcher.get("options") if isinstance(matcher, dict) else None
         if field in widths:
-            _set_override_value(override, CUSTOM_WIDTH, widths[field])
+            properties = override.setdefault("properties", [])
+            properties[:] = [p for p in properties if p.get("id") != CUSTOM_WIDTH]
+            properties.append({"id": CUSTOM_WIDTH, "value": widths[field]})
+        if field in {"reason", "Reason"}:
+            override["properties"] = [
+                p for p in override.get("properties", [])
+                if p.get("id") != CUSTOM_WIDTH
+            ]
         if field in wrap_fields:
             _set_override_value(
                 override,
@@ -1174,9 +1181,14 @@ def _stamp_trust_override(override: dict[str, object]) -> None:
         matcher["options"] = field
     if field == "processing_status":
         _set_override_value(override, "displayName", "Result")
-    width = {"Result": 80, "Trust": 130, "Observed": 90}.get(field)
+    width = {"Result": 90, "Trust": 110}.get(field)
     if width is not None:
         _set_override_value(override, CUSTOM_WIDTH, width)
+    if field == "Observed":
+        override["properties"] = [
+            p for p in override.get("properties", [])
+            if p.get("id") != CUSTOM_WIDTH
+        ]
     if field == "reasons_text":
         _set_override_value(override, "noValue", "—")
         _set_override_value(

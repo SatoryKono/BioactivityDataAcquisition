@@ -211,9 +211,9 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
     assert override_properties["status"]["custom.cellOptions"].get("wrapText") is False
     assert override_properties["reason"]["custom.cellOptions"].get("wrapText") is True
     assert override_properties["reason"]["custom.inspect"] is True
-    assert override_properties["reason"]["custom.width"] == 150
-    assert "custom.width" not in override_properties["status"]
-    assert override_properties["check"]["custom.width"] == 150
+    assert "custom.width" not in override_properties["reason"]
+    assert override_properties["status"]["custom.width"] == 110
+    assert override_properties["check"]["custom.width"] == 170
     check_maps = override_properties["check"]["mappings"][0]["options"]
     assert check_maps["snapshot_evidence"]["text"] == "Snapshots"
     assert check_maps["archive"]["text"] == "Archive"

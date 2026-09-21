@@ -139,6 +139,9 @@ def _trust(p: dict[int, dict]) -> None:
 
 
 def _overview(p: dict[int, dict]) -> None:
+    # Align the current verdict with the selected-run domains column below it.
+    p[99]["gridPos"].update(x=0, w=16)
+    p[214]["gridPos"].update(x=16, w=p[9002]["gridPos"]["w"])
     for panel_id in (215, 20215):
         panel = p[panel_id]
         _table(panel)
@@ -166,6 +169,9 @@ def _overview(p: dict[int, dict]) -> None:
                                     "Provider": "Provider Health",
                                 }.get(value.get("text"), value.get("text", ""))
     _table(p[20215], compact=False)
+    # Reserve only the short label columns; leave the explanation responsive.
+    for name, width in (("Priority", 80), ("Pipeline", 120), ("action_target", 160)):
+        override(p[215], name, **{"custom.width": width})
     p[20215]["gridPos"]["h"] = 14
     # Retain domain-specific links and queries, but compare the six diagnostics in one banded grid.
     _bands(
