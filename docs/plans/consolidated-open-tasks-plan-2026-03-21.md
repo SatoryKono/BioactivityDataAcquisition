@@ -99,15 +99,20 @@ Config-topology seams после `P1` closeout удерживаются как g
 Статус: `proposed-no-go`; выполнение начинается с read-only этапа A.
 
 Supporting context и проверяемые gates:
-[план миграции v4](github-to-gitlab-migration-plan-v4-2026-09-21.md).
+[план миграции v4.1](github-to-gitlab-migration-plan-v4-2026-09-21.md).
+
+Выбраны D-01 `B1` (GitLab GitHub Importer) и D-03 `M1` (существующий GitHub
+repository как live push mirror). D-09 для выбранного профиля имеет статус N/A;
+B2/B3 не являются fallback.
 
 Ближайший bounded scope:
 
 - назначить Migration Owner и approver;
-- закрыть D-01…D-09 и Gate A (`GA-01…GA-08`), включая target/identity capacity,
-  recovery objectives и выбор B1/B2/B3 + M1/M2/M3;
-- получить полный non-promisor source clone, inventory и восстановленный backup;
-- только после Gate A подготовить отдельный rehearsal runbook.
+- утвердить D-02 и D-04…D-08, затем закрыть Gate A (`GA-01…GA-08`), включая
+  authenticated target/tier, identity capacity, runners и recovery objectives;
+- получить полный non-promisor source clone, all-ref LFS inventory и
+  восстановленный backup;
+- только после Gate A подготовить отдельный B1 + M1 rehearsal runbook.
 
 Definition of Done для этой задачи: formal `GO` к rehearsal либо зафиксированное
 решение отменить/отложить миграцию. Production cutover не входит в этот bounded
