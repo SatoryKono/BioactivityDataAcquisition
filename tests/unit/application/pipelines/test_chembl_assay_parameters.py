@@ -93,7 +93,7 @@ async def test_nested_api_parameter_reaches_canonical_gold_contract(
     config = load_domain_pipeline_config("chembl_assay_parameters")
     _apply_runtime_dq_outcomes(silver_record=result, dq_config=config.dq)
     schema = ChEMBLAssayParametersGoldSchema.to_schema()
-    projected = {key: result.get(key) for key in schema.columns}
+    projected = {key: value for key, value in result.items() if key in schema.columns}
     checked = schema.validate(pd.DataFrame([projected]))
     assert checked["assay_param_id"].iloc[0] == raw["assay_param_id"]
 

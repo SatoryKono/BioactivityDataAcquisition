@@ -63,6 +63,14 @@ class AssayParameters(BaseEntity):
     standard_value: float | None = None  # Standardized value
     standard_units: str | None = None  # Standardized units
     standard_text_value: str | None = None  # Standardized text value
+    qudt_units: str | None = None
+    qudt_unit_iri: str | None = None
+    qudt_unit_mapping_status: str | None = None
+    qudt_ontology_version: str | None = None
+    uo_units: str | None = None
+    uo_unit_iri: str | None = None
+    uo_unit_mapping_status: str | None = None
+    uo_ontology_version: str | None = None
 
     def _validate_invariants(self) -> None:
         """Validate entity invariants."""
