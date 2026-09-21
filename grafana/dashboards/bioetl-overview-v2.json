@@ -249,7 +249,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"0. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"1. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Trust</a><a class=\"bioetl-nav-current\" href=\"#bioetl-overview-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"2. Overview (Overview)\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">2. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"3. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">3. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"4. Provider Health (Provider Health). Scope reset: provider=All; preserves time range, pipeline context.\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-provider=$__all&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">4. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"5. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">5. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"0. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"1. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Trust</a><a class=\"bioetl-nav-current\" href=\"#bioetl-overview-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"2. Overview (Overview)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">2. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"3. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">3. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"4. Provider Health (Provider Health). Scope reset: provider=All; preserves time range, pipeline context.\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-provider=$__all&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">4. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"5. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">5. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
       },
       "title": "",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus 0–6: Run Explorer / Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality / Incident Workspace. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
@@ -370,7 +370,7 @@
             "align": "left",
             "cellOptions": {
               "type": "auto",
-              "wrapText": false
+              "wrapText": true
             },
             "inspect": true
           },
@@ -383,7 +383,56 @@
             }
           ]
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "action_dashboard_uid"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pipeline"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "showHeader": true,
@@ -435,6 +484,10 @@
               "evidence_completeness": "Evidence",
               "rules_version": "Rules",
               "run_verdict": "Status"
+            },
+            "excludeByName": {
+              "__name__": true,
+              "job": true
             }
           }
         }
@@ -601,9 +654,10 @@
             "align": "left",
             "cellOptions": {
               "type": "auto",
-              "wrapText": false
+              "wrapText": true
             },
-            "inspect": true
+            "inspect": true,
+            "wrapText": true
           },
           "mappings": [
             {
@@ -772,10 +826,6 @@
                   "type": "auto",
                   "wrapText": true
                 }
-              },
-              {
-                "id": "custom.width",
-                "value": 190
               }
             ]
           },
@@ -811,10 +861,6 @@
                     "targetBlank": false
                   }
                 ]
-              },
-              {
-                "id": "custom.width",
-                "value": 80
               }
             ]
           },
@@ -900,16 +946,16 @@
                 "value": ""
               },
               {
-                "id": "custom.hidden",
-                "value": true
-              },
-              {
                 "id": "custom.hideFrom",
                 "value": {
                   "tooltip": false,
                   "viz": true,
                   "legend": true
                 }
+              },
+              {
+                "id": "custom.hidden",
+                "value": true
               }
             ]
           },
@@ -928,7 +974,66 @@
               },
               {
                 "id": "custom.width",
-                "value": 120
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Action"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Started"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Why"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reason"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Stage"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
               }
             ]
           }
@@ -1010,7 +1115,9 @@
               "input": true,
               "run_type": true,
               "pipeline": false,
-              "Pipeline": false
+              "Pipeline": false,
+              "action_dashboard_uid": true,
+              "job": true
             },
             "indexByName": {
               "Value": 0,
@@ -3667,6 +3774,110 @@
                     "value": true
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "deadline_exceeded": {
+                            "text": "QUERY ERROR — deadline exceeded",
+                            "color": "red"
+                          },
+                          "capacity_exhausted": {
+                            "text": "QUERY ERROR — capacity exhausted",
+                            "color": "red"
+                          },
+                          "catalog_unavailable": {
+                            "text": "QUERY ERROR — catalog unavailable",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Reason"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "deadline_exceeded": {
+                            "text": "QUERY ERROR — deadline exceeded",
+                            "color": "red"
+                          },
+                          "capacity_exhausted": {
+                            "text": "QUERY ERROR — capacity exhausted",
+                            "color": "red"
+                          },
+                          "catalog_unavailable": {
+                            "text": "QUERY ERROR — catalog unavailable",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "ERROR": {
+                            "text": "QUERY ERROR",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "status"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "ERROR": {
+                            "text": "QUERY ERROR",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -3682,8 +3893,7 @@
               "url_options": {
                 "data": "",
                 "method": "GET"
-              },
-              "expr": ""
+              }
             }
           ],
           "options": {
@@ -4032,8 +4242,7 @@
               "url_options": {
                 "data": "",
                 "method": "GET"
-              },
-              "expr": ""
+              }
             }
           ],
           "options": {

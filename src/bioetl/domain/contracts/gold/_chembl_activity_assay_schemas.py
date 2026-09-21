@@ -187,19 +187,19 @@ class ChEMBLAssayParametersGoldSchema(StrictGoldContractSchema):
     )
 
     # Primary identifier (surrogate)
-    assay_param_id: Series[float] = pa.Field(
+    assay_param_id: Series[int] = pa.Field(
         nullable=False, coerce=True
-    )  # int64 in Silver
+    )  # Preserve all 63 identity bits; float64 would silently round keys.
 
     # Foreign key
     assay_id: Series[str] = pa.Field(nullable=False)
 
     # Parameter type
-    type: Series[str] = pa.Field(nullable=False)
+    type: Series[str] = pa.Field(nullable=False, alias="parameter_type")
 
     # Raw values
-    relation: Series[str] = pa.Field(nullable=True)
-    value: Series[float] = pa.Field(nullable=True, coerce=True)
+    relation: Series[str] = pa.Field(nullable=True, alias="parameter_relation")
+    value: Series[float] = pa.Field(nullable=True, coerce=True, alias="parameter_value")
     units: Series[str] = pa.Field(nullable=True)
     text_value: Series[str] = pa.Field(nullable=True)
     comments: Series[str] = pa.Field(nullable=True)

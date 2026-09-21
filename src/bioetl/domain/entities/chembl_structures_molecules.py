@@ -85,8 +85,10 @@ class ChemblPublicationSimilarity(BaseEntity):
     """Represents similarity between two ChEMBL documents."""
 
     sim_id: int
-    doc_1: int
-    doc_2: int
+    doc_1: int | None = None
+    doc_2: int | None = None
+    publication_id1: str | None = None
+    publication_id2: str | None = None
     pubmed_id1: str | None = None
     pubmed_id2: str | None = None
     tid_tani: float | None = None
@@ -105,6 +107,21 @@ class ChemblPublicationSimilarity(BaseEntity):
 
     def _validate_similarity_documents(self) -> None:
         """Validate similarity endpoints for positivity and non-identity."""
+        public_pair = (self.publication_id1, self.publication_id2)
+        if any(value is not None for value in public_pair):
+            if not all(
+                isinstance(value, str)
+                and value.startswith("CHEMBL")
+                and value[6:].isdigit()
+                and int(value[6:]) > 0
+                for value in public_pair
+            ):
+                raise ValueError("Both public document ChEMBL identifiers are required")
+            if public_pair[0] == public_pair[1]:
+                raise ValueError("Document cannot be similar to itself")
+            return
+        if self.doc_1 is None or self.doc_2 is None:
+            raise ValueError("Both document identifiers are required")
         if self.doc_1 <= 0 or self.doc_2 <= 0:
             raise ValueError("doc_1 and doc_2 must be positive")
         if self.doc_1 == self.doc_2:

@@ -84,6 +84,12 @@ async def write_silver_then_gold(
         if silver_outcome is not True:
             silver_result = cast("SilverWriteResult", silver_outcome)
         silver_written = len(transform_result.silver_records)
+        track_storage_write_metrics(
+            batch_metrics,
+            transform_result=transform_result,
+            silver_written=silver_written,
+            gold_written=0,
+        )
     if transform_result.gold_records:
         gold_outcome = await safe_write_layer(
             execute_with_span=execute_with_span,
@@ -105,6 +111,6 @@ async def write_silver_then_gold(
     track_storage_write_metrics(
         batch_metrics,
         transform_result=transform_result,
-        silver_written=silver_written,
+        silver_written=0,
         gold_written=gold_written,
     )

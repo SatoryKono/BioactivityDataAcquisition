@@ -308,7 +308,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"0. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"1. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"2. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">2. Overview</a><a class=\"bioetl-nav-current\" href=\"#bioetl-runtime\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"3. Pipeline Diagnostics (Pipeline Diagnostics)\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">3. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"4. Provider Health (Provider Health). Scope reset: provider=All; preserves time range, pipeline context.\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-provider=$__all&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">4. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"5. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">5. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"0. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"1. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"2. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">2. Overview</a><a class=\"bioetl-nav-current\" href=\"#bioetl-runtime\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"3. Pipeline Diagnostics (Pipeline Diagnostics)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">3. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"4. Provider Health (Provider Health). Scope reset: provider=All; preserves time range, pipeline context.\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-provider=$__all&amp;var-pipeline_context=${pipeline:percentencode}&amp;${__url_time_range}\">4. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"5. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">5. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
       },
       "title": "",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus 0–6: Run Explorer / Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality / Incident Workspace. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
@@ -539,9 +539,11 @@
           "custom": {
             "align": "auto",
             "cellOptions": {
-              "type": "auto"
+              "type": "auto",
+              "wrapText": true
             },
-            "inspect": true
+            "inspect": true,
+            "wrapText": true
           },
           "mappings": [
             {
@@ -632,10 +634,6 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 80
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
@@ -660,10 +658,6 @@
               {
                 "id": "custom.inspect",
                 "value": true
-              },
-              {
-                "id": "custom.width",
-                "value": 260
               }
             ]
           },
@@ -766,6 +760,89 @@
                 ]
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Action"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Started"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pipeline"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Why"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reason"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Stage"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "action_dashboard_uid"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
           }
         ]
       },
@@ -819,7 +896,9 @@
               "Time": true,
               "__name__": true,
               "pipeline": true,
-              "run_type": true
+              "run_type": true,
+              "action_dashboard_uid": true,
+              "job": true
             },
             "indexByName": {
               "severity": 0,
@@ -1061,8 +1140,9 @@
             "inspect": true,
             "cellOptions": {
               "type": "auto",
-              "wrapText": false
-            }
+              "wrapText": true
+            },
+            "wrapText": true
           },
           "unit": "short"
         },
@@ -1100,6 +1180,89 @@
               {
                 "id": "unit",
                 "value": "rps"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Action"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Started"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pipeline"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Why"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reason"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Stage"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "action_dashboard_uid"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
               }
             ]
           }
@@ -1640,9 +1803,11 @@
               "custom": {
                 "align": "auto",
                 "cellOptions": {
-                  "type": "color-text"
+                  "type": "color-text",
+                  "wrapText": true
                 },
-                "inspect": true
+                "inspect": true,
+                "wrapText": true
               },
               "mappings": [
                 {
@@ -1733,10 +1898,6 @@
                     }
                   },
                   {
-                    "id": "custom.width",
-                    "value": 80
-                  },
-                  {
                     "id": "noValue",
                     "value": "N/A — stage is not in this pipeline's expectedness contract"
                   }
@@ -1757,10 +1918,6 @@
                     "value": {
                       "type": "auto"
                     }
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 200
                   }
                 ]
               },
@@ -1769,10 +1926,88 @@
                   "id": "byName",
                   "options": "stage"
                 },
+                "properties": []
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Action"
+                },
+                "properties": []
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Started"
+                },
+                "properties": []
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Pipeline"
+                },
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 160
+                    "value": 100
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Why"
+                },
+                "properties": []
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Reason"
+                },
+                "properties": []
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Stage"
+                },
+                "properties": []
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 90
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Severity"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 90
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "action_dashboard_uid"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               }
@@ -1827,7 +2062,10 @@
                 "excludeByName": {
                   "Time": true,
                   "Time #A": true,
-                  "Time #B": true
+                  "Time #B": true,
+                  "action_dashboard_uid": true,
+                  "__name__": true,
+                  "job": true
                 },
                 "indexByName": {
                   "pipeline": 0,
@@ -3338,7 +3576,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum by(reason) (increase(bioetl_shutdown_initiated_total[$__interval])))",
+              "expr": "round(sum by(reason) (increase(bioetl_shutdown_initiated_total[$__rate_interval])))",
               "legendFormat": "{{reason}}",
               "refId": "A"
             }
@@ -3418,7 +3656,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum by(reason) (increase(bioetl_shutdown_completed_total[$__interval])))",
+              "expr": "round(sum by(reason) (increase(bioetl_shutdown_completed_total[$__rate_interval])))",
               "legendFormat": "{{reason}}",
               "refId": "A"
             }
@@ -3808,6 +4046,110 @@
                     "value": true
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "deadline_exceeded": {
+                            "text": "QUERY ERROR — deadline exceeded",
+                            "color": "red"
+                          },
+                          "capacity_exhausted": {
+                            "text": "QUERY ERROR — capacity exhausted",
+                            "color": "red"
+                          },
+                          "catalog_unavailable": {
+                            "text": "QUERY ERROR — catalog unavailable",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Reason"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "deadline_exceeded": {
+                            "text": "QUERY ERROR — deadline exceeded",
+                            "color": "red"
+                          },
+                          "capacity_exhausted": {
+                            "text": "QUERY ERROR — capacity exhausted",
+                            "color": "red"
+                          },
+                          "catalog_unavailable": {
+                            "text": "QUERY ERROR — catalog unavailable",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "ERROR": {
+                            "text": "QUERY ERROR",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "status"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "ERROR": {
+                            "text": "QUERY ERROR",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -3830,8 +4172,7 @@
               "url_options": {
                 "data": "",
                 "method": "GET"
-              },
-              "expr": ""
+              }
             }
           ],
           "transformations": [
@@ -4137,8 +4478,7 @@
               "url_options": {
                 "data": "",
                 "method": "GET"
-              },
-              "expr": ""
+              }
             }
           ],
           "transformations": [

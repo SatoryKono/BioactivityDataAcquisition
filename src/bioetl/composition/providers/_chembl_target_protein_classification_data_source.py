@@ -8,6 +8,7 @@ from types import TracebackType
 from typing import cast
 
 import pyarrow as pa
+from bioetl.domain.exceptions.internal_state import InvalidStateError
 from bioetl.application.services.protein.classification_resolution import (
     InvalidRecordPolicy,
     ProteinClassificationResolutionService,
@@ -219,6 +220,24 @@ class TargetProteinClassificationSnapshotDataSource:
             # while awaiting the lock.
             if self._is_loaded():
                 return
+            missing = [
+                table
+                for table in (
+                    _TARGET_TABLE,
+                    _TARGET_COMPONENT_TABLE,
+                    _PROTEIN_CLASS_TABLE,
+                )
+                if not await self._delta_reader.table_exists(table)
+            ]
+            if missing:
+                raise InvalidStateError(
+                    "blocked_dependency: missing Gold snapshot(s): "
+                    + ", ".join(missing)
+                    + ". Materialize and validate the upstream tables before retrying; "
+                    "an absent table is not a validated empty result.",
+                    current_state="blocked_dependency",
+                    attempted_operation="load_target_protein_classification_snapshots",
+                )
             target_rows = await self._read_rows(
                 _TARGET_TABLE,
                 columns=[

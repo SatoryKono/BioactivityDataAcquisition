@@ -9,6 +9,10 @@ from bioetl.application.core.data_source_mixins import (
     _SourceMetadataDelegationMixin,
     _WrappedDataSourceDelegationMixin,
 )
+from bioetl.application.core.derived_scan_budget import (
+    DEFAULT_SCAN_RECORDS,
+    bounded_source_records,
+)
 from bioetl.application.core.target_data_source_mixins import (
     _FallbackFilterableTargetFetchMixin,
     _FilterableTargetDelegationMixin,
@@ -75,6 +79,7 @@ class SubcellularFractionDataSource(
     ) -> AsyncIterator[JsonDict]:
         assays = self._data_source.fetch(
             entity_type=self.SOURCE_ENTITY_TYPE,
+            limit=DEFAULT_SCAN_RECORDS + 1,
             query=query,
             filter_ids=filter_ids,
             filter_field=filter_field,
@@ -111,7 +116,7 @@ class SubcellularFractionDataSource(
                 entity_type=self.SOURCE_ENTITY_TYPE,
                 filter_ids=filter_ids,
                 filter_field=filter_field,
-                limit=None,
+                limit=DEFAULT_SCAN_RECORDS + 1,
             ),
             limit,
         ):
@@ -127,7 +132,7 @@ class SubcellularFractionDataSource(
             filterable.fetch_multi_filtered(
                 entity_type=self.SOURCE_ENTITY_TYPE,
                 filters=filters,
-                limit=None,
+                limit=DEFAULT_SCAN_RECORDS + 1,
             ),
             limit,
         ):
@@ -138,7 +143,7 @@ class SubcellularFractionDataSource(
         limit: int | None = None,
     ) -> int | None:
         _ = limit
-        return None
+        return DEFAULT_SCAN_RECORDS + 1
 
     def _yield_target_records_from_fallback_source_records(
         self,
@@ -174,7 +179,7 @@ class SubcellularFractionDataSource(
         limit: int | None,
     ) -> AsyncIterator[JsonDict]:
         async for record in support.extract_unique_fraction_records(
-            assays,
+            bounded_source_records(assays),
             limit,
             self._seen_fractions,
         ):

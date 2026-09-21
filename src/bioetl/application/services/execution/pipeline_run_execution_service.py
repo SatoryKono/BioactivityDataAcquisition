@@ -10,7 +10,7 @@ from bioetl.application.runtime_timestamps import (
     capture_runtime_timing_anchor,
     derive_completion_timestamp,
 )
-from bioetl.domain.exceptions import BioETLError
+from bioetl.domain.exceptions.base import BioETLError
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 from bioetl.domain.types import JsonDict
 
@@ -25,8 +25,8 @@ _PIPELINE_RUN_ERRORS = (
     RuntimeError,
     ValueError,
     TypeError,
+    LookupError,
 )
-
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (

@@ -124,37 +124,6 @@ quality:
     - SERUM
     nullable: false
     error_message: Invalid assay parameter type value
-  - field: type
-    type: enum
-    allowed:
-    - IC50
-    - EC50
-    - Ki
-    - Kd
-    - AC50
-    - GI50
-    - Potency
-    - Inhibition
-    - '% Inhibition'
-    - Activity
-    - Ratio
-    - ED50
-    - ID50
-    - CONC
-    - PH
-    - TEMP
-    - TIME
-    - DOSE
-    - VOLUME
-    - WAVELENGTH
-    - PERCENT
-    - PRESSURE
-    - HUMIDITY
-    - CELL_COUNT
-    - CELL_DENSITY
-    - SERUM
-    nullable: false
-    error_message: Invalid assay parameter type value
   - field: type_raw
     type: pattern
     pattern: ^.{1,100}$
@@ -320,8 +289,8 @@ filters:
   input_filter:
     enabled: true
     source_path: data/input/assay_parameters.csv
-    column_name: assay_param_id
-    filter_field: assay_param_id
+    column_name: assay_id
+    filter_field: assay_id
     batch_size: 1000
     checkpoint_interval: 1000
     fallback_column: title
@@ -332,7 +301,6 @@ filters:
     - assay_id
     - assay_param_id
     - parameter_type
-    - type
   gold_filters:
     list_contains: {}
     list_lengths: {}
@@ -351,19 +319,19 @@ contracts:
   hash_exclude: []
   hash_datetime_policy: v2_datetime_utc
   contract_ref: chembl.assay_parameters
-  active_version: 1.0.0
+  active_version: 2.0.0
   rollout:
     mode: single
     read_order:
-    - 1.0.0
+    - 2.0.0
     write_versions:
-    - 1.0.0
-    affects_hash: false
+    - 2.0.0
+    affects_hash: true
 hash_policy:
   provider: chembl
   entity: assay_parameters
   contract:
-    version: 1.0.0
+    version: 2.0.0
     migration_note: 'Explicit config-level hash contract for the normalized ChEMBL assay_parameters Silver surface.'
   hash_policy:
     algorithm: sha256

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -133,11 +134,24 @@ class ChEMBLPublicationSimilarityGoldSchema(StrictGoldContractSchema):
     )
 
     # Primary key
-    sim_id: Series[float] = pa.Field(nullable=False, coerce=True)  # int64 in Silver
+    sim_id: Series[int] = pa.Field(nullable=False, coerce=True)
+
+    @pa.dataframe_check
+    def complete_document_pair(cls, frame: pd.DataFrame) -> pd.Series:
+        """Do not accept a missing or half-present public/internal pair."""
+        from bioetl.domain.schemas.chembl.similarity_pair import valid_similarity_pairs
+
+        return valid_similarity_pairs(frame)
 
     # Foreign keys
-    doc_1: Series[float] = pa.Field(nullable=False, coerce=True)  # int64 in Silver
-    doc_2: Series[float] = pa.Field(nullable=False, coerce=True)  # int64 in Silver
+    doc_1: Series[float] = pa.Field(nullable=True, coerce=True)
+    doc_2: Series[float] = pa.Field(nullable=True, coerce=True)
+    publication_id1: Series[str] | None = pa.Field(
+        nullable=True, str_matches=r"^CHEMBL[1-9]\d*$"
+    )
+    publication_id2: Series[str] | None = pa.Field(
+        nullable=True, str_matches=r"^CHEMBL[1-9]\d*$"
+    )
 
     # PubMed identifiers (numeric strings - matches Silver)
     pubmed_id1: Series[str] = pa.Field(nullable=True)

@@ -42,10 +42,6 @@ def track_transform_result_metrics(
     transform_result: TransformResult,
 ) -> None:
     """Record transform-stage metrics derived from one TransformResult."""
-    batch_metrics.track_processed_records(
-        "silver", len(transform_result.silver_records)
-    )
-    batch_metrics.track_processed_records("gold", len(transform_result.gold_records))
     batch_metrics.track_stage_records(
         stage="transform",
         outcome="silver_ready",
@@ -84,6 +80,8 @@ def track_storage_write_metrics(
     gold_count = (
         gold_written if gold_written is not None else len(transform_result.gold_records)
     )
+    batch_metrics.track_processed_records("silver", silver_count)
+    batch_metrics.track_processed_records("gold", gold_count)
     batch_metrics.track_stage_records(
         stage="storage",
         outcome="silver_written",

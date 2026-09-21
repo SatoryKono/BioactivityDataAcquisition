@@ -8,6 +8,7 @@ from urllib.parse import urlencode
 
 from pydantic import BaseModel
 
+from bioetl.domain.exceptions import ApiError
 from bioetl.domain.types import BronzeRecord, JsonDict
 from bioetl.infrastructure.adapters.chembl.constants import (
     _NO_PAGINATION_ENTITIES,
@@ -74,12 +75,20 @@ def process_chembl_response(
     """Process API response and return records with pagination flag."""
     data = response.json()
     plural_key = mapper.get_plural_key(entity_type)
-    records = data.get(plural_key, [])
+    if not isinstance(data, dict) or not isinstance(data.get(plural_key), list):
+        raise ApiError(f"ChEMBL response is missing the {plural_key} record collection")
+    records = data[plural_key]
     if entity_type in {"publication", "publication_term"}:
         for record in records:
             if "publication_id" not in record and record.get("document_chembl_id"):
                 record["publication_id"] = record["document_chembl_id"]
     page_meta = data.get("page_meta", {})
+    if not isinstance(page_meta, dict):
+        raise ApiError("ChEMBL response contains invalid page metadata")
+    if not records and page_meta.get("next"):
+        raise ApiError(
+            "ChEMBL returned an empty page with a continuation; scan is incomplete"
+        )
     has_next = page_meta.get("next") is not None
     return records, has_next
 
@@ -115,6 +124,8 @@ def get_api_dedup_fields(
     *, entity_type: str, mapper: ChemblEntityMapper
 ) -> tuple[str, ...]:
     """Get dedup key fields as they appear in raw API responses."""
+    if entity_type in {"publication_similarity", "document_similarity"}:
+        return ("document_1_chembl_id", "document_2_chembl_id")
     fields = mapper.get_dedup_key_fields(entity_type)
     return tuple(_SILVER_TO_CHEMBL_API_FIELD.get(f, f) for f in fields)
 

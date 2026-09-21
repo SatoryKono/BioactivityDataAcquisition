@@ -63,11 +63,8 @@ def _record_filtered_out_stage_metrics(
         outcome="filtered_out",
         count=count,
     )
-    _record_silver_removal_accounting(
-        outcome="filtered_out",
-        reason_code="FILTERED_OUT_SILVER",
-        count=count,
-    )
+    # Detailed rejection handling owns removal accounting. These two counters
+    # are projections of that same event, not additional discarded records.
 
 
 def _record_processed_stage_accounting(stage: str, count: int) -> None:
@@ -88,7 +85,7 @@ def _record_processed_stage_accounting(stage: str, count: int) -> None:
         accounting.record_out(StageId.GOLD.value, count)
         accounting.mark_instrumented(StageId.GOLD.value)
         return
-    if stage not in _SILVER_REMOVAL_REASONS:
+    if stage not in _SILVER_REMOVAL_REASONS or stage == "quarantined":
         return
     accounting.record_removal(
         StageId.SILVER.value,
@@ -113,9 +110,7 @@ def _record_stage_outcome_accounting(stage: str, outcome: str, count: int) -> No
                 reason_code=_GOLD_REMOVAL_REASONS[outcome_l],
                 count=count,
             )
-        elif outcome_l in {"written", "records"}:
-            accounting.record_out(StageId.GOLD.value, count)
-            accounting.mark_instrumented(StageId.GOLD.value)
+        # The processed-record write counter owns durable Gold output.
         return
     if stage_l == "silver" and outcome_l in _SILVER_REMOVAL_REASONS:
         accounting.record_removal(

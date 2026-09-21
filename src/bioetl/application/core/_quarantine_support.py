@@ -173,6 +173,7 @@ async def persist_filtered_quarantine_request(
         metrics=ports.metrics,
         pipeline_metrics=ports.pipeline_metrics,
         count=1,
+        record_accounting=ports.batch_metrics is None,
     )
 
 
@@ -201,4 +202,5 @@ async def persist_filtered_quarantine_requests(
         metrics=ports.metrics,
         pipeline_metrics=ports.pipeline_metrics,
         count=len(requests),
+        record_accounting=ports.batch_metrics is None,
     )

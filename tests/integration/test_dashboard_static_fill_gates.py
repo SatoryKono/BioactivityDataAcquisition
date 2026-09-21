@@ -263,11 +263,13 @@ def test_navigation_bus_uses_full_width_short_band() -> None:
         assert 'aria-label="BioETL dashboards"' in content
         assert "bioetl-panel-title" not in content
         assert "font-size:16px" in content
-        assert "flex-wrap:wrap" in content
-        assert "flex:1 1 auto" in content
+        assert "display:flex" in content
+        assert "flex-wrap:nowrap" in content
+        assert "width:14%" in content
+        assert "line-height:18px" in content
         assert "min-width:0" in content
         assert "overflow-wrap:anywhere" in content
-        assert "flex-wrap:nowrap" not in content
+        assert "font:600 16px/18px Arial" in content
         assert "overflow:hidden" not in content
 
 

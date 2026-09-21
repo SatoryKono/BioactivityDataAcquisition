@@ -121,13 +121,13 @@ def test_provider_severity_column_has_min_width_and_narrower_provider() -> None:
             widths[field] = int(props["custom.width"])
         if field == "provider":
             assert "custom.width" not in props
-            assert props.get("custom.minWidth") == 130
+            assert "custom.minWidth" not in props
         if field == "Value":
-            assert props.get("custom.minWidth") == 160
             assert (props.get("custom.cellOptions") or {}).get("wrapText") is False
     assert "provider" not in widths
-    assert widths.get("Value") == 160
-    assert "Severity" not in widths
+    assert "Value" not in widths
+    assert widths.get("Severity") == 130
+    assert panel["transformations"][0]["options"]["renameByName"]["Value"] == "Severity"
     assert int((panel.get("gridPos") or {}).get("y") or 0) < 18
     for panel_id in (9102, 9111, 9112):
         expander = _panel(dashboard, panel_id)
@@ -149,7 +149,7 @@ def test_nav_chips_use_eight_px_gap_and_status_stats_stay_compact() -> None:
         nav = _panel(dashboard, 1000)
         content = str((nav.get("options") or {}).get("content") or "")
         assert "gap:8px" in content
-        assert "padding:0 8px" in content
+        assert "padding:0 2px" in content
         for panel in get_dashboard_panels(dashboard):
             if panel.get("type") != "stat":
                 continue

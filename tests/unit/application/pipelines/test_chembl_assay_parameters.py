@@ -44,6 +44,36 @@ from bioetl.domain.types import RunType
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 
+@pytest.mark.asyncio
+async def test_nested_api_parameter_reaches_canonical_gold_contract(mock_context):
+    import pandas as pd
+    from bioetl.application.core.data_sources.assay_parameters import (
+        AssayParametersDataSource,
+    )
+    from bioetl.domain.contracts.gold._chembl_activity_assay_schemas import (
+        ChEMBLAssayParametersGoldSchema,
+    )
+
+    raw = AssayParametersDataSource._parameters(
+        {
+            "assay_chembl_id": "CHEMBL615121",
+            "assay_parameters": [{"type": "PH", "value": 7.4, "relation": "="}],
+        }
+    )[0]
+    transformer = AssayParametersTransformer(
+        provider="chembl",
+        entity_type="assay_parameters",
+        dependencies=build_test_transformer_dependencies(),
+    )
+    result = await transformer.transform(mock_context, raw, index=0)
+    assert result is not None
+    assert result["parameter_type"] == "PH"
+    schema = ChEMBLAssayParametersGoldSchema.to_schema()
+    projected = {key: result.get(key) for key in schema.columns}
+    checked = schema.validate(pd.DataFrame([projected]))
+    assert checked["assay_param_id"].iloc[0] == raw["assay_param_id"]
+
+
 @pytest.fixture
 def mock_context():
     """Create a mock pipeline context."""
@@ -256,8 +286,8 @@ class TestAssayParametersTransformer:
         assert result is not None
         assert result["assay_param_id"] == 12345
         assert result["assay_id"] == "CHEMBL1217643"
-        assert result["type"] == "CONC"
-        assert result["value"] == pytest.approx(10.0)
+        assert result["parameter_type"] == "CONC"
+        assert result["parameter_value"] == pytest.approx(10.0)
         assert result["standard_value"] == pytest.approx(10000.0)
         assert "entity_id" in result
         assert "content_hash" in result
@@ -299,7 +329,7 @@ class TestAssayParametersTransformer:
         assert result is not None
         assert result["text_value"] == "Room temperature"
         assert result["standard_text_value"] == "25 degrees Celsius"
-        assert result["value"] is None
+        assert result["parameter_value"] is None
 
     @pytest.mark.asyncio
     async def test_transform_leaves_type_canonicalization_to_profile(
@@ -317,7 +347,7 @@ class TestAssayParametersTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["type"] == "conc"
+        assert result["parameter_type"] == "conc"
 
     @pytest.mark.asyncio
     async def test_transform_handles_none_type(
@@ -335,7 +365,7 @@ class TestAssayParametersTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["type"] is None
+        assert result["parameter_type"] is None
 
     @pytest.mark.asyncio
     async def test_transform_all_optional_fields_none(
@@ -363,8 +393,8 @@ class TestAssayParametersTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["relation"] is None
-        assert result["value"] is None
+        assert result["parameter_relation"] is None
+        assert result["parameter_value"] is None
         assert result["units"] is None
         assert result["text_value"] is None
 

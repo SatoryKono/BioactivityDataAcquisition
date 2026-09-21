@@ -127,7 +127,7 @@ def test_started_run_without_report_and_no_false_completion(tmp_path):
     ]
     row = _list(tmp_path, manifest_port=manifests, ledger_port=ledger)["items"][0]
     assert row["run_id"] == str(manifest.run_id)
-    assert row["status"] == "running"
+    assert row["status"] == "unfinished"
     assert row["completed_at"] is None
     assert row["report_state"] == "REPORT MISSING"
     assert row["started_at_source"] == "run_ledger_started_event"

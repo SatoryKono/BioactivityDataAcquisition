@@ -205,6 +205,7 @@ class PipelineRunnerService:
         observation_token = bind_run_observations()
         accounting = StageAccountingAccumulator()
         accounting_token = bind_stage_accounting(accounting)
+        runner = None
         try:
             runner = await create_execution_runner_audited(
                 lambda: _require_execution_runner(self.runner_factory.create(context)),
@@ -222,6 +223,34 @@ class PipelineRunnerService:
             )
         except asyncio.CancelledError:
             completed_at = self.clock.now()
+            result = (
+                build_pipeline_run_result(
+                    outcome=PipelineExecutionResult(
+                        status="shutdown",
+                        completed_at=completed_at,
+                        error_type="CancelledError",
+                        metrics=self.metrics_extractor.extract_metrics(runner),
+                    ),
+                    runner=runner,
+                    pipeline_name=pipeline_name,
+                    run_id=run_id,
+                    run_type=options.run_type,
+                    started_at=started_at,
+                    options=options,
+                    write_report=False,
+                    store=self.report_store,
+                )
+                if runner is not None
+                else RunResult(
+                    status=PipelineRunResult.SHUTDOWN,
+                    pipeline_name=pipeline_name,
+                    run_id=str(run_id),
+                    run_type=options.run_type,
+                    started_at=started_at,
+                    completed_at=completed_at,
+                    error_type="CancelledError",
+                )
+            )
             await _record_pipeline_audit_event(
                 self.audit,
                 event_name="PipelineRunCompleted",
@@ -232,18 +261,7 @@ class PipelineRunnerService:
                 timestamp=completed_at,
                 error_type="CancelledError",
             )
-            self._finalize_report(
-                RunResult(
-                    status=PipelineRunResult.SHUTDOWN,
-                    pipeline_name=pipeline_name,
-                    run_id=str(run_id),
-                    run_type=options.run_type,
-                    started_at=started_at,
-                    completed_at=completed_at,
-                    error_type="CancelledError",
-                ),
-                options,
-            )
+            self._finalize_report(result, options)
             raise
         finally:
             reset_stage_accounting(accounting_token)

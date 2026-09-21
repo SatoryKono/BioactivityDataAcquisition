@@ -22,6 +22,7 @@ from bioetl.application.core.runner_flow import record_run_failed, record_run_st
 from bioetl.application.services.export_lineage.debug_export_service import (
     DebugExportResult,
 )
+from bioetl.domain.run_reports.context import get_stage_accounting
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
@@ -127,7 +128,7 @@ class PipelineRunner(PipelineRunnerSupportMixin):
     def execution_metrics(self) -> dict[str, int]:
         gold_excluded = getattr(self._executor, "records_gold_excluded_by_contract", 0)
         gold_excluded = gold_excluded if isinstance(gold_excluded, int) else 0
-        return {
+        metrics = {
             "records_fetched": int(self._executor.records_fetched),
             "records_bronze": int(self._executor.records_bronze),
             "records_silver": int(self._executor.records_silver),
@@ -136,6 +137,10 @@ class PipelineRunner(PipelineRunnerSupportMixin):
             "records_quarantined": int(self._executor.records_quarantined),
             "records_filtered_out": int(self._executor.records_filtered_out),
         }
+        accounting = get_stage_accounting()
+        if accounting is not None:
+            metrics.update(accounting.measured_record_metrics())
+        return metrics
 
     def _debug_export_result(self) -> DebugExportResult | None:
         result = getattr(self._executor, "debug_export_result", None)
@@ -184,6 +189,8 @@ class PipelineRunner(PipelineRunnerSupportMixin):
             if isinstance(exc, CancelledError):
                 raise
         except _RUN_FAILURE_EXCEPTIONS as exc:
+            # Terminal boundary must not finalize an unexpected adapter error
+            # as successful. Preserve the original exception for the caller.
             debug_export_status = "failed"
             record_run_failed(self, exc)
             raise

@@ -215,6 +215,7 @@ async def handle_control_plane_filter_options(
         payload = await asyncio.to_thread(
             supplement_report_options,
             payload,
+            timezone=query.get("timezone") or "UTC",
             dimension=dimension,
             response_shape=response_shape,
             scopes={

@@ -22,6 +22,7 @@ from bioetl.domain.entities.chembl_assay_parameters import AssayParameters
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BronzeRecord, PrimaryId
 
 
@@ -93,7 +94,34 @@ class AssayParametersTransformer(BaseChemblTransformer):
         # Apply declarative field groups
         business_data.update(map_field_groups(record, _ASSAY_PARAMS_GROUPS))
 
+        for raw_name in ("type", "relation", "value"):
+            business_data[f"parameter_{raw_name}"] = business_data.pop(raw_name, None)
         return business_data
+
+    def _build_pre_silver_record(
+        self,
+        context: PipelineContext,
+        entity_id: str,
+        content_hash: str,
+        index: int,
+        business_data: JsonDict,
+    ) -> JsonDict:
+        """Bridge canonical hash fields to the legacy entity constructor only."""
+        entity_data = dict(business_data)
+        for raw_name in ("type", "relation", "value"):
+            entity_data[raw_name] = entity_data.pop(f"parameter_{raw_name}", None)
+        return super()._build_pre_silver_record(
+            context, entity_id, content_hash, index, entity_data
+        )
+
+    def _postprocess_pre_silver_record(
+        self, silver_record: JsonDict, *, business_data: JsonDict
+    ) -> JsonDict:
+        """Publish canonical aliases before schema, filter and partition checks."""
+        del business_data
+        for raw_name in ("type", "relation", "value"):
+            silver_record[f"parameter_{raw_name}"] = silver_record.pop(raw_name, None)
+        return silver_record
 
     def _has_any_value(self, record: BronzeRecord) -> bool:
         """Check if record has at least one value field populated.

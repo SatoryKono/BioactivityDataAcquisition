@@ -43,6 +43,7 @@ from bioetl.application.observability.control_plane_evidence.service_support imp
 from bioetl.domain.control_plane import (
     ControlPlaneArtifactLifecyclePlan,
     ControlPlaneArtifactLifecyclePolicy,
+    RunLedgerEntry,
     RunManifest,
 )
 from bioetl.domain.ports import (
@@ -69,10 +70,15 @@ class ControlPlaneEvidenceService:
         self, *, scope: EvidenceScopeContext, now: datetime
     ) -> dict[str, object]:
         """Aggregate manifest, lineage and retention evidence for one exact scope."""
+        # One immutable ledger view per response: no cross-request cache and no
+        # repeated full ledger reads while assembling the same Trust verdict.
+        snapshot = (
+            ledger_entries(self.ledger_port, scope.manifest) if scope.manifest else ()
+        )
         components = (
-            self.manifest_validation(scope=scope),
-            self.lineage_validation(scope=scope),
-            self.retention_compliance(scope=scope, now=now),
+            self.manifest_validation(scope=scope, ledger_snapshot=snapshot),
+            self.lineage_validation(scope=scope, ledger_snapshot=snapshot),
+            self.retention_compliance(scope=scope, now=now, ledger_snapshot=snapshot),
         )
         checks: list[EvidenceCheckResult] = []
         for component in components:
@@ -101,9 +107,7 @@ class ControlPlaneEvidenceService:
             endpoint="trust-summary",
             scope=scope,
             checks=tuple(checks),
-            ledger_entries=ledger_entries(self.ledger_port, scope.manifest)
-            if scope.manifest
-            else (),
+            ledger_entries=snapshot,
         )
 
     def checkpoint_validation(
@@ -134,7 +138,12 @@ class ControlPlaneEvidenceService:
             ledger_entries=ledger_entries(self.ledger_port, scope.manifest),
         )
 
-    def manifest_validation(self, *, scope: EvidenceScopeContext) -> dict[str, object]:
+    def manifest_validation(
+        self,
+        *,
+        scope: EvidenceScopeContext,
+        ledger_snapshot: tuple[RunLedgerEntry, ...] | None = None,
+    ) -> dict[str, object]:
         """Return manifest parsing, schema, version, and contract compatibility."""
         raw_inspection = None
         if scope.manifest is not None and self.manifest_inspector is not None:
@@ -154,13 +163,22 @@ class ControlPlaneEvidenceService:
             scope=sanitized_manifest_payload_scope(scope, checks),
             checks=checks,
             ledger_entries=(
-                ledger_entries(self.ledger_port, scope.manifest)
+                (
+                    ledger_snapshot
+                    if ledger_snapshot is not None
+                    else ledger_entries(self.ledger_port, scope.manifest)
+                )
                 if scope.manifest is not None
                 else ()
             ),
         )
 
-    def lineage_validation(self, *, scope: EvidenceScopeContext) -> dict[str, object]:
+    def lineage_validation(
+        self,
+        *,
+        scope: EvidenceScopeContext,
+        ledger_snapshot: tuple[RunLedgerEntry, ...] | None = None,
+    ) -> dict[str, object]:
         """Return lineage closure, identity, cycle, and persistence validation."""
         if scope.manifest is None:
             return service_payload(
@@ -186,7 +204,11 @@ class ControlPlaneEvidenceService:
         )
         if not fragments:
             fragments = tuple(self.lineage_store.list_by_run_id(scope.manifest.run_id))
-        run_ledger_entries = ledger_entries(self.ledger_port, scope.manifest)
+        run_ledger_entries = (
+            ledger_snapshot
+            if ledger_snapshot is not None
+            else ledger_entries(self.ledger_port, scope.manifest)
+        )
         return service_payload(
             endpoint="lineage-validation",
             scope=scope,
@@ -210,6 +232,7 @@ class ControlPlaneEvidenceService:
         *,
         scope: EvidenceScopeContext,
         now: datetime,
+        ledger_snapshot: tuple[RunLedgerEntry, ...] | None = None,
     ) -> dict[str, object]:
         """Evaluate default retention and evidence-floor policy in dry-run mode."""
         if scope.manifest is None:
@@ -230,7 +253,11 @@ class ControlPlaneEvidenceService:
                         "The read-only lifecycle planner is not configured.",
                     ),
                 ),
-                ledger_entries=ledger_entries(self.ledger_port, scope.manifest),
+                ledger_entries=(
+                    ledger_snapshot
+                    if ledger_snapshot is not None
+                    else ledger_entries(self.ledger_port, scope.manifest)
+                ),
             )
         plan = self._bounded_retention_plan(scope.manifest, now)
         checks, relevant_artifacts = build_retention_checks(
@@ -249,7 +276,11 @@ class ControlPlaneEvidenceService:
                 "retention_plan_scope": "manifest",
                 "resolution_issues": serialize_resolution_issues(plan),
             },
-            ledger_entries=ledger_entries(self.ledger_port, scope.manifest),
+            ledger_entries=(
+                ledger_snapshot
+                if ledger_snapshot is not None
+                else ledger_entries(self.ledger_port, scope.manifest)
+            ),
         )
 
     def _bounded_retention_plan(

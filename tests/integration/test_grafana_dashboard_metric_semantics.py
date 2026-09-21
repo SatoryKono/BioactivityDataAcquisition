@@ -146,7 +146,6 @@ def _assert_processed_records_target_contract(processed: dict[str, object]) -> N
             "pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
         ),
         "url_options": {"data": "", "method": "GET"},
-        "expr": "",
     }
 
     processed_json = json.dumps(processed, sort_keys=True)
@@ -1340,9 +1339,15 @@ def test_provider_critical_table_keeps_severity_only_scope() -> None:
     assert panel is not None, "Panel 'Inspect Non-OK Providers' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert expressions == [
+    assert len(expressions) == 1
+    assert (
         "topk(4, max by (provider) (bioetl_provider_current_status) >= 1)"
-    ]
+        in expressions[0]
+    )
+    assert "VALID EMPTY" in expressions[0]
+    assert "unless on(provider)" in expressions[0]
+    assert "bioetl_provider_health_status" in expressions[0]
+    assert "or vector(0)" not in expressions[0]
 
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     # Null/missing stays gray (not healthy green); explicit 0 remains OK/green.
@@ -1355,7 +1360,7 @@ def test_provider_critical_table_keeps_severity_only_scope() -> None:
     ]
 
     description = str(panel.get("description", ""))
-    assert "DEGRADED or FAILING" in description
+    assert "VALID EMPTY requires every observed" in description
     assert "provider-status" in description.lower() or "current" in description.lower()
 
 

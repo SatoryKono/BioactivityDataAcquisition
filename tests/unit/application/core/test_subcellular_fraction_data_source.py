@@ -693,7 +693,7 @@ class TestSubcellularFractionFilterable:
         assert len(records) == 1
 
     @pytest.mark.asyncio
-    async def test_fetch_filtered_with_fallback_keeps_upstream_limit_unbounded(
+    async def test_fetch_filtered_with_fallback_bounds_upstream_scan(
         self,
     ) -> None:
         class _RecordingFilterableDataSource(MockFilterableDataSource):
@@ -738,7 +738,7 @@ class TestSubcellularFractionFilterable:
         )
 
         assert source.fallback_calls[-1]["entity_type"] == "assay"
-        assert source.fallback_calls[-1]["limit"] is None
+        assert source.fallback_calls[-1]["limit"] == 50_001
 
     @pytest.mark.asyncio
     async def test_fraction_filterable__for_non_filterable__00d6447a(self) -> None:

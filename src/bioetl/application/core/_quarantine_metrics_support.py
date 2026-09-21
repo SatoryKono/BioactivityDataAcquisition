@@ -39,6 +39,7 @@ def track_quarantine_metrics(
     """
     if batch_metrics is not None:
         batch_metrics.track_quarantined_records(error_type, count)
+        return
     elif metrics is not None:
         metrics.increment_counter(
             "bioetl_dq_records_quarantined_total",
@@ -52,6 +53,9 @@ def track_quarantine_metrics(
     pipeline_metrics.record_quarantine_records(
         reason=error_type.value,
         count=count,
+    )
+    _record_silver_removal_accounting(
+        outcome="quarantined", reason_code=error_type.value, count=count
     )
 
 
@@ -92,6 +96,7 @@ def record_filtered_quarantine_metrics(
     metrics: MetricsPort | None,
     pipeline_metrics: PipelineMetricsRecorder,
     count: int,
+    record_accounting: bool = True,
 ) -> None:
     """Emit metrics for filter-rejected records.
 
@@ -103,8 +108,9 @@ def record_filtered_quarantine_metrics(
         reason=FILTERED_OUT_SILVER,
         count=count,
     )
-    _record_silver_removal_accounting(
-        outcome="filtered_out",
-        reason_code=FILTERED_OUT_SILVER,
-        count=count,
-    )
+    if record_accounting:
+        _record_silver_removal_accounting(
+            outcome="filtered_out",
+            reason_code=FILTERED_OUT_SILVER,
+            count=count,
+        )

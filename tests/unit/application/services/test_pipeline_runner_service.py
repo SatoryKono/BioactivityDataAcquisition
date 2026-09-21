@@ -970,6 +970,9 @@ async def test_cancelled_execution_persists_snapshot_and_releases_observations(
     assert len(paths) == 1
     payload = json.loads(paths[0].read_text())
     assert payload["identity"]["status"] == "shutdown"
+    assert payload["identity"]["manifest_id"] == "manifest-123"
+    assert payload["layers"]["bronze_records"] == 95
+    assert payload["layers"]["silver_valid"] == 90
     assert verify_snapshot(payload["selected_run_snapshot"])
     assert (
         payload["selected_run_snapshot"]["assessment"]["execution_state"] == "SHUTDOWN"

@@ -20,7 +20,8 @@ class AssayParameters(BaseEntity):
 
     M:1 relationship with Assay (many parameters -> one assay via assay_id FK).
 
-    API Endpoint: https://www.ebi.ac.uk/chembl/api/data/assay_parameters
+    API source: the assay endpoint's nested assay_parameters observations.
+    Public records use a local deterministic observation key, not a database PK.
 
     Entity ID: chembl:{assay_param_id}
     Content Hash: sha256(chembl + canonical_json(business_fields))

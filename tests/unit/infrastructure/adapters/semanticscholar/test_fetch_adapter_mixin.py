@@ -199,3 +199,29 @@ async def test_fetch_adapter_mixin__fetch_multi_filtered__raises_not_implemented
     adapter = _SemanticScholarAdapter()
     with pytest.raises(NotImplementedError):
         await anext(adapter.fetch_multi_filtered("publication", {"doi": ["10.1/A"]}))
+
+
+@pytest.mark.asyncio
+async def test_search_http_failure_is_normalized_at_adapter_boundary():
+    import httpx
+    from bioetl.domain.exceptions.network.service import ApiError
+    from bioetl.infrastructure.adapters.semanticscholar._search_fetch_flow import (
+        _SemanticScholarSearchFetchMixin,
+    )
+
+    class SearchAdapter(_SemanticScholarSearchFetchMixin):
+        fields = "paperId"
+        _adapter_metrics = MagicMock()
+        _http_client = MagicMock()
+        _build_headers = MagicMock(return_value={})
+
+    adapter = SearchAdapter()
+    request = httpx.Request("GET", "https://example.invalid/paper/search")
+    error = httpx.HTTPStatusError(
+        "rate limited", request=request, response=httpx.Response(429, request=request)
+    )
+    adapter._http_client.get_once = AsyncMock(side_effect=error)
+    with pytest.raises(ApiError) as caught:
+        await adapter._fetch_search_page(query="*", page_size=100, current_offset=0)
+    assert caught.value.status_code == 429
+    assert caught.value.__cause__ is error

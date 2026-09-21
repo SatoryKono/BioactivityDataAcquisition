@@ -590,7 +590,12 @@ class TestUniProtIdMappingCreatorBranches:
         )
         source = SimpleNamespace(api=source_api, input_path="data/input/custom.csv")
         pipeline_config = cast(PipelineYamlConfig, SimpleNamespace(source=source))
-        filter_config = SimpleNamespace(direct_filter_ids=["CHEMBL1", "CHEMBL2"])
+        filter_config = SimpleNamespace(
+            direct_filter_ids=["CHEMBL1", "CHEMBL2"],
+            enabled=True,
+            source_path=None,
+            column_name=None,
+        )
         logger = MagicMock()
 
         result = _create_uniprot_idmapping_data_source(
@@ -721,3 +726,68 @@ class TestUniProtProteinCreatorBranches:
         call_kwargs = support.create_adapter.call_args.kwargs
         assert call_kwargs["api_key"] == "uniprot-secret"
         assert call_kwargs["base_url"] == "https://mirror.uniprot.test"
+
+
+@pytest.mark.parametrize(
+    "enabled,expected_path,expected_column",
+    [
+        (True, "override.csv", "chembl_target"),
+        (False, "configured.csv", "target_id"),
+    ],
+)
+def test_idmapping_csv_override_precedence(enabled, expected_path, expected_column):
+    config = SimpleNamespace(
+        source=SimpleNamespace(api=None, input_path="configured.csv")
+    )
+    filtering = SimpleNamespace(
+        enabled=enabled,
+        source_path="override.csv",
+        column_name="chembl_target",
+        direct_filter_ids=None,
+    )
+    with patch(
+        "bioetl.composition.providers.registration_bio.IDMappingDataSource"
+    ) as source:
+        _create_uniprot_idmapping_data_source(
+            settings=MagicMock(),
+            pipeline_config=config,
+            logger=MagicMock(),
+            filter_config=filtering,
+            assembly_support=MagicMock(),
+        )
+    assert source.call_args.kwargs["input_path"] == expected_path
+    assert source.call_args.kwargs["id_column"] == expected_column
+
+
+@pytest.mark.asyncio
+async def test_idmapping_override_reads_actual_csv_before_request(tmp_path):
+    from unittest.mock import AsyncMock
+
+    default = tmp_path / "default.csv"
+    override = tmp_path / "override.csv"
+    default.write_text("target_id\nCHEMBL_DEFAULT\n", encoding="utf-8")
+    override.write_text(
+        "chembl_target\nCHEMBL_FIRST\nCHEMBL_SECOND\n", encoding="utf-8"
+    )
+    config = SimpleNamespace(source=SimpleNamespace(api=None, input_path=str(default)))
+    filtering = SimpleNamespace(
+        enabled=True,
+        source_path=str(override),
+        column_name="chembl_target",
+        direct_filter_ids=None,
+    )
+    with patch(
+        "bioetl.composition.providers.registration_bio.UniProtIDMappingClient"
+    ) as factory:
+        client = factory.return_value
+        client.map_ids = AsyncMock(return_value={})
+        source = _create_uniprot_idmapping_data_source(
+            settings=MagicMock(),
+            pipeline_config=config,
+            logger=MagicMock(),
+            filter_config=filtering,
+            assembly_support=MagicMock(),
+        )
+        rows = [row async for row in source.fetch("idmapping", limit=1)]
+    assert [row["target_id"] for row in rows] == ["CHEMBL_FIRST"]
+    assert client.map_ids.await_args.kwargs["ids"] == ["CHEMBL_FIRST"]
