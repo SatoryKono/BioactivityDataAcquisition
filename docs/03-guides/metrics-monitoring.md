@@ -1016,3 +1016,10 @@ resume-pointer cleanup. The original saved-at timestamp is preserved regardless
 of age. Restoration requires a matching pipeline and checksum, and a finite,
 positive timestamp that is not in the future; file modification time is never
 substituted. Missing or invalid evidence remains UNKNOWN/INCOMPLETE.
+
+Trust event charts use `$__rate_interval` for counter increments. Optional outcome
+panels show NO OBSERVATIONS when their selected series has no samples; this is not
+a measured zero. After an actual control-plane read, checkpoint load/save, or replay
+reconstructability observation, the Prometheus adapter initializes bounded alternative
+outcomes to zero without resetting existing counts. This does not backfill historical
+runs or initialize components that have never emitted an observation.

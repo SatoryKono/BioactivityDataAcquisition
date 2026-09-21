@@ -1625,7 +1625,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Last checkpoint age, informational only; age does not change readiness. Missing evidence remains UNKNOWN. Pipeline-scoped, independent of Run ID.",
+      "description": "TIME RANGE · Last checkpoint age, informational only; age does not change readiness. Missing evidence remains UNKNOWN. Pipeline-scoped, independent of Run ID.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2209,7 +2209,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Counts incompatible checkpoint decisions during the selected range. Any non-zero value blocks resume. Run Type does not affect this panel.",
+          "description": "TIME RANGE · Counts incompatible checkpoint decisions during the selected range. Any non-zero value blocks resume. Run Type does not affect this panel. No observations means this outcome has no samples in the selected window; it does not prove zero failures. A measured zero is displayed numerically.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2228,7 +2228,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "UNKNOWN",
+                      "text": "NO OBSERVATIONS",
                       "color": "gray"
                     }
                   }
@@ -2253,7 +2253,7 @@
               },
               "unit": "short",
               "decimals": 0,
-              "noValue": "UNKNOWN",
+              "noValue": "NO OBSERVATIONS",
               "displayName": "Track Checkpoint Incompatibilities"
             },
             "overrides": []
@@ -2302,7 +2302,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Counts replay attempts that could not be reconstructed during the selected range. Any non-zero value blocks replay. Run Type does not affect this panel.",
+          "description": "TIME RANGE · Counts replay attempts that could not be reconstructed during the selected range. Any non-zero value blocks replay. Run Type does not affect this panel. No observations means this outcome has no samples in the selected window; it does not prove zero failures. A measured zero is displayed numerically.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2321,7 +2321,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "UNKNOWN",
+                      "text": "NO OBSERVATIONS",
                       "color": "gray"
                     }
                   }
@@ -2345,7 +2345,7 @@
                 ]
               },
               "unit": "short",
-              "noValue": "UNKNOWN",
+              "noValue": "NO OBSERVATIONS",
               "displayName": "Track Unreconstructable Replays"
             },
             "overrides": []
@@ -2394,7 +2394,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Counts replay-drift events during the selected range. Any non-zero value requires stopping replay and inspecting the drift type.",
+          "description": "TIME RANGE · Counts replay-drift events during the selected range. Any non-zero value requires stopping replay and inspecting the drift type. No observations means this outcome has no samples in the selected window; it does not prove zero failures. A measured zero is displayed numerically.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2413,7 +2413,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "UNKNOWN",
+                      "text": "NO OBSERVATIONS",
                       "color": "gray"
                     }
                   }
@@ -2437,7 +2437,7 @@
                 ]
               },
               "unit": "short",
-              "noValue": "UNKNOWN",
+              "noValue": "NO OBSERVATIONS",
               "displayName": "Track Replay Drift"
             },
             "overrides": []
@@ -2486,7 +2486,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Counts failed checkpoint loads during the selected range. Run Type does not affect this panel.",
+          "description": "TIME RANGE · Counts failed checkpoint loads during the selected range. Run Type does not affect this panel. No observations means this outcome has no samples in the selected window; it does not prove zero failures. A measured zero is displayed numerically.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2505,7 +2505,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "UNKNOWN",
+                      "text": "NO OBSERVATIONS",
                       "color": "gray"
                     }
                   }
@@ -2529,7 +2529,7 @@
                 ]
               },
               "unit": "short",
-              "noValue": "UNKNOWN",
+              "noValue": "NO OBSERVATIONS",
               "displayName": "Track Checkpoint Load Failures"
             },
             "overrides": []
@@ -2578,7 +2578,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Counts failed checkpoint saves during the selected range. Run Type does not affect this panel.",
+          "description": "TIME RANGE · Counts failed checkpoint saves during the selected range. Run Type does not affect this panel. No observations means this outcome has no samples in the selected window; it does not prove zero failures. A measured zero is displayed numerically.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2597,7 +2597,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "UNKNOWN",
+                      "text": "NO OBSERVATIONS",
                       "color": "gray"
                     }
                   }
@@ -2621,7 +2621,7 @@
                 ]
               },
               "unit": "short",
-              "noValue": "UNKNOWN",
+              "noValue": "NO OBSERVATIONS",
               "displayName": "Track Checkpoint Save Failures"
             },
             "overrides": []
@@ -2670,7 +2670,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Counts failed checkpoint administration operations across all pipelines during the selected range. Pipeline and Run Type filters do not affect this panel. Zero means no failures were recorded in the selected range; it does not prove telemetry completeness. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
+          "description": "TIME RANGE · Counts failed checkpoint administration operations across all pipelines during the selected range. Pipeline and Run Type filters do not affect this panel. Zero means no failures were recorded in the selected range; it does not prove telemetry completeness. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero. No observations means this outcome has no samples in the selected window; it does not prove zero failures. A measured zero is displayed numerically.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2689,7 +2689,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "UNKNOWN",
+                      "text": "NO OBSERVATIONS",
                       "color": "gray"
                     }
                   }
@@ -2713,7 +2713,7 @@
                 ]
               },
               "unit": "short",
-              "noValue": "UNKNOWN",
+              "noValue": "NO OBSERVATIONS",
               "displayName": "Track Global Checkpoint Admin Failures"
             },
             "overrides": []
@@ -2906,7 +2906,7 @@
           },
           "targets": [
             {
-              "expr": "sum by (replay_capability, drift_type, status) (increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
+              "expr": "sum by (replay_capability, drift_type, status) (increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__rate_interval]))",
               "legendFormat": "{{replay_capability}} / {{drift_type}} / {{status}}",
               "refId": "A"
             }
@@ -2960,7 +2960,7 @@
           },
           "targets": [
             {
-              "expr": "sum by (disposition) (increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\"}[$__interval])) or label_replace(vector(0), \"disposition\", \"no_events\", \"\", \"\")",
+              "expr": "sum by (disposition) (increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\"}[$__rate_interval]))",
               "legendFormat": "{{disposition}}",
               "refId": "A"
             }
@@ -3795,7 +3795,7 @@
           },
           "targets": [
             {
-              "expr": "sum by (status, run_type) (increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
+              "expr": "sum by (status, run_type) (increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__rate_interval]))",
               "legendFormat": "{{run_type}} / {{status}}",
               "refId": "A"
             }
@@ -3849,7 +3849,7 @@
           },
           "targets": [
             {
-              "expr": "sum by (event_type, status) (increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[$__interval]))",
+              "expr": "sum by (event_type, status) (increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[$__rate_interval]))",
               "legendFormat": "{{event_type}} / {{status}}",
               "refId": "A"
             }
@@ -3952,7 +3952,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Counts failed reads across all control-plane stores during the selected range. Pipeline and Run Type filters do not apply. Role: selected-range failure count ($__range); the 30m fail-rate gate on this row is Monitor Global Read Failures (136).",
+          "description": "TIME RANGE · Counts failed reads across all control-plane stores during the selected range. Pipeline and Run Type filters do not apply. Role: selected-range failure count ($__range); the 30m fail-rate gate on this row is Monitor Global Read Failures (136). No observations means this outcome has no samples in the selected window; it does not prove zero failures. A measured zero is displayed numerically.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3971,7 +3971,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "UNKNOWN",
+                      "text": "NO OBSERVATIONS",
                       "color": "gray"
                     }
                   }
@@ -3995,7 +3995,7 @@
                 ]
               },
               "unit": "short",
-              "noValue": "UNKNOWN",
+              "noValue": "NO OBSERVATIONS",
               "displayName": "Track Global Read Failures"
             },
             "overrides": []
@@ -4044,7 +4044,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows global read failure severity over the last 30 minutes. Status mapping: 0=OK at <=5%, 1=WARN at >5%, 2=CRIT at >10%, null=UNKNOWN. Role: 30m fail-rate gate (ratio), not the selected-range count in Track Global Read Failures (4).",
+          "description": "TIME RANGE · Shows global read failure severity over the last 30 minutes. Status mapping: 0=OK at <=5%, 1=WARN at >5%, 2=CRIT at >10%, null=UNKNOWN. Role: 30m fail-rate gate (ratio), not the selected-range count in Track Global Read Failures (4). No observations means this outcome has no samples in the selected window; it does not prove zero failures. A measured zero is displayed numerically.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -4063,7 +4063,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "UNKNOWN",
+                      "text": "NO OBSERVATIONS",
                       "color": "gray"
                     }
                   }
@@ -4087,7 +4087,7 @@
                 ]
               },
               "unit": "short",
-              "noValue": "UNKNOWN",
+              "noValue": "NO OBSERVATIONS",
               "displayName": "Monitor Global Read Failures (30m)"
             },
             "overrides": []
@@ -4213,7 +4213,7 @@
           },
           "targets": [
             {
-              "expr": "sum by (store, operation, status) (increase(bioetl_control_plane_reads_total[$__interval]))",
+              "expr": "sum by (store, operation, status) (increase(bioetl_control_plane_reads_total[$__rate_interval]))",
               "legendFormat": "{{store}} / {{operation}} / {{status}}",
               "refId": "A"
             }
@@ -4315,7 +4315,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Counts missing upstream lineage references during the selected range. Any non-zero value makes replay evidence incomplete. Run Type does not affect this panel.",
+          "description": "TIME RANGE · Counts missing upstream lineage references during the selected range. Any non-zero value makes replay evidence incomplete. Run Type does not affect this panel. No observations means this outcome has no samples in the selected window; it does not prove zero failures. A measured zero is displayed numerically.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -4334,7 +4334,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "UNKNOWN",
+                      "text": "NO OBSERVATIONS",
                       "color": "gray"
                     }
                   }
@@ -4359,7 +4359,7 @@
               },
               "unit": "short",
               "decimals": 0,
-              "noValue": "UNKNOWN",
+              "noValue": "NO OBSERVATIONS",
               "displayName": "Track Missing Lineage References"
             },
             "overrides": []
@@ -4408,7 +4408,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Counts failed lineage-fragment writes during the selected range. Run Type does not affect this panel.",
+          "description": "TIME RANGE · Counts failed lineage-fragment writes during the selected range. Run Type does not affect this panel. No observations means this outcome has no samples in the selected window; it does not prove zero failures. A measured zero is displayed numerically.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -4427,7 +4427,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "UNKNOWN",
+                      "text": "NO OBSERVATIONS",
                       "color": "gray"
                     }
                   }
@@ -4451,7 +4451,7 @@
                 ]
               },
               "unit": "short",
-              "noValue": "UNKNOWN",
+              "noValue": "NO OBSERVATIONS",
               "displayName": "Track Lineage Persistence Failures"
             },
             "overrides": []
@@ -4696,7 +4696,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum by (layer, operation, status) (increase(bioetl_audit_write_events_total[$__interval])))",
+              "expr": "round(sum by (layer, operation, status) (increase(bioetl_audit_write_events_total[$__rate_interval])))",
               "legendFormat": "{{layer}} / {{operation}} / {{status}}",
               "refId": "A"
             }
@@ -4750,7 +4750,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum by (layer_filter, status) (increase(bioetl_audit_query_events_total[$__interval])))",
+              "expr": "round(sum by (layer_filter, status) (increase(bioetl_audit_query_events_total[$__rate_interval])))",
               "legendFormat": "{{layer_filter}} / {{status}}",
               "refId": "A"
             }
@@ -4966,7 +4966,7 @@
           },
           "targets": [
             {
-              "expr": "sum by (layer, status) (increase(bioetl_lineage_fragments_emitted_total{pipeline=~\"$pipeline\"}[$__interval]))",
+              "expr": "sum by (layer, status) (increase(bioetl_lineage_fragments_emitted_total{pipeline=~\"$pipeline\"}[$__rate_interval]))",
               "legendFormat": "{{layer}} / {{status}}",
               "refId": "A"
             }

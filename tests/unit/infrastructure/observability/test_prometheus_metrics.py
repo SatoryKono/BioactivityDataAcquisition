@@ -1426,3 +1426,53 @@ class TestMetricCardinalityGuards:
             "Metrics must keep high-cardinality correlation anchors out of labels:\n"
             + "\n".join(f"  - {line}" for line in violations)
         )
+
+
+@pytest.mark.parametrize(
+    "name,labels,observed,alternative",
+    [
+        (
+            "bioetl_control_plane_reads_total",
+            {"store": "manifest", "operation": "get_by_run_id"},
+            "success",
+            "failed",
+        ),
+        (
+            "bioetl_checkpoint_load_events_total",
+            {"pipeline": "chembl_assay"},
+            "skipped",
+            "failed",
+        ),
+        (
+            "bioetl_checkpoint_save_events_total",
+            {"pipeline": "chembl_assay", "operation": "periodic"},
+            "succeeded",
+            "failed",
+        ),
+        (
+            "bioetl_replay_reconstructability_events_total",
+            {"pipeline": "chembl_assay"},
+            "reconstructable",
+            "not_reconstructable",
+        ),
+    ],
+)
+def test_observed_outcomes_publish_zero_without_erasing_errors(
+    monkeypatch, name, labels, observed, alternative
+):
+    from prometheus_client import CollectorRegistry, Counter
+
+    counter = Counter(name, "test", [*labels, "status"], registry=CollectorRegistry())
+    monkeypatch.setitem(COUNTERS, name, counter)
+    metrics = PrometheusMetrics()
+    metrics.increment_counter(name, 0, dict(labels, status=observed))
+    assert not any(
+        s.labels.get("status") == alternative
+        for m in counter.collect()
+        for s in m.samples
+    )
+    metrics.increment_counter(name, 1, dict(labels, status=observed))
+    assert counter.labels(**dict(labels, status=alternative))._value.get() == 0
+    metrics.increment_counter(name, 2, dict(labels, status=alternative))
+    metrics.increment_counter(name, 1, dict(labels, status=observed))
+    assert counter.labels(**dict(labels, status=alternative))._value.get() == 2

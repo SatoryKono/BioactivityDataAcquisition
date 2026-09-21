@@ -78,8 +78,35 @@ def _runtime(p: dict[int, dict]) -> None:
 
 
 def _trust(p: dict[int, dict]) -> None:
+    for panel in p.values():
+        for target in panel.get("targets", []):
+            expr = target.get("expr", "")
+            if "increase(" in expr or "rate(" in expr:
+                target["expr"] = expr.replace("[$__interval]", "[$__rate_interval]")
+    p[5]["targets"][0]["expr"] = (
+        "sum by (disposition) (increase(bioetl_checkpoint_compatibility_events_total"
+        '{pipeline=~"$pipeline"}[$__rate_interval]))'
+    )
+    for panel_id in (3, 104, 120, 101, 102, 103, 4, 136, 122, 137):
+        p[panel_id]["fieldConfig"]["defaults"]["noValue"] = "NO OBSERVATIONS"
+        for mapping in p[panel_id]["fieldConfig"]["defaults"].get("mappings", []):
+            if (
+                mapping.get("type") == "special"
+                and mapping["options"].get("match") == "null"
+            ):
+                mapping["options"]["result"]["text"] = "NO OBSERVATIONS"
+        p[panel_id]["description"] = (
+            (
+                p[panel_id].get("description", "")
+                + " No observations means this outcome has no samples in the selected window; "
+                "it does not prove zero failures. A measured zero is displayed numerically."
+            )
+            if "No observations means" not in p[panel_id].get("description", "")
+            else p[panel_id]["description"]
+        )
     p[892]["fieldConfig"]["defaults"]["thresholds"] = {
-        "mode": "absolute", "steps": [{"color": "blue", "value": None}]
+        "mode": "absolute",
+        "steps": [{"color": "blue", "value": None}],
     }
     p[892]["description"] = (
         "Last checkpoint age, informational only; age does not change readiness. "

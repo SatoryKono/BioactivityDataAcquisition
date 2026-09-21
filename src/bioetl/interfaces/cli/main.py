@@ -8,7 +8,7 @@ It keeps import-time overhead low for targeted CLI tests and single-command use.
 from __future__ import annotations
 
 from importlib import import_module
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from click.core import Command, Context, Group
 from click.formatting import HelpFormatter
@@ -144,10 +144,10 @@ def _load_cli_command(command_name: str) -> Command | Group | None:
     return command
 
 
-def _configure_lazy_cli_group(group: Group) -> Group:
-    """Attach lazy command resolution to the root Click group."""
+class _LazyCliGroup(Group):
+    """Root Click group with lazy command resolution."""
 
-    def list_commands(ctx: Context) -> list[str]:
+    def list_commands(self, ctx: Context) -> list[str]:
         del ctx
         seen: set[str] = set()
         names: list[str] = []
@@ -159,19 +159,21 @@ def _configure_lazy_cli_group(group: Group) -> Group:
         return names
 
     def get_command(
+        self,
         ctx: Context,
         cmd_name: str,
     ) -> Command | Group | None:
         del ctx
-        if cmd_name in group.commands:
-            return group.commands[cmd_name]
+        if cmd_name in self.commands:
+            return self.commands[cmd_name]
 
         command = _load_cli_command(cmd_name)
         if command is not None:
-            group.commands[cmd_name] = command
+            self.commands[cmd_name] = command
         return command
 
     def format_commands(
+        self,
         ctx: Context,
         formatter: HelpFormatter,
     ) -> None:
@@ -181,11 +183,6 @@ def _configure_lazy_cli_group(group: Group) -> Group:
             eager_commands=_EAGER_COMMANDS,
             lazy_commands=_LAZY_COMMAND_SPECS,
         )
-
-    group.list_commands = list_commands  # type: ignore[method-assign]
-    group.get_command = get_command  # type: ignore[method-assign]
-    group.format_commands = format_commands  # type: ignore[method-assign]
-    return group
 
 
 def _build_main_registry() -> object:
@@ -198,19 +195,21 @@ def _build_main_registry() -> object:
     return build_cli_registry()
 
 
-def register_all_pipelines(*, registry: object | None = None) -> None:
+def register_all_pipelines(
+    *, registry: PipelineRegistry | None = None
+) -> None:
     """Historical CLI patch seam for pipeline registration."""
-    _register_all_pipelines(registry=registry)  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+    _register_all_pipelines(registry=registry)
 
 
-def build_cli_registry() -> object:
+def build_cli_registry() -> PipelineRegistry:
     """Build a fresh CLI registry through local test seams."""
     registry = _create_registry()
     register_all_pipelines(registry=registry)
     return registry
 
 
-@typed_click_group()
+@typed_click_group(cls=_LazyCliGroup)
 @typed_version_option(version=BIOETL_VERSION)
 @typed_pass_context
 def _cli_group(ctx: Context) -> None:
@@ -218,7 +217,7 @@ def _cli_group(ctx: Context) -> None:
     del ctx
 
 
-cli: Group = _configure_lazy_cli_group(cast(Group, _cli_group))
+cli: Group = cast(Group, _cli_group)
 
 
 def main() -> None:

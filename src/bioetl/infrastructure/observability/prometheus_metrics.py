@@ -31,6 +31,23 @@ _COUNTER_ALIASES = {
     "bioetl_shutdown_completed": "bioetl_shutdown_completed_total",
 }
 
+# Materialize bounded alternative outcomes only after an actual observation.
+_OBSERVED_COUNTER_OUTCOMES = {
+    "bioetl_control_plane_reads_total": ("success", "failed"),
+    "bioetl_checkpoint_load_events_total": (
+        "loaded",
+        "missing",
+        "skipped",
+        "blocked",
+        "failed",
+    ),
+    "bioetl_checkpoint_save_events_total": ("succeeded", "skipped", "failed"),
+    "bioetl_replay_reconstructability_events_total": (
+        "reconstructable",
+        "not_reconstructable",
+    ),
+}
+
 
 class _HistogramObserver(Protocol):
     def observe(self, amount: float) -> None:
@@ -167,6 +184,12 @@ class PrometheusMetrics(MetricsPort):
         counter.labels(**normalize_metric_dispatch_labels(name, resolved_labels)).inc(
             value
         )
+        if value > 0 and resolved_labels.get(
+            "status"
+        ) in _OBSERVED_COUNTER_OUTCOMES.get(name, ()):
+            for status in _OBSERVED_COUNTER_OUTCOMES[name]:
+                sibling = dict(resolved_labels, status=status)
+                counter.labels(**normalize_metric_dispatch_labels(name, sibling)).inc(0)
 
     @override
     def set_gauge(

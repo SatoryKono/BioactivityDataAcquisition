@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import cast
+from typing import Any, cast
 
 import click
 
@@ -40,38 +40,38 @@ def _cast_command[**CommandParams, CommandReturn](
     return func
 
 
-def typed_click_option(*args: object, **kwargs: object) -> CommandDecorator:
+def typed_click_option(*args: str, **kwargs: Any) -> CommandDecorator:
     """Attach one Click option while preserving the wrapped callback type."""
 
     def decorator(func: CommandCallback) -> CommandCallback:
-        return _cast_command(click.option(*args, **kwargs)(func))  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        return _cast_command(click.option(*args, **kwargs)(func))
 
     return decorator
 
 
-def typed_click_argument(*args: object, **kwargs: object) -> CommandDecorator:
+def typed_click_argument(*args: str, **kwargs: Any) -> CommandDecorator:
     """Attach one Click argument while preserving the wrapped callback type."""
 
     def decorator(func: CommandCallback) -> CommandCallback:
-        return _cast_command(click.argument(*args, **kwargs)(func))  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        return _cast_command(click.argument(*args, **kwargs)(func))
 
     return decorator
 
 
-def typed_click_command(name: str | None = None, **attrs: object) -> CommandDecorator:
+def typed_click_command(name: str | None = None, **attrs: Any) -> CommandDecorator:
     """Register one standalone Click command while preserving callback types."""
 
     def decorator(func: CommandCallback) -> CommandCallback:
-        return _cast_command(click.command(name, **attrs)(func))  # type: ignore[call-overload]  # pyright: ignore[reportArgumentType]
+        return _cast_command(click.command(name, **attrs)(func))
 
     return decorator
 
 
-def typed_click_group(**attrs: object) -> CommandDecorator:
+def typed_click_group(**attrs: Any) -> CommandDecorator:
     """Register one Click command group while preserving callback types."""
 
     def decorator(func: CommandCallback) -> CommandCallback:
-        return _cast_command(click.group(**attrs)(func))  # type: ignore[call-overload]  # pyright: ignore[reportArgumentType]
+        return _cast_command(click.group(**attrs)(func))
 
     return decorator
 
@@ -100,11 +100,11 @@ def typed_pass_obj(func: CommandCallback) -> CommandCallback:
     return _cast_command(click.pass_obj(func))
 
 
-def typed_version_option(**kwargs: object) -> CommandDecorator:
+def typed_version_option(**kwargs: Any) -> CommandDecorator:
     """Attach Click version metadata while preserving callback types."""
 
     def decorator(func: CommandCallback) -> CommandCallback:
-        return _cast_command(click.version_option(**kwargs)(func))  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        return _cast_command(click.version_option(**kwargs)(func))
 
     return decorator
 
