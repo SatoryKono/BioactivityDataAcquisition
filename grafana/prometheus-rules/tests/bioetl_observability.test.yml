@@ -1215,7 +1215,7 @@ tests:
           - labels: '{__name__="bioetl_control_plane_current_status_trusted",pipeline="chembl",run_type="incremental"}'
             value: 3
 
-  - name: control-plane-trusted-status-critical-with-stale-checkpoint
+  - name: control-plane-trusted-status-ok-with-old-checkpoint
     interval: 1m
     input_series:
       - series: 'bioetl_control_plane_manifest_writes_total{pipeline="chembl",run_type="incremental",status="success"}'
@@ -1231,13 +1231,13 @@ tests:
       - series: 'bioetl_manifest_ledger_integrity_ratio{pipeline="chembl",run_type="incremental",integrity_type="inconsistent"}'
         values: "0+0x70"
       - series: 'bioetl_checkpoint_saved_at_seconds{pipeline="chembl"}'
-        values: "0+0x70"
+        values: "1+0x70"
     promql_expr_test:
       - expr: bioetl_control_plane_current_status_trusted{pipeline="chembl",run_type="incremental"}
         eval_time: 70m
         exp_samples:
           - labels: '{__name__="bioetl_control_plane_current_status_trusted",pipeline="chembl",run_type="incremental"}'
-            value: 2
+            value: 0
 
   - name: workflow-pipeline-verdict-fails-closed-after-intermediate-failure
     interval: 1m
@@ -2386,15 +2386,15 @@ tests:
       - expr: 'bioetl_provider_current_status_info{provider="stale"}'
         eval_time: 20m
         exp_samples:
-          - labels: 'bioetl_provider_current_status_info{provider="stale",reason="stale_health_status",source_state="stale",completeness="incomplete",scrape_present="1",health_status_present="1"}'
-            value: 3
+          - labels: 'bioetl_provider_current_status_info{provider="stale",reason="observed_health_status",source_state="observed",completeness="complete",scrape_present="1",health_status_present="1"}'
+            value: 0
       - expr: 'bioetl_provider_current_status_info{provider="missing"}'
         eval_time: 20m
         exp_samples:
           - labels: 'bioetl_provider_current_status_info{provider="missing",reason="missing_health_status",source_state="missing",completeness="incomplete",scrape_present="1",health_status_present="0"}'
             value: 3
 
-  - name: provider-verdict-expires-observation-not-scrape
+  - name: provider-verdict-retains-last-valid-observation
     interval: 1m
     input_series:
     - series: bioetl_provider_health_status{provider="chembl",job="probe",instance="one"}
@@ -2411,7 +2411,7 @@ tests:
       eval_time: 21m
       exp_samples:
       - labels: bioetl_provider_current_status{provider="chembl"}
-        value: 3
+        value: 0
   - name: provider-verdict-missing-zero-future-and-stale-timestamps
     interval: 1m
     input_series:
@@ -2449,7 +2449,7 @@ tests:
       eval_time: 20m
       exp_samples:
       - labels: bioetl_provider_current_status{provider="stale_timestamp"}
-        value: 3
+        value: 0
   - name: provider-verdict-latest-observation-wins
     interval: 1m
     input_series:

@@ -1199,7 +1199,7 @@ def test_provider_current_status_preserves_provider_health_status_mapping() -> N
     assert info_rules
     reasons = {rule.get("labels", {}).get("reason") for rule in info_rules}
     assert "missing_health_status" in reasons
-    assert "stale_health_status" in reasons
+    assert "invalid_health_timestamp" in reasons
     assert "observed_health_status" in reasons
     completeness = {rule.get("labels", {}).get("completeness") for rule in info_rules}
     assert completeness == {"incomplete", "complete"}

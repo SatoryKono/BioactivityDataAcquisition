@@ -78,6 +78,15 @@ def _runtime(p: dict[int, dict]) -> None:
 
 
 def _trust(p: dict[int, dict]) -> None:
+    p[892]["fieldConfig"]["defaults"]["thresholds"] = {
+        "mode": "absolute", "steps": [{"color": "blue", "value": None}]
+    }
+    p[892]["description"] = (
+        "Last checkpoint age, informational only; age does not change readiness. "
+        "Missing evidence remains UNKNOWN. Pipeline-scoped, independent of Run ID."
+    )
+    # An empty reasons list is valid; query failures remain explicit in Trust.
+    override(p[9418], "Reasons", **{"noValue": "—"})
     latency = p[111]
     latency["fieldConfig"]["defaults"]["color"] = {"mode": "palette-classic"}
     latency["options"]["legend"] = {
@@ -185,6 +194,13 @@ def _overview(p: dict[int, dict]) -> None:
 
 
 def _provider(p: dict[int, dict]) -> None:
+    # Compact categorical columns; let the explanatory column take spare width.
+    _flex(p[9101], {"provider", "Provider", "Value", "Severity"})
+    override(p[9101], "Severity", **{"custom.width": 130, "custom.align": "left"})
+    _flex(p[9107], {"provider", "Provider", "reason", "Source state", "Status"})
+    for name, width in (("Provider", 105), ("Source state", 105), ("Status", 110)):
+        override(p[9107], name, **{"custom.width": width, "custom.align": "left"})
+    override(p[9107], "reason", **{"displayName": "Reason"})
     for panel_id in (9103, 9113):
         _table(p[panel_id])
         _flex(p[panel_id], {"cause", "Cause"})

@@ -7,7 +7,7 @@ import time
 from collections.abc import Iterator
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
@@ -45,8 +45,13 @@ from bioetl.infrastructure.storage.bronze.write_execution import (
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.ports import (
+        AuditPort,
+        LineageStorePort,
         LoggerPort,
+        MetadataCoordinatorPort,
+        MetadataWriterPort,
         MetricsPort,
+        TracingPort,
     )
 from bioetl.domain.ports.noop import _NoOpSpan
 
@@ -120,12 +125,14 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
 
             metadata_writer = NoOpMetadataWriter()
         return runtime_services or BronzeWriterRuntimeServices(
-            tracing=tracing,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-            audit=audit,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-            metadata_writer=metadata_writer,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+            tracing=cast("TracingPort | None", tracing),
+            audit=cast("AuditPort | None", audit),
+            metadata_writer=cast("MetadataWriterPort", metadata_writer),
             save_metadata=bool(save_metadata),
-            metadata_coordinator=metadata_coordinator,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-            lineage_store=lineage_store,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+            metadata_coordinator=cast(
+                "MetadataCoordinatorPort | None", metadata_coordinator
+            ),
+            lineage_store=cast("LineageStorePort | None", lineage_store),
         )
 
     def __init__(

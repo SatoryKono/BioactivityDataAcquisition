@@ -88,7 +88,8 @@ def rehydrate_provider_health_evidence(
                 float(observed_unix),
                 {"provider": record.provider},
             )
-        if record.is_fresh(now=current):
+        # Rehydrate the last valid observation without treating its age as failure.
+        if observed_unix is not None and 0 < observed_unix <= current.timestamp():
             restore_provider_health_status(
                 metrics=metrics,
                 provider=record.provider,

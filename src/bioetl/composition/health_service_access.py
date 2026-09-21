@@ -36,6 +36,7 @@ __all__ = [
     "get_health_service",
     "get_quarantine_runtime_service",
     "get_quarantine_service",
+    "rehydrate_checkpoint_gauges",
     "rehydrate_provider_health_gauges",
 ]
 
@@ -72,6 +73,19 @@ def get_quarantine_service(*, data_root: Path | None = None) -> QuarantineServic
 def rehydrate_provider_health_gauges(metrics: MetricsPort) -> int:
     """Publish CURRENT provider-health gauges through one composition owner seam."""
     return _preflight_health_monitor.rehydrate_provider_health_gauges(metrics)
+
+
+def rehydrate_checkpoint_gauges(metrics: MetricsPort) -> int:
+    """Restore checkpoint timestamps through the configured storage owner."""
+    from bioetl.composition.runtime_builders.config_access import get_settings
+    from bioetl.infrastructure.checkpoint.metrics_rehydrate import (
+        rehydrate_checkpoint_metrics,
+    )
+    from bioetl.infrastructure.time import SystemClock
+
+    return rehydrate_checkpoint_metrics(
+        metrics, get_settings().checkpoint_path, now=SystemClock().now()
+    )
 
 
 def get_bronze_cleanup_service() -> BronzeCleanupServiceProtocol:

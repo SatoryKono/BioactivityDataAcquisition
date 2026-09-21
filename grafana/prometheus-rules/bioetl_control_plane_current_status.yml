@@ -215,11 +215,14 @@ groups:
       - record: bioetl_checkpoint_age_seconds
         expr: >-
           clamp_min(
-            time() - max by (pipeline) (bioetl_checkpoint_saved_at_seconds),
+            time() - max by (pipeline) (
+              (bioetl_checkpoint_saved_at_seconds > 0)
+              and (bioetl_checkpoint_saved_at_seconds <= time())
+            ),
             0
           )
 
-      # Mutual exclusion: missing checkpoint → 3; present → age severity 0..2.
+      # Mutual exclusion: missing checkpoint → 3; present → 0. Age is informational.
       # max by forces a single series per (pipeline, run_type).
       - record: bioetl_control_plane_checkpoint_evidence_status
         expr: >-
@@ -234,12 +237,7 @@ groups:
             (
               bioetl_control_plane_run_type_universe
               * on (pipeline) group_left()
-              clamp_max(
-                (bioetl_checkpoint_age_seconds >= bool 900)
-                +
-                (bioetl_checkpoint_age_seconds >= bool 3600),
-                2
-              )
+              (bioetl_checkpoint_age_seconds * 0)
             )
           )
 
@@ -258,7 +256,7 @@ groups:
             label_replace(
               bioetl_control_plane_checkpoint_evidence_status,
               "required_evidence",
-              "checkpoint_freshness",
+              "checkpoint_presence",
               "",
               ""
             )

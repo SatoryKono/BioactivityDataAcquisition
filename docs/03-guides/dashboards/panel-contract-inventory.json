@@ -1341,16 +1341,8 @@
       ],
       "thresholds": [
         {
-          "color": "green",
+          "color": "blue",
           "value": null
-        },
-        {
-          "color": "orange",
-          "value": 900
-        },
-        {
-          "color": "red",
-          "value": 3600
         }
       ],
       "unit": "s"

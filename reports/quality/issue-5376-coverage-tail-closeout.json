@@ -29,7 +29,7 @@
     "tests/architecture/test_module_coverage_inventory.py"
   ],
   "current_live_metrics": {
-    "below_85_module_count": 0,
+    "below_85_module_count": 2,
     "uncovered_module_count": 0,
     "unmeasured_module_count": 0,
     "tracked_module_coverage_percent": 100,
@@ -38,8 +38,8 @@
   "closeout": {
     "status": "regressed_after_closeout",
     "historical_status": "bounded_shard_complete",
-    "residual_tail_remains": false,
-    "residual_below_85_module_count": 0,
-    "rationale": "Stream-B rebind: live inventory shows zero below-floor modules (below_85=0, uncovered=0, unmeasured=0); the residual tail tracked at closeout is cleared on this branch."
+    "residual_tail_remains": true,
+    "residual_below_85_module_count": 2,
+    "rationale": "Live inventory has 2 modules below the default floor; uncovered and unmeasured remain 0. The historical shard delta is unchanged."
   }
 }

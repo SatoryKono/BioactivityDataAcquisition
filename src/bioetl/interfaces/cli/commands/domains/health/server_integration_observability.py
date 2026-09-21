@@ -135,6 +135,9 @@ def _rehydrate_current_metrics(*, logger: LoggerPort | None = None) -> None:
             store=create_run_report_store(),
         )
         _rehydrate_provider_health_gauges(deps)
+        from bioetl.composition.health_service_access import rehydrate_checkpoint_gauges
+
+        rehydrate_checkpoint_gauges(deps.metrics)
     except (
         ImportError,
         OSError,

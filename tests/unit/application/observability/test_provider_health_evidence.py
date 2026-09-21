@@ -58,7 +58,8 @@ def test_persist_and_rehydrate_fresh_status(tmp_path: Path) -> None:
     assert metrics.counter_names() == []
 
 
-def test_stale_evidence_does_not_publish_health_status(tmp_path: Path) -> None:
+@pytest.mark.parametrize("status", [0, 1, 2])
+def test_old_evidence_publishes_last_health_status(tmp_path: Path, status: int) -> None:
     (
         FileProviderHealthEvidenceStore,
         ProviderHealthEvidenceRecord,
@@ -69,7 +70,7 @@ def test_stale_evidence_does_not_publish_health_status(tmp_path: Path) -> None:
     store.persist(
         ProviderHealthEvidenceRecord(
             provider="chembl",
-            status=2,
+            status=status,
             observed_at=observed.isoformat(),
             endpoint="/status",
         )
@@ -82,7 +83,26 @@ def test_stale_evidence_does_not_publish_health_status(tmp_path: Path) -> None:
     )
     names = _gauge_names(metrics)
     assert "bioetl_provider_observed_universe" in names
-    assert "bioetl_provider_health_status" not in names
+    assert "bioetl_provider_health_status" in names
+    assert [
+        c.value for c in metrics.calls if c.name == "bioetl_provider_health_status"
+    ] == [status]
+
+
+@pytest.mark.parametrize(
+    "observed", ["invalid", "1970-01-01T00:00:00+00:00", "2099-01-01T00:00:00+00:00"]
+)
+def test_invalid_timestamp_never_restores_health(tmp_path: Path, observed: str) -> None:
+    store_type, record_type, rehydrate = _provider_health_infra()
+    store = store_type(base_path=tmp_path)
+    store.persist(
+        record_type(
+            provider="chembl", status=2, observed_at=observed, endpoint="/status"
+        )
+    )
+    metrics = RecordingMetrics()
+    rehydrate(metrics, store, now=datetime(2026, 9, 21, tzinfo=UTC))
+    assert "bioetl_provider_health_status" not in _gauge_names(metrics)
 
 
 def test_persisting_monitor_writes_compact_evidence(tmp_path: Path) -> None:

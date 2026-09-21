@@ -131,7 +131,7 @@
   "priority": "P3",
   "requirement_id": "RULES-debt-ratchet",
   "domain": "code",
-  "claim": "74 type: ignore, кластеры до 5/файл",
+  "claim": "74 type: ignore триажированы 2026-09-21: 10 сняты через cast() (context_run 5, bronze_writer 5), остаток 64 — границы click/dynamic-API",
   "broken_invariant": "debt may only shrink or stay unchanged; residue must be owned",
   "root_cause": "нетипизируемые границы CLI/storage",
   "affected_paths": [
@@ -146,7 +146,7 @@
    "exit_code": 0,
    "output": "measured"
   },
-  "acceptance": "Точечная типизация топ-3 файлов; effort S",
+  "acceptance": "Частично закрыто: ruff чист, 120 unit-тестов зеленые (73 bronze + 47 context); click_options/observability_backend_runtime оставлены (типизация динамики click без mypy — риск); mypy-проверка пропущена (нет в окружении)",
   "validation_commands": [
    "grep -rn --include='*.py' -E 'TODO|FIXME|HACK|XXX|WORKAROUND' src/bioetl",
    "git diff 09ab9ac286bacb7eee3324e950603539a5c62ee6 HEAD -- configs/quality/debt_scorecard.yaml"
@@ -162,7 +162,7 @@
   "priority": "P3",
   "requirement_id": "RULES-debt-ratchet",
   "domain": "security",
-  "claim": "32 nosec под реестром SUP-* и лок-тестом",
+  "claim": "32 nosec под реестром SUP-*: lock-тест зелен 2026-09-21 (4 passed), реестр синхронен",
   "broken_invariant": "debt may only shrink or stay unchanged; residue must be owned",
   "root_cause": "ложные срабатывания bandit B404/B405/B603/B604",
   "affected_paths": [
@@ -177,7 +177,7 @@
    "exit_code": 0,
    "output": "measured"
   },
-  "acceptance": "Держать реестр синхронно (лок-тест), effort S",
+  "acceptance": "Закрыто 2026-09-21: test_security_suppression_registry 4 passed; ревью реестра 2027-03",
   "validation_commands": [
    "grep -rn --include='*.py' -E 'TODO|FIXME|HACK|XXX|WORKAROUND' src/bioetl",
    "git diff 09ab9ac286bacb7eee3324e950603539a5c62ee6 HEAD -- configs/quality/debt_scorecard.yaml"
@@ -193,7 +193,7 @@
   "priority": "P3",
   "requirement_id": "RULES-debt-ratchet",
   "domain": "tests",
-  "claim": "23 pragma: no cover с rationale и датами",
+  "claim": "23 pragma проверены 2026-09-21: все EXCLUDED by design (coverage.xml); снятие без покрытия снизило бы метрики; dated-review 2026-12-31 в будущем",
   "broken_invariant": "debt may only shrink or stay unchanged; residue must be owned",
   "root_cause": "труднопокрываемые guard-ветви",
   "affected_paths": [
@@ -208,7 +208,7 @@
    "exit_code": 0,
    "output": "measured"
   },
-  "acceptance": "Снимать по датам ревью; effort S",
+  "acceptance": "Закрыто 2026-09-21 как controlled: снятий не due; код не менялся (снятие ухудшило бы покрытие); пересмотр по дате 2026-12-31",
   "validation_commands": [
    "grep -rn --include='*.py' -E 'TODO|FIXME|HACK|XXX|WORKAROUND' src/bioetl",
    "git diff 09ab9ac286bacb7eee3324e950603539a5c62ee6 HEAD -- configs/quality/debt_scorecard.yaml"
@@ -224,7 +224,7 @@
   "priority": "P3",
   "requirement_id": "RULES-debt-ratchet",
   "domain": "code",
-  "claim": "12 ruff noqa I001 в barrel __init__",
+  "claim": "11 noqa I001 удалены (повторно после внешнего отката); ruff isort-fix, gate src/bioetl чист, 86 тестов зеленые",
   "broken_invariant": "debt may only shrink or stay unchanged; residue must be owned",
   "root_cause": "isort-профиль не покрывает barrels",
   "affected_paths": [
@@ -239,7 +239,7 @@
    "exit_code": 0,
    "output": "measured"
   },
-  "acceptance": "isort-профиль для barrels или реестр; effort S",
+  "acceptance": "Закрыто повторно 2026-09-21: правки были откачены внешним актором, накачены заново тем же способом; noqa=0, ruff pass, re-export pass",
   "validation_commands": [
    "grep -rn --include='*.py' -E 'TODO|FIXME|HACK|XXX|WORKAROUND' src/bioetl",
    "git diff 09ab9ac286bacb7eee3324e950603539a5c62ee6 HEAD -- configs/quality/debt_scorecard.yaml"
@@ -255,7 +255,7 @@
   "priority": "P3",
   "requirement_id": "RULES-debt-ratchet",
   "domain": "tests",
-  "claim": "43 TODO-маркера в tests/scripts",
+  "claim": "43 маркера разобраны 2026-09-21: 40 ложных срабатываний, 3 реальных TODO удалены; test_validation_test_debt_markers проходит",
   "broken_invariant": "debt may only shrink or stay unchanged; residue must be owned",
   "root_cause": "отложенные тест-улучшения",
   "affected_paths": [
@@ -270,7 +270,7 @@
    "exit_code": 0,
    "output": "measured"
   },
-  "acceptance": "Разобрать пачкой; effort S",
+  "acceptance": "Закрыто 2026-09-21: guard-тест зеленый (1 passed, --timeout 300); новых маркеров не вносить (лок test_no_todo_markers)",
   "validation_commands": [
    "grep -rn --include='*.py' -E 'TODO|FIXME|HACK|XXX|WORKAROUND' src/bioetl",
    "git diff 09ab9ac286bacb7eee3324e950603539a5c62ee6 HEAD -- configs/quality/debt_scorecard.yaml"

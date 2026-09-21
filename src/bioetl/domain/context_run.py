@@ -13,6 +13,7 @@ from bioetl.domain.context_correlation import _normalize_correlation_value
 from bioetl.domain.context_filtering import InputFilterContext, VacuumSettings
 from bioetl.domain.context_time import (
     MISSING_RUNTIME_TIMESTAMP,
+    ClockLike,
     resolve_context_started_at,
 )
 from bioetl.domain.context_validation import (
@@ -56,15 +57,17 @@ def _build_pipeline_run_context_kwargs(
     started_at = payload.pop("started_at", None)
     clock = payload.pop("clock", None)
     payload["started_at"] = resolve_context_started_at(
-        started_at=started_at,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        clock=clock,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        started_at=cast("datetime | None", started_at),
+        clock=cast("ClockLike | None", clock),
     )
-    payload["vacuum"] = _resolve_vacuum_settings(payload.get("vacuum"))  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+    payload["vacuum"] = _resolve_vacuum_settings(
+        cast("VacuumSettings | None", payload.get("vacuum"))
+    )
     payload["input_filter"] = _resolve_input_filter_context(
-        payload.get("input_filter")  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        cast("InputFilterContext | None", payload.get("input_filter"))
     )
     payload["cached_bronze"] = _resolve_cached_bronze_context(
-        payload.get("cached_bronze")  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        cast("CachedBronzeContext | None", payload.get("cached_bronze"))
     )
     return payload
 

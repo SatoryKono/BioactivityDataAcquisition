@@ -1299,8 +1299,9 @@ def _layout_uid_first_window(panels: list[object], *, current_uid: str) -> None:
                 panel["description"] = (
                     "CURRENT · Remote API evidence. Cached Bronze replay does not "
                     "exercise the API and proves neither outage nor health. "
-                    "missing_health_status = no observation; stale_health_status = "
-                    "observation is not fresh. Both are UNKNOWN, never healthy. "
+                    "missing_health_status = no observation; invalid_health_timestamp = "
+                    "missing, zero or future timestamp. Both are UNKNOWN. "
+                    "The latest valid observation has no age expiry. "
                     "GLOBAL: independent of selected run."
                 )
     if current_uid == "bioetl-control-plane-v1":

@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `cabdb666f7abff1a44a8aea28230dce13621b75fe014c4e7ab360c6e4c450a0d`
+Evidence surface SHA-256: `8ed8a588143ed7abc3b99503a276fceca16402e31f352f33f1217d147eabe401`
 
 Evidence metadata refresh (2026-09-19): the canonical registry digest was
 recomputed after hotspot fan-in closeout, assertless-triage reduction,
@@ -50,15 +50,15 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "cabdb666f7abff1a44a8aea28230dce13621b75fe014c4e7ab360c6e4c450a0d",
+  "evidence_surface_sha256": "8ed8a588143ed7abc3b99503a276fceca16402e31f352f33f1217d147eabe401",
   "metrics": {
     "architecture_integral_score": 9.47,
     "architecture_interpretation": "good_targeted_improvements",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 45,
-    "debt_gate_fail_count": 0,
-    "debt_gate_pass_count": 45,
+    "debt_gate_fail_count": 2,
+    "debt_gate_pass_count": 43,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
     "fully_covered_module_count": 2485,

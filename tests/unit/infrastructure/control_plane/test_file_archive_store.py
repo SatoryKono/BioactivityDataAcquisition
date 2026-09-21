@@ -25,6 +25,8 @@ from bioetl.infrastructure.control_plane import file_archive_store as archive_mo
 
 pytestmark = pytest.mark.unit
 
+_OBSERVED_AT = datetime(2026, 9, 21, 12, 0, tzinfo=UTC)
+
 
 def _assessment_case(archive_case, tmp_path, monkeypatch, *, dq="OK"):
     from bioetl.application.services.run_reports.snapshots import publish_snapshot
@@ -102,7 +104,7 @@ def test_archive_assessment_commits_verified_revision_and_preserves_history(
         report_root=archive.report_root,
         manifest=manifest,
         plan=plan,
-        observed_at=datetime.now(UTC),
+        observed_at=_OBSERVED_AT,
     )
     assert result == (True, "archive_restore_verified")
     current = json.loads(path.read_bytes())
@@ -148,7 +150,7 @@ def test_archive_assessment_failed_candidate_keeps_original_report(
             report_root=archive.report_root,
             manifest=manifest,
             plan=plan,
-            observed_at=datetime.now(UTC),
+            observed_at=_OBSERVED_AT,
         )
     assert path.read_bytes() == original
     assert list(path.parent.glob("status-revisions/*.json")) == revisions
@@ -220,7 +222,7 @@ def test_assessment_rejects_source_changed_during_candidate_archive(
         report_root=archive.report_root,
         manifest=manifest,
         plan=plan,
-        observed_at=datetime.now(UTC),
+        observed_at=_OBSERVED_AT,
     )
     assert outcome[0] is not True
     assert path.read_bytes() == original

@@ -713,10 +713,6 @@
             },
             "properties": [
               {
-                "id": "custom.minWidth",
-                "value": 130
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
@@ -731,10 +727,6 @@
               "options": "Value"
             },
             "properties": [
-              {
-                "id": "custom.width",
-                "value": 160
-              },
               {
                 "id": "custom.cellOptions",
                 "value": {
@@ -788,10 +780,22 @@
                     }
                   }
                 ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 130
               },
               {
-                "id": "custom.minWidth",
-                "value": 160
+                "id": "custom.align",
+                "value": "left"
               }
             ]
           }
@@ -871,7 +875,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Remote API evidence. Cached Bronze replay does not exercise the API and proves neither outage nor health. missing_health_status = no observation; stale_health_status = observation is not fresh. Both are UNKNOWN, never healthy. GLOBAL: independent of selected run.",
+      "description": "CURRENT · Remote API evidence. Cached Bronze replay does not exercise the API and proves neither outage nor health. missing_health_status = no observation; invalid_health_timestamp = missing, zero or future timestamp. Both are UNKNOWN. The latest valid observation has no age expiry. GLOBAL: independent of selected run.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1034,6 +1038,10 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "displayName",
+                "value": "Reason"
               }
             ]
           },
@@ -1118,16 +1126,20 @@
                 ]
               },
               {
-                "id": "custom.width",
-                "value": 100
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-background",
                   "mode": "basic",
                   "wrapText": false
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 110
+              },
+              {
+                "id": "custom.align",
+                "value": "left"
               }
             ]
           },
@@ -1147,6 +1159,26 @@
               {
                 "id": "custom.width",
                 "value": 105
+              },
+              {
+                "id": "custom.align",
+                "value": "left"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Provider"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 105
+              },
+              {
+                "id": "custom.align",
+                "value": "left"
               }
             ]
           }

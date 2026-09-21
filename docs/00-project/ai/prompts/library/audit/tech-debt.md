@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.tech-debt
-version: 1.2.0
+version: 1.3.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -30,6 +30,9 @@ anti_patterns:
 - Raising debt/quality budgets or exemptions to “pass”
 - Calling every style nit technical debt
 - Priority by TODO count instead of blast radius
+- Reporting raw marker counts as debt without false-positive triage
+- Removing coverage exclusions to “pay down” without covering tests
+- Retyping dynamic APIs without a runnable type checker to verify
 tags:
 - audit
 - debt
@@ -66,7 +69,17 @@ Prioritize by probability × blast radius, not TODO count.
 1. Collect markers in SCOPE: TODO/FIXME/HACK/XXX/WORKAROUND/TEMP/DEPRECATED,
    lint/type/test suppressions, compatibility shims, disabled checks, dead
    flags, oversized modules, cycles (use project tooling when available).
-2. For top items: history/blame age, owner, blast radius, tests protecting
+2. Triage false positives BEFORE counting: test-data patterns (`XXXXX`),
+   guard-test infrastructure, docstrings/templates (`ADR-XXX`, `CVCL_XXXX`),
+   tooling strings. Report measured debt, never raw hit counts.
+3. For coverage-gated exclusions (`pragma: no cover`, `nosec`): check each
+   line against `coverage.xml` (EXCLUDED vs executed). Never remove an
+   exclusion without a covering test — removal alone lowers measured
+   coverage and breaks gates.
+4. For `type: ignore` at dynamic-API seams (decorators, `**kwargs: object`):
+   prefer narrow `cast()`; do not retype without a runnable type checker
+   to verify. Verify every remediation with the repo gate + unit tests.
+5. For top items: history/blame age, owner, blast radius, tests protecting
    refactor, whether debt blocks security patch or feature.
 3. Classify: code, tests, dependencies, architecture, data/schema, CI,
    observability, documentation, security, operational.
@@ -89,6 +102,13 @@ Prioritize by probability × blast radius, not TODO count.
 - kit extras: `technical-debt-register.csv` (id,path,line,type,evidence,age,risk,blast_radius,effort,owner,priority),
   `debt-heatmap.md`, top-20, quick wins vs strategic vs dependency debt
 - `surface_score` 0–3; remediations; `MODE=propose-patches` only with approval
+- Machine contract (`finding-v3`): `evidence` is ONE object
+  `{path,line,command,scope,timestamp,exit_code,output}`; `fingerprint` is
+  sha256 over `domain|requirement_id|root_cause|canonical_paths` (64 hex);
+  `evidence_class` in `FACT|INFERENCE|GAP|CONTRADICTION`;
+  `status` in `PROVEN|NOT_PROVEN` (closure tracked via `acceptance` text).
+- Differential runs re-verify open items and rescan markers; close items
+  through `acceptance`, never by deleting rows.
 
 ## Priority hints
 

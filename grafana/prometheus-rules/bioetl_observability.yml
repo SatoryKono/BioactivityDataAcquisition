@@ -682,7 +682,7 @@ groups:
             bioetl_runtime_current_status_scoped
             or label_replace(
               bioetl_scope_publication_status,
-              "runtime_status_source", "publication_stale_or_missing", "", ""
+              "runtime_status_source", "publication_invalid_or_missing", "", ""
             )
             or label_replace(
               (bioetl_runtime_stage_evidence_status > bool 0) * 3,
@@ -781,15 +781,14 @@ groups:
             and on (provider, job, instance) (
               bioetl_provider_health_observed_timestamp_seconds > 0
               and bioetl_provider_health_observed_timestamp_seconds <= time()
-              and time() - bioetl_provider_health_observed_timestamp_seconds <= 900
               and bioetl_provider_health_observed_timestamp_seconds
                 == on (provider) group_left()
                 max by (provider) (bioetl_provider_health_observed_timestamp_seconds)
             )
           )
       - record: bioetl_provider_current_status
-        # Only the newest valid observation can establish a current verdict.
-        # Retain one UNKNOWN per known provider when its evidence is not fresh.
+        # Last valid observation determines status without an age expiry.
+        # Missing/zero/future timestamps remain UNKNOWN.
         expr: >-
           ((bioetl_provider_health_status_fresh == bool 0) * 2
             + (bioetl_provider_health_status_fresh == bool 1)
@@ -807,8 +806,8 @@ groups:
         expr: ((max by (provider) (bioetl_provider_observed_universe) * 0 + 3) or (max by (provider) (bioetl_provider_health_check_provider_universe_15m) * 0 + 3)) unless on (provider) bioetl_provider_health_status
       - record: bioetl_provider_current_status_info
         labels:
-          reason: stale_health_status
-          source_state: stale
+          reason: invalid_health_timestamp
+          source_state: invalid
           completeness: incomplete
           scrape_present: "1"
           health_status_present: "1"

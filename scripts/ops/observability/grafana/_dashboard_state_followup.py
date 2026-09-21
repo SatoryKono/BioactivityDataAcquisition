@@ -35,8 +35,15 @@ def override(panel: dict[str, Any], name: str, **properties: Any) -> None:
         item = {"matcher": {"id": "byName", "options": name}, "properties": []}
         overrides.append(item)
     for key, value in properties.items():
-        item["properties"] = [p for p in item["properties"] if p["id"] != key]
-        item["properties"].append({"id": key, "value": value})
+        existing = item["properties"]
+        index = next((i for i, p in enumerate(existing) if p["id"] == key), None)
+        filtered = [p for p in existing if p["id"] != key]
+        new_prop = {"id": key, "value": value}
+        if index is None:
+            filtered.append(new_prop)
+        else:
+            filtered.insert(min(index, len(filtered)), new_prop)
+        item["properties"] = filtered
 
 
 def _scrub_link_list(links: list[Any]) -> list[Any]:

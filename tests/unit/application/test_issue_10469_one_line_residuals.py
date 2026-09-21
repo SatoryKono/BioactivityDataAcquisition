@@ -425,6 +425,10 @@ async def test_workflow_runner_skips_missing_topological_step() -> None:
             "attach_workflow_run_report",
             return_value=final_result,
         ),
+        patch(
+            "bioetl.application.services.workflow.workflow_runner_service."
+            "archive_workflow_children",
+        ),
     ):
         result = await service.run_workflow(config)
     assert result is final_result

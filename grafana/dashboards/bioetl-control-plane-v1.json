@@ -880,6 +880,10 @@
               {
                 "id": "links",
                 "value": []
+              },
+              {
+                "id": "noValue",
+                "value": "—"
               }
             ]
           }
@@ -1621,7 +1625,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "TIME RANGE · Shows the age of the latest persisted checkpoint in seconds from selected-range samples for the selected pipeline. Lower is fresher. Run ID does not filter this panel. No data means checkpoint evidence is unavailable; inspect checkpoint artifacts before replay or resume.",
+      "description": "Last checkpoint age, informational only; age does not change readiness. Missing evidence remains UNKNOWN. Pipeline-scoped, independent of Run ID.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1651,16 +1655,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "blue",
                 "value": null
-              },
-              {
-                "color": "orange",
-                "value": 900
-              },
-              {
-                "color": "red",
-                "value": 3600
               }
             ]
           },
@@ -8961,72 +8957,7 @@
                 "minWidth": 50
               }
             },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Status"
-                },
-                "properties": [
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text"
-                    }
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "OK": {
-                            "text": "OK",
-                            "color": "green"
-                          },
-                          "WARN": {
-                            "text": "WARN",
-                            "color": "orange"
-                          },
-                          "WARNING": {
-                            "text": "WARN",
-                            "color": "orange"
-                          },
-                          "ERROR": {
-                            "text": "ERROR",
-                            "color": "red"
-                          },
-                          "QUERY ERROR": {
-                            "text": "QUERY ERROR",
-                            "color": "red"
-                          },
-                          "INCOMPLETE": {
-                            "text": "INCOMPLETE",
-                            "color": "#555555"
-                          },
-                          "UNKNOWN": {
-                            "text": "UNKNOWN",
-                            "color": "#555555"
-                          },
-                          "N/A": {
-                            "text": "N/A",
-                            "color": "#555555"
-                          },
-                          "SELECT RUN": {
-                            "text": "SELECT RUN",
-                            "color": "#555555"
-                          },
-                          "RUNNING": {
-                            "text": "RUNNING",
-                            "color": "orange"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
+            "overrides": []
           },
           "targets": [
             {
@@ -9057,7 +8988,7 @@
                   "names": [
                     "domain",
                     "verdict",
-                    "reason_display",
+                    "reason",
                     "action",
                     "evidence_ref"
                   ]
@@ -9070,7 +9001,7 @@
                 "indexByName": {
                   "domain": 0,
                   "verdict": 1,
-                  "reason_display": 2,
+                  "reason": 2,
                   "action": 3,
                   "evidence_ref": 4
                 },
@@ -9080,7 +9011,7 @@
                   "execution_state": "Result",
                   "evidence_completeness": "Evidence",
                   "rules_version": "Rules",
-                  "reason_display": "Reason",
+                  "reason": "Reason",
                   "action": "Action",
                   "evidence_ref": "Evidence reference",
                   "pipeline": "Pipeline",
