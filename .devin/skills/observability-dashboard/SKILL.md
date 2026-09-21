@@ -7,6 +7,7 @@ description: "Edit, render, validate, or debug BioETL Grafana dashboards and the
 
 ## Source Of Truth
 
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
@@ -16,24 +17,6 @@ description: "Edit, render, validate, or debug BioETL Grafana dashboards and the
 - Dashboard source: `../../../grafana/dashboards/`
 - Render and validation scripts: `../../../scripts/`
 
-## Environment Configuration
-
-This skill uses Grafana credentials from the repository root `.env` file:
-
-- `GRAFANA_URL` - Grafana server URL (default: http://localhost:3000)
-- `GRAFANA_SERVICE_ACCOUNT_TOKEN` - Grafana service account token for API access
-- `GRAFANA_USERNAME` - Grafana username (fallback auth)
-- `GRAFANA_PASSWORD` - Grafana password (fallback auth)
-- `GRAFANA_ORG_ID` - Grafana organization ID
-- `GF_SECURITY_ADMIN_PASSWORD` - Admin password for local Grafana instance
-- `GF_RENDERING_RENDERER_TOKEN` - Image renderer token
-- `GRAFANA_IMAGE_RENDERER_GOMEMLIMIT` - Renderer memory limit
-- `GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT` - Renderer readiness timeout
-
-**Note:** Monitoring services are optional (ADR-010). Do not start `docker-compose.monitoring.yml`
-unless the user explicitly requests dashboard/render work. Default Docker surface is main only
-(health on :8000).
-
 ## Workflow
 
 1. Confirm that the task touches a shipped dashboard or asks for a render.
@@ -42,7 +25,32 @@ unless the user explicitly requests dashboard/render work. Default Docker surfac
 4. Do not start `docker-compose.monitoring.yml` unless the user explicitly
    requested dashboard/render work.
 5. Validate JSON, queries, and relevant dashboard tests; update operator docs
-   when shipped behaviour changes.
+   when shipped behaviour changes. Any change under `grafana/dashboards/`
+   MUST run
+   `pytest tests/integration/test_dashboard_operator_readability.py`
+   (copy roles, `YYYY-MM-DD HH:MM` clock, first-window no-scroll) **and**
+   `pytest tests/integration/test_dashboard_first_window_noscroll.py`
+   (DASH-FIT-004 on every first-window panel). The no-scroll gate is
+   required on code, test, and documentation changes via
+   `.github/workflows/dashboard-first-window-noscroll.yml` (not
+   path-filtered), the Tests semantic release policy job, and the
+   `check-dashboard-first-window-noscroll` pre-push hook.
+
+## Debug empty Run Explorer index
+
+For **6. Run Explorer** panel `Inspect Recent Runs` (`id=3010`) or workflow
+panel `3020`, do not start with Grafana selectors. `$pipeline` / `$run_type`
+come from Prometheus and `$run_id` from the control-plane catalog; the table
+reads `GET /ops/observability/pipeline-run-reports`.
+
+1. From the checkout you are viewing, run
+   `python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay`.
+2. Confirm `GET /ops/observability/pipeline-run-reports?pipeline=chembl_assay&limit=3`
+   `index_state`: `ok` (rows), `valid_empty` (no artifacts for that pipeline),
+   or `tree_missing` / `layout_unhealthy` / `identity_unhealthy` (bind/origin).
+3. `/health/ready` green is not proof the index should fill.
+4. Do not start main from `/tmp/bioetl-issues*` without
+   `--allow-transient-origin`. Recreate from the canonical checkout instead.
 
 This single skill replaces `grafana-dashboard-extension`,
 `grafana-dashboard-render`, `prometheus-metric-discovery`, and

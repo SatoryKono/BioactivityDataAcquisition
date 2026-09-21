@@ -43,7 +43,7 @@ case "$MODE" in
     ;;
   --sync)
     exec "$PYTHON_BIN" "$REPO_ROOT/scripts/ai/sync/governance.py" \
-      --root "$REPO_ROOT" --only skill-mirrors
+      --root "$REPO_ROOT" --only skill-mirrors --apply
     ;;
   -h|--help)
     usage

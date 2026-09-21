@@ -5,49 +5,51 @@ description: Execute BioETL py-doc-bot profile for role-specific workflow and co
 
 # py-doc-bot
 
-## Objective
-
-Run the role-specific workflow as defined in the py-doc-bot profile. This skill provides a convenient entry point for documentation tasks, while the actual agent logic resides in `.devin/agents/py-doc-bot/AGENT.md`.
-
 ## Source Of Truth
+
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 - Primary profile: `../../agents/py-doc-bot/AGENT.md`
 - Team orchestration: `../../agents/ORCHESTRATION.md`
+- Shared wrapper contract: [../py-audit-bot/references/wrapper-contract.md](../py-audit-bot/references/wrapper-contract.md)
 - Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - Shared project context: `../../../docs/00-project/ai/memory/agent-memory.md`
-- Role-specific memory: matching `../../../docs/00-project/ai/memory/memory-py-*.md`
-  sheet when one exists for this profile
+- Role memory: `../../../docs/00-project/ai/memory/memory-py-doc-bot.md`
+
+## Trigger Scope
+
+Use this wrapper for docs edits, doc drift, docs generated artifact refresh,
+runtime mirror updates, and documentation validation. Use `mode=focused` for a
+bounded surface and `mode=broad` for the retired cascade-audit workflow.
 
 ## Workflow
 
-1. Start with the canonical memory loop from `../../../src/memory/DAILY_WORKFLOW.md` and run `python -m memory.tooling.workflow pre-task ...` for the current task.
-1. Read `MEMORY_USAGE.md`, `agent-memory.md`, and the matching role-specific
-   memory sheet when it exists. If no role-specific sheet exists for this
-   profile, record that and continue with project memory plus repo search.
-1. Open and follow `../../agents/py-doc-bot/AGENT.md`.
-1. Keep output artifacts and scope aligned with `../../agents/ORCHESTRATION.md`.
-1. Respect BioETL architecture rules from `AGENTS.md` and project constraints.
-1. After markdown link or `Owner:` / `Status:` / `Class:` header changes, run
-   `python -m scripts.docs generate-cleanup-inventory --update` and keep
-   `docs/reports/generated/documentation-cleanup-inventory.{json,md}` in the
-   same changeset. `--check` reads the working tree, not `HEAD`.
-1. After doc work, run `python -m memory.tooling.workflow post-task ...` and promote only durable documentation guidance.
+1. Follow the shared wrapper contract.
+1. Read and apply `../../agents/py-doc-bot/AGENT.md`.
+1. Verify cited code/config/runtime surfaces directly.
+1. Update runtime source first, then docs mirrors when runtime behavior changes.
 
-## Skill vs Agent Usage
+## Expected Output
 
-**When to use this skill:**
-- Quick documentation tasks with standard settings
-- When you want a convenient entry point without navigating to agents
-- For routine documentation operations with default parameters
+- Docs changed or drift audit result.
+- Claim-to-source verification summary.
+- Mirror-sync status.
 
-**When to use the agent directly:**
-- Complex documentation tasks requiring custom settings
-- When you need fine-grained control over documentation parameters
-- For advanced documentation scenarios beyond standard workflow
+## Validation
 
-## Guidance
+Use targeted docs checks such as `python -m scripts.docs check-links` and
+`python -m scripts.docs check-drift --runtime-mirrors --freshness`.
 
-This skill is designed as a convenient shortcut for common documentation scenarios. For complex or custom documentation requirements, use the agent directly via `.devin/agents/py-doc-bot/AGENT.md`.
+After markdown link or `Owner:` / `Status:` / `Class:` header changes, also
+run `python -m scripts.docs generate-cleanup-inventory --update` and
+`--check`. Commit the generated JSON/MD with the docs change; skipping this
+fails `test_documentation_cleanup_inventory_check_passes` and stops
+`architecture-fast`.
+
+## Fallback
+
+If docs validation is too broad for the environment, report the skipped command
+and keep claims limited to files inspected directly.

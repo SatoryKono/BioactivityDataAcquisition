@@ -82,6 +82,32 @@ def test_compare_trees_treats_crlf_and_lf_as_equal(tmp_path: Path) -> None:
     assert sync_ai_governance._compare_trees(expected, actual) == []
 
 
+def test_skill_overlay_redirect_keeps_archive_target_after_sync(tmp_path: Path) -> None:
+    """An overlay is one level deeper than the generated docs skill mirror."""
+    _seed_skills_mirror_fixture(tmp_path)
+    archive = tmp_path / "docs/99-archive/old.md"
+    archive.parent.mkdir(parents=True)
+    archive.write_text("# Archived\n", encoding="utf-8")
+    overlay = (
+        tmp_path
+        / "docs/00-project/ai/skills/_references/local/retired/references/redirect.md"
+    )
+    overlay.parent.mkdir(parents=True)
+    overlay.write_text(
+        "[archive](../../../../../../../99-archive/old.md#section)\n"
+        "[web](https://example.org/doc) [anchor](#section)\n",
+        encoding="utf-8",
+    )
+
+    assert sync_ai_governance.sync_skill_mirrors(tmp_path, check_only=False) == []
+    mirror = tmp_path / "docs/00-project/ai/skills/local/retired/references/redirect.md"
+    text = mirror.read_text(encoding="utf-8")
+    target = text.split("](", 1)[1].split("#", 1)[0]
+    assert (mirror.parent / target).resolve() == archive.resolve()
+    assert "[web](https://example.org/doc) [anchor](#section)" in text
+    assert sync_ai_governance.sync_skill_mirrors(tmp_path, check_only=True) == []
+
+
 def test_normalize_codex_agents_strips_mirror_header(tmp_path: Path) -> None:
     agents = tmp_path / ".codex" / "agents"
     agents.mkdir(parents=True)
