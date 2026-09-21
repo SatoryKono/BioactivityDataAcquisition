@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
-from typing import TYPE_CHECKING
 
 from bioetl.application.composite.checkpoint._checkpoint_runtime import (
     CHECKPOINT_READ_ERRORS,
@@ -14,10 +13,12 @@ from bioetl.application.composite.checkpoint._checkpoint_runtime import (
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
 from bioetl.application.runtime_clock import resolve_runtime_clock
 from bioetl.domain.exceptions import BioETLError
-from bioetl.domain.ports import CompositeCheckpointPort, LoggerPort, MetricsPort
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import ClockPort
+from bioetl.domain.ports import (
+    ClockPort,
+    CompositeCheckpointPort,
+    LoggerPort,
+    MetricsPort,
+)
 
 __all__ = [
     "warn_if_checkpoint_exists_with_progress",

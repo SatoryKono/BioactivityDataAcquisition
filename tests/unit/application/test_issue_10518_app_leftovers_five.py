@@ -213,7 +213,7 @@ async def test_runner_stage_skip_success_and_exception(
     assert "dep" in started[1]
 
     monkeypatch.setattr(
-        "bioetl.application.composite.runner_pkg.runner_stage_mixin.handle_dependencies_phase_exception",
+        "bioetl.application.composite.runner_pkg.runner_stage_completion_mixin.handle_dependencies_phase_exception",
         AsyncMock(),
     )
     await CompositeRunnerStageMixin._handle_dependencies_phase_exception(

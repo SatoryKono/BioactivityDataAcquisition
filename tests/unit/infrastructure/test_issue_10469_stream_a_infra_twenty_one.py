@@ -16,7 +16,7 @@ import pyarrow as pa
 import pytest
 
 from bioetl.domain.medallion import SilverWriteMode, WriteModePolicy
-from bioetl.domain.workflow.foreign_key_reconciliation import (
+from bioetl.domain.workflow import (
     ForeignKeyReconciliationRequest,
 )
 from bioetl.infrastructure.control_plane._file_run_ledger_helpers import (

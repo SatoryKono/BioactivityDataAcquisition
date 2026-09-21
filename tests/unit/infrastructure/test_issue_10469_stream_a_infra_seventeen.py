@@ -41,6 +41,7 @@ pytestmark = pytest.mark.unit
 def test_record_dropped_duplicates_without_metrics() -> None:
     recorder = AdapterMetricsRecorder(metrics=None, provider="chembl")
     recorder.record_dropped_duplicates("activity", 3)
+    assert recorder.metrics is None
 
 
 def test_grouping_label_empty_and_unknown_key() -> None:

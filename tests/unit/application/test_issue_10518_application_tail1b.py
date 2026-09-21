@@ -749,7 +749,7 @@ class TestCoordinatorThresholdFailure:
 # composite/runner_pkg/runner_merge_stage_mixin.py [130, 161, 171]
 # ---------------------------------------------------------------------------
 
-import bioetl.application.composite.runner_pkg.runner_merge_stage_mixin as merge_mod
+import bioetl.application.composite.runner_pkg.runner_merge_stage_execution_mixin as merge_exec_mod
 from bioetl.application.composite.runner_pkg.runner_merge_stage_mixin import (
     CompositeRunnerMergeStageMixin,
 )
@@ -760,7 +760,7 @@ class TestMergeStageMixinDelegation:
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         monkeypatch.setattr(
-            merge_mod, "start_merge_phase", AsyncMock(return_value="MERGING")
+            merge_exec_mod, "start_merge_phase", AsyncMock(return_value="MERGING")
         )
         host = CompositeRunnerMergeStageMixin()
         assert await host._start_merge_phase(MagicMock()) == "MERGING"
@@ -769,7 +769,9 @@ class TestMergeStageMixinDelegation:
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         monkeypatch.setattr(
-            merge_mod, "run_prepared_merge_request", AsyncMock(return_value="MERGED")
+            merge_exec_mod,
+            "run_prepared_merge_request",
+            AsyncMock(return_value="MERGED"),
         )
         host = CompositeRunnerMergeStageMixin()
         assert await host._run_prepared_merge_request(MagicMock()) == "MERGED"
@@ -778,7 +780,9 @@ class TestMergeStageMixinDelegation:
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         monkeypatch.setattr(
-            merge_mod, "execute_started_merge_phase", AsyncMock(return_value="DONE")
+            merge_exec_mod,
+            "execute_started_merge_phase",
+            AsyncMock(return_value="DONE"),
         )
         host = CompositeRunnerMergeStageMixin()
         assert (

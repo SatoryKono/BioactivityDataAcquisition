@@ -2,16 +2,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import cast
+
+from opentelemetry.trace import Span
 
 from bioetl.application.composite.runner_pkg.runner_support_types import (
     _CompositeRunnerSupportHostProtocol,
 )
-
-if TYPE_CHECKING:
-    from opentelemetry.trace import Span
-
-    from bioetl.domain.ports import TracingPort
+from bioetl.domain.ports import TracingPort
 
 _CHECKPOINT_TRACER_NAME = "bioetl.checkpoint"
 

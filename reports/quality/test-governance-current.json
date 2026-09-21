@@ -90,7 +90,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "892",
+      "line": "895",
       "path": "tests/unit/application/test_issue_10518_application_svc1a.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_skips_rows_without_identity"
@@ -276,13 +276,6 @@
       "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_silver.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_merged_metadata_skips_when_flagged"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "41",
-      "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_seventeen.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_record_dropped_duplicates_without_metrics"
     },
     {
       "category": "intentional_no_exception_contract",
@@ -632,7 +625,7 @@
     "architecture_helper_guard": 1,
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
-    "intentional_no_exception_contract": 84,
+    "intentional_no_exception_contract": 83,
     "weak_no_value": 0
   },
   "assertless_examples": [
@@ -644,7 +637,7 @@
     "tests/unit/application/test_issue_10518_application_coreobs_b.py:43",
     "tests/unit/application/test_issue_10518_application_coreobs_b.py:50",
     "tests/unit/application/test_issue_10518_application_pipelines_a.py:753",
-    "tests/unit/application/test_issue_10518_application_svc1a.py:892",
+    "tests/unit/application/test_issue_10518_application_svc1a.py:895",
     "tests/unit/application/test_issue_10518_application_svc2.py:1552",
     "tests/unit/application/test_issue_10518_application_tail1a.py:982",
     "tests/unit/application/core/test_batch_metrics_accounting.py:48",
@@ -963,12 +956,6 @@
         "intentional_no_exception_contract": 1
       }
     },
-    "tests/unit/infrastructure/test_issue_10469_stream_a_infra_seventeen.py": {
-      "assertless_tests": 1,
-      "categories": {
-        "intentional_no_exception_contract": 1
-      }
-    },
     "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py": {
       "assertless_tests": 1,
       "categories": {
@@ -1006,7 +993,7 @@
       }
     }
   },
-  "assertless_total_candidates": 85,
+  "assertless_total_candidates": 84,
   "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
@@ -1180,7 +1167,7 @@
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 84,
+  "intentional_no_exception_contract": 83,
   "markerless_examples": [],
   "markerless_test_functions": 0,
   "parse_errors": [],
@@ -1286,7 +1273,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "892",
+        "line": "895",
         "path": "tests/unit/application/test_issue_10518_application_svc1a.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_skips_rows_without_identity"
@@ -1472,13 +1459,6 @@
         "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_silver.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_merged_metadata_skips_when_flagged"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "41",
-        "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_seventeen.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_record_dropped_duplicates_without_metrics"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -1828,7 +1808,7 @@
       "architecture_helper_guard": 1,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
-      "intentional_no_exception_contract": 84,
+      "intentional_no_exception_contract": 83,
       "weak_no_value": 0
     },
     "assertless_examples": [
@@ -1840,7 +1820,7 @@
       "tests/unit/application/test_issue_10518_application_coreobs_b.py:43",
       "tests/unit/application/test_issue_10518_application_coreobs_b.py:50",
       "tests/unit/application/test_issue_10518_application_pipelines_a.py:753",
-      "tests/unit/application/test_issue_10518_application_svc1a.py:892",
+      "tests/unit/application/test_issue_10518_application_svc1a.py:895",
       "tests/unit/application/test_issue_10518_application_svc2.py:1552",
       "tests/unit/application/test_issue_10518_application_tail1a.py:982",
       "tests/unit/application/core/test_batch_metrics_accounting.py:48",
@@ -1858,7 +1838,7 @@
       "tests/unit/composition/factories/storage/test_health_mixin.py:72",
       "tests/unit/composition/factories/storage/test_health_mixin.py:103"
     ],
-    "assertless_total_candidates": 85,
+    "assertless_total_candidates": 84,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -2098,15 +2078,15 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "772a2db8773e1b495a726b0276642fb0dde27ba1954d11f84b9ff203537c6e1e",
+  "source_tree_sha256": "7b775b9dc81a910b399e6268c8c9811242ac6f0d27af1549204a204ae27ccc28",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 85,
+    "assertless_total_candidates": 84,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
-    "intentional_no_exception_contract": 84,
+    "intentional_no_exception_contract": 83,
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,

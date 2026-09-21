@@ -5,7 +5,7 @@ coverage inventory rebind. Counts and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=abd5d626c1215b53f688556340464b8f3d7f6916238cc61a2885f52f72c251c6`
+`source_tree_sha256=a0a868ed798ee084ee039babe08fde6b44dd07bca1b23b8cd5353892d3fff880`
 
 `source_module_count=2482`
 

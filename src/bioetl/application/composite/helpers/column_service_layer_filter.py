@@ -3,17 +3,14 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
-from typing import TYPE_CHECKING
 
 from bioetl.application.composite.column_orderer_group_flow import (
     apply_renames,
     filter_columns_by_explicit,
     filter_columns_by_groups,
 )
-
-if TYPE_CHECKING:
-    from bioetl.domain.composite import ColumnGroupConfig, LayerColumnConfig
-    from bioetl.domain.ports import LoggerPort
+from bioetl.domain.composite import ColumnGroupConfig, LayerColumnConfig
+from bioetl.domain.ports import LoggerPort
 
 __all__ = ["filter_columns_by_layer_config"]
 

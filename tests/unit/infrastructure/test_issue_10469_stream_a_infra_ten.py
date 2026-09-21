@@ -11,7 +11,7 @@ import pyarrow as pa
 import pytest
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
-from bioetl.domain.workflow.foreign_key_reconciliation import (
+from bioetl.domain.workflow import (
     ForeignKeyReconciliationRequest,
 )
 from bioetl.infrastructure.storage.delta.arrow_converter import (

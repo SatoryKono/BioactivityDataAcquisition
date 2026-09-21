@@ -13,7 +13,7 @@ import yaml
 
 from bioetl.domain.models.metadata import GoldMetadata, SilverMetadata
 from bioetl.domain.types import BatchID, RunID, RunType
-from bioetl.domain.workflow.foreign_key_reconciliation import (
+from bioetl.domain.workflow import (
     ForeignKeyReconciliationRequest,
 )
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger

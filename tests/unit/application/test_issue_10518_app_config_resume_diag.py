@@ -22,6 +22,9 @@ from bioetl.application.services.ops.config_service import ConfigService
 from bioetl.application.services.quality._quarantine_service_async_mixin import (
     QuarantineServiceAsyncMixin,
 )
+from bioetl.application.services.run_reports import (
+    _report_diff_support as diff_support,
+)
 from bioetl.application.services.run_reports import query as reports
 from bioetl.application.services.workflow.control_plane import (
     _execution_resume_support as resume,
@@ -212,9 +215,9 @@ def test_inspection_service_claim_and_artifact_gaps() -> None:
 
 
 def test_report_query_int_and_remove_directories(tmp_path: Path) -> None:
-    assert reports._int(None) == 0
-    assert reports._int(object()) == 0
-    assert reports._int("nope") == 0
+    assert diff_support._int(None) == 0
+    assert diff_support._int(object()) == 0
+    assert diff_support._int("nope") == 0
     store = SimpleNamespace(remove_tree=MagicMock())
     first = SimpleNamespace(json_path=tmp_path / "a" / "report.json")
     second = SimpleNamespace(json_path=tmp_path / "a" / "other.json")

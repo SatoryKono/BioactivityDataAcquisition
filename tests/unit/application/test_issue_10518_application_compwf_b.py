@@ -413,7 +413,7 @@ async def test_handle_dependencies_phase_exception_delegates() -> None:
     host = _host()
     state, err = MagicMock(), ValueError("x")
     with patch(
-        "bioetl.application.composite.runner_pkg.runner_stage_mixin.handle_dependencies_phase_exception",
+        "bioetl.application.composite.runner_pkg.runner_stage_completion_mixin.handle_dependencies_phase_exception",
         new=AsyncMock(),
     ) as fn:
         await host._handle_dependencies_phase_exception(state, err)

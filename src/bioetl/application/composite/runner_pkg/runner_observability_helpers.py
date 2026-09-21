@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import UTC, date, datetime
-from typing import TYPE_CHECKING, Any, Protocol, cast
+from typing import Any, Protocol, cast
 
 from bioetl.application.composite.runner_pkg.runner_constants import (
     DQ_REPORT_NON_FATAL_ERRORS,
+)
+from bioetl.application.services.control_plane.ledger.service import (
+    RunLedgerService,
 )
 from bioetl.application.services.quality.dq_report_service import DQReportService
 from bioetl.domain.composite import CompositeConfig
@@ -14,13 +18,6 @@ from bioetl.domain.composite.result import MergeResult
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.ports import LoggerPort, MetricsPort, QuarantinePort
 from bioetl.domain.types import RunID
-
-if TYPE_CHECKING:
-    from collections.abc import Callable
-
-    from bioetl.application.services.control_plane.ledger.service import (
-        RunLedgerService,
-    )
 
 _COMPOSITE_CV_QUARANTINE_ARTIFACT_POLICY = "occurrence_only_diagnostic"
 _COMPOSITE_CV_QUARANTINE_REPLAY_CONTRACT = "excluded_from_exact_replay"

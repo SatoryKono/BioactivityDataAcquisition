@@ -2,16 +2,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import polars as pl
 
 from bioetl.application.composite.cross_validator_helpers import _combine_cv_details
-from bioetl.domain.composite.cross_validation import CrossValidationStats
-
-if TYPE_CHECKING:
-    import polars as pl
-
-    from bioetl.domain.composite.cross_validation import EnricherCVStats
-    from bioetl.domain.ports import LoggerPort
+from bioetl.domain.composite.cross_validation import (
+    CrossValidationStats,
+    EnricherCVStats,
+)
+from bioetl.domain.ports import LoggerPort
 
 __all__ = [
     "finalize_cross_validation",

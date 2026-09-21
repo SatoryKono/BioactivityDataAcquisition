@@ -56,16 +56,15 @@ def _empty_refs() -> _ProtectedRefs:
 def test_unknown_artifact_surface_defaults() -> None:
     path = Path("artifact.bin")
     unknown = object()
-    assert _artifact_id(surface=unknown, path=path, payload={}) == "artifact"  # type: ignore[arg-type]
-    assert (
+    with pytest.raises(AssertionError, match="unreachable"):
+        _artifact_id(surface=unknown, path=path, payload={})  # type: ignore[arg-type]
+    with pytest.raises(AssertionError, match="unreachable"):
         _protected_by(
             surface=unknown,  # type: ignore[arg-type]
             path=path,
             payload={},
             protected_refs=_empty_refs(),
         )
-        == ()
-    )
 
 
 def test_snapshot_attach_existing_and_new() -> None:

@@ -11,7 +11,7 @@ from unittest.mock import MagicMock
 import pytest
 import zstandard as zstd
 
-from bioetl.domain.workflow.foreign_key_reconciliation import (
+from bioetl.domain.workflow import (
     ForeignKeyReconciliationRequest,
 )
 from bioetl.infrastructure.adapters.crossref.fetch_flow import CrossRefFetchFlow

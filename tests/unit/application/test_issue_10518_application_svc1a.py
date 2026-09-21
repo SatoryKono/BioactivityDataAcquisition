@@ -44,6 +44,9 @@ from bioetl.application.services.ops.observability_backend_startup import (  # n
     _start_observability_backend_detached,
     ensure_observability_backend_started_impl,
 )
+from bioetl.application.services.run_reports import (
+    _report_diff_support as _diff_support,
+)
 from bioetl.application.services.run_reports import query as _query  # noqa: E402
 from bioetl.application.services.run_reports import source_identity as _sid  # noqa: E402
 from bioetl.application.services.run_reports.snapshots import (  # noqa: E402
@@ -683,13 +686,13 @@ class TestDiffReports:
             _query.diff_pipeline_reports(["not", "mapping"], {})
 
     def test_int_coercion_branches(self):
-        assert _query._int(None) == 0
-        assert _query._int("7") == 0 + 7
-        assert _query._int(3.9) == 3
-        assert _query._int(b"4") == 4
-        assert _query._int("nope") == 0
-        assert _query._int(object()) == 0
-        assert _query._int(float("inf")) == 0
+        assert _diff_support._int(None) == 0
+        assert _diff_support._int("7") == 0 + 7
+        assert _diff_support._int(3.9) == 3
+        assert _diff_support._int(b"4") == 4
+        assert _diff_support._int("nope") == 0
+        assert _diff_support._int(object()) == 0
+        assert _diff_support._int(float("inf")) == 0
 
 
 class TestPruneReports:

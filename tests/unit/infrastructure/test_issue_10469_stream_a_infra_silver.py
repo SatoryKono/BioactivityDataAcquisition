@@ -14,7 +14,7 @@ from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.types import BatchID, RunID, RunType
-from bioetl.domain.workflow.foreign_key_reconciliation import (
+from bioetl.domain.workflow import (
     ForeignKeyReconciliationRequest,
 )
 from bioetl.infrastructure.storage.bronze.io_mixin import (
