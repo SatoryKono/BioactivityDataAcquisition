@@ -59,6 +59,8 @@ class BronzeWriterReadCleanupMixin:
                 self.base_path / date.strftime("%Y-%m-%d") if date else self.base_path
             )
         else:
+            if not provider or not entity:
+                return []
             prefix = f"{provider}/{entity}/"
             if date:
                 prefix = f"{prefix}{date.strftime('%Y-%m-%d')}/"

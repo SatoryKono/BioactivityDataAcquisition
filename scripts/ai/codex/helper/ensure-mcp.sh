@@ -391,8 +391,8 @@ esac
 if [[ "${SHOULD_GENERATE}" -eq 1 ]]; then
     # Bound regeneration and skip the potentially slow live CLI check here;
     # the structural checks below still fail closed on incomplete output.
-    # 30s: WSL mounts of Windows drives pay high Python cold-start cost.
-    local_setup_timeout="${CODEX_MCP_SETUP_TIMEOUT:-30}"
+    # 90s: WSL mounts of Windows drives pay high Python cold-start cost.
+    local_setup_timeout="${CODEX_MCP_SETUP_TIMEOUT:-90}"
     # Defaults must match setup_mcp.DEFAULT_LOCAL_* (stable + shared transport).
     # Override with CODEX_MCP_PROFILE / CODEX_MCP_TRANSPORT_MODE if needed.
     local_profile="${CODEX_MCP_PROFILE:-}"
