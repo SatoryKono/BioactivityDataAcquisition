@@ -119,6 +119,12 @@ def _create_chembl_data_source(
         base_adapter = PublicationTermDataSource(base_adapter)
     if pipeline_config.entity_type == "subcellular_fraction":
         base_adapter = SubcellularFractionDataSource(base_adapter)
+    if pipeline_config.entity_type == "assay_parameters":
+        from bioetl.application.core.data_sources.assay_parameters import (
+            AssayParametersDataSource,
+        )
+
+        base_adapter = AssayParametersDataSource(base_adapter)
 
     return _wrap_with_filter(
         base_adapter,
@@ -229,7 +235,12 @@ def _create_uniprot_idmapping_data_source(
             base_url=_resolve_uniprot_mapping_base_url(pipeline_config),
         ),
         id_source_reader=IDMappingCsvReaderAdapter(logger=logger),
-        input_path=_resolve_uniprot_mapping_input_path(pipeline_config),
+        input_path=_resolve_uniprot_mapping_input_path(pipeline_config, filter_config),
+        id_column=(
+            filter_config.column_name
+            if filter_config and filter_config.enabled and filter_config.column_name
+            else "target_id"
+        ),
         logger=logger,
         from_db=from_db,
         to_db=to_db,
@@ -244,8 +255,13 @@ def _resolve_uniprot_mapping_base_url(pipeline_config: PipelineYamlConfig) -> st
     return str(UNIPROT_API_BASE)
 
 
-def _resolve_uniprot_mapping_input_path(pipeline_config: PipelineYamlConfig) -> str:
+def _resolve_uniprot_mapping_input_path(
+    pipeline_config: PipelineYamlConfig,
+    filter_config: InputFilterConfig | None = None,
+) -> str:
     """Resolve input CSV path for UniProt ID Mapping seed IDs."""
+    if filter_config and filter_config.enabled and filter_config.source_path:
+        return filter_config.source_path
     configured = getattr(pipeline_config.source, "input_path", None)
     return configured or "data/input/target.csv"
 

@@ -224,7 +224,7 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
     )
     assert reason_maps["archive_evidence_not_recorded"]["text"] == "Archive missing"
     assert reason_maps["selected_run_id_not_found"]["text"] == "Run not found"
-    assert reason_maps["deadline_exceeded"]["text"] == "Deadline exceeded"
+    assert reason_maps["deadline_exceeded"]["text"] == "QUERY ERROR — deadline exceeded"
     assert reason_maps["archive_not_applicable"]["text"] == "N/A: policy"
     assert reason_maps["archive_restore_verified"]["text"] == "Archive verified"
     assert reason_maps["reproducibility_evidence_floor_satisfied"]["text"] == (

@@ -903,8 +903,8 @@ dashboards:
         title: Monitor Checkpoint Age
         role: freshness
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: current
+        scope_class: current
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
@@ -4190,11 +4190,12 @@ dashboards:
         title: Inspect Non-OK Providers
         role: forensic_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: global
+        scope_class: global
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
+        - VALID_EMPTY
         - UNKNOWN
         - ERROR
         - TELEMETRY_ABSENT
@@ -4202,6 +4203,7 @@ dashboards:
         - evidence_scope
         - no_data
         fixture_cases:
+        - valid_empty
         - populated
         - telemetry_absent
         - backend_error
@@ -4337,8 +4339,8 @@ dashboards:
         title: Inspect Full Non-OK Providers
         role: forensic_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: global
+        scope_class: global
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:

@@ -1,7 +1,7 @@
 {
-  "additive_coverage_xml_path": "reports/local/checkpoint-coverage.xml",
-  "additive_coverage_xml_sha256": "d71d1bf46029cf81e7cfb304bca11b9193699bebb9bc67dcb7462c64a6616cbc",
-  "additive_measured_module_count": 1,
+  "additive_coverage_xml_path": "reports/gr-db-corr/new-modules-coverage.xml",
+  "additive_coverage_xml_sha256": "48a3625decf553547716b87a63c87037157f82100f22b838aaf597d6dbfaafc5",
+  "additive_measured_module_count": 176,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
   "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
@@ -2439,6 +2439,16 @@
       "source_lines": 16
     },
     {
+      "coverage_percent": 93.62,
+      "coverage_status": "partially_covered",
+      "covered_lines": 44,
+      "executable_lines": 47,
+      "missing_lines": 3,
+      "module": "bioetl.application.core.data_sources.assay_parameters",
+      "path": "src/bioetl/application/core/data_sources/assay_parameters.py",
+      "source_lines": 93
+    },
+    {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 30,
@@ -2477,6 +2487,16 @@
       "module": "bioetl.application.core.data_sources.subcellular_fraction",
       "path": "src/bioetl/application/core/data_sources/subcellular_fraction.py",
       "source_lines": 181
+    },
+    {
+      "coverage_percent": 94.29,
+      "coverage_status": "partially_covered",
+      "covered_lines": 33,
+      "executable_lines": 35,
+      "missing_lines": 2,
+      "module": "bioetl.application.core.derived_scan_budget",
+      "path": "src/bioetl/application/core/derived_scan_budget.py",
+      "source_lines": 65
     },
     {
       "coverage_percent": 100.0,
@@ -15647,6 +15667,16 @@
       "module": "bioetl.domain.schemas.chembl.publication_term",
       "path": "src/bioetl/domain/schemas/chembl/publication_term.py",
       "source_lines": 69
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 14,
+      "executable_lines": 14,
+      "missing_lines": 0,
+      "module": "bioetl.domain.schemas.chembl.similarity_pair",
+      "path": "src/bioetl/domain/schemas/chembl/similarity_pair.py",
+      "source_lines": 26
     },
     {
       "coverage_percent": 100.0,
@@ -27381,6 +27411,16 @@
       "source_lines": 16
     },
     {
+      "coverage_percent": 93.62,
+      "coverage_status": "partially_covered",
+      "covered_lines": 44,
+      "executable_lines": 47,
+      "missing_lines": 3,
+      "module": "bioetl.application.core.data_sources.assay_parameters",
+      "path": "src/bioetl/application/core/data_sources/assay_parameters.py",
+      "source_lines": 93
+    },
+    {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 30,
@@ -27419,6 +27459,16 @@
       "module": "bioetl.application.core.data_sources.subcellular_fraction",
       "path": "src/bioetl/application/core/data_sources/subcellular_fraction.py",
       "source_lines": 181
+    },
+    {
+      "coverage_percent": 94.29,
+      "coverage_status": "partially_covered",
+      "covered_lines": 33,
+      "executable_lines": 35,
+      "missing_lines": 2,
+      "module": "bioetl.application.core.derived_scan_budget",
+      "path": "src/bioetl/application/core/derived_scan_budget.py",
+      "source_lines": 65
     },
     {
       "coverage_percent": 100.0,
@@ -40593,6 +40643,16 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
+      "covered_lines": 14,
+      "executable_lines": 14,
+      "missing_lines": 0,
+      "module": "bioetl.domain.schemas.chembl.similarity_pair",
+      "path": "src/bioetl/domain/schemas/chembl/similarity_pair.py",
+      "source_lines": 26
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
       "covered_lines": 15,
       "executable_lines": 15,
       "missing_lines": 0,
@@ -49893,25 +49953,25 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
-  "source_tree_sha256": "6fb8aa8ae2e3fa3c8e6b9c200e9f35b533e129eef40f03d598839d6921a7502e",
+  "source_tree_sha256": "eec1bc99b093ea4f6df224270ad680122d4436604cf066986fd7541994a6d7f0",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
       "application_core": {
         "allowlisted_unmeasured_module_count": 0,
         "allowlisted_unmeasured_modules": [],
-        "coverage_percent_avg": 100.0,
-        "coverage_percent_min": 100.0,
-        "covered_line_percent": 100.0,
-        "covered_module_count": 194,
-        "measured_module_count": 194,
+        "coverage_percent_avg": 99.94,
+        "coverage_percent_min": 93.62,
+        "covered_line_percent": 99.93,
+        "covered_module_count": 196,
+        "measured_module_count": 196,
         "measured_percent": 100.0,
-        "module_count": 194,
+        "module_count": 196,
         "status_counts": {
           "coverage_xml_missing": 0,
           "fully_covered": 194,
           "no_executable_lines": 0,
-          "partially_covered": 0,
+          "partially_covered": 2,
           "uncovered": 0,
           "unmeasured": 0
         },
@@ -50048,12 +50108,12 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2494,
+    "source_module_count": 2497,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 2485,
+      "fully_covered": 2486,
       "no_executable_lines": 1,
-      "partially_covered": 8,
+      "partially_covered": 10,
       "uncovered": 0,
       "unmeasured": 0
     },

@@ -39,6 +39,8 @@ schema:
     - sim_id
     - doc_1
     - doc_2
+    - publication_id1
+    - publication_id2
     - pubmed_id1
     - pubmed_id2
     - tid_tani
@@ -74,12 +76,12 @@ quality:
   - field: doc_1
     type: range
     min: 1
-    nullable: false
+    nullable: true
     error_message: First document ID is required
   - field: doc_2
     type: range
     min: 1
-    nullable: false
+    nullable: true
     error_message: Second document ID is required
   - field: max_tani
     type: range
@@ -98,8 +100,10 @@ quality:
     fields:
     - doc_1
     - doc_2
-    condition: all_present
-    error_message: Both document IDs are required
+    - publication_id1
+    - publication_id2
+    condition: any_present
+    error_message: A complete public or legacy document pair is required; pair completeness is validated by the entity and layer schemas
   entity_conditional_validations: []
   key_nullability:
   - field: sim_id
@@ -122,8 +126,6 @@ filters:
     exclude_if_present: []
     required_fields:
     - sim_id
-    - doc_1
-    - doc_2
   gold_filters:
     list_contains: {}
     list_lengths: {}
@@ -133,8 +135,6 @@ filters:
         include_min: true
     required_fields:
     - sim_id
-    - doc_1
-    - doc_2
     columns: {}
     exclude_if_present: []
 contracts:
@@ -146,19 +146,19 @@ contracts:
   hash_exclude: []
   hash_datetime_policy: v2_datetime_utc
   contract_ref: chembl.publication_similarity
-  active_version: 1.0.0
+  active_version: 2.0.0
   rollout:
     mode: single
     read_order:
-    - 1.0.0
+    - 2.0.0
     write_versions:
-    - 1.0.0
-    affects_hash: false
+    - 2.0.0
+    affects_hash: true
 hash_policy:
   provider: chembl
   entity: publication_similarity
   contract:
-    version: 1.0.0
+    version: 2.0.0
     migration_note: 'Explicit config-level hash contract for the normalized ChEMBL publication_similarity Silver surface.'
   hash_policy:
     algorithm: sha256
@@ -167,6 +167,8 @@ hash_policy:
     - sim_id
     - doc_1
     - doc_2
+    - publication_id1
+    - publication_id2
     - pubmed_id1
     - pubmed_id2
     - tid_tani

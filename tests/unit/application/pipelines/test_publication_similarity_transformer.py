@@ -61,6 +61,38 @@ def mock_context():
 class TestPublicationSimilarityTransformer:
     """Tests for PublicationSimilarityTransformer."""
 
+    @pytest.mark.asyncio
+    async def test_public_api_pair_has_stable_identity_without_internal_ids(
+        self, transformer, mock_context
+    ):
+        record = {
+            "document_1_chembl_id": "CHEMBL1125806",
+            "document_2_chembl_id": "CHEMBL1125225",
+            "mol_tani": 0.0,
+            "tid_tani": 1.0,
+        }
+        result = await transformer.transform(mock_context, record, index=0)
+        assert result is not None
+        assert result["doc_1"] is None and result["doc_2"] is None
+        assert result["publication_id1"] == "CHEMBL1125806"
+        changed = {**record, "mol_tani": 0.2}
+        assert transformer._prepare_record(changed)["sim_id"] == result["sim_id"]
+        reversed_pair = {
+            **record,
+            "document_1_chembl_id": record["document_2_chembl_id"],
+            "document_2_chembl_id": record["document_1_chembl_id"],
+        }
+        assert transformer._prepare_record(reversed_pair)["sim_id"] == result["sim_id"]
+
+    @pytest.mark.parametrize(
+        "pair", [("CHEMBL1", None), ("CHEMBL1", "CHEMBL1"), ("garbage", "CHEMBL2")]
+    )
+    def test_invalid_public_pair_does_not_receive_generated_identity(
+        self, transformer, pair
+    ):
+        record = {"document_1_chembl_id": pair[0], "document_2_chembl_id": pair[1]}
+        assert "sim_id" not in transformer._prepare_record(record)
+
     @pytest.fixture
     def transformer(self):
         """Create PublicationSimilarityTransformer instance."""

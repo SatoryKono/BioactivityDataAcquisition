@@ -81,6 +81,20 @@ class TestPipelineRunExecutionService:
     """Direct branch coverage for execution helper behavior."""
 
     @pytest.mark.asyncio
+    async def test_unexpected_http_429_is_terminal_failure(
+        self, service, runner, run_logger, metrics_extractor
+    ):
+        from bioetl.domain.exceptions.network.service import ApiError
+
+        runner.run.side_effect = ApiError("rate limited", status_code=429)
+        result = await service.execute(
+            runner=runner, run_logger=run_logger, metrics_extractor=metrics_extractor
+        )
+        assert result.status == "failed"
+        assert result.error_type == "ApiError"
+        assert result.metrics == {"records_silver": 7}
+
+    @pytest.mark.asyncio
     async def test_successful_execution_returns_normalized_result(
         self,
         service: PipelineRunExecutionService,
@@ -161,7 +175,7 @@ class TestPipelineRunExecutionService:
         )
 
     @pytest.mark.asyncio
-    async def test_unexpected_error_propagates_without_metrics_extraction(
+    async def test_unexpected_error_is_recorded_with_metrics(
         self,
         service: PipelineRunExecutionService,
         runner: MagicMock,
@@ -170,15 +184,15 @@ class TestPipelineRunExecutionService:
     ) -> None:
         runner.run.side_effect = KeyError("unexpected")
 
-        with pytest.raises(KeyError, match="unexpected"):
-            await service.execute(
-                runner=runner,
-                run_logger=run_logger,
-                metrics_extractor=metrics_extractor,
-            )
-
-        metrics_extractor.extract_metrics.assert_not_called()
-        run_logger.exception.assert_not_called()
+        result = await service.execute(
+            runner=runner,
+            run_logger=run_logger,
+            metrics_extractor=metrics_extractor,
+        )
+        assert result.status == "failed"
+        assert result.error_type == "KeyError"
+        metrics_extractor.extract_metrics.assert_called_once_with(runner)
+        run_logger.exception.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_metrics_extractor_failure_bubbles_after_successful_run(

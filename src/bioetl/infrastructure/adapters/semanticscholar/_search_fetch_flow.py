@@ -10,6 +10,9 @@ import contextlib
 import time
 from typing import TYPE_CHECKING
 
+import httpx
+
+from bioetl.domain.exceptions.network.service import ApiError
 from bioetl.domain.mixin_host import as_mixin_host
 from bioetl.domain.types import BronzeRecord, JsonDict
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
@@ -79,13 +82,21 @@ class _SemanticScholarSearchFetchMixin:
         with as_mixin_host(self)._adapter_metrics.measure_request(
             "/paper/search"
         ):  # Any: mixin host
-            response = await as_mixin_host(
-                self
-            )._http_client.get_once(  # Any: mixin host
-                url,
-                params=params,
-                headers=as_mixin_host(self)._build_headers(),  # Any: mixin host
-            )
+            try:
+                response = await as_mixin_host(
+                    self
+                )._http_client.get_once(  # Any: mixin host
+                    url,
+                    params=params,
+                    headers=as_mixin_host(self)._build_headers(),  # Any: mixin host
+                )
+            except httpx.HTTPStatusError as exc:
+                raise ApiError(
+                    "Semantic Scholar search request failed",
+                    status_code=exc.response.status_code,
+                ) from exc
+            except httpx.RequestError as exc:
+                raise ApiError("Semantic Scholar search transport failed") from exc
         duration_ms = (time.perf_counter() - start_time) * 1000
         with contextlib.suppress(Exception):
             as_mixin_host(self)._request_collector.record_from_response(

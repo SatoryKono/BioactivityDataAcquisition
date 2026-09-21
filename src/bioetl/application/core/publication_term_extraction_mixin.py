@@ -5,6 +5,10 @@ from __future__ import annotations
 from collections.abc import AsyncIterator, Awaitable, Callable
 from typing import TYPE_CHECKING, ClassVar, Protocol, cast
 
+from bioetl.application.core.derived_scan_budget import (
+    DEFAULT_SCAN_RECORDS,
+    bounded_source_records,
+)
 from bioetl.application.core.publication_term_runtime import (
     compute_term_entity_id,
     create_term_record,
@@ -50,7 +54,13 @@ def resolve_publication_upstream_limit(
     if normalized_limit == 0:
         return None
     publication_limit = (
-        normalized_limit * multiplier if normalized_limit is not None else None
+        min(
+            normalized_limit * multiplier
+            if normalized_limit is not None
+            else DEFAULT_SCAN_RECORDS,
+            DEFAULT_SCAN_RECORDS,
+        )
+        + 1
     )
     return normalized_limit, publication_limit
 
@@ -98,7 +108,15 @@ class PublicationTermExtractionMixin:
 
         term_count = 0
         try:
-            async for publication in publications:
+            scan_limit = min(
+                normalized_limit * self.PUBLICATION_LIMIT_MULTIPLIER
+                if normalized_limit is not None
+                else DEFAULT_SCAN_RECORDS,
+                DEFAULT_SCAN_RECORDS,
+            )
+            async for publication in bounded_source_records(
+                publications, max_records=scan_limit
+            ):
                 publication_id = publication.get("publication_id") or publication.get(
                     "document_chembl_id"
                 )

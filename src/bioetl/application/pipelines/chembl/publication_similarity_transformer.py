@@ -20,6 +20,7 @@ from bioetl.application.core.field_specs import normalize_pmid
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
+from bioetl.domain.deterministic_identity import deterministic_uuid
 from bioetl.domain.entities import ChemblPublicationSimilarity
 from bioetl.domain.transformations import safe_float, safe_int
 
@@ -40,6 +41,30 @@ class PublicationSimilarityTransformer(BaseChemblTransformer):
 
     entity_class = ChemblPublicationSimilarity
     primary_id_field = "sim_id"
+
+    def _prepare_record(self, record: BronzeRecord) -> BronzeRecord:
+        """Keep public API identities separate from legacy internal document IDs."""
+        if record.get("sim_id") is not None:
+            return record
+        pair = tuple(record.get(f"document_{n}_chembl_id") for n in (1, 2))
+        if (
+            not all(
+                isinstance(value, str)
+                and value.startswith("CHEMBL")
+                and value[6:].isdigit()
+                and int(value[6:]) > 0
+                for value in pair
+            )
+            or pair[0] == pair[1]
+        ):
+            return record  # Required-key validation quarantines malformed records.
+        # Similarity is symmetric. Scores are observations, not part of identity.
+        first, second = sorted(pair)
+        identity = deterministic_uuid(
+            "chembl.publication_similarity.public_pair.v1",
+            {"first": first, "second": second},
+        ).int
+        return {**record, "sim_id": (identity & ((1 << 63) - 1)) or 1}
 
     def _extract_business_data(
         self,
@@ -80,6 +105,8 @@ class PublicationSimilarityTransformer(BaseChemblTransformer):
             # Foreign keys
             "doc_1": safe_int(record.get("doc_1")),
             "doc_2": safe_int(record.get("doc_2")),
+            "publication_id1": record.get("document_1_chembl_id"),
+            "publication_id2": record.get("document_2_chembl_id"),
             # PubMed identifiers (normalized to string)
             "pubmed_id1": normalize_pmid(record.get("pubmed_id1")),
             "pubmed_id2": normalize_pmid(record.get("pubmed_id2")),

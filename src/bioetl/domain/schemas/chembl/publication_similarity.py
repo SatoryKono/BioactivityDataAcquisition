@@ -6,10 +6,12 @@ Renamed from DocumentSimilaritySchema per ADR-024 (Entity Naming Unification).
 
 from __future__ import annotations
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.chembl.similarity_pair import valid_similarity_pairs
 
 __all__ = [
     "PublicationSimilaritySchema",
@@ -19,14 +21,35 @@ __all__ = [
 class PublicationSimilaritySchema(ETLRecordSchema):
     """Publication Similarity validation schema for Silver layer."""
 
+    @pa.dataframe_check
+    def complete_document_pair(cls, frame: pd.DataFrame) -> pd.Series:
+        """Require a complete public pair or a complete legacy internal pair."""
+        return valid_similarity_pairs(frame)
+
     # === Primary Key ===
     sim_id: Series[int] = pa.Field(
         nullable=False, unique=True, description="Primary key."
     )
 
     # === Foreign Keys ===
-    doc_1: Series[int] = pa.Field(nullable=False, description="FK to document 1.")
-    doc_2: Series[int] = pa.Field(nullable=False, description="FK to document 2.")
+    doc_1: Series[pa.Int64] | None = pa.Field(
+        nullable=True,
+        description="Legacy internal document 1 ID, never inferred from CHEMBL ID.",
+    )
+    doc_2: Series[pa.Int64] | None = pa.Field(
+        nullable=True,
+        description="Legacy internal document 2 ID, never inferred from CHEMBL ID.",
+    )
+    publication_id1: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=r"^CHEMBL[1-9]\d*$",
+        description="Public ChEMBL identifier of the first document; not its internal database ID.",
+    )
+    publication_id2: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=r"^CHEMBL[1-9]\d*$",
+        description="Public ChEMBL identifier of the second document; not its internal database ID.",
+    )
 
     # === Identifiers ===
     pubmed_id1: Series[str] | None = pa.Field(

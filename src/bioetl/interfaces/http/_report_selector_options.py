@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from pathlib import Path
 
 from bioetl.application.services.run_reports.query import (
@@ -9,6 +10,7 @@ from bioetl.application.services.run_reports.query import (
     list_pipeline_reports,
 )
 from bioetl.composition.observability_runtime import create_run_report_store
+from bioetl.interfaces.http._identity_display_rows import format_timestamp_label
 from bioetl.interfaces.http.report_root_config import configured_report_root
 from bioetl.interfaces.http.run_report_ops import load_pipeline_run_report_payload
 
@@ -67,14 +69,21 @@ def _identity_matches_scopes(
 
 
 def _option_label(
-    dimension: str, identity: dict[str, object], entry: ReportIndexEntry, value: str
+    dimension: str,
+    identity: dict[str, object],
+    entry: ReportIndexEntry,
+    value: str,
+    timezone: str = "UTC",
 ) -> str:
     if dimension != "run_id":
         return value
-    return (
-        f"{identity.get('started_at', 'UNKNOWN')} · {entry.owner} · "
-        f"{identity.get('status', 'unknown')} · {value}"
-    )
+    raw = identity.get("started_at")
+    try:
+        moment = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+        started = format_timestamp_label(moment, timezone)
+    except (ValueError, TypeError):
+        started = "UNKNOWN"
+    return f"{started} · {entry.owner} · {identity.get('status', 'unknown')} · {value}"
 
 
 def supplement_report_options(
@@ -84,6 +93,7 @@ def supplement_report_options(
     response_shape: str,
     scopes: dict[str, tuple[str, ...]],
     root: Path | None = None,
+    timezone: str = "UTC",
 ) -> dict[str, object]:
     """Append genuine report identities; empty/error responses are never fabricated."""
     if dimension not in _FIELDS:
@@ -105,7 +115,7 @@ def supplement_report_options(
         if not isinstance(value, str) or not value or value in seen:
             continue
         seen.add(value)
-        label = _option_label(dimension, identity, entry, value)
+        label = _option_label(dimension, identity, entry, value, timezone)
         items.append(
             {"text": label, "value": value} if response_shape == "options" else value
         )

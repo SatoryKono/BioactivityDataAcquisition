@@ -395,3 +395,27 @@ def test_with_source_manifest_overlays_relation_row_metadata() -> None:
         "dataset_version": "manifest",
         "source_url": "https://example.test",
     }
+
+
+@pytest.mark.asyncio
+async def test_missing_snapshot_is_explicit_blocked_dependency(data_source):
+    from bioetl.domain.exceptions.internal_state import InvalidStateError
+
+    del data_source._delta_reader.tables["chembl.target_component"]
+    with pytest.raises(
+        InvalidStateError, match="blocked_dependency.*chembl.target_component"
+    ) as exc:
+        await data_source.__aenter__()
+    assert exc.value.current_state == "blocked_dependency"
+    assert not data_source._loaded
+
+
+@pytest.mark.asyncio
+async def test_schema_valid_empty_snapshots_are_not_missing(data_source):
+    reader = data_source._delta_reader
+    reader.tables = {name: table.slice(0, 0) for name, table in reader.tables.items()}
+    assert await data_source.health_check() == HealthStatus.HEALTHY
+    assert [
+        row async for row in data_source.fetch("target_protein_classification")
+    ] == []
+    assert data_source._loaded

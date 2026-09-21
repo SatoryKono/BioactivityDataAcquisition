@@ -70,3 +70,26 @@ def test_expected_artifacts_are_reproducible_without_historical_diff_state(
         path.write_text(content, encoding="utf-8")
 
     assert generator._expected_artifacts() == first
+
+
+@pytest.mark.parametrize(
+    "pair,valid",
+    [
+        ({"publication_id1": "CHEMBL1", "publication_id2": "CHEMBL2"}, True),
+        ({"doc_1": 1, "doc_2": 2}, True),
+        ({}, False),
+        ({"doc_1": 1}, False),
+        ({"publication_id1": "CHEMBL1", "doc_1": 1, "doc_2": 2}, False),
+        ({"publication_id1": "CHEMBL0", "publication_id2": "CHEMBL2"}, False),
+    ],
+)
+def test_similarity_export_requires_a_complete_pair(pair, valid):
+    from jsonschema import Draft7Validator
+    from bioetl.domain.contracts.gold import ChEMBLPublicationSimilarityGoldSchema
+
+    contract = generator._build_contract(
+        ChEMBLPublicationSimilarityGoldSchema, "chembl_publication_similarity", "2.0.0"
+    )
+    # Other required metadata has separate contract coverage.
+    pair_contract = {"anyOf": contract["anyOf"]}
+    assert Draft7Validator(pair_contract).is_valid(pair) is valid

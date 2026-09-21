@@ -150,8 +150,8 @@ _RECOVERY_ACTION_HTML = (
     "Check retention below.</div>"
 )
 CHIP_BASE = (
-    "box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;"
-    "border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere"
+    "box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;"
+    "border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere"
 )
 # Theme-safe chips: slate link surface works on dark and light Grafana themes.
 LINK_STYLE = (
@@ -166,7 +166,7 @@ CURRENT_STYLE = (
     "cursor:default;text-decoration:underline;pointer-events:none"
 )
 CONTAINER_STYLE = (
-    "display:flex;gap:8px;flex-wrap:wrap;align-items:center;"
+    "display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;"
     "padding:0 2px;overflow:visible;white-space:normal;font-size:16px"
 )
 _PROVIDER_VARIABLE_UIDS = {"bioetl-provider-health-v2", "bioetl-incident-v1"}
@@ -744,9 +744,7 @@ def _clear_run_column_width(child: dict[str, object]) -> None:
     for override in child["fieldConfig"]["overrides"]:
         if override.get("matcher", {}).get("options") in {"Run", "run_id"}:
             override["properties"] = [
-                prop
-                for prop in override["properties"]
-                if prop["id"] != CUSTOM_WIDTH
+                prop for prop in override["properties"] if prop["id"] != CUSTOM_WIDTH
             ]
 
 
@@ -1113,8 +1111,7 @@ def _stamp_retention_readability(by_id: dict[object, dict[str, object]]) -> None
             properties.append({"id": CUSTOM_WIDTH, "value": widths[field]})
         if field in {"reason", "Reason"}:
             override["properties"] = [
-                p for p in override.get("properties", [])
-                if p.get("id") != CUSTOM_WIDTH
+                p for p in override.get("properties", []) if p.get("id") != CUSTOM_WIDTH
             ]
         if field in wrap_fields:
             _set_override_value(
@@ -1166,7 +1163,9 @@ def _stamp_aggregate_trust(by_id: dict[object, dict[str, object]]) -> None:
         _stamp_trust_override(override)
 
 
-def _set_override_value(override: dict[str, object], prop_id: str, value: object) -> None:
+def _set_override_value(
+    override: dict[str, object], prop_id: str, value: object
+) -> None:
     for prop in override.get("properties", []):
         if prop.get("id") == prop_id:
             prop["value"] = value
@@ -1186,8 +1185,7 @@ def _stamp_trust_override(override: dict[str, object]) -> None:
         _set_override_value(override, CUSTOM_WIDTH, width)
     if field == "Observed":
         override["properties"] = [
-            p for p in override.get("properties", [])
-            if p.get("id") != CUSTOM_WIDTH
+            p for p in override.get("properties", []) if p.get("id") != CUSTOM_WIDTH
         ]
     if field == "reasons_text":
         _set_override_value(override, "noValue", "—")
@@ -1453,9 +1451,14 @@ def apply_to_dashboard(
     _attach_nav_bus(nav, current_uid=current_uid)
     stamp_selector_columns(payload)
     stamp_selected_run_panels(payload)
-    from scripts.ops.observability.grafana._visual_usability import apply_visual_usability
+    from scripts.ops.observability.grafana._visual_usability import (
+        apply_visual_usability,
+    )
 
     apply_visual_usability(payload)
+    from scripts.ops.observability.grafana._gr_db_corrections import apply_corrections
+
+    apply_corrections(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:

@@ -31,6 +31,27 @@ class StageAccountingSnapshotsMixin:
         """Return a measured stage/outcome total, or None when unmapped."""
         raise NotImplementedError
 
+    def measured_record_metrics(self) -> dict[str, int]:
+        """Return only observed counters, including durable writes before failure.
+
+        An absent bucket is not a measured zero and must not overwrite other
+        sources. Callers bind this accumulator to exactly one run.
+        """
+        metrics = {
+            f"records_{stage}": bucket.records_out
+            for stage, bucket in self._stages.items()
+            if stage in {"bronze", "silver", "gold"} and bucket.instrumented
+        }
+        for metric, stage, outcome in (
+            ("records_filtered_out", "silver", "filtered_out"),
+            ("records_quarantined", "silver", "quarantined"),
+            ("records_gold_excluded_by_contract", "gold", "excluded_by_contract"),
+        ):
+            count = self._sum_outcome(stage, outcome)
+            if count is not None:
+                metrics[metric] = count
+        return metrics
+
     def snapshot_layers_from_metrics(self, metrics: dict[str, int]) -> LayerCounts:
         """Build layer rollup from coarse metrics + removal maps."""
         silver_filtered = int(metrics.get("records_filtered_out", 0))

@@ -119,6 +119,8 @@ CHEMBL_DOCUMENT_SIMILARITY_SCHEMA = pa.schema(
         # Foreign keys
         pa.field("doc_1", pa.int64()),
         pa.field("doc_2", pa.int64()),
+        pa.field("publication_id1", pa.string()),
+        pa.field("publication_id2", pa.string()),
         pa.field("max_tani", pa.float64()),
         # Tanimoto coefficients
         pa.field("mol_tani", pa.float64()),

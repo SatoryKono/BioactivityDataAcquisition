@@ -186,7 +186,8 @@ def handle_data_quality_transform_error(
         raise error
     if policy == "skip":
         return empty_outcome()
-    batch_metrics.track_quarantined_records(error_type, 1)
+    # Quarantine persistence owns the removal count, after the durable write.
+    # Merely scheduling an entry must not claim that it has been stored.
     return RecordTransformOutcome(
         silver_record=None,
         gold_record=None,

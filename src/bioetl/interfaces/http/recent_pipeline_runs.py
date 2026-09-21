@@ -48,7 +48,7 @@ def _catalog_status(*, started: bool, terminal: bool, run_status: object) -> str
     if terminal:
         return str(run_status)
     if started:
-        return "running"
+        return "unfinished"
     return "unknown"
 
 
@@ -272,7 +272,7 @@ def _event_age_display(
     row: dict[str, object], now: datetime, last: datetime, minimum: datetime
 ) -> str:
     status = row.get("status")
-    if status == "running":
+    if status in {"running", "unfinished"}:
         if minimum < last <= now:
             return _format_compact_duration((now - last).total_seconds())
         return "UNKNOWN"
@@ -290,7 +290,7 @@ def _timing_fields(row: dict[str, object], now: datetime) -> dict[str, object]:
     if start != minimum and end >= start and end != minimum:
         duration = (end - start).total_seconds()
     last_event_age = None
-    if row.get("status") == "running" and minimum < last <= now:
+    if row.get("status") in {"running", "unfinished"} and minimum < last <= now:
         last_event_age = (now - last).total_seconds()
     return {
         "duration_seconds": duration,

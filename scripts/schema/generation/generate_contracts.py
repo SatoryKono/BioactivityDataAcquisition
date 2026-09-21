@@ -23,6 +23,8 @@ from bioetl.domain.normalization.profiles import (
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_CONTRACT_VERSION = "1.0.0"
 ENTITY_CONTRACT_VERSIONS: dict[str, str] = {
+    "chembl_assay_parameters": "2.0.0",
+    "chembl_publication_similarity": "2.0.0",
     "chembl_target": "3.0.0",
     "chembl_target_protein_classification": "2.2.0",
 }
@@ -46,7 +48,12 @@ ENTITY_NAME_OVERRIDES: dict[str, str] = {
     "chembl_document_similarity": "chembl_publication_similarity",
     "chembl_document_term": "chembl_publication_term",
 }
-RETAINED_LEGACY_CONTRACT_FILENAMES: frozenset[str] = frozenset()
+RETAINED_LEGACY_CONTRACT_FILENAMES: frozenset[str] = frozenset(
+    {
+        "chembl_assay_parameters_v1.0.json",
+        "chembl_publication_similarity_v1.0.json",
+    }
+)
 
 
 def _camel_to_snake(name: str) -> str:
@@ -164,6 +171,28 @@ def _build_contract(
             "version": profile_identity.profile_version,
             "hash": profile_identity.profile_hash,
         }
+    if entity == "chembl_publication_similarity":
+        public_pair = {
+            "required": ["publication_id1", "publication_id2"],
+            "properties": {
+                name: {"type": "string", "pattern": "^CHEMBL[1-9][0-9]*$"}
+                for name in ("publication_id1", "publication_id2")
+            },
+        }
+        # Draft 7 can express completeness, but not inequality between fields.
+        # Silver/Gold dataframe validation also rejects self-pairs.
+        contract_payload["anyOf"] = [
+            public_pair,
+            {
+                "required": ["doc_1", "doc_2"],
+                "properties": {
+                    "doc_1": {"type": "integer", "minimum": 1},
+                    "doc_2": {"type": "integer", "minimum": 1},
+                    "publication_id1": {"type": "null"},
+                    "publication_id2": {"type": "null"},
+                },
+            },
+        ]
     return contract_payload
 
 

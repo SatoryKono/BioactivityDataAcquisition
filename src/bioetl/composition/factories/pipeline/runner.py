@@ -16,7 +16,9 @@ from typing import TYPE_CHECKING
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.providers import ensure_providers_loaded
 from bioetl.composition.registry_api import PipelineRegistry, create_registry
-from bioetl.composition.runtime_builders.runner_builder import build_pipeline_runner
+from bioetl.composition.bootstrap.runtime.pipeline import (
+    bootstrap_pipeline_runner as build_pipeline_runner,
+)
 
 from bioetl.domain.ports import ExecutionMetricsRunnerPort
 

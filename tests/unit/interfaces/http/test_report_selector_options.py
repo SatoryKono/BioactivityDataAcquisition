@@ -10,6 +10,23 @@ from bioetl.interfaces.http._report_selector_options import supplement_report_op
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize(
+    "zone,clock", [("UTC", "11:00 UTC"), ("Europe/Kiev", "14:00 EEST")]
+)
+def test_report_fallback_uses_selector_timezone(tmp_path, zone, clock):
+    _report(tmp_path, status="failed")
+    payload = supplement_report_options(
+        {"items": []},
+        dimension="run_id",
+        response_shape="options",
+        scopes={},
+        root=tmp_path,
+        timezone=zone,
+    )
+    assert payload["items"][0]["value"] == "run-a"
+    assert payload["items"][0]["text"].startswith(f"2026-09-15 {clock} ·")
+
+
 def _report(root: Path, run_id: str = "run-a", **overrides: str) -> Path:
     path = root / "pipeline" / "chembl_assay" / run_id / "pipeline-run-report.json"
     path.parent.mkdir(parents=True, exist_ok=True)

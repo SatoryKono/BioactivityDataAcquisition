@@ -193,6 +193,29 @@ class TestRunnerFactory:
 class TestRunnerFactoryCreate:
     """Tests for RunnerFactory.create method."""
 
+    def test_default_factory_initializes_cold_publication_policy(self, monkeypatch):
+        from bioetl.domain.mapping import publication_type_classification as policy
+        from bioetl.composition.bootstrap.runtime import pipeline as bootstrap
+
+        monkeypatch.setattr(policy, "_PROVIDER_LOOKUPS", {})
+        assert not policy.is_initialized()
+        registry = PipelineRegistry()
+        factory = RunnerFactory(registry=registry)
+        factory._registrations_done = True
+        context = MagicMock(pipeline_name="crossref_publication", cached_bronze=None)
+        runner = _make_mock_runner()
+
+        def assemble(**kwargs):
+            assert policy.is_initialized()
+            assert policy.classify_publication_type("crossref", "journal-article")
+            return runner
+
+        with (
+            patch.object(bootstrap, "prepare_runtime_registry", return_value=registry),
+            patch.object(bootstrap, "_build_pipeline_runner", side_effect=assemble),
+        ):
+            assert factory.create(context) is runner
+
     @pytest.fixture
     def mock_context(self):
         """Create a mock PipelineRunContext."""

@@ -27,6 +27,8 @@ tests:
 - name: covered-coverage-controls-selected-verdict
   interval: 1m
   input_series:
+  - series: bioetl_control_plane_current_status_trusted{pipeline="audit",run_type="backfill"}
+    values: 0+0x3
   - series: bioetl_runtime_current_status_trusted{pipeline="audit",run_type="backfill"}
     values: 0+0x3
   - series: bioetl_overview_pipeline_run_type_universe{pipeline="audit",run_type="backfill"}
@@ -49,6 +51,8 @@ tests:
 - name: critical-coverage-controls-selected-verdict
   interval: 1m
   input_series:
+  - series: bioetl_control_plane_current_status_trusted{pipeline="audit",run_type="backfill"}
+    values: 2+0x3
   - series: bioetl_runtime_current_status_trusted{pipeline="audit",run_type="backfill"}
     values: 2+0x3
   - series: bioetl_overview_pipeline_run_type_universe{pipeline="audit",run_type="backfill"}
@@ -89,3 +93,12 @@ tests:
     exp_samples:
     - labels: '{}'
       value: 1
+- name: restored-provider-is-current-evidence-without-recent-probe
+  interval: 1m
+  input_series:
+  - series: bioetl_provider_current_status{provider="chembl"}
+    values: 0+0x3
+  promql_expr_test:
+  - expr: bioetl_incident_ranked_evidence{provider="unknown",signal="telemetry_gap"}
+    eval_time: 1m
+    exp_samples: []

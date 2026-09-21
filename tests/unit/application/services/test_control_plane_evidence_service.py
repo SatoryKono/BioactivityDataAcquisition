@@ -968,3 +968,17 @@ def test_archive_requires_explicit_referenced_applicability_policy(
         if expected == "OK"
         else "archive_evidence_not_recorded"
     )
+
+
+def test_trust_summary_reads_one_ledger_snapshot_per_request():
+    from unittest.mock import Mock
+
+    ledger = Mock()
+    ledger.list_entries.return_value = ()
+    service = ControlPlaneEvidenceService(ledger_port=ledger)
+    scope = _scope()
+    service.trust_summary(scope=scope, now=_NOW)
+    ledger.list_entries.assert_called_once_with(scope.manifest.manifest_id)
+    # A new HTTP request must read again rather than reuse stale cached evidence.
+    service.trust_summary(scope=scope, now=_NOW)
+    assert ledger.list_entries.call_count == 2

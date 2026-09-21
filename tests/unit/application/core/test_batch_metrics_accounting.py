@@ -85,7 +85,8 @@ def test_record_processed_stage_accounting_stages() -> None:
         _record_processed_stage_accounting("bronze", 0)
     assert accounting.record_in.called
     assert accounting.record_out.called
-    assert accounting.record_removal.called
+    # Coarse quarantined counters project the durable removal, never own it.
+    accounting.record_removal.assert_not_called()
 
 
 def test_record_stage_outcome_accounting_gold_and_silver() -> None:
@@ -104,7 +105,7 @@ def test_record_stage_outcome_accounting_gold_and_silver() -> None:
         return_value=None,
     ):
         _record_stage_outcome_accounting("gold", "written", 1)
-    assert accounting.record_out.called
+    accounting.record_out.assert_not_called()
     assert accounting.record_removal.called
 
 

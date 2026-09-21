@@ -331,7 +331,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"0. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"1. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"2. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">2. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"3. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range, visible pipeline selection.\" href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">3. Pipeline Diagnostics</a><a class=\"bioetl-nav-current\" href=\"#bioetl-provider-health-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"4. Provider Health (Provider Health)\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">4. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"5. Data Quality (Data Quality). Scope reset: stage=All; preserves time range, visible pipeline selection.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">5. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 auto;min-width:0;text-align:center;padding:0 8px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"0. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"1. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"2. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">2. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"3. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range, visible pipeline selection.\" href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">3. Pipeline Diagnostics</a><a class=\"bioetl-nav-current\" href=\"#bioetl-provider-health-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"4. Provider Health (Provider Health)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">4. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"5. Data Quality (Data Quality). Scope reset: stage=All; preserves time range, visible pipeline selection.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">5. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
       },
       "title": "",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus 0–6: Run Explorer / Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality / Incident Workspace. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
@@ -790,12 +790,12 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 130
-              },
-              {
                 "id": "custom.align",
                 "value": "left"
+              },
+              {
+                "id": "custom.width",
+                "value": 130
               }
             ]
           }
@@ -1134,12 +1134,12 @@
                 }
               },
               {
-                "id": "custom.width",
-                "value": 110
-              },
-              {
                 "id": "custom.align",
                 "value": "left"
+              },
+              {
+                "id": "custom.width",
+                "value": 100
               }
             ]
           },
@@ -1157,12 +1157,12 @@
                 }
               },
               {
-                "id": "custom.width",
-                "value": 105
-              },
-              {
                 "id": "custom.align",
                 "value": "left"
+              },
+              {
+                "id": "custom.width",
+                "value": 85
               }
             ]
           },
@@ -1173,12 +1173,12 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 105
-              },
-              {
                 "id": "custom.align",
                 "value": "left"
+              },
+              {
+                "id": "custom.width",
+                "value": 105
               }
             ]
           }
@@ -1367,7 +1367,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Do not put full UUIDs into Prometheus labels. Only providers currently observed as DEGRADED or FAILING on the first-screen provider-status recording rule (instant/current semantics, not selected-range history). Empty table means no provider is currently above OK in the active trust window. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id. Fleet-first matrix: answer without forcing a provider selector; select row to deep-dive TELEMETRY MISSING is not a zero and not VALID EMPTY. First-screen Monitor Fleet Severity is the compact summary; this table is the Non-OK expander (status>=1), not a second copy of OK rows. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
+          "description": "GLOBAL · Current fleet, independent of the selected Provider. VALID EMPTY requires every observed provider to have health evidence and current status OK. Missing coverage remains UNKNOWN; query failure is not a healthy empty fleet.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1421,7 +1421,7 @@
               "links": [
                 {
                   "title": "Open selected provider context",
-                  "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=${__data.fields.provider:percentencode}&${__url_time_range}",
+                  "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=${__data.fields.provider_target:percentencode}&${__url_time_range}",
                   "targetBlank": false,
                   "includeVars": false
                 }
@@ -1455,18 +1455,22 @@
                     }
                   },
                   {
+                    "id": "custom.minWidth",
+                    "value": 160
+                  },
+                  {
                     "id": "mappings",
                     "value": [
                       {
                         "type": "value",
                         "options": {
-                          "0": {
-                            "text": "OK",
-                            "color": "#166534"
+                          "-1": {
+                            "text": "VALID EMPTY",
+                            "color": "text"
                           },
                           "1": {
                             "text": "WARN",
-                            "color": "orange"
+                            "color": "yellow"
                           },
                           "2": {
                             "text": "CRIT",
@@ -1474,35 +1478,11 @@
                           },
                           "3": {
                             "text": "UNKNOWN",
-                            "color": "#555555"
-                          }
-                        }
-                      },
-                      {
-                        "type": "special",
-                        "options": {
-                          "match": "null",
-                          "result": {
-                            "text": "UNKNOWN",
-                            "color": "#555555"
-                          }
-                        }
-                      },
-                      {
-                        "type": "special",
-                        "options": {
-                          "match": "nan",
-                          "result": {
-                            "text": "UNKNOWN",
-                            "color": "#555555"
+                            "color": "gray"
                           }
                         }
                       }
                     ]
-                  },
-                  {
-                    "id": "custom.minWidth",
-                    "value": 160
                   }
                 ]
               },
@@ -1612,6 +1592,52 @@
                     "value": 160
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Severity"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "-1": {
+                            "text": "VALID EMPTY",
+                            "color": "text"
+                          },
+                          "1": {
+                            "text": "WARN",
+                            "color": "yellow"
+                          },
+                          "2": {
+                            "text": "CRIT",
+                            "color": "red"
+                          },
+                          "3": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "provider_target"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
               }
             ]
           },
@@ -1650,7 +1676,7 @@
           "pluginVersion": "10.4.0",
           "targets": [
             {
-              "expr": "topk(4, max by (provider) (bioetl_provider_current_status) >= 1)",
+              "expr": "(label_replace((topk(4, max by (provider) (bioetl_provider_current_status) >= 1)), \"provider_target\", \"$1\", \"provider\", \"(.*)\")) or label_replace(label_replace(((((count(max by (provider) (bioetl_provider_current_status)) > 0) * 0 + 1) * absent(max by (provider) (bioetl_provider_current_status) != 0) * absent(max by (provider) (bioetl_provider_current_status) unless on(provider) max by (provider) (bioetl_provider_health_status))) * 0 - 1), \"provider\", \"VALID EMPTY - fleet observed, no non-OK providers\", \"\", \"\"), \"provider_target\", \"$$__all\", \"\", \"\")",
               "format": "table",
               "instant": true,
               "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
@@ -2204,7 +2230,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Complete DEGRADED or FAILING provider list. First-screen Inspect Non-OK Providers is the four-row summary. TELEMETRY MISSING is not a zero and not VALID EMPTY. GLOBAL: independent of the selected Provider. Unknown evidence is visible before healthy providers.",
+          "description": "GLOBAL · Current fleet, independent of the selected Provider. VALID EMPTY requires every observed provider to have health evidence and current status OK. Missing coverage remains UNKNOWN; query failure is not a healthy empty fleet.",
           "gridPos": {
             "x": 12,
             "y": 19,
@@ -2224,7 +2250,7 @@
           },
           "targets": [
             {
-              "expr": "max by (provider) (bioetl_provider_current_status) >= 1",
+              "expr": "(label_replace((max by (provider) (bioetl_provider_current_status) >= 1), \"provider_target\", \"$1\", \"provider\", \"(.*)\")) or label_replace(label_replace(((((count(max by (provider) (bioetl_provider_current_status)) > 0) * 0 + 1) * absent(max by (provider) (bioetl_provider_current_status) != 0) * absent(max by (provider) (bioetl_provider_current_status) unless on(provider) max by (provider) (bioetl_provider_health_status))) * 0 - 1), \"provider\", \"VALID EMPTY - fleet observed, no non-OK providers\", \"\", \"\"), \"provider_target\", \"$$__all\", \"\", \"\")",
               "format": "table",
               "instant": true,
               "legendFormat": "{{provider}}",
@@ -2274,6 +2300,32 @@
                       "type": "auto",
                       "wrapText": false
                     }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "-1": {
+                            "text": "VALID EMPTY",
+                            "color": "text"
+                          },
+                          "1": {
+                            "text": "WARN",
+                            "color": "yellow"
+                          },
+                          "2": {
+                            "text": "CRIT",
+                            "color": "red"
+                          },
+                          "3": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               },
@@ -2283,6 +2335,17 @@
                   "options": "Status"
                 },
                 "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 130
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  },
                   {
                     "id": "mappings",
                     "value": [
@@ -2295,7 +2358,7 @@
                           },
                           "1": {
                             "text": "WARN",
-                            "color": "orange"
+                            "color": "yellow"
                           },
                           "2": {
                             "text": "CRIT",
@@ -2304,6 +2367,10 @@
                           "3": {
                             "text": "UNKNOWN",
                             "color": "gray"
+                          },
+                          "-1": {
+                            "text": "VALID EMPTY",
+                            "color": "text"
                           }
                         }
                       },
@@ -2318,17 +2385,6 @@
                         }
                       }
                     ]
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 130
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
-                    }
                   }
                 ]
               },
@@ -2380,6 +2436,18 @@
                   {
                     "id": "custom.minWidth",
                     "value": 160
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "provider_target"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               }
@@ -2648,12 +2716,12 @@
           },
           "targets": [
             {
-              "expr": "round(sum by (provider) (increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__interval])))",
+              "expr": "round(sum by (provider) (increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__rate_interval])))",
               "legendFormat": "failures {{ provider }}",
               "refId": "A"
             },
             {
-              "expr": "round(sum by (provider) (increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__interval])))",
+              "expr": "round(sum by (provider) (increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__rate_interval])))",
               "legendFormat": "degraded {{ provider }}",
               "refId": "B"
             }
@@ -2986,7 +3054,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__interval])))",
+              "expr": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__rate_interval])))",
               "legendFormat": "{{ provider }} {{ operation }}",
               "refId": "A"
             }
@@ -3164,7 +3232,7 @@
           },
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
+              "expr": "histogram_quantile(0.95, sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
               "legendFormat": "{{ provider }} {{ endpoint }} p95",
               "refId": "A"
             }
@@ -3250,7 +3318,7 @@
           },
           "targets": [
             {
-              "expr": "round((sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(rate.?limit|429|thrott).*\"}[$__interval]))))",
+              "expr": "round((sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(rate.?limit|429|thrott).*\"}[$__rate_interval]))))",
               "legendFormat": "{{ provider }} {{ method }} {{ error_type }}",
               "refId": "A"
             }
@@ -3328,7 +3396,7 @@
           },
           "targets": [
             {
-              "expr": "round((sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(timeout|timed.?out|network).*\"}[$__interval]))))",
+              "expr": "round((sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(timeout|timed.?out|network).*\"}[$__rate_interval]))))",
               "legendFormat": "{{ provider }} {{ method }} {{ error_type }}",
               "refId": "A"
             }
@@ -3417,7 +3485,7 @@
           },
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
+              "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
               "legendFormat": "{{ provider }} p95",
               "refId": "A"
             }
@@ -3668,7 +3736,7 @@
           },
           "targets": [
             {
-              "expr": "sum by (adapter) (increase(bioetl_circuit_breaker_trips_total{adapter=~\"$adapter\"}[$__interval]))",
+              "expr": "sum by (adapter) (increase(bioetl_circuit_breaker_trips_total{adapter=~\"$adapter\"}[$__rate_interval]))",
               "legendFormat": "{{adapter}}",
               "refId": "A"
             }
@@ -3990,7 +4058,7 @@
           },
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
+              "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
               "legendFormat": "{{ provider }} p95",
               "refId": "A"
             }
@@ -4410,6 +4478,110 @@
                     "value": true
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "deadline_exceeded": {
+                            "text": "QUERY ERROR — deadline exceeded",
+                            "color": "red"
+                          },
+                          "capacity_exhausted": {
+                            "text": "QUERY ERROR — capacity exhausted",
+                            "color": "red"
+                          },
+                          "catalog_unavailable": {
+                            "text": "QUERY ERROR — catalog unavailable",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Reason"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "deadline_exceeded": {
+                            "text": "QUERY ERROR — deadline exceeded",
+                            "color": "red"
+                          },
+                          "capacity_exhausted": {
+                            "text": "QUERY ERROR — capacity exhausted",
+                            "color": "red"
+                          },
+                          "catalog_unavailable": {
+                            "text": "QUERY ERROR — catalog unavailable",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "ERROR": {
+                            "text": "QUERY ERROR",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "status"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "ERROR": {
+                            "text": "QUERY ERROR",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -4434,8 +4606,7 @@
               "url_options": {
                 "data": "",
                 "method": "GET"
-              },
-              "expr": ""
+              }
             }
           ],
           "transformations": [
@@ -4793,8 +4964,7 @@
               "url_options": {
                 "data": "",
                 "method": "GET"
-              },
-              "expr": ""
+              }
             }
           ],
           "transformations": [
