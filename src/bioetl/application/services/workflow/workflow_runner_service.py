@@ -21,6 +21,7 @@ from bioetl.application.services.workflow.workflow_runner_models import (
     WorkflowStepExecutionResult,
 )
 from bioetl.application.services.workflow.workflow_runner_reports import (
+    archive_workflow_children,
     attach_workflow_run_report,
 )
 from bioetl.application.services.workflow.workflow_runner_support import (
@@ -160,13 +161,19 @@ class WorkflowRunnerService:
                 duration_seconds=perf_counter() - started_monotonic,
             )
         )
-        return attach_workflow_run_report(
+        reported = attach_workflow_run_report(
             config=config,
             result=identified_result,
             logger=getattr(self.pipeline_runner, "logger", None),
             store=self.report_store,
             report_root=self.report_root,
         )
+        archive_workflow_children(
+            config,
+            reported,
+            getattr(self.pipeline_runner, "archive_control_plane", None),
+        )
+        return reported
 
     def record_expected_pipeline_metrics(self, config: WorkflowConfig) -> None:
         """Record planned pipeline scopes before workflow step execution."""

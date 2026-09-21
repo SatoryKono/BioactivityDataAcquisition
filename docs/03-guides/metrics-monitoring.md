@@ -966,6 +966,19 @@ rechecks inventory, identity, both copies and the retained source on every read.
 Missing evidence stays UNKNOWN; corruption or identity/inventory mismatch is ERROR.
 This proves a local restore, not off-host durability or replay safety.
 
+After archiving, successful runs publish a new selected-run assessment. Workflow
+finalization repeats this step after recording the workflow observation. The
+candidate report and its revision history are archived and verified before the
+current report is replaced; previous revisions remain available. Other failing
+domains retain their verdicts. `assessment_at` records the later evaluation time
+without changing the original completion time.
+
+To reassess an existing run without rerunning ETL, add
+`--report-root reports/run-reports --refresh-assessment` to the manual archive
+command above. This option cannot be combined with `--verify-only`. A verified
+archive alone does not update a previously saved assessment. Historical run
+status and current telemetry health remain separate.
+
 The Archive row distinguishes `N/A: policy` from `Archive verified`. N/A requires
 the run's original referenced `archive_policy.required=false`; it contributes OK
 to applicability but does not attest copies. Do not rewrite old manifests to add

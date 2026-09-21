@@ -3,15 +3,22 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import replace
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.application.runtime_clock import current_utc_time
+from bioetl.application.services.execution.pipeline_runner_models import (
+    RunOptions,
+    RunResult,
+)
 from bioetl.application.services.workflow.workflow_runner_models import (
     WorkflowRunExecutionResult,
     WorkflowStepExecutionResult,
+)
+from bioetl.application.services.workflow.workflow_runner_support import (
+    run_options_from_config,
 )
 from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.types import JsonDict
@@ -19,6 +26,30 @@ from bioetl.domain.workflow import WorkflowConfig, WorkflowStepConfig
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
+
+
+def archive_workflow_children(
+    config: WorkflowConfig,
+    result: WorkflowRunExecutionResult,
+    archive: Callable[[RunResult, RunOptions | None], None] | None,
+) -> None:
+    """Archive the late workflow revision, preserving each step's archive opt-out."""
+    if archive is None or result.run_report_error is not None:
+        return
+    for step in result.steps:
+        definition = config.get_step(step.step_id)
+        if not isinstance(step.payload, RunResult) or not isinstance(
+            definition, WorkflowStepConfig
+        ):
+            continue
+        options = run_options_from_config(
+            config.defaults.merged_with(definition.run_options)
+        )
+        try:
+            archive(step.payload, options)
+        except (OSError, RuntimeError, TypeError, ValueError):
+            # The persisted assessment remains fail-closed when archive publication fails.
+            continue
 
 
 def _require_workflow_result(value: object) -> WorkflowRunExecutionResult:

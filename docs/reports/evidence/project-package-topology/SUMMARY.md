@@ -5,9 +5,9 @@ coverage inventory rebind. Counts and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=a0a868ed798ee084ee039babe08fde6b44dd07bca1b23b8cd5353892d3fff880`
+`source_tree_sha256=fa6ce1301ccda5929484a5ceee74e970a3a299ec3e22952c835d1dfdacc5e836`
 
-`source_module_count=2482`
+`source_module_count=2493`
 
 Refresh note (2026-09-19): hash-only reconcile after FK normalization split
 and governance rebind loop. Counts and the source fingerprint below come from

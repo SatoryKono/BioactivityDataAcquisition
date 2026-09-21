@@ -67,6 +67,20 @@ def read(tmp_path, run_id="run-a"):
     )
 
 
+def test_late_assessment_time_is_separate_from_completion(tmp_path):
+    from bioetl.application.services.run_reports.snapshots import publish_snapshot
+
+    path = persist(tmp_path).json_path
+    original = json.loads(path.read_text())
+    original.pop("selected_run_snapshot")
+    original["assessment_at"] = "2026-01-02T00:00:00+00:00"
+    updated = publish_snapshot(original, path, store=FileRunReportStoreAdapter())
+    path.write_text(json.dumps(updated))
+    result = read(tmp_path)
+    assert result["evaluation_at"] == original["assessment_at"]
+    assert result["completed_at"] == "2026-01-01T00:01:00+00:00"
+
+
 @pytest.mark.parametrize("age", [300, 899, 900, 901, 86400, 604800])
 @pytest.mark.parametrize(
     "chart_range",

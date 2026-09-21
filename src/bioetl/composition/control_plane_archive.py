@@ -13,6 +13,7 @@ from bioetl.application.services.execution.pipeline_runner_models import (
     RunOptions,
     RunResult,
 )
+from bioetl.application.services.run_reports.paths import resolve_report_root
 from bioetl.domain.control_plane import ControlPlaneArtifactLifecyclePolicy, RunManifest
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane.file_archive_store import FileArchiveStore
@@ -23,6 +24,7 @@ from bioetl.infrastructure.control_plane.file_run_manifest_store import (
     FileRunManifestStore,
 )
 from bioetl.infrastructure.time import SystemClock
+from bioetl.composition.archive_assessment import refresh_archived_assessment
 
 _ARCHIVE_FAILURES = (OSError, RuntimeError, TypeError, ValueError, FileExistsError)
 
@@ -48,13 +50,34 @@ def archive_successful_run(
     manifest = manifests.get_by_run_id(run_id)
     if manifest is None or manifest.pipeline_name != result.pipeline_name:
         return None, "archive_manifest_missing"
-    return _create_or_verify_pack(
+    report_root = resolve_report_root(root=report_root).resolve()
+    outcome = _create_or_verify_pack(
         manifest=manifest,
         data_root=resolved_root,
         archive_root=resolve_control_plane_archive_root(archive_root),
         report_root=report_root,
         control_root=control_root,
     )
+    if outcome[0] is not True:
+        return outcome
+    now = SystemClock().now()
+    plan = FileControlPlaneArtifactLifecycleStore(
+        base_path=control_root
+    ).plan_for_manifest(
+        ControlPlaneArtifactLifecyclePolicy(retention_days=90, now=now),
+        manifest=manifest,
+    )
+    try:
+        return refresh_archived_assessment(
+            data_root=resolved_root,
+            archive_root=resolve_control_plane_archive_root(archive_root),
+            report_root=report_root.resolve(),
+            manifest=manifest,
+            plan=plan,
+            observed_at=now,
+        )
+    except _ARCHIVE_FAILURES:
+        return False, "archive_assessment_failed"
 
 
 def _create_or_verify_pack(

@@ -1,23 +1,11 @@
-# Тепловая карта технического долга
+# Debt heatmap
 
-Шкала surface_score: 0 — нет поверхности, 1 — локальная, 2 — средняя (подсистема), 3 — максимальная (ядро/гейты).
+| Зона | P1 | P2 | P3 |
+| --- | --- | --- | --- |
+| architecture (memory/tooling) | TD-001 | TD-003, TD-004 | |
+| dependencies | TD-002 | | |
+| code (src/bioetl) | | | TD-005, TD-008 |
+| security/tests | | | TD-006, TD-007, TD-009 |
 
-| Зона | Находки | Surface | Приоритет |
-|------|---------|---------|-----------|
-| `src/memory/` sidecar (god-module, query-раскол, mypy-exclude, exemptions) | AUD-001, AUD-002*, AUD-003, AUD-004* | ███ 3 | P0/P1 |
-| Quality gates (exemptions cliff, jscpd-5, mypy-поблажки) | AUD-002, AUD-007* | ███ 3 | P0/P2 |
-| Startup/observability DI-seam | AUD-004 | ██ 2 | P1 |
-| FK-reconciliation (infra + application) | AUD-005 | ██ 2 | P1 |
-| Зависимости/пины | AUD-006 | ██ 2 | P1 |
-| `application/composite/` God-пакет | AUD-007 | ██ 2 | P2 |
-| CLI-поверхность (12 entrypoints) | AUD-011 | ██ 2 | P2 |
-| Фасады/реэкспорты | AUD-008 | █ 1 | P2 |
-| Покрытие (pragma no cover) | AUD-009 | █ 1 | P2 |
-| Legacy/compat-шимы | AUD-010 | █ 1 | P2 |
-| Подавления nosec/subprocess | AUD-012 | █ 1 | P3 |
-
-\* сквозные находки: затрагивают несколько зон.
-
-## Вывод
-
-Жара сконцентрирована в двух местах: **memory-sidecar** (размер + нетипизированность + освобождение от гейтов) и **точка синхронизации exemptions 2026-12-31**. Их снятие (декомпозиция + рассредоточение сроков) даёт наибольшее снижение риска. Остальное — распределённый средний/низкий фон: типы, фрагментация, шимы, покрытие, подавления.
+Горячие точки: `src/memory/graph/sync_pkg/` (размер), allowlist циклов (30), холдбэки мажоров.
+Холодные зоны: `src/bioetl` (0 TODO, топ-модуль 441 строка), конфиги (дрейф 0).

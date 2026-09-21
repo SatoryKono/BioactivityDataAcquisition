@@ -18,9 +18,9 @@ ADR-matrix rebind, and module-coverage inventory rebind.
 Current headline evidence:
 Debt-governance gates: **45 pass / 0 fail**;
 Architecture quality integral score: **9.47** (`good_targeted_improvements`);
-source_module_count: **2482** with fully_covered: **2441**;
-partially_covered: **40**; no_executable_lines: **1**;
-uncovered: **0**; unmeasured: **0** (= 2482 == source_module_count).
+source_module_count: **2493** with fully_covered: **2485**;
+partially_covered: **7**; no_executable_lines: **1**;
+uncovered: **0**; unmeasured: **0** (= 2493 == source_module_count).
 The historical audited commit above is retained; this metadata refresh does
 not constitute a new repository-wide architecture audit.
 
@@ -84,13 +84,13 @@ Refresh reason: Reconcile the current evidence surface and semantic summary with
 1. Release status: **debt-governance gates passing**; no blocking gaps remain.
 1. Architecture quality integral score: **9.47** (`good_targeted_improvements`). Integral score `9.47`.
 1. Module inventory (from module-coverage-inventory.json only):
-   - source_module_count: **2482**
-   - fully_covered: **2441**
-   - partially_covered: **40**
+   - source_module_count: **2493**
+   - fully_covered: **2485**
+   - partially_covered: **7**
    - no_executable_lines: **1**
    - uncovered: **0**
    - unmeasured: **0**
-   - check: fully + partial + no_exec + uncovered + unmeasured = 2482 == source_module_count
+   - check: fully + partial + no_exec + uncovered + unmeasured = 2493 == source_module_count
 1. Contract coverage matrix schema: **contract-coverage-matrix-v3** (v3: strict Gold required for availability).
 1. Constructor waivers (shrink-only inventory): **1** entries.
 1. Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**.

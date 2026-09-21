@@ -26,6 +26,206 @@ from bioetl.infrastructure.control_plane import file_archive_store as archive_mo
 pytestmark = pytest.mark.unit
 
 
+def _assessment_case(archive_case, tmp_path, monkeypatch, *, dq="OK"):
+    from bioetl.application.services.run_reports.snapshots import publish_snapshot
+    from bioetl.application.services.run_reports.writer import write_json
+    from bioetl.application.services.run_reports.observations import (
+        record_run_observation,
+    )
+    from bioetl.composition import archive_assessment
+    from bioetl.infrastructure.storage.run_report_store_adapter import (
+        FileRunReportStoreAdapter,
+    )
+
+    archive, manifest, plan = archive_case
+    root = tmp_path / "reports"
+    path = (
+        root
+        / "pipeline"
+        / manifest.pipeline_name
+        / str(manifest.run_id)
+        / "pipeline-run-report.json"
+    )
+    report = {
+        "identity": {
+            "pipeline_name": manifest.pipeline_name,
+            "run_id": str(manifest.run_id),
+            "status": "success",
+        },
+        "observations": {
+            "Control Plane": {
+                "verdict": "INCOMPLETE",
+                "reason": "archive_evidence_not_recorded",
+            },
+            "Data Quality": {"verdict": dq},
+            "Data Validation": {"verdict": "OK"},
+            "Provider": {"verdict": "OK"},
+        },
+    }
+    adapter = FileRunReportStoreAdapter()
+    write_json(path, publish_snapshot(report, path, store=adapter), store=adapter)
+    archive = FileArchiveStore(archive.data_root, archive.archive_root, root)
+
+    def capture(*_args):
+        assert archive.verify(manifest=manifest, plan=plan)[0] is True
+        record_run_observation(
+            "Control Plane", verdict="OK", reason="archive_restore_verified", facts={}
+        )
+
+    monkeypatch.setattr(
+        archive_assessment, "create_run_status_capture", lambda *a, **k: capture
+    )
+    return archive, manifest, plan, path
+
+
+@pytest.mark.parametrize("dq, verdict", [("OK", "OK"), ("ERROR", "ERROR")])
+def test_archive_assessment_commits_verified_revision_and_preserves_history(
+    archive_case, tmp_path, monkeypatch, dq, verdict
+):
+    from bioetl.composition.archive_assessment import refresh_archived_assessment
+    from bioetl.domain.run_reports.selected_status import verify_snapshot
+
+    archive, manifest, plan, path = _assessment_case(
+        archive_case, tmp_path, monkeypatch, dq=dq
+    )
+    original = path.read_bytes()
+    old_snapshot = json.loads(original)["selected_run_snapshot"]
+    old_pack = archive.create(manifest=manifest, plan=plan)
+    old_files = {
+        p.relative_to(old_pack): p.read_bytes()
+        for p in old_pack.rglob("*")
+        if p.is_file()
+    }
+    result = refresh_archived_assessment(
+        data_root=archive.data_root,
+        archive_root=archive.archive_root,
+        report_root=archive.report_root,
+        manifest=manifest,
+        plan=plan,
+        observed_at=datetime.now(UTC),
+    )
+    assert result == (True, "archive_restore_verified")
+    current = json.loads(path.read_bytes())
+    snapshot = current["selected_run_snapshot"]
+    assert verify_snapshot(snapshot)
+    assert snapshot["assessment"]["verdict"] == verdict
+    assert snapshot["revision"] != old_snapshot["revision"]
+    assert (
+        json.loads(
+            (
+                path.parent / "status-revisions" / f"{old_snapshot['revision']}.json"
+            ).read_text()
+        )
+        == old_snapshot
+    )
+    assert all(
+        (old_pack / relative).read_bytes() == content
+        for relative, content in old_files.items()
+    )
+    assert archive.verify(manifest=manifest, plan=plan)[0] is True
+
+
+def test_archive_assessment_failed_candidate_keeps_original_report(
+    archive_case, tmp_path, monkeypatch
+):
+    from bioetl.composition.archive_assessment import refresh_archived_assessment
+
+    archive, manifest, plan, path = _assessment_case(
+        archive_case, tmp_path, monkeypatch
+    )
+    archive.create(manifest=manifest, plan=plan)
+    original = path.read_bytes()
+    revisions = list(path.parent.glob("status-revisions/*.json"))
+
+    def fail(*args, **kwargs):
+        raise OSError("candidate archive failed")
+
+    monkeypatch.setattr(FileArchiveStore, "create", fail)
+    with pytest.raises(OSError, match="candidate archive failed"):
+        refresh_archived_assessment(
+            data_root=archive.data_root,
+            archive_root=archive.archive_root,
+            report_root=archive.report_root,
+            manifest=manifest,
+            plan=plan,
+            observed_at=datetime.now(UTC),
+        )
+    assert path.read_bytes() == original
+    assert list(path.parent.glob("status-revisions/*.json")) == revisions
+    assert archive.verify(manifest=manifest, plan=plan)[0] is True
+
+
+def test_automatic_archive_resolves_default_report_root(
+    archive_case, tmp_path, monkeypatch
+):
+    from bioetl.composition import control_plane_archive as module
+    from bioetl.application.services.run_reports import paths
+    from bioetl.application.services.execution.pipeline_runner_models import (
+        RunResult,
+        PipelineRunResult,
+    )
+
+    archive, manifest, plan, path = _assessment_case(
+        archive_case, tmp_path, monkeypatch
+    )
+    monkeypatch.setattr(paths, "DEFAULT_REPORT_ROOT", archive.report_root)
+    monkeypatch.setattr(
+        module.FileRunManifestStore, "get_by_run_id", lambda *a: manifest
+    )
+    monkeypatch.setattr(
+        module.FileControlPlaneArtifactLifecycleStore,
+        "plan_for_manifest",
+        lambda *a, **k: plan,
+    )
+    result = RunResult(
+        status=PipelineRunResult.SUCCESS,
+        pipeline_name=manifest.pipeline_name,
+        run_id=str(manifest.run_id),
+        run_type="backfill",
+        manifest_id=manifest.manifest_id,
+    )
+    assert module.archive_successful_run(
+        result=result,
+        options=None,
+        data_root=archive.data_root,
+        archive_root=archive.archive_root,
+        report_root=None,
+    ) == (True, "archive_restore_verified")
+    assert (
+        json.loads(path.read_bytes())["selected_run_snapshot"]["assessment"]["verdict"]
+        == "OK"
+    )
+
+
+def test_assessment_rejects_source_changed_during_candidate_archive(
+    archive_case, tmp_path, monkeypatch
+):
+    from bioetl.composition.archive_assessment import refresh_archived_assessment
+
+    archive, manifest, plan, path = _assessment_case(
+        archive_case, tmp_path, monkeypatch
+    )
+    archive.create(manifest=manifest, plan=plan)
+    original = path.read_bytes()
+    create = FileArchiveStore.create
+
+    def changed(store, **kwargs):
+        (archive.data_root / "ledger.jsonl").write_text("changed evidence\n")
+        return create(store, **kwargs)
+
+    monkeypatch.setattr(FileArchiveStore, "create", changed)
+    outcome = refresh_archived_assessment(
+        data_root=archive.data_root,
+        archive_root=archive.archive_root,
+        report_root=archive.report_root,
+        manifest=manifest,
+        plan=plan,
+        observed_at=datetime.now(UTC),
+    )
+    assert outcome[0] is not True
+    assert path.read_bytes() == original
+
+
 @pytest.fixture
 def archive_case(tmp_path: Path):
     data = tmp_path / "data"

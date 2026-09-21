@@ -251,7 +251,7 @@ def load_selected_run_status(
         "run_type": identity.get("run_type"),
         "workflow_id": identity.get("workflow_id"),
         "started_at": identity.get("started_at"),
-        "evaluation_at": identity.get("completed_at"),
+        "evaluation_at": report.get("assessment_at", identity.get("completed_at")),
         "revision": revision,
         "evidence_availability": availability,
         "replay_readiness_now": _NOT_EVALUATED,
