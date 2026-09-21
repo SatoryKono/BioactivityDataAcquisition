@@ -194,9 +194,19 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "primary_topic": self.serialize_json(primary_topic)
             if primary_topic
             else None,
+            "primary_topic_raw_json": self.serialize_json(rec.get("primary_topic")),
+            "primary_topic_canonical_json": self.serialize_json(primary_topic)
+            if primary_topic
+            else None,
             "grants": self._serialize_json_list_or_none(
                 grants,
                 require_non_empty=True,
+            ),
+            "grants_raw_json": self._serialize_json_list_or_none(
+                grant_records, require_non_empty=True
+            ),
+            "grants_canonical_json": self._serialize_json_list_or_none(
+                grants, require_non_empty=True
             ),
             "subject_mesh": self._serialize_json_list_or_none(subject_mesh),
             "subject_keywords": self._serialize_json_list_or_none(subject_keywords),

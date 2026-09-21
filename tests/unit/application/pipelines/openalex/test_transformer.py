@@ -196,6 +196,10 @@ class TestOpenAlexPublicationTransformer:
         assert grants[0]["award_id"] == "633053"
         assert grants[0]["award_openalex_id"] == "G5453342221"
         assert grants[0]["funder"] == "F4320337670"
+        assert json.loads(result["grants_raw_json"]) == sample_openalex_record["awards"]
+        assert json.loads(result["grants_canonical_json"]) == grants
+        assert "primary_topic_raw_json" in result
+        assert "primary_topic_canonical_json" in result
 
     @pytest.mark.asyncio
     async def test_transform_record_without_id_raises_filtered_out_error(
