@@ -1,6 +1,6 @@
 # Consolidated Open Tasks Plan
 
-Дата: 2026-03-21 (актуализировано 2026-04-03)
+Дата: 2026-03-21 (актуализировано 2026-09-21)
 Статус: active consolidated plan
 Язык: русский
 
@@ -93,6 +93,25 @@ Config-topology seams после `P1` closeout удерживаются как g
   уже удерживаются как measured-only / no-new-first-party-imports seams.
 
 ## Активная очередь
+
+### MIG-GHGL-01. Подготовить решение о миграции GitHub → GitLab
+
+Статус: `proposed-no-go`; выполнение начинается с read-only этапа A.
+
+Supporting context и проверяемые gates:
+[план миграции v4](github-to-gitlab-migration-plan-v4-2026-09-21.md).
+
+Ближайший bounded scope:
+
+- назначить Migration Owner и approver;
+- закрыть D-01…D-09 и Gate A (`GA-01…GA-08`), включая target/identity capacity,
+  recovery objectives и выбор B1/B2/B3 + M1/M2/M3;
+- получить полный non-promisor source clone, inventory и восстановленный backup;
+- только после Gate A подготовить отдельный rehearsal runbook.
+
+Definition of Done для этой задачи: formal `GO` к rehearsal либо зафиксированное
+решение отменить/отложить миграцию. Production cutover не входит в этот bounded
+шаг и остаётся `NO-GO` до Gates B/C/E.
 
 ### Execution refresh 2026-04-03: measured package-slice roadmap
 

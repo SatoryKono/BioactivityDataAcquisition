@@ -1,7 +1,7 @@
 # Plans Directory
 
 *Status: Working planning artifacts (non-normative)*
-*Last updated: 2026-07-28 (DOC-GOV-08 / #6888)*
+*Last updated: 2026-09-21 (GitHub → GitLab migration audit)*
 
 This directory holds **active** planning surfaces only. Completed plans live in
 `docs/99-archive/plans/`.
@@ -52,6 +52,10 @@ Protocol:
 - [consolidated-open-tasks-plan-2026-03-21.md](consolidated-open-tasks-plan-2026-03-21.md)
 
 This is the only active execution/backlog document in `docs/plans/`.
+
+### Supporting Context
+
+- [github-to-gitlab-migration-plan-v4-2026-09-21.md](github-to-gitlab-migration-plan-v4-2026-09-21.md) — proposed migration gates and audit findings; lifecycle `supporting_context`, not a second active backlog.
 
 ### Archived context (DOC-GOV-08)
 

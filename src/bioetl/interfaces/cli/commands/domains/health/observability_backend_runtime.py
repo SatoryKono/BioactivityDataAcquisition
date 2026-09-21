@@ -6,7 +6,7 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
 from os import environ as os_environ
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.services.ops.observability_backend_startup import (
     ensure_observability_backend_started_impl,
@@ -97,7 +97,7 @@ def start_detached_quarantine_backend(
     return _composition_start_detached_quarantine_backend(
         bind_host=bind_host,
         port=port,
-        **kwargs,  # type: ignore[arg-type]
+        **cast("Any", kwargs),  # Any: Dynamic kwargs for composition function
     )
 
 
@@ -352,14 +352,17 @@ def ensure_observability_backend_started(
             # Prefer explicit legacy kwargs when tests still pass them.
             pass
     ready_timeout_seconds = float(
-        hook_overrides.pop("ready_timeout_seconds", ready_timeout_seconds)  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        cast("Any", hook_overrides.pop("ready_timeout_seconds", ready_timeout_seconds))  # Any: Dynamic dict pop returns unknown type
     )
     required_probe_timeout_seconds = float(
-        hook_overrides.pop(  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-            "required_probe_timeout_seconds", required_probe_timeout_seconds
+        cast(
+            "Any",  # Any: Dynamic dict pop returns unknown type
+            hook_overrides.pop(
+                "required_probe_timeout_seconds", required_probe_timeout_seconds
+            ),
         )
     )
-    poll_seconds = float(hook_overrides.pop("poll_seconds", poll_seconds))  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+    poll_seconds = float(cast("Any", hook_overrides.pop("poll_seconds", poll_seconds)))  # Any: Dynamic dict pop returns unknown type
     runtime_hooks = {**defaults, **hook_overrides}
     return ensure_observability_backend_started_impl(
         startup_kwargs=_observability_backend_startup_kwargs(
@@ -372,7 +375,7 @@ def ensure_observability_backend_started(
             poll_seconds=poll_seconds,
             required_probe_paths=required_probe_paths,
         ),
-        runtime_hooks=runtime_hooks,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        runtime_hooks=cast("_ObservabilityBackendRuntimeHooks", runtime_hooks),
         failure_handlers=_observability_backend_failure_kwargs(),
         result_factory=ObservabilityBackendEnsureResult,
     )

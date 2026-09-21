@@ -10097,7 +10097,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 7,
+      "inbound_links": 8,
       "lifecycle": null,
       "outbound_links": 12,
       "owner": "BioETL Team",
@@ -10125,7 +10125,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 54,
+      "inbound_links": 55,
       "lifecycle": null,
       "outbound_links": 103,
       "owner": "BioETL Team",
@@ -11049,7 +11049,7 @@
       "generator": "scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py",
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 8,
+      "inbound_links": 9,
       "lifecycle": null,
       "outbound_links": 0,
       "owner": "BioETL Team",
@@ -16957,7 +16957,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 6,
+      "inbound_links": 8,
       "lifecycle": null,
       "outbound_links": 10,
       "owner": "BioETL Team",
@@ -51005,7 +51005,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 8,
+      "inbound_links": 10,
       "lifecycle": null,
       "outbound_links": 4,
       "owner": "BioETL Team",
@@ -69179,7 +69179,7 @@
       "github_issue_url": null,
       "inbound_links": 3,
       "lifecycle": "plans_governance_entrypoint",
-      "outbound_links": 4,
+      "outbound_links": 5,
       "owner": "BioETL Team",
       "path": "docs/plans/README.md",
       "recommended_action": "keep",
@@ -69205,9 +69205,9 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 1,
+      "inbound_links": 2,
       "lifecycle": "active_backlog",
-      "outbound_links": 0,
+      "outbound_links": 1,
       "owner": "BioETL Team",
       "path": "docs/plans/consolidated-open-tasks-plan-2026-03-21.md",
       "recommended_action": "keep",
@@ -69215,6 +69215,34 @@
       "section": "plans",
       "status": "Active",
       "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": "supporting_context",
+      "commit_policy": null,
+      "declared_class": "repo-only",
+      "declared_status": "proposed-no-go",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 2,
+      "lifecycle": "supporting_context",
+      "outbound_links": 10,
+      "owner": "BioETL Team",
+      "path": "docs/plans/github-to-gitlab-migration-plan-v4-2026-09-21.md",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "plans",
+      "status": "Working",
+      "surface_family": "working",
       "tracking_state": "tracked"
     },
     {
@@ -103348,11 +103376,12 @@
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 21,
       "reports_workspace_entrypoint": 1,
+      "supporting_context": 1,
       "working_report": 983
     },
     "by_recommended_action": {
       "archive-after-github-state-check": 337,
-      "archive-after-migration": 995,
+      "archive-after-migration": 996,
       "generate-automatically": 1045,
       "keep": 1275,
       "reconcile-with-github-state": 8,
@@ -103383,7 +103412,7 @@
       "docs-folder-analysis.md": 1,
       "filters": 4,
       "mkdocs.yml": 1,
-      "plans": 2,
+      "plans": 3,
       "reports": 1186,
       "reports-migration-analysis.md": 1,
       "security": 2
@@ -103394,7 +103423,7 @@
       "Canonical": 74,
       "Deprecated": 2,
       "Generated": 1045,
-      "Working": 1499
+      "Working": 1500
     },
     "by_surface_family": {
       "active": 750,
@@ -103402,10 +103431,10 @@
       "canonical": 74,
       "duplicate": 2,
       "generated": 1045,
-      "working": 1499
+      "working": 1500
     },
     "by_tracking_state": {
-      "tracked": 3662
+      "tracked": 3663
     },
     "docs_reports_local_count": 39,
     "duplicate_group_count": 7,
@@ -103421,8 +103450,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3662,
+    "total_doc_like": 3663,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3662
+    "total_doc_like_tracked": 3663
   }
 }

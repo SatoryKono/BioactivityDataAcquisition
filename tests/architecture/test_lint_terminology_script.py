@@ -34,6 +34,7 @@ def test_lint_terminology_supports_check_without_paths() -> None:
         capture_output=True,
         text=True,
         cwd=repo_root,
+        timeout=60,
     )
 
     combined_output = f"{result.stdout}\n{result.stderr}".lower()

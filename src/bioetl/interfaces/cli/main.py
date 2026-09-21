@@ -32,6 +32,9 @@ from bioetl.interfaces.cli.registry_helpers import (
     register_all_pipelines as _register_all_pipelines,
 )
 
+if TYPE_CHECKING:
+    from bioetl.composition.registry_api import PipelineRegistry
+
 __all__ = [
     "build_cli_registry",
     "cli",
