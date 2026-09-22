@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3667 |
-| Tracked doc-like files | 3667 |
+| Doc-like files | 3666 |
+| Tracked doc-like files | 3666 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 7 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3667 |
+| tracked | 3666 |
 
 ## Lifecycle Counts
 
@@ -41,7 +41,6 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 21 |
 | reports_workspace_entrypoint | 1 |
-| supporting_context | 1 |
 | working_report | 983 |
 
 ## GitHub Issue Drafts And Packs
@@ -63,7 +62,7 @@
 | Canonical | 74 |
 | Deprecated | 2 |
 | Generated | 1045 |
-| Working | 1501 |
+| Working | 1500 |
 
 ## Surface Families
 
@@ -74,14 +73,14 @@
 | canonical | 74 |
 | duplicate | 2 |
 | generated | 1045 |
-| working | 1501 |
+| working | 1500 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 337 |
-| archive-after-migration | 997 |
+| archive-after-migration | 996 |
 | generate-automatically | 1045 |
 | keep | 1278 |
 | reconcile-with-github-state | 8 |
@@ -106,7 +105,6 @@
 | `docs/03-guides/dashboards/archive/audit-protocols/dux5-screenshot-regression-protocol.md` | Working | 3 | archive-after-migration |
 | `docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md` | Working | 2 | archive-after-migration |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
-| `docs/plans/github-to-gitlab-migration-plan-v4-2026-09-21.md` | Working | 2 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-05.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-11.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-16.md` | Working | 0 | archive-after-migration |
@@ -171,6 +169,7 @@
 | `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-1/findings.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-1/plan.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-1/report.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-1/summary.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 

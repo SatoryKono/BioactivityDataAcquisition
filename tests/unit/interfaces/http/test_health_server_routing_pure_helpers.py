@@ -33,6 +33,7 @@ from __future__ import annotations
 import asyncio
 from datetime import UTC, datetime
 from pathlib import Path
+from threading import get_ident
 
 import pytest
 
@@ -337,6 +338,22 @@ async def test_routing_mixin_parses_queries_and_routes_without_sockets(
         ("observability", "/ops/observability/metrics", {}),
     ]
     assert host.sent[-1] == ("text", 404, "Not Found")
+
+
+@pytest.mark.asyncio
+async def test_metrics_collection_runs_outside_http_event_loop(monkeypatch) -> None:
+    host = _RoutingHost()
+    loop_thread = get_ident()
+    worker_threads = []
+
+    def collect():
+        worker_threads.append(get_ident())
+        return "metric 1\n"
+
+    monkeypatch.setattr(host._metrics_exposition, "build_exposition", collect)
+    await host._route_request(_Writer(), "/metrics")
+    assert worker_threads and worker_threads[0] != loop_thread
+    assert host.sent[-1][1] == 200
 
 
 @pytest.mark.asyncio
