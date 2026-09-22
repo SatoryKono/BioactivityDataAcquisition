@@ -53,6 +53,33 @@ def dq_loader(real_configs_root: Path) -> DQConfigLoader:
 class TestDQConfigIntegration:
     """Integration tests for DQ config loading."""
 
+    @pytest.mark.parametrize(
+        ("component_type", "accession", "expected"),
+        [
+            ("PROTEIN", "P00533", True),
+            ("DNA", "P00533", False),
+            ("PROTEIN", None, False),
+        ],
+    )
+    def test_target_component_gold_uses_component_fields(
+        self,
+        config_loader: PipelineConfigLoader,
+        component_type: str,
+        accession: str | None,
+        expected: bool,
+    ) -> None:
+        """Individual components must not require aggregate target fields (#10580)."""
+        config = resolve_domain_pipeline_config(
+            config_loader.load_pipeline_config("chembl_target_component")
+        )
+        record = {
+            "component_id": 1,
+            "component_type": component_type,
+            "accession": accession,
+            "organism": "Homo sapiens",
+        }
+        assert config.gold_filters.should_include(record) is expected
+
     def test_load_chembl_activity_dq(self, dq_loader: DQConfigLoader) -> None:
         """Load ChEMBL activity DQ config from hierarchy."""
         config = dq_loader.load("chembl", "activity")
