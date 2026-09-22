@@ -51,7 +51,7 @@ from bioetl.application.services.control_plane.manifest.inspection_service impor
 from bioetl.composition.bootstrap.runtime.composite_control_plane_builder import (
     build_composite_control_plane_bundle,
 )
-from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
+from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
 )
 from bioetl.domain.config.dq import DQConfig

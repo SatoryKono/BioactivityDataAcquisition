@@ -35,14 +35,11 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
-def test_storage_factory_reexports_storage_factory() -> None:
-    """Canonical storage_factory path should expose the legacy storage factory symbols."""
+def test_storage_factory_canonical_path_exposes_factory() -> None:
+    """Storage factory symbols live on the owner module after shim removal (#10551)."""
     from bioetl.composition.factories.storage.factory import StorageFactory
-    from bioetl.composition.factories.storage.storage_factory import (
-        StorageFactory as CanonicalStorageFactory,
-    )
 
-    assert CanonicalStorageFactory is StorageFactory
+    assert StorageFactory is not None
 
 
 def test_datasource_package_reexports_factory_and_creator_helper() -> None:
@@ -60,16 +57,13 @@ def test_datasource_package_reexports_factory_and_creator_helper() -> None:
     assert canonical_get_data_source_creator is get_data_source_creator
 
 
-def test_pipeline_runner_service_bootstrap_reexports_legacy_entrypoint() -> None:
-    """Canonical bootstrap module should expose the legacy runner entrypoint."""
-    from bioetl.composition.bootstrap.runtime.pipeline_runner_service_bootstrap import (
-        bootstrap_pipeline_runner_service as canonical_bootstrap,
-    )
+def test_pipeline_runner_service_bootstrap_uses_runner_owner() -> None:
+    """Runner bootstrap entrypoint stays on runtime.runner after shim removal (#10551)."""
     from bioetl.composition.bootstrap.runtime.runner import (
         bootstrap_pipeline_runner_service,
     )
 
-    assert canonical_bootstrap is bootstrap_pipeline_runner_service
+    assert callable(bootstrap_pipeline_runner_service)
 
 
 def test_pipeline_configs_imports_use_canonical_manifest_and_config_type_paths() -> (

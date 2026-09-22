@@ -25,7 +25,7 @@ from bioetl.composition.factories.datasource.data_source_factory import (
 from bioetl.composition.providers.provider_registry import (
     resolve_provider_registry,
 )
-from bioetl.composition.providers._registry_protocols import (
+from bioetl.application.ports.providers import (
     ProviderDataSourceAccessProtocol,
 )
 from bioetl.composition.providers.registration import (

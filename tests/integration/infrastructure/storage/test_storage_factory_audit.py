@@ -25,7 +25,7 @@ import pytest
 from pandera.pandas import Column, DataFrameSchema
 
 from bioetl.composition.factories.storage.audit import create_audit_port
-from bioetl.composition.factories.storage.storage_factory import StorageFactory
+from bioetl.composition.factories.storage.factory import StorageFactory
 from bioetl.domain.ports import AuditLayer
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import RunType

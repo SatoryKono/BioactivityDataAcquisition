@@ -831,7 +831,7 @@ def _init_publication_type_classification(request: pytest.FixtureRequest) -> Non
     if not _selected_tests_need_publication_type_classification(request):
         return
 
-    from bioetl.composition.bootstrap.runtime.classification_init import (
+    from bioetl.composition.runtime_builders.config_access import (
         initialize_publication_type_classification,
     )
 

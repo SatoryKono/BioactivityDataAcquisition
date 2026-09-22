@@ -45,7 +45,7 @@ from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,
 )
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
-from bioetl.composition.bootstrap.runtime.classification_init import (
+from bioetl.composition.runtime_builders.config_access import (
     initialize_publication_type_classification,
 )
 from bioetl.domain.context import PipelineContext

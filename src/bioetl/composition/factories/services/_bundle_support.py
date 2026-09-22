@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 from bioetl.application.ports.pipeline import BaseServicesFactoryProtocol
-from bioetl.composition.factories.services.observability_api import (
+from bioetl.composition.factories.observability_api import (
     create_data_source_with_observability,
 )
 from bioetl.composition.factories.pipeline.creation_support import (

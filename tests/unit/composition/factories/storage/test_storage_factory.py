@@ -36,11 +36,11 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.composition.factories.storage.audit import create_audit_port
-from bioetl.composition.factories.storage.storage_factory import BronzeWriter
-from bioetl.composition.factories.storage.storage_factory import GoldWriter
-from bioetl.composition.factories.storage.storage_factory import SilverWriter
-from bioetl.composition.factories.storage.storage_factory import StorageContext
-from bioetl.composition.factories.storage.storage_factory import StorageFactory
+from bioetl.composition.factories.storage.factory import BronzeWriter
+from bioetl.composition.factories.storage.factory import GoldWriter
+from bioetl.composition.factories.storage.factory import SilverWriter
+from bioetl.composition.factories.storage.factory import StorageContext
+from bioetl.composition.factories.storage.factory import StorageFactory
 from bioetl.domain.ports.noop import NoOpAudit
 from bioetl.infrastructure.validation.pandera_validator import NoOpValidator
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from bioetl.composition.providers._registry_protocols import (
+from bioetl.application.ports.providers import (
     ProviderRegistrarProtocol,
 )
 from bioetl.composition.providers.registration import register_all_providers

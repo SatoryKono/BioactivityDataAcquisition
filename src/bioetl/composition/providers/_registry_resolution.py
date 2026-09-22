@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal, TypeVar, overload
 
-from bioetl.composition.providers._registry_protocols import (
+from bioetl.application.ports.providers import (
     ProviderRegistrarProtocol,
 )
 from bioetl.composition.providers.provider_registry import (

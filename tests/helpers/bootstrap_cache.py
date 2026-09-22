@@ -12,7 +12,7 @@ from bioetl.composition.providers._models import (
     AdapterCreatorProtocol,
     DataSourceCreatorProtocol,
 )
-from bioetl.composition.providers._registry_protocols import ProviderRegistrarProtocol
+from bioetl.application.ports.providers import ProviderRegistrarProtocol
 from bioetl.domain.ports import PipelineFactoryPort
 
 

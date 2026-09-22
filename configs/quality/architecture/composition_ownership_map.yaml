@@ -12,8 +12,6 @@ packages:
   responsibility: private composition helpers
 - package: _resource_management.py
   responsibility: private composition helpers
-- package: _service_protocols.py
-  responsibility: private composition helpers
 - package: _service_types.py
   responsibility: private composition helpers
 - package: _services.py

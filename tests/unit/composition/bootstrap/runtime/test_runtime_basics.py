@@ -42,7 +42,7 @@ from bioetl.composition.bootstrap.runtime.runtime_basics import (
     bootstrap_runtime_basics,
     build_support_services,
 )
-from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
+from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
 )
 from bioetl.domain.composite import CompositeConfig

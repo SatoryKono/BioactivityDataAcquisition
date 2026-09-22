@@ -31,7 +31,7 @@ from bioetl.composition.providers._models import (
     ProviderConfig,
     ProviderSettingsProtocol,
 )
-from bioetl.composition.providers._registry_protocols import (
+from bioetl.application.ports.providers import (
     ProviderDataSourceAccessProtocol,
     ProviderRegistrarProtocol,
 )

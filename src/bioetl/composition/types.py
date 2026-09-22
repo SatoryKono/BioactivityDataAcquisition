@@ -6,7 +6,7 @@ that work with composition-layer constructs.
 
 For actual runtime imports, use the specific modules:
 - ObservabilityBundle: from bioetl.composition.observability
-- StorageBundle: from bioetl.composition.factories.storage.storage_factory
+- StorageBundle: from bioetl.composition.factories.storage.factory
 - PipelineRegistry: from bioetl.composition.registry_api
 - create_registry: from bioetl.composition.registry_api (isolated instance for tests)
 - get_default_registry: shared default-registry export from registry_api

@@ -16,7 +16,7 @@ from bioetl.composition.providers._models import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.composition.providers._registry_protocols import (
+    from bioetl.application.ports.providers import (
         ProviderDataSourceAccessProtocol,
     )
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort

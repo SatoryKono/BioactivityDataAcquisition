@@ -16,8 +16,10 @@ packages:
     max_helper_ratio: 0.399
     target_helper_ratio: 0.40
   - path: src/bioetl/composition
-    max_modules: 300
+    # Shrink-only after shim collapse (#10551 / AUD-001): live 291, headroom kept.
+    max_modules: 295
     max_package_loc: 40000
+    linked_issue: "10551"
   - path: src/bioetl/infrastructure/quality
     max_modules: 40
     max_package_loc: 8000

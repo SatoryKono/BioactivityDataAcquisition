@@ -19,7 +19,7 @@ from bioetl.composition.factories.services._bundle_support import (
 from bioetl.composition.factories.services._bundle_support import (
     create_pipeline_data_source as _create_pipeline_data_source_impl,
 )
-from bioetl.composition.factories.services.observability_api import (
+from bioetl.composition.factories.observability_api import (
     _create_cached_bronze_data_source as _create_cached_bronze_data_source_impl,
     _create_data_source as _create_observability_data_source,
     create_shared_metrics,

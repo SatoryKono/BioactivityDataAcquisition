@@ -4,7 +4,7 @@
 
 schema_version: 1
 strict_mode: false
-max_count: 13
+max_count: 12
 owner: "@bioetl-architecture"
 linked_issue: "9626"
 ratchet_policy: fail on growth; shrink max_count to live observed_count
@@ -20,10 +20,6 @@ pairs:
   - importer: bioetl/application/services/control_plane/run_manifest_reproducibility_claims.py
     target: bioetl.application.services.control_plane.replay._historical_claim_reason
     owner: "@bioetl-application"
-    target_removal_wave: residual
-  - importer: bioetl/composition/bootstrap/assembly/health_service.py
-    target: bioetl.composition.providers._registry_protocols
-    owner: "@bioetl-composition"
     target_removal_wave: residual
   - importer: bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py
     target: bioetl.composition.runtime_builders._run_manifest_refs

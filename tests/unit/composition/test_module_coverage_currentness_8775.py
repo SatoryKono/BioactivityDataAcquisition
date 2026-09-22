@@ -12,10 +12,10 @@ import pytest
 
 from bioetl.application.ports import MetricsService
 from bioetl.composition import (
-    _service_protocols,
     _service_registry,
     _services,
 )
+from bioetl.composition.contracts import health as _service_protocols
 from bioetl.composition.factories.datasource import http_client
 from bioetl.composition.factories.pipeline.control_plane_artifacts import (
     build_control_plane_artifacts,
