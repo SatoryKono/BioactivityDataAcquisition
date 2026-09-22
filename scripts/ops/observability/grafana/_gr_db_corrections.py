@@ -112,17 +112,17 @@ def apply_corrections(payload: dict) -> None:
     scope_copy = {
         "bioetl-runtime": (
             "CURRENT · Pipeline / Run Type. Missing stages: INCOMPLETE / UNKNOWN. "
-            "Inspect stage signals below; SCRAPING and no blockers do not prove completeness."
+            "SCRAPING is not an active blocker; no blockers do not prove completeness."
         ),
         "bioetl-incident-v1": (
-            "GLOBAL · Signals are not verified causes. Check source gaps. "
+            "GLOBAL · Signals are not verified causes. Telemetry gaps remain UNKNOWN. "
             "Selected-scope status is separate; event age and impact need event evidence."
         ),
     }
     if uid in scope_copy:
         panels[9400]["options"]["content"] = (
             '<div style="padding:4px 10px;border-left:4px solid #6b7280;'
-            'font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere">'
+            'font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch">'
             + scope_copy[uid]
             + "</div>"
         )
@@ -568,13 +568,76 @@ def apply_corrections(payload: dict) -> None:
                     ]
                 width_fields.add(field)
     if uid == "bioetl-runtime" and 2460 in panels:
+        _override(panels[243], "Expected", "noValue", "N/A: not declared")
+        _override(panels[243], "Expected", "custom.width", 150)
+        _override(panels[243], "Observed Records", "custom.width", 150)
+        stage_panel = panels[2460]
+        for field in ("Backlog", "Lag", "Throughput"):
+            _override(stage_panel, field, "custom.width", 100)
+        _override(
+            stage_panel,
+            "scope_stage\\measure",
+            "displayName",
+            "Pipeline / Run Type / Stage",
+        )
+        for field in ("reason",):
+            _override(panels[9101], field, "links", [])
+            _override(
+                panels[9101],
+                field,
+                "custom.cellOptions",
+                {"type": "auto", "wrapText": True},
+            )
+        _override(panels[9101], "severity", "custom.width", 110)
+        _override(panels[9101], "Action", "custom.width", 110)
+        _override(panels[9101], "action_target", "custom.inspect", False)
+        _override(panels[9101], "Count", "custom.hidden", True)
+        for transform in panels[9101].get("transformations", []):
+            if transform["id"] == "organize":
+                transform["options"]["excludeByName"].update(
+                    pipeline=False, run_type=False
+                )
+        for field in ("pipeline", "run_type"):
+            _override(panels[9101], field, "custom.hidden", True)
+        _override(
+            panels[9101],
+            "action_target",
+            "links",
+            [
+                {
+                    "title": "Open blocker diagnostics",
+                    "url": "/d/${__data.fields.action_dashboard_uid}/?${workflow:queryparam}&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&${run_id:queryparam}&${__url_time_range}",
+                    "targetBlank": False,
+                }
+            ],
+        )
+        _override(
+            panels[9101],
+            "Reason",
+            "custom.cellOptions",
+            {"type": "auto", "wrapText": False},
+        )
+        for override in panels[9101]["fieldConfig"]["overrides"]:
+            if override["matcher"].get("options") in ("Status", "Severity", "Pipeline"):
+                override["properties"] = [
+                    prop
+                    for prop in override["properties"]
+                    if prop["id"] != "custom.width"
+                ]
         for target in panels[2460].get("targets", []):
             if "legendFormat" in target:
                 target["legendFormat"] = "{{stage}}"
     if uid == "bioetl-dq-v2" and 155 in panels:
+        soft = 'sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~"$pipeline"}[$__rate_interval]))'
+        hard = 'sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~"$pipeline", severity="hard_fail"}[$__rate_interval]))'
+        panels[155]["targets"][0]["expr"] = (
+            f"round(sum({soft}) + sum({hard})) unless "
+            f"(count({soft} unless on(pipeline) {hard}) or "
+            f"count({hard} unless on(pipeline) {soft}))"
+        )
         panels[155]["description"] = (
             "TIME RANGE · Total soft plus hard threshold events requires observations "
-            "for both counters. A missing branch leaves the total UNKNOWN, not zero. "
+            "for both counters for every observed pipeline. A missing branch leaves the total UNKNOWN, not zero. "
             "Inspect each counter when coverage is incomplete; resets use increase."
             " Tooltip and inspection expose full series labels; full identifiers remain available."
         )

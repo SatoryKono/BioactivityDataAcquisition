@@ -1,70 +1,161 @@
 rule_files: []
 evaluation_interval: 1m
 tests:
-  - name: threshold-events-reset-and-measured-zero
-    interval: 1m
-    input_series:
-      - series: bioetl_dq_soft_threshold_exceeded_total{pipeline="example"}
-        values: 0 2 0 3 3
-      - series: bioetl_dq_validation_failures_total{pipeline="example",severity="hard_fail"}
-        values: 0 1 0 2 2
-    promql_expr_test:
-      - expr: round(sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline="example"}[5m])) + sum(increase(bioetl_dq_validation_failures_total{pipeline="example",severity="hard_fail"}[5m])))
-        eval_time: 4m
-        exp_samples:
-          - labels: '{}'
-            value: 8
-      - expr: round(sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline="example"}[2m])) + sum(increase(bioetl_dq_validation_failures_total{pipeline="example",severity="hard_fail"}[2m])))
-        eval_time: 4m
-        exp_samples:
-          - labels: '{}'
-            value: 0
-  - name: one-sample-is-not-zero
-    interval: 1m
-    input_series:
-      - series: bioetl_dq_soft_threshold_exceeded_total{pipeline="example"}
-        values: 0
-      - series: bioetl_dq_validation_failures_total{pipeline="example",severity="hard_fail"}
-        values: 0
-    promql_expr_test:
-      - expr: round(sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline="example"}[2m])) + sum(increase(bioetl_dq_validation_failures_total{pipeline="example",severity="hard_fail"}[2m])))
-        eval_time: 0m
-        exp_samples: []
-  - name: two-samples-include-real-events
-    interval: 1m
-    input_series:
-      - series: bioetl_dq_soft_threshold_exceeded_total{pipeline="example"}
-        values: 0 2
-      - series: bioetl_dq_validation_failures_total{pipeline="example",severity="hard_fail"}
-        values: 0 1
-    promql_expr_test:
-      - expr: round(sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline="example"}[2m])) + sum(increase(bioetl_dq_validation_failures_total{pipeline="example",severity="hard_fail"}[2m])))
-        eval_time: 1m
-        exp_samples:
-          - labels: '{}'
-            value: 3
-  - name: partial-soft-only-is-not-complete-total
-    interval: 1m
-    input_series:
-      - series: bioetl_dq_soft_threshold_exceeded_total{pipeline="example"}
-        values: 0 2
-    promql_expr_test:
-      - expr: round(sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline="example"}[2m])) + sum(increase(bioetl_dq_validation_failures_total{pipeline="example",severity="hard_fail"}[2m])))
-        eval_time: 1m
-        exp_samples: []
-  - name: partial-hard-only-is-not-complete-total
-    interval: 1m
-    input_series:
-      - series: bioetl_dq_validation_failures_total{pipeline="example",severity="hard_fail"}
-        values: 0 1
-    promql_expr_test:
-      - expr: round(sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline="example"}[2m])) + sum(increase(bioetl_dq_validation_failures_total{pipeline="example",severity="hard_fail"}[2m])))
-        eval_time: 1m
-        exp_samples: []
-  - name: no-telemetry-is-not-zero
-    interval: 1m
-    input_series: []
-    promql_expr_test:
-      - expr: round(sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline="example"}[2m])) + sum(increase(bioetl_dq_validation_failures_total{pipeline="example",severity="hard_fail"}[2m])))
-        eval_time: 1m
-        exp_samples: []
+- name: threshold-events-reset-and-measured-zero
+  interval: 1m
+  input_series:
+  - series: bioetl_dq_soft_threshold_exceeded_total{pipeline="example"}
+    values: 0 2 0 3 3
+  - series: bioetl_dq_validation_failures_total{pipeline="example",severity="hard_fail"}
+    values: 0 1 0 2 2
+  promql_expr_test:
+  - expr: round(sum(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[5m])))
+      + sum(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*", severity="hard_fail"}[5m]))))
+      unless (count(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[5m]))
+      unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*",
+      severity="hard_fail"}[5m]))) or count(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*",
+      severity="hard_fail"}[5m])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[5m]))))
+    eval_time: 4m
+    exp_samples:
+    - labels: '{}'
+      value: 8
+  - expr: round(sum(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m])))
+      + sum(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*", severity="hard_fail"}[2m]))))
+      unless (count(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m]))
+      unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*",
+      severity="hard_fail"}[2m]))) or count(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*",
+      severity="hard_fail"}[2m])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m]))))
+    eval_time: 4m
+    exp_samples:
+    - labels: '{}'
+      value: 0
+- name: one-sample-is-not-zero
+  interval: 1m
+  input_series:
+  - series: bioetl_dq_soft_threshold_exceeded_total{pipeline="example"}
+    values: 0
+  - series: bioetl_dq_validation_failures_total{pipeline="example",severity="hard_fail"}
+    values: 0
+  promql_expr_test:
+  - expr: round(sum(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m])))
+      + sum(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*", severity="hard_fail"}[2m]))))
+      unless (count(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m]))
+      unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*",
+      severity="hard_fail"}[2m]))) or count(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*",
+      severity="hard_fail"}[2m])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m]))))
+    eval_time: 0m
+    exp_samples: []
+- name: two-samples-include-real-events
+  interval: 1m
+  input_series:
+  - series: bioetl_dq_soft_threshold_exceeded_total{pipeline="example"}
+    values: 0 2
+  - series: bioetl_dq_validation_failures_total{pipeline="example",severity="hard_fail"}
+    values: 0 1
+  promql_expr_test:
+  - expr: round(sum(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m])))
+      + sum(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*", severity="hard_fail"}[2m]))))
+      unless (count(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m]))
+      unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*",
+      severity="hard_fail"}[2m]))) or count(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*",
+      severity="hard_fail"}[2m])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m]))))
+    eval_time: 1m
+    exp_samples:
+    - labels: '{}'
+      value: 3
+- name: partial-soft-only-is-not-complete-total
+  interval: 1m
+  input_series:
+  - series: bioetl_dq_soft_threshold_exceeded_total{pipeline="example"}
+    values: 0 2
+  promql_expr_test:
+  - expr: round(sum(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m])))
+      + sum(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*", severity="hard_fail"}[2m]))))
+      unless (count(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m]))
+      unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*",
+      severity="hard_fail"}[2m]))) or count(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*",
+      severity="hard_fail"}[2m])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m]))))
+    eval_time: 1m
+    exp_samples: []
+- name: partial-hard-only-is-not-complete-total
+  interval: 1m
+  input_series:
+  - series: bioetl_dq_validation_failures_total{pipeline="example",severity="hard_fail"}
+    values: 0 1
+  promql_expr_test:
+  - expr: round(sum(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m])))
+      + sum(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*", severity="hard_fail"}[2m]))))
+      unless (count(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m]))
+      unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*",
+      severity="hard_fail"}[2m]))) or count(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*",
+      severity="hard_fail"}[2m])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m]))))
+    eval_time: 1m
+    exp_samples: []
+- name: no-telemetry-is-not-zero
+  interval: 1m
+  input_series: []
+  promql_expr_test:
+  - expr: round(sum(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m])))
+      + sum(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*", severity="hard_fail"}[2m]))))
+      unless (count(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m]))
+      unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*",
+      severity="hard_fail"}[2m]))) or count(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*",
+      severity="hard_fail"}[2m])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m]))))
+    eval_time: 1m
+    exp_samples: []
+- name: different-pipelines-do-not-complete-each-other
+  interval: 1m
+  input_series:
+  - series: bioetl_dq_soft_threshold_exceeded_total{pipeline="a"}
+    values: 0 2
+  - series: bioetl_dq_validation_failures_total{pipeline="b",severity="hard_fail"}
+    values: 0 1
+  promql_expr_test:
+  - expr: round(sum(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m])))
+      + sum(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*", severity="hard_fail"}[2m]))))
+      unless (count(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m]))
+      unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*",
+      severity="hard_fail"}[2m]))) or count(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*",
+      severity="hard_fail"}[2m])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m]))))
+    eval_time: 1m
+    exp_samples: []
+- name: one-incomplete-pipeline-invalidates-total
+  interval: 1m
+  input_series:
+  - series: bioetl_dq_soft_threshold_exceeded_total{pipeline="a"}
+    values: 0 2
+  - series: bioetl_dq_validation_failures_total{pipeline="a",severity="hard_fail"}
+    values: 0 1
+  - series: bioetl_dq_soft_threshold_exceeded_total{pipeline="b"}
+    values: 0 2
+  promql_expr_test:
+  - expr: round(sum(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m])))
+      + sum(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*", severity="hard_fail"}[2m]))))
+      unless (count(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m]))
+      unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*",
+      severity="hard_fail"}[2m]))) or count(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*",
+      severity="hard_fail"}[2m])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m]))))
+    eval_time: 1m
+    exp_samples: []
+- name: all-observed-pipelines-complete
+  interval: 1m
+  input_series:
+  - series: bioetl_dq_soft_threshold_exceeded_total{pipeline="a"}
+    values: 0 2
+  - series: bioetl_dq_validation_failures_total{pipeline="a",severity="hard_fail"}
+    values: 0 1
+  - series: bioetl_dq_soft_threshold_exceeded_total{pipeline="b"}
+    values: 0 2
+  - series: bioetl_dq_validation_failures_total{pipeline="b",severity="hard_fail"}
+    values: 0 1
+  promql_expr_test:
+  - expr: round(sum(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m])))
+      + sum(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*", severity="hard_fail"}[2m]))))
+      unless (count(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m]))
+      unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*",
+      severity="hard_fail"}[2m]))) or count(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~".*",
+      severity="hard_fail"}[2m])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~".*"}[2m]))))
+    eval_time: 1m
+    exp_samples:
+    - labels: '{}'
+      value: 6

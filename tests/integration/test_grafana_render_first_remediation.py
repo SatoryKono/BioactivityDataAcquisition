@@ -665,6 +665,25 @@ def test_rf007_counts_and_dense_legends_are_bounded() -> None:
         assert "full identifiers remain available" in desc or "TIME RANGE" in desc
 
 
+def test_dq_threshold_counter_fixtures_exercise_shipped_query() -> None:
+    """Promtool reset/partial fixtures must test the actual dashboard expression."""
+    panel = _panel(_load("bioetl-dq-v2.json"), 155)
+    expression = panel["targets"][0]["expr"].replace("$pipeline", ".*")
+    fixtures = yaml.safe_load(
+        Path("grafana/prometheus-rules/tests/gr_db_counter_windows.test.yml").read_text(
+            encoding="utf-8"
+        )
+    )
+    cases = fixtures["tests"]
+    assert len(cases) == 9
+    for case in cases:
+        for check in case["promql_expr_test"]:
+            assert check["expr"] in {
+                expression.replace("$__rate_interval", window)
+                for window in ("2m", "5m")
+            }, case["name"]
+
+
 def _limit_field(panel: dict[str, object]) -> int | None:
     for transform in panel.get("transformations") or []:
         if isinstance(transform, dict) and transform.get("id") == "limit":
