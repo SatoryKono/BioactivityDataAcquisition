@@ -700,7 +700,7 @@ def test_duration_fixtures_exercise_shipped_nan_filter() -> None:
         )
     )
     cases = [case for case in fixtures["tests"] if case["name"].startswith("duration-")]
-    assert len(cases) == 3
+    assert len(cases) == 6
     for case in cases:
         assert case["promql_expr_test"][0]["expr"] == expression
     assert panel["fieldConfig"]["defaults"]["noValue"].startswith("NO OBSERVATIONS")

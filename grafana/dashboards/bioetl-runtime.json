@@ -2242,7 +2242,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Duration quantiles require observed histogram increments within the rate interval. An empty chart is UNKNOWN, not zero duration or a failed run. NaN quantiles are omitted; isolated valid observations are shown as points.",
+          "description": "TIME RANGE · Duration quantiles require observed histogram increments within the rate interval. An empty chart is UNKNOWN, not zero duration or a failed run. NaN quantiles are omitted; isolated valid observations are shown as points. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2301,17 +2301,17 @@
           },
           "targets": [
             {
-              "expr": "(histogram_quantile(0.50, sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])))) >= 0",
+              "expr": "(histogram_quantile(0.50, (sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on (phase, status) (sum by (phase, status) (changes(bioetl_phase_duration_seconds_created{pipeline=~\"$pipeline\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{phase}} / {{status}} p50",
               "refId": "A"
             },
             {
-              "expr": "(histogram_quantile(0.95, sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])))) >= 0",
+              "expr": "(histogram_quantile(0.95, (sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on (phase, status) (sum by (phase, status) (changes(bioetl_phase_duration_seconds_created{pipeline=~\"$pipeline\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{phase}} / {{status}} p95",
               "refId": "B"
             },
             {
-              "expr": "(histogram_quantile(0.99, sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])))) >= 0",
+              "expr": "(histogram_quantile(0.99, (sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on (phase, status) (sum by (phase, status) (changes(bioetl_phase_duration_seconds_created{pipeline=~\"$pipeline\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{phase}} / {{status}} p99",
               "refId": "C"
             }
@@ -2326,7 +2326,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Duration quantiles require observed histogram increments within the rate interval. An empty chart is UNKNOWN, not zero duration or a failed run. NaN quantiles are omitted; isolated valid observations are shown as points.",
+          "description": "TIME RANGE · Duration quantiles require observed histogram increments within the rate interval. An empty chart is UNKNOWN, not zero duration or a failed run. NaN quantiles are omitted; isolated valid observations are shown as points. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2385,17 +2385,17 @@
           },
           "targets": [
             {
-              "expr": "(histogram_quantile(0.50, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))) >= 0",
+              "expr": "(histogram_quantile(0.50, (sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])) unless on (stage, status, run_type) (sum by (stage, status, run_type) (changes(bioetl_pipeline_duration_seconds_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{stage}} / {{status}} / {{run_type}} p50",
               "refId": "A"
             },
             {
-              "expr": "(histogram_quantile(0.95, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))) >= 0",
+              "expr": "(histogram_quantile(0.95, (sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])) unless on (stage, status, run_type) (sum by (stage, status, run_type) (changes(bioetl_pipeline_duration_seconds_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{stage}} / {{status}} / {{run_type}} p95",
               "refId": "B"
             },
             {
-              "expr": "(histogram_quantile(0.99, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))) >= 0",
+              "expr": "(histogram_quantile(0.99, (sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])) unless on (stage, status, run_type) (sum by (stage, status, run_type) (changes(bioetl_pipeline_duration_seconds_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{stage}} / {{status}} / {{run_type}} p99",
               "refId": "C"
             }
