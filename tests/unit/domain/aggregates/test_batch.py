@@ -42,8 +42,8 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
+from bioetl.domain.aggregates import Batch
 from bioetl.domain.aggregates.batch import (
-    Batch,
     BatchRecord,
     BatchStatus,
 )

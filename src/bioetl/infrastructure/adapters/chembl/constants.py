@@ -48,15 +48,6 @@ CHEMBL_DTO_MODELS: dict[str, type[BaseModel]] = {
     "document_similarity": PublicationSimilarityRecord,
 }
 
-# Entity types that don't support limit/offset pagination
-# These endpoints return all records in a single response.
-_NO_PAGINATION_ENTITIES: frozenset[str] = frozenset(
-    {
-        "target_component",
-        "protein_class",
-    }
-)
-
 # Silver canonical name → ChEMBL API field name.
 # ChEMBL API silently ignores unknown filter params and returns ALL records,
 # so correct mapping is critical for filtering to work.

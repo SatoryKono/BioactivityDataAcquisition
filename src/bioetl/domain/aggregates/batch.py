@@ -1,8 +1,12 @@
-"""Batch aggregate types and compatibility Batch re-export (ADR-059)."""
+"""Batch aggregate value objects and shared mixins (ADR-059).
+
+``Batch`` lives in ``_batch_aggregate``; import the root from
+``bioetl.domain.aggregates`` (or ``_batch_aggregate``). The former
+``batch.Batch`` compatibility ``__getattr__`` shim was removed in #10552.
+"""
 
 from __future__ import annotations
 
-import importlib
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime
@@ -264,10 +268,3 @@ class _BatchMutationMixin(_BatchReadModelMixin):
                 current_state=self._status.value,
                 attempted_operation=operation,
             )
-
-
-def __getattr__(name: str) -> object:
-    if name == "Batch":
-        module = importlib.import_module("bioetl.domain.aggregates._batch_aggregate")
-        return module.Batch
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
