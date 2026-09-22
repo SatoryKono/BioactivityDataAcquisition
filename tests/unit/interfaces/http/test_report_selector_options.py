@@ -71,6 +71,23 @@ def test_report_only_historical_run_supplies_type(tmp_path: Path) -> None:
     ) == {"items": [{"text": "backfill", "value": "backfill"}]}
 
 
+def test_identity_snapshot_avoids_reread_but_refreshes_next_request(
+    tmp_path, monkeypatch
+):
+    from unittest.mock import Mock
+    from bioetl.interfaces.http import _report_selector_options as module
+
+    _report(tmp_path)
+    duplicate_read = Mock(side_effect=AssertionError("already read in this request"))
+    monkeypatch.setattr(module, "load_pipeline_run_report_payload", duplicate_read)
+    assert _options(tmp_path)["items"] == [{"text": "backfill", "value": "backfill"}]
+    _report(tmp_path, run_type="incremental")
+    assert _options(tmp_path)["items"] == [
+        {"text": "incremental", "value": "incremental"}
+    ]
+    duplicate_read.assert_not_called()
+
+
 @pytest.mark.parametrize(
     "scope",
     [
@@ -147,8 +164,13 @@ async def test_filter_catalog_reads_overlap_without_losing_options(monkeypatch) 
     barrier = Barrier(2, timeout=2)
 
     def manifests():
-        barrier.wait()
         return ()
+
+    def build_options(**kwargs):
+        # Report I/O must overlap ledger-backed label construction too, not
+        # merely the initial manifest scan; otherwise their costs add up.
+        barrier.wait()
+        return {"items": [{"text": "chembl_assay", "value": "chembl_assay"}]}
 
     def reports(scopes):
         barrier.wait()
@@ -162,10 +184,17 @@ async def test_filter_catalog_reads_overlap_without_losing_options(monkeypatch) 
     host._workflow_manifest_port = None
     host._send_payload_response = AsyncMock()
     monkeypatch.setattr(module, "load_report_selector_entries", reports)
+    monkeypatch.setattr(module, "build_selector_filter_options_payload", build_options)
+    budget = AsyncMock(wraps=module.run_bounded_forensic_operation)
+    monkeypatch.setattr(module, "run_bounded_forensic_operation", budget)
     await module.handle_control_plane_filter_options(
         host, None, {"dimension": "pipeline", "response_shape": "options"}
     )
     assert host._send_payload_response.call_args.args[1] == 200
+    assert budget.call_args.kwargs["timeout_seconds"] == 20.0
+    assert host._send_payload_response.call_args.args[2]["items"] == [
+        {"text": "chembl_assay", "value": "chembl_assay"}
+    ]
 
 
 def test_duplicates_and_all_are_supported(tmp_path: Path) -> None:

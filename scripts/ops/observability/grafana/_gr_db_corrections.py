@@ -691,3 +691,28 @@ def apply_corrections(payload: dict) -> None:
         )
     if uid == "bioetl-overview-v2" and 215 in panels:
         _override(panels[215], "Action", "custom.width", 150)
+    if uid == "bioetl-run-explorer-v1" and 3010 in panels:
+        _override(
+            panels[3010],
+            "Pipeline",
+            "custom.cellOptions",
+            {"type": "auto", "wrapText": True},
+        )
+        _override(panels[3010], "Report", "custom.width", 110)
+        _override(
+            panels[3010],
+            "Workflow",
+            "custom.cellOptions",
+            {"type": "auto", "wrapText": True},
+        )
+        _override(
+            panels[3010],
+            "Workflow",
+            "mappings",
+            [
+                {
+                    "type": "value",
+                    "options": {"— (no workflow data)": {"text": "No workflow"}},
+                }
+            ],
+        )
