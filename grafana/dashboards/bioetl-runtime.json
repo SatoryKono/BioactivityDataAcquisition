@@ -402,7 +402,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Pipeline Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">CURRENT · Pipeline / Run Type. Missing stages: INCOMPLETE / UNKNOWN. SCRAPING is not an active blocker; no blockers do not prove completeness.</div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">CURRENT · Pipeline / Run Type. Missing stages: INCOMPLETE / UNKNOWN. Inspect stage signals below; SCRAPING is not an active blocker; no blockers do not prove completeness.</div>"
       },
       "links": []
     },
