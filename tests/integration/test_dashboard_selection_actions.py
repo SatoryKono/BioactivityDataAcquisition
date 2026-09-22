@@ -97,9 +97,40 @@ def test_ranked_action_overrides_inspect_value_with_domain_link() -> None:
         if o["matcher"]["options"] == "Details"
     )
     assert {"id": "custom.inspect", "value": True} in details["properties"]
-    assert {"id": "custom.hidden", "value": False} in details["properties"]
+    assert {"id": "custom.hidden", "value": True} in details["properties"]
+    evidence = next(p for p in panels(dashboard) if p["id"] == 22010)
+    signal = next(
+        o
+        for o in evidence["fieldConfig"]["overrides"]
+        if o["matcher"]["options"] == "Signal"
+    )
+    assert {"id": "custom.wrapText", "value": True} in signal["properties"]
+    assert {"id": "links", "value": []} in signal["properties"]
     assert {"id": "links", "value": []} in details["properties"]
     extractor = next(t for t in panel["transformations"] if t["id"] == "extractFields")
     assert extractor["options"]["source"] == "signal"
     assert extractor["options"]["regExp"] == "/(?<action_detail>.*)/"
     assert extractor["options"]["replace"] is False
+
+
+def test_run_explorer_styles_processing_without_obsolete_columns() -> None:
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-run-explorer-v1.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    panel = next(p for p in panels(dashboard) if p["id"] == 3010)
+    props = {
+        o["matcher"]["options"]: {p["id"]: p["value"] for p in o["properties"]}
+        for o in panel["fieldConfig"]["overrides"]
+    }
+    assert "Status" not in props and "Severity" not in props
+    assert props["Processing"]["custom.cellOptions"]["type"] == "color-background"
+    mappings = props["Processing"]["mappings"][0]["options"]
+    assert mappings["failed"]["color"] == "red"
+    assert mappings["unfinished"]["text"] == "unfinished"
+    assert props["Trust"]["noValue"] != "OK"
+
+    assert props["Pipeline"]["custom.cellOptions"]["wrapText"] is False
+    assert props["Pipeline"]["custom.inspect"] is True
+    assert panel["options"]["footer"]["enablePagination"] is False

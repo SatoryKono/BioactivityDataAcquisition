@@ -79,15 +79,11 @@ def test_runtime_blocker_action_target_is_allowlisted_and_complete() -> None:
     defaults_links = panel.get("fieldConfig", {}).get("defaults", {}).get("links", [])
     assert isinstance(defaults_links, list) and len(defaults_links) >= 1
     links = props.get("links", [])
-    assert isinstance(links, list) and len(links) >= 3
-    titles = {link.get("title") for link in links}
-    assert "Open Runtime" in titles
-    assert "Open Trust" in titles
-    assert "Open Data Quality" in titles
-    for link in links:
-        url = str(link.get("url", ""))
-        assert "${__data.fields.pipeline}" in url or "var-pipeline" in url
-        assert "${__url_time_range}" in url
+    assert len(links) == 1
+    assert "${__data.fields.action_dashboard_uid}" in links[0]["url"]
+    assert "${__data.fields.action_scope:raw}" in links[0]["url"]
+    assert "${__url_time_range}" in links[0]["url"]
+    assert '"action_scope"' in RULES_PATH.read_text(encoding="utf-8")
     assert props.get("custom.width", 0) <= 90
     assert set(RUNTIME_BLOCKER_ACTION_MAP.keys()) == expected
 
@@ -112,19 +108,13 @@ def test_dq_reason_action_target_is_allowlisted_and_complete() -> None:
         for m in mappings
     )
     links = props.get("links", [])
-    assert len(links) == 2
-    titles = {link.get("title") for link in links}
-    assert "Open Data Quality evidence" in titles
-    assert "Open DQ reason-rules runbook" in titles
-    runbook_link = next(
-        link for link in links if "runbook" in link.get("title", "").lower()
-    )
-    assert "observability-checklist.md" in runbook_link.get("url", "")
-    dq_link = next(
-        link for link in links if "Data Quality evidence" in link.get("title", "")
-    )
-    assert "${__data.fields.pipeline}" in dq_link.get("url", "")
-    assert "${__url_time_range}" in dq_link.get("url", "")
+    assert len(links) == 1
+    assert "${__data.fields.action_dashboard_uid}" in links[0]["url"]
+    assert "${__data.fields.action_scope:raw}" in links[0]["url"]
+    assert "${__url_time_range}" in links[0]["url"]
+    # Runbook routes have no dashboard UID; retain the independent panel link.
+    assert any("observability-checklist.md" in link["url"] for link in panel["links"])
+    assert '"action_scope"' in RULES_PATH.read_text(encoding="utf-8")
     # DQ panel now has allowlisted defaults.links per contract (single dashboard handoff)
     assert panel.get("fieldConfig", {}).get("defaults", {}).get("links", []) != []
     assert set(DQ_REASON_ACTION_MAP.keys()) == {
@@ -154,3 +144,31 @@ def test_unknown_action_target_is_fail_closed() -> None:
                     str(m.get("options", {}).get("result", {}).get("text", ""))
                 )
         assert "UNKNOWN" in unknown_texts
+
+
+def test_recorded_action_scope_is_destination_specific() -> None:
+    """Route metadata must preserve values and never pass foreign selectors."""
+    payload = yaml.safe_load(RULES_PATH.read_text(encoding="utf-8"))
+    records = {
+        "bioetl_l0_next_action_route",
+        "bioetl_runtime_current_blocker_reason",
+        "bioetl_dq_current_reason",
+    }
+    checked = set()
+    for group in payload["groups"]:
+        for rule in group["rules"]:
+            uid = rule.get("labels", {}).get("action_dashboard_uid")
+            if rule.get("record") not in records or not uid:
+                continue
+            expected = "var-pipeline=$1"
+            if uid in {"bioetl-runtime", "bioetl-dq-v2"}:
+                expected += "&var-stage=$$__all"
+            elif uid == "bioetl-provider-health-v2":
+                expected += "&var-provider=$$__all&var-pipeline_context=$1"
+            expr = rule["expr"]
+            assert expr.startswith("label_replace((")
+            assert expr.endswith(
+                f'), "action_scope", "{expected}", "pipeline", "([A-Za-z0-9_]+)")'
+            )
+            checked.add(rule["record"])
+    assert checked == records

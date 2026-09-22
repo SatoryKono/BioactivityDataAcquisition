@@ -406,11 +406,11 @@ required_panel_links_by_uid:
   - panel_id: 110
     target_uid: bioetl-runtime
     link_titles:
-    - Open 2. Runtime
+    - Open 3. Pipeline Diagnostics
   - panel_id: 110
     target_uid: bioetl-control-plane-v1
     link_titles:
-    - Open 0. Control Plane
+    - Open 1. Trust
   bioetl-incident-v1:
   - panel_id: 2010
     target_uid: bioetl-runtime
@@ -432,7 +432,11 @@ required_panel_links_by_uid:
     target_uid: bioetl-run-explorer-v1
     link_titles:
     - Open Run Explorer
-  bioetl-run-explorer-v1: []
+  bioetl-run-explorer-v1:
+  - panel_id: 3010
+    target_uid: bioetl-control-plane-v1
+    link_titles:
+    - Open 1. Trust
 default_time_refresh_policy:
   L0:
     dashboards:

@@ -207,13 +207,13 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
         }
         for override in panel.get("fieldConfig", {}).get("overrides", [])
     }
-    assert override_properties["check"]["custom.cellOptions"].get("wrapText") is True
+    assert override_properties["check"]["custom.cellOptions"].get("wrapText") is False
     assert override_properties["status"]["custom.cellOptions"].get("wrapText") is False
-    assert override_properties["reason"]["custom.cellOptions"].get("wrapText") is True
+    assert override_properties["reason"]["custom.cellOptions"].get("wrapText") is False
     assert override_properties["reason"]["custom.inspect"] is True
     assert "custom.width" not in override_properties["reason"]
     assert override_properties["status"]["custom.width"] == 110
-    assert override_properties["check"]["custom.width"] == 170
+    assert override_properties["check"]["custom.width"] == 125
     check_maps = override_properties["check"]["mappings"][0]["options"]
     assert check_maps["snapshot_evidence"]["text"] == "Snapshots"
     assert check_maps["archive"]["text"] == "Archive"
@@ -230,12 +230,10 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
     assert reason_maps["reproducibility_evidence_floor_satisfied"]["text"] == (
         "Evidence floor met"
     )
-    assert reason_maps["snapshot_evidence_not_required"]["text"] == (
-        "Snapshots not required"
-    )
+    assert reason_maps["snapshot_evidence_not_required"]["text"] == ("Not required")
     status_maps = override_properties["status"]["mappings"][0]["options"]
-    assert status_maps["INCOMPLETE"]["color"] == "#555555"
-    assert status_maps["UNKNOWN"]["color"] == "#555555"
+    assert status_maps["INCOMPLETE"]["color"] == "text"
+    assert status_maps["UNKNOWN"]["color"] == "text"
     assert status_maps["ERROR"]["color"] == "red"
     assert status_maps["OK"]["color"] == "green"
     for hidden in ("detail", "endpoint", "retryable", "observed_at"):

@@ -25,7 +25,15 @@ SEVEN_UIDS: tuple[str, ...] = (
     "bioetl-run-explorer-v1",
 )
 
-PATH_BY_UID: dict[str, str] = {uid: uid for uid in SEVEN_UIDS}
+PATH_BY_UID: dict[str, str] = {
+    "bioetl-run-explorer-v1": "0-run-explorer",
+    "bioetl-control-plane-v1": "1-trust",
+    "bioetl-overview-v2": "2-overview",
+    "bioetl-runtime": "3-pipeline-diagnostics",
+    "bioetl-provider-health-v2": "4-provider-health",
+    "bioetl-dq-v2": "5-data-quality",
+    "bioetl-incident-v1": "6-incident-workspace",
+}
 
 CORE_VAR_ORDER: tuple[str, ...] = ("workflow", "pipeline", "run_type", "run_id")
 TIME_TOKEN = "${__url_time_range}"
@@ -79,9 +87,7 @@ class DashboardContext:
         object.__setattr__(self, "run_id", normalize_run_id(self.run_id))
 
 
-def _pipeline_value(
-    *, template: bool, context: DashboardContext | None
-) -> str:
+def _pipeline_value(*, template: bool, context: DashboardContext | None) -> str:
     if template:
         return "$pipeline"
     assert context is not None
@@ -476,3 +482,18 @@ def normalize_dashboard_actions(payload: dict) -> None:
     for panel in payload.get("panels", []):
         _fix_panel(panel, payload.get("uid", ""))
     _rewrite_links(payload)
+
+
+def finalize_dashboard_links(node: object) -> None:
+    """Pin explicit context after all generators have added their links."""
+    if isinstance(node, dict):
+        if isinstance(node.get("url"), str) and node["url"].startswith("/d/"):
+            node["includeVars"] = False
+        options = node.get("options")
+        if isinstance(options, dict) and options.get("dataLinks") == []:
+            options.pop("dataLinks")
+        for value in node.values():
+            finalize_dashboard_links(value)
+    elif isinstance(node, list):
+        for value in node:
+            finalize_dashboard_links(value)
