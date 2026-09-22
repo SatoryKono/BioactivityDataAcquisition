@@ -1,0 +1,2827 @@
+{
+  "acceptance": "INCOMPLETE",
+  "baseline_contexts": 59474,
+  "baseline_sha256": "ca23b975895c1141fddeb96c19aed3897e3681b0f66191ddecabb661ff44441a",
+  "elements": [
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 1000,
+      "title": "",
+      "type": "text",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9400,
+      "title": "",
+      "type": "text",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9401,
+      "title": "Monitor Current Readiness",
+      "type": "stat",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "3e141aa1ff9b028c9b7eeaca7a673fb0355dc2a7087af7f2b4350d86ee803e66"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9418,
+      "title": "Review Selected-Run Trust",
+      "type": "table",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "de3aedd95dd93134493c5480158e590c2388d2d7e4e9cc0e75c45268ea7219d0"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9416,
+      "title": "Review Retention Compliance",
+      "type": "table",
+      "section": "",
+      "repeat": null,
+      "target_count": 2,
+      "query_sha256": "d60a293293bde4d1c15366f4e2f1f872efb9bbe638819d65406d4c65fe93d3db"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 891,
+      "title": "Monitor Replay Safety",
+      "type": "stat",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "80c8cf5103d1f6706d196cf778bd4f3ad8f1d4e5a55d76fd75223be8dc08ebfc"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 892,
+      "title": "Monitor Checkpoint Age",
+      "type": "stat",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "0036aa6986e5c6606c328f7e141ea359259bac0f2d6d493ba26c0bb86ee9c928"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 893,
+      "title": "Monitor Manifest/Ledger",
+      "type": "stat",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "49ef473a1d47fd681754052021e75cedd0d072b6c0a6a66431ff87cebe08aa0e"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 907,
+      "title": "Monitor Telemetry",
+      "type": "stat",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "780a43f5358fbc6148dafefd7053cee2e60559c6d1eb7056d887aee9eae18caf"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9419,
+      "title": "Review Lineage Validation",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9415,
+      "title": "Review Lineage Validation",
+      "type": "table",
+      "section": "Review Lineage Validation",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "fca9aa5b34160169ef331735c47dd8144f001951dadcc254796a34d5103e720b"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 902,
+      "title": "Inspect Replay & Checkpoint Evidence",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 894,
+      "title": "Review Coverage Limits",
+      "type": "text",
+      "section": "Inspect Replay & Checkpoint Evidence",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 130,
+      "title": "Track Replay Blockers",
+      "type": "stat",
+      "section": "Inspect Replay & Checkpoint Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "0db320be6532050a49fc611516541f4c64da2b23bed34421745766b3c8df113a"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 3,
+      "title": "Track Checkpoint Incompatibilities",
+      "type": "stat",
+      "section": "Inspect Replay & Checkpoint Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "1cb330e492c12aabe519da625cb6035e6ad3c4ccd0eccec96ab6b6ef50cc8d05"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 104,
+      "title": "Track Unreconstructable Replays",
+      "type": "stat",
+      "section": "Inspect Replay & Checkpoint Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "e6261d530e1ab2285624e7b3ab9e9deb8aa0c43e57988554a7dfddaa9abc2acc"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 120,
+      "title": "Track Replay Drift",
+      "type": "stat",
+      "section": "Inspect Replay & Checkpoint Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "45b9f20a42105b3bcbe7f868c22b04fcba20640082051b2ba553da86106cbecb"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 101,
+      "title": "Track Checkpoint Load Failures",
+      "type": "stat",
+      "section": "Inspect Replay & Checkpoint Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "17beb2ec272b1bba24a49248c78ff73a97b8567fc383cdd00132d10223821547"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 102,
+      "title": "Track Checkpoint Save Failures",
+      "type": "stat",
+      "section": "Inspect Replay & Checkpoint Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "f499f9dc1051c7fb5fb7fa0f074511fa500f5c0f5339b356db8794ca1a7bc4bb"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 103,
+      "title": "Track Global Checkpoint Admin Failures",
+      "type": "stat",
+      "section": "Inspect Replay & Checkpoint Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "50b157bf54e393cb07286eab72c25cb2ba0ac6f6f446b16b77e193a62bd0ba99"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 121,
+      "title": "Track Peak Replay Lag",
+      "type": "stat",
+      "section": "Inspect Replay & Checkpoint Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "507d05e9057d1f8e49f44023141e073534924c8fa98cb2f9fe578edb047a94e3"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 134,
+      "title": "Track Replay Drift by Type",
+      "type": "timeseries",
+      "section": "Inspect Replay & Checkpoint Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "6e18d981f770935542a3e6d2fc5cc600a600669f7c36ded37d4fc9f89b058bda"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 5,
+      "title": "Compare Checkpoint Outcomes",
+      "type": "timeseries",
+      "section": "Inspect Replay & Checkpoint Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "e620c9e38b7c8688eb7cb0f8bef7936f82a4d174e1fb6caec6b8b1d25e0ee55a"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 135,
+      "title": "Track Replay Lag",
+      "type": "timeseries",
+      "section": "Inspect Replay & Checkpoint Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "a250030a815d23081794b72f86d2ffe0516a9cb3fdab51133274124520ca61f9"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 105,
+      "title": "Track Checkpoint Save Latency",
+      "type": "timeseries",
+      "section": "Inspect Replay & Checkpoint Evidence",
+      "repeat": null,
+      "target_count": 3,
+      "query_sha256": "da8e735724f5d2ec11e3d5505c83fe3f3cc23d7cbcc3a881fb27227d9eda78c4"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 106,
+      "title": "Track Global Checkpoint Admin Latency",
+      "type": "timeseries",
+      "section": "Inspect Replay & Checkpoint Evidence",
+      "repeat": null,
+      "target_count": 3,
+      "query_sha256": "cf20f60cdfc0f148884b35bb2fbdf08a343198ea19a06794a1a18ca1aa5df082"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9413,
+      "title": "Review Checkpoint Validation",
+      "type": "table",
+      "section": "Inspect Replay & Checkpoint Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "a910ebdd14a36c7e2ebeda45fbd5dc55f6b44f05fed17a9feb4ee46e77022be5"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 901,
+      "title": "Inspect Manifest & Ledger Evidence",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 908,
+      "title": "Review Observed Terminal Counters",
+      "type": "table",
+      "section": "Inspect Manifest & Ledger Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "a626c0d3b649acf6a379f0887fac2917272fed38667a60b9c4149f27326d9426"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 2,
+      "title": "Track Ledger Append Failures",
+      "type": "stat",
+      "section": "Inspect Manifest & Ledger Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "1d712fc87261825772f91adfabc374da647184a9090647b59ade03b335c8f263"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 1,
+      "title": "Track Manifest Write Failures",
+      "type": "stat",
+      "section": "Inspect Manifest & Ledger Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "78e0d73c204bdef9598bcb33bc7946441e9b37f95730fc5025149d473b548e02"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 132,
+      "title": "Monitor Manifest Failures (30m)",
+      "type": "stat",
+      "section": "Inspect Manifest & Ledger Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "39b7b5cdb45d018620bf23cc371c2d6caef768d2db86876ec038a5e353e5e774"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 133,
+      "title": "Monitor Ledger Failures (30m)",
+      "type": "stat",
+      "section": "Inspect Manifest & Ledger Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "28da31f856e075620dd5dec9d282fc019afbdce0fc00839d69037f00b4009c06"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 131,
+      "title": "Track Observed Manifest Write Increments",
+      "type": "timeseries",
+      "section": "Inspect Manifest & Ledger Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "ca6c35325f6e69281e7df90c0719f8566c1e73eebc2d6ec50fc9ed133edded64"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 7,
+      "title": "Compare Ledger Appends by Type & Status",
+      "type": "timeseries",
+      "section": "Inspect Manifest & Ledger Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "69a1b4f4f886df1b5eb9711ea95f612697a5b92ff5133c8c45ef4f358e312c61"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9414,
+      "title": "Review Manifest Validation",
+      "type": "table",
+      "section": "Inspect Manifest & Ledger Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "cb5407a165d7cf4895c4d73773a691cf6969b6e69ac76bcccd90ef0ce7a5ebf6"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 903,
+      "title": "Inspect Global Store Reliability",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 4,
+      "title": "Track Global Read Failures",
+      "type": "stat",
+      "section": "Inspect Global Store Reliability",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "07b2842ce4637edd9da7d89618165afaf73a8805da718e577859be01fb5e7361"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 136,
+      "title": "Monitor Global Read Failures (30m)",
+      "type": "stat",
+      "section": "Inspect Global Store Reliability",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "cdd3ddf6c5a9dd9a0dc38903156fa6fe3cbff574c2fe22ba6574c802c1388380"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 6,
+      "title": "Compare Global Reads by Store",
+      "type": "timeseries",
+      "section": "Inspect Global Store Reliability",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "ba941ea82db9f89e8c8096503e538228057da0620184ec4129c33e59d0dd52ca"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 111,
+      "title": "Track Global Read Latency",
+      "type": "timeseries",
+      "section": "Inspect Global Store Reliability",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "dd27f68e85abd153bca9c3c35aa2b47ee70dcce5bf0c6b60ecfff1d82b8bed65"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 904,
+      "title": "Inspect Audit & Lineage Evidence",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 122,
+      "title": "Track Missing Lineage References",
+      "type": "stat",
+      "section": "Inspect Audit & Lineage Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "273bc1ed2e29e14d60bb2b05d732f5325791d16e54ab92fac56d9ec769e4f0d0"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 137,
+      "title": "Track Lineage Persistence Failures",
+      "type": "stat",
+      "section": "Inspect Audit & Lineage Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "310e3d1895c76ebb09767d32f14d9928e4b92c195eecc132179dcdc54b5b2bfc"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 138,
+      "title": "Review Missing Lineage by Layer",
+      "type": "table",
+      "section": "Inspect Audit & Lineage Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "a3c3b772357efdbf8ccf5861584844bc783633e1684a350c3ca14f469d0609bb"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 107,
+      "title": "Compare Global Audit Write Outcomes",
+      "type": "timeseries",
+      "section": "Inspect Audit & Lineage Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "12f686025fc6e0574bc8c84e6e28edb0fb7a0625504a2fe02090710387cf37ca"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 108,
+      "title": "Compare Global Audit Query Outcomes",
+      "type": "timeseries",
+      "section": "Inspect Audit & Lineage Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "96064e1a11c2f06ef40531e90368f49fb431fcdf330aafe9f5f2dc12f2fa927a"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 109,
+      "title": "Track Global Audit Write Latency",
+      "type": "timeseries",
+      "section": "Inspect Audit & Lineage Evidence",
+      "repeat": null,
+      "target_count": 3,
+      "query_sha256": "e8acf823c3ddc68adce957990ec56ad48b1363f61f4188e50c657a7c99b7f4f6"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 110,
+      "title": "Track Global Audit Query Latency",
+      "type": "timeseries",
+      "section": "Inspect Audit & Lineage Evidence",
+      "repeat": null,
+      "target_count": 3,
+      "query_sha256": "6a864e07a2989343fb5080dd3b2f3b8aa4b61c46234340a5fc570135c1ef9023"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 112,
+      "title": "Compare Lineage Persistence Outcomes",
+      "type": "timeseries",
+      "section": "Inspect Audit & Lineage Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "df553e44ec22179579f5bf6eb2d1df99a04870368a2c0ef20a02aedc1687f94b"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 905,
+      "title": "Inspect Run Identity Evidence",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9404,
+      "title": "Review Identity Anchors",
+      "type": "table",
+      "section": "Inspect Run Identity Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "381c962f228da4b218f92ca931a0c3cef07aaf551cf5daf20c8981674809da29"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9407,
+      "title": "Inspect Identity Values",
+      "type": "table",
+      "section": "Inspect Run Identity Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "ca4a8adbc1f5238086726b86ac448d629a07987d3c30c1a8a4d80f859f1e9ed0"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9410,
+      "title": "Explain Missing Identity Data",
+      "type": "text",
+      "section": "Inspect Run Identity Evidence",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9411,
+      "title": "Explain Missing Record Counts",
+      "type": "text",
+      "section": "Inspect Run Identity Evidence",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9405,
+      "title": "Review Identity Gaps",
+      "type": "table",
+      "section": "Inspect Run Identity Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "63024497d04f72b1ca57c776a5ee225c1ed9a54c8b7bf607ce4bba855e926218"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9408,
+      "title": "Review Required Replay Anchors",
+      "type": "table",
+      "section": "Inspect Run Identity Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "8901998560772f0a0e3832833eed085a57ca7dc752337d78b72fd861e1665ba0"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9406,
+      "title": "Compare Checkpoint Anchors",
+      "type": "table",
+      "section": "Inspect Run Identity Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "d6790943543fd24a2cfc9fe3fe169556c043cb65133739efe9256fa331db673b"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9409,
+      "title": "Review Additional Forensic Anchors",
+      "type": "table",
+      "section": "Inspect Run Identity Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "ffbb15a5f4f0cdf52f90e785ad7f6f5c1101ac2c77121c07894ff54eb46c6675"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 139,
+      "title": "Review Uncovered Replay Signals",
+      "type": "text",
+      "section": "Inspect Run Identity Evidence",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9412,
+      "title": "Inspect Run Details",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9402,
+      "title": "Review Run Summary",
+      "type": "table",
+      "section": "Inspect Run Details",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "9dacdaa4561322f1abf2ea77889e7d2c588ce1231371df9b41e4c01d500d5d42"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9403,
+      "title": "Review Processed Records",
+      "type": "table",
+      "section": "Inspect Run Details",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "d140e0cb46bd032f26244629cb63e9fc29ea2dd8cfd82febd165843a3a10df1d"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9417,
+      "title": "Review Bounded Failure Reasons",
+      "type": "table",
+      "section": "Inspect Run Details",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "80d350089fffe70aa0b710e16e6de7240973615d630fc4e8f19d5be08a3b9eba"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9420,
+      "title": "Inspect Complete Run Discovery",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9421,
+      "title": "Inspect Latest Complete Run",
+      "type": "table",
+      "section": "Inspect Complete Run Discovery",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "f09a537af018da341baa825b5fdc82c0908847d3e0e572b3563cc841bf5c2bc5"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9450,
+      "title": "Inspect Saved Run Evidence",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9451,
+      "title": "Inspect Selected Run Domains",
+      "type": "table",
+      "section": "Inspect Saved Run Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "9f884a4b1d735e0294d9d1d100838c704011d0469a896ef5531a9adcd658a2b6"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "id": 9452,
+      "title": "Inspect Selected Run Identity",
+      "type": "table",
+      "section": "Inspect Saved Run Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "5d3b38f6e0408f640f2d8d2ad62f08a6a029bf7e957f6f0bb7b0819ba350e9ac"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 1000,
+      "title": "",
+      "type": "text",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 9400,
+      "title": "",
+      "type": "text",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 9401,
+      "title": "Monitor Current DQ Status",
+      "type": "stat",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "ac088518d7bad37b18c8caa4264f5bc03be7b680e270e911c4499a1f6eeb917c"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 9103,
+      "title": "",
+      "type": "text",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 9101,
+      "title": "Monitor DQ Threshold State",
+      "type": "stat",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "d3cb50269c336d7e07567b943f9bc01e2f8a0e36733a15e2a79143f75a2ff9ff"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 9102,
+      "title": "Inspect Current DQ Reasons",
+      "type": "table",
+      "section": "",
+      "repeat": null,
+      "target_count": 3,
+      "query_sha256": "fde34fa2d8fe02dd197a55e8ecb3fbbcdac24ae8b5c78ca95861eaf4e5ee8ccf"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 9406,
+      "title": "Review Selected Run Status",
+      "type": "table",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "5d3b38f6e0408f640f2d8d2ad62f08a6a029bf7e957f6f0bb7b0819ba350e9ac"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 9405,
+      "title": "Selected Run · Identity & Accounting",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 9402,
+      "title": "Inspect Run Identity",
+      "type": "table",
+      "section": "Selected Run · Identity & Accounting",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "9dacdaa4561322f1abf2ea77889e7d2c588ce1231371df9b41e4c01d500d5d42"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 9403,
+      "title": "Inspect Processed Records",
+      "type": "table",
+      "section": "Selected Run · Identity & Accounting",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "d140e0cb46bd032f26244629cb63e9fc29ea2dd8cfd82febd165843a3a10df1d"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 9404,
+      "title": "Selected Range · Impact & Freshness",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 157,
+      "title": "Review DQ Coverage",
+      "type": "text",
+      "section": "Selected Range · Impact & Freshness",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 2,
+      "title": "Monitor Volume-Weighted DQ Score",
+      "type": "stat",
+      "section": "Selected Range · Impact & Freshness",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "cd345f989efe137bbd7a4fa8360965700c189824f4250913d6e2db2987f95d49"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 5,
+      "title": "Monitor Worst-Entity DQ Score",
+      "type": "stat",
+      "section": "Selected Range · Impact & Freshness",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "e8e86c3622cdd37a6e79fc8629517fcca8494f58eec28b8f5cc90bc3c4580d46"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 8,
+      "title": "Monitor Worst Freshness Age",
+      "type": "stat",
+      "section": "Selected Range · Impact & Freshness",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "785949f16682dce58004a885210fb769275bb04b1e493008e79994033de32438"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 158,
+      "title": "Inspect DQ Sample Coverage",
+      "type": "stat",
+      "section": "Selected Range · Impact & Freshness",
+      "repeat": null,
+      "target_count": 2,
+      "query_sha256": "3795a8d318a95179969c49066e379f2944ca1ec24a86ea6264f22c855df7de15"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 154,
+      "title": "Monitor Blocked Records",
+      "type": "stat",
+      "section": "Selected Range · Impact & Freshness",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "c3dd6ddcc65a0314c5d546bf46808411d1ae35dcd53ada4e8cf36f5cd66e2589"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 6,
+      "title": "Monitor Quarantined Records",
+      "type": "stat",
+      "section": "Selected Range · Impact & Freshness",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "f66a9696cbf095483040cb47128fcd3d48f9f01579c1f0c8fe729af835d23d5a"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 117,
+      "title": "Monitor Silver Filter Rejects",
+      "type": "stat",
+      "section": "Selected Range · Impact & Freshness",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "af0fce9a7b18d962155e4b2840b20cf4f60f4f80d7aee1a6446eb3c4f46c39b0"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 220,
+      "title": "Selected Range · Reject Evidence",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 152,
+      "title": "Monitor Silver Reject Mismatch",
+      "type": "stat",
+      "section": "Selected Range · Reject Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "09d36a8a779695a9b1d50896cc36d3634ac4065abf9b2508ed99b96b187c030e"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 121,
+      "title": "Inspect Top Silver Reject Reasons",
+      "type": "table",
+      "section": "Selected Range · Reject Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "aa1dd646d2c09dd409190ea63e6b1fc2c75f7ce2e7ee08445a43376103fb8878"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 122,
+      "title": "Inspect Top Silver Reject Fields",
+      "type": "table",
+      "section": "Selected Range · Reject Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "3a02ca37107247b994636232715aaa6a200ab4f3776edb4ddda185a4b8045f2c"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 118,
+      "title": "Inspect Silver Rejects by Pipeline",
+      "type": "table",
+      "section": "Selected Range · Reject Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "09adbcf59cce96eac4ec0fa1b3b444ef19a44619ded1d11910b21ef710deecfd"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 156,
+      "title": "Inspect Gold Reject Outcomes by Pipeline",
+      "type": "table",
+      "section": "Selected Range · Reject Evidence",
+      "repeat": null,
+      "target_count": 2,
+      "query_sha256": "0333f1369cd975b42ed7628ea93aec880c381a87925e0866da04ee8ac8ae42f8"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 221,
+      "title": "Selected Range · Validation Diagnostics",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 1,
+      "title": "Track Record Flow by Stage",
+      "type": "timeseries",
+      "section": "Selected Range · Validation Diagnostics",
+      "repeat": null,
+      "target_count": 2,
+      "query_sha256": "337d4667bbf33e1dba560dede38416d7d55b07a5915b68d420057c54d93c8ae9"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 4,
+      "title": "Monitor Gold Records",
+      "type": "stat",
+      "section": "Selected Range · Validation Diagnostics",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "337c22220af584259c7a8f31169d22c8c61811881fe7c7ddb251d1d31f7cf252"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 3,
+      "title": "Monitor Bronze Records",
+      "type": "stat",
+      "section": "Selected Range · Validation Diagnostics",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "6906c5ccb841f1e6de5a733e6312b07221932e69146d3ceac288ccf10e97e3b8"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 101,
+      "title": "Inspect Latest Successful Data",
+      "type": "stat",
+      "section": "Selected Range · Validation Diagnostics",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "3ddf7a5ff11fc5197cfaa9d29b1dfab8a92ffb67f375a2e64675007c81f082a5"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 9,
+      "title": "Inspect Quarantine Error Types",
+      "type": "bargauge",
+      "section": "Selected Range · Validation Diagnostics",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "689011ea8d92962d33946b174f46e71e0ffe6001236b3fac2c6960a7dd0549b9"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 12,
+      "title": "Monitor Silver Validation Failures",
+      "type": "stat",
+      "section": "Selected Range · Validation Diagnostics",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "3abf2fd0982bde32d38d04ebe4b15b97c0b5d80f4f37874e1f0bb1a6cf4bb6b5"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 151,
+      "title": "Monitor Gold Validation Failures",
+      "type": "stat",
+      "section": "Selected Range · Validation Diagnostics",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "95c83ef6ac72132046d58ede8e57943630bcd21c0f17f17d740392c4d719663f"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 10,
+      "title": "Track DQ Anomalies",
+      "type": "timeseries",
+      "section": "Selected Range · Validation Diagnostics",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "b5d03e0b702d171c656aef7b30fa12ca758c17979edeec0dc08db4fb2090e3c4"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 11,
+      "title": "Track DQ Check Duration p95",
+      "type": "timeseries",
+      "section": "Selected Range · Validation Diagnostics",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "12ade02b54421e87d62a8738ad7863dbf8da88f9b8b8cae4105623179607e292"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 155,
+      "title": "Track DQ Threshold Events",
+      "type": "timeseries",
+      "section": "Selected Range · Validation Diagnostics",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "865cbcf701684ca25cd112332eda92e0c2dd8a0ee9a598f9c0c06989fa897050"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 153,
+      "title": "Track Volume-Weighted DQ Score",
+      "type": "timeseries",
+      "section": "Selected Range · Validation Diagnostics",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "bc213affeecf1ca908c0e7ec4f397db28cc57c2ccd1ac77cb9a16c529d28dfb0"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 116,
+      "title": "Inspect Lineage in Control Plane",
+      "type": "text",
+      "section": "Selected Range · Validation Diagnostics",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 150,
+      "title": "Inspect Aggregate Control-Plane Issues",
+      "type": "text",
+      "section": "Selected Range · Validation Diagnostics",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 9450,
+      "title": "Inspect Saved Run Evidence",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 9451,
+      "title": "Inspect Selected Run Domains",
+      "type": "table",
+      "section": "Inspect Saved Run Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "9f884a4b1d735e0294d9d1d100838c704011d0469a896ef5531a9adcd658a2b6"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "id": 9452,
+      "title": "Inspect Selected Run Identity",
+      "type": "table",
+      "section": "Inspect Saved Run Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "5d3b38f6e0408f640f2d8d2ad62f08a6a029bf7e957f6f0bb7b0819ba350e9ac"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "id": 1000,
+      "title": "",
+      "type": "text",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "id": 9400,
+      "title": "",
+      "type": "text",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "id": 9401,
+      "title": "Monitor Selected-Scope Status",
+      "type": "stat",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "eae9db0cc6780bf15f7fcd0bf4b3e103ec80eac0f4f0ed4fd99f678244c69fb7"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "id": 2001,
+      "title": "",
+      "type": "text",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "id": 2010,
+      "title": "Inspect Ranked Suspects",
+      "type": "table",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "1cea44024aee10a1d342ae78ce577cc31514460c45abd00731aef1805da4255e"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "id": 2005,
+      "title": "Monitor Current Alerts",
+      "type": "table",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "f57e9efc1b49b469f3fdabdbe2e4f03a829a34b6a6949c6275fdf1a44f114322"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "id": 2020,
+      "title": "Review Alert Evidence",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "id": 2006,
+      "title": "Track Alert State History",
+      "type": "state-timeline",
+      "section": "Review Alert Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "f8429f851fb97966607e0c41d6d0e701a96502b2d0b3fac24c98e8d35cd9f03e"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "id": 2007,
+      "title": "Assess Impact & Confidence",
+      "type": "text",
+      "section": "Review Alert Evidence",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "id": 2099,
+      "title": "Domain Suspect Details · GLOBAL / CURRENT",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "id": 2002,
+      "title": "Inspect Runtime Suspects",
+      "type": "table",
+      "section": "Domain Suspect Details · GLOBAL / CURRENT",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "d5cff64ab41f3b5a52c489a44f810c68a64fd384393feb45fc9ef3f7a25e8150"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "id": 2003,
+      "title": "Inspect Provider Suspects",
+      "type": "table",
+      "section": "Domain Suspect Details · GLOBAL / CURRENT",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "786618091338deb38765656e7cd1da21c60e2c9ba6a30529eb3bcf8b84a5407c"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "id": 2004,
+      "title": "Inspect DQ Suspects",
+      "type": "table",
+      "section": "Domain Suspect Details · GLOBAL / CURRENT",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "d28aae7582e70cdff25c57472ad7edd961a61b4bbde10ed145c9d2b88ef9e482"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "id": 2100,
+      "title": "Inspect Selected Run Summary",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "id": 2101,
+      "title": "Review Selected Run Status",
+      "type": "table",
+      "section": "Inspect Selected Run Summary",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "5d3b38f6e0408f640f2d8d2ad62f08a6a029bf7e957f6f0bb7b0819ba350e9ac"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "id": 32010,
+      "title": "Inspect Full Ranked Suspects",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "id": 22010,
+      "title": "Inspect Full Ranked Suspects",
+      "type": "table",
+      "section": "Inspect Full Ranked Suspects",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "f2f72f88ee50e9fe3aade9d7ef17564236689e7c048a921dac351a8e6c3d699e"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "id": 32005,
+      "title": "Inspect Full Current Alerts",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "id": 22005,
+      "title": "Inspect Full Current Alerts",
+      "type": "table",
+      "section": "Inspect Full Current Alerts",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "94f9853851b167537c17eb0875257631d5a517dbc39769bc924b283d9ec3e792"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "id": 9450,
+      "title": "Inspect Saved Run Evidence",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "id": 9451,
+      "title": "Inspect Selected Run Domains",
+      "type": "table",
+      "section": "Inspect Saved Run Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "9f884a4b1d735e0294d9d1d100838c704011d0469a896ef5531a9adcd658a2b6"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "id": 9452,
+      "title": "Inspect Selected Run Identity",
+      "type": "table",
+      "section": "Inspect Saved Run Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "5d3b38f6e0408f640f2d8d2ad62f08a6a029bf7e957f6f0bb7b0819ba350e9ac"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 1000,
+      "title": "",
+      "type": "text",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 99,
+      "title": "",
+      "type": "text",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9603,
+      "title": "Review Selected Run Status",
+      "type": "table",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "8c8dcdb5a27b3d86378b54df78e9cfab208d3b4c03a8cc6b522994fc2835c2e0"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 214,
+      "title": "Monitor Scope Health",
+      "type": "stat",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "eae9db0cc6780bf15f7fcd0bf4b3e103ec80eac0f4f0ed4fd99f678244c69fb7"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 215,
+      "title": "Review First Action",
+      "type": "table",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "ac9d99a35ed6a1ca82ba0a839950e99d26e91619fa4dd371c0b80b15827f0fb7"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9002,
+      "title": "Review Selected Run Domains",
+      "type": "table",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "9f884a4b1d735e0294d9d1d100838c704011d0469a896ef5531a9adcd658a2b6"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9600,
+      "title": "Inspect Alerts",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9601,
+      "title": "Review Active Alerts",
+      "type": "table",
+      "section": "Inspect Alerts",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "28e26de3bb20a8c036b0459983d3d830edf2d3011fd62e6646e19507d0df7afc"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9030,
+      "title": "Domain Status Tracks",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9031,
+      "title": "Review All Domain Status",
+      "type": "table",
+      "section": "Domain Status Tracks",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "0ed02643005cbaeb7a471ef941616b6578643ab6d4a37d0a26a3082db21bf19b"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9018,
+      "title": "Track Runtime Blockers",
+      "type": "state-timeline",
+      "section": "Domain Status Tracks",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "919b52d5b80d553bc336b119a75d2f27a874e907b2ef8458a6a28ceb71a3032f"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9019,
+      "title": "Track Data Quality Status",
+      "type": "state-timeline",
+      "section": "Domain Status Tracks",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "c98d5bdd4a804cf8eca3afc752346436f369debd4ae0b5c056cb2012bfad7ffa"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9020,
+      "title": "Track Gold Lifecycle",
+      "type": "state-timeline",
+      "section": "Domain Status Tracks",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "5055bc4affce79317a8d30c76dac36d1f504f8b1ce404a4577535261c55be5b6"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9009,
+      "title": "Inspect Range Evidence",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9010,
+      "title": "Review Failed Runs",
+      "type": "table",
+      "section": "Inspect Range Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "230384e412aa51946e24cbf9f6869b28475cafca6df8eedf0f41d446ce01bd5e"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9011,
+      "title": "Review Recent Non-success Terminal Runs",
+      "type": "table",
+      "section": "Inspect Range Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "f6fffc27b243461307c26060339d98a0992acbb60ec87404a7f11dc5699e722e"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9015,
+      "title": "Track Silver Rejects",
+      "type": "stat",
+      "section": "Inspect Range Evidence",
+      "repeat": null,
+      "target_count": 2,
+      "query_sha256": "139b1ad6af6198e0fca5dfc4d3eb96d51e58f4d7a27dc0f4cad880818874383d"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9012,
+      "title": "Inspect Domain Diagnostics",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9006,
+      "title": "Review Control Plane Status",
+      "type": "table",
+      "section": "Inspect Domain Diagnostics",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "e40284b43c2e7b66cc73fb2ceaa3f17903fbbbbb0284cac00eeee5344d08b360"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9003,
+      "title": "Review Runtime Status",
+      "type": "table",
+      "section": "Inspect Domain Diagnostics",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "3351b76a4472c3d1453a35970822f76ef58a9dada42fd67715588fa8420f117d"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9004,
+      "title": "Review Data Quality Status",
+      "type": "table",
+      "section": "Inspect Domain Diagnostics",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "cf5a0a1cd64e984f226eebb7344d20fec76d7674bafef508178d51b1383eac22"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9007,
+      "title": "Review Global Provider Status",
+      "type": "table",
+      "section": "Inspect Domain Diagnostics",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "04d0ceee8d7c969649dfcd169dc1e9c9555f257d1f38123d795f3b41212228f6"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9005,
+      "title": "Review Data Validation Status",
+      "type": "table",
+      "section": "Inspect Domain Diagnostics",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "e170667f0d6e1220f6afe23698dda72cdb8bc79f16d829833eed8e1bb9fde1b4"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9013,
+      "title": "Review Workflow Status",
+      "type": "table",
+      "section": "Inspect Domain Diagnostics",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "1dfd0dc7a4ceb0c7f6d0979565ba76473728e75843d007b7e6d0dd94e30d6574"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9021,
+      "title": "Navigate Diagnostics",
+      "type": "text",
+      "section": "Inspect Domain Diagnostics",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9602,
+      "title": "Inspect Run Context",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9300,
+      "title": "Review Run Identity",
+      "type": "table",
+      "section": "Inspect Run Context",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "9dacdaa4561322f1abf2ea77889e7d2c588ce1231371df9b41e4c01d500d5d42"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9301,
+      "title": "Review Processed Records",
+      "type": "table",
+      "section": "Inspect Run Context",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "d140e0cb46bd032f26244629cb63e9fc29ea2dd8cfd82febd165843a3a10df1d"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 30215,
+      "title": "Inspect Full First Action",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 20215,
+      "title": "Inspect Full First Action",
+      "type": "table",
+      "section": "Inspect Full First Action",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "c6f111d16654bbc629f20153490266ca55dbf7468c7c59b14bab468b94095a0e"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9450,
+      "title": "Inspect Saved Run Evidence",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9451,
+      "title": "Inspect Selected Run Domains",
+      "type": "table",
+      "section": "Inspect Saved Run Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "9f884a4b1d735e0294d9d1d100838c704011d0469a896ef5531a9adcd658a2b6"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "id": 9452,
+      "title": "Inspect Selected Run Identity",
+      "type": "table",
+      "section": "Inspect Saved Run Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "5d3b38f6e0408f640f2d8d2ad62f08a6a029bf7e957f6f0bb7b0819ba350e9ac"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 1000,
+      "title": "",
+      "type": "text",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 9400,
+      "title": "",
+      "type": "text",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 9401,
+      "title": "Monitor Selected Provider",
+      "type": "stat",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "d2b0174954af30e380555eb6b49b7334194586b78ee792656c97eb6bbad33859"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 9002,
+      "title": "",
+      "type": "text",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 9101,
+      "title": "Monitor Fleet Severity",
+      "type": "table",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "3fb2fea508a7483e64d365264e411e4b7b4f49a7fab9405c91217b5173103c30"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 9107,
+      "title": "Inspect Status Reason",
+      "type": "table",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "a9928da3ca38450393d1b9e9a56e52ef62b0142f176ddb2b1d7bff17463bd010"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 9104,
+      "title": "Monitor Telemetry Presence",
+      "type": "stat",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "123b373de2705d8ff35b9ff39d244243befdbe7b4546aef18431da8645b93361"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 9106,
+      "title": "Inspect Fleet Non-OK and Causes",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 9102,
+      "title": "Inspect Non-OK Providers",
+      "type": "table",
+      "section": "Inspect Fleet Non-OK and Causes",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "255a6bcaf5eb4b5f21ec6f2849bcc26b650068bc12dc3fcd1c9c7136f6e0c86b"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 9103,
+      "title": "Inspect Top Provider Causes",
+      "type": "table",
+      "section": "Inspect Fleet Non-OK and Causes",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "666b87e486663c28c17bee3ed58ddb2539b94e5a82ac09c7b2b5008dd8391e56"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 9105,
+      "title": "Inspect Full Fleet Evidence",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 9111,
+      "title": "Inspect Full Fleet Severity",
+      "type": "table",
+      "section": "Inspect Full Fleet Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "07a49eb3e98ddd909fe05a0b6da2d6b03a7994a928e22d28107554b2bf7daf68"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 9112,
+      "title": "Inspect Full Non-OK Providers",
+      "type": "table",
+      "section": "Inspect Full Fleet Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "94a55c32a6c946af58001c4c4e52c415b325d852f5d570a3555c232dafa016ff"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 9113,
+      "title": "Inspect Full Provider Causes",
+      "type": "table",
+      "section": "Inspect Full Fleet Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "5f1d2d0f7b17566365e11f0cd558ada85e9d479bc1e5de31e3a4ff209d8d6e51"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 91,
+      "title": "Selected Provider Details",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 106,
+      "title": "Track Health Failures & Degradation",
+      "type": "timeseries",
+      "section": "Selected Provider Details",
+      "repeat": null,
+      "target_count": 2,
+      "query_sha256": "906cd486b4767fb426c962276557cefce4c921762cb72a8f5a5795b8c480c60a"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 107,
+      "title": "Track Failure Share",
+      "type": "table",
+      "section": "Selected Provider Details",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "1bd6f6cfe5d59d4ac25d5ef33f659d3905391d43767d9f2a2793a69dfe09f242"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 108,
+      "title": "Inspect Exhausted Retries",
+      "type": "table",
+      "section": "Selected Provider Details",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "993678cc73b156a380fe7e6a7560a2195bfd7227b2a65e17e10174fa1f6c192b"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 109,
+      "title": "Track Exhausted Retries",
+      "type": "timeseries",
+      "section": "Selected Provider Details",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "6020e2d378f1de2a0be10f53745276c0f8989d06785cb51ce2b076533f42ddea"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 102,
+      "title": "Inspect Health-Check Latency p95",
+      "type": "stat",
+      "section": "Selected Provider Details",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "6f90a2e739da170808aafa00a06fb00dc2f8fcaabe8ff5be5bd05c8a05391c82"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 110,
+      "title": "Track Request Latency p95",
+      "type": "timeseries",
+      "section": "Selected Provider Details",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "0388105a866480ee20e98913e5eac526e3eb53d43349f1f75aba16fa91e5c393"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 111,
+      "title": "Track Rate-Limit Errors",
+      "type": "timeseries",
+      "section": "Selected Provider Details",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "55cdc51b8ee0fe09adcb543317d10a804a2783812ca6143440d701df7a7cb8fb"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 115,
+      "title": "Track Network & Timeout Errors",
+      "type": "timeseries",
+      "section": "Selected Provider Details",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "fb85ab644f7d8b4e39f5632ddb16bf40353224c400557480e24f39de1512d5ca"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 112,
+      "title": "Track Rate-Limiter Wait p95",
+      "type": "timeseries",
+      "section": "Selected Provider Details",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "a2c7586918a72640a45a963d9f443a847863e7ab8e21b22fd3bbc733904d35f7"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 113,
+      "title": "Monitor Available Rate-Limit Tokens",
+      "type": "bargauge",
+      "section": "Selected Provider Details",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "f508a8e6fa59c02aac70a8a0bd81b7693d39f557a18c83f0cedce8e0408c437f"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 31,
+      "title": "Monitor Global Circuit-Breaker State",
+      "type": "stat",
+      "section": "Selected Provider Details",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "32d7b0f88bb7470e48ce71c5e4140912a5b5006cbe2b7785a5a036ef23d129f2"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 32,
+      "title": "Track Global Circuit-Breaker Trips",
+      "type": "timeseries",
+      "section": "Selected Provider Details",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "409bfbdd8087bf9888676bedd7a7ccd1cf3742762545507140c64c021fa0c5eb"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 9404,
+      "title": "Range & Debug Evidence",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 114,
+      "title": "Inspect Raw Health Status",
+      "type": "table",
+      "section": "Range & Debug Evidence",
+      "repeat": null,
+      "target_count": 3,
+      "query_sha256": "9bdbb729689557394aaaec455836ee993b75b93d08e03e9553fe898aca9b817a"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 1,
+      "title": "Track Health-Check Latency p95",
+      "type": "timeseries",
+      "section": "Range & Debug Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "09635675ee6d9417120acced7e8f25956207129c2220046774a3bf2aeb190898"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 2,
+      "title": "Monitor Healthy Checks",
+      "type": "stat",
+      "section": "Range & Debug Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "0965a2b82a4cf9fc123296726995267944c2a36fd014ae48bd63865bb6d5e5ad"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 105,
+      "title": "Monitor Degraded Checks",
+      "type": "stat",
+      "section": "Range & Debug Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "28b84f477ee757e1b3a6a76f5ab9d450fe29d3671f5e735a8ee2877a3391e064"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 104,
+      "title": "Track Failure Rate",
+      "type": "stat",
+      "section": "Range & Debug Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "c9c6115a2b7285dd24038341e378b322582233ddb85522b4708b4c92951a08ca"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 7,
+      "title": "Monitor Health Checks",
+      "type": "stat",
+      "section": "Range & Debug Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "14d516982e9e599213bc40a5dc85749623b1531ba84562d0616f27fd064cd7bc"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 9405,
+      "title": "Run Context",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 9402,
+      "title": "Inspect Run Identity",
+      "type": "table",
+      "section": "Run Context",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "9dacdaa4561322f1abf2ea77889e7d2c588ce1231371df9b41e4c01d500d5d42"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 9403,
+      "title": "Inspect Processed Records",
+      "type": "table",
+      "section": "Run Context",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "d140e0cb46bd032f26244629cb63e9fc29ea2dd8cfd82febd165843a3a10df1d"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 9450,
+      "title": "Inspect Saved Run Evidence",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 9451,
+      "title": "Inspect Selected Run Domains",
+      "type": "table",
+      "section": "Inspect Saved Run Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "9f884a4b1d735e0294d9d1d100838c704011d0469a896ef5531a9adcd658a2b6"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "id": 9452,
+      "title": "Inspect Selected Run Identity",
+      "type": "table",
+      "section": "Inspect Saved Run Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "5d3b38f6e0408f640f2d8d2ad62f08a6a029bf7e957f6f0bb7b0819ba350e9ac"
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "id": 1000,
+      "title": "",
+      "type": "text",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "id": 1,
+      "title": "",
+      "type": "text",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "id": 3010,
+      "title": "Inspect Recent Runs (last 10)",
+      "type": "table",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "e1369ee23509cc7e015073d8d9eeb6138809ab522312e661b54986169bd3f824"
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "id": 9450,
+      "title": "Inspect Saved Run Evidence",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "id": 9451,
+      "title": "Inspect Selected Run Domains",
+      "type": "table",
+      "section": "Inspect Saved Run Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "9f884a4b1d735e0294d9d1d100838c704011d0469a896ef5531a9adcd658a2b6"
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "id": 9452,
+      "title": "Inspect Selected Run Identity",
+      "type": "table",
+      "section": "Inspect Saved Run Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "5d3b38f6e0408f640f2d8d2ad62f08a6a029bf7e957f6f0bb7b0819ba350e9ac"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 1000,
+      "title": "",
+      "type": "text",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 9400,
+      "title": "",
+      "type": "text",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 9401,
+      "title": "Monitor Pipeline Status",
+      "type": "stat",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "e289662a2c9a946fc1963e79e394a42941022d1d1549f3bf309b45b447671e3a"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 9101,
+      "title": "Review Runtime Blockers",
+      "type": "table",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "a38cac1497095ce440935761d6dbdc434101e598b37e0c62368171bf22e657d3"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 9102,
+      "title": "Monitor Metrics Coverage",
+      "type": "stat",
+      "section": "",
+      "repeat": null,
+      "target_count": 3,
+      "query_sha256": "0730f09d4735094841e828f6093683abbfd472fd0d12235acb1347dd17e0fb98"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 2460,
+      "title": "Review Stage Progress",
+      "type": "table",
+      "section": "",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "4d0fab5edbc87e2761f53a6246280b28830fb6562df226147670a853487216fa"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 252,
+      "title": "Inspect Detection Signals",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 238,
+      "title": "Track Stage Backlog Trend",
+      "type": "timeseries",
+      "section": "Inspect Detection Signals",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "6fa3079d58a143db4d944667a1914418b074a9fb1b83348198c952672c66912e"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 240,
+      "title": "Track Records by Stage / Interval",
+      "type": "timeseries",
+      "section": "Inspect Detection Signals",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "f4a0099e086c608a8dca9102091cf39f27816f098fbad9044bf3f12d7615ed86"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 242,
+      "title": "Inspect Active Runtime Blocker Detail",
+      "type": "table",
+      "section": "Inspect Detection Signals",
+      "repeat": null,
+      "target_count": 10,
+      "query_sha256": "46d110b4b670a138fea37127b1492989db2ce975e2a5423a3f8f7a6b8b0e7086"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 9105,
+      "title": "Track Stage Lag",
+      "type": "timeseries",
+      "section": "Inspect Detection Signals",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "dc65bf252e4c597423acba028b832c8affe3fa5d7a30fe665b33c68471c195ba"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 243,
+      "title": "Inspect Stage Expectedness",
+      "type": "table",
+      "section": "Inspect Detection Signals",
+      "repeat": null,
+      "target_count": 2,
+      "query_sha256": "cfb4cb7422c68d218890f04de1d528dc9a8d4e5cb8e6fe834a757aec5afa0291"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 220,
+      "title": "Monitor Runtime Error Rate",
+      "type": "stat",
+      "section": "Inspect Detection Signals",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "0092759cd0ccbd53a4403645ae86a778dd40a88024818c6992abe68402ae5f31"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 253,
+      "title": "Localize Runtime Cause",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 207,
+      "title": "Track Phase Duration",
+      "type": "timeseries",
+      "section": "Localize Runtime Cause",
+      "repeat": null,
+      "target_count": 3,
+      "query_sha256": "7a65505978f78dc5129e7fa2677e109c1afea707c764aef5e044a0465a375fb4"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 239,
+      "title": "Track Pipeline Duration",
+      "type": "timeseries",
+      "section": "Localize Runtime Cause",
+      "repeat": null,
+      "target_count": 3,
+      "query_sha256": "a09758efc0ec3355737fd6d4cfd89106d86792aebded03f52169086b36fd4f49"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 256,
+      "title": "Review Errors by Stage & Code",
+      "type": "table",
+      "section": "Localize Runtime Cause",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "ad6ad3c6c0ebaabf96b823aa0ea2cc206109ef09d2ee8da65dce3ea6c4e222b9"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 241,
+      "title": "Compare Records by Stage & Run Type",
+      "type": "table",
+      "section": "Localize Runtime Cause",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "8514b0fe026044709cb0c66b0d374e5e5c77f6d05c0216af95932a3adddf7874"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 9991,
+      "title": "",
+      "type": "text",
+      "section": "Localize Runtime Cause",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 254,
+      "title": "Review Escalation Paths",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 2541,
+      "title": "Review Runtime Escalation",
+      "type": "text",
+      "section": "Review Escalation Paths",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 230,
+      "title": "Monitor Pipeline Alert Conditions",
+      "type": "stat",
+      "section": "Review Escalation Paths",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "f0cfcd5e35c1bc4324d76b9e860b64aefbc77899a505517c9cb1fe4eaf740e3d"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 236,
+      "title": "Monitor No-Records Runs",
+      "type": "stat",
+      "section": "Review Escalation Paths",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "73b06ea6beb5379d057c9add384a9845ebe0883a28c1032a03a568e74b25f59f"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 21,
+      "title": "Monitor Memory Pressure Active",
+      "type": "stat",
+      "section": "Review Escalation Paths",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "034f29190a2c27389a5afdc674af157c6ea44614969ccdcc751b47bf531c2be0"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 2542,
+      "title": "Review Cross-Domain Handoffs",
+      "type": "text",
+      "section": "Review Escalation Paths",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 4,
+      "title": "Inspect DQ Alert Conditions",
+      "type": "stat",
+      "section": "Review Escalation Paths",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "8ffa8b68b677b27101cc894a990d8332d1db58b1bb93e7a1a7d16fec04713ee0"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 5,
+      "title": "Inspect Control Plane Alert Conditions",
+      "type": "stat",
+      "section": "Review Escalation Paths",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "7368f05d69b9be5cfce40c7a0888460c6c4419981a7915e7df0d4d67bf79f9ac"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 6,
+      "title": "Inspect Provider Alert Conditions",
+      "type": "stat",
+      "section": "Review Escalation Paths",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "42ace22570513cb72a7995401339519e097c6a8a657cf1365f0571052e1039f0"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 259,
+      "title": "Inspect Global Provider Alert Conditions",
+      "type": "stat",
+      "section": "Review Escalation Paths",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "b847d1f71407285cc43d5552097bdf511c461fd0132fbbfffd9621f73a269798"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 7,
+      "title": "Inspect Entities Stale Over 24h",
+      "type": "stat",
+      "section": "Review Escalation Paths",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "03cac0606675b54c1fc0aaffa7bf4b1701af6f4372d9cf65797c3537b4f0962b"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 2543,
+      "title": "Review Global Process Signals",
+      "type": "text",
+      "section": "Review Escalation Paths",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 209,
+      "title": "Track Global Shutdown Starts",
+      "type": "timeseries",
+      "section": "Review Escalation Paths",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "aa3480af072db118d7fd309e8d8ad465c4512cec996178b57e8759f7a1915e41"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 210,
+      "title": "Track Global Shutdown Completions",
+      "type": "timeseries",
+      "section": "Review Escalation Paths",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "b0e26fa234700fe69760d4d749d6e300792d4dabfd39fc1e689997fe2fe3e119"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 9992,
+      "title": "Inspect Secondary Runtime Indicators",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 237,
+      "title": "Monitor Worst Stage Lag",
+      "type": "stat",
+      "section": "Inspect Secondary Runtime Indicators",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "3f705cd949a1801bf05e489d596fd59398e63e63ac775b8756349d8d595c942d"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 16,
+      "title": "Monitor Active Blocker Count",
+      "type": "stat",
+      "section": "Inspect Secondary Runtime Indicators",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "30918714e9d4faec963e72ed5f7670427eb4ee3c2f65d16ed3c0bb8b1dc8c284"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 205,
+      "title": "Monitor Failed Runs",
+      "type": "stat",
+      "section": "Inspect Secondary Runtime Indicators",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "08c084f71e369e42a98b0943dc3c74ab2d6315ce38de265a803285d1496492d0"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 9993,
+      "title": "Inspect Run Context",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 9402,
+      "title": "Inspect Pipeline Identity",
+      "type": "table",
+      "section": "Inspect Run Context",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "9dacdaa4561322f1abf2ea77889e7d2c588ce1231371df9b41e4c01d500d5d42"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 9403,
+      "title": "Inspect Processed Records",
+      "type": "table",
+      "section": "Inspect Run Context",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "d140e0cb46bd032f26244629cb63e9fc29ea2dd8cfd82febd165843a3a10df1d"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 9998,
+      "title": "Review Selected Run Status",
+      "type": "table",
+      "section": "Inspect Run Context",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "5d3b38f6e0408f640f2d8d2ad62f08a6a029bf7e957f6f0bb7b0819ba350e9ac"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 9994,
+      "title": "Inspect Workflow Evidence",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 9996,
+      "title": "Track Failed Workflow Runs",
+      "type": "stat",
+      "section": "Inspect Workflow Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "9fa9a7905f83702da74de1c82c4dea9a4472f686e89e2ec3b7bad4674c67a4fd"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 9997,
+      "title": "Track Failed Workflow Steps",
+      "type": "stat",
+      "section": "Inspect Workflow Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "334048e24a2edf78ac3f47e88db4c2834ff98c58be6f0bd47f983c0c6d82b94d"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 32460,
+      "title": "Inspect Full Stage Progress",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 22460,
+      "title": "Inspect Full Stage Progress",
+      "type": "table",
+      "section": "Inspect Full Stage Progress",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "181a30473b581fb50b2f962f20d50b3ed272396bae8e4cf1cb0fd498b1ad71bd"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 2461,
+      "title": "Inspect Current Missing Stage Signals",
+      "type": "table",
+      "section": "Inspect Full Stage Progress",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "f103a78b2e91d6e37f80f95e1ba39660d8ab26640ca768c562977183a0219261"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 9450,
+      "title": "Inspect Saved Run Evidence",
+      "type": "row",
+      "section": "",
+      "repeat": null,
+      "target_count": 0,
+      "query_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 9451,
+      "title": "Inspect Selected Run Domains",
+      "type": "table",
+      "section": "Inspect Saved Run Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "9f884a4b1d735e0294d9d1d100838c704011d0469a896ef5531a9adcd658a2b6"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "id": 9452,
+      "title": "Inspect Selected Run Identity",
+      "type": "table",
+      "section": "Inspect Saved Run Evidence",
+      "repeat": null,
+      "target_count": 1,
+      "query_sha256": "5d3b38f6e0408f640f2d8d2ad62f08a6a029bf7e957f6f0bb7b0819ba350e9ac"
+    }
+  ],
+  "missing_elements": [],
+  "added_elements": [],
+  "pipeline_baseline_counts": [
+    {
+      "pipeline": "chembl_activity",
+      "counts": {
+        "дефект": 113,
+        "заблокировано": 2507
+      }
+    },
+    {
+      "pipeline": "chembl_assay",
+      "counts": {
+        "дефект": 135,
+        "заблокировано": 3533
+      }
+    },
+    {
+      "pipeline": "chembl_assay_parameters",
+      "counts": {
+        "дефект": 91,
+        "заблокировано": 2005
+      }
+    },
+    {
+      "pipeline": "chembl_cell_line",
+      "counts": {
+        "дефект": 77,
+        "заблокировано": 2019
+      }
+    },
+    {
+      "pipeline": "chembl_compound_record",
+      "counts": {
+        "дефект": 76,
+        "заблокировано": 2020
+      }
+    },
+    {
+      "pipeline": "chembl_molecule",
+      "counts": {
+        "дефект": 104,
+        "заблокировано": 1992
+      }
+    },
+    {
+      "pipeline": "chembl_protein_class",
+      "counts": {
+        "дефект": 76,
+        "заблокировано": 2020
+      }
+    },
+    {
+      "pipeline": "chembl_publication",
+      "counts": {
+        "дефект": 137,
+        "заблокировано": 3531
+      }
+    },
+    {
+      "pipeline": "chembl_publication_similarity",
+      "counts": {
+        "дефект": 91,
+        "заблокировано": 2005
+      }
+    },
+    {
+      "pipeline": "chembl_publication_term",
+      "counts": {
+        "дефект": 76,
+        "заблокировано": 2020
+      }
+    },
+    {
+      "pipeline": "chembl_subcellular_fraction",
+      "counts": {
+        "дефект": 77,
+        "заблокировано": 2019
+      }
+    },
+    {
+      "pipeline": "chembl_target",
+      "counts": {
+        "дефект": 96,
+        "заблокировано": 2524
+      }
+    },
+    {
+      "pipeline": "chembl_target_component",
+      "counts": {
+        "дефект": 76,
+        "заблокировано": 2020
+      }
+    },
+    {
+      "pipeline": "chembl_target_protein_classification",
+      "counts": {
+        "дефект": 76,
+        "заблокировано": 2020
+      }
+    },
+    {
+      "pipeline": "chembl_tissue",
+      "counts": {
+        "дефект": 94,
+        "заблокировано": 2002
+      }
+    },
+    {
+      "pipeline": "composite_activity",
+      "counts": {
+        "дефект": 54,
+        "заблокировано": 1518
+      }
+    },
+    {
+      "pipeline": "composite_assay",
+      "counts": {
+        "дефект": 54,
+        "заблокировано": 1518
+      }
+    },
+    {
+      "pipeline": "composite_molecule",
+      "counts": {
+        "дефект": 54,
+        "заблокировано": 1518
+      }
+    },
+    {
+      "pipeline": "composite_publication",
+      "counts": {
+        "дефект": 57,
+        "заблокировано": 1515
+      }
+    },
+    {
+      "pipeline": "composite_target",
+      "counts": {
+        "дефект": 55,
+        "заблокировано": 1517
+      }
+    },
+    {
+      "pipeline": "crossref_publication",
+      "counts": {
+        "дефект": 91,
+        "заблокировано": 2005
+      }
+    },
+    {
+      "pipeline": "openalex_publication",
+      "counts": {
+        "дефект": 91,
+        "заблокировано": 2005
+      }
+    },
+    {
+      "pipeline": "pubchem_compound",
+      "counts": {
+        "дефект": 117,
+        "заблокировано": 2503
+      }
+    },
+    {
+      "pipeline": "pubmed_publication",
+      "counts": {
+        "дефект": 91,
+        "заблокировано": 2005
+      }
+    },
+    {
+      "pipeline": "semanticscholar_publication",
+      "counts": {
+        "дефект": 94,
+        "заблокировано": 2788
+      }
+    },
+    {
+      "pipeline": "uniprot_idmapping",
+      "counts": {
+        "дефект": 80,
+        "заблокировано": 2016
+      }
+    },
+    {
+      "pipeline": "uniprot_protein",
+      "counts": {
+        "дефект": 91,
+        "заблокировано": 2005
+      }
+    }
+  ],
+  "limitations": [
+    "Historical counts are not current PASS/FAIL decisions.",
+    "262 elements and 27 configured pipelines accounted; all original 59474 contexts retained in baseline.",
+    "Individual query/artifact/UI evidence reconciliation remains incomplete.",
+    "Shared panel verification is not automatically promoted to every pipeline/run/time context.",
+    "Absent event paths for R01-R02 remain unverified; no production data fabricated."
+  ]
+}
