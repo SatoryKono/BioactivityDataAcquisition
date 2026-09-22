@@ -118,13 +118,9 @@ def test_runtime_first_screen_status_panels_expose_actionable_drilldowns() -> No
     telemetry_urls = {
         str(link.get("title")): str(link.get("url")) for link in telemetry_links
     }
-    assert telemetry_urls["Open Prometheus Targets"] == "http://localhost:9090/targets"
-    prometheus_targets_link = next(
-        link
-        for link in telemetry_links
-        if link.get("title") == "Open Prometheus Targets"
-    )
-    assert prometheus_targets_link.get("targetBlank") is True
+    # B3: local Prometheus /targets is not useful outside the host; omit it.
+    assert "Open Prometheus Targets" not in telemetry_urls
+    assert all("localhost:9090" not in url for url in telemetry_urls.values())
 
     detail_links = _iter_panel_data_links(panels_by_id[242])
     detail_urls = {

@@ -349,9 +349,42 @@ async def test_forensic_failure_returns_table_row_and_preserves_http_error(
 
 
 @pytest.mark.asyncio
-async def test_latest_complete_route_preserves_selection_and_returns_no_false_ok() -> (
-    None
-):
+async def test_run_id_sentinel_returns_select_run_not_http_400() -> None:
+    """Grafana default run_id=- must stay HTTP 200 with SELECT RUN / empty discovery."""
+    manifests = InMemoryRunManifestStore()
+    server = HealthServer(
+        host="127.0.0.1",
+        port=0,
+        run_manifest_port=manifests,
+        control_plane_evidence_service=ControlPlaneEvidenceService(),
+    )
+    await server.start()
+    try:
+        status, payload = await _get_json(
+            server,
+            "/ops/control-plane/trust-summary?pipeline=chembl_activity&run_id=-",
+        )
+        assert status == 200
+        assert payload["trust_status"] == "INCOMPLETE"
+        assert any(
+            row.get("reason") == "selection_required" for row in _payload_rows(payload)
+        )
+        assert any(
+            "SELECT RUN" in str(row.get("detail") or "") for row in _payload_rows(payload)
+        )
+
+        status_all, payload_all = await _get_json(
+            server,
+            "/ops/control-plane/latest-complete-run?pipeline=$__all&run_type=incremental",
+        )
+        assert status_all == 200
+        assert payload_all["contract"] == "control_plane_latest_complete_run_v1"
+        assert payload_all["scanned"] == 0
+        assert _payload_rows(payload_all)[0]["reason"] == (
+            "exact_pipeline_and_run_type_required"
+        )
+    finally:
+        await server.stop()
     manifest = _manifest()
     manifests = InMemoryRunManifestStore()
     manifests.save(manifest)

@@ -30,7 +30,7 @@ Live Grafana Infinity URL pattern:
 | `populated` | Readable OK rows for exact run | 200 | `OK` |
 | `valid_empty_or_unknown` | Scope missing / evidence absent | 200 | `UNKNOWN` |
 | `zero_failures` | failure-reasons only: counts=0 | 200 | `OK` |
-| `backend_error` | Source parse/read failure | 200 | `ERROR` |
+| `backend_error` | Source parse/read failure | 200 | `UNKNOWN` → trust `INCOMPLETE` |
 | `service_unavailable` | Evidence service down (QUERY_ERROR path) | **503** | `ERROR` |
 | `empty_rows` | Synthetic `rows=[]` for Infinity `noValue` | 200 | `UNKNOWN` |
 | `incomplete_reasons` | manifest-validation only: INCOMPLETE trust, `reasons_text` capped at 3 lines | 200 | `UNKNOWN` |
@@ -88,6 +88,6 @@ For each panel 9413–9417, keep **separate** PNG sets:
 
 1. `populated` — OK rows readable  
 2. `valid_empty_or_unknown` or `empty_rows` — not green  
-3. `backend_error` or `service_unavailable` — ERROR / QUERY_ERROR distinct from empty  
+3. `backend_error` or `service_unavailable` — UNAVAILABLE/INCOMPLETE / QUERY_ERROR distinct from empty and from failed trust ERROR  
 
 Record state name + fixture path + PNG SHA in the #8576 baseline folder.

@@ -249,8 +249,11 @@ def test_source_error_payload_reports_read_failure() -> None:
     payload = source_error_payload(
         endpoint="evidence", scope=scope, reason="read_failed", check="snapshot"
     )
-    assert payload["trust_status"] == "ERROR"
+    # Read/unavailable is not a failed trust verdict (ERROR).
+    assert payload["trust_status"] == "INCOMPLETE"
+    assert payload["rows"][0]["status"] == "UNKNOWN"
     assert payload["rows"][0]["reason"] == "read_failed"
+    assert "UNAVAILABLE" in payload["rows"][0]["detail"]
 
 
 # --- reason_aliases (28) ---

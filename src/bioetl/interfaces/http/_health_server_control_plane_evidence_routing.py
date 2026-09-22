@@ -16,6 +16,7 @@ from bioetl.application.observability.control_plane_evidence.service_support imp
 from bioetl.application.runtime_clock import current_utc_time
 from bioetl.domain.ports import CheckpointPort, WorkflowManifestPort
 from bioetl.interfaces.http._control_plane_latest_complete import (
+    LATEST_COMPLETE_SCAN_LIMIT,
     build_latest_complete_run_payload,
 )
 from bioetl.interfaces.http._forensic_request_budget import (
@@ -144,18 +145,57 @@ async def dispatch_control_plane_evidence_request(
     return True
 
 
+def _latest_complete_scope_unavailable(
+    *,
+    pipeline: str,
+    run_types: tuple[str, ...],
+    workflows: tuple[str, ...],
+    selected_run_id: str | None,
+) -> dict[str, object]:
+    """Return HTTP-200 empty discovery when Grafana All-scope cannot scan."""
+    run_type = run_types[0] if len(run_types) == 1 else ",".join(run_types)
+    row: dict[str, object] = {
+        "status": "NOT FOUND",
+        "reason": "exact_pipeline_and_run_type_required",
+        "pipeline": pipeline,
+        "run_type": run_type,
+    }
+    return {
+        "contract": "control_plane_latest_complete_run_v1",
+        "selected_run_id": selected_run_id,
+        "candidate_run_id": None,
+        "pipeline": pipeline,
+        "run_type": run_type,
+        "workflow": list(workflows),
+        "order": "manifest_created_at_desc",
+        "scanned": 0,
+        "candidate_count": 0,
+        "scan_limit": LATEST_COMPLETE_SCAN_LIMIT,
+        "replay_authorized": False,
+        "rows": [row],
+    }
+
+
 async def _latest_complete_payload(
     host: _EvidenceRoutingHost, query: dict[str, str]
 ) -> dict[str, object]:
     started = perf_counter()
     pipeline = host._read_required_param(query, "pipeline")
     run_types = host._read_scope_csv_param(query, "run_type")
+    workflows = host._read_scope_csv_param(query, "workflow")
+    selected_run_id = read_selected_run_id(host, query)
     if (
         host._is_all_scope_token(pipeline)
         or "," in pipeline
         or (len(run_types) != 1 or host._is_all_scope_token(run_types[0]))
     ):
-        raise ValueError("latest-complete-run requires one pipeline and one run_type")
+        # Dashboard default All/$__all must not become Grafana red triangles (HTTP 400).
+        return _latest_complete_scope_unavailable(
+            pipeline=pipeline,
+            run_types=run_types,
+            workflows=workflows,
+            selected_run_id=selected_run_id,
+        )
     if host._run_manifest_port is None:
         raise ForensicEndpointUnavailable(reason="catalog_unavailable", status_code=503)
     if host._workflow_manifest_port is not None:
@@ -173,8 +213,8 @@ async def _latest_complete_payload(
         service=_require_service(host),
         pipeline=pipeline,
         run_type=run_types[0],
-        workflows=host._read_scope_csv_param(query, "workflow"),
-        selected_run_id=read_selected_run_id(host, query),
+        workflows=workflows,
+        selected_run_id=selected_run_id,
         now=current_utc_time(),
         scan_seconds=max(
             0.0, FORENSIC_ENDPOINT_TIMEOUT_SECONDS - (perf_counter() - started) - 3.0
