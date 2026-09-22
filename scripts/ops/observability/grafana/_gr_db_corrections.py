@@ -369,6 +369,10 @@ def apply_corrections(payload: dict) -> None:
                 _override(panel, field, "custom.width", width)
             if panel_id == 22010:
                 _override(panel, "Domain", "custom.width", 100)
+                # Grafana's linked-cell renderer forces ellipsis; keep the
+                # dedicated Action link and render evidence as wrapping text.
+                for field in ("Object", "Signal"):
+                    _override(panel, field, "links", [])
                 for field in ("Object", "Signal", "Details"):
                     _override(panel, field, "custom.wrapText", True)
                     _override(
