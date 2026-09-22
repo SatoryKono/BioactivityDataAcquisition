@@ -9,20 +9,20 @@
   "rows": [
     {
       "check": "classification",
-      "detail": "Persisted control-plane evidence could not be read or parsed.",
+      "detail": "Persisted control-plane evidence is UNAVAILABLE (could not be read or parsed).",
       "reason": "run_ledger_parse_error",
-      "status": "ERROR"
+      "status": "UNKNOWN"
     }
   ],
   "run_id": "00000000-0000-0000-0000-000000008576",
   "run_type": "incremental",
   "scope_kind": "exact_run",
-  "status": "ERROR",
+  "status": "UNKNOWN",
   "summary": {
     "check_count": 1,
-    "error_count": 1,
+    "error_count": 0,
     "ok_count": 0,
-    "unknown_count": 0,
+    "unknown_count": 1,
     "warning_count": 0
   },
   "trust": {
@@ -36,7 +36,7 @@
     "reasons_text": "run_ledger_parse_error",
     "reasons_truncated": false,
     "scope_kind": "exact_run",
-    "trust_status": "ERROR"
+    "trust_status": "INCOMPLETE"
   },
-  "trust_status": "ERROR"
+  "trust_status": "INCOMPLETE"
 }

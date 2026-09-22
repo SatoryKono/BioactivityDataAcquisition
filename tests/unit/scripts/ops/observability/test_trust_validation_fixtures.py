@@ -86,8 +86,9 @@ def test_populated_is_not_error_and_unknown_is_not_ok() -> None:
         )
         assert populated["status"] == "OK"
         assert unknown["status"] == "UNKNOWN"
-        assert error["status"] == "ERROR"
-        assert any(row.get("status") == "ERROR" for row in error["rows"])
+        assert error["status"] == "UNKNOWN"
+        assert any(row.get("status") == "UNKNOWN" for row in error["rows"])
+        assert error["trust_status"] == "INCOMPLETE"
 
 
 def test_service_unavailable_marks_http_503() -> None:

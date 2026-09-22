@@ -33,7 +33,7 @@ def test_cross_scope_links_use_required_titles():
             "3. Pipeline Diagnostics",
             "Open Runtime",
             "Open Pipeline Diagnostics",
-            "Open 2. Runtime",
+            "Open 3. Pipeline Diagnostics",
             "2. Runtime",
         ],
         ("bioetl-overview-v2", "bioetl-control-plane-v1"): [

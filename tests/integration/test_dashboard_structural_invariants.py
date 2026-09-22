@@ -327,7 +327,10 @@ def test_internal_dashboard_links_resolve_to_shipped_uids() -> None:
                 continue
             target_uid = match.group(1)
             if target_uid == "${__data.fields.action_dashboard_uid}":
-                assert dashboard["uid"] == "bioetl-incident-v1"
+                # Dynamic First Action handoffs appear on several boards; the
+                # ranked-incident label contract applies only on Incident Workspace.
+                if dashboard["uid"] != "bioetl-incident-v1":
+                    continue
                 panel = next(p for p in dashboard["panels"] if p.get("id") == 2010)
                 sources = re.findall(
                     r"\bbioetl_incident_ranked_[a-z_]+\b",

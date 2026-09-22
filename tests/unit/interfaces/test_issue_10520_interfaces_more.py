@@ -183,14 +183,19 @@ async def test_latest_complete_scope_errors() -> None:
     host = SimpleNamespace(
         _read_required_param=lambda query, key: "ALL",
         _read_scope_csv_param=lambda query, key: ("incremental",),
+        _read_optional_param=lambda query, key: "-",
         _is_all_scope_token=lambda value: value == "ALL",
         _run_manifest_port=object(),
         _workflow_manifest_port=None,
     )
-    with pytest.raises(ValueError, match="latest-complete-run"):
-        await _latest_complete_payload(host, {})  # type: ignore[arg-type]
+    # All-scope must stay HTTP-200 empty (no Grafana red triangles from 400).
+    payload = await _latest_complete_payload(host, {})  # type: ignore[arg-type]
+    assert payload["contract"] == "control_plane_latest_complete_run_v1"
+    assert payload["scanned"] == 0
+    assert payload["rows"][0]["reason"] == "exact_pipeline_and_run_type_required"
 
     host._read_required_param = lambda query, key: "chembl_activity"
+    host._is_all_scope_token = lambda value: False
     host._run_manifest_port = None
     with pytest.raises(ForensicEndpointUnavailable):
         await _latest_complete_payload(host, {})  # type: ignore[arg-type]

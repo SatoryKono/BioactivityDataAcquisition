@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "d2a57246d2e53ebfe12ddf2503a5f2dbc91ff0c3074d0e611a8b4e833e4adccf",
-    "bioetl-dq-v2": "d16bbe296a00d2d074c8da9b464846cb812a06592d64be9328f4ed98df5d423f",
+    "bioetl-control-plane-v1": "7ab246ea2a4910f71e9490a08186a63961065a73e78ded1f18566994462215bd",
+    "bioetl-dq-v2": "c64e66a6495e5b3617b5d1eefa195f81860577e5a4e258b8cfdc1b82f2bc60b4",
     "bioetl-incident-v1": "f7a1819a6d5961d094fb790dbcd4ade06b30352ec2cccb6b4dd7148c3c85b39a",
     "bioetl-overview-v2": "87fae257645c66fe2e319e87caebd04a2774e8437b871ba905ef32e96af4893e",
-    "bioetl-provider-health-v2": "5c77fe76f31071a38884439e823273bf282dabbb50a55fa68be9c93cd70afe04",
+    "bioetl-provider-health-v2": "35a60907a15ee0a0dd1fced46d9015df58d6294dc4ce4561a1c9510db2abdaea",
     "bioetl-run-explorer-v1": "531d4c06c8532f1b57cc143d656dae259c35626922ca85063cd106eadfb3f160",
-    "bioetl-runtime": "71b33ae22deb625b1ed555b7937d3529325a76d4f8e759d1ac6b140e833ade9e"
+    "bioetl-runtime": "15b4971165cc41ed4bcc4d48bb04b3e5a4e692361d9c78a1d62a2623be07d379"
   },
   "panels": [
     {
@@ -456,9 +456,9 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "histogram_quantile(0.50, sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])))",
-          "histogram_quantile(0.95, sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])))",
-          "histogram_quantile(0.99, sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])))"
+          "(histogram_quantile(0.50, (sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes(bioetl_checkpoint_save_duration_seconds_created{pipeline=~\"$pipeline\"}[$__range]) > 0))))) >= 0",
+          "(histogram_quantile(0.95, (sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes(bioetl_checkpoint_save_duration_seconds_created{pipeline=~\"$pipeline\"}[$__range]) > 0))))) >= 0",
+          "(histogram_quantile(0.99, (sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes(bioetl_checkpoint_save_duration_seconds_created{pipeline=~\"$pipeline\"}[$__range]) > 0))))) >= 0"
         ],
         "target_count": 3
       }
@@ -477,9 +477,9 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "histogram_quantile(0.50, sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])))",
-          "histogram_quantile(0.95, sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])))",
-          "histogram_quantile(0.99, sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])))"
+          "(histogram_quantile(0.50, (sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])) unless on (operation) (sum by (operation) (changes(bioetl_checkpoint_operator_duration_seconds_created[$__range]) > 0))))) >= 0",
+          "(histogram_quantile(0.95, (sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])) unless on (operation) (sum by (operation) (changes(bioetl_checkpoint_operator_duration_seconds_created[$__range]) > 0))))) >= 0",
+          "(histogram_quantile(0.99, (sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])) unless on (operation) (sum by (operation) (changes(bioetl_checkpoint_operator_duration_seconds_created[$__range]) > 0))))) >= 0"
         ],
         "target_count": 3
       }
@@ -726,7 +726,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "histogram_quantile($read_latency_quantile, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))"
+          "(histogram_quantile($read_latency_quantile, (sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])) unless on (store, operation) (sum by (store, operation) (changes(bioetl_control_plane_read_duration_seconds_created{status!=\"failed\"}[$__range]) > 0))))) >= 0"
         ],
         "target_count": 1
       }
@@ -840,9 +840,9 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "histogram_quantile(0.50, sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])))",
-          "histogram_quantile(0.95, sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])))",
-          "histogram_quantile(0.99, sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])))"
+          "(histogram_quantile(0.50, (sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_write_duration_seconds_created[$__range]) > 0))))) >= 0",
+          "(histogram_quantile(0.95, (sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_write_duration_seconds_created[$__range]) > 0))))) >= 0",
+          "(histogram_quantile(0.99, (sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_write_duration_seconds_created[$__range]) > 0))))) >= 0"
         ],
         "target_count": 3
       }
@@ -861,9 +861,9 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "histogram_quantile(0.50, sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])))",
-          "histogram_quantile(0.95, sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])))",
-          "histogram_quantile(0.99, sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])))"
+          "(histogram_quantile(0.50, (sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_query_duration_seconds_created[$__range]) > 0))))) >= 0",
+          "(histogram_quantile(0.95, (sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_query_duration_seconds_created[$__range]) > 0))))) >= 0",
+          "(histogram_quantile(0.99, (sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_query_duration_seconds_created[$__range]) > 0))))) >= 0"
         ],
         "target_count": 3
       }
@@ -1747,7 +1747,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__rate_interval])))"
+          "(histogram_quantile(0.95, (sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__rate_interval])) unless on (pipeline) (sum by (pipeline) (changes(bioetl_dq_check_duration_ms_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__rate_interval]) > 0))))) >= 0"
         ],
         "target_count": 1
       }
@@ -2952,7 +2952,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])))"
+          "(histogram_quantile(0.95, (sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])) unless on (provider) (sum by (provider) (changes(bioetl_health_check_latency_seconds_created{provider=~\"$provider\"}[$__range]) > 0))))) >= 0"
         ],
         "target_count": 1
       }
@@ -2971,7 +2971,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "histogram_quantile(0.95, sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))"
+          "(histogram_quantile(0.95, (sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])) unless on (provider, endpoint) (sum by (provider, endpoint) (changes(bioetl_adapter_request_duration_seconds_created{provider=~\"$provider\"}[$__rate_interval]) > 0))))) >= 0"
         ],
         "target_count": 1
       }
@@ -3028,7 +3028,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))"
+          "(histogram_quantile(0.95, (sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])) unless on (provider) (sum by (provider) (changes(bioetl_rate_limiter_wait_seconds_created{provider=~\"$provider\"}[$__rate_interval]) > 0))))) >= 0"
         ],
         "target_count": 1
       }
@@ -3125,7 +3125,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))"
+          "(histogram_quantile(0.95, (sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])) unless on (provider) (sum by (provider) (changes(bioetl_health_check_latency_seconds_created{provider=~\"$provider\"}[$__rate_interval]) > 0))))) >= 0"
         ],
         "target_count": 1
       }
@@ -3623,9 +3623,9 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "(histogram_quantile(0.50, sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])))) >= 0",
-          "(histogram_quantile(0.95, sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])))) >= 0",
-          "(histogram_quantile(0.99, sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])))) >= 0"
+          "(histogram_quantile(0.50, (sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on (phase, status) (sum by (phase, status) (changes(bioetl_phase_duration_seconds_created{pipeline=~\"$pipeline\"}[$__rate_interval]) > 0))))) >= 0",
+          "(histogram_quantile(0.95, (sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on (phase, status) (sum by (phase, status) (changes(bioetl_phase_duration_seconds_created{pipeline=~\"$pipeline\"}[$__rate_interval]) > 0))))) >= 0",
+          "(histogram_quantile(0.99, (sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on (phase, status) (sum by (phase, status) (changes(bioetl_phase_duration_seconds_created{pipeline=~\"$pipeline\"}[$__rate_interval]) > 0))))) >= 0"
         ],
         "target_count": 3
       }
@@ -3644,9 +3644,9 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "(histogram_quantile(0.50, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))) >= 0",
-          "(histogram_quantile(0.95, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))) >= 0",
-          "(histogram_quantile(0.99, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))) >= 0"
+          "(histogram_quantile(0.50, (sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])) unless on (stage, status, run_type) (sum by (stage, status, run_type) (changes(bioetl_pipeline_duration_seconds_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval]) > 0))))) >= 0",
+          "(histogram_quantile(0.95, (sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])) unless on (stage, status, run_type) (sum by (stage, status, run_type) (changes(bioetl_pipeline_duration_seconds_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval]) > 0))))) >= 0",
+          "(histogram_quantile(0.99, (sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])) unless on (stage, status, run_type) (sum by (stage, status, run_type) (changes(bioetl_pipeline_duration_seconds_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval]) > 0))))) >= 0"
         ],
         "target_count": 3
       }

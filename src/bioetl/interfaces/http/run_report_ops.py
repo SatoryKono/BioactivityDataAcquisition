@@ -202,6 +202,9 @@ def _run_index_item(
     )
     paths = {
         "status": item.status,
+        "processing_status": item.status,
+        # Trust/evidence is a separate axis on 1. Trust; index stays execution-only.
+        "trust_status": "Inspect in 1. Trust",
         "completed_at": item.completed_at,
         "selected": selected,
         "json_path": str(item.json_path.as_posix()),

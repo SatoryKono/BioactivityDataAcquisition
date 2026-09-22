@@ -228,7 +228,7 @@
   "schema_version": 1,
   "states": {
     "aggregate_scope_unknown": "checkpoint only: aggregate scope needs exact pipeline.",
-    "backend_error": "Source read/parse failure as ERROR row (HTTP 200 body).",
+    "backend_error": "Source read/parse failure as UNKNOWN/UNAVAILABLE row (HTTP 200 body; trust folds to INCOMPLETE, not ERROR).",
     "empty_rows": "Synthetic rows=[] for Infinity noValue visual path.",
     "incomplete_reasons": "manifest-validation only: INCOMPLETE trust with >3 UNKNOWN reasons so first-screen reasons_text is capped (#8976).",
     "populated": "OK check rows for selected exact run (operator-readable).",

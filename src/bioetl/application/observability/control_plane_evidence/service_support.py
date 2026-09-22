@@ -66,16 +66,22 @@ def source_error_payload(
     reason: str,
     check: str,
 ) -> dict[str, object]:
-    """Return a stable source-read failure without raw exception text."""
+    """Return a stable source-read failure without raw exception text.
+
+    Read/unavailable failures use ``UNKNOWN`` (folds to trust ``INCOMPLETE``),
+    not ``ERROR``. A failed trust verdict is reserved for evaluated evidence that
+    explicitly failed checks — not for "could not read the source".
+    """
     return service_payload(
         endpoint=endpoint,
         scope=scope,
         checks=(
             EvidenceCheckResult(
                 check,
-                "ERROR",
+                "UNKNOWN",
                 reason,
-                "Persisted control-plane evidence could not be read or parsed.",
+                "Persisted control-plane evidence is UNAVAILABLE "
+                "(could not be read or parsed).",
             ),
         ),
     )

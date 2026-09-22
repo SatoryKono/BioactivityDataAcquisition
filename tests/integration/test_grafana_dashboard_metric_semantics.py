@@ -717,7 +717,7 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
             "bioetl-dq-v2.json",
             "Track DQ Check Duration p95",
             "No data means no DQ duration samples were observed in range or DQ timing telemetry is absent",
-            "No DQ duration samples",
+            "NO OBSERVATIONS — no usable histogram increments",
         ),
     ],
 )
@@ -1658,9 +1658,18 @@ def test_dashboards_do_not_use_prometheus_created_timestamps() -> None:
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
         expressions = get_panel_expressions(dashboard)
-        assert all("_created" not in expr for expr in expressions), (
-            f"Dashboard {dashboard_path.name} must not use Prometheus *_created series"
-        )
+        for expr in expressions:
+            if "_created" not in expr:
+                continue
+            # A creation marker may suppress a mixed-generation histogram,
+            # but must never be displayed as run time, freshness or latency.
+            assert "histogram_quantile(" in expr and " unless on (" in expr
+            without_guards = re.sub(
+                r"changes\(bioetl_\w+_created(?:\{.*?\})?\[[^]]+\]\)",
+                "GENERATION_GUARD",
+                expr,
+            )
+            assert "_created" not in without_guards, dashboard_path.name
 
 
 def test_selected_range_kpis_follow_declared_counter_window_intent() -> None:

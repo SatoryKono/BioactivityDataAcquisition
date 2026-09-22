@@ -6,7 +6,7 @@
       "path": "reports/quality/architecture-quality-scorecard.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "644c799094b48e278109e792c63956c0980e233f",
+      "source_revision": "749e37d13eec36459ded79a83ffd6d1cf250816f",
       "summary": {
         "available": true,
         "integral_score": 10.0,
@@ -20,7 +20,7 @@
       "path": "reports/quality/module-coverage-inventory.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "644c799094b48e278109e792c63956c0980e233f",
+      "source_revision": "749e37d13eec36459ded79a83ffd6d1cf250816f",
       "summary": {
         "available": true,
         "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
@@ -37,7 +37,7 @@
       "path": "reports/quality/compatibility-importer-census.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "644c799094b48e278109e792c63956c0980e233f",
+      "source_revision": "749e37d13eec36459ded79a83ffd6d1cf250816f",
       "summary": {
         "available": true,
         "retained_entrypoint_count": 12,
@@ -50,7 +50,7 @@
       "path": "reports/quality/dead-code-inventory.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "644c799094b48e278109e792c63956c0980e233f",
+      "source_revision": "749e37d13eec36459ded79a83ffd6d1cf250816f",
       "summary": {
         "available": true,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
@@ -63,7 +63,7 @@
       "path": "reports/quality/contract-registry-diagnostics.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "644c799094b48e278109e792c63956c0980e233f",
+      "source_revision": "749e37d13eec36459ded79a83ffd6d1cf250816f",
       "summary": {
         "available": true,
         "blocking_issue_count": 0,
@@ -76,7 +76,7 @@
       "path": "reports/observability/runtime_cardinality_inventory.json",
       "required": false,
       "required_on_remote": false,
-      "source_revision": "644c799094b48e278109e792c63956c0980e233f",
+      "source_revision": "749e37d13eec36459ded79a83ffd6d1cf250816f",
       "summary": {
         "available": true
       }
@@ -102,9 +102,9 @@
   ],
   "local_tracking_ref": "origin/main",
   "local_tracking_ref_matches_remote": true,
-  "local_tracking_ref_sha": "644c799094b48e278109e792c63956c0980e233f",
+  "local_tracking_ref_sha": "749e37d13eec36459ded79a83ffd6d1cf250816f",
   "remote": "origin",
   "remote_main_ref": "refs/heads/main",
-  "remote_main_sha": "644c799094b48e278109e792c63956c0980e233f",
+  "remote_main_sha": "749e37d13eec36459ded79a83ffd6d1cf250816f",
   "schema_version": 1
 }

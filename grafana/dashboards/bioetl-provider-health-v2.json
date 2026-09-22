@@ -66,23 +66,23 @@
         "useTags": false
       },
       {
-        "allValue": null,
+        "allValue": ".*",
         "current": {
-          "selected": false,
-          "text": "unknown",
-          "value": "unknown"
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "BioETL Ops HTTP",
         "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}",
-        "description": "Core scope: pipeline option list from the local control-plane catalog (/ops/control-plane/filter-options?dimension=pipeline), not the Prometheus universe. PromQL current-state panels still match $pipeline against the shared universe metrics. Single-select unless this board documents All. Unknown is the fail-closed default until a source dashboard or the operator selects a concrete pipeline. A pasted var-pipeline value that exists in the catalog remains selectable even when Prometheus has no series.",
+        "description": "Core scope: pipeline option list from the local control-plane catalog (/ops/control-plane/filter-options?dimension=pipeline), not the Prometheus universe. PromQL current-state panels still match $pipeline against the shared universe metrics. Single-select unless this board documents All. Default selection is All pipelines until the operator narrows to a concrete pipeline. A pasted var-pipeline value that exists in the catalog remains selectable even when Prometheus has no series.",
         "hide": 0,
-        "includeAll": false,
+        "includeAll": true,
         "label": "Pipeline",
         "multi": false,
         "name": "pipeline",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "unknown",
             "value": "unknown"
           }
@@ -331,7 +331,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"0. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"1. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"2. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">2. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"3. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range, visible pipeline selection.\" href=\"/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">3. Pipeline Diagnostics</a><a class=\"bioetl-nav-current\" href=\"#bioetl-provider-health-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"4. Provider Health (Provider Health)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">4. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"5. Data Quality (Data Quality). Scope reset: stage=All; preserves time range, visible pipeline selection.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">5. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"0. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">0. Run Explorer</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"1. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">1. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"2. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">2. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"3. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range, visible pipeline selection.\" href=\"/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">3. Pipeline Diagnostics</a><a class=\"bioetl-nav-current\" href=\"#bioetl-provider-health-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"4. Provider Health (Provider Health)\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">4. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"5. Data Quality (Data Quality). Scope reset: stage=All; preserves time range, visible pipeline selection.\" href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;var-stage=$__all&amp;${__url_time_range}\">5. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;width:14%;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font:600 16px/18px Arial;font-weight:600;line-height:18px;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:2px solid #94a3b8;text-decoration:none\" title=\"6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">6. Incident Workspace</a></div>"
       },
       "title": "",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Shared link-only bus 0–6: Run Explorer / Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality / Incident Workspace. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
@@ -339,7 +339,7 @@
       "links": [
         {
           "title": "0. Run Explorer",
-          "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "url": "/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
           "tooltip": "0. Run Explorer (Run Explorer). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
@@ -351,7 +351,7 @@
         },
         {
           "title": "1. Trust",
-          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
           "tooltip": "1. Trust (Trust). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
@@ -363,7 +363,7 @@
         },
         {
           "title": "2. Overview",
-          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
           "tooltip": "2. Overview (Overview). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
@@ -375,7 +375,7 @@
         },
         {
           "title": "3. Pipeline Diagnostics",
-          "url": "/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+          "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
           "tooltip": "3. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range, visible pipeline selection.",
           "type": "link",
           "icon": "dashboard",
@@ -387,7 +387,7 @@
         },
         {
           "title": "5. Data Quality",
-          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+          "url": "/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
           "tooltip": "5. Data Quality (Data Quality). Scope reset: stage=All; preserves time range, visible pipeline selection.",
           "type": "link",
           "icon": "dashboard",
@@ -399,7 +399,7 @@
         },
         {
           "title": "6. Incident Workspace",
-          "url": "/d/bioetl-incident-v1/bioetl-incident-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
           "tooltip": "6. Incident Workspace (Incident Workspace). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
@@ -525,25 +525,25 @@
         "dataLinks": [
           {
             "title": "Inspect Provider Telemetry Presence",
-            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${provider:queryparam}&${pipeline_context:queryparam}&${adapter:queryparam}&viewPanel=9104&${__url_time_range}",
+            "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${provider:queryparam}&${pipeline_context:queryparam}&${adapter:queryparam}&viewPanel=9104&${__url_time_range}",
             "targetBlank": false,
             "includeVars": false
           },
           {
             "title": "Review Raw Provider Health Enum",
-            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${provider:queryparam}&${pipeline_context:queryparam}&${adapter:queryparam}&viewPanel=114&${__url_time_range}",
+            "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${provider:queryparam}&${pipeline_context:queryparam}&${adapter:queryparam}&viewPanel=114&${__url_time_range}",
             "targetBlank": false,
             "includeVars": false
           },
           {
             "title": "Inspect Severity Matrix",
-            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${provider:queryparam}&${pipeline_context:queryparam}&${adapter:queryparam}&viewPanel=9101&${__url_time_range}",
+            "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${provider:queryparam}&${pipeline_context:queryparam}&${adapter:queryparam}&viewPanel=9101&${__url_time_range}",
             "targetBlank": false,
             "includeVars": false
           },
           {
             "title": "Inspect provider top causes",
-            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${provider:queryparam}&${pipeline_context:queryparam}&${adapter:queryparam}&viewPanel=9103&${__url_time_range}",
+            "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${provider:queryparam}&${pipeline_context:queryparam}&${adapter:queryparam}&viewPanel=9103&${__url_time_range}",
             "targetBlank": false,
             "includeVars": false
           }
@@ -591,19 +591,19 @@
       "links": [
         {
           "title": "Review severity matrix",
-          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${provider:queryparam}&${pipeline_context:queryparam}&${adapter:queryparam}&viewPanel=9101&${__url_time_range}",
+          "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${provider:queryparam}&${pipeline_context:queryparam}&${adapter:queryparam}&viewPanel=9101&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
         },
         {
           "title": "Inspect critical providers",
-          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${provider:queryparam}&${pipeline_context:queryparam}&${adapter:queryparam}&viewPanel=9102&${__url_time_range}",
+          "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${provider:queryparam}&${pipeline_context:queryparam}&${adapter:queryparam}&viewPanel=9102&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
         },
         {
           "title": "Inspect provider top causes",
-          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${provider:queryparam}&${pipeline_context:queryparam}&${adapter:queryparam}&viewPanel=9103&${__url_time_range}",
+          "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${provider:queryparam}&${pipeline_context:queryparam}&${adapter:queryparam}&viewPanel=9103&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
         }
@@ -687,7 +687,7 @@
           "links": [
             {
               "title": "Open selected provider context",
-              "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=${__data.fields.provider:percentencode}&${__url_time_range}",
+              "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=${__data.fields.provider:percentencode}&${__url_time_range}",
               "targetBlank": false,
               "includeVars": false
             }
@@ -1462,7 +1462,7 @@
               "links": [
                 {
                   "title": "Open selected provider context",
-                  "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=${__data.fields.provider_target:percentencode}&${__url_time_range}",
+                  "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-provider=${__data.fields.provider_target:percentencode}&${__url_time_range}",
                   "targetBlank": false,
                   "includeVars": false
                 }
@@ -2074,7 +2074,7 @@
                 "targetBlank": false,
                 "includeVars": false,
                 "title": "Diagnose provider telemetry coverage",
-                "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&viewPanel=9104&${__url_time_range}"
+                "url": "/d/bioetl-provider-health-v2/4-provider-health?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&viewPanel=9104&${__url_time_range}"
               },
               {
                 "targetBlank": true,
@@ -3256,7 +3256,7 @@
                 ]
               },
               "unit": "s",
-              "noValue": "UNKNOWN",
+              "noValue": "NO OBSERVATIONS — no usable histogram increments",
               "mappings": [
                 {
                   "type": "special",
@@ -3268,7 +3268,10 @@
                     }
                   }
                 }
-              ]
+              ],
+              "custom": {
+                "showPoints": "always"
+              }
             },
             "overrides": []
           },
@@ -3295,14 +3298,14 @@
           },
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])))",
+              "expr": "(histogram_quantile(0.95, (sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])) unless on (provider) (sum by (provider) (changes(bioetl_health_check_latency_seconds_created{provider=~\"$provider\"}[$__range]) > 0))))) >= 0",
               "legendFormat": "{{ provider }}",
               "refId": "A"
             }
           ],
           "title": "Inspect Health-Check Latency p95",
           "type": "stat",
-          "description": "TIME RANGE · Compact optional selected-range evidence: per-provider p95 health-check latency over the active Grafana range. No data means no latency samples or no probe activity in range, not 0s latency and not a provider verdict TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: range snapshot stat of health-check p95; the interval trend is Track Health-Check Latency p95 (1)."
+          "description": "TIME RANGE · Compact optional selected-range evidence: per-provider p95 health-check latency over the active Grafana range. No data means no latency samples or no probe activity in range, not 0s latency and not a provider verdict TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: range snapshot stat of health-check p95; the interval trend is Track Health-Check Latency p95 (1). Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency."
         },
         {
           "datasource": {
@@ -3338,18 +3341,18 @@
                 ]
               },
               "unit": "s",
-              "noValue": "TELEMETRY MISSING",
+              "noValue": "NO OBSERVATIONS — no usable histogram increments",
               "links": [
                 {
                   "targetBlank": false,
-                  "title": "Open 2. Runtime",
-                  "url": "/d/bioetl-runtime/bioetl-runtime?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+                  "title": "Open 3. Pipeline Diagnostics",
+                  "url": "/d/bioetl-runtime/3-pipeline-diagnostics?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
                   "includeVars": false
                 },
                 {
                   "targetBlank": false,
-                  "title": "Open 0. Control Plane",
-                  "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+                  "title": "Open 1. Trust",
+                  "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
                   "includeVars": false
                 }
               ],
@@ -3388,14 +3391,14 @@
           },
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
+              "expr": "(histogram_quantile(0.95, (sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])) unless on (provider, endpoint) (sum by (provider, endpoint) (changes(bioetl_adapter_request_duration_seconds_created{provider=~\"$provider\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{ provider }} {{ endpoint }} p95",
               "refId": "A"
             }
           ],
           "title": "Track Request Latency p95",
           "type": "timeseries",
-          "description": "TIME RANGE · Optional latency samples only. Empty/NaN is TELEMETRY MISSING, not zero latency or a healthy provider. Check telemetry presence above.",
+          "description": "TIME RANGE · Optional latency samples only. Empty/NaN is TELEMETRY MISSING, not zero latency or a healthy provider. Check telemetry presence above. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
@@ -3582,7 +3585,7 @@
                 "lineInterpolation": "linear",
                 "lineWidth": 2,
                 "pointSize": 5,
-                "showPoints": "auto",
+                "showPoints": "always",
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -3615,7 +3618,7 @@
                 ]
               },
               "unit": "s",
-              "noValue": "No optional rate-limiter wait samples in range; not a provider verdict."
+              "noValue": "NO OBSERVATIONS — no usable histogram increments"
             },
             "overrides": []
           },
@@ -3641,14 +3644,14 @@
           },
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
+              "expr": "(histogram_quantile(0.95, (sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])) unless on (provider) (sum by (provider) (changes(bioetl_rate_limiter_wait_seconds_created{provider=~\"$provider\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{ provider }} p95",
               "refId": "A"
             }
           ],
           "title": "Track Rate-Limiter Wait p95",
           "type": "timeseries",
-          "description": "TIME RANGE · Compact optional selected-range evidence: p95 wait time imposed by provider rate limiting. No data means no observed wait samples in range, not a healthy wait time. This optional telemetry can stay empty even when current provider severity is non-OK. The provider degraded-rule surface starts at p95 > 1s; this panel keeps a lower yellow band for earlier-warning inspection TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Compact optional selected-range evidence: p95 wait time imposed by provider rate limiting. No data means no observed wait samples in range, not a healthy wait time. This optional telemetry can stay empty even when current provider severity is non-OK. The provider degraded-rule surface starts at p95 > 1s; this panel keeps a lower yellow band for earlier-warning inspection TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
@@ -4187,7 +4190,7 @@
                 ]
               },
               "unit": "s",
-              "noValue": "TELEMETRY MISSING"
+              "noValue": "NO OBSERVATIONS — no usable histogram increments"
             },
             "overrides": []
           },
@@ -4214,14 +4217,14 @@
           },
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
+              "expr": "(histogram_quantile(0.95, (sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])) unless on (provider) (sum by (provider) (changes(bioetl_health_check_latency_seconds_created{provider=~\"$provider\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{ provider }} p95",
               "refId": "A"
             }
           ],
           "title": "Track Health-Check Latency p95",
           "type": "timeseries",
-          "description": "TIME RANGE · Optional latency samples only. Empty/NaN is TELEMETRY MISSING, not zero latency or a healthy provider. Check telemetry presence above.",
+          "description": "TIME RANGE · Optional latency samples only. Empty/NaN is TELEMETRY MISSING, not zero latency or a healthy provider. Check telemetry presence above. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
           "maxDataPoints": 400,
           "interval": "1m"
         },

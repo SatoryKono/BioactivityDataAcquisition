@@ -195,6 +195,16 @@ def _summary(
 
 def unresolved_scope_check(resolved_via: str) -> EvidenceCheckResult:
     """Return an explicit non-fabricated result for an unresolved run scope."""
+    if resolved_via == "selection_required":
+        return EvidenceCheckResult(
+            check="scope_resolution",
+            status="UNKNOWN",
+            reason="selection_required",
+            detail=(
+                "SELECT RUN — choose an exact Run ID before evaluating "
+                "control-plane evidence."
+            ),
+        )
     reason = (
         "selected_run_id_not_found"
         if resolved_via == "selected_run_id_not_found"

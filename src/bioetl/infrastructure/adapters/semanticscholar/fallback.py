@@ -176,6 +176,10 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
                 )
 
             data = response.json()
+            # Handle async json() for test mocks (AsyncMock) vs sync httpx.Response.json()
+            import asyncio as _asyncio
+            if _asyncio.iscoroutine(data):
+                data = await data
 
             for record in data.get("data", []):
                 # Validate title match to reduce false positives

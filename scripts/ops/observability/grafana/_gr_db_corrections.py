@@ -45,6 +45,29 @@ def _override(panel: dict, field: str, prop: str, value: object) -> None:
     entry["properties"].append({"id": prop, "value": value})
 
 
+def _guard_histogram_generation(expression: str) -> str:
+    """Exclude aggregates spanning producer generations before estimating quantiles."""
+    if "_created[" in expression or "_created{" in expression:
+        return expression
+    match = re.search(
+        r"sum by \(([^)]*)\) \((?:increase|rate)\("
+        r"(bioetl_\w+)_bucket(\{.*?\})?\[([^]]*)\]\)\)",
+        expression,
+    )
+    if match is None:
+        raise ValueError("Unsupported histogram aggregation: " + expression)
+    labels = ", ".join(
+        label.strip() for label in match[1].split(",") if label.strip() != "le"
+    )
+    created = f"{match[2]}_created{match[3] or ''}[{match[4]}]"
+    aggregate = f"sum by ({labels})" if labels else "sum"
+    reset = f"{aggregate} (changes({created}) > 0)"
+    # Suppress the whole output group, not just one producer: a partial
+    # histogram is not the requested aggregate and must not look complete.
+    guarded = f"({match[0]} unless on ({labels}) ({reset}))"
+    return expression[: match.start()] + guarded + expression[match.end() :]
+
+
 def apply_corrections(payload: dict) -> None:
     """Apply idempotent source-level corrections before dashboard serialization."""
     uid = payload.get("uid")
@@ -156,6 +179,27 @@ def apply_corrections(payload: dict) -> None:
                 if expression
                 else expression
             )
+            if re.match(r"^\(*histogram_quantile\(", target["expr"]):
+                target["expr"] = _guard_histogram_generation(target["expr"])
+                explanation = (
+                    " Histogram generation guard: windows with a changed producer "
+                    "creation timestamp are omitted for the whole aggregate. "
+                    "A repeated batch snapshot is not a continuous counter; "
+                    "narrow the window to one stable generation. "
+                    "Omitted values do not mean zero latency."
+                )
+                if "Histogram generation guard:" not in panel.get("description", ""):
+                    panel["description"] = panel.get("description", "") + explanation
+                if not target["expr"].endswith(" >= 0"):
+                    target["expr"] = f"({target['expr']}) >= 0"
+                defaults = panel.setdefault("fieldConfig", {}).setdefault(
+                    "defaults", {}
+                )
+                if not defaults.get("noValue", "").startswith("No GLOBAL"):
+                    defaults["noValue"] = (
+                        "NO OBSERVATIONS — no usable histogram increments"
+                    )
+                defaults.setdefault("custom", {})["showPoints"] = "always"
 
     scope_copy = {
         "bioetl-runtime": (
@@ -676,6 +720,9 @@ def apply_corrections(payload: dict) -> None:
             if "legendFormat" in target:
                 target["legendFormat"] = "{{stage}}"
     if uid == "bioetl-dq-v2" and 155 in panels:
+        panels[10]["fieldConfig"]["defaults"]["noValue"] = (
+            "No anomaly samples in range; telemetry may be absent"
+        )
         soft = 'sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~"$pipeline"}[$__rate_interval]))'
         hard = 'sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~"$pipeline", severity="hard_fail"}[$__rate_interval]))'
         panels[155]["targets"][0]["expr"] = (

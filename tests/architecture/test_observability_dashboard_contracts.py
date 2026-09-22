@@ -288,7 +288,7 @@ def test_workflow_overview_exposes_fail_closed_pipeline_status_verdict() -> None
     assert "run_id" not in " ".join(_panel_expressions(panel))
     data_links = panel.get("options", {}).get("dataLinks", [])
     link_titles = {str(link.get("title")) for link in data_links}
-    assert {"Open 2. Runtime", "Open 0. Control Plane"} <= link_titles
+    assert {"Open 3. Pipeline Diagnostics", "Open 1. Trust"} <= link_titles
 
 
 def test_batch_status_aggregate_is_not_synthesized_as_runtime_metric() -> None:
