@@ -159,3 +159,49 @@ tests:
     exp_samples:
     - labels: '{}'
       value: 6
+- name: duration-no-increments-is-no-observations
+  interval: 1m
+  input_series:
+  - series: bioetl_dq_check_duration_ms_bucket{pipeline="example",le="0"}
+    values: 0 0
+  - series: bioetl_dq_check_duration_ms_bucket{pipeline="example",le="100"}
+    values: 2 2
+  - series: bioetl_dq_check_duration_ms_bucket{pipeline="example",le="+Inf"}
+    values: 2 2
+  promql_expr_test:
+  - expr: (histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~"(example|workflow_example)"}[2m]))))
+      >= 0
+    eval_time: 1m
+    exp_samples: []
+- name: duration-measured-zero-is-preserved
+  interval: 1m
+  input_series:
+  - series: bioetl_dq_check_duration_ms_bucket{pipeline="example",le="0"}
+    values: 0 1
+  - series: bioetl_dq_check_duration_ms_bucket{pipeline="example",le="100"}
+    values: 0 1
+  - series: bioetl_dq_check_duration_ms_bucket{pipeline="example",le="+Inf"}
+    values: 0 1
+  promql_expr_test:
+  - expr: (histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~"(example|workflow_example)"}[2m]))))
+      >= 0
+    eval_time: 1m
+    exp_samples:
+    - labels: '{pipeline="example"}'
+      value: 0
+- name: duration-positive-is-preserved
+  interval: 1m
+  input_series:
+  - series: bioetl_dq_check_duration_ms_bucket{pipeline="example",le="0"}
+    values: 0 0
+  - series: bioetl_dq_check_duration_ms_bucket{pipeline="example",le="100"}
+    values: 0 2
+  - series: bioetl_dq_check_duration_ms_bucket{pipeline="example",le="+Inf"}
+    values: 0 2
+  promql_expr_test:
+  - expr: (histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~"(example|workflow_example)"}[2m]))))
+      >= 0
+    eval_time: 1m
+    exp_samples:
+    - labels: '{pipeline="example"}'
+      value: 95

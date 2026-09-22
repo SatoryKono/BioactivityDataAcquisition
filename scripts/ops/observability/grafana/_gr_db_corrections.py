@@ -156,6 +156,15 @@ def apply_corrections(payload: dict) -> None:
                 if expression
                 else expression
             )
+            if re.match(r"^\(*histogram_quantile\(", target["expr"]):
+                if not target["expr"].endswith(" >= 0"):
+                    target["expr"] = f"({target['expr']}) >= 0"
+                defaults = panel.setdefault("fieldConfig", {}).setdefault(
+                    "defaults", {}
+                )
+                if not defaults.get("noValue", "").startswith("No GLOBAL"):
+                    defaults["noValue"] = "NO OBSERVATIONS — no usable histogram increments"
+                defaults.setdefault("custom", {})["showPoints"] = "always"
 
     scope_copy = {
         "bioetl-runtime": (
@@ -676,6 +685,9 @@ def apply_corrections(payload: dict) -> None:
             if "legendFormat" in target:
                 target["legendFormat"] = "{{stage}}"
     if uid == "bioetl-dq-v2" and 155 in panels:
+        panels[10]["fieldConfig"]["defaults"]["noValue"] = (
+            "No anomaly samples in range; telemetry may be absent"
+        )
         soft = 'sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~"$pipeline"}[$__rate_interval]))'
         hard = 'sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~"$pipeline", severity="hard_fail"}[$__rate_interval]))'
         panels[155]["targets"][0]["expr"] = (

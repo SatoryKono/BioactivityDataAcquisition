@@ -674,7 +674,9 @@ def test_dq_threshold_counter_fixtures_exercise_shipped_query() -> None:
             encoding="utf-8"
         )
     )
-    cases = fixtures["tests"]
+    cases = [
+        case for case in fixtures["tests"] if not case["name"].startswith("duration-")
+    ]
     assert len(cases) == 9
     for case in cases:
         for check in case["promql_expr_test"]:
@@ -682,6 +684,26 @@ def test_dq_threshold_counter_fixtures_exercise_shipped_query() -> None:
                 expression.replace("$__rate_interval", window)
                 for window in ("2m", "5m")
             }, case["name"]
+
+
+def test_duration_fixtures_exercise_shipped_nan_filter() -> None:
+    """Zero and positive latency survive; NaN-only observations cannot draw an empty frame."""
+    panel = _panel(_load("bioetl-dq-v2.json"), 11)
+    expression = (
+        panel["targets"][0]["expr"]
+        .replace("${pipeline:regex}", "example")
+        .replace("$__rate_interval", "2m")
+    )
+    fixtures = yaml.safe_load(
+        Path("grafana/prometheus-rules/tests/gr_db_counter_windows.test.yml").read_text(
+            encoding="utf-8"
+        )
+    )
+    cases = [case for case in fixtures["tests"] if case["name"].startswith("duration-")]
+    assert len(cases) == 3
+    for case in cases:
+        assert case["promql_expr_test"][0]["expr"] == expression
+    assert panel["fieldConfig"]["defaults"]["noValue"].startswith("NO OBSERVATIONS")
 
 
 def _limit_field(panel: dict[str, object]) -> int | None:

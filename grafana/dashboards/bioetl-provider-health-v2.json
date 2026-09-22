@@ -3256,7 +3256,7 @@
                 ]
               },
               "unit": "s",
-              "noValue": "UNKNOWN",
+              "noValue": "NO OBSERVATIONS — no usable histogram increments",
               "mappings": [
                 {
                   "type": "special",
@@ -3268,7 +3268,10 @@
                     }
                   }
                 }
-              ]
+              ],
+              "custom": {
+                "showPoints": "always"
+              }
             },
             "overrides": []
           },
@@ -3295,7 +3298,7 @@
           },
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])))",
+              "expr": "(histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])))) >= 0",
               "legendFormat": "{{ provider }}",
               "refId": "A"
             }
@@ -3338,7 +3341,7 @@
                 ]
               },
               "unit": "s",
-              "noValue": "TELEMETRY MISSING",
+              "noValue": "NO OBSERVATIONS — no usable histogram increments",
               "links": [
                 {
                   "targetBlank": false,
@@ -3388,7 +3391,7 @@
           },
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
+              "expr": "(histogram_quantile(0.95, sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))) >= 0",
               "legendFormat": "{{ provider }} {{ endpoint }} p95",
               "refId": "A"
             }
@@ -3582,7 +3585,7 @@
                 "lineInterpolation": "linear",
                 "lineWidth": 2,
                 "pointSize": 5,
-                "showPoints": "auto",
+                "showPoints": "always",
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -3615,7 +3618,7 @@
                 ]
               },
               "unit": "s",
-              "noValue": "No optional rate-limiter wait samples in range; not a provider verdict."
+              "noValue": "NO OBSERVATIONS — no usable histogram increments"
             },
             "overrides": []
           },
@@ -3641,7 +3644,7 @@
           },
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
+              "expr": "(histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))) >= 0",
               "legendFormat": "{{ provider }} p95",
               "refId": "A"
             }
@@ -4187,7 +4190,7 @@
                 ]
               },
               "unit": "s",
-              "noValue": "TELEMETRY MISSING"
+              "noValue": "NO OBSERVATIONS — no usable histogram increments"
             },
             "overrides": []
           },
@@ -4214,7 +4217,7 @@
           },
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
+              "expr": "(histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))) >= 0",
               "legendFormat": "{{ provider }} p95",
               "refId": "A"
             }
