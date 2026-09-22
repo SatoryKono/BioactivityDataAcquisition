@@ -147,6 +147,7 @@ async def dispatch_control_plane_evidence_request(
 async def _latest_complete_payload(
     host: _EvidenceRoutingHost, query: dict[str, str]
 ) -> dict[str, object]:
+    started = perf_counter()
     pipeline = host._read_required_param(query, "pipeline")
     run_types = host._read_scope_csv_param(query, "run_type")
     if (
@@ -157,12 +158,12 @@ async def _latest_complete_payload(
         raise ValueError("latest-complete-run requires one pipeline and one run_type")
     if host._run_manifest_port is None:
         raise ForensicEndpointUnavailable(reason="catalog_unavailable", status_code=503)
-    manifests = await asyncio.to_thread(host._run_manifest_port.list_all)
-    workflow_manifests = (
-        await asyncio.to_thread(host._workflow_manifest_port.list_all)
-        if host._workflow_manifest_port is not None
-        else ()
-    )
+    catalog_tasks = [asyncio.to_thread(host._run_manifest_port.list_all)]
+    if host._workflow_manifest_port is not None:
+        catalog_tasks.append(asyncio.to_thread(host._workflow_manifest_port.list_all))
+    catalogs = await asyncio.gather(*catalog_tasks)
+    manifests = catalogs[0]
+    workflow_manifests = catalogs[1] if len(catalogs) > 1 else ()
     return await asyncio.to_thread(
         build_latest_complete_run_payload,
         manifests=tuple(manifests),
@@ -173,6 +174,9 @@ async def _latest_complete_payload(
         workflows=host._read_scope_csv_param(query, "workflow"),
         selected_run_id=read_selected_run_id(host, query),
         now=current_utc_time(),
+        scan_seconds=max(
+            0.0, FORENSIC_ENDPOINT_TIMEOUT_SECONDS - (perf_counter() - started) - 3.0
+        ),
     )
 
 

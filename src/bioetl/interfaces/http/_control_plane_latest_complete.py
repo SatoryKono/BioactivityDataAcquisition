@@ -29,6 +29,7 @@ def build_latest_complete_run_payload(
     workflows: tuple[str, ...],
     selected_run_id: str | None,
     now: datetime,
+    scan_seconds: float = LATEST_COMPLETE_SCAN_SECONDS,
 ) -> dict[str, object]:
     """Find the newest-created successful run whose aggregate Trust is OK.
 
@@ -60,7 +61,7 @@ def build_latest_complete_run_payload(
     }
     for manifest in ordered:
         if scanned >= LATEST_COMPLETE_SCAN_LIMIT or (
-            monotonic() - started >= LATEST_COMPLETE_SCAN_SECONDS
+            monotonic() - started >= min(scan_seconds, LATEST_COMPLETE_SCAN_SECONDS)
         ):
             row.update(status="INCOMPLETE", reason="complete_run_scan_limit")
             break

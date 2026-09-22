@@ -5124,7 +5124,7 @@
                 "properties": [
                   {
                     "id": "unit",
-                    "value": "time:YYYY-MM-DD HH:mm:ss"
+                    "value": "time:YYYY-MM-DD HH:mm"
                   },
                   {
                     "id": "custom.width",

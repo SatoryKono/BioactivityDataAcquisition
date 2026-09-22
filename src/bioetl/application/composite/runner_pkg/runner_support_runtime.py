@@ -61,7 +61,7 @@ async def save_checkpoint_safe(
             )
             status = "succeeded"
             return True
-        except CHECKPOINT_NON_FATAL_ERRORS as error:
+        except (*CHECKPOINT_NON_FATAL_ERRORS, BioETLError) as error:
             span_error = error
             duration_seconds = time.monotonic() - started_at
             emit_checkpoint_save_event(
@@ -82,31 +82,11 @@ async def save_checkpoint_safe(
                     error=str(error),
                     error_type=type(error).__name__,
                     note="Resume capability may be affected",
-                ),
-            )
-            return False
-        except BioETLError as error:
-            span_error = error
-            duration_seconds = time.monotonic() - started_at
-            emit_checkpoint_save_event(
-                host,
-                operation=operation,
-                status="failed",
-            )
-            observe_checkpoint_save_duration(
-                host,
-                operation=operation,
-                status="failed",
-                duration_seconds=duration_seconds,
-            )
-            host._logger.warning(
-                "checkpoint_save_failed",
-                **host._build_correlation_log_context(
-                    operation=operation,
-                    error=str(error),
-                    error_type=type(error).__name__,
-                    reason_code="unexpected_bioetl_error",
-                    note="Resume capability may be affected",
+                    **(
+                        {"reason_code": "unexpected_bioetl_error"}
+                        if not isinstance(error, CHECKPOINT_NON_FATAL_ERRORS)
+                        else {}
+                    ),
                 ),
             )
             return False

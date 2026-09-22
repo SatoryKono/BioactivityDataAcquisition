@@ -272,6 +272,42 @@ def apply_corrections(payload: dict) -> None:
                 ],
             )
         panel["options"]["cellHeight"] = "sm"
+    if uid == "bioetl-control-plane-v1" and 9418 in panels:
+        trust = panels[9418]
+        trust["fieldConfig"]["defaults"]["custom"]["cellOptions"] = {
+            "type": "auto",
+            "wrapText": False,
+        }
+        for transform in trust.get("transformations", []):
+            if transform.get("id") == "organize":
+                options = transform["options"]
+                options.setdefault("excludeByName", {})["reasons_display"] = True
+                options["renameByName"].pop("reasons_display", None)
+                options["renameByName"]["reasons_count"] = "Reasons"
+                options["indexByName"]["reasons_count"] = 2
+        for field, width in (
+            ("Result", 80),
+            ("Trust", 115),
+            ("Reasons", 65),
+        ):
+            _override(trust, field, "custom.width", width)
+        for item in trust["fieldConfig"]["overrides"]:
+            if item["matcher"].get("options") == "Observed":
+                item["properties"] = [
+                    p for p in item["properties"] if p["id"] != "custom.width"
+                ]
+        _override(trust, "Reasons", "custom.cellOptions", {"type": "auto"})
+        _override(trust, "Reasons", "custom.hidden", False)
+        _override(trust, "Reasons", "noValue", "Inspect")
+        _override(trust, "Reasons", "links", trust["links"])
+        for item in trust["fieldConfig"]["overrides"]:
+            for prop in item["properties"]:
+                if prop["id"] == "mappings":
+                    for mapping in prop["value"]:
+                        if mapping.get("type") == "value":
+                            for value in mapping["options"].values():
+                                if value.get("color") == "#555555":
+                                    value["color"] = "#A3A3A3"
     # A display-name alias must not reserve the same column's width twice.
     for panel in panels.values():
         width_fields = set()

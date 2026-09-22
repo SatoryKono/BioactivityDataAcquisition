@@ -100,7 +100,7 @@ def _detail_fields(panel: dict, fields: list[str]) -> None:
             {
                 "matcher": {"id": "byName", "options": "Completed"},
                 "properties": [
-                    {"id": "unit", "value": "time:YYYY-MM-DD HH:mm:ss"},
+                    {"id": "unit", "value": "time:YYYY-MM-DD HH:mm"},
                     {"id": "custom.width", "value": 175},
                 ],
             }

@@ -544,7 +544,7 @@
             "align": "left",
             "cellOptions": {
               "type": "auto",
-              "wrapText": true
+              "wrapText": false
             },
             "inspect": true,
             "minWidth": 50
@@ -745,10 +745,6 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 90
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-text"
@@ -774,15 +770,19 @@
                       },
                       "unknown": {
                         "text": "unknown",
-                        "color": "#555555"
+                        "color": "#A3A3A3"
                       },
                       "UNKNOWN": {
                         "text": "UNKNOWN",
-                        "color": "#555555"
+                        "color": "#A3A3A3"
                       }
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 80
               }
             ]
           },
@@ -792,10 +792,6 @@
               "options": "Trust"
             },
             "properties": [
-              {
-                "id": "custom.width",
-                "value": 110
-              },
               {
                 "id": "custom.cellOptions",
                 "value": {
@@ -834,23 +830,27 @@
                       },
                       "INCOMPLETE": {
                         "text": "INCOMPLETE",
-                        "color": "#555555"
+                        "color": "#A3A3A3"
                       },
                       "UNKNOWN": {
                         "text": "UNKNOWN",
-                        "color": "#555555"
+                        "color": "#A3A3A3"
                       },
                       "N/A": {
                         "text": "N/A",
-                        "color": "#555555"
+                        "color": "#A3A3A3"
                       },
                       "SELECT RUN": {
                         "text": "SELECT RUN",
-                        "color": "#555555"
+                        "color": "#A3A3A3"
                       }
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 115
               }
             ]
           },
@@ -868,22 +868,37 @@
             },
             "properties": [
               {
+                "id": "custom.inspect",
+                "value": true
+              },
+              {
+                "id": "custom.width",
+                "value": 65
+              },
+              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto"
                 }
               },
               {
-                "id": "custom.inspect",
-                "value": true
-              },
-              {
-                "id": "links",
-                "value": []
+                "id": "custom.hidden",
+                "value": false
               },
               {
                 "id": "noValue",
-                "value": "—"
+                "value": "Inspect"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Inspect manifest checks",
+                    "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9414&${__url_time_range}",
+                    "includeVars": false,
+                    "targetBlank": false
+                  }
+                ]
               }
             ]
           }
@@ -948,14 +963,17 @@
               "trust_status": 1,
               "reasons_display": 2,
               "evidence_observed_at": 3,
-              "reasons_count": 4,
+              "reasons_count": 2,
               "evidence_freshness": 5
             },
             "renameByName": {
               "processing_status": "Result",
               "trust_status": "Trust",
-              "reasons_display": "Reasons",
-              "evidence_observed_at": "Observed"
+              "evidence_observed_at": "Observed",
+              "reasons_count": "Reasons"
+            },
+            "excludeByName": {
+              "reasons_display": true
             }
           }
         },
@@ -10267,7 +10285,7 @@
                 "properties": [
                   {
                     "id": "unit",
-                    "value": "time:YYYY-MM-DD HH:mm:ss"
+                    "value": "time:YYYY-MM-DD HH:mm"
                   },
                   {
                     "id": "custom.width",

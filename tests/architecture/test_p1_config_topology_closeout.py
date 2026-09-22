@@ -247,7 +247,9 @@ def test_runtime_inputs_resolver_receives_config_access_dependencies() -> None:
     )
     required = {
         arg.arg
-        for arg, default in zip(resolver.args.kwonlyargs, resolver.args.kw_defaults)
+        for arg, default in zip(
+            resolver.args.kwonlyargs, resolver.args.kw_defaults, strict=True
+        )
         if default is None
     }
     assert {

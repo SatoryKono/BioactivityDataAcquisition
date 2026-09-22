@@ -28,11 +28,34 @@ from bioetl.infrastructure.storage.run_report_store_adapter import (
     FileRunReportStoreAdapter,
 )
 from bioetl.interfaces.http.selected_run_status import (
+    _saved_trust,
     handle_selected_run_status,
     load_selected_run_status,
 )
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize(
+    "reasons,count", [("", 0), ("missing_archive\n\nmissing_lineage", 2)]
+)
+def test_saved_trust_reason_count_preserves_full_details(reasons, count):
+    saved = {
+        "observations": {
+            "Control Plane": {"facts": {"checks": {"trust": {"reasons_text": reasons}}}}
+        }
+    }
+    summary = dict.fromkeys(
+        ("evaluation_at", "pipeline", "run_id", "rules_version", "revision"), "value"
+    )
+    summary["execution_state"] = "SUCCESS"
+    result = _saved_trust(
+        saved,
+        summary,
+        [{"domain": "Control Plane", "reason": "fallback", "verdict": "OK"}],
+    )
+    assert result["reasons_count"] == count
+    assert result["reasons_text"] == reasons
 
 
 def report(run_id="run-a", status="success"):
