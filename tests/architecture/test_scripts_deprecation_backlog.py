@@ -22,7 +22,11 @@ from tests.helpers import repo_root
 def test_scripts_deprecation_report_generation(tmp_path: Path, cached_subprocess_run) -> None:
     """Inventory tool should generate markdown backlog for non-active scripts with cached results."""
     root = repo_root()
-    report_rel = tmp_path / "scripts_deprecation_backlog.md"
+
+    # Use a fixed path for caching (in project tmp directory)
+    cache_dir = root / "tmp"
+    cache_dir.mkdir(exist_ok=True)
+    cache_report = cache_dir / "scripts_deprecation_backlog_cached.md"
 
     # Use venv python for the script
     venv_python = root / ".venv" / "bin" / "python"
@@ -30,12 +34,16 @@ def test_scripts_deprecation_report_generation(tmp_path: Path, cached_subprocess
         venv_python = root / ".venv-win" / "Scripts" / "python.exe"
 
     result = cached_subprocess_run(
-        [str(venv_python), "scripts/engineering/repo/check_scripts_inventory.py", "--deprecation-report", str(report_rel)],
+        [str(venv_python), "scripts/engineering/repo/check_scripts_inventory.py", "--deprecation-report", str(cache_report)],
         timeout=300,
         cwd=root,
     )
     assert result.returncode == 0, result.stderr
-    assert report_rel.exists()
+    assert cache_report.exists()
+
+    # Copy to tmp_path for test isolation
+    report_rel = tmp_path / "scripts_deprecation_backlog.md"
+    report_rel.write_text(cache_report.read_text(encoding="utf-8"), encoding="utf-8")
 
     content = report_rel.read_text(encoding="utf-8")
     assert "# Scripts Deprecation Backlog" in content
