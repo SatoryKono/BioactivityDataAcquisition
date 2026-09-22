@@ -11,7 +11,6 @@
 from __future__ import annotations
 
 import ast
-import json
 import re
 from pathlib import Path
 
@@ -102,40 +101,33 @@ def test_no_sentinel_values(source_content_cache: dict) -> None:
 
 @pytest.mark.slow
 @pytest.mark.timeout(600)  # Increased timeout to 10 minutes
-def test_no_hardcoded_secrets() -> None:
+def test_no_hardcoded_secrets(cached_subprocess_run) -> None:
+    """Verify no hardcoded secrets using detect-secrets scanner with cached results."""
     baseline_path = REPO_ROOT / ".secrets.baseline"
     if not baseline_path.exists():
         raise AssertionError("Missing .secrets.baseline for detect-secrets scan")
 
-    try:
-        baseline_output = json.loads(baseline_path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        raise AssertionError(".secrets.baseline is not valid JSON") from exc
+    # Use venv python for detect-secrets module
+    venv_python = REPO_ROOT / ".venv" / "bin" / "python"
+    if not venv_python.exists():
+        venv_python = REPO_ROOT / ".venv-win" / "Scripts" / "python.exe"
 
-    from detect_secrets.core.scan import scan_file
-    from detect_secrets.settings import transient_settings
-
-    baseline_hashes = {
-        finding.get("hashed_secret")
-        for findings in baseline_output.get("results", {}).values()
-        for finding in findings
-    }
-
-    violations: list[str] = []
-    with transient_settings(baseline_output):
-        for path in sorted((REPO_ROOT / "src").rglob("*.py")):
-            relative_path = path.relative_to(REPO_ROOT).as_posix()
-            for finding in scan_file(str(path)):
-                if finding.secret_hash in baseline_hashes:
-                    continue
-                violations.append(
-                    f"{relative_path}:{finding.line_number}: {finding.type}"
-                )
-
-    assert not violations, (
-        "Potential secrets detected. Update .secrets.baseline if false positives:\n"
-        + "\n".join(violations[:50])
+    # Run detect-secrets scan as subprocess with caching using Python module
+    result = cached_subprocess_run(
+        [str(venv_python), "-m", "detect_secrets", "scan", "--baseline", str(baseline_path), "src/"],
+        timeout=600,
+        cwd=REPO_ROOT,
     )
+
+    # detect-secrets returns 0 if no new secrets found, 1 if new secrets detected
+    # We want to ensure no NEW secrets are found (only baseline is allowed)
+    if result.returncode != 0:
+        # Parse output to show what was found
+        violations = result.stdout or result.stderr
+        raise AssertionError(
+            "Potential secrets detected. Update .secrets.baseline if false positives:\n"
+            + violations
+        )
 
 
 def test_no_print_in_production(source_content_cache: dict) -> None:

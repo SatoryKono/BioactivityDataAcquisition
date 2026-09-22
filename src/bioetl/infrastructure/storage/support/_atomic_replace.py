@@ -48,7 +48,7 @@ def _is_retryable_replace_error(error: OSError) -> bool:
     """Return True when Path.replace failure is transient on Windows-like FS."""
     winerror = getattr(error, "winerror", None)
     if isinstance(winerror, int):
-        return bool(_IS_WINDOWS and winerror in _REPLACE_RETRYABLE_WINERRORS)
+        return winerror in _REPLACE_RETRYABLE_WINERRORS
     errno_value = getattr(error, "errno", None)
     retryable_errnos = (
         _REPLACE_RETRYABLE_ERRNOS_WINDOWS

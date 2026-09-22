@@ -72,3 +72,11 @@ emits a machine-readable drift/sync report for owner review.
 ## Shared Generic Skills
 
 Additional non-BioETL generic skills may coexist under `.codex/skills/` (for example discovery, decision, and research helpers). They are intentionally excluded from the core catalog above.
+
+## Sanctioned Devin-only skill
+
+`coderabbit-audit/SKILL.md` is an optional Devin-only entrypoint for the CodeRabbit
+audit workflow. Its presence and content are explicitly sanctioned by
+`scripts/ai/codex/skills-mirror-contract.json` (`coderabbit-audit/*`). It is excluded
+from the shared core catalog and its strict link-membership validation; this is
+an intentional exception, not a missing Codex or docs-mirror counterpart.

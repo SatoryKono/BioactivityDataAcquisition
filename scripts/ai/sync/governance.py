@@ -723,6 +723,25 @@ def _validate_codex_devin_parity(
     return issues
 
 
+def _rebase_overlay_links(content: str, *, source: Path, destination: Path) -> str:
+    """Keep Markdown link targets stable when an overlay changes directory depth."""
+    from urllib.parse import urlsplit, urlunsplit
+
+    def replace(match: re.Match[str]) -> str:
+        raw = match.group(0)
+        angled = raw.startswith("<")
+        target = raw[1:-1] if angled else raw
+        parts = urlsplit(target)
+        if parts.scheme or parts.netloc or not parts.path or parts.path.startswith("/"):
+            return raw
+        resolved = (source.parent / parts.path).resolve()
+        relative = Path(os.path.relpath(resolved, destination.parent)).as_posix()
+        updated = urlunsplit(("", "", relative, parts.query, parts.fragment))
+        return f"<{updated}>" if angled else updated
+
+    return re.sub(r"(?<=\]\()(<[^>]+>|[^\s)]+)", replace, content)
+
+
 def _materialize_expected_docs_mirror(
     root: Path,
     paths: dict[str, Path],
@@ -745,7 +764,16 @@ def _materialize_expected_docs_mirror(
             continue
         target = expected_docs / source.relative_to(overlay_root)
         target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, target)
+        if source.suffix == ".md":
+            destination = paths["docs_mirror"] / source.relative_to(overlay_root)
+            content = _rebase_overlay_links(
+                source.read_text(encoding="utf-8"),
+                source=source,
+                destination=destination,
+            )
+            _atomic_write(target, content)
+        else:
+            shutil.copy2(source, target)
 
     # Drop exact-duplicate LICENSE clones before header injection / compare.
     thin_exact_duplicate_license_clones(expected_docs)

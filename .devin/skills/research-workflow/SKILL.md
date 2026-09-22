@@ -8,12 +8,18 @@ agent: general-purpose
 # Research Workflow
 
 ## Source Of Truth
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
 
-This skill provides a unified workflow for structured research projects that require traceable evidence and explicit decisions. It combines evidence collection, synthesis, decision-making, and spec generation into a coherent process.
+This skill provides the single workflow for structured research, deep
+investigation, traceable evidence, and multi-stream synthesis. It replaces the
+retired `deep-research`, `collecting-evidence`, and
+`hierarchical-evidence-orchestration` routes. Use `mode=single` by default and
+`mode=multi-stream` only when the task genuinely benefits from independent
+evidence streams.
 
 ## Workflow Phases
 

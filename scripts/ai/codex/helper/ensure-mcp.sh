@@ -391,8 +391,8 @@ esac
 if [[ "${SHOULD_GENERATE}" -eq 1 ]]; then
     # Bound regeneration and skip the potentially slow live CLI check here;
     # the structural checks below still fail closed on incomplete output.
-    # 30s: WSL mounts of Windows drives pay high Python cold-start cost.
-    local_setup_timeout="${CODEX_MCP_SETUP_TIMEOUT:-30}"
+    # 90s: WSL mounts of Windows drives pay high Python cold-start cost.
+    local_setup_timeout="${CODEX_MCP_SETUP_TIMEOUT:-90}"
     # Defaults must match setup_mcp.DEFAULT_LOCAL_* (stable + shared transport).
     # Override with CODEX_MCP_PROFILE / CODEX_MCP_TRANSPORT_MODE if needed.
     local_profile="${CODEX_MCP_PROFILE:-}"
@@ -420,13 +420,23 @@ PY
             local_transport="${_mcp_defaults[1]:-shared}"
         fi
     fi
-    timeout "${local_setup_timeout}" python3 "${SETUP_MCP}" \
-        --root "${REPO_ROOT}" \
-        --workspace-root "${REPO_ROOT}" \
-        --profile "${local_profile}" \
-        --transport-mode "${local_transport}" \
-        --skip-codex-validation >/dev/null 2>&1 || \
-        fail "MCP config materialization phase failed or timed out after ${local_setup_timeout}s"
+    if timeout 1 true >/dev/null 2>&1; then
+        timeout "${local_setup_timeout}" python3 "${SETUP_MCP}" \
+            --root "${REPO_ROOT}" \
+            --workspace-root "${REPO_ROOT}" \
+            --profile "${local_profile}" \
+            --transport-mode "${local_transport}" \
+            --skip-codex-validation >/dev/null 2>&1 || \
+            fail "MCP config materialization phase failed or timed out after ${local_setup_timeout}s"
+    else
+        python3 "${SETUP_MCP}" \
+            --root "${REPO_ROOT}" \
+            --workspace-root "${REPO_ROOT}" \
+            --profile "${local_profile}" \
+            --transport-mode "${local_transport}" \
+            --skip-codex-validation >/dev/null 2>&1 || \
+            fail "MCP config materialization phase failed or timed out after ${local_setup_timeout}s"
+    fi
 fi
 
 check_workspace_mcp_config "${REPO_ROOT}/.mcp.json"

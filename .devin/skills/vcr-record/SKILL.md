@@ -10,36 +10,48 @@ description: Record, validate, update, and clean VCR cassettes for BioETL HTTP t
 Manage VCR cassette lifecycle for provider integration tests.
 
 ## Source Of Truth
+
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 - Canonical runtime entrypoint: this `SKILL.md`
+- Shared wrapper contract: [../py-audit-bot/references/wrapper-contract.md](../py-audit-bot/references/wrapper-contract.md)
 - Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 
-## Environment Configuration
+## Trigger Scope
 
-This skill may use provider API keys from the repository root `.env` file when recording
-VCR cassettes for providers that require authentication:
-
-- `BIOETL_UNIPROT_API_KEY` - UniProt API key (if recording UniProt tests)
-- `BIOETL_OPENALEX_API_KEY` - OpenAlex API key (if recording OpenAlex tests)
-- `BIOETL_PUBMED_API_KEY` - PubMed API key (if recording PubMed tests)
-- `BIOETL_SEMANTICSCHOLAR_API_KEY` - Semantic Scholar API key (if recording Semantic Scholar tests)
-- `BIOETL_CROSSREF_EMAIL` - CrossRef email (if recording CrossRef tests)
-
-**Note:** Provider API keys are only required when recording new cassettes. For playback
-of existing cassettes, no API keys are needed. The `.env` file is machine-local and
-secret-bearing.
+Use this wrapper for cassette recording, cassette refresh, missing-cassette
+triage, cassette cleanup, or secret-safety review around HTTP integration tests.
 
 ## Workflow
 
-1. Follow this skill file as the canonical Codex runtime instructions.
+1. Follow the shared wrapper contract.
 1. Adapt shell examples to the current environment when needed.
 1. Always include cassette validation and secret sanitization checks.
 1. Prefer repository-local commands (`uv run ...`) consistent with project standards.
+1. Keep cassette updates scoped to the provider/entity and test path requested.
 
-## Notes
+## Expected Output
 
-- The canonical action modes are `record`, `list`, `validate`, `update`, and `clean`.
+- Cassettes recorded, updated, cleaned, or explicitly left unchanged.
+- Record mode used.
+- Secret-safety validation result.
+- Focused test result.
+
+## Validation
+
+Use the VCR placement and targeted pytest checks relevant to the cassette:
+
+```bash
+python -m scripts.engineering.qa.vcr check-placement
+```
+
+Then run the provider integration test that consumes the cassette.
+
+## Fallback
+
+If network recording is unavailable, do not synthesize cassettes. Report the
+missing cassette path and the exact record-mode command to run later.
