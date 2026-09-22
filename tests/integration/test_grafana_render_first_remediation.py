@@ -659,7 +659,7 @@ def test_rf007_counts_and_dense_legends_are_bounded() -> None:
         if isinstance(legend, dict):
             assert legend.get("showLegend") is (panel_id == 153)
         desc = str(_panel(dq, panel_id).get("description", ""))
-        assert ("full identifiers remain available" in desc or "TIME RANGE" in desc)
+        assert "full identifiers remain available" in desc or "TIME RANGE" in desc
 
 
 def _limit_field(panel: dict[str, object]) -> int | None:
@@ -739,12 +739,18 @@ def test_operator_critical_tables_expose_full_values() -> None:
                     assert panel["options"]["footer"]["enablePagination"] is False
                 else:
                     # Updated Sep21: dashboard now uses wrapText True at defaults for these panels
-                    assert custom.get("cellOptions", {}).get("wrapText") in (True, False, None)
+                    assert custom.get("cellOptions", {}).get("wrapText") in (
+                        True,
+                        False,
+                        None,
+                    )
                 if panel_id in {2010, 3010}:
                     continue
                 wrapped = _wrapped_field_names(panel)
                 # Dashboard now wraps at defaults, not via overrides, so allow empty
-                assert wrapped or custom.get("cellOptions", {}).get("wrapText") is True, (
+                assert (
+                    wrapped or custom.get("cellOptions", {}).get("wrapText") is True
+                ), (
                     f"{dashboard_name} panel {panel_id} must wrap at least one named field"
                 )
 
@@ -764,7 +770,9 @@ def test_first_window_named_text_columns_wrap_without_table_default() -> None:
         assert custom.get("cellOptions", {}).get("wrapText") in (True, False, None)
         wrapped = _wrapped_field_names(panel)
         # Allow either wrapped via overrides or wrapText at defaults
-        assert wrapped == allowed or custom.get("cellOptions", {}).get("wrapText") is True, (dashboard_name, panel_id, wrapped)
+        assert (
+            wrapped == allowed or custom.get("cellOptions", {}).get("wrapText") is True
+        ), (dashboard_name, panel_id, wrapped)
         if panel_id == 9107:
             # Keep the reason flexible so status and source survive at 900px.
             assert _override_width(panel, "reason") is None
@@ -1306,6 +1314,28 @@ def test_selected_trust_reasons_link_preserves_multiple_run_types() -> None:
     assert "var-run_type=${run_type:csv}" not in links[0]["url"]
 
 
+def test_visible_trust_reason_count_opens_frozen_reason_details() -> None:
+    dashboard = _load("bioetl-control-plane-v1.json")
+    trust = _panel(dashboard, 9418)
+    reasons = next(
+        item
+        for item in trust["fieldConfig"]["overrides"]
+        if item["matcher"]["options"] == "Reasons"
+    )
+    links = next(
+        item["value"] for item in reasons["properties"] if item["id"] == "links"
+    )
+    assert "viewPanel=9451" in links[0]["url"]
+    assert "${run_type:queryparam}" in links[0]["url"]
+    details = _panel(dashboard, 9451)
+    names = next(
+        item["options"]["include"]["names"]
+        for item in details["transformations"]
+        if item["id"] == "filterFieldsByName"
+    )
+    assert "reason_display" in names
+
+
 def test_cycle5_wrap_text_columns_restore_declared_widths() -> None:
     """#9563 #9564 #9565 #9566: wrap columns keep a declared width; one column stays flex."""
     layout_width = 1366 // 2
@@ -1473,8 +1503,28 @@ def test_incident_main_columns_hide_future_service_labels_but_keep_inspect() -> 
     }
 
 
+def test_active_alert_missing_labels_do_not_claim_empty_domain() -> None:
+    dashboard = _load("bioetl-incident-v1.json")
+    for panel in _iter_panels(dashboard["panels"]):
+        if panel.get("type") == "table":
+            assert "EMPTY DOMAIN" not in panel["fieldConfig"]["defaults"].get(
+                "noValue", ""
+            )
+    for panel_id in (2005, 22005):
+        overrides = _panel(dashboard, panel_id)["fieldConfig"]["overrides"]
+        for field in ("instance", "job"):
+            assert any(
+                override["matcher"] == {"id": "byName", "options": field}
+                and {"id": "noValue", "value": "NOT PROVIDED"}
+                in override["properties"]
+                for override in overrides
+            )
+
+
 def test_scrolling_capture_preserves_layout_viewport(tmp_path: Path) -> None:
-    pytest.skip("playwright not fully installed in this environment - skipping render capture")
+    pytest.skip(
+        "playwright not fully installed in this environment - skipping render capture"
+    )
     import os
     import subprocess
     from scripts.ops.observability.grafana import (

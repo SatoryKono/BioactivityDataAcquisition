@@ -183,7 +183,9 @@ def _run_bash(
     # On Windows the default ``bash`` is often WSL. Write the probe to a file so
     # ``$`` / ``$?`` expansions are not mangled by interop layers, and use
     # ``env -i`` so host/WSL PATH/HOME installs cannot leak into uvx contracts.
-    if os.name == "nt" and _wsl_probe_succeeds():
+    if os.name == "nt":
+        if not _wsl_probe_succeeds():
+            pytest.skip("WSL is unavailable for the isolated Windows Bash contract")
         import tempfile
 
         fd, raw_script_path = tempfile.mkstemp(prefix="bioetl-bash-", suffix=".sh")

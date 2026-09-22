@@ -158,12 +158,14 @@ async def _latest_complete_payload(
         raise ValueError("latest-complete-run requires one pipeline and one run_type")
     if host._run_manifest_port is None:
         raise ForensicEndpointUnavailable(reason="catalog_unavailable", status_code=503)
-    catalog_tasks = [asyncio.to_thread(host._run_manifest_port.list_all)]
     if host._workflow_manifest_port is not None:
-        catalog_tasks.append(asyncio.to_thread(host._workflow_manifest_port.list_all))
-    catalogs = await asyncio.gather(*catalog_tasks)
-    manifests = catalogs[0]
-    workflow_manifests = catalogs[1] if len(catalogs) > 1 else ()
+        manifests, workflow_manifests = await asyncio.gather(
+            asyncio.to_thread(host._run_manifest_port.list_all),
+            asyncio.to_thread(host._workflow_manifest_port.list_all),
+        )
+    else:
+        manifests = await asyncio.to_thread(host._run_manifest_port.list_all)
+        workflow_manifests = ()
     return await asyncio.to_thread(
         build_latest_complete_run_payload,
         manifests=tuple(manifests),

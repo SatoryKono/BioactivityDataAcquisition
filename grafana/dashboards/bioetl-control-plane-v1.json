@@ -893,8 +893,8 @@
                 "id": "links",
                 "value": [
                   {
-                    "title": "Inspect manifest checks",
-                    "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9414&${__url_time_range}",
+                    "title": "Inspect saved Trust reasons",
+                    "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9451&${__url_time_range}",
                     "includeVars": false,
                     "targetBlank": false
                   }
@@ -10175,7 +10175,27 @@
                 "minWidth": 50
               }
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Reason"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  },
+                  {
+                    "id": "custom.inspect",
+                    "value": true
+                  }
+                ]
+              }
+            ]
           },
           "targets": [
             {
@@ -10206,7 +10226,7 @@
                   "names": [
                     "domain",
                     "verdict",
-                    "reason",
+                    "reason_display",
                     "action",
                     "evidence_ref"
                   ]
@@ -10219,9 +10239,9 @@
                 "indexByName": {
                   "domain": 0,
                   "verdict": 1,
-                  "reason": 2,
                   "action": 3,
-                  "evidence_ref": 4
+                  "evidence_ref": 4,
+                  "reason_display": 2
                 },
                 "renameByName": {
                   "domain": "Domain",
@@ -10229,13 +10249,13 @@
                   "execution_state": "Result",
                   "evidence_completeness": "Evidence",
                   "rules_version": "Rules",
-                  "reason": "Reason",
                   "action": "Action",
                   "evidence_ref": "Evidence reference",
                   "pipeline": "Pipeline",
                   "run_id": "Run ID",
                   "completed_at": "Completed",
-                  "revision": "Revision"
+                  "revision": "Revision",
+                  "reason_display": "Reason"
                 }
               }
             }

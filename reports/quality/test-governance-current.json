@@ -40,13 +40,6 @@
       "test_name": "test_no_hardcoded_secrets"
     },
     {
-      "category": "architecture_helper_guard",
-      "line": "1127",
-      "path": "tests/architecture/test_quality_debt_scorecard.py",
-      "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
-      "test_name": "test_growth_rollout_warns_registry_section_before_cutoff"
-    },
-    {
       "category": "intentional_no_exception_contract",
       "line": "84",
       "path": "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py",
@@ -629,7 +622,7 @@
     }
   ],
   "assertless_category_counts": {
-    "architecture_helper_guard": 2,
+    "architecture_helper_guard": 1,
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
     "intentional_no_exception_contract": 83,
@@ -637,7 +630,6 @@
   },
   "assertless_examples": [
     "tests/architecture/test_antipatterns.py:104",
-    "tests/architecture/test_quality_debt_scorecard.py:1127",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
     "tests/integration/infrastructure/storage/test_delta_reader.py:586",
     "tests/unit/application/test_issue_10518_app_leftovers_branches.py:100",
@@ -660,16 +652,11 @@
     "tests/unit/application/services/test_checkpoint_telemetry_helpers.py:68",
     "tests/unit/composition/test_observability_contract.py:421",
     "tests/unit/composition/test_observability_contract.py:431",
-    "tests/unit/composition/factories/storage/test_health_mixin.py:72"
+    "tests/unit/composition/factories/storage/test_health_mixin.py:72",
+    "tests/unit/composition/factories/storage/test_health_mixin.py:103"
   ],
   "assertless_families": {
     "tests/architecture/test_antipatterns.py": {
-      "assertless_tests": 1,
-      "categories": {
-        "architecture_helper_guard": 1
-      }
-    },
-    "tests/architecture/test_quality_debt_scorecard.py": {
       "assertless_tests": 1,
       "categories": {
         "architecture_helper_guard": 1
@@ -1006,7 +993,7 @@
       }
     }
   },
-  "assertless_total_candidates": 85,
+  "assertless_total_candidates": 84,
   "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
@@ -1183,20 +1170,7 @@
   "intentional_no_exception_contract": 83,
   "markerless_examples": [],
   "markerless_test_functions": 0,
-  "parse_errors": [
-    {
-      "error": "invalid syntax (tests/integration/test_grafana_render_first_remediation.py, line 338)",
-      "path": "tests/integration/test_grafana_render_first_remediation.py"
-    },
-    {
-      "error": "invalid syntax (tests/integration/test_grafana_surface_contracts.py, line 563)",
-      "path": "tests/integration/test_grafana_surface_contracts.py"
-    },
-    {
-      "error": "invalid syntax (tests/integration/test_prometheus_rules_config.py, line 1376)",
-      "path": "tests/integration/test_prometheus_rules_config.py"
-    }
-  ],
+  "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
@@ -1247,13 +1221,6 @@
         "path": "tests/architecture/test_antipatterns.py",
         "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
         "test_name": "test_no_hardcoded_secrets"
-      },
-      {
-        "category": "architecture_helper_guard",
-        "line": "1127",
-        "path": "tests/architecture/test_quality_debt_scorecard.py",
-        "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
-        "test_name": "test_growth_rollout_warns_registry_section_before_cutoff"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -1838,7 +1805,7 @@
       }
     ],
     "assertless_category_counts": {
-      "architecture_helper_guard": 2,
+      "architecture_helper_guard": 1,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
       "intentional_no_exception_contract": 83,
@@ -1846,7 +1813,6 @@
     },
     "assertless_examples": [
       "tests/architecture/test_antipatterns.py:104",
-      "tests/architecture/test_quality_debt_scorecard.py:1127",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
       "tests/integration/infrastructure/storage/test_delta_reader.py:586",
       "tests/unit/application/test_issue_10518_app_leftovers_branches.py:100",
@@ -1869,9 +1835,10 @@
       "tests/unit/application/services/test_checkpoint_telemetry_helpers.py:68",
       "tests/unit/composition/test_observability_contract.py:421",
       "tests/unit/composition/test_observability_contract.py:431",
-      "tests/unit/composition/factories/storage/test_health_mixin.py:72"
+      "tests/unit/composition/factories/storage/test_health_mixin.py:72",
+      "tests/unit/composition/factories/storage/test_health_mixin.py:103"
     ],
-    "assertless_total_candidates": 85,
+    "assertless_total_candidates": 84,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -2046,20 +2013,7 @@
     },
     "markerless_examples": [],
     "markerless_test_functions": 0,
-    "parse_errors": [
-      {
-        "error": "invalid syntax (tests/integration/test_grafana_render_first_remediation.py, line 338)",
-        "path": "tests/integration/test_grafana_render_first_remediation.py"
-      },
-      {
-        "error": "invalid syntax (tests/integration/test_grafana_surface_contracts.py, line 563)",
-        "path": "tests/integration/test_grafana_surface_contracts.py"
-      },
-      {
-        "error": "invalid syntax (tests/integration/test_prometheus_rules_config.py, line 1376)",
-        "path": "tests/integration/test_prometheus_rules_config.py"
-      }
-    ],
+    "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
@@ -2119,15 +2073,15 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2625,
-    "total_test_functions": 28142,
+    "total_test_functions": 28249,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "604befca6c97f163a2803f3fa1bebab187d7fe3d20d623ac1577f8ea2fe36919",
+  "source_tree_sha256": "b5084266d709763ccc2d6f7c0eca34e42bcf6a59ff7f8d92dccfb12a858c1ce7",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 85,
+    "assertless_total_candidates": 84,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
@@ -2187,7 +2141,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2625,
-  "total_test_functions": 28142,
+  "total_test_functions": 28249,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

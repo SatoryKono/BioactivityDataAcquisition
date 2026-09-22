@@ -653,6 +653,7 @@ def test_static_test_governance_report_reuses_cached_inventory_scan() -> None:
         "tests.architecture.conftest.cached_subprocess_run",
         "tests.architecture.conftest._run_cached_subprocess",
         "tests.architecture.test_antipatterns.test_no_hardcoded_secrets",
+        "tests.architecture.test_scripts_deprecation_backlog.test_scripts_deprecation_report_generation",
     ]
     assert cache_policy["isolated_lanes"] == [
         "architecture-fast-boundary",

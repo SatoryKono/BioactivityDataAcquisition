@@ -1160,7 +1160,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
+          "noValue": "UNKNOWN",
           "custom": {
             "align": "left",
             "cellOptions": {
@@ -1270,6 +1270,30 @@
                 "value": {
                   "type": "color-text"
                 }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "instance"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "NOT PROVIDED"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "job"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "NOT PROVIDED"
               }
             ]
           }
@@ -1482,7 +1506,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
+              "noValue": "UNKNOWN",
               "custom": {
                 "align": "left",
                 "cellOptions": {
@@ -1686,7 +1710,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
+              "noValue": "UNKNOWN",
               "custom": {
                 "align": "left",
                 "cellOptions": {
@@ -1881,7 +1905,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
+              "noValue": "UNKNOWN",
               "custom": {
                 "align": "left",
                 "cellOptions": {
@@ -2860,7 +2884,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
+              "noValue": "UNKNOWN",
               "custom": {
                 "align": "left",
                 "cellOptions": {
@@ -2970,6 +2994,30 @@
                     "value": {
                       "type": "color-text"
                     }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "instance"
+                },
+                "properties": [
+                  {
+                    "id": "noValue",
+                    "value": "NOT PROVIDED"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "job"
+                },
+                "properties": [
+                  {
+                    "id": "noValue",
+                    "value": "NOT PROVIDED"
                   }
                 ]
               }
