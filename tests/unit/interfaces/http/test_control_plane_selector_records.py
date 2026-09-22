@@ -569,6 +569,21 @@ def test_pipeline_filter_options_prefix_unknown_scope() -> None:
     assert str(manifest.pipeline_name) in payload["items"]
 
 
+@pytest.mark.parametrize("dimension", ["pipeline", "workflow", "provider", "run_type"])
+def test_identity_dimension_options_do_not_scan_run_ledgers(dimension: str) -> None:
+    manifest = _manifest(11)
+    ledger = _Ledger({})
+    payload = selector_context.build_selector_filter_options_payload(
+        manifests=(manifest,),
+        ledger_port=ledger,
+        dimension=dimension,
+        response_shape="options",
+        requested_pipeline=None,
+    )
+    assert payload["items"]
+    assert ledger.lookups == []
+
+
 def test_run_id_filter_options_use_ledger_when_status_is_selected() -> None:
     manifest = _manifest(12)
     ledger = _Ledger(

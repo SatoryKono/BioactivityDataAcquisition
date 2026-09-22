@@ -40,7 +40,9 @@ def _cast_command[**CommandParams, CommandReturn](
     return func
 
 
-def typed_click_option(*args: str, **kwargs: Any) -> CommandDecorator:  # Any: Click library kwargs
+def typed_click_option(
+    *args: str, **kwargs: Any
+) -> CommandDecorator:  # Any: Click library kwargs
     """Attach one Click option while preserving the wrapped callback type."""
 
     def decorator(func: CommandCallback) -> CommandCallback:
@@ -49,7 +51,9 @@ def typed_click_option(*args: str, **kwargs: Any) -> CommandDecorator:  # Any: C
     return decorator
 
 
-def typed_click_argument(*args: str, **kwargs: Any) -> CommandDecorator:  # Any: Click library kwargs
+def typed_click_argument(
+    *args: str, **kwargs: Any
+) -> CommandDecorator:  # Any: Click library kwargs
     """Attach one Click argument while preserving the wrapped callback type."""
 
     def decorator(func: CommandCallback) -> CommandCallback:
@@ -58,11 +62,14 @@ def typed_click_argument(*args: str, **kwargs: Any) -> CommandDecorator:  # Any:
     return decorator
 
 
-def typed_click_command(name: str | None = None, **attrs: Any) -> CommandDecorator:  # Any: Click library attrs
+def typed_click_command(
+    name: str | None = None, **attrs: Any
+) -> CommandDecorator:  # Any: Click library attrs
     """Register one standalone Click command while preserving callback types."""
 
     def decorator(func: CommandCallback) -> CommandCallback:
-        return _cast_command(click.command(name, **attrs)(func))
+        decorate = cast(CommandDecorator, click.command(name, **attrs))
+        return decorate(func)
 
     return decorator
 
@@ -100,7 +107,9 @@ def typed_pass_obj(func: CommandCallback) -> CommandCallback:
     return _cast_command(click.pass_obj(func))
 
 
-def typed_version_option(**kwargs: Any) -> CommandDecorator:  # Any: Click library kwargs
+def typed_version_option(
+    **kwargs: Any,
+) -> CommandDecorator:  # Any: Click library kwargs
     """Attach Click version metadata while preserving callback types."""
 
     def decorator(func: CommandCallback) -> CommandCallback:

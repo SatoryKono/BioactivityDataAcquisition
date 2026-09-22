@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from dataclasses import replace
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
@@ -58,8 +59,12 @@ class QuarantineManagerSupportMixin:
     )  # Any: host attr default (PD3)
     _run_type: str = cast(Any, None)  # Any: host attr default (PD3)
 
-    def _quarantine_runtime_ports(self) -> QuarantineRuntimeDependencies:
-        return build_quarantine_runtime_ports(
+    def _quarantine_runtime_ports(
+        self, stage: str = "silver"
+    ) -> QuarantineRuntimeDependencies:
+        if stage not in {"silver", "gold"}:
+            raise ValueError(f"Unsupported quarantine stage: {stage!r}")
+        ports = build_quarantine_runtime_ports(
             quarantine=self._quarantine,
             emitter=self._domain_event_emitter,
             pipeline_name=self._pipeline_name,
@@ -68,6 +73,7 @@ class QuarantineManagerSupportMixin:
             batch_metrics=self._batch_metrics,
             run_type=getattr(self, "_run_type", "unknown"),
         )
+        return replace(ports, stage=stage)
 
     async def quarantine_record(
         self,
@@ -106,6 +112,7 @@ class QuarantineManagerSupportMixin:
         run_id: RunID | None = None,
         *,
         ingestion_ts: datetime,
+        stage: str = "silver",
     ) -> None:
         """Persist a batch of DQ quarantine records with shared run context."""
         if not records:
@@ -123,7 +130,7 @@ class QuarantineManagerSupportMixin:
             for record, error_type, error_details in records
         ]
         await persist_dq_quarantine_requests(
-            self._quarantine_runtime_ports(),
+            self._quarantine_runtime_ports(stage),
             requests=write_requests,
             records=records,
             batch_id=batch_id,

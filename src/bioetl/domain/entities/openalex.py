@@ -43,10 +43,14 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     # Primary topic (single most relevant topic for quick categorization)
     # Dict with: id, display_name, score, subfield, field, domain
     primary_topic: JsonDict | None = None
+    primary_topic_raw_json: str | None = None
+    primary_topic_canonical_json: str | None = None
 
     # Grants/funding information
     # Each grant dict has: funder, funder_display_name, award_id
     grants: list[JsonDict] = field(default_factory=list)
+    grants_raw_json: str | None = None
+    grants_canonical_json: str | None = None
 
     # MeSH terms (Medical Subject Headings)
     subject_mesh: list[str] = field(default_factory=list)

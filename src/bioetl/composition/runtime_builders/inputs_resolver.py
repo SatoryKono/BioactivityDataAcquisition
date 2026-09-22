@@ -8,11 +8,6 @@ from bioetl.composition.runtime_builders._runner_input_preparation import (
     prepare_runner_context as _prepare_runner_context,
     resolve_runner_derived_inputs as _resolve_runner_derived_inputs,
 )
-from bioetl.composition.runtime_builders.config_access import (
-    get_settings as _get_settings,
-    load_pipeline_config as _load_pipeline_config,
-    load_source_config as _load_source_config,
-)
 from bioetl.composition.runtime_builders.inputs_runtime_models import (
     ResolvedVacuumSettings,
 )
@@ -38,12 +33,6 @@ __all__ = [
     "RunnerInputs",
     "prepare_runner_inputs",
 ]
-
-_RUNTIME_CONFIG_ACCESS = (
-    _get_settings,
-    _load_pipeline_config,
-    _load_source_config,
-)
 
 
 def __getattr__(name: str) -> object:

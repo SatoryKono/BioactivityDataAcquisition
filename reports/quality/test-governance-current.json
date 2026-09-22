@@ -34,6 +34,13 @@
   "assertless_candidates": [
     {
       "category": "architecture_helper_guard",
+      "line": "104",
+      "path": "tests/architecture/test_antipatterns.py",
+      "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
+      "test_name": "test_no_hardcoded_secrets"
+    },
+    {
+      "category": "architecture_helper_guard",
       "line": "1127",
       "path": "tests/architecture/test_quality_debt_scorecard.py",
       "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
@@ -104,7 +111,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "982",
+      "line": "981",
       "path": "tests/unit/application/test_issue_10518_application_tail1a.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_increment_counter_without_metrics_api_is_noop"
@@ -622,13 +629,14 @@
     }
   ],
   "assertless_category_counts": {
-    "architecture_helper_guard": 1,
+    "architecture_helper_guard": 2,
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
     "intentional_no_exception_contract": 83,
     "weak_no_value": 0
   },
   "assertless_examples": [
+    "tests/architecture/test_antipatterns.py:104",
     "tests/architecture/test_quality_debt_scorecard.py:1127",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
     "tests/integration/infrastructure/storage/test_delta_reader.py:586",
@@ -639,7 +647,7 @@
     "tests/unit/application/test_issue_10518_application_pipelines_a.py:753",
     "tests/unit/application/test_issue_10518_application_svc1a.py:895",
     "tests/unit/application/test_issue_10518_application_svc2.py:1552",
-    "tests/unit/application/test_issue_10518_application_tail1a.py:982",
+    "tests/unit/application/test_issue_10518_application_tail1a.py:981",
     "tests/unit/application/core/test_batch_metrics_accounting.py:48",
     "tests/unit/application/core/test_batch_tracing.py:137",
     "tests/unit/application/core/test_batch_writer_tracing_mixin.py:106",
@@ -652,10 +660,15 @@
     "tests/unit/application/services/test_checkpoint_telemetry_helpers.py:68",
     "tests/unit/composition/test_observability_contract.py:421",
     "tests/unit/composition/test_observability_contract.py:431",
-    "tests/unit/composition/factories/storage/test_health_mixin.py:72",
-    "tests/unit/composition/factories/storage/test_health_mixin.py:103"
+    "tests/unit/composition/factories/storage/test_health_mixin.py:72"
   ],
   "assertless_families": {
+    "tests/architecture/test_antipatterns.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "architecture_helper_guard": 1
+      }
+    },
     "tests/architecture/test_quality_debt_scorecard.py": {
       "assertless_tests": 1,
       "categories": {
@@ -993,7 +1006,7 @@
       }
     }
   },
-  "assertless_total_candidates": 84,
+  "assertless_total_candidates": 85,
   "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
@@ -1170,7 +1183,20 @@
   "intentional_no_exception_contract": 83,
   "markerless_examples": [],
   "markerless_test_functions": 0,
-  "parse_errors": [],
+  "parse_errors": [
+    {
+      "error": "invalid syntax (tests/integration/test_grafana_render_first_remediation.py, line 338)",
+      "path": "tests/integration/test_grafana_render_first_remediation.py"
+    },
+    {
+      "error": "invalid syntax (tests/integration/test_grafana_surface_contracts.py, line 563)",
+      "path": "tests/integration/test_grafana_surface_contracts.py"
+    },
+    {
+      "error": "invalid syntax (tests/integration/test_prometheus_rules_config.py, line 1376)",
+      "path": "tests/integration/test_prometheus_rules_config.py"
+    }
+  ],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
@@ -1215,6 +1241,13 @@
     },
     "assertion_branch_reachability_percent": 100.0,
     "assertless_candidates": [
+      {
+        "category": "architecture_helper_guard",
+        "line": "104",
+        "path": "tests/architecture/test_antipatterns.py",
+        "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
+        "test_name": "test_no_hardcoded_secrets"
+      },
       {
         "category": "architecture_helper_guard",
         "line": "1127",
@@ -1287,7 +1320,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "982",
+        "line": "981",
         "path": "tests/unit/application/test_issue_10518_application_tail1a.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_increment_counter_without_metrics_api_is_noop"
@@ -1805,13 +1838,14 @@
       }
     ],
     "assertless_category_counts": {
-      "architecture_helper_guard": 1,
+      "architecture_helper_guard": 2,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
       "intentional_no_exception_contract": 83,
       "weak_no_value": 0
     },
     "assertless_examples": [
+      "tests/architecture/test_antipatterns.py:104",
       "tests/architecture/test_quality_debt_scorecard.py:1127",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
       "tests/integration/infrastructure/storage/test_delta_reader.py:586",
@@ -1822,7 +1856,7 @@
       "tests/unit/application/test_issue_10518_application_pipelines_a.py:753",
       "tests/unit/application/test_issue_10518_application_svc1a.py:895",
       "tests/unit/application/test_issue_10518_application_svc2.py:1552",
-      "tests/unit/application/test_issue_10518_application_tail1a.py:982",
+      "tests/unit/application/test_issue_10518_application_tail1a.py:981",
       "tests/unit/application/core/test_batch_metrics_accounting.py:48",
       "tests/unit/application/core/test_batch_tracing.py:137",
       "tests/unit/application/core/test_batch_writer_tracing_mixin.py:106",
@@ -1835,10 +1869,9 @@
       "tests/unit/application/services/test_checkpoint_telemetry_helpers.py:68",
       "tests/unit/composition/test_observability_contract.py:421",
       "tests/unit/composition/test_observability_contract.py:431",
-      "tests/unit/composition/factories/storage/test_health_mixin.py:72",
-      "tests/unit/composition/factories/storage/test_health_mixin.py:103"
+      "tests/unit/composition/factories/storage/test_health_mixin.py:72"
     ],
-    "assertless_total_candidates": 84,
+    "assertless_total_candidates": 85,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -2013,7 +2046,20 @@
     },
     "markerless_examples": [],
     "markerless_test_functions": 0,
-    "parse_errors": [],
+    "parse_errors": [
+      {
+        "error": "invalid syntax (tests/integration/test_grafana_render_first_remediation.py, line 338)",
+        "path": "tests/integration/test_grafana_render_first_remediation.py"
+      },
+      {
+        "error": "invalid syntax (tests/integration/test_grafana_surface_contracts.py, line 563)",
+        "path": "tests/integration/test_grafana_surface_contracts.py"
+      },
+      {
+        "error": "invalid syntax (tests/integration/test_prometheus_rules_config.py, line 1376)",
+        "path": "tests/integration/test_prometheus_rules_config.py"
+      }
+    ],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
@@ -2030,8 +2076,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2620,
-      "test_python_file_count": 2854,
+      "test_glob_file_count": 2625,
+      "test_python_file_count": 2859,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2072,16 +2118,16 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2620,
-    "total_test_functions": 28205,
+    "total_test_files": 2625,
+    "total_test_functions": 28142,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "012848a65e24cb3513fd5b45d92582b626c30b1a3bb0ab92800f0e5fd95be6c4",
+  "source_tree_sha256": "604befca6c97f163a2803f3fa1bebab187d7fe3d20d623ac1577f8ea2fe36919",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 84,
+    "assertless_total_candidates": 85,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
@@ -2098,8 +2144,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2620,
-    "test_python_file_count": 2854,
+    "test_glob_file_count": 2625,
+    "test_python_file_count": 2859,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2140,8 +2186,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2620,
-  "total_test_functions": 28205,
+  "total_test_files": 2625,
+  "total_test_functions": 28142,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

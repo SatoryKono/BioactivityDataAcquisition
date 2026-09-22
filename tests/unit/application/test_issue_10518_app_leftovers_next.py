@@ -220,17 +220,17 @@ def test_evidence_service_unresolved_and_trust_row_gaps(
     monkeypatch.setattr(
         ControlPlaneEvidenceService,
         "manifest_validation",
-        lambda self, *, scope: {"endpoint": "m", "rows": []},
+        lambda self, *, scope, ledger_snapshot: {"endpoint": "m", "rows": []},
     )
     monkeypatch.setattr(
         ControlPlaneEvidenceService,
         "lineage_validation",
-        lambda self, *, scope: {"endpoint": "l", "rows": ["skip"]},
+        lambda self, *, scope, ledger_snapshot: {"endpoint": "l", "rows": ["skip"]},
     )
     monkeypatch.setattr(
         ControlPlaneEvidenceService,
         "retention_compliance",
-        lambda self, *, scope, now: {
+        lambda self, *, scope, now, ledger_snapshot: {
             "endpoint": "r",
             "rows": [{"status": "weird", "check": "c", "reason": "ok", "detail": ""}],
         },

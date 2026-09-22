@@ -296,10 +296,10 @@ def test_runtime_pipeline_error_code_breakdown_uses_bounded_runtime_error_metric
         ("Monitor Degraded Checks", "[$__range]"),
         ("Track Failure Rate", "[$__range]"),
         ("Monitor Health Checks", "[$__range]"),
-        ("Track Request Latency p95", "[$__interval]"),
-        ("Track Rate-Limit Errors", "[$__interval]"),
-        ("Track Network & Timeout Errors", "[$__interval]"),
-        ("Track Rate-Limiter Wait p95", "[$__interval]"),
+        ("Track Request Latency p95", "[$__rate_interval]"),
+        ("Track Rate-Limit Errors", "[$__rate_interval]"),
+        ("Track Network & Timeout Errors", "[$__rate_interval]"),
+        ("Track Rate-Limiter Wait p95", "[$__rate_interval]"),
         ("Monitor Available Rate-Limit Tokens", "[$__range]"),
     ],
 )
@@ -379,22 +379,22 @@ def test_provider_circuit_breaker_panels_use_adapter_variable() -> None:
         (
             "bioetl-runtime.json",
             "Track Global Shutdown Starts",
-            "[$__interval]",
+            "[$__rate_interval]",
         ),
         (
             "bioetl-runtime.json",
             "Track Global Shutdown Completions",
-            "[$__interval]",
+            "[$__rate_interval]",
         ),
         (
             "bioetl-control-plane-v1.json",
             "Compare Global Audit Write Outcomes",
-            "[$__interval]",
+            "[$__rate_interval]",
         ),
         (
             "bioetl-control-plane-v1.json",
             "Compare Global Audit Query Outcomes",
-            "[$__interval]",
+            "[$__rate_interval]",
         ),
         (
             "bioetl-control-plane-v1.json",
@@ -543,7 +543,7 @@ def test_runtime_tracing_row_orders_log_hygiene_panels() -> None:
 def test_adaptive_trend_panels_use_selected_interval(
     dashboard_file: str, panel_title: str
 ) -> None:
-    """Trend panels should adapt to the active Grafana window via $__interval."""
+    """Trend panels should adapt to the active Grafana window via $__rate_interval."""
     dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_file)
     panel = next(
         (
@@ -560,8 +560,13 @@ def test_adaptive_trend_panels_use_selected_interval(
         for target in panel.get("targets", [])
         if isinstance(target.get("expr"), str)
     ]
-    assert any("[$__interval]" in expr or "[$__rate_interval]" in expr for expr in expressions), (
-        f"Panel '{panel_title}' in {dashboard_file} must use $__interval or $__rate_interval"
+    window = (
+        "[$__interval]"
+        if panel_title == "Track Records by Stage / Interval"
+        else "[$__rate_interval]"
+    )
+    assert any(window in expr for expr in expressions), (
+        f"Panel '{panel_title}' in {dashboard_file} must use $__rate_interval"
     )
 
 

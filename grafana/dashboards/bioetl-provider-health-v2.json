@@ -1162,7 +1162,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 85
+                "value": 105
               }
             ]
           },
@@ -1178,7 +1178,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 105
+                "value": 95
               }
             ]
           }
@@ -1622,6 +1622,16 @@
                             "color": "gray"
                           }
                         }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "null",
+                          "result": {
+                            "text": "UNKNOWN",
+                            "color": "#555555"
+                          }
+                        }
                       }
                     ]
                   }
@@ -1871,10 +1881,6 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 130
-                  },
-                  {
                     "id": "custom.minWidth",
                     "value": 130
                   }
@@ -2071,12 +2077,7 @@
                   "id": "byName",
                   "options": "provider"
                 },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 130
-                  }
-                ]
+                "properties": []
               },
               {
                 "matcher": {
@@ -2273,12 +2274,7 @@
                   "id": "byName",
                   "options": "provider"
                 },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 130
-                  }
-                ]
+                "properties": []
               },
               {
                 "matcher": {
@@ -2516,12 +2512,7 @@
                   "id": "byName",
                   "options": "provider"
                 },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 130
-                  }
-                ]
+                "properties": []
               },
               {
                 "matcher": {
@@ -4552,7 +4543,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -4574,7 +4565,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -5146,7 +5137,24 @@
                 "minWidth": 50
               }
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Completed"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 175
+                  }
+                ]
+              }
+            ]
           },
           "targets": [
             {
@@ -5164,6 +5172,17 @@
             }
           ],
           "transformations": [
+            {
+              "id": "convertFieldType",
+              "options": {
+                "conversions": [
+                  {
+                    "targetField": "completed_at",
+                    "destinationType": "time"
+                  }
+                ]
+              }
+            },
             {
               "id": "limit",
               "options": {

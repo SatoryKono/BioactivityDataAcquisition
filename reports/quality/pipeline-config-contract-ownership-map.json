@@ -48,8 +48,8 @@
       "pipeline_code_owner": "src/bioetl/application/pipelines/chembl/assay_parameters_transformer.py",
       "pipeline_name": "chembl_assay_parameters",
       "provider": "chembl",
-      "published_artifact_path": "docs/04-reference/contracts/gold/chembl_assay_parameters_v1.0.json",
-      "registry_contract_version": "1.0.0",
+      "published_artifact_path": "docs/04-reference/contracts/gold/chembl_assay_parameters_v2.0.json",
+      "registry_contract_version": "2.0.0",
       "registry_source_path": "src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py",
       "registry_status": "active"
     },
@@ -150,8 +150,8 @@
       "pipeline_code_owner": "src/bioetl/application/pipelines/chembl/publication_similarity_transformer.py",
       "pipeline_name": "chembl_publication_similarity",
       "provider": "chembl",
-      "published_artifact_path": "docs/04-reference/contracts/gold/chembl_publication_similarity_v1.0.json",
-      "registry_contract_version": "1.0.0",
+      "published_artifact_path": "docs/04-reference/contracts/gold/chembl_publication_similarity_v2.0.json",
+      "registry_contract_version": "2.0.0",
       "registry_source_path": "src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
       "registry_status": "active"
     },
@@ -467,5 +467,5 @@
       "registry_status": "active"
     }
   ],
-  "snapshot_date": "2026-06-30"
+  "snapshot_date": "2026-09-22"
 }

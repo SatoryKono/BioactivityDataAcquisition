@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
-from bioetl.domain.types import JsonDict
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bioetl.domain.types import JsonDict
+
+
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 from bioetl.infrastructure.config_merge import config_merge
 

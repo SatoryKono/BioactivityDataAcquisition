@@ -37,11 +37,9 @@ class BatchMetricsRecorderService:
         self._metrics = metrics
         self._pipeline_label = pipeline_label
         self._run_type_label = run_type_label
-        self._pipeline_metrics = (
-            pipeline_metrics
-            if pipeline_metrics is not None
-            else PipelineMetricsRecorder(metrics, pipeline_label)
-        )
+        if pipeline_metrics is None:
+            pipeline_metrics = PipelineMetricsRecorder(metrics, pipeline_label)
+        self._pipeline_metrics = pipeline_metrics
         self._error_count = 0
         self._batch_error_count = 0
 
@@ -192,7 +190,9 @@ class BatchMetricsRecorderService:
         )
         _record_stage_outcome_accounting(stage, outcome, count)
 
-    def track_quarantined_records(self, error_type: ErrorType, count: int) -> None:
+    def track_quarantined_records(
+        self, error_type: ErrorType, count: int, *, stage: str = "silver"
+    ) -> None:
         """Record quarantined-record counters and flow projections."""
         if self._metrics:
             self._metrics.increment_counter(
@@ -217,6 +217,7 @@ class BatchMetricsRecorderService:
             outcome="quarantined",
             reason_code=getattr(error_type, "value", str(error_type)),
             count=count,
+            stage=stage,
         )
 
     def track_silver_filter_rejection(
@@ -224,10 +225,7 @@ class BatchMetricsRecorderService:
         details: JsonDict | None = None,
         count: int = 1,
     ) -> None:
-        """Record bounded labels; ``message`` remains display-only and ignored.
-
-        Accounting always runs; Prometheus emission requires a configured metrics port.
-        """
+        """Always account removals; emit bounded labels only with a metrics port."""
         reason_code, rule_type, field = _silver_filter_rejection_labels(details)
         if self._metrics is not None:
             self._pipeline_metrics.record_silver_filter_rejections(

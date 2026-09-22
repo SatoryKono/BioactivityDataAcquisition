@@ -156,7 +156,7 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
     assert panels["Review Selected Run Domains"].get("id") == 9002
     assert panels["Inspect Scope & Evidence"].get("gridPos", {}).get("y") == 2
     assert panels["Review Selected Run Status"].get("id") == 9603
-    assert panels["Review Selected Run Status"].get("gridPos", {}).get("y") == 10
+    assert panels["Review Selected Run Status"].get("gridPos", {}).get("y") == 11
     assert panels["Monitor Scope Health"].get("gridPos", {}).get("y") == 2
     assert panels["Review First Action"].get("gridPos", {}).get("y") == 5
     assert panels["Review Selected Run Domains"].get("gridPos", {}).get("y") == panels[
@@ -303,7 +303,14 @@ def test_review_domain_status_uses_exact_persisted_evidence() -> None:
     }
     assert action_props.get("custom.cellOptions", {}).get("type") == "auto"
     assert next_action.get("options", {}).get("cellHeight") == "sm"
-    assert int(action_props.get("custom.width") or 0) >= 90, (
+    action_widths = [
+        prop["value"]
+        for item in overrides
+        if item.get("matcher", {}).get("options") in {"action_target", "Action"}
+        for prop in item.get("properties", [])
+        if prop["id"] == "custom.width"
+    ]
+    assert action_widths and min(action_widths) >= 90, (
         "Action column keeps a named width that still fits DASH-REFLOW-001 200%"
     )
     # Short operator labels (panel dataLinks keep full Open* CTA titles).
@@ -312,13 +319,13 @@ def test_review_domain_status_uses_exact_persisted_evidence() -> None:
         if mapping.get("type") == "value":
             action_maps.update(mapping.get("options") or {})
     for key, text in {
-        "runtime": "Pipeline Diagnostics",
+        "runtime": "Diagnostics",
         "control_plane": "Trust",
         "dq": "Data Quality",
         "provider": "Provider Health",
         "monitor": "Monitor",
         "no_route": "No route",
-        "workflow": "Pipeline Diagnostics",
+        "workflow": "Diagnostics",
     }.items():
         assert key in action_maps, f"missing Action map for {key}"
         assert action_maps[key].get("text") == text

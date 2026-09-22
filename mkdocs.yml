@@ -467,6 +467,7 @@ nav:
       - "Data Contracts":
           - "Current State": 04-reference/contracts/data-contracts-current.md
           - "Gold Schemas": 04-reference/contracts/gold-schemas.md
+          - "ChEMBL Public Observations v2": 04-reference/contracts/chembl-public-observations-v2.md
           - "Data Quality Contracts": 04-reference/contracts/dq-contracts.md
           - "Observability Metrics": 04-reference/contracts/observability.md
           - "Observability Rollout Contracts": 04-reference/contracts/observability-rollout-contracts.md

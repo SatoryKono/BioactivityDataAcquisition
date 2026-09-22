@@ -84,6 +84,27 @@ def _panel(
 
 def _detail_fields(panel: dict, fields: list[str]) -> None:
     """Show evidence fields explicitly instead of exposing the entire API envelope."""
+    if "completed_at" in fields:
+        panel["transformations"].insert(
+            0,
+            {
+                "id": "convertFieldType",
+                "options": {
+                    "conversions": [
+                        {"targetField": "completed_at", "destinationType": "time"}
+                    ]
+                },
+            },
+        )
+        panel["fieldConfig"]["overrides"].append(
+            {
+                "matcher": {"id": "byName", "options": "Completed"},
+                "properties": [
+                    {"id": "unit", "value": "time:YYYY-MM-DD HH:mm"},
+                    {"id": "custom.width", "value": 175},
+                ],
+            }
+        )
     for transform in panel["transformations"]:
         if transform["id"] == "filterFieldsByName":
             transform["options"]["include"]["names"] = fields

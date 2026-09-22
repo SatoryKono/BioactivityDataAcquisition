@@ -45,7 +45,22 @@ from tests.helpers.transformer_dependencies import build_test_transformer_depend
 
 
 @pytest.mark.asyncio
-async def test_nested_api_parameter_reaches_canonical_gold_contract(mock_context):
+@pytest.mark.parametrize(
+    "parameter",
+    [
+        {"type": "PH", "value": 7.4, "relation": "="},
+        {"type": "ROUTE", "text_value": "Intravenous", "standard_type": "ROUTE"},
+        {
+            "type": "DOSE",
+            "value": "0.002",
+            "units": "mg/kg",
+            "standard_units": "mg.kg-1",
+        },
+    ],
+)
+async def test_nested_api_parameter_reaches_canonical_gold_contract(
+    mock_context, parameter
+):
     import pandas as pd
     from bioetl.application.core.data_sources.assay_parameters import (
         AssayParametersDataSource,
@@ -57,7 +72,7 @@ async def test_nested_api_parameter_reaches_canonical_gold_contract(mock_context
     raw = AssayParametersDataSource._parameters(
         {
             "assay_chembl_id": "CHEMBL615121",
-            "assay_parameters": [{"type": "PH", "value": 7.4, "relation": "="}],
+            "assay_parameters": [parameter],
         }
     )[0]
     transformer = AssayParametersTransformer(
@@ -67,9 +82,18 @@ async def test_nested_api_parameter_reaches_canonical_gold_contract(mock_context
     )
     result = await transformer.transform(mock_context, raw, index=0)
     assert result is not None
-    assert result["parameter_type"] == "PH"
+    assert result["parameter_type"] == parameter["type"]
+    from bioetl.infrastructure.config.domain_config_resolver import (
+        load_domain_pipeline_config,
+    )
+    from bioetl.application.core.batch_transformer_attempt_success import (
+        _apply_runtime_dq_outcomes,
+    )
+
+    config = load_domain_pipeline_config("chembl_assay_parameters")
+    _apply_runtime_dq_outcomes(silver_record=result, dq_config=config.dq)
     schema = ChEMBLAssayParametersGoldSchema.to_schema()
-    projected = {key: result.get(key) for key in schema.columns}
+    projected = {key: value for key, value in result.items() if key in schema.columns}
     checked = schema.validate(pd.DataFrame([projected]))
     assert checked["assay_param_id"].iloc[0] == raw["assay_param_id"]
 

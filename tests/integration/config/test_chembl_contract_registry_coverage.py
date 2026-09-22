@@ -46,9 +46,9 @@ _EXPECTED_CHEMBL_CONTRACT_SURFACE: dict[str, dict[str, str]] = {
     },
     "chembl.assay_parameters": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py",
-        "artifact": "../../docs/04-reference/contracts/gold/chembl_assay_parameters_v1.0.json",
-        "contract_version": "1.0.0",
-        "normalization_profile_hash": "b394b4be1e352b1bd04fa522f7d352cc15276c62aeec8b74798c2f3752889ccf",
+        "artifact": "../../docs/04-reference/contracts/gold/chembl_assay_parameters_v2.0.json",
+        "contract_version": "2.0.0",
+        "normalization_profile_hash": "cd43d4d61524b0ca8b0cc1b61372278efce0e813dc026beb1ed36ccb9b3457f8",
     },
     "chembl.cell_line": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
@@ -82,9 +82,9 @@ _EXPECTED_CHEMBL_CONTRACT_SURFACE: dict[str, dict[str, str]] = {
     },
     "chembl.publication_similarity": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
-        "artifact": "../../docs/04-reference/contracts/gold/chembl_publication_similarity_v1.0.json",
-        "contract_version": "1.0.0",
-        "normalization_profile_hash": "657878c5a190656b33f472d2b4c102e5fd1ecb6497e4d775843a3be415739dff",
+        "artifact": "../../docs/04-reference/contracts/gold/chembl_publication_similarity_v2.0.json",
+        "contract_version": "2.0.0",
+        "normalization_profile_hash": "b34fa496209cb02f01f196eaaaa75893034897b7a8a94ddb0a9299343d985c61",
     },
     "chembl.publication_term": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",

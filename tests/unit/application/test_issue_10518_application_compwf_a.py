@@ -147,7 +147,7 @@ def test_load_source_fields_fans_out_to_seed_dependency_enricher() -> None:
     result = host._load_source_fields(config)
     assert "chembl_activity" in result or "chembl.activity" in result
     assert "pubmed_article" in result or "pubmed.article" in result
-    assert host._load_pipeline_schema_fields.call_count == 3  # noqa: SLF001
+    assert host._load_pipeline_schema_fields.call_count == 3
 
 
 def test_load_source_profiles_registers_seed_dependency_enricher() -> None:
@@ -181,7 +181,7 @@ def test_load_source_profiles_registers_seed_dependency_enricher() -> None:
     # wrap raw namespaces into ProfileInfo via real loader path instead:
     host._load_pipeline_profile = MagicMock(return_value=None)  # type: ignore[method-assign]
     assert host._load_source_profiles(config) == {}
-    assert host._load_pipeline_profile.call_count == 3  # noqa: SLF001
+    assert host._load_pipeline_profile.call_count == 3
 
 
 def test_load_source_profiles_registers_non_none_profiles() -> None:

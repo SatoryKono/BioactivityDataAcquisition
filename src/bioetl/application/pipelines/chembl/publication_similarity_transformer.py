@@ -22,6 +22,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 )
 from bioetl.domain.deterministic_identity import deterministic_uuid
 from bioetl.domain.entities import ChemblPublicationSimilarity
+from bioetl.domain.schemas.chembl.similarity_pair import is_public_document_id
 from bioetl.domain.transformations import safe_float, safe_int
 
 if TYPE_CHECKING:
@@ -47,19 +48,10 @@ class PublicationSimilarityTransformer(BaseChemblTransformer):
         if record.get("sim_id") is not None:
             return record
         pair = tuple(record.get(f"document_{n}_chembl_id") for n in (1, 2))
-        if (
-            not all(
-                isinstance(value, str)
-                and value.startswith("CHEMBL")
-                and value[6:].isdigit()
-                and int(value[6:]) > 0
-                for value in pair
-            )
-            or pair[0] == pair[1]
-        ):
+        if not all(map(is_public_document_id, pair)) or pair[0] == pair[1]:
             return record  # Required-key validation quarantines malformed records.
         # Similarity is symmetric. Scores are observations, not part of identity.
-        first, second = sorted(pair)
+        first, second = sorted(str(value) for value in pair)
         identity = deterministic_uuid(
             "chembl.publication_similarity.public_pair.v1",
             {"first": first, "second": second},

@@ -38,9 +38,9 @@ Current committed quality artifacts agree on the following architecture evidence
 | --- | ---: | --- |
 | Architecture quality score | `9.47` (`good_targeted_improvements`) | `reports/quality/debt-governance-gates.json`, `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2494` | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2497` | `reports/quality/module-coverage-inventory.json` (refreshed 2026-09-21) |
 | Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json`, `reports/quality/debt-governance-gates.json` |
-| Coverage inventory status counts | `2485` fully covered, `8` partially covered, `1` with no executable lines | `reports/quality/module-coverage-inventory.json` |
+| Coverage inventory status counts | `2486` fully covered, `10` partially covered, `1` with no executable lines | `reports/quality/module-coverage-inventory.json` (refreshed 2026-09-21) |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
 | Families at fan-in budget | `0` | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
 | Module-boundaries coupling | `10.0` (`control-plane` fan-in `1/2`, `runtime_builders` fan-in `2/3`) | `reports/quality/architecture-quality-scorecard.json`, `tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py` |

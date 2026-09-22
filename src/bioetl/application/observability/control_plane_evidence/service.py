@@ -11,7 +11,7 @@ from bioetl.application.observability.control_plane_evidence.checkpoint_validati
 )
 from bioetl.application.observability.control_plane_evidence.checks import (
     EvidenceCheckResult,
-    EvidenceStatus,
+    component_checks,
 )
 from bioetl.application.observability.control_plane_evidence.failure_reasons import (
     FAILURE_REASON_CATEGORIES,
@@ -80,33 +80,10 @@ class ControlPlaneEvidenceService:
             self.lineage_validation(scope=scope, ledger_snapshot=snapshot),
             self.retention_compliance(scope=scope, now=now, ledger_snapshot=snapshot),
         )
-        checks: list[EvidenceCheckResult] = []
-        for component in components:
-            name = str(component["endpoint"])
-            rows = component.get("rows")
-            if not isinstance(rows, list) or not rows:
-                checks.append(
-                    EvidenceCheckResult(name, "UNKNOWN", "evidence_missing", name)
-                )
-                continue
-            for row in rows:
-                if not isinstance(row, dict):
-                    continue
-                status = row.get("status", "UNKNOWN")
-                checks.append(
-                    EvidenceCheckResult(
-                        f"{name}.{row.get('check', 'unknown')}",
-                        cast(EvidenceStatus, status)
-                        if status in {"OK", "WARNING", "ERROR", "UNKNOWN"}
-                        else "UNKNOWN",
-                        str(row.get("reason", "evidence_missing")),
-                        str(row.get("detail", "")),
-                    )
-                )
         return service_payload(
             endpoint="trust-summary",
             scope=scope,
-            checks=tuple(checks),
+            checks=component_checks(components),
             ledger_entries=snapshot,
         )
 

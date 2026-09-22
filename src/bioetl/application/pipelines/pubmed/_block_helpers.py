@@ -20,6 +20,24 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import DataNormalizationPort, PiiHasherPort
 
 
+def structured_affiliation_fields(
+    authors_json: str | None, affiliations_json: str | None
+) -> JsonDict:
+    """Preserve PII-safe extraction before profile canonicalization.
+
+    The raw sidecars retain extraction order; profile rules canonicalize the
+    separate canonical fields without overwriting this evidence.
+    """
+    return {
+        "authors_with_affiliations": authors_json,
+        "authors_with_affiliations_raw_json": authors_json,
+        "authors_with_affiliations_canonical_json": authors_json,
+        "affiliation_structured": affiliations_json,
+        "affiliation_structured_raw_json": affiliations_json,
+        "affiliation_structured_canonical_json": affiliations_json,
+    }
+
+
 def process_structured_affiliations(
     affiliations: Sequence[StructuredAffiliation],
     pii_hasher: PiiHasherPort | None,
@@ -271,4 +289,5 @@ __all__ = [
     "parse_month",
     "parse_month_day",
     "process_structured_affiliations",
+    "structured_affiliation_fields",
 ]

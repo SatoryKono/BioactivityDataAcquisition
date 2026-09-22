@@ -6,7 +6,7 @@ Covers batch slice indices 32..62 of ``/tmp/batch_tail1.json`` (31 modules,
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
@@ -699,7 +699,7 @@ class TestCheckpointWarnings:
     def test_domain_error_warns(self, monkeypatch: pytest.MonkeyPatch) -> None:
         class _BadState:
             @classmethod
-            def from_dict(cls, payload: object) -> object:
+            def from_dict(cls, _payload: object) -> object:
                 raise BioETLError("bad state")
 
         monkeypatch.setattr(warn_mod, "CompositeCheckpointState", _BadState)

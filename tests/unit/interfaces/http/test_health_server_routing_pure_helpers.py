@@ -33,6 +33,7 @@ from __future__ import annotations
 import asyncio
 from datetime import UTC, datetime
 from pathlib import Path
+from threading import get_ident
 
 import pytest
 
@@ -340,6 +341,22 @@ async def test_routing_mixin_parses_queries_and_routes_without_sockets(
 
 
 @pytest.mark.asyncio
+async def test_metrics_collection_runs_outside_http_event_loop(monkeypatch) -> None:
+    host = _RoutingHost()
+    loop_thread = get_ident()
+    worker_threads = []
+
+    def collect():
+        worker_threads.append(get_ident())
+        return "metric 1\n"
+
+    monkeypatch.setattr(host._metrics_exposition, "build_exposition", collect)
+    await host._route_request(_Writer(), "/metrics")
+    assert worker_threads and worker_threads[0] != loop_thread
+    assert host.sent[-1][1] == 200
+
+
+@pytest.mark.asyncio
 async def test_routing_mixin_health_handlers_cover_monitor_states() -> None:
     host = _RoutingHost()
 
@@ -545,6 +562,35 @@ async def test_missing_evidence_service_keeps_unknown_table_contract() -> None:
     assert payload["rows"][0]["reason"] == (
         "control_plane_evidence_service_unavailable"
     )
+
+
+@pytest.mark.asyncio
+async def test_filter_options_deadline_does_not_send_late_success(monkeypatch) -> None:
+    from functools import partial
+
+    host = _RoutingHost()
+    release = asyncio.Event()
+    completed = asyncio.Event()
+
+    async def slow_options(_host, _query):
+        await release.wait()
+        completed.set()
+        return {"items": []}
+
+    monkeypatch.setattr(routing_support, "_filter_options_payload", slow_options)
+    monkeypatch.setattr(
+        routing_support,
+        "run_bounded_forensic_operation",
+        partial(routing_support.run_bounded_forensic_operation, timeout_seconds=0.01),
+    )
+    await routing_support.handle_control_plane_filter_options(host, _Writer(), {})
+    assert host.sent[-1][1] == 504
+    assert host.sent[-1][2]["reason"] == "deadline_exceeded"
+    count = len(host.sent)
+    release.set()
+    await completed.wait()
+    await asyncio.sleep(0)
+    assert len(host.sent) == count
 
 
 @pytest.mark.asyncio

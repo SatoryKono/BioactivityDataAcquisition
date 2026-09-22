@@ -170,12 +170,20 @@ def test_provider_cause_contract_declares_unknown_beside_valid_empty() -> None:
             f"panel {panel_id} must declare both proven-empty and UNKNOWN states"
         )
         assert record["empty_state_class"] == "telemetry_missing"
-    for panel_id in (9102, 9107):
+    for panel_id in (9107,):
         record = panels[str(panel_id)]
         assert "UNKNOWN" in record["state_model"]
         assert "VALID_EMPTY" not in record["state_model"], (
             f"panel {panel_id} cannot prove VALID EMPTY from its own query"
         )
+    fleet = _provider_health_panels_by_id()[9102]
+    expr = fleet["targets"][0]["expr"]
+    assert "VALID_EMPTY" in panels["9102"]["state_model"]
+    assert "count(max by (provider) (bioetl_provider_current_status)) > 0" in expr
+    assert "absent(max by (provider) (bioetl_provider_current_status) != 0)" in expr
+    assert (
+        "unless on(provider) max by (provider) (bioetl_provider_health_status)" in expr
+    )
 
 
 def _runtime_panels_by_id() -> dict[int, dict]:

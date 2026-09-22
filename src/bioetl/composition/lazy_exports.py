@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Mapping
 from importlib import import_module
-from typing import TYPE_CHECKING, cast
+from typing import cast
 
 type LazyExportTarget = str | tuple[str, str]
 
@@ -80,8 +80,6 @@ def build_lazy_export_hooks(
     """Build module-level ``__getattr__`` and ``__dir__`` hooks for lazy exports."""
 
     def _module_getattr(name: str) -> object:
-        if TYPE_CHECKING:
-            raise AttributeError
         return resolve_lazy_export(
             module_globals=module_globals,
             public_exports=public_exports,
@@ -91,8 +89,6 @@ def build_lazy_export_hooks(
         )
 
     def _module_dir() -> list[str]:
-        if TYPE_CHECKING:
-            raise AttributeError
         return lazy_export_dir(
             module_globals=module_globals,
             public_exports=public_exports,

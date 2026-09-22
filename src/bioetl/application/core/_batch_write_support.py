@@ -230,11 +230,7 @@ async def _quarantine_schema_violation(
         occurred_at=ingestion_ts,
         logger=logger,
     )
-    logger.warning(
-        "schema_violation_quarantined",
-        layer=layer,
-        errors=error.errors,
-    )
+    logger.warning("schema_violation_quarantined", layer=layer, errors=error.errors)
     await quarantine_manager.quarantine_records(
         [
             DQQuarantineEntry(
@@ -246,4 +242,5 @@ async def _quarantine_schema_violation(
         ],
         batch_id,
         ingestion_ts=ingestion_ts,
+        stage=layer,
     )

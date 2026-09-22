@@ -22,7 +22,7 @@ RAW_BYTES_HASH_VERSION = "raw-bytes-sha256-v1"
 _YAML_SUFFIXES = frozenset({".yaml", ".yml"})
 
 
-class _UniqueKeySafeLoader(yaml.SafeLoader):  # type: ignore[misc]
+class _UniqueKeySafeLoader(yaml.SafeLoader):
     """PyYAML safe loader that rejects duplicate mapping keys."""
 
 

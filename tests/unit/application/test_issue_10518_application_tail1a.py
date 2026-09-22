@@ -6,7 +6,6 @@ application-layer modules and their missing-line branches.
 
 from __future__ import annotations
 
-import inspect
 from contextlib import nullcontext
 from dataclasses import dataclass
 from pathlib import Path
@@ -1254,7 +1253,6 @@ def test_build_enricher_detail_empty_fields() -> None:
 
 
 def test_combine_cv_details_empty() -> None:
-    import polars as pl
 
     from bioetl.application.composite.cross_validator_helpers import (
         _combine_cv_details,

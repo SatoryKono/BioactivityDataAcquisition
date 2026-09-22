@@ -802,7 +802,7 @@ def _ledger_entry(event_type):
         manifest_id="legacy-manifest",
         run_id=RunID(UUID(int=1)),
         event_type=event_type,
-        occurred_at=datetime.datetime(2024, 1, 1, tzinfo=datetime.timezone.utc),
+        occurred_at=datetime.datetime(2024, 1, 1, tzinfo=datetime.UTC),
     )
 
 

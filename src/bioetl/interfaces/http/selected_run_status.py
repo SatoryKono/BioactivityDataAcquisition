@@ -86,6 +86,7 @@ def unavailable_status(
         "trust_status": state,
         "reasons_text": reason,
         "reasons_display": display_reason(reason),
+        "reasons_count": None,
         "evidence_observed_at": None,
     }
     return {
@@ -118,6 +119,7 @@ def _saved_trust(
         "trust_status": control["verdict"],
         "reasons_text": reasons_text,
         "reasons_display": display_reasons_text(reasons_text),
+        "reasons_count": sum(bool(line.strip()) for line in reasons_text.splitlines()),
         "evidence_observed_at": summary["evaluation_at"],
         "pipeline": summary["pipeline"],
         "run_id": summary["run_id"],

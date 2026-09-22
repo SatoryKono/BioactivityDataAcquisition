@@ -3,6 +3,11 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import DataNormalizationPort
+
 
 from bioetl.application.core.base_transformer_helpers_mixin import ScalarValue
 from bioetl.application.pipelines.crossref._business_data_builder import (
@@ -21,7 +26,6 @@ from bioetl.application.pipelines.crossref.extractors import (
     extract_references,
 )
 from bioetl.domain.normalization import extract_first_string
-from bioetl.domain.ports import DataNormalizationPort
 from bioetl.domain.types import BronzeRecord, JsonDict
 
 

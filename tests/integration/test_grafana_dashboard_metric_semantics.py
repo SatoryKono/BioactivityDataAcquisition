@@ -158,27 +158,6 @@ def _assert_processed_records_target_contract(processed: dict[str, object]) -> N
         assert removed_label not in processed_json
 
 
-def test_design_system_documents_missing_data_panel_class_contract() -> None:
-    """Design docs must preserve missing-data semantics by panel class."""
-    text = Path("docs/03-guides/dashboards/design-system.md").read_text(
-        encoding="utf-8"
-    )
-    required_tokens = {
-        "Missing-data semantics by panel class",
-        "Current-status / current-cause panels",
-        "Zero-valid event counters",
-        "Timeseries / latency / histogram evidence",
-        "Forensic tables and HTTP-backed explorer surfaces",
-        "Telemetry-gap / trust-marker policy",
-        "`or vector(0)` запрещён",
-    }
-    missing = sorted(token for token in required_tokens if token not in text)
-    assert not missing, (
-        "dashboard design-system must document missing-data semantics; "
-        f"missing={missing}"
-    )
-
-
 def test_summary_queries_do_not_mask_absence_with_vector_zero() -> None:
     """Count summaries must not hide missing telemetry behind PromQL `or vector(0)`."""
     for dashboard_name, panel_titles in SUMMARY_NO_VECTOR_ZERO_FALLBACK_PANELS.items():

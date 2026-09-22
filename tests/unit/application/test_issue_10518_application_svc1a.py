@@ -13,13 +13,13 @@ import os
 import shutil
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import MagicMock
 
 import pytest
 
 pytestmark = pytest.mark.unit
 
-from bioetl.application.services.control_plane.effective_config.runtime_overrides import (  # noqa: E402
+from bioetl.application.services.control_plane.effective_config.runtime_overrides import (
     apply_deep_update,
     apply_runtime_overrides,
     build_effective_execution_config,
@@ -29,17 +29,17 @@ from bioetl.application.services.control_plane.effective_config.runtime_override
     normalize_runtime_overrides_for_semantic_identity,
     validate_runtime_environment_provenance,
 )
-from bioetl.application.services.control_plane.forensic import (  # noqa: E402
+from bioetl.application.services.control_plane.forensic import (
     ForensicRunDiffResult,
     ForensicRunDiffService,
 )
-from bioetl.application.services.control_plane.manifest.inspection_models import (  # noqa: E402
+from bioetl.application.services.control_plane.manifest.inspection_models import (
     RunManifestDiffResult,
 )
-from bioetl.application.services.control_plane.manifest.inspection_result_model import (  # noqa: E402
+from bioetl.application.services.control_plane.manifest.inspection_result_model import (
     RunManifestInspectionResult,
 )
-from bioetl.application.services.ops.observability_backend_startup import (  # noqa: E402
+from bioetl.application.services.ops.observability_backend_startup import (
     _reuse_observability_backend_if_ready,
     _start_observability_backend_detached,
     ensure_observability_backend_started_impl,
@@ -47,17 +47,17 @@ from bioetl.application.services.ops.observability_backend_startup import (  # n
 from bioetl.application.services.run_reports import (
     _report_diff_support as _diff_support,
 )
-from bioetl.application.services.run_reports import query as _query  # noqa: E402
-from bioetl.application.services.run_reports import source_identity as _sid  # noqa: E402
-from bioetl.application.services.run_reports.snapshots import (  # noqa: E402
+from bioetl.application.services.run_reports import query as _query
+from bioetl.application.services.run_reports import source_identity as _sid
+from bioetl.application.services.run_reports.snapshots import (
     publish_snapshot,
 )
-from bioetl.application.services.run_reports.workflow_observations import (  # noqa: E402
+from bioetl.application.services.run_reports.workflow_observations import (
     _child_path,
     _verified_child,
     finalize_workflow_children,
 )
-from bioetl.application.services.workflow.workflow_runner_reports import (  # noqa: E402
+from bioetl.application.services.workflow.workflow_runner_reports import (
     _execution_rows_from_result,
     _load_child_report_slice,
     _pipeline_name_for_step,
@@ -65,8 +65,8 @@ from bioetl.application.services.workflow.workflow_runner_reports import (  # no
     _require_workflow_result,
     attach_workflow_run_report,
 )
-from bioetl.domain.control_plane import RunManifest  # noqa: E402
-from bioetl.domain.run_reports.models import (  # noqa: E402
+from bioetl.domain.control_plane import RunManifest
+from bioetl.domain.run_reports.models import (
     WorkflowExecutionRow,
     WorkflowRunReport,
 )
@@ -1665,9 +1665,6 @@ class TestRuntimeOverrideSnapshots:
         )
         from bioetl.domain.control_plane.effective_config_environment import (
             MATERIALIZED_EXECUTION_ENVIRONMENT_POLICY,
-        )
-        from bioetl.domain.control_plane.effective_config_environment import (
-            semantic_runtime_env_dependencies as _deps,
         )
 
         snapshot = build_execution_environment_snapshot(

@@ -6,11 +6,15 @@ Used by pipeline/source config loading and hierarchical DQ/filter loaders.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bioetl.domain.types import JsonDict
+
+
 import copy
 from collections.abc import Callable, Mapping
 from typing import Any
-
-from bioetl.domain.types import JsonDict
 
 ListMergeFn = Callable[
     [list[Any], list[Any], str],  # Any: heterogeneous YAML values

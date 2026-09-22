@@ -19,14 +19,14 @@ pytestmark = pytest.mark.unit
 
 from bioetl.application.services.control_plane.forensic import (
     diagnostics_support as _ds,
-)  # noqa: E402
-from bioetl.application.services.control_plane.manifest.diagnostics import (  # noqa: E402
+)
+from bioetl.application.services.control_plane.manifest.diagnostics import (
     replay_state as _rs,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context import (  # noqa: E402
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context import (
     ReplayFamilyContext,
 )
-from bioetl.application.services.control_plane.manifest.inspection_artifact_refs import (  # noqa: E402
+from bioetl.application.services.control_plane.manifest.inspection_artifact_refs import (
     _analyze_artifact_ref_pair,
     _artifact_ref_identity_label,
     _artifact_ref_occurrence_difference_fields,
@@ -35,39 +35,39 @@ from bioetl.application.services.control_plane.manifest.inspection_artifact_refs
     _semantic_artifact_ref,
     build_artifact_ref_semantic_diff,
 )
-from bioetl.application.services.control_plane.manifest.inspection_models import (  # noqa: E402
+from bioetl.application.services.control_plane.manifest.inspection_models import (
     RunManifestDiffResult,
 )
-from bioetl.application.services.control_plane.manifest.inspection_result_model import (  # noqa: E402
+from bioetl.application.services.control_plane.manifest.inspection_result_model import (
     RunManifestInspectionResult,
 )
-from bioetl.application.services.ops._metrics_service_gateway_support import (  # noqa: E402
+from bioetl.application.services.ops._metrics_service_gateway_support import (
     _MetricsGatewayMixin,
 )
-from bioetl.application.services.ops.health_service import (  # noqa: E402
+from bioetl.application.services.ops.health_service import (
     HealthCheckSummary,
     HealthResult,
     HealthService,
     _NullAsyncContext,
 )
-from bioetl.application.services.quality.quarantine_service import (  # noqa: E402
+from bioetl.application.services.quality.quarantine_service import (
     QuarantineService,
 )
-from bioetl.application.services.run_reports import markdown as _md  # noqa: E402
-from bioetl.domain.control_plane import (  # noqa: E402
+from bioetl.application.services.run_reports import markdown as _md
+from bioetl.domain.control_plane import (
     ReplayCapability,
     RunManifest,
 )
-from bioetl.domain.control_plane.reproducibility_policy import (  # noqa: E402
+from bioetl.domain.control_plane.reproducibility_policy import (
     ReproducibilityPolicyAssessment,
     SnapshotEnvelopeStatus,
 )
-from bioetl.domain.control_plane.snapshot_materialization import (  # noqa: E402
+from bioetl.domain.control_plane.snapshot_materialization import (
     HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED,
     HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
     LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,
 )
-from bioetl.domain.run_reports.models import (  # noqa: E402
+from bioetl.domain.run_reports.models import (
     BalanceStatus,
     LayerCounts,
     PipelineRunReport,

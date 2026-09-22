@@ -234,3 +234,24 @@ async def test_transform_bronze_to_silver_invalid_xml(pipeline, pipeline_context
     assert args[0] == "entity_validation_failed"
     assert "error" in kwargs
     # The XML_parse_error is also logged earlier (can check call_args_list if needed)
+
+
+def test_init_accepts_injected_extractors() -> None:
+    """Transformer should allow extractor overrides via DI."""
+    from bioetl.application.pipelines.pubmed.extractors import (
+        AuthorExtractor,
+        DateExtractor,
+    )
+
+    author_extractor = MagicMock(spec=AuthorExtractor)
+    date_extractor = MagicMock(spec=DateExtractor)
+
+    transformer = instantiate_test_transformer(
+        PubMedPublicationTransformer,
+        provider="pubmed",
+        author_extractor=author_extractor,
+        date_extractor=date_extractor,
+    )
+
+    assert transformer._author_extractor is author_extractor
+    assert transformer._date_extractor is date_extractor

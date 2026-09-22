@@ -163,7 +163,9 @@ def test_run_type_child_report_failure_shapes(
         == ""
     )
     for child in (None, {}, {"identity": []}):
-        monkeypatch.setattr(subject, "load_pipeline_report", lambda **_kwargs: child)
+        monkeypatch.setattr(
+            subject, "load_pipeline_report", lambda child=child, **_kwargs: child
+        )
         assert (
             subject.run_type_from_execution_row(
                 {"pipeline_run_id": "child"}, pipeline="p", root=None, store=store

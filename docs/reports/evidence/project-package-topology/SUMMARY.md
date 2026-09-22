@@ -223,3 +223,11 @@ Collected: `6`
 - source_tree_sha256: `c5a7e8f28785b3bbc04f32b5d6c49fc20d4848e7b90db779c7a5ff3feed7e1a8`
 
 `source_module_count=2468`
+
+
+Refresh note (2026-09-22): Grafana correction branch source inventory contains
+`source_module_count=2497`. Annotation-only imports were removed from runtime
+dependency edges; the generated map has 330 cross-layer group edges and zero
+layer violations. This is a source inventory refresh, not new coverage proof.
+
+`source_tree_sha256=0b8525d1668c34dbc68510828f851c1bb44052578c8b38689d98dd4d65300a51`

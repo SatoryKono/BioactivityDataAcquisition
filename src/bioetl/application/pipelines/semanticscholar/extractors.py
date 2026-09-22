@@ -33,6 +33,20 @@ from bioetl.domain.normalization.open_access import (
 from bioetl.domain.types import JsonDict
 
 
+def extract_raw_citation_contexts(citations: object) -> list[object]:
+    """Retain provider context values before normalization and truncation."""
+    if not isinstance(citations, list):
+        return []
+    return [
+        context
+        for citation in citations
+        if isinstance(citation, dict)
+        for context in (
+            citation["contexts"] if isinstance(citation.get("contexts"), list) else []
+        )
+    ]
+
+
 def extract_external_ids(
     external_ids: JsonDict | None,  # Any: raw S2 API JSON
 ) -> JsonDict:  # Any: raw S2 API JSON

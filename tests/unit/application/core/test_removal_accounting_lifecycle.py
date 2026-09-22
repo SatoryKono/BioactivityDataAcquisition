@@ -25,6 +25,62 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("with_batch_metrics", [True, False])
+async def test_gold_schema_quarantine_preserves_silver_and_zero_gold(
+    with_batch_metrics: bool,
+) -> None:
+    from bioetl.application.core._batch_processing_layer_write_support import (
+        write_silver_then_gold,
+    )
+    from bioetl.domain.exceptions import SchemaViolationError
+
+    accounting = StageAccountingAccumulator()
+    token = bind_stage_accounting(accounting)
+    metrics = BatchMetricsRecorderService(None, "pubmed_publication", "incremental")
+    port = MagicMock(write_many=AsyncMock())
+    quarantine = QuarantineRuntimeService(
+        port,
+        "pubmed_publication",
+        batch_metrics=metrics if with_batch_metrics else None,
+    )
+    writer = MagicMock(
+        write_silver=AsyncMock(return_value=True),
+        write_gold=AsyncMock(side_effect=SchemaViolationError("gold", ["invalid"])),
+    )
+
+    async def execute_span(name, operation, *args, **kwargs):
+        return await operation
+
+    try:
+        metrics.track_processed_records("bronze", 2)
+        await write_silver_then_gold(
+            execute_with_span=execute_span,
+            writer=writer,
+            quarantine_manager=quarantine,
+            logger=MagicMock(),
+            batch_metrics=metrics,
+            run_id=None,
+            domain_event_emitter=None,
+            transform_result=MagicMock(silver_records=[{}, {}], gold_records=[{}, {}]),
+            batch_id=BatchID(UUID("11111111-1111-4111-8111-111111111111")),
+            ingestion_ts=datetime(2026, 9, 21, tzinfo=UTC),
+            bronze_refs=None,
+        )
+        # Simulate the executor's prepared-record fallback; durable accounting
+        # must override it even when the successful write count is zero.
+        counters = {"records_gold": 2, **accounting.measured_record_metrics()}
+        layers = accounting.snapshot_layers_from_metrics(counters)
+        assert layers.bronze_records == layers.silver_valid == 2
+        assert layers.silver_quarantined == 0
+        assert layers.gold_written == 0
+        assert layers.gold_quarantined == 2
+        port.write_many.assert_awaited_once()
+        writer.track_batch_written.assert_called_once_with(stage="silver", count=2)
+    finally:
+        reset_stage_accounting(token)
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize("filtered", [True, False])
 async def test_rejection_and_durable_quarantine_count_once(filtered: bool) -> None:
     accounting = StageAccountingAccumulator()
@@ -131,5 +187,63 @@ def test_failed_batch_retains_durable_bronze_before_transform() -> None:
         assert runner.execution_metrics["records_bronze"] == 1000
         assert runner.execution_metrics["records_silver"] == 0
         assert runner.execution_metrics["records_gold"] == 0
+    finally:
+        reset_stage_accounting(token)
+
+
+@pytest.mark.asyncio
+async def test_hard_threshold_persists_quarantine_before_abort() -> None:
+    from types import SimpleNamespace
+    from bioetl.application.core.batch_transformer_finalization import (
+        finalize_batch_transform_result,
+    )
+    from bioetl.application.core.batch_transformer_state import (
+        TransformAggregationState,
+    )
+    from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
+
+    accounting = StageAccountingAccumulator()
+    token = bind_stage_accounting(accounting)
+    metrics = BatchMetricsRecorderService(
+        None, "chembl_assay_parameters", "incremental"
+    )
+    port = MagicMock(write_many=AsyncMock())
+    quarantine = QuarantineRuntimeService(
+        port, "chembl_assay_parameters", batch_metrics=metrics
+    )
+    record = {"id": 1}
+    try:
+        outcome = handle_data_quality_transform_error(
+            ValueError("invalid"),
+            error_type=ErrorType.SCHEMA_VIOLATION,
+            batch_metrics=metrics,
+            dq_config=None,
+            raw_record=record,
+            debug_export_service=None,
+            index=0,
+        )
+
+        async def flush():
+            await quarantine.quarantine_records(
+                [outcome.dq_entry],
+                BatchID(UUID("11111111-1111-4111-8111-111111111111")),
+                ingestion_ts=datetime(2026, 9, 21, tzinfo=UTC),
+            )
+            return 0
+
+        with pytest.raises(DataQualityThresholdError):
+            await finalize_batch_transform_result(
+                context=SimpleNamespace(logger=MagicMock()),
+                config=SimpleNamespace(
+                    dq_config=SimpleNamespace(soft_threshold=0.1, hard_threshold=0.5)
+                ),
+                batch_metrics=metrics,
+                state=TransformAggregationState(silver_records=[], gold_records=[]),
+                records=[record],
+                flush_filtered_records=AsyncMock(return_value=0),
+                flush_dq_records=flush,
+            )
+        port.write_many.assert_awaited_once()
+        assert accounting.measured_record_metrics()["records_quarantined"] == 1
     finally:
         reset_stage_accounting(token)

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from types import MappingProxyType
 from typing import cast
@@ -159,7 +160,7 @@ def _as_tuple(value: object) -> tuple[object, ...]:
         return value
     if isinstance(value, list):
         return tuple(value)
-    return cast("tuple[object, ...]", tuple(value))
+    return tuple(cast(Iterable[object], value))
 
 
 def _freeze_type_change(item: object) -> object:

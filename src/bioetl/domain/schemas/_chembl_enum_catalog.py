@@ -74,6 +74,7 @@ ASSAY_PARAMETER_STANDARD_TYPES: frozenset[str] = frozenset(
         "CELL_COUNT",
         "CELL_DENSITY",
         "SERUM",
+        "ROUTE",
     ]
 )
 

@@ -2,19 +2,25 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import asyncio
 from collections.abc import AsyncIterator
 from types import TracebackType
 from typing import cast
 
 import pyarrow as pa
+
+if TYPE_CHECKING:
+    from bioetl.domain.mapping.protein_class_target_type import (
+        ProteinClassTargetTypeMappingData,
+    )
+
+
 from bioetl.domain.exceptions.internal_state import InvalidStateError
 from bioetl.application.services.protein.classification_resolution import (
     InvalidRecordPolicy,
     ProteinClassificationResolutionService,
-)
-from bioetl.domain.mapping.protein_class_target_type import (
-    ProteinClassTargetTypeMappingData,
 )
 from bioetl.domain.ports import DeltaReaderPort, LoggerPort
 from bioetl.domain.types import HealthStatus, JsonDict

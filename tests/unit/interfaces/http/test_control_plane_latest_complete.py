@@ -36,7 +36,9 @@ def manifest(
     )
 
 
-def discover(manifests: tuple[RunManifest, ...], service: Mock) -> dict[str, object]:
+def discover(
+    manifests: tuple[RunManifest, ...], service: Mock, *, scan_seconds: float = 9.0
+) -> dict[str, object]:
     return subject.build_latest_complete_run_payload(
         manifests=manifests,
         workflow_manifests=(),
@@ -46,6 +48,7 @@ def discover(manifests: tuple[RunManifest, ...], service: Mock) -> dict[str, obj
         workflows=("baseline",),
         selected_run_id="historical-run",
         now=NOW,
+        scan_seconds=scan_seconds,
     )
 
 
@@ -104,6 +107,15 @@ def test_time_budget_stops_before_another_file_scan(
     service = Mock(spec=ControlPlaneEvidenceService)
     payload = discover((manifest(1),), service)
     assert payload["rows"][0]["reason"] == "complete_run_scan_limit"
+    service.trust_summary.assert_not_called()
+
+
+def test_catalog_exhausted_budget_does_not_start_evidence_reads() -> None:
+    service = Mock(spec=ControlPlaneEvidenceService)
+    payload = discover((manifest(1),), service, scan_seconds=0.0)
+    assert payload["rows"][0]["status"] == "INCOMPLETE"
+    assert payload["rows"][0]["reason"] == "complete_run_scan_limit"
+    assert payload["scanned"] == 0
     service.trust_summary.assert_not_called()
 
 

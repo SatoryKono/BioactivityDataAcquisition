@@ -544,7 +544,7 @@
             "align": "left",
             "cellOptions": {
               "type": "auto",
-              "wrapText": true
+              "wrapText": false
             },
             "inspect": true,
             "minWidth": 50
@@ -745,10 +745,6 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 90
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-text"
@@ -774,15 +770,19 @@
                       },
                       "unknown": {
                         "text": "unknown",
-                        "color": "#555555"
+                        "color": "#A3A3A3"
                       },
                       "UNKNOWN": {
                         "text": "UNKNOWN",
-                        "color": "#555555"
+                        "color": "#A3A3A3"
                       }
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 80
               }
             ]
           },
@@ -792,10 +792,6 @@
               "options": "Trust"
             },
             "properties": [
-              {
-                "id": "custom.width",
-                "value": 110
-              },
               {
                 "id": "custom.cellOptions",
                 "value": {
@@ -834,23 +830,27 @@
                       },
                       "INCOMPLETE": {
                         "text": "INCOMPLETE",
-                        "color": "#555555"
+                        "color": "#A3A3A3"
                       },
                       "UNKNOWN": {
                         "text": "UNKNOWN",
-                        "color": "#555555"
+                        "color": "#A3A3A3"
                       },
                       "N/A": {
                         "text": "N/A",
-                        "color": "#555555"
+                        "color": "#A3A3A3"
                       },
                       "SELECT RUN": {
                         "text": "SELECT RUN",
-                        "color": "#555555"
+                        "color": "#A3A3A3"
                       }
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 115
               }
             ]
           },
@@ -868,22 +868,37 @@
             },
             "properties": [
               {
+                "id": "custom.inspect",
+                "value": true
+              },
+              {
+                "id": "custom.width",
+                "value": 65
+              },
+              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto"
                 }
               },
               {
-                "id": "custom.inspect",
-                "value": true
-              },
-              {
-                "id": "links",
-                "value": []
+                "id": "custom.hidden",
+                "value": false
               },
               {
                 "id": "noValue",
-                "value": "—"
+                "value": "Inspect"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Inspect manifest checks",
+                    "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9414&${__url_time_range}",
+                    "includeVars": false,
+                    "targetBlank": false
+                  }
+                ]
               }
             ]
           }
@@ -948,14 +963,17 @@
               "trust_status": 1,
               "reasons_display": 2,
               "evidence_observed_at": 3,
-              "reasons_count": 4,
+              "reasons_count": 2,
               "evidence_freshness": 5
             },
             "renameByName": {
               "processing_status": "Result",
               "trust_status": "Trust",
-              "reasons_display": "Reasons",
-              "evidence_observed_at": "Observed"
+              "evidence_observed_at": "Observed",
+              "reasons_count": "Reasons"
+            },
+            "excludeByName": {
+              "reasons_display": true
             }
           }
         },
@@ -1069,10 +1087,6 @@
                 }
               },
               {
-                "id": "custom.width",
-                "value": 110
-              },
-              {
                 "id": "mappings",
                 "value": [
                   {
@@ -1091,7 +1105,7 @@
                         "color": "orange"
                       },
                       "ERROR": {
-                        "text": "QUERY ERROR",
+                        "text": "ERROR",
                         "color": "red"
                       },
                       "INCOMPLETE": {
@@ -1105,6 +1119,10 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 110
               }
             ]
           },
@@ -1363,6 +1381,60 @@
                   {
                     "type": "value",
                     "options": {
+                      "retention_policy_satisfied": {
+                        "text": "Retained by policy"
+                      },
+                      "reproducibility_evidence_within_retention": {
+                        "text": "Within retention"
+                      },
+                      "required_evidence_surfaces_present": {
+                        "text": "Evidence present"
+                      },
+                      "snapshot_lifecycle_evidence_incomplete": {
+                        "text": "Snapshot incomplete"
+                      },
+                      "archive_evidence_not_recorded": {
+                        "text": "Archive missing"
+                      },
+                      "archive_not_applicable": {
+                        "text": "N/A: policy"
+                      },
+                      "archive_restore_verified": {
+                        "text": "Archive verified"
+                      },
+                      "reproducibility_evidence_floor_satisfied": {
+                        "text": "Evidence floor met"
+                      },
+                      "snapshot_evidence_not_required": {
+                        "text": "Snapshots not required"
+                      },
+                      "lineage_closure_gap": {
+                        "text": "Lineage closure gap"
+                      },
+                      "archive_identity_mismatch": {
+                        "text": "Identity mismatch"
+                      },
+                      "archive_checksum_mismatch": {
+                        "text": "Checksum mismatch"
+                      },
+                      "archive_inventory_mismatch": {
+                        "text": "Files mismatch"
+                      },
+                      "archive_source_mismatch": {
+                        "text": "Source changed"
+                      },
+                      "archive_evidence_invalid": {
+                        "text": "Archive invalid"
+                      },
+                      "archive_index_invalid": {
+                        "text": "Index invalid"
+                      },
+                      "snapshot_lifecycle_evidence_present": {
+                        "text": "Snapshots present"
+                      },
+                      "selected_run_id_not_found": {
+                        "text": "Run not found"
+                      },
                       "deadline_exceeded": {
                         "text": "QUERY ERROR — deadline exceeded",
                         "color": "red"
@@ -1388,17 +1460,13 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 110
-              },
-              {
                 "id": "mappings",
                 "value": [
                   {
                     "type": "value",
                     "options": {
                       "ERROR": {
-                        "text": "QUERY ERROR",
+                        "text": "ERROR",
                         "color": "red"
                       }
                     }
@@ -2044,7 +2112,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -2171,7 +2239,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -3067,7 +3135,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows checkpoint compatibility decisions by outcome during the selected range. The no_events series means no decisions were recorded; confirm telemetry before treating it as healthy. Run Type does not affect this panel. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Checkpoint compatibility decisions by outcome. An absent series is TELEMETRY MISSING and remains UNKNOWN. Run Type does not affect this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3384,7 +3452,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -3466,7 +3534,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -4133,7 +4201,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -4215,7 +4283,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -5589,7 +5657,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -5779,7 +5847,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -6304,7 +6372,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -6326,7 +6394,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -6938,7 +7006,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -6960,7 +7028,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -7391,7 +7459,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -7549,7 +7617,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -8004,7 +8072,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -8139,7 +8207,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -8571,7 +8639,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -8729,7 +8797,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -8895,10 +8963,6 @@
                   {
                     "id": "displayName",
                     "value": "Parameter"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 210
                   },
                   {
                     "id": "custom.align",
@@ -9075,7 +9139,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -9097,7 +9161,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -9629,7 +9693,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -9686,10 +9750,6 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
@@ -9704,10 +9764,6 @@
                   "options": "Action"
                 },
                 "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 240
-                  },
                   {
                     "id": "custom.cellOptions",
                     "value": {
@@ -9813,7 +9869,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -9983,50 +10039,6 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Status"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "ERROR": {
-                            "text": "QUERY ERROR",
-                            "color": "red"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "status"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "ERROR": {
-                            "text": "QUERY ERROR",
-                            "color": "red"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
                   "options": "reason"
                 },
                 "properties": [
@@ -10036,6 +10048,15 @@
                       {
                         "type": "value",
                         "options": {
+                          "complete_run_scan_limit": {
+                            "text": "Search limit reached"
+                          },
+                          "no_complete_run_in_scope": {
+                            "text": "No complete run in scope"
+                          },
+                          "aggregate_complete_run_found": {
+                            "text": "Aggregate evidence complete"
+                          },
                           "deadline_exceeded": {
                             "text": "QUERY ERROR — deadline exceeded",
                             "color": "red"
@@ -10255,7 +10276,24 @@
                 "minWidth": 50
               }
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Completed"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 175
+                  }
+                ]
+              }
+            ]
           },
           "targets": [
             {
@@ -10273,6 +10311,17 @@
             }
           ],
           "transformations": [
+            {
+              "id": "convertFieldType",
+              "options": {
+                "conversions": [
+                  {
+                    "targetField": "completed_at",
+                    "destinationType": "time"
+                  }
+                ]
+              }
+            },
             {
               "id": "limit",
               "options": {

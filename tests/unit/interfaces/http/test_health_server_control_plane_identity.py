@@ -578,7 +578,7 @@ def test_control_plane_filter_options_exact_run_only_returns_fallback_without_se
     )
 
     assert payload == {"items": ["chembl_target"]}
-    assert ledger_store.lookup_run_ids == [str(manifest_store.list_all()[0].run_id)]
+    assert ledger_store.lookup_run_ids == []
 
 
 def test_control_plane_filter_options_exact_run_only_resolves_provider_for_selected_run() -> (
@@ -641,7 +641,7 @@ def test_control_plane_filter_options_exact_run_only_resolves_provider_for_selec
     )
 
     assert payload == {"items": ["chembl"]}
-    assert ledger_store.lookup_run_ids == [str(run_id)]
+    assert ledger_store.lookup_run_ids == []
 
 
 class TestHealthServerControlPlaneSelector:

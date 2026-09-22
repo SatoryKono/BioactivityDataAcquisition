@@ -210,7 +210,6 @@ pipelines:
         - assay_id
         - assay_param_id
         - parameter_type
-        - type
       ranges:
         business_only:
         - publication_year
@@ -494,9 +493,6 @@ pipelines:
       required_fields:
         structural:
         - sim_id
-        join_safety:
-        - doc_1
-        - doc_2
       ranges:
         business_only:
         - publication_year

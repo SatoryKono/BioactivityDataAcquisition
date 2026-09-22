@@ -4,12 +4,16 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import yaml
 from pydantic import ValidationError
 
+if TYPE_CHECKING:
+    from bioetl.domain.workflow import WorkflowConfig
+
+
 from bioetl.domain.types import JsonDict
-from bioetl.domain.workflow import WorkflowConfig
 from bioetl.infrastructure.config.config_root import resolve_config_subdir
 from bioetl.infrastructure.schemas.workflow_config import (
     WorkflowConfigFileSchema,

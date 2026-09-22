@@ -264,7 +264,6 @@ async def test_pipeline_run_report_returns_unresolved_and_missing_shells(
             "stage_timings": [],
             "identity_rows": [],
             "timings_and_failure": [],
-            "rejection_details_display": [],
             "schema_version": "pipeline_run_report_v1",
         },
     )

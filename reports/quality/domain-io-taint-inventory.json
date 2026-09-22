@@ -31,14 +31,14 @@
     },
     {
       "kind": "import:pandera",
-      "line": 6,
+      "line": 8,
       "path": "src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
     },
     {
       "kind": "import:pandera",
-      "line": 7,
+      "line": 9,
       "path": "src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
@@ -227,7 +227,7 @@
     },
     {
       "kind": "attribute_call:resolve",
-      "line": 197,
+      "line": 211,
       "path": "src/bioetl/domain/run_reports/accounting_snapshots.py",
       "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
       "symbol": "StageAccountingSnapshotsMixin._removals_for_bucket"
@@ -416,14 +416,14 @@
     },
     {
       "kind": "import:pandera",
-      "line": 9,
+      "line": 11,
       "path": "src/bioetl/domain/schemas/chembl/publication_similarity.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
     },
     {
       "kind": "import:pandera",
-      "line": 10,
+      "line": 12,
       "path": "src/bioetl/domain/schemas/chembl/publication_similarity.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
@@ -815,13 +815,6 @@
     },
     {
       "kind": "import:pandas",
-      "line": 20,
-      "path": "src/bioetl/domain/schemas/validators.py",
-      "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
-      "symbol": "<module>"
-    },
-    {
-      "kind": "import:pandera",
       "line": 21,
       "path": "src/bioetl/domain/schemas/validators.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
@@ -833,11 +826,18 @@
       "path": "src/bioetl/domain/schemas/validators.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
+    },
+    {
+      "kind": "import:pandera",
+      "line": 23,
+      "path": "src/bioetl/domain/schemas/validators.py",
+      "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
+      "symbol": "<module>"
     }
   ],
   "domain_root": "src/bioetl/domain",
   "generated_by": "scripts.engineering.qa.report_domain_io_taint_inventory",
-  "scanned_file_count": 611,
+  "scanned_file_count": 612,
   "schema_version": 1,
   "violation_count": 0,
   "violations": []

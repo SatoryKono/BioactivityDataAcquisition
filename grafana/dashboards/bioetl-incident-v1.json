@@ -603,7 +603,8 @@
               "row_index": true,
               "confidence": false,
               "object": false,
-              "job": true
+              "job": true,
+              "action_dashboard_uid": false
             },
             "indexByName": {
               "Rank": 0,
@@ -638,12 +639,12 @@
             "align": "left",
             "cellOptions": {
               "type": "auto",
-              "wrapText": true
+              "wrapText": false
             },
             "inspect": true,
             "hidden": true,
             "minWidth": 50,
-            "wrapText": true
+            "wrapText": false
           },
           "color": {
             "mode": "fixed",
@@ -803,7 +804,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 100
+                "value": 140
               }
             ]
           },
@@ -2295,7 +2296,7 @@
                   "row_index": true,
                   "confidence": false,
                   "object": false,
-                  "action_dashboard_uid": true,
+                  "action_dashboard_uid": false,
                   "job": true
                 },
                 "indexByName": {
@@ -2331,12 +2332,12 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
                 "hidden": true,
                 "minWidth": 50,
-                "wrapText": true
+                "wrapText": false
               },
               "color": {
                 "mode": "fixed",
@@ -2496,7 +2497,7 @@
                   },
                   {
                     "id": "custom.width",
-                    "value": 100
+                    "value": 140
                   }
                 ]
               },
@@ -3165,7 +3166,24 @@
                 "minWidth": 50
               }
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Completed"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 175
+                  }
+                ]
+              }
+            ]
           },
           "targets": [
             {
@@ -3183,6 +3201,17 @@
             }
           ],
           "transformations": [
+            {
+              "id": "convertFieldType",
+              "options": {
+                "conversions": [
+                  {
+                    "targetField": "completed_at",
+                    "destinationType": "time"
+                  }
+                ]
+              }
+            },
             {
               "id": "limit",
               "options": {

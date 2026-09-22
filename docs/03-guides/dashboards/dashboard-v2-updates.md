@@ -2,6 +2,9 @@ ______________________________________________________________________
 
 ## UX report artifact requirement
 
+The GR-DB-CORR acceptance report `docs/reports/dashboard-ux-checks/2026-09-21.md`
+records observed improvements and remaining verification gaps.
+
 ## State and navigation follow-up — 2026-09-14
 
 All seven dashboards now distinguish missing evidence from measured empty

@@ -2,7 +2,26 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from collections.abc import Callable
+from functools import cache
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+
+from bioetl.domain.mapping.classification_data import ClassificationData
+from bioetl.domain.mapping.protein_class_target_type import (
+    ProteinClassTargetTypeMappingData,
+)
+
+from bioetl.domain.mapping import publication_type_classification
+from bioetl.domain.mapping import protein_class_target_type
+import bioetl.infrastructure.config.publication_type_classification_loader as publication_type_classification_loader
+import bioetl.infrastructure.config.protein_class_target_type_loader as protein_class_target_type_loader
+
+
 from pathlib import Path
 
 from bioetl.composition.runtime_builders._config_access_loaders import (
@@ -12,7 +31,6 @@ from bioetl.composition.runtime_builders._config_access_loaders import (
 )
 from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.config.settings_api import Settings
-from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.config.settings_api import get_settings as _get_settings
 from bioetl.infrastructure.config.pipeline_config_api import (
     load_pipeline_config as _load_pipeline_config,
@@ -81,3 +99,39 @@ def load_dq_config_for_pipeline(
     if configs_root is None:
         configs_root = resolve_configs_root(None)
     return _load_dq_config_for_pipeline(pipeline_name, configs_root=configs_root)
+
+
+@cache
+def _load_publication_type_classification_data(
+    configs_root_key: str,
+) -> ClassificationData:
+    """Load classification data once per configs root key."""
+
+    return publication_type_classification_loader.PublicationTypeClassificationLoader(
+        Path(configs_root_key)
+    ).load()
+
+
+def initialize_publication_type_classification(configs_root: Path) -> None:
+    """Load publication type classification data into the domain module."""
+
+    data = _load_publication_type_classification_data(str(configs_root))
+    publication_type_classification.initialize_classification(data)
+
+
+@cache
+def _load_protein_class_target_type_mapping_data(
+    configs_root_key: str,
+) -> ProteinClassTargetTypeMappingData:
+    """Load protein-class target type mapping once per configs root key."""
+
+    return protein_class_target_type_loader.ProteinClassTargetTypeMappingLoader(
+        Path(configs_root_key)
+    ).load()
+
+
+def initialize_protein_class_target_type_mapping(configs_root: Path) -> None:
+    """Load protein-class L1 mapping and initialize the domain rule module."""
+
+    data = _load_protein_class_target_type_mapping_data(str(configs_root))
+    protein_class_target_type.initialize_protein_class_target_type_mapping(data)

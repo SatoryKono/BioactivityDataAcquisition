@@ -32,7 +32,6 @@ from __future__ import annotations
 import io
 import json
 from datetime import UTC, datetime
-from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID
 
@@ -424,7 +423,7 @@ class TestSilverWriter:
 
     @pytest.mark.asyncio
     async def test_write_silver_merge_existing_table(
-        self, mock_silver_writer, noop_logger
+        self, mock_silver_writer, noop_logger, tmp_path
     ):
         """Test write_silver merges into existing table."""
         import pyarrow as pa
@@ -457,8 +456,8 @@ class TestSilverWriter:
         # Mock version() to return an integer for SilverWriteResult
         mock_table_instance.version.return_value = 1
 
-        writer = SilverWriter(base_path=SILVER_DELTA_ROOT, logger=noop_logger)
-        table_path = Path(SILVER_DELTA_ROOT) / "test_table"
+        writer = SilverWriter(base_path=str(tmp_path), logger=noop_logger)
+        table_path = tmp_path / "test_table"
         table_path.mkdir(parents=True, exist_ok=True)
         (table_path / "part-00000.parquet").write_bytes(b"parquet-marker")
 

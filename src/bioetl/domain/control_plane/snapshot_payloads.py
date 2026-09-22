@@ -90,16 +90,6 @@ def _trace_ref_row(
     }
 
 
-def _trace_ref_sort_key(item: dict[str, object]) -> tuple[str, str, str, str]:
-    """Return the deterministic ordering key for snapshot trace refs."""
-    return (
-        str(item.get("provider") or ""),
-        str(item.get("entity") or ""),
-        str(item.get("pipeline_name") or ""),
-        str(item.get("snapshot_id") or ""),
-    )
-
-
 def collect_input_snapshot_refs(manifest: RunManifest) -> list[dict[str, object]]:
     """Return deterministic flattened snapshot provenance extracted from source refs."""
     return manifest_input_snapshot_trace_refs(manifest)

@@ -342,17 +342,10 @@ def ensure_observability_backend_started(
         warning_printer=echo_warning,
     )
     # Preserve legacy kwargs that previously were first-class parameters.
-    legacy_timing_keys = {
-        "ready_timeout_seconds",
-        "required_probe_timeout_seconds",
-        "poll_seconds",
-    }
-    for key in legacy_timing_keys:
-        if key in hook_overrides:
-            # Prefer explicit legacy kwargs when tests still pass them.
-            pass
     ready_timeout_seconds = float(
-        cast("Any", hook_overrides.pop("ready_timeout_seconds", ready_timeout_seconds))  # Any: Dynamic dict pop returns unknown type
+        cast(
+            "Any", hook_overrides.pop("ready_timeout_seconds", ready_timeout_seconds)
+        )  # Any: legacy kwargs
     )
     required_probe_timeout_seconds = float(
         cast(
@@ -362,7 +355,9 @@ def ensure_observability_backend_started(
             ),
         )
     )
-    poll_seconds = float(cast("Any", hook_overrides.pop("poll_seconds", poll_seconds)))  # Any: Dynamic dict pop returns unknown type
+    poll_seconds = float(
+        cast("Any", hook_overrides.pop("poll_seconds", poll_seconds))
+    )  # Any: legacy kwargs
     runtime_hooks = {**defaults, **hook_overrides}
     return ensure_observability_backend_started_impl(
         startup_kwargs=_observability_backend_startup_kwargs(

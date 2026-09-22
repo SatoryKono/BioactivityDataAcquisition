@@ -119,11 +119,11 @@ CHEMBL_DOCUMENT_SIMILARITY_SCHEMA = pa.schema(
         # Foreign keys
         pa.field("doc_1", pa.int64()),
         pa.field("doc_2", pa.int64()),
-        pa.field("publication_id1", pa.string()),
-        pa.field("publication_id2", pa.string()),
         pa.field("max_tani", pa.float64()),
         # Tanimoto coefficients
         pa.field("mol_tani", pa.float64()),
+        pa.field("publication_id1", pa.string()),
+        pa.field("publication_id2", pa.string()),
         # PubMed identifiers (numeric strings for cross-provider consistency)
         pa.field("pubmed_id1", pa.string()),
         pa.field("pubmed_id2", pa.string()),
@@ -172,12 +172,13 @@ CHEMBL_ASSAY_PARAMETERS_SCHEMA = pa.schema(
         # Primary identifier (surrogate)
         pa.field("assay_param_id", pa.int64(), nullable=False),
         pa.field("comments", pa.string()),
+        pa.field("parameter_relation", pa.string()),
+        pa.field("parameter_type", pa.string()),
+        pa.field("parameter_value", pa.float64()),
         pa.field("qudt_ontology_version", pa.string()),
         pa.field("qudt_unit_iri", pa.string()),
         pa.field("qudt_unit_mapping_status", pa.string()),
         pa.field("qudt_units", pa.string()),
-        # Raw values
-        pa.field("relation", pa.string()),
         # Standardized values
         pa.field("standard_relation", pa.string()),
         pa.field("standard_text_value", pa.string()),
@@ -185,15 +186,12 @@ CHEMBL_ASSAY_PARAMETERS_SCHEMA = pa.schema(
         pa.field("standard_units", pa.string()),
         pa.field("standard_value", pa.float64()),
         pa.field("text_value", pa.string()),
-        # Parameter type
-        pa.field("type", pa.string()),
         pa.field("type_raw", pa.string()),
         pa.field("units", pa.string()),
         pa.field("uo_ontology_version", pa.string()),
         pa.field("uo_unit_iri", pa.string()),
         pa.field("uo_unit_mapping_status", pa.string()),
         pa.field("uo_units", pa.string()),
-        pa.field("value", pa.float64()),
         # === DQ_FIELDS_SUFFIX ===
         *build_silver_dq_suffix_fields(),
     ]

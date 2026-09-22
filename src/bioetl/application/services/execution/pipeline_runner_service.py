@@ -289,22 +289,11 @@ class PipelineRunnerService:
         return run_logger
 
     def list_pipelines(self) -> list[str]:
-        """List all available pipeline names.
-
-        Returns:
-            Sorted list of registered pipeline names.
-        """
+        """Return registered pipeline names in sorted order."""
         return self.runner_factory.list_pipelines()
 
     def validate_pipeline(self, pipeline_name: str) -> bool:
-        """Check if a pipeline is registered.
-
-        Args:
-            pipeline_name: Name of the pipeline to check.
-
-        Returns:
-            True if pipeline exists, False otherwise.
-        """
+        """Return whether the pipeline is registered."""
         return self.runner_factory.contains(pipeline_name)
 
     async def _execute_pipeline(

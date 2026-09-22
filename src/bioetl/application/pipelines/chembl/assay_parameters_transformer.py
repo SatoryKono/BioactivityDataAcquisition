@@ -93,6 +93,12 @@ class AssayParametersTransformer(BaseChemblTransformer):
 
         # Apply declarative field groups
         business_data.update(map_field_groups(record, _ASSAY_PARAMS_GROUPS))
+        # Materialize optional ontology inputs before profile normalization and
+        # hashing; the entity must retain their derived mapping companions.
+        for prefix in ("qudt", "uo"):
+            business_data[f"{prefix}_units"] = record.get(f"{prefix}_units")
+            for suffix in ("unit_iri", "unit_mapping_status", "ontology_version"):
+                business_data[f"{prefix}_{suffix}"] = None
 
         for raw_name in ("type", "relation", "value"):
             business_data[f"parameter_{raw_name}"] = business_data.pop(raw_name, None)

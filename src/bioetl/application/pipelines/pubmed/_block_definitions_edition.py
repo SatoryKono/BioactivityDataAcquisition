@@ -12,6 +12,7 @@ from bioetl.application.pipelines.pubmed._block_helpers import (
     build_authors_with_affiliations,
     extract_journal_data,
     process_structured_affiliations,
+    structured_affiliation_fields,
 )
 from bioetl.application.pipelines.pubmed.extractors.author import AuthorExtractor
 from bioetl.application.pipelines.pubmed.xml_parser import get_text
@@ -78,15 +79,13 @@ class _PubMedAuthorBlock(_PubMedXmlBlock):
         return {
             "authors": authors_json,
             "author_keys": self._normalize_author_keys(author_names),
-            "authors_with_affiliations": self._serialize_json_list(
-                authors_with_affiliations
-            )
-            if authors_with_affiliations
-            else None,
-            "affiliation_list": affiliation_list,
-            "affiliation_structured": self._serialize_json_list(
-                structured_affiliations
+            **structured_affiliation_fields(
+                self._serialize_json_list(authors_with_affiliations)
+                if authors_with_affiliations
+                else None,
+                self._serialize_json_list(structured_affiliations),
             ),
+            "affiliation_list": affiliation_list,
             "author_count": len(author_names),
         }
 

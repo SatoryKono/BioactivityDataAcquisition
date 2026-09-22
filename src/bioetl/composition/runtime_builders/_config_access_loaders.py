@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from collections.abc import Callable
 from pathlib import Path
 
+if TYPE_CHECKING:
+    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+
 from bioetl.infrastructure.config.config_root import resolve_configs_root
-from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 from bioetl.infrastructure.config.pipeline_config_api import (
     load_pipeline_config_from_root,

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import AsyncIterator
+from collections.abc import AsyncGenerator, AsyncIterator
 from time import monotonic
 
 from bioetl.domain.exceptions.internal_state import InvalidStateError
@@ -17,7 +17,7 @@ async def bounded_source_records[T](
     *,
     max_records: int = DEFAULT_SCAN_RECORDS,
     timeout_seconds: float = DEFAULT_SCAN_SECONDS,
-) -> AsyncIterator[T]:
+) -> AsyncGenerator[T, None]:
     """Fail explicitly on exhaustion; close the upstream iterator on every exit.
 
     Time spent processing yielded rows is excluded from the upstream I/O budget.

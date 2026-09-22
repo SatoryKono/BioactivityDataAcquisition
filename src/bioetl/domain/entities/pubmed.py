@@ -225,6 +225,10 @@ class PubMedPublicationEntity(PublicationEntityBase):
     authors_with_affiliations: str | None = (
         None  # JSON array: author-affiliation mapping
     )
+    authors_with_affiliations_raw_json: str | None = None
+    authors_with_affiliations_canonical_json: str | None = None
+    affiliation_structured_raw_json: str | None = None
+    affiliation_structured_canonical_json: str | None = None
 
     # Denormalized counts (Gold schema)
     author_count: int | None = None

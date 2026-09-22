@@ -403,7 +403,7 @@ class TestPipelineConfigLoaderWithDQResolution:
         type_rules = [
             rule
             for rule in config.field_validations
-            if rule.field == "type" and rule.validation_type == "enum"
+            if rule.field == "parameter_type" and rule.validation_type == "enum"
         ]
 
         assert type_rules, "Missing assay_parameters.type enum rule"

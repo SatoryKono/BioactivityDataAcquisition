@@ -82,6 +82,82 @@ def test_empty_catalog_stays_empty(tmp_path: Path) -> None:
     assert _options(tmp_path) == {"items": []}
 
 
+def test_selected_pipeline_does_not_read_foreign_report_identity(
+    tmp_path: Path, monkeypatch
+) -> None:
+    from bioetl.interfaces.http import _report_selector_options as module
+
+    _report(tmp_path)
+    original = module.list_pipeline_reports
+    owners = []
+
+    def record_scope(**kwargs):
+        owners.append(kwargs.get("pipeline_name"))
+        return original(**kwargs)
+
+    monkeypatch.setattr(module, "list_pipeline_reports", record_scope)
+    assert _options(tmp_path, pipeline=("chembl_assay",))["items"]
+    assert owners == ["chembl_assay"]
+
+
+def test_manifest_backed_pipeline_does_not_reload_duplicate_reports(
+    tmp_path: Path, monkeypatch
+) -> None:
+    from unittest.mock import Mock
+    from bioetl.interfaces.http import _report_selector_options as module
+
+    _report(tmp_path)
+    check = Mock(side_effect=AssertionError("duplicate must not contribute evidence"))
+    monkeypatch.setattr(module, "_checked_identity", check)
+    payload = {"items": [{"text": "chembl_assay", "value": "chembl_assay"}]}
+    assert (
+        module.supplement_report_options(
+            payload,
+            dimension="pipeline",
+            response_shape="options",
+            scopes={},
+            root=tmp_path,
+        )
+        == payload
+    )
+    check.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_filter_catalog_reads_overlap_without_losing_options(monkeypatch) -> None:
+    import asyncio
+    from threading import Barrier
+    from unittest.mock import AsyncMock, Mock
+
+    from bioetl.interfaces.http import _health_server_routing_support as module
+    from bioetl.interfaces.http.health_server_routing_mixin import (
+        HealthServerRoutingMixin,
+    )
+
+    barrier = Barrier(2, timeout=2)
+
+    def manifests():
+        barrier.wait()
+        return ()
+
+    def reports(scopes):
+        barrier.wait()
+        return []
+
+    host = HealthServerRoutingMixin()
+    host._forensic_endpoint_limiter = asyncio.Semaphore(4)
+    host._run_manifest_port = Mock()
+    host._run_manifest_port.list_all.side_effect = manifests
+    host._run_ledger_port = None
+    host._workflow_manifest_port = None
+    host._send_payload_response = AsyncMock()
+    monkeypatch.setattr(module, "load_report_selector_entries", reports)
+    await module.handle_control_plane_filter_options(
+        host, None, {"dimension": "pipeline", "response_shape": "options"}
+    )
+    assert host._send_payload_response.call_args.args[1] == 200
+
+
 def test_duplicates_and_all_are_supported(tmp_path: Path) -> None:
     _report(tmp_path)
     _report(tmp_path, "run-b")
@@ -139,6 +215,9 @@ async def test_http_handler_merges_report_only_options(
     _report(tmp_path)
     monkeypatch.setenv("BIOETL_REPORT_ROOT", str(tmp_path))
     host = HealthServerRoutingMixin()
+    import asyncio
+
+    host._forensic_endpoint_limiter = asyncio.Semaphore(4)
     host._run_manifest_port = Mock()
     host._run_manifest_port.list_all.return_value = ()
     host._run_ledger_port = None

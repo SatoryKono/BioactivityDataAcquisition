@@ -195,7 +195,7 @@ class TestRunnerFactoryCreate:
 
     def test_default_factory_initializes_cold_publication_policy(self, monkeypatch):
         from bioetl.domain.mapping import publication_type_classification as policy
-        from bioetl.composition.bootstrap.runtime import pipeline as bootstrap
+        from bioetl.composition.runtime_builders import runner_builder as builder
 
         monkeypatch.setattr(policy, "_PROVIDER_LOOKUPS", {})
         assert not policy.is_initialized()
@@ -211,8 +211,15 @@ class TestRunnerFactoryCreate:
             return runner
 
         with (
-            patch.object(bootstrap, "prepare_runtime_registry", return_value=registry),
-            patch.object(bootstrap, "_build_pipeline_runner", side_effect=assemble),
+            patch.object(builder, "_bootstrap_runner_factory"),
+            patch.object(
+                builder,
+                "_prepare_runner_context_and_inputs",
+                return_value=(context, MagicMock()),
+            ),
+            patch.object(builder, "_assemble_runner_control_plane"),
+            patch.object(builder, "_create_runner", side_effect=assemble),
+            patch.object(builder, "_attach_runner_control_plane_collaborators"),
         ):
             assert factory.create(context) is runner
 

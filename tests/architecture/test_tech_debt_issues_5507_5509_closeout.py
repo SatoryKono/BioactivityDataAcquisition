@@ -130,5 +130,9 @@ def test_issue_5509_entity_contract_identity_stays_explicit() -> None:
             "mode": "single",
             "read_order": [active_version],
             "write_versions": [active_version],
-            "affects_hash": False,
+            "affects_hash": (provider, entity, active_version)
+            in {
+                ("chembl", "assay_parameters", "2.0.0"),
+                ("chembl", "publication_similarity", "2.0.0"),
+            },
         }, path

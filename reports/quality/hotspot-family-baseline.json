@@ -17,24 +17,24 @@
         "src/bioetl/application/core/"
       ],
       "duplication_clusters": 0,
-      "files": 194,
-      "total_loc": 23633,
+      "files": 196,
+      "total_loc": 23839,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.374,
+      "helper_function_ratio": 0.376,
       "max_internal_fan_in": 5,
-      "max_internal_fan_in_module": "bioetl.application.core.record_processor_config",
+      "max_internal_fan_in_module": "bioetl.application.core.target_data_source_mixins",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 7
       },
       "internal_fan_in_census": {
         "distribution": {
-          "0": 18,
+          "0": 19,
           "1": 103,
-          "2": 42,
-          "3": 14,
-          "4": 6,
-          "5": 11
+          "2": 41,
+          "3": 16,
+          "4": 5,
+          "5": 12
         },
         "modules": [
           {
@@ -241,8 +241,9 @@
           },
           {
             "module": "bioetl.application.core._target_data_source_fetch_support",
-            "fan_in": 2,
+            "fan_in": 3,
             "runtime_importers": [
+              "bioetl.application.core._filtered_data_source_fetch_support",
               "bioetl.application.core.data_source_mixins",
               "bioetl.application.core.target_data_source_mixins"
             ]
@@ -762,7 +763,7 @@
             "module": "bioetl.application.core.data_source_mixins",
             "fan_in": 5,
             "runtime_importers": [
-              "bioetl.application.core._filtered_data_source_fetch_support",
+              "bioetl.application.core.data_sources.assay_parameters",
               "bioetl.application.core.data_sources.filtered",
               "bioetl.application.core.data_sources.publication_term",
               "bioetl.application.core.data_sources.subcellular_fraction",
@@ -771,6 +772,11 @@
           },
           {
             "module": "bioetl.application.core.data_sources",
+            "fan_in": 0,
+            "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.core.data_sources.assay_parameters",
             "fan_in": 0,
             "runtime_importers": []
           },
@@ -804,6 +810,15 @@
             "runtime_importers": [
               "bioetl.application.core.data_sources",
               "bioetl.application.core.subcellular_fraction_data_source"
+            ]
+          },
+          {
+            "module": "bioetl.application.core.derived_scan_budget",
+            "fan_in": 3,
+            "runtime_importers": [
+              "bioetl.application.core.data_sources.assay_parameters",
+              "bioetl.application.core.data_sources.subcellular_fraction",
+              "bioetl.application.core.publication_term_extraction_mixin"
             ]
           },
           {
@@ -1378,9 +1393,10 @@
           },
           {
             "module": "bioetl.application.core.target_data_source_mixins",
-            "fan_in": 4,
+            "fan_in": 5,
             "runtime_importers": [
               "bioetl.application.core.data_source_mixins",
+              "bioetl.application.core.data_sources.assay_parameters",
               "bioetl.application.core.data_sources.publication_term",
               "bioetl.application.core.data_sources.subcellular_fraction",
               "bioetl.application.core.publication_term_filtering_mixin"
@@ -1504,7 +1520,8 @@
           "bioetl.application.core.lifecycle.shutdown",
           "bioetl.application.core.pipeline_span_lifecycle",
           "bioetl.application.core.quarantine_manager",
-          "bioetl.application.core.record_processor_config"
+          "bioetl.application.core.record_processor_config",
+          "bioetl.application.core.target_data_source_mixins"
         ]
       },
       "budget_warnings": [],
@@ -1523,9 +1540,9 @@
       ],
       "duplication_clusters": 0,
       "files": 52,
-      "total_loc": 6216,
+      "total_loc": 6177,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.332,
+      "helper_function_ratio": 0.328,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.tracing_bootstrap",
       "bounded_growth_budgets": {
@@ -1954,7 +1971,7 @@
       ],
       "duplication_clusters": 0,
       "files": 35,
-      "total_loc": 3934,
+      "total_loc": 3936,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.358,
       "max_internal_fan_in": 2,
@@ -2254,7 +2271,7 @@
       ],
       "duplication_clusters": 0,
       "files": 113,
-      "total_loc": 14509,
+      "total_loc": 14514,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.375,
       "max_internal_fan_in": 1,
@@ -3134,9 +3151,9 @@
       ],
       "duplication_clusters": 0,
       "files": 55,
-      "total_loc": 7115,
+      "total_loc": 7171,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.38,
+      "helper_function_ratio": 0.382,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.runtime_builders.runner_inputs",
       "bounded_growth_budgets": {
@@ -3406,7 +3423,7 @@
             "module": "bioetl.composition.runtime_builders.config_access",
             "fan_in": 2,
             "runtime_importers": [
-              "bioetl.composition.runtime_builders.inputs_resolver",
+              "bioetl.composition.runtime_builders.runner_builder",
               "bioetl.composition.runtime_builders.runner_builder_wiring"
             ]
           },

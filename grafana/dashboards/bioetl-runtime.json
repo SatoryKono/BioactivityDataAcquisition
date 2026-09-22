@@ -540,10 +540,10 @@
             "align": "auto",
             "cellOptions": {
               "type": "auto",
-              "wrapText": true
+              "wrapText": false
             },
             "inspect": true,
-            "wrapText": true
+            "wrapText": false
           },
           "mappings": [
             {
@@ -783,7 +783,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 100
+                "value": 140
               }
             ]
           },
@@ -897,7 +897,7 @@
               "__name__": true,
               "pipeline": true,
               "run_type": true,
-              "action_dashboard_uid": true,
+              "action_dashboard_uid": false,
               "job": true
             },
             "indexByName": {
@@ -1140,9 +1140,9 @@
             "inspect": true,
             "cellOptions": {
               "type": "auto",
-              "wrapText": true
+              "wrapText": false
             },
-            "wrapText": true
+            "wrapText": false
           },
           "unit": "short"
         },
@@ -1205,7 +1205,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 100
+                "value": 140
               }
             ]
           },
@@ -1804,10 +1804,10 @@
                 "align": "auto",
                 "cellOptions": {
                   "type": "color-text",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
-                "wrapText": true
+                "wrapText": false
               },
               "mappings": [
                 {
@@ -1950,7 +1950,7 @@
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 100
+                    "value": 140
                   }
                 ]
               },
@@ -2063,7 +2063,7 @@
                   "Time": true,
                   "Time #A": true,
                   "Time #B": true,
-                  "action_dashboard_uid": true,
+                  "action_dashboard_uid": false,
                   "__name__": true,
                   "job": true
                 },
@@ -2445,12 +2445,7 @@
                   "id": "byName",
                   "options": "Value"
                 },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 70
-                  }
-                ]
+                "properties": []
               },
               {
                 "matcher": {
@@ -2605,12 +2600,7 @@
                   "id": "byName",
                   "options": "Value"
                 },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 70
-                  }
-                ]
+                "properties": []
               },
               {
                 "matcher": {
@@ -4120,7 +4110,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -4142,7 +4132,7 @@
                         "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "QUERY ERROR",
+                            "text": "ERROR",
                             "color": "red"
                           }
                         }
@@ -5125,7 +5115,24 @@
                 "minWidth": 50
               }
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Completed"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 175
+                  }
+                ]
+              }
+            ]
           },
           "targets": [
             {
@@ -5143,6 +5150,17 @@
             }
           ],
           "transformations": [
+            {
+              "id": "convertFieldType",
+              "options": {
+                "conversions": [
+                  {
+                    "targetField": "completed_at",
+                    "destinationType": "time"
+                  }
+                ]
+              }
+            },
             {
               "id": "limit",
               "options": {

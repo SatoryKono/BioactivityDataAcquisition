@@ -88,14 +88,22 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
 
     # SemanticScholar-specific classification (JSON strings)
     subject_fields: str | None = None
+    subject_fields_raw_json: str | None = None
+    subject_fields_canonical_json: str | None = None
     publication_types: str | None = None  # JSON array of publication types
+    publication_types_raw_json: str | None = None
+    publication_types_canonical_json: str | None = None
 
     # Author identifiers (for author-level analytics and disambiguation)
     author_s2_ids: str | None = None  # JSON array of S2 author IDs (40-char hex)
     author_h_indices: str | None = None  # JSON array of h-index values
+    author_h_indices_raw_json: str | None = None
+    author_h_indices_canonical_json: str | None = None
 
     # Citation context (for citation sentiment analysis)
     citation_contexts: str | None = None  # JSON array of context sentences
+    citation_contexts_raw_json: str | None = None
+    citation_contexts_canonical_json: str | None = None
 
     # Override: Default source for SemanticScholar
     _source: str = "semanticscholar"

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID
@@ -11,7 +11,7 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-_NOW = datetime(2026, 1, 2, 3, 4, 5, tzinfo=timezone.utc)
+_NOW = datetime(2026, 1, 2, 3, 4, 5, tzinfo=UTC)
 
 
 # ---------------------------------------------------------------------------

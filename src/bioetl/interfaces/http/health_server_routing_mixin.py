@@ -103,7 +103,7 @@ class HealthServerRoutingMixin:
             await self._send_text_response(
                 writer,
                 200,
-                self._handle_metrics(),
+                await asyncio.to_thread(self._handle_metrics),
                 content_type=_PROMETHEUS_TEXT_CONTENT_TYPE,
             )
             return

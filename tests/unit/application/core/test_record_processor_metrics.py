@@ -205,6 +205,25 @@ class TestRecordProcessorMetrics:
         span_executor_factory.assert_called_once()
         assert processor._span_executor is span_executor
 
+    async def test_gold_failure_does_not_publish_prepared_records_as_written(
+        self, record_processor, mock_metrics
+    ):
+        record_processor._write_gold_if_present = AsyncMock(
+            side_effect=OSError("Gold write failed")
+        )
+        with pytest.raises(OSError, match="Gold write failed"):
+            await record_processor.process_batch(
+                [{"id": 1}],
+                deterministic_batch_uuid_from_callsite("gold_write_failure"),
+            )
+        written = {
+            call.args[2]["stage"]: call.args[1]
+            for call in mock_metrics.increment_counter.call_args_list
+            if call.args[0] == "bioetl_records_processed_total"
+        }
+        assert written["bronze"] == written["silver"] == 1
+        assert written.get("gold", 0) == 0
+
     async def test_process_batch_records_batch_size_and_counts(
         self, record_processor, mock_metrics, mock_context
     ):
