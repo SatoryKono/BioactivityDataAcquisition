@@ -105,6 +105,11 @@ SCHEMA_PAIRS: tuple[SchemaPair, ...] = (
         CHEMBL_ASSAY_PARAMETERS_SCHEMA,
         ChEMBLAssayParametersGoldSchema,
         "configs/entities/chembl/assay_parameters.yaml",
+        {
+            "parameter_type": "type",
+            "parameter_relation": "relation",
+            "parameter_value": "value",
+        },
     ),
     SchemaPair(
         "chembl_cell_line",

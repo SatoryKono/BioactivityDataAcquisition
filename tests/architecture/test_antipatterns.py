@@ -11,7 +11,6 @@
 from __future__ import annotations
 
 import ast
-import json
 import re
 from pathlib import Path
 
@@ -108,9 +107,14 @@ def test_no_hardcoded_secrets(cached_subprocess_run) -> None:
     if not baseline_path.exists():
         raise AssertionError("Missing .secrets.baseline for detect-secrets scan")
 
-    # Run detect-secrets scan as subprocess with caching
+    # Use venv python for detect-secrets module
+    venv_python = REPO_ROOT / ".venv" / "bin" / "python"
+    if not venv_python.exists():
+        venv_python = REPO_ROOT / ".venv-win" / "Scripts" / "python.exe"
+
+    # Run detect-secrets scan as subprocess with caching using Python module
     result = cached_subprocess_run(
-        ["detect-secrets", "scan", "--baseline", str(baseline_path), "src/"],
+        [str(venv_python), "-m", "detect_secrets", "scan", "--baseline", str(baseline_path), "src/"],
         timeout=600,
         cwd=REPO_ROOT,
     )

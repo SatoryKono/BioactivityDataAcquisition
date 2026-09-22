@@ -782,6 +782,7 @@ slow_governance_scanner_cache:
     - tests.architecture.conftest.cached_subprocess_run
     - tests.architecture.conftest._run_cached_subprocess
     - tests.architecture.test_antipatterns.test_no_hardcoded_secrets
+    - tests.architecture.test_scripts_deprecation_backlog.test_scripts_deprecation_report_generation
   isolated_lanes:
     - architecture-fast-boundary
     - architecture-slow-governance
