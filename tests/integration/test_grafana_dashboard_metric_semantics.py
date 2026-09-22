@@ -717,7 +717,7 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
             "bioetl-dq-v2.json",
             "Track DQ Check Duration p95",
             "No data means no DQ duration samples were observed in range or DQ timing telemetry is absent",
-            "No DQ duration samples",
+            "NO OBSERVATIONS — no usable histogram increments",
         ),
     ],
 )
