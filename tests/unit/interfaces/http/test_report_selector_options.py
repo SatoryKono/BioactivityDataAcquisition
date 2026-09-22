@@ -12,10 +12,17 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.parametrize(
-    "zone,clock", [("UTC", "11:00 UTC"), ("Europe/Kiev", "14:00 EEST")]
+    "zone,started,label",
+    [
+        ("UTC", "2026-09-15T11:00:00+00:00", "2026-09-15 11:00 UTC"),
+        ("Europe/Kiev", "2026-09-15T11:00:00+00:00", "2026-09-15 14:00 EEST"),
+        ("Europe/Kiev", "2026-10-25T00:30:00+00:00", "2026-10-25 03:30 EEST"),
+        ("Europe/Kiev", "2026-10-25T01:30:00+00:00", "2026-10-25 03:30 EET"),
+        ("UTC", "invalid", "UNKNOWN"),
+    ],
 )
-def test_report_fallback_uses_selector_timezone(tmp_path, zone, clock):
-    _report(tmp_path, status="failed")
+def test_report_fallback_uses_selector_timezone(tmp_path, zone, started, label):
+    _report(tmp_path, status="failed", started_at=started)
     payload = supplement_report_options(
         {"items": []},
         dimension="run_id",
@@ -25,7 +32,7 @@ def test_report_fallback_uses_selector_timezone(tmp_path, zone, clock):
         timezone=zone,
     )
     assert payload["items"][0]["value"] == "run-a"
-    assert payload["items"][0]["text"].startswith(f"2026-09-15 {clock} ·")
+    assert payload["items"][0]["text"].startswith(f"{label} ·")
 
 
 def _report(root: Path, run_id: str = "run-a", **overrides: str) -> Path:
