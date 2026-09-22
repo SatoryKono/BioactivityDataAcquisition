@@ -271,14 +271,13 @@ class TestFilteredDataSourceContextManager:
         assert filtered._filter_ids is None
 
     @pytest.mark.asyncio
-    async def test_aenter_graceful_degradation_when_filter_file_missing(
+    async def test_aenter_fails_closed_when_filter_file_missing(
         self,
         mock_data_source,
         mock_filter_reader,
         enabled_filter_config,
     ):
-        """Test __aenter__ proceeds without filtering when filter file is missing."""
-        # Configure mock to raise FileNotFoundError (as InputFilterPort does)
+        """Enabled filter with missing CSV must fail before extract continues."""
         mock_filter_reader.load_filter_ids = AsyncMock(
             side_effect=FileNotFoundError("Filter file not found")
         )
@@ -289,15 +288,11 @@ class TestFilteredDataSourceContextManager:
             filter_config=enabled_filter_config,
         )
 
-        result = await filtered.__aenter__()
+        with pytest.raises(FileNotFoundError, match="Input filter CSV is required"):
+            await filtered.__aenter__()
 
-        assert result is filtered
         mock_data_source.__aenter__.assert_called_once()
-        # Filter reader WAS called, but raised FileNotFoundError
         mock_filter_reader.load_filter_ids.assert_called_once()
-        # Filter IDs should remain None (graceful degradation)
-        assert filtered._filter_ids is None
-        assert filtered.filter_result is None
 
     @pytest.mark.asyncio
     async def test_aenter_with_filtering_enabled(
@@ -1093,12 +1088,12 @@ class TestFilteredDataSourceLoggerWarning:
     """Tests for logger warning path."""
 
     @pytest.mark.asyncio
-    async def test_filter_file_not_found_logs_warning(
+    async def test_filter_file_not_found_raises(
         self,
         mock_data_source,
         enabled_filter_config,
     ):
-        """Test that logger.warning is called when filter file is missing."""
+        """Missing enabled filter CSV must fail closed before extract."""
         reader = AsyncMock()
         reader.load_filter_ids = AsyncMock(
             side_effect=FileNotFoundError("Filter file not found")
@@ -1113,11 +1108,8 @@ class TestFilteredDataSourceLoggerWarning:
             pipeline_name="test_pipeline",
         )
 
-        await filtered.__aenter__()
-
-        mock_logger.warning.assert_called_once()
-        call_args = mock_logger.warning.call_args
-        assert call_args[0][0] == "input_filter_file_not_found"
+        with pytest.raises(FileNotFoundError, match="Input filter CSV is required"):
+            await filtered.__aenter__()
 
     @pytest.mark.asyncio
     async def test_no_filter_reader_skips_loading(

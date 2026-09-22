@@ -1611,6 +1611,29 @@
                   {
                     "id": "custom.minWidth",
                     "value": 130
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "VALID EMPTY - fleet observed, no non-OK providers": {
+                            "text": "No non-OK providers"
+                          }
+                        }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "null",
+                          "result": {
+                            "text": "UNKNOWN",
+                            "color": "#555555"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               },
@@ -1889,6 +1912,10 @@
                   {
                     "id": "custom.minWidth",
                     "value": 160
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               },
@@ -1908,6 +1935,32 @@
                       "type": "auto",
                       "wrapText": true
                     }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "VALID EMPTY - FLEET coverage proven, no active provider causes": {
+                            "text": "VALID EMPTY - no active causes"
+                          },
+                          "UNKNOWN - FLEET cause coverage unproven, restore provider telemetry": {
+                            "text": "UNKNOWN - restore telemetry"
+                          }
+                        }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "null",
+                          "result": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               },
@@ -1968,6 +2021,40 @@
                   {
                     "id": "custom.minWidth",
                     "value": 160
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Cause"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "VALID EMPTY - FLEET coverage proven, no active provider causes": {
+                            "text": "VALID EMPTY - no active causes"
+                          },
+                          "UNKNOWN - FLEET cause coverage unproven, restore provider telemetry": {
+                            "text": "UNKNOWN - restore telemetry"
+                          }
+                        }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "null",
+                          "result": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               }
@@ -2429,6 +2516,19 @@
                       "type": "auto",
                       "wrapText": true
                     }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "VALID EMPTY - fleet observed, no non-OK providers": {
+                            "text": "No non-OK providers"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               },
@@ -2547,6 +2647,22 @@
                       "type": "auto",
                       "wrapText": true
                     }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "VALID EMPTY - FLEET coverage proven, no active provider causes": {
+                            "text": "VALID EMPTY - no active causes"
+                          },
+                          "UNKNOWN - FLEET cause coverage unproven, restore provider telemetry": {
+                            "text": "UNKNOWN - restore telemetry"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               },
@@ -2579,6 +2695,10 @@
                   {
                     "id": "custom.minWidth",
                     "value": 160
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               },
@@ -2611,6 +2731,30 @@
                   {
                     "id": "custom.minWidth",
                     "value": 160
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Cause"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "VALID EMPTY - FLEET coverage proven, no active provider causes": {
+                            "text": "VALID EMPTY - no active causes"
+                          },
+                          "UNKNOWN - FLEET cause coverage unproven, restore provider telemetry": {
+                            "text": "UNKNOWN - restore telemetry"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               }

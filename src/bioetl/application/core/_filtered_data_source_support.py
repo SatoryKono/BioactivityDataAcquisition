@@ -55,20 +55,6 @@ async def enter_filtered_data_source(state: _FilteredDataSourceState) -> None:
     await load_csv_filter_ids(state)
 
 
-def log_filter_file_not_found(
-    state: _FilteredDataSourceState,
-    source_path: str,
-) -> None:
-    """Log warning when filter file is not found."""
-    if state._logger:
-        state._logger.warning(
-            "input_filter_file_not_found",
-            source_path=source_path,
-            pipeline=state._pipeline_name,
-            message="Filter file not found, proceeding without filtering",
-        )
-
-
 def load_direct_multi_filter_ids(state: _FilteredDataSourceState) -> None:
     """Load direct multi-field filter IDs from configuration."""
     multi_ids = state._filter_config.direct_multi_filter_ids or {}
@@ -126,8 +112,12 @@ async def load_csv_filter_ids(state: _FilteredDataSourceState) -> None:
             raise ValueError(
                 "CSV filter loading requires column_name or a non-empty columns list"
             )
-    except FileNotFoundError:
-        log_filter_file_not_found(state, source_path)
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(
+            f"Input filter CSV is required but missing: {source_path}. "
+            f"Provide a valid `--csv`/`--input` path, create the configured "
+            f"file, or pass a non-empty `--query` where supported."
+        ) from exc
 
 
 async def _load_multi_column_filter(
