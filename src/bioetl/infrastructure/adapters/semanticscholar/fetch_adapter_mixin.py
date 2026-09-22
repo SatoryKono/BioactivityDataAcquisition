@@ -69,8 +69,6 @@ class SemanticScholarFetchAdapterMixin(
                 yield record
             return
 
-        if query is None or not query.strip():
-            raise ValueError("Semantic Scholar fetch requires query when filter_ids is not provided")
         as_mixin_host(self)._validate_entity_type(entity_type)  # Any: mixin host
         search_query = as_mixin_host(self)._require_search_query(
             query

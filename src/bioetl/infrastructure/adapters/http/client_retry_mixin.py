@@ -4,9 +4,7 @@
 from __future__ import annotations
 
 import asyncio
-import datetime
 import time
-from email.utils import parsedate_to_datetime
 from typing import Any, cast
 
 import httpx
@@ -45,30 +43,6 @@ from bioetl.infrastructure.adapters.http.client_retry_observability import (
 )
 
 
-
-def _parse_retry_after_seconds(value: str) -> float | None:
-    """Parse Retry-After header as seconds or HTTP-date to seconds."""
-    value = value.strip()
-    if not value:
-        return None
-    # Try numeric seconds
-    try:
-        return float(value)
-    except ValueError:
-        pass
-    # Try HTTP-date
-    try:
-        dt = parsedate_to_datetime(value)
-        if dt is None:
-            return None
-        if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=datetime.timezone.utc)
-        now = datetime.datetime.now(datetime.timezone.utc)
-        delta = (dt - now).total_seconds()
-        return max(0.0, delta)
-    except Exception:
-        return None
-
 class HTTPClientRetryMixin:
     """Retry policy orchestration extracted from UnifiedHTTPClient."""
 
@@ -102,18 +76,12 @@ class HTTPClientRetryMixin:
         if response is not None:
             retry_after = response.headers.get("Retry-After")
             if retry_after:
-<<<<<<< HEAD
-                parsed = _parse_retry_after_seconds(retry_after)
-                if parsed is not None:
-                    delay = self.retry_config.clamp_retry_after(parsed)
-=======
                 retry_after_delay = _parse_retry_after(
                     retry_after,
                     now=time.time(),
                 )
                 if retry_after_delay is not None:
                     delay = self.retry_config.clamp_retry_after(retry_after_delay)
->>>>>>> fix/issue-10577-search-retry
         await asyncio.sleep(delay)
         return float(delay)
 
