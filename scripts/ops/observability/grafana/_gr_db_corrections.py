@@ -220,6 +220,21 @@ def apply_corrections(payload: dict) -> None:
                 ],
             )
             _override(panel, "provider_target", "custom.hidden", True)
+            _override(
+                panel,
+                "Provider",
+                "mappings",
+                [
+                    {
+                        "type": "value",
+                        "options": {
+                            "VALID EMPTY - fleet observed, no non-OK providers": {
+                                "text": "No non-OK providers"
+                            }
+                        },
+                    }
+                ],
+            )
             for link in panel["fieldConfig"].get("defaults", {}).get("links", []):
                 link["url"] = link.get("url", "").replace(
                     "${__data.fields.provider:percentencode}",
@@ -231,6 +246,29 @@ def apply_corrections(payload: dict) -> None:
                 "provider to have health evidence and current status OK. Missing coverage "
                 "remains UNKNOWN; query failure is not a healthy empty fleet."
             )
+        for panel_id in (9103, 9113):
+            panel = panels[panel_id]
+            for field in ("cause", "Cause"):
+                _override(
+                    panel,
+                    field,
+                    "mappings",
+                    [
+                        {
+                            "type": "value",
+                            "options": {
+                                "VALID EMPTY - FLEET coverage proven, no active provider causes": {
+                                    "text": "VALID EMPTY - no active causes"
+                                },
+                                "UNKNOWN - FLEET cause coverage unproven, restore provider telemetry": {
+                                    "text": "UNKNOWN - restore telemetry"
+                                },
+                            },
+                        }
+                    ],
+                )
+            # The synthetic verdict is a presence marker, not an event count.
+            _override(panel, "Value", "custom.hidden", True)
 
     if uid == "bioetl-control-plane-v1":
         retention = panels[9416]
@@ -369,6 +407,10 @@ def apply_corrections(payload: dict) -> None:
                 _override(panel, field, "custom.width", width)
             if panel_id == 22010:
                 _override(panel, "Domain", "custom.width", 100)
+                # Grafana's linked-cell renderer forces ellipsis; keep the
+                # dedicated Action link and render evidence as wrapping text.
+                for field in ("Object", "Signal"):
+                    _override(panel, field, "links", [])
                 for field in ("Object", "Signal", "Details"):
                     _override(panel, field, "custom.wrapText", True)
                     _override(
