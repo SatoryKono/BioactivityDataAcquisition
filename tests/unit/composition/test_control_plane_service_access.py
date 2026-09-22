@@ -122,7 +122,7 @@ def test_control_plane_service_access_reexports_bootstrap_owner_seams() -> None:
         persist_historical_replay_closure_report,
         persist_historical_replay_universe_report,
     )
-    from bioetl.composition.config_catalog import list_configured_pipeline_names
+    from bioetl.composition.composite_catalog import list_configured_pipeline_names
 
     assert (
         control_plane_service_access.bootstrap_control_plane_lifecycle_store

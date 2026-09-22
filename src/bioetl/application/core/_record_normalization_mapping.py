@@ -1,12 +1,16 @@
-# Host attrs/methods provided by concrete composition.
-"""Field-mapping normalization helpers for RecordNormalizationProcessor."""
+"""Field-mapping normalization helpers for RecordNormalizationProcessor.
+
+Host attributes are declared through the ``_RecordNormalizationMappingHost``
+Protocol instead of ``cast(Any, None)`` class defaults (#10596 / AUD-006).
+"""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING
 
 from bioetl.application.core._record_normalization_contract import (
     _NormalizationFinding,
+    _RecordNormalizationMappingHost,
 )
 from bioetl.application.core._record_normalization_runtime_support import (
     profile_json_runtime_finding,
@@ -30,29 +34,23 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.core._record_normalization_hash_support import (
-        _NormalizationProfileLike,
-    )
-    from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
     from bioetl.domain.normalization.profiles import FieldRule
     from bioetl.domain.types import JsonDict
+
+__all__ = ["RecordNormalizationMappingMixin"]
 
 
 class RecordNormalizationMappingMixin:
     """Own field-by-field mapping normalization for Silver record payloads.
 
-    Host classes must assign these attributes before mapping runs.
+    Host classes must provide the ``_RecordNormalizationMappingHost`` surface
+    (``provider``, ``entity_type``, ``profile``, ``rule_set``,
+    ``allow_compatibility_fallback``) before mapping runs.
     """
 
-    provider: str = cast(Any, None)  # Any: host attr default (PD3)
-    entity_type: str | None = cast(Any, None)  # Any: host attr default (PD3)
-    profile: _NormalizationProfileLike | None = cast(
-        Any, None
-    )  # Any: host attr default (PD3)
-    rule_set: NormalizationRulesPolicy = cast(Any, None)  # Any: host attr default (PD3)
-    allow_compatibility_fallback: bool = cast(Any, None)  # Any: host attr default (PD3)
-
-    def _normalize_mapping(self, record: JsonDict) -> JsonDict:
+    def _normalize_mapping(
+        self: _RecordNormalizationMappingHost, record: JsonDict
+    ) -> JsonDict:
         object.__setattr__(self, "_normalization_findings", ())
         normalized: JsonDict = {}
         findings: list[_NormalizationFinding] = []
@@ -81,7 +79,9 @@ class RecordNormalizationMappingMixin:
         object.__setattr__(self, "_normalization_findings", tuple(findings))
         return normalized
 
-    def _is_passthrough_field(self, field_name: str) -> bool:
+    def _is_passthrough_field(
+        self: _RecordNormalizationMappingHost, field_name: str
+    ) -> bool:
         if field_name in self.rule_set.passthrough_fields:
             return True
         if field_name.startswith("_"):
@@ -89,7 +89,7 @@ class RecordNormalizationMappingMixin:
         return False
 
     def _normalize_field_value(
-        self,
+        self: _RecordNormalizationMappingHost,
         field_name: str,
         value: object,
         record: JsonDict,
@@ -113,14 +113,18 @@ class RecordNormalizationMappingMixin:
             return value
         return self._normalize_string_field(field_name, value)
 
-    def _normalize_special_field(self, field_name: str, value: object) -> object:
+    def _normalize_special_field(
+        self: _RecordNormalizationMappingHost, field_name: str, value: object
+    ) -> object:
         return normalize_special_fallback_field(
             field_name,
             value,
             rule_set=self.rule_set,
         )
 
-    def _normalize_string_field(self, field_name: str, value: str) -> str | None:
+    def _normalize_string_field(
+        self: _RecordNormalizationMappingHost, field_name: str, value: str
+    ) -> str | None:
         normalized_text = self._normalize_named_text_field(field_name, value)
         if normalized_text is not None:
             return normalized_text
@@ -130,13 +134,15 @@ class RecordNormalizationMappingMixin:
             return None
         return self._canonicalize_json_like_string(stripped)
 
-    def _profile_rule(self, field_name: str) -> FieldRule | None:
+    def _profile_rule(
+        self: _RecordNormalizationMappingHost, field_name: str
+    ) -> FieldRule | None:
         if self.profile is None:
             return None
         return self.profile.rule_for(field_name)
 
     def _normalize_profile_field_value(
-        self,
+        self: _RecordNormalizationMappingHost,
         rule: FieldRule,
         value: object,
         record: JsonDict,
@@ -150,7 +156,9 @@ class RecordNormalizationMappingMixin:
             return self._normalize_string_field(rule.field_name, normalized)
         return normalized
 
-    def _reapply_record_aware_profile_rules(self, record: JsonDict) -> JsonDict:
+    def _reapply_record_aware_profile_rules(
+        self: _RecordNormalizationMappingHost, record: JsonDict
+    ) -> JsonDict:
         """Recompute derived profile fields against the normalized sibling context.
 
         Some profile-backed fields are intentionally derived from sibling values
@@ -178,7 +186,7 @@ class RecordNormalizationMappingMixin:
         return normalized
 
     def _normalize_named_text_field(
-        self,
+        self: _RecordNormalizationMappingHost,
         field_name: str,
         value: str,
     ) -> str | None:

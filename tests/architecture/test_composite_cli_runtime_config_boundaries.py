@@ -12,7 +12,6 @@
 
 from __future__ import annotations
 
-import ast
 from pathlib import Path
 
 import pytest
@@ -30,12 +29,8 @@ import pytest
         Path("bioetl/composition/bootstrap/runtime/runtime_basics.py"),
         Path("bioetl/composition/bootstrap/runtime/runner_factory_builder_service.py"),
         Path(
-            "bioetl/composition/bootstrap/runtime/composite_support_service_builders.py"
-        ),
-        Path(
             "bioetl/composition/bootstrap/runtime/composite_support_services_factory.py"
         ),
-        Path("bioetl/composition/bootstrap/runtime/composite_bootstrap_builders.py"),
         Path("bioetl/composition/bootstrap/runtime/runner_assembly.py"),
     ],
 )
@@ -63,64 +58,14 @@ def test_composite_runtime_modules_import_runtime_config_from_stable_facade(
     ), f"{relative_path} must not import CompositeRuntimeConfig from runner_models."
 
 
-def _parse_tree(path: Path) -> ast.AST:
-    return ast.parse(path.read_text(encoding="utf-8"))
-
-
 @pytest.mark.architecture
-def test_composite_support_service_builders_stays_facade_only(src_dir: Path) -> None:
-    """The composite support builders module should remain a thin re-export facade."""
-    file_path = (
-        src_dir
-        / "bioetl"
-        / "composition"
-        / "bootstrap"
-        / "runtime"
-        / "composite_support_service_builders.py"
+def test_composite_support_service_builder_shims_stay_removed(src_dir: Path) -> None:
+    """Facade-only builder/bundle shims were collapsed in #10595 and must not return."""
+    runtime_dir = src_dir / "bioetl" / "composition" / "bootstrap" / "runtime"
+    removed = (
+        "composite_support_service_builders.py",
+        "composite_support_service_bundles.py",
+        "composite_bootstrap_builders.py",
     )
-    content = file_path.read_text(encoding="utf-8")
-    tree = _parse_tree(file_path)
-
-    function_defs = [
-        node.name
-        for node in ast.walk(tree)
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-    ]
-    class_defs = [
-        node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)
-    ]
-
-    assert not function_defs, (
-        "composite_support_service_builders.py must stay a facade-only module. "
-        f"Found local function definitions: {function_defs}"
-    )
-    assert not class_defs, (
-        "composite_support_service_builders.py must stay a facade-only module. "
-        f"Found local class definitions: {class_defs}"
-    )
-
-    allowed_import_modules = {
-        "bioetl.application.composite.runtime_models",
-        "bioetl.composition.bootstrap.runtime.composite_execution_support_builder",
-        "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder",
-        "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder",
-        "bioetl.composition.bootstrap.runtime.composite_support_service_bundles",
-        "__future__",
-        "typing",
-    }
-    import_modules = {
-        node.module
-        for node in ast.walk(tree)
-        if isinstance(node, ast.ImportFrom) and node.module is not None
-    }
-    unexpected_imports = import_modules - allowed_import_modules
-    assert not unexpected_imports, (
-        "composite_support_service_builders.py imported unexpected modules:\n"
-        + "\n".join(sorted(unexpected_imports))
-    )
-
-    line_count = len(content.splitlines())
-    assert line_count <= 40, (
-        "composite_support_service_builders.py must remain a thin facade "
-        f"(current lines: {line_count}, max: 40)."
-    )
+    present = [name for name in removed if (runtime_dir / name).exists()]
+    assert present == [], f"re-export shims must stay deleted: {present}"

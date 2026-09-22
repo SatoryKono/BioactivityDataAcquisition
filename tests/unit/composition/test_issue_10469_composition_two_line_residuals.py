@@ -53,8 +53,6 @@ pytestmark = pytest.mark.unit
 @pytest.mark.parametrize(
     "module_name",
     [
-        "bioetl.composition._service_types",
-        "bioetl.composition.contracts.services",
         "bioetl.application.services.control_plane.manifest.diagnostics.persistence",
         "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy",
         "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family",

@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 from bioetl.composition.lazy_exports import install_cached_public_exports
 
 if TYPE_CHECKING:
-    from bioetl.composition._json_types import JsonDict
     from bioetl.composition._pipeline_execution import ArchiveOptions, VacuumOptions
     from bioetl.composition._resource_management import (
         CheckpointRuntimeServiceProtocol,
@@ -15,6 +14,7 @@ if TYPE_CHECKING:
         MedallionLifecycleServiceProtocol,
         QuarantineRuntimeServiceProtocol,
     )
+    from bioetl.domain.types import JsonDict
 
 __all__ = [
     "ArchiveOptions",

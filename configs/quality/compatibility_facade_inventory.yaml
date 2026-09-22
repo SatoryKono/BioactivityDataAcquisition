@@ -254,8 +254,9 @@ retained_entrypoints:
       retained_wrappers_outside_all: []
   - path: src/bioetl/composition/maintenance_api.py
     compatibility_role:
-      Permanent logic-free public maintenance lazy re-export facade that shields maintenance/resource owners
-      behind a reviewed export budget.
+      Permanent logic-free public maintenance lazy re-export entrypoint retained for external callers; maintenance
+      symbols should prefer the canonical `bioetl.composition.entrypoints` surface, and the module no longer carries a
+      separate export-facade budget (#10597).
     canonical_target: bioetl.composition.maintenance_api
     compatibility_contract:
       deprecation_window: 90d
@@ -274,15 +275,15 @@ retained_entrypoints:
       routes through `bioetl.composition.entrypoints` and the reviewed `_services` owner. `tests`: public facade imports may
       appear in composition coverage only when validating the external seam itself."
     migration_path:
-      External consumers use `bioetl.composition.maintenance_api` as the single supported maintenance import path;
-      first-party runtime callers use the reviewed owner seam and executable behavior remains in owner modules.
+      Maintenance symbols should prefer `bioetl.composition.entrypoints` (`get_contract_migration_service`,
+      `get_vacuum_service`) and the owner-only `bioetl.composition.control_plane_service_access` seam
+      (`get_bronze_cleanup_service`) as canonical access paths; external consumers may keep
+      `bioetl.composition.maintenance_api` as a retained public entrypoint, while first-party runtime callers use the
+      reviewed owner seam and executable behavior remains in owner modules (#10597).
     exit_criteria:
-      The public maintenance facade contains no executable wrapper bodies, remains the sanctioned external import seam,
-      and its reviewed export budget stays bounded.
-    public_export_contract:
-      max_public_exports: 4
-      lazy_export_table: _PUBLIC_EXPORTS
-      retained_wrappers_outside_all: []
+      The public maintenance entrypoint contains no executable wrapper bodies and remains a retained public entrypoint
+      without a separate export-facade budget; canonical maintenance symbol access is governed by the
+      `bioetl.composition.entrypoints` export contract and the owner-only service-access seams (#10597).
   - path: src/bioetl/infrastructure/config/__init__.py
     compatibility_role:
       Permanent public infrastructure config package-root convenience facade that intentionally shields split
@@ -447,7 +448,7 @@ retained_compatibility_freeze_policy:
         stays on canonical owner modules.
   exit_criteria:
     - retained_entrypoint_count stays at or below the reviewed inventory count of 12.
-    - retained_public_export_facade_count stays at or below the reviewed inventory count of 4.
+    - retained_public_export_facade_count stays at or below the reviewed inventory count of 3 (#10597).
     - compatibility importer census remains conflict-free with no duplicate, unresolved, or unowned rows.
     - every retained row keeps owner, consumer_class, sunset_status, migration_path, and exit_criteria metadata.
 retained_entrypoint_burn_down_plan:
@@ -521,10 +522,11 @@ retained_entrypoint_burn_down_plan:
       phase: enforce
       target_state: retain_as_stable_public_api
       rationale:
-        Public composition maintenance facade stays stable and logic-free while first-party callers use canonical
-        entrypoints or the reviewed owner seam.
+        Public composition maintenance entrypoint stays stable and logic-free without a separate export-facade budget;
+        maintenance symbols prefer `bioetl.composition.entrypoints` and first-party callers use the reviewed owner seam
+        (#10597).
       completion_gate:
-        Keep the public maintenance facade stable while holding first-party runtime imports at zero and preventing
+        Keep the public maintenance entrypoint stable while holding first-party runtime imports at zero and preventing
         growth of ad hoc maintenance-api callers.
     - path: src/bioetl/infrastructure/config/__init__.py
       phase: enforce

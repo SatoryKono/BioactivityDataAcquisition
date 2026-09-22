@@ -19,15 +19,17 @@ from bioetl.application.composite.runtime_wiring_api import (
 from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
 )
+from bioetl.composition.bootstrap.runtime.composite_execution_support_builder import (
+    build_execution_support_services,
+)
 from bioetl.composition.bootstrap.runtime.composite_merge_service_builder import (
     build_composite_merge_service,
 )
+from bioetl.composition.bootstrap.runtime.composite_runtime_management_builder import (
+    build_runtime_management_services,
+)
 from bioetl.composition.bootstrap.runtime.composite_support_runtime_context import (
     resolve_composite_support_runtime_context,
-)
-from bioetl.composition.bootstrap.runtime.composite_support_service_builders import (
-    build_execution_support_services,
-    build_runtime_management_services,
 )
 
 if TYPE_CHECKING:

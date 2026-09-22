@@ -30,6 +30,7 @@
 from __future__ import annotations
 
 import importlib
+import importlib.util
 import sys
 
 import pytest
@@ -38,8 +39,9 @@ import pytest
 @pytest.mark.unit
 def test_composite_api_reexports_bootstrap_entrypoints() -> None:
     """Public composite API should expose owner helpers unchanged."""
-    sys.modules.pop("bioetl.composition.composite_catalog", None)
-
+    # Do not evict ``composite_catalog`` from ``sys.modules``: it now owns
+    # ``list_configured_pipeline_names`` (#10595) and other tests assert identity
+    # against the already-imported owner.
     compat_module = importlib.import_module("bioetl.composition.composite_catalog")
     target_module = importlib.import_module(
         "bioetl.composition.bootstrap.runtime.composite"
@@ -84,29 +86,24 @@ def test_bootstrap_package_root_reexports_curated_lazy_helpers() -> None:
 
 
 @pytest.mark.unit
-def test_pipeline_construction_module_reexports_canonical_builders() -> None:
-    """Public construction seam should expose its delegated helper owners."""
-    sys.modules.pop("bioetl.composition.factories.pipeline.construction", None)
-
-    compat_module = importlib.import_module(
-        "bioetl.composition.factories.pipeline.construction"
-    )
-
+def test_pipeline_construction_owners_are_importable_without_shim() -> None:
+    """Construction helpers are owned directly; the aggregate shim is gone (#10595)."""
     assert (
-        compat_module.TransformerBuilder
-        is importlib.import_module(
+        importlib.util.find_spec("bioetl.composition.factories.pipeline.construction")
+        is None
+    )
+    assert callable(
+        importlib.import_module(
             "bioetl.composition.factories.pipeline.transformer_builder"
         ).TransformerBuilder
     )
-    assert (
-        compat_module.RunContextFactory
-        is importlib.import_module(
+    assert callable(
+        importlib.import_module(
             "bioetl.composition.factories.pipeline.run_context_factory"
         ).RunContextFactory
     )
-    assert (
-        compat_module.DomainConfigResolver
-        is importlib.import_module(
+    assert callable(
+        importlib.import_module(
             "bioetl.infrastructure.config.domain_config_resolver"
         ).DomainConfigResolver
     )

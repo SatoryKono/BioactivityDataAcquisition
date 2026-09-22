@@ -41,9 +41,13 @@ from bioetl.application.composite.runtime_wiring_api import (
 from bioetl.application.composite.join_key_normalization import (
     JOIN_KEY_NORMALIZATION_POLICIES,
 )
-from bioetl.composition.bootstrap.runtime.composite_support_service_builders import (
+from bioetl.composition.bootstrap.runtime.composite_execution_support_builder import (
     build_execution_support_services,
+)
+from bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder import (
     build_merge_dependencies,
+)
+from bioetl.composition.bootstrap.runtime.composite_runtime_management_builder import (
     build_runtime_management_services,
 )
 from bioetl.domain.composite.strategy import MergeStrategy
@@ -416,7 +420,7 @@ def test_build_runtime_management_services_fails_when_effective_hash_cannot_be_r
 @pytest.mark.unit
 def test_build_merge_dependencies_creates_required_services() -> None:
     """Test that build_merge_dependencies creates all required services without errors."""
-    from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (
+    from bioetl.composition.bootstrap.runtime.composite_merge_dependencies_bundle import (
         MergeDependenciesBundle,
     )
 

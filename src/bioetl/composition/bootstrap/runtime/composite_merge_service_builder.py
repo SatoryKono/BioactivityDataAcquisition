@@ -10,7 +10,7 @@ from bioetl.application.composite.runtime_wiring_api import (
     MergeCollaboratorGroup,
     MergeService,
 )
-from bioetl.composition.bootstrap.runtime.composite_support_service_builders import (
+from bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder import (
     build_merge_dependencies,
 )
 from bioetl.domain.composite.strategy import MergeStrategy

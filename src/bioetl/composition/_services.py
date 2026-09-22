@@ -38,19 +38,27 @@ from bioetl.composition.registry_api import create_registry
 from bioetl.composition import _workflow_services
 
 if TYPE_CHECKING:
-    from bioetl.composition._service_types import (
-        BronzeCleanupResult,
-        LockPort,
-        PipelineRegistry,
+    from bioetl.application.services.execution.pipeline_runner_service import (
         PipelineRunnerService,
+    )
+    from bioetl.application.services.ops.bronze_cleanup_service import (
+        BronzeCleanupResult,
+    )
+    from bioetl.application.services.quality.quarantine_service import (
         QuarantineService,
-        WorkflowConfig,
+    )
+    from bioetl.application.services.workflow.control_plane.execution_service import (
         WorkflowExecutionService,
+    )
+    from bioetl.application.services.workflow.workflow_runner_service import (
         WorkflowRunnerService,
     )
     from bioetl.composition.bootstrap.assembly.health_server import (
         HealthServerDependencies,
     )
+    from bioetl.composition.registry_api import PipelineRegistry
+    from bioetl.domain.ports import LockPort
+    from bioetl.domain.workflow import WorkflowConfig
 
 
 def _ensure_registrations(

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Protocol
 if TYPE_CHECKING:
     from collections.abc import Awaitable
 
-    from bioetl.composition.contracts.services import JsonDict
+    from bioetl.domain.types import JsonDict
 
 
 class QuarantineRuntimeServiceProtocol(Protocol):

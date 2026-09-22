@@ -114,7 +114,6 @@ access.
 | `runtime.runtime_basics`                   | Basic runtime setup                                              |
 | `runtime.classification_init`              | Publication type classification loading                          |
 | `runtime.composite`                        | Composite pipeline bootstrap                                     |
-| `runtime.composite_bootstrap_builders`     | Composite pipeline builder helpers                               |
 | `runtime.composite_support_helpers`        | Composite support service helpers                                |
 | `runtime.composite_infrastructure_context` | Typed container for shared composite infrastructure dependencies |
 

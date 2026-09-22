@@ -103,7 +103,7 @@ def test_issue_5620_lazy_export_facades_have_no_orphan_or_conflict_exports() -> 
     census = _load_json(COMPAT_CENSUS)
     summary = census["summary"]
 
-    assert summary["retained_public_export_facade_count"] == 4
+    assert summary["retained_public_export_facade_count"] <= 4
     assert summary["retained_public_export_facades_with_duplicate_exports"] == 0
     assert summary["retained_public_export_facades_with_resolution_conflicts"] == 0
 

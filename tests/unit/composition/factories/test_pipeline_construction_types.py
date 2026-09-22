@@ -34,9 +34,11 @@ import pytest
 from typing import Protocol
 from typing import get_type_hints
 
-from bioetl.composition.factories.pipeline import construction_types
 from bioetl.application.ports.pipeline import (
+    ContractPolicyLoaderProtocol,
+    DomainConfigMapperPort,
     EntityTypeExtractor,
+    SchemaBuilderProtocol,
 )
 
 
@@ -44,17 +46,17 @@ pytestmark = pytest.mark.unit
 
 
 def test_pipeline_construction_protocols_expose_expected_public_contracts() -> None:
-    """Construction protocol module should expose stable callable contracts."""
+    """Construction protocol owner should expose stable callable contracts."""
     assert issubclass(EntityTypeExtractor, Protocol)
-    assert issubclass(construction_types.DomainConfigMapperPort, Protocol)
-    assert issubclass(construction_types.ContractPolicyLoaderProtocol, Protocol)
-    assert issubclass(construction_types._SchemaBuilder, Protocol)
+    assert issubclass(DomainConfigMapperPort, Protocol)
+    assert issubclass(ContractPolicyLoaderProtocol, Protocol)
+    assert issubclass(SchemaBuilderProtocol, Protocol)
 
 
 def test_pipeline_construction_protocols_preserve_expected_return_hints() -> None:
     """Construction protocol call signatures should keep their typed return contracts."""
     entity_hints = get_type_hints(EntityTypeExtractor.__call__)
-    schema_hints = get_type_hints(construction_types._SchemaBuilder.to_schema)
+    schema_hints = get_type_hints(SchemaBuilderProtocol.to_schema)
 
     assert entity_hints["return"] == str | None
     assert schema_hints["return"] is object

@@ -37,7 +37,7 @@ _LOCK_SURFACE_FILES = (
     "src/bioetl/domain/exceptions/internal_lock.py",
     "src/bioetl/domain/types/enums.py",
     "src/bioetl/application/composite/runner_pkg/runner.py",
-    "src/bioetl/composition/bootstrap/runtime/composite_bootstrap_builders.py",
+    "src/bioetl/composition/bootstrap/runtime/runtime_basics.py",
     "src/bioetl/composition/bootstrap/cli/lock.py",
     "docs/04-reference/api/domain.md",
     "docs/04-reference/api/application.md",

@@ -166,10 +166,10 @@ class TestTransformerInjectionPath:
         construction_file = (
             _get_base_path(Path("src/bioetl/composition/factories"))
             / "pipeline"
-            / "construction.py"
+            / "transformer_builder.py"
         )
         if not construction_file.exists():
-            pytest.skip("pipeline/construction.py not found")
+            pytest.skip("pipeline/transformer_builder.py not found")
         if not assembler_file.exists():
             pytest.skip("pipeline/assembler.py not found")
         if not service_bundle_file.exists():

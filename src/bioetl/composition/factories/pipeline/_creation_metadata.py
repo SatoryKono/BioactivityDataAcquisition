@@ -10,9 +10,7 @@ import pyarrow as pa
 from bioetl.application.services.lineage.metadata_coordinator import (
     MetadataCoordinator,
 )
-from bioetl.composition.factories.pipeline.construction_types import (
-    _SchemaBuilder,
-)
+from bioetl.application.ports.pipeline import SchemaBuilderProtocol as _SchemaBuilder
 from bioetl.composition.factories.pipeline.run_context_factory import (
     RunContextFactory,
 )

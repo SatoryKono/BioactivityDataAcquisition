@@ -9,10 +9,8 @@ from bioetl.composition.runtime_builders.config_access import (
     initialize_protein_class_target_type_mapping,
     resolve_configs_root,
 )
+from bioetl.application.ports.pipeline import PipelineRunnerProtocol
 from bioetl.composition.providers import ensure_providers_loaded
-from bioetl.composition.bootstrap.service_registry_contracts import (
-    PipelineRunnerProtocol,
-)
 from bioetl.composition.runtime_builders._runner_builder_orchestration import (
     attach_runner_control_plane_collaborators as _attach_runner_control_plane_collaborators,
     bootstrap_runner_factory as _bootstrap_runner_factory,

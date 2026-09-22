@@ -45,7 +45,7 @@ FORBIDDEN_ADAPTER_NOOP_PATHS = (
 )
 FORBIDDEN_COMPOSITION_NOOP_METRICS_PATHS = (
     Path("src/bioetl/composition/factories/datasource/adapter_helpers.py"),
-    Path("src/bioetl/composition/factories/_observability_wiring.py"),
+    Path("src/bioetl/composition/factories/observability_api.py"),
     Path("src/bioetl/composition/factories/services/port_factories.py"),
 )
 FORBIDDEN_STORAGE_LOCAL_AUDIT_CONSTRUCTION_PATHS = (

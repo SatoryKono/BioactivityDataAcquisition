@@ -49,7 +49,7 @@ from bioetl.composition.bootstrap.cli.run_manifest import (
 from bioetl.composition.bootstrap.cli.run_manifest import (
     persist_historical_replay_universe_report as persist_historical_replay_universe_report,
 )
-from bioetl.composition.config_catalog import (
+from bioetl.composition.composite_catalog import (
     list_configured_pipeline_names as list_configured_pipeline_names,
 )
 

@@ -244,13 +244,19 @@ def test_transformer_builder_builds_transformer_with_policy_fallback() -> None:
 
 
 @pytest.mark.unit
-def test_construction_module_reexports_canonical_helpers() -> None:
-    from bioetl.composition.factories.pipeline import construction
+def test_construction_helpers_resolve_from_canonical_owners() -> None:
+    """The ``construction`` aggregate shim was removed in #10595; owners stay callable."""
+    import importlib.util
+
     from bioetl.infrastructure.config.domain_config_resolver import (
         resolve_domain_pipeline_config,
     )
 
-    assert construction.RunContextFactory is RunContextFactory
-    assert construction.DomainConfigResolver is DomainConfigResolver
-    assert construction.TransformerBuilder is TransformerBuilder
-    assert construction.resolve_domain_pipeline_config is resolve_domain_pipeline_config
+    assert (
+        importlib.util.find_spec("bioetl.composition.factories.pipeline.construction")
+        is None
+    )
+    assert callable(RunContextFactory)
+    assert callable(DomainConfigResolver)
+    assert callable(TransformerBuilder)
+    assert callable(resolve_domain_pipeline_config)

@@ -36,7 +36,7 @@ from types import SimpleNamespace
 from typing import cast
 from unittest.mock import MagicMock
 
-from bioetl.composition.factories._observability_wiring import (
+from bioetl.composition.factories.observability_api import (
     _create_cached_bronze_data_source,
 )
 from bioetl.domain.context import CachedBronzeContext
@@ -63,7 +63,7 @@ def test_cached_bronze_data_source_reuses_shared_metrics(
         def __init__(self, **kwargs: object) -> None:
             captured["data_source_kwargs"] = kwargs
 
-    import bioetl.composition.factories._observability_wiring as wiring_module
+    import bioetl.composition.factories.observability_api as wiring_module
 
     monkeypatch.setattr(
         wiring_module,

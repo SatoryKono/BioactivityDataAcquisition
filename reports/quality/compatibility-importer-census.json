@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-09-08",
+  "snapshot_date": "2026-09-22",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
@@ -18,7 +18,7 @@
     "config_root_symbol_count": 3,
     "config_root_src_importer_count": 0,
     "control_plane_root_src_importer_count": 0,
-    "retained_public_export_facade_count": 4,
+    "retained_public_export_facade_count": 3,
     "retained_public_export_facades_with_duplicate_exports": 0,
     "retained_public_export_facades_with_resolution_conflicts": 0,
     "retained_public_export_facades_with_wrapper_contract_drift": 0
@@ -36,10 +36,11 @@
       "src_importers": [],
       "test_importers": [
         "tests/unit/interfaces/cli/commands/test_boundary_families.py",
-        "tests/unit/interfaces/cli/test_cli_run_commands.py"
+        "tests/unit/interfaces/cli/test_cli_run_commands.py",
+        "tests/unit/interfaces/test_issue_10469_two_line_residuals_three.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 2,
+      "test_importer_count": 3,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing"
@@ -96,9 +97,13 @@
       "internal_callers_zero": true,
       "usage_classification": "stable_public_api_zero_first_party_src",
       "src_importers": [],
-      "test_importers": [],
+      "test_importers": [
+        "tests/unit/interfaces/cli/commands/test_health.py",
+        "tests/unit/interfaces/test_issue_10520_interfaces_more.py",
+        "tests/unit/interfaces/test_issue_10520_interfaces_tail.py"
+      ],
       "src_importer_count": 0,
-      "test_importer_count": 0,
+      "test_importer_count": 3,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing"
@@ -115,10 +120,11 @@
       "src_importers": [],
       "test_importers": [
         "tests/unit/interfaces/cli/commands/test_commands_package.py",
-        "tests/unit/interfaces/cli/commands/test_diagnostics.py"
+        "tests/unit/interfaces/cli/commands/test_diagnostics.py",
+        "tests/unit/interfaces/test_issue_10520_interfaces_tail.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 2,
+      "test_importer_count": 3,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing"
@@ -135,10 +141,11 @@
       "src_importers": [],
       "test_importers": [
         "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py",
-        "tests/unit/interfaces/cli/commands/test_cr_8957_cli_residuals.py"
+        "tests/unit/interfaces/cli/commands/test_cr_8957_cli_residuals.py",
+        "tests/unit/interfaces/test_issue_10520_interfaces_tail.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 2,
+      "test_importer_count": 3,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing"
@@ -261,32 +268,7 @@
       "test_importer_count": 2,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
-      "sunset_status": "external-facing",
-      "max_public_exports": 4,
-      "public_exports": [
-        "cleanup_bronze",
-        "get_bronze_cleanup_service",
-        "get_contract_migration_service",
-        "get_vacuum_service"
-      ],
-      "public_export_count": 4,
-      "duplicate_public_exports": [],
-      "lazy_export_table": "_PUBLIC_EXPORTS",
-      "lazy_export_keys": [
-        "cleanup_bronze",
-        "get_bronze_cleanup_service",
-        "get_contract_migration_service",
-        "get_vacuum_service"
-      ],
-      "duplicate_lazy_export_keys": [],
-      "orphan_lazy_export_keys": [],
-      "dunder_getattr_exports": [],
-      "orphan_dunder_getattr_exports": [],
-      "retained_wrapper_contract": [],
-      "retained_wrappers_outside_all": [],
-      "missing_retained_wrappers_outside_all": [],
-      "unexpected_retained_wrappers_outside_all": [],
-      "resolution_conflicts": {}
+      "sunset_status": "external-facing"
     },
     {
       "path": "src/bioetl/infrastructure/config/__init__.py",
@@ -306,10 +288,14 @@
         "tests/unit/infrastructure/config/test_contract_registry_loader_additional.py",
         "tests/unit/infrastructure/config/test_pipeline_payload_normalization.py",
         "tests/unit/infrastructure/config/test_public_config_surfaces.py",
-        "tests/unit/infrastructure/config/test_workflow_config_api.py"
+        "tests/unit/infrastructure/config/test_workflow_config_api.py",
+        "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py",
+        "tests/unit/infrastructure/test_issue_10469_stream_a_infra_five.py",
+        "tests/unit/infrastructure/test_issue_10469_stream_a_infra_fourteen.py",
+        "tests/unit/infrastructure/test_issue_10469_two_line_residuals_three.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 8,
+      "test_importer_count": 12,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
@@ -393,6 +379,9 @@
         "tests/unit/application/composite/test_merger_metrics_mixin.py",
         "tests/unit/application/composite/test_merger_orchestration.py",
         "tests/unit/application/composite/test_merger_post_join.py",
+        "tests/unit/application/test_issue_10518_application_compwf_a.py",
+        "tests/unit/application/test_issue_10518_application_compwf_b.py",
+        "tests/unit/application/test_issue_10518_application_tail2a.py",
         "tests/unit/composite/test_merge_golden.py",
         "tests/unit/domain/composite/test_composite_config.py",
         "tests/unit/domain/composite/test_composite_config_edge_cases.py",
@@ -402,12 +391,13 @@
         "tests/unit/domain/composite/test_domain_composite_cr_residuals_8220_8240.py",
         "tests/unit/domain/composite/test_domain_composite_cr_residuals_8222_8255.py",
         "tests/unit/domain/test_cr_stream_8644_domain_other.py",
+        "tests/unit/domain/test_issue_10469_two_line_residuals_three.py",
         "tests/unit/repo_backed/application/composite/test_merger_golden_snapshots.py",
         "tests/unit/repo_backed/application/composite/test_preflight_validator.py",
         "tests/unit/repo_backed/application/composite/test_publication_schema_columns.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 40,
+      "test_importer_count": 44,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing"
@@ -449,10 +439,11 @@
       "src_importers": [],
       "test_importers": [
         "tests/unit/interfaces/cli/commands/test_boundary_families.py",
-        "tests/unit/interfaces/cli/test_cli_run_commands.py"
+        "tests/unit/interfaces/cli/test_cli_run_commands.py",
+        "tests/unit/interfaces/test_issue_10469_two_line_residuals_three.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 2,
+      "test_importer_count": 3,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing"
@@ -509,9 +500,13 @@
       "internal_callers_zero": true,
       "usage_classification": "stable_public_api_zero_first_party_src",
       "src_importers": [],
-      "test_importers": [],
+      "test_importers": [
+        "tests/unit/interfaces/cli/commands/test_health.py",
+        "tests/unit/interfaces/test_issue_10520_interfaces_more.py",
+        "tests/unit/interfaces/test_issue_10520_interfaces_tail.py"
+      ],
       "src_importer_count": 0,
-      "test_importer_count": 0,
+      "test_importer_count": 3,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing"
@@ -528,10 +523,11 @@
       "src_importers": [],
       "test_importers": [
         "tests/unit/interfaces/cli/commands/test_commands_package.py",
-        "tests/unit/interfaces/cli/commands/test_diagnostics.py"
+        "tests/unit/interfaces/cli/commands/test_diagnostics.py",
+        "tests/unit/interfaces/test_issue_10520_interfaces_tail.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 2,
+      "test_importer_count": 3,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing"
@@ -548,10 +544,11 @@
       "src_importers": [],
       "test_importers": [
         "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py",
-        "tests/unit/interfaces/cli/commands/test_cr_8957_cli_residuals.py"
+        "tests/unit/interfaces/cli/commands/test_cr_8957_cli_residuals.py",
+        "tests/unit/interfaces/test_issue_10520_interfaces_tail.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 2,
+      "test_importer_count": 3,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing"
@@ -674,32 +671,7 @@
       "test_importer_count": 2,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
-      "sunset_status": "external-facing",
-      "max_public_exports": 4,
-      "public_exports": [
-        "cleanup_bronze",
-        "get_bronze_cleanup_service",
-        "get_contract_migration_service",
-        "get_vacuum_service"
-      ],
-      "public_export_count": 4,
-      "duplicate_public_exports": [],
-      "lazy_export_table": "_PUBLIC_EXPORTS",
-      "lazy_export_keys": [
-        "cleanup_bronze",
-        "get_bronze_cleanup_service",
-        "get_contract_migration_service",
-        "get_vacuum_service"
-      ],
-      "duplicate_lazy_export_keys": [],
-      "orphan_lazy_export_keys": [],
-      "dunder_getattr_exports": [],
-      "orphan_dunder_getattr_exports": [],
-      "retained_wrapper_contract": [],
-      "retained_wrappers_outside_all": [],
-      "missing_retained_wrappers_outside_all": [],
-      "unexpected_retained_wrappers_outside_all": [],
-      "resolution_conflicts": {}
+      "sunset_status": "external-facing"
     },
     {
       "path": "src/bioetl/infrastructure/config/__init__.py",
@@ -719,10 +691,14 @@
         "tests/unit/infrastructure/config/test_contract_registry_loader_additional.py",
         "tests/unit/infrastructure/config/test_pipeline_payload_normalization.py",
         "tests/unit/infrastructure/config/test_public_config_surfaces.py",
-        "tests/unit/infrastructure/config/test_workflow_config_api.py"
+        "tests/unit/infrastructure/config/test_workflow_config_api.py",
+        "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py",
+        "tests/unit/infrastructure/test_issue_10469_stream_a_infra_five.py",
+        "tests/unit/infrastructure/test_issue_10469_stream_a_infra_fourteen.py",
+        "tests/unit/infrastructure/test_issue_10469_two_line_residuals_three.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 8,
+      "test_importer_count": 12,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
@@ -806,6 +782,9 @@
         "tests/unit/application/composite/test_merger_metrics_mixin.py",
         "tests/unit/application/composite/test_merger_orchestration.py",
         "tests/unit/application/composite/test_merger_post_join.py",
+        "tests/unit/application/test_issue_10518_application_compwf_a.py",
+        "tests/unit/application/test_issue_10518_application_compwf_b.py",
+        "tests/unit/application/test_issue_10518_application_tail2a.py",
         "tests/unit/composite/test_merge_golden.py",
         "tests/unit/domain/composite/test_composite_config.py",
         "tests/unit/domain/composite/test_composite_config_edge_cases.py",
@@ -815,12 +794,13 @@
         "tests/unit/domain/composite/test_domain_composite_cr_residuals_8220_8240.py",
         "tests/unit/domain/composite/test_domain_composite_cr_residuals_8222_8255.py",
         "tests/unit/domain/test_cr_stream_8644_domain_other.py",
+        "tests/unit/domain/test_issue_10469_two_line_residuals_three.py",
         "tests/unit/repo_backed/application/composite/test_merger_golden_snapshots.py",
         "tests/unit/repo_backed/application/composite/test_preflight_validator.py",
         "tests/unit/repo_backed/application/composite/test_publication_schema_columns.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 40,
+      "test_importer_count": 44,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing"
@@ -938,46 +918,6 @@
       "test_importer_count": 3
     },
     {
-      "path": "src/bioetl/composition/maintenance_api.py",
-      "module_name": "bioetl.composition.maintenance_api",
-      "canonical_target": "bioetl.composition.maintenance_api",
-      "max_public_exports": 4,
-      "public_exports": [
-        "cleanup_bronze",
-        "get_bronze_cleanup_service",
-        "get_contract_migration_service",
-        "get_vacuum_service"
-      ],
-      "public_export_count": 4,
-      "duplicate_public_exports": [],
-      "lazy_export_table": "_PUBLIC_EXPORTS",
-      "lazy_export_keys": [
-        "cleanup_bronze",
-        "get_bronze_cleanup_service",
-        "get_contract_migration_service",
-        "get_vacuum_service"
-      ],
-      "duplicate_lazy_export_keys": [],
-      "orphan_lazy_export_keys": [],
-      "dunder_getattr_exports": [],
-      "orphan_dunder_getattr_exports": [],
-      "retained_wrapper_contract": [],
-      "retained_wrappers_outside_all": [],
-      "missing_retained_wrappers_outside_all": [],
-      "unexpected_retained_wrappers_outside_all": [],
-      "resolution_conflicts": {},
-      "owner": "bioetl.composition",
-      "status": "public-entrypoint",
-      "external_breaking_change_required": true,
-      "internal_callers_zero": true,
-      "usage_classification": "stable_public_api_zero_first_party_src",
-      "surface_classification": "external-facing",
-      "consumer_class": "stable_public_api_zero_first_party_src",
-      "sunset_status": "external-facing",
-      "src_importer_count": 0,
-      "test_importer_count": 2
-    },
-    {
       "path": "src/bioetl/infrastructure/config/__init__.py",
       "module_name": "bioetl.infrastructure.config",
       "canonical_target": "bioetl.infrastructure.config",
@@ -1030,7 +970,7 @@
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 8
+      "test_importer_count": 12
     }
   ],
   "retained_public_export_owner_usage_map": [
@@ -1122,46 +1062,6 @@
       "test_importer_count": 3
     },
     {
-      "path": "src/bioetl/composition/maintenance_api.py",
-      "module_name": "bioetl.composition.maintenance_api",
-      "canonical_target": "bioetl.composition.maintenance_api",
-      "max_public_exports": 4,
-      "public_exports": [
-        "cleanup_bronze",
-        "get_bronze_cleanup_service",
-        "get_contract_migration_service",
-        "get_vacuum_service"
-      ],
-      "public_export_count": 4,
-      "duplicate_public_exports": [],
-      "lazy_export_table": "_PUBLIC_EXPORTS",
-      "lazy_export_keys": [
-        "cleanup_bronze",
-        "get_bronze_cleanup_service",
-        "get_contract_migration_service",
-        "get_vacuum_service"
-      ],
-      "duplicate_lazy_export_keys": [],
-      "orphan_lazy_export_keys": [],
-      "dunder_getattr_exports": [],
-      "orphan_dunder_getattr_exports": [],
-      "retained_wrapper_contract": [],
-      "retained_wrappers_outside_all": [],
-      "missing_retained_wrappers_outside_all": [],
-      "unexpected_retained_wrappers_outside_all": [],
-      "resolution_conflicts": {},
-      "owner": "bioetl.composition",
-      "status": "public-entrypoint",
-      "external_breaking_change_required": true,
-      "internal_callers_zero": true,
-      "usage_classification": "stable_public_api_zero_first_party_src",
-      "surface_classification": "external-facing",
-      "consumer_class": "stable_public_api_zero_first_party_src",
-      "sunset_status": "external-facing",
-      "src_importer_count": 0,
-      "test_importer_count": 2
-    },
-    {
       "path": "src/bioetl/infrastructure/config/__init__.py",
       "module_name": "bioetl.infrastructure.config",
       "canonical_target": "bioetl.infrastructure.config",
@@ -1214,7 +1114,7 @@
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 8
+      "test_importer_count": 12
     }
   ],
   "first_safe_removal_wave": {

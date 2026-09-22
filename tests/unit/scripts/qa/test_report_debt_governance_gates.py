@@ -177,14 +177,14 @@ def test_compatibility_scorecard_coherence_gate_passes_when_metrics_align() -> N
         {
             "metrics": {
                 "retained_entrypoint_count": 12,
-                "retained_public_export_facade_count": 4,
+                "retained_public_export_facade_count": 3,
                 "twin_pair_count": 0,
             }
         },
         {
             "summary": {
                 "retained_entrypoint_count": 12,
-                "retained_public_export_facade_count": 4,
+                "retained_public_export_facade_count": 3,
                 "twin_pair_count": 0,
             }
         },
@@ -198,14 +198,14 @@ def test_compatibility_scorecard_coherence_gate_fails_for_metric_drift() -> None
         {
             "metrics": {
                 "retained_entrypoint_count": 13,
-                "retained_public_export_facade_count": 4,
+                "retained_public_export_facade_count": 3,
                 "twin_pair_count": 1,
             }
         },
         {
             "summary": {
                 "retained_entrypoint_count": 12,
-                "retained_public_export_facade_count": 4,
+                "retained_public_export_facade_count": 3,
                 "twin_pair_count": 0,
             }
         },
