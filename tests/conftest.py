@@ -320,6 +320,8 @@ def pytest_configure(config):
     _configure_windows_pycharm_traceback_style(config)
     _configure_wsl_timeout(config)
     _configure_windows_local_basetemp(config)
+    _configure_wsl_local_basetemp(config)
+    _configure_wsl_cache_dir(config)
     _configure_windows_test_mode_for_control_plane_durability()
     _configure_isolated_run_report_root(config)
     if _selected_paths_need_hypothesis(config):
@@ -451,6 +453,80 @@ def _configure_windows_local_basetemp(config: pytest.Config) -> None:
     # leaf here races that cleanup on Windows (WinError 5 on os.scandir).
     # Point at a unique path that does not exist yet; pytest creates it.
     config.option.basetemp = root / f"basetemp-{os.getpid()}-{os.urandom(4).hex()}"
+
+
+def _is_mounted_worktree() -> bool:
+    """Return True when checkout lives on a slow /mnt/* mount (WSL)."""
+    try:
+        return Path(__file__).resolve().is_relative_to(Path("/mnt"))
+    except (OSError, ValueError):
+        return False
+
+
+def _wsl_local_temp_root() -> Path | None:
+    """Return a local tmp root for WSL mounted-worktree runs."""
+    if not _is_wsl() or not _is_mounted_worktree():
+        return None
+    override = os.environ.get("BIOETL_PYTEST_TEMP_ROOT", "").strip()
+    if override:
+        root = Path(override).expanduser()
+        root.mkdir(parents=True, exist_ok=True)
+        return root
+    root = Path("/tmp/bioetl-pytest")
+    root.mkdir(parents=True, exist_ok=True)
+    return root
+
+
+def _configure_wsl_local_basetemp(config: pytest.Config) -> None:
+    """Force pytest basetemp onto local /tmp for WSL mounted worktrees."""
+    if not _is_wsl() or not _is_mounted_worktree():
+        return
+    existing = getattr(config.option, "basetemp", None)
+    if existing:
+        return
+    root = _wsl_local_temp_root()
+    if root is None:
+        return
+    config.option.basetemp = root / f"basetemp-{os.getpid()}-{os.urandom(4).hex()}"
+
+
+def _configure_wsl_cache_dir(config: pytest.Config) -> None:
+    """Redirect pytest cache and hypothesis storage to local tmp for WSL."""
+    if not _is_wsl() or not _is_mounted_worktree():
+        return
+    # Avoid writing .pytest_cache and .hypothesis databases to the slow mount.
+    root = _wsl_local_temp_root()
+    if root is None:
+        return
+    # Use stable local cache so assertion-rewrite and hypothesis DB reuse across runs.
+    cache_dir = root / "cache"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    # pytest's cache provider reads cache_dir from config option; set ini override.
+    try:
+        config.option.cache_dir = str(cache_dir)
+    except AttributeError:
+        pass
+    # Hypothesis uses database file; keep it local to avoid per-example fsync on /mnt.
+    hypothesis_dir = cache_dir / "hypothesis"
+    hypothesis_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        from hypothesis import settings as _hyp_settings
+        from hypothesis.database import DirectoryBasedExampleDatabase
+
+        _hyp_settings.register_profile(
+            "wsl-fast",
+            database=DirectoryBasedExampleDatabase(str(hypothesis_dir)),
+            max_examples=5,
+        )
+        # Only switch to wsl-fast if current profile is fast (default).
+        current = os.getenv("HYPOTHESIS_PROFILE", "fast")
+        if current == "fast":
+            _hyp_settings.load_profile("wsl-fast")
+    except Exception:
+        # Fallback env for other hypothesis versions.
+        os.environ.setdefault("HYPOTHESIS_STORAGE_DIRECTORY", str(hypothesis_dir))
+    # Also ensure tmp_path fixtures land on local tmp.
+    os.environ.setdefault("TMPDIR", str(root))
 
 
 def _configure_isolated_run_report_root(config: pytest.Config) -> None:
