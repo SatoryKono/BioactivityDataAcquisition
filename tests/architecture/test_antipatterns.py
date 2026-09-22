@@ -114,7 +114,15 @@ def test_no_hardcoded_secrets(cached_subprocess_run) -> None:
 
     # Run detect-secrets scan as subprocess with caching using Python module
     result = cached_subprocess_run(
-        [str(venv_python), "-m", "detect_secrets", "scan", "--baseline", str(baseline_path), "src/"],
+        [
+            str(venv_python),
+            "-m",
+            "detect_secrets",
+            "scan",
+            "--baseline",
+            str(baseline_path),
+            "src/",
+        ],
         timeout=600,
         cwd=REPO_ROOT,
     )
