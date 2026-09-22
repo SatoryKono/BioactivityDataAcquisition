@@ -34,7 +34,7 @@ _OTHER = "b" * 64
 def test_source_identity_windows_and_conflict_paths(tmp_path: Path) -> None:
     assert src_id._clean_path_text("foo//bar") == "foo/bar"
     assert src_id._mapped_runtime_path("E:/data") is not None
-    assert src_id._local_posix_runtime_path("E:/data") is None
+    assert src_id._local_posix_runtime_path("E:/data") == Path("/mnt/e/data")
     resolved = src_id.resolve_runtime_source_identity(
         computed_identity=_DIGEST,
         process_environment={src_id.RUNTIME_SOURCE_ID_ENV: _OTHER},

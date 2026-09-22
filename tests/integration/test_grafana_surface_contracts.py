@@ -560,8 +560,8 @@ def test_adaptive_trend_panels_use_selected_interval(
         for target in panel.get("targets", [])
         if isinstance(target.get("expr"), str)
     ]
-    assert any("[$__interval]" in expr for expr in expressions), (
-        f"Panel '{panel_title}' in {dashboard_file} must use $__interval"
+    assert any("[$__interval]" in expr or "[$__rate_interval]" in expr for expr in expressions), (
+        f"Panel '{panel_title}' in {dashboard_file} must use $__interval or $__rate_interval"
     )
 
 

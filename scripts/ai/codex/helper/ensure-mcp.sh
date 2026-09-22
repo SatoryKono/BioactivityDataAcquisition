@@ -420,13 +420,23 @@ PY
             local_transport="${_mcp_defaults[1]:-shared}"
         fi
     fi
-    timeout "${local_setup_timeout}" python3 "${SETUP_MCP}" \
-        --root "${REPO_ROOT}" \
-        --workspace-root "${REPO_ROOT}" \
-        --profile "${local_profile}" \
-        --transport-mode "${local_transport}" \
-        --skip-codex-validation >/dev/null 2>&1 || \
-        fail "MCP config materialization phase failed or timed out after ${local_setup_timeout}s"
+    if timeout 1 true >/dev/null 2>&1; then
+        timeout "${local_setup_timeout}" python3 "${SETUP_MCP}" \
+            --root "${REPO_ROOT}" \
+            --workspace-root "${REPO_ROOT}" \
+            --profile "${local_profile}" \
+            --transport-mode "${local_transport}" \
+            --skip-codex-validation >/dev/null 2>&1 || \
+            fail "MCP config materialization phase failed or timed out after ${local_setup_timeout}s"
+    else
+        python3 "${SETUP_MCP}" \
+            --root "${REPO_ROOT}" \
+            --workspace-root "${REPO_ROOT}" \
+            --profile "${local_profile}" \
+            --transport-mode "${local_transport}" \
+            --skip-codex-validation >/dev/null 2>&1 || \
+            fail "MCP config materialization phase failed or timed out after ${local_setup_timeout}s"
+    fi
 fi
 
 check_workspace_mcp_config "${REPO_ROOT}/.mcp.json"
