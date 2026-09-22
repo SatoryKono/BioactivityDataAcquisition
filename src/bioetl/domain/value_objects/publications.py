@@ -195,6 +195,6 @@ class PubMedId(ValueObject[str]):
         try:
             # Normalize ints through str(); _validate applies the same coercion
             # rules, so outcomes match cls(raw) for every input.
-            return cls(raw if isinstance(raw, str) else str(raw))
+            return cls(str(raw))
         except (TypeError, ValueError):
             return None

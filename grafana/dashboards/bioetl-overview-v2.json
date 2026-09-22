@@ -352,10 +352,10 @@
       "type": "table",
       "title": "Review Selected Run Status",
       "gridPos": {
-        "h": 7,
+        "h": 6,
         "w": 16,
         "x": 0,
-        "y": 10
+        "y": 11
       },
       "datasource": {
         "type": "datasource",
@@ -370,9 +370,10 @@
             "align": "left",
             "cellOptions": {
               "type": "auto",
-              "wrapText": true
+              "wrapText": false
             },
-            "inspect": true
+            "inspect": true,
+            "wrapText": false
           },
           "links": [
             {
@@ -404,7 +405,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 90
+                "value": 130
               }
             ]
           },
@@ -428,7 +429,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 100
+                "value": 140
               }
             ]
           }
@@ -487,7 +488,8 @@
             },
             "excludeByName": {
               "__name__": true,
-              "job": true
+              "job": true,
+              "action_dashboard_uid": false
             }
           }
         }
@@ -636,7 +638,7 @@
       "type": "table",
       "title": "Review First Action",
       "gridPos": {
-        "h": 5,
+        "h": 6,
         "w": 16,
         "x": 0,
         "y": 5
@@ -654,10 +656,10 @@
             "align": "left",
             "cellOptions": {
               "type": "auto",
-              "wrapText": true
+              "wrapText": false
             },
             "inspect": true,
-            "wrapText": true
+            "wrapText": false
           },
           "mappings": [
             {
@@ -748,44 +750,6 @@
                 "value": "Action"
               },
               {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "control_plane": {
-                        "text": "Trust",
-                        "color": "text"
-                      },
-                      "dq": {
-                        "text": "Data Quality",
-                        "color": "text"
-                      },
-                      "monitor": {
-                        "text": "Monitor",
-                        "color": "text"
-                      },
-                      "no_route": {
-                        "text": "No route",
-                        "color": "text"
-                      },
-                      "provider": {
-                        "text": "Provider Health",
-                        "color": "text"
-                      },
-                      "runtime": {
-                        "text": "Pipeline Diagnostics",
-                        "color": "text"
-                      },
-                      "workflow": {
-                        "text": "Pipeline Diagnostics",
-                        "color": "text"
-                      }
-                    }
-                  }
-                ]
-              },
-              {
                 "id": "color",
                 "value": {
                   "mode": "thresholds"
@@ -826,6 +790,90 @@
                   "type": "auto",
                   "wrapText": true
                 }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "0": {
+                        "text": "UNKNOWN",
+                        "color": "#555555"
+                      },
+                      "5": {
+                        "text": "WATCH",
+                        "color": "#555555"
+                      },
+                      "10": {
+                        "text": "REVIEW",
+                        "color": "green"
+                      },
+                      "20": {
+                        "text": "HIGH",
+                        "color": "orange"
+                      },
+                      "30": {
+                        "text": "HIGH",
+                        "color": "orange"
+                      },
+                      "35": {
+                        "text": "URGENT",
+                        "color": "orange"
+                      },
+                      "40": {
+                        "text": "URGENT",
+                        "color": "red"
+                      },
+                      "50": {
+                        "text": "URGENT",
+                        "color": "red"
+                      },
+                      "15": {
+                        "text": "VERIFY",
+                        "color": "#8e8e8e"
+                      },
+                      "control_plane": {
+                        "text": "Trust",
+                        "color": "text"
+                      },
+                      "dq": {
+                        "text": "Data Quality",
+                        "color": "text"
+                      },
+                      "monitor": {
+                        "text": "Monitor",
+                        "color": "text"
+                      },
+                      "no_route": {
+                        "text": "No route",
+                        "color": "text"
+                      },
+                      "provider": {
+                        "text": "Provider Health",
+                        "color": "text"
+                      },
+                      "runtime": {
+                        "text": "Diagnostics",
+                        "color": "text"
+                      },
+                      "workflow": {
+                        "text": "Diagnostics",
+                        "color": "text"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "?",
+                        "color": "#555555"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -861,6 +909,10 @@
                     "targetBlank": false
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 90
               }
             ]
           },
@@ -875,11 +927,54 @@
                 "value": "Why"
               },
               {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              },
+              {
                 "id": "mappings",
                 "value": [
                   {
                     "type": "value",
                     "options": {
+                      "0": {
+                        "text": "UNKNOWN",
+                        "color": "#555555"
+                      },
+                      "5": {
+                        "text": "WATCH",
+                        "color": "#555555"
+                      },
+                      "10": {
+                        "text": "REVIEW",
+                        "color": "green"
+                      },
+                      "20": {
+                        "text": "HIGH",
+                        "color": "orange"
+                      },
+                      "30": {
+                        "text": "HIGH",
+                        "color": "orange"
+                      },
+                      "35": {
+                        "text": "URGENT",
+                        "color": "orange"
+                      },
+                      "40": {
+                        "text": "URGENT",
+                        "color": "red"
+                      },
+                      "50": {
+                        "text": "URGENT",
+                        "color": "red"
+                      },
+                      "15": {
+                        "text": "VERIFY",
+                        "color": "#8e8e8e"
+                      },
                       "control_plane_guardrail_active": {
                         "text": "Replay guardrail active"
                       },
@@ -905,33 +1000,36 @@
                         "text": "Workflow review"
                       },
                       "runtime_evidence_missing": {
-                        "text": "Runtime: evidence missing; verify source"
+                        "text": "Runtime: evidence missing"
                       },
                       "control_plane_evidence_missing": {
-                        "text": "Control Plane: evidence missing; verify source"
+                        "text": "Control Plane: evidence missing"
                       },
                       "gold_evidence_missing": {
-                        "text": "Gold: evidence missing; verify source"
+                        "text": "Gold: evidence missing"
                       },
                       "dq_evidence_missing": {
-                        "text": "Dq: evidence missing; verify source"
+                        "text": "DQ: evidence missing"
                       },
                       "provider_evidence_missing": {
-                        "text": "Provider: evidence missing; verify source"
+                        "text": "Provider: evidence missing"
                       },
                       "workflow_evidence_missing": {
-                        "text": "Workflow: evidence missing; verify source"
+                        "text": "Workflow: evidence missing"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "?",
+                        "color": "#555555"
                       }
                     }
                   }
                 ]
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
               }
             ]
           },
@@ -974,7 +1072,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 100
+                "value": 140
               }
             ]
           },
@@ -983,7 +1081,12 @@
               "id": "byName",
               "options": "Action"
             },
-            "properties": []
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 125
+              }
+            ]
           },
           {
             "matcher": {
@@ -1018,24 +1121,14 @@
               "id": "byName",
               "options": "Status"
             },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 90
-              }
-            ]
+            "properties": []
           },
           {
             "matcher": {
               "id": "byName",
               "options": "Severity"
             },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 90
-              }
-            ]
+            "properties": []
           }
         ]
       },
@@ -1116,7 +1209,7 @@
               "run_type": true,
               "pipeline": false,
               "Pipeline": false,
-              "action_dashboard_uid": true,
+              "action_dashboard_uid": false,
               "job": true
             },
             "indexByName": {
@@ -4912,7 +5005,24 @@
                 "minWidth": 50
               }
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Completed"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm:ss"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 175
+                  }
+                ]
+              }
+            ]
           },
           "targets": [
             {
@@ -4930,6 +5040,17 @@
             }
           ],
           "transformations": [
+            {
+              "id": "convertFieldType",
+              "options": {
+                "conversions": [
+                  {
+                    "targetField": "completed_at",
+                    "destinationType": "time"
+                  }
+                ]
+              }
+            },
             {
               "id": "limit",
               "options": {

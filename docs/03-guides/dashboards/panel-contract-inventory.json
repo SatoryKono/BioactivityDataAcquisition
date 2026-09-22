@@ -166,13 +166,13 @@
       "dashboard_uid": "bioetl-control-plane-v1",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
-      "documents_valid_empty": true,
+      "documents_valid_empty": false,
       "empty_state": "valid_empty",
-      "formula": "sum by (disposition) (increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\"}[$__interval])) or label_replace(vector(0), \"disposition\", \"no_events\", \"\", \"\")",
+      "formula": "sum by (disposition) (increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\"}[$__rate_interval]))",
       "kind": "promql",
       "panel_id": 5,
       "panel_title": "Compare Checkpoint Outcomes",
-      "query": "sum by (disposition) (increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\"}[$__interval])) or label_replace(vector(0), \"disposition\", \"no_events\", \"\", \"\")",
+      "query": "sum by (disposition) (increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\"}[$__rate_interval]))",
       "query_tokens": [
         "bioetl_checkpoint_compatibility_events_total"
       ],
@@ -190,11 +190,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "sum by (store, operation, status) (increase(bioetl_control_plane_reads_total[$__interval]))",
+      "formula": "sum by (store, operation, status) (increase(bioetl_control_plane_reads_total[$__rate_interval]))",
       "kind": "promql",
       "panel_id": 6,
       "panel_title": "Compare Global Reads by Store",
-      "query": "sum by (store, operation, status) (increase(bioetl_control_plane_reads_total[$__interval]))",
+      "query": "sum by (store, operation, status) (increase(bioetl_control_plane_reads_total[$__rate_interval]))",
       "query_tokens": [
         "bioetl_control_plane_reads_total"
       ],
@@ -212,11 +212,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "sum by (event_type, status) (increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[$__interval]))",
+      "formula": "sum by (event_type, status) (increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[$__rate_interval]))",
       "kind": "promql",
       "panel_id": 7,
       "panel_title": "Compare Ledger Appends by Type & Status",
-      "query": "sum by (event_type, status) (increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[$__interval]))",
+      "query": "sum by (event_type, status) (increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[$__rate_interval]))",
       "query_tokens": [
         "bioetl_control_plane_ledger_appends_total"
       ],
@@ -584,11 +584,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "round(sum by (layer, operation, status) (increase(bioetl_audit_write_events_total[$__interval])))",
+      "formula": "round(sum by (layer, operation, status) (increase(bioetl_audit_write_events_total[$__rate_interval])))",
       "kind": "promql",
       "panel_id": 107,
       "panel_title": "Compare Global Audit Write Outcomes",
-      "query": "round(sum by (layer, operation, status) (increase(bioetl_audit_write_events_total[$__interval])))",
+      "query": "round(sum by (layer, operation, status) (increase(bioetl_audit_write_events_total[$__rate_interval])))",
       "query_tokens": [
         "bioetl_audit_write_events_total"
       ],
@@ -606,11 +606,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "round(sum by (layer_filter, status) (increase(bioetl_audit_query_events_total[$__interval])))",
+      "formula": "round(sum by (layer_filter, status) (increase(bioetl_audit_query_events_total[$__rate_interval])))",
       "kind": "promql",
       "panel_id": 108,
       "panel_title": "Compare Global Audit Query Outcomes",
-      "query": "round(sum by (layer_filter, status) (increase(bioetl_audit_query_events_total[$__interval])))",
+      "query": "round(sum by (layer_filter, status) (increase(bioetl_audit_query_events_total[$__rate_interval])))",
       "query_tokens": [
         "bioetl_audit_query_events_total"
       ],
@@ -865,11 +865,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "sum by (layer, status) (increase(bioetl_lineage_fragments_emitted_total{pipeline=~\"$pipeline\"}[$__interval]))",
+      "formula": "sum by (layer, status) (increase(bioetl_lineage_fragments_emitted_total{pipeline=~\"$pipeline\"}[$__rate_interval]))",
       "kind": "promql",
       "panel_id": 112,
       "panel_title": "Compare Lineage Persistence Outcomes",
-      "query": "sum by (layer, status) (increase(bioetl_lineage_fragments_emitted_total{pipeline=~\"$pipeline\"}[$__interval]))",
+      "query": "sum by (layer, status) (increase(bioetl_lineage_fragments_emitted_total{pipeline=~\"$pipeline\"}[$__rate_interval]))",
       "query_tokens": [
         "bioetl_lineage_fragments_emitted_total"
       ],
@@ -1026,11 +1026,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "valid_empty",
-      "formula": "sum by (status, run_type) (increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
+      "formula": "sum by (status, run_type) (increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__rate_interval]))",
       "kind": "promql",
       "panel_id": 131,
       "panel_title": "Track Observed Manifest Write Increments",
-      "query": "sum by (status, run_type) (increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
+      "query": "sum by (status, run_type) (increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__rate_interval]))",
       "query_tokens": [
         "bioetl_control_plane_manifest_writes_total"
       ],
@@ -1118,11 +1118,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "sum by (replay_capability, drift_type, status) (increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
+      "formula": "sum by (replay_capability, drift_type, status) (increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__rate_interval]))",
       "kind": "promql",
       "panel_id": 134,
       "panel_title": "Track Replay Drift by Type",
-      "query": "sum by (replay_capability, drift_type, status) (increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
+      "query": "sum by (replay_capability, drift_type, status) (increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__rate_interval]))",
       "query_tokens": [
         "bioetl_replay_drift_events_total"
       ],
@@ -1931,11 +1931,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "sum by (invariant, status) (increase(bioetl_record_flow_invariants_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
+      "formula": "sum by (invariant, status) (increase(bioetl_record_flow_invariants_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__rate_interval]))",
       "kind": "promql",
       "panel_id": 1,
       "panel_title": "Track Record Flow by Stage",
-      "query": "sum by (invariant, status) (increase(bioetl_record_flow_invariants_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
+      "query": "sum by (invariant, status) (increase(bioetl_record_flow_invariants_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__rate_interval]))",
       "query_tokens": [
         "bioetl_record_flow_invariants_total"
       ],
@@ -2151,11 +2151,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "sum by (severity, anomaly_type) (increase(bioetl_dq_anomaly_detected_total{pipeline=~\"$pipeline\"}[$__interval]))",
+      "formula": "sum by (severity, anomaly_type) (increase(bioetl_dq_anomaly_detected_total{pipeline=~\"$pipeline\"}[$__rate_interval]))",
       "kind": "promql",
       "panel_id": 10,
       "panel_title": "Track DQ Anomalies",
-      "query": "sum by (severity, anomaly_type) (increase(bioetl_dq_anomaly_detected_total{pipeline=~\"$pipeline\"}[$__interval]))",
+      "query": "sum by (severity, anomaly_type) (increase(bioetl_dq_anomaly_detected_total{pipeline=~\"$pipeline\"}[$__rate_interval]))",
       "query_tokens": [
         "bioetl_dq_anomaly_detected_total"
       ],
@@ -2176,11 +2176,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__interval])))",
+      "formula": "histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__rate_interval])))",
       "kind": "promql",
       "panel_id": 11,
       "panel_title": "Track DQ Check Duration p95",
-      "query": "histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__interval])))",
+      "query": "histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__rate_interval])))",
       "query_tokens": [
         "bioetl_dq_check_duration_ms_bucket"
       ],
@@ -2495,13 +2495,13 @@
       "dashboard_uid": "bioetl-dq-v2",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
-      "documents_valid_empty": true,
+      "documents_valid_empty": false,
       "empty_state": "valid_empty",
-      "formula": "round((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__interval]))) + (sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__interval]))))",
+      "formula": "round((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval]))) + (sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval]))))",
       "kind": "promql",
       "panel_id": 155,
       "panel_title": "Track DQ Threshold Events",
-      "query": "round((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__interval]))) + (sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__interval]))))",
+      "query": "round((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval]))) + (sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval]))))",
       "query_tokens": [
         "bioetl_dq_soft_threshold_exceeded_total",
         "bioetl_dq_validation_failures_total"
@@ -3891,11 +3891,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
+      "formula": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
       "kind": "promql",
       "panel_id": 1,
       "panel_title": "Track Health-Check Latency p95",
-      "query": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
+      "query": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
       "query_tokens": [
         "bioetl_health_check_latency_seconds_bucket"
       ],
@@ -4001,11 +4001,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "sum by (adapter) (increase(bioetl_circuit_breaker_trips_total{adapter=~\"$adapter\"}[$__interval]))",
+      "formula": "sum by (adapter) (increase(bioetl_circuit_breaker_trips_total{adapter=~\"$adapter\"}[$__rate_interval]))",
       "kind": "promql",
       "panel_id": 32,
       "panel_title": "Track Global Circuit-Breaker Trips",
-      "query": "sum by (adapter) (increase(bioetl_circuit_breaker_trips_total{adapter=~\"$adapter\"}[$__interval]))",
+      "query": "sum by (adapter) (increase(bioetl_circuit_breaker_trips_total{adapter=~\"$adapter\"}[$__rate_interval]))",
       "query_tokens": [
         "bioetl_circuit_breaker_trips_total"
       ],
@@ -4123,11 +4123,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "round(sum by (provider) (increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__interval])))",
+      "formula": "round(sum by (provider) (increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__rate_interval])))",
       "kind": "promql",
       "panel_id": 106,
       "panel_title": "Track Health Failures & Degradation",
-      "query": "round(sum by (provider) (increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__interval])))",
+      "query": "round(sum by (provider) (increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__rate_interval])))",
       "query_tokens": [
         "bioetl_health_check_failures_total"
       ],
@@ -4148,11 +4148,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "round(sum by (provider) (increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__interval])))",
+      "formula": "round(sum by (provider) (increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__rate_interval])))",
       "kind": "promql",
       "panel_id": 106,
       "panel_title": "Track Health Failures & Degradation",
-      "query": "round(sum by (provider) (increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__interval])))",
+      "query": "round(sum by (provider) (increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__rate_interval])))",
       "query_tokens": [
         "bioetl_health_check_degraded_total"
       ],
@@ -4247,11 +4247,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__interval])))",
+      "formula": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__rate_interval])))",
       "kind": "promql",
       "panel_id": 109,
       "panel_title": "Track Exhausted Retries",
-      "query": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__interval])))",
+      "query": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__rate_interval])))",
       "query_tokens": [
         "bioetl_data_source_retry_exhausted_total"
       ],
@@ -4280,11 +4280,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.95, sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
+      "formula": "histogram_quantile(0.95, sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
       "kind": "promql",
       "panel_id": 110,
       "panel_title": "Track Request Latency p95",
-      "query": "histogram_quantile(0.95, sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
+      "query": "histogram_quantile(0.95, sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
       "query_tokens": [
         "bioetl_adapter_request_duration_seconds_bucket"
       ],
@@ -4317,11 +4317,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "round((sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(rate.?limit|429|thrott).*\"}[$__interval]))))",
+      "formula": "round((sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(rate.?limit|429|thrott).*\"}[$__rate_interval]))))",
       "kind": "promql",
       "panel_id": 111,
       "panel_title": "Track Rate-Limit Errors",
-      "query": "round((sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(rate.?limit|429|thrott).*\"}[$__interval]))))",
+      "query": "round((sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(rate.?limit|429|thrott).*\"}[$__rate_interval]))))",
       "query_tokens": [
         "bioetl_http_request_errors_total"
       ],
@@ -4350,11 +4350,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
+      "formula": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
       "kind": "promql",
       "panel_id": 112,
       "panel_title": "Track Rate-Limiter Wait p95",
-      "query": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
+      "query": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
       "query_tokens": [
         "bioetl_rate_limiter_wait_seconds_bucket"
       ],
@@ -4520,11 +4520,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "round((sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(timeout|timed.?out|network).*\"}[$__interval]))))",
+      "formula": "round((sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(timeout|timed.?out|network).*\"}[$__rate_interval]))))",
       "kind": "promql",
       "panel_id": 115,
       "panel_title": "Track Network & Timeout Errors",
-      "query": "round((sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(timeout|timed.?out|network).*\"}[$__interval]))))",
+      "query": "round((sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(timeout|timed.?out|network).*\"}[$__rate_interval]))))",
       "query_tokens": [
         "bioetl_http_request_errors_total"
       ],
@@ -4586,13 +4586,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
-      "formula": "topk(4, max by (provider) (bioetl_provider_current_status) >= 1)",
+      "formula": "(label_replace((topk(4, max by (provider) (bioetl_provider_current_status) >= 1)), \"provider_target\", \"$1\", \"provider\", \"(.*)\")) or label_replace(label_replace(((((count(max by (provider) (bioetl_provider_current_status)) > 0) * 0 + 1) * absent(max by (provider) (bioetl_provider_current_status) != 0) * absent(max by (provider) (bioetl_provider_current_status) unless on(provider) max by (provider) (bioetl_provider_health_status))) * 0 - 1), \"provider\", \"VALID EMPTY - fleet observed, no non-OK providers\", \"\", \"\"), \"provider_target\", \"$$__all\", \"\", \"\")",
       "kind": "promql",
       "panel_id": 9102,
       "panel_title": "Inspect Non-OK Providers",
-      "query": "topk(4, max by (provider) (bioetl_provider_current_status) >= 1)",
+      "query": "(label_replace((topk(4, max by (provider) (bioetl_provider_current_status) >= 1)), \"provider_target\", \"$1\", \"provider\", \"(.*)\")) or label_replace(label_replace(((((count(max by (provider) (bioetl_provider_current_status)) > 0) * 0 + 1) * absent(max by (provider) (bioetl_provider_current_status) != 0) * absent(max by (provider) (bioetl_provider_current_status) unless on(provider) max by (provider) (bioetl_provider_health_status))) * 0 - 1), \"provider\", \"VALID EMPTY - fleet observed, no non-OK providers\", \"\", \"\"), \"provider_target\", \"$$__all\", \"\", \"\")",
       "query_tokens": [
-        "bioetl_provider_current_status"
+        "bioetl_provider_current_status",
+        "bioetl_provider_health_status"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -4763,13 +4764,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
-      "formula": "max by (provider) (bioetl_provider_current_status) >= 1",
+      "formula": "(label_replace((max by (provider) (bioetl_provider_current_status) >= 1), \"provider_target\", \"$1\", \"provider\", \"(.*)\")) or label_replace(label_replace(((((count(max by (provider) (bioetl_provider_current_status)) > 0) * 0 + 1) * absent(max by (provider) (bioetl_provider_current_status) != 0) * absent(max by (provider) (bioetl_provider_current_status) unless on(provider) max by (provider) (bioetl_provider_health_status))) * 0 - 1), \"provider\", \"VALID EMPTY - fleet observed, no non-OK providers\", \"\", \"\"), \"provider_target\", \"$$__all\", \"\", \"\")",
       "kind": "promql",
       "panel_id": 9112,
       "panel_title": "Inspect Full Non-OK Providers",
-      "query": "max by (provider) (bioetl_provider_current_status) >= 1",
+      "query": "(label_replace((max by (provider) (bioetl_provider_current_status) >= 1), \"provider_target\", \"$1\", \"provider\", \"(.*)\")) or label_replace(label_replace(((((count(max by (provider) (bioetl_provider_current_status)) > 0) * 0 + 1) * absent(max by (provider) (bioetl_provider_current_status) != 0) * absent(max by (provider) (bioetl_provider_current_status) unless on(provider) max by (provider) (bioetl_provider_health_status))) * 0 - 1), \"provider\", \"VALID EMPTY - fleet observed, no non-OK providers\", \"\", \"\"), \"provider_target\", \"$$__all\", \"\", \"\")",
       "query_tokens": [
-        "bioetl_provider_current_status"
+        "bioetl_provider_current_status",
+        "bioetl_provider_health_status"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -5324,11 +5326,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "round(sum by(reason) (increase(bioetl_shutdown_initiated_total[$__interval])))",
+      "formula": "round(sum by(reason) (increase(bioetl_shutdown_initiated_total[$__rate_interval])))",
       "kind": "promql",
       "panel_id": 209,
       "panel_title": "Track Global Shutdown Starts",
-      "query": "round(sum by(reason) (increase(bioetl_shutdown_initiated_total[$__interval])))",
+      "query": "round(sum by(reason) (increase(bioetl_shutdown_initiated_total[$__rate_interval])))",
       "query_tokens": [
         "bioetl_shutdown_initiated_total"
       ],
@@ -5349,11 +5351,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "round(sum by(reason) (increase(bioetl_shutdown_completed_total[$__interval])))",
+      "formula": "round(sum by(reason) (increase(bioetl_shutdown_completed_total[$__rate_interval])))",
       "kind": "promql",
       "panel_id": 210,
       "panel_title": "Track Global Shutdown Completions",
-      "query": "round(sum by(reason) (increase(bioetl_shutdown_completed_total[$__interval])))",
+      "query": "round(sum by(reason) (increase(bioetl_shutdown_completed_total[$__rate_interval])))",
       "query_tokens": [
         "bioetl_shutdown_completed_total"
       ],

@@ -548,6 +548,35 @@ async def test_missing_evidence_service_keeps_unknown_table_contract() -> None:
 
 
 @pytest.mark.asyncio
+async def test_filter_options_deadline_does_not_send_late_success(monkeypatch) -> None:
+    from functools import partial
+
+    host = _RoutingHost()
+    release = asyncio.Event()
+    completed = asyncio.Event()
+
+    async def slow_options(_host, _query):
+        await release.wait()
+        completed.set()
+        return {"items": []}
+
+    monkeypatch.setattr(routing_support, "_filter_options_payload", slow_options)
+    monkeypatch.setattr(
+        routing_support,
+        "run_bounded_forensic_operation",
+        partial(routing_support.run_bounded_forensic_operation, timeout_seconds=0.01),
+    )
+    await routing_support.handle_control_plane_filter_options(host, _Writer(), {})
+    assert host.sent[-1][1] == 504
+    assert host.sent[-1][2]["reason"] == "deadline_exceeded"
+    count = len(host.sent)
+    release.set()
+    await completed.wait()
+    await asyncio.sleep(0)
+    assert len(host.sent) == count
+
+
+@pytest.mark.asyncio
 async def test_routing_support_filter_options_and_selector_context(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

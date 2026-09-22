@@ -4,11 +4,9 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.forensic.diagnostics_support import (
-    RunManifestDiffResult,
-    RunManifestInspectionResult,
-    RunManifestInspectionService,
     artifact_completeness,
     artifact_refs,
     checkpoint_compatibility_payload,
@@ -20,6 +18,13 @@ from bioetl.application.services.control_plane.forensic.diagnostics_support impo
     replay_capability_payload,
     string_list,
 )
+
+if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.manifest.inspection_service import (
+        RunManifestDiffResult,
+        RunManifestInspectionResult,
+        RunManifestInspectionService,
+    )
 from bioetl.domain.ports import (
     ArtifactByteComparisonPort,
     RunLedgerPort,

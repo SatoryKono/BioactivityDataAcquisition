@@ -455,12 +455,12 @@ hotspot_family_ratchets:
       max_internal_fan_in: 7
     metrics:
       duplication_clusters: 0
-      files: 194
-      total_loc: 23633
+      files: 196
+      total_loc: 23839
       files_ge_250_loc: 0
-      helper_function_ratio: 0.374
+      helper_function_ratio: 0.376
       max_internal_fan_in: 5
-      max_internal_fan_in_module: bioetl.application.core.record_processor_config
+      max_internal_fan_in_module: bioetl.application.core.target_data_source_mixins
     trend:
       status: reduced_2026-08-27_debt_cycle_fanin_ratchet
       next_action: '2026-08-27 audit-cycle-tech-debt: ratchet application_core max_internal_fan_in budget
@@ -484,9 +484,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 52
-      total_loc: 6216
+      total_loc: 6177
       files_ge_250_loc: 0
-      helper_function_ratio: 0.332
+      helper_function_ratio: 0.328
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.tracing_bootstrap
     trend:
@@ -511,7 +511,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 35
-      total_loc: 3934
+      total_loc: 3936
       files_ge_250_loc: 0
       helper_function_ratio: 0.358
       max_internal_fan_in: 2
@@ -538,7 +538,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 113
-      total_loc: 14509
+      total_loc: 14514
       files_ge_250_loc: 0
       helper_function_ratio: 0.375
       max_internal_fan_in: 1
@@ -566,9 +566,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 55
-      total_loc: 7115
+      total_loc: 7171
       files_ge_250_loc: 0
-      helper_function_ratio: 0.38
+      helper_function_ratio: 0.382
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.runtime_builders.runner_inputs
     trend:

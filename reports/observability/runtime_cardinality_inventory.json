@@ -9,6 +9,7 @@
     "bioetl_checkpoint_saved_at_seconds",
     "bioetl_circuit_breaker_state",
     "bioetl_control_plane_checkpoint_evidence_status",
+    "bioetl_control_plane_current_status_trusted",
     "bioetl_control_plane_ledger_appends_total",
     "bioetl_control_plane_manifest_present",
     "bioetl_control_plane_manifest_writes_total",
@@ -3474,6 +3475,9 @@
     "bioetl_control_plane_checkpoint_evidence_status": [
       "grafana/prometheus-rules/bioetl_control_plane_current_status.yml"
     ],
+    "bioetl_control_plane_current_status_trusted": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
     "bioetl_control_plane_ledger_appends_total": [
       "grafana/prometheus-rules/bioetl_control_plane_current_status.yml",
       "grafana/prometheus-rules/bioetl_observability.yml"
@@ -3492,8 +3496,7 @@
       "grafana/prometheus-rules/bioetl_control_plane_current_status.yml"
     ],
     "bioetl_control_plane_telemetry_missing_5m": [
-      "grafana/prometheus-rules/bioetl_control_plane_current_status.yml",
-      "grafana/prometheus-rules/bioetl_observability.yml"
+      "grafana/prometheus-rules/bioetl_control_plane_current_status.yml"
     ],
     "bioetl_control_plane_terminal_events_total": [
       "grafana/prometheus-rules/bioetl_control_plane_current_status.yml"
@@ -3893,7 +3896,7 @@
     "bioetl_checkpoint_saved_at_seconds": [
       "observed_series_count=0",
       "approved_max_series=500",
-      "runtime_emitter_count=4",
+      "runtime_emitter_count=5",
       "label_keys=pipeline"
     ],
     "bioetl_health_check_latency_seconds": [
@@ -4528,7 +4531,8 @@
       "src/bioetl/application/composite/checkpoint/_checkpoint_runtime.py",
       "src/bioetl/application/composite/checkpoint/persistence_service.py",
       "src/bioetl/application/composite/runner_pkg/runner_checkpoint_save_observability.py",
-      "src/bioetl/application/core/lifecycle/checkpoint_saved_at.py"
+      "src/bioetl/application/core/lifecycle/checkpoint_saved_at.py",
+      "src/bioetl/infrastructure/checkpoint/metrics_rehydrate.py"
     ],
     "bioetl_composite_phase_errors_total": [
       "src/bioetl/application/observability/pipeline_metrics.py"

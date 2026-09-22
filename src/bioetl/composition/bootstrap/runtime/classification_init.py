@@ -1,52 +1,13 @@
-"""Bootstrap classification mapping data."""
+"""Compatibility exports for classification initialization at composition root."""
 
 from __future__ import annotations
 
-from functools import cache
-from pathlib import Path
-
-from bioetl.domain.mapping.classification_data import ClassificationData
-from bioetl.domain.mapping.protein_class_target_type import (
-    ProteinClassTargetTypeMappingData,
+from bioetl.composition.runtime_builders.config_access import (
+    initialize_protein_class_target_type_mapping,
+    initialize_publication_type_classification,
 )
 
-from bioetl.domain.mapping import publication_type_classification
-from bioetl.domain.mapping import protein_class_target_type
-import bioetl.infrastructure.config.publication_type_classification_loader as publication_type_classification_loader
-import bioetl.infrastructure.config.protein_class_target_type_loader as protein_class_target_type_loader
-
-
-@cache
-def _load_publication_type_classification_data(
-    configs_root_key: str,
-) -> ClassificationData:
-    """Load classification data once per configs root key."""
-
-    return publication_type_classification_loader.PublicationTypeClassificationLoader(
-        Path(configs_root_key)
-    ).load()
-
-
-def initialize_publication_type_classification(configs_root: Path) -> None:
-    """Load publication type classification data into the domain module."""
-
-    data = _load_publication_type_classification_data(str(configs_root))
-    publication_type_classification.initialize_classification(data)
-
-
-@cache
-def _load_protein_class_target_type_mapping_data(
-    configs_root_key: str,
-) -> ProteinClassTargetTypeMappingData:
-    """Load protein-class target type mapping once per configs root key."""
-
-    return protein_class_target_type_loader.ProteinClassTargetTypeMappingLoader(
-        Path(configs_root_key)
-    ).load()
-
-
-def initialize_protein_class_target_type_mapping(configs_root: Path) -> None:
-    """Load protein-class L1 mapping and initialize the domain rule module."""
-
-    data = _load_protein_class_target_type_mapping_data(str(configs_root))
-    protein_class_target_type.initialize_protein_class_target_type_mapping(data)
+__all__ = [
+    "initialize_protein_class_target_type_mapping",
+    "initialize_publication_type_classification",
+]

@@ -85,7 +85,7 @@ class TestGoldReadCleanupLeftovers:
                 class _Dataset:
                     schema = SimpleNamespace(names=schema_names)
 
-                    def count_rows(self, filter=None) -> int:
+                    def count_rows(self, filter=None, *, use_threads=True) -> int:
                         return 2 if filter is None else 1
 
                 return _Dataset()

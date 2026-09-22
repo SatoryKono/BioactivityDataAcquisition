@@ -5,6 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from bioetl.domain.entities.base import BaseEntity
+from bioetl.domain.schemas.chembl.similarity_pair import (
+    validate_legacy_pair,
+    validate_public_pair,
+)
 from bioetl.domain.schemas.constants import MAX_PHASE_VALUES
 
 
@@ -109,23 +113,9 @@ class ChemblPublicationSimilarity(BaseEntity):
         """Validate similarity endpoints for positivity and non-identity."""
         public_pair = (self.publication_id1, self.publication_id2)
         if any(value is not None for value in public_pair):
-            if not all(
-                isinstance(value, str)
-                and value.startswith("CHEMBL")
-                and value[6:].isdigit()
-                and int(value[6:]) > 0
-                for value in public_pair
-            ):
-                raise ValueError("Both public document ChEMBL identifiers are required")
-            if public_pair[0] == public_pair[1]:
-                raise ValueError("Document cannot be similar to itself")
+            validate_public_pair(*public_pair)
             return
-        if self.doc_1 is None or self.doc_2 is None:
-            raise ValueError("Both document identifiers are required")
-        if self.doc_1 <= 0 or self.doc_2 <= 0:
-            raise ValueError("doc_1 and doc_2 must be positive")
-        if self.doc_1 == self.doc_2:
-            raise ValueError("Document cannot be similar to itself")
+        validate_legacy_pair(self.doc_1, self.doc_2)
 
 
 @dataclass(frozen=True, kw_only=True)

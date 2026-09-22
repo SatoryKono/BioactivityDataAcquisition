@@ -650,10 +650,10 @@
             "align": "auto",
             "cellOptions": {
               "type": "auto",
-              "wrapText": true
+              "wrapText": false
             },
             "inspect": true,
-            "wrapText": true
+            "wrapText": false
           },
           "mappings": [
             {
@@ -901,7 +901,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 100
+                "value": 140
               }
             ]
           },
@@ -1030,7 +1030,7 @@
               "Value #A": true,
               "Value #B": true,
               "Value #C": true,
-              "action_dashboard_uid": true,
+              "action_dashboard_uid": false,
               "job": true
             },
             "indexByName": {
@@ -3972,7 +3972,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Total soft plus hard threshold events requires observations for both counters. A missing branch leaves the total UNKNOWN, not zero. Inspect each counter when coverage is incomplete; resets use increase.",
+          "description": "TIME RANGE · Total soft plus hard threshold events requires observations for both counters. A missing branch leaves the total UNKNOWN, not zero. Inspect each counter when coverage is incomplete; resets use increase. Tooltip and inspection expose full series labels; full identifiers remain available.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -4349,7 +4349,24 @@
                 "minWidth": 50
               }
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Completed"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm:ss"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 175
+                  }
+                ]
+              }
+            ]
           },
           "targets": [
             {
@@ -4367,6 +4384,17 @@
             }
           ],
           "transformations": [
+            {
+              "id": "convertFieldType",
+              "options": {
+                "conversions": [
+                  {
+                    "targetField": "completed_at",
+                    "destinationType": "time"
+                  }
+                ]
+              }
+            },
             {
               "id": "limit",
               "options": {

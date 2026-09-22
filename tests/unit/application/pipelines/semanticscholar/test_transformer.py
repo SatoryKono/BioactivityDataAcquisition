@@ -129,6 +129,18 @@ class TestSemanticScholarPublicationTransformer:
         assert result["doi"] == "10.1038/s41586-024-07487-w"
         assert result["pmid"] == "12345678"
         assert result["corpus_id"] == 123456
+        from bioetl.domain.contracts.gold.publications_semanticscholar import (
+            SemanticScholarPublicationGoldSchema,
+        )
+        import pandas as pd
+
+        gold = transformer.transform_for_gold(mock_context, result)
+        assert gold["corpus_id"] == "123456"
+        assert result["corpus_id"] == 123456
+        fields = SemanticScholarPublicationGoldSchema.to_schema().columns
+        SemanticScholarPublicationGoldSchema.validate(
+            pd.DataFrame([{key: value for key, value in gold.items() if key in fields}])
+        )
         assert result["title"] == "CRISPR-Cas9 gene editing in human embryos"
         assert result["abstract"] == "This study demonstrates novel applications..."
         assert result["publication_year"] == 2024

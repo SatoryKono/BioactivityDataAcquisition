@@ -33,9 +33,10 @@ def _collect_materialization_modes(
     """Collect distinct non-empty materialization modes in sorted order."""
     collected: list[str] = []
     for snapshot in input_snapshots:
-        if not isinstance(snapshot, Mapping):
+        raw_snapshot: object = snapshot
+        if not isinstance(raw_snapshot, Mapping):
             continue
-        mode = _snapshot_materialization_mode(snapshot)
+        mode = _snapshot_materialization_mode(raw_snapshot)
         if mode:
             collected.append(mode)
     return sorted(set(collected))

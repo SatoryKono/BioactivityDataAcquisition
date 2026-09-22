@@ -5,8 +5,12 @@ from __future__ import annotations
 import math
 from datetime import datetime
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from bioetl.domain.ports import MetricsPort
+if TYPE_CHECKING:
+    from bioetl.domain.ports import MetricsPort
+
+
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.checkpoint._local_checkpoint_integrity import (
     compute_checkpoint_payload_sha256,

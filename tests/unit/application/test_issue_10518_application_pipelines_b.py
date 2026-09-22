@@ -173,9 +173,8 @@ class TestCoercePublicationTransformerInit:
             "provider": "pubmed",
             "self": None,
         }
-        assert publication_transformer_kwargs(init_locals) == {
-            key: None
-            for key in (
+        assert publication_transformer_kwargs(init_locals) == dict.fromkeys(
+            (
                 "entity_type",
                 "silver_filters",
                 "gold_filters",
@@ -185,7 +184,7 @@ class TestCoercePublicationTransformerInit:
                 "pii_hasher",
                 "dependencies",
             )
-        } | {"entity_type": "publication"}
+        ) | {"entity_type": "publication"}
 
     def test_build_runtime_init(self) -> None:
         runtime_init = build_runtime_publication_transformer_init(

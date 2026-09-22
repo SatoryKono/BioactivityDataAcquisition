@@ -67,8 +67,13 @@ class GoldWriterReadCleanupMixin:
             table = module.DeltaTable(table_path)
             dataset = table.to_pyarrow_dataset()
             flag = _current_flag_column(list(dataset.schema.names))
-            physical = dataset.count_rows()
-            current = dataset.count_rows(filter=ds.field(flag)) if flag else physical
+            # Already running in an executor; avoid nested Arrow worker pools.
+            physical = dataset.count_rows(use_threads=False)
+            current = (
+                dataset.count_rows(filter=ds.field(flag), use_threads=False)
+                if flag
+                else physical
+            )
             return {
                 "version": table.version(),
                 "physical_rows": physical,

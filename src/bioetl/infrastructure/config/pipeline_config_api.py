@@ -265,8 +265,9 @@ class _CachedPipelineConfigLoader(Protocol):
     """Typed surface of the cached pipeline-config entrypoint."""
 
     def __call__(self, pipeline_name: str) -> PipelineYamlConfig: ...
-    def cache_clear(self) -> None: ...
-    def cache_info(self) -> Any: ...  # Any: functools.lru_cache cache_info() return type
+
+    cache_clear: Callable[[], None]
+    cache_info: Callable[[], object]
     __wrapped__: Any  # Any: functools.lru_cache wrapped function attribute
 
 

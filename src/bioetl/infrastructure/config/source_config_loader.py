@@ -10,6 +10,7 @@ by configs/quality/config_compatibility_registry.yaml.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Protocol, cast
@@ -129,8 +130,9 @@ class _CachedSourceConfigLoader(Protocol):
     """Typed surface of the cached source-config entrypoint."""
 
     def __call__(self, provider: str) -> SourceYamlConfig: ...
-    def cache_clear(self) -> None: ...
-    def cache_info(self) -> Any: ...  # Any: functools.lru_cache cache_info() return type
+
+    cache_clear: Callable[[], None]
+    cache_info: Callable[[], object]
     __wrapped__: Any  # Any: functools.lru_cache wrapped function attribute
 
 

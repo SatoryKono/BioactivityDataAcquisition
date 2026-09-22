@@ -88,7 +88,7 @@ ENUM_POLICIES: tuple[EnumPolicy, ...] = (
     ),
     EnumPolicy(
         "assay_parameters",
-        "type",
+        "parameter_type",
         ("assay", "parameter_standard_type_universe"),
         surfaces=frozenset({"quality"}),
     ),
@@ -273,7 +273,7 @@ EXACT_DQ_ENUM_POLICIES: tuple[EnumPolicy, ...] = (
     ),
     EnumPolicy(
         "assay_parameters",
-        "type",
+        "parameter_type",
         ("assay", "parameter_standard_type_universe"),
         surfaces=frozenset({"quality"}),
     ),

@@ -2,11 +2,20 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import json
 import shutil
 from datetime import datetime
 from pathlib import Path
 from tempfile import TemporaryDirectory
+
+if TYPE_CHECKING:
+    from bioetl.domain.control_plane import (
+        ControlPlaneArtifactLifecyclePlan,
+        RunManifest,
+    )
+
 
 from bioetl.application.services.run_reports.observations import (
     bind_run_observations,
@@ -16,7 +25,6 @@ from bioetl.application.services.run_reports.observations import (
 from bioetl.application.services.run_reports.snapshots import publish_snapshot
 from bioetl.application.services.run_reports.writer import write_json
 from bioetl.composition.bootstrap.runtime.run_status import create_run_status_capture
-from bioetl.domain.control_plane import ControlPlaneArtifactLifecyclePlan, RunManifest
 from bioetl.infrastructure.control_plane.archive_run_reports import (
     selected_report_sources,
 )

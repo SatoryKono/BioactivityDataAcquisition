@@ -21,26 +21,19 @@ class StageAccountingSnapshotsMixin:
     """Projection methods shared by StageAccountingAccumulator."""
 
     _catalog: ReasonCatalog = cast(Any, None)  # Any: host attr default (PD3)
-    _instrumented_stages: frozenset[str] = cast(
-        Any, None
-    )  # Any: host attr default (PD3)
+    _instrumented_stages: frozenset[str] = cast(Any, None)  # Any: host field
     _stages: dict[str, _StageBucket] = cast(Any, None)  # Any: host attr default (PD3)
     _touched_instrumented: bool = cast(Any, None)  # Any: host attr default (PD3)
 
     def _sum_outcome(self, stage: str, outcome: str) -> int | None:
-        """Return a measured stage/outcome total, or None when unmapped."""
         raise NotImplementedError
 
     def measured_record_metrics(self) -> dict[str, int]:
-        """Return only observed counters, including durable writes before failure.
-
-        An absent bucket is not a measured zero and must not overwrite other
-        sources. Callers bind this accumulator to exactly one run.
-        """
+        """Project observed counters for one run; omit missing buckets, keep zeros."""
         metrics = {
             f"records_{stage}": bucket.records_out
             for stage, bucket in self._stages.items()
-            if stage in {"bronze", "silver", "gold"} and bucket.instrumented
+            if _is_observed_write(stage, bucket)
         }
         for metric, stage, outcome in (
             ("records_filtered_out", "silver", "filtered_out"),
@@ -284,21 +277,23 @@ class StageAccountingSnapshotsMixin:
                 key = (code, outcome, family)
                 totals[key] = totals.get(key, 0) + count
         ranked = sorted(totals.items(), key=lambda item: (-item[1], item[0][0]))
-        result: list[dict[str, object]] = []
-        for (code, outcome, reason_family), count in ranked[:limit]:
-            result.append(
-                {
-                    "reason_code": code,
-                    "outcome": outcome,
-                    "reason_family": reason_family,
-                    "count": count,
-                }
-            )
-        return tuple(result)
+        return tuple(
+            {
+                "reason_code": code,
+                "outcome": outcome,
+                "reason_family": reason_family,
+                "count": count,
+            }
+            for (code, outcome, reason_family), count in ranked[:limit]
+        )
 
 
 def _is_unknown_balance(records_in: int, tracking: TrackingCoverage) -> bool:
     return records_in == 0 and tracking is TrackingCoverage.NOT_TRACKED
+
+
+def _is_observed_write(stage: str, bucket: _StageBucket) -> bool:
+    return stage in {"bronze", "silver", "gold"} and bucket.instrumented
 
 
 def _is_degraded_balance(unaccounted: int, tracking: TrackingCoverage) -> bool:

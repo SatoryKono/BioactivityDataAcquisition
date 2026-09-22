@@ -198,9 +198,7 @@ def _build_main_registry() -> object:
     return build_cli_registry()
 
 
-def register_all_pipelines(
-    *, registry: PipelineRegistry | None = None
-) -> None:
+def register_all_pipelines(*, registry: PipelineRegistry | None = None) -> None:
     """Historical CLI patch seam for pipeline registration."""
     _register_all_pipelines(registry=registry)
 

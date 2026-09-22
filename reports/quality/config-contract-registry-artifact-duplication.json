@@ -39,7 +39,7 @@
     "configs/**/*.csv": 2,
     "configs/**/*.json": 17,
     "configs/**/*.yaml": 232,
-    "docs/04-reference/contracts/**/*.md": 10,
+    "docs/04-reference/contracts/**/*.md": 11,
     "reports/quality/*contract*.json": 5,
     "reports/quality/*contract*.md": 3,
     "reports/quality/*matrix*.json": 3,
@@ -56,12 +56,12 @@
   "schema_version": 1,
   "scope_file_counts": {
     "config": 200,
-    "contract": 49,
+    "contract": 50,
     "golden": 27,
     "quality_report": 9,
     "registry": 26
   },
-  "total_files": 311,
+  "total_files": 312,
   "tracked_extensions": [
     ".csv",
     ".json",

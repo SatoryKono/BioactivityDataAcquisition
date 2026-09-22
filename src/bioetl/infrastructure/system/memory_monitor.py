@@ -24,7 +24,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 # Import domain value objects
-from bioetl.domain.config import MemoryConfig
 from bioetl.domain.mixin_host import as_mixin_host
 
 # Re-export MemoryStats from domain for backward compatibility.
@@ -33,6 +32,7 @@ from bioetl.domain.mixin_host import as_mixin_host
 from bioetl.domain.ports import MemoryStats
 
 if TYPE_CHECKING:
+    from bioetl.domain.config import MemoryConfig
     from bioetl.domain.ports import LoggerPort
 
 # Module-level cache for psutil availability (checked once per process)

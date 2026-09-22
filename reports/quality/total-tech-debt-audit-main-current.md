@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `8ed8a588143ed7abc3b99503a276fceca16402e31f352f33f1217d147eabe401`
+Evidence surface SHA-256: `fc368fac68048b0bc2812d21f0fc4e75fa043bf6fa62229d41b662ec69d612bd`
 
 Evidence metadata refresh (2026-09-19): the canonical registry digest was
 recomputed after hotspot fan-in closeout, assertless-triage reduction,
@@ -18,9 +18,9 @@ ADR-matrix rebind, and module-coverage inventory rebind.
 Current headline evidence:
 Debt-governance gates: **45 pass / 0 fail**;
 Architecture quality integral score: **9.47** (`good_targeted_improvements`);
-source_module_count: **2493** with fully_covered: **2485**;
-partially_covered: **7**; no_executable_lines: **1**;
-uncovered: **0**; unmeasured: **0** (= 2493 == source_module_count).
+source_module_count: **2497** with fully_covered: **2486**;
+partially_covered: **10**; no_executable_lines: **1**;
+uncovered: **0**; unmeasured: **0** (= 2497 == source_module_count).
 The historical audited commit above is retained; this metadata refresh does
 not constitute a new repository-wide architecture audit.
 
@@ -50,22 +50,22 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "8ed8a588143ed7abc3b99503a276fceca16402e31f352f33f1217d147eabe401",
+  "evidence_surface_sha256": "fc368fac68048b0bc2812d21f0fc4e75fa043bf6fa62229d41b662ec69d612bd",
   "metrics": {
     "architecture_integral_score": 9.47,
     "architecture_interpretation": "good_targeted_improvements",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 45,
-    "debt_gate_fail_count": 2,
-    "debt_gate_pass_count": 43,
+    "debt_gate_fail_count": 0,
+    "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 2485,
+    "fully_covered_module_count": 2486,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 1,
-    "partially_covered_module_count": 7,
-    "source_module_count": 2493,
+    "partially_covered_module_count": 10,
+    "source_module_count": 2497,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,

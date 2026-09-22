@@ -230,13 +230,33 @@ def test_registry_manifest_avoids_loader_yaml_and_normalization_modules() -> Non
 
 
 @pytest.mark.architecture
-def test_runtime_inputs_resolver_uses_runtime_config_access_seam() -> None:
-    """Runtime input resolution should use the local config-access seam."""
+def test_runtime_inputs_resolver_receives_config_access_dependencies() -> None:
+    """Resolution receives loaders explicitly; wiring owns their defaults."""
     imported_modules = _imported_modules(
         "src/bioetl/composition/runtime_builders/inputs_resolver.py"
     )
-    assert "bioetl.composition.runtime_builders.config_access" in imported_modules, (
-        "inputs_resolver.py must use the runtime config_access seam."
+    tree = ast.parse(
+        (
+            ROOT / "src/bioetl/composition/runtime_builders/inputs_resolver.py"
+        ).read_text()
+    )
+    resolver = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "prepare_runner_inputs"
+    )
+    required = {
+        arg.arg
+        for arg, default in zip(resolver.args.kwonlyargs, resolver.args.kw_defaults)
+        if default is None
+    }
+    assert {
+        "get_settings_fn",
+        "load_pipeline_config_fn",
+        "load_source_config_fn",
+    } <= required
+    assert "bioetl.composition.runtime_builders.config_access" in _imported_modules(
+        "src/bioetl/composition/runtime_builders/runner_builder_wiring.py"
     )
     assert (
         "bioetl.infrastructure.config.source_config_loader" not in imported_modules

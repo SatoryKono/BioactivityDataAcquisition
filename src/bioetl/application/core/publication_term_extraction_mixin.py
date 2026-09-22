@@ -20,6 +20,13 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import DataSourcePort, FilterableDataSourcePort
 
 
+async def _close_publications(publications: AsyncIterator[BronzeRecord]) -> None:
+    """Close an upstream generator when it exposes asynchronous cleanup."""
+    aclose = getattr(publications, "aclose", None)
+    if callable(aclose):
+        await cast(Callable[[], Awaitable[object]], aclose)()
+
+
 def normalize_publication_term_limit(limit: int | None) -> int | None:
     """Validate and normalize an optional term-record limit.
 
@@ -100,10 +107,7 @@ class PublicationTermExtractionMixin:
         """Expand a publication stream into term records with optional limit."""
         normalized_limit = normalize_publication_term_limit(limit)
         if normalized_limit == 0:
-            aclose = getattr(publications, "aclose", None)
-            if callable(aclose):
-                aclose_fn = cast(Callable[[], Awaitable[object]], aclose)
-                await aclose_fn()
+            await _close_publications(publications)
             return
 
         term_count = 0
@@ -131,10 +135,7 @@ class PublicationTermExtractionMixin:
                     if normalized_limit is not None and term_count >= normalized_limit:
                         return
         finally:
-            aclose = getattr(publications, "aclose", None)
-            if callable(aclose):
-                aclose_fn = cast(Callable[[], Awaitable[object]], aclose)
-                await aclose_fn()
+            await _close_publications(publications)
 
     async def _fetch_publication_terms(
         self: PublicationTermExtractionHost,

@@ -15,6 +15,11 @@ from bioetl.domain.ports import (
     RunManifestPort,
     WorkflowManifestPort,
 )
+from bioetl.interfaces.http._forensic_request_budget import (
+    ForensicEndpointUnavailable,
+    forensic_unavailable_payload,
+    run_bounded_forensic_operation,
+)
 from bioetl.interfaces.http._health_server_checkpoint_freshness import (
     handle_control_plane_checkpoint_freshness,
 )
@@ -34,7 +39,10 @@ from bioetl.interfaces.http._health_server_observability_routing import (
 from bioetl.interfaces.http._health_server_quarantine_routing import (
     dispatch_quarantine_request,
 )
-from bioetl.interfaces.http._report_selector_options import supplement_report_options
+from bioetl.interfaces.http._report_selector_options import (
+    load_report_selector_entries,
+    supplement_report_options,
+)
 from bioetl.interfaces.http.control_plane_selector_context import (
     RUN_ID_NO_SELECTION,
     build_selector_context_payload,
@@ -176,6 +184,29 @@ async def handle_control_plane_filter_options(
     query: dict[str, str],
 ) -> None:
     """Handle control-plane-backed selector options for Grafana variables."""
+    try:
+        payload = await run_bounded_forensic_operation(
+            limiter=host._forensic_endpoint_limiter,
+            operation_factory=lambda: _filter_options_payload(host, query),
+        )
+    except ForensicEndpointUnavailable as exc:
+        await host._send_payload_response(
+            writer,
+            exc.status_code,
+            forensic_unavailable_payload(
+                endpoint="/ops/control-plane/filter-options",
+                reason=exc.reason,
+            ),
+        )
+        return
+    await host._send_payload_response(writer, 200, payload)
+
+
+async def _filter_options_payload(
+    host: _HealthRoutingHost,
+    query: dict[str, str],
+) -> dict[str, object]:
+    """Build options without writing after the caller's deadline expires."""
     assert host._run_manifest_port is not None
     dimension = host._read_optional_param(query, "dimension") or "run_id"
     requested_pipeline = (
@@ -192,8 +223,21 @@ async def handle_control_plane_filter_options(
     exact_run_only = _read_truthy_query_param(query, "exact_run_only")
     fallback_value = host._read_optional_param(query, "fallback_value")
 
-    manifests = await asyncio.to_thread(host._run_manifest_port.list_all)
-    workflow_manifests = await _list_workflow_manifests(host)
+    scopes = {
+        "workflow": selected_workflows,
+        "pipeline": selected_pipelines,
+        "run_type": selected_run_types,
+        "run_status": selected_run_statuses,
+        "run_id": (selected_run_id,) if selected_run_id else (),
+    }
+    include_reports = not exact_run_only or selected_run_id is not None
+    manifests, workflow_manifests, report_entries = await asyncio.gather(
+        asyncio.to_thread(host._run_manifest_port.list_all),
+        _list_workflow_manifests(host),
+        asyncio.to_thread(load_report_selector_entries, scopes)
+        if include_reports
+        else asyncio.sleep(0, result=[]),
+    )
     payload = await asyncio.to_thread(
         build_selector_filter_options_payload,
         manifests=manifests,
@@ -211,20 +255,15 @@ async def handle_control_plane_filter_options(
         fallback_value=fallback_value,
         timezone=query.get("timezone") or "UTC",
     )
-    if not exact_run_only or selected_run_id is not None:
+    if include_reports:
         payload = await asyncio.to_thread(
             supplement_report_options,
             payload,
             timezone=query.get("timezone") or "UTC",
             dimension=dimension,
             response_shape=response_shape,
-            scopes={
-                "workflow": selected_workflows,
-                "pipeline": selected_pipelines,
-                "run_type": selected_run_types,
-                "run_status": selected_run_statuses,
-                "run_id": (selected_run_id,) if selected_run_id else (),
-            },
+            scopes=scopes,
+            entries=report_entries,
         )
     if response_shape != "list" and dimension == "run_id":
         payload["run_ids"] = [
@@ -232,7 +271,7 @@ async def handle_control_plane_filter_options(
             for value in _string_payload_items(payload.get("items"))
             if value != RUN_ID_NO_SELECTION
         ]
-    await host._send_payload_response(writer, 200, payload)
+    return payload
 
 
 def _string_payload_items(value: object) -> tuple[str, ...]:

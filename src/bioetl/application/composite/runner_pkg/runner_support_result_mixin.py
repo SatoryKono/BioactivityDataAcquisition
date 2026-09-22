@@ -31,9 +31,11 @@ __all__ = ["_CompositeRunnerSupportResultMixin"]
 class _CompositeRunnerSupportResultMixin:
     """Correlation context and final result assembly."""
 
-    def _build_correlation_log_context(self, **extra: object) -> dict[str, object]:
+    def _build_correlation_log_context(
+        self: _CompositeRunnerSupportHostProtocol, **extra: object
+    ) -> dict[str, object]:
         """Build a stable correlation envelope for composite critical logs."""
-        return dict(build_correlation_log_context(self, **extra))  # pyright: ignore[reportArgumentType]
+        return dict(build_correlation_log_context(self, **extra))
 
     def _build_composite_result(
         self: _CompositeRunnerSupportHostProtocol,

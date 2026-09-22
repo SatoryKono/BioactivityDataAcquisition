@@ -4,6 +4,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.composition.runtime_builders.config_access import (
+    initialize_publication_type_classification,
+    initialize_protein_class_target_type_mapping,
+    resolve_configs_root,
+)
 from bioetl.composition.providers import ensure_providers_loaded
 from bioetl.composition.bootstrap.service_registry_contracts import (
     PipelineRunnerProtocol,
@@ -48,6 +53,9 @@ def build_pipeline_runner(
     wiring: RunnerBuilderWiring | None = None,
 ) -> PipelineRunnerProtocol:
     """Assemble and return a fully configured ``PipelineRunner``."""
+    configs_root = resolve_configs_root()
+    initialize_publication_type_classification(configs_root)
+    initialize_protein_class_target_type_mapping(configs_root)
     resolved_wiring = resolve_runner_builder_wiring(wiring)
     factory_wiring = resolved_wiring.factory
     input_wiring = resolved_wiring.inputs

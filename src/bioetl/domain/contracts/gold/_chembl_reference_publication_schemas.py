@@ -3,14 +3,16 @@
 
 from __future__ import annotations
 
-import pandas as pd
+from typing import cast
+
 import pandera.pandas as pa
-from pandera.typing import Series
+from pandera.typing import DataFrame, Series
 
 from bioetl.domain.contracts.gold._strict_gold_contract_schema import (
     CONTENT_HASH_HEX64_PATTERN,
     StrictGoldContractSchema,
 )
+from bioetl.domain.schemas.chembl.similarity_pair import valid_similarity_pair
 from bioetl.domain.schemas.common.publication_base import LOOKUP_METHODS
 
 
@@ -137,11 +139,13 @@ class ChEMBLPublicationSimilarityGoldSchema(StrictGoldContractSchema):
     sim_id: Series[int] = pa.Field(nullable=False, coerce=True)
 
     @pa.dataframe_check
-    def complete_document_pair(cls, frame: pd.DataFrame) -> pd.Series:
+    @classmethod
+    def complete_document_pair(cls, frame: DataFrame) -> Series[bool]:
         """Do not accept a missing or half-present public/internal pair."""
-        from bioetl.domain.schemas.chembl.similarity_pair import valid_similarity_pairs
-
-        return valid_similarity_pairs(frame)
+        return cast(
+            Series[bool],
+            frame.apply(lambda row: valid_similarity_pair(row.to_dict()), axis=1),
+        )
 
     # Foreign keys
     doc_1: Series[float] = pa.Field(nullable=True, coerce=True)

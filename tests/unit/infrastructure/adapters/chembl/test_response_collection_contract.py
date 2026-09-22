@@ -9,6 +9,8 @@ from bioetl.infrastructure.adapters.chembl._client_request_helpers import (
 )
 from bioetl.infrastructure.adapters.chembl.entity_mapper import ChemblEntityMapper
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.mark.parametrize(
     "payload",

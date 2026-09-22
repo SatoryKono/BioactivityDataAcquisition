@@ -10,6 +10,9 @@ from bioetl.application.ports.providers import (
     SupportAwareDataSourceCreatorProtocol,
 )
 
+from bioetl.application.core.data_sources.assay_parameters import (
+    AssayParametersDataSource,
+)
 from bioetl.application.core.data_sources.idmapping import IDMappingDataSource
 from bioetl.application.core.data_sources.publication_term import (
     PublicationTermDataSource,
@@ -120,10 +123,6 @@ def _create_chembl_data_source(
     if pipeline_config.entity_type == "subcellular_fraction":
         base_adapter = SubcellularFractionDataSource(base_adapter)
     if pipeline_config.entity_type == "assay_parameters":
-        from bioetl.application.core.data_sources.assay_parameters import (
-            AssayParametersDataSource,
-        )
-
         base_adapter = AssayParametersDataSource(base_adapter)
 
     return _wrap_with_filter(
@@ -217,13 +216,7 @@ def _create_uniprot_idmapping_data_source(
     *,
     assembly_support: ProviderAssemblySupport | None = None,
 ) -> DataSourcePort:
-    """Create UniProt ID Mapping data source.
-
-    Creates an IDMappingDataSource that:
-    1. Reads ChEMBL target IDs via an infrastructure source reader
-    2. Calls UniProt ID Mapping API to map to UniProt accessions
-    3. Yields records with mapping results
-    """
+    """Read configured ChEMBL seed IDs and yield UniProt ID Mapping results."""
     support = resolve_provider_assembly_support(assembly_support)
     http_client = support.create_http_client("uniprot", settings, metrics=metrics)
     from_db, to_db = _resolve_uniprot_mapping_databases(pipeline_config)
@@ -294,37 +287,25 @@ def _build_bio_http_provider_specs(
     chembl = rate_limits["chembl"]
     uniprot = rate_limits["uniprot"]
 
-    return (
-        build_http_provider_config_spec(
-            provider_name="chembl",
-            adapter_class=ChemblAdapter,
-            rate=chembl.rate,
-            capacity=chembl.capacity,
-            data_source_creator=cast(
-                "SupportAwareDataSourceCreatorProtocol",
-                _create_chembl_data_source,
-            ),
+    providers = (
+        ("chembl", ChemblAdapter, chembl, _create_chembl_data_source),
+        ("uniprot", UniProtAdapter, uniprot, _create_uniprot_data_source),
+        (
+            "uniprot_idmapping",
+            IDMappingDataSource,
+            uniprot,
+            _create_uniprot_idmapping_data_source,
         ),
+    )
+    return tuple(
         build_http_provider_config_spec(
-            provider_name="uniprot",
-            adapter_class=UniProtAdapter,
-            rate=uniprot.rate,
-            capacity=uniprot.capacity,
-            data_source_creator=cast(
-                "SupportAwareDataSourceCreatorProtocol",
-                _create_uniprot_data_source,
-            ),
-        ),
-        build_http_provider_config_spec(
-            provider_name="uniprot_idmapping",
-            adapter_class=IDMappingDataSource,
-            rate=uniprot.rate,
-            capacity=uniprot.capacity,
-            data_source_creator=cast(
-                "SupportAwareDataSourceCreatorProtocol",
-                _create_uniprot_idmapping_data_source,
-            ),
-        ),
+            provider_name=name,
+            adapter_class=adapter,
+            rate=limits.rate,
+            capacity=limits.capacity,
+            data_source_creator=cast("SupportAwareDataSourceCreatorProtocol", creator),
+        )
+        for name, adapter, limits, creator in providers
     )
 
 

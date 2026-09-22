@@ -27,6 +27,7 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_fields_of_study,
     extract_journal_info,
     extract_open_access_info,
+    extract_raw_citation_contexts,
     extract_tldr,
 )
 from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
@@ -35,6 +36,7 @@ from bioetl.domain.value_objects import PublicationYear
 from bioetl.domain.value_objects.publications import DOI, PubMedId
 
 if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BronzeRecord
 
 
@@ -149,6 +151,12 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "author_h_indices": self.serialize_json_list(author_h_indices)
             if any(h is not None for h in author_h_indices)
             else None,
+            "author_h_indices_raw_json": self.serialize_json_list(
+                [author.get("hIndex") for author in (authors_list or [])]
+            ),
+            "author_h_indices_canonical_json": self.serialize_json_list(
+                author_h_indices
+            ),
             "affiliation_list": affiliations_json,
         }
 
@@ -169,6 +177,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         author_meta = self._extract_author_metadata(rec.get("authors"))
 
         citation_contexts = extract_citation_contexts(rec.get("citations"))
+        raw_contexts = extract_raw_citation_contexts(rec.get("citations"))
         journal_info = extract_journal_info(rec.get("journal"), rec.get("venue"))
         oa_info = extract_open_access_info(
             rec.get("isOpenAccess"), rec.get("openAccessPdf")
@@ -207,6 +216,10 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "citation_contexts": self.serialize_json_list(citation_contexts)
             if citation_contexts
             else None,
+            "citation_contexts_raw_json": self.serialize_json(raw_contexts),
+            "citation_contexts_canonical_json": self.serialize_json_list(
+                citation_contexts
+            ),
             "journal": journal_info.get("journal"),
             "issn": None,
             "issn_list": None,
@@ -230,18 +243,35 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "subject_fields": self.serialize_json(
                 extract_fields_of_study(rec.get("fieldsOfStudy"))
             ),
+            "subject_fields_raw_json": self.serialize_json(rec.get("fieldsOfStudy")),
+            "subject_fields_canonical_json": self.serialize_json(
+                extract_fields_of_study(rec.get("fieldsOfStudy"))
+            ),
             **self._classify_publication_type(
                 "semanticscholar",
                 raw_type=raw_type,
                 raw_types_list=raw_types_list,
             ),
             "publication_types": self.serialize_json(publication_types),
+            "publication_types_raw_json": self.serialize_json(publication_types),
+            "publication_types_canonical_json": self.serialize_json(publication_types),
             "_source": "semanticscholar",
             "_lookup_method": rec.get("_lookup_method", "unknown"),
             "_original_id": rec.get("_original_id"),
             "_dq_warn": False,
             "_dq_error": False,
         }
+
+    @override
+    def transform_for_gold(
+        self, _context: PipelineContext, silver_record: GoldRecord
+    ) -> GoldRecord:
+        """Preserve exact corpus identifiers in the Gold string contract."""
+        result = super().transform_for_gold(_context, silver_record)
+        corpus_id = result.get("corpus_id")
+        if corpus_id is not None:
+            result["corpus_id"] = str(corpus_id)
+        return result
 
     @override
     def _get_primary_id_field(self) -> str:

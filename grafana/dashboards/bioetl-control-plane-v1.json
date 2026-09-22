@@ -1454,10 +1454,6 @@
                     }
                   }
                 ]
-              },
-              {
-                "id": "custom.width",
-                "value": 110
               }
             ]
           }
@@ -3121,7 +3117,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows checkpoint compatibility decisions by outcome during the selected range. The no_events series means no decisions were recorded; confirm telemetry before treating it as healthy. Run Type does not affect this panel. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Checkpoint compatibility decisions by outcome. An absent series is TELEMETRY MISSING and remains UNKNOWN. Run Type does not affect this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -8951,10 +8947,6 @@
                     "value": "Parameter"
                   },
                   {
-                    "id": "custom.width",
-                    "value": 210
-                  },
-                  {
                     "id": "custom.align",
                     "value": "left"
                   },
@@ -9740,10 +9732,6 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
@@ -9758,10 +9746,6 @@
                   "options": "Action"
                 },
                 "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 240
-                  },
                   {
                     "id": "custom.cellOptions",
                     "value": {
@@ -10274,7 +10258,24 @@
                 "minWidth": 50
               }
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Completed"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm:ss"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 175
+                  }
+                ]
+              }
+            ]
           },
           "targets": [
             {
@@ -10292,6 +10293,17 @@
             }
           ],
           "transformations": [
+            {
+              "id": "convertFieldType",
+              "options": {
+                "conversions": [
+                  {
+                    "targetField": "completed_at",
+                    "destinationType": "time"
+                  }
+                ]
+              }
+            },
             {
               "id": "limit",
               "options": {

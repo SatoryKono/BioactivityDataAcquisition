@@ -8,6 +8,8 @@ from bioetl.application.core.data_sources.assay_parameters import (
     AssayParametersDataSource,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.mark.asyncio
 async def test_empty_assays_are_not_emitted_as_malformed_parameters():

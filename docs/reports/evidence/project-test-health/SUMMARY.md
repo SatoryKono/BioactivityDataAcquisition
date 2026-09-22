@@ -1,6 +1,6 @@
 ---
 status: active-non-canonical
-last_verified: "2026-09-14"
+last_verified: "2026-09-22"
 freshness_window_days: 7
 owner: quality
 canonical_sources:
@@ -15,11 +15,14 @@ verification_scope: tracked_test_module_inventory
 
 ## Current status
 
-The tracked inventory contains 2436 test modules. The 2026-09-14 dashboard and
-Grafana campaign passed 1199 tests, with 11 explicit skips, across unit,
-integration, and architecture surfaces. Five stale contract expectations were
-repaired. This scoped run does not establish the health or coverage of the
-complete repository suite; a full campaign remains outstanding.
+The tracked inventory contains 2625 test modules, counted from tracked
+`tests/**/test_*.py` files on 2026-09-22. The GR-DB-CORR broad attempt executed
+29,758 tests with 10 failures and 91 skips; it was not a PASS. A subsequent
+integration and affected-runner attempt executed 2885 tests with three failures
+and 12 skips. After fixes, the 108-test recheck of the affected integration
+files passed. The architectural campaign encountered additional drift and a
+timeout and remains incomplete. These local results do not establish CI,
+release acceptance, or the health of the complete repository suite.
 
 ## Required evidence refresh
 

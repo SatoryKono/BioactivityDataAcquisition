@@ -118,7 +118,13 @@ async def save_checkpoint_safe(
             close_checkpoint_save_span(
                 host, span, status=status, error=pending_error or span_error
             )
-        except Exception as cleanup_error:
+        except (
+            BioETLError,
+            OSError,
+            RuntimeError,
+            TypeError,
+            ValueError,
+        ) as cleanup_error:
             if pending_error is None:
                 host._logger.warning(
                     "checkpoint_span_cleanup_failed",

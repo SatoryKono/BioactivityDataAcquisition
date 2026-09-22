@@ -380,9 +380,9 @@
             "minWidth": 50,
             "cellOptions": {
               "type": "auto",
-              "wrapText": true
+              "wrapText": false
             },
-            "wrapText": true
+            "wrapText": false
           },
           "noValue": "VALID EMPTY — no matching launches in the report and control-plane catalogs.",
           "links": []
@@ -595,6 +595,10 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 28
               }
             ]
           },
@@ -622,7 +626,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 100
+                "value": 140
               }
             ]
           },
@@ -672,6 +676,10 @@
               {
                 "id": "noValue",
                 "value": "—"
+              },
+              {
+                "id": "custom.width",
+                "value": 145
               }
             ]
           },
@@ -697,6 +705,18 @@
               "options": "Status"
             },
             "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "wrapText": false,
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 90
+              },
               {
                 "id": "mappings",
                 "value": [
@@ -746,22 +766,14 @@
                       "unknown": {
                         "text": "UNKNOWN",
                         "color": "gray"
+                      },
+                      "unfinished": {
+                        "text": "unfinished",
+                        "color": "gray"
                       }
                     }
                   }
                 ]
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background",
-                  "wrapText": false,
-                  "mode": "basic"
-                }
-              },
-              {
-                "id": "custom.width",
-                "value": 90
               }
             ]
           },
@@ -1079,7 +1091,7 @@
               "report_url": false,
               "workflow_scope": false,
               "run_type": false,
-              "action_dashboard_uid": true,
+              "action_dashboard_uid": false,
               "__name__": true,
               "job": true
             }
@@ -1254,7 +1266,24 @@
                 "minWidth": 50
               }
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Completed"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm:ss"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 175
+                  }
+                ]
+              }
+            ]
           },
           "targets": [
             {
@@ -1272,6 +1301,17 @@
             }
           ],
           "transformations": [
+            {
+              "id": "convertFieldType",
+              "options": {
+                "conversions": [
+                  {
+                    "targetField": "completed_at",
+                    "destinationType": "time"
+                  }
+                ]
+              }
+            },
             {
               "id": "limit",
               "options": {

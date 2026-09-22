@@ -87,7 +87,7 @@ def _selector_ledger_for_dimension(
     selected_run_statuses: tuple[str, ...],
     ledger_port: RunLedgerLookup | None,
 ) -> RunLedgerLookup | None:
-    if dimension == "run_id" and not selected_run_statuses:
+    if dimension != "run_status" and not selected_run_statuses:
         return None
     return ledger_port
 

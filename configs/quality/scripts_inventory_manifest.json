@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-21T09:04:55.366634+00:00",
+  "generated_at": "2026-09-22T03:02:52.544014+00:00",
   "summary": {
-    "total_scripts": 621,
+    "total_scripts": 622,
     "status_counts": {
-      "active": 338,
+      "active": 339,
       "supporting": 283
     },
     "reference_group_coverage": {
@@ -13,7 +13,7 @@
       "ci": 83,
       "docs": 261,
       "other": 75,
-      "scripts": 520,
+      "scripts": 521,
       "skills": 12,
       "tests": 435
     }
@@ -8989,13 +8989,13 @@
         },
         {
           "path": "docs/filters/inventory-baseline.csv",
-          "line": 177,
+          "line": 174,
           "source_group": "docs",
           "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/docs/matrix/generate_pipeline_normalization_matrix.py,5,1074,Source-profile extraction policy,extraction_"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
-          "line": 2276,
+          "line": 2246,
           "source_group": "docs",
           "text": "\"path\": \"scripts/docs/matrix/generate_pipeline_normalization_matrix.py\","
         },
@@ -12871,7 +12871,7 @@
         },
         {
           "path": "tests/integration/test_grafana_render_first_remediation.py",
-          "line": 1439,
+          "line": 1440,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         },
@@ -13515,13 +13515,13 @@
       "references": [
         {
           "path": "docs/filters/inventory-baseline.csv",
-          "line": 178,
+          "line": 175,
           "source_group": "docs",
           "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/engineering/qa/config_surface_governance.py,2,8,Source-profile extraction policy,extraction_params are pr"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
-          "line": 2287,
+          "line": 2257,
           "source_group": "docs",
           "text": "\"path\": \"scripts/engineering/qa/config_surface_governance.py\","
         },
@@ -20035,7 +20035,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1430,
+          "line": 1428,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._dashboard_state_followup import ("
         },
@@ -20050,6 +20050,21 @@
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-12-14",
       "next_step": "Internal transformations invoked by render_nav_bus --state-followup; no standalone CLI. Keep the public command in render_nav_bus."
+    },
+    {
+      "path": "scripts/ops/observability/grafana/_gr_db_corrections.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 1459,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._gr_db_corrections import apply_corrections"
+        }
+      ]
     },
     {
       "path": "scripts/ops/observability/grafana/_latest_complete_run_panel.py",
@@ -20104,9 +20119,9 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1456,
+          "line": 1454,
           "source_group": "scripts",
-          "text": "from scripts.ops.observability.grafana._visual_usability import apply_visual_usability"
+          "text": "from scripts.ops.observability.grafana._visual_usability import ("
         }
       ],
       "owner": "@bioetl-observability",
@@ -20477,7 +20492,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1425,
+          "line": 1423,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },

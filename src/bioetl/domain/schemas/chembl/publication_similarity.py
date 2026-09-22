@@ -6,12 +6,13 @@ Renamed from DocumentSimilaritySchema per ADR-024 (Entity Naming Unification).
 
 from __future__ import annotations
 
-import pandas as pd
+from typing import cast
+
 import pandera.pandas as pa
-from pandera.typing import Series
+from pandera.typing import DataFrame, Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
-from bioetl.domain.schemas.chembl.similarity_pair import valid_similarity_pairs
+from bioetl.domain.schemas.chembl.similarity_pair import valid_similarity_pair
 
 __all__ = [
     "PublicationSimilaritySchema",
@@ -22,9 +23,13 @@ class PublicationSimilaritySchema(ETLRecordSchema):
     """Publication Similarity validation schema for Silver layer."""
 
     @pa.dataframe_check
-    def complete_document_pair(cls, frame: pd.DataFrame) -> pd.Series:
+    @classmethod
+    def complete_document_pair(cls, frame: DataFrame) -> Series[bool]:
         """Require a complete public pair or a complete legacy internal pair."""
-        return valid_similarity_pairs(frame)
+        return cast(
+            Series[bool],
+            frame.apply(lambda row: valid_similarity_pair(row.to_dict()), axis=1),
+        )
 
     # === Primary Key ===
     sim_id: Series[int] = pa.Field(

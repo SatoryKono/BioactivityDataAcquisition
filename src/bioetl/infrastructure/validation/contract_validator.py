@@ -9,7 +9,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.domain.behavior.dq_policy_resolver import DQPolicyResolver
-from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import (
     DQDisposition,
@@ -25,6 +24,8 @@ from bioetl.infrastructure.validation.pandera_validator import (
 if TYPE_CHECKING:
     import pandas as pd
     import pandera.pandas as pa
+
+    from bioetl.domain.config.dq import DQConfig
 
 
 class ContractAwareGoldValidator(PanderaGoldValidator):

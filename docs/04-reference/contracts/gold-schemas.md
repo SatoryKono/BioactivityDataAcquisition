@@ -1007,10 +1007,12 @@ JSON exports для Gold-схем хранятся в `docs/04-reference/contrac
 
 - `chembl_activity_v1.0.json`
 - `chembl_assay_parameters_v1.0.json`
+- `chembl_assay_parameters_v2.0.json`
 - `chembl_assay_v1.0.json`
 - `chembl_cell_line_v1.0.json`
 - `chembl_compound_record_v1.0.json`
 - `chembl_publication_similarity_v1.0.json`
+- `chembl_publication_similarity_v2.0.json`
 - `chembl_publication_term_v1.0.json`
 - `chembl_publication_v1.0.json`
 - `chembl_molecule_v1.0.json`

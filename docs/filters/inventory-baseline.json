@@ -5,8 +5,8 @@
     "entities_total": 27,
     "entities_with_silver_filters": 27,
     "entities_with_gold_filters": 27,
-    "rules_total": 107,
-    "keep_in_silver": 107,
+    "rules_total": 104,
+    "keep_in_silver": 104,
     "move_to_gold": 0,
     "duplicate": 0,
     "conflict": 0
@@ -461,7 +461,7 @@
       "has_silver_filters": true,
       "has_gold_filters": true,
       "counts_by_action": {
-        "keep_in_silver": 4,
+        "keep_in_silver": 3,
         "move_to_gold": 0,
         "duplicate": 0,
         "conflict": 0
@@ -496,16 +496,6 @@
           "gold_value": "\"parameter_type\"",
           "action": "keep_in_silver",
           "notes": "also present in gold_filters (informational)"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay_parameters",
-          "rule_type": "required_fields",
-          "field": "type",
-          "silver_value": "\"type\"",
-          "gold_value": "",
-          "action": "keep_in_silver",
-          "notes": "structural rule stays in silver_filters"
         }
       ]
     },
@@ -721,7 +711,7 @@
       "has_silver_filters": true,
       "has_gold_filters": true,
       "counts_by_action": {
-        "keep_in_silver": 3,
+        "keep_in_silver": 1,
         "move_to_gold": 0,
         "duplicate": 0,
         "conflict": 0
@@ -734,26 +724,6 @@
           "field": "sim_id",
           "silver_value": "\"sim_id\"",
           "gold_value": "\"sim_id\"",
-          "action": "keep_in_silver",
-          "notes": "also present in gold_filters (informational)"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_similarity",
-          "rule_type": "required_fields",
-          "field": "doc_1",
-          "silver_value": "\"doc_1\"",
-          "gold_value": "\"doc_1\"",
-          "action": "keep_in_silver",
-          "notes": "also present in gold_filters (informational)"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_similarity",
-          "rule_type": "required_fields",
-          "field": "doc_2",
-          "silver_value": "\"doc_2\"",
-          "gold_value": "\"doc_2\"",
           "action": "keep_in_silver",
           "notes": "also present in gold_filters (informational)"
         }
@@ -1736,7 +1706,7 @@
       "symbol": "silver_filter_rejects",
       "path": "grafana/prometheus-rules/bioetl_observability.yml",
       "occurrence_count": 4,
-      "first_line": 942,
+      "first_line": 912,
       "role": "Operator summary alias for Silver rejects",
       "migration_relevance": "Summary key is a compatibility alias while semantic/business rejects move to Gold taxonomy.",
       "notes": ""
@@ -1835,7 +1805,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "grafana/dashboards/bioetl-dq-v2.json",
       "occurrence_count": 2,
-      "first_line": 2469,
+      "first_line": 2649,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1846,7 +1816,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "grafana/prometheus-rules/bioetl_observability.yml",
       "occurrence_count": 3,
-      "first_line": 893,
+      "first_line": 863,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1912,7 +1882,7 @@
       "symbol": "bioetl_silver_filter_reject_total_mismatch_15m",
       "path": "grafana/prometheus-rules/bioetl_observability.yml",
       "occurrence_count": 2,
-      "first_line": 1054,
+      "first_line": 1024,
       "role": "Silver reject accounting reconciliation",
       "migration_relevance": "Recording rule reconciles stage totals with bounded Silver reject breakdowns.",
       "notes": ""
@@ -2176,7 +2146,7 @@
       "symbol": "source_profile",
       "path": "src/bioetl/infrastructure/config/converters.py",
       "occurrence_count": 2,
-      "first_line": 214,
+      "first_line": 215,
       "role": "Versioned source-profile metadata",
       "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
       "notes": ""
@@ -2374,7 +2344,7 @@
       "symbol": "filters.extraction_params",
       "path": "configs/entities/chembl/assay_parameters.yaml",
       "occurrence_count": 1,
-      "first_line": 328,
+      "first_line": 299,
       "role": "Entity source-profile policy for chembl.assay_parameters",
       "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
       "notes": "empty; parameter_count=0"
@@ -2440,7 +2410,7 @@
       "symbol": "filters.extraction_params",
       "path": "configs/entities/chembl/publication_similarity.yaml",
       "occurrence_count": 1,
-      "first_line": 120,
+      "first_line": 124,
       "role": "Entity source-profile policy for chembl.publication_similarity",
       "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
       "notes": "empty; parameter_count=0"

@@ -94,19 +94,24 @@ def supplement_report_options(
     scopes: dict[str, tuple[str, ...]],
     root: Path | None = None,
     timezone: str = "UTC",
+    entries: list[ReportIndexEntry] | None = None,
 ) -> dict[str, object]:
     """Append genuine report identities; empty/error responses are never fabricated."""
     if dimension not in _FIELDS:
         return payload
     root = configured_report_root(root=root)
-    entries = list_pipeline_reports(
-        root=root, limit=None, store=create_run_report_store()
-    )
+    if entries is None:
+        entries = load_report_selector_entries(scopes, root=root)
     raw_items = payload.get("items", [])
     items = list(raw_items) if isinstance(raw_items, list) else []
     seen = {item.get("value") if isinstance(item, dict) else item for item in items}
     for entry in sorted(entries, key=lambda item: item.started_at or "", reverse=True):
         if not _entry_matches_catalog(entry, scopes):
+            continue
+        # Existing manifest-backed values already have their own evidence. Only
+        # a newly contributed option needs the full report identity check.
+        known_value = entry.owner if dimension == "pipeline" else entry.run_id
+        if dimension in {"pipeline", "run_id"} and known_value in seen:
             continue
         identity = _checked_identity(entry, root)
         if not _identity_matches_scopes(identity, scopes):
@@ -120,3 +125,21 @@ def supplement_report_options(
             {"text": label, "value": value} if response_shape == "options" else value
         )
     return {**payload, "items": items}
+
+
+def load_report_selector_entries(
+    scopes: dict[str, tuple[str, ...]], *, root: Path | None = None
+) -> list[ReportIndexEntry]:
+    """Read only selected owners while preserving the complete historical catalog."""
+    root = configured_report_root(root=root)
+    pipelines = _allowed_scope(scopes.get("pipeline", ()))
+    return [
+        entry
+        for pipeline in (sorted(pipelines) if pipelines else [None])
+        for entry in list_pipeline_reports(
+            pipeline_name=pipeline,
+            root=root,
+            limit=None,
+            store=create_run_report_store(),
+        )
+    ]

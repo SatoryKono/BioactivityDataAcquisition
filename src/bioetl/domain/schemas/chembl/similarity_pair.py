@@ -1,26 +1,48 @@
-"""Shared complete-pair invariant for public and legacy similarity records."""
+"""Framework-independent complete-pair invariant for similarity records."""
 
 from __future__ import annotations
 
-import pandas as pd
+import re
+from collections.abc import Mapping
+from math import isfinite
+from numbers import Real
 
 
-def valid_similarity_pairs(frame: pd.DataFrame) -> pd.Series:
-    """Require two distinct endpoints in one namespace, never mix namespaces."""
-    valid = pd.Series(False, index=frame.index)
-    legacy = ("doc_1", "doc_2")
-    public = ("publication_id1", "publication_id2")
-    if all(name in frame for name in legacy):
-        valid |= (
-            frame[list(legacy)].notna().all(axis=1)
-            & frame[list(legacy)].gt(0).all(axis=1)
-            & frame[legacy[0]].ne(frame[legacy[1]])
-        ).fillna(False)
-    if any(name in frame for name in public):
-        public_frame = frame.reindex(columns=list(public))
-        present = public_frame.notna().any(axis=1)
-        complete = public_frame.notna().all(axis=1) & public_frame[public[0]].ne(
-            public_frame[public[1]]
-        )
-        valid = valid.where(~present, complete)
-    return valid.fillna(False)
+def is_public_document_id(value: object) -> bool:
+    """Recognize positive public ChEMBL IDs without inferring internal IDs."""
+    return isinstance(value, str) and re.fullmatch(r"CHEMBL[1-9]\d*", value) is not None
+
+
+def _present(value: object) -> bool:
+    return isinstance(value, str) or (isinstance(value, Real) and isfinite(value))
+
+
+def _positive_number(value: object) -> bool:
+    return isinstance(value, Real) and isfinite(value) and float(value) > 0
+
+
+def valid_similarity_pair(record: Mapping[str, object]) -> bool:
+    """Require distinct endpoints from one namespace, never a mixed pair."""
+    first, second = record.get("publication_id1"), record.get("publication_id2")
+    if any(map(_present, (first, second))):
+        return all(map(is_public_document_id, (first, second))) and first != second
+    first, second = record.get("doc_1"), record.get("doc_2")
+    return all(map(_positive_number, (first, second))) and first != second
+
+
+def validate_public_pair(first: str | None, second: str | None) -> None:
+    """Reject incomplete, malformed and self-referential public pairs."""
+    if not all(map(is_public_document_id, (first, second))):
+        raise ValueError("Both public document ChEMBL identifiers are required")
+    if first == second:
+        raise ValueError("Document cannot be similar to itself")
+
+
+def validate_legacy_pair(first: int | None, second: int | None) -> None:
+    """Retain the positive internal-ID contract for legacy records."""
+    if first is None or second is None:
+        raise ValueError("Both document identifiers are required")
+    if min(first, second) <= 0:
+        raise ValueError("doc_1 and doc_2 must be positive")
+    if first == second:
+        raise ValueError("Document cannot be similar to itself")

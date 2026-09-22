@@ -242,20 +242,6 @@ class TestPubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
         return _build_transformer()
 
-    def test_init_accepts_injected_extractors(self) -> None:
-        """Transformer should allow extractor overrides via DI."""
-        symbols = _pubmed_test_symbols()
-        author_extractor = MagicMock(spec=symbols["AuthorExtractor"])
-        date_extractor = MagicMock(spec=symbols["DateExtractor"])
-
-        transformer = _build_transformer(
-            author_extractor=author_extractor,
-            date_extractor=date_extractor,
-        )
-
-        assert transformer._author_extractor is author_extractor
-        assert transformer._date_extractor is date_extractor
-
     def test_extract_author_block_uses_injected_author_extractor(self) -> None:
         """Author normalization should use injected extractor instance."""
         symbols = _pubmed_test_symbols()

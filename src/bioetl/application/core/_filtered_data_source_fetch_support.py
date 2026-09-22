@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol, cast
 
-from bioetl.application.core.data_source_mixins import (
-    _yield_plain_wrapped_fetch_records,
+from bioetl.application.core._target_data_source_fetch_support import (
+    yield_plain_wrapped_fetch_records as _yield_plain_wrapped_fetch_records,
 )
 from bioetl.domain.types import JsonDict
 

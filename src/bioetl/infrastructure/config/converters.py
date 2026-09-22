@@ -33,7 +33,8 @@ def _extract_source_fields(yaml_config: PipelineYamlConfig) -> list[str]:
     if not source_fields:
         return []
     names: list[str] = []
-    for field in source_fields:
+    for raw_field in source_fields:
+        field: object = raw_field
         if isinstance(field, dict):
             if "name" in field:
                 names.append(field["name"])

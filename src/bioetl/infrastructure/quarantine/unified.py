@@ -22,7 +22,6 @@ import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
 
-from bioetl.domain.ports import QuarantineWriteRequest
 from bioetl.domain.serialization import serialize_to_json
 from bioetl.domain.types import (
     BatchID,
@@ -54,6 +53,8 @@ from bioetl.infrastructure.storage.delta.table_ops import read_delta_records
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
+
+    from bioetl.domain.ports import QuarantineWriteRequest
 
 
 def _normalize_quarantine_record(record: QuarantineWriteRequest) -> JsonDict:
