@@ -2,11 +2,36 @@
 
 from __future__ import annotations
 
+import math
+from email.utils import parsedate_to_datetime
+
 import httpx
 
 from bioetl.domain.exceptions import RecoverableError
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.resilience import RetryConfig
+
+
+def _parse_retry_after(value: str, *, now: float) -> float | None:
+    """Parse a Retry-After delay-seconds or HTTP-date value."""
+    normalized = value.strip()
+    if not normalized:
+        return None
+
+    try:
+        delay = float(normalized)
+    except ValueError:
+        delay = None
+    if delay is not None and math.isfinite(delay) and delay >= 0:
+        return delay
+
+    try:
+        retry_at = parsedate_to_datetime(normalized)
+        if retry_at.tzinfo is None:
+            return None
+        return max(0.0, retry_at.timestamp() - now)
+    except (OverflowError, TypeError, ValueError):
+        return None
 
 
 def _can_retry(

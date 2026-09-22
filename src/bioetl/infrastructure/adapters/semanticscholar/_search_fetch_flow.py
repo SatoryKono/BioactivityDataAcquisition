@@ -62,6 +62,7 @@ class _SemanticScholarSearchFetchMixin:
         limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
         """Paginate through search results with optional limit."""
+        search_query = self._require_search_query(query)
         current_offset = 0
         page_size = min(100, limit or 100)
         fetched = 0
@@ -69,7 +70,7 @@ class _SemanticScholarSearchFetchMixin:
             records, next_offset = await as_mixin_host(
                 self
             )._fetch_search_page(  # Any: mixin host
-                query=query,
+                query=search_query,
                 page_size=page_size,
                 current_offset=current_offset,
             )
@@ -81,6 +82,13 @@ class _SemanticScholarSearchFetchMixin:
             if next_offset is None or (limit and fetched >= limit):
                 return
             current_offset = next_offset
+
+    @staticmethod
+    def _require_search_query(query: str | None) -> str:
+        """Return a normalized non-empty search query."""
+        if query is None or not query.strip():
+            raise ValueError("Semantic Scholar search query must be non-empty")
+        return query.strip()
 
     @staticmethod
     def _validate_entity_type(entity_type: str) -> None:
@@ -100,10 +108,16 @@ class _SemanticScholarSearchFetchMixin:
         current_offset: int,
     ) -> tuple[list[BronzeRecord], int | None]:
         """Fetch one search page and emit request telemetry."""
+<<<<<<< HEAD
         if query is None or not query.strip():
             raise ValueError("Semantic Scholar search requires explicit query; use filter_ids for batch lookup")
         params: JsonDict = {
             "query": query,
+=======
+        search_query = self._require_search_query(query)
+        params: JsonDict = {
+            "query": search_query,
+>>>>>>> fix/issue-10577-search-retry
             "fields": as_mixin_host(self).fields,  # Any: mixin host
             "offset": current_offset,
             "limit": page_size,
@@ -116,7 +130,11 @@ class _SemanticScholarSearchFetchMixin:
             try:
                 response = await as_mixin_host(
                     self
+<<<<<<< HEAD
                 )._http_client.get(  # Any: mixin host - bounded retry for 429 via UnifiedHTTPClient
+=======
+                )._http_client.get(  # Any: mixin host
+>>>>>>> fix/issue-10577-search-retry
                     url,
                     params=params,
                     headers=as_mixin_host(self)._build_headers(),  # Any: mixin host

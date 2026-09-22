@@ -56,7 +56,7 @@ class SemanticScholarFetchAdapterMixin(
             BronzeRecord entries from the Semantic Scholar API.
 
         Raises:
-            ValueError: If entity_type is not "publication" or "paper".
+            ValueError: If entity_type is unsupported or query is empty.
         """
         del offset
         if filter_ids:
@@ -72,8 +72,11 @@ class SemanticScholarFetchAdapterMixin(
         if query is None or not query.strip():
             raise ValueError("Semantic Scholar fetch requires query when filter_ids is not provided")
         as_mixin_host(self)._validate_entity_type(entity_type)  # Any: mixin host
+        search_query = as_mixin_host(self)._require_search_query(
+            query
+        )  # Any: mixin host
         async for record in as_mixin_host(self)._paginate_search(
-            query=query, limit=limit
+            query=search_query, limit=limit
         ):  # Any: mixin host
             yield record
 

@@ -27,9 +27,14 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Unit tests for HTTP client retry mixin refactoring."""
 
-import pytest
-from unittest.mock import MagicMock, AsyncMock
+from datetime import datetime, UTC
+from unittest.mock import AsyncMock, MagicMock
+
 import httpx
+import pytest
+
+from bioetl.domain.resilience import RetryConfig
+import bioetl.infrastructure.adapters.http.client_retry_mixin as retry_mixin_module
 
 from bioetl.infrastructure.adapters.http.client_retry_mixin import HTTPClientRetryMixin
 from bioetl.infrastructure.adapters.http._client_retry_models import (
@@ -159,3 +164,60 @@ class TestHTTPClientRetryRefactoring:
 
         with pytest.raises(Exception, match="Exhausted"):
             await self.mixin._request_with_retry("GET", "https://test.com")
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("retry_after", "now", "expected_delay"),
+    [
+        ("7", datetime(2015, 10, 21, 7, 27, 55, tzinfo=UTC), 7.0),
+        ("999999", datetime(2015, 10, 21, 7, 27, 55, tzinfo=UTC), 60.0),
+        ("nan", datetime(2015, 10, 21, 7, 27, 55, tzinfo=UTC), 1.0),
+        ("inf", datetime(2015, 10, 21, 7, 27, 55, tzinfo=UTC), 1.0),
+        ("-1", datetime(2015, 10, 21, 7, 27, 55, tzinfo=UTC), 1.0),
+        ("bad date", datetime(2015, 10, 21, 7, 27, 55, tzinfo=UTC), 1.0),
+        ("", datetime(2015, 10, 21, 7, 27, 55, tzinfo=UTC), 1.0),
+        (
+            "Wed, 21 Oct 2015 07:27:00 GMT",
+            datetime(2015, 10, 21, 7, 27, 55, tzinfo=UTC),
+            0.0,
+        ),
+        (
+            "Wed, 21 Oct 2099 07:28:00 GMT",
+            datetime(2015, 10, 21, 7, 27, 55, tzinfo=UTC),
+            60.0,
+        ),
+        (
+            "Wed, 21 Oct 2015 07:28:00 GMT",
+            datetime(2015, 10, 21, 7, 27, 55, tzinfo=UTC),
+            5.0,
+        ),
+    ],
+)
+async def test_retry_after_supports_seconds_and_http_date_deterministically(
+    monkeypatch: pytest.MonkeyPatch,
+    retry_after: str,
+    now: datetime,
+    expected_delay: float,
+) -> None:
+    """Retry-After parsing uses a deterministic wall-clock seam."""
+    mixin = HTTPClientRetryMixin()
+    mixin.retry_config = RetryConfig(
+        base_delay=1.0,
+        max_delay=60.0,
+        jitter_range=(0.0, 0.0),
+    )
+    sleep = AsyncMock()
+    monkeypatch.setattr(retry_mixin_module.time, "time", lambda: now.timestamp())
+    monkeypatch.setattr(retry_mixin_module.asyncio, "sleep", sleep)
+    request = httpx.Request("GET", "https://api.test.example/paper/search")
+    response = httpx.Response(
+        429,
+        request=request,
+        headers={"Retry-After": retry_after},
+    )
+
+    delay = await mixin._handle_retry_delay(0, str(request.url), response)
+
+    assert delay == pytest.approx(expected_delay)
+    sleep.assert_awaited_once_with(expected_delay)
