@@ -2611,6 +2611,10 @@
                     "value": false
                   },
                   {
+                    "id": "links",
+                    "value": []
+                  },
+                  {
                     "id": "custom.wrapText",
                     "value": true
                   },
@@ -2691,6 +2695,10 @@
                   {
                     "id": "custom.hidden",
                     "value": false
+                  },
+                  {
+                    "id": "links",
+                    "value": []
                   },
                   {
                     "id": "custom.wrapText",
