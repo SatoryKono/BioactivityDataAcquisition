@@ -101,13 +101,16 @@ async def persist_dq_quarantine_request(
         count=1,
         stage=ports.stage,
     )
-    track_processed_quarantined(
-        metrics=ports.metrics,
-        batch_metrics=ports.batch_metrics,
-        pipeline_name=ports.pipeline_name,
-        run_type=ports.run_type,
-        count=1,
-    )
+    # Flat records_quarantined feeds bronze_partitioned (silver-side). Gold-layer
+    # schema quarantine must stay on the gold bucket only (#10579).
+    if ports.stage == "silver":
+        track_processed_quarantined(
+            metrics=ports.metrics,
+            batch_metrics=ports.batch_metrics,
+            pipeline_name=ports.pipeline_name,
+            run_type=ports.run_type,
+            count=1,
+        )
 
 
 async def persist_dq_quarantine_requests(
@@ -142,13 +145,14 @@ async def persist_dq_quarantine_requests(
             count=count,
             stage=ports.stage,
         )
-    track_processed_quarantined(
-        metrics=ports.metrics,
-        batch_metrics=ports.batch_metrics,
-        pipeline_name=ports.pipeline_name,
-        run_type=ports.run_type,
-        count=len(requests),
-    )
+    if ports.stage == "silver":
+        track_processed_quarantined(
+            metrics=ports.metrics,
+            batch_metrics=ports.batch_metrics,
+            pipeline_name=ports.pipeline_name,
+            run_type=ports.run_type,
+            count=len(requests),
+        )
 
 
 async def persist_filtered_quarantine_request(

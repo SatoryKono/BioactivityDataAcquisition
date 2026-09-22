@@ -240,11 +240,17 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "is_oa": oa_info.get("is_oa"),
             "open_access_url": oa_info.get("url"),
             "oa_status": oa_info.get("oa_status"),
-            "subject_fields": self.serialize_json(
+            "subject_fields": self.serialize_json_list(
                 extract_fields_of_study(rec.get("fieldsOfStudy"))
             ),
-            "subject_fields_raw_json": self.serialize_json(rec.get("fieldsOfStudy")),
-            "subject_fields_canonical_json": self.serialize_json(
+            # Keep list sidecars as JSON arrays even for single-element payloads
+            # (serialize_json unwraps len==1 lists to scalars and breaks Gold JSON).
+            "subject_fields_raw_json": self.serialize_json_list(
+                rec.get("fieldsOfStudy")
+                if isinstance(rec.get("fieldsOfStudy"), list)
+                else None
+            ),
+            "subject_fields_canonical_json": self.serialize_json_list(
                 extract_fields_of_study(rec.get("fieldsOfStudy"))
             ),
             **self._classify_publication_type(
@@ -252,9 +258,15 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
                 raw_type=raw_type,
                 raw_types_list=raw_types_list,
             ),
-            "publication_types": self.serialize_json(publication_types),
-            "publication_types_raw_json": self.serialize_json(publication_types),
-            "publication_types_canonical_json": self.serialize_json(publication_types),
+            "publication_types": self.serialize_json_list(
+                publication_types if isinstance(publication_types, list) else None
+            ),
+            "publication_types_raw_json": self.serialize_json_list(
+                publication_types if isinstance(publication_types, list) else None
+            ),
+            "publication_types_canonical_json": self.serialize_json_list(
+                publication_types if isinstance(publication_types, list) else None
+            ),
             "_source": "semanticscholar",
             "_lookup_method": rec.get("_lookup_method", "unknown"),
             "_original_id": rec.get("_original_id"),
