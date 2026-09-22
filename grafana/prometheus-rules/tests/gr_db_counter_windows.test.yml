@@ -168,9 +168,12 @@ tests:
     values: 2 2
   - series: bioetl_dq_check_duration_ms_bucket{pipeline="example",le="+Inf"}
     values: 2 2
+  - series: bioetl_dq_check_duration_ms_created{pipeline="example"}
+    values: 100 100
   promql_expr_test:
-  - expr: (histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~"(example|workflow_example)"}[2m]))))
-      >= 0
+  - expr: (histogram_quantile(0.95, (sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~"(example|workflow_example)"}[2m]))
+      unless on (pipeline) (sum by (pipeline) (changes(bioetl_dq_check_duration_ms_created{pipeline=~"(example|workflow_example)"}[2m])
+      > 0))))) >= 0
     eval_time: 1m
     exp_samples: []
 - name: duration-measured-zero-is-preserved
@@ -182,9 +185,12 @@ tests:
     values: 0 1
   - series: bioetl_dq_check_duration_ms_bucket{pipeline="example",le="+Inf"}
     values: 0 1
+  - series: bioetl_dq_check_duration_ms_created{pipeline="example"}
+    values: 100 100
   promql_expr_test:
-  - expr: (histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~"(example|workflow_example)"}[2m]))))
-      >= 0
+  - expr: (histogram_quantile(0.95, (sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~"(example|workflow_example)"}[2m]))
+      unless on (pipeline) (sum by (pipeline) (changes(bioetl_dq_check_duration_ms_created{pipeline=~"(example|workflow_example)"}[2m])
+      > 0))))) >= 0
     eval_time: 1m
     exp_samples:
     - labels: '{pipeline="example"}'
@@ -198,10 +204,78 @@ tests:
     values: 0 2
   - series: bioetl_dq_check_duration_ms_bucket{pipeline="example",le="+Inf"}
     values: 0 2
+  - series: bioetl_dq_check_duration_ms_created{pipeline="example"}
+    values: 100 100
   promql_expr_test:
-  - expr: (histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~"(example|workflow_example)"}[2m]))))
-      >= 0
+  - expr: (histogram_quantile(0.95, (sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~"(example|workflow_example)"}[2m]))
+      unless on (pipeline) (sum by (pipeline) (changes(bioetl_dq_check_duration_ms_created{pipeline=~"(example|workflow_example)"}[2m])
+      > 0))))) >= 0
     eval_time: 1m
     exp_samples:
     - labels: '{pipeline="example"}'
+      value: 95
+- name: duration-replaced-batch-equal-count
+  interval: 1m
+  input_series:
+  - &id001
+    series: bioetl_dq_check_duration_ms_bucket{pipeline="example",instance="a",le="0"}
+    values: 0 0
+  - &id002
+    series: bioetl_dq_check_duration_ms_bucket{pipeline="example",instance="a",le="100"}
+    values: 0 3
+  - &id003
+    series: bioetl_dq_check_duration_ms_bucket{pipeline="example",instance="a",le="+Inf"}
+    values: 3 3
+  - &id004
+    series: bioetl_dq_check_duration_ms_created{pipeline="example",instance="a"}
+    values: 100 200
+  promql_expr_test:
+  - expr: (histogram_quantile(0.95, (sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~"(example|workflow_example)"}[2m]))
+      unless on (pipeline) (sum by (pipeline) (changes(bioetl_dq_check_duration_ms_created{pipeline=~"(example|workflow_example)"}[2m])
+      > 0))))) >= 0
+    eval_time: 1m
+    exp_samples: []
+- name: duration-one-reset-invalidates-whole-group
+  interval: 1m
+  input_series:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - series: bioetl_dq_check_duration_ms_bucket{pipeline="example",instance="b",le="0"}
+    values: 0 0
+  - series: bioetl_dq_check_duration_ms_bucket{pipeline="example",instance="b",le="100"}
+    values: 0 2
+  - series: bioetl_dq_check_duration_ms_bucket{pipeline="example",instance="b",le="+Inf"}
+    values: 0 2
+  - series: bioetl_dq_check_duration_ms_created{pipeline="example",instance="b"}
+    values: 100 100
+  promql_expr_test:
+  - expr: (histogram_quantile(0.95, (sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~"(example|workflow_example)"}[2m]))
+      unless on (pipeline) (sum by (pipeline) (changes(bioetl_dq_check_duration_ms_created{pipeline=~"(example|workflow_example)"}[2m])
+      > 0))))) >= 0
+    eval_time: 1m
+    exp_samples: []
+- name: duration-reset-does-not-hide-another-group
+  interval: 1m
+  input_series:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - series: bioetl_dq_check_duration_ms_bucket{pipeline="workflow_example",instance="c",le="0"}
+    values: 0 0
+  - series: bioetl_dq_check_duration_ms_bucket{pipeline="workflow_example",instance="c",le="100"}
+    values: 0 2
+  - series: bioetl_dq_check_duration_ms_bucket{pipeline="workflow_example",instance="c",le="+Inf"}
+    values: 0 2
+  - series: bioetl_dq_check_duration_ms_created{pipeline="workflow_example",instance="c"}
+    values: 100 100
+  promql_expr_test:
+  - expr: (histogram_quantile(0.95, (sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~"(example|workflow_example)"}[2m]))
+      unless on (pipeline) (sum by (pipeline) (changes(bioetl_dq_check_duration_ms_created{pipeline=~"(example|workflow_example)"}[2m])
+      > 0))))) >= 0
+    eval_time: 1m
+    exp_samples:
+    - labels: '{pipeline="workflow_example"}'
       value: 95

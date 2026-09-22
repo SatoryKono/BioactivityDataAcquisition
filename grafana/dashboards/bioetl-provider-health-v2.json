@@ -3298,14 +3298,14 @@
           },
           "targets": [
             {
-              "expr": "(histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])))) >= 0",
+              "expr": "(histogram_quantile(0.95, (sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])) unless on (provider) (sum by (provider) (changes(bioetl_health_check_latency_seconds_created{provider=~\"$provider\"}[$__range]) > 0))))) >= 0",
               "legendFormat": "{{ provider }}",
               "refId": "A"
             }
           ],
           "title": "Inspect Health-Check Latency p95",
           "type": "stat",
-          "description": "TIME RANGE · Compact optional selected-range evidence: per-provider p95 health-check latency over the active Grafana range. No data means no latency samples or no probe activity in range, not 0s latency and not a provider verdict TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: range snapshot stat of health-check p95; the interval trend is Track Health-Check Latency p95 (1)."
+          "description": "TIME RANGE · Compact optional selected-range evidence: per-provider p95 health-check latency over the active Grafana range. No data means no latency samples or no probe activity in range, not 0s latency and not a provider verdict TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: range snapshot stat of health-check p95; the interval trend is Track Health-Check Latency p95 (1). Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency."
         },
         {
           "datasource": {
@@ -3391,14 +3391,14 @@
           },
           "targets": [
             {
-              "expr": "(histogram_quantile(0.95, sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))) >= 0",
+              "expr": "(histogram_quantile(0.95, (sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])) unless on (provider, endpoint) (sum by (provider, endpoint) (changes(bioetl_adapter_request_duration_seconds_created{provider=~\"$provider\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{ provider }} {{ endpoint }} p95",
               "refId": "A"
             }
           ],
           "title": "Track Request Latency p95",
           "type": "timeseries",
-          "description": "TIME RANGE · Optional latency samples only. Empty/NaN is TELEMETRY MISSING, not zero latency or a healthy provider. Check telemetry presence above.",
+          "description": "TIME RANGE · Optional latency samples only. Empty/NaN is TELEMETRY MISSING, not zero latency or a healthy provider. Check telemetry presence above. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
@@ -3644,14 +3644,14 @@
           },
           "targets": [
             {
-              "expr": "(histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))) >= 0",
+              "expr": "(histogram_quantile(0.95, (sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])) unless on (provider) (sum by (provider) (changes(bioetl_rate_limiter_wait_seconds_created{provider=~\"$provider\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{ provider }} p95",
               "refId": "A"
             }
           ],
           "title": "Track Rate-Limiter Wait p95",
           "type": "timeseries",
-          "description": "TIME RANGE · Compact optional selected-range evidence: p95 wait time imposed by provider rate limiting. No data means no observed wait samples in range, not a healthy wait time. This optional telemetry can stay empty even when current provider severity is non-OK. The provider degraded-rule surface starts at p95 > 1s; this panel keeps a lower yellow band for earlier-warning inspection TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Compact optional selected-range evidence: p95 wait time imposed by provider rate limiting. No data means no observed wait samples in range, not a healthy wait time. This optional telemetry can stay empty even when current provider severity is non-OK. The provider degraded-rule surface starts at p95 > 1s; this panel keeps a lower yellow band for earlier-warning inspection TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
@@ -4217,14 +4217,14 @@
           },
           "targets": [
             {
-              "expr": "(histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))) >= 0",
+              "expr": "(histogram_quantile(0.95, (sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])) unless on (provider) (sum by (provider) (changes(bioetl_health_check_latency_seconds_created{provider=~\"$provider\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{ provider }} p95",
               "refId": "A"
             }
           ],
           "title": "Track Health-Check Latency p95",
           "type": "timeseries",
-          "description": "TIME RANGE · Optional latency samples only. Empty/NaN is TELEMETRY MISSING, not zero latency or a healthy provider. Check telemetry presence above.",
+          "description": "TIME RANGE · Optional latency samples only. Empty/NaN is TELEMETRY MISSING, not zero latency or a healthy provider. Check telemetry presence above. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
