@@ -17,6 +17,7 @@ from bioetl.composition.runtime_builders._inputs_resolution_support import (
 from bioetl.composition.runtime_builders.inputs_resolution_orchestration import (
     resolve_runner_filter_config as _resolve_runner_filter_config,
     resolve_runner_runtime_config as _resolve_runner_runtime_config,
+    validate_resolved_extraction_input,
     validate_runner_data_root_policy as _validate_runner_data_root_policy,
 )
 from bioetl.domain.config import RuntimeConfig
@@ -220,6 +221,23 @@ def resolve_runner_derived_inputs(
         adjust_batch_size_for_filter_fn=adjust_batch_size_for_filter_fn,
         load_source_config_fn=load_source_config_fn,
     )
+    provenance = validate_resolved_extraction_input(
+        pipeline_name=prepared.yaml_config.pipeline_name,
+        provider=prepared.yaml_config.provider,
+        query=runtime_config.query,
+        filter_config=filter_config,
+    )
+    if provenance is not None:
+        prepared.observability.logger.info(
+            "extraction_input_preflight_passed",
+            pipeline=provenance.pipeline_name,
+            provider=provenance.provider,
+            input_kind=provenance.input_kind,
+            source_path=provenance.source_path,
+            column_name=provenance.column_name,
+            filter_field=provenance.filter_field,
+            id_count=provenance.id_count,
+        )
     return ResolvedRunnerDerivedInputs(
         runtime_config=runtime_config,
         filter_config=filter_config,
