@@ -7,7 +7,7 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from bioetl.domain.aggregates.batch import Batch
+from bioetl.domain.aggregates import Batch
 from bioetl.domain.aggregates.pipeline_run import StageResult, StageStatus
 from bioetl.domain.aggregates.quarantine_entry import (
     QuarantineEntry,

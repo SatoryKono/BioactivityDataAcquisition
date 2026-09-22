@@ -5,7 +5,7 @@ reviewed_on: "2026-07-27"
 review_by: "2026-10-27"
 owner: "@bioetl-architecture"
 new_surface_policy: fail_fast_unclassified_lazy_public_facade
-row_count: 52
+row_count: 51
 rationale: >-
   Lazy public facades are intentional only when the owning package declares the
   owner, allowed importer class, classification, and exit criteria. New
@@ -127,15 +127,6 @@ facades:
       module: bioetl.composition.resources_runtime,
       markers: [_PUBLIC_EXPORTS],
       <<: *composition_external,
-    }
-  - {
-      path: src/bioetl/domain/aggregates/batch.py,
-      module: bioetl.domain.aggregates.batch,
-      markers: [__getattr__],
-      classification: compatibility_debt,
-      owner: "@bioetl-domain",
-      allowed_importers: [owning_package, tests],
-      exit_criteria: "Retain the Batch compatibility re-export until ADR-059 callers import _batch_aggregate directly.",
     }
   - {
       path: src/bioetl/domain/__init__.py,

@@ -13,7 +13,7 @@
         "sealed or terminal batches reject further record mutation",
         "batch lifecycle transitions emit deterministic domain events"
       ],
-      "root_module": "src/bioetl/domain/aggregates/batch.py",
+      "root_module": "src/bioetl/domain/aggregates/_batch_aggregate.py",
       "test_paths": [
         "tests/unit/domain/aggregates/test_batch.py",
         "tests/unit/domain/aggregates/test_batch_determinism.py",

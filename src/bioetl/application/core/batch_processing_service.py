@@ -18,6 +18,7 @@ from bioetl.application.core.batch_processing_support import (
     build_bronze_refs,
     execute_with_pipeline_failure_policy,
 )
+from bioetl.domain.aggregates import Batch
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.ports import BatchIdGeneratorPort
 from bioetl.domain.types import BatchID, BronzeRecord
@@ -35,11 +36,8 @@ if TYPE_CHECKING:
         PipelineDataSourceServicesProtocol,
     )
     from bioetl.application.core.record_processor_config import RecordProcessorConfig
-    from bioetl.domain.aggregates import Batch
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
-else:
-    from bioetl.domain.aggregates.batch import Batch
 
 
 @dataclass(frozen=True, slots=True)

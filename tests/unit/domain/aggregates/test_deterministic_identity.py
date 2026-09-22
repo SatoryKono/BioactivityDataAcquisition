@@ -34,7 +34,7 @@ import pytest
 
 from datetime import UTC, datetime
 
-from bioetl.domain.aggregates.batch import Batch
+from bioetl.domain.aggregates import Batch
 from bioetl.domain.aggregates.events import BatchCreated
 from bioetl.domain.aggregates.quarantine_entry import QuarantineEntry
 from bioetl.domain.types import BatchID, RunID

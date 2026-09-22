@@ -18,7 +18,7 @@ aggregate_package:
   invariant_registry: reports/quality/domain-aggregate-invariant-registry.json
 true_aggregates:
   - aggregate: Batch
-    root_module: src/bioetl/domain/aggregates/batch.py
+    root_module: src/bioetl/domain/aggregates/_batch_aggregate.py
     implementation_modules:
       - src/bioetl/domain/aggregates/_batch_aggregate.py
       - src/bioetl/domain/aggregates/batch.py
