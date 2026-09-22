@@ -627,6 +627,13 @@
               {
                 "id": "custom.width",
                 "value": 140
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
               }
             ]
           },
@@ -836,6 +843,10 @@
               {
                 "id": "custom.inspect",
                 "value": false
+              },
+              {
+                "id": "custom.width",
+                "value": 110
               }
             ]
           },
@@ -988,6 +999,34 @@
               {
                 "id": "custom.hidden",
                 "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Workflow"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "— (no workflow data)": {
+                        "text": "No workflow"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           }

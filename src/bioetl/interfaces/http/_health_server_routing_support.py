@@ -50,6 +50,7 @@ from bioetl.interfaces.http.control_plane_selector_context import (
 )
 
 _NOT_FOUND_MESSAGE = "Not Found"
+_FILTER_OPTIONS_TIMEOUT_SECONDS = 20.0
 _CONTROL_PLANE_CLIENT_ERRORS = (ValueError, RuntimeError, OSError, ConnectionError)
 
 
@@ -188,6 +189,7 @@ async def handle_control_plane_filter_options(
         payload = await run_bounded_forensic_operation(
             limiter=host._forensic_endpoint_limiter,
             operation_factory=lambda: _filter_options_payload(host, query),
+            timeout_seconds=_FILTER_OPTIONS_TIMEOUT_SECONDS,
         )
     except ForensicEndpointUnavailable as exc:
         await host._send_payload_response(
@@ -231,29 +233,35 @@ async def _filter_options_payload(
         "run_id": (selected_run_id,) if selected_run_id else (),
     }
     include_reports = not exact_run_only or selected_run_id is not None
-    manifests, workflow_manifests, report_entries = await asyncio.gather(
-        asyncio.to_thread(host._run_manifest_port.list_all),
-        _list_workflow_manifests(host),
+
+    async def manifest_options() -> dict[str, object]:
+        manifests, workflow_manifests = await asyncio.gather(
+            asyncio.to_thread(host._run_manifest_port.list_all),
+            _list_workflow_manifests(host),
+        )
+        return await asyncio.to_thread(
+            build_selector_filter_options_payload,
+            manifests=manifests,
+            ledger_port=host._run_ledger_port,
+            workflow_manifests=workflow_manifests,
+            dimension=dimension,
+            response_shape=response_shape,
+            requested_pipeline=requested_pipeline,
+            selected_workflows=selected_workflows,
+            selected_pipelines=selected_pipelines,
+            selected_run_types=selected_run_types,
+            selected_run_statuses=selected_run_statuses,
+            selected_run_id=selected_run_id,
+            exact_run_only=exact_run_only,
+            fallback_value=fallback_value,
+            timezone=query.get("timezone") or "UTC",
+        )
+
+    payload, report_entries = await asyncio.gather(
+        manifest_options(),
         asyncio.to_thread(load_report_selector_entries, scopes)
         if include_reports
         else asyncio.sleep(0, result=[]),
-    )
-    payload = await asyncio.to_thread(
-        build_selector_filter_options_payload,
-        manifests=manifests,
-        ledger_port=host._run_ledger_port,
-        workflow_manifests=workflow_manifests,
-        dimension=dimension,
-        response_shape=response_shape,
-        requested_pipeline=requested_pipeline,
-        selected_workflows=selected_workflows,
-        selected_pipelines=selected_pipelines,
-        selected_run_types=selected_run_types,
-        selected_run_statuses=selected_run_statuses,
-        selected_run_id=selected_run_id,
-        exact_run_only=exact_run_only,
-        fallback_value=fallback_value,
-        timezone=query.get("timezone") or "UTC",
     )
     if include_reports:
         payload = await asyncio.to_thread(

@@ -321,15 +321,22 @@ def read_identity_preview(
     path: Path, *, store: RunReportStorePort
 ) -> IdentityIndexPreview:
     """Read identity fields from a run-report JSON file."""
+    return read_identity_snapshot(path, store=store)[0]
+
+
+def read_identity_snapshot(
+    path: Path, *, store: RunReportStorePort
+) -> tuple[IdentityIndexPreview, dict[str, object] | None, str | None]:
+    """Keep the identity from this read for request-local validation reuse."""
     empty = IdentityIndexPreview(None, None, None, None, None, None)
     try:
         payload = json.loads(store.read_text(str(path)))
     except (OSError, json.JSONDecodeError):
-        return empty
+        return empty, None, None
     identity = payload.get("identity") if isinstance(payload, dict) else None
     if not isinstance(identity, dict):
-        return empty
-    return IdentityIndexPreview(
+        return empty, None, None
+    preview = IdentityIndexPreview(
         status=_optional_identity_text(identity.get("status")),
         started_at=_optional_identity_text(identity.get("started_at")),
         completed_at=_optional_identity_text(identity.get("completed_at")),
@@ -337,3 +344,5 @@ def read_identity_preview(
         workflow_run_id=_optional_identity_text(identity.get("workflow_run_id")),
         run_type=_optional_identity_text(identity.get("run_type")),
     )
+    schema = payload.get("schema_version")
+    return preview, identity, schema if isinstance(schema, str) else None

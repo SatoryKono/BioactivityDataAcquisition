@@ -40,10 +40,13 @@ def _entry_matches_catalog(
 
 
 def _checked_identity(entry: ReportIndexEntry, root: Path) -> dict[str, object]:
-    report = load_pipeline_run_report_payload(
-        run_id=entry.run_id,
-        pipeline_name=entry.owner,
-        root=root,
+    report = (
+        {"identity": entry.identity_snapshot}
+        if entry.identity_snapshot is not None
+        and entry.schema_version in {"pipeline_run_report_v1", "pipeline_run_report_v2"}
+        else load_pipeline_run_report_payload(
+            run_id=entry.run_id, pipeline_name=entry.owner, root=root
+        )
     )
     if report is None:
         raise ValueError("Persisted selector report is unreadable or unsupported")
@@ -141,5 +144,6 @@ def load_report_selector_entries(
             root=root,
             limit=None,
             store=create_run_report_store(),
+            include_markdown=False,
         )
     ]

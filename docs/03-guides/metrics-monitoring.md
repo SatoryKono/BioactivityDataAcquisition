@@ -1005,6 +1005,14 @@ a 9-second cooperative scan budget and the existing 12-second HTTP deadline.
 catalog was exhausted. Backend failures remain errors. Neither state supplies
 a candidate link or asserts replay safety.
 
+The full `/ops/control-plane/filter-options` catalog has a separate 20-second
+HTTP deadline: it reads all historical identities rather than a bounded candidate
+prefix. It shares the four-operation limiter and 250 ms queue deadline with other
+forensic endpoints. Exceeding either limit still returns explicit 504/503 errors.
+Manifest/ledger construction overlaps report discovery; report identity data is
+reused only within that request. Every later request reads the artifacts again.
+The catalog does not truncate history or substitute a stale cached response.
+
 Open a candidate in a new tab to preserve the historical view. The link keeps
 workflow, pipeline, run type, time range and timezone; the candidate may therefore
 show `OUT OF RANGE`. Use its existing range-to-run action when needed. This search
