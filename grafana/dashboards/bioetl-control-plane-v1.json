@@ -1025,15 +1025,19 @@
             },
             "properties": [
               {
+                "id": "displayName",
+                "value": "Check"
+              },
+              {
+                "id": "custom.width",
+                "value": 125
+              },
+              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Check"
               },
               {
                 "id": "mappings",
@@ -1042,13 +1046,13 @@
                     "type": "value",
                     "options": {
                       "retention_policy": {
-                        "text": "Retention policy"
+                        "text": "Policy"
                       },
                       "evidence_floor": {
                         "text": "Evidence floor"
                       },
                       "required_evidence": {
-                        "text": "Required evidence"
+                        "text": "Evidence"
                       },
                       "snapshot_evidence": {
                         "text": "Snapshots"
@@ -1062,10 +1066,6 @@
                     }
                   }
                 ]
-              },
-              {
-                "id": "custom.width",
-                "value": 170
               }
             ]
           },
@@ -1085,6 +1085,10 @@
                   "type": "color-text",
                   "wrapText": false
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 110
               },
               {
                 "id": "mappings",
@@ -1110,19 +1114,15 @@
                       },
                       "INCOMPLETE": {
                         "text": "INCOMPLETE",
-                        "color": "#555555"
+                        "color": "text"
                       },
                       "UNKNOWN": {
                         "text": "UNKNOWN",
-                        "color": "#555555"
+                        "color": "text"
                       }
                     }
                   }
                 ]
-              },
-              {
-                "id": "custom.width",
-                "value": 110
               }
             ]
           },
@@ -1133,19 +1133,19 @@
             },
             "properties": [
               {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
-              },
-              {
                 "id": "custom.inspect",
                 "value": true
               },
               {
                 "id": "displayName",
                 "value": "Reason"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               },
               {
                 "id": "mappings",
@@ -1178,7 +1178,7 @@
                         "text": "Evidence floor met"
                       },
                       "snapshot_evidence_not_required": {
-                        "text": "Snapshots not required"
+                        "text": "Not required"
                       },
                       "lineage_closure_gap": {
                         "text": "Lineage closure gap"
@@ -1376,6 +1376,13 @@
             },
             "properties": [
               {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              },
+              {
                 "id": "mappings",
                 "value": [
                   {
@@ -1406,7 +1413,7 @@
                         "text": "Evidence floor met"
                       },
                       "snapshot_evidence_not_required": {
-                        "text": "Snapshots not required"
+                        "text": "Not required"
                       },
                       "lineage_closure_gap": {
                         "text": "Lineage closure gap"
@@ -1465,13 +1472,48 @@
                   {
                     "type": "value",
                     "options": {
+                      "OK": {
+                        "text": "OK",
+                        "color": "green"
+                      },
+                      "WARN": {
+                        "text": "WARN",
+                        "color": "orange"
+                      },
+                      "WARNING": {
+                        "text": "WARN",
+                        "color": "orange"
+                      },
                       "ERROR": {
                         "text": "ERROR",
                         "color": "red"
+                      },
+                      "INCOMPLETE": {
+                        "text": "INCOMPLETE",
+                        "color": "text"
+                      },
+                      "UNKNOWN": {
+                        "text": "UNKNOWN",
+                        "color": "text"
                       }
                     }
                   }
                 ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           }
@@ -2352,7 +2394,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -2996,7 +3038,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -3708,7 +3750,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -3800,7 +3842,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -3892,7 +3934,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -3984,7 +4026,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -10225,7 +10267,7 @@
                 "include": {
                   "names": [
                     "domain",
-                    "verdict",
+                    "display_verdict",
                     "reason_display",
                     "action",
                     "evidence_ref"
@@ -10238,14 +10280,13 @@
               "options": {
                 "indexByName": {
                   "domain": 0,
-                  "verdict": 1,
                   "action": 3,
                   "evidence_ref": 4,
-                  "reason_display": 2
+                  "reason_display": 2,
+                  "display_verdict": 1
                 },
                 "renameByName": {
                   "domain": "Domain",
-                  "verdict": "Status",
                   "execution_state": "Result",
                   "evidence_completeness": "Evidence",
                   "rules_version": "Rules",
@@ -10255,7 +10296,8 @@
                   "run_id": "Run ID",
                   "completed_at": "Completed",
                   "revision": "Revision",
-                  "reason_display": "Reason"
+                  "reason_display": "Reason",
+                  "display_verdict": "Status"
                 }
               }
             }

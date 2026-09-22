@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import sys
 
 import pytest
 from tests.helpers import repo_root
@@ -26,19 +27,11 @@ def test_scripts_deprecation_report_generation(
     """Inventory tool should generate markdown backlog for non-active scripts with cached results."""
     root = repo_root()
 
-    # Use a fixed path for caching (in project tmp directory)
-    cache_dir = root / "tmp"
-    cache_dir.mkdir(exist_ok=True)
-    cache_report = cache_dir / "scripts_deprecation_backlog_cached.md"
-
-    # Use venv python for the script
-    venv_python = root / ".venv" / "bin" / "python"
-    if not venv_python.exists():
-        venv_python = root / ".venv-win" / "Scripts" / "python.exe"
+    cache_report = tmp_path / "scripts_deprecation_backlog_cached.md"
 
     result = cached_subprocess_run(
         [
-            str(venv_python),
+            sys.executable,
             "scripts/engineering/repo/check_scripts_inventory.py",
             "--deprecation-report",
             str(cache_report),

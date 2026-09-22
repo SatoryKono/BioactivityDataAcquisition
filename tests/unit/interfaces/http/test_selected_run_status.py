@@ -78,6 +78,32 @@ def report(run_id="run-a", status="success"):
     )
 
 
+def test_saved_accounting_conflict_is_visible_without_rewriting_snapshot(tmp_path):
+    original = replace(
+        report(),
+        reconciliation={
+            "silver_vs_bronze_status": "FAILING",
+            "silver_delta": -154,
+            "gold_vs_silver_status": "OK",
+            "gold_delta": 0,
+        },
+    )
+    persisted = persist(tmp_path, original)
+    before = persisted.json_path.read_bytes()
+    result = read(tmp_path)
+    trust = result["trust"][0]
+    assert trust["saved_trust_status"] == "OK"
+    assert trust["trust_status"] == "ERROR"
+    assert trust["accounting_integrity"] == "CONFLICT"
+    assert "delta=-154" in trust["reasons_display"]
+    assert "Saved Trust verdict: OK" in trust["reasons_display"]
+    assert result["verdict"] == "OK"  # Frozen assessment remains historical evidence.
+    control = next(row for row in result["domains"] if row["domain"] == "Control Plane")
+    assert control["verdict"] == "OK"
+    assert control["display_verdict"] == "ERROR"
+    assert persisted.json_path.read_bytes() == before
+
+
 def persist(tmp_path, value=None, store=None):
     return write_pipeline_run_report(
         value or report(), root=tmp_path, store=store or FileRunReportStoreAdapter()

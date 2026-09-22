@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-22T05:56:38.009916+00:00",
+  "generated_at": "2026-09-22T09:12:35.182286+00:00",
   "summary": {
     "total_scripts": 622,
     "status_counts": {
@@ -12871,7 +12871,7 @@
         },
         {
           "path": "tests/integration/test_grafana_render_first_remediation.py",
-          "line": 1473,
+          "line": 1480,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         },
@@ -20870,7 +20870,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/design-system.md",
-          "line": 488,
+          "line": 490,
           "source_group": "docs",
           "text": "`rerender_grafana_screenshots.py --fixture-manifest tests/fixtures/grafana/dashboard_states/INDEX.json`."
         },

@@ -231,3 +231,8 @@ dependency edges; the generated map has 330 cross-layer group edges and zero
 layer violations. This is a source inventory refresh, not new coverage proof.
 
 `source_tree_sha256=0b8525d1668c34dbc68510828f851c1bb44052578c8b38689d98dd4d65300a51`
+
+Refresh note (2026-09-22, isolated Grafana continuation): source inventory
+rebound to `source_tree_sha256=6c334dfe51b614f733e0a070d4eb84658e171e21fa6dd11b2ed9a5e024232b00`,
+`source_module_count=2497`. This stamp is derived from the module inventory;
+it is not a new coverage measurement or a complete topology re-audit.

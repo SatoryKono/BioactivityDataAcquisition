@@ -82,24 +82,8 @@ def _ruff_env() -> dict[str, str]:
 
 
 def _run_format_check(target: str) -> subprocess.CompletedProcess[str]:
-    """Run `ruff format --check` with Windows retry for line-ending churn."""
+    """Check formatting without changing the repository under the test runner."""
     assert _RUFF_CMD is not None
-    result = subprocess.run(
-        [*_RUFF_CMD, "format", "--check", target],
-        capture_output=True,
-        env=_ruff_env(),
-        text=True,
-    )
-    if result.returncode == 0 or platform.system() != "Windows":
-        return result
-
-    # On Windows, normalize line endings and retry once to avoid flaky churn.
-    subprocess.run(
-        [*_RUFF_CMD, "format", target],
-        capture_output=True,
-        env=_ruff_env(),
-        text=True,
-    )
     return subprocess.run(
         [*_RUFF_CMD, "format", "--check", target],
         capture_output=True,

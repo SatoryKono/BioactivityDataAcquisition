@@ -20,12 +20,14 @@ evidence) are **deprecated**. Evidence strip + status + ≤4 CTAs is required.
 - **OK** → `green`
 - **WARN** → `orange`
 - **CRIT** → `red`
-- **UNKNOWN** → `gray`
-- **INCOMPLETE** → `gray` (required evidence is missing or stale; never OK)
+- **UNKNOWN** → neutral (`gray` background; theme `text` foreground for text-only cards)
+- **INCOMPLETE** → neutral (`gray` background; theme `text` foreground for text-only cards; required evidence is missing or stale; never OK)
 - **ERROR** → `red` for an explicit query/datasource/backend failure
 
 `UNKNOWN` обязателен как явное отображение no-data/null через mapping:
-- `null` → текст `UNKNOWN` + цвет `gray`.
+- `null` → текст `UNKNOWN` + нейтральный цвет: `gray` для фона,
+  theme `text` для карточек с `colorMode=value`. Тёмно-серый текст на тёмном
+  фоне не допускается; нейтральный цвет не означает статус OK.
 
 Terminal-state vocabulary is role-aware:
 
@@ -754,3 +756,13 @@ status tokens in `<b>` / `<strong>`.
 Pilot surface: `bioetl-control-plane-v1` authored text panels. Other shipped
 dashboards keep their current markup until the same pass lands there.
 Enforcement: `tests/integration/test_dashboard_operator_readability.py`.
+
+### Saved assessment and accounting integrity
+
+The Selected Run API preserves the frozen assessment and revision. Its Trust
+table also checks the saved report's reconciliation: an explicit `FAILING`
+balance displays `ERROR` with the saved verdict and delta in the explanation.
+`saved_trust_status` retains the historical verdict; `accounting_integrity`
+identifies this display guard. `NO REPORTED CONFLICT` does not prove complete
+accounting when reconciliation is absent. Neither the saved report nor the
+ledger is rewritten by this read-only check.

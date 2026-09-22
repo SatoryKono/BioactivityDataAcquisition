@@ -639,7 +639,9 @@ def test_lifecycle_metrics_rehydrate_tick(monkeypatch: pytest.MonkeyPatch) -> No
     monkeypatch.setattr(
         life._observability, "_start_health_observability", record_worker
     )
-    monkeypatch.setattr(life._observability, "_rehydrate_current_metrics", record_worker)
+    monkeypatch.setattr(
+        life._observability, "_rehydrate_current_metrics", record_worker
+    )
     ticks = {"n": 0}
 
     async def _sleep(_seconds: float) -> None:

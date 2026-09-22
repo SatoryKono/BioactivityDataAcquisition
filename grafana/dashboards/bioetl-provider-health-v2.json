@@ -716,7 +716,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 }
               }
             ]
@@ -1020,10 +1020,14 @@
             },
             "properties": [
               {
+                "id": "displayName",
+                "value": "Reason"
+              },
+              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 }
               },
               {
@@ -1033,15 +1037,37 @@
                     "type": "value",
                     "options": {
                       "missing_health_status": {
-                        "text": "Health status missing"
+                        "text": "Missing"
+                      },
+                      "observed_health_status": {
+                        "text": "Observed"
+                      },
+                      "invalid_health_timestamp": {
+                        "text": "Bad time"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "UNKNOWN",
+                        "color": "#555555"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "nan",
+                      "result": {
+                        "text": "UNKNOWN",
+                        "color": "#555555"
                       }
                     }
                   }
                 ]
-              },
-              {
-                "id": "displayName",
-                "value": "Reason"
               }
             ]
           },
@@ -1150,15 +1176,15 @@
             },
             "properties": [
               {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 }
-              },
-              {
-                "id": "custom.align",
-                "value": "left"
               },
               {
                 "id": "custom.width",
@@ -1179,6 +1205,21 @@
               {
                 "id": "custom.width",
                 "value": 95
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reason"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           }
@@ -1568,10 +1609,6 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 130
-                  },
-                  {
                     "id": "custom.minWidth",
                     "value": 130
                   }
@@ -1584,10 +1621,6 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 160
-                  },
-                  {
                     "id": "custom.minWidth",
                     "value": 160
                   }
@@ -1599,6 +1632,10 @@
                   "options": "Severity"
                 },
                 "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 130
+                  },
                   {
                     "id": "mappings",
                     "value": [
@@ -2283,10 +2320,6 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 160
-                  },
-                  {
                     "id": "custom.minWidth",
                     "value": 160
                   },
@@ -2332,15 +2365,15 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 130
-                  },
-                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
                       "wrapText": false
                     }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 130
                   },
                   {
                     "id": "mappings",
@@ -2396,10 +2429,6 @@
                       "type": "auto",
                       "wrapText": true
                     }
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 130
                   }
                 ]
               },
@@ -2409,10 +2438,6 @@
                   "options": "Severity"
                 },
                 "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 160
-                  },
                   {
                     "id": "custom.minWidth",
                     "value": 160
@@ -2425,10 +2450,6 @@
                   "options": "bioetl_provider_current_status"
                 },
                 "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 160
-                  },
                   {
                     "id": "custom.minWidth",
                     "value": 160
@@ -3099,7 +3120,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -3601,7 +3622,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -4077,7 +4098,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -4157,7 +4178,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -4237,7 +4258,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -4313,7 +4334,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }

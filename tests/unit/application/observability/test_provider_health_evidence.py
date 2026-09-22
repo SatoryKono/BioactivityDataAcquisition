@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
+import json
 from pathlib import Path
 
 import pytest
@@ -103,6 +104,69 @@ def test_invalid_timestamp_never_restores_health(tmp_path: Path, observed: str) 
     metrics = RecordingMetrics()
     rehydrate(metrics, store, now=datetime(2026, 9, 21, tzinfo=UTC))
     assert "bioetl_provider_health_status" not in _gauge_names(metrics)
+
+
+@pytest.mark.parametrize("contents", [None, "{broken", "[]"])
+def test_missing_or_corrupt_store_never_publishes_health(
+    tmp_path: Path, contents: str | None
+) -> None:
+    store_type, _, rehydrate = _provider_health_infra()
+    store = store_type(base_path=tmp_path)
+    if contents is not None:
+        store.path_for("chembl").write_text(contents, encoding="utf-8")
+    metrics = RecordingMetrics()
+    assert rehydrate(metrics, store, now=datetime(2026, 9, 21, tzinfo=UTC)) == 0
+    assert metrics.calls == []
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [("schema_version", "future_schema"), ("schema_version", None), ("status", True)],
+)
+def test_invalid_record_contract_never_publishes_health(
+    tmp_path: Path, field: str, value: object
+) -> None:
+    store_type, record_type, rehydrate = _provider_health_infra()
+    store = store_type(base_path=tmp_path)
+    payload = record_type(
+        provider="chembl",
+        status=2,
+        observed_at="2026-08-19T12:00:00+00:00",
+        endpoint="/status",
+    ).to_dict()
+    payload[field] = value
+    store.path_for("chembl").write_text(json.dumps(payload), encoding="utf-8")
+    metrics = RecordingMetrics()
+    assert rehydrate(metrics, store, now=datetime(2026, 9, 21, tzinfo=UTC)) == 0
+    assert metrics.calls == []
+
+
+def test_new_observation_replaces_restored_status_and_keeps_real_time(
+    tmp_path: Path,
+) -> None:
+    store_type, record_type, rehydrate = _provider_health_infra()
+    store = store_type(base_path=tmp_path)
+    now = datetime(2026, 9, 21, tzinfo=UTC)
+    for status, observed in ((0, now - timedelta(days=30)), (2, now)):
+        store.persist(
+            record_type(
+                provider="chembl",
+                status=status,
+                observed_at=observed.isoformat(),
+                endpoint="/status",
+            )
+        )
+        metrics = RecordingMetrics()
+        assert rehydrate(metrics, store, now=now) == 1
+        assert [
+            c.value for c in metrics.calls if c.name == "bioetl_provider_health_status"
+        ] == [status]
+        assert [
+            c.value
+            for c in metrics.calls
+            if c.name == "bioetl_provider_health_observed_timestamp_seconds"
+        ] == [observed.timestamp()]
+        assert metrics.counter_names() == []
 
 
 def test_persisting_monitor_writes_compact_evidence(tmp_path: Path) -> None:
