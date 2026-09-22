@@ -3876,7 +3876,7 @@
                 }
               },
               "mappings": [],
-              "noValue": "No anomaly events in range",
+              "noValue": "No anomaly samples in range; telemetry may be absent",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -3944,7 +3944,7 @@
                 "lineInterpolation": "linear",
                 "lineWidth": 2,
                 "pointSize": 5,
-                "showPoints": "auto",
+                "showPoints": "always",
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -3955,7 +3955,7 @@
                 }
               },
               "mappings": [],
-              "noValue": "No DQ duration samples",
+              "noValue": "NO OBSERVATIONS — no usable histogram increments",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -3993,7 +3993,7 @@
           },
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__rate_interval])))",
+              "expr": "(histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__rate_interval])))) >= 0",
               "legendFormat": "{{pipeline}} p95",
               "refId": "A"
             }
