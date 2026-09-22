@@ -168,7 +168,10 @@ def test_rf001_shared_headline_vocabulary_is_fail_closed() -> None:
         assert _mapping_result(panel, "1") == {"text": "WARN", "color": "orange"}
         assert _mapping_result(panel, "2") == {"text": "CRIT", "color": "red"}
         assert _mapping_result(panel, "3")["text"] == "INCOMPLETE"
-        assert _mapping_result(panel, "3")["color"] in {"gray", "#555555"}
+        if panel.get("options", {}).get("colorMode") == "value":
+            assert _mapping_result(panel, "3")["color"] == "text"
+        else:
+            assert _mapping_result(panel, "3")["color"] in {"gray", "#555555"}
 
     design_system = Path("docs/03-guides/dashboards/design-system.md").read_text(
         encoding="utf-8"
@@ -759,7 +762,7 @@ def test_first_window_named_text_columns_wrap_without_table_default() -> None:
     """#8977: wrap only the named first-window text column; do not grow h."""
     cases = (
         ("bioetl-runtime.json", 9101, frozenset({"reason"})),
-        ("bioetl-provider-health-v2.json", 9107, frozenset({"reason", "Source state"})),
+        ("bioetl-provider-health-v2.json", 9107, frozenset()),
     )
     for dashboard_name, panel_id, allowed in cases:
         panel = _panel(_load(dashboard_name), panel_id)
@@ -774,6 +777,10 @@ def test_first_window_named_text_columns_wrap_without_table_default() -> None:
             wrapped == allowed or custom.get("cellOptions", {}).get("wrapText") is True
         ), (dashboard_name, panel_id, wrapped)
         if panel_id == 9107:
+            # Compact mapped reasons keep all summary rows visible at 900px;
+            # Inspect retains the original reason code.
+            assert custom.get("inspect") is True
+            assert panel["options"]["cellHeight"] == "sm"
             # Keep the reason flexible so status and source survive at 900px.
             assert _override_width(panel, "reason") is None
             assert _override_width(panel, "Source state") == 105
@@ -1498,8 +1505,6 @@ def test_incident_main_columns_hide_future_service_labels_but_keep_inspect() -> 
         "Object",
         "Signal",
         "Action",
-        "Details",
-        "Domain",
     }
 
 
@@ -1515,16 +1520,12 @@ def test_active_alert_missing_labels_do_not_claim_empty_domain() -> None:
         for field in ("instance", "job"):
             assert any(
                 override["matcher"] == {"id": "byName", "options": field}
-                and {"id": "noValue", "value": "NOT PROVIDED"}
-                in override["properties"]
+                and {"id": "noValue", "value": "NOT PROVIDED"} in override["properties"]
                 for override in overrides
             )
 
 
 def test_scrolling_capture_preserves_layout_viewport(tmp_path: Path) -> None:
-    pytest.skip(
-        "playwright not fully installed in this environment - skipping render capture"
-    )
     import os
     import subprocess
     from scripts.ops.observability.grafana import (

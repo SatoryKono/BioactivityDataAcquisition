@@ -58,6 +58,7 @@ def unavailable_status(
         {
             "domain": domain,
             "verdict": state,
+            "display_verdict": state,
             "reason": reason,
             "reason_display": display_reason(reason),
             "run_id": run_id,
@@ -114,9 +115,24 @@ def _saved_trust(
     ):
         reasons = reasons.get(key) if isinstance(reasons, dict) else None
     reasons_text = reasons if isinstance(reasons, str) else str(control["reason"])
+    reconciliation = report.get("reconciliation")
+    conflicts = []
+    if isinstance(reconciliation, dict):
+        for stage in ("silver", "gold"):
+            key = f"{stage}_vs_{'bronze' if stage == 'silver' else 'silver'}_status"
+            if reconciliation.get(key) == "FAILING":
+                conflicts.append(
+                    f"Saved report accounting conflict: {key}=FAILING, "
+                    f"delta={reconciliation.get(f'{stage}_delta', 'UNKNOWN')}. "
+                    f"Saved Trust verdict: {control['verdict']}; inspect report and ledger."
+                )
+    if conflicts:
+        reasons_text = "\n".join(filter(None, (reasons_text, *conflicts)))
     return {
         "processing_status": str(summary["execution_state"]).lower(),
-        "trust_status": control["verdict"],
+        "trust_status": "ERROR" if conflicts else control["verdict"],
+        "saved_trust_status": control["verdict"],
+        "accounting_integrity": "CONFLICT" if conflicts else "NO REPORTED CONFLICT",
         "reasons_text": reasons_text,
         "reasons_display": display_reasons_text(reasons_text),
         "reasons_count": sum(bool(line.strip()) for line in reasons_text.splitlines()),
@@ -267,6 +283,7 @@ def load_selected_run_status(
             **summary,
             **row,
             "run_verdict": summary["verdict"],
+            "display_verdict": row["verdict"],
             "reason_display": display_reason(str(row.get("reason", ""))),
         }
         for row in domain_rows
@@ -275,6 +292,7 @@ def load_selected_run_status(
     for row in rows:
         if row["domain"] == _CONTROL_PLANE:
             row["reason_display"] = trust["reasons_display"] or "No saved Trust reasons"
+            row["display_verdict"] = trust["trust_status"]
     return {
         **summary,
         "summary": [summary],

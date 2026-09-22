@@ -11,7 +11,9 @@
 from __future__ import annotations
 
 import ast
+import json
 import re
+import sys
 from pathlib import Path
 
 import pytest
@@ -101,33 +103,48 @@ def test_no_sentinel_values(source_content_cache: dict) -> None:
 
 @pytest.mark.slow
 @pytest.mark.timeout(600)  # Increased timeout to 10 minutes
-def test_no_hardcoded_secrets(cached_subprocess_run) -> None:
+def test_no_hardcoded_secrets(cached_subprocess_run, tmp_path: Path) -> None:
     """Verify no hardcoded secrets using detect-secrets scanner with cached results."""
     baseline_path = REPO_ROOT / ".secrets.baseline"
     if not baseline_path.exists():
         raise AssertionError("Missing .secrets.baseline for detect-secrets scan")
 
-    # Use venv python for detect-secrets module
-    venv_python = REPO_ROOT / ".venv" / "bin" / "python"
-    if not venv_python.exists():
-        venv_python = REPO_ROOT / ".venv-win" / "Scripts" / "python.exe"
-
-    # Run detect-secrets scan as subprocess with caching using Python module
+    original = baseline_path.read_text(encoding="utf-8")
+    scan_baseline = tmp_path / "secrets.baseline"
+    scan_baseline.write_text(original, encoding="utf-8")
+    # scan --baseline updates its input; never mutate the committed baseline.
+    # Reuse the active test environment, including worktrees sharing a venv.
     result = cached_subprocess_run(
-        [str(venv_python), "-m", "detect_secrets", "scan", "--baseline", str(baseline_path), "src/"],
+        [
+            sys.executable,
+            "-m",
+            "detect_secrets",
+            "scan",
+            "--baseline",
+            str(scan_baseline),
+            "src/",
+        ],
         timeout=600,
         cwd=REPO_ROOT,
     )
 
-    # detect-secrets returns 0 if no new secrets found, 1 if new secrets detected
-    # We want to ensure no NEW secrets are found (only baseline is allowed)
     if result.returncode != 0:
-        # Parse output to show what was found
-        violations = result.stdout or result.stderr
         raise AssertionError(
-            "Potential secrets detected. Update .secrets.baseline if false positives:\n"
-            + violations
+            "Secret scanner failed; its result cannot establish absence of new secrets"
         )
+
+    def identities(payload: dict) -> set[tuple[str, str, str]]:
+        return {
+            (path.replace("\\", "/"), item["type"], item["hashed_secret"])
+            for path, findings in payload["results"].items()
+            for item in findings
+        }
+
+    added = identities(
+        json.loads(scan_baseline.read_text(encoding="utf-8"))
+    ) - identities(json.loads(original))
+    assert not added, f"New secret findings (paths/types/hashes only): {sorted(added)}"
+    assert baseline_path.read_text(encoding="utf-8") == original
 
 
 def test_no_print_in_production(source_content_cache: dict) -> None:

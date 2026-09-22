@@ -127,6 +127,116 @@ def test_manifest_backed_pipeline_does_not_reload_duplicate_reports(
 @pytest.mark.asyncio
 async def test_filter_catalog_reads_overlap_without_losing_options(monkeypatch) -> None:
     if _is_wsl():
-        pytest.skip("WSL inline to_thread - skipping")
-    if _is_wsl():
-        pytest.skip("WSL inline to_thread - skipping")
+        pytest.skip("WSL inline to_thread - skipping thread overlap check")
+    import asyncio
+    from threading import Barrier
+    from unittest.mock import AsyncMock, Mock
+
+    from bioetl.interfaces.http import _health_server_routing_support as module
+    from bioetl.interfaces.http.health_server_routing_mixin import (
+        HealthServerRoutingMixin,
+    )
+
+    barrier = Barrier(2, timeout=2)
+
+    def manifests():
+        barrier.wait()
+        return ()
+
+    def reports(scopes):
+        barrier.wait()
+        return []
+
+    host = HealthServerRoutingMixin()
+    host._forensic_endpoint_limiter = asyncio.Semaphore(4)
+    host._run_manifest_port = Mock()
+    host._run_manifest_port.list_all.side_effect = manifests
+    host._run_ledger_port = None
+    host._workflow_manifest_port = None
+    host._send_payload_response = AsyncMock()
+    monkeypatch.setattr(module, "load_report_selector_entries", reports)
+    await module.handle_control_plane_filter_options(
+        host, None, {"dimension": "pipeline", "response_shape": "options"}
+    )
+    assert host._send_payload_response.call_args.args[1] == 200
+
+
+def test_duplicates_and_all_are_supported(tmp_path: Path) -> None:
+    _report(tmp_path)
+    _report(tmp_path, "run-b")
+    assert _options(tmp_path, pipeline=("$__all",)) == {
+        "items": [{"text": "backfill", "value": "backfill"}]
+    }
+
+
+@pytest.mark.parametrize("damage", ["identity", "json", "schema"])
+def test_corrupt_reports_are_errors(tmp_path: Path, damage: str) -> None:
+    path = _report(tmp_path)
+    if damage == "identity":
+        _report(tmp_path, pipeline_name="other")
+    else:
+        path.write_text("{" if damage == "json" else "{}", encoding="utf-8")
+    with pytest.raises(ValueError, match="selector report"):
+        _options(tmp_path)
+
+
+def test_report_run_id_label_and_catalog_value_deduplicate(tmp_path: Path) -> None:
+    _report(tmp_path)
+    payload = supplement_report_options(
+        {"items": [{"text": "SELECT RUN", "value": "-"}]},
+        dimension="run_id",
+        response_shape="options",
+        scopes={},
+        root=tmp_path,
+    )
+    assert payload["items"][1]["value"] == "run-a"
+    assert "chembl_assay" in payload["items"][1]["text"]
+    assert (
+        supplement_report_options(
+            payload,
+            dimension="run_id",
+            response_shape="options",
+            scopes={},
+            root=tmp_path,
+        )
+        == payload
+    )
+
+
+@pytest.mark.asyncio
+async def test_http_handler_merges_report_only_options(
+    tmp_path: Path, monkeypatch
+) -> None:
+    from unittest.mock import AsyncMock, Mock
+    from bioetl.interfaces.http._health_server_routing_support import (
+        handle_control_plane_filter_options,
+    )
+    from bioetl.interfaces.http.health_server_routing_mixin import (
+        HealthServerRoutingMixin,
+    )
+
+    _report(tmp_path)
+    monkeypatch.setenv("BIOETL_REPORT_ROOT", str(tmp_path))
+    host = HealthServerRoutingMixin()
+    import asyncio
+
+    host._forensic_endpoint_limiter = asyncio.Semaphore(4)
+    host._run_manifest_port = Mock()
+    host._run_manifest_port.list_all.return_value = ()
+    host._run_ledger_port = None
+    host._workflow_manifest_port = None
+    host._send_payload_response = AsyncMock()
+    await handle_control_plane_filter_options(
+        host,
+        None,
+        {
+            "dimension": "run_type",
+            "response_shape": "options",
+            "workflow": "chembl_baseline",
+            "pipeline": "chembl_assay",
+        },
+    )
+    assert host._send_payload_response.call_args.args[1:] == (
+        200,
+        {"items": [{"text": "backfill", "value": "backfill"}]},
+    )

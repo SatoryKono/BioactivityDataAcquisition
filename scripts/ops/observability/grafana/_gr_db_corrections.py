@@ -51,6 +51,19 @@ def apply_corrections(payload: dict) -> None:
     panels = {p["id"]: p for p in _panels(payload.get("panels", []))}
     for panel in panels.values():
         if (
+            panel.get("type") == "stat"
+            and panel.get("options", {}).get("colorMode") == "value"
+        ):
+            for mapping in (
+                panel.get("fieldConfig", {}).get("defaults", {}).get("mappings", [])
+            ):
+                for value in mapping.get("options", {}).values():
+                    if isinstance(value, dict) and value.get("text") in {
+                        "UNKNOWN",
+                        "INCOMPLETE",
+                    }:
+                        value["color"] = "text"
+        if (
             any(
                 "/ops/control-plane/" in target.get("url", "")
                 for target in panel.get("targets", [])
@@ -96,6 +109,24 @@ def apply_corrections(payload: dict) -> None:
                 else expression
             )
 
+    scope_copy = {
+        "bioetl-runtime": (
+            "CURRENT · Pipeline / Run Type. Missing stages: INCOMPLETE / UNKNOWN. "
+            "Inspect stage signals below; SCRAPING and no blockers do not prove completeness."
+        ),
+        "bioetl-incident-v1": (
+            "GLOBAL · Signals are not verified causes. Check source gaps. "
+            "Selected-scope status is separate; event age and impact need event evidence."
+        ),
+    }
+    if uid in scope_copy:
+        panels[9400]["options"]["content"] = (
+            '<div style="padding:4px 10px;border-left:4px solid #6b7280;'
+            'font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere">'
+            + scope_copy[uid]
+            + "</div>"
+        )
+
     if uid == "bioetl-incident-v1":
         for panel in panels.values():
             if panel.get("type") != "table":
@@ -107,8 +138,43 @@ def apply_corrections(payload: dict) -> None:
         for panel_id in (2005, 22005):
             for field in ("instance", "job"):
                 _override(panels[panel_id], field, "noValue", "NOT PROVIDED")
+            for field, width in (
+                ("severity", 85),
+                ("alertstate", 95),
+                ("instance", 145),
+                ("job", 185),
+            ):
+                _override(panels[panel_id], field, "custom.width", width)
 
     if uid == "bioetl-provider-health-v2":
+        _override(
+            panels[9101],
+            "provider",
+            "custom.cellOptions",
+            {"type": "auto", "wrapText": False},
+        )
+        for field in ("reason", "Reason", "Source state"):
+            _override(
+                panels[9107],
+                field,
+                "custom.cellOptions",
+                {"type": "auto", "wrapText": False},
+            )
+        _override(
+            panels[9107],
+            "reason",
+            "mappings",
+            [
+                {
+                    "type": "value",
+                    "options": {
+                        "observed_health_status": {"text": "Observed"},
+                        "invalid_health_timestamp": {"text": "Bad time"},
+                        "missing_health_status": {"text": "Missing"},
+                    },
+                }
+            ],
+        )
         _override(panels[9107], "Provider", "custom.width", 95)
         _override(panels[9107], "Source state", "custom.width", 105)
         _override(panels[9107], "Status", "custom.width", 100)
@@ -123,6 +189,13 @@ def apply_corrections(payload: dict) -> None:
         empty = f'label_replace({empty}, "provider_target", "$$__all", "", "")'
         for panel_id in (9102, 9112):
             panel = panels[panel_id]
+            for item in panel["fieldConfig"]["overrides"]:
+                item["properties"] = [
+                    prop for prop in item["properties"] if prop["id"] != "custom.width"
+                ]
+            _override(
+                panel, "Severity" if panel_id == 9102 else "Status", "custom.width", 130
+            )
             expr = f"{fleet} >= 1"
             if panel_id == 9102:
                 expr = f"topk(4, {expr})"
@@ -160,6 +233,68 @@ def apply_corrections(payload: dict) -> None:
             )
 
     if uid == "bioetl-control-plane-v1":
+        retention = panels[9416]
+        for item in retention["fieldConfig"]["overrides"]:
+            if item["matcher"].get("options") in ("Check", "Status"):
+                item["properties"] = [
+                    p for p in item["properties"] if p["id"] != "custom.width"
+                ]
+        _override(retention, "check", "custom.width", 125)
+        _override(retention, "status", "custom.width", 110)
+        for field in ("check", "Check", "reason", "Reason"):
+            _override(
+                retention,
+                field,
+                "custom.cellOptions",
+                {"type": "auto", "wrapText": False},
+            )
+        for field in ("reason", "Reason"):
+            _override(
+                retention,
+                field,
+                "mappings",
+                [
+                    {
+                        "type": "value",
+                        "options": {
+                            "snapshot_evidence_not_required": {"text": "Not required"},
+                        },
+                    }
+                ],
+            )
+        _override(
+            retention,
+            "check",
+            "mappings",
+            [
+                {
+                    "type": "value",
+                    "options": {
+                        "required_evidence": {"text": "Evidence"},
+                        "retention_policy": {"text": "Policy"},
+                    },
+                }
+            ],
+        )
+        for field in ("status", "Status"):
+            _override(
+                retention,
+                field,
+                "mappings",
+                [
+                    {
+                        "type": "value",
+                        "options": {
+                            "OK": {"text": "OK", "color": "green"},
+                            "WARN": {"text": "WARN", "color": "orange"},
+                            "WARNING": {"text": "WARN", "color": "orange"},
+                            "ERROR": {"text": "ERROR", "color": "red"},
+                            "UNKNOWN": {"text": "UNKNOWN", "color": "text"},
+                            "INCOMPLETE": {"text": "INCOMPLETE", "color": "text"},
+                        },
+                    }
+                ],
+            )
         panels[892]["description"] = (
             "CURRENT · Last checkpoint age, informational only; age does not change readiness. "
             "Missing evidence remains UNKNOWN. Pipeline-scoped, independent of Run ID."
@@ -220,6 +355,28 @@ def apply_corrections(payload: dict) -> None:
         )
         for field, width in widths:
             _override(panel, field, "custom.width", width)
+        if uid == "bioetl-incident-v1" and panel_id in (2010, 22010):
+            # Keep the summary readable; duplicated/raw details remain in 22010.
+            if panel_id == 2010:
+                for field in ("Details", "Domain"):
+                    _override(panel, field, "custom.hidden", True)
+            for field, width in (
+                ("Rank", 50),
+                ("Severity", 85),
+                ("Confidence", 125),
+                ("Action", 90),
+            ):
+                _override(panel, field, "custom.width", width)
+            if panel_id == 22010:
+                _override(panel, "Domain", "custom.width", 100)
+                for field in ("Object", "Signal", "Details"):
+                    _override(panel, field, "custom.wrapText", True)
+                    _override(
+                        panel,
+                        field,
+                        "custom.cellOptions",
+                        {"type": "auto", "wrapText": True},
+                    )
         if uid == "bioetl-overview-v2" and panel_id == 9603:
             _override(panel, "Status", "custom.width", 130)
         if uid == "bioetl-run-explorer-v1" and panel_id == 3010:
@@ -325,7 +482,9 @@ def apply_corrections(payload: dict) -> None:
             options = transform["options"]
             if transform["id"] == "filterFieldsByName":
                 options["include"]["names"] = [
-                    "reason_display" if name == "reason" else name
+                    {"reason": "reason_display", "verdict": "display_verdict"}.get(
+                        name, name
+                    )
                     for name in options["include"]["names"]
                 ]
             elif transform["id"] == "organize":
@@ -334,6 +493,11 @@ def apply_corrections(payload: dict) -> None:
                 )
                 options["renameByName"].pop("reason", None)
                 options["renameByName"]["reason_display"] = "Reason"
+                options["indexByName"]["display_verdict"] = options["indexByName"].pop(
+                    "verdict", 1
+                )
+                options["renameByName"].pop("verdict", None)
+                options["renameByName"]["display_verdict"] = "Status"
         _override(
             details, "Reason", "custom.cellOptions", {"type": "auto", "wrapText": True}
         )

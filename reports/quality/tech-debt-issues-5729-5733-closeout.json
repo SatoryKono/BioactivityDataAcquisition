@@ -72,7 +72,7 @@
       }
     },
     "5732": {
-      "assertless_total_candidates": 84,
+      "assertless_total_candidates": 83,
       "intentional_no_exception_contract": 83,
       "target_file_family_counts": {}
     },
@@ -86,7 +86,7 @@
   },
   "ratchets": {
     "assertless_total_candidates": {
-      "current": 87,
+      "current": 83,
       "max": 113
     },
     "coverage_tail_modules": {

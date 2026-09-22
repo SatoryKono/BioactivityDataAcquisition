@@ -402,7 +402,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Pipeline Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">CURRENT · Pipeline / Run Type. <b>INCOMPLETE / UNKNOWN:</b> expected stage evidence is unverified. Check <b>Expected stage signals</b>, then open <b>Review Stage Progress</b> below. SCRAPING is not an active blocker. None observed does not prove completeness or health.</div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\">CURRENT · Pipeline / Run Type. Missing stages: INCOMPLETE / UNKNOWN. Inspect stage signals below; SCRAPING and no blockers do not prove completeness.</div>"
       },
       "links": []
     },
@@ -445,7 +445,7 @@
                 },
                 "3": {
                   "text": "INCOMPLETE",
-                  "color": "gray"
+                  "color": "text"
                 }
               }
             },
@@ -455,7 +455,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "text"
                 }
               }
             }
@@ -935,7 +935,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "gray"
+                  "color": "text"
                 }
               }
             }
@@ -2766,7 +2766,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -2854,7 +2854,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -2958,7 +2958,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -3058,7 +3058,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -3146,7 +3146,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -3228,7 +3228,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -3317,7 +3317,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -3406,7 +3406,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -3778,7 +3778,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -4647,7 +4647,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -4733,7 +4733,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }

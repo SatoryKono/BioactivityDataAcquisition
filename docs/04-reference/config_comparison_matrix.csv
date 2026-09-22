@@ -291,9 +291,9 @@ filters.gold_filters.columns.standard_units,—,—,—,—,—,"[""nM""]",—,�
 filters.gold_filters.columns.structure_type,—,—,—,—,—,—,—,—,—,—,"[""MOL""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.columns.target_type,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,"[""SINGLE PROTEIN""]",—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.columns.term_type,—,—,—,—,—,—,—,—,—,—,—,—,—,—,"[""MESH_HEADING"", ""MESH_QUALIFIER"", ""KEYWORD""]",—,—,—,—,—,—,—,—,—,—,—,—
-filters.gold_filters.list_contains.component_types,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,(dict),(dict),—,—,—,—,—,—,—,—,—
-filters.gold_filters.list_lengths.component_accessions,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,(dict),(dict),—,—,—,—,—,—,—,—,—
-filters.gold_filters.list_lengths.component_ids,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,(dict),(dict),—,—,—,—,—,—,—,—,—
+filters.gold_filters.list_contains.component_types,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,(dict),—,—,—,—,—,—,—,—,—,—
+filters.gold_filters.list_lengths.component_accessions,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,(dict),—,—,—,—,—,—,—,—,—,—
+filters.gold_filters.list_lengths.component_ids,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,(dict),—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.ranges.activity_id,—,—,—,—,—,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.ranges.confidence_score,—,—,—,—,—,—,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.ranges.max_tani,—,—,—,—,—,—,—,—,—,—,—,—,—,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—
@@ -380,11 +380,11 @@ filters.gold_filters.columns.assay_test_type.operator,—,—,—,—,—,—,no
 filters.gold_filters.columns.assay_test_type.values,—,—,—,—,—,—,"[""In vivo"", ""Ex vivo""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.columns.bao_format.operator,—,—,—,—,—,—,not_in,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.columns.bao_format.values,—,—,—,—,—,—,"[""BAO_0000218""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-filters.gold_filters.list_contains.component_types.mode,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,all,all,—,—,—,—,—,—,—,—,—
-filters.gold_filters.list_contains.component_types.values,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,"[""PROTEIN""]","[""PROTEIN""]",—,—,—,—,—,—,—,—,—
-filters.gold_filters.list_lengths.component_accessions.max,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,1,1,—,—,—,—,—,—,—,—,—
-filters.gold_filters.list_lengths.component_accessions.min,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,1,1,—,—,—,—,—,—,—,—,—
-filters.gold_filters.list_lengths.component_ids.min,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,1,1,—,—,—,—,—,—,—,—,—
+filters.gold_filters.list_contains.component_types.mode,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,all,—,—,—,—,—,—,—,—,—,—
+filters.gold_filters.list_contains.component_types.values,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,"[""PROTEIN""]",—,—,—,—,—,—,—,—,—,—
+filters.gold_filters.list_lengths.component_accessions.max,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,1,—,—,—,—,—,—,—,—,—,—
+filters.gold_filters.list_lengths.component_accessions.min,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,1,—,—,—,—,—,—,—,—,—,—
+filters.gold_filters.list_lengths.component_ids.min,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,1,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.ranges.activity_id.max,—,—,—,—,—,10000000000,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.ranges.activity_id.min,—,—,—,—,—,1,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.ranges.confidence_score.max,—,—,—,—,—,—,9,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—

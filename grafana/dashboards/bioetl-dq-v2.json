@@ -565,7 +565,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "#555555"
+                  "color": "text"
                 }
               }
             }
@@ -1843,7 +1843,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -1926,7 +1926,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -1996,7 +1996,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -2094,7 +2094,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -2182,7 +2182,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -2263,7 +2263,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -2351,7 +2351,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -2455,7 +2455,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -3337,7 +3337,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -3408,7 +3408,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -3484,7 +3484,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -3659,7 +3659,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }
@@ -3744,7 +3744,7 @@
                     "match": "null",
                     "result": {
                       "text": "UNKNOWN",
-                      "color": "gray"
+                      "color": "text"
                     }
                   }
                 }

@@ -87,6 +87,11 @@ class FileProviderHealthEvidenceStore:
         return tuple(records)
 
 
+def _optional_reason(value: object) -> str | None:
+    """Normalize optional diagnostic text without accepting arbitrary JSON types."""
+    return (value.strip() or None) if isinstance(value, str) else None
+
+
 def _record_from_path(path: Path) -> ProviderHealthEvidenceRecord | None:
     if not path.is_file():
         return None
@@ -96,25 +101,28 @@ def _record_from_path(path: Path) -> ProviderHealthEvidenceRecord | None:
         return None
     if not isinstance(payload, dict):
         return None
+    if payload.get("schema_version") != PROVIDER_HEALTH_EVIDENCE_SCHEMA:
+        return None
     provider = payload.get("provider")
     status = payload.get("status")
     observed_at = payload.get("observed_at")
     endpoint = payload.get("endpoint")
     if not isinstance(provider, str) or not provider.strip():
         return None
-    if not isinstance(status, int) or status not in {0, 1, 2}:
+    if (
+        isinstance(status, bool)
+        or not isinstance(status, int)
+        or status not in {0, 1, 2}
+    ):
         return None
     if not isinstance(observed_at, str) or not observed_at.strip():
         return None
     if not isinstance(endpoint, str):
         endpoint = ""
-    reason = payload.get("reason")
-    if reason is not None and not isinstance(reason, str):
-        reason = None
     return ProviderHealthEvidenceRecord(
         provider=provider.strip(),
         status=status,
         observed_at=observed_at.strip(),
         endpoint=endpoint.strip(),
-        reason=reason.strip() if isinstance(reason, str) and reason.strip() else None,
+        reason=_optional_reason(payload.get("reason")),
     )
