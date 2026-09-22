@@ -72,6 +72,7 @@ EXCEPTION_EXIT_CODES: dict[str, ExitCode] = {
     "StorageError": ExitCode.STORAGE_ERROR,
     # Configuration errors
     "ValueError": ExitCode.CONFIG_ERROR,
+    "ExtractionInputError": ExitCode.CONFIG_ERROR,
     "FileNotFoundError": ExitCode.EX_NOINPUT,
     "ConfigValidationError": ExitCode.CONFIG_ERROR,
     # Data quality errors
