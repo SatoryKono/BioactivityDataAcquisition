@@ -21,9 +21,9 @@
   },
   "dashboard_sha256": {
     "bioetl-control-plane-v1": "d2a57246d2e53ebfe12ddf2503a5f2dbc91ff0c3074d0e611a8b4e833e4adccf",
-    "bioetl-dq-v2": "51178fa2910274a9e4b36a3d51851f98db4ed12f9b1900b0d9f4458c5f3f0fc4",
+    "bioetl-dq-v2": "d16bbe296a00d2d074c8da9b464846cb812a06592d64be9328f4ed98df5d423f",
     "bioetl-incident-v1": "f7a1819a6d5961d094fb790dbcd4ade06b30352ec2cccb6b4dd7148c3c85b39a",
-    "bioetl-overview-v2": "982ddcf4645965e2d8f035b373600ca9ee39e665016ddb8a6c4a61d69d6c8150",
+    "bioetl-overview-v2": "87fae257645c66fe2e319e87caebd04a2774e8437b871ba905ef32e96af4893e",
     "bioetl-provider-health-v2": "5c77fe76f31071a38884439e823273bf282dabbb50a55fa68be9c93cd70afe04",
     "bioetl-run-explorer-v1": "324b5c2938fdedadca90bfd7ef7feaa266091e5ccf2ec3fe7c7bf804418003cd",
     "bioetl-runtime": "71b33ae22deb625b1ed555b7937d3529325a76d4f8e759d1ac6b140e833ade9e"

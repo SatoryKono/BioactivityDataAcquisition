@@ -49,6 +49,54 @@ def apply_corrections(payload: dict) -> None:
     """Apply idempotent source-level corrections before dashboard serialization."""
     uid = payload.get("uid")
     panels = {p["id"]: p for p in _panels(payload.get("panels", []))}
+    action_panel_id = {"bioetl-overview-v2": 215, "bioetl-dq-v2": 9102}.get(uid)
+    if action_panel_id in panels:
+        action_panel = panels[action_panel_id]
+        pipeline_field = "Pipeline" if uid == "bioetl-overview-v2" else "pipeline"
+        for transform in action_panel.get("transformations", []):
+            if transform["id"] == "organize":
+                options = transform["options"]
+                options.setdefault("excludeByName", {}).update(
+                    pipeline=False, run_type=False, action_dashboard_uid=False
+                )
+                options.get("renameByName", {}).pop("run_type", None)
+        for field in ("run_type", "action_dashboard_uid"):
+            _override(action_panel, field, "custom.hidden", True)
+        if pipeline_field == "pipeline":
+            _override(action_panel, "pipeline", "custom.hidden", True)
+        _override(action_panel, "action_target", "custom.inspect", False)
+        _override(
+            action_panel,
+            "action_target",
+            "links",
+            [
+                {
+                    "title": "Open routed diagnostics",
+                    "url": "/d/${__data.fields.action_dashboard_uid}/?${workflow:queryparam}"
+                    + "&var-pipeline=${__data.fields."
+                    + pipeline_field
+                    + ":percentencode}"
+                    + "&${run_type:queryparam}"
+                    + "&var-provider=$__all&var-pipeline_context=${__data.fields."
+                    + pipeline_field
+                    + ":percentencode}"
+                    + "&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+                    "targetBlank": False,
+                }
+            ],
+        )
+        if uid == "bioetl-dq-v2":
+            _override(action_panel, "reason", "links", [])
+            _override(action_panel, "severity", "links", [])
+            _override(action_panel, "severity", "custom.width", 90)
+            _override(action_panel, "Action", "custom.width", 125)
+            runbook = {
+                "title": "DQ reason-rules runbook",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md",
+                "targetBlank": True,
+            }
+            if runbook not in action_panel.setdefault("links", []):
+                action_panel["links"].append(runbook)
     for panel in panels.values():
         if (
             panel.get("type") == "stat"
@@ -641,3 +689,5 @@ def apply_corrections(payload: dict) -> None:
             "Inspect each counter when coverage is incomplete; resets use increase."
             " Tooltip and inspection expose full series labels; full identifiers remain available."
         )
+    if uid == "bioetl-overview-v2" and 215 in panels:
+        _override(panels[215], "Action", "custom.width", 150)
