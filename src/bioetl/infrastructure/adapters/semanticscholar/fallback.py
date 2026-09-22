@@ -12,6 +12,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast, override
 
+import httpx
+
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler, titles_match
 from bioetl.infrastructure.adapters.common.error_bundles import (
@@ -165,11 +167,11 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
 
             if self._metrics:
                 with self._metrics.measure_request("/paper/search"):
-                    response = await self._http_client.get_once(
+                    response = await self._http_client.get(
                         url, params=params, headers=self._build_headers()
                     )
             else:
-                response = await self._http_client.get_once(
+                response = await self._http_client.get(
                     url, params=params, headers=self._build_headers()
                 )
 
@@ -184,7 +186,7 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
                 if not found_title:
                     return cast(JsonDict, record)  # Any: untyped API JSON record
 
-        except SEMANTICSCHOLAR_FALLBACK_ERRORS as e:
+        except (*SEMANTICSCHOLAR_FALLBACK_ERRORS, httpx.HTTPError) as e:
             self._logger.debug(
                 "semanticscholar_title_search_failed",
                 title=title[:50],

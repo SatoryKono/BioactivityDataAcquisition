@@ -217,7 +217,7 @@ class TestSemanticScholarTitleFallbackHandler:
         self, mock_logger, mock_http_client
     ):
         """Test successful title search."""
-        mock_http_client.get_once.return_value = create_mock_response(
+        mock_http_client.get.return_value = create_mock_response(
             [{"paperId": "abc123", "title": "Crystal structure of rhodopsin"}]
         )
 
@@ -229,14 +229,14 @@ class TestSemanticScholarTitleFallbackHandler:
 
         assert result is not None
         assert result["paperId"] == "abc123"
-        mock_http_client.get_once.assert_called_once()
+        mock_http_client.get.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_search_by_title_validates_title_match(
         self, mock_logger, mock_http_client
     ):
         """Test that title matching validates results."""
-        mock_http_client.get_once.return_value = create_mock_response(
+        mock_http_client.get.return_value = create_mock_response(
             [{"paperId": "abc123", "title": "Completely different topic"}]
         )
 
@@ -252,7 +252,7 @@ class TestSemanticScholarTitleFallbackHandler:
     @pytest.mark.asyncio
     async def test_search_by_title_no_results(self, mock_logger, mock_http_client):
         """Test title search with no results."""
-        mock_http_client.get_once.return_value = create_mock_response([])
+        mock_http_client.get.return_value = create_mock_response([])
 
         handler = SemanticScholarTitleFallbackHandler(
             http_client=mock_http_client,
@@ -267,7 +267,7 @@ class TestSemanticScholarTitleFallbackHandler:
         self, mock_logger, mock_http_client
     ):
         """Test that search errors are caught and logged."""
-        mock_http_client.get_once.side_effect = RuntimeError("Search failed")
+        mock_http_client.get.side_effect = RuntimeError("Search failed")
 
         handler = SemanticScholarTitleFallbackHandler(
             http_client=mock_http_client,
@@ -283,7 +283,7 @@ class TestSemanticScholarTitleFallbackHandler:
         self, mock_logger, mock_http_client
     ):
         """Test that first matching result is returned."""
-        mock_http_client.get_once.return_value = create_mock_response(
+        mock_http_client.get.return_value = create_mock_response(
             [
                 {"paperId": "wrong1", "title": "Wrong topic"},
                 {"paperId": "correct", "title": "Crystal structure of rhodopsin"},
@@ -305,7 +305,7 @@ class TestSemanticScholarTitleFallbackHandler:
         self, mock_logger, mock_http_client
     ):
         """Test that result without title field is returned."""
-        mock_http_client.get_once.return_value = create_mock_response(
+        mock_http_client.get.return_value = create_mock_response(
             [{"paperId": "abc123"}]  # No title field
         )
 
@@ -323,7 +323,7 @@ class TestSemanticScholarTitleFallbackHandler:
         self, mock_logger, mock_http_client, mock_metrics
     ):
         """Test that metrics are recorded when provided."""
-        mock_http_client.get_once.return_value = create_mock_response(
+        mock_http_client.get.return_value = create_mock_response(
             [{"paperId": "abc123", "title": "Test Paper"}]
         )
 
@@ -350,7 +350,7 @@ class TestProcessMissingDois:
         self, mock_logger, mock_http_client
     ):
         """Test processing missing DOIs with successful fallback."""
-        mock_http_client.get_once.return_value = create_mock_response(
+        mock_http_client.get.return_value = create_mock_response(
             [{"paperId": "abc123", "title": "Crystal structure of rhodopsin"}]
         )
 
@@ -402,7 +402,7 @@ class TestProcessMissingDois:
 
         assert len(results) == 0
         # HTTP client should not be called
-        mock_http_client.get_once.assert_not_called()
+        mock_http_client.get.assert_not_called()
 
 
 # =============================================================================
@@ -418,7 +418,7 @@ class TestProcessTitleOnlyEntries:
         self, mock_logger, mock_http_client
     ):
         """Test processing title-only entries with successful search."""
-        mock_http_client.get_once.return_value = create_mock_response(
+        mock_http_client.get.return_value = create_mock_response(
             [{"paperId": "abc123", "title": "Crystal structure of rhodopsin"}]
         )
 
@@ -465,7 +465,7 @@ class TestProcessTitleOnlyEntries:
 
         assert len(results) == 0
         # HTTP client should not be called
-        mock_http_client.get_once.assert_not_called()
+        mock_http_client.get.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_process_title_only_respects_limit(
@@ -473,7 +473,7 @@ class TestProcessTitleOnlyEntries:
     ):
         """Test that limit is respected during title-only processing."""
         # Return different papers for different titles
-        mock_http_client.get_once.return_value = create_mock_response(
+        mock_http_client.get.return_value = create_mock_response(
             [{"paperId": "abc123", "title": "Title 1"}]
         )
 

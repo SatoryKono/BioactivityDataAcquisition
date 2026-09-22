@@ -44,7 +44,15 @@ tags:
 summary: One-cycle audit paste with severity, stop conditions, Windows/memory gates
 max_body_lines: 140
 ---
-# BioETL audit cycle
+# Deprecated: grok audit cycle
+
+> **Deprecated.** Use [`prompt.audit.cycle`](cycle.md) — see [REGISTRY.yaml](../../REGISTRY.yaml) `successor: prompt.audit.cycle`.
+
+```text
+python -m scripts.ai.prompts render prompt.audit.cycle --param DOMAIN=docs --param SCOPE=docs/
+```
+
+# BioETL audit cycle (archived spec)
 
 Default **one** full cycle per session. Raise to 2 only if explicitly requested.
 Do not run empty cycles "for form".
