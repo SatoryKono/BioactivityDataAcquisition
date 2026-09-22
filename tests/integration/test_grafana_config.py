@@ -746,10 +746,10 @@ def _assert_workflow_step_diagnostics_layout(dashboard: dict) -> None:
 
 
 _WORKFLOW_FIRST_ACTION_LINK_TITLES = {
-    "Open 2. Runtime",
+    "Open 3. Pipeline Diagnostics",
     "Open 5. Data Quality",
     "Open 4. Provider Health",
-    "Open 0. Control Plane",
+    "Open 1. Trust",
     "Open 2. Overview",
 }
 

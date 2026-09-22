@@ -133,7 +133,7 @@ def test_pipeline_runtime_variables_use_runtime_universe() -> None:
     assert "bioetl_records_processed_total" not in pipeline_query
     assert "bioetl_records_processed_total" not in run_type_query
     assert "bioetl_pipeline_stage_expected" in stage_query
-    assert variables["provider_hint"].get("current", {}).get("value") == "chembl"
+    assert variables["provider_hint"].get("current", {}).get("value") == "$__all"
 
 
 def test_pipeline_runtime_keeps_record_level_forensic_variables_out() -> None:
