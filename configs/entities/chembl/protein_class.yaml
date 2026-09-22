@@ -89,9 +89,9 @@ quality:
     error_message: pref_name is required
   - field: parent_id
     type: range
-    min: 1
+    min: 0
     nullable: true
-    error_message: parent_id must be positive when present
+    error_message: parent_id must be non-negative (0 denotes the ChEMBL root)
   entity_cross_field_validations:
   - name: hierarchy_valid
     fields:

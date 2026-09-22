@@ -93,7 +93,7 @@ class ChEMBLProteinClassGoldSchema(StrictGoldContractSchema):
     protein_class_id: Series[float] = pa.Field(nullable=False, ge=1, coerce=True)
 
     # Hierarchy
-    parent_id: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
+    parent_id: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     class_level: Series[float] = pa.Field(nullable=True, ge=1, le=8, coerce=True)
 
     # Classification data

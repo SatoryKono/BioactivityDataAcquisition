@@ -11,7 +11,6 @@ from pydantic import BaseModel
 from bioetl.domain.exceptions import ApiError
 from bioetl.domain.types import BronzeRecord, JsonDict
 from bioetl.infrastructure.adapters.chembl.constants import (
-    _NO_PAGINATION_ENTITIES,
     _SILVER_TO_CHEMBL_API_FIELD,
     CHEMBL_DTO_MODELS,
 )
@@ -57,10 +56,8 @@ def build_request_params(
     extraction_params: ExtractionParams,
 ) -> JsonDict:
     """Build API request parameters with health-aware batch size."""
-    params: JsonDict = {"format": "json"}
-    if entity_type not in _NO_PAGINATION_ENTITIES:
-        params["limit"] = page_size
-        params["offset"] = offset
+    # Classification endpoints also return page_meta.next and need pagination.
+    params: JsonDict = {"format": "json", "limit": page_size, "offset": offset}
     if not extraction_params.is_empty:
         params.update(extraction_params.to_query_dict())
     return params
