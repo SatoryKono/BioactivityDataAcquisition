@@ -256,15 +256,20 @@ class TestSubcellularFractionDataSourceFetch:
         assert records[0]["assay_count"] == 2
 
     @pytest.mark.asyncio
-    async def test_data_source_fetch__fetch_with_limit__9e18668b(self) -> None:
+    async def test_limited_fetch_scales_upstream_assay_budget(self) -> None:
         source = MockDataSource(assays=[ASSAY_WITH_FRACTION, ASSAY_WITH_FRACTION_2])
         wrapper = SubcellularFractionDataSource(data_source=source)
 
-        records = []
-        async for record in wrapper.fetch("subcellular_fraction", limit=1):
-            records.append(record)
+        records = [
+            record async for record in wrapper.fetch("subcellular_fraction", limit=1)
+        ]
 
         assert len(records) == 1
+        assert source.fetch_calls[-1]["entity_type"] == "assay"
+        assert (
+            source.fetch_calls[-1]["limit"]
+            == 1 * wrapper.ASSAY_LIMIT_MULTIPLIER + 1
+        )
 
     @pytest.mark.asyncio
     async def test_data_source_fetch__applies_offset_before_limit(self) -> None:
@@ -738,7 +743,10 @@ class TestSubcellularFractionFilterable:
         )
 
         assert source.fallback_calls[-1]["entity_type"] == "assay"
-        assert source.fallback_calls[-1]["limit"] == 50_001
+        assert (
+            source.fallback_calls[-1]["limit"]
+            == 1 * wrapper.ASSAY_LIMIT_MULTIPLIER + 1
+        )
 
     @pytest.mark.asyncio
     async def test_fraction_filterable__for_non_filterable__00d6447a(self) -> None:

@@ -59,6 +59,43 @@ async def test_extract_unique_fraction_records_consumes_full_stream_with_limit()
     assert "cytosol" in seen or any(k == "cytosol" for k in seen)
 
 
+@pytest.mark.asyncio
+async def test_extract_unique_fraction_records_can_stop_after_limit() -> None:
+    """Bounded runs may stop upstream once the unique-fraction quota is filled."""
+
+    emitted = 0
+
+    async def _assays() -> AsyncIterator[JsonDict]:
+        nonlocal emitted
+        for assay_id, fraction in (
+            ("A1", "cytosol"),
+            ("A2", "nucleus"),
+            ("A3", "cytosol"),
+            ("A4", "membrane"),
+        ):
+            emitted += 1
+            yield {
+                "assay_chembl_id": assay_id,
+                "assay_subcellular_fraction": fraction,
+            }
+
+    seen: set[str] = set()
+    records = [
+        record
+        async for record in extract_unique_fraction_records(
+            _assays(),
+            limit=1,
+            seen_fractions=seen,
+            continue_after_limit=False,
+        )
+    ]
+
+    assert len(records) == 1
+    assert records[0]["subcellular_fraction"].lower() == "cytosol"
+    assert records[0]["assay_count"] == 1
+    assert emitted == 1
+
+
 def test_normalize_fraction_accepts_object_and_returns_str_or_none() -> None:
     assert normalize_fraction(None) is None
     assert normalize_fraction(123) is None or isinstance(normalize_fraction(123), str)

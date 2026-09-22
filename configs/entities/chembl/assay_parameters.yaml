@@ -289,7 +289,7 @@ filters:
   provider: chembl
   entity: assay_parameters
   input_filter:
-    enabled: true
+    enabled: false
     source_path: data/input/assay_parameters.csv
     column_name: assay_id
     filter_field: assay_id

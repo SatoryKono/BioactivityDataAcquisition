@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from bioetl.application.core import subcellular_fraction_support as support
 from bioetl.application.core.data_source_mixins import (
@@ -10,8 +10,8 @@ from bioetl.application.core.data_source_mixins import (
     _WrappedDataSourceDelegationMixin,
 )
 from bioetl.application.core.derived_scan_budget import (
-    DEFAULT_SCAN_RECORDS,
     bounded_source_records,
+    resolve_derived_upstream_limit,
 )
 from bioetl.application.core.target_data_source_mixins import (
     _FallbackFilterableTargetFetchMixin,
@@ -39,6 +39,8 @@ class SubcellularFractionDataSource(
 
     SOURCE_ENTITY_TYPE = "assay"
     TARGET_ENTITY_TYPE = "subcellular_fraction"
+    # assay_subcellular_fraction is sparse; scale upstream assays for --limit runs.
+    ASSAY_LIMIT_MULTIPLIER: ClassVar[int] = 200
 
     def __init__(self, data_source: DataSourcePort) -> None:
         self._data_source = data_source
@@ -46,6 +48,17 @@ class SubcellularFractionDataSource(
 
     def _after_wrapped_data_source_enter(self) -> None:
         self._seen_fractions = set()
+
+    def _upstream_limit(
+        self,
+        limit: int | None,
+        filter_ids: list[str] | None = None,
+    ) -> int:
+        return resolve_derived_upstream_limit(
+            limit,
+            multiplier=self.ASSAY_LIMIT_MULTIPLIER,
+            filter_ids=filter_ids,
+        )
 
     async def _fetch_target_records(
         self,
@@ -79,7 +92,7 @@ class SubcellularFractionDataSource(
     ) -> AsyncIterator[JsonDict]:
         assays = self._data_source.fetch(
             entity_type=self.SOURCE_ENTITY_TYPE,
-            limit=DEFAULT_SCAN_RECORDS + 1,
+            limit=self._upstream_limit(limit, filter_ids),
             query=query,
             filter_ids=filter_ids,
             filter_field=filter_field,
@@ -116,7 +129,7 @@ class SubcellularFractionDataSource(
                 entity_type=self.SOURCE_ENTITY_TYPE,
                 filter_ids=filter_ids,
                 filter_field=filter_field,
-                limit=DEFAULT_SCAN_RECORDS + 1,
+                limit=self._upstream_limit(limit, filter_ids),
             ),
             limit,
         ):
@@ -128,11 +141,16 @@ class SubcellularFractionDataSource(
         filters: dict[str, list[str]],
         limit: int | None = None,
     ) -> AsyncIterator[JsonDict]:
+        id_count = sum(len(values) for values in filters.values())
         async for record in self._fetch_filtered_fractions(
             filterable.fetch_multi_filtered(
                 entity_type=self.SOURCE_ENTITY_TYPE,
                 filters=filters,
-                limit=DEFAULT_SCAN_RECORDS + 1,
+                limit=resolve_derived_upstream_limit(
+                    limit,
+                    multiplier=self.ASSAY_LIMIT_MULTIPLIER,
+                    filter_id_count=id_count,
+                ),
             ),
             limit,
         ):
@@ -142,8 +160,7 @@ class SubcellularFractionDataSource(
         self,
         limit: int | None = None,
     ) -> int | None:
-        _ = limit
-        return DEFAULT_SCAN_RECORDS + 1
+        return self._upstream_limit(limit)
 
     def _yield_target_records_from_fallback_source_records(
         self,
@@ -182,5 +199,9 @@ class SubcellularFractionDataSource(
             bounded_source_records(assays),
             limit,
             self._seen_fractions,
+            # Limited runs stop once the unique quota is filled so upstream I/O
+            # stays inside the derived-scan time budget. Unlimited runs keep the
+            # full-stream aggregation contract (#7787).
+            continue_after_limit=limit is None,
         ):
             yield record
