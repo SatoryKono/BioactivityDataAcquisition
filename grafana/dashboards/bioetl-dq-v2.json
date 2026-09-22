@@ -3929,7 +3929,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Selected-range p95 duration of DQ checks. This is a diagnostics/performance surface, not a quality outcome; use it when DQ checks themselves look slow or noisy during an incident. Samples exist only when the runtime emitted bioetl_dq_check_duration_ms, which requires an active DQ monitor path rather than disabled/noop monitoring. No data means no DQ duration samples were observed in range or DQ timing telemetry is absent; it is not equivalent to fast checks. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Selected-range p95 duration of DQ checks. This is a diagnostics/performance surface, not a quality outcome; use it when DQ checks themselves look slow or noisy during an incident. Samples exist only when the runtime emitted bioetl_dq_check_duration_ms, which requires an active DQ monitor path rather than disabled/noop monitoring. No data means no DQ duration samples were observed in range or DQ timing telemetry is absent; it is not equivalent to fast checks. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3993,7 +3993,7 @@
           },
           "targets": [
             {
-              "expr": "(histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__rate_interval])))) >= 0",
+              "expr": "(histogram_quantile(0.95, (sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__rate_interval])) unless on (pipeline) (sum by (pipeline) (changes(bioetl_dq_check_duration_ms_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{pipeline}} p95",
               "refId": "A"
             }

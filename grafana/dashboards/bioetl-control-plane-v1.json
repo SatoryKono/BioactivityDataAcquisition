@@ -3302,7 +3302,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows p50, p95, and p99 checkpoint-save latency for the selected range. No data means no latency samples were recorded, not zero latency. Run Type does not affect this panel. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Shows p50, p95, and p99 checkpoint-save latency for the selected range. No data means no latency samples were recorded, not zero latency. Run Type does not affect this panel. TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3362,17 +3362,17 @@
           },
           "targets": [
             {
-              "expr": "(histogram_quantile(0.50, sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])))) >= 0",
+              "expr": "(histogram_quantile(0.50, (sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes(bioetl_checkpoint_save_duration_seconds_created{pipeline=~\"$pipeline\"}[$__range]) > 0))))) >= 0",
               "legendFormat": "p50 {{pipeline}} / {{operation}}",
               "refId": "A"
             },
             {
-              "expr": "(histogram_quantile(0.95, sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])))) >= 0",
+              "expr": "(histogram_quantile(0.95, (sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes(bioetl_checkpoint_save_duration_seconds_created{pipeline=~\"$pipeline\"}[$__range]) > 0))))) >= 0",
               "legendFormat": "p95 {{pipeline}} / {{operation}}",
               "refId": "B"
             },
             {
-              "expr": "(histogram_quantile(0.99, sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])))) >= 0",
+              "expr": "(histogram_quantile(0.99, (sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes(bioetl_checkpoint_save_duration_seconds_created{pipeline=~\"$pipeline\"}[$__range]) > 0))))) >= 0",
               "legendFormat": "p99 {{pipeline}} / {{operation}}",
               "refId": "C"
             }
@@ -3387,7 +3387,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows p50, p95, and p99 administration latency across all pipelines during the selected range. Filters do not affect this panel. No data is expected when no administration operations occurred in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Shows p50, p95, and p99 administration latency across all pipelines during the selected range. Filters do not affect this panel. No data is expected when no administration operations occurred in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3447,17 +3447,17 @@
           },
           "targets": [
             {
-              "expr": "(histogram_quantile(0.50, sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])))) >= 0",
+              "expr": "(histogram_quantile(0.50, (sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])) unless on (operation) (sum by (operation) (changes(bioetl_checkpoint_operator_duration_seconds_created[$__range]) > 0))))) >= 0",
               "legendFormat": "p50 {{operation}}",
               "refId": "A"
             },
             {
-              "expr": "(histogram_quantile(0.95, sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])))) >= 0",
+              "expr": "(histogram_quantile(0.95, (sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])) unless on (operation) (sum by (operation) (changes(bioetl_checkpoint_operator_duration_seconds_created[$__range]) > 0))))) >= 0",
               "legendFormat": "p95 {{operation}}",
               "refId": "B"
             },
             {
-              "expr": "(histogram_quantile(0.99, sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])))) >= 0",
+              "expr": "(histogram_quantile(0.99, (sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])) unless on (operation) (sum by (operation) (changes(bioetl_checkpoint_operator_duration_seconds_created[$__range]) > 0))))) >= 0",
               "legendFormat": "p99 {{operation}}",
               "refId": "C"
             }
@@ -4680,7 +4680,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Default p95 read latency by store and operation; change Read latency to p50 or p99. Excludes failed reads (status!=\"failed\"). Filters do not apply. Values are seconds; the axis auto-scales (milliseconds display as ms). No data means no latency samples were recorded in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Default p95 read latency by store and operation; change Read latency to p50 or p99. Excludes failed reads (status!=\"failed\"). Filters do not apply. Values are seconds; the axis auto-scales (milliseconds display as ms). No data means no latency samples were recorded in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -4738,7 +4738,7 @@
           },
           "targets": [
             {
-              "expr": "(histogram_quantile($read_latency_quantile, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))) >= 0",
+              "expr": "(histogram_quantile($read_latency_quantile, (sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])) unless on (store, operation) (sum by (store, operation) (changes(bioetl_control_plane_read_duration_seconds_created{status!=\"failed\"}[$__range]) > 0))))) >= 0",
               "legendFormat": "{{store}} / {{operation}}",
               "refId": "A"
             }
@@ -5218,7 +5218,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows p50, p95, and p99 audit-write latency across all pipelines during the selected range. No data means no latency samples were recorded in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Shows p50, p95, and p99 audit-write latency across all pipelines during the selected range. No data means no latency samples were recorded in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -5277,17 +5277,17 @@
           },
           "targets": [
             {
-              "expr": "(histogram_quantile(0.50, sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])))) >= 0",
+              "expr": "(histogram_quantile(0.50, (sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_write_duration_seconds_created[$__range]) > 0))))) >= 0",
               "legendFormat": "p50",
               "refId": "A"
             },
             {
-              "expr": "(histogram_quantile(0.95, sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])))) >= 0",
+              "expr": "(histogram_quantile(0.95, (sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_write_duration_seconds_created[$__range]) > 0))))) >= 0",
               "legendFormat": "p95",
               "refId": "B"
             },
             {
-              "expr": "(histogram_quantile(0.99, sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])))) >= 0",
+              "expr": "(histogram_quantile(0.99, (sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_write_duration_seconds_created[$__range]) > 0))))) >= 0",
               "legendFormat": "p99",
               "refId": "C"
             }
@@ -5302,7 +5302,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows p50, p95, and p99 audit-query latency across all pipelines during the selected range. No data means no latency samples were recorded in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Shows p50, p95, and p99 audit-query latency across all pipelines during the selected range. No data means no latency samples were recorded in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY. Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -5361,17 +5361,17 @@
           },
           "targets": [
             {
-              "expr": "(histogram_quantile(0.50, sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])))) >= 0",
+              "expr": "(histogram_quantile(0.50, (sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_query_duration_seconds_created[$__range]) > 0))))) >= 0",
               "legendFormat": "p50",
               "refId": "A"
             },
             {
-              "expr": "(histogram_quantile(0.95, sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])))) >= 0",
+              "expr": "(histogram_quantile(0.95, (sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_query_duration_seconds_created[$__range]) > 0))))) >= 0",
               "legendFormat": "p95",
               "refId": "B"
             },
             {
-              "expr": "(histogram_quantile(0.99, sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])))) >= 0",
+              "expr": "(histogram_quantile(0.99, (sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_query_duration_seconds_created[$__range]) > 0))))) >= 0",
               "legendFormat": "p99",
               "refId": "C"
             }
