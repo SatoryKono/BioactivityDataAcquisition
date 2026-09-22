@@ -56,6 +56,7 @@ def mock_http_client() -> MagicMock:
     client = MagicMock()
     client.get = AsyncMock()
     client.get_once = AsyncMock()
+    client.get = AsyncMock()
     client.post = AsyncMock()
     client.__aenter__ = AsyncMock(return_value=client)
     client.__aexit__ = AsyncMock()

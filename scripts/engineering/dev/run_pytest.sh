@@ -562,7 +562,7 @@ elif [[ "${BIOETL_PYTEST_AUTOLOAD:-0}" != "1" ]]; then
     fi
 fi
 
-if [[ -f "scripts/ops/launchers/codex/setup_plugins.sh" ]]; then
+if [[ "${BIOETL_SKIP_PREFLIGHT:-0}" != "1" && "${BIOETL_SKIP_SETUP_PLUGINS:-0}" != "1" && -f "scripts/ops/launchers/codex/setup_plugins.sh" ]]; then
     bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only
 fi
 
