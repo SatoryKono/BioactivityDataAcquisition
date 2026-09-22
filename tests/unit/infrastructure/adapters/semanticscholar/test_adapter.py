@@ -54,6 +54,7 @@ LEGACY_HTTP_DOI = "http" + "://doi.org/10.1038/s41586-024-07487-w"
 def mock_http_client() -> MagicMock:
     """Create a mock HTTP client."""
     client = MagicMock()
+    client.get = AsyncMock()
     client.get_once = AsyncMock()
     client.post = AsyncMock()
     client.__aenter__ = AsyncMock(return_value=client)
@@ -294,7 +295,7 @@ class TestFetchFilteredWithFallback:
         }
 
         mock_http_client.post.return_value = batch_response
-        mock_http_client.get_once.return_value = search_response
+        mock_http_client.get.return_value = search_response
 
         fallback_mapping = {
             "doi1": "Title 1",
@@ -328,7 +329,7 @@ class TestFetchFilteredWithFallback:
                 {"paperId": "c" * 40, "title": "Title Only Paper"}
             ]  # Matches fallback
         }
-        mock_http_client.get_once.return_value = search_response
+        mock_http_client.get.return_value = search_response
 
         # Empty batch response for no valid DOIs
         batch_response = MagicMock()
@@ -506,7 +507,7 @@ class TestFetch:
             "data": [{"paperId": "a" * 40}],
             "next": None,
         }
-        mock_http_client.get_once.return_value = mock_response
+        mock_http_client.get.return_value = mock_response
 
         results = []
         async for record in adapter.fetch(
@@ -517,7 +518,7 @@ class TestFetch:
             results.append(record)
 
         assert len(results) == 1
-        mock_http_client.get_once.assert_called_once()
+        mock_http_client.get.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_adapter_fetch__invalid_entity_type__31f77600(

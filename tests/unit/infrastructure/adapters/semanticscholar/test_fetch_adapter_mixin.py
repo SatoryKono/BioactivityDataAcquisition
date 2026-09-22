@@ -220,7 +220,7 @@ async def test_search_http_failure_is_normalized_at_adapter_boundary():
     error = httpx.HTTPStatusError(
         "rate limited", request=request, response=httpx.Response(429, request=request)
     )
-    adapter._http_client.get_once = AsyncMock(side_effect=error)
+    adapter._http_client.get = AsyncMock(side_effect=error)
     with pytest.raises(ApiError) as caught:
         await adapter._fetch_search_page(query="*", page_size=100, current_offset=0)
     assert caught.value.status_code == 429
