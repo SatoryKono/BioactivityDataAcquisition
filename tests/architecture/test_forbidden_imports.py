@@ -761,7 +761,7 @@ class TestInterfacesBootstrapIsolation:
             "bioetl.composition.registry_api",
             "bioetl.composition.contracts",
             # Internal composition modules used by interfaces for runtime access
-            "bioetl.composition._service_protocols",
+            "bioetl.composition.contracts.health",
             "bioetl.composition._services",
             "bioetl.composition.runtime_builders.config_access",
         }
@@ -789,7 +789,7 @@ class TestInterfacesBootstrapIsolation:
             "  - bioetl.composition.observability_backend\n"
             "  - bioetl.composition.registry_api\n"
             "  - bioetl.composition.contracts\n"
-            "  - bioetl.composition._service_protocols (internal runtime access)\n"
+            "  - bioetl.composition.contracts.health (internal runtime access)\n"
             "  - bioetl.composition._services (internal runtime access)\n"
             "  - bioetl.composition.runtime_builders.config_access (internal runtime access)\n\n"
             "Violations:\n" + "\n".join(f"  - {item}" for item in violations)

@@ -17,7 +17,7 @@ from bioetl.composition.providers._registration_contracts import (
     ProviderAssemblySupport,
     resolve_provider_assembly_support,
 )
-from bioetl.composition.providers._registry_protocols import (
+from bioetl.application.ports.providers import (
     ProviderRegistrarProtocol,
 )
 from bioetl.composition.providers._registry_resolution import (

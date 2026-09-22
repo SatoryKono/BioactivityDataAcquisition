@@ -123,7 +123,7 @@ RUNTIME_PACKAGE_PUBLIC_EXPORTS: dict[str, str] = {
     ),
     "assemble_vacuum_settings": RUNTIME_ASSEMBLY_MODULE,
     "bootstrap_pipeline_runner_service": (
-        "bioetl.composition.bootstrap.runtime.pipeline_runner_service_bootstrap"
+        "bioetl.composition.bootstrap.runtime.runner"
     ),
     "validate_observability_preflight": RUNTIME_OBSERVABILITY_MODULE,
 }

@@ -10,7 +10,7 @@ from bioetl.composition.factories.pipeline.construction_types import (
     ContractPolicyLoaderProtocol,
     DomainConfigMapperPort,
 )
-from bioetl.composition.factories.pipeline.entity_type_extractor import (
+from bioetl.application.ports.pipeline import (
     EntityTypeExtractor,
 )
 from bioetl.composition.factories.pipeline.run_context_factory import (

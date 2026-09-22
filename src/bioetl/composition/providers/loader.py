@@ -18,7 +18,7 @@ from bioetl.composition.providers._loading import (
     load_provider_registry,
     reset_provider_registry_loader,
 )
-from bioetl.composition.providers._registry_protocols import (
+from bioetl.application.ports.providers import (
     ProviderRegistrarProtocol,
 )
 from bioetl.composition.providers._registry_resolution import (

@@ -26,7 +26,7 @@ class TestFactoryClassAvailability:
         assert hasattr(StorageFactory, "__init__")
 
     def test_storage_factory_alt_importable(self) -> None:
-        from bioetl.composition.factories.storage.storage_factory import (
+        from bioetl.composition.factories.storage.factory import (
             StorageFactory,
         )
 

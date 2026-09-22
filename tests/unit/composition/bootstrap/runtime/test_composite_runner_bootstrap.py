@@ -36,7 +36,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 import bioetl.composition.bootstrap.runtime.composite as composite_runtime
-from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
+from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
 )
 

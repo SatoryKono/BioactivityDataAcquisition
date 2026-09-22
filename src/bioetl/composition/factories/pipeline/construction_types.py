@@ -7,7 +7,7 @@ from bioetl.application.ports.pipeline import (
     DomainConfigMapperPort,
     SchemaBuilderProtocol as _SchemaBuilder,
 )
-from bioetl.composition.factories.pipeline.entity_type_extractor import (
+from bioetl.application.ports.pipeline import (
     EntityTypeExtractor,
 )
 

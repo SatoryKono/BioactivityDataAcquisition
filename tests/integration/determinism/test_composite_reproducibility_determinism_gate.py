@@ -25,7 +25,7 @@ from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.composition.bootstrap.runtime.composite_control_plane_builder import (
     build_composite_control_plane_bundle,
 )
-from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
+from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
 )
 from bioetl.infrastructure.config._base import Settings

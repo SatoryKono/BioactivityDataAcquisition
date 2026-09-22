@@ -62,7 +62,7 @@ from bioetl.application.pipelines.chembl.target_transformer import TargetTransfo
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
-from bioetl.composition.bootstrap.runtime.classification_init import (
+from bioetl.composition.runtime_builders.config_access import (
     initialize_publication_type_classification,
 )
 from bioetl.domain.context import PipelineContext

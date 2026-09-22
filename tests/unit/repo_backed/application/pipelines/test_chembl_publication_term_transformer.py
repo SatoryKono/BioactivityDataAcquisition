@@ -42,7 +42,7 @@ from bioetl.application.core.record_normalization_processor import (
 from bioetl.application.pipelines.chembl.publication_term_transformer import (
     PublicationTermTransformer,
 )
-from bioetl.composition.bootstrap.runtime.classification_init import (
+from bioetl.composition.runtime_builders.config_access import (
     initialize_publication_type_classification,
 )
 from bioetl.domain.context import PipelineContext

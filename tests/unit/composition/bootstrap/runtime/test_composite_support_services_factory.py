@@ -48,7 +48,7 @@ from bioetl.composition.bootstrap.runtime.composite_merge_service_builder import
 from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
     CompositeSupportServicesFactory,
 )
-from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
+from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
 )
 from bioetl.application.composite.join_planner_helpers import (
