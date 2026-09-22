@@ -29,7 +29,10 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
 
+import httpx
 import pytest
+
+from bioetl.domain.exceptions.network.service import ApiError
 
 from tests.async_utils import collect_async_iterator
 
@@ -100,6 +103,22 @@ async def test_fetch_without_filters_validates_entity_type_and_uses_search() -> 
 
     assert rows == [{"id": "search"}]
     adapter._validate_entity_type.assert_called_once_with("publication")
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("query", [None, "", "   "])
+async def test_fetch_rejects_empty_search_query_without_request(
+    query: str | None,
+) -> None:
+    """Unfiltered search requires an explicit non-empty query."""
+    adapter = _SemanticScholarAdapter()
+
+    with pytest.raises(ValueError, match="search query must be non-empty"):
+        await collect_async_iterator(
+            adapter.fetch(entity_type="publication", query=query)
+        )
+
+    adapter._paginate_search.assert_not_called()
 
 
 @pytest.mark.asyncio
@@ -203,8 +222,6 @@ async def test_fetch_adapter_mixin__fetch_multi_filtered__raises_not_implemented
 
 @pytest.mark.asyncio
 async def test_search_http_failure_is_normalized_at_adapter_boundary():
-    import httpx
-    from bioetl.domain.exceptions.network.service import ApiError
     from bioetl.infrastructure.adapters.semanticscholar._search_fetch_flow import (
         _SemanticScholarSearchFetchMixin,
     )
@@ -220,7 +237,7 @@ async def test_search_http_failure_is_normalized_at_adapter_boundary():
     error = httpx.HTTPStatusError(
         "rate limited", request=request, response=httpx.Response(429, request=request)
     )
-    adapter._http_client.get_once = AsyncMock(side_effect=error)
+    adapter._http_client.get = AsyncMock(side_effect=error)
     with pytest.raises(ApiError) as caught:
         await adapter._fetch_search_page(query="*", page_size=100, current_offset=0)
     assert caught.value.status_code == 429

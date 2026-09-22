@@ -30,6 +30,7 @@ from bioetl.infrastructure.adapters.http._client_retry_models import (
 from bioetl.infrastructure.adapters.http._client_retry_policy import (
     _can_retry,
     _is_retryable_error,
+    _parse_retry_after,
     _record_request_metrics,
     _status_code_from_error,
 )
@@ -72,13 +73,15 @@ class HTTPClientRetryMixin:
     ) -> float:
         """Calculate and sleep for retry delay, honoring Retry-After."""
         delay = self.retry_config.calculate_delay(attempt, url)
-        if response:
+        if response is not None:
             retry_after = response.headers.get("Retry-After")
             if retry_after:
-                from contextlib import suppress
-
-                with suppress(ValueError):
-                    delay = self.retry_config.clamp_retry_after(float(retry_after))
+                retry_after_delay = _parse_retry_after(
+                    retry_after,
+                    now=time.time(),
+                )
+                if retry_after_delay is not None:
+                    delay = self.retry_config.clamp_retry_after(retry_after_delay)
         await asyncio.sleep(delay)
         return float(delay)
 

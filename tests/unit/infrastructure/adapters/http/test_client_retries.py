@@ -25,8 +25,10 @@
 # pyright: reportConstantRedefinition=false
 # pyright: reportInvalidTypeForm=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-import pytest
+import asyncio
+
 import httpx
+import pytest
 from unittest.mock import AsyncMock
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.domain.resilience import RetryConfig
@@ -105,3 +107,64 @@ async def test_unified_client_exhausts_retries_on_protocol_error():
         await client.get("https://api.test.com")
 
     assert mock_httpx.request.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_unified_client_bounds_timeout_attempts():
+    """Timeout retries stop exactly at max_attempts."""
+    rate_limiter = AsyncMock()
+    circuit_breaker = AsyncMock()
+
+    async def mock_call(func, *args, **kwargs):
+        return await func(*args, **kwargs)
+
+    circuit_breaker.call.side_effect = mock_call
+    client = UnifiedHTTPClient(
+        rate_limiter=rate_limiter,
+        circuit_breaker=circuit_breaker,
+        retry_config=RetryConfig(
+            max_attempts=2,
+            base_delay=0.0,
+            max_delay=0.0,
+            jitter_range=(0.0, 0.0),
+        ),
+        provider="test",
+    )
+    request = httpx.Request("GET", "https://api.test.example/paper/search")
+    mock_httpx = AsyncMock()
+    mock_httpx.request.side_effect = httpx.ReadTimeout("timed out", request=request)
+    client._client = mock_httpx
+
+    with pytest.raises(RetryExhaustedError) as caught:
+        await client.get(str(request.url))
+
+    assert caught.value.attempts == 2
+    assert mock_httpx.request.await_count == 2
+    assert circuit_breaker.call.await_count == 2
+
+
+@pytest.mark.asyncio
+async def test_unified_client_propagates_cancellation_without_retry():
+    """Task cancellation escapes immediately and consumes one request attempt."""
+    rate_limiter = AsyncMock()
+    circuit_breaker = AsyncMock()
+
+    async def mock_call(func, *args, **kwargs):
+        return await func(*args, **kwargs)
+
+    circuit_breaker.call.side_effect = mock_call
+    client = UnifiedHTTPClient(
+        rate_limiter=rate_limiter,
+        circuit_breaker=circuit_breaker,
+        retry_config=RetryConfig(max_attempts=3, base_delay=0.0),
+        provider="test",
+    )
+    mock_httpx = AsyncMock()
+    mock_httpx.request.side_effect = asyncio.CancelledError
+    client._client = mock_httpx
+
+    with pytest.raises(asyncio.CancelledError):
+        await client.get("https://api.test.example/paper/search")
+
+    assert mock_httpx.request.await_count == 1
+    assert circuit_breaker.call.await_count == 1
