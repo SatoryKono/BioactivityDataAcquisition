@@ -12,7 +12,7 @@ from bioetl.application.services.run_reports._report_diff_support import (
     diff_pipeline_reports as diff_pipeline_reports,
 )
 from bioetl.application.services.run_reports.paths import (
-    read_identity_preview,
+    read_identity_snapshot,
     resolve_report_root,
 )
 from bioetl.application.services.run_reports.writer import _safe_segment
@@ -35,6 +35,8 @@ class ReportIndexEntry:
     workflow_id: str | None = None
     workflow_run_id: str | None = None
     run_type: str | None = None
+    identity_snapshot: dict[str, object] | None = None
+    schema_version: str | None = None
 
 
 def _root(root: Path | None) -> Path:
@@ -127,9 +129,15 @@ def list_pipeline_reports(
     limit: int | None = 20,
     root: Path | None = None,
     store: RunReportStorePort,
+    include_markdown: bool = True,
 ) -> list[ReportIndexEntry]:
     return _list_reports(
-        kind="pipeline", owner=pipeline_name, limit=limit, root=root, store=store
+        kind="pipeline",
+        owner=pipeline_name,
+        limit=limit,
+        root=root,
+        store=store,
+        include_markdown=include_markdown,
     )
 
 
@@ -152,6 +160,7 @@ def _list_reports(
     limit: int | None,
     root: Path | None,
     store: RunReportStorePort,
+    include_markdown: bool = True,
 ) -> list[ReportIndexEntry]:
     """List newest reports by mtime first; hydrate meta only for top ``limit``."""
     base = _root(root) / kind
@@ -169,6 +178,7 @@ def _list_reports(
             run_dir=run_dir,
             json_path=json_path,
             store=store,
+            include_markdown=include_markdown,
         )
         for mtime, owner_name, run_dir, json_path in _limit_report_candidates(
             candidates,
@@ -218,16 +228,19 @@ def _build_report_index_entry(
     run_dir: Path,
     json_path: Path,
     store: RunReportStorePort,
+    include_markdown: bool = True,
 ) -> ReportIndexEntry:
     """Hydrate one ranked report candidate."""
-    meta = read_identity_preview(json_path, store=store)
+    meta, identity, schema = read_identity_snapshot(json_path, store=store)
     md_path = run_dir / f"{kind}-run-report.md"
     return ReportIndexEntry(
         kind=kind,
         owner=owner_name,
         run_id=run_dir.name,
         json_path=json_path,
-        markdown_path=md_path if store.is_file(str(md_path)) else None,
+        markdown_path=md_path
+        if include_markdown and store.is_file(str(md_path))
+        else None,
         status=meta.status,
         started_at=meta.started_at,
         completed_at=meta.completed_at,
@@ -235,6 +248,8 @@ def _build_report_index_entry(
         workflow_id=meta.workflow_id if kind == "pipeline" else None,
         workflow_run_id=meta.workflow_run_id if kind == "pipeline" else None,
         run_type=meta.run_type if kind == "pipeline" else None,
+        identity_snapshot=identity,
+        schema_version=schema,
     )
 
 
