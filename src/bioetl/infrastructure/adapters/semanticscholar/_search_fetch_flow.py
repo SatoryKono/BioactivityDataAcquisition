@@ -111,9 +111,5 @@ class _SemanticScholarSearchFetchMixin:
             as_mixin_host(self)._request_collector.record_from_response(
                 response, duration_ms
             )  # Any: mixin host
-        data_raw = response.json()
-            import asyncio as _asyncio2
-            if _asyncio2.iscoroutine(data_raw):
-                data_raw = await data_raw
-            data = data_raw
+        data = response.json()
         return list(data.get("data", [])), data.get("next")
