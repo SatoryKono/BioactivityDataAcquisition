@@ -605,6 +605,8 @@ def test_debug_breakpoints_and_log_session(monkeypatch: pytest.MonkeyPatch) -> N
 
 
 def test_lifecycle_metrics_rehydrate_tick(monkeypatch: pytest.MonkeyPatch) -> None:
+    import threading
+
     from bioetl.interfaces.cli.commands.domains.health import (
         server_integration_lifecycle as life,
     )
@@ -628,10 +630,16 @@ def test_lifecycle_metrics_rehydrate_tick(monkeypatch: pytest.MonkeyPatch) -> No
     )
     monkeypatch.setattr(life._deps, "build_health_server", lambda **_k: _Server())
     monkeypatch.setattr(life._deps, "close_health_server_resources", _close)
+    loop_thread = threading.get_ident()
+    worker_threads: list[int] = []
+
+    def record_worker() -> None:
+        worker_threads.append(threading.get_ident())
+
     monkeypatch.setattr(
-        life._observability, "_start_health_observability", lambda: None
+        life._observability, "_start_health_observability", record_worker
     )
-    monkeypatch.setattr(life._observability, "_rehydrate_current_metrics", lambda: None)
+    monkeypatch.setattr(life._observability, "_rehydrate_current_metrics", record_worker)
     ticks = {"n": 0}
 
     async def _sleep(_seconds: float) -> None:
@@ -642,6 +650,8 @@ def test_lifecycle_metrics_rehydrate_tick(monkeypatch: pytest.MonkeyPatch) -> No
     monkeypatch.setattr(life.asyncio, "sleep", _sleep)
     with pytest.raises(KeyboardInterrupt):
         asyncio.run(life._run_health_server("127.0.0.1", 8000, start_metrics=True))
+    assert len(worker_threads) == 2
+    assert all(worker != loop_thread for worker in worker_threads)
 
 
 def test_cli_main_dunder_main(monkeypatch: pytest.MonkeyPatch) -> None:

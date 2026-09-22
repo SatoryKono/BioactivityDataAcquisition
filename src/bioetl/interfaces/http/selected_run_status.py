@@ -271,12 +271,16 @@ def load_selected_run_status(
         }
         for row in domain_rows
     ]
+    trust = _saved_trust(report, summary, rows)
+    for row in rows:
+        if row["domain"] == _CONTROL_PLANE:
+            row["reason_display"] = trust["reasons_display"] or "No saved Trust reasons"
     return {
         **summary,
         "summary": [summary],
         "domains": rows,
         "rows": rows,
-        "trust": [_saved_trust(report, summary, rows)],
+        "trust": [trust],
     }
 
 

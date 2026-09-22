@@ -90,6 +90,29 @@ def read(tmp_path, run_id="run-a"):
     )
 
 
+def test_domain_detail_exposes_all_frozen_trust_reasons(tmp_path):
+    original = report()
+    reasons = "lineage_fragments_missing\nlineage_identity_not_observable"
+    value = replace(
+        original,
+        observations={
+            **original.observations,
+            "Control Plane": {
+                "verdict": "INCOMPLETE",
+                "reason": "run_completion_trust_assessment",
+                "facts": {"checks": {"trust": {"reasons_text": reasons}}},
+            },
+        },
+    )
+    persist(tmp_path, value)
+    result = read(tmp_path)
+    control = next(row for row in result["domains"] if row["domain"] == "Control Plane")
+    assert control["reason"] == "run_completion_trust_assessment"
+    assert control["reason_display"] == result["trust"][0]["reasons_display"]
+    assert result["trust"][0]["reasons_text"] == reasons
+    assert result["trust"][0]["reasons_count"] == 2
+
+
 def test_late_assessment_time_is_separate_from_completion(tmp_path):
     from bioetl.application.services.run_reports.snapshots import publish_snapshot
 

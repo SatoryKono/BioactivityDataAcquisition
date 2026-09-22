@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-22T04:44:01.000767+00:00",
+  "generated_at": "2026-09-22T05:56:38.009916+00:00",
   "summary": {
     "total_scripts": 622,
     "status_counts": {
@@ -4237,7 +4237,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 1387,
+          "line": 1389,
           "source_group": "tests",
           "text": "powershell_source = (MCP_DIR / \"mcp_neo4j_cypher_wrapper.ps1\").read_text("
         }
@@ -12871,7 +12871,7 @@
         },
         {
           "path": "tests/integration/test_grafana_render_first_remediation.py",
-          "line": 1443,
+          "line": 1473,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         },

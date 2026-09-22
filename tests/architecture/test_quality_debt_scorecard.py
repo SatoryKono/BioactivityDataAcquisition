@@ -1124,12 +1124,18 @@ def test_program_done_criteria_applies_after_deadline(tmp_path: Path) -> None:
     ), "Expected at least one done-criteria violation after deadline"
 
 
-def test_growth_rollout_warns_registry_section_before_cutoff() -> None:
-    """Registry section violations should be warn-level during rollout window."""
+def test_registry_section_blocks_after_rollout_override_removal() -> None:
+    """Removed rollout overrides must not downgrade registry violations."""
     scorecard = load_debt_scorecard()
-    # After removing warn_until_by_section, all violations are blocking
-    # This test is no longer applicable
-    pytest.skip("warn_until_by_section removed from scorecard")
+    violations = ["registry 'file_size_limits' count 120 exceeds budget 90"]
+    blocking, warning = split_growth_violations_by_severity(
+        violations=violations,
+        scorecard=scorecard,
+        today=date(2026, 3, 1),
+        fallback_mode="block",
+    )
+    assert blocking == violations
+    assert not warning
 
 
 def test_growth_rollout_blocks_registry_section_after_cutoff() -> None:

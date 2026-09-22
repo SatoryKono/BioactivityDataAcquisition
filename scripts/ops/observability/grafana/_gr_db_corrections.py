@@ -96,6 +96,18 @@ def apply_corrections(payload: dict) -> None:
                 else expression
             )
 
+    if uid == "bioetl-incident-v1":
+        for panel in panels.values():
+            if panel.get("type") != "table":
+                continue
+            defaults = panel.setdefault("fieldConfig", {}).setdefault("defaults", {})
+            if "EMPTY DOMAIN" in defaults.get("noValue", ""):
+                # Grafana applies noValue to missing cells inside non-empty rows too.
+                defaults["noValue"] = "UNKNOWN"
+        for panel_id in (2005, 22005):
+            for field in ("instance", "job"):
+                _override(panels[panel_id], field, "noValue", "NOT PROVIDED")
+
     if uid == "bioetl-provider-health-v2":
         _override(panels[9107], "Provider", "custom.width", 95)
         _override(panels[9107], "Source state", "custom.width", 105)
@@ -299,7 +311,33 @@ def apply_corrections(payload: dict) -> None:
         _override(trust, "Reasons", "custom.cellOptions", {"type": "auto"})
         _override(trust, "Reasons", "custom.hidden", False)
         _override(trust, "Reasons", "noValue", "Inspect")
-        _override(trust, "Reasons", "links", trust["links"])
+        reason_links = [
+            {
+                **link,
+                "title": "Inspect saved Trust reasons",
+                "url": link["url"].replace("viewPanel=9414", "viewPanel=9451"),
+            }
+            for link in trust["links"]
+        ]
+        _override(trust, "Reasons", "links", reason_links)
+        details = panels[9451]
+        for transform in details.get("transformations", []):
+            options = transform["options"]
+            if transform["id"] == "filterFieldsByName":
+                options["include"]["names"] = [
+                    "reason_display" if name == "reason" else name
+                    for name in options["include"]["names"]
+                ]
+            elif transform["id"] == "organize":
+                options["indexByName"]["reason_display"] = options["indexByName"].pop(
+                    "reason", 2
+                )
+                options["renameByName"].pop("reason", None)
+                options["renameByName"]["reason_display"] = "Reason"
+        _override(
+            details, "Reason", "custom.cellOptions", {"type": "auto", "wrapText": True}
+        )
+        _override(details, "Reason", "custom.inspect", True)
         for item in trust["fieldConfig"]["overrides"]:
             for prop in item["properties"]:
                 if prop["id"] == "mappings":
