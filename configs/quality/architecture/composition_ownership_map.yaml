@@ -4,15 +4,11 @@ rule: src/bioetl/composition/** MUST contain wiring only; no business transforms
 packages:
 - package: __init__.py
   responsibility: private composition helpers
-- package: _json_types.py
-  responsibility: private composition helpers
 - package: _pipeline_execution.py
   responsibility: private composition helpers
 - package: _registration.py
   responsibility: private composition helpers
 - package: _resource_management.py
-  responsibility: private composition helpers
-- package: _service_types.py
   responsibility: private composition helpers
 - package: _services.py
   responsibility: private composition helpers
@@ -27,8 +23,6 @@ packages:
 - package: builders.py
   responsibility: wiring/DI only
 - package: composite_catalog.py
-  responsibility: wiring/DI only
-- package: config_catalog.py
   responsibility: wiring/DI only
 - package: control_plane_runtime.py
   responsibility: wiring/DI only

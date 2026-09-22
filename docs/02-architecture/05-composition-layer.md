@@ -80,10 +80,9 @@ import paths.
 | Файл                                     | Назначение                                    |
 | ---------------------------------------- | --------------------------------------------- |
 | `composite.py`                           | Bootstrap `CompositePipelineRunner` (ADR-026) |
-| `composite_bootstrap_builders.py`        | Builders для composite компонентов            |
 | `composite_filter_extraction_service.py` | Bootstrap filter extraction для composite     |
 | `composite_support_helpers.py`           | Вспомогательные функции composite bootstrap   |
-| `composite_support_service_builders.py`  | Builders для composite support services       |
+| `composite_*_builder.py`                 | Owner-builders composite support services     |
 | `composite_support_services_factory.py`  | Фабрика composite support services            |
 
 **Observability bootstrap:**
@@ -245,7 +244,7 @@ ports, но не принимает решения о runtime wiring.
 | Pipeline run CLI | `src/bioetl/interfaces/cli/commands/run.py` resolves the canonical `bioetl.composition.entrypoints` seam; `execution_api` is external compatibility only | `src/bioetl/composition/bootstrap/runtime/pipeline.py::bootstrap_pipeline_runner()` | `src/bioetl/composition/runtime_builders/runner_builder.py::build_pipeline_runner()` and `src/bioetl/composition/factories/pipeline/runner.py::create_runner_factory()` | Provider/storage implementations under `src/bioetl/infrastructure/adapters/**` and `src/bioetl/infrastructure/storage/**` |
 | Pipeline runner service | `src/bioetl/composition/_services.py` compatibility dispatch for stable public imports | `src/bioetl/composition/bootstrap/runtime/runner.py::bootstrap_pipeline_runner_service()` | `src/bioetl/composition/factories/pipeline/runner.py::RunnerFactory` | Runtime services and adapters injected through composition-owned factory callbacks |
 | CLI storage previews / maintenance | `src/bioetl/composition/bootstrap/cli/storage.py` owns CLI-specific storage bootstrap | `src/bioetl/composition/bootstrap/assembly/storage.py::bootstrap_storage_adapter()` | `src/bioetl/composition/factories/storage/factory.py::StorageFactory` and `src/bioetl/composition/factories/storage/adapter.py::StorageBundle` | `BronzeWriter`, `SilverWriter`, `GoldWriter`, Delta/table operations under `src/bioetl/infrastructure/storage/**` |
-| Composite runtime | `src/bioetl/composition/bootstrap/runtime/composite.py::bootstrap_composite_runner()` | Composite runtime storage bootstrapping via `bootstrap_storage_adapter` callback | `src/bioetl/composition/bootstrap/runtime/composite_bootstrap_builders.py` and `src/bioetl/composition/runtime_builders/**` | Composite pipeline storage/data-source adapters injected through explicit builder inputs |
+| Composite runtime | `src/bioetl/composition/bootstrap/runtime/composite.py::bootstrap_composite_runner()` | Composite runtime storage bootstrapping via `bootstrap_storage_adapter` callback | `src/bioetl/composition/bootstrap/runtime/runtime_basics.py` and `src/bioetl/composition/runtime_builders/**` | Composite pipeline storage/data-source adapters injected through explicit builder inputs |
 | Provider data source creation | `src/bioetl/composition/providers/**` owns provider registration lifecycle | `src/bioetl/composition/factories/datasource/data_source_factory.py::DataSourceFactory` | `src/bioetl/composition/factories/datasource/http_client.py::HttpClientFactory` and provider creator callbacks | Concrete HTTP/source adapters under `src/bioetl/infrastructure/adapters/**` |
 
 Generated evidence for this map is maintained by

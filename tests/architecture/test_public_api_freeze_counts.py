@@ -31,7 +31,8 @@ def test_public_entrypoint_and_export_facade_counts_are_frozen() -> None:
     assert len(entrypoints) == 12
     governance = scorecard["sanctioned_public_entrypoint_governance"]["metrics"]
     assert governance["public_entrypoint_count"]["current_count"] == 12
-    assert governance["public_export_facade_count"]["current_count"] == 4
+    # 4 -> 3 in #10597 (AUD-007): maintenance_api export-facade budget retired.
+    assert governance["public_export_facade_count"]["current_count"] == 3
     assert governance["public_export_facade_conflict_count"]["current_count"] == 0
     freeze = inv.get("retained_compatibility_freeze_policy") or {}
     assert freeze.get("status") == "active_no_growth"

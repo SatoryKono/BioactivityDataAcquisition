@@ -2162,19 +2162,19 @@
       "decision_date": "2026-08-25",
       "decision_path": "docs/02-architecture/decisions/ADR-059-package-cohesion-budgets.md",
       "enforcement_owner_paths": [
-        "configs/quality/public_lazy_facade_inventory.yaml",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_arch_s4_s9_gates.py",
-        "tests/architecture/test_domain_aggregate_classification.py"
+        "tests/architecture/test_domain_aggregate_classification.py",
+        "tests/architecture/test_issue_10552_domain_aggregates_hold_flat.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
-        "configs/quality/public_lazy_facade_inventory.yaml",
         "docs/00-project/RULES.md",
         "src/bioetl/domain/aggregates/batch.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_arch_s4_s9_gates.py",
-        "tests/architecture/test_domain_aggregate_classification.py"
+        "tests/architecture/test_domain_aggregate_classification.py",
+        "tests/architecture/test_issue_10552_domain_aggregates_hold_flat.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",

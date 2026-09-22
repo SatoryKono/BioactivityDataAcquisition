@@ -94,11 +94,10 @@ This is the most complex sub-package. It handles pipeline runtime assembly:
 | `runner_assembly.py`                     | RunnerAssembly helpers                                                    |
 | `runner_factory_builder_service.py`      | RunnerFactoryBuilder                                                      |
 | `composite.py`                           | Composite pipeline assembly                                               |
-| `composite_bootstrap_builders.py`        | Composite-specific builder helpers                                        |
 | `composite_support_services_factory.py`  | Support services for composite pipelines                                  |
 | `composite_filter_extraction_service.py` | Filter extraction for composites                                          |
 | `composite_support_helpers.py`           | Utility helpers for composite support                                     |
-| `composite_support_service_builders.py`  | Service builders for composite support                                    |
+| `composite_*_builder.py`                 | Owner builders (execution support, merge dependencies, runtime management) |
 | `observability.py`                       | Observability bootstrap (logger, tracer, metrics)                         |
 | `observability_bundle.py`                | ObservabilityBundle assembly                                              |
 | `logger_bootstrap.py`                    | StructlogLogger bootstrap                                                 |

@@ -305,10 +305,10 @@ def test_issue_5636_public_lazy_export_facades_are_bounded_and_drift_free() -> N
     summary = census["summary"]
     public_facades = census["retained_public_export_facades"]
 
-    assert summary["retained_public_export_facade_count"] == 4
+    assert summary["retained_public_export_facade_count"] <= 4
     assert summary["retained_public_export_facades_with_duplicate_exports"] == 0
     assert summary["retained_public_export_facades_with_resolution_conflicts"] == 0
-    assert {facade["path"] for facade in public_facades} == PUBLIC_EXPORT_FACADES
+    assert {facade["path"] for facade in public_facades} <= PUBLIC_EXPORT_FACADES
 
     registry_by_path = {
         entry["path"]: entry for entry in registry["retained_entrypoints"]

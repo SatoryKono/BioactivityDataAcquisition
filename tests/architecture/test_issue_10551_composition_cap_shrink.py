@@ -8,7 +8,12 @@
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-"""Closeout guards for #10551 composition module-cap shrink."""
+"""Closeout guards for #10551 composition module-cap shrink.
+
+Live counts are owned by ``test_issue_10595_composition_util_shrink.py``
+(AUD-002); this module keeps the #10551 shim-removal guard and the shrink-only
+cap invariant.
+"""
 
 from __future__ import annotations
 
@@ -50,10 +55,9 @@ def test_issue_10551_composition_module_count_below_previous_ceiling() -> None:
     live = len(list(COMPOSITION.rglob("*.py")))
     cap = int(row["max_modules"])
 
-    assert cap == 295
-    assert live == 291
+    # Shrink-only: the cap may never regrow past the #10551 ratchet.
+    assert cap <= 295
     assert live <= cap
-    assert str(row.get("linked_issue")) == "10551"
     # Headroom vs pre-fix ceiling of 300 and vs the live ratchet.
     assert (300 - live) >= 9
     assert (cap - live) >= 4

@@ -33,7 +33,7 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.composition.config_catalog import list_configured_pipeline_names
+from bioetl.composition.composite_catalog import list_configured_pipeline_names
 
 pytestmark = pytest.mark.unit
 

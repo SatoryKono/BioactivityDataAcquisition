@@ -62,13 +62,11 @@ from bioetl.infrastructure.schemas.composite_config import (
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.composition.bootstrap.runtime.runner_assembly import (
+    create_composite_runner as _create_composite_runner_builder_impl,
     create_composite_runner_service,
 )
 from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
     _create_dq_report_service,
-)
-from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
-    create_composite_runner as _create_composite_runner_builder_impl,
 )
 
 if TYPE_CHECKING:

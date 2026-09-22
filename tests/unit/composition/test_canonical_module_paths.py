@@ -176,7 +176,7 @@ def test_control_plane_service_access_routes_to_canonical_owner_seams() -> None:
         list_configured_pipeline_names as canonical_list_configured_pipeline_names,
         load_workflow_config as canonical_load_workflow_config,
     )
-    from bioetl.composition.config_catalog import list_configured_pipeline_names
+    from bioetl.composition.composite_catalog import list_configured_pipeline_names
     from bioetl.composition.resources_runtime import get_checkpoint_runtime_service
 
     assert canonical_get_checkpoint_runtime_service is get_checkpoint_runtime_service

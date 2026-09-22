@@ -140,17 +140,13 @@ def test_observability_backend_startup_types_are_importable() -> None:
     assert BronzeCleanupServiceProtocol is not None
 
 
-def test_pipeline_bootstrap_lazy_dependencies_delegate() -> None:
-    from bioetl.composition.bootstrap.runtime import (
-        _pipeline_bootstrap_lazy_dependencies as lazy,
+def test_pipeline_bootstrap_phases_bind_owner_dependencies() -> None:
+    """Phase seam imports policy/registry owners directly (#10595 shim removal)."""
+    from bioetl.composition.bootstrap.runtime import pipeline_bootstrap_phases as phases
+    from bioetl.composition.bootstrap.runtime.normalization_policy_init import (
+        initialize_chembl_policy_registry,
     )
-    from pathlib import Path
+    from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 
-    with patch.object(lazy, "initialize_chembl_policy_registry") as init_chembl:
-        lazy.initialize_chembl_policy_registry(Path("configs"))
-        init_chembl.assert_called_once_with(Path("configs"))
-
-    with patch.object(lazy, "register_all_pipelines") as register_all:
-        registry = object()
-        lazy.register_all_pipelines(registry=registry)
-        register_all.assert_called_once_with(registry=registry)
+    assert phases.initialize_chembl_policy_registry is initialize_chembl_policy_registry
+    assert phases.register_all_pipelines is register_all_pipelines

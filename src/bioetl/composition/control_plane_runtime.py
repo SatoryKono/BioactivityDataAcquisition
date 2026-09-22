@@ -129,7 +129,7 @@ _PUBLIC_EXPORTS = {
     "bootstrap_control_plane_lifecycle_store": _CLI_CONTROL_PLANE_LIFECYCLE_MODULE,
     "get_adr_service": _SERVICES_MODULE,
     "get_checkpoint_runtime_service": _RESOURCE_MANAGEMENT_MODULE,
-    "list_configured_pipeline_names": "bioetl.composition.config_catalog",
+    "list_configured_pipeline_names": "bioetl.composition.composite_catalog",
     "get_config_service": _SERVICES_MODULE,
     "get_export_service": _SERVICES_MODULE,
     "get_forensic_run_diff_service": _SERVICES_MODULE,

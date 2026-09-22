@@ -53,7 +53,8 @@ def test_services_package_lazy_exports_submodules_and_pipeline_creation() -> Non
 def test_services_package_lazy_exports_factory_and_observability_helpers() -> None:
     """Factory and observability API branches remain explicit package exports."""
     import bioetl.composition.factories.services as services
-    from bioetl.composition.factories.services import factory, observability_api
+    from bioetl.composition.factories import observability_api
+    from bioetl.composition.factories.services import factory
 
     assert services.BaseServicesFactory is factory.BaseServicesFactory
     assert services.ServicesBuilder is factory.ServicesBuilder

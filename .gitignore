@@ -222,6 +222,8 @@ reports/quality/coderabbit/**/auth.*
 !/reports/quality/weak-assert-inventory.json
 !/reports/quality/weak-assert-inventory.md
 !/reports/quality/weak-assert-triage-8330.json
+!/reports/quality/cast-any-typing-census.json
+!/reports/quality/cast-any-typing-census.md
 !/reports/quality/vcr-corpus-budget-report.json
 !/reports/quality/vcr-corpus-budget-report.md
 !/reports/quality/architecture-suite-burndown-inventory.json

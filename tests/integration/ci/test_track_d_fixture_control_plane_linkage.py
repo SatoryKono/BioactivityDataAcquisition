@@ -21,7 +21,7 @@ from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 import pytest
 
 from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
-from bioetl.composition.factories import _observability_wiring
+from bioetl.composition.factories import observability_api as _observability_wiring
 from bioetl.infrastructure.config._base import get_pipeline_config, get_settings
 from tests.helpers.control_plane_replay import (
     PROJECT_ROOT,

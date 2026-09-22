@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "6c334dfe51b614f733e0a070d4eb84658e171e21fa6dd11b2ed9a5e024232b00",
-      "limit": "6c334dfe51b614f733e0a070d4eb84658e171e21fa6dd11b2ed9a5e024232b00",
+      "current": "7ae0e7360da125029eef24538a98f23b1e125ffc5bb608e90e7be598d997682a",
+      "limit": "7ae0e7360da125029eef24538a98f23b1e125ffc5bb608e90e7be598d997682a",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -56,14 +56,14 @@
     },
     {
       "current": {
-        "source_module_count": 2497,
-        "source_tree_sha256": "6c334dfe51b614f733e0a070d4eb84658e171e21fa6dd11b2ed9a5e024232b00",
+        "source_module_count": 2477,
+        "source_tree_sha256": "7ae0e7360da125029eef24538a98f23b1e125ffc5bb608e90e7be598d997682a",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
-        "source_module_count": 2497,
-        "source_tree_sha256": "6c334dfe51b614f733e0a070d4eb84658e171e21fa6dd11b2ed9a5e024232b00",
+        "source_module_count": 2477,
+        "source_tree_sha256": "7ae0e7360da125029eef24538a98f23b1e125ffc5bb608e90e7be598d997682a",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -110,8 +110,8 @@
       "status": "pass"
     },
     {
-      "current": 4,
-      "limit": 4,
+      "current": 3,
+      "limit": 3,
       "metric": "retained_public_export_facade_count",
       "name": "retained_public_export_facade_growth",
       "remediation": "Remove facade exports or update the scorecard only after approved reduction evidence.",
@@ -121,12 +121,12 @@
     {
       "current": {
         "retained_entrypoint_count": 12,
-        "retained_public_export_facade_count": 4,
+        "retained_public_export_facade_count": 3,
         "twin_pair_count": 0
       },
       "limit": {
         "retained_entrypoint_count": 12,
-        "retained_public_export_facade_count": 4,
+        "retained_public_export_facade_count": 3,
         "twin_pair_count": 0
       },
       "metric": "compatibility_scorecard_alignment",
@@ -406,7 +406,7 @@
       "status": "pass"
     },
     {
-      "current": "2d890f3cf53374978569db64e9038feef5a002d4994b4d06073f95d92e0ebd8a",
+      "current": "ffb7597d4115bd3276ac3f46fbb0be3e5416893d9d7881b733d7ef2e664b76f0",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -463,7 +463,7 @@
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 9.47,
+    "architecture_quality_scorecard_integral_score": 10.0,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
     "fail_count": 0,
     "failing_gates": [],

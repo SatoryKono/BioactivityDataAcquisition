@@ -25,40 +25,62 @@
 # pyright: reportConstantRedefinition=false
 # pyright: reportInvalidTypeForm=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-"""Unit tests for composite bootstrap builder aliases."""
+"""Unit tests for composite bootstrap builder owner bindings.
+
+The ``composite_bootstrap_builders`` re-export shim was removed in #10595;
+composite bootstrap callers now bind directly to ``runtime_basics`` and
+``runner_assembly`` owners.
+"""
 
 from __future__ import annotations
 
+import importlib.util
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.composition.bootstrap.runtime import composite_bootstrap_builders
-from bioetl.composition.bootstrap.runtime import runtime_basics
+from bioetl.composition.bootstrap.runtime import composite
+from bioetl.composition.bootstrap.runtime import composite_support_helpers
 from bioetl.composition.bootstrap.runtime import runner_assembly
+from bioetl.composition.bootstrap.runtime import runtime_basics
 
 
 @pytest.mark.unit
-def test_passthrough_builder_exports_alias_runtime_basics() -> None:
-    """Pure passthrough builder seams should stay direct aliases."""
+def test_composite_bootstrap_builders_shim_is_gone() -> None:
+    """The pure re-export shim must not be resurrected."""
     assert (
-        composite_bootstrap_builders.build_runner_factories
+        importlib.util.find_spec(
+            "bioetl.composition.bootstrap.runtime.composite_bootstrap_builders"
+        )
+        is None
+    )
+
+
+@pytest.mark.unit
+def test_composite_callers_bind_directly_to_owner_builders() -> None:
+    """Composite bootstrap callers should alias the runtime_basics/runner_assembly owners."""
+    assert (
+        composite_support_helpers._bootstrap_runtime_basics_builder_impl
+        is runtime_basics.bootstrap_runtime_basics
+    )
+    assert (
+        composite_support_helpers._build_runner_factories_builder_impl
         is runtime_basics.build_runner_factories
     )
     assert (
-        composite_bootstrap_builders.build_support_services
+        composite_support_helpers._build_support_services_builder_impl
         is runtime_basics.build_support_services
     )
     assert (
-        composite_bootstrap_builders.create_composite_runner
+        composite._create_composite_runner_builder_impl
         is runner_assembly.create_composite_runner
     )
 
 
 @pytest.mark.unit
 def test_bootstrap_runtime_basics_forwards_injected_runtime_dependencies() -> None:
-    """Composite builder must forward injected runtime providers to runtime_basics."""
+    """Owner builder must forward injected runtime providers unchanged."""
     config = SimpleNamespace(name="composite_publication")
     settings = SimpleNamespace(metrics_enabled=False)
     logger = MagicMock()
@@ -68,7 +90,7 @@ def test_bootstrap_runtime_basics_forwards_injected_runtime_dependencies() -> No
     lock = MagicMock()
 
     with patch(
-        "bioetl.composition.bootstrap.runtime.composite_bootstrap_builders.bootstrap_runtime_basics"
+        "bioetl.composition.bootstrap.runtime.runtime_basics.bootstrap_runtime_basics"
     ) as mock_runtime_basics:
         mock_runtime_basics.return_value = SimpleNamespace(
             run_id="rid-123",
@@ -80,7 +102,7 @@ def test_bootstrap_runtime_basics_forwards_injected_runtime_dependencies() -> No
             lock=lock,
         )
 
-        result = composite_bootstrap_builders.bootstrap_runtime_basics(
+        result = runtime_basics.bootstrap_runtime_basics(
             config=config,
             run_id=None,
             settings_provider=MagicMock(return_value=settings),

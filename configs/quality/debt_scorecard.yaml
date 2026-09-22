@@ -157,11 +157,15 @@ sanctioned_public_entrypoint_governance:
       review_policy: Ratchet first-party callers toward reviewed facade exports and keep deeper owner
         modules hidden behind the sanctioned public seam.
     public_export_facade_count:
-      current_count: 4
+      current_count: 3
       owner: '@bioetl-architecture'
-      linked_issue: '5374'
-      rationale: Reviewed public export facades remain sanctioned public API seams and stay visible as
-        governance inventory rather than compatibility debt.
+      linked_issue: '10597'
+      rationale: >-
+        Reviewed public export facades remain sanctioned public API seams and stay visible as
+        governance inventory rather than compatibility debt. Ratcheted 4 -> 3 in issue 10597 (AUD-007) by
+        retiring the separate maintenance_api export-facade budget; canonical maintenance symbol access is
+        governed by bioetl.composition.entrypoints and the owner-only service-access seams. The facade
+        inventory was introduced under issue 5374.
       review_cadence: quarterly
       review_policy: Hold export facade count flat or reduce it; new facades require architecture review
         and an explicit sanctioned-public inventory update.

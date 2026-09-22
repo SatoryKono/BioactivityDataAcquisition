@@ -171,6 +171,9 @@ COMMAND_MODULES: dict[str, str] = {
     "report-private-import-inventory": (
         "scripts.engineering.qa.report_private_import_inventory"
     ),
+    "report-cast-any-typing-census": (
+        "scripts.engineering.qa.report_cast_any_typing_census"
+    ),
     "report-composition-protocol-inventory": (
         "scripts.engineering.qa.report_composition_protocol_inventory"
     ),

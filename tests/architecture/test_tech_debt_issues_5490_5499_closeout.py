@@ -88,10 +88,14 @@ def test_issue_5492_public_export_budgets_stay_reduced() -> None:
     ceilings = {
         "src/bioetl/composition/entrypoints.py": 10,
         "src/bioetl/composition/health_api.py": 7,
+        # maintenance_api export-facade budget retired in #10597; a re-added
+        # contract must stay at or below the historical ceiling.
         "src/bioetl/composition/maintenance_api.py": 4,
     }
 
     for path, max_public_exports in ceilings.items():
+        if path not in budgets:
+            continue
         assert budgets[path] <= max_public_exports
 
 

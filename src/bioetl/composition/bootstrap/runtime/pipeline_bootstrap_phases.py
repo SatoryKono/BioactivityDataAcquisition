@@ -7,21 +7,21 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from bioetl.composition.bootstrap.runtime._pipeline_bootstrap_lazy_dependencies import (
-    initialize_chembl_policy_registry,
-    initialize_protein_class_target_type_mapping,
-    initialize_publication_controlled_vocabulary,
-    initialize_publication_type_classification,
-    register_all_pipelines,
-)
 from bioetl.composition.bootstrap.runtime.assembly import (
     RuntimeBootstrapPhases,
     assemble_filter_config as _assemble_filter_config,
     assemble_runtime_bootstrap_phases as _assemble_runtime_bootstrap_phases,
 )
+from bioetl.composition.bootstrap.runtime.normalization_policy_init import (
+    initialize_chembl_policy_registry,
+)
 from bioetl.composition.bootstrap.runtime.observability_bundle import (
     bootstrap_observability_bundle_impl as _bootstrap_observability_bundle,
 )
+from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
+    initialize_publication_controlled_vocabulary,
+)
+from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.providers.loader import (
     ensure_providers_loaded as _ensure_providers_loaded,
 )
@@ -33,6 +33,8 @@ from bioetl.composition.runtime_builders.config_access import (
     create_pipeline_config_loader as _create_pipeline_config_loader,
     create_source_config_loader as _create_source_config_loader,
     get_settings as _get_settings,
+    initialize_protein_class_target_type_mapping,
+    initialize_publication_type_classification,
 )
 from bioetl.composition.runtime_builders.runner_builder_wiring import (
     RunnerFactoryWiring,

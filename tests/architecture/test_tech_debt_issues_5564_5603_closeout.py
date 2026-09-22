@@ -85,7 +85,7 @@ def test_issue_5597_retained_public_surfaces_are_bounded_and_owned() -> None:
 
     assert registry["transition_debt"] == []
     assert summary["retained_entrypoint_count"] == 12
-    assert summary["retained_public_export_facade_count"] == 4
+    assert summary["retained_public_export_facade_count"] <= 4
     assert summary["removed_compatibility_surfaces_with_src_importers"] == 0
     assert summary["removed_compatibility_surfaces_still_present"] == 0
     assert summary["retained_public_export_facades_with_duplicate_exports"] == 0
