@@ -131,8 +131,9 @@ async def test_failed_quarantine_write_does_not_claim_durable_removal() -> None:
     accounting = StageAccountingAccumulator()
     token = bind_stage_accounting(accounting)
     metrics = BatchMetricsRecorderService(None, "chembl_activity", "incremental")
+    port = MagicMock(write_many=AsyncMock(side_effect=[OSError("disk full"), None]))
     quarantine = QuarantineRuntimeService(
-        MagicMock(write_many=AsyncMock(side_effect=OSError("disk full"))),
+        port,
         "chembl_activity",
         batch_metrics=metrics,
     )
@@ -153,6 +154,23 @@ async def test_failed_quarantine_write_does_not_claim_durable_removal() -> None:
                 ingestion_ts=datetime(2026, 9, 21, tzinfo=UTC),
             )
         assert "records_quarantined" not in accounting.measured_record_metrics()
+        # Retry the failed durable write, then republish the same completed
+        # accounting snapshot. Neither projection may add another removal.
+        await quarantine.quarantine_records(
+            [outcome.dq_entry],
+            BatchID(UUID("11111111-1111-4111-8111-111111111111")),
+            ingestion_ts=datetime(2026, 9, 21, tzinfo=UTC),
+        )
+        for _ in range(3):
+            measured = accounting.measured_record_metrics()
+            assert measured["records_quarantined"] == 1
+            layers = accounting.snapshot_layers_from_metrics(
+                {"records_bronze": 1, **measured}
+            )
+            silver = accounting.snapshot_funnel(layers)[2]
+            assert silver.removed_total == 1
+            assert silver.records_in == silver.records_out + silver.removed_total
+        assert port.write_many.await_count == 2
     finally:
         reset_stage_accounting(token)
 
