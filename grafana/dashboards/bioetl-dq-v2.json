@@ -773,6 +773,10 @@
               {
                 "id": "custom.inspect",
                 "value": true
+              },
+              {
+                "id": "links",
+                "value": []
               }
             ]
           },
@@ -792,6 +796,10 @@
               {
                 "id": "noValue",
                 "value": "—"
+              },
+              {
+                "id": "links",
+                "value": []
               }
             ]
           },
@@ -857,25 +865,22 @@
                 }
               },
               {
+                "id": "noValue",
+                "value": "—"
+              },
+              {
+                "id": "custom.inspect",
+                "value": false
+              },
+              {
                 "id": "links",
                 "value": [
                   {
-                    "title": "Open Data Quality evidence",
-                    "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${workflow:queryparam}&var-pipeline=${__data.fields.pipeline}&${run_type:queryparam}&var-stage=$__all&${run_id:queryparam}&${__url_time_range}",
-                    "targetBlank": false,
-                    "includeVars": false
-                  },
-                  {
-                    "title": "Open DQ reason-rules runbook",
-                    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md",
-                    "targetBlank": true,
-                    "includeVars": false
+                    "title": "Open routed diagnostics",
+                    "url": "/d/${__data.fields.action_dashboard_uid}/?${workflow:queryparam}&var-pipeline=${__data.fields.pipeline:percentencode}&${run_type:queryparam}&var-provider=$__all&var-pipeline_context=${__data.fields.pipeline:percentencode}&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+                    "targetBlank": false
                   }
                 ]
-              },
-              {
-                "id": "noValue",
-                "value": "—"
               }
             ]
           },
@@ -961,6 +966,30 @@
                 "value": true
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "run_type"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pipeline"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
           }
         ]
       },
@@ -1025,8 +1054,8 @@
               "Time": true,
               "__name__": true,
               "Value": true,
-              "pipeline": true,
-              "run_type": true,
+              "pipeline": false,
+              "run_type": false,
               "Value #A": true,
               "Value #B": true,
               "Value #C": true,
@@ -1039,6 +1068,13 @@
               "action_target": 2
             }
           }
+        }
+      ],
+      "links": [
+        {
+          "title": "DQ reason-rules runbook",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md",
+          "targetBlank": true
         }
       ]
     },
@@ -3972,7 +4008,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Total soft plus hard threshold events requires observations for both counters. A missing branch leaves the total UNKNOWN, not zero. Inspect each counter when coverage is incomplete; resets use increase. Tooltip and inspection expose full series labels; full identifiers remain available.",
+          "description": "TIME RANGE · Total soft plus hard threshold events requires observations for both counters for every observed pipeline. A missing branch leaves the total UNKNOWN, not zero. Inspect each counter when coverage is incomplete; resets use increase. Tooltip and inspection expose full series labels; full identifiers remain available.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -4030,7 +4066,7 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "round((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval]))) + (sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval]))))",
+              "expr": "round(sum(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval]))) + sum(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval])))) unless (count(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval]))) or count(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval]))))",
               "legendFormat": "threshold events",
               "range": true,
               "refId": "A"
