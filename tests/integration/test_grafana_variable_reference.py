@@ -111,8 +111,8 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
         run_type = variables["run_type"]
         run_id = variables["run_id"]
         assert pipeline.get("multi") is False
-        assert pipeline.get("includeAll") is False
-        assert pipeline.get("current", {}).get("value") == "unknown"
+        assert pipeline.get("includeAll") is True
+        assert pipeline.get("current", {}).get("value") == "$__all"
         assert run_type.get("includeAll") is True
         # SEL-P0/P2: non-Overview native default is backfill (fallback policy).
         assert run_type.get("current", {}).get("value") == "backfill"
@@ -124,8 +124,8 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
     assert provider["workflow"].get("includeAll") is True
     assert provider["workflow"].get("current", {}).get("value") == "$__all"
     assert provider["pipeline"].get("multi") is False
-    assert provider["pipeline"].get("includeAll") is False
-    assert provider["pipeline"].get("current", {}).get("value") == "unknown"
+    assert provider["pipeline"].get("includeAll") is True
+    assert provider["pipeline"].get("current", {}).get("value") == "$__all"
     assert provider["run_type"].get("includeAll") is True
     assert provider["run_type"].get("current", {}).get("value") == "backfill"
     assert provider["run_id"].get("multi") is False

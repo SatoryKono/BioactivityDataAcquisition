@@ -219,7 +219,9 @@ def test_runtime_10251_expectedness_unknown_vs_contract_na() -> None:
         for prop in override.get("properties", []):
             if prop.get("id") == "noValue":
                 expected_no_value = prop.get("value")
-    assert isinstance(expected_no_value, str) and expected_no_value.startswith("N/A —")
+    assert (
+        isinstance(expected_no_value, str) and expected_no_value == "N/A: not declared"
+    )
 
 
 def test_runtime_10251_select_run_novalue_drops_hedge_tails() -> None:

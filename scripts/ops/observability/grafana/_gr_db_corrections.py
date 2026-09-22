@@ -96,14 +96,8 @@ def apply_corrections(payload: dict) -> None:
                 {
                     "title": "Open routed diagnostics",
                     "url": "/d/${__data.fields.action_dashboard_uid}/?${workflow:queryparam}"
-                    + "&var-pipeline=${__data.fields."
-                    + pipeline_field
-                    + ":percentencode}"
-                    + "&${run_type:queryparam}"
-                    + "&var-provider=$__all&var-pipeline_context=${__data.fields."
-                    + pipeline_field
-                    + ":percentencode}"
-                    + "&${run_id:queryparam}&var-stage=$__all&${__url_time_range}",
+                    + "&${__data.fields.action_scope:raw}&${run_type:queryparam}"
+                    + "&${run_id:queryparam}&${__url_time_range}",
                     "targetBlank": False,
                 }
             ],
@@ -698,7 +692,7 @@ def apply_corrections(payload: dict) -> None:
             [
                 {
                     "title": "Open blocker diagnostics",
-                    "url": "/d/${__data.fields.action_dashboard_uid}/?${workflow:queryparam}&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&${run_id:queryparam}&${__url_time_range}",
+                    "url": "/d/${__data.fields.action_dashboard_uid}/?${workflow:queryparam}&${__data.fields.action_scope:raw}&var-run_type=${__data.fields.run_type:percentencode}&${run_id:queryparam}&${__url_time_range}",
                     "targetBlank": False,
                 }
             ],
@@ -743,9 +737,40 @@ def apply_corrections(payload: dict) -> None:
             panels[3010],
             "Pipeline",
             "custom.cellOptions",
-            {"type": "auto", "wrapText": True},
+            {"type": "auto", "wrapText": False},
+        )
+        # Processing replaced Status; Severity is not a field in this table.
+        # Keep presentation on the visible field, without reserving phantom widths.
+        overrides = panels[3010]["fieldConfig"]["overrides"]
+        status = next(
+            (item for item in overrides if item["matcher"].get("options") == "Status"),
+            None,
+        )
+        if status is not None:
+            for prop in status["properties"]:
+                _override(panels[3010], "Processing", prop["id"], prop["value"])
+        overrides[:] = [
+            item
+            for item in overrides
+            if item["matcher"].get("options") not in ("Status", "Severity")
+        ]
+        panels[3010]["options"].setdefault("footer", {}).update(
+            enablePagination=False, countRows=False
         )
         _override(panels[3010], "Report", "custom.width", 110)
+        _override(panels[3010], "Trust", "custom.width", 110)
+        _override(
+            panels[3010],
+            "Trust",
+            "links",
+            [
+                {
+                    "title": "Open 1. Trust",
+                    "url": "/d/bioetl-control-plane-v1/1-trust?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.Run:percentencode}&${__url_time_range}",
+                    "includeVars": False,
+                }
+            ],
+        )
         _override(
             panels[3010],
             "Workflow",
@@ -763,3 +788,20 @@ def apply_corrections(payload: dict) -> None:
                 }
             ],
         )
+
+    routed_panel_id = {
+        "bioetl-overview-v2": 215,
+        "bioetl-runtime": 9101,
+        "bioetl-dq-v2": 9102,
+    }.get(uid)
+    if routed_panel_id in panels:
+        routed_panel = panels[routed_panel_id]
+        for transform in routed_panel.get("transformations", []):
+            options = transform.get("options", {})
+            if transform["id"] == "organize":
+                options.setdefault("excludeByName", {})["action_scope"] = False
+            elif transform["id"] == "filterFieldsByName":
+                names = options.get("include", {}).get("names", [])
+                if names and "action_scope" not in names:
+                    names.append("action_scope")
+        _override(routed_panel, "action_scope", "custom.hidden", True)

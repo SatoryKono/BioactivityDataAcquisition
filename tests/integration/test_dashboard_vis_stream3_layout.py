@@ -147,4 +147,5 @@ def test_run_id_selector_and_recent_runs_do_not_label_uuid_as_count() -> None:
     rename = (organize.get("options") or {}).get("renameByName") or {}
     assert rename.get("run_id") == "Run"
     assert rename.get("started_at") == "Started"
-    assert rename.get("status") == "Status"
+    assert rename.get("status") == "Processing"
+    assert rename.get("trust_status") == "Trust"

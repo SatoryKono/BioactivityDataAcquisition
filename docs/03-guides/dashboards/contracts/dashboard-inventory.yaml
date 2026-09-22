@@ -213,6 +213,7 @@ dashboards:
     ux_phase: drm-05
     data_sources:
       - Prometheus
+      - Grafana
       - BioETL Ops HTTP
     panel_count: 6
     key_panels:

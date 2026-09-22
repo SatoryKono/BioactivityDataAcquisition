@@ -882,7 +882,7 @@ def test_run_type_variables_default_to_all_not_unknown() -> None:
                 )
 
 
-def test_pipeline_and_provider_variables_are_single_select_unknown_default() -> None:
+def test_pipeline_and_provider_variables_follow_explicit_scope_defaults() -> None:
     """Pipeline and Provider selectors must be single-value fail-closed scopes."""
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
@@ -900,11 +900,7 @@ def test_pipeline_and_provider_variables_are_single_select_unknown_default() -> 
             )
             current = variable.get("current", {})
             assert isinstance(current, dict)
-            if (
-                dashboard_path.name
-                in {"bioetl-overview-v2.json", "bioetl-run-explorer-v1.json"}
-                and variable_name == "pipeline"
-            ) or (
+            if (variable_name == "pipeline") or (
                 dashboard_path.name == "bioetl-provider-health-v2.json"
                 and variable_name == "provider"
             ):

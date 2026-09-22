@@ -42,37 +42,37 @@ BUS: list[dict[str, str]] = [
     {
         "uid": "bioetl-run-explorer-v1",
         "title": "0. Run Explorer",
-        "path": "bioetl-run-explorer-v1",
+        "path": "0-run-explorer",
     },
     {
         "uid": "bioetl-control-plane-v1",
         "title": "1. Trust",
-        "path": "bioetl-control-plane-v1",
+        "path": "1-trust",
     },
     {
         "uid": "bioetl-overview-v2",
         "title": "2. Overview",
-        "path": "bioetl-overview-v2",
+        "path": "2-overview",
     },
     {
         "uid": "bioetl-runtime",
         "title": "3. Pipeline Diagnostics",
-        "path": "bioetl-runtime",
+        "path": "3-pipeline-diagnostics",
     },
     {
         "uid": "bioetl-provider-health-v2",
         "title": "4. Provider Health",
-        "path": "bioetl-provider-health-v2",
+        "path": "4-provider-health",
     },
     {
         "uid": "bioetl-dq-v2",
         "title": "5. Data Quality",
-        "path": "bioetl-dq-v2",
+        "path": "5-data-quality",
     },
     {
         "uid": "bioetl-incident-v1",
         "title": "6. Incident Workspace",
-        "path": "bioetl-incident-v1",
+        "path": "6-incident-workspace",
     },
 ]
 
@@ -1422,6 +1422,7 @@ def apply_to_dashboard(
     ]
     from scripts.ops.observability.grafana.dashboard_context_links import (
         normalize_dashboard_actions,
+        finalize_dashboard_links,
     )
 
     if state_followup:
@@ -1459,6 +1460,7 @@ def apply_to_dashboard(
     from scripts.ops.observability.grafana._gr_db_corrections import apply_corrections
 
     apply_corrections(payload)
+    finalize_dashboard_links(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:
