@@ -645,7 +645,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 }
               }
             ]
@@ -720,84 +720,6 @@
               {
                 "id": "noValue",
                 "value": "—"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Status"
-            },
-            "properties": [
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background",
-                  "wrapText": false,
-                  "mode": "basic"
-                }
-              },
-              {
-                "id": "custom.width",
-                "value": 90
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "TREE_MISSING": {
-                        "text": "TREE_MISSING",
-                        "color": "red"
-                      },
-                      "LAYOUT_UNHEALTHY": {
-                        "text": "LAYOUT_UNHEALTHY",
-                        "color": "orange"
-                      },
-                      "IDENTITY_UNHEALTHY": {
-                        "text": "IDENTITY_UNHEALTHY",
-                        "color": "orange"
-                      },
-                      "success": {
-                        "text": "success",
-                        "color": "#166534"
-                      },
-                      "failed": {
-                        "text": "failed",
-                        "color": "red"
-                      },
-                      "partial": {
-                        "text": "partial",
-                        "color": "orange"
-                      },
-                      "shutdown": {
-                        "text": "shutdown",
-                        "color": "orange"
-                      },
-                      "dry_run": {
-                        "text": "dry_run",
-                        "color": "blue"
-                      },
-                      "fail": {
-                        "text": "fail",
-                        "color": "red"
-                      },
-                      "running": {
-                        "text": "running",
-                        "color": "blue"
-                      },
-                      "unknown": {
-                        "text": "UNKNOWN",
-                        "color": "gray"
-                      },
-                      "unfinished": {
-                        "text": "unfinished",
-                        "color": "gray"
-                      }
-                    }
-                  }
-                ]
               }
             ]
           },
@@ -998,18 +920,6 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Severity"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 90
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
               "options": "action_dashboard_uid"
             },
             "properties": [
@@ -1025,6 +935,10 @@
               "options": "Workflow"
             },
             "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              },
               {
                 "id": "custom.cellOptions",
                 "value": {
@@ -1044,10 +958,6 @@
                     }
                   }
                 ]
-              },
-              {
-                "id": "custom.hidden",
-                "value": true
               }
             ]
           },
@@ -1058,19 +968,98 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 110
-              },
-              {
                 "id": "noValue",
                 "value": "Inspect in 1. Trust"
+              },
+              {
+                "id": "custom.width",
+                "value": 110
               },
               {
                 "id": "links",
                 "value": [
                   {
                     "title": "Open 1. Trust",
-                    "url": "/d/bioetl-control-plane-v1/1-trust?var-pipeline=${__data.fields.Pipeline}&var-run_type=${__data.fields.run_type}&var-run_id=${__data.fields.Run}&${__url_time_range}"
+                    "url": "/d/bioetl-control-plane-v1/1-trust?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.Run:percentencode}&${__url_time_range}",
+                    "includeVars": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Processing"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "wrapText": false,
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 90
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "TREE_MISSING": {
+                        "text": "TREE_MISSING",
+                        "color": "red"
+                      },
+                      "LAYOUT_UNHEALTHY": {
+                        "text": "LAYOUT_UNHEALTHY",
+                        "color": "orange"
+                      },
+                      "IDENTITY_UNHEALTHY": {
+                        "text": "IDENTITY_UNHEALTHY",
+                        "color": "orange"
+                      },
+                      "success": {
+                        "text": "success",
+                        "color": "#166534"
+                      },
+                      "failed": {
+                        "text": "failed",
+                        "color": "red"
+                      },
+                      "partial": {
+                        "text": "partial",
+                        "color": "orange"
+                      },
+                      "shutdown": {
+                        "text": "shutdown",
+                        "color": "orange"
+                      },
+                      "dry_run": {
+                        "text": "dry_run",
+                        "color": "blue"
+                      },
+                      "fail": {
+                        "text": "fail",
+                        "color": "red"
+                      },
+                      "running": {
+                        "text": "running",
+                        "color": "blue"
+                      },
+                      "unknown": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      },
+                      "unfinished": {
+                        "text": "unfinished",
+                        "color": "gray"
+                      }
+                    }
                   }
                 ]
               }
@@ -1082,7 +1071,8 @@
         "showHeader": true,
         "footer": {
           "show": false,
-          "enablePagination": false
+          "enablePagination": false,
+          "countRows": false
         },
         "cellHeight": "sm"
       },
@@ -1227,7 +1217,7 @@
             "x": 0,
             "y": 18,
             "w": 24,
-            "h": 8
+            "h": 12
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
@@ -1305,6 +1295,7 @@
                   "domain": "Domain",
                   "verdict": "Status",
                   "execution_state": "Result",
+                  "evidence_completeness": "Evidence",
                   "rules_version": "Rules",
                   "reason": "Reason",
                   "action": "Action",

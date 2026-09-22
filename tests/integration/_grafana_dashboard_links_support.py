@@ -268,6 +268,10 @@ def _iter_panel_data_links(panel: dict[str, object]) -> list[dict[str, object]]:
     field_config = panel.get("fieldConfig")
     defaults = field_config.get("defaults") if isinstance(field_config, dict) else None
     _extend_link_dicts(result, defaults, "links")
+    for override in (field_config or {}).get("overrides", []):
+        for prop in override.get("properties", []):
+            if prop.get("id") == "links":
+                result.extend(prop.get("value", []))
     return result
 
 
@@ -716,6 +720,43 @@ def _assert_cross_dashboard_link_policy(
         return
     target_uid = _extract_dashboard_uid(url)
     assert target_uid is not None, f"Could not parse dashboard UID from {url}"
+    if (
+        target_uid == "${__data.fields.action_dashboard_uid}"
+        and current_uid != "bioetl-incident-v1"
+    ):
+        routes = {
+            "bioetl-overview-v2": {
+                "bioetl-runtime",
+                "bioetl-control-plane-v1",
+                "bioetl-dq-v2",
+                "bioetl-provider-health-v2",
+                "bioetl-overview-v2",
+            },
+            "bioetl-runtime": {
+                "bioetl-runtime",
+                "bioetl-control-plane-v1",
+                "bioetl-dq-v2",
+            },
+            "bioetl-dq-v2": {"bioetl-dq-v2"},
+        }
+        assert current_uid in routes
+        assert "${__data.fields.action_scope:raw}" in url
+        for resolved_uid in routes[current_uid]:
+            scope = "var-pipeline=chembl_assay"
+            if resolved_uid in {"bioetl-runtime", "bioetl-dq-v2"}:
+                scope += "&var-stage=$__all"
+            if resolved_uid == "bioetl-provider-health-v2":
+                scope += "&var-provider=$__all&var-pipeline_context=chembl_assay"
+            resolved_url = url.replace(
+                "${__data.fields.action_dashboard_uid}", resolved_uid
+            ).replace("${__data.fields.action_scope:raw}", scope)
+            _assert_cross_dashboard_link_policy(
+                dashboard_name=dashboard_name,
+                current_uid=current_uid,
+                link={**link, "url": resolved_url},
+                dashboard_links=dashboard_links,
+            )
+        return
     if target_uid == "${__data.fields.action_dashboard_uid}":
         assert current_uid == "bioetl-incident-v1"
         assert link.get("title") == "Open domain diagnostics"
@@ -759,6 +800,14 @@ def _assert_cross_dashboard_link_policy(
                 _extract_link_var_values(url)["pipeline"]
                 == "${__data.fields.route_pipeline}"
             )
+        elif (
+            current_uid == "bioetl-run-explorer-v1"
+            and link.get("title") == "Open 1. Trust"
+        ):
+            values = _extract_link_var_values(url)
+            assert values["run_id"] == "${__data.fields.Run:percentencode}"
+            assert values["pipeline"] == "${__data.fields.Pipeline:percentencode}"
+            assert values["run_type"] == "${__data.fields.run_type:percentencode}"
         else:
             _assert_preserved_identity_handoff(
                 dashboard_name=dashboard_name,

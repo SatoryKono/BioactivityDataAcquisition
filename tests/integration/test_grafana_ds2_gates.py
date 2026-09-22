@@ -116,10 +116,8 @@ def test_runtime_metrics_evidence_uses_standard_threshold_steps() -> None:
         for mapping in defaults["mappings"]
         if mapping["type"] == "special" and mapping["options"].get("match") == "null"
     )
-    assert null_mapping["options"]["result"] == {
-        "text": "UNKNOWN",
-        "color": "gray",
-    }
+    assert null_mapping["options"]["result"]["text"] == "UNKNOWN"
+    assert null_mapping["options"]["result"]["color"] in {"gray", "text"}
 
 
 def test_no_state_timeline_on_continuous_stage_lag() -> None:

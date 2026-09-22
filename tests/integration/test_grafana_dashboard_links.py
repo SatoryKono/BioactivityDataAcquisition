@@ -634,7 +634,7 @@ def test_runtime_and_dq_dashboards_expose_control_plane_handoff() -> None:
         _assert_named_dashboard_handoff(
             dashboard_name=dashboard_name,
             expected_title="1. Trust",
-            url_prefix="/d/bioetl-control-plane-v1/bioetl-control-plane-v1",
+            url_prefix="/d/bioetl-control-plane-v1/1-trust",
         )
 
 

@@ -334,13 +334,13 @@ def test_review_domain_status_uses_exact_persisted_evidence() -> None:
     links = action_props.get("links") or []
     assert links, "Action column must expose row-aware board links"
     assert any(
-        "bioetl-runtime" in str(link.get("url", ""))
-        and "${__data.fields.pipeline}" in str(link.get("url", ""))
+        "${__data.fields.action_dashboard_uid}" in str(link.get("url", ""))
+        and "${__data.fields.action_scope:raw}" in str(link.get("url", ""))
         for link in links
     ), "Action links must pass the row pipeline into target dashboards"
-    assert any("var-provider=$__all" in str(link.get("url", "")) for link in links), (
-        "Provider Action link must fail-close provider=unknown"
-    )
+    assert "var-provider=$$__all&var-pipeline_context=$1" in Path(
+        "grafana/prometheus-rules/bioetl_observability.yml"
+    ).read_text(encoding="utf-8")
 
     organize = next(
         (

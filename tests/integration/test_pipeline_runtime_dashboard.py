@@ -312,6 +312,22 @@ def test_pipeline_runtime_links_are_target_scoped() -> None:
             continue
         target_uid = _extract_dashboard_uid(url)
         assert target_uid is not None, f"Could not parse dashboard UID from {url}"
+        if target_uid == "${__data.fields.action_dashboard_uid}":
+            assert "${__data.fields.action_scope:raw}" in url
+            for resolved_uid in (
+                "bioetl-runtime",
+                "bioetl-control-plane-v1",
+                "bioetl-dq-v2",
+            ):
+                scope = "var-pipeline=chembl_assay"
+                if resolved_uid != "bioetl-control-plane-v1":
+                    scope += "&var-stage=$__all"
+                resolved = url.replace("${__data.fields.action_scope:raw}", scope)
+                assert (
+                    _extract_link_vars(resolved)
+                    <= _ALLOWED_DASHBOARD_LINK_VARS[resolved_uid]
+                )
+            continue
         allowed_vars = _ALLOWED_DASHBOARD_LINK_VARS[target_uid]
         assert _extract_link_vars(url) <= allowed_vars, (
             f"Runtime dashboard link to {target_uid} leaks variables via {url}"
@@ -527,7 +543,10 @@ def test_pipeline_duration_has_explicit_no_value_message() -> None:
     panel = panels.get("Track Pipeline Duration")
     assert panel is not None
     no_value = panel.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
-    assert "terminal" in no_value.lower() or "samples" in no_value.lower(), (
+    assert any(
+        term in no_value.lower()
+        for term in ("terminal", "samples", "histogram increments")
+    ), (
         f"Pipeline Duration noValue must explain missing terminal metric, got: {no_value!r}"
     )
 

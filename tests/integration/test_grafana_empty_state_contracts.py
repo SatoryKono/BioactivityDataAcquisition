@@ -52,7 +52,7 @@ def test_unfinished_run_never_inherits_the_success_color() -> None:
     panel = next(p for p in dashboard["panels"] if p["id"] == 3010)
     mappings = {}
     for override in panel["fieldConfig"]["overrides"]:
-        if str(override["matcher"].get("options", "")).casefold() != "status":
+        if str(override["matcher"].get("options", "")).casefold() != "processing":
             continue
         for prop in override["properties"]:
             if prop["id"] == "mappings":

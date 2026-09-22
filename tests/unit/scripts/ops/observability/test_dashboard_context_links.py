@@ -135,3 +135,59 @@ def test_action_normalization_preserves_rank_query_and_visible_column() -> None:
     assert {"id": "custom.width", "value": 105} in properties
     link = next(prop["value"][0] for prop in properties if prop["id"] == "links")
     assert "${__data.fields.route_pipeline}" in link["url"]
+
+
+@pytest.mark.parametrize(
+    "uid, slug",
+    [
+        ("bioetl-run-explorer-v1", "0-run-explorer"),
+        ("bioetl-control-plane-v1", "1-trust"),
+        ("bioetl-overview-v2", "2-overview"),
+        ("bioetl-runtime", "3-pipeline-diagnostics"),
+        ("bioetl-provider-health-v2", "4-provider-health"),
+        ("bioetl-dq-v2", "5-data-quality"),
+        ("bioetl-incident-v1", "6-incident-workspace"),
+    ],
+)
+def test_handoff_uses_canonical_numbered_slug(uid: str, slug: str) -> None:
+    assert build_handoff_url(uid).startswith(f"/d/{uid}/{slug}?")
+
+
+def test_late_links_are_finalized_without_rewriting_row_context() -> None:
+    from copy import deepcopy
+    from scripts.ops.observability.grafana.dashboard_context_links import (
+        finalize_dashboard_links,
+    )
+
+    url = "/d/${__data.fields.action_dashboard_uid}/?var-pipeline=${__data.fields.pipeline:percentencode}"
+    link = {"url": url, "includeVars": True}
+    payload = {
+        "panels": [{"panels": [{"options": {"dataLinks": []}, "links": [link]}]}]
+    }
+    finalize_dashboard_links(payload)
+    assert link == {"url": url, "includeVars": False}
+    assert payload["panels"][0]["panels"][0]["options"] == {}
+    first = deepcopy(payload)
+    finalize_dashboard_links(payload)
+    assert payload == first
+
+
+@pytest.mark.parametrize("color", ["text", "#A3A3A3", "#555555", "gray"])
+def test_neutral_status_colors_remain_neutral(color: str) -> None:
+    from scripts.engineering.qa.check_dashboard_visual_semantics import (
+        _semantic_palette,
+    )
+
+    assert _semantic_palette({"text": "UNKNOWN", "color": color}) == {
+        "text": "UNKNOWN",
+        "color": "gray",
+    }
+
+
+@pytest.mark.parametrize("color", ["green", "red", "orange", "yellow"])
+def test_severity_colors_are_never_normalized_to_unknown(color: str) -> None:
+    from scripts.engineering.qa.check_dashboard_visual_semantics import (
+        _semantic_palette,
+    )
+
+    assert _semantic_palette({"text": "UNKNOWN", "color": color})["color"] == color
