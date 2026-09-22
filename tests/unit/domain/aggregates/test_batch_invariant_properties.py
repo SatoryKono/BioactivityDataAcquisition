@@ -36,7 +36,7 @@ import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
-from bioetl.domain.aggregates.batch import Batch
+from bioetl.domain.aggregates import Batch
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.types import RunID
 from tests.helpers.deterministic_ids import deterministic_uuid_value

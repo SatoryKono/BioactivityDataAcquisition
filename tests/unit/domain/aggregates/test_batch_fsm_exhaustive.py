@@ -55,7 +55,8 @@ from datetime import UTC, datetime
 
 import pytest
 
-from bioetl.domain.aggregates.batch import Batch, BatchStatus
+from bioetl.domain.aggregates import Batch
+from bioetl.domain.aggregates.batch import BatchStatus
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.medallion import Layer
 from bioetl.domain.types import RunID

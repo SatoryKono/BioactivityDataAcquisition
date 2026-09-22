@@ -22,7 +22,7 @@ and their enforced lifecycle boundaries.
 
 | Aggregate | Public root | Child objects | Core invariants | Lifecycle / state machine | Primary source files |
 | --- | --- | --- | --- | --- | --- |
-| `Batch` | `Batch` | `BatchRecord`, `BatchStatus` | `start_index >= 0`; records may be added or quarantined only while `OPEN`; write flow cannot skip sealing | `OPEN -> SEALED -> WRITING -> COMMITTED/FAILED` | `batch.py`, `_batch_aggregate.py` |
+| `Batch` | `Batch` | `BatchRecord`, `BatchStatus` | `start_index >= 0`; records may be added or quarantined only while `OPEN`; write flow cannot skip sealing | `OPEN -> SEALED -> WRITING -> COMMITTED/FAILED` | `_batch_aggregate.py`, `batch.py` |
 | `PipelineRun` | `PipelineRun` | `StageResult`, `PipelineRunState`, `StageStatus` | run may start only from `PENDING`; terminal states block further transitions; successful completion requires stage evidence | `PENDING -> RUNNING -> COMPLETED/FAILED/SHUTDOWN` | `pipeline_run.py`, `pipeline_run_stage_result.py` |
 | `QuarantineEntry` | `QuarantineEntry` | `ResolutionInfo`, `QuarantineStatus` | `entry_id`, `pipeline_name`, `error_code`, `payload`, and `payload_hash` are mandatory; reprocessing requires replacement identity | `NEW -> UNDER_REVIEW -> IGNORED/REPROCESSED`, plus `NEW/UNDER_REVIEW -> EXPIRED` | `quarantine_entry.py`, `_quarantine_value_objects.py` |
 
