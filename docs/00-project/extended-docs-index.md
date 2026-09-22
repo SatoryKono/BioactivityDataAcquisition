@@ -1,3 +1,16 @@
+______________________________________________________________________
+
+Version: 1.1.3
+Status: active
+Class: index
+Owner: BioETL Team
+Reviewers:
+
+- BioETL Team
+  Last verified: '2026-08-25'
+
+______________________________________________________________________
+
 # Extended Documentation Index
 
 This index keeps active, non-navigation support documents discoverable without

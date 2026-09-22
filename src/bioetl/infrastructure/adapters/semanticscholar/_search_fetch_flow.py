@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 
 import httpx
 
+from bioetl.domain.exceptions import RetryExhaustedError
 from bioetl.domain.exceptions.network.service import ApiError
 from bioetl.domain.mixin_host import as_mixin_host
 from bioetl.domain.types import BronzeRecord, JsonDict
@@ -85,11 +86,16 @@ class _SemanticScholarSearchFetchMixin:
             try:
                 response = await as_mixin_host(
                     self
-                )._http_client.get_once(  # Any: mixin host
+                )._http_client.get(  # Any: mixin host - bounded retry for 429 via UnifiedHTTPClient
                     url,
                     params=params,
                     headers=as_mixin_host(self)._build_headers(),  # Any: mixin host
                 )
+            except RetryExhaustedError as exc:
+                raise ApiError(
+                    "Semantic Scholar search request failed",
+                    status_code=429,
+                ) from exc
             except httpx.HTTPStatusError as exc:
                 raise ApiError(
                     "Semantic Scholar search request failed",
