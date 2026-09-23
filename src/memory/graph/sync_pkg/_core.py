@@ -1632,6 +1632,12 @@ from memory.graph.sync_pkg.normalization_statement import (
 from memory.graph.sync_pkg.normalization_statement import (
     _normalization_statement as _normalization_statement,
 )
+from memory.graph.sync_pkg.normalize_docs_repo_reference import (
+    _markdown_heading_context as _markdown_heading_context,
+)
+from memory.graph.sync_pkg.normalize_docs_repo_reference import (
+    _normalize_docs_repo_reference as _normalize_docs_repo_reference,
+)
 from memory.graph.sync_pkg.override_target_classes import (
     _duplication_family_by_name as _duplication_family_by_name,
 )
@@ -3258,30 +3264,6 @@ def _populate_workflow_job_surface(
     _add_job_matrix_variants(snapshot, job_context, matrix_variants)
     _add_job_outputs(snapshot, job_context, job_payload.get("outputs"))
     _process_workflow_steps(snapshot, job_context, job_payload.get("steps"))
-
-
-def _normalize_docs_repo_reference(raw_ref: str) -> str | None:
-    candidate = _trim_docs_reference_candidate(raw_ref)
-    if not candidate:
-        return None
-    candidate = _normalize_docs_glob_candidate(candidate)
-    candidate = candidate.rstrip("/")
-    if candidate in {"README.md", "mkdocs.yml"}:
-        return candidate
-    if any(candidate.startswith(prefix) for prefix in _DOCS_REFERENCE_ALLOWED_PREFIXES):
-        return candidate
-    return None
-
-
-def _markdown_heading_context(text: str, offset: int) -> tuple[str | None, str | None]:
-    current_title: str | None = None
-    current_anchor: str | None = None
-    for line_start, title in _markdown_headings(text):
-        if line_start > offset:
-            break
-        current_title = title
-        current_anchor = _heading_anchor_slug(current_title)
-    return current_title, current_anchor
 
 
 def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
