@@ -763,6 +763,12 @@ from memory.graph.sync_pkg.contract_dependency_module_key import (
 from memory.graph.sync_pkg.contract_dependency_module_key import (
     _link_contract_doc_dependencies as _link_contract_doc_dependencies,
 )
+from memory.graph.sync_pkg.contract_dependency_module_specs import (
+    _contract_dependency_doc_specs as _contract_dependency_doc_specs,
+)
+from memory.graph.sync_pkg.contract_dependency_module_specs import (
+    _contract_dependency_module_specs as _contract_dependency_module_specs,
+)
 from memory.graph.sync_pkg.contract_mapping_values import (
     _add_contract_policy_config as _add_contract_policy_config,
 )
@@ -4730,38 +4736,6 @@ def _link_contract_dependency_docs(
             source_kind=source_kind,
             provenance=provenance,
         )
-
-
-def _contract_dependency_module_specs(
-    mapping_config: ContractMappingConfig,
-) -> tuple[tuple[list[str], str], ...]:
-    return (
-        (mapping_config.control_plane_modules, "impact_contracts_control_plane"),
-        (mapping_config.control_plane_runtime_modules, "impact_contracts_runtime"),
-        (mapping_config.lineage_modules, "impact_contracts_lineage"),
-        (mapping_config.lineage_runtime_modules, "impact_contracts_lineage_runtime"),
-    )
-
-
-def _contract_dependency_doc_specs(
-    mapping_config: ContractMappingConfig,
-) -> tuple[tuple[list[str], list[str], str, str, str], ...]:
-    return (
-        (
-            mapping_config.control_plane_docs,
-            mapping_config.control_plane_anchor_fields,
-            "Control-plane contract reference for `{contract_ref}`.",
-            "control_plane_contract_doc",
-            "impact_contracts_control_plane",
-        ),
-        (
-            mapping_config.lineage_docs,
-            mapping_config.lineage_anchor_fields,
-            "Lineage/traceability contract reference for `{contract_ref}`.",
-            "lineage_contract_doc",
-            "impact_contracts_lineage",
-        ),
-    )
 
 
 def _add_contract_surfaces(
