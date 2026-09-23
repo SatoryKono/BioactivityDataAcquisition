@@ -9249,9 +9249,11 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 },
-                "inspect": true
+                "inspect": true,
+                "wrapText": true,
+                "minWidth": 50
               },
               "unit": "none",
               "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity.",
@@ -9351,13 +9353,17 @@
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 240
+                    "value": 300
+                  },
+                  {
+                    "id": "custom.wrapText",
+                    "value": true
                   },
                   {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
                   }
                 ]
@@ -9484,6 +9490,25 @@
                     ]
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value"
+                },
+                "properties": [
+                  {
+                    "id": "custom.wrapText",
+                    "value": true
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -9494,7 +9519,7 @@
               "enablePagination": true,
               "countRows": true
             },
-            "cellHeight": "md"
+            "cellHeight": "lg"
           },
           "targets": [
             {
