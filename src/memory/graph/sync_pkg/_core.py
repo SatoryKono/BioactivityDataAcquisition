@@ -544,6 +544,12 @@ from memory.graph.sync_pkg.alert_targets import _sorted_node_keys as _sorted_nod
 from memory.graph.sync_pkg.alert_targets import (
     _sorted_unique_node_keys as _sorted_unique_node_keys,
 )
+from memory.graph.sync_pkg.alertrulefilecontext import (
+    AlertRuleFileContext as AlertRuleFileContext,
+)
+from memory.graph.sync_pkg.alertrulefilecontext import (
+    _alert_rule_file_context as _alert_rule_file_context,
+)
 from memory.graph.sync_pkg.alerttargetselection import (
     AlertTargetSelection as AlertTargetSelection,
 )
@@ -3857,24 +3863,6 @@ def _add_alert_rule_file_surfaces(
             target_context=target_context,
             memory_mapping=memory_mapping,
         )
-
-
-@dataclass(frozen=True)
-class AlertRuleFileContext:
-    payload: dict[str, object]
-    artifact: NodeKey
-
-
-def _alert_rule_file_context(
-    snapshot: GraphSnapshot,
-    root: Path,
-    today: str,
-    rules_path: Path,
-) -> AlertRuleFileContext:
-    return AlertRuleFileContext(
-        payload=_alert_rule_file_payload(rules_path),
-        artifact=_add_alert_rules_artifact(snapshot, root, rules_path, today),
-    )
 
 
 def _add_alert_rule_group_surfaces(
