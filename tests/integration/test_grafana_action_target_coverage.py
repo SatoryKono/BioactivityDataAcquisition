@@ -108,7 +108,13 @@ def test_dq_reason_action_target_is_allowlisted_and_complete() -> None:
         for m in mappings
     )
     links = props.get("links", [])
-    assert len(links) == 1
+    assert len(links) == 3
+    assert links[0]["url"].endswith("&viewPanel=156")
+    assert links[1]["url"].endswith("&viewPanel=121")
+    assert links[2]["url"].endswith("/observability-checklist.md")
+    for link in links[:2]:
+        assert "${__data.fields.action_scope:raw}" in link["url"]
+        assert "${__url_time_range}" in link["url"]
     assert "${__data.fields.action_dashboard_uid}" in links[0]["url"]
     assert "${__data.fields.action_scope:raw}" in links[0]["url"]
     assert "${__url_time_range}" in links[0]["url"]

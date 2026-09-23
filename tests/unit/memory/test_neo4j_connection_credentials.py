@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from memory.graph.sync_pkg import _core
+from memory.graph.sync_pkg import transport as graph_transport
 
 pytestmark = pytest.mark.unit
 
@@ -76,3 +77,16 @@ def test_main_connection_still_uses_main_credentials(
         "main-test-value",
         "neo4j",
     )
+
+
+@pytest.mark.parametrize(
+    ("uri", "expected"),
+    [
+        ("bolt://localhost:7687", "http://localhost:7474"),
+        ("neo4j+s://graph.example:7687", "https://graph.example:7474"),
+        ("http://localhost:7475", "http://localhost:7475"),
+    ],
+)
+def test_derive_http_uri_maps_bolt_and_http_schemes(uri: str, expected: str) -> None:
+    assert graph_transport.derive_http_uri(uri) == expected
+    assert _core.derive_http_uri is graph_transport.derive_http_uri

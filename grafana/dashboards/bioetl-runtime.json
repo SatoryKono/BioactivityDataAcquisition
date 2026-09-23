@@ -515,7 +515,11 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value"
+        "textMode": "value",
+        "text": {
+          "valueSize": 20,
+          "titleSize": 14
+        }
       },
       "targets": [
         {
@@ -1130,8 +1134,8 @@
         },
         "textMode": "value_and_name",
         "text": {
-          "titleSize": 16,
-          "valueSize": 18
+          "valueSize": 20,
+          "titleSize": 14
         },
         "wideLayout": false
       },
@@ -1224,12 +1228,12 @@
             },
             "properties": [
               {
-                "id": "unit",
-                "value": "rps"
-              },
-              {
                 "id": "custom.width",
                 "value": 100
+              },
+              {
+                "id": "unit",
+                "value": "suffix: records/s"
               }
             ]
           },
@@ -1324,7 +1328,19 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "Pipeline / Run Type / Stage"
+                "value": "Pipeline / Stage"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "scope_stage"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Pipeline / Stage"
               }
             ]
           }
@@ -1436,21 +1452,85 @@
               "decimals": 0,
               "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])bronze$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#CD7F32"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])silver$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#C0C0C0"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])gold$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#E0B400"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])quarantined$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#B877D9"
+                    }
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
             "x": 0,
             "y": 18,
-            "w": 12,
-            "h": 6
+            "w": 24,
+            "h": 10
           },
           "id": 238,
           "options": {
             "legend": {
-              "calcs": [],
-              "displayMode": "list",
+              "showLegend": true,
+              "displayMode": "table",
               "placement": "bottom",
-              "showLegend": false
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
             },
             "tooltip": {
               "mode": "multi",
@@ -1511,21 +1591,85 @@
               "decimals": 0,
               "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])bronze$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#CD7F32"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])silver$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#C0C0C0"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])gold$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#E0B400"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])quarantined$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#B877D9"
+                    }
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
-            "x": 12,
-            "y": 18,
-            "w": 12,
-            "h": 6
+            "x": 0,
+            "y": 28,
+            "w": 24,
+            "h": 10
           },
           "id": 240,
           "options": {
             "legend": {
-              "calcs": [],
-              "displayMode": "list",
+              "showLegend": true,
+              "displayMode": "table",
               "placement": "bottom",
-              "showLegend": false
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
             },
             "tooltip": {
               "mode": "multi",
@@ -1612,9 +1756,9 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 24,
+            "y": 38,
             "w": 24,
-            "h": 6
+            "h": 9
           },
           "id": 242,
           "options": {
@@ -1771,9 +1915,9 @@
           "description": "TIME RANGE · Shows selected-range stage lag in seconds for Pipeline, Run Type, and Stage. No data means no emitted lag samples or unavailable telemetry, never zero lag. Use Worst Stage Lag and current blockers for severity",
           "gridPos": {
             "x": 0,
-            "y": 30,
+            "y": 47,
             "w": 24,
-            "h": 5
+            "h": 10
           },
           "datasource": {
             "type": "prometheus",
@@ -1797,7 +1941,7 @@
                 "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
-                "axisLabel": "lag (s)",
+                "axisLabel": "Stage lag",
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "lineInterpolation": "linear",
@@ -1831,17 +1975,78 @@
               "unit": "s",
               "noValue": "UNKNOWN"
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])bronze$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#CD7F32"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])silver$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#C0C0C0"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])gold$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#E0B400"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])quarantined$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#B877D9"
+                    }
+                  }
+                ]
+              }
+            ]
           },
           "options": {
             "legend": {
+              "showLegend": true,
+              "displayMode": "table",
+              "placement": "bottom",
               "calcs": [
                 "lastNotNull",
                 "max"
-              ],
-              "displayMode": "table",
-              "placement": "bottom",
-              "showLegend": true
+              ]
             },
             "tooltip": {
               "mode": "multi",
@@ -2080,14 +2285,50 @@
                     "value": true
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Throughput"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "suffix: records/s"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "scope_stage\\measure"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Pipeline / Stage"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "scope_stage"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Pipeline / Stage"
+                  }
+                ]
               }
             ]
           },
           "gridPos": {
             "x": 0,
-            "y": 35,
+            "y": 57,
             "w": 24,
-            "h": 5
+            "h": 9
           },
           "id": 243,
           "options": {
@@ -2201,7 +2442,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 40,
+            "y": 66,
             "w": 24,
             "h": 3
           },
@@ -2218,7 +2459,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -2895,7 +3140,11 @@
                 "targetBlank": false,
                 "includeVars": false
               }
-            ]
+            ],
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -2983,7 +3232,11 @@
                 "targetBlank": false,
                 "includeVars": false
               }
-            ]
+            ],
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -3081,7 +3334,11 @@
                 "title": "Open Runtime Troubleshooting Runbook",
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
               }
-            ]
+            ],
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "description": "TIME RANGE · Shows current memory-pressure state by Pipeline and Stage. Mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN; Run Type does not affect this panel. Review structured report files and checkpoint/resume pressure before retrying",
           "targets": [
@@ -3187,7 +3444,11 @@
                 "targetBlank": false,
                 "includeVars": false
               }
-            ]
+            ],
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -3269,7 +3530,11 @@
                 "title": "Open Run Manifest Runbook",
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md"
               }
-            ]
+            ],
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -3358,7 +3623,11 @@
                 "includeVars": false,
                 "tooltip": "Context mapping: provider=unknown, pipeline_context=$pipeline, adapter=unknown. Provider alert query may scope by $provider_hint when validated."
               }
-            ]
+            ],
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -3447,7 +3716,11 @@
                 "includeVars": false,
                 "tooltip": "Context mapping: provider=unknown, pipeline_context=$pipeline, adapter=unknown. GLOBAL card sums cluster-wide adapter latency and rate-limiter wait conditions."
               }
-            ]
+            ],
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -3536,7 +3809,11 @@
                 "targetBlank": false,
                 "includeVars": false
               }
-            ]
+            ],
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -3806,7 +4083,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -3897,7 +4178,11 @@
                 "title": "Open Runtime Troubleshooting Runbook",
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
               }
-            ]
+            ],
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -3979,7 +4264,11 @@
                 "title": "Open Pipeline Failure Runbook",
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/pipeline-failure-critical.md"
               }
-            ]
+            ],
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -4620,7 +4909,7 @@
               "source": "url",
               "parser": "backend",
               "format": "table",
-              "root_selector": "summary",
+              "root_selector": "presentation_summary",
               "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
               "url_options": {
                 "method": "GET",
@@ -4765,7 +5054,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -4851,7 +5144,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -4891,7 +5188,9 @@
                 "cellOptions": {
                   "type": "auto",
                   "wrapText": false
-                }
+                },
+                "minWidth": 50,
+                "wrapText": false
               },
               "unit": "short"
             },
@@ -4905,6 +5204,10 @@
                   {
                     "id": "unit",
                     "value": "short"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 100
                   }
                 ]
               },
@@ -4917,6 +5220,10 @@
                   {
                     "id": "unit",
                     "value": "s"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 100
                   }
                 ]
               },
@@ -4927,8 +5234,36 @@
                 },
                 "properties": [
                   {
+                    "id": "custom.width",
+                    "value": 130
+                  },
+                  {
                     "id": "unit",
-                    "value": "rps"
+                    "value": "suffix: records/s"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "scope_stage\\measure"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Pipeline / Stage"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "scope_stage"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Pipeline / Stage"
                   }
                 ]
               }
@@ -4938,7 +5273,7 @@
             "x": 0,
             "y": 24,
             "w": 24,
-            "h": 6
+            "h": 14
           },
           "id": 22460,
           "options": {
@@ -4979,9 +5314,9 @@
           "description": "CURRENT · Expected stage coverage for Pipeline / Run Type. Missing lag/backlog signals are listed individually. Undefined expected stages are UNKNOWN. VALID EMPTY requires a recorded complete stage catalog and every expected signal. Query failures are QUERY ERROR.",
           "gridPos": {
             "x": 0,
-            "y": 30,
+            "y": 38,
             "w": 24,
-            "h": 6
+            "h": 14
           },
           "datasource": {
             "type": "prometheus",
@@ -4999,15 +5334,78 @@
             "defaults": {
               "custom": {
                 "inspect": true,
-                "minWidth": 70,
+                "minWidth": 50,
                 "cellOptions": {
-                  "type": "auto"
-                }
+                  "type": "auto",
+                  "wrapText": false
+                },
+                "wrapText": false
               },
               "noValue": "UNKNOWN — stage coverage unavailable",
               "unit": "none"
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Throughput"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "suffix: records/s"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "scope_stage\\measure"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Pipeline / Stage"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "scope_stage"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Pipeline / Stage"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Pipeline"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Run type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 130
+                  }
+                ]
+              }
+            ]
           },
           "options": {
             "showHeader": true,
@@ -5058,16 +5456,16 @@
             "x": 0,
             "y": 25,
             "w": 24,
-            "h": 12
+            "h": 8
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "md",
+            "cellHeight": "sm",
             "footer": {
               "show": false,
-              "enablePagination": true
+              "enablePagination": false
             }
           },
           "fieldConfig": {
@@ -5078,13 +5476,104 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapText": false
               }
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "action_path"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Domain"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 125
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 115
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Action"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 170
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Inspect saved run report",
+                        "url": "/${__data.fields.action_path}&var-pipeline=${pipeline:percentencode}&var-run_type=${run_type:percentencode}&var-workflow=${workflow:percentencode}&${__url_time_range}",
+                        "targetBlank": true
+                      }
+                    ]
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "Inspect saved evidence": {
+                            "text": "Open report"
+                          },
+                          "Inspect reason and evidence": {
+                            "text": "Open report"
+                          },
+                          "Select run or inspect evidence": {
+                            "text": "Inspect report"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Evidence reference"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              }
+            ]
           },
           "targets": [
             {
@@ -5093,7 +5582,7 @@
               "source": "url",
               "parser": "backend",
               "format": "table",
-              "root_selector": "domains",
+              "root_selector": "presentation_domains",
               "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
               "url_options": {
                 "method": "GET",
@@ -5117,7 +5606,8 @@
                     "verdict",
                     "reason",
                     "action",
-                    "evidence_ref"
+                    "evidence_ref",
+                    "action_path"
                   ]
                 }
               }
@@ -5157,18 +5647,18 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 37,
+            "y": 33,
             "w": 24,
-            "h": 7
+            "h": 4
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "md",
+            "cellHeight": "sm",
             "footer": {
               "show": false,
-              "enablePagination": true
+              "enablePagination": false
             }
           },
           "fieldConfig": {
@@ -5179,10 +5669,11 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapText": false
               }
             },
             "overrides": [
@@ -5201,6 +5692,54 @@
                     "value": 175
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Pipeline"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          ".*": {
+                            "text": "No run selected"
+                          },
+                          "-": {
+                            "text": "No run selected"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Run ID"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          ".*": {
+                            "text": "No run selected"
+                          },
+                          "-": {
+                            "text": "No run selected"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -5211,7 +5750,7 @@
               "source": "url",
               "parser": "backend",
               "format": "table",
-              "root_selector": "summary",
+              "root_selector": "presentation_summary",
               "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
               "url_options": {
                 "method": "GET",

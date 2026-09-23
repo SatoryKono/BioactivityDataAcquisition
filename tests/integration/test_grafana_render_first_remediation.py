@@ -203,16 +203,17 @@ def test_dq_duplicate_validation_fact_is_removed_and_grid_is_compacted() -> None
     assert canonical["title"] == "Monitor Silver Validation Failures"
     assert "or vector(0)" not in canonical["targets"][0]["expr"]
 
-    expected_geometry = {
-        3: {"x": 6, "y": 27, "w": 6, "h": 4},
-        4: {"x": 0, "y": 27, "w": 6, "h": 4},
-        101: {"x": 12, "y": 27, "w": 6, "h": 4},
-        9: {"x": 18, "y": 27, "w": 6, "h": 4},
-        12: {"x": 0, "y": 31, "w": 12, "h": 4},
-        151: {"x": 12, "y": 31, "w": 12, "h": 4},
-    }
-    for panel_id, geometry in expected_geometry.items():
-        assert panels[panel_id]["gridPos"] == geometry
+    # Detail evidence uses full-width rows so categories remain readable at 1000 px.
+    ordered_ids = (1, 4, 3, 101, 9, 12, 151)
+    previous_end = None
+    for panel_id in ordered_ids:
+        geometry = panels[panel_id]["gridPos"]
+        assert geometry["x"] == 0
+        assert geometry["w"] == 24
+        assert geometry["h"] == (10 if panel_id == 1 else 7 if panel_id == 9 else 3)
+        if previous_end is not None:
+            assert geometry["y"] == previous_end
+        previous_end = geometry["y"] + geometry["h"]
 
 
 def test_iteration_2_active_alert_severity_is_not_overridden_by_count() -> None:
@@ -559,8 +560,8 @@ def test_audit_followup_action_first_layout_contracts() -> None:
     workflow = _panel(overview, 9013)
     navigation = _panel(overview, 9021)
     run_context = _panel(overview, 9602)
-    assert workflow.get("gridPos", {}).get("x") == 16
-    assert workflow.get("gridPos", {}).get("w") == 8
+    assert workflow.get("gridPos", {}).get("x") == 0
+    assert workflow.get("gridPos", {}).get("w") == 24
     assert navigation.get("gridPos", {}).get("h") <= 3
     assert run_context.get("collapsed") is True
     assert run_context.get("panels")
@@ -660,7 +661,7 @@ def test_rf007_counts_and_dense_legends_are_bounded() -> None:
     for panel_id in (1, 10, 11, 153, 155):
         legend = _panel(dq, panel_id).get("options", {}).get("legend")
         if isinstance(legend, dict):
-            assert legend.get("showLegend") is (panel_id == 153)
+            assert legend.get("showLegend") is (panel_id in (1, 153))
         desc = str(_panel(dq, panel_id).get("description", ""))
         assert "full identifiers remain available" in desc or "TIME RANGE" in desc
 
@@ -1148,7 +1149,9 @@ def test_run_explorer_recent_runs_bind_run_id_via_data_link() -> None:
     first_screen = _panel(explorer, 3010)
     first_links = _run_select_links(first_screen)
     assert first_links
-    assert any("var-run_id=${__value.raw}" in url for url in first_links)
+    assert any(
+        "var-run_id=${__data.fields.run_id:percentencode}" in url for url in first_links
+    )
     assert any("var-pipeline=${__data.fields.Pipeline}" in url for url in first_links)
     assert any("var-run_type=${__data.fields.run_type}" in url for url in first_links)
     assert all("var-run_type=$run_type" not in url for url in first_links)

@@ -233,6 +233,7 @@ tracked_suite_inventory:
       - tests/integration/test_grafana_dashboard_provisioning.py
       - tests/integration/test_grafana_dashboard_query_governance.py
       - tests/integration/test_grafana_datasource_provisioning.py
+      - tests/integration/test_grafana_evidence_readability.py
       - tests/integration/test_grafana_design_system_policy.py
       - tests/integration/test_grafana_ds2_gates.py
       - tests/integration/test_grafana_empty_state_contracts.py

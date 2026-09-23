@@ -805,7 +805,7 @@ def _assert_cross_dashboard_link_policy(
             and link.get("title") == "Open 1. Trust"
         ):
             values = _extract_link_var_values(url)
-            assert values["run_id"] == "${__data.fields.Run:percentencode}"
+            assert values["run_id"] == "${__data.fields.run_id:percentencode}"
             assert values["pipeline"] == "${__data.fields.Pipeline:percentencode}"
             assert values["run_type"] == "${__data.fields.run_type:percentencode}"
         else:
@@ -881,7 +881,12 @@ def _collect_cross_dashboard_target_locations(
         if target_uid is None or target_uid == source_uid:
             continue
         title = str(link.get("title", ""))
-        target_locations.setdefault(target_uid, []).append(f"{title} -> {url}")
+        # Distinct panel destinations are not duplicated dashboard navigation.
+        panel_match = re.search(r"[?&]viewPanel=([0-9]+)(?:&|$)", url)
+        destination = (
+            f"{target_uid}#panel={panel_match.group(1)}" if panel_match else target_uid
+        )
+        target_locations.setdefault(destination, []).append(f"{title} -> {url}")
     return target_locations
 
 
@@ -894,7 +899,8 @@ def _assert_no_duplicate_dashboard_targets(
     duplicates = {
         target_uid: links
         for target_uid, links in target_locations.items()
-        if len(links) > 1 and target_uid not in allowed_duplicate_targets
+        if len(links) > 1
+        and target_uid.split("#panel=", 1)[0] not in allowed_duplicate_targets
     }
     assert not duplicates, (
         f"{dashboard_name} duplicates dashboard links by target UID: {duplicates}"

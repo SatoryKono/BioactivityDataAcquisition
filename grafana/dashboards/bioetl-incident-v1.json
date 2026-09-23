@@ -367,7 +367,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Incident Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">GLOBAL · Signals are not verified causes. Telemetry gaps remain UNKNOWN. Selected-scope status is separate; event age and impact need event evidence.</div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">GLOBAL signals are not verified causes. Selected-scope status is separate. Telemetry gaps remain UNKNOWN; event age and impact need event evidence.</div>"
       },
       "links": []
     },
@@ -472,8 +472,8 @@
           }
         ],
         "text": {
-          "titleSize": 14,
-          "valueSize": 20
+          "valueSize": 20,
+          "titleSize": 14
         }
       }
     },
@@ -491,7 +491,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Start Incident Triage",
-        "content": "<div style=\"font-size:16px;line-height:1.25;padding:0;white-space:normal;overflow-wrap:anywhere\">GLOBAL · CURRENT · CRIT before WARN; ties are equally urgent. Signal ≠ verified cause. Impact and event age: UNKNOWN.</div>"
+        "content": "<div style=\"font-size:16px;line-height:1.2\">Start with ranked suspects; open Action for domain evidence. PENDING means the alert has not fired. Use alert history below to assess timing and impact.</div>"
       },
       "links": [
         {
@@ -1192,7 +1192,9 @@
               "type": "auto",
               "wrapText": false
             },
-            "inspect": true
+            "inspect": true,
+            "minWidth": 50,
+            "wrapText": false
           },
           "color": {
             "mode": "fixed",
@@ -1263,6 +1265,10 @@
                   "type": "auto",
                   "wrapText": true
                 }
+              },
+              {
+                "id": "displayName",
+                "value": "Alert"
               }
             ]
           },
@@ -1298,7 +1304,11 @@
               },
               {
                 "id": "custom.width",
-                "value": 95
+                "value": 100
+              },
+              {
+                "id": "displayName",
+                "value": "State"
               }
             ]
           },
@@ -1342,7 +1352,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 85
+                "value": 90
               }
             ]
           }
@@ -2193,7 +2203,7 @@
               "source": "url",
               "parser": "backend",
               "format": "table",
-              "root_selector": "summary",
+              "root_selector": "presentation_summary",
               "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
               "url_options": {
                 "method": "GET",
@@ -2267,12 +2277,12 @@
           "id": 22010,
           "type": "table",
           "title": "Inspect Full Ranked Suspects",
-          "description": "CURRENT · GLOBAL · CURRENT at query evaluation time (range end), not SELECTED RUN. Rank is severity order: CRIT=2, WARN=1, UNKNOWN=0; ties have equal urgency, not higher confidence. Confidence is UNVERIFIED: a rule signal alone does not establish cause or impact. Pipeline/provider identifies potential impact scope; confirm with domain evidence. Only active (>0) signals are ranked; telemetry_gap stays UNKNOWN. VALID EMPTY means no active suspects with available evidence; TELEMETRY MISSING is not a zero and not VALID EMPTY. Domain details use the same GLOBAL scope and evaluation time. Rule sample time is not the underlying event time. Inspect retains source labels; Action preserves row scope. TIME RANGE selects evaluation time, not an event-history rank. First screen shows four rows; complete domain evidence remains below. Rank is ordering only, never confidence. Telemetry gaps are observation problems, not confirmed incidents.",
+          "description": "GLOBAL / CURRENT · Empty successful result: no ranked suspects. Missing telemetry remains UNKNOWN; request failures remain QUERY ERROR. Open domain diagnostics from Action.",
           "gridPos": {
             "x": 0,
             "y": 21,
             "w": 24,
-            "h": 6
+            "h": 12
           },
           "datasource": {
             "type": "datasource",
@@ -2768,31 +2778,6 @@
                     "value": "Inspect"
                   },
                   {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "provider": {
-                            "text": "Provider"
-                          },
-                          "runtime": {
-                            "text": "Runtime"
-                          },
-                          "dq": {
-                            "text": "DQ"
-                          },
-                          "UNKNOWN": {
-                            "text": "Inspect"
-                          },
-                          "unknown": {
-                            "text": "Inspect"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
                     "id": "custom.hidden",
                     "value": false
                   },
@@ -2814,6 +2799,34 @@
                   {
                     "id": "custom.width",
                     "value": 90
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "provider": {
+                            "text": "Provider"
+                          },
+                          "runtime": {
+                            "text": "Runtime"
+                          },
+                          "dq": {
+                            "text": "DQ"
+                          },
+                          "UNKNOWN": {
+                            "text": "Inspect"
+                          },
+                          "unknown": {
+                            "text": "Inspect"
+                          },
+                          "data_quality": {
+                            "text": "DQ"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               },
@@ -2920,8 +2933,8 @@
             "cellHeight": "sm",
             "footer": {
               "show": false,
-              "enablePagination": true,
-              "countRows": true
+              "enablePagination": false,
+              "countRows": false
             },
             "sortBy": [
               {
@@ -2977,7 +2990,9 @@
                   "type": "auto",
                   "wrapText": false
                 },
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50,
+                "wrapText": false
               },
               "color": {
                 "mode": "fixed",
@@ -3048,6 +3063,10 @@
                       "type": "auto",
                       "wrapText": true
                     }
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Alert"
                   }
                 ]
               },
@@ -3083,7 +3102,11 @@
                   },
                   {
                     "id": "custom.width",
-                    "value": 95
+                    "value": 100
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "State"
                   }
                 ]
               },
@@ -3127,7 +3150,7 @@
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 85
+                    "value": 90
                   }
                 ]
               }
@@ -3197,16 +3220,16 @@
             "x": 0,
             "y": 23,
             "w": 24,
-            "h": 12
+            "h": 8
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "md",
+            "cellHeight": "sm",
             "footer": {
               "show": false,
-              "enablePagination": true
+              "enablePagination": false
             }
           },
           "fieldConfig": {
@@ -3217,13 +3240,104 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapText": false
               }
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "action_path"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Domain"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 125
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 115
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Action"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 170
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Inspect saved run report",
+                        "url": "/${__data.fields.action_path}&var-pipeline=${pipeline:percentencode}&var-run_type=${run_type:percentencode}&var-workflow=${workflow:percentencode}&${__url_time_range}",
+                        "targetBlank": true
+                      }
+                    ]
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "Inspect saved evidence": {
+                            "text": "Open report"
+                          },
+                          "Inspect reason and evidence": {
+                            "text": "Open report"
+                          },
+                          "Select run or inspect evidence": {
+                            "text": "Inspect report"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Evidence reference"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              }
+            ]
           },
           "targets": [
             {
@@ -3232,7 +3346,7 @@
               "source": "url",
               "parser": "backend",
               "format": "table",
-              "root_selector": "domains",
+              "root_selector": "presentation_domains",
               "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
               "url_options": {
                 "method": "GET",
@@ -3256,7 +3370,8 @@
                     "verdict",
                     "reason",
                     "action",
-                    "evidence_ref"
+                    "evidence_ref",
+                    "action_path"
                   ]
                 }
               }
@@ -3296,18 +3411,18 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 35,
+            "y": 31,
             "w": 24,
-            "h": 7
+            "h": 4
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "md",
+            "cellHeight": "sm",
             "footer": {
               "show": false,
-              "enablePagination": true
+              "enablePagination": false
             }
           },
           "fieldConfig": {
@@ -3318,10 +3433,11 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapText": false
               }
             },
             "overrides": [
@@ -3340,6 +3456,54 @@
                     "value": 175
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Pipeline"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          ".*": {
+                            "text": "No run selected"
+                          },
+                          "-": {
+                            "text": "No run selected"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Run ID"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          ".*": {
+                            "text": "No run selected"
+                          },
+                          "-": {
+                            "text": "No run selected"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -3350,7 +3514,7 @@
               "source": "url",
               "parser": "backend",
               "format": "table",
-              "root_selector": "summary",
+              "root_selector": "presentation_summary",
               "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
               "url_options": {
                 "method": "GET",

@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "42f4180d75c87027f7944c06d1b54b0c833779e5645a677ef08d40348d0f97c2",
-    "bioetl-dq-v2": "99e04f886cd5c6c506d48ae4a3c9759f3210ffd8dd4c32bf41624c0d14c00c1f",
-    "bioetl-incident-v1": "58c6baf4e1736fc3774ba12e3e4c7483e4b17518e39648e4652546683aa198b4",
-    "bioetl-overview-v2": "66cd7ecd01dcc0383b0cc7ce034174d1978d6b67f070fca304377dc0846e81f0",
-    "bioetl-provider-health-v2": "fd7d3a9605f037dc0e7dc6bbe955237244f603f3abac3918e2fc4302f8c70119",
-    "bioetl-run-explorer-v1": "442ac55ab416e16e06aef8d95b3880b554d94e2ccdc68a55838a0c85594be596",
-    "bioetl-runtime": "e5ac2c18c3b9e4fdd545669b179eb252740e65fd393c6b59cb80915f18735443"
+    "bioetl-control-plane-v1": "d4404371be966335da7aafcbff913a7d21eb3e7ae8946f023bfe96ee23392c7d",
+    "bioetl-dq-v2": "6aa6bc23c7180c07d40c2f2e32b7de6e4ccb353e726543d901f5ce3b23a340dd",
+    "bioetl-incident-v1": "0a79b026718d294d24bb6ec2d7634cd348f0021c64d119c99db602fd4298aaf2",
+    "bioetl-overview-v2": "e65494cd36461c9fcb481efb56bf52fabdeeb373f1cf7a309b9f144f02c7ce15",
+    "bioetl-provider-health-v2": "22cfac4a304baa0027083c303819ca6f4e110b40fcf2f0cdf1b0b2df54531692",
+    "bioetl-run-explorer-v1": "02e152a59cce0c28df47d0e3d7723231d4805eb7df70318d69d1dd4e340311a6",
+    "bioetl-runtime": "8179b0166222d9f4273bfd8e5c87a96c8ecc9078cc916165e382548b4f23e7e6"
   },
   "panels": [
     {
@@ -1756,44 +1756,6 @@
       "basis": "preserved-from-json",
       "component": "JSON fallback",
       "dashboard_uid": "bioetl-dq-v2",
-      "disposition": "advanced-evidence",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-dq-v2",
-      "panel_id": 155,
-      "panel_title": "Track DQ Threshold Events",
-      "route": "data-trust-recovery",
-      "source": {
-        "datasource_type": "prometheus",
-        "datasource_uid": "prometheus",
-        "expressions": [
-          "round(sum(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval]))) + sum(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval])))) unless (count(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval]))) or count(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval]))))"
-        ],
-        "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-dq-v2",
-      "disposition": "advanced-evidence",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-dq-v2",
-      "panel_id": 153,
-      "panel_title": "Track Volume-Weighted DQ Score",
-      "route": "data-trust-recovery",
-      "source": {
-        "datasource_type": "prometheus",
-        "datasource_uid": "prometheus",
-        "expressions": [
-          "((sum((bioetl_dq_validation_score{pipeline=~\"$pipeline\"} * bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}))) / clamp_min(sum(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}), 1))"
-        ],
-        "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-dq-v2",
       "disposition": "fallback-only",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-dq-v2",
@@ -1822,6 +1784,44 @@
         "datasource_uid": "prometheus",
         "expressions": [],
         "target_count": 0
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-dq-v2",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-dq-v2",
+      "panel_id": 153,
+      "panel_title": "Track Volume-Weighted DQ Score",
+      "route": "data-trust-recovery",
+      "source": {
+        "datasource_type": "prometheus",
+        "datasource_uid": "prometheus",
+        "expressions": [
+          "((sum((bioetl_dq_validation_score{pipeline=~\"$pipeline\"} * bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}))) / clamp_min(sum(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}), 1))"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-dq-v2",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-dq-v2",
+      "panel_id": 155,
+      "panel_title": "Track DQ Threshold Events",
+      "route": "data-trust-recovery",
+      "source": {
+        "datasource_type": "prometheus",
+        "datasource_uid": "prometheus",
+        "expressions": [
+          "round(sum(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval]))) + sum(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval])))) unless (count(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval]))) or count(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval]))))"
+        ],
+        "target_count": 1
       }
     },
     {
