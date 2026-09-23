@@ -20,10 +20,10 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "960c5898864074093ede923b8878b4cd3bcaefea719f6f834d6405b30c17ff99",
+    "bioetl-control-plane-v1": "74c8810b098669a6d1129d6ff93542d39f5f28c501616bdd7427186917a4e307",
     "bioetl-dq-v2": "8fb7692efc68009032963bd87e333ef3f83b35efe53dedb3f3cf407960754295",
     "bioetl-incident-v1": "d4a4ec5ba3e9b2595c3f8ac8653f58ed650bf85a375eec610eae459352dfe1f6",
-    "bioetl-overview-v2": "e40e4a495791fadfe53dfee00ca1b57aaf2fd5b8b8797ade60b75a5443490477",
+    "bioetl-overview-v2": "6cc12b5722e897a2478ad9a303e3dc7dee487ed4d9d40fd0f71d6bd607a4b91b",
     "bioetl-provider-health-v2": "a5c7fc1b5340f74ebb5b22ce2f0be43095f69310cdfdb55e7d30cb92781a2441",
     "bioetl-run-explorer-v1": "1f68dc375d8c566928b07f6874e6eed12ad052358b6388e255e9a2da8b0d77c7",
     "bioetl-runtime": "1d25872c4f9d74223b29b467e615c734370f25f99021b41b0dbd3999ad05c37c"
@@ -260,7 +260,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 3,
-      "panel_title": "Track Checkpoint Incompatibilities",
+      "panel_title": "Track Incompatibilities",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
@@ -279,7 +279,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 104,
-      "panel_title": "Track Unreconstructable Replays",
+      "panel_title": "Track Unreconstructable",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
@@ -317,7 +317,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 101,
-      "panel_title": "Track Checkpoint Load Failures",
+      "panel_title": "Track Load Failures",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
@@ -336,7 +336,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 102,
-      "panel_title": "Track Checkpoint Save Failures",
+      "panel_title": "Track Save Failures",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
@@ -355,7 +355,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 103,
-      "panel_title": "Track Global Checkpoint Admin Failures",
+      "panel_title": "Track Global Admin Failures",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
@@ -530,7 +530,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 2,
-      "panel_title": "Track Ledger Append Failures",
+      "panel_title": "Track Ledger Failures",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
@@ -549,7 +549,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 1,
-      "panel_title": "Track Manifest Write Failures",
+      "panel_title": "Track Manifest Failures",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
@@ -568,7 +568,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 132,
-      "panel_title": "Monitor Manifest Failures (30m)",
+      "panel_title": "Monitor Manifest (30m)",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
@@ -587,7 +587,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 133,
-      "panel_title": "Monitor Ledger Failures (30m)",
+      "panel_title": "Monitor Ledger (30m)",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
@@ -739,7 +739,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 122,
-      "panel_title": "Track Missing Lineage References",
+      "panel_title": "Track Missing Lineage",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
@@ -758,7 +758,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 137,
-      "panel_title": "Track Lineage Persistence Failures",
+      "panel_title": "Track Lineage Failures",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
@@ -2251,7 +2251,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-overview-v2",
       "panel_id": 9002,
-      "panel_title": "Review Selected Run Domains",
+      "panel_title": "Review Run Domains",
       "route": "operations-home",
       "source": {
         "datasource_type": null,

@@ -49,7 +49,7 @@ dashboards:
   bioetl-control-plane-v1:
     panels:
       '1':
-        title: Track Manifest Write Failures
+        title: Track Manifest Failures
         role: indicator
         tier: 3
         scope: time_range
@@ -80,7 +80,7 @@ dashboards:
         - full_light
         - zoom_200
       '2':
-        title: Track Ledger Append Failures
+        title: Track Ledger Failures
         role: indicator
         tier: 3
         scope: time_range
@@ -108,7 +108,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '3':
-        title: Track Checkpoint Incompatibilities
+        title: Track Incompatibilities
         role: indicator
         tier: 3
         scope: time_range
@@ -236,7 +236,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '101':
-        title: Track Checkpoint Load Failures
+        title: Track Load Failures
         role: indicator
         tier: 3
         scope: time_range
@@ -264,7 +264,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '102':
-        title: Track Checkpoint Save Failures
+        title: Track Save Failures
         role: indicator
         tier: 3
         scope: time_range
@@ -292,7 +292,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '103':
-        title: Track Global Checkpoint Admin Failures
+        title: Track Global Admin Failures
         role: indicator
         tier: 3
         scope: time_range
@@ -320,7 +320,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '104':
-        title: Track Unreconstructable Replays
+        title: Track Unreconstructable
         role: indicator
         tier: 3
         scope: time_range
@@ -596,7 +596,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '122':
-        title: Track Missing Lineage References
+        title: Track Missing Lineage
         role: freshness
         tier: 3
         scope: time_range
@@ -674,7 +674,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '132':
-        title: Monitor Manifest Failures (30m)
+        title: Monitor Manifest (30m)
         role: indicator
         tier: 3
         scope: time_range
@@ -702,7 +702,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '133':
-        title: Monitor Ledger Failures (30m)
+        title: Monitor Ledger (30m)
         role: indicator
         tier: 3
         scope: time_range
@@ -806,7 +806,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '137':
-        title: Track Lineage Persistence Failures
+        title: Track Lineage Failures
         role: freshness
         tier: 3
         scope: time_range
@@ -3085,7 +3085,7 @@ dashboards:
         - first_window_light
         - zoom_200
       '9002':
-        title: Review Selected Run Domains
+        title: Review Run Domains
         role: evidence_table
         tier: 3
         scope: selected_run

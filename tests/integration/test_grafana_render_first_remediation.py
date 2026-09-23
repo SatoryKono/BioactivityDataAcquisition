@@ -407,7 +407,7 @@ def test_rf003_1024_layout_prioritizes_actions_and_readability() -> None:
     assert len(str(first_action["title"])) <= 24
     assert len(first_action.get("options", {}).get("dataLinks", [])) >= 4
     inputs = _panel(overview, 9002)
-    assert inputs["title"] == "Review Selected Run Domains"
+    assert inputs["title"] == "Review Run Domains"
     assert inputs["gridPos"]["y"] == first_action["gridPos"]["y"]
     assert inputs["gridPos"]["w"] >= 8
     assert first_action["gridPos"]["y"] < _panel(overview, 9603)["gridPos"]["y"]

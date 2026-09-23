@@ -1355,7 +1355,7 @@
     {
       "id": 9002,
       "type": "table",
-      "title": "Review Selected Run Domains",
+      "title": "Review Run Domains",
       "gridPos": {
         "h": 12,
         "w": 8,

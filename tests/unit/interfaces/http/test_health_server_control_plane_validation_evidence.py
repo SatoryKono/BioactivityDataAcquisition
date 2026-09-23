@@ -199,7 +199,11 @@ async def test_checkpoint_parse_failure_has_stable_reason_without_raw_error() ->
         )
 
         assert status == 200
-        assert payload["status"] == "ERROR"
+        # Source parsing is unavailable evidence, distinct from an evaluated
+        # check failure; keep the explicit diagnostic instead of claiming OK.
+        assert payload["status"] == "UNKNOWN"
+        assert payload["trust_status"] == "INCOMPLETE"
+        assert "UNAVAILABLE" in str(payload)
         assert any(
             row.get("reason") == "checkpoint_parse_error"
             for row in _payload_rows(payload)

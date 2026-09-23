@@ -31,7 +31,7 @@
       "formula": "round((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range]))))",
       "kind": "promql",
       "panel_id": 1,
-      "panel_title": "Track Manifest Write Failures",
+      "panel_title": "Track Manifest Failures",
       "query": "round((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range]))))",
       "query_tokens": [
         "bioetl_control_plane_manifest_writes_total"
@@ -66,7 +66,7 @@
       "formula": "round((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))))",
       "kind": "promql",
       "panel_id": 2,
-      "panel_title": "Track Ledger Append Failures",
+      "panel_title": "Track Ledger Failures",
       "query": "round((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))))",
       "query_tokens": [
         "bioetl_control_plane_ledger_appends_total"
@@ -101,7 +101,7 @@
       "formula": "round((sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range]))))",
       "kind": "promql",
       "panel_id": 3,
-      "panel_title": "Track Checkpoint Incompatibilities",
+      "panel_title": "Track Incompatibilities",
       "query": "round((sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range]))))",
       "query_tokens": [
         "bioetl_checkpoint_compatibility_events_total"
@@ -237,7 +237,7 @@
       "formula": "round((sum(increase(bioetl_checkpoint_load_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))))",
       "kind": "promql",
       "panel_id": 101,
-      "panel_title": "Track Checkpoint Load Failures",
+      "panel_title": "Track Load Failures",
       "query": "round((sum(increase(bioetl_checkpoint_load_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))))",
       "query_tokens": [
         "bioetl_checkpoint_load_events_total"
@@ -272,7 +272,7 @@
       "formula": "round((sum(increase(bioetl_checkpoint_save_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))))",
       "kind": "promql",
       "panel_id": 102,
-      "panel_title": "Track Checkpoint Save Failures",
+      "panel_title": "Track Save Failures",
       "query": "round((sum(increase(bioetl_checkpoint_save_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))))",
       "query_tokens": [
         "bioetl_checkpoint_save_events_total"
@@ -307,7 +307,7 @@
       "formula": "round((sum(increase(bioetl_checkpoint_operator_operations_total{status=\"failed\"}[$__range]))))",
       "kind": "promql",
       "panel_id": 103,
-      "panel_title": "Track Global Checkpoint Admin Failures",
+      "panel_title": "Track Global Admin Failures",
       "query": "round((sum(increase(bioetl_checkpoint_operator_operations_total{status=\"failed\"}[$__range]))))",
       "query_tokens": [
         "bioetl_checkpoint_operator_operations_total"
@@ -342,7 +342,7 @@
       "formula": "round((sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range]))))",
       "kind": "promql",
       "panel_id": 104,
-      "panel_title": "Track Unreconstructable Replays",
+      "panel_title": "Track Unreconstructable",
       "query": "round((sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range]))))",
       "query_tokens": [
         "bioetl_replay_reconstructability_events_total"
@@ -973,7 +973,7 @@
       "formula": "round((sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range]))))",
       "kind": "promql",
       "panel_id": 122,
-      "panel_title": "Track Missing Lineage References",
+      "panel_title": "Track Missing Lineage",
       "query": "round((sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range]))))",
       "query_tokens": [
         "bioetl_lineage_refs_missing_total"
@@ -1064,7 +1064,7 @@
       "formula": "sum(bioetl_control_plane_manifest_fail_severity_30m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
       "kind": "promql",
       "panel_id": 132,
-      "panel_title": "Monitor Manifest Failures (30m)",
+      "panel_title": "Monitor Manifest (30m)",
       "query": "sum(bioetl_control_plane_manifest_fail_severity_30m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
       "query_tokens": [
         "bioetl_control_plane_manifest_fail_severity_30m"
@@ -1099,7 +1099,7 @@
       "formula": "sum(bioetl_control_plane_ledger_fail_severity_30m{pipeline=~\"$pipeline\"})",
       "kind": "promql",
       "panel_id": 133,
-      "panel_title": "Monitor Ledger Failures (30m)",
+      "panel_title": "Monitor Ledger (30m)",
       "query": "sum(bioetl_control_plane_ledger_fail_severity_30m{pipeline=~\"$pipeline\"})",
       "query_tokens": [
         "bioetl_control_plane_ledger_fail_severity_30m"
@@ -1235,7 +1235,7 @@
       "formula": "round((sum(increase(bioetl_lineage_fragments_emitted_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))))",
       "kind": "promql",
       "panel_id": 137,
-      "panel_title": "Track Lineage Persistence Failures",
+      "panel_title": "Track Lineage Failures",
       "query": "round((sum(increase(bioetl_lineage_fragments_emitted_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))))",
       "query_tokens": [
         "bioetl_lineage_fragments_emitted_total"
@@ -3308,7 +3308,7 @@
       "formula": "",
       "kind": "http",
       "panel_id": 9002,
-      "panel_title": "Review Selected Run Domains",
+      "panel_title": "Review Run Domains",
       "query": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
       "query_tokens": [
         "/ops/observability/selected-run-status",

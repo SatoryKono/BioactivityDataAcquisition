@@ -176,7 +176,7 @@ def _rewrite_selected_run_tables(panel: dict[str, object], uid: object) -> None:
         )
     if uid == _OVERVIEW_UID and panel.get("id") == 9002:
         panel.update(
-            _panel(9002, "Review Selected Run Domains", panel["gridPos"], domains=True)
+            _panel(9002, "Review Run Domains", panel["gridPos"], domains=True)
         )
 
 

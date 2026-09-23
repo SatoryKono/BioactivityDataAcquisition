@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
@@ -36,6 +37,8 @@ from bioetl.infrastructure.control_plane._run_manifest_scope_rebuild import (
 from bioetl.infrastructure.storage.atomic import atomic_write_text
 
 __all__ = ["FileRunManifestStore", "RunManifestStoreCorruptionError"]
+
+_MANIFEST_READ_WORKERS = 4
 
 
 class RunManifestStoreCorruptionError(ValueError):
@@ -236,19 +239,31 @@ class FileRunManifestStore(RawRunManifestInspectionMixin, RunManifestPort):
         started_at = perf_counter()
         status = "success"
         try:
-            manifests = tuple(
-                sorted(
-                    (
-                        manifest
-                        for path in sorted(self.base_path.glob("*.json"))
-                        if path.is_file()
-                        if not path.name.endswith(".contract-evidence.json")
-                        for manifest in (self._load_manifest(path.stem),)
-                        if manifest is not None
-                    ),
-                    key=lambda manifest: (manifest.created_at, manifest.manifest_id),
-                )
+            manifest_ids = (
+                path.stem
+                for path in sorted(self.base_path.glob("*.json"))
+                if path.is_file()
+                if not path.name.endswith(".contract-evidence.json")
             )
+            # Windows bind mounts make sequential file/index reads exceed the
+            # operator deadline. Bound parallel I/O, retaining the same parser,
+            # index validation, exception propagation and deterministic order.
+            with ThreadPoolExecutor(max_workers=_MANIFEST_READ_WORKERS) as executor:
+                manifests = tuple(
+                    sorted(
+                        (
+                            manifest
+                            for manifest in executor.map(
+                                self._load_manifest, manifest_ids
+                            )
+                            if manifest is not None
+                        ),
+                        key=lambda manifest: (
+                            manifest.created_at,
+                            manifest.manifest_id,
+                        ),
+                    )
+                )
             if not manifests:
                 status = "miss"
             return manifests

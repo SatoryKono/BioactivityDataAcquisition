@@ -155,17 +155,17 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
     assert panels["Inspect Scope & Evidence"].get("id") == 99
     assert panels["Monitor Scope Health"].get("id") == 214
     assert panels["Review First Action"].get("id") == 215
-    assert panels["Review Selected Run Domains"].get("id") == 9002
+    assert panels["Review Run Domains"].get("id") == 9002
     assert panels["Inspect Scope & Evidence"].get("gridPos", {}).get("y") == 2
     assert panels["Review Selected Run Status"].get("id") == 9603
     assert panels["Review Selected Run Status"].get("gridPos", {}).get("y") == 11
     assert panels["Monitor Scope Health"].get("gridPos", {}).get("y") == 2
     assert panels["Review First Action"].get("gridPos", {}).get("y") == 5
-    assert panels["Review Selected Run Domains"].get("gridPos", {}).get("y") == panels[
+    assert panels["Review Run Domains"].get("gridPos", {}).get("y") == panels[
         "Review First Action"
     ].get("gridPos", {}).get("y")
     assert panels["Review First Action"].get("gridPos", {}).get("w", 0) >= 8
-    assert panels["Review Selected Run Domains"].get("gridPos", {}).get("w", 0) >= 8
+    assert panels["Review Run Domains"].get("gridPos", {}).get("w", 0) >= 8
     lazy = {"Review Run Identity": 9300, "Review Processed Records": 9301}
     for title, panel_id in lazy.items():
         panel = panels[title]
@@ -223,7 +223,7 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
 def test_review_domain_status_uses_exact_persisted_evidence() -> None:
     """Selected-run domains use saved evidence; CURRENT detail stays below the fold."""
     panels = _panels_by_title()
-    summary = panels["Review Selected Run Domains"]
+    summary = panels["Review Run Domains"]
     full_matrix = panels["Review All Domain Status"]
     next_action = panels["Review First Action"]
     summary_expr = _panel_expr(summary)
@@ -490,7 +490,7 @@ def test_range_evidence_and_trend_rows_are_retained() -> None:
     current_verdict_titles = {
         "Monitor Scope Health",
         "Review First Action",
-        "Review Selected Run Domains",
+        "Review Run Domains",
         *_L1_CARD_TITLES,
     }
     expected_evidence_panels = {
