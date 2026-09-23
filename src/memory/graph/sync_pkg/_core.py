@@ -1378,6 +1378,9 @@ from memory.graph.sync_pkg.graph_snapshot import GraphRelation as GraphRelation
 from memory.graph.sync_pkg.graph_snapshot import GraphSnapshot as GraphSnapshot
 from memory.graph.sync_pkg.graph_snapshot import _write_export as _write_export
 from memory.graph.sync_pkg.graph_snapshot import snapshot_orphans as snapshot_orphans
+from memory.graph.sync_pkg.impact_analysis_context import (
+    _impact_analysis_context as _impact_analysis_context,
+)
 from memory.graph.sync_pkg.included_file_structure_dirs import (
     _add_repo_zone_directory_surface as _add_repo_zone_directory_surface,
 )
@@ -2612,26 +2615,6 @@ def _run_impact_analysis_passes(
     )
     _add_pipeline_operational_edges(snapshot, pipeline_nodes, memory_mapping)
     _extract_code_duplication_surfaces(snapshot, root, project, today, memory_mapping)
-
-
-def _impact_analysis_context(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    memory_mapping: dict[str, object],
-) -> tuple[set[NodeKey], dict[str, NodeKey], dict[str, NodeKey], dict[str, NodeKey]]:
-    port_nodes = _add_port_surfaces(snapshot, root, project, today)
-    adapter_nodes = _add_adapter_surfaces(
-        snapshot, root, project, today, port_nodes, memory_mapping
-    )
-    contract_nodes = _add_contract_surfaces(
-        snapshot, root, project, today, memory_mapping
-    )
-    pipeline_nodes = _add_pipeline_surfaces(
-        snapshot, root, project, today, contract_nodes, adapter_nodes
-    )
-    return port_nodes, adapter_nodes, contract_nodes, pipeline_nodes
 
 
 def _add_file_structure_surfaces(
