@@ -2055,6 +2055,10 @@ from memory.graph.sync_pkg.sync_run_id import (
     _verify_sync_snapshot as _verify_sync_snapshot,
 )
 from memory.graph.sync_pkg.sync_run_id import sync_snapshot as sync_snapshot
+from memory.graph.sync_pkg.test_suite_name import (
+    _link_test_artifact_scope as _link_test_artifact_scope,
+)
+from memory.graph.sync_pkg.test_suite_name import _test_suite_name as _test_suite_name
 from memory.graph.sync_pkg.transport import (
     _DEFAULT_NEO4J_AUDIT_DATABASE as _DEFAULT_NEO4J_AUDIT_DATABASE,
 )
@@ -2544,37 +2548,6 @@ def _add_test_artifact_surface(
         provenance="test_graph",
     )
     _link_test_artifact_scope(snapshot, artifact, parts)
-
-
-def _test_suite_name(parts: tuple[str, ...]) -> str | None:
-    if len(parts) < 2:
-        return None
-    suite_dir = parts[1]
-    return TEST_SURFACES.get(suite_dir)
-
-
-def _link_test_artifact_scope(
-    snapshot: GraphSnapshot, artifact: NodeKey, parts: tuple[str, ...]
-) -> None:
-    layer_name = parts[2] if len(parts) > 2 and parts[2] in KNOWN_LAYERS else None
-    if layer_name is None:
-        return
-    snapshot.add_relation(
-        artifact,
-        "TESTS_LAYER",
-        NodeKey("layer_family", layer_name),
-        provenance="test_graph",
-    )
-    if len(parts) <= 4:
-        return
-    family_key = NodeKey("package_family", f"{layer_name}/{parts[3]}")
-    if family_key in snapshot.nodes:
-        snapshot.add_relation(
-            artifact,
-            "TESTS_PACKAGE_FAMILY",
-            family_key,
-            provenance="test_graph",
-        )
 
 
 def _add_policy_surfaces(
