@@ -7,10 +7,9 @@ import os
 import re
 import shutil as shutil  # re-exported via __all__
 import sys
-import time
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence, Set
 from dataclasses import dataclass
-from datetime import UTC, date, datetime
+from datetime import date
 from pathlib import Path
 from typing import TypeVar, cast
 
@@ -1155,6 +1154,15 @@ from memory.graph.sync_pkg.is_describes_doc_to_module import (
 )
 from memory.graph.sync_pkg.is_describes_doc_to_module import (
     _is_describes_doc_to_module as _is_describes_doc_to_module,
+)
+from memory.graph.sync_pkg.iter_normalization_evidence_updates import (
+    _iter_normalization_evidence_updates as _iter_normalization_evidence_updates,
+)
+from memory.graph.sync_pkg.iter_normalization_evidence_updates import (
+    _normalization_evidence_statements as _normalization_evidence_statements,
+)
+from memory.graph.sync_pkg.iter_normalization_evidence_updates import (
+    apply_normalization_evidence_only as apply_normalization_evidence_only,
 )
 from memory.graph.sync_pkg.link_composite_layer_promotions import (
     CONTROL_PLANE_LEDGER_DOCS as CONTROL_PLANE_LEDGER_DOCS,
@@ -5954,72 +5962,6 @@ def _add_pipeline_normalization_evidence(
             entity_key=entity_key,
             module_path=update_payload["normalization_profile_module_path"],
         )
-
-
-def _iter_normalization_evidence_updates(
-    pipeline_nodes: dict[str, NodeKey],
-    evidence_by_pipeline: dict[str, dict[str, JsonValue]],
-) -> tuple[tuple[str, NodeKey, dict[str, JsonValue]], ...]:
-    updates: list[tuple[str, NodeKey, dict[str, JsonValue]]] = []
-    for pipeline_name, evidence in evidence_by_pipeline.items():
-        if pipeline_nodes.get(pipeline_name) is None:
-            continue
-        updates.append(
-            (
-                pipeline_name,
-                NodeKey("entity_config", pipeline_name),
-                _normalization_evidence_update_payload(evidence),
-            )
-        )
-    return tuple(updates)
-
-
-def _normalization_evidence_statements() -> list[dict[str, JsonValue]]:
-    evidence_by_pipeline = _build_normalization_pipeline_evidence()
-    statements: list[dict[str, JsonValue]] = []
-    for pipeline_name, evidence in sorted(evidence_by_pipeline.items()):
-        statements.append(_normalization_statement(pipeline_name, evidence))
-    return statements
-
-
-def apply_normalization_evidence_only(
-    root: Path,
-    http_uri: str | None,
-    batch_size: int = DEFAULT_BATCH_SIZE,
-) -> dict[str, JsonValue]:
-    started_at = datetime.now(tz=UTC).isoformat()
-    overall_started = time.perf_counter()
-    base_uri, username, password, database = resolve_neo4j_connection(root, http_uri)
-    client = Neo4jHttpClient(base_uri, username, password, database)
-    evidence_started = time.perf_counter()
-    statements = _normalization_evidence_statements()
-    evidence_build_seconds = time.perf_counter() - evidence_started
-    batches = _normalization_evidence_batches(statements, batch_size)
-    batch_summaries: list[dict[str, JsonValue]] = []
-    completed_statement_count = 0
-
-    for batch_index, batch in enumerate(batches, start=1):
-        batch_summary = _execute_normalization_evidence_batch(
-            client,
-            batch,
-            batch_index=batch_index,
-            batch_count=len(batches),
-        )
-        completed_statement_count += len(batch)
-        batch_summaries.append(batch_summary)
-
-    total_seconds = time.perf_counter() - overall_started
-    return {
-        "started_at": started_at,
-        "pipeline_count": len(statements),
-        "batch_count": len(batches),
-        "batch_size": batch_size,
-        "completed_statement_count": completed_statement_count,
-        "evidence_build_seconds": round(evidence_build_seconds, 3),
-        "total_seconds": round(total_seconds, 3),
-        "batches": batch_summaries,
-        "updated_at": datetime.now(tz=UTC).isoformat(),
-    }
 
 
 def _add_pipeline_test_edges(
