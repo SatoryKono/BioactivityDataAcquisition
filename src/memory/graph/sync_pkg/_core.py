@@ -390,6 +390,9 @@ from memory.graph.sync_pkg.add_secret_requirements import (
 from memory.graph.sync_pkg.add_single_adr_constraint_edges import (
     _add_single_adr_constraint_edges as _add_single_adr_constraint_edges,
 )
+from memory.graph.sync_pkg.add_storage_data_surfaces import (
+    _add_storage_data_surfaces as _add_storage_data_surfaces,
+)
 from memory.graph.sync_pkg.add_test_suite_surface import (
     _add_test_artifact_surface as _add_test_artifact_surface,
 )
@@ -2720,29 +2723,6 @@ def _run_impact_analysis_passes(
     )
     _add_pipeline_operational_edges(snapshot, pipeline_nodes, memory_mapping)
     _extract_code_duplication_surfaces(snapshot, root, project, today, memory_mapping)
-
-
-def _add_storage_data_surfaces(
-    snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str
-) -> None:
-    base_payload, base_sink = _base_pipeline_storage_config(root)
-    schema_fields_by_storage: dict[str, dict[str, NodeKey]] = {}
-    _add_entity_storage_data_surfaces(
-        snapshot,
-        root,
-        project,
-        today,
-        base_payload=base_payload,
-        base_sink=base_sink,
-        schema_fields_by_storage=schema_fields_by_storage,
-    )
-    _add_composite_storage_data_surfaces(
-        snapshot,
-        root,
-        project,
-        today,
-        schema_fields_by_storage=schema_fields_by_storage,
-    )
 
 
 def _add_control_plane_runtime_evidence(
