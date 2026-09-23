@@ -538,6 +538,16 @@ from memory.graph.sync_pkg.neo4j_statements import (
 from memory.graph.sync_pkg.neo4j_statements import (
     _reset_managed_relations_statement as _reset_managed_relations_statement,
 )
+from memory.graph.sync_pkg.score_family import _family_for_path as _family_for_path
+from memory.graph.sync_pkg.score_family import (
+    _family_matches_relative_path as _family_matches_relative_path,
+)
+from memory.graph.sync_pkg.score_family import (
+    _family_root_priority as _family_root_priority,
+)
+from memory.graph.sync_pkg.score_family import _presence_score as _presence_score
+from memory.graph.sync_pkg.score_family import _semantic_tags as _semantic_tags
+from memory.graph.sync_pkg.score_family import _threshold_score as _threshold_score
 from memory.graph.sync_pkg.shard_filters import DOCS_DRIFT_FILTER as DOCS_DRIFT_FILTER
 from memory.graph.sync_pkg.shard_filters import (
     RUNTIME_EVIDENCE_LAYER_FILTER as RUNTIME_EVIDENCE_LAYER_FILTER,
@@ -1951,74 +1961,6 @@ def _dashboard_panel_target_metrics(panel: dict[str, object]) -> set[str]:
         if isinstance(expr, str):
             metrics.update(_extract_bioetl_metrics(expr))
     return metrics
-
-
-def _threshold_score(value: int, *, medium: int, high: int) -> int:
-    if value >= high:
-        return 2
-    if value >= medium:
-        return 1
-    return 0
-
-
-def _presence_score(size: int) -> int:
-    return _threshold_score(size, medium=1, high=2)
-
-
-def _semantic_tags(relative_path: str, symbol_name: str) -> tuple[str, ...]:
-    normalized = f"{relative_path} {symbol_name}".lower()
-    tags = []
-    for tag in (
-        "normalize",
-        "health",
-        "retry",
-        "fallback",
-        "merge",
-        "join",
-        "request",
-        "response",
-        "contract",
-        "schema",
-        "manifest",
-        "lineage",
-        "metadata",
-        "pipeline",
-    ):
-        if tag in normalized:
-            tags.append(tag)
-    return tuple(sorted(set(tags)))
-
-
-def _family_for_path(
-    relative_path: str, config: dict[str, object]
-) -> DuplicateFamilyConfig | None:
-    families = config.get("families", ())
-    if not isinstance(families, tuple):
-        return None
-    best: DuplicateFamilyConfig | None = None
-    for family in families:
-        if not isinstance(family, DuplicateFamilyConfig):
-            continue
-        if not _family_matches_relative_path(relative_path, family):
-            continue
-        if best is None or _family_root_priority(family) > _family_root_priority(best):
-            best = family
-    return best
-
-
-def _family_matches_relative_path(
-    relative_path: str, family: DuplicateFamilyConfig
-) -> bool:
-    if relative_path in family.excluded_paths:
-        return False
-    return any(
-        relative_path == root or relative_path.startswith(f"{root}/")
-        for root in family.roots
-    )
-
-
-def _family_root_priority(family: DuplicateFamilyConfig) -> int:
-    return max(len(root) for root in family.roots)
 
 
 def _build_port_surface_catalog(
