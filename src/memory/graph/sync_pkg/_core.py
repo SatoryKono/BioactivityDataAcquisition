@@ -1208,6 +1208,9 @@ from memory.graph.sync_pkg.docs_reference_exact_candidates import (
 from memory.graph.sync_pkg.docs_reference_exact_candidates import (
     _resolve_claim_targets as _resolve_claim_targets,
 )
+from memory.graph.sync_pkg.duplication_analysis_config import (
+    _duplication_analysis_config as _duplication_analysis_config,
+)
 from memory.graph.sync_pkg.duplication_cluster_groups import (
     _add_duplication_cluster_node as _add_duplication_cluster_node,
 )
@@ -2590,19 +2593,6 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 if str(DEFAULT_ROOT) not in sys.path:
     sys.path.insert(0, str(DEFAULT_ROOT))
-
-
-def _duplication_analysis_config(
-    memory_mapping: dict[str, object],
-) -> dict[str, object]:
-    payload = _mapping_section(memory_mapping, "duplication_analysis")
-    families = _configured_duplication_families(payload.get("families", {}))
-    return {
-        "enabled": bool(payload.get("enabled", True)),
-        "min_cluster_size": _coerce_int(payload.get("min_cluster_size", 2), 2),
-        "min_ast_nodes": _coerce_int(payload.get("min_ast_nodes", 12), 12),
-        "families": tuple(families),
-    }
 
 
 def build_snapshot(root: Path, verified_at: str | None = None) -> GraphSnapshot:
