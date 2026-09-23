@@ -8,13 +8,11 @@ import fnmatch
 import itertools
 import json
 import os
-import queue
 import re
 import shutil as shutil  # re-exported via __all__
 import subprocess
 import sys
 import tempfile
-import threading
 import time
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence, Set
 from dataclasses import dataclass
@@ -209,6 +207,18 @@ from memory.graph.sync_pkg._core_models import SnapshotSelection as SnapshotSele
 from memory.graph.sync_pkg._core_models import StorageSurfaceSpec as StorageSurfaceSpec
 from memory.graph.sync_pkg._core_models import SyncApplyOptions as SyncApplyOptions
 from memory.graph.sync_pkg._core_models import _ShapeNormalizer as _ShapeNormalizer
+from memory.graph.sync_pkg.analysis_source import (
+    ANALYSIS_SOURCE_READ_TIMEOUT_SECONDS as ANALYSIS_SOURCE_READ_TIMEOUT_SECONDS,
+)
+from memory.graph.sync_pkg.analysis_source import (
+    _analysis_read_source_text as _analysis_read_source_text,
+)
+from memory.graph.sync_pkg.analysis_source import (
+    _build_surface_relation_indexes as _build_surface_relation_indexes,
+)
+from memory.graph.sync_pkg.analysis_source import (
+    _read_analysis_source_text as _read_analysis_source_text,
+)
 from memory.graph.sync_pkg.apply_anchors import _anchor_count_rows as _anchor_count_rows
 from memory.graph.sync_pkg.apply_anchors import (
     _ensure_targeted_apply_prerequisites as _ensure_targeted_apply_prerequisites,
@@ -592,7 +602,6 @@ if str(DEFAULT_ROOT) not in sys.path:
 DEFAULT_BATCH_SIZE = 20
 DEFAULT_MEMORY_MAPPING_PATH = "src/memory/graph/mappings.yaml"
 LEGACY_MEMORY_MAPPING_PATH = "configs/quality/neo4j_memory_mapping.yaml"
-ANALYSIS_SOURCE_READ_TIMEOUT_SECONDS = 2.0
 INIT_PY = "__init__.py"
 MAIN_PY = "__main__.py"
 GITHUB_WORKFLOWS_PREFIX = f"{GITHUB_DIR}/workflows/"
