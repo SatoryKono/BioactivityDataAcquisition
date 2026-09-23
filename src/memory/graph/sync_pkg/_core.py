@@ -267,6 +267,12 @@ from memory.graph.sync_pkg.add_entity_pipeline_surfaces import (
 from memory.graph.sync_pkg.add_entity_pipeline_surfaces import (
     _add_entity_pipeline_surfaces as _add_entity_pipeline_surfaces,
 )
+from memory.graph.sync_pkg.add_policy_surface import (
+    _add_policy_artifact as _add_policy_artifact,
+)
+from memory.graph.sync_pkg.add_policy_surface import (
+    _add_policy_surface as _add_policy_surface,
+)
 from memory.graph.sync_pkg.add_port_facade_surface import (
     _add_port_facade_surface as _add_port_facade_surface,
 )
@@ -2616,41 +2622,6 @@ def _policy_surface_context(
     return PolicySurfaceContext(
         policy=_add_policy_surface(snapshot, policy_payload, today),
         artifact=_add_policy_artifact(snapshot, policy_payload, today),
-    )
-
-
-def _add_policy_surface(
-    snapshot: GraphSnapshot,
-    policy_payload: dict[str, object],
-    today: str,
-) -> NodeKey:
-    return snapshot.add_node(
-        "policy_surface",
-        str(policy_payload["name"]),
-        summary=str(policy_payload["summary"]),
-        source_path=str(policy_payload["source_path"]),
-        source_kind="repo_policy_surface",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-
-
-def _add_policy_artifact(
-    snapshot: GraphSnapshot,
-    policy_payload: dict[str, object],
-    today: str,
-) -> NodeKey:
-    source_path = str(policy_payload["source_path"])
-    return snapshot.add_node(
-        str(policy_payload["artifact_label"]),
-        source_path,
-        summary=str(policy_payload["summary"]),
-        source_path=source_path,
-        source_kind="policy_artifact",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
     )
 
 
