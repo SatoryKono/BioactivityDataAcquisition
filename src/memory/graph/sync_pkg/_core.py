@@ -1963,6 +1963,9 @@ from memory.graph.sync_pkg.policysurfacecontext import (
 from memory.graph.sync_pkg.policysurfacecontext import (
     _policy_surface_context as _policy_surface_context,
 )
+from memory.graph.sync_pkg.populate_workflow_job_surface import (
+    _populate_workflow_job_surface as _populate_workflow_job_surface,
+)
 from memory.graph.sync_pkg.port_surfaces import (
     PORTS_MODULE_PREFIX as PORTS_MODULE_PREFIX,
 )
@@ -2940,35 +2943,6 @@ def _process_workflow_job(
         matrix_variants=matrix_variants,
         secret_usage_hints=secret_usage_hints,
     )
-
-
-def _populate_workflow_job_surface(
-    snapshot: GraphSnapshot,
-    *,
-    workflow_nodes: dict[str, NodeKey],
-    workflow_name_by_relative_path: dict[str, str],
-    job_context: WorkflowJobContext,
-    job_payload: dict[str, object],
-    matrix_variants: tuple[dict[str, str], ...],
-    secret_usage_hints: tuple[str, ...],
-) -> None:
-    _link_workflow_job_reusable_target(
-        snapshot,
-        workflow_nodes,
-        workflow_name_by_relative_path,
-        job_context,
-        job_payload.get("uses"),
-    )
-    _add_secret_requirements(
-        snapshot,
-        job_context.job,
-        secret_usage_hints,
-        relative_path=job_context.relative_path,
-        today=job_context.today,
-    )
-    _add_job_matrix_variants(snapshot, job_context, matrix_variants)
-    _add_job_outputs(snapshot, job_context, job_payload.get("outputs"))
-    _process_workflow_steps(snapshot, job_context, job_payload.get("steps"))
 
 
 def _add_pipeline_test_edges(
