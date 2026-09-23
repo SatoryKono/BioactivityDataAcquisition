@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Bounded pipeline smoke runbook:** sequential `--limit 100` launch of all
+  22 registered entity pipelines and five composite packs, with CSV
+  preconditions, wave order, exit-code routing, and run-report verification
+  (`docs/05-operations/runbooks/bounded-pipeline-smoke.md`).
+
 - **FK reconciliation completeness and mutation identity (#10424, #10425):**
   `ForeignKeyReconciliationRequest.reference_completeness` defaults to
   `unproven` and requires bound evidence (`reference_identity` +

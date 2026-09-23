@@ -19,6 +19,8 @@ import sys
 from pathlib import Path
 from types import ModuleType
 
+from tests.architecture._platform_skip_support import mounted_worktree_skip_reason
+
 
 pytestmark = pytest.mark.architecture
 
@@ -156,6 +158,9 @@ def test_fix_file_rejects_parent_traversal_relative_paths(
 
 @pytest.mark.slow
 def test_repo_regression_has_no_thick_arrows_in_class_sequence_sources() -> None:
+    skip_reason = mounted_worktree_skip_reason()
+    if skip_reason is not None:
+        pytest.skip(skip_reason)
     module = _load_module()
     repo_root = Path(__file__).resolve().parents[2]
     scope = repo_root / "docs" / "02-architecture" / "diagrams"
