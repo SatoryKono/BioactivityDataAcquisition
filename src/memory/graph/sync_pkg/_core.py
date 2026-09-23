@@ -1789,6 +1789,15 @@ from memory.graph.sync_pkg.pipeline_source_config_artifact import (
 from memory.graph.sync_pkg.pipeline_source_config_artifact import (
     _pipeline_source_config_artifact as _pipeline_source_config_artifact,
 )
+from memory.graph.sync_pkg.pipeline_test_ownership_path import (
+    _pipeline_test_mapping_config as _pipeline_test_mapping_config,
+)
+from memory.graph.sync_pkg.pipeline_test_ownership_path import (
+    _pipeline_test_ownership as _pipeline_test_ownership,
+)
+from memory.graph.sync_pkg.pipeline_test_ownership_path import (
+    _pipeline_test_ownership_path as _pipeline_test_ownership_path,
+)
 from memory.graph.sync_pkg.policy_governance_targets import (
     _policy_governance_targets as _policy_governance_targets,
 )
@@ -3854,27 +3863,6 @@ def _pipeline_test_payload(
         return None, None
     payload = _read_yaml(ownership_path)
     return payload, _pipeline_test_ownership(payload)
-
-
-def _pipeline_test_ownership_path(root: Path, ownership_config: str) -> Path:
-    return root / ownership_config
-
-
-def _pipeline_test_ownership(payload: dict[str, object]) -> dict[object, object] | None:
-    ownership = payload.get("entity_test_ownership")
-    return ownership if isinstance(ownership, dict) else None
-
-
-def _pipeline_test_mapping_config(
-    tests_mapping: object,
-) -> tuple[str, str, bool]:
-    if not isinstance(tests_mapping, dict):
-        return "TESTED_BY", TEST_MATRIX_CONFIG_PATH, True
-    return (
-        str(tests_mapping.get("relation_type", "TESTED_BY")),
-        str(tests_mapping.get("ownership_config", TEST_MATRIX_CONFIG_PATH)),
-        bool(tests_mapping.get("provider_regression_suites", True)),
-    )
 
 
 def _pipeline_test_indexes(
