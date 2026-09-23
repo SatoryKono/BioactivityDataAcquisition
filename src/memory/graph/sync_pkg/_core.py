@@ -2058,6 +2058,12 @@ from memory.graph.sync_pkg.snapshotrelationindex import (
 from memory.graph.sync_pkg.snapshotrelationindex import (
     _SnapshotRelationIndex as _SnapshotRelationIndex,
 )
+from memory.graph.sync_pkg.sorted_governance_targets import (
+    _governance_policy_specs as _governance_policy_specs,
+)
+from memory.graph.sync_pkg.sorted_governance_targets import (
+    _sorted_governance_targets as _sorted_governance_targets,
+)
 from memory.graph.sync_pkg.source_backed_path_kind import (
     _link_source_backed_directory_structure as _link_source_backed_directory_structure,
 )
@@ -5524,41 +5530,6 @@ def _governance_policy_targets(
             sorted_contracts=sorted_contracts,
         )
     )
-
-
-def _sorted_governance_targets(
-    *,
-    port_nodes: set[NodeKey],
-    adapter_nodes: dict[str, NodeKey],
-    pipeline_nodes: dict[str, NodeKey],
-    contract_nodes: dict[str, NodeKey],
-) -> tuple[list[NodeKey], list[NodeKey], list[NodeKey], list[NodeKey]]:
-    return (
-        sorted(port_nodes, key=lambda node: node.name),
-        sorted(adapter_nodes.values(), key=lambda node: node.name),
-        sorted(pipeline_nodes.values(), key=lambda node: node.name),
-        sorted(contract_nodes.values(), key=lambda node: node.name),
-    )
-
-
-def _governance_policy_specs(
-    snapshot: GraphSnapshot,
-    *,
-    sorted_ports: list[NodeKey],
-    sorted_adapters: list[NodeKey],
-    sorted_pipelines: list[NodeKey],
-    sorted_contracts: list[NodeKey],
-) -> list[tuple[NodeKey, tuple[Sequence[NodeKey], ...]]]:
-    return [
-        _governance_policy_spec(*policy)
-        for policy in _governance_policy_definitions(
-            snapshot,
-            sorted_ports=sorted_ports,
-            sorted_adapters=sorted_adapters,
-            sorted_pipelines=sorted_pipelines,
-            sorted_contracts=sorted_contracts,
-        )
-    ]
 
 
 def _add_pipeline_operational_edges(
