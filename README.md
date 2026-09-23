@@ -153,6 +153,7 @@ fallback when `uv` is unavailable.
 - **Python runtime baseline: 3.12** for local development, onboarding, and CI defaults.
 - **Supported versions: Python 3.12 and 3.13** (see `pyproject.toml` classifiers).
 - The **source of truth** for Python runtime compatibility is `pyproject.toml` (`requires-python` and classifiers).
+- **Local default: 3.13** via `.python-version` (uv-managed) and `setup_env_windows.ps1` / `setup_env_wsl.sh` (`--python 3.13`). CI validates both 3.12 (main matrix) and 3.13 (coverage shards); 3.12 remains the minimum supported version.
 - Any docs or scripts mentioning older Python versions (3.10/3.11) should be treated as deprecated and updated before use.
 
 ### Installation
@@ -173,6 +174,7 @@ Notes:
 - The command above is the **minimal local-dev** extra-set (`dev,tests,tracing`). It is not the same as `make install` (`dev,tests,tests_full,export`) or the Testing section (`dev,tests,tests_full,tracing`). Add `tests_full` before architecture / benchmark / observability suites; `export` is only required for export tooling; `docs` is only required for MkDocs/site builds.
 - Documentation site commands require the separate `docs` extra: `uv sync --extra dev --extra tests --extra tracing --extra docs` or `pip install -e ".[dev,tests,tracing,docs]"`.
 - `uv run python -m scripts.ops setup-plugins` configures local pytest and pre-commit tooling.
+- Native Windows PowerShell: `python -m scripts.ops` shell commands (e.g. `setup-plugins`) require POSIX bash and exit with guidance instead of running. Use `.\scripts\engineering\dev\setup_env_windows.ps1` for the venv, then install hooks manually with `uv run python -m pre_commit install --hook-type pre-commit --hook-type pre-push --hook-type commit-msg` (see Testing).
 - Hook-only reinstall remains available through `bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only`.
 - If you use Codex, GitHub Copilot, or Devin MCP, run `uv run python -m scripts.engineering.dev setup-mcp` after install. If you activated the OS-appropriate environment instead of using `uv`, `python -m scripts.engineering.dev setup-mcp` is also valid.
 - For Devin CLI `v3000.3+`, run `make devin-check` once and `make devin` to

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import importlib
 import inspect
+import os
 import subprocess
 import sys
 from collections.abc import Mapping
@@ -103,9 +104,28 @@ def run_command(
     elif spec.runner == "shell":
         if base_dir is None:
             raise ValueError("base_dir is required for shell command specs")
+        script_path = (base_dir / spec.target).resolve()
+        if os.name == "nt":
+            # #10641: native Windows bash (WSL bash.exe) mangles
+            # Windows paths (backslashes become escapes) and cannot run
+            # these POSIX scripts against a Windows checkout. Fail closed
+            # with actionable guidance instead of a cryptic bash error.
+            print(
+                f"Shell script '{spec.target}' requires a POSIX bash "
+                "(Git Bash or WSL); refusing to run it under native Windows.",
+                file=sys.stderr,
+            )
+            print(
+                "On native Windows PowerShell use the OS-specific wrapper "
+                "documented in README.md (Mixed Windows + WSL Development), "
+                "e.g. .\\scripts\\engineering\\dev\\setup_env_windows.ps1, "
+                "or run this command from Git Bash/WSL.",
+                file=sys.stderr,
+            )
+            return 2
         command = [
             "bash",
-            str((base_dir / spec.target).resolve()),
+            str(script_path),
             *spec.prefix_args,
             *argv,
         ]

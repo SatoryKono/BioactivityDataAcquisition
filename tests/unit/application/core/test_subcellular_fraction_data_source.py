@@ -266,10 +266,7 @@ class TestSubcellularFractionDataSourceFetch:
 
         assert len(records) == 1
         assert source.fetch_calls[-1]["entity_type"] == "assay"
-        assert (
-            source.fetch_calls[-1]["limit"]
-            == 1 * wrapper.ASSAY_LIMIT_MULTIPLIER + 1
-        )
+        assert source.fetch_calls[-1]["limit"] == 1 * wrapper.ASSAY_LIMIT_MULTIPLIER + 1
 
     @pytest.mark.asyncio
     async def test_data_source_fetch__applies_offset_before_limit(self) -> None:
@@ -744,8 +741,7 @@ class TestSubcellularFractionFilterable:
 
         assert source.fallback_calls[-1]["entity_type"] == "assay"
         assert (
-            source.fallback_calls[-1]["limit"]
-            == 1 * wrapper.ASSAY_LIMIT_MULTIPLIER + 1
+            source.fallback_calls[-1]["limit"] == 1 * wrapper.ASSAY_LIMIT_MULTIPLIER + 1
         )
 
     @pytest.mark.asyncio
