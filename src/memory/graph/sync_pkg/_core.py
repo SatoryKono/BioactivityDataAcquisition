@@ -7,7 +7,7 @@ import os
 import re
 import shutil as shutil  # re-exported via __all__
 import sys
-from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence, Set
+from collections.abc import Callable, Iterable, Mapping, Sequence, Set
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -1452,6 +1452,12 @@ from memory.graph.sync_pkg.mapping_io import (
 )
 from memory.graph.sync_pkg.mapping_io import _read_json as _read_json
 from memory.graph.sync_pkg.mapping_io import _read_yaml as _read_yaml
+from memory.graph.sync_pkg.markdown_headings import (
+    _markdown_headings as _markdown_headings,
+)
+from memory.graph.sync_pkg.markdown_headings import (
+    _resolve_docs_reference_target as _resolve_docs_reference_target,
+)
 from memory.graph.sync_pkg.merge_field_validation_item import (
     _add_schema_field_surface as _add_schema_field_surface,
 )
@@ -3546,46 +3552,6 @@ def _markdown_heading_context(text: str, offset: int) -> tuple[str | None, str |
         current_title = title
         current_anchor = _heading_anchor_slug(current_title)
     return current_title, current_anchor
-
-
-def _markdown_headings(text: str) -> Iterator[tuple[int, str]]:
-    offset = 0
-    for raw_line in text.splitlines(keepends=True):
-        line = raw_line.rstrip("\r\n")
-        stripped = line.lstrip(" \t")
-        leading_indent = len(line) - len(stripped)
-        if leading_indent > 3 or not stripped.startswith("#"):
-            offset += len(raw_line)
-            continue
-
-        level = len(stripped) - len(stripped.lstrip("#"))
-        if level < 1 or level > 6:
-            offset += len(raw_line)
-            continue
-
-        if len(stripped) <= level or stripped[level] not in {" ", "\t"}:
-            offset += len(raw_line)
-            continue
-
-        title = stripped[level:].strip()
-        if title:
-            yield offset, title
-        offset += len(raw_line)
-
-
-def _resolve_docs_reference_target(
-    snapshot: GraphSnapshot,
-    ref: str,
-) -> tuple[NodeKey | None, str, str]:
-    for candidate in _docs_reference_exact_candidates(ref):
-        if candidate in snapshot.nodes:
-            return candidate, "direct_path", "high"
-
-    for node in tuple(snapshot.nodes.values()):
-        source_path = node.properties.get("source_path")
-        if isinstance(source_path, str) and source_path == ref:
-            return node.key, "source_path_match", "medium"
-    return None, "unresolved", "low"
 
 
 def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
