@@ -276,6 +276,12 @@ from memory.graph.sync_pkg.add_repo_zone_file_surface import (
 from memory.graph.sync_pkg.add_repo_zone_file_surface import (
     _add_repo_zone_file_surface as _add_repo_zone_file_surface,
 )
+from memory.graph.sync_pkg.add_runtime_evidence_surface import (
+    _add_runtime_evidence_surface as _add_runtime_evidence_surface,
+)
+from memory.graph.sync_pkg.add_runtime_evidence_surface import (
+    _link_run_instance_surface as _link_run_instance_surface,
+)
 from memory.graph.sync_pkg.add_secret_requirements import (
     _add_secret_requirements as _add_secret_requirements,
 )
@@ -3552,47 +3558,6 @@ def _add_control_plane_runtime_evidence(
         _add_runtime_evidence_surface(snapshot, project, today, spec)
 
     _add_control_plane_run_instance_surfaces(snapshot, root, project, today)
-
-
-def _add_runtime_evidence_surface(
-    snapshot: GraphSnapshot,
-    project: NodeKey,
-    today: str,
-    spec: dict[str, object],
-) -> None:
-    evidence_name = str(spec["name"])
-    surface = snapshot.add_node(
-        "runtime_evidence_surface",
-        evidence_name,
-        summary=str(spec["summary"]),
-        source_path=str(spec["source_path"]),
-        source_kind="runtime_evidence_surface",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    snapshot.add_relation(
-        project, "HAS_RUNTIME_EVIDENCE", surface, provenance="runtime_evidence"
-    )
-    _link_runtime_evidence_support(snapshot, surface, spec)
-    _add_runtime_evidence_storage_refs(
-        snapshot,
-        project,
-        surface,
-        evidence_name=evidence_name,
-        storage_refs=spec["storage_refs"],
-        today=today,
-    )
-
-
-def _link_run_instance_surface(
-    snapshot: GraphSnapshot,
-    surface: NodeKey,
-    spec: dict[str, object],
-) -> None:
-    _link_run_instance_dependencies(snapshot, surface, spec)
-    _link_run_instance_documents(snapshot, surface, spec)
-    _link_run_instance_artifacts(snapshot, surface, spec)
 
 
 def _link_runtime_state_surface(
