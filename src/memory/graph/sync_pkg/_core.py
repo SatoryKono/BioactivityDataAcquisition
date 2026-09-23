@@ -2696,6 +2696,12 @@ from memory.graph.sync_pkg.workflow_family_rules import (
 from memory.graph.sync_pkg.workflow_family_rules import (
     _workflow_trigger_names as _workflow_trigger_names,
 )
+from memory.graph.sync_pkg.workflow_graph_files import (
+    _process_workflow_file as _process_workflow_file,
+)
+from memory.graph.sync_pkg.workflow_graph_files import (
+    _workflow_graph_files as _workflow_graph_files,
+)
 from memory.graph.sync_pkg.workflow_job_dependency_ids import (
     _workflow_job_dependency_ids as _workflow_job_dependency_ids,
 )
@@ -2895,45 +2901,6 @@ def _add_ci_workflow_graph(
             workflow_name_by_relative_path=workflow_name_by_relative_path,
             job_nodes=job_nodes,
         )
-
-
-def _workflow_graph_files(workflows_root: Path) -> list[Path]:
-    return sorted(workflows_root.glob("*.y*ml"))
-
-
-def _process_workflow_file(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    workflow_path: Path,
-    *,
-    workflow_nodes: dict[str, NodeKey],
-    workflow_name_by_relative_path: dict[str, str],
-    job_nodes: dict[tuple[str, str], NodeKey],
-) -> None:
-    workflow_name, payload, context, workflow_call_entrypoint = (
-        _add_workflow_file_surface(
-            snapshot,
-            root,
-            project,
-            today,
-            workflow_path,
-        )
-    )
-    workflow_nodes[workflow_name] = context.workflow
-    jobs = payload.get("jobs")
-    if not isinstance(jobs, dict):
-        return
-    _add_workflow_jobs(
-        snapshot,
-        context=context,
-        jobs=jobs,
-        workflow_nodes=workflow_nodes,
-        workflow_name_by_relative_path=workflow_name_by_relative_path,
-        workflow_call_entrypoint=workflow_call_entrypoint,
-        job_nodes=job_nodes,
-    )
 
 
 def _add_pipeline_test_edges(
