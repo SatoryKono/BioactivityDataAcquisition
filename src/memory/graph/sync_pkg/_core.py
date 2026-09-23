@@ -1350,6 +1350,12 @@ from memory.graph.sync_pkg.entity_pipeline_identity import (
 from memory.graph.sync_pkg.entity_pipeline_identity import (
     _link_entity_pipeline_dependencies as _link_entity_pipeline_dependencies,
 )
+from memory.graph.sync_pkg.entity_pipeline_node_identity import (
+    _entity_pipeline_node_identity as _entity_pipeline_node_identity,
+)
+from memory.graph.sync_pkg.entity_pipeline_node_identity import (
+    _provider_pipeline_test_index as _provider_pipeline_test_index,
+)
 from memory.graph.sync_pkg.entity_storage_context import (
     _entity_storage_context as _entity_storage_context,
 )
@@ -3042,22 +3048,6 @@ def _entity_pipeline_test_index(
         for identity in [_entity_pipeline_node_identity(node)]
         if identity is not None
     }
-
-
-def _entity_pipeline_node_identity(node: GraphNode) -> tuple[str, str] | None:
-    if (
-        node.key.label != "pipeline_surface"
-        or node.properties.get("pipeline_kind") != "entity"
-    ):
-        return None
-    return str(node.properties.get("provider")), str(node.properties.get("entity"))
-
-
-def _provider_pipeline_test_index(snapshot: GraphSnapshot) -> dict[str, list[NodeKey]]:
-    provider_pipeline_index: dict[str, list[NodeKey]] = {}
-    for provider, node_key in _provider_pipeline_index_entries(snapshot):
-        provider_pipeline_index.setdefault(provider, []).append(node_key)
-    return provider_pipeline_index
 
 
 if __name__ == "__main__":
