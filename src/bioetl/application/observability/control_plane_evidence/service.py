@@ -14,9 +14,7 @@ from bioetl.application.observability.control_plane_evidence.checks import (
     component_checks,
 )
 from bioetl.application.observability.control_plane_evidence.failure_reasons import (
-    FAILURE_REASON_CATEGORIES,
-    build_failure_reason_rows,
-    build_unknown_failure_reason_rows,
+    build_failure_reasons_payload,
 )
 from bioetl.application.observability.control_plane_evidence.lineage import (
     build_lineage_checks,
@@ -336,54 +334,7 @@ class ControlPlaneEvidenceService:
 
     def failure_reasons(self, *, scope: EvidenceScopeContext) -> dict[str, object]:
         """Return only fixed-category failure counts; omit raw errors/messages."""
-        if scope.manifest is None:
-            scope_check = unresolved_scope_check(scope.resolved_via)
-            payload = service_payload(
-                endpoint="failure-reasons",
-                scope=scope,
-                checks=(scope_check,),
-                additional_data={
-                    "categories": list(FAILURE_REASON_CATEGORIES),
-                    "total_failure_count": None,
-                },
-            )
-            payload["rows"] = build_unknown_failure_reason_rows(scope_check.reason)
-            return payload
-        if self.ledger_port is None:
-            checks = (
-                EvidenceCheckResult(
-                    "ledger",
-                    "UNKNOWN",
-                    "run_ledger_unavailable",
-                    "The run ledger is not configured for failure aggregation.",
-                ),
-            )
-            rows = build_unknown_failure_reason_rows("run_ledger_unavailable")
-            total = None
-        else:
-            rows, total = build_failure_reason_rows(
-                ledger_entries(self.ledger_port, scope.manifest)
-            )
-            checks = (
-                EvidenceCheckResult(
-                    "classification",
-                    "OK",
-                    "failure_reasons_bounded",
-                    "Failed ledger events were projected to the fixed category set.",
-                ),
-            )
-        payload = service_payload(
-            endpoint="failure-reasons",
-            scope=scope,
-            checks=checks,
-            additional_data={
-                "categories": list(FAILURE_REASON_CATEGORIES),
-                "total_failure_count": total,
-            },
-            ledger_entries=ledger_entries(self.ledger_port, scope.manifest),
-        )
-        payload["rows"] = rows
-        return payload
+        return build_failure_reasons_payload(scope=scope, ledger_port=self.ledger_port)
 
 
 __all__ = [

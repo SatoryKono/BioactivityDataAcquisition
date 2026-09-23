@@ -92,7 +92,7 @@ def _journal_and_citation_fields(host: Any, rec: GoldRecord) -> GoldRecord:
 
 
 def _subject_and_type_fields(
-    host: Any,
+    host: Any,  # Any: transformer mixin host
     rec: GoldRecord,
     *,
     raw_type: str | None,

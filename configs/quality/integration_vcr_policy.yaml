@@ -234,10 +234,10 @@ tracked_suite_inventory:
       - tests/integration/test_grafana_dashboard_provisioning.py
       - tests/integration/test_grafana_dashboard_query_governance.py
       - tests/integration/test_grafana_datasource_provisioning.py
-      - tests/integration/test_grafana_evidence_readability.py
       - tests/integration/test_grafana_design_system_policy.py
       - tests/integration/test_grafana_ds2_gates.py
       - tests/integration/test_grafana_empty_state_contracts.py
+      - tests/integration/test_grafana_evidence_readability.py
       - tests/integration/test_grafana_failed_runs_window.py
       - tests/integration/test_grafana_layout_and_metadata.py
       - tests/integration/test_grafana_navigation_matrix.py
@@ -344,11 +344,11 @@ tracked_suite_inventory:
     provider_runs:
       chembl_activity: tests/e2e/test_chembl_activity_e2e.py
       chembl_assay: tests/e2e/test_chembl_assay_e2e.py
+      chembl_classification_upstream: tests/e2e/test_chembl_classification_upstream_e2e.py
       chembl_molecule: tests/e2e/test_chembl_molecule_e2e.py
       chembl_publication: tests/e2e/test_chembl_publication_e2e.py
       chembl_publication_term: tests/e2e/test_chembl_publication_term_e2e.py
       chembl_target: tests/e2e/test_chembl_target_e2e.py
-      chembl_classification_upstream: tests/e2e/test_chembl_classification_upstream_e2e.py
       crossref_publication: tests/e2e/test_crossref_publication_e2e.py
       openalex_publication: tests/e2e/test_openalex_publication_e2e.py
       pubchem_compound: tests/e2e/test_pubchem_compound_e2e.py

@@ -4,6 +4,8 @@ from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import Mock
 
+FIXED_NOW = datetime(2026, 9, 23, tzinfo=UTC)
+
 import pytest
 
 from bioetl.application.observability.control_plane_evidence import (
@@ -33,9 +35,7 @@ def test_unsuccessful_discovery_candidate_does_not_read_artifacts(event, monkeyp
         manifest=manifest,
     )
     service = ControlPlaneEvidenceService(ledger_port=ledger)
-    assert (
-        service.successful_run_trust_summary(scope=scope, now=datetime.now(UTC)) is None
-    )
+    assert service.successful_run_trust_summary(scope=scope, now=FIXED_NOW) is None
     ledger.list_entries.assert_called_once_with(manifest.manifest_id)
     component.assert_not_called()
 
@@ -71,7 +71,7 @@ def test_success_still_requires_all_components_and_one_ledger_read(monkeypatch):
     )
     payload = ControlPlaneEvidenceService(
         ledger_port=ledger
-    ).successful_run_trust_summary(scope=scope, now=datetime.now(UTC))
+    ).successful_run_trust_summary(scope=scope, now=FIXED_NOW)
     assert payload["processing_status"] == "success"
     assert payload["trust_status"] == "OK"
     ledger.list_entries.assert_called_once_with(manifest.manifest_id)
