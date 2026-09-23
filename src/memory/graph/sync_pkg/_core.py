@@ -534,6 +534,12 @@ from memory.graph.sync_pkg.alert_targets import _sorted_node_keys as _sorted_nod
 from memory.graph.sync_pkg.alert_targets import (
     _sorted_unique_node_keys as _sorted_unique_node_keys,
 )
+from memory.graph.sync_pkg.alerttargetselection import (
+    AlertTargetSelection as AlertTargetSelection,
+)
+from memory.graph.sync_pkg.alerttargetselection import (
+    ComplexityCandidateContext as ComplexityCandidateContext,
+)
 from memory.graph.sync_pkg.analysis_source import (
     ANALYSIS_SOURCE_READ_TIMEOUT_SECONDS as ANALYSIS_SOURCE_READ_TIMEOUT_SECONDS,
 )
@@ -4164,26 +4170,6 @@ def _link_alert_targets(
         dashboard_metrics,
         memory_mapping,
     )
-
-
-@dataclass(frozen=True)
-class AlertTargetSelection:
-    selected_pipelines: tuple[NodeKey, ...]
-    selected_providers: tuple[NodeKey, ...]
-    selected_contracts: tuple[NodeKey, ...]
-
-
-@dataclass(frozen=True)
-class ComplexityCandidateContext:
-    anchors: SurfaceAnchorSets
-    metrics: SurfaceComplexityMetrics
-    runtime_anchors: tuple[NodeKey, ...]
-    config_anchors: tuple[NodeKey, ...]
-    doc_anchors: tuple[NodeKey, ...]
-    test_anchors: tuple[NodeKey, ...]
-    blocked_by_current_cycle: bool
-    simplification_score: float
-    classification: str
 
 
 def _alert_target_inputs(rule: dict[str, object]) -> tuple[str, set[str]]:
