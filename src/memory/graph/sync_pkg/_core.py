@@ -1153,6 +1153,12 @@ from memory.graph.sync_pkg.file_structure import (
 from memory.graph.sync_pkg.file_structure import (
     _file_structure_config as _file_structure_config,
 )
+from memory.graph.sync_pkg.file_structure_zone_roots import (
+    _add_file_structure_zones as _add_file_structure_zones,
+)
+from memory.graph.sync_pkg.file_structure_zone_roots import (
+    _file_structure_zone_roots as _file_structure_zone_roots,
+)
 from memory.graph.sync_pkg.git_history import (
     _git_chunk_commit_ages as _git_chunk_commit_ages,
 )
@@ -2627,35 +2633,6 @@ def _materialize_file_structure(
     _add_file_structure_zones(snapshot, root, project, today, zone_roots, config)
     _link_source_backed_file_structure(snapshot, root, today, zone_roots, config)
     _link_relation_backed_file_structure(snapshot, root, config)
-
-
-def _file_structure_zone_roots(config: dict[str, object]) -> dict[str, tuple[str, ...]]:
-    raw_zones = config.get("repo_zones")
-    if not isinstance(raw_zones, dict):
-        return {}
-    return {
-        str(name): tuple(_as_string_list(paths)) for name, paths in raw_zones.items()
-    }
-
-
-def _add_file_structure_zones(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    zone_roots: dict[str, tuple[str, ...]],
-    config: dict[str, object],
-) -> None:
-    for zone_name, relative_roots in zone_roots.items():
-        _add_file_structure_zone(
-            snapshot,
-            root,
-            project,
-            today,
-            zone_name,
-            relative_roots,
-            config,
-        )
 
 
 def _add_entity_layer_field_nodes(
