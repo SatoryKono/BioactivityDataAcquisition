@@ -320,7 +320,6 @@ class HTTPClientRetryMixin:
         retries_used: int,
         span: SpanLike,
     ) -> _RequestAttemptOutcome | None:
-        """Process retryable vs terminal exception paths for one request attempt."""
         return await handle_request_exception(
             exc,
             method=method,
