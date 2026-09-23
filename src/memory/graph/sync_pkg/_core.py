@@ -1126,6 +1126,12 @@ from memory.graph.sync_pkg.entity_storage_promotion_pairs import (
 from memory.graph.sync_pkg.entity_storage_promotion_pairs import (
     _link_storage_layer_promotion as _link_storage_layer_promotion,
 )
+from memory.graph.sync_pkg.existing_snapshot_nodes import (
+    _existing_snapshot_nodes as _existing_snapshot_nodes,
+)
+from memory.graph.sync_pkg.existing_snapshot_nodes import (
+    _selected_alert_dashboards as _selected_alert_dashboards,
+)
 from memory.graph.sync_pkg.fast_analysis_snapshot_counts import (
     _active_critical_names as _active_critical_names,
 )
@@ -4962,31 +4968,6 @@ def _link_alert_observer_dashboards(
         snapshot.add_relation(
             alert, "OBSERVED_BY", dashboard, provenance="impact_alerts"
         )
-
-
-def _existing_snapshot_nodes(
-    snapshot: GraphSnapshot,
-    nodes: Iterable[NodeKey],
-) -> tuple[NodeKey, ...]:
-    return tuple(node for node in nodes if node in snapshot.nodes)
-
-
-def _selected_alert_dashboards(
-    alert_name: str,
-    group_name: str,
-    expr: str,
-    dashboard_metrics: Mapping[NodeKey, Set[str]],
-    memory_mapping: dict[str, object],
-) -> tuple[NodeKey, ...]:
-    return tuple(
-        _select_alert_dashboards(
-            alert_name,
-            group_name,
-            expr,
-            dashboard_metrics,
-            memory_mapping,
-        )
-    )
 
 
 def _link_alert_runbook(
