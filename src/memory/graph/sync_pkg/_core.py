@@ -2178,6 +2178,12 @@ from memory.graph.sync_pkg.score_family import (
 from memory.graph.sync_pkg.score_family import _presence_score as _presence_score
 from memory.graph.sync_pkg.score_family import _semantic_tags as _semantic_tags
 from memory.graph.sync_pkg.score_family import _threshold_score as _threshold_score
+from memory.graph.sync_pkg.selected_alert_target_groups import (
+    _link_alert_runbook as _link_alert_runbook,
+)
+from memory.graph.sync_pkg.selected_alert_target_groups import (
+    _selected_alert_target_groups as _selected_alert_target_groups,
+)
 from memory.graph.sync_pkg.shard_filters import DOCS_DRIFT_FILTER as DOCS_DRIFT_FILTER
 from memory.graph.sync_pkg.shard_filters import (
     RUNTIME_EVIDENCE_LAYER_FILTER as RUNTIME_EVIDENCE_LAYER_FILTER,
@@ -4058,35 +4064,6 @@ def _link_selected_alert_targets(
 ) -> None:
     for target_group in _selected_alert_target_groups(selection):
         _link_alert_target_group(snapshot, alert, target_group)
-
-
-def _selected_alert_target_groups(
-    selection: AlertTargetSelection,
-) -> tuple[tuple[NodeKey, ...], ...]:
-    return tuple(
-        targets
-        for targets in (
-            selection.selected_pipelines,
-            selection.selected_providers,
-            selection.selected_contracts,
-        )
-        if targets
-    )
-
-
-def _link_alert_runbook(
-    snapshot: GraphSnapshot,
-    root: Path,
-    alert: NodeKey,
-    alert_name: str,
-    annotations: dict[str, object],
-    today: str,
-) -> None:
-    runbook_context = _alert_runbook_context(root, annotations)
-    if runbook_context is None:
-        return
-    doc = _add_alert_runbook_doc(snapshot, alert_name, runbook_context.runbook, today)
-    snapshot.add_relation(alert, "DESCRIBED_IN", doc, provenance="impact_alerts")
 
 
 if __name__ == "__main__":
