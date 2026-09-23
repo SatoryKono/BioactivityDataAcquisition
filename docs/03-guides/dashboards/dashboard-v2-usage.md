@@ -674,7 +674,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
   raw lagged-entity evidence, not a runtime alert-condition recording rule.
 
 - Runtime escalation triage path:
-  `Monitor Pipeline Alert Conditions` -> `pipeline-failure-critical.md`,
+  `Monitor Pipeline Alerts` -> `pipeline-failure-critical.md`,
   `Inspect DQ Alert Conditions` / `Inspect Freshness Lagged Entities >24h` -> `pipeline-failure-dq.md`,
   `Inspect Control-plane Alert Conditions` -> `run-manifest-inspection.md`,
   `Inspect GLOBAL Provider Alert Conditions` -> `incident-response.md`,
@@ -709,7 +709,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
   quarantine pressure, spike = incident. Next action: `Top Silver Reject
   Reasons` + `bioetl quarantine inspect` (CLI).
 - `runtime.id=16 (Monitor Active Blocker Count)`: CURRENT 15m count chip supporting `9101`; non-zero = active blocker count; `UNKNOWN` means missing current runtime status/blocker telemetry and must not be treated as OK. Next action: runtime blockers table + culprit stage panels, затем file logs under `reports/logs/` при необходимости (no Grafana Loki/Tempo UI).
-- `runtime.id=9102 (Monitor Metrics Coverage)`: three neutral evidence fields
+- `runtime.id=9102 (Monitor Coverage)`: three neutral evidence fields
   separate Endpoint (`SCRAPING` / `UNAVAILABLE`), Baseline (`PRESENT` /
   `RULE/SERIES GAP` / `RULE+SERIES GAP`) and Rule age in seconds. Missing
   evidence is UNKNOWN. Baseline PRESENT checks only the existing ten-minute

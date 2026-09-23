@@ -247,13 +247,13 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-runtime.json | 9991 | Start Pipeline Triage |
 | bioetl-runtime.json | 254 | Review Escalation Paths |
 | bioetl-runtime.json | 2541 | Review Runtime Escalation |
-| bioetl-runtime.json | 230 | Monitor Pipeline Alert Conditions |
+| bioetl-runtime.json | 230 | Monitor Pipeline Alerts |
 | bioetl-runtime.json | 236 | Monitor No-Records Runs |
-| bioetl-runtime.json | 21 | Monitor Memory Pressure Active |
+| bioetl-runtime.json | 21 | Monitor Memory Pressure |
 | bioetl-runtime.json | 2542 | Review Cross-Domain Handoffs |
 | bioetl-runtime.json | 4 | Inspect DQ Alert Conditions |
-| bioetl-runtime.json | 5 | Inspect Control Plane Alert Conditions |
-| bioetl-runtime.json | 6 | Inspect Provider Alert Conditions |
+| bioetl-runtime.json | 5 | Inspect Control Plane Alerts |
+| bioetl-runtime.json | 6 | Inspect Provider Alerts |
 | bioetl-runtime.json | 259 | Inspect Global Provider Alert Conditions |
 | bioetl-runtime.json | 7 | Inspect Entities Stale Over 24h |
 | bioetl-runtime.json | 2543 | Review Global Process Signals |

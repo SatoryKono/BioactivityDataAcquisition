@@ -58,10 +58,10 @@ SUMMARY_ZERO_FALLBACK_EXPECTATIONS: dict[str, dict[str, str]] = {}
 
 DIAGNOSTIC_NO_ZERO_FALLBACK_EXPECTATIONS = {
     "bioetl-runtime.json": {
-        "Monitor Pipeline Alert Conditions",
+        "Monitor Pipeline Alerts",
         "Inspect DQ Alert Conditions",
-        "Inspect Control Plane Alert Conditions",
-        "Inspect Provider Alert Conditions",
+        "Inspect Control Plane Alerts",
+        "Inspect Provider Alerts",
         "Inspect Global Provider Alert Conditions",
     },
     "bioetl-provider-health-v2.json": {

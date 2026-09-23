@@ -230,6 +230,15 @@ def _trust(p: dict[int, dict]) -> None:
 
 def _runtime(p: dict[int, dict]) -> None:
     p[9102]["title"] = "Monitor Coverage"
+    for pid, title in {
+        230: "Monitor Pipeline Alerts",
+        21: "Monitor Memory Pressure",
+        5: "Inspect Control Plane Alerts",
+        6: "Inspect Provider Alerts",
+    }.items():
+        p[pid]["title"] = title
+    for pid in (241, 256):
+        _override(p[pid], "stage", _WIDTH, 130)
     for pid in (238, 240, 9105):
         _legend(p[pid])
         _stage_colors(p[pid])

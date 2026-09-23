@@ -5074,7 +5074,7 @@
       "formula": "sum(bioetl_runtime_control_plane_alert_count{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0)",
       "kind": "promql",
       "panel_id": 5,
-      "panel_title": "Inspect Control Plane Alert Conditions",
+      "panel_title": "Inspect Control Plane Alerts",
       "query": "sum(bioetl_runtime_control_plane_alert_count{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0)",
       "query_tokens": [
         "bioetl_runtime_control_plane_alert_count",
@@ -5108,7 +5108,7 @@
       "formula": "sum(bioetl_runtime_provider_alert_count{provider=~\"$provider_hint\"}) and on() (count(bioetl_provider_current_status{provider=~\"$provider_hint\"}) > bool 0)",
       "kind": "promql",
       "panel_id": 6,
-      "panel_title": "Inspect Provider Alert Conditions",
+      "panel_title": "Inspect Provider Alerts",
       "query": "sum(bioetl_runtime_provider_alert_count{provider=~\"$provider_hint\"}) and on() (count(bioetl_provider_current_status{provider=~\"$provider_hint\"}) > bool 0)",
       "query_tokens": [
         "bioetl_provider_current_status",
@@ -5205,7 +5205,7 @@
       "formula": "max(max_over_time(bioetl_memory_pressure_state{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",stage=~\"$stage\"}[15m]))",
       "kind": "promql",
       "panel_id": 21,
-      "panel_title": "Monitor Memory Pressure Active",
+      "panel_title": "Monitor Memory Pressure",
       "query": "max(max_over_time(bioetl_memory_pressure_state{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",stage=~\"$stage\"}[15m]))",
       "query_tokens": [
         "bioetl_memory_pressure_state"
@@ -5433,7 +5433,7 @@
       "formula": "sum(bioetl_runtime_pipeline_alert_count{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0)",
       "kind": "promql",
       "panel_id": 230,
-      "panel_title": "Monitor Pipeline Alert Conditions",
+      "panel_title": "Monitor Pipeline Alerts",
       "query": "sum(bioetl_runtime_pipeline_alert_count{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0)",
       "query_tokens": [
         "bioetl_runtime_pipeline_alert_count",

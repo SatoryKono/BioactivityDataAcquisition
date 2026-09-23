@@ -2751,7 +2751,7 @@
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 80
+                    "value": 130
                   }
                 ]
               },
@@ -2906,7 +2906,7 @@
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 80
+                    "value": 130
                   }
                 ]
               },
@@ -3152,7 +3152,7 @@
               "refId": "A"
             }
           ],
-          "title": "Monitor Pipeline Alert Conditions",
+          "title": "Monitor Pipeline Alerts",
           "type": "stat"
         },
         {
@@ -3347,7 +3347,7 @@
               "refId": "A"
             }
           ],
-          "title": "Monitor Memory Pressure Active",
+          "title": "Monitor Memory Pressure",
           "type": "stat"
         },
         {
@@ -3542,7 +3542,7 @@
               "refId": "A"
             }
           ],
-          "title": "Inspect Control Plane Alert Conditions",
+          "title": "Inspect Control Plane Alerts",
           "type": "stat"
         },
         {
@@ -3635,7 +3635,7 @@
               "refId": "A"
             }
           ],
-          "title": "Inspect Provider Alert Conditions",
+          "title": "Inspect Provider Alerts",
           "type": "stat"
         },
         {

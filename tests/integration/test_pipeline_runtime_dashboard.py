@@ -229,7 +229,7 @@ def test_pipeline_runtime_count_panels_have_window_in_title_or_description() -> 
         "Monitor No-Records Runs",
         "Monitor Monitor Runtime Error Rate",
         "Monitor Monitor Worst Stage Lag",
-        "Monitor Memory Pressure Active",
+        "Monitor Memory Pressure",
         "Inspect Entities Stale Over 24h",
         "Inspect Warning Logs (1h)",
         "Inspect GLOBAL Unstructured Logs (1h)",

@@ -585,7 +585,7 @@ def test_runtime_alert_condition_summaries_are_telemetry_anchored() -> None:
     """Runtime handoff cards must preserve UNKNOWN for missing scope telemetry."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expected_anchor = {
-        "Monitor Pipeline Alert Conditions": (
+        "Monitor Pipeline Alerts": (
             "bioetl_runtime_pipeline_run_type_universe",
             'run_type=~"$run_type"',
         ),
@@ -593,11 +593,11 @@ def test_runtime_alert_condition_summaries_are_telemetry_anchored() -> None:
             "bioetl_runtime_pipeline_run_type_universe",
             'pipeline=~"$pipeline"',
         ),
-        "Inspect Control Plane Alert Conditions": (
+        "Inspect Control Plane Alerts": (
             "bioetl_runtime_pipeline_run_type_universe",
             'run_type=~"$run_type"',
         ),
-        "Inspect Provider Alert Conditions": (
+        "Inspect Provider Alerts": (
             "bioetl_provider_current_status",
             'provider=~"$provider_hint"',
         ),
@@ -772,10 +772,10 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
             "Monitor Silver Validation Failures": "round(",
         },
         "bioetl-runtime.json": {
-            "Monitor Pipeline Alert Conditions": "bioetl_runtime_pipeline_alert_count",
+            "Monitor Pipeline Alerts": "bioetl_runtime_pipeline_alert_count",
             "Inspect DQ Alert Conditions": "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
-            "Inspect Control Plane Alert Conditions": "bioetl_runtime_control_plane_alert_count",
-            "Inspect Provider Alert Conditions": "bioetl_runtime_provider_alert_count",
+            "Inspect Control Plane Alerts": "bioetl_runtime_control_plane_alert_count",
+            "Inspect Provider Alerts": "bioetl_runtime_provider_alert_count",
             "Inspect Global Provider Alert Conditions": (
                 "bioetl_runtime_alert_condition_provider_adapter_latency_high_30m"
             ),
@@ -1073,7 +1073,7 @@ def test_runtime_diagnostic_panels_preserve_unknown_no_data_state() -> None:
         "Monitor Active Blocker Count",
         "Monitor Runtime Error Rate",
         "Monitor Worst Stage Lag",
-        "Monitor Memory Pressure Active",
+        "Monitor Memory Pressure",
     }
     panels = {
         panel.get("title"): panel

@@ -1578,7 +1578,7 @@ def test_runtime_provider_alert_conditions_local_panel_scopes_all_addends_to_pro
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Inspect Provider Alert Conditions"
+            if item.get("title") == "Inspect Provider Alerts"
         ),
         None,
     )

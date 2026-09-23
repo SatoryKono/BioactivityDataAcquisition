@@ -4692,7 +4692,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '5':
-        title: Inspect Control Plane Alert Conditions
+        title: Inspect Control Plane Alerts
         role: indicator
         tier: 3
         scope: time_range
@@ -4720,7 +4720,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '6':
-        title: Inspect Provider Alert Conditions
+        title: Inspect Provider Alerts
         role: indicator
         tier: 3
         scope: time_range
@@ -4804,7 +4804,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '21':
-        title: Monitor Memory Pressure Active
+        title: Monitor Memory Pressure
         role: indicator
         tier: 3
         scope: time_range
@@ -4958,7 +4958,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '230':
-        title: Monitor Pipeline Alert Conditions
+        title: Monitor Pipeline Alerts
         role: indicator
         tier: 3
         scope: time_range

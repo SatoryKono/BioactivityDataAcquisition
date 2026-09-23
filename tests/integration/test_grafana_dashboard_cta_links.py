@@ -53,7 +53,7 @@ def test_runtime_incident_panels_do_not_duplicate_control_plane_dashboard_link()
     """Runtime incident panels must not duplicate the top-level Control Plane link."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     panel_titles = {
-        "Inspect Control Plane Alert Conditions",
+        "Inspect Control Plane Alerts",
         "Monitor No-Records Runs",
     }
 
@@ -139,7 +139,7 @@ def test_runtime_alert_condition_panels_expose_direct_runbook_links() -> None:
     """Runtime condition-summary panels should route operators directly to runbooks."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expectations = {
-        "Monitor Pipeline Alert Conditions": (
+        "Monitor Pipeline Alerts": (
             "Open Pipeline Failure Runbook",
             "docs/05-operations/runbooks/pipeline-failure-critical.md",
         ),
@@ -147,11 +147,11 @@ def test_runtime_alert_condition_panels_expose_direct_runbook_links() -> None:
             "Open DQ Failure Runbook",
             "docs/05-operations/runbooks/pipeline-failure-dq.md",
         ),
-        "Inspect Control Plane Alert Conditions": (
+        "Inspect Control Plane Alerts": (
             "Open Run Manifest Runbook",
             "docs/05-operations/runbooks/run-manifest-inspection.md",
         ),
-        "Inspect Provider Alert Conditions": (
+        "Inspect Provider Alerts": (
             "Open Provider Incident Runbook",
             "docs/05-operations/runbooks/incident-response.md",
         ),
@@ -201,7 +201,7 @@ def test_runtime_alert_condition_panels_expose_dashboard_handoffs() -> None:
     """Runtime condition-summary panels should route operators directly to target dashboards."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expectations = {
-        "Monitor Pipeline Alert Conditions": (
+        "Monitor Pipeline Alerts": (
             "Inspect active runtime blocker",
             "bioetl-runtime",
         ),
@@ -209,7 +209,7 @@ def test_runtime_alert_condition_panels_expose_dashboard_handoffs() -> None:
             "Open 5. Data Quality",
             "bioetl-dq-v2",
         ),
-        "Inspect Provider Alert Conditions": (
+        "Inspect Provider Alerts": (
             "Open 4. Provider Health",
             "bioetl-provider-health-v2",
         ),
