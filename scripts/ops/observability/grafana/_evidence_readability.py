@@ -82,10 +82,37 @@ def _saved_run(p: dict[int, dict]) -> None:
     for transform in panel["transformations"]:
         if transform["id"] == "filterFieldsByName":
             names = transform["options"]["include"]["names"]
+            names[:] = [
+                "reason_display" if name == "reason" else name for name in names
+            ]
             if "action_path" not in names:
                 names.append("action_path")
+        elif transform["id"] == "organize":
+            options = transform["options"]
+            options["indexByName"]["reason_display"] = options["indexByName"].pop(
+                "reason", 2
+            )
+            options["renameByName"].pop("reason", None)
+            options["renameByName"]["reason_display"] = "Reason"
     _override(panel, "action_path", _HIDDEN, True)
     _table(panel, {"Domain": 125, "Status": 115, "Action": 170})
+    _override(panel, "Reason", "custom.wrapText", True)
+    _override(panel, "Reason", "custom.cellOptions", {"type": "auto", "wrapText": True})
+    _override(
+        panel,
+        "Reason",
+        "mappings",
+        [
+            {
+                "type": "value",
+                "options": {
+                    "selection_required": {
+                        "text": "Choose a run to inspect saved evidence"
+                    }
+                },
+            }
+        ],
+    )
     _override(panel, "Evidence reference", _HIDDEN, True)
     _override(
         panel,
@@ -131,9 +158,14 @@ def _saved_run(p: dict[int, dict]) -> None:
             ],
         )
     _table(p[9452])
+    # Identity is a single evidence row: retain the full UUID and revision,
+    # including on narrow screens, rather than truncating provenance.
+    identity_custom = p[9452]["fieldConfig"]["defaults"]["custom"]
+    identity_custom["wrapText"] = True
+    identity_custom["cellOptions"]["wrapText"] = True
     p[9451]["options"]["footer"]["enablePagination"] = False
-    p[9452]["options"]["footer"]["enablePagination"] = False
-    _stack(p[9450], {9451: 8, 9452: 4})
+    p[9452]["options"]["footer"]["enablePagination"] = True
+    _stack(p[9450], {9451: 12, 9452: 6})
 
 
 def _overview(p: dict[int, dict]) -> None:

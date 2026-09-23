@@ -1405,6 +1405,24 @@ def test_visible_trust_reason_count_opens_frozen_reason_details() -> None:
     assert "reason_display" in names
 
 
+@pytest.mark.parametrize("dashboard_path", sorted(DASHBOARD_DIR.glob("*.json")))
+def test_saved_domain_details_expose_specific_reason(dashboard_path: Path) -> None:
+    """A trust-assessment label must not hide the persisted failure reasons."""
+    details = _panel(_load(dashboard_path.name), 9451)
+    names = next(
+        item["options"]["include"]["names"]
+        for item in details["transformations"]
+        if item["id"] == "filterFieldsByName"
+    )
+    assert "reason_display" in names and "reason" not in names
+    rename = next(
+        item["options"]["renameByName"]
+        for item in details["transformations"]
+        if item["id"] == "organize"
+    )
+    assert rename["reason_display"] == "Reason"
+
+
 def test_cycle5_wrap_text_columns_restore_declared_widths() -> None:
     """#9563 #9564 #9565 #9566: wrap columns keep a declared width; one column stays flex."""
     layout_width = 1366 // 2
