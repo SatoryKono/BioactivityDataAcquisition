@@ -72,10 +72,11 @@ def build_latest_complete_run_payload(
             resolved_via="selected_run_id",
             manifest=manifest,
         )
-        evidence = service.trust_summary(scope=scope, now=now)
+        evidence = service.successful_run_trust_summary(scope=scope, now=now)
         scanned += 1
         if (
-            evidence.get("trust_status") == "OK"
+            evidence is not None
+            and evidence.get("trust_status") == "OK"
             and evidence.get("processing_status") == "success"
         ):
             row.update(

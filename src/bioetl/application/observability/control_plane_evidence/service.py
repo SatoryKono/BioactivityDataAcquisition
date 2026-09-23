@@ -25,6 +25,7 @@ from bioetl.application.observability.control_plane_evidence.manifest_validation
     build_manifest_checks,
 )
 from bioetl.application.observability.control_plane_evidence.models import (
+    _processing_status,
     unresolved_scope_check,
 )
 from bioetl.application.observability.control_plane_evidence.retention import (
@@ -75,6 +76,35 @@ class ControlPlaneEvidenceService:
         snapshot = (
             ledger_entries(self.ledger_port, scope.manifest) if scope.manifest else ()
         )
+        return self._trust_summary_from_snapshot(
+            scope=scope, now=now, snapshot=snapshot
+        )
+
+    def successful_run_trust_summary(
+        self, *, scope: EvidenceScopeContext, now: datetime
+    ) -> dict[str, object] | None:
+        """Validate a discovery candidate only after its terminal success is known.
+
+        Non-success cannot satisfy latest-complete discovery, so reading its
+        archives and lineage is unnecessary. Success still requires every Trust
+        component; the same immutable ledger snapshot drives both decisions.
+        """
+        snapshot = (
+            ledger_entries(self.ledger_port, scope.manifest) if scope.manifest else ()
+        )
+        if _processing_status(scope.manifest, snapshot) != "success":
+            return None
+        return self._trust_summary_from_snapshot(
+            scope=scope, now=now, snapshot=snapshot
+        )
+
+    def _trust_summary_from_snapshot(
+        self,
+        *,
+        scope: EvidenceScopeContext,
+        now: datetime,
+        snapshot: tuple[RunLedgerEntry, ...],
+    ) -> dict[str, object]:
         components = (
             self.manifest_validation(scope=scope, ledger_snapshot=snapshot),
             self.lineage_validation(scope=scope, ledger_snapshot=snapshot),
