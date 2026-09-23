@@ -115,6 +115,9 @@ def _missing_anchor_severity(
 
 def ui_status(domain_status: str) -> str:
     """Map a domain severity token to the Control Plane UI status."""
+    if domain_status == "INFO":
+        # Optional missing evidence is non-blocking, but is not observed OK.
+        return "UNKNOWN"
     if domain_status == "FAILING":
         return "CRIT"
     if domain_status in {"DEGRADED", "WARNING"}:

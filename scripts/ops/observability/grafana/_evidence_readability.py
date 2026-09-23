@@ -165,7 +165,7 @@ def _saved_run(p: dict[int, dict]) -> None:
     identity_custom["cellOptions"]["wrapText"] = True
     p[9451]["options"]["footer"]["enablePagination"] = False
     p[9452]["options"]["footer"]["enablePagination"] = True
-    _stack(p[9450], {9451: 12, 9452: 6})
+    _stack(p[9450], {9451: 12, 9452: 8})
 
 
 def _overview(p: dict[int, dict]) -> None:
@@ -196,8 +196,19 @@ def _overview(p: dict[int, dict]) -> None:
 
 def _trust(p: dict[int, dict]) -> None:
     _table(p[9418], {"Result": 110, "Trust": 105, "Reasons": 90, "Observed": 165})
+    anchors = p[9404]
+    _table(anchors)
+    anchors["options"]["cellHeight"] = "lg"
+    anchors["fieldConfig"]["defaults"]["custom"]["wrapText"] = True
+    anchors["fieldConfig"]["defaults"]["custom"]["cellOptions"]["wrapText"] = True
+    _override(anchors, "value_full", "custom.wrapText", True)
+    _override(anchors, "value_full", "custom.cellOptions", {"type": "auto", "wrapText": True})
     for pid in (9408, 9409, 9406):
         _table(p[pid], {"Result": 125, "Status": 115, "Action": 160})
+    # A missing cell is not an empty table: retain the per-row MISSING result
+    # without repeating the panel-level no-rows explanation in each cell.
+    _override(p[9406], "checkpoint_value_short", "noValue", "UNKNOWN")
+    _override(p[9409], "Action", _WIDTH, 190)
     for pid in (9413, 9414, 9415):
         _table(p[pid], {"check": 220, "status": 110})
         _override(p[pid], "reason", _HIDDEN, True)
@@ -522,6 +533,19 @@ def apply_evidence_readability(payload: dict) -> None:
     if payload.get("uid") == "bioetl-run-explorer-v1":
         _run_explorer(p)
     _first_window_widths(payload, p)
+    if 9402 in p and p[9402].get("title") == "Review Run Summary":
+        # Hashes and composite parameter names need two lines at 900px.
+        # Large rows keep pagination from placing wrapped text under its footer.
+        summary = p[9402]
+        _table(summary, {"Parameter": 300})
+        summary["options"]["cellHeight"] = "lg"
+        summary["fieldConfig"]["defaults"]["custom"]["wrapText"] = True
+        summary["fieldConfig"]["defaults"]["custom"]["cellOptions"]["wrapText"] = True
+        for field in ("Parameter", "Value"):
+            _override(summary, field, "custom.wrapText", True)
+            _override(
+                summary, field, "custom.cellOptions", {"type": "auto", "wrapText": True}
+            )
     if payload.get("uid") == "bioetl-control-plane-v1":
         for pid, title in {
             9401: "Monitor Readiness",

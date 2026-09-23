@@ -6,6 +6,9 @@ This module extracts legacy HTTP identity anchor values.
 
 from __future__ import annotations
 
+from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_ledger import (
+    collect_ledger_input_snapshot_refs,
+)
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import (
     ARTIFACT_PUBLISHED_EVENT,
@@ -97,6 +100,10 @@ def bronze_batch_ids(
     ledger_entries: tuple[RunLedgerEntry, ...],
 ) -> list[str]:
     values = [item.snapshot_id for item in input_snapshots(manifest)]
+    # The immutable manifest may predate capture; published snapshots are durable
+    # ledger evidence. Reuse validation of id, content hash and immutable URI.
+    for snapshot in collect_ledger_input_snapshot_refs(ledger_entries):
+        append_value(values, snapshot["snapshot_id"])
     for entry in ledger_entries:
         details = entry.details or {}
         for key in ("bronze_batch_id", "bronze_batch_ids", "source_batch_ids"):

@@ -172,7 +172,7 @@ def load_provider_contract_replay_payload(case: ProviderContractReplayProbe) -> 
     if cassette_text.startswith(_GIT_LFS_POINTER_PREFIX):
         pytest.skip(
             "Provider contract replay cassette is a Git LFS pointer; "
-            f"run git lfs pull before replaying {case.cassette_rel_path}"
+            f"store the full YAML in git before replaying {case.cassette_rel_path}"
         )
 
     cassette_payload_raw = yaml.safe_load(cassette_text)

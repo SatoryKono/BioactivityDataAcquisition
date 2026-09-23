@@ -68,7 +68,7 @@ def test_collect_vcr_replay_preflight_reports_exact_lfs_pointer_paths(
     blocker_ids = {row["id"] for row in report["blockers"]}
     assert "unresolved_vcr_lfs_pointers" in blocker_ids
     assert "unresolved_replay_critical_lfs_pointers" in blocker_ids
-    assert "git lfs pull" in report["remediation"]
+    assert "git-stored YAML" in report["remediation"]
 
 
 def test_collect_vcr_replay_preflight_accepts_clean_catalog_and_secret_filter(
