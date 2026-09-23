@@ -403,6 +403,16 @@ from memory.graph.sync_pkg.adr_title import (
 from memory.graph.sync_pkg.adr_title import (
     _resolve_adr_constraint_target as _resolve_adr_constraint_target,
 )
+from memory.graph.sync_pkg.alert_annotations import (
+    _alert_annotations as _alert_annotations,
+)
+from memory.graph.sync_pkg.alert_annotations import (
+    _alert_dimension_text as _alert_dimension_text,
+)
+from memory.graph.sync_pkg.alert_annotations import _alert_labels as _alert_labels
+from memory.graph.sync_pkg.alert_annotations import (
+    _link_selected_alert_targets as _link_selected_alert_targets,
+)
 from memory.graph.sync_pkg.alert_group_name import (
     _alert_group_name as _alert_group_name,
 )
@@ -4041,29 +4051,6 @@ def _alert_target_inputs(rule: dict[str, object]) -> tuple[str, set[str]]:
         dimensions=_runtime_dimensions(expr, _alert_dimension_text(annotations)),
     )
     return context.expr, context.dimensions
-
-
-def _alert_annotations(rule: dict[str, object]) -> dict[str, object]:
-    annotations = rule.get("annotations")
-    return annotations if isinstance(annotations, dict) else {}
-
-
-def _alert_labels(rule: dict[str, object]) -> dict[str, object]:
-    labels = rule.get("labels")
-    return labels if isinstance(labels, dict) else {}
-
-
-def _alert_dimension_text(annotations: dict[str, object]) -> str:
-    return " ".join(str(value) for value in annotations.values())
-
-
-def _link_selected_alert_targets(
-    snapshot: GraphSnapshot,
-    alert: NodeKey,
-    selection: AlertTargetSelection,
-) -> None:
-    for target_group in _selected_alert_target_groups(selection):
-        _link_alert_target_group(snapshot, alert, target_group)
 
 
 if __name__ == "__main__":
