@@ -204,6 +204,98 @@ from memory.graph.sync_pkg._core_models import SnapshotSelection as SnapshotSele
 from memory.graph.sync_pkg._core_models import StorageSurfaceSpec as StorageSurfaceSpec
 from memory.graph.sync_pkg._core_models import SyncApplyOptions as SyncApplyOptions
 from memory.graph.sync_pkg._core_models import _ShapeNormalizer as _ShapeNormalizer
+from memory.graph.sync_pkg.alert_targets import (
+    _RUNTIME_DIMENSIONS as _RUNTIME_DIMENSIONS,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _alert_dashboard_config as _alert_dashboard_config,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _alert_dashboard_fallback_groups as _alert_dashboard_fallback_groups,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _alert_dashboard_fallbacks as _alert_dashboard_fallbacks,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _alert_override_maps as _alert_override_maps,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _alert_pipeline_kind_override as _alert_pipeline_kind_override,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _alert_rule_overrides as _alert_rule_overrides,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _alert_rule_settings as _alert_rule_settings,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _alerts_config_section as _alerts_config_section,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _all_contract_targets as _all_contract_targets,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _all_pipeline_targets as _all_pipeline_targets,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _configured_alert_rule as _configured_alert_rule,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _configured_dashboard_targets as _configured_dashboard_targets,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _contract_targets_for_alert as _contract_targets_for_alert,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _dashboard_target_keys as _dashboard_target_keys,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _entity_alert_signal_detected as _entity_alert_signal_detected,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _mapped_contract_targets as _mapped_contract_targets,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _merged_alert_dashboard_targets as _merged_alert_dashboard_targets,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _metric_dashboard_targets as _metric_dashboard_targets,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _pipeline_targets_for_alert as _pipeline_targets_for_alert,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _pipeline_targets_for_alert_mode as _pipeline_targets_for_alert_mode,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _pipeline_targets_matching_kind as _pipeline_targets_matching_kind,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _provider_alert_signal_detected as _provider_alert_signal_detected,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _provider_targets_for_alert as _provider_targets_for_alert,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _provider_targets_requested as _provider_targets_requested,
+)
+from memory.graph.sync_pkg.alert_targets import _raw_alert_targets as _raw_alert_targets
+from memory.graph.sync_pkg.alert_targets import (
+    _runtime_dimensions as _runtime_dimensions,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _select_alert_dashboards as _select_alert_dashboards,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _select_alert_targets as _select_alert_targets,
+)
+from memory.graph.sync_pkg.alert_targets import (
+    _sorted_alert_targets as _sorted_alert_targets,
+)
+from memory.graph.sync_pkg.alert_targets import _sorted_node_keys as _sorted_node_keys
+from memory.graph.sync_pkg.alert_targets import (
+    _sorted_unique_node_keys as _sorted_unique_node_keys,
+)
 from memory.graph.sync_pkg.analysis_source import (
     ANALYSIS_SOURCE_READ_TIMEOUT_SECONDS as ANALYSIS_SOURCE_READ_TIMEOUT_SECONDS,
 )
@@ -574,6 +666,39 @@ from memory.graph.sync_pkg.neo4j_statements import (
 from memory.graph.sync_pkg.neo4j_statements import (
     _reset_managed_relations_statement as _reset_managed_relations_statement,
 )
+from memory.graph.sync_pkg.port_surfaces import (
+    PORTS_MODULE_PREFIX as PORTS_MODULE_PREFIX,
+)
+from memory.graph.sync_pkg.port_surfaces import (
+    _build_port_surface_catalog as _build_port_surface_catalog,
+)
+from memory.graph.sync_pkg.port_surfaces import (
+    _imported_port_surfaces as _imported_port_surfaces,
+)
+from memory.graph.sync_pkg.port_surfaces import (
+    _imported_port_surfaces_for_node as _imported_port_surfaces_for_node,
+)
+from memory.graph.sync_pkg.port_surfaces import (
+    _imported_port_surfaces_from_import as _imported_port_surfaces_from_import,
+)
+from memory.graph.sync_pkg.port_surfaces import (
+    _imported_port_surfaces_from_import_from as _imported_port_surfaces_from_import_from,
+)
+from memory.graph.sync_pkg.port_surfaces import (
+    _merge_port_init_exports as _merge_port_init_exports,
+)
+from memory.graph.sync_pkg.port_surfaces import (
+    _propagate_port_init_exports as _propagate_port_init_exports,
+)
+from memory.graph.sync_pkg.port_surfaces import (
+    _register_port_protocol_descriptors as _register_port_protocol_descriptors,
+)
+from memory.graph.sync_pkg.port_surfaces import (
+    _resolve_python_module_surface as _resolve_python_module_surface,
+)
+from memory.graph.sync_pkg.port_surfaces import (
+    _seed_port_surface_catalog as _seed_port_surface_catalog,
+)
 from memory.graph.sync_pkg.python_paths import INIT_PY as INIT_PY
 from memory.graph.sync_pkg.python_paths import MAIN_PY as MAIN_PY
 from memory.graph.sync_pkg.python_paths import (
@@ -699,7 +824,6 @@ if str(DEFAULT_ROOT) not in sys.path:
     sys.path.insert(0, str(DEFAULT_ROOT))
 DEFAULT_BATCH_SIZE = 20
 GITHUB_WORKFLOWS_PREFIX = f"{GITHUB_DIR}/workflows/"
-PORTS_MODULE_PREFIX = "bioetl.domain.ports"
 PORTS_FACADE_SOURCE_PATH = f"src/bioetl/domain/ports/{INIT_PY}"
 RULES_DOC_PATH = "docs/00-project/RULES.md"
 TESTING_GUIDE_PATH = "docs/03-guides/testing.md"
@@ -1785,595 +1909,6 @@ def _complexity_analysis_config(
         deprecation_markers=retirement_config.deprecation_markers,
         blocker_anchor_limit=_coerce_int(payload.get("blocker_anchor_limit", 3), 3),
     )
-
-
-def _build_port_surface_catalog(
-    root: Path,
-) -> tuple[list[PortSurfaceDescriptor], dict[str, set[str]], dict[str, dict[str, str]]]:
-    ports_root = root / "src" / "bioetl" / "domain" / "ports"
-    if not ports_root.is_dir():
-        return [], {}, {}
-
-    descriptors: list[PortSurfaceDescriptor] = []
-    module_surfaces: dict[str, set[str]] = {}
-    symbol_index: dict[str, dict[str, str]] = {}
-    init_paths: list[tuple[str, Path]] = []
-
-    for port_path in sorted(ports_root.rglob("*.py")):
-        _seed_port_surface_catalog(
-            root,
-            port_path,
-            descriptors,
-            module_surfaces,
-            symbol_index,
-            init_paths,
-        )
-
-    _propagate_port_init_exports(init_paths, module_surfaces, symbol_index)
-
-    return descriptors, module_surfaces, symbol_index
-
-
-def _seed_port_surface_catalog(
-    root: Path,
-    port_path: Path,
-    descriptors: list[PortSurfaceDescriptor],
-    module_surfaces: dict[str, set[str]],
-    symbol_index: dict[str, dict[str, str]],
-    init_paths: list[tuple[str, Path]],
-) -> None:
-    if _is_ignored_repo_path(port_path) or "noop" in port_path.parts:
-        return
-    relative_path = _rel_path(root, port_path)
-    module_name = _python_surface_name(relative_path)
-    if port_path.name == INIT_PY:
-        init_paths.append((module_name, port_path))
-    _register_port_protocol_descriptors(
-        port_path,
-        relative_path,
-        module_name,
-        descriptors,
-        module_surfaces,
-        symbol_index,
-    )
-
-
-def _register_port_protocol_descriptors(
-    port_path: Path,
-    relative_path: str,
-    module_name: str,
-    descriptors: list[PortSurfaceDescriptor],
-    module_surfaces: dict[str, set[str]],
-    symbol_index: dict[str, dict[str, str]],
-) -> None:
-    for class_name in _protocol_class_names(port_path):
-        surface_name = f"{module_name}.{class_name}"
-        descriptors.append(
-            PortSurfaceDescriptor(
-                surface_name=surface_name,
-                class_name=class_name,
-                module_name=module_name,
-                source_path=relative_path,
-            )
-        )
-        module_surfaces.setdefault(module_name, set()).add(surface_name)
-        symbol_index.setdefault(module_name, {})[class_name] = surface_name
-
-
-def _propagate_port_init_exports(
-    init_paths: list[tuple[str, Path]],
-    module_surfaces: dict[str, set[str]],
-    symbol_index: dict[str, dict[str, str]],
-) -> None:
-    changed = True
-    while changed:
-        changed = False
-        for module_name, init_path in init_paths:
-            if _merge_port_init_exports(
-                module_name, init_path, module_surfaces, symbol_index
-            ):
-                changed = True
-
-
-def _merge_port_init_exports(
-    module_name: str,
-    init_path: Path,
-    module_surfaces: dict[str, set[str]],
-    symbol_index: dict[str, dict[str, str]],
-) -> bool:
-    changed = False
-    exported_surfaces = module_surfaces.setdefault(module_name, set())
-    exported_symbols = symbol_index.setdefault(module_name, {})
-    for imported_module, imported_name, alias_name in _imported_symbols(init_path):
-        if not imported_module.startswith(PORTS_MODULE_PREFIX):
-            continue
-        target = symbol_index.get(imported_module, {}).get(imported_name)
-        if target is None:
-            continue
-        if exported_symbols.get(alias_name) != target:
-            exported_symbols[alias_name] = target
-            changed = True
-        if target not in exported_surfaces:
-            exported_surfaces.add(target)
-            changed = True
-    return changed
-
-
-def _imported_port_surfaces(
-    path: Path,
-    port_module_surfaces: dict[str, set[str]],
-    port_symbol_index: dict[str, dict[str, str]],
-) -> set[str]:
-    tree = _parse_python_ast(path)
-    if tree is None:
-        return set()
-
-    imported: set[str] = set()
-    for node in ast.walk(tree):
-        imported.update(
-            _imported_port_surfaces_for_node(
-                node,
-                port_module_surfaces=port_module_surfaces,
-                port_symbol_index=port_symbol_index,
-            )
-        )
-    return imported
-
-
-def _imported_port_surfaces_for_node(
-    node: ast.AST,
-    *,
-    port_module_surfaces: dict[str, set[str]],
-    port_symbol_index: dict[str, dict[str, str]],
-) -> set[str]:
-    if isinstance(node, ast.Import):
-        return _imported_port_surfaces_from_import(node, port_module_surfaces)
-    if isinstance(node, ast.ImportFrom) and node.module is not None:
-        return _imported_port_surfaces_from_import_from(
-            node,
-            port_module_surfaces=port_module_surfaces,
-            port_symbol_index=port_symbol_index,
-        )
-    return set()
-
-
-def _imported_port_surfaces_from_import(
-    node: ast.Import,
-    port_module_surfaces: dict[str, set[str]],
-) -> set[str]:
-    imported: set[str] = set()
-    for alias in node.names:
-        if alias.name.startswith(PORTS_MODULE_PREFIX):
-            imported.update(port_module_surfaces.get(alias.name, set()))
-    return imported
-
-
-def _imported_port_surfaces_from_import_from(
-    node: ast.ImportFrom,
-    *,
-    port_module_surfaces: dict[str, set[str]],
-    port_symbol_index: dict[str, dict[str, str]],
-) -> set[str]:
-    if node.module is None or not node.module.startswith(PORTS_MODULE_PREFIX):
-        return set()
-    if any(alias.name == "*" for alias in node.names):
-        return set(port_module_surfaces.get(node.module, set()))
-    imported: set[str] = set()
-    symbol_targets = port_symbol_index.get(node.module, {})
-    for alias in node.names:
-        target = symbol_targets.get(alias.name)
-        if target is not None:
-            imported.add(target)
-    return imported
-
-
-def _resolve_python_module_surface(root: Path, module_name: str) -> NodeKey | None:
-    relative_py = Path("src") / Path(*module_name.split("."))
-    file_candidate = root / relative_py.with_suffix(".py")
-    if file_candidate.is_file():
-        return NodeKey("module_surface", _rel_path(root, file_candidate))
-    init_candidate = root / relative_py / INIT_PY
-    if init_candidate.is_file():
-        return NodeKey("module_surface", _rel_path(root, init_candidate))
-    return None
-
-
-def _runtime_dimensions(*parts: str) -> set[str]:
-    combined = " ".join(parts)
-    dimensions = set()
-    for dim in _RUNTIME_DIMENSIONS:
-        if re.search(rf"\b{dim}\b", combined):
-            dimensions.add(dim)
-    return dimensions
-
-
-_RUNTIME_DIMENSIONS = (
-    "pipeline",
-    "provider",
-    "entity",
-    "layer",
-    "run_type",
-    "stage",
-    "table",
-    "metric",
-    "anomaly_type",
-    "event_type",
-    "store",
-    "operation",
-    "ref_type",
-)
-
-
-def _alert_rule_settings(
-    memory_mapping: dict[str, object],
-    *,
-    alert_name: str,
-    group_name: str,
-) -> AlertRuleSettings:
-    group_rule, alert_rule = _alert_rule_overrides(
-        memory_mapping,
-        alert_name=alert_name,
-        group_name=group_name,
-    )
-    return AlertRuleSettings(
-        pipeline_mode=str(
-            alert_rule.get("pipelines", group_rule.get("pipelines", "auto"))
-        ),
-        pipeline_kind=str(
-            alert_rule.get("pipeline_kind", group_rule.get("pipeline_kind", "any"))
-        ),
-        provider_mode=str(
-            alert_rule.get("providers", group_rule.get("providers", "auto"))
-        ),
-        contract_mode=str(
-            alert_rule.get("contracts", group_rule.get("contracts", "none"))
-        ),
-    )
-
-
-def _alert_rule_overrides(
-    memory_mapping: dict[str, object],
-    *,
-    alert_name: str,
-    group_name: str,
-) -> tuple[dict[str, object], dict[str, object]]:
-    alerts_config = _alerts_config_section(memory_mapping)
-    groups, rules = _alert_override_maps(alerts_config)
-    group_rule = _as_mapping(groups.get(group_name)) if isinstance(groups, dict) else {}
-    alert_rule = _as_mapping(rules.get(alert_name)) if isinstance(rules, dict) else {}
-    return group_rule, alert_rule
-
-
-def _alerts_config_section(memory_mapping: dict[str, object]) -> dict[str, object]:
-    alerts_config = memory_mapping.get("alerts")
-    return alerts_config if isinstance(alerts_config, dict) else {}
-
-
-def _alert_override_maps(
-    alerts_config: dict[str, object],
-) -> tuple[object, object]:
-    return alerts_config.get("groups"), alerts_config.get("rules")
-
-
-def _pipeline_targets_for_alert(
-    context: AlertTargetContext,
-    *,
-    pipeline_mode: str,
-    pipeline_kind: str,
-    normalized: str,
-    dimensions: set[str],
-) -> list[NodeKey]:
-    pipeline_targets = _pipeline_targets_for_alert_mode(
-        context, pipeline_mode, dimensions
-    )
-    effective_kind = _alert_pipeline_kind_override(
-        pipeline_kind, normalized, dimensions
-    )
-    if effective_kind in {"entity", "composite"}:
-        return _pipeline_targets_matching_kind(
-            context, pipeline_targets, effective_kind
-        )
-    return pipeline_targets
-
-
-def _pipeline_targets_for_alert_mode(
-    context: AlertTargetContext,
-    pipeline_mode: str,
-    dimensions: set[str],
-) -> list[NodeKey]:
-    all_pipelines = _all_pipeline_targets(context)
-    if pipeline_mode == "all":
-        return all_pipelines
-    if pipeline_mode == "entity":
-        return _pipeline_targets_matching_kind(context, all_pipelines, "entity")
-    if pipeline_mode == "composite":
-        return _pipeline_targets_matching_kind(context, all_pipelines, "composite")
-    if pipeline_mode == "auto" and "pipeline" in dimensions:
-        return all_pipelines
-    return []
-
-
-def _all_pipeline_targets(context: AlertTargetContext) -> list[NodeKey]:
-    return list(context.pipeline_nodes.values())
-
-
-def _alert_pipeline_kind_override(
-    pipeline_kind: str,
-    normalized: str,
-    dimensions: set[str],
-) -> str:
-    if pipeline_kind in {"entity", "composite"}:
-        return pipeline_kind
-    if _entity_alert_signal_detected(normalized, dimensions):
-        return "entity"
-    return pipeline_kind
-
-
-def _entity_alert_signal_detected(normalized: str, dimensions: set[str]) -> bool:
-    return "entity" in dimensions or any(
-        marker in normalized
-        for marker in (
-            "bioetl_dq_",
-            "bioetl_silver_",
-            'stage="bronze"',
-            "bioetl_data_freshness_seconds",
-        )
-    )
-
-
-def _pipeline_targets_matching_kind(
-    context: AlertTargetContext,
-    pipeline_targets: Iterable[NodeKey],
-    pipeline_kind: str,
-) -> list[NodeKey]:
-    return [
-        node
-        for node in pipeline_targets
-        if context.snapshot.nodes[node].properties.get("pipeline_kind") == pipeline_kind
-    ]
-
-
-def _provider_targets_for_alert(
-    context: AlertTargetContext,
-    *,
-    provider_mode: str,
-    normalized: str,
-    dimensions: set[str],
-) -> list[NodeKey]:
-    provider_targets_requested = _provider_targets_requested(
-        provider_mode,
-        normalized=normalized,
-        dimensions=dimensions,
-    )
-    return context.provider_nodes if provider_targets_requested else []
-
-
-def _provider_targets_requested(
-    provider_mode: str,
-    *,
-    normalized: str,
-    dimensions: set[str],
-) -> bool:
-    return provider_mode == "all" or (
-        provider_mode == "auto"
-        and _provider_alert_signal_detected(normalized, dimensions)
-    )
-
-
-def _provider_alert_signal_detected(normalized: str, dimensions: set[str]) -> bool:
-    return (
-        "provider" in dimensions
-        or "provider_health" in normalized
-        or "bioetl_health_check_" in normalized
-    )
-
-
-def _contract_targets_for_alert(
-    context: AlertTargetContext,
-    *,
-    contract_mode: str,
-    pipeline_targets: list[NodeKey],
-) -> list[NodeKey]:
-    if contract_mode == "all":
-        return _all_contract_targets(context)
-    if contract_mode != "mapped":
-        return []
-    return sorted(
-        _mapped_contract_targets(context, pipeline_targets), key=lambda node: node.name
-    )
-
-
-def _all_contract_targets(context: AlertTargetContext) -> list[NodeKey]:
-    return list(context.contract_nodes.values())
-
-
-def _mapped_contract_targets(
-    context: AlertTargetContext,
-    pipeline_targets: Iterable[NodeKey],
-) -> set[NodeKey]:
-    pipeline_target_set = set(pipeline_targets)
-    return {
-        relation.target
-        for relation in context.snapshot.relations.values()
-        if relation.source in pipeline_target_set
-        and relation.relation_type == "DEPENDS_ON"
-        and relation.target.label == "contract_surface"
-    }
-
-
-def _select_alert_targets(
-    context: AlertTargetContext,
-    alert_name: str,
-    group_name: str,
-    expr: str,
-    dimensions: set[str],
-) -> AlertTargetSelection:
-    pipeline_targets, provider_targets, contract_targets = _raw_alert_targets(
-        context,
-        alert_name=alert_name,
-        group_name=group_name,
-        expr=expr,
-        dimensions=dimensions,
-    )
-    return _sorted_alert_targets(pipeline_targets, provider_targets, contract_targets)
-
-
-def _sorted_unique_node_keys(nodes: Iterable[NodeKey]) -> tuple[NodeKey, ...]:
-    return tuple(sorted(set(nodes), key=lambda node: node.name))
-
-
-def _raw_alert_targets(
-    context: AlertTargetContext,
-    *,
-    alert_name: str,
-    group_name: str,
-    expr: str,
-    dimensions: set[str],
-) -> tuple[list[NodeKey], list[NodeKey], list[NodeKey]]:
-    normalized = _normalized_alert_selector(group_name, expr)
-    settings = _alert_rule_settings(
-        context.memory_mapping,
-        alert_name=alert_name,
-        group_name=group_name,
-    )
-    pipeline_targets = _pipeline_targets_for_alert(
-        context,
-        pipeline_mode=settings.pipeline_mode,
-        pipeline_kind=settings.pipeline_kind,
-        normalized=normalized,
-        dimensions=dimensions,
-    )
-    provider_targets = _provider_targets_for_alert(
-        context,
-        provider_mode=settings.provider_mode,
-        normalized=normalized,
-        dimensions=dimensions,
-    )
-    contract_targets = _contract_targets_for_alert(
-        context,
-        contract_mode=settings.contract_mode,
-        pipeline_targets=pipeline_targets,
-    )
-    return pipeline_targets, provider_targets, contract_targets
-
-
-def _sorted_alert_targets(
-    pipeline_targets: list[NodeKey],
-    provider_targets: list[NodeKey],
-    contract_targets: list[NodeKey],
-) -> AlertTargetSelection:
-    return AlertTargetSelection(
-        selected_pipelines=_sorted_unique_node_keys(pipeline_targets),
-        selected_providers=_sorted_unique_node_keys(provider_targets),
-        selected_contracts=_sorted_unique_node_keys(contract_targets),
-    )
-
-
-def _select_alert_dashboards(
-    alert_name: str,
-    group_name: str,
-    expr: str,
-    dashboard_metrics: Mapping[NodeKey, Set[str]],
-    memory_mapping: dict[str, object],
-) -> list[NodeKey]:
-    config = _alert_dashboard_config(
-        memory_mapping,
-        alert_name=alert_name,
-    )
-    explicit_dashboards = _configured_dashboard_targets(
-        config.alert_rule.get("dashboards")
-    )
-    common_dashboards = _configured_dashboard_targets(
-        config.dashboard_fallbacks.get("common")
-    )
-    group_dashboards = _configured_dashboard_targets(
-        config.fallback_groups.get(group_name)
-    )
-    metric_dashboards = _metric_dashboard_targets(expr, dashboard_metrics)
-    return _merged_alert_dashboard_targets(
-        explicit_dashboards=explicit_dashboards,
-        metric_dashboards=metric_dashboards,
-        group_dashboards=group_dashboards,
-        common_dashboards=common_dashboards,
-    )
-
-
-def _merged_alert_dashboard_targets(
-    *,
-    explicit_dashboards: set[NodeKey],
-    metric_dashboards: set[NodeKey],
-    group_dashboards: set[NodeKey],
-    common_dashboards: set[NodeKey],
-) -> list[NodeKey]:
-    selected = set(explicit_dashboards)
-    selected.update(metric_dashboards)
-    if not metric_dashboards:
-        selected.update(group_dashboards)
-    selected.update(common_dashboards)
-    return _sorted_node_keys(selected)
-
-
-def _sorted_node_keys(nodes: Iterable[NodeKey]) -> list[NodeKey]:
-    return sorted(nodes, key=lambda node: node.name)
-
-
-def _alert_dashboard_config(
-    memory_mapping: dict[str, object],
-    *,
-    alert_name: str,
-) -> AlertDashboardConfig:
-    alerts_config = _alerts_config_section(memory_mapping)
-    dashboard_fallbacks = _alert_dashboard_fallbacks(alerts_config)
-    return AlertDashboardConfig(
-        alert_rule=_configured_alert_rule(alerts_config, alert_name),
-        dashboard_fallbacks=dashboard_fallbacks,
-        fallback_groups=_alert_dashboard_fallback_groups(dashboard_fallbacks),
-    )
-
-
-def _configured_alert_rule(
-    alerts_config: dict[str, object],
-    alert_name: str,
-) -> dict[str, object]:
-    rules = alerts_config.get("rules")
-    if not isinstance(rules, dict):
-        return {}
-    alert_rule = rules.get(alert_name)
-    return alert_rule if isinstance(alert_rule, dict) else {}
-
-
-def _alert_dashboard_fallbacks(
-    alerts_config: dict[str, object],
-) -> dict[str, object]:
-    dashboard_fallbacks = alerts_config.get("dashboard_fallbacks")
-    return dashboard_fallbacks if isinstance(dashboard_fallbacks, dict) else {}
-
-
-def _alert_dashboard_fallback_groups(
-    dashboard_fallbacks: dict[str, object],
-) -> dict[str, object]:
-    fallback_groups = dashboard_fallbacks.get("groups")
-    return fallback_groups if isinstance(fallback_groups, dict) else {}
-
-
-def _configured_dashboard_targets(values: object) -> set[NodeKey]:
-    return _dashboard_target_keys(_as_string_list(values))
-
-
-def _dashboard_target_keys(names: Iterable[str]) -> set[NodeKey]:
-    return {NodeKey("dashboard_surface", name) for name in names}
-
-
-def _metric_dashboard_targets(
-    expr: str,
-    dashboard_metrics: Mapping[NodeKey, Set[str]],
-) -> set[NodeKey]:
-    metrics = _extract_bioetl_metrics(expr)
-    return {
-        dashboard
-        for dashboard, dashboard_metric_names in dashboard_metrics.items()
-        if metrics & dashboard_metric_names
-    }
 
 
 def build_snapshot(root: Path, verified_at: str | None = None) -> GraphSnapshot:
