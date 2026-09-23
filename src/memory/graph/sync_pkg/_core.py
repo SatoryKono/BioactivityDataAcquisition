@@ -1277,6 +1277,15 @@ from memory.graph.sync_pkg.pipeline_operational_targets_config import (
 from memory.graph.sync_pkg.pipeline_operational_targets_config import (
     build_audit_report as build_audit_report,
 )
+from memory.graph.sync_pkg.pipeline_source_config_artifact import (
+    _link_pipeline_doc_artifacts as _link_pipeline_doc_artifacts,
+)
+from memory.graph.sync_pkg.pipeline_source_config_artifact import (
+    _pipeline_doc_artifact_targets as _pipeline_doc_artifact_targets,
+)
+from memory.graph.sync_pkg.pipeline_source_config_artifact import (
+    _pipeline_source_config_artifact as _pipeline_source_config_artifact,
+)
 from memory.graph.sync_pkg.port_surfaces import (
     PORTS_MODULE_PREFIX as PORTS_MODULE_PREFIX,
 )
@@ -6631,54 +6640,6 @@ def _add_entity_pipeline_surface(
         contract_nodes=contract_nodes,
         adapter_nodes=adapter_nodes,
     )
-
-
-def _pipeline_source_config_artifact(
-    snapshot: GraphSnapshot, pipeline: NodeKey
-) -> NodeKey:
-    source_path = snapshot.nodes[pipeline].properties.get("source_path", "")
-    return NodeKey("config_artifact", str(source_path))
-
-
-def _pipeline_doc_artifact_targets(
-    snapshot: GraphSnapshot,
-    *,
-    provider_name: str,
-    entity_name: str,
-) -> tuple[NodeKey, ...]:
-    entity_dash = entity_name.replace("_", "-")
-    candidates = (
-        f"docs/04-reference/providers/{provider_name}/{entity_dash}.md",
-        f"docs/04-reference/pipelines/{provider_name}-{entity_dash}.md",
-    )
-    glob_prefix = f"docs/04-reference/pipelines/{provider_name}/"
-    glob_suffix = f"-{entity_dash}-spec.md"
-    doc_keys = [
-        NodeKey("doc_artifact", path)
-        for path in candidates
-        if NodeKey("doc_artifact", path) in snapshot.nodes
-    ]
-    doc_keys.extend(
-        node.key
-        for node in snapshot.nodes.values()
-        if node.key.label == "doc_artifact"
-        and node.key.name.startswith(glob_prefix)
-        and node.key.name.endswith(glob_suffix)
-    )
-    return tuple(sorted(set(doc_keys), key=lambda key: key.name))
-
-
-def _link_pipeline_doc_artifacts(
-    snapshot: GraphSnapshot,
-    pipeline: NodeKey,
-    doc_artifacts: tuple[NodeKey, ...],
-    *,
-    provenance: str,
-) -> None:
-    for doc_artifact in doc_artifacts:
-        snapshot.add_relation(
-            pipeline, "DESCRIBED_IN", doc_artifact, provenance=provenance
-        )
 
 
 def _add_composite_pipeline_surfaces(
