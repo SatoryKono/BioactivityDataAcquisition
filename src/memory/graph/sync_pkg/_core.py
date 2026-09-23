@@ -1242,6 +1242,9 @@ from memory.graph.sync_pkg.link_curated_execution_script import (
 from memory.graph.sync_pkg.link_curated_execution_script import (
     _link_curated_execution_script as _link_curated_execution_script,
 )
+from memory.graph.sync_pkg.link_relation_backed_structure_for_relat import (
+    _link_relation_backed_structure_for_relation as _link_relation_backed_structure_for_relation,
+)
 from memory.graph.sync_pkg.link_run_instance_dependencies import (
     _add_runtime_state_surface as _add_runtime_state_surface,
 )
@@ -3010,40 +3013,6 @@ def _link_relation_backed_file_structure(
             file_backed_labels=file_backed_labels,
             config=config,
         )
-
-
-def _link_relation_backed_structure_for_relation(
-    snapshot: GraphSnapshot,
-    root: Path,
-    relation: GraphRelation,
-    *,
-    relation_backed_types: set[str],
-    file_backed_labels: set[str],
-    config: dict[str, object],
-) -> None:
-    if (
-        relation.relation_type not in relation_backed_types
-        or relation.target.label not in file_backed_labels
-    ):
-        return
-    target_node = snapshot.nodes.get(relation.target)
-    if target_node is None:
-        return
-    source_path_value = target_node.properties.get("source_path")
-    if not isinstance(source_path_value, str) or not source_path_value:
-        return
-    if _is_excluded_file_structure_path(source_path_value, config):
-        return
-
-    parent_relative = _relation_backed_parent_relative(root, source_path_value)
-    if parent_relative is None:
-        return
-    _link_relation_backed_directory_housing(
-        snapshot,
-        relation.source,
-        parent_relative=parent_relative,
-        config=config,
-    )
 
 
 def _add_file_structure_surfaces(
