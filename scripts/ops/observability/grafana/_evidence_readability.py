@@ -202,10 +202,11 @@ def _trust(p: dict[int, dict]) -> None:
                 if prop["id"] == "mappings":
                     for mapping in prop["value"]:
                         if mapping["type"] == "value":
-                            mapping["options"]["SELECT RUN"] = {
-                                "text": "SELECT RUN",
-                                "color": "#A3A3A3",
-                            }
+                            for state in ("SELECT RUN", "UNFINISHED"):
+                                mapping["options"][state] = {
+                                    "text": state,
+                                    "color": "#A3A3A3",
+                                }
     _table(p[9418], {"Result": 110, "Trust": 105, "Reasons": 90, "Observed": 165})
     anchors = p[9404]
     _table(anchors)

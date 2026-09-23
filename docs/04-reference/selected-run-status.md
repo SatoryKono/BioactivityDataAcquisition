@@ -19,10 +19,13 @@ not signatures or an authorization mechanism.
 | Data Validation | This execution's Gold schema validation | An executed successful check is OK; a failed check is ERROR. Explicit skip_gold is N/A under v2 rules; otherwise missing validation is INCOMPLETE, not inferred from processing success. |
 
 For applicable domains, overall precedence is ERROR, INCOMPLETE, UNKNOWN, WARN,
-OK. N/A is excluded; an entirely inapplicable dry run remains N/A. An active
-execution keeps RUNNING; recent ledger activity and its age are separate live
-diagnostics, not proof that an idle process is alive. A terminal ledger without
-a final report means incomplete finalization.
+OK. N/A is excluded; an entirely inapplicable dry run remains N/A. A persisted
+start without a terminal ledger event yields execution_state UNFINISHED and
+verdict INCOMPLETE with terminal_event_missing. This holds for recent and old
+events: ledger activity and its age do not prove that a worker is alive and do
+not establish failure or cancellation. A terminal ledger without a final report
+means incomplete finalization. A saved report that explicitly records RUNNING
+retains its recorded execution result; historical assessment is not a liveness probe.
 
 The response separates `execution_state`, `checks_verdict`,
 `evidence_completeness`, `evidence_availability`, and `replay_readiness_now`.
