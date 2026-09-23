@@ -342,11 +342,11 @@ def test_control_plane_replay_and_manifest_panels_route_to_expected_runbooks() -
     """Control Plane replay-family and manifest-family panels must use stable runbook routing."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     expectations = {
-        "Monitor Replay Safety": (
+        "Monitor Replay": (
             "Open Checkpoint Debugging Runbook",
             "docs/05-operations/runbooks/checkpoint-debugging.md",
         ),
-        "Monitor Manifest/Ledger": (
+        "Monitor Ledger": (
             "Open Run Manifest Inspection",
             "docs/05-operations/runbooks/run-manifest-inspection.md",
         ),
@@ -472,8 +472,8 @@ def test_control_plane_first_screen_stat_panels_do_not_duplicate_runbook_ctas() 
     """First-screen trust KPI panels should expose one clear runbook CTA each."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     expected_titles = {
-        "Monitor Replay Safety",
-        "Monitor Manifest/Ledger",
+        "Monitor Replay",
+        "Monitor Ledger",
     }
 
     for panel_title in expected_titles:

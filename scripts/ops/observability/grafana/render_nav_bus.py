@@ -1020,10 +1020,10 @@ def _stamp_current_readiness(by_id: dict[object, dict[str, object]]) -> None:
     if 9401 not in by_id:
         return
     readiness = by_id[9401]
-    readiness["title"] = "Monitor Current Readiness"
+    readiness["title"] = "Monitor Readiness"
     field_config = readiness.setdefault("fieldConfig", {})
     defaults = field_config.setdefault("defaults", {})
-    defaults["displayName"] = "Monitor Current Readiness"
+    defaults["displayName"] = "Monitor Readiness"
     readiness["description"] = (
         "CURRENT · Latest fresh pipeline/run_type telemetry. Run ID does not filter "
         "this panel. Palette: 0=OK, 1=WARN, 2=CRIT, 3=INCOMPLETE, "

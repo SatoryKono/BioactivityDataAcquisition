@@ -321,7 +321,7 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
     PanelAuditSpec(
         dashboard_uid="bioetl-control-plane-v1",
         panel_id=892,
-        title="Monitor Checkpoint Age",
+        title="Track Checkpoint",
         source_kind="prometheus",
         semantic_kind="freshness",
         target_ref_id="A",

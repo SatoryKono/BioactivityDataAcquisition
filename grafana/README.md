@@ -1146,7 +1146,7 @@ mixed Docker plus host/WSL setups, prefer an explicit value over assuming
   `manifest_id`, config/contract hashes, artifact refs, replay parentage,
   composite identity, and checkpoint anchor compare are surfaced by
   `/ops/control-plane/identity-evidence` plus run-manifest inspection, not
-  Prometheus labels. `Monitor Checkpoint Age` is also now
+  Prometheus labels. `Track Checkpoint` is also now
   HTTP-backed through `/ops/control-plane/checkpoint-freshness`, so it reads
   persisted checkpoint metadata instead of relying on short-lived scrape
   presence. When that endpoint returns `status=UNKNOWN` with `age_seconds=null`,

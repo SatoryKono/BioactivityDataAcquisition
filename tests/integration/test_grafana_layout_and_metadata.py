@@ -378,7 +378,7 @@ def test_control_plane_long_first_screen_titles_keep_extra_width() -> None:
     }
 
     for panel_title in (
-        "Monitor Manifest/Ledger",
+        "Monitor Ledger",
         "Monitor Telemetry",
         "Inspect Scope & Evidence",
     ):
@@ -396,7 +396,7 @@ def test_control_plane_trust_panels_follow_reference_widths() -> None:
     panels = index_panels_by_base_title(get_dashboard_panels(dashboard))
 
     scope = panels["Inspect Scope & Evidence"]["gridPos"]
-    readiness = panels["Monitor Current Readiness"]["gridPos"]
+    readiness = panels["Monitor Readiness"]["gridPos"]
     run_summary = panels["Review Run Summary"]["gridPos"]
     processed = panels["Review Processed Records"]["gridPos"]
     telemetry = panels["Monitor Telemetry"]["gridPos"]
@@ -413,9 +413,9 @@ def test_control_plane_trust_panels_follow_reference_widths() -> None:
 
     quarter_width = 24 // 4
     quarter_panels = [
-        panels["Monitor Replay Safety"]["gridPos"],
-        panels["Monitor Checkpoint Age"]["gridPos"],
-        panels["Monitor Manifest/Ledger"]["gridPos"],
+        panels["Monitor Replay"]["gridPos"],
+        panels["Track Checkpoint"]["gridPos"],
+        panels["Monitor Ledger"]["gridPos"],
     ]
     assert [grid["w"] for grid in quarter_panels] == [quarter_width] * 3
     assert [grid["x"] for grid in quarter_panels] == [
@@ -651,8 +651,8 @@ def test_control_plane_trust_panels_preserve_missing_telemetry() -> None:
     }
 
     for title in (
-        "Monitor Replay Safety",
-        "Monitor Manifest/Ledger",
+        "Monitor Replay",
+        "Monitor Ledger",
     ):
         panel = panels.get(title)
         assert panel is not None
@@ -801,8 +801,8 @@ def test_control_plane_first_screen_normalizes_workflow_pipeline_aliases() -> No
     }
 
     for title in (
-        "Monitor Replay Safety",
-        "Monitor Manifest/Ledger",
+        "Monitor Replay",
+        "Monitor Ledger",
         "Monitor Telemetry",
     ):
         panel = panels.get(title)

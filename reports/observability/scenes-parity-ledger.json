@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "d4404371be966335da7aafcbff913a7d21eb3e7ae8946f023bfe96ee23392c7d",
-    "bioetl-dq-v2": "6aa6bc23c7180c07d40c2f2e32b7de6e4ccb353e726543d901f5ce3b23a340dd",
-    "bioetl-incident-v1": "0a79b026718d294d24bb6ec2d7634cd348f0021c64d119c99db602fd4298aaf2",
-    "bioetl-overview-v2": "e65494cd36461c9fcb481efb56bf52fabdeeb373f1cf7a309b9f144f02c7ce15",
-    "bioetl-provider-health-v2": "22cfac4a304baa0027083c303819ca6f4e110b40fcf2f0cdf1b0b2df54531692",
-    "bioetl-run-explorer-v1": "02e152a59cce0c28df47d0e3d7723231d4805eb7df70318d69d1dd4e340311a6",
-    "bioetl-runtime": "8179b0166222d9f4273bfd8e5c87a96c8ecc9078cc916165e382548b4f23e7e6"
+    "bioetl-control-plane-v1": "960c5898864074093ede923b8878b4cd3bcaefea719f6f834d6405b30c17ff99",
+    "bioetl-dq-v2": "1953f81631d8795987b25e98ddd401526116dff4b2f777685f9249beb2885839",
+    "bioetl-incident-v1": "80667b29d3487ed5bb314ba9387d1a06e814283ff5d676ce182b4bdd09e619de",
+    "bioetl-overview-v2": "c9c84438fd2c5d838b671e9facf1d558c90f02219fc95b71d94f307064dff607",
+    "bioetl-provider-health-v2": "a5c7fc1b5340f74ebb5b22ce2f0be43095f69310cdfdb55e7d30cb92781a2441",
+    "bioetl-run-explorer-v1": "1f68dc375d8c566928b07f6874e6eed12ad052358b6388e255e9a2da8b0d77c7",
+    "bioetl-runtime": "976818435ec2a619c170e8f7c1ac26a1622c168251607a625e7bc5ee5159c7b3"
   },
   "panels": [
     {
@@ -71,7 +71,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 9401,
-      "panel_title": "Monitor Current Readiness",
+      "panel_title": "Monitor Readiness",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
@@ -129,7 +129,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 891,
-      "panel_title": "Monitor Replay Safety",
+      "panel_title": "Monitor Replay",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
@@ -148,7 +148,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 892,
-      "panel_title": "Monitor Checkpoint Age",
+      "panel_title": "Track Checkpoint",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
@@ -167,7 +167,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 893,
-      "panel_title": "Monitor Manifest/Ledger",
+      "panel_title": "Monitor Ledger",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",

@@ -331,6 +331,12 @@ def stamp_selected_run_panels(payload: dict[str, object]) -> None:
     _append_saved_run_evidence_row(panels)
 
 
+SELECTOR_ROWS = (
+    '$exists(items) and $count(items) = 0 ? '
+    '[{"text":"NO MATCHES","value":"-"}] : items'
+)
+
+
 def stamp_selector_columns(payload: dict[str, object]) -> None:
     """Keep Infinity variable frames typed even when the catalog is empty."""
     for variable in payload.get("templating", {}).get("list", []):
@@ -345,8 +351,8 @@ def stamp_selector_columns(payload: dict[str, object]) -> None:
             continue
         url = url.replace("response_shape=list", "response_shape=options")
         infinity["url"] = url
-        infinity["parser"] = "simple"
-        infinity["root_selector"] = "items"
+        infinity["parser"] = "backend"
+        infinity["root_selector"] = SELECTOR_ROWS
         variable["definition"] = url
         infinity["columns"] = [
             {"selector": field, "text": f"__{field}", "type": "string"}

@@ -293,7 +293,7 @@ scalar_density_enforced_uids:
 answer_panels:
   bioetl-control-plane-v1.json:
     - id: 9401
-      title: Monitor Current Readiness
+      title: Monitor Readiness
   bioetl-overview-v2.json:
     - id: 214
       title: Monitor Scope Health

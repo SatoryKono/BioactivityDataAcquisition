@@ -374,13 +374,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.50, sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])))",
+      "formula": "(histogram_quantile(0.50, (sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes(bioetl_checkpoint_save_duration_seconds_created{pipeline=~\"$pipeline\"}[$__range]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 105,
       "panel_title": "Track Checkpoint Save Latency",
-      "query": "histogram_quantile(0.50, sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])))",
+      "query": "(histogram_quantile(0.50, (sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes(bioetl_checkpoint_save_duration_seconds_created{pipeline=~\"$pipeline\"}[$__range]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_checkpoint_save_duration_seconds_bucket"
+        "bioetl_checkpoint_save_duration_seconds_bucket",
+        "bioetl_checkpoint_save_duration_seconds_created"
       ],
       "ref_id": "A",
       "runbook_urls": [
@@ -409,13 +410,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.95, sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])))",
+      "formula": "(histogram_quantile(0.95, (sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes(bioetl_checkpoint_save_duration_seconds_created{pipeline=~\"$pipeline\"}[$__range]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 105,
       "panel_title": "Track Checkpoint Save Latency",
-      "query": "histogram_quantile(0.95, sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])))",
+      "query": "(histogram_quantile(0.95, (sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes(bioetl_checkpoint_save_duration_seconds_created{pipeline=~\"$pipeline\"}[$__range]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_checkpoint_save_duration_seconds_bucket"
+        "bioetl_checkpoint_save_duration_seconds_bucket",
+        "bioetl_checkpoint_save_duration_seconds_created"
       ],
       "ref_id": "B",
       "runbook_urls": [
@@ -444,13 +446,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.99, sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])))",
+      "formula": "(histogram_quantile(0.99, (sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes(bioetl_checkpoint_save_duration_seconds_created{pipeline=~\"$pipeline\"}[$__range]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 105,
       "panel_title": "Track Checkpoint Save Latency",
-      "query": "histogram_quantile(0.99, sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])))",
+      "query": "(histogram_quantile(0.99, (sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes(bioetl_checkpoint_save_duration_seconds_created{pipeline=~\"$pipeline\"}[$__range]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_checkpoint_save_duration_seconds_bucket"
+        "bioetl_checkpoint_save_duration_seconds_bucket",
+        "bioetl_checkpoint_save_duration_seconds_created"
       ],
       "ref_id": "C",
       "runbook_urls": [
@@ -479,13 +482,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.50, sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])))",
+      "formula": "(histogram_quantile(0.50, (sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])) unless on (operation) (sum by (operation) (changes(bioetl_checkpoint_operator_duration_seconds_created[$__range]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 106,
       "panel_title": "Track Global Checkpoint Admin Latency",
-      "query": "histogram_quantile(0.50, sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])))",
+      "query": "(histogram_quantile(0.50, (sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])) unless on (operation) (sum by (operation) (changes(bioetl_checkpoint_operator_duration_seconds_created[$__range]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_checkpoint_operator_duration_seconds_bucket"
+        "bioetl_checkpoint_operator_duration_seconds_bucket",
+        "bioetl_checkpoint_operator_duration_seconds_created"
       ],
       "ref_id": "A",
       "runbook_urls": [
@@ -514,13 +518,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.95, sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])))",
+      "formula": "(histogram_quantile(0.95, (sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])) unless on (operation) (sum by (operation) (changes(bioetl_checkpoint_operator_duration_seconds_created[$__range]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 106,
       "panel_title": "Track Global Checkpoint Admin Latency",
-      "query": "histogram_quantile(0.95, sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])))",
+      "query": "(histogram_quantile(0.95, (sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])) unless on (operation) (sum by (operation) (changes(bioetl_checkpoint_operator_duration_seconds_created[$__range]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_checkpoint_operator_duration_seconds_bucket"
+        "bioetl_checkpoint_operator_duration_seconds_bucket",
+        "bioetl_checkpoint_operator_duration_seconds_created"
       ],
       "ref_id": "B",
       "runbook_urls": [
@@ -549,13 +554,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.99, sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])))",
+      "formula": "(histogram_quantile(0.99, (sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])) unless on (operation) (sum by (operation) (changes(bioetl_checkpoint_operator_duration_seconds_created[$__range]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 106,
       "panel_title": "Track Global Checkpoint Admin Latency",
-      "query": "histogram_quantile(0.99, sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])))",
+      "query": "(histogram_quantile(0.99, (sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])) unless on (operation) (sum by (operation) (changes(bioetl_checkpoint_operator_duration_seconds_created[$__range]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_checkpoint_operator_duration_seconds_bucket"
+        "bioetl_checkpoint_operator_duration_seconds_bucket",
+        "bioetl_checkpoint_operator_duration_seconds_created"
       ],
       "ref_id": "C",
       "runbook_urls": [
@@ -628,13 +634,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.50, sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])))",
+      "formula": "(histogram_quantile(0.50, (sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_write_duration_seconds_created[$__range]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 109,
       "panel_title": "Track Global Audit Write Latency",
-      "query": "histogram_quantile(0.50, sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])))",
+      "query": "(histogram_quantile(0.50, (sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_write_duration_seconds_created[$__range]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_audit_write_duration_seconds_bucket"
+        "bioetl_audit_write_duration_seconds_bucket",
+        "bioetl_audit_write_duration_seconds_created"
       ],
       "ref_id": "A",
       "runbook_urls": [
@@ -663,13 +670,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.95, sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])))",
+      "formula": "(histogram_quantile(0.95, (sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_write_duration_seconds_created[$__range]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 109,
       "panel_title": "Track Global Audit Write Latency",
-      "query": "histogram_quantile(0.95, sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])))",
+      "query": "(histogram_quantile(0.95, (sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_write_duration_seconds_created[$__range]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_audit_write_duration_seconds_bucket"
+        "bioetl_audit_write_duration_seconds_bucket",
+        "bioetl_audit_write_duration_seconds_created"
       ],
       "ref_id": "B",
       "runbook_urls": [
@@ -698,13 +706,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.99, sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])))",
+      "formula": "(histogram_quantile(0.99, (sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_write_duration_seconds_created[$__range]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 109,
       "panel_title": "Track Global Audit Write Latency",
-      "query": "histogram_quantile(0.99, sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])))",
+      "query": "(histogram_quantile(0.99, (sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_write_duration_seconds_created[$__range]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_audit_write_duration_seconds_bucket"
+        "bioetl_audit_write_duration_seconds_bucket",
+        "bioetl_audit_write_duration_seconds_created"
       ],
       "ref_id": "C",
       "runbook_urls": [
@@ -733,13 +742,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.50, sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])))",
+      "formula": "(histogram_quantile(0.50, (sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_query_duration_seconds_created[$__range]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 110,
       "panel_title": "Track Global Audit Query Latency",
-      "query": "histogram_quantile(0.50, sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])))",
+      "query": "(histogram_quantile(0.50, (sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_query_duration_seconds_created[$__range]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_audit_query_duration_seconds_bucket"
+        "bioetl_audit_query_duration_seconds_bucket",
+        "bioetl_audit_query_duration_seconds_created"
       ],
       "ref_id": "A",
       "runbook_urls": [
@@ -768,13 +778,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.95, sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])))",
+      "formula": "(histogram_quantile(0.95, (sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_query_duration_seconds_created[$__range]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 110,
       "panel_title": "Track Global Audit Query Latency",
-      "query": "histogram_quantile(0.95, sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])))",
+      "query": "(histogram_quantile(0.95, (sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_query_duration_seconds_created[$__range]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_audit_query_duration_seconds_bucket"
+        "bioetl_audit_query_duration_seconds_bucket",
+        "bioetl_audit_query_duration_seconds_created"
       ],
       "ref_id": "B",
       "runbook_urls": [
@@ -803,13 +814,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.99, sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])))",
+      "formula": "(histogram_quantile(0.99, (sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_query_duration_seconds_created[$__range]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 110,
       "panel_title": "Track Global Audit Query Latency",
-      "query": "histogram_quantile(0.99, sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])))",
+      "query": "(histogram_quantile(0.99, (sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_query_duration_seconds_created[$__range]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_audit_query_duration_seconds_bucket"
+        "bioetl_audit_query_duration_seconds_bucket",
+        "bioetl_audit_query_duration_seconds_created"
       ],
       "ref_id": "C",
       "runbook_urls": [
@@ -838,13 +850,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile($read_latency_quantile, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
+      "formula": "(histogram_quantile($read_latency_quantile, (sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])) unless on (store, operation) (sum by (store, operation) (changes(bioetl_control_plane_read_duration_seconds_created{status!=\"failed\"}[$__range]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 111,
       "panel_title": "Track Global Read Latency",
-      "query": "histogram_quantile($read_latency_quantile, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
+      "query": "(histogram_quantile($read_latency_quantile, (sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])) unless on (store, operation) (sum by (store, operation) (changes(bioetl_control_plane_read_duration_seconds_created{status!=\"failed\"}[$__range]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_control_plane_read_duration_seconds_bucket"
+        "bioetl_control_plane_read_duration_seconds_bucket",
+        "bioetl_control_plane_read_duration_seconds_created"
       ],
       "ref_id": "A",
       "runbook_urls": [
@@ -1296,7 +1309,7 @@
       "formula": "clamp_max(max(bioetl_replay_safety_blockers_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} and on(pipeline,run_type) (bioetl_control_plane_telemetry_missing_5m == 0)), 2)",
       "kind": "promql",
       "panel_id": 891,
-      "panel_title": "Monitor Replay Safety",
+      "panel_title": "Monitor Replay",
       "query": "clamp_max(max(bioetl_replay_safety_blockers_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} and on(pipeline,run_type) (bioetl_control_plane_telemetry_missing_5m == 0)), 2)",
       "query_tokens": [
         "bioetl_control_plane_telemetry_missing_5m",
@@ -1330,7 +1343,7 @@
       "formula": "max(bioetl_checkpoint_age_seconds{pipeline=~\"$pipeline\"})",
       "kind": "promql",
       "panel_id": 892,
-      "panel_title": "Monitor Checkpoint Age",
+      "panel_title": "Track Checkpoint",
       "query": "max(bioetl_checkpoint_age_seconds{pipeline=~\"$pipeline\"})",
       "query_tokens": [
         "bioetl_checkpoint_age_seconds"
@@ -1357,7 +1370,7 @@
       "formula": "clamp_max(max(bioetl_manifest_ledger_failures_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} and on(pipeline,run_type) (bioetl_control_plane_telemetry_missing_5m == 0)), 2)",
       "kind": "promql",
       "panel_id": 893,
-      "panel_title": "Monitor Manifest/Ledger",
+      "panel_title": "Monitor Ledger",
       "query": "clamp_max(max(bioetl_manifest_ledger_failures_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} and on(pipeline,run_type) (bioetl_control_plane_telemetry_missing_5m == 0)), 2)",
       "query_tokens": [
         "bioetl_control_plane_telemetry_missing_5m",
@@ -1446,7 +1459,7 @@
       "formula": "max(bioetl_control_plane_current_status_trusted{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
       "kind": "promql",
       "panel_id": 9401,
-      "panel_title": "Monitor Current Readiness",
+      "panel_title": "Monitor Readiness",
       "query": "max(bioetl_control_plane_current_status_trusted{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
       "query_tokens": [
         "bioetl_control_plane_current_status_trusted"
@@ -2176,13 +2189,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__rate_interval])))",
+      "formula": "(histogram_quantile(0.95, (sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__rate_interval])) unless on (pipeline) (sum by (pipeline) (changes(bioetl_dq_check_duration_ms_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__rate_interval]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 11,
       "panel_title": "Track DQ Check Duration p95",
-      "query": "histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__rate_interval])))",
+      "query": "(histogram_quantile(0.95, (sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__rate_interval])) unless on (pipeline) (sum by (pipeline) (changes(bioetl_dq_check_duration_ms_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__rate_interval]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_dq_check_duration_ms_bucket"
+        "bioetl_dq_check_duration_ms_bucket",
+        "bioetl_dq_check_duration_ms_created"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -2497,11 +2511,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "valid_empty",
-      "formula": "round((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval]))) + (sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval]))))",
+      "formula": "round(sum(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval]))) + sum(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval])))) unless (count(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval]))) or count(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval]))))",
       "kind": "promql",
       "panel_id": 155,
       "panel_title": "Track DQ Threshold Events",
-      "query": "round((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval]))) + (sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval]))))",
+      "query": "round(sum(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval]))) + sum(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval])))) unless (count(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval]))) or count(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval]))))",
       "query_tokens": [
         "bioetl_dq_soft_threshold_exceeded_total",
         "bioetl_dq_validation_failures_total"
@@ -3891,13 +3905,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
+      "formula": "(histogram_quantile(0.95, (sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])) unless on (provider) (sum by (provider) (changes(bioetl_health_check_latency_seconds_created{provider=~\"$provider\"}[$__rate_interval]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 1,
       "panel_title": "Track Health-Check Latency p95",
-      "query": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
+      "query": "(histogram_quantile(0.95, (sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])) unless on (provider) (sum by (provider) (changes(bioetl_health_check_latency_seconds_created{provider=~\"$provider\"}[$__rate_interval]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_health_check_latency_seconds_bucket"
+        "bioetl_health_check_latency_seconds_bucket",
+        "bioetl_health_check_latency_seconds_created"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -4026,13 +4041,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])))",
+      "formula": "(histogram_quantile(0.95, (sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])) unless on (provider) (sum by (provider) (changes(bioetl_health_check_latency_seconds_created{provider=~\"$provider\"}[$__range]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 102,
       "panel_title": "Inspect Health-Check Latency p95",
-      "query": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])))",
+      "query": "(histogram_quantile(0.95, (sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])) unless on (provider) (sum by (provider) (changes(bioetl_health_check_latency_seconds_created{provider=~\"$provider\"}[$__range]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_health_check_latency_seconds_bucket"
+        "bioetl_health_check_latency_seconds_bucket",
+        "bioetl_health_check_latency_seconds_created"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -4096,7 +4112,7 @@
       "dashboard_uid": "bioetl-provider-health-v2",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
-      "documents_valid_empty": true,
+      "documents_valid_empty": false,
       "empty_state": "valid_empty",
       "formula": "round((sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range]))))",
       "kind": "promql",
@@ -4110,7 +4126,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "green",
+          "color": "text",
           "value": null
         }
       ],
@@ -4280,13 +4296,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.95, sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
+      "formula": "(histogram_quantile(0.95, (sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])) unless on (provider, endpoint) (sum by (provider, endpoint) (changes(bioetl_adapter_request_duration_seconds_created{provider=~\"$provider\"}[$__rate_interval]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 110,
       "panel_title": "Track Request Latency p95",
-      "query": "histogram_quantile(0.95, sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
+      "query": "(histogram_quantile(0.95, (sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])) unless on (provider, endpoint) (sum by (provider, endpoint) (changes(bioetl_adapter_request_duration_seconds_created{provider=~\"$provider\"}[$__rate_interval]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_adapter_request_duration_seconds_bucket"
+        "bioetl_adapter_request_duration_seconds_bucket",
+        "bioetl_adapter_request_duration_seconds_created"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -4350,13 +4367,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "valid_empty",
-      "formula": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
+      "formula": "(histogram_quantile(0.95, (sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])) unless on (provider) (sum by (provider) (changes(bioetl_rate_limiter_wait_seconds_created{provider=~\"$provider\"}[$__rate_interval]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 112,
       "panel_title": "Track Rate-Limiter Wait p95",
-      "query": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
+      "query": "(histogram_quantile(0.95, (sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])) unless on (provider) (sum by (provider) (changes(bioetl_rate_limiter_wait_seconds_created{provider=~\"$provider\"}[$__rate_interval]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_rate_limiter_wait_seconds_bucket"
+        "bioetl_rate_limiter_wait_seconds_bucket",
+        "bioetl_rate_limiter_wait_seconds_created"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -5251,13 +5269,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "valid_empty",
-      "formula": "(histogram_quantile(0.50, sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])))) >= 0",
+      "formula": "(histogram_quantile(0.50, (sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on (phase, status) (sum by (phase, status) (changes(bioetl_phase_duration_seconds_created{pipeline=~\"$pipeline\"}[$__rate_interval]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 207,
       "panel_title": "Track Phase Duration",
-      "query": "(histogram_quantile(0.50, sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])))) >= 0",
+      "query": "(histogram_quantile(0.50, (sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on (phase, status) (sum by (phase, status) (changes(bioetl_phase_duration_seconds_created{pipeline=~\"$pipeline\"}[$__rate_interval]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_phase_duration_seconds_bucket"
+        "bioetl_phase_duration_seconds_bucket",
+        "bioetl_phase_duration_seconds_created"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -5276,13 +5295,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "valid_empty",
-      "formula": "(histogram_quantile(0.95, sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])))) >= 0",
+      "formula": "(histogram_quantile(0.95, (sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on (phase, status) (sum by (phase, status) (changes(bioetl_phase_duration_seconds_created{pipeline=~\"$pipeline\"}[$__rate_interval]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 207,
       "panel_title": "Track Phase Duration",
-      "query": "(histogram_quantile(0.95, sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])))) >= 0",
+      "query": "(histogram_quantile(0.95, (sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on (phase, status) (sum by (phase, status) (changes(bioetl_phase_duration_seconds_created{pipeline=~\"$pipeline\"}[$__rate_interval]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_phase_duration_seconds_bucket"
+        "bioetl_phase_duration_seconds_bucket",
+        "bioetl_phase_duration_seconds_created"
       ],
       "ref_id": "B",
       "runbook_urls": [],
@@ -5301,13 +5321,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "valid_empty",
-      "formula": "(histogram_quantile(0.99, sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])))) >= 0",
+      "formula": "(histogram_quantile(0.99, (sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on (phase, status) (sum by (phase, status) (changes(bioetl_phase_duration_seconds_created{pipeline=~\"$pipeline\"}[$__rate_interval]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 207,
       "panel_title": "Track Phase Duration",
-      "query": "(histogram_quantile(0.99, sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])))) >= 0",
+      "query": "(histogram_quantile(0.99, (sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on (phase, status) (sum by (phase, status) (changes(bioetl_phase_duration_seconds_created{pipeline=~\"$pipeline\"}[$__rate_interval]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_phase_duration_seconds_bucket"
+        "bioetl_phase_duration_seconds_bucket",
+        "bioetl_phase_duration_seconds_created"
       ],
       "ref_id": "C",
       "runbook_urls": [],
@@ -5536,13 +5557,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "valid_empty",
-      "formula": "(histogram_quantile(0.50, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))) >= 0",
+      "formula": "(histogram_quantile(0.50, (sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])) unless on (stage, status, run_type) (sum by (stage, status, run_type) (changes(bioetl_pipeline_duration_seconds_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 239,
       "panel_title": "Track Pipeline Duration",
-      "query": "(histogram_quantile(0.50, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))) >= 0",
+      "query": "(histogram_quantile(0.50, (sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])) unless on (stage, status, run_type) (sum by (stage, status, run_type) (changes(bioetl_pipeline_duration_seconds_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_pipeline_duration_seconds_bucket"
+        "bioetl_pipeline_duration_seconds_bucket",
+        "bioetl_pipeline_duration_seconds_created"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -5561,13 +5583,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "valid_empty",
-      "formula": "(histogram_quantile(0.95, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))) >= 0",
+      "formula": "(histogram_quantile(0.95, (sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])) unless on (stage, status, run_type) (sum by (stage, status, run_type) (changes(bioetl_pipeline_duration_seconds_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 239,
       "panel_title": "Track Pipeline Duration",
-      "query": "(histogram_quantile(0.95, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))) >= 0",
+      "query": "(histogram_quantile(0.95, (sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])) unless on (stage, status, run_type) (sum by (stage, status, run_type) (changes(bioetl_pipeline_duration_seconds_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_pipeline_duration_seconds_bucket"
+        "bioetl_pipeline_duration_seconds_bucket",
+        "bioetl_pipeline_duration_seconds_created"
       ],
       "ref_id": "B",
       "runbook_urls": [],
@@ -5586,13 +5609,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "valid_empty",
-      "formula": "(histogram_quantile(0.99, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))) >= 0",
+      "formula": "(histogram_quantile(0.99, (sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])) unless on (stage, status, run_type) (sum by (stage, status, run_type) (changes(bioetl_pipeline_duration_seconds_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 239,
       "panel_title": "Track Pipeline Duration",
-      "query": "(histogram_quantile(0.99, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))) >= 0",
+      "query": "(histogram_quantile(0.99, (sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])) unless on (stage, status, run_type) (sum by (stage, status, run_type) (changes(bioetl_pipeline_duration_seconds_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval]) > 0))))) >= 0",
       "query_tokens": [
-        "bioetl_pipeline_duration_seconds_bucket"
+        "bioetl_pipeline_duration_seconds_bucket",
+        "bioetl_pipeline_duration_seconds_created"
       ],
       "ref_id": "C",
       "runbook_urls": [],
