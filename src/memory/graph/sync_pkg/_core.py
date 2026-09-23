@@ -328,6 +328,12 @@ from memory.graph.sync_pkg.add_port_facade_surface import (
 from memory.graph.sync_pkg.add_port_surfaces import (
     _add_port_surfaces as _add_port_surfaces,
 )
+from memory.graph.sync_pkg.add_provider_surfaces import (
+    _add_policy_surfaces as _add_policy_surfaces,
+)
+from memory.graph.sync_pkg.add_provider_surfaces import (
+    _add_provider_surfaces as _add_provider_surfaces,
+)
 from memory.graph.sync_pkg.add_repo_zone_directory_file import (
     _add_repo_zone_directory_file as _add_repo_zone_directory_file,
 )
@@ -2542,33 +2548,6 @@ def _add_provider_and_config_graph(
     provider_nodes = _add_provider_surfaces(snapshot, root, project, today)
     entity_nodes = _add_entity_config_surfaces(snapshot, root, today, provider_nodes)
     _add_composite_config_surfaces(snapshot, root, project, today, entity_nodes)
-
-
-def _add_provider_surfaces(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-) -> dict[str, NodeKey]:
-    providers_root = root / "configs" / "providers"
-    provider_nodes: dict[str, NodeKey] = {}
-    for provider_path in _provider_config_paths(providers_root):
-        _add_provider_surface(
-            snapshot,
-            root,
-            project,
-            today,
-            provider_path,
-            provider_nodes=provider_nodes,
-        )
-    return provider_nodes
-
-
-def _add_policy_surfaces(
-    snapshot: GraphSnapshot, _root: Path, project: NodeKey, today: str
-) -> None:
-    for policy_payload in _curated_policy_surfaces():
-        _add_policy_surface_entry(snapshot, project, today, policy_payload)
 
 
 def _add_impact_analysis_surfaces(
