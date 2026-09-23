@@ -195,6 +195,17 @@ def _overview(p: dict[int, dict]) -> None:
 
 
 def _trust(p: dict[int, dict]) -> None:
+    # An unselected run is not a successful processing result.
+    for override in p[9418]["fieldConfig"]["overrides"]:
+        if override.get("matcher", {}).get("options") == "Result":
+            for prop in override["properties"]:
+                if prop["id"] == "mappings":
+                    for mapping in prop["value"]:
+                        if mapping["type"] == "value":
+                            mapping["options"]["SELECT RUN"] = {
+                                "text": "SELECT RUN",
+                                "color": "#A3A3A3",
+                            }
     _table(p[9418], {"Result": 110, "Trust": 105, "Reasons": 90, "Observed": 165})
     anchors = p[9404]
     _table(anchors)
@@ -533,6 +544,19 @@ def apply_evidence_readability(payload: dict) -> None:
     if payload.get("uid") == "bioetl-run-explorer-v1":
         _run_explorer(p)
     _first_window_widths(payload, p)
+    # These are enum verdicts, not blocker counts: code 3 is UNKNOWN.
+    # Counter panels intentionally retain their >=2=CRIT threshold copy.
+    enum_panels = {
+        "bioetl-dq-v2": (9401,),
+        "bioetl-provider-health-v2": (9401,),
+        "bioetl-overview-v2": (9031, 9007),
+    }
+    for pid in enum_panels.get(payload.get("uid"), ()):
+        p[pid]["description"] = (
+            p[pid]["description"]
+            .replace(">=2=CRIT", "2=CRIT")
+            .replace("`null=UNKNOWN`", "`3/null=UNKNOWN`")
+        )
     if 9402 in p and p[9402].get("title") == "Review Run Summary":
         # Hashes and composite parameter names need two lines at 900px.
         # Large rows keep pagination from placing wrapped text under its footer.
@@ -647,17 +671,18 @@ def _first_window_widths(payload: dict, p: dict[int, dict]) -> None:
         "bioetl-control-plane-v1": {
             9418: {"Result": 100, "Trust": 105, "reasons_count": 80}
         },
-        "bioetl-overview-v2": {215: {"Priority": 90, "Action": 125}},
+        "bioetl-overview-v2": {215: {"Priority": 90, "Action": 155}},
         "bioetl-dq-v2": {9102: {"severity": 70, "Action": 125}},
         "bioetl-run-explorer-v1": {
             3010: {
-                "selected": 50,
+                "selected": 28,
                 "Started": 145,
+                "Pipeline": 165,
                 "Run": 115,
-                "Duration": 75,
-                "Trust": 75,
+                "Duration": 90,
+                "Trust": 120,
                 "Processing": 90,
-                "Report": 68,
+                "Report": 80,
             }
         },
     }
@@ -667,3 +692,5 @@ def _first_window_widths(payload: dict, p: dict[int, dict]) -> None:
                 prop for prop in item["properties"] if prop["id"] != _WIDTH
             ]
         _table(p[pid], fields)
+        if payload.get("uid") == "bioetl-run-explorer-v1" and pid == 3010:
+            _override(p[pid], "selected", "custom.minWidth", 28)

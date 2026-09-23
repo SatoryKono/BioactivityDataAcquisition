@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 
@@ -23,6 +25,7 @@ _FIELDS = {
     "provider": "provider",
 }
 _ALL = {"", "All", "all", "$__all", ".*"}
+_CATALOG_READ_WORKERS = 4
 
 
 def _allowed_scope(values: tuple[str, ...]) -> set[str]:
@@ -136,14 +139,41 @@ def load_report_selector_entries(
     """Read only selected owners while preserving the complete historical catalog."""
     root = configured_report_root(root=root)
     pipelines = _allowed_scope(scopes.get("pipeline", ()))
-    return [
-        entry
-        for pipeline in (sorted(pipelines) if pipelines else [None])
-        for entry in list_pipeline_reports(
+    owners: list[str | None] = sorted(pipelines)
+    if not pipelines:
+        store = create_run_report_store()
+        base = root / "pipeline"
+        if not store.is_dir(str(base)):
+            return []
+        owners = [
+            Path(location).name
+            for location in store.iterdir(str(base))
+            if store.is_dir(location)
+        ]
+        # Preserve legacy enumeration semantics for names that a selected-owner
+        # lookup would normalize. Never silently omit unusual historical paths.
+        if any(not re.fullmatch(r"[A-Za-z0-9_-]+", owner or "") for owner in owners):
+            owners = [None]
+
+    def read_owner(pipeline: str | None) -> list[ReportIndexEntry]:
+        return list_pipeline_reports(
             pipeline_name=pipeline,
             root=root,
             limit=None,
             store=create_run_report_store(),
             include_markdown=False,
         )
-    ]
+
+    if not owners:
+        return []
+    if len(owners) == 1:
+        return read_owner(owners[0])
+    # Each worker owns its store. executor.map preserves owner order and raises
+    # read failures rather than returning an incomplete successful catalog.
+    with ThreadPoolExecutor(max_workers=_CATALOG_READ_WORKERS) as executor:
+        entries = [
+            entry for batch in executor.map(read_owner, owners) for entry in batch
+        ]
+    if not pipelines:
+        entries.sort(key=lambda entry: entry.mtime, reverse=True)
+    return entries

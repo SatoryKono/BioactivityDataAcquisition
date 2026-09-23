@@ -615,7 +615,11 @@
               },
               {
                 "id": "custom.width",
-                "value": 50
+                "value": 28
+              },
+              {
+                "id": "custom.minWidth",
+                "value": 28
               }
             ]
           },
@@ -647,6 +651,10 @@
                   "type": "auto",
                   "wrapText": false
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 165
               }
             ]
           },
@@ -805,7 +813,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 68
+                "value": 80
               }
             ]
           },
@@ -865,7 +873,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 75
+                "value": 90
               }
             ]
           },
@@ -1028,7 +1036,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 75
+                "value": 120
               }
             ]
           },
