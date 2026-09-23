@@ -22,7 +22,12 @@ __all__ = [
 
 
 # System fields that MUST appear first (in order)
-# These are lineage/metadata fields per RULES.md §2.4
+# These are lineage/metadata fields per RULES.md §2.4.
+# This tuple is the write-time SSOT for present prefix fields. Config
+# `schema.column_groups[system]` / `merge.column_groups[system]` may list a
+# subset plus entity extras (`_state`); intersection order must match this tuple.
+# Composite persisted groups intentionally omit occurrence-scoped provenance
+# (`_run_id`, `_run_type`, `_source_batch_id`, `_ingestion_ts`).
 SYSTEM_FIELDS_PREFIX: Final[tuple[str, ...]] = (
     "entity_id",
     "content_hash",

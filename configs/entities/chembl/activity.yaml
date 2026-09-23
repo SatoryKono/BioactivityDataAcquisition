@@ -26,6 +26,9 @@ schema:
   column_groups:
     - name: system
       fields:
+        # SYSTEM_FIELDS_PREFIX is write-time SSOT for present prefix fields.
+        # `_source` omitted: CHEMBL_ACTIVITY_SCHEMA uses include_source=False.
+        # `_state` is activity metadata after the prefix, not a prefix member.
         - entity_id
         - content_hash
         - _run_id

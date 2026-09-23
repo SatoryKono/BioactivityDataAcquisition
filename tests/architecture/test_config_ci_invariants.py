@@ -38,6 +38,7 @@ from bioetl.domain.constants import META_FIELDS
 from bioetl.domain.models.filter import compute_extraction_params_sha256
 from bioetl.infrastructure.config.config_ci_contract import (
     COMPOSITE_ALLOWED_KEYS,
+    COMPOSITE_NESTED_PAYLOAD_KEYS,
     CONTRACT_ALLOWED_KEYS,
     ENTITY_ALLOWED_KEYS,
     FILTER_ALLOWED_KEYS,
@@ -690,6 +691,9 @@ class TestConfigContractSourceOfTruth:
         assert invariant_script.PIPELINE_ALLOWED_KEYS is PIPELINE_ALLOWED_KEYS
         assert invariant_script.ENTITY_ALLOWED_KEYS is ENTITY_ALLOWED_KEYS
         assert invariant_script.COMPOSITE_ALLOWED_KEYS is COMPOSITE_ALLOWED_KEYS
+        assert (
+            invariant_script.COMPOSITE_NESTED_PAYLOAD_KEYS is COMPOSITE_NESTED_PAYLOAD_KEYS
+        )
         assert invariant_script.PROVIDER_ALLOWED_KEYS is PROVIDER_ALLOWED_KEYS
         assert invariant_script.QUALITY_ALLOWED_KEYS is QUALITY_ALLOWED_KEYS
         assert invariant_script.FILTER_ALLOWED_KEYS is FILTER_ALLOWED_KEYS
@@ -1027,6 +1031,10 @@ class TestProviderAuthRequirements:
 class TestNoUnknownKeys:
     """INV-CFG-005: config files must not contain unrecognized top-level keys."""
 
+    def test_check_inv_005_script_passes(self) -> None:
+        errors = invariant_script.check_inv_005(verbose=False)
+        assert errors == []
+
     @pytest.mark.parametrize("config_path", _collect_pipeline_configs(), ids=_rel)
     def test_entity_top_level_keys(self, config_path: Path) -> None:
         data = _load_yaml(config_path)
@@ -1091,6 +1099,49 @@ class TestNoUnknownKeys:
         assert not unknown, (
             f"{_rel(config_path)}: unknown top-level keys: {unknown}. "
             f"Allowed: {sorted(COMPOSITE_ALLOWED_KEYS)}"
+        )
+        leaked = COMPOSITE_NESTED_PAYLOAD_KEYS & set(data.keys())
+        assert not leaked, (
+            f"{_rel(config_path)}: nested CompositeConfig keys must stay under "
+            f"composite:, not top-level: {sorted(leaked)}"
+        )
+
+    @pytest.mark.parametrize("config_path", _collect_composite_configs(), ids=_rel)
+    def test_composite_nested_payload_keys_live_under_composite(
+        self, config_path: Path
+    ) -> None:
+        data = _load_yaml(config_path)
+        composite = data.get("composite")
+        assert isinstance(composite, dict), f"{_rel(config_path)}: missing composite:"
+        nested_present = COMPOSITE_NESTED_PAYLOAD_KEYS & set(composite.keys())
+        assert nested_present == COMPOSITE_NESTED_PAYLOAD_KEYS, (
+            f"{_rel(config_path)}: expected nested CompositeConfig keys "
+            f"{sorted(COMPOSITE_NESTED_PAYLOAD_KEYS)} under composite:, "
+            f"found {sorted(nested_present)}"
+        )
+
+    @pytest.mark.parametrize("config_path", _collect_composite_configs(), ids=_rel)
+    def test_composite_shared_policy_file_resolves_under_composites(
+        self, config_path: Path
+    ) -> None:
+        data = _load_yaml(config_path)
+        maintenance = data.get("maintenance")
+        assert isinstance(maintenance, dict), (
+            f"{_rel(config_path)}: missing maintenance:"
+        )
+        policy_file = maintenance.get("composite_shared_policy_file")
+        assert isinstance(policy_file, str) and policy_file.strip(), (
+            f"{_rel(config_path)}: maintenance.composite_shared_policy_file required"
+        )
+        resolved = (config_path.parent / policy_file).resolve()
+        assert resolved.is_file(), (
+            f"{_rel(config_path)}: composite_shared_policy_file={policy_file!r} "
+            f"does not resolve to {resolved}"
+        )
+        composites_root = COMPOSITES_DIR.resolve()
+        assert composites_root in resolved.parents or resolved == composites_root, (
+            f"{_rel(config_path)}: policy file must resolve under "
+            f"configs/composites/, got {resolved}"
         )
 
     @pytest.mark.parametrize("config_path", _collect_provider_configs(), ids=_rel)
