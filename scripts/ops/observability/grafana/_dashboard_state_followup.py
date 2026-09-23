@@ -556,7 +556,7 @@ def _apply_incident(
 
         _rewrite_incident_route_links(p)
         for pid in (2010, 2005):
-            full_list(dashboard, panels[pid], 4 if pid == 2010 else 3)
+            full_list(dashboard, panels[pid], 2)
 
 
 def _rewrite_incident_route_links(value: Any) -> None:

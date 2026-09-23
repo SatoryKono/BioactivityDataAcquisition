@@ -97,7 +97,7 @@ def test_incident_current_alerts_share_first_window_with_runbook() -> None:
     assert any(
         isinstance(item, dict)
         and item.get("id") == "limit"
-        and (item.get("options") or {}).get("limitField") == 3
+        and (item.get("options") or {}).get("limitField") == 2
         for item in (alert.get("transformations") or [])
     )
     row = next(

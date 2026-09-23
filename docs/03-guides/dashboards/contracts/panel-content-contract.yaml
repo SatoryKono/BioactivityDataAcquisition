@@ -2832,7 +2832,7 @@ dashboards:
         - not_applicable
         render_profiles: *id001
       '9401':
-        title: Monitor Selected-Scope Status
+        title: Monitor Scope Status
         role: indicator
         tier: 3
         scope: current

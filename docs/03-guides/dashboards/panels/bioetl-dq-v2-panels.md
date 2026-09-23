@@ -105,6 +105,10 @@ accepted as the denominator; zero/missing denominator remains unknown.
 - **Data sources:** `bioetl_dq_records_quarantined_total`
 
 ### 16. Monitor Worst Freshness Age
+
+Age is evaluated at the selected range end using the latest observed timestamp
+per series within that range. Missing observations remain UNKNOWN; the card
+does not carry forward an earlier non-null age.
 - **Type:** Gauge
 - **Purpose:** Show worst TIME RANGE freshness age in hours. WARN begins at
   `24h`, CRIT at `72h`; query output, unit, title, and thresholds use hours.

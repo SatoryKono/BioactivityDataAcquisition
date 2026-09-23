@@ -127,7 +127,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 9452 | Inspect Selected Run Identity |
 | bioetl-incident-v1.json | 1000 | Navigate Dashboards |
 | bioetl-incident-v1.json | 9400 | Understand Incident Scope |
-| bioetl-incident-v1.json | 9401 | Monitor Selected-Scope Status |
+| bioetl-incident-v1.json | 9401 | Monitor Scope Status |
 | bioetl-incident-v1.json | 2001 | Start Incident Triage |
 | bioetl-incident-v1.json | 2010 | Inspect Ranked Suspects |
 | bioetl-incident-v1.json | 2005 | Monitor Current Alerts |

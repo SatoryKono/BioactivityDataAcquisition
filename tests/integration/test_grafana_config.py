@@ -1094,6 +1094,11 @@ def test_dq_freshness_panel_uses_age_from_timestamp_metric() -> None:
         and "/ 3600" in expr
         for expr in expressions
     ), "Freshness panel must derive worst age in hours from range timestamp evidence"
+    assert all("[$__range]" in expr for expr in expressions)
+    assert all(
+        target.get("instant") is True and target.get("range") is False
+        for target in panel["targets"]
+    ), "A stat must evaluate age at range end, not reuse an earlier non-null age"
     assert all(
         "time() - max(bioetl_data_freshness_seconds" not in expr for expr in expressions
     ), "Freshness lag must not collapse scope to the freshest entity"

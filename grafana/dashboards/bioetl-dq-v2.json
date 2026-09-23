@@ -2165,7 +2165,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE delivery impact: Freshness age in hours. SLA 24/72 only applies when samples exist. Explicit SLA: WARN at 24h and CRIT at 72h. An ~8h value is green only because it is below the visible 24h SLA; null is UNKNOWN. TELEMETRY MISSING means freshness evidence is unavailable, not healthy. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
+          "description": "TIME RANGE · Worst age in hours at the selected range end, using the latest timestamp observed per series within that range. Missing series remain UNKNOWN; an older non-null age is never carried forward. SLA 24/72: WARN at 24h and CRIT at 72h apply only to observed evidence. This is range evidence, not a selected-run or CURRENT completeness verdict.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2241,9 +2241,11 @@
           },
           "targets": [
             {
-              "expr": "(max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}[12h]), 0))) / 3600",
+              "expr": "(max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}[$__range]), 0))) / 3600",
               "legendFormat": "Worst Freshness",
-              "refId": "A"
+              "refId": "A",
+              "instant": true,
+              "range": false
             }
           ],
           "title": "Monitor Worst Freshness Age",

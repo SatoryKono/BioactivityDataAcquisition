@@ -367,14 +367,14 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Understand Incident Scope",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">GLOBAL signals are not verified causes. Selected-scope status is separate. Telemetry gaps remain UNKNOWN; event age and impact need event evidence.</div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">GLOBAL suspects are not verified causes. Telemetry gaps are UNKNOWN.</div>"
       },
       "links": []
     },
     {
       "id": 9401,
       "type": "stat",
-      "title": "Monitor Selected-Scope Status",
+      "title": "Monitor Scope Status",
       "description": "CURRENT snapshot · Selected pipeline/run_type status at evaluation time. Ranked suspects (2010) are GLOBAL/UNVERIFIED and independent of this card. Pair with Provenance reason + action; never read as OK. Not a healthy OK. Ranked suspects may be WORKFLOW/GLOBAL blast radius — check scope labels on tables. Map 0=OK,1=WARN,2=CRIT,3/null=UNKNOWN. Never bare numbers. Confidence from missing telemetry / VALID_EMPTY suspects. Read-only workspace",
       "gridPos": {
         "h": 3,
@@ -454,7 +454,7 @@
           },
           "noValue": "UNKNOWN",
           "decimals": 0,
-          "displayName": "Monitor Selected-Scope Status"
+          "displayName": "Monitor Scope Status"
         },
         "overrides": []
       },
@@ -483,7 +483,7 @@
       "title": "",
       "description": "DSA-07 decision rail. Read-only",
       "gridPos": {
-        "h": 3,
+        "h": 2,
         "w": 24,
         "x": 0,
         "y": 5
@@ -491,7 +491,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Start Incident Triage",
-        "content": "<div style=\"font-size:16px;line-height:1.2\">Start with ranked suspects; open Action for domain evidence. PENDING means the alert has not fired. Use alert history below to assess timing and impact.</div>"
+        "content": "<div style=\"font-size:16px;line-height:1.2\">Open Action for evidence; PENDING has not fired. Use alert history.</div>"
       },
       "links": [
         {
@@ -511,7 +511,7 @@
         "h": 5,
         "w": 24,
         "x": 0,
-        "y": 8
+        "y": 7
       },
       "datasource": {
         "type": "prometheus",
@@ -569,7 +569,7 @@
         {
           "id": "limit",
           "options": {
-            "limitField": 4
+            "limitField": 2
           }
         },
         {
@@ -801,15 +801,15 @@
                 "value": false
               },
               {
+                "id": "custom.width",
+                "value": 125
+              },
+              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 }
-              },
-              {
-                "id": "custom.width",
-                "value": 125
               }
             ]
           },
@@ -1157,7 +1157,7 @@
       "links": [
         {
           "includeVars": false,
-          "title": "Show all rows and total (summary: up to 4)",
+          "title": "Show all rows and total (summary: up to 2)",
           "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=22010&${__url_time_range}",
           "targetBlank": false
         }
@@ -1169,10 +1169,10 @@
       "title": "Monitor Current Alerts",
       "description": "GLOBAL · CURRENT firing/pending alerts ranked critical before warning before other/unknown severity, then firing before pending, before the three-row limit. Object labels retain alert instance scope. Open the incident response runbook; full evidence remains below.",
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 12
       },
       "datasource": {
         "type": "prometheus",
@@ -1263,15 +1263,15 @@
             },
             "properties": [
               {
+                "id": "displayName",
+                "value": "Alert"
+              },
+              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Alert"
               }
             ]
           },
@@ -1306,12 +1306,12 @@
                 }
               },
               {
-                "id": "custom.width",
-                "value": 100
-              },
-              {
                 "id": "displayName",
                 "value": "State"
+              },
+              {
+                "id": "custom.width",
+                "value": 75
               }
             ]
           },
@@ -1324,10 +1324,6 @@
               {
                 "id": "noValue",
                 "value": "NOT PROVIDED"
-              },
-              {
-                "id": "custom.width",
-                "value": 145
               }
             ]
           },
@@ -1340,10 +1336,6 @@
               {
                 "id": "noValue",
                 "value": "NOT PROVIDED"
-              },
-              {
-                "id": "custom.width",
-                "value": 185
               }
             ]
           },
@@ -1355,7 +1347,19 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 90
+                "value": 75
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "provider"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
               }
             ]
           }
@@ -1385,7 +1389,7 @@
         {
           "id": "limit",
           "options": {
-            "limitField": 3
+            "limitField": 2
           }
         },
         {
@@ -1409,7 +1413,7 @@
       "links": [
         {
           "includeVars": false,
-          "title": "Show all rows and total (summary: up to 3)",
+          "title": "Show all rows and total (summary: up to 2)",
           "url": "/d/bioetl-incident-v1/6-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=22005&${__url_time_range}",
           "targetBlank": false
         }
@@ -1508,7 +1512,7 @@
               "mode": "single",
               "sort": "none"
             },
-            "pageSize": 10
+            "perPage": 8
           },
           "maxDataPoints": 400
         },
@@ -1711,6 +1715,10 @@
                   {
                     "id": "custom.width",
                     "value": 230
+                  },
+                  {
+                    "id": "custom.wrapText",
+                    "value": true
                   }
                 ]
               },

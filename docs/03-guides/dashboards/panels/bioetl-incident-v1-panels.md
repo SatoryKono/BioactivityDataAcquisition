@@ -17,7 +17,7 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
   do not filter ranked suspects; selected-run evidence is separate.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 3. Monitor Selected-Scope Status
+### 3. Monitor Scope Status
 - **Type:** Stat
 - **Purpose:** Worst-of L0 status for selected pipeline/run_type.
 - **Data sources:** `bioetl_l0_status`
@@ -131,3 +131,7 @@ Complete evidence is available in the collapsed detail group. The table reuses t
 | 9450 | Inspect Saved Run Evidence | Saved exact-run evidence; expand for identity, version, reasons and actions. |
 | 9451 | Inspect Selected Run Domains | Saved exact-run evidence; expand for identity, version, reasons and actions. |
 | 9452 | Inspect Selected Run Identity | Saved exact-run evidence; expand for identity, version, reasons and actions. |
+
+The first-window ranked-suspect and current-alert tables show up to two rows;
+the panel links open the unrestricted full lists. Alert history paginates
+at eight series per page while preserving complete alert and scope labels.

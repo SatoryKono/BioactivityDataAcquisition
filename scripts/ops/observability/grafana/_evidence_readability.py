@@ -261,7 +261,9 @@ def _provider(p: dict[int, dict]) -> None:
         _override(p[9107], field, _WIDTH, width)
     _override(p[9107], "Source state", "displayName", "Source")
     _override(p[9111], "Provider", _WIDTH, 200)
-    _override(p[9111], "Provider", "custom.cellOptions", {"type": "auto", "wrapText": False})
+    _override(
+        p[9111], "Provider", "custom.cellOptions", {"type": "auto", "wrapText": False}
+    )
     p[9101]["gridPos"]["h"] = p[9107]["gridPos"]["h"] = 7
     p[9104]["gridPos"].update(y=14, h=3)
     p[9104]["options"]["colorMode"] = "value"
@@ -284,7 +286,21 @@ def _provider(p: dict[int, dict]) -> None:
 
 def _dq(p: dict[int, dict]) -> None:
     p[2]["title"] = "Monitor Weighted DQ"
-    _table(p[156], {"Pipeline": 200, "Quarantined records": 100, "Excluded records": 80})
+    p[8]["targets"][0].update(
+        expr='(max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds{pipeline=~"$pipeline"}[$__range]), 0))) / 3600',
+        instant=True,
+        range=False,
+    )
+    p[8]["description"] = (
+        "TIME RANGE · Worst age in hours at the selected range end, using the "
+        "latest timestamp observed per series within that range. Missing series "
+        "remain UNKNOWN; an older non-null age is never carried forward. "
+        "SLA 24/72: WARN at 24h and CRIT at 72h apply only to observed evidence. "
+        "This is range evidence, not a selected-run or CURRENT completeness verdict."
+    )
+    _table(
+        p[156], {"Pipeline": 200, "Quarantined records": 100, "Excluded records": 80}
+    )
     _override(p[156], "Quarantined records", "displayName", "Quarantined")
     _override(p[156], "Excluded records", "displayName", "Excluded")
     p[5]["title"] = "Monitor Worst DQ"
@@ -355,6 +371,23 @@ def _dq(p: dict[int, dict]) -> None:
 
 
 def _incident(p: dict[int, dict]) -> None:
+    p[9401]["title"] = "Monitor Scope Status"
+    p[9400]["gridPos"]["h"] = 3
+    p[9401]["gridPos"]["h"] = 3
+    p[9401]["fieldConfig"]["defaults"]["displayName"] = "Monitor Scope Status"
+    p[2001]["gridPos"].update(y=5, h=2)
+    p[2010]["gridPos"].update(y=7, h=5)
+    p[2005]["gridPos"].update(y=12, h=5)
+    for panel_id, limit in ((2010, 2), (2005, 2)):
+        for transform in p[panel_id]["transformations"]:
+            if transform["id"] == "limit":
+                transform["options"]["limitField"] = limit
+        for link in p[panel_id].get("links", []):
+            if link.get("title", "").startswith("Show all rows"):
+                link["title"] = f"Show all rows and total (summary: up to {limit})"
+    _override(
+        p[2010], "Confidence", "custom.cellOptions", {"type": "auto", "wrapText": False}
+    )
     for pid in (2010, 22010):
         _override(
             p[pid],
@@ -364,6 +397,7 @@ def _incident(p: dict[int, dict]) -> None:
         )
     _stack(p[2099], {2002: 7, 2003: 4, 2004: 7})
     _table(p[2002], {"pipeline": 230, "reason": 230, "run_type": 120})
+    _override(p[2002], "reason", "custom.wrapText", True)
     _table(p[2004], {"Pipeline": 250, "Signal": 88})
     p[22010]["options"].setdefault("footer", {}).update(
         enablePagination=False, countRows=False
@@ -379,18 +413,27 @@ def _incident(p: dict[int, dict]) -> None:
         "UNKNOWN; request failures remain QUERY ERROR. Open domain diagnostics from Action."
     )
     p[9400]["options"]["content"] = (
-        '<div style="padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch">GLOBAL signals are not verified causes. '
-        "Selected-scope status is separate. Telemetry gaps remain UNKNOWN; event age and impact need event evidence.</div>"
+        '<div style="padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch">GLOBAL suspects are not verified causes. Telemetry gaps are UNKNOWN.</div>'
     )
     p[2001]["options"]["content"] = (
-        '<div style="font-size:16px;line-height:1.2">Start with ranked suspects; '
-        "open Action for domain evidence. PENDING means the alert has not fired. "
-        "Use alert history below to assess timing and impact.</div>"
+        '<div style="font-size:16px;line-height:1.2">Open Action for evidence; PENDING has not fired. Use alert history.</div>'
     )
     for pid in (2005, 22005):
         _table(p[pid], {"severity": 90, "alertstate": 100})
         _override(p[pid], "alertname", "displayName", "Alert")
         _override(p[pid], "alertstate", "displayName", "State")
+    for override in p[2005]["fieldConfig"]["overrides"]:
+        if override.get("matcher", {}).get("options") in {"instance", "job", "Value"}:
+            override["properties"] = [
+                prop for prop in override["properties"] if prop["id"] != _WIDTH
+            ]
+    p[2006]["options"].pop("pageSize", None)
+    p[2006]["options"].update(perPage=8, rowHeight=0.85, showValue="never")
+    p[2006]["fieldConfig"]["defaults"]["custom"]["axisWidth"] = 650
+    _table(p[2005], {"severity": 75, "provider": 110, "alertstate": 75})
+    _override(
+        p[2005], "alertname", "custom.cellOptions", {"type": "auto", "wrapText": False}
+    )
 
 
 def _selection_summary(panel: dict) -> None:

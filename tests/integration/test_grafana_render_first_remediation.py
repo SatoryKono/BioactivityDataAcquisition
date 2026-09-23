@@ -789,6 +789,18 @@ def test_operator_critical_tables_expose_full_values() -> None:
                         False,
                         None,
                     )
+                if dashboard_name == "bioetl-incident-v1.json" and panel_id == 2005:
+                    assert any(
+                        "viewPanel=22005" in link.get("url", "")
+                        for link in panel.get("links", [])
+                    )
+                    detail = _panel(dashboard, 22005)
+                    assert _wrapped_field_names(detail), "Full alert evidence must retain wrapping"
+                    assert any(
+                        t["id"] == "limit" and t["options"]["limitField"] == 2
+                        for t in panel["transformations"]
+                    ), "Compact summary must fit the two visible rows"
+                    continue
                 if panel_id in {2010, 3010}:
                     continue
                 wrapped = _wrapped_field_names(panel)
@@ -927,7 +939,7 @@ def test_incident_ranked_suspects_uses_one_comparable_value_column() -> None:
     assert (sort.get("options") or {}).get("sort", [{}])[0].get("desc") is True
     assert any(
         transform.get("id") == "limit"
-        and (transform.get("options") or {}).get("limitField") == 4
+        and (transform.get("options") or {}).get("limitField") == 2
         for transform in transforms
     )
     for field in ("Time", "Time 1", "Time 2"):
@@ -999,10 +1011,12 @@ def test_incident_alert_history_has_readable_full_width_layout() -> None:
     assert history.get("options", {}).get("legend", {}).get("showLegend") is True
     assert history.get("options", {}).get("showValue") == "never"
     assert history.get("options", {}).get("rowHeight") == 0.85
+    assert history["options"]["perPage"] == 8
+    assert "pageSize" not in history["options"]
     assert impact.get("gridPos", {}).get("y", 0) >= (
         history_grid.get("y", 0) + history_grid.get("h", 0)
     )
-    assert current_alerts.get("gridPos") == {"h": 4, "w": 24, "x": 0, "y": 13}
+    assert current_alerts.get("gridPos") == {"h": 5, "w": 24, "x": 0, "y": 12}
     assert "ALERTS" in str(history.get("targets", [{}])[0].get("expr", ""))
     assert str(history.get("targets", [{}])[0].get("legendFormat", "")).startswith(
         "{{alertname}}"
