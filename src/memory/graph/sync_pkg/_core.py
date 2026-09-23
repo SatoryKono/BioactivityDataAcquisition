@@ -6,7 +6,6 @@ from __future__ import annotations
 import shutil as shutil  # re-exported via __all__
 import sys
 from collections.abc import Callable, Mapping, Set
-from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 from typing import TypeVar
@@ -1957,6 +1956,9 @@ from memory.graph.sync_pkg.pipeline_test_ownership_path import (
 from memory.graph.sync_pkg.pipeline_test_payload import (
     _pipeline_test_payload as _pipeline_test_payload,
 )
+from memory.graph.sync_pkg.pipelinetestcontext import (
+    PipelineTestContext as PipelineTestContext,
+)
 from memory.graph.sync_pkg.policy_governance_targets import (
     _policy_governance_targets as _policy_governance_targets,
 )
@@ -2919,16 +2921,6 @@ def _add_pipeline_test_edges(
         suites=test_context.provider_regression_suites,
         enabled=test_context.include_provider_regression_suites,
     )
-
-
-@dataclass(frozen=True)
-class PipelineTestContext:
-    relation_type: str
-    ownership: dict[object, object]
-    provider_regression_suites: object
-    include_provider_regression_suites: bool
-    entity_pipeline_index: dict[tuple[str, str], NodeKey]
-    provider_pipeline_index: dict[str, list[NodeKey]]
 
 
 def _pipeline_test_context(
