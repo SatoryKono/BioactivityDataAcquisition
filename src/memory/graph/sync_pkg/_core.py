@@ -213,6 +213,9 @@ from memory.graph.sync_pkg.add_claim_target_relation import (
 from memory.graph.sync_pkg.add_claim_target_relation import (
     _add_claim_target_relation as _add_claim_target_relation,
 )
+from memory.graph.sync_pkg.add_claim_token_targets import (
+    _add_claim_token_targets as _add_claim_token_targets,
+)
 from memory.graph.sync_pkg.add_cli_command_surface import (
     _add_cli_command_surface as _add_cli_command_surface,
 )
@@ -3892,34 +3895,6 @@ def _add_claim_path_targets(
             section_anchor=section_anchor,
             line_number=line_number,
             doc_reference=normalized,
-            evidence_kind=evidence_kind,
-            confidence=confidence,
-        )
-        claim_has_target = True
-    return claim_has_target
-
-
-def _add_claim_token_targets(
-    snapshot: GraphSnapshot,
-    claim: NodeKey,
-    clean_text: str,
-    *,
-    section_title: str | None,
-    section_anchor: str | None,
-    line_number: int,
-) -> bool:
-    claim_has_target = False
-    for target, evidence_kind, confidence in _resolve_claim_targets(
-        snapshot, clean_text
-    ):
-        _add_claim_target_relation(
-            snapshot,
-            claim,
-            target,
-            provenance="docs_claims",
-            section_title=section_title,
-            section_anchor=section_anchor,
-            line_number=line_number,
             evidence_kind=evidence_kind,
             confidence=confidence,
         )
