@@ -18,6 +18,7 @@ REASON_ALIASES: dict[str, str] = {
     "selected_run_id_not_found": "Run not found",
     "deadline_exceeded": "Deadline exceeded",
     "capacity_exhausted": "At capacity",
+    "terminal_event_missing": "Started; no terminal event. Liveness unverified",
 }
 
 

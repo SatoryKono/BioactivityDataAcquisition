@@ -28,7 +28,7 @@ def pipeline_owners(selection: str) -> set[str] | None:
 def active_run_diagnostics(
     host: _HealthObservabilityRoutingHost, pipeline: str, run_id: str
 ) -> dict[str, object] | None:
-    """Resolve an active run without confusing missing finalization with missing identity."""
+    """Resolve persisted execution evidence without claiming live worker activity."""
     if host._run_manifest_port is None:
         return None
     selected_id = cast(RunID, UUID(run_id))
@@ -54,10 +54,12 @@ def active_run_diagnostics(
         for entry in entries
     )
     age = (current_utc_time() - latest.occurred_at).total_seconds()
+    # A ledger start is historical evidence, not a live-process probe.
+    # Its age remains diagnostic and never promotes an unfinished run to failed.
     return {
-        "verdict": "INCOMPLETE" if terminal else "RUNNING",
-        "reason": "finalization_missing" if terminal else "active_run",
-        "execution_state": "TERMINAL" if terminal else "RUNNING",
+        "verdict": "INCOMPLETE",
+        "reason": "finalization_missing" if terminal else "terminal_event_missing",
+        "execution_state": "TERMINAL" if terminal else "UNFINISHED",
         "heartbeat_now": "STALE" if age > 900 else "RECENT LEDGER EVENT",
         "heartbeat_age_seconds": max(0, age),
         "run_type": manifest.run_type.value,

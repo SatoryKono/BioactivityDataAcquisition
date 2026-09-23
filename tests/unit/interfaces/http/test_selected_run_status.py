@@ -378,7 +378,7 @@ def test_workflow_completion_creates_explicit_child_revision(tmp_path):
 
 
 @pytest.mark.parametrize(
-    "event,expected", [("run_started", "RUNNING"), ("run_finished", "INCOMPLETE")]
+    "event,expected", [("run_started", "INCOMPLETE"), ("run_finished", "INCOMPLETE")]
 )
 @pytest.mark.parametrize(
     "pipeline",
@@ -473,7 +473,7 @@ async def test_unfinalized_run_presentation_matches_ledger(
         },
     )
     payload = host._send_payload_response.call_args.args[2]
-    execution = "RUNNING" if event == "run_started" else "TERMINAL"
+    execution = "UNFINISHED" if event == "run_started" else "TERMINAL"
     assert payload["execution_state"] == execution
     for field in ("summary", "presentation_summary", "domains", "presentation_domains"):
         for row in payload[field]:
@@ -860,7 +860,7 @@ async def test_active_workflow_in_all_scope_retains_exact_context(
     query = {"pipeline": ".*", "run_id": run_id, "workflow": "workflow-a"}
     await handle_selected_run_status(host, MagicMock(), query)
     result = host._send_payload_response.call_args.args[2]
-    assert result["execution_state"] == "RUNNING"
+    assert result["execution_state"] == "UNFINISHED"
     assert result["workflow_id"] == "workflow-a"
     assert result["pipeline"] == "chembl_activity"
     assert "trust" not in result["summary"][0]

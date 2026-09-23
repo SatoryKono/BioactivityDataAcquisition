@@ -776,6 +776,10 @@
                       "SELECT RUN": {
                         "text": "SELECT RUN",
                         "color": "#A3A3A3"
+                      },
+                      "UNFINISHED": {
+                        "text": "UNFINISHED",
+                        "color": "#A3A3A3"
                       }
                     }
                   }
