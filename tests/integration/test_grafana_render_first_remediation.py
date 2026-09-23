@@ -1060,7 +1060,8 @@ def test_incident_alert_count_and_dq_reason_have_honest_table_semantics() -> Non
         }
         for override in dq_suspects["fieldConfig"]["overrides"]
     }
-    assert overrides["Pipeline"]["custom.width"] == 70
+    assert dq_suspects["gridPos"]["w"] == 24
+    assert overrides["Pipeline"]["custom.width"] == 250
     assert "custom.width" not in overrides["Reason"]
     assert overrides["Reason"]["custom.cellOptions"] == {
         "type": "auto",
