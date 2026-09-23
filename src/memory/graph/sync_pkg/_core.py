@@ -562,6 +562,26 @@ from memory.graph.sync_pkg.neo4j_statements import (
 from memory.graph.sync_pkg.neo4j_statements import (
     _reset_managed_relations_statement as _reset_managed_relations_statement,
 )
+from memory.graph.sync_pkg.python_paths import INIT_PY as INIT_PY
+from memory.graph.sync_pkg.python_paths import MAIN_PY as MAIN_PY
+from memory.graph.sync_pkg.python_paths import (
+    OPS_SCRIPT_HUB_PREFIXES as OPS_SCRIPT_HUB_PREFIXES,
+)
+from memory.graph.sync_pkg.python_paths import (
+    _coerce_repo_relative_path as _coerce_repo_relative_path,
+)
+from memory.graph.sync_pkg.python_paths import (
+    _is_excluded_file_structure_path as _is_excluded_file_structure_path,
+)
+from memory.graph.sync_pkg.python_paths import (
+    _promoted_directory_hubs as _promoted_directory_hubs,
+)
+from memory.graph.sync_pkg.python_paths import (
+    _python_surface_name as _python_surface_name,
+)
+from memory.graph.sync_pkg.python_paths import (
+    _supplemental_directory_hubs_for_node as _supplemental_directory_hubs_for_node,
+)
 from memory.graph.sync_pkg.score_family import _family_for_path as _family_for_path
 from memory.graph.sync_pkg.score_family import (
     _family_matches_relative_path as _family_matches_relative_path,
@@ -666,8 +686,6 @@ if str(SRC_ROOT) not in sys.path:
 if str(DEFAULT_ROOT) not in sys.path:
     sys.path.insert(0, str(DEFAULT_ROOT))
 DEFAULT_BATCH_SIZE = 20
-INIT_PY = "__init__.py"
-MAIN_PY = "__main__.py"
 GITHUB_WORKFLOWS_PREFIX = f"{GITHUB_DIR}/workflows/"
 PORTS_MODULE_PREFIX = "bioetl.domain.ports"
 PORTS_FACADE_SOURCE_PATH = f"src/bioetl/domain/ports/{INIT_PY}"
@@ -749,13 +767,6 @@ DEFAULT_FILE_STRUCTURE_EXCLUDED_PREFIXES: tuple[str, ...] = (
 )
 DEFAULT_FILE_STRUCTURE_EXCLUDED_DIR_NAMES: tuple[str, ...] = ("__pycache__",)
 ADR_DECISIONS_DIR = "docs/02-architecture/decisions"
-OPS_SCRIPT_HUB_PREFIXES: tuple[str, ...] = (
-    "scripts/diagrams/",
-    "scripts/docs/",
-    "scripts/engineering/qa/",
-    "scripts/schema/",
-    "scripts/memory/",
-)
 DEFAULT_PIPELINE_RUNTIME_PATHS: tuple[str, ...] = (
     "uv run python -m bioetl run --pipeline",
     '"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m bioetl run --pipeline',
@@ -1837,91 +1848,6 @@ def _complexity_analysis_config(
         deprecation_markers=retirement_config.deprecation_markers,
         blocker_anchor_limit=_coerce_int(payload.get("blocker_anchor_limit", 3), 3),
     )
-
-
-def _python_surface_name(relative_path: str) -> str:
-    init_suffix = f"/{INIT_PY}"
-    if relative_path.endswith(init_suffix):
-        dotted = relative_path.removesuffix(init_suffix).replace("/", ".")
-    else:
-        dotted = _module_dotted_name(relative_path)
-    return dotted.removeprefix("src.")
-
-
-def _coerce_repo_relative_path(root: Path, raw_path: str) -> str:
-    normalized = _normalize_repo_relative_path(raw_path)
-    if not normalized:
-        return ""
-
-    root_normalized = _normalize_repo_relative_path(root.resolve().as_posix())
-    normalized_lower = normalized.casefold()
-    root_lower = root_normalized.casefold()
-    if normalized_lower == root_lower:
-        return ""
-    if normalized_lower.startswith(f"{root_lower}/"):
-        return normalized[len(root_normalized) + 1 :]
-
-    root_anchor = root.resolve().name.casefold()
-    parts = [part for part in normalized.split("/") if part]
-    parts_lower = [part.casefold() for part in parts]
-    if root_anchor in parts_lower:
-        anchor_index = parts_lower.index(root_anchor)
-        return "/".join(parts[anchor_index + 1 :])
-
-    return normalized
-
-
-def _is_excluded_file_structure_path(
-    relative_path: str, config: dict[str, object]
-) -> bool:
-    normalized = _normalize_repo_relative_path(relative_path)
-    path = Path(normalized)
-    excluded_dir_names = {
-        name for name in _as_string_list(config.get("excluded_dir_names")) if name
-    }
-    if any(part in excluded_dir_names for part in path.parts):
-        return True
-    # Keep generated diagram raster/vector trees out of file-structure surfaces.
-    # Aligns with snapshot_invariant_issues path-leak checks for /svg and /png.
-    if any(part in {"svg", "png"} for part in path.parts):
-        return True
-
-    excluded_prefixes = [
-        prefix.strip("/")
-        for prefix in _as_string_list(config.get("excluded_prefixes"))
-        if prefix
-    ]
-    return any(
-        normalized == prefix or normalized.startswith(f"{prefix}/")
-        for prefix in excluded_prefixes
-    )
-
-
-def _promoted_directory_hubs(
-    relative_path: str, config: dict[str, object]
-) -> list[str]:
-    promoted = {
-        entry.strip("/")
-        for entry in _as_string_list(config.get("promoted_hubs"))
-        if entry
-    }
-    path = Path(relative_path)
-    matches: list[str] = []
-    for index in range(1, len(path.parts) + 1):
-        candidate = Path(*path.parts[:index]).as_posix()
-        if candidate in promoted:
-            matches.append(candidate)
-    return matches
-
-
-def _supplemental_directory_hubs_for_node(
-    node_key: NodeKey, source_path_value: str
-) -> tuple[str, ...]:
-    if node_key.label == "script_surface" and any(
-        source_path_value.startswith(prefix) for prefix in OPS_SCRIPT_HUB_PREFIXES
-    ):
-        return ("scripts/ops",)
-    return ()
 
 
 def _build_port_surface_catalog(
