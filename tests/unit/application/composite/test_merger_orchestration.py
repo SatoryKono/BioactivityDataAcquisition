@@ -76,6 +76,7 @@ def _make_host() -> MagicMock:
         )
     )
     host._load_dependency_dataframes = AsyncMock(return_value=({}, []))
+    host._clock = None
     return host
 
 
@@ -120,6 +121,25 @@ class TestMergeExecutionRequestHelpers:
     def test_resolve_merge_metadata_timestamp_when_none_then_returns_none(self) -> None:
         assert resolve_merge_metadata_timestamp(None) is None
 
+    def test_resolve_merge_metadata_timestamp_when_clock_then_uses_clock_now(
+        self,
+    ) -> None:
+        clock = MagicMock()
+        clock.now.return_value = datetime(2026, 9, 23, 9, 0, tzinfo=UTC)
+        assert resolve_merge_metadata_timestamp(None, clock=clock) == datetime(
+            2026,
+            9,
+            23,
+            9,
+            0,
+            tzinfo=UTC,
+        )
+        assert resolve_merge_metadata_timestamp(
+            "2026-04-10",
+            clock=clock,
+        ) == datetime(2026, 4, 10, 0, 0, 0, tzinfo=UTC)
+        clock.now.assert_called_once()
+
     def test_resolve_merge_metadata_timestamp_when_iso_date_then_returns_utc_midnight(
         self,
     ) -> None:
@@ -161,6 +181,34 @@ class TestMergeExecutionRequestHelpers:
         host._prepare_seed_dataframe.assert_awaited_once_with(
             "silver/chembl",
             "chembl_compound",
+        )
+
+    @pytest.mark.asyncio
+    async def test_prepare_merge_execution_context_when_timestamp_missing_then_uses_clock(
+        self,
+    ) -> None:
+        host = _make_host()
+        clock = MagicMock()
+        clock.now.return_value = datetime(2026, 9, 23, 10, 0, tzinfo=UTC)
+        host._clock = clock
+        request = build_merge_execution_request(
+            seed_table="silver/chembl",
+            seed_pipeline="chembl_compound",
+            enrichers=[],
+            enrichment_results={},
+            run_id="run-ctx",
+        )
+
+        execution_context = await prepare_merge_execution_context(host, request)
+
+        assert execution_context.request is not request
+        assert execution_context.request.metadata_timestamp == datetime(
+            2026,
+            9,
+            23,
+            10,
+            0,
+            tzinfo=UTC,
         )
 
 

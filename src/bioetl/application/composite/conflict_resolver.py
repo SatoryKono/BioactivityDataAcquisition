@@ -135,8 +135,10 @@ class ConflictResolverService:
         from bioetl.application.composite._coalesce_policy_support import (
             build_field_groups,
             compatible_columns,
-            seed_prefix as build_seed_prefix,
             sort_columns,
+        )
+        from bioetl.application.composite._coalesce_policy_support import (
+            seed_prefix as build_seed_prefix,
         )
 
         seed_prefix_value = build_seed_prefix(seed_pipeline)

@@ -137,6 +137,32 @@ class TestPanderaSilverValidator:
         assert result.valid is False
         assert len(result.errors) > 0
 
+    def test_validate_non_strict_allows_extra_columns_and_seeds_dq(self):
+        """Non-strict Silver validation ignores extras and seeds DQ flags."""
+        import pandera as pa
+
+        schema = pa.DataFrameSchema(
+            {
+                "entity_id": pa.Column(str),
+                "title": pa.Column(str, nullable=True),
+                "_dq_warn": pa.Column(bool),
+                "_dq_error": pa.Column(bool),
+            },
+            strict=True,
+        )
+        validator = PanderaSilverValidator(schema=schema, strict=False)
+        records = [
+            {
+                "entity_id": "CHEMBL123",
+                "title": "Seed",
+                "chembl.publication.title": "Qualified",
+                "content_hash": "abc",
+            }
+        ]
+        result = validator.validate(records)
+        assert result.valid is True
+        assert result.errors == []
+
     def test_validate_with_nullable_columns(self):
         """Test validation passes with nullable columns when using valid types."""
         import math

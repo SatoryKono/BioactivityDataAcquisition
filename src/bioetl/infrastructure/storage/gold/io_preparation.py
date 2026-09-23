@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
@@ -85,19 +85,31 @@ async def _prepare_gold_merged_write(
     request: _GoldMergedWriteRequest,
 ) -> _PreparedGoldMergedWrite:
     """Validate and prepare one merged Gold write request."""
+    from bioetl.infrastructure.storage.gold.writer_schema_helpers import (
+        _project_records_for_gold_schema,
+    )
+
     host._validate_schema_strict(request.schema)
+    projected_records = cast(
+        "list[dict[str, object]]",
+        _project_records_for_gold_schema(
+            cast("list[dict[str, object]]", request.records),
+            schema=request.schema,
+        ),
+    )
+    projected_request = replace(request, records=projected_records)
     arrow_table = _prepare_gold_merged_table(
-        records=request.records,
-        primary_keys=request.primary_keys,
-        preserve_column_order=request.preserve_column_order,
+        records=projected_request.records,
+        primary_keys=projected_request.primary_keys,
+        preserve_column_order=projected_request.preserve_column_order,
     )
     await host._validate_records_against_schema(
         cast("list[dict[str, object]]", arrow_table.to_pylist()),
-        request.schema,
+        projected_request.schema,
     )
     return _PreparedGoldMergedWrite(
-        request=request,
-        table_path=host._resolve_table_path(request.table_name),
+        request=projected_request,
+        table_path=host._resolve_table_path(projected_request.table_name),
         arrow_table=arrow_table,
     )
 

@@ -102,6 +102,7 @@ async def test_write_silver_merged_delegates() -> None:
         records,
         ["id"],
         schema=mixin._COMPOSITE_GOLD_SCHEMAS["test.table"],
+        completed_at=None,
         run_id="run-1",
         sources_used=None,
         preserve_column_order=False,

@@ -595,6 +595,38 @@ class TestDependencyExecution:
         mock_logger.warning.assert_called()
 
     @pytest.mark.asyncio
+    async def test_run_single_dependency_optional_http_error_returns_failed(
+        self,
+        mock_logger: LoggerPort,
+        seed_keys: pl.DataFrame,
+    ) -> None:
+        import httpx
+
+        coordinator = _make_coordinator(mock_logger)
+        dependency = DependencyConfig(
+            pipeline="uniprot_idmapping",
+            join_keys=("target_id",),
+            required=False,
+        )
+        request = httpx.Request("GET", "https://rest.uniprot.org/idmapping/status/job")
+        response = httpx.Response(400, request=request)
+        runner = MagicMock()
+        runner.run = AsyncMock(side_effect=httpx.HTTPStatusError(
+            "400",
+            request=request,
+            response=response,
+        ))
+
+        result = await coordinator._run_single_dependency(
+            dependency=dependency,
+            keys=seed_keys,
+            runner_factory=lambda _pipeline, _keys: runner,
+        )
+
+        assert result.status == DependencyStatus.FAILED
+        mock_logger.warning.assert_called()
+
+    @pytest.mark.asyncio
     async def test_run_single_dependency_required_failure_returns_failed_with_error_log(
         self,
         mock_logger: LoggerPort,

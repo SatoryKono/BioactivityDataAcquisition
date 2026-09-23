@@ -13,7 +13,7 @@
       "debt_type": "compatibility_facade_freeze",
       "rationale": "Retained public entrypoints and export facades remain frozen public API seams with zero duplicate exports, resolution conflicts, wrapper drift, or first-party source importer burden.",
       "retained_entrypoint_count": 12,
-      "retained_public_export_facade_count": 4
+      "retained_public_export_facade_count": 3
     },
     "6163": {
       "control_plane_extracted_helper_owner": "src/bioetl/application/services/control_plane/replay/historical_identity_models.py#HistoricalReplayUniverseRecord",

@@ -104,7 +104,7 @@
     "5747": {
       "retained_entrypoint_count": 12,
       "retained_public_entrypoint_burden": 0,
-      "retained_public_export_facade_count": 4,
+      "retained_public_export_facade_count": 3,
       "retained_public_export_facades_with_duplicate_exports": 0,
       "retained_public_export_facades_with_resolution_conflicts": 0,
       "review_date": "2026-12-31",
@@ -202,8 +202,8 @@
       "opening": 12
     },
     "retained_public_export_facade_count": {
-      "current": 4,
-      "max": 4,
+      "current": 3,
+      "max": 3,
       "opening": 4
     }
   },

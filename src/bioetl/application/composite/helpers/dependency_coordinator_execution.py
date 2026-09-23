@@ -17,13 +17,6 @@ from bioetl.application.runtime_timestamps import (
 )
 from bioetl.domain.composite import DependencyConfig
 from bioetl.domain.composite.result import DependencyResult
-from bioetl.domain.exceptions import (
-    BioETLError,
-    CheckpointConflictError,
-    DataQualityError,
-    NetworkError,
-    StorageError,
-)
 from bioetl.domain.ports import ClockPort, ExecutionMetricsRunnerPort, LoggerPort
 
 __all__ = [
@@ -32,18 +25,6 @@ __all__ = [
     "log_dependency_start",
     "run_single_dependency",
 ]
-
-_DEPENDENCY_EXECUTION_ERRORS = (
-    BioETLError,
-    NetworkError,
-    StorageError,
-    CheckpointConflictError,
-    DataQualityError,
-    RuntimeError,
-    ValueError,
-    TypeError,
-    OSError,
-)
 
 
 class _DependencyCoordinatorExecutionHost(Protocol):
@@ -122,7 +103,7 @@ async def run_single_dependency(
             completed_at=completed_at,
             duration_seconds=duration_seconds,
         )
-    except _DEPENDENCY_EXECUTION_ERRORS as e:
+    except Exception as e:
         completed_at, duration_seconds = derive_completion_timestamp(
             started_at=started_at,
             started_monotonic=started_monotonic,

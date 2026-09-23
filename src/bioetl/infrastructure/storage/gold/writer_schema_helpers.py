@@ -39,18 +39,23 @@ def _project_records_for_gold_schema(
     *,
     schema: object,
 ) -> list[GoldRecord]:
-    """Project raw Gold records to the ordered columns of one schema version."""
+    """Project raw Gold records to the ordered columns of one schema version.
+
+    Always emits the full schema column surface. Missing values become ``None``
+    (or DQ/`_index` defaults) so strict Pandera validation sees every column
+    and enricher extras outside the contract are dropped.
+    """
     schema_columns = _schema_column_names(schema)
     if not schema_columns:
         return records
 
-    dq_defaults = {"_dq_warn": False, "_dq_error": False}
+    dq_defaults: dict[str, object] = {
+        "_dq_warn": False,
+        "_dq_error": False,
+        "_index": 0,
+    }
     return [
-        {
-            key: record.get(key, dq_defaults.get(key))
-            for key in schema_columns
-            if key in record or key in dq_defaults
-        }
+        {key: record.get(key, dq_defaults.get(key)) for key in schema_columns}
         for record in records
     ]
 

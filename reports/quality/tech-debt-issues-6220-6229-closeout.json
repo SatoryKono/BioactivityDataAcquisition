@@ -144,8 +144,8 @@
   },
   "ratchets": {
     "public_lazy_facade_rows": {
-      "current": 52,
-      "max": 52,
+      "current": 51,
+      "max": 51,
       "opening": 53,
       "source": "configs/quality/public_lazy_facade_inventory.yaml"
     },
@@ -156,8 +156,8 @@
       "source": "configs/quality/public_lazy_facade_inventory.yaml"
     },
     "retained_public_export_facades": {
-      "current": 4,
-      "max": 4,
+      "current": 3,
+      "max": 3,
       "opening": 4,
       "source": "reports/quality/compatibility-importer-census.json"
     },

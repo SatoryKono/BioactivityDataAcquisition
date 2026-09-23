@@ -264,7 +264,7 @@ def test_prepare_merge_request_when_called_then_binds_seed_and_inputs() -> None:
     assert request.seed_table == "silver/seed"
     assert request.seed_pipeline == "seed_pipeline"
     assert request.run_id == "run-merge-test"
-    assert request.metadata_timestamp is None
+    assert request.metadata_timestamp == datetime(2026, 4, 28, 12, 0, tzinfo=UTC)
     assert request.enrichment_results is enrichment_results
     assert request.enrichers[0].pipeline == "enricher_a"
     assert request.dependencies == []

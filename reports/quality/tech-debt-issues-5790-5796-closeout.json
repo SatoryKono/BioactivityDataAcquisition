@@ -29,7 +29,7 @@
       "owner_test_anchored": 2
     },
     "retained_entrypoint_count": 12,
-    "retained_public_export_facade_count": 4,
+    "retained_public_export_facade_count": 3,
     "runtime_basics_targeted_coverage_percent": {
       "current_canonical_inventory": 76.32,
       "targeted_closeout_proof": 100.0

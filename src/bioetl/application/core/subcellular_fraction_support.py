@@ -86,11 +86,7 @@ async def extract_unique_fraction_records(
     *,
     continue_after_limit: bool = True,
 ) -> AsyncIterator[JsonDict]:
-    """Collect unique subcellular fraction records from an assay stream.
-
-    Default: consume the full stream so counts stay complete (#7787).
-    ``continue_after_limit=False`` stops I/O once the unique-fraction quota fills.
-    """
+    """Collect unique subcellular fraction records from an assay stream (#7787)."""
     seen_fractions.clear()
     records: dict[str, JsonDict] = {}
     try:
