@@ -254,6 +254,49 @@ class PanderaSilverValidator(BasePanderaValidator):
         """Initialize Silver validator with strict schema binding by default."""
         super().__init__(schema=schema, strict=strict)
 
+    def _validate_with_schema(self, df: pd.DataFrame) -> ValidationResult:
+        """Validate Silver frames; non-strict mode ignores extra columns.
+
+        Composite merged Silver writes attach provider-qualified extras
+        (``chembl.assay.*``, ``content_hash``). Production Silver schemas are
+        typically strict, so extras fail unless the frame is reindexed onto
+        the contract columns first. Missing DQ flags are seeded to False.
+        """
+        assert self._schema is not None
+        from pandera.errors import SchemaError, SchemaErrors
+
+        try:
+            df_to_validate = df
+            if not self._strict and hasattr(self._schema, "columns"):
+                schema_columns = list(self._schema.columns.keys())
+                df_to_validate = df.reindex(columns=schema_columns)
+                dq_defaults = {"_dq_warn": False, "_dq_error": False, "_index": 0}
+                for name, default in dq_defaults.items():
+                    if name not in df_to_validate.columns:
+                        continue
+                    if df_to_validate[name].isna().all():
+                        df_to_validate[name] = default
+            else:
+                if hasattr(self._schema, "columns"):
+                    missing = [
+                        name
+                        for name in self._schema.columns
+                        if name not in df_to_validate.columns
+                    ]
+                    if missing:
+                        df_to_validate = df_to_validate.copy()
+                        for name in missing:
+                            column = self._schema.columns[name]
+                            if getattr(column, "nullable", False):
+                                df_to_validate[name] = None
+            df_to_validate = self._normalize_nullable_integer_columns(df_to_validate)
+            df_to_validate = self._normalize_nullable_boolean_columns(df_to_validate)
+            df_to_validate = self._reorder_to_schema(df_to_validate)
+            self._schema.validate(df_to_validate, lazy=True)
+            return ValidationResult(valid=True)
+        except (SchemaError, SchemaErrors, KeyError, TypeError, ValueError) as e:
+            return ValidationResult(valid=False, errors=[str(e)])
+
 
 class PanderaGoldValidator(BasePanderaValidator):
     """Gold validator using Pandera DataFrameSchema.

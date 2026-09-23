@@ -91,6 +91,42 @@ class TestGoldWriterSchemaHelpers:
         records = [{"entity_id": "CHEMBL2"}]
         assert _project_records_for_gold_schema(records, schema=object()) is records
 
+    def test_project_records_for_gold_schema_drops_extras_and_seeds_missing(
+        self,
+    ) -> None:
+        schema = SimpleNamespace(
+            columns=OrderedDict(
+                (
+                    ("entity_id", object()),
+                    ("title", object()),
+                    ("_dq_warn", object()),
+                    ("_dq_error", object()),
+                    ("_index", object()),
+                )
+            )
+        )
+
+        projected = _project_records_for_gold_schema(
+            [
+                {
+                    "entity_id": "CHEMBL1",
+                    "extra": "drop-me",
+                    "chembl.assay.assay_id": "A1",
+                }
+            ],
+            schema=schema,
+        )
+
+        assert projected == [
+            {
+                "entity_id": "CHEMBL1",
+                "title": None,
+                "_dq_warn": False,
+                "_dq_error": False,
+                "_index": 0,
+            }
+        ]
+
     def test_resolve_active_gold_schema_handles_version_policy(self) -> None:
         legacy_schema = object()
         active_schema = object()

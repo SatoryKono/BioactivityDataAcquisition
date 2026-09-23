@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import UTC, date, datetime
 from typing import TYPE_CHECKING
 
@@ -27,6 +28,7 @@ if TYPE_CHECKING:
         EnrichmentResult,
         MergeResult,
     )
+    from bioetl.domain.ports import ClockPort
 
 __all__ = [
     "MergeExecutionContext",
@@ -82,12 +84,20 @@ async def load_merge_inputs(
 
 def resolve_merge_metadata_timestamp(
     cached_bronze_date: object | None,
+    *,
+    clock: ClockPort | None = None,
 ) -> datetime | None:
-    """Return deterministic replay timestamp from cached bronze date."""
-    if cached_bronze_date is None:
-        return None
-    replay_date = date.fromisoformat(str(cached_bronze_date))
-    return datetime.combine(replay_date, datetime.min.time(), tzinfo=UTC)
+    """Return merge metadata timestamp for replay or live runs.
+
+    Replay uses cached bronze date at UTC midnight. Live runs without a
+    cached date use ``clock.now()`` when a ClockPort is provided.
+    """
+    if cached_bronze_date is not None:
+        replay_date = date.fromisoformat(str(cached_bronze_date))
+        return datetime.combine(replay_date, datetime.min.time(), tzinfo=UTC)
+    if clock is not None:
+        return clock.now()
+    return None
 
 
 def build_merge_execution_request(
@@ -120,8 +130,19 @@ async def prepare_merge_execution_context(
 ) -> MergeExecutionContext:
     """Load all merge inputs and bind them to one execution context model."""
     started_at, started_monotonic = capture_runtime_timing_anchor(clock=host._clock)
+    execution_request = request
+    if request.metadata_timestamp is None:
+        resolved_timestamp = resolve_merge_metadata_timestamp(
+            None,
+            clock=host._clock,
+        )
+        if resolved_timestamp is not None:
+            execution_request = replace(
+                request,
+                metadata_timestamp=resolved_timestamp,
+            )
     return MergeExecutionContext(
-        request=request,
+        request=execution_request,
         started_at=started_at,
         started_monotonic=started_monotonic,
         loaded_inputs=await load_merge_inputs(

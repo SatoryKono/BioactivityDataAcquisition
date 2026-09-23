@@ -5,7 +5,7 @@ and governance rebind loop. Counts and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=e1725f5ce53dfd1a4b54dac7c3186e4c2e31b162e491bfb04ee38b1e52afa775`
+`source_tree_sha256=24d6e17529aca8a02bdb5912227fdf145c254f7d62384842a0a0ed5e491e2c24`
 
 `source_module_count=2479`
 
