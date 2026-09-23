@@ -740,6 +740,12 @@ from memory.graph.sync_pkg.collect_duplication_class_descriptors import (
 from memory.graph.sync_pkg.collect_duplication_descriptors_for_modu import (
     _collect_duplication_descriptors_for_module as _collect_duplication_descriptors_for_module,
 )
+from memory.graph.sync_pkg.complexity_analysis_context import (
+    _complexity_analysis_context as _complexity_analysis_context,
+)
+from memory.graph.sync_pkg.complexity_analysis_context import (
+    _complexity_surface_measurements as _complexity_surface_measurements,
+)
 from memory.graph.sync_pkg.complexity_analysis_label_sets import (
     _complexity_analysis_label_sets as _complexity_analysis_label_sets,
 )
@@ -3374,75 +3380,6 @@ def _add_complexity_analysis_surfaces(
         _emit_complexity_candidate(
             snapshot, project, today, config, node, candidate_payload
         )
-
-
-def _complexity_analysis_context(
-    snapshot: GraphSnapshot,
-    config: ComplexityAnalysisConfig,
-) -> ComplexityAnalysisContext:
-    return ComplexityAnalysisContext(
-        family_names=set(config.family_names),
-        label_sets=_complexity_analysis_label_sets(),
-        indexes=_build_surface_relation_indexes(snapshot),
-    )
-
-
-def _complexity_surface_measurements(
-    snapshot: GraphSnapshot,
-    node: GraphNode,
-    *,
-    source_path: str,
-    module_key: NodeKey,
-    source_text: str,
-    label_sets: AnalysisLabelSets,
-    indexes: SurfaceRelationIndexes,
-    config: ComplexityAnalysisConfig,
-) -> tuple[
-    SurfaceAnchorSets,
-    tuple[str, ...],
-    tuple[str, ...],
-    tuple[str, ...],
-    SurfaceComplexityMetrics,
-    bool,
-    float,
-    float,
-    float,
-]:
-    anchors = _collect_analysis_anchor_nodes(
-        snapshot, indexes, node.key, module_key, label_sets
-    )
-    symbol_name = node.key.name.removeprefix(f"{_module_dotted_name(source_path)}.")
-    indirection_markers, stateful_markers, deprecation_markers = (
-        _complexity_marker_buckets(
-            config,
-            source_path,
-            symbol_name,
-            source_text,
-        )
-    )
-    metrics = _aggregate_surface_complexity_metrics(snapshot, indexes, node.key)
-    blocked_by_current_cycle = bool(node.properties.get("current_cycle_status"))
-    complexity_score, simplification_score, removable_score = (
-        _complexity_surface_scores(
-            metrics,
-            anchors,
-            blocked_by_current_cycle=blocked_by_current_cycle,
-            indirection_markers=indirection_markers,
-            stateful_markers=stateful_markers,
-            deprecation_markers=deprecation_markers,
-        )
-    )
-    return (
-        anchors,
-        indirection_markers,
-        stateful_markers,
-        deprecation_markers,
-        metrics,
-        blocked_by_current_cycle,
-        complexity_score,
-        simplification_score,
-        removable_score,
-    )
 
 
 def _complexity_candidate_context(
