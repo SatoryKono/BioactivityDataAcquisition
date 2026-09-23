@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import shutil as shutil  # re-exported via __all__
 import sys
-from collections.abc import Callable
 from datetime import date
 from pathlib import Path
 from typing import TypeVar
@@ -2103,6 +2102,12 @@ from memory.graph.sync_pkg.provider_config_properties import (
 from memory.graph.sync_pkg.provider_config_properties import (
     _provider_config_properties as _provider_config_properties,
 )
+from memory.graph.sync_pkg.provider_pipeline_index_key import (
+    _pipeline_test_linker as _pipeline_test_linker,
+)
+from memory.graph.sync_pkg.provider_pipeline_index_key import (
+    _provider_pipeline_index_key as _provider_pipeline_index_key,
+)
 from memory.graph.sync_pkg.provider_regression_provider_target import (
     _add_alert_surfaces as _add_alert_surfaces,
 )
@@ -3061,33 +3066,6 @@ def _provider_pipeline_index_entries(
         for provider in [_provider_pipeline_index_key(node)]
         if provider is not None
     )
-
-
-def _provider_pipeline_index_key(node: GraphNode) -> str | None:
-    if node.key.label != "pipeline_surface":
-        return None
-    provider = node.properties.get("provider")
-    return provider if isinstance(provider, str) else None
-
-
-def _pipeline_test_linker(
-    snapshot: GraphSnapshot,
-    relation_type: str,
-) -> Callable[[NodeKey, str, str], None]:
-    def link_test_target(
-        pipeline_key: NodeKey, test_path: str, provenance: str
-    ) -> None:
-        artifact_key = _test_artifact_key(test_path)
-        if artifact_key not in snapshot.nodes:
-            return
-        _link_pipeline_test_artifact(
-            snapshot, pipeline_key, relation_type, artifact_key, provenance
-        )
-        _link_pipeline_test_suite(
-            snapshot, pipeline_key, relation_type, artifact_key, provenance
-        )
-
-    return link_test_target
 
 
 if __name__ == "__main__":
