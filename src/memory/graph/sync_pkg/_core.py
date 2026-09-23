@@ -1566,6 +1566,12 @@ from memory.graph.sync_pkg.relation_requirement_keys import (
 from memory.graph.sync_pkg.relation_requirement_keys import (
     snapshot_invariant_issues as snapshot_invariant_issues,
 )
+from memory.graph.sync_pkg.resolved_base_classes import (
+    _link_duplication_override_methods as _link_duplication_override_methods,
+)
+from memory.graph.sync_pkg.resolved_base_classes import (
+    _resolved_base_classes as _resolved_base_classes,
+)
 from memory.graph.sync_pkg.retirement_analysis_context import (
     _prime_retirement_age_cache as _prime_retirement_age_cache,
 )
@@ -5158,43 +5164,6 @@ def _link_duplication_override_relations(
                 class_descriptor=class_descriptor,
                 base_class=base_class,
                 class_method_index=class_method_index,
-            )
-
-
-def _resolved_base_classes(
-    snapshot: GraphSnapshot,
-    class_descriptor: ClassDescriptor,
-    class_name_index: dict[str, list[NodeKey]],
-) -> tuple[NodeKey, ...]:
-    class_node = snapshot.nodes[class_descriptor.node_key]
-    base_names = class_node.properties.get("base_names")
-    if not isinstance(base_names, list):
-        return ()
-    resolved: list[NodeKey] = []
-    for base_name in base_names:
-        if not isinstance(base_name, str) or not base_name:
-            continue
-        base_candidates = class_name_index.get(base_name, [])
-        if len(base_candidates) == 1:
-            resolved.append(base_candidates[0])
-    return tuple(resolved)
-
-
-def _link_duplication_override_methods(
-    snapshot: GraphSnapshot,
-    *,
-    class_descriptor: ClassDescriptor,
-    base_class: NodeKey,
-    class_method_index: dict[tuple[NodeKey, str], NodeKey],
-) -> None:
-    for method_name in class_descriptor.method_names:
-        base_method = class_method_index.get((base_class, method_name))
-        current_method = class_method_index.get(
-            (class_descriptor.node_key, method_name)
-        )
-        if base_method is not None and current_method is not None:
-            snapshot.add_relation(
-                current_method, "OVERRIDES", base_method, provenance="code_duplication"
             )
 
 
