@@ -113,7 +113,7 @@
       "source": "reports/quality/compatibility-importer-census.json"
     },
     "retained_public_export_facade_count": {
-      "current": 4,
+      "current": 3,
       "source": "reports/quality/compatibility-importer-census.json"
     },
     "source_module_count": {

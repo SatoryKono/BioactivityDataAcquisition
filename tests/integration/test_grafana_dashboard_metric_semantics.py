@@ -126,11 +126,7 @@ _PROCESSED_RECORDS_SECONDARY_LABELS = {
 
 
 def _expected_processed_records_display_token_mappings() -> list[dict[str, object]]:
-    """Historical pipe-token mappings removed (PFILL-01).
-
-    Value/percentage cells now carry plain counts and percents; parameter
-    coloring stays on the ``parameter`` column overrides.
-    """
+    """Historical pipe-token mappings removed (PFILL-01)."""
     return []
 
 
@@ -1980,15 +1976,10 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         if label in _PROCESSED_RECORDS_PRIMARY_COLORS:
             assert (
                 mapping_options[label]["color"]
-                == (_PROCESSED_RECORDS_PRIMARY_COLORS[label])
+                == _PROCESSED_RECORDS_PRIMARY_COLORS[label]
             )
         else:
             assert "color" not in mapping_options[label]
-
-    for label, color in _PROCESSED_RECORDS_PRIMARY_COLORS.items():
-        assert mapping_options[label]["color"] == color
-    for label in _PROCESSED_RECORDS_SECONDARY_LABELS:
-        assert "color" not in mapping_options[label]
 
     parameter_properties = {
         prop.get("id"): prop.get("value")
@@ -1996,8 +1987,6 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     }
     assert parameter_properties["custom.align"] == "left"
     assert parameter_properties["custom.cellOptions"]["type"] == "color-text"
-    # Run Explorer aligns accounting with the adjacent 36px identity rows.
-    # Its bounded labels fit without wrapping at the audited 900px viewport.
     expected_wrap = dashboard_name not in {
         "bioetl-run-explorer-v1.json",
         "bioetl-control-plane-v1.json",
@@ -2007,7 +1996,5 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
 
     assert_processed_records_field_overrides(
         processed,
-        expected_row_status_mappings=(
-            _expected_processed_records_row_status_mappings()
-        ),
+        expected_row_status_mappings=_expected_processed_records_row_status_mappings(),
     )

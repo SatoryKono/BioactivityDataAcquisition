@@ -99,8 +99,8 @@
       "source": "reports/quality/compatibility-importer-census.json"
     },
     "retained_public_export_facades": {
-      "current": 4,
-      "max": 4,
+      "current": 3,
+      "max": 3,
       "opening": 4,
       "source": "reports/quality/compatibility-importer-census.json"
     },

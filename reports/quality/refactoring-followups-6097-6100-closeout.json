@@ -62,8 +62,8 @@
       "source": "reports/quality/compatibility-importer-census.json"
     },
     "retained_public_export_facade_count": {
-      "current": 4,
-      "max": 4,
+      "current": 3,
+      "max": 3,
       "source": "reports/quality/compatibility-importer-census.json"
     },
     "reviewed_runtime_scc_budget": {
