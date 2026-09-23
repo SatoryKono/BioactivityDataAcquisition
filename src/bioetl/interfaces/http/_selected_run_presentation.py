@@ -1,5 +1,7 @@
 """Grafana presentation of exact-run evidence without changing canonical verdicts."""
 
+from __future__ import annotations
+
 from urllib.parse import urlencode
 
 _SELECT_RUN = "SELECT RUN"

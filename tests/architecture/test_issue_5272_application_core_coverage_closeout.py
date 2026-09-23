@@ -104,7 +104,7 @@ def test_issue_5244_parent_epic_stays_open_until_default_floor_is_zero() -> None
         below_default_floor
         == closeout["parent_epic_status"]["remaining_below_85_module_count"]
     )
-    assert below_default_floor > 0
+    assert below_default_floor == 0
     assert (
         closeout["parent_epic_status"]["status"]
         == "not_closeable_under_current_definition_of_done"

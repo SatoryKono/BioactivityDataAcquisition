@@ -115,11 +115,10 @@ def test_issue_10597_debt_scorecard_current_count_is_three() -> None:
     assert metric["linked_issue"] == "10597"
 
 
-@pytest.mark.skipif(
-    mounted_worktree_skip_reason() is not None,
-    reason=mounted_worktree_skip_reason() or "",
-)
 def test_issue_10597_live_census_reports_three_public_export_facades() -> None:
+    skip_reason = mounted_worktree_skip_reason()
+    if skip_reason is not None:
+        pytest.skip(skip_reason)
     from scripts.engineering.qa.report_compatibility_importer_census import (
         build_compatibility_importer_census,
     )

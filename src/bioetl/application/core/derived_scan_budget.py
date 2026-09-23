@@ -12,6 +12,12 @@ DEFAULT_SCAN_RECORDS = 50_000
 DEFAULT_SCAN_SECONDS = 180.0
 
 
+def look_ahead_budget(count: int, max_records: int) -> int:
+    if count < 0:
+        raise ValueError("count must be >= 0")
+    return 1 if count < 1 else min(count, max_records) + 1
+
+
 def resolve_derived_upstream_limit(
     output_limit: int | None,
     *,
@@ -35,17 +41,11 @@ def resolve_derived_upstream_limit(
     if count is None and filter_ids is not None:
         count = len(filter_ids)
     if count is not None:
-        if count < 0:
-            raise ValueError("filter_id_count must be >= 0")
-        if count < 1:
-            return 1
-        return min(count, max_records) + 1
+        return look_ahead_budget(count, max_records)
     if output_limit is None:
         return max_records + 1
-    if output_limit < 0:
-        raise ValueError("output_limit must be >= 0")
-    if output_limit == 0:
-        return 1
+    if output_limit < 1:
+        return look_ahead_budget(output_limit, max_records)
     return min(output_limit * multiplier, max_records) + 1
 
 

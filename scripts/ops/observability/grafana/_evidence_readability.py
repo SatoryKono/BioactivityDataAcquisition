@@ -51,11 +51,14 @@ def _stage_colors(panel: dict) -> None:
         "gold": "#E0B400",
         "quarantined": "#B877D9",
     }.items():
-        matcher = {"id": "byRegexp", "options": "(^|[ /])" + stage + "$"}
-        match = next((o for o in overrides if o["matcher"] == matcher), None)
+        # Grafana anchors patterns without / delimiters to the whole display name.
+        matcher = {"id": "byRegexp", "options": "(^|.*[ /])" + stage + "$"}
+        legacy = {"id": "byRegexp", "options": "(^|[ /])" + stage + "$"}
+        match = next((o for o in overrides if o["matcher"] in (matcher, legacy)), None)
         if match is None:
             match = {"matcher": matcher, "properties": []}
             overrides.append(match)
+        match["matcher"] = matcher
         match["properties"] = [p for p in match["properties"] if p["id"] != "color"]
         match["properties"].append(
             {"id": "color", "value": {"mode": "fixed", "fixedColor": color}}
@@ -143,7 +146,13 @@ def _overview(p: dict[int, dict]) -> None:
     for pid in (215, 20215):
         for field in ("action_scope", "action_dashboard_uid", "run_type"):
             _override(p[pid], field, _HIDDEN, True)
-        _table(p[pid], {"Priority": 80, "Pipeline": 190, "Action": 170})
+        _table(p[pid], {"Priority": 90, "Pipeline": 280, "Action": 170})
+        _override(
+            p[pid],
+            "Pipeline",
+            "custom.cellOptions",
+            {"type": "auto", "wrapText": False},
+        )
     for pid in (9010, 9011):
         for item in p[pid]["fieldConfig"].get("overrides", []):
             item["properties"] = [
@@ -208,7 +217,7 @@ def _provider(p: dict[int, dict]) -> None:
     }
     p[105]["options"]["colorMode"] = "value"
     p[105]["description"] = (
-        "TIME RANGE · Observed degraded health checks in the selected range; "
+        "TIME RANGE Â· Observed degraded health checks in the selected range; "
         "historical count, not current severity. Missing evidence remains UNKNOWN."
     )
 
@@ -276,12 +285,14 @@ def _dq(p: dict[int, dict]) -> None:
 
 
 def _incident(p: dict[int, dict]) -> None:
-    _override(
-        p[22010],
-        "Action",
-        "mappings",
-        [{"type": "value", "options": {"data_quality": {"text": "DQ"}}}],
-    )
+    for pid in (2010, 22010):
+        _override(
+            p[pid],
+            "Action",
+            "mappings",
+            [{"type": "value", "options": {"data_quality": {"text": "DQ"}}}],
+        )
+    _stack(p[2099], {2002: 7, 2003: 3, 2004: 7})
     p[22010]["options"].setdefault("footer", {}).update(
         enablePagination=False, countRows=False
     )
@@ -292,7 +303,7 @@ def _incident(p: dict[int, dict]) -> None:
             p[22010], field, "custom.cellOptions", {"type": "auto", "wrapText": True}
         )
     p[22010]["description"] = (
-        "GLOBAL / CURRENT · Empty successful result: no ranked suspects. Missing telemetry remains "
+        "GLOBAL / CURRENT Â· Empty successful result: no ranked suspects. Missing telemetry remains "
         "UNKNOWN; request failures remain QUERY ERROR. Open domain diagnostics from Action."
     )
     p[9400]["options"]["content"] = (
@@ -310,10 +321,42 @@ def _incident(p: dict[int, dict]) -> None:
         _override(p[pid], "alertstate", "displayName", "State")
 
 
+def _selection_summary(panel: dict) -> None:
+    """Present one selection action; preserve the selected-run verdict values."""
+    if panel.get("title") != "Review Selected Run Status":
+        return
+    for field in ("Result", "Status"):
+        _override(panel, field, "links", [])
+        _override(
+            panel,
+            field,
+            "mappings",
+            [
+                {
+                    "type": "value",
+                    "options": {"SELECT RUN": {"text": "â€”", "color": "text"}},
+                }
+            ],
+        )
+    _override(panel, "Rules", _HIDDEN, True)
+    _override(
+        panel,
+        "Evidence",
+        "mappings",
+        [
+            {
+                "type": "value",
+                "options": {"SELECT RUN": {"text": "Choose a run", "color": "text"}},
+            }
+        ],
+    )
+
+
 def apply_evidence_readability(payload: dict) -> None:
     """Preserve queries while improving evidence readability at narrow widths."""
     p = {panel["id"]: panel for panel in _panels(payload["panels"])}
     for panel in p.values():
+        _selection_summary(panel)
         if panel["type"] == "stat":
             panel.setdefault("options", {})["text"] = {"valueSize": 20, "titleSize": 14}
     _saved_run(p)
@@ -408,7 +451,7 @@ def _first_window_widths(payload: dict, p: dict[int, dict]) -> None:
         "bioetl-control-plane-v1": {
             9418: {"Result": 100, "Trust": 105, "reasons_count": 80}
         },
-        "bioetl-overview-v2": {215: {"Priority": 70, "Action": 125}},
+        "bioetl-overview-v2": {215: {"Priority": 90, "Action": 125}},
         "bioetl-dq-v2": {9102: {"severity": 70, "Action": 125}},
         "bioetl-run-explorer-v1": {
             3010: {

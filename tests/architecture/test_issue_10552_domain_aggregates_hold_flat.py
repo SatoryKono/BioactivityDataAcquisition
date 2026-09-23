@@ -54,7 +54,9 @@ def test_issue_10552_domain_aggregates_hold_flat_at_ceiling() -> None:
 
 def test_issue_10552_batch_compatibility_getattr_removed() -> None:
     """ADR-059 one-release Batch re-export sunset (#10552)."""
-    tree = ast.parse(BATCH_MODULE.read_text(encoding="utf-8"), filename=str(BATCH_MODULE))
+    tree = ast.parse(
+        BATCH_MODULE.read_text(encoding="utf-8"), filename=str(BATCH_MODULE)
+    )
     getattr_names = [
         node.name
         for node in tree.body

@@ -71,6 +71,7 @@ supported_scopes:
       provider_runs:
       - chembl_activity
       - chembl_assay
+      - chembl_classification_upstream
       - chembl_molecule
       - chembl_publication
       - chembl_publication_term
@@ -347,6 +348,7 @@ tracked_suite_inventory:
       chembl_publication: tests/e2e/test_chembl_publication_e2e.py
       chembl_publication_term: tests/e2e/test_chembl_publication_term_e2e.py
       chembl_target: tests/e2e/test_chembl_target_e2e.py
+      chembl_classification_upstream: tests/e2e/test_chembl_classification_upstream_e2e.py
       crossref_publication: tests/e2e/test_crossref_publication_e2e.py
       openalex_publication: tests/e2e/test_openalex_publication_e2e.py
       pubchem_compound: tests/e2e/test_pubchem_compound_e2e.py
