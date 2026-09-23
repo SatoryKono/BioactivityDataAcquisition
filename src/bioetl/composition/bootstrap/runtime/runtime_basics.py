@@ -160,9 +160,12 @@ def build_runner_factories(
         normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
     )
     run_options_factory: Callable[..., RunOptions] = RunOptions
-    build_context_fn: Callable[[str, RunOptions], PipelineRunContext] = (
-        build_pipeline_context
-    )
+
+    def build_context_fn(name: str, options: RunOptions) -> PipelineRunContext:
+        # Match entity ``create_pipeline_runner``: composite phase factories must
+        # inject an explicit ClockPort; ``build_pipeline_context`` rejects None.
+        return build_pipeline_context(name, options, clock=SystemClock())
+
     runner_factory_builder = cast(
         "Callable[..., RunnerFactoryBuilder[RunOptions]]",
         runner_factory_builder_cls,

@@ -21,6 +21,7 @@ from bioetl.composition.bootstrap.runtime._dependency_runner_support import (
 from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
     CompositeFilterExtractor,
 )
+from bioetl.infrastructure.config.settings_api import get_settings
 
 
 class BronzeRunOptions(TypedDict):
@@ -78,6 +79,13 @@ class RunnerFactoryBuilder[RunOptionsT]:
         **option_kwargs: object,
     ) -> PipelineRunner:
         """Build a runner from one resolved RunOptions payload."""
+        # Composite phases must put the required profile on RunOptions/ctx so
+        # degraded_observable opt-down is explicit (settings alone leave
+        # ctx.required_persistence_profile=None and strict snapshot gates fire).
+        option_kwargs.setdefault(
+            "required_persistence_profile",
+            get_settings().pipeline.control_plane.required_persistence_profile,
+        )
         options = self._run_options_cls(**option_kwargs)
         ctx = self._build_context(pipeline_name, options)
         return self._pipeline_runner_builder(ctx)
