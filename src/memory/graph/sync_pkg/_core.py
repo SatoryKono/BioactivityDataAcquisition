@@ -1044,6 +1044,12 @@ from memory.graph.sync_pkg.included_file_structure_dirs import (
 from memory.graph.sync_pkg.included_file_structure_dirs import (
     _included_file_structure_dirs as _included_file_structure_dirs,
 )
+from memory.graph.sync_pkg.index_storage_layer_fields import (
+    _add_composite_storage_data_surfaces as _add_composite_storage_data_surfaces,
+)
+from memory.graph.sync_pkg.index_storage_layer_fields import (
+    _index_storage_layer_fields as _index_storage_layer_fields,
+)
 from memory.graph.sync_pkg.int_node_property import (
     _aggregate_callable_metrics as _aggregate_callable_metrics,
 )
@@ -3415,72 +3421,6 @@ def _entity_storage_context(
     )
     pipeline_sink = _entity_pipeline_sink_config(payload)
     return context, pipeline_sink, _field_quality_index(payload)
-
-
-def _index_storage_layer_fields(
-    schema_fields_by_storage: dict[str, dict[str, NodeKey]],
-    layer_nodes: dict[str, NodeKey],
-    field_nodes_by_layer: dict[str, dict[str, NodeKey]],
-) -> None:
-    for layer_name, surface in layer_nodes.items():
-        schema_fields_by_storage[surface.name] = field_nodes_by_layer.get(
-            layer_name, {}
-        )
-
-
-def _add_composite_storage_data_surfaces(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    *,
-    schema_fields_by_storage: dict[str, dict[str, NodeKey]],
-) -> None:
-    composites_root = root / "configs" / "composites"
-    for composite_path in sorted(composites_root.glob(YAML_FILE_GLOB)):
-        payload = _read_yaml(composite_path)
-        context, composite_payload, dependencies = _composite_storage_context(
-            root,
-            composite_path,
-            payload,
-            today=today,
-        )
-        has_dependency_pipelines = isinstance(dependencies, list) and any(
-            isinstance(item, dict) for item in dependencies
-        )
-        source_storage_refs = _add_composite_seed_surface(
-            snapshot,
-            project,
-            context,
-            composite_payload=composite_payload,
-            has_dependency_pipelines=has_dependency_pipelines,
-        )
-        source_storage_refs.extend(
-            _add_composite_dependency_surfaces(
-                snapshot,
-                project,
-                context,
-                dependencies=dependencies,
-            )
-        )
-        merge_payload = _as_mapping(composite_payload.get("merge"))
-        output_payload = _as_mapping(merge_payload.get("output"))
-        layer_nodes, field_nodes_by_layer = _add_composite_output_layers(
-            snapshot,
-            project,
-            context,
-            CompositeOutputConfig(
-                merge_payload=merge_payload,
-                output_payload=output_payload,
-                group_fields=_composite_group_fields(merge_payload),
-                source_storage_refs=source_storage_refs,
-                schema_fields_by_storage=schema_fields_by_storage,
-            ),
-        )
-        _index_storage_layer_fields(
-            schema_fields_by_storage, layer_nodes, field_nodes_by_layer
-        )
-        _link_composite_layer_promotions(snapshot, layer_nodes, field_nodes_by_layer)
 
 
 def _add_control_plane_runtime_evidence(
