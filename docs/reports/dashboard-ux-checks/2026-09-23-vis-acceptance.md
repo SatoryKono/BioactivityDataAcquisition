@@ -34,3 +34,7 @@
 Сначала исправлены неверная семантика возраста и наложения временных дорожек (P1), затем ссылки на evidence, таблицы и пустые/ошибочные состояния (P2), затем единая типографика и плотность (P3). Stage identity отделена от severity; отсутствие телеметрии не окрашивается в OK. Навигация сохраняет общий scope и time range, подробные evidence остаются в раскрываемых группах. В длинных таблицах сохранены все строки и штатный вертикальный scroll/pagination, а полный UUID доступен через ссылку и report.
 
 Проверенные дашборды: **0. Run Explorer; 1. Trust; 2. Overview; 3. Pipeline Diagnostics; 4. Provider Health; 5. Data Quality; 6. Incident Workspace**.
+
+## Дополнительная проверка нулевого списка Incident
+
+В отдельной копии `TEST FIXTURE - Incident successful empty` сохранены настройки и transformations панели 22010; Dashboard datasource заменён прямым Prometheus datasource с успешным `vector(0) > 1`. Проверены [1920×1080](assets/2026-09-23-vis-acceptance/accepted-empty-fixture-wide.jpg) и [1000×900](assets/2026-09-23-vis-acceptance/accepted-empty-fixture-narrow.jpg): диапазон 1–0, кнопка вперёд и footer отсутствуют. Это browser evidence нулевого набора, не утверждение об отсутствии инцидентов в production. UNKNOWN сохранён: успешный запрос с нулём строк сам по себе не доказывает полноту телеметрии. Баннер тестовой копии явно обозначает искусственный вход. Историческое production-состояние не воспроизводилось.

@@ -557,5 +557,33 @@
       "height": 887
     },
     "sha256": "e891db875fbad46d43fe08c2a377973030a29b0f04f9900ddde96227c73196ee"
+  },
+  {
+    "name": "accepted-empty-fixture-wide",
+    "url": "http://127.0.0.1:3000/d/bioetl-vis-empty-acceptance/test-fixture-incident-successful-empty?orgId=1&from=now-24h&to=now&timezone=browser",
+    "time": "2026-09-23T09:03:07.200Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-empty-fixture-wide.jpg",
+    "image": {
+      "width": 1920,
+      "height": 1080
+    },
+    "sha256": "d8665b4f99b9ed96e0d3b598040cf9886bacacaa26437d86d5adc38a8edc6dc9",
+    "fixture": true
+  },
+  {
+    "name": "accepted-empty-fixture-narrow",
+    "url": "http://127.0.0.1:3000/d/bioetl-vis-empty-acceptance/test-fixture-incident-successful-empty?orgId=1&from=now-24h&to=now&timezone=browser",
+    "time": "2026-09-23T09:02:36.220Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-empty-fixture-narrow.jpg",
+    "image": {
+      "width": 1000,
+      "height": 900
+    },
+    "sha256": "3d4b2c04b937279d1b1bb2f3ae572001c40834ce584320dea94d5480a486e5e3",
+    "fixture": true
   }
 ]
