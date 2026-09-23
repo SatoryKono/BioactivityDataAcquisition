@@ -1352,6 +1352,9 @@ from memory.graph.sync_pkg.process_adapter_module import (
 from memory.graph.sync_pkg.process_adapter_package import (
     _process_adapter_package as _process_adapter_package,
 )
+from memory.graph.sync_pkg.process_adapter_root_child import (
+    _process_adapter_root_child as _process_adapter_root_child,
+)
 from memory.graph.sync_pkg.promotion_targets_from_payload import (
     _complexity_analysis_config as _complexity_analysis_config,
 )
@@ -5077,53 +5080,6 @@ def _add_adapter_surfaces(
         )
 
     return adapter_nodes
-
-
-def _process_adapter_root_child(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    child: Path,
-    *,
-    adapter_family: NodeKey,
-    adapter_nodes: dict[str, NodeKey],
-    port_module_surfaces: dict[str, set[str]],
-    port_symbol_index: dict[str, dict[str, str]],
-    port_names: set[str],
-    fine_grained_enabled: bool,
-) -> None:
-    if _is_ignored_repo_path(child) or child.name.startswith("_"):
-        return
-    if child.is_dir():
-        _process_adapter_package(
-            snapshot,
-            root,
-            project,
-            today,
-            child,
-            adapter_family=adapter_family,
-            adapter_nodes=adapter_nodes,
-            port_module_surfaces=port_module_surfaces,
-            port_symbol_index=port_symbol_index,
-            port_names=port_names,
-            fine_grained_enabled=fine_grained_enabled,
-        )
-        return
-    if child.suffix != ".py" or child.name == INIT_PY:
-        return
-    _process_adapter_module(
-        snapshot,
-        root,
-        project,
-        today,
-        child,
-        adapter_family=adapter_family,
-        adapter_nodes=adapter_nodes,
-        port_module_surfaces=port_module_surfaces,
-        port_symbol_index=port_symbol_index,
-        port_names=port_names,
-    )
 
 
 def _contract_mapping_config(
