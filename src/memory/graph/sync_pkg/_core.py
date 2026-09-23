@@ -2456,6 +2456,12 @@ from memory.graph.sync_pkg.sorted_governance_targets import (
 from memory.graph.sync_pkg.sorted_governance_targets import (
     _sorted_governance_targets as _sorted_governance_targets,
 )
+from memory.graph.sync_pkg.sorted_provider_surface_nodes import (
+    _add_alert_rule_file_surfaces as _add_alert_rule_file_surfaces,
+)
+from memory.graph.sync_pkg.sorted_provider_surface_nodes import (
+    _sorted_provider_surface_nodes as _sorted_provider_surface_nodes,
+)
 from memory.graph.sync_pkg.source_backed_path_kind import (
     _link_source_backed_directory_structure as _link_source_backed_directory_structure,
 )
@@ -3267,40 +3273,6 @@ def _alert_target_context(
         contract_nodes=contract_nodes,
         memory_mapping=memory_mapping,
     )
-
-
-def _sorted_provider_surface_nodes(snapshot: GraphSnapshot) -> list[NodeKey]:
-    return sorted(
-        (key for key in snapshot.nodes if key.label == "provider_surface"),
-        key=lambda node: node.name,
-    )
-
-
-def _add_alert_rule_file_surfaces(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    rules_path: Path,
-    *,
-    dashboard_metrics: dict[NodeKey, set[str]],
-    target_context: AlertTargetContext,
-    memory_mapping: dict[str, object],
-) -> None:
-    file_context = _alert_rule_file_context(snapshot, root, today, rules_path)
-    for group in _alert_rule_groups(file_context.payload):
-        _add_alert_rule_group_surfaces(
-            snapshot,
-            root,
-            project,
-            today,
-            rules_path,
-            file_context.artifact,
-            group,
-            dashboard_metrics=dashboard_metrics,
-            target_context=target_context,
-            memory_mapping=memory_mapping,
-        )
 
 
 if __name__ == "__main__":
