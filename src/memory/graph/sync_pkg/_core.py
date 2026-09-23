@@ -625,6 +625,12 @@ from memory.graph.sync_pkg.batch_pipeline_names import (
 from memory.graph.sync_pkg.batch_pipeline_names import (
     _normalization_progress_payload as _normalization_progress_payload,
 )
+from memory.graph.sync_pkg.claim_target_tokens import (
+    _claim_exact_candidates as _claim_exact_candidates,
+)
+from memory.graph.sync_pkg.claim_target_tokens import (
+    _claim_target_tokens as _claim_target_tokens,
+)
 from memory.graph.sync_pkg.classify_silver_storage_fields import (
     _classify_gold_storage_fields as _classify_gold_storage_fields,
 )
@@ -3605,34 +3611,6 @@ def _resolve_claim_targets(
                 seen.add(candidate)
                 break
     return tuple(resolved)
-
-
-def _claim_target_tokens(claim_text: str) -> set[str]:
-    tokens: set[str] = set()
-    tokens.update(match.group(1) for match in re.finditer(r"`([^`]+)`", claim_text))
-    tokens.update(
-        match.group(0) for match in re.finditer(r"\bbioetl\s+[\w-]+\b", claim_text)
-    )
-    tokens.update(
-        match.group(0)
-        for match in re.finditer(r"\bscripts\.\w+(?:\s+[\w.-]+)?\b", claim_text)
-    )
-    tokens.update(
-        match.group(0)
-        for match in re.finditer(r"\b(?:bioetl|domain)\.[\w.]+\b", claim_text)
-    )
-    return tokens
-
-
-def _claim_exact_candidates(normalized_token: str) -> tuple[NodeKey, ...]:
-    return (
-        NodeKey("port_surface", normalized_token),
-        NodeKey("cli_command_surface", normalized_token),
-        NodeKey("script_surface", normalized_token),
-        NodeKey("module_surface", normalized_token),
-        NodeKey("workflow_surface", normalized_token),
-        NodeKey("execution_path", normalized_token),
-    )
 
 
 def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
