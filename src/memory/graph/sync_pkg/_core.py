@@ -1185,6 +1185,12 @@ from memory.graph.sync_pkg.link_composite_layer_promotions import (
 from memory.graph.sync_pkg.link_composite_layer_promotions import (
     _link_composite_layer_promotions as _link_composite_layer_promotions,
 )
+from memory.graph.sync_pkg.link_composite_pipeline_dependencies import (
+    _add_pipeline_normalization_evidence as _add_pipeline_normalization_evidence,
+)
+from memory.graph.sync_pkg.link_composite_pipeline_dependencies import (
+    _link_composite_pipeline_dependencies as _link_composite_pipeline_dependencies,
+)
 from memory.graph.sync_pkg.link_curated_doc_artifact import (
     _add_summary_identifiers as _add_summary_identifiers,
 )
@@ -5919,49 +5925,6 @@ def _add_composite_pipeline_surface(
     _link_composite_pipeline_dependencies(
         snapshot, pipeline, composite_payload, pipeline_nodes
     )
-
-
-def _link_composite_pipeline_dependencies(
-    snapshot: GraphSnapshot,
-    pipeline: NodeKey,
-    composite_payload: object,
-    pipeline_nodes: dict[str, NodeKey],
-) -> None:
-    for dependency_key in _composite_pipeline_dependency_keys(
-        composite_payload, pipeline_nodes
-    ):
-        snapshot.add_relation(
-            pipeline,
-            "DEPENDS_ON",
-            dependency_key,
-            provenance="impact_pipelines",
-        )
-
-
-def _add_pipeline_normalization_evidence(
-    snapshot: GraphSnapshot,
-    pipeline_nodes: dict[str, NodeKey],
-) -> None:
-    evidence_by_pipeline = _build_normalization_pipeline_evidence()
-    for (
-        pipeline_name,
-        entity_key,
-        update_payload,
-    ) in _iter_normalization_evidence_updates(
-        pipeline_nodes,
-        evidence_by_pipeline,
-    ):
-        pipeline = snapshot.add_node(
-            "pipeline_surface", pipeline_name, **update_payload
-        )
-        if entity_key in snapshot.nodes:
-            snapshot.add_node("entity_config", pipeline_name, **update_payload)
-        _link_normalization_registry_module(
-            snapshot,
-            pipeline,
-            entity_key=entity_key,
-            module_path=update_payload["normalization_profile_module_path"],
-        )
 
 
 def _add_pipeline_test_edges(
