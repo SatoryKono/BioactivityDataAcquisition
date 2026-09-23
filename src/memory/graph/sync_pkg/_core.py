@@ -1148,6 +1148,12 @@ from memory.graph.sync_pkg.git_history import (
 from memory.graph.sync_pkg.git_history import (
     _run_git_history_subprocess as _run_git_history_subprocess,
 )
+from memory.graph.sync_pkg.governance_policy_definitions import (
+    _governance_policy_definitions as _governance_policy_definitions,
+)
+from memory.graph.sync_pkg.governance_policy_definitions import (
+    _governance_policy_spec as _governance_policy_spec,
+)
 from memory.graph.sync_pkg.governance_summary_table_specs import (
     _add_layer_topology as _add_layer_topology,
 )
@@ -5553,34 +5559,6 @@ def _governance_policy_specs(
             sorted_contracts=sorted_contracts,
         )
     ]
-
-
-def _governance_policy_definitions(
-    snapshot: GraphSnapshot,
-    *,
-    sorted_ports: list[NodeKey],
-    sorted_adapters: list[NodeKey],
-    sorted_pipelines: list[NodeKey],
-    sorted_contracts: list[NodeKey],
-) -> tuple[tuple[str, Sequence[NodeKey], Sequence[NodeKey] | None], ...]:
-    return (
-        ("hexagonal import matrix", sorted_ports, sorted_adapters),
-        ("hexagonal package layout", sorted_ports, sorted_adapters),
-        ("pipeline assembly model", sorted_pipelines, None),
-        ("medallion storage contract", sorted_contracts, sorted_pipelines),
-        ("observability surface model", _alert_surface_nodes(snapshot), None),
-    )
-
-
-def _governance_policy_spec(
-    policy_name: str,
-    target_group: Sequence[NodeKey],
-    extra_target_group: Sequence[NodeKey] | None = None,
-) -> tuple[NodeKey, tuple[Sequence[NodeKey], ...]]:
-    return NodeKey("policy_surface", policy_name), _governance_target_groups(
-        target_group,
-        extra_target_group,
-    )
 
 
 def _add_pipeline_operational_edges(
