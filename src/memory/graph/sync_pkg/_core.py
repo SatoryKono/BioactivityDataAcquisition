@@ -1652,6 +1652,9 @@ from memory.graph.sync_pkg.link_runtime_state_run_and_pipeline import (
 from memory.graph.sync_pkg.link_runtime_state_run_and_pipeline import (
     _link_runtime_state_run_and_pipeline as _link_runtime_state_run_and_pipeline,
 )
+from memory.graph.sync_pkg.link_runtime_state_surface import (
+    _link_runtime_state_surface as _link_runtime_state_surface,
+)
 from memory.graph.sync_pkg.link_schema_field_definition import (
     _link_schema_field_definition as _link_schema_field_definition,
 )
@@ -2747,16 +2750,6 @@ def _add_control_plane_runtime_evidence(
         _add_runtime_evidence_surface(snapshot, project, today, spec)
 
     _add_control_plane_run_instance_surfaces(snapshot, root, project, today)
-
-
-def _link_runtime_state_surface(
-    snapshot: GraphSnapshot,
-    state: NodeKey,
-    spec: dict[str, object],
-) -> None:
-    _link_runtime_state_run_and_pipeline(snapshot, state, spec)
-    _link_runtime_state_dependencies(snapshot, state, spec)
-    _link_runtime_state_evidence_materials(snapshot, state, spec)
 
 
 def _add_control_plane_run_instance_surfaces(
