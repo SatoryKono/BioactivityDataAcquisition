@@ -1365,6 +1365,12 @@ from memory.graph.sync_pkg.neo4j_statements import (
 from memory.graph.sync_pkg.neo4j_statements import (
     _reset_managed_relations_statement as _reset_managed_relations_statement,
 )
+from memory.graph.sync_pkg.normalization_evidence_batches import (
+    _execute_normalization_evidence_batch as _execute_normalization_evidence_batch,
+)
+from memory.graph.sync_pkg.normalization_evidence_batches import (
+    _normalization_evidence_batches as _normalization_evidence_batches,
+)
 from memory.graph.sync_pkg.normalization_evidence_statement import (
     _NORMALIZATION_EVIDENCE_STATEMENT as _NORMALIZATION_EVIDENCE_STATEMENT,
 )
@@ -6014,57 +6020,6 @@ def apply_normalization_evidence_only(
         "batches": batch_summaries,
         "updated_at": datetime.now(tz=UTC).isoformat(),
     }
-
-
-def _normalization_evidence_batches(
-    statements: list[dict[str, JsonValue]],
-    batch_size: int,
-) -> list[list[dict[str, JsonValue]]]:
-    return _batched(statements, batch_size)
-
-
-def _execute_normalization_evidence_batch(
-    client: Neo4jHttpClient,
-    batch: list[dict[str, JsonValue]],
-    *,
-    batch_index: int,
-    batch_count: int,
-) -> dict[str, JsonValue]:
-    pipeline_start, pipeline_end = _normalization_batch_pipeline_span(batch)
-    _emit_normalization_batch_progress(
-        event="batch_start",
-        batch=batch,
-        batch_index=batch_index,
-        batch_count=batch_count,
-        pipeline_start=pipeline_start,
-        pipeline_end=pipeline_end,
-    )
-    batch_started = time.perf_counter()
-    client.execute(
-        batch,
-        context=(
-            "normalization evidence batch "
-            f"{batch_index}/{batch_count} "
-            f"pipelines {pipeline_start or '?'}..{pipeline_end or '?'}"
-        ),
-    )
-    batch_elapsed = time.perf_counter() - batch_started
-    _emit_normalization_batch_progress(
-        event="batch_complete",
-        batch=batch,
-        batch_index=batch_index,
-        batch_count=batch_count,
-        pipeline_start=pipeline_start,
-        pipeline_end=pipeline_end,
-        elapsed_seconds=batch_elapsed,
-    )
-    return _normalization_batch_summary(
-        batch=batch,
-        batch_index=batch_index,
-        pipeline_start=pipeline_start,
-        pipeline_end=pipeline_end,
-        elapsed_seconds=batch_elapsed,
-    )
 
 
 def _add_pipeline_test_edges(
