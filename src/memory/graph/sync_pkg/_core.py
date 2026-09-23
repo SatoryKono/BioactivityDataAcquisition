@@ -2208,6 +2208,9 @@ from memory.graph.sync_pkg.transport import (
 from memory.graph.sync_pkg.walk_repo_zone_file_structure import (
     _walk_repo_zone_file_structure as _walk_repo_zone_file_structure,
 )
+from memory.graph.sync_pkg.walk_repo_zone_root import (
+    _walk_repo_zone_root as _walk_repo_zone_root,
+)
 from memory.graph.sync_pkg.workflow_environment_mapping_name import (
     _sorted_string_items as _sorted_string_items,
 )
@@ -2606,33 +2609,6 @@ def _add_repo_zone_file_structure(
             relative_root=relative_root,
             config=config,
         )
-
-
-def _walk_repo_zone_root(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    zone: NodeKey,
-    today: str,
-    *,
-    zone_name: str,
-    relative_root: str,
-    config: dict[str, object],
-) -> None:
-    zone_root = root / relative_root
-    if not zone_root.is_dir():
-        return
-    _walk_repo_zone_file_structure(
-        snapshot,
-        root,
-        project,
-        zone,
-        today,
-        zone_name=zone_name,
-        relative_root=relative_root,
-        zone_root=zone_root,
-        config=config,
-    )
 
 
 def _link_source_backed_file_structure(
