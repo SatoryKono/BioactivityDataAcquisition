@@ -499,6 +499,9 @@ from memory.graph.sync_pkg.alert_runbook_path import (
 from memory.graph.sync_pkg.alert_runbook_path import (
     _alert_runbook_path as _alert_runbook_path,
 )
+from memory.graph.sync_pkg.alert_target_inputs import (
+    _alert_target_inputs as _alert_target_inputs,
+)
 from memory.graph.sync_pkg.alert_targets import (
     _RUNTIME_DIMENSIONS as _RUNTIME_DIMENSIONS,
 )
@@ -3425,16 +3428,6 @@ def _link_alert_targets(
         dashboard_metrics,
         memory_mapping,
     )
-
-
-def _alert_target_inputs(rule: dict[str, object]) -> tuple[str, set[str]]:
-    annotations = _alert_annotations(rule)
-    expr = str(rule.get("expr", ""))
-    context = AlertTargetInputs(
-        expr=expr,
-        dimensions=_runtime_dimensions(expr, _alert_dimension_text(annotations)),
-    )
-    return context.expr, context.dimensions
 
 
 if __name__ == "__main__":
