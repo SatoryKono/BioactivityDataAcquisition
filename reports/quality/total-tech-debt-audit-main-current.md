@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `43bf513a434fb8a7ff78d2edab88083581961b6aad690444793ec42a47143e66`
+Evidence surface SHA-256: `96b355d51486be4094efa14d57195ad1a7b095b0a8c6968d8851d00f7d353aa4`
 
 Evidence metadata refresh (2026-09-23): the canonical registry digest was
 recomputed after S2 transformer split, test-governance unique-name/marker
@@ -67,7 +67,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "43bf513a434fb8a7ff78d2edab88083581961b6aad690444793ec42a47143e66",
+  "evidence_surface_sha256": "96b355d51486be4094efa14d57195ad1a7b095b0a8c6968d8851d00f7d353aa4",
   "metrics": {
     "architecture_integral_score": 10.0,
     "architecture_interpretation": "excellent",

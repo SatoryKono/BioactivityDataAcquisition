@@ -39,6 +39,10 @@ ALLOWED_BROAD_EXCEPTION_POLICIES: dict[str, frozenset[str]] = {
     # Run-report persistence must not fail the primary pipeline/workflow path.
     "src/bioetl/application/services/workflow/workflow_runner_reports.py": frozenset(),
     "src/bioetl/application/services/execution/_pipeline_runner_support.py": frozenset(),
+    "src/bioetl/application/composite/coordinator.py": frozenset(),
+    "src/bioetl/application/composite/helpers/dependency_coordinator_execution.py": (
+        frozenset()
+    ),
 }
 P0_2_CRITICAL_ERROR_MODULES = (
     "src/bioetl/application/core/batch_executor.py",

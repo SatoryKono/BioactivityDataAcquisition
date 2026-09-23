@@ -191,16 +191,24 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
                 )
             except TimeoutError as error:
                 return handle_enricher_timeout(self, execution_context, error)
-            except Exception as e:
-                if isinstance(e, _ENRICHER_EXECUTION_ERRORS):
-                    reason_code = None
-                elif isinstance(e, BioETLError):
-                    reason_code = "unexpected_bioetl_error"
-                else:
-                    reason_code = "unexpected_provider_error"
+            except _ENRICHER_EXECUTION_ERRORS as error:
                 return handle_enricher_execution_error(
                     self,
-                    e,
+                    error,
                     execution_context=execution_context,
-                    reason_code=reason_code,
+                    reason_code=None,
+                )
+            except BioETLError as error:
+                return handle_enricher_execution_error(
+                    self,
+                    error,
+                    execution_context=execution_context,
+                    reason_code="unexpected_bioetl_error",
+                )
+            except Exception as error:
+                return handle_enricher_execution_error(
+                    self,
+                    error,
+                    execution_context=execution_context,
+                    reason_code="unexpected_provider_error",
                 )

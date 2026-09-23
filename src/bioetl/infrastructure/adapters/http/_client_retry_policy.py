@@ -10,9 +10,10 @@ import httpx
 from bioetl.domain.exceptions import RecoverableError
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.resilience import RetryConfig
+from bioetl.infrastructure.time.system_clock import SystemClock
 
 
-def _parse_retry_after(value: str, *, now: float) -> float | None:
+def _parse_retry_after(value: str, *, now: float | None = None) -> float | None:
     """Parse a Retry-After delay-seconds or HTTP-date value."""
     normalized = value.strip()
     if not normalized:
@@ -29,7 +30,8 @@ def _parse_retry_after(value: str, *, now: float) -> float | None:
         retry_at = parsedate_to_datetime(normalized)
         if retry_at.tzinfo is None:
             return None
-        return max(0.0, retry_at.timestamp() - now)
+        clock_now = SystemClock().now().timestamp() if now is None else now
+        return max(0.0, retry_at.timestamp() - clock_now)
     except (OverflowError, TypeError, ValueError):
         return None
 
