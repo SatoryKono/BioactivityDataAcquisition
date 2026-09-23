@@ -1291,6 +1291,18 @@ def _pin_collapsed_rows_from(
 
 
 def _layout_uid_first_window(panels: list[object], *, current_uid: str) -> None:
+    if current_uid == "bioetl-runtime":
+        for panel in _root_panels(panels):
+            if panel.get("id") == 9401:
+                panel["description"] = (
+                    "CURRENT · Pipeline / Run Type readiness. Mapping: "
+                    "0=OK, 1=WARN, 2=CRIT, 3=INCOMPLETE, null=UNKNOWN. "
+                    "Missing publication or expected stage evidence makes readiness "
+                    "INCOMPLETE even when no active blockers are observed. "
+                    "Inspect Monitor Coverage and Review Stage Progress. "
+                    "This verdict does not describe the selected run's processing "
+                    "or trust status."
+                )
     if current_uid == "bioetl-provider-health-v2":
         for panel in _root_panels(panels):
             if panel.get("id") == 9107:
