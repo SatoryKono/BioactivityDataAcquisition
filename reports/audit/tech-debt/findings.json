@@ -1,281 +1,189 @@
-[
- {
-  "finding_id": "TD-001",
-  "fingerprint": "2e6fdc6c5646b07d987092ef2607dbc0eb1627061620ccf6784742c2b09b818d",
-  "status": "PROVEN",
-  "evidence_class": "FACT",
-  "priority": "P1",
-  "requirement_id": "RULES-debt-ratchet",
-  "domain": "architecture",
-  "claim": "God-module sync_pkg/_core.py: 17739 строк (было 18179); проектный memory-tooling под ruff/mypy, декомпозиция идет (slice 1)",
-  "broken_invariant": "debt may only shrink or stay unchanged; residue must be owned",
-  "root_cause": "monolithic memory-sync core",
-  "affected_paths": [
-   "src/memory/graph/sync_pkg/_core.py:1"
-  ],
-  "evidence": {
-   "path": "src/memory/graph/sync_pkg/_core.py",
-   "line": 1,
-   "command": "wc -l src/memory/graph/sync_pkg/_core.py",
-   "scope": "repo-wide",
-   "timestamp": "2026-09-21T07:00:00Z",
-   "exit_code": 0,
-   "output": "measured"
+{
+  "audit_id": "tech-debt-src-20260923",
+  "audited_commit": "670633e6ec685da28c734fb7225db5de27c87d97",
+  "audited_ref": "origin/main",
+  "scope": "src",
+  "mode": "propose-patches",
+  "audit_mode": "full",
+  "surface_score": 2,
+  "surface_score_legend": "2 = core mechanism correct; local non-critical gaps plus one unmanaged god-module",
+  "trend": {
+    "exemptions": "48 (2025-Q4) -> 0 (current)",
+    "architecture_integral_score": "9.47 (2026-08-28 snapshot) -> 10.0 (committed scorecard)",
+    "composition_modules": "291/295 (#10595) -> 280/295",
+    "god_module_loc": "18179 (#10526) -> 17740 (still unmet acceptance <500)",
+    "debt_gates_on_origin_main": "2 fail after #10630 hash desync"
   },
-  "acceptance": "Продолжить нарезку ядер (образец: _core_cli); effort L; трек: tests/architecture/test_tech_debt_issues_5646_*_closeout.py",
-  "validation_commands": [
-   "grep -rn --include='*.py' -E 'TODO|FIXME|HACK|XXX|WORKAROUND' src/bioetl",
-   "git diff 09ab9ac286bacb7eee3324e950603539a5c62ee6 HEAD -- configs/quality/debt_scorecard.yaml"
-  ],
-  "rollback": "N/A (read-only audit)",
-  "owner_surface": "memory-surface"
- },
- {
-  "finding_id": "TD-002",
-  "fingerprint": "4c525433d0a558f2662126764f17093b7918ad3d146c6f6cb4424822ebf79fb3",
-  "status": "PROVEN",
-  "evidence_class": "FACT",
-  "priority": "P1",
-  "requirement_id": "RULES-debt-ratchet",
-  "domain": "dependencies",
-  "claim": "Холдбэки pandas<2.3 и deltalake<1.0; пин arro3 снят",
-  "broken_invariant": "debt may only shrink or stay unchanged; residue must be owned",
-  "root_cause": "невалидированные мажорные миграции",
-  "affected_paths": [
-   "pyproject.toml:26"
-  ],
-  "evidence": {
-   "path": "pyproject.toml",
-   "line": 26,
-   "command": "grep -n -E '==|<' pyproject.toml",
-   "scope": "repo-wide",
-   "timestamp": "2026-09-21T07:00:00Z",
-   "exit_code": 0,
-   "output": "measured"
+  "marker_triage": {
+    "raw_TODO_FIXME_HACK_XXX_TEMP_DEPRECATED_hits": 8,
+    "false_positives": [
+      "TEMP as ChEMBL assay parameter type",
+      "CVCL_XXXX Cellosaurus docstring",
+      "ADR-XXX filename template",
+      "DEPRECATED enum member"
+    ],
+    "measured_todo_fixme_hack_in_src_bioetl": 0
   },
-  "acceptance": "Валидировать pandas 3.x CoW/strings и deltalake 1.x в отдельной ветке",
-  "validation_commands": [
-   "grep -rn --include='*.py' -E 'TODO|FIXME|HACK|XXX|WORKAROUND' src/bioetl",
-   "git diff 09ab9ac286bacb7eee3324e950603539a5c62ee6 HEAD -- configs/quality/debt_scorecard.yaml"
-  ],
-  "rollback": "N/A (read-only audit)",
-  "owner_surface": "interfaces-deps"
- },
- {
-  "finding_id": "TD-003",
-  "fingerprint": "011b6994b65a6894bae2f6ae18cb2fc07ce5dada7a00b3d44e5da5d20c467ddb",
-  "status": "PROVEN",
-  "evidence_class": "FACT",
-  "priority": "P2",
-  "requirement_id": "RULES-debt-ratchet",
-  "domain": "architecture",
-  "claim": "30 allowlist-циклов импорта с owner и review_by",
-  "broken_invariant": "debt may only shrink or stay unchanged; residue must be owned",
-  "root_cause": "исторические слоистые нарушения",
-  "affected_paths": [
-   "configs/quality/basedpyright_import_cycle_allowlist.json:1"
-  ],
-  "evidence": {
-   "path": "configs/quality/basedpyright_import_cycle_allowlist.json",
-   "line": 1,
-   "command": "basedpyright_import_cycle_allowlist.json count",
-   "scope": "repo-wide",
-   "timestamp": "2026-09-21T07:00:00Z",
-   "exit_code": 0,
-   "output": "measured"
-  },
-  "acceptance": "Гасить по датам review_by, начиная с просроченных",
-  "validation_commands": [
-   "grep -rn --include='*.py' -E 'TODO|FIXME|HACK|XXX|WORKAROUND' src/bioetl",
-   "git diff 09ab9ac286bacb7eee3324e950603539a5c62ee6 HEAD -- configs/quality/debt_scorecard.yaml"
-  ],
-  "rollback": "N/A (read-only audit)",
-  "owner_surface": "architecture"
- },
- {
-  "finding_id": "TD-004",
-  "fingerprint": "ee454303080ce9b22a2a8140b12640858a23df37e3bf9d6ee7879e2f17ee97a0",
-  "status": "PROVEN",
-  "evidence_class": "FACT",
-  "priority": "P2",
-  "requirement_id": "RULES-debt-ratchet",
-  "domain": "architecture",
-  "claim": "Кластер checkpoint_compatibility_* (8+ модулей) при нулевом transition-debt",
-  "broken_invariant": "debt may only shrink or stay unchanged; residue must be owned",
-  "root_cause": "накопленная transition-политика",
-  "affected_paths": [
-   "src/bioetl/application/services/checkpoint/:1"
-  ],
-  "evidence": {
-   "path": "src/bioetl/application/services/checkpoint/",
-   "line": 1,
-   "command": "git diff scorecard",
-   "scope": "repo-wide",
-   "timestamp": "2026-09-21T07:00:00Z",
-   "exit_code": 0,
-   "output": "measured"
-  },
-  "acceptance": "Зафиксировать инвенторию кластера в compatibility_facade_inventory",
-  "validation_commands": [
-   "grep -rn --include='*.py' -E 'TODO|FIXME|HACK|XXX|WORKAROUND' src/bioetl",
-   "git diff 09ab9ac286bacb7eee3324e950603539a5c62ee6 HEAD -- configs/quality/debt_scorecard.yaml"
-  ],
-  "rollback": "N/A (read-only audit)",
-  "owner_surface": "application"
- },
- {
-  "finding_id": "TD-005",
-  "fingerprint": "2dd05350b261febccfe1f8334798a3162dadea647a122bf56aa23fbc16d82aeb",
-  "status": "PROVEN",
-  "evidence_class": "FACT",
-  "priority": "P3",
-  "requirement_id": "RULES-debt-ratchet",
-  "domain": "code",
-  "claim": "74 type: ignore триажированы 2026-09-21: 10 сняты через cast() (context_run 5, bronze_writer 5), остаток 64 — границы click/dynamic-API",
-  "broken_invariant": "debt may only shrink or stay unchanged; residue must be owned",
-  "root_cause": "нетипизируемые границы CLI/storage",
-  "affected_paths": [
-   "src/bioetl/interfaces/cli/commands/domains/shared/click_options.py:1"
-  ],
-  "evidence": {
-   "path": "src/bioetl/interfaces/cli/commands/domains/shared/click_options.py",
-   "line": 1,
-   "command": "grep -rn 'type: ignore' src/bioetl",
-   "scope": "repo-wide",
-   "timestamp": "2026-09-21T07:00:00Z",
-   "exit_code": 0,
-   "output": "measured"
-  },
-  "acceptance": "Частично закрыто: ruff чист, 120 unit-тестов зеленые (73 bronze + 47 context); click_options/observability_backend_runtime оставлены (типизация динамики click без mypy — риск); mypy-проверка пропущена (нет в окружении)",
-  "validation_commands": [
-   "grep -rn --include='*.py' -E 'TODO|FIXME|HACK|XXX|WORKAROUND' src/bioetl",
-   "git diff 09ab9ac286bacb7eee3324e950603539a5c62ee6 HEAD -- configs/quality/debt_scorecard.yaml"
-  ],
-  "rollback": "N/A (read-only audit)",
-  "owner_surface": "interfaces"
- },
- {
-  "finding_id": "TD-006",
-  "fingerprint": "6d76dce002511ce8383f7badcdf6a740d216a0dfbd796f0127eada9ba95665c2",
-  "status": "PROVEN",
-  "evidence_class": "FACT",
-  "priority": "P3",
-  "requirement_id": "RULES-debt-ratchet",
-  "domain": "security",
-  "claim": "32 nosec под реестром SUP-*: lock-тест зелен 2026-09-21 (4 passed), реестр синхронен",
-  "broken_invariant": "debt may only shrink or stay unchanged; residue must be owned",
-  "root_cause": "ложные срабатывания bandit B404/B405/B603/B604",
-  "affected_paths": [
-   "configs/quality/security_suppression_registry.yaml:1"
-  ],
-  "evidence": {
-   "path": "configs/quality/security_suppression_registry.yaml",
-   "line": 1,
-   "command": "git diff scorecard",
-   "scope": "repo-wide",
-   "timestamp": "2026-09-21T07:00:00Z",
-   "exit_code": 0,
-   "output": "measured"
-  },
-  "acceptance": "Закрыто 2026-09-21: test_security_suppression_registry 4 passed; ревью реестра 2027-03",
-  "validation_commands": [
-   "grep -rn --include='*.py' -E 'TODO|FIXME|HACK|XXX|WORKAROUND' src/bioetl",
-   "git diff 09ab9ac286bacb7eee3324e950603539a5c62ee6 HEAD -- configs/quality/debt_scorecard.yaml"
-  ],
-  "rollback": "N/A (read-only audit)",
-  "owner_surface": "architecture"
- },
- {
-  "finding_id": "TD-007",
-  "fingerprint": "469aa5f5f2da17167ce31ab146fa22eb9399659d6c6aba90a685cd093167273d",
-  "status": "PROVEN",
-  "evidence_class": "FACT",
-  "priority": "P3",
-  "requirement_id": "RULES-debt-ratchet",
-  "domain": "tests",
-  "claim": "23 pragma проверены 2026-09-21: все EXCLUDED by design (coverage.xml); снятие без покрытия снизило бы метрики; dated-review 2026-12-31 в будущем",
-  "broken_invariant": "debt may only shrink or stay unchanged; residue must be owned",
-  "root_cause": "труднопокрываемые guard-ветви",
-  "affected_paths": [
-   "src/bioetl/application/core/record_processor_config.py:63"
-  ],
-  "evidence": {
-   "path": "src/bioetl/application/core/record_processor_config.py",
-   "line": 63,
-   "command": "git diff scorecard",
-   "scope": "repo-wide",
-   "timestamp": "2026-09-21T07:00:00Z",
-   "exit_code": 0,
-   "output": "measured"
-  },
-  "acceptance": "Закрыто 2026-09-21 как controlled: снятий не due; код не менялся (снятие ухудшило бы покрытие); пересмотр по дате 2026-12-31",
-  "validation_commands": [
-   "grep -rn --include='*.py' -E 'TODO|FIXME|HACK|XXX|WORKAROUND' src/bioetl",
-   "git diff 09ab9ac286bacb7eee3324e950603539a5c62ee6 HEAD -- configs/quality/debt_scorecard.yaml"
-  ],
-  "rollback": "N/A (read-only audit)",
-  "owner_surface": "architecture"
- },
- {
-  "finding_id": "TD-008",
-  "fingerprint": "e93a307a6978e1027f2e838d247359a4a84339bfb2750cdd2d413267e5fb5200",
-  "status": "PROVEN",
-  "evidence_class": "FACT",
-  "priority": "P3",
-  "requirement_id": "RULES-debt-ratchet",
-  "domain": "code",
-  "claim": "11 noqa I001 удалены (повторно после внешнего отката); ruff isort-fix, gate src/bioetl чист, 86 тестов зеленые",
-  "broken_invariant": "debt may only shrink or stay unchanged; residue must be owned",
-  "root_cause": "isort-профиль не покрывает barrels",
-  "affected_paths": [
-   "src/bioetl/application/core/base_transformer/__init__.py:4"
-  ],
-  "evidence": {
-   "path": "src/bioetl/application/core/base_transformer/__init__.py",
-   "line": 4,
-   "command": "grep -rn 'noqa' src/bioetl",
-   "scope": "repo-wide",
-   "timestamp": "2026-09-21T07:00:00Z",
-   "exit_code": 0,
-   "output": "measured"
-  },
-  "acceptance": "Закрыто повторно 2026-09-21: правки были откачены внешним актором, накачены заново тем же способом; noqa=0, ruff pass, re-export pass",
-  "validation_commands": [
-   "grep -rn --include='*.py' -E 'TODO|FIXME|HACK|XXX|WORKAROUND' src/bioetl",
-   "git diff 09ab9ac286bacb7eee3324e950603539a5c62ee6 HEAD -- configs/quality/debt_scorecard.yaml"
-  ],
-  "rollback": "N/A (read-only audit)",
-  "owner_surface": "application"
- },
- {
-  "finding_id": "TD-009",
-  "fingerprint": "5a1b9dd256d025b8159f20d26fbe174b94bd1e161ca6feae558bb325ced631fd",
-  "status": "PROVEN",
-  "evidence_class": "FACT",
-  "priority": "P3",
-  "requirement_id": "RULES-debt-ratchet",
-  "domain": "tests",
-  "claim": "43 маркера разобраны 2026-09-21: 40 ложных срабатываний, 3 реальных TODO удалены; test_validation_test_debt_markers проходит",
-  "broken_invariant": "debt may only shrink or stay unchanged; residue must be owned",
-  "root_cause": "отложенные тест-улучшения",
-  "affected_paths": [
-   "tests/:1"
-  ],
-  "evidence": {
-   "path": "tests/",
-   "line": 1,
-   "command": "grep -rn TODO/FIXME/HACK tests scripts",
-   "scope": "repo-wide",
-   "timestamp": "2026-09-21T07:00:00Z",
-   "exit_code": 0,
-   "output": "measured"
-  },
-  "acceptance": "Закрыто 2026-09-21: guard-тест зеленый (1 passed, --timeout 300); новых маркеров не вносить (лок test_no_todo_markers)",
-  "validation_commands": [
-   "grep -rn --include='*.py' -E 'TODO|FIXME|HACK|XXX|WORKAROUND' src/bioetl",
-   "git diff 09ab9ac286bacb7eee3324e950603539a5c62ee6 HEAD -- configs/quality/debt_scorecard.yaml"
-  ],
-  "rollback": "N/A (read-only audit)",
-  "owner_surface": "platform"
- }
-]
+  "findings": [
+    {
+      "finding_id": "AUD-001",
+      "fingerprint": "b7997794b5de41ec54c1761440cb86786b39e9a30b83aad339c0a5cee4915679",
+      "status": "PROVEN",
+      "evidence_class": "FACT",
+      "priority": "P1",
+      "requirement_id": "REQ-GOV-007",
+      "domain": "tech-debt",
+      "claim": "После merge #10630 committed scorecard хранит source_tree_sha256 ce0ac31, а module-coverage-inventory — 0db51a46; debt-governance gates падают на чистом origin/main.",
+      "broken_invariant": "module_coverage_scorecard_coherence и generated_artifact_drift должны быть pass на origin/main без ручного rebind.",
+      "root_cause": "scorecard inventory source_tree_sha256 desync after config closeout merge",
+      "affected_paths": [
+        "reports/quality/architecture-quality-scorecard.json",
+        "reports/quality/module-coverage-inventory.json"
+      ],
+      "evidence": {
+        "path": "reports/quality/architecture-quality-scorecard.json",
+        "symbol": "source_artifacts.module_coverage_inventory.source_tree_sha256",
+        "line": 272,
+        "command": "python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main",
+        "scope": "src",
+        "timestamp": "2026-09-23T06:05:47Z",
+        "exit_code": 1,
+        "output": "Debt governance gates have 2 failing gate(s): module_coverage_scorecard_coherence, generated_artifact_drift"
+      },
+      "acceptance": "Gates pass на том же SHA: inventory.source_tree_sha256 == scorecard source_artifacts.module_coverage_inventory.source_tree_sha256; generated_artifact_drift count=0. Бюджеты не выросли.",
+      "validation_commands": [
+        "python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main"
+      ],
+      "rollback": "git revert of the rebind commit; do not raise budgets",
+      "owner_surface": "docs"
+    },
+    {
+      "finding_id": "AUD-002",
+      "fingerprint": "9932d85b9fdf0a64e17d086e8bea5ca77e873362db811fb69363c266649af790",
+      "status": "PROVEN",
+      "evidence_class": "FACT",
+      "priority": "P1",
+      "requirement_id": "REQ-ARCH-001",
+      "domain": "tech-debt",
+      "claim": "src/memory/graph/sync_pkg/_core.py остаётся god-module на 17740 строк; acceptance #10526 (<500 строк на единицу) не выполнен, issue закрыт 2026-09-21 без комментария.",
+      "broken_invariant": "Крупнейший модуль src не должен смешивать argparse, ast, subprocess, threading, http.client и Neo4j sync в одном файле на порядок больше следующего.",
+      "root_cause": "god-module src/memory/graph/sync_pkg/_core.py remains a single 17k-LOC unit",
+      "affected_paths": [
+        "src/memory/graph/sync_pkg/_core.py"
+      ],
+      "evidence": {
+        "path": "src/memory/graph/sync_pkg/_core.py",
+        "symbol": "module",
+        "line": 1,
+        "command": "python -c \"from pathlib import Path; p=Path('src/memory/graph/sync_pkg/_core.py'); print(p.read_text(encoding='utf-8').count(chr(10))+1)\"",
+        "scope": "src/memory",
+        "timestamp": "2026-09-23T06:03:00Z",
+        "exit_code": 0,
+        "output": "17740 src/memory/graph/sync_pkg/_core.py; next largest src/memory/graph/query.py=1978"
+      },
+      "acceptance": "Модуль разбит на cohesive единицы <500 LOC; потребители импортируют новые пути; e2e sync зелёный. Не закрывать #10526 пока loc(_core.py)>=500.",
+      "validation_commands": [
+        "python -c \"from pathlib import Path; print((Path('src/memory/graph/sync_pkg/_core.py').read_text(encoding='utf-8').count(chr(10))+1))\""
+      ],
+      "rollback": "restore previous _core.py via git; no budget change",
+      "owner_surface": "docs"
+    },
+    {
+      "finding_id": "AUD-003",
+      "fingerprint": "5bf2316f3b533e9ca930f6c60dad6487e23c7db081117d8741ada5eeffe61905",
+      "status": "PROVEN",
+      "evidence_class": "FACT",
+      "priority": "P2",
+      "requirement_id": "REQ-GOV-012",
+      "domain": "tech-debt",
+      "claim": "composition_util=0.9492 (280/295) держит cap, но headroom 15 модулей; любой рост composition без shrink блокирует фичи. Это watch, не нарушение ≤0.95.",
+      "broken_invariant": "Не нарушен: util ≤ 0.95. Нарушение наступит при 281-м модуле без удаления другого.",
+      "root_cause": "composition package utilization remains within cap but near 0.95 headroom floor",
+      "affected_paths": [
+        "configs/quality/package_cohesion_budget.yaml",
+        "src/bioetl/composition"
+      ],
+      "evidence": {
+        "path": "reports/quality/architecture-quality-scorecard.json",
+        "symbol": "diagnostics.composition_util",
+        "line": 172,
+        "command": "python -c \"import json; d=json.loads(open('reports/quality/architecture-quality-scorecard.json',encoding='utf-8').read()); print(d['diagnostics']['composition_module_count'], d['diagnostics']['composition_module_cap'], d['diagnostics']['composition_util'])\"",
+        "scope": "src/bioetl/composition",
+        "timestamp": "2026-09-23T06:04:00Z",
+        "exit_code": 0,
+        "output": "280 295 0.9492"
+      },
+      "acceptance": "Watch: не создавать issue пока util≤0.95. При util>0.95 — shrink-only PR, cap не поднимать. Комментарий в package_cohesion_budget.yaml (live 279) синхронизировать с 280.",
+      "validation_commands": [
+        "python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main"
+      ],
+      "rollback": "n/a watch item",
+      "owner_surface": "composition"
+    },
+    {
+      "finding_id": "AUD-004",
+      "fingerprint": "d22baa24bbb67fbcb0c1281c730eb1a1d6126c1ef6e7cf4d8f8ca87562c8a148",
+      "status": "PROVEN",
+      "evidence_class": "FACT",
+      "priority": "P2",
+      "requirement_id": "REQ-GOV-007",
+      "domain": "tech-debt",
+      "claim": "10 модулей bioetl partially_covered; хвост FK-reconciliation 76.74/77.5/88.41% (27 missing lines). Не снимать pragma: покрытие только тестами.",
+      "broken_invariant": "coverage-verify inventory допускает partial, но FK-reconciliation ниже 80% повышает cost-of-change на Gold FK path.",
+      "root_cause": "ten bioetl modules remain partially_covered with FK-reconciliation tail below 80 percent",
+      "affected_paths": [
+        "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_loaded.py",
+        "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_normalization.py",
+        "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_reads.py"
+      ],
+      "evidence": {
+        "path": "reports/quality/module-coverage-inventory.json",
+        "symbol": "summary.status_counts.partially_covered",
+        "line": 49736,
+        "command": "python reports/audit/tech-debt/_collect_scan.py",
+        "scope": "src/bioetl",
+        "timestamp": "2026-09-23T06:06:00Z",
+        "exit_code": 0,
+        "output": "partially_covered=10; worst=workflow_foreign_key_reconciliation_loaded.py 76.74 missing=10"
+      },
+      "acceptance": "Три FK-модуля fully_covered в inventory без снятия pragma и без снижения fail-under. Бюджеты покрытия не поднимать.",
+      "validation_commands": [
+        "python -m scripts.engineering.qa report-module-coverage --check --allow-missing-coverage-xml"
+      ],
+      "rollback": "revert tests only",
+      "owner_surface": "infrastructure"
+    },
+    {
+      "finding_id": "AUD-005",
+      "fingerprint": "9ebadbabb087f151b67d531c268547df4aca44e4193e9d7956e648831febd799",
+      "status": "PROVEN",
+      "evidence_class": "FACT",
+      "priority": "P3",
+      "requirement_id": "REQ-ARCH-002",
+      "domain": "tech-debt",
+      "claim": "Около 20 type: ignore в src/bioetl на mixin/override/dynamic kwargs; соседний openalex клиент уже использует cast(). Не ретипировать без mypy --strict.",
+      "broken_invariant": "Публичные швы предпочитают узкий cast(), а не type: ignore, где это проверяемо.",
+      "root_cause": "dynamic mixin and override seams still use type ignore instead of narrow cast",
+      "affected_paths": [
+        "src/bioetl/application/pipelines/common/transformer_initialization.py",
+        "src/bioetl/infrastructure/adapters/common/fallback_policy_mixin.py"
+      ],
+      "evidence": {
+        "path": "src/bioetl/application/pipelines/common/transformer_initialization.py",
+        "symbol": "BaseTransformer.__init__",
+        "line": 47,
+        "command": "rg -n \"type: ignore\" src/bioetl --glob \"*.py\"",
+        "scope": "src/bioetl",
+        "timestamp": "2026-09-23T06:03:30Z",
+        "exit_code": 0,
+        "output": "transformer_initialization.py:47 type: ignore[arg-type]; fallback_policy_mixin.py:116 type: ignore[attr-defined]"
+      },
+      "acceptance": "Каждая замена ignore→cast проходит mypy --strict и существующие unit-тесты модуля. Не массовый ретайп.",
+      "validation_commands": [
+        "mypy --strict src/bioetl/application/pipelines/common/transformer_initialization.py src/bioetl/infrastructure/adapters/common/fallback_policy_mixin.py"
+      ],
+      "rollback": "restore type: ignore comments",
+      "owner_surface": "application"
+    }
+  ]
+}
