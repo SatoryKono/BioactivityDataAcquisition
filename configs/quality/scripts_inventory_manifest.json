@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-23T09:20:20.256576+00:00",
+  "generated_at": "2026-09-23T09:23:39.946862+00:00",
   "summary": {
     "total_scripts": 624,
     "status_counts": {
-      "active": 339,
-      "supporting": 285
+      "active": 338,
+      "supporting": 286
     },
     "reference_group_coverage": {
       "agents": 9,
@@ -12871,7 +12871,7 @@
         },
         {
           "path": "tests/integration/test_grafana_render_first_remediation.py",
-          "line": 1525,
+          "line": 1524,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         },
@@ -15324,7 +15324,7 @@
     {
       "path": "scripts/engineering/qa/report_chembl_observed_value_inventory.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -15340,7 +15340,11 @@
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_chembl_observed_value_inventory import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the deterministic ChEMBL Bronze observed-value inventory implementation behind python -m scripts.engineering.qa report-chembl-observed-value-inventory; keep operator execution routed through the unified QA dispatcher while unit tests import the computation helpers directly. Promote to active only with an explicit active-surface budget reduction elsewhere."
     },
     {
       "path": "scripts/engineering/qa/report_compatibility_importer_census.py",
@@ -20111,7 +20115,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
@@ -20121,15 +20125,9 @@
         },
         {
           "path": "tests/integration/test_grafana_evidence_readability.py",
-          "line": 10,
+          "line": 9,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
-        },
-        {
-          "path": "tests/integration/test_grafana_evidence_readability.py",
-          "line": 90,
-          "source_group": "tests",
-          "text": "from scripts.ops.observability.grafana._evidence_readability import _stage_colors"
         }
       ],
       "owner": "@bioetl-platform",
@@ -20142,8 +20140,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "scripts/ops/observability/grafana/_evidence_readability.py",
+          "line": 4,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._gr_db_corrections import _override, _panels"
+        },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
           "line": 1460,
