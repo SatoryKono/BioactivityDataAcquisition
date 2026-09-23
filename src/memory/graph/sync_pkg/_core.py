@@ -1356,6 +1356,9 @@ from memory.graph.sync_pkg.entity_pipeline_node_identity import (
 from memory.graph.sync_pkg.entity_pipeline_node_identity import (
     _provider_pipeline_test_index as _provider_pipeline_test_index,
 )
+from memory.graph.sync_pkg.entity_pipeline_test_index import (
+    _entity_pipeline_test_index as _entity_pipeline_test_index,
+)
 from memory.graph.sync_pkg.entity_storage_context import (
     _entity_storage_context as _entity_storage_context,
 )
@@ -3037,17 +3040,6 @@ def _pipeline_test_indexes(
     return _entity_pipeline_test_index(snapshot), _provider_pipeline_test_index(
         snapshot
     )
-
-
-def _entity_pipeline_test_index(
-    snapshot: GraphSnapshot,
-) -> dict[tuple[str, str], NodeKey]:
-    return {
-        identity: node.key
-        for node in snapshot.nodes.values()
-        for identity in [_entity_pipeline_node_identity(node)]
-        if identity is not None
-    }
 
 
 if __name__ == "__main__":
