@@ -660,7 +660,7 @@ def _first_window_widths(payload: dict, p: dict[int, dict]) -> None:
         "bioetl-control-plane-v1": {
             9418: {"Result": 100, "Trust": 105, "reasons_count": 80}
         },
-        "bioetl-overview-v2": {215: {"Priority": 90, "Action": 125}},
+        "bioetl-overview-v2": {215: {"Priority": 90, "Action": 155}},
         "bioetl-dq-v2": {9102: {"severity": 70, "Action": 125}},
         "bioetl-run-explorer-v1": {
             3010: {
