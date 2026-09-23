@@ -2379,10 +2379,10 @@
       "panels": [
         {
           "gridPos": {
-            "h": 5,
-            "w": 24,
             "x": 0,
-            "y": 19
+            "y": 19,
+            "w": 24,
+            "h": 5
           },
           "id": 894,
           "options": {
@@ -2451,10 +2451,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
-            "w": 6,
             "x": 0,
-            "y": 24
+            "y": 24,
+            "w": 8,
+            "h": 3
           },
           "id": 130,
           "options": {
@@ -2542,15 +2542,15 @@
               "unit": "short",
               "decimals": 0,
               "noValue": "NO OBSERVATIONS",
-              "displayName": "Track Checkpoint Incompatibilities"
+              "displayName": "Track Incompatibilities"
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
-            "w": 6,
-            "x": 6,
-            "y": 24
+            "x": 8,
+            "y": 24,
+            "w": 8,
+            "h": 3
           },
           "id": 3,
           "options": {
@@ -2586,7 +2586,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track Checkpoint Incompatibilities",
+          "title": "Track Incompatibilities",
           "type": "stat"
         },
         {
@@ -2638,15 +2638,15 @@
               },
               "unit": "short",
               "noValue": "NO OBSERVATIONS",
-              "displayName": "Track Unreconstructable Replays"
+              "displayName": "Track Unreconstructable"
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
-            "w": 6,
-            "x": 12,
-            "y": 24
+            "x": 16,
+            "y": 24,
+            "w": 8,
+            "h": 3
           },
           "id": 104,
           "options": {
@@ -2682,7 +2682,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track Unreconstructable Replays",
+          "title": "Track Unreconstructable",
           "type": "stat"
         },
         {
@@ -2739,10 +2739,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
-            "w": 6,
-            "x": 18,
-            "y": 24
+            "x": 0,
+            "y": 27,
+            "w": 8,
+            "h": 3
           },
           "id": 120,
           "options": {
@@ -2830,15 +2830,15 @@
               },
               "unit": "short",
               "noValue": "NO OBSERVATIONS",
-              "displayName": "Track Checkpoint Load Failures"
+              "displayName": "Track Load Failures"
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
-            "w": 6,
-            "x": 0,
-            "y": 27
+            "x": 8,
+            "y": 27,
+            "w": 8,
+            "h": 3
           },
           "id": 101,
           "options": {
@@ -2874,7 +2874,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track Checkpoint Load Failures",
+          "title": "Track Load Failures",
           "type": "stat"
         },
         {
@@ -2926,15 +2926,15 @@
               },
               "unit": "short",
               "noValue": "NO OBSERVATIONS",
-              "displayName": "Track Checkpoint Save Failures"
+              "displayName": "Track Save Failures"
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
-            "w": 6,
-            "x": 6,
-            "y": 27
+            "x": 16,
+            "y": 27,
+            "w": 8,
+            "h": 3
           },
           "id": 102,
           "options": {
@@ -2970,7 +2970,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track Checkpoint Save Failures",
+          "title": "Track Save Failures",
           "type": "stat"
         },
         {
@@ -3022,15 +3022,15 @@
               },
               "unit": "short",
               "noValue": "NO OBSERVATIONS",
-              "displayName": "Track Global Checkpoint Admin Failures"
+              "displayName": "Track Global Admin Failures"
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
-            "w": 6,
-            "x": 12,
-            "y": 27
+            "x": 0,
+            "y": 30,
+            "w": 8,
+            "h": 3
           },
           "id": 103,
           "options": {
@@ -3066,7 +3066,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track Global Checkpoint Admin Failures",
+          "title": "Track Global Admin Failures",
           "type": "stat"
         },
         {
@@ -3123,10 +3123,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
-            "w": 6,
-            "x": 18,
-            "y": 27
+            "x": 8,
+            "y": 30,
+            "w": 8,
+            "h": 3
           },
           "id": 121,
           "options": {
@@ -3203,10 +3203,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 0,
-            "y": 30
+            "y": 33,
+            "w": 12,
+            "h": 6
           },
           "id": 134,
           "options": {
@@ -3257,10 +3257,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 12,
-            "y": 30
+            "y": 33,
+            "w": 12,
+            "h": 6
           },
           "id": 5,
           "options": {
@@ -3328,10 +3328,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 24,
             "x": 0,
-            "y": 36
+            "y": 39,
+            "w": 24,
+            "h": 6
           },
           "id": 135,
           "options": {
@@ -3402,10 +3402,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 7,
-            "w": 24,
             "x": 0,
-            "y": 42
+            "y": 45,
+            "w": 24,
+            "h": 7
           },
           "id": 105,
           "options": {
@@ -3487,10 +3487,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 7,
-            "w": 24,
             "x": 0,
-            "y": 49
+            "y": 52,
+            "w": 24,
+            "h": 7
           },
           "id": 106,
           "options": {
@@ -3709,10 +3709,10 @@
             ]
           },
           "gridPos": {
-            "h": 6,
-            "w": 24,
             "x": 0,
-            "y": 56
+            "y": 59,
+            "w": 24,
+            "h": 6
           },
           "id": 9413,
           "options": {
@@ -3895,14 +3895,14 @@
               },
               "unit": "short",
               "noValue": "UNKNOWN",
-              "displayName": "Track Ledger Append Failures"
+              "displayName": "Track Ledger Failures"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 0,
             "y": 24,
-            "w": 6,
+            "w": 8,
             "h": 3
           },
           "id": 2,
@@ -3939,7 +3939,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track Ledger Append Failures",
+          "title": "Track Ledger Failures",
           "type": "stat"
         },
         {
@@ -3991,14 +3991,14 @@
               },
               "unit": "short",
               "noValue": "UNKNOWN",
-              "displayName": "Track Manifest Write Failures"
+              "displayName": "Track Manifest Failures"
             },
             "overrides": []
           },
           "gridPos": {
-            "x": 6,
+            "x": 8,
             "y": 24,
-            "w": 6,
+            "w": 8,
             "h": 3
           },
           "id": 1,
@@ -4035,7 +4035,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track Manifest Write Failures",
+          "title": "Track Manifest Failures",
           "type": "stat"
         },
         {
@@ -4087,14 +4087,14 @@
               },
               "unit": "short",
               "noValue": "UNKNOWN",
-              "displayName": "Monitor Manifest Failures (30m)"
+              "displayName": "Monitor Manifest (30m)"
             },
             "overrides": []
           },
           "gridPos": {
-            "x": 12,
-            "y": 24,
-            "w": 6,
+            "x": 0,
+            "y": 27,
+            "w": 8,
             "h": 3
           },
           "id": 132,
@@ -4131,7 +4131,7 @@
               "refId": "A"
             }
           ],
-          "title": "Monitor Manifest Failures (30m)",
+          "title": "Monitor Manifest (30m)",
           "type": "stat"
         },
         {
@@ -4183,14 +4183,14 @@
               },
               "unit": "short",
               "noValue": "UNKNOWN",
-              "displayName": "Monitor Ledger Failures (30m)"
+              "displayName": "Monitor Ledger (30m)"
             },
             "overrides": []
           },
           "gridPos": {
-            "x": 18,
-            "y": 24,
-            "w": 6,
+            "x": 8,
+            "y": 27,
+            "w": 8,
             "h": 3
           },
           "id": 133,
@@ -4227,7 +4227,7 @@
               "refId": "A"
             }
           ],
-          "title": "Monitor Ledger Failures (30m)",
+          "title": "Monitor Ledger (30m)",
           "type": "stat"
         },
         {
@@ -4262,7 +4262,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 27,
+            "y": 30,
             "w": 24,
             "h": 9
           },
@@ -4319,7 +4319,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 36,
+            "y": 39,
             "w": 24,
             "h": 12
           },
@@ -4534,7 +4534,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 48,
+            "y": 51,
             "w": 24,
             "h": 9
           },
@@ -5011,14 +5011,14 @@
               "unit": "short",
               "decimals": 0,
               "noValue": "NO OBSERVATIONS",
-              "displayName": "Track Missing Lineage References"
+              "displayName": "Track Missing Lineage"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 0,
             "y": 22,
-            "w": 6,
+            "w": 8,
             "h": 3
           },
           "id": 122,
@@ -5055,7 +5055,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track Missing Lineage References",
+          "title": "Track Missing Lineage",
           "type": "stat"
         },
         {
@@ -5107,14 +5107,14 @@
               },
               "unit": "short",
               "noValue": "NO OBSERVATIONS",
-              "displayName": "Track Lineage Persistence Failures"
+              "displayName": "Track Lineage Failures"
             },
             "overrides": []
           },
           "gridPos": {
-            "x": 6,
+            "x": 8,
             "y": 22,
-            "w": 6,
+            "w": 8,
             "h": 3
           },
           "id": 137,
@@ -5151,7 +5151,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track Lineage Persistence Failures",
+          "title": "Track Lineage Failures",
           "type": "stat"
         },
         {

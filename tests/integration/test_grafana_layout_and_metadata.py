@@ -364,7 +364,7 @@ def test_control_plane_first_evidence_panel_stays_close_to_answer_row() -> None:
     row_panel = panels["Inspect Replay & Checkpoint Evidence"]
     grid_pos = panel.get("gridPos", {})
     assert grid_pos.get("y") > row_panel.get("gridPos", {}).get("y", 0)
-    assert grid_pos.get("w", 0) == 6
+    assert grid_pos.get("w", 0) == 8
     assert grid_pos.get("h", 0) == 3
 
 
@@ -457,21 +457,20 @@ def test_control_plane_manifest_evidence_top_band_uses_full_row_width() -> None:
     assert terminal_grid.get("x") == 0
     assert terminal_grid.get("y", 0) > row.get("gridPos", {}).get("y", 0)
     failure_panels = [
-        panels["Track Manifest Write Failures"],
-        panels["Track Ledger Append Failures"],
-        panels["Monitor Manifest Failures (30m)"],
-        panels["Monitor Ledger Failures (30m)"],
+        panels["Track Manifest Failures"],
+        panels["Track Ledger Failures"],
+        panels["Monitor Manifest (30m)"],
+        panels["Monitor Ledger (30m)"],
     ]
-    assert {panel.get("gridPos", {}).get("w") for panel in failure_panels} == {6}
+    assert {panel.get("gridPos", {}).get("w") for panel in failure_panels} == {8}
     assert {panel.get("gridPos", {}).get("h") for panel in failure_panels} == {3}
     assert {panel.get("gridPos", {}).get("y") for panel in failure_panels} == {
-        terminal_grid["y"] + terminal_grid["h"]
+        terminal_grid["y"] + terminal_grid["h"],
+        terminal_grid["y"] + terminal_grid["h"] + 3,
     }
     assert {panel.get("gridPos", {}).get("x") for panel in failure_panels} == {
         0,
-        6,
-        12,
-        18,
+        8,
     }
     _assert_panels_stay_in_grid_without_overlap(
         child_panels, context="Control Plane manifest/ledger disclosure"
@@ -502,21 +501,17 @@ def test_control_plane_replay_safety_detail_top_bands_use_full_row_width() -> No
 
     blocker_grid = panels[130].get("gridPos", {})
     assert blocker_grid.get("x") == 0
-    assert blocker_grid.get("w") == 6
+    assert blocker_grid.get("w") == 8
     assert blocker_grid.get("h") == 3
     assert blocker_grid.get("y") == blind_spots_grid.get("y") + blind_spots_grid.get(
         "h"
     )
-    first_band = [panels[panel_id] for panel_id in (130, 3, 104, 120)]
-    assert {panel.get("gridPos", {}).get("y") for panel in first_band} == {
-        blocker_grid["y"]
-    }
-    assert {panel.get("gridPos", {}).get("w") for panel in first_band} == {6}
-    assert {panel.get("gridPos", {}).get("h") for panel in first_band} == {3}
-    second_band = [panels[panel_id] for panel_id in (101, 102, 103, 121)]
-    assert {panel.get("gridPos", {}).get("y") for panel in second_band} == {
-        blocker_grid["y"] + blocker_grid["h"]
-    }
+    for index, ids in enumerate(((130, 3, 104), (120, 101, 102), (103, 121))):
+        band = [panels[panel_id]["gridPos"] for panel_id in ids]
+        assert {grid["y"] for grid in band} == {blocker_grid["y"] + index * 3}
+        assert {grid["w"] for grid in band} == {8}
+        assert {grid["h"] for grid in band} == {3}
+        assert {grid["x"] for grid in band} == {i * 8 for i in range(len(ids))}
     _assert_panels_stay_in_grid_without_overlap(
         child_panels, context="Control Plane replay-safety disclosure"
     )
@@ -539,7 +534,7 @@ def test_control_plane_lineage_top_band_uses_full_row_width() -> None:
     grid_pos = panel.get("gridPos", {})
     assert grid_pos.get("x") == 0
     assert grid_pos.get("y", 0) > row_panel.get("gridPos", {}).get("y", 0)
-    assert grid_pos.get("w") == 6
+    assert grid_pos.get("w") == 8
     assert grid_pos.get("h") == 3
 
 
@@ -608,7 +603,7 @@ def test_replay_panels_are_split_by_semantics(dashboard_file: str) -> None:
         if panel.get("title")
     }
 
-    reconstruct = panels.get("Track Unreconstructable Replays")
+    reconstruct = panels.get("Track Unreconstructable")
     assert reconstruct is not None
     reconstruct_expr = "\n".join(
         target.get("expr", "")
@@ -689,17 +684,17 @@ def test_control_plane_run_type_noop_panels_disclose_scope_limit() -> None:
     """Panels backed by metric families without run_type must disclose that the selector is a no-op."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     expected_titles = (
-        "Track Checkpoint Incompatibilities",
-        "Track Unreconstructable Replays",
-        "Track Checkpoint Load Failures",
-        "Track Checkpoint Save Failures",
+        "Track Incompatibilities",
+        "Track Unreconstructable",
+        "Track Load Failures",
+        "Track Save Failures",
         "Compare Checkpoint Outcomes",
         "Track Checkpoint Save Latency",
-        "Track Ledger Append Failures",
+        "Track Ledger Failures",
         "Compare Ledger Appends by Type & Status",
-        "Monitor Ledger Failures (30m)",
-        "Track Missing Lineage References",
-        "Track Lineage Persistence Failures",
+        "Monitor Ledger (30m)",
+        "Track Missing Lineage",
+        "Track Lineage Failures",
         "Review Missing Lineage by Layer",
         "Compare Lineage Persistence Outcomes",
     )
@@ -829,8 +824,8 @@ def test_control_plane_failure_ratio_thresholds_match_descriptions() -> None:
     }
 
     for title in (
-        "Monitor Manifest Failures (30m)",
-        "Monitor Ledger Failures (30m)",
+        "Monitor Manifest (30m)",
+        "Monitor Ledger (30m)",
         "Monitor Global Read Failures (30m)",
     ):
         panel = panels.get(title)
@@ -843,7 +838,7 @@ def test_control_plane_failure_ratio_thresholds_match_descriptions() -> None:
         if title == "Monitor Global Read Failures (30m)":
             assert "> bool 0.05" in expr
             assert "> bool 0.10" in expr
-        elif title == "Monitor Manifest Failures (30m)":
+        elif title == "Monitor Manifest (30m)":
             assert "bioetl_control_plane_manifest_fail_severity_30m" in expr
             assert "> bool 0.1" not in expr
         else:

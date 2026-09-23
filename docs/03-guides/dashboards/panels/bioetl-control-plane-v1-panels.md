@@ -49,12 +49,12 @@ absence.
 | 902 | Inspect Replay & Checkpoint Evidence | row | Static | Collapsed-by-default incident section for checkpoint/replay safety evidence. | shared shell | Expand only after the first-screen verdict points to replay/checkpoint evidence. |
 | 894 | Review Coverage Limits | text | Static | Static explanation of expected-empty and backend caveat cases. | shared shell | No thresholds; interpretive guidance only. |
 | 130 | Track Replay Blockers | stat | Prometheus | Selected-range blocker rollup from `bioetl_trust_replay_blocker_events_total` / `bioetl_trust_replay_blocker_integrity` with Grafana `$__range`. | shared shell | Count panel; no separate threshold mapping documented. |
-| 3 | Track Checkpoint Incompatibilities | stat | Prometheus | Incompatible checkpoint compatibility events from `bioetl_checkpoint_compatibility_events_total`. | shared shell | Count panel. |
-| 104 | Track Unreconstructable Replays | stat | Prometheus | `bioetl_replay_reconstructability_events_total` with `status="not_reconstructable"`. | shared shell | Count panel. |
+| 3 | Track Incompatibilities | stat | Prometheus | Incompatible checkpoint compatibility events from `bioetl_checkpoint_compatibility_events_total`. | shared shell | Count panel. |
+| 104 | Track Unreconstructable | stat | Prometheus | `bioetl_replay_reconstructability_events_total` with `status="not_reconstructable"`. | shared shell | Count panel. |
 | 120 | Track Replay Drift | stat | Prometheus | Replay drift events from `bioetl_replay_drift_events_total`. | shared shell | Count panel. |
-| 101 | Track Checkpoint Load Failures | stat | Prometheus | Failed checkpoint load events over the selected range. | shared shell | Count panel. |
-| 102 | Track Checkpoint Save Failures | stat | Prometheus | Failed checkpoint save events over the selected range. | shared shell | Count panel. |
-| 103 | Track Global Checkpoint Admin Failures | stat | Prometheus | Global checkpoint operator failures independent of pipeline scope. | shared shell | Count panel. |
+| 101 | Track Load Failures | stat | Prometheus | Failed checkpoint load events over the selected range. | shared shell | Count panel. |
+| 102 | Track Save Failures | stat | Prometheus | Failed checkpoint save events over the selected range. | shared shell | Count panel. |
+| 103 | Track Global Admin Failures | stat | Prometheus | Global checkpoint operator failures independent of pipeline scope. | shared shell | Count panel. |
 | 121 | Track Peak Replay Lag | stat | Prometheus | Max replay lag for the selected scope from `bioetl_replay_lag_seconds`. | shared shell | Numeric lag panel. |
 | 5 | Compare Checkpoint Outcomes | timeseries | Prometheus | Compatibility outcomes by `disposition` over time. | shared shell | Series legend is the primary mapping. |
 | 134 | Track Replay Drift by Type | timeseries | Prometheus | Replay drift events by `replay_capability`, `drift_type`, and `status`. | shared shell | Series legend is the primary mapping. |
@@ -69,12 +69,12 @@ absence.
 | --- | --- | --- | --- | --- | --- | --- |
 | 901 | Inspect Manifest & Ledger Evidence | row | Static | Collapsed-by-default manifest/ledger incident section. | shared shell | Groups integrity panels; no direct metric. |
 | 908 | Review Observed Terminal Counters | table | Prometheus | Terminal run-event totals by `terminal_status`. | shared shell | Forensic table; status breakdown is the key mapping. |
-| 1 | Track Manifest Write Failures | stat | Prometheus | Failed manifest writes over the selected range. | shared shell | Count panel. |
-| 2 | Track Ledger Append Failures | stat | Prometheus | Failed ledger appends over the selected range. | shared shell | Count panel. |
+| 1 | Track Manifest Failures | stat | Prometheus | Failed manifest writes over the selected range. | shared shell | Count panel. |
+| 2 | Track Ledger Failures | stat | Prometheus | Failed ledger appends over the selected range. | shared shell | Count panel. |
 | 131 | Track Observed Manifest Write Increments | timeseries | Prometheus | Manifest writes by `status` and `run_type` over time. | shared shell | Series legend maps status/run type. |
 | 7 | Compare Ledger Appends by Type & Status | timeseries | Prometheus | Ledger appends by `event_type` and `status`. | shared shell | Series legend maps event/status breakdown. |
-| 132 | Monitor Manifest Failures (30m) | stat | Prometheus | 30-minute manifest write failure ratio severity from `bioetl_control_plane_manifest_fail_severity_30m`. | shared shell | Threshold/value mapping encodes ratio severity. |
-| 133 | Monitor Ledger Failures (30m) | stat | Prometheus | 30-minute ledger append failure ratio severity from `bioetl_control_plane_ledger_fail_severity_30m`. | shared shell | Threshold/value mapping encodes ratio severity. |
+| 132 | Monitor Manifest (30m) | stat | Prometheus | 30-minute manifest write failure ratio severity from `bioetl_control_plane_manifest_fail_severity_30m`. | shared shell | Threshold/value mapping encodes ratio severity. |
+| 133 | Monitor Ledger (30m) | stat | Prometheus | 30-minute ledger append failure ratio severity from `bioetl_control_plane_ledger_fail_severity_30m`. | shared shell | Threshold/value mapping encodes ratio severity. |
 | 9414 | Review Manifest Validation | table | BioETL Ops HTTP | Run-scoped parse, schema, schema-version, and contract-compatibility checks with stable reason codes. | shared shell | `OK/WARNING/ERROR/UNKNOWN`; unsupported schema versions are explicit. |
 
 ### Inspect Global Store Reliability
@@ -99,8 +99,8 @@ absence.
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
 | 904 | Inspect Audit & Lineage Evidence | row | Static | Collapsed-by-default audit/lineage PromQL evidence section. Does not contain Review Lineage Validation or Review Retention Compliance. | shared shell | Groups remaining lineage and audit PromQL panels; no direct metric. |
-| 122 | Track Missing Lineage References | stat | Prometheus | Missing lineage reference count over the selected range. | shared shell | Count panel. |
-| 137 | Track Lineage Persistence Failures | stat | Prometheus | Failed lineage fragment persistence events. | shared shell | Count panel. |
+| 122 | Track Missing Lineage | stat | Prometheus | Missing lineage reference count over the selected range. | shared shell | Count panel. |
+| 137 | Track Lineage Failures | stat | Prometheus | Failed lineage fragment persistence events. | shared shell | Count panel. |
 | 138 | Review Missing Lineage by Layer | table | Prometheus | Missing lineage references grouped by `layer` and `ref_type`. | shared shell | Forensic table; grouped breakdown is the key mapping. |
 | 107 | Compare Global Audit Write Outcomes | timeseries | Prometheus | Audit write events by `layer`, `operation`, and `status`. | shared shell | Series legend maps layer/operation/status. |
 | 108 | Compare Global Audit Query Outcomes | timeseries | Prometheus | Audit query events by `layer_filter` and `status`. | shared shell | Series legend maps query outcome families. |

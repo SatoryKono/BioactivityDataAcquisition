@@ -28,12 +28,12 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 902 | Inspect Replay & Checkpoint Evidence |
 | bioetl-control-plane-v1.json | 894 | Review Coverage Limits |
 | bioetl-control-plane-v1.json | 130 | Track Replay Blockers |
-| bioetl-control-plane-v1.json | 3 | Track Checkpoint Incompatibilities |
-| bioetl-control-plane-v1.json | 104 | Track Unreconstructable Replays |
+| bioetl-control-plane-v1.json | 3 | Track Incompatibilities |
+| bioetl-control-plane-v1.json | 104 | Track Unreconstructable |
 | bioetl-control-plane-v1.json | 120 | Track Replay Drift |
-| bioetl-control-plane-v1.json | 101 | Track Checkpoint Load Failures |
-| bioetl-control-plane-v1.json | 102 | Track Checkpoint Save Failures |
-| bioetl-control-plane-v1.json | 103 | Track Global Checkpoint Admin Failures |
+| bioetl-control-plane-v1.json | 101 | Track Load Failures |
+| bioetl-control-plane-v1.json | 102 | Track Save Failures |
+| bioetl-control-plane-v1.json | 103 | Track Global Admin Failures |
 | bioetl-control-plane-v1.json | 121 | Track Peak Replay Lag |
 | bioetl-control-plane-v1.json | 134 | Track Replay Drift by Type |
 | bioetl-control-plane-v1.json | 5 | Compare Checkpoint Outcomes |
@@ -43,10 +43,10 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 9413 | Review Checkpoint Validation |
 | bioetl-control-plane-v1.json | 901 | Inspect Manifest & Ledger Evidence |
 | bioetl-control-plane-v1.json | 908 | Review Observed Terminal Counters |
-| bioetl-control-plane-v1.json | 2 | Track Ledger Append Failures |
-| bioetl-control-plane-v1.json | 1 | Track Manifest Write Failures |
-| bioetl-control-plane-v1.json | 132 | Monitor Manifest Failures (30m) |
-| bioetl-control-plane-v1.json | 133 | Monitor Ledger Failures (30m) |
+| bioetl-control-plane-v1.json | 2 | Track Ledger Failures |
+| bioetl-control-plane-v1.json | 1 | Track Manifest Failures |
+| bioetl-control-plane-v1.json | 132 | Monitor Manifest (30m) |
+| bioetl-control-plane-v1.json | 133 | Monitor Ledger (30m) |
 | bioetl-control-plane-v1.json | 131 | Track Observed Manifest Write Increments |
 | bioetl-control-plane-v1.json | 7 | Compare Ledger Appends by Type & Status |
 | bioetl-control-plane-v1.json | 9414 | Review Manifest Validation |
@@ -56,8 +56,8 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 6 | Compare Global Reads by Store |
 | bioetl-control-plane-v1.json | 111 | Track Global Read Latency |
 | bioetl-control-plane-v1.json | 904 | Inspect Audit & Lineage Evidence |
-| bioetl-control-plane-v1.json | 122 | Track Missing Lineage References |
-| bioetl-control-plane-v1.json | 137 | Track Lineage Persistence Failures |
+| bioetl-control-plane-v1.json | 122 | Track Missing Lineage |
+| bioetl-control-plane-v1.json | 137 | Track Lineage Failures |
 | bioetl-control-plane-v1.json | 138 | Review Missing Lineage by Layer |
 | bioetl-control-plane-v1.json | 107 | Compare Global Audit Write Outcomes |
 | bioetl-control-plane-v1.json | 108 | Compare Global Audit Query Outcomes |

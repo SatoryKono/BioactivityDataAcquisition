@@ -354,7 +354,7 @@ def test_control_plane_replay_and_manifest_panels_route_to_expected_runbooks() -
             "Open Checkpoint Debugging Runbook",
             "docs/05-operations/runbooks/checkpoint-debugging.md",
         ),
-        "Track Unreconstructable Replays": (
+        "Track Unreconstructable": (
             "Open Checkpoint Debugging",
             "docs/05-operations/runbooks/checkpoint-debugging.md",
         ),
