@@ -256,6 +256,11 @@ def _runtime(p: dict[int, dict]) -> None:
 
 
 def _provider(p: dict[int, dict]) -> None:
+    for field, width in {"Provider": 140, "Source state": 75, "Status": 90}.items():
+        _override(p[9107], field, _WIDTH, width)
+    _override(p[9107], "Source state", "displayName", "Source")
+    _override(p[9111], "Provider", _WIDTH, 200)
+    _override(p[9111], "Provider", "custom.cellOptions", {"type": "auto", "wrapText": False})
     p[9101]["gridPos"]["h"] = p[9107]["gridPos"]["h"] = 7
     p[9104]["gridPos"].update(y=14, h=3)
     p[9104]["options"]["colorMode"] = "value"
