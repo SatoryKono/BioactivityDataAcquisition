@@ -306,6 +306,9 @@ from memory.graph.sync_pkg.add_port_surfaces import (
 from memory.graph.sync_pkg.add_repo_zone_directory_file import (
     _add_repo_zone_directory_file as _add_repo_zone_directory_file,
 )
+from memory.graph.sync_pkg.add_repo_zone_directory_files import (
+    _add_repo_zone_directory_files as _add_repo_zone_directory_files,
+)
 from memory.graph.sync_pkg.add_repo_zone_file_surface import (
     _add_repo_zone_doc_artifact as _add_repo_zone_doc_artifact,
 )
@@ -2669,32 +2672,6 @@ def _walk_repo_zone_file_structure(
             directory,
             current_path,
             filenames,
-            today,
-            zone_name=zone_name,
-            config=config,
-        )
-
-
-def _add_repo_zone_directory_files(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    directory: NodeKey,
-    current_path: Path,
-    filenames: list[str],
-    today: str,
-    *,
-    zone_name: str,
-    config: dict[str, object],
-) -> None:
-    for filename in sorted(filenames):
-        _add_repo_zone_directory_file(
-            snapshot,
-            root,
-            project,
-            directory,
-            current_path,
-            filename,
             today,
             zone_name=zone_name,
             config=config,
