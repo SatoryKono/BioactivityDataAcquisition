@@ -1723,6 +1723,12 @@ from memory.graph.sync_pkg.pipeline_normalization_targets import (
 from memory.graph.sync_pkg.pipeline_normalization_targets import (
     _pipeline_normalization_targets as _pipeline_normalization_targets,
 )
+from memory.graph.sync_pkg.pipeline_operational_context import (
+    _pipeline_operational_context as _pipeline_operational_context,
+)
+from memory.graph.sync_pkg.pipeline_operational_context import (
+    build_fast_analysis_audit_report as build_fast_analysis_audit_report,
+)
 from memory.graph.sync_pkg.pipeline_operational_targets_config import (
     _link_pipeline_operational_for_pipeline as _link_pipeline_operational_for_pipeline,
 )
@@ -4693,61 +4699,6 @@ def _add_pipeline_operational_edges(
             pipeline,
             operational_context=operational_context,
         )
-
-
-def _pipeline_operational_context(
-    memory_mapping: dict[str, object],
-) -> PipelineOperationalContext:
-    pipeline_ops = _pipeline_operational_section(memory_mapping)
-    runtime_paths, validation_gates = _pipeline_operational_targets_config(pipeline_ops)
-    common_dashboards, entity_dashboards, composite_dashboards = (
-        _pipeline_dashboard_targets(pipeline_ops)
-    )
-    return PipelineOperationalContext(
-        runtime_paths=runtime_paths,
-        validation_gates=validation_gates,
-        common_dashboards=common_dashboards,
-        entity_dashboards=entity_dashboards,
-        composite_dashboards=composite_dashboards,
-    )
-
-
-def build_fast_analysis_audit_report(
-    snapshot: GraphSnapshot,
-    root: Path,
-    http_uri: str | None,
-) -> dict[str, JsonValue]:
-    base_uri, username, password, database = resolve_neo4j_connection(root, http_uri)
-    client = Neo4jHttpClient(base_uri, username, password, database)
-    snapshot_stats = snapshot.stats()
-    active_labels, active_relation_types = _fast_analysis_scope(snapshot_stats)
-    snapshot_label_counts, snapshot_relation_counts = _fast_analysis_snapshot_counts(
-        snapshot_stats,
-        active_labels,
-        active_relation_types,
-    )
-    live_managed_label_counts, live_managed_relation_counts = (
-        _fast_analysis_live_counts(
-            client,
-            active_labels,
-            active_relation_types,
-        )
-    )
-    live_summary = _fast_analysis_live_summary(
-        live_managed_label_counts,
-        live_managed_relation_counts,
-    )
-    return _audit_report_payload(
-        snapshot_payload=_fast_audit_snapshot_payload(
-            snapshot_label_counts, snapshot_relation_counts
-        ),
-        managed_labels=list(active_labels),
-        live_summary=live_summary,
-        snapshot_label_counts=snapshot_label_counts,
-        live_managed_label_counts=live_managed_label_counts,
-        snapshot_relation_counts=snapshot_relation_counts,
-        live_managed_relation_counts=live_managed_relation_counts,
-    )
 
 
 if __name__ == "__main__":
