@@ -327,6 +327,9 @@ from memory.graph.sync_pkg.add_test_suite_surface import (
 from memory.graph.sync_pkg.add_test_suite_surface import (
     _add_test_suite_surface as _add_test_suite_surface,
 )
+from memory.graph.sync_pkg.add_workflow_file_surface import (
+    _add_workflow_file_surface as _add_workflow_file_surface,
+)
 from memory.graph.sync_pkg.adr_constraint_candidates import (
     _adr_constraint_candidates as _adr_constraint_candidates,
 )
@@ -3392,34 +3395,6 @@ def _process_workflow_file(
         workflow_call_entrypoint=workflow_call_entrypoint,
         job_nodes=job_nodes,
     )
-
-
-def _add_workflow_file_surface(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    workflow_path: Path,
-) -> tuple[str, dict[str, object], WorkflowContext, NodeKey | None]:
-    payload = _read_yaml(workflow_path)
-    workflow_name = workflow_path.stem
-    title_value = payload.get("name")
-    title = title_value if isinstance(title_value, str) else workflow_name
-    relative_path = _rel_path(root, workflow_path)
-    context = _add_workflow_surface(
-        snapshot,
-        workflow_name=workflow_name,
-        title=title,
-        relative_path=relative_path,
-        today=today,
-    )
-    _enrich_workflow_surface(snapshot, context, payload)
-    snapshot.add_relation(
-        project, "HAS_WORKFLOW", context.workflow, provenance="workflow_graph"
-    )
-    _attach_workflow_file_backing(snapshot, context.workflow, relative_path)
-    workflow_call_entrypoint = _add_workflow_call_entrypoint(snapshot, context, payload)
-    return workflow_name, payload, context, workflow_call_entrypoint
 
 
 def _add_workflow_jobs(
