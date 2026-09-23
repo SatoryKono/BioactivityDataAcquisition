@@ -1577,6 +1577,15 @@ from memory.graph.sync_pkg.promotion_targets_from_payload import (
 from memory.graph.sync_pkg.promotion_targets_from_payload import (
     _retirement_analysis_config as _retirement_analysis_config,
 )
+from memory.graph.sync_pkg.published_contract_artifact_paths import (
+    _link_contract_module_dependencies as _link_contract_module_dependencies,
+)
+from memory.graph.sync_pkg.published_contract_artifact_paths import (
+    _published_contract_artifact_key as _published_contract_artifact_key,
+)
+from memory.graph.sync_pkg.published_contract_artifact_paths import (
+    _published_contract_artifact_paths as _published_contract_artifact_paths,
+)
 from memory.graph.sync_pkg.python_paths import INIT_PY as INIT_PY
 from memory.graph.sync_pkg.python_paths import MAIN_PY as MAIN_PY
 from memory.graph.sync_pkg.python_paths import (
@@ -4742,46 +4751,6 @@ def _add_published_contract_artifacts(
         snapshot.add_relation(
             context.contract, "BACKED_BY", artifact, provenance="impact_contracts"
         )
-
-
-def _published_contract_artifact_paths(
-    context: ContractEntryContext,
-) -> tuple[str, ...]:
-    published_artifacts = context.raw_entry.get("published_artifacts")
-    if not isinstance(published_artifacts, list):
-        return ()
-    return tuple(path for path in published_artifacts if isinstance(path, str))
-
-
-def _published_contract_artifact_key(
-    snapshot: GraphSnapshot,
-    context: ContractEntryContext,
-    published_path: str,
-) -> NodeKey | None:
-    resolved = _resolve_repo_path(context.root, context.registry_path, published_path)
-    if resolved is None:
-        return None
-    relative_path = _rel_path(context.root, resolved)
-    return snapshot.add_node(
-        "doc_artifact",
-        relative_path,
-        summary=f"Published contract artifact for `{context.contract_ref}`.",
-        source_path=relative_path,
-        source_kind="published_contract",
-        last_verified=context.today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-
-
-def _link_contract_module_dependencies(
-    snapshot: GraphSnapshot,
-    context: ContractEntryContext,
-    module_paths: list[str],
-    provenance: str,
-) -> None:
-    for module_path in module_paths:
-        _link_contract_dependency_module(snapshot, context, module_path, provenance)
 
 
 def _contract_registry_entries(root: Path) -> dict[str, dict[str, object]]:
