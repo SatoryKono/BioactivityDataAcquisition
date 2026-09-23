@@ -56,6 +56,9 @@ def _catalog_row(record: SelectorRecord) -> dict[str, object]:
     """A started event is the last known state, not a live-process health probe."""
     started = record.started_at_source == "run_ledger_started_event"
     terminal = record.terminal_event_type is not None
+    processing_status = _catalog_status(
+        started=started, terminal=terminal, run_status=record.run_status
+    )
     return {
         "pipeline": record.pipeline,
         "run_id": record.run_id,
@@ -65,9 +68,9 @@ def _catalog_row(record: SelectorRecord) -> dict[str, object]:
         "started_at": record.started_at.isoformat(),
         "started_at_source": record.started_at_source,
         "completed_at": record.completed_at.isoformat() if terminal else None,
-        "status": _catalog_status(
-            started=started, terminal=terminal, run_status=record.run_status
-        ),
+        "status": processing_status,
+        "processing_status": processing_status,
+        "trust_status": "UNKNOWN",
         "report_state": REPORT_MISSING,
         "selected": 0,
         "json_path": None,

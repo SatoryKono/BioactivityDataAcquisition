@@ -128,6 +128,8 @@ def test_started_run_without_report_and_no_false_completion(tmp_path):
     row = _list(tmp_path, manifest_port=manifests, ledger_port=ledger)["items"][0]
     assert row["run_id"] == str(manifest.run_id)
     assert row["status"] == "unfinished"
+    assert row["processing_status"] == "unfinished"
+    assert row["trust_status"] == "UNKNOWN"
     assert row["completed_at"] is None
     assert row["report_state"] == "REPORT MISSING"
     assert row["started_at_source"] == "run_ledger_started_event"
@@ -141,8 +143,11 @@ def test_manifest_fallback_does_not_claim_running_or_duplicate_report(tmp_path):
     rows = _list(tmp_path, manifest_port=manifests)["items"]
     assert len(rows) == 2
     assert rows[0]["status"] == "unknown"
+    assert rows[0]["trust_status"] == "UNKNOWN"
     assert rows[0]["completed_at"] is None
     assert rows[1]["status"] == "success"
+    assert rows[1]["processing_status"] == "success"
+    assert rows[1]["trust_status"] == "Inspect in 1. Trust"
     assert rows[1]["report_state"] == "AVAILABLE"
     assert rows[1]["started_at_source"] == "manifest_created_at_fallback"
 
@@ -178,6 +183,8 @@ def test_terminal_catalog_event_keeps_failure_without_report(tmp_path):
     ]
     row = _list(tmp_path, manifest_port=manifests, ledger_port=ledger)["items"][0]
     assert row["status"] == "failed"
+    assert row["processing_status"] == "failed"
+    assert row["trust_status"] == "UNKNOWN"
     assert row["completed_at"] == (NOW + timedelta(hours=1)).isoformat()
     assert row["report_state"] == "REPORT MISSING"
 
