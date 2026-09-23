@@ -281,6 +281,12 @@ from memory.graph.sync_pkg.add_entity_pipeline_surfaces import (
 from memory.graph.sync_pkg.add_entity_pipeline_surfaces import (
     _add_entity_pipeline_surfaces as _add_entity_pipeline_surfaces,
 )
+from memory.graph.sync_pkg.add_file_structure_zone import (
+    _add_file_structure_zone as _add_file_structure_zone,
+)
+from memory.graph.sync_pkg.add_file_structure_zone import (
+    _field_quality_index as _field_quality_index,
+)
 from memory.graph.sync_pkg.add_package_topology_decisions_and_risks import (
     _add_package_topology_decisions_and_risks as _add_package_topology_decisions_and_risks,
 )
@@ -2647,40 +2653,6 @@ def _add_file_structure_zones(
             relative_roots,
             config,
         )
-
-
-def _add_file_structure_zone(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    zone_name: str,
-    relative_roots: tuple[str, ...],
-    config: dict[str, object],
-) -> None:
-    _add_repo_zone_file_structure(
-        snapshot,
-        root,
-        project,
-        today,
-        zone_name,
-        relative_roots,
-        config,
-    )
-
-
-def _field_quality_index(payload: dict[str, object]) -> dict[str, dict[str, JsonValue]]:
-    quality_payload = _as_mapping(payload.get("quality"))
-    index: dict[str, dict[str, JsonValue]] = {}
-    field_validations = quality_payload.get("entity_field_validations")
-    if isinstance(field_validations, list):
-        for item in field_validations:
-            _merge_field_validation_item(index, item)
-    key_nullability = quality_payload.get("key_nullability")
-    if isinstance(key_nullability, list):
-        for item in key_nullability:
-            _merge_key_nullability_item(index, item)
-    return index
 
 
 def _add_entity_layer_field_nodes(
