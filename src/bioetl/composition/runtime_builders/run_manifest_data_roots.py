@@ -27,14 +27,22 @@ __all__ = [
 ]
 
 
+def _import_attr(module: str, attr: str) -> object:
+    """Single importlib seam for thin compatibility re-exports (#S4 freeze)."""
+    return getattr(import_module(module), attr)
+
+
 def control_plane_root(*args: object, **kwargs: object) -> object:
-    module = "bioetl.composition.control_plane_paths"
-    return import_module(module).control_plane_root(*args, **kwargs)
+    return _import_attr("bioetl.composition.control_plane_paths", "control_plane_root")(
+        *args, **kwargs
+    )
 
 
 def build_planned_artifacts(*args: object, **kwargs: object) -> object:
-    module = "bioetl.composition.runtime_builders._run_manifest_planned_artifacts"
-    return import_module(module).build_planned_artifacts(*args, **kwargs)
+    return _import_attr(
+        "bioetl.composition.runtime_builders._run_manifest_planned_artifacts",
+        "build_planned_artifacts",
+    )(*args, **kwargs)
 
 
 def is_explicit_data_root_configured(settings: Settings) -> bool:

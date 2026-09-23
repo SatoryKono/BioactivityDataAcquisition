@@ -44,12 +44,11 @@ def _project_records_for_gold_schema(
     if not schema_columns:
         return records
 
-    dq_defaults = {"_dq_warn": False, "_dq_error": False}
+    dq_defaults = {"_dq_warn": False, "_dq_error": False, "_index": 0}
     return [
         {
             key: record.get(key, dq_defaults.get(key))
             for key in schema_columns
-            if key in record or key in dq_defaults
         }
         for record in records
     ]

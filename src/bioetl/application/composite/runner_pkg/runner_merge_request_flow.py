@@ -111,7 +111,8 @@ def prepare_merge_request(
         enrichment_results=enrichment_results,
         run_id=host._run_id_str,
         metadata_timestamp=resolve_merge_metadata_timestamp(
-            getattr(host._runtime, "cached_bronze_date", None)
+            getattr(host._runtime, "cached_bronze_date", None),
+            clock=getattr(host, "_clock", None),
         ),
         dependencies=prepared_inputs.dependencies,
         dependency_results=dependency_results,

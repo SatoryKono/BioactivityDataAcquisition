@@ -175,3 +175,35 @@ class TestSilverWriterMergedMixin:
                     schema=schema,
                 )
             )
+
+    def test_prepare_merged_silver_write_allows_extra_columns_under_strict_gold_schema(
+        self,
+    ) -> None:
+        """Merged Silver core-check must tolerate enricher extras from strict Gold schemas."""
+        host = _MergedHost()
+        schema = pa.DataFrameSchema(
+            {
+                "id": pa.Column(int),
+                "name": pa.Column(str),
+            },
+            strict=True,
+        )
+
+        prepared = host._prepare_merged_silver_write(
+            request=_MergedSilverWriteRequest(
+                table_name="test.table",
+                records=[
+                    {
+                        "id": 1,
+                        "name": "Alice",
+                        "content_hash": "abc",
+                        "chembl.assay.assay_id": "CHEMBL1",
+                    }
+                ],
+                primary_keys=["id"],
+                schema=schema,
+            )
+        )
+
+        assert prepared.arrow_table.num_rows == 1
+        assert "content_hash" in prepared.arrow_table.column_names

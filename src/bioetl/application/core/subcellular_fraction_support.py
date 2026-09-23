@@ -56,6 +56,47 @@ def update_fraction_record(
     record["example_assay_id"] = str(assay_id).strip() if assay_id else None
 
 
+def _should_stop_after_new_fraction(
+    *,
+    limit: int | None,
+    tracked: int,
+    continue_after_limit: bool,
+) -> bool:
+    """Return True when a limited run should stop after accepting a new key."""
+    return not continue_after_limit and limit is not None and tracked >= limit
+
+
+def _ingest_fraction_assay(
+    assay: JsonDict,
+    records: dict[str, JsonDict],
+    seen_fractions: set[str],
+    *,
+    limit: int | None,
+    continue_after_limit: bool,
+) -> bool:
+    """Update fraction aggregates for one assay.
+
+    Returns ``True`` when the caller should stop consuming the upstream stream.
+    """
+    fraction = normalize_fraction(assay.get("assay_subcellular_fraction"))
+    if not fraction:
+        return False
+    key = fraction.lower()
+    record = records.get(key)
+    if record is not None:
+        update_fraction_record(record, assay)
+        return False
+    if limit is not None and len(records) >= limit:
+        return not continue_after_limit
+    records[key] = create_fraction_record(assay, fraction)
+    seen_fractions.add(key)
+    return _should_stop_after_new_fraction(
+        limit=limit,
+        tracked=len(records),
+        continue_after_limit=continue_after_limit,
+    )
+
+
 async def extract_unique_fraction_records(
     assays: AsyncIterator[JsonDict],
     limit: int | None,
@@ -78,29 +119,14 @@ async def extract_unique_fraction_records(
     records: dict[str, JsonDict] = {}
     try:
         async for assay in assays:
-            fraction = normalize_fraction(assay.get("assay_subcellular_fraction"))
-            if not fraction:
-                continue
-            key = fraction.lower()
-            record = records.get(key)
-            if record is None:
-                # Cap unique fractions, but keep consuming the stream for updates
-                # unless the caller requested an early stop for limited runs.
-                if limit is not None and len(records) >= limit:
-                    if not continue_after_limit:
-                        break
-                    continue
-                record = create_fraction_record(assay, fraction)
-                records[key] = record
-                seen_fractions.add(key)
-                if (
-                    not continue_after_limit
-                    and limit is not None
-                    and len(records) >= limit
-                ):
-                    break
-                continue
-            update_fraction_record(record, assay)
+            if _ingest_fraction_assay(
+                assay,
+                records,
+                seen_fractions,
+                limit=limit,
+                continue_after_limit=continue_after_limit,
+            ):
+                break
     finally:
         aclose = getattr(assays, "aclose", None)
         if callable(aclose):

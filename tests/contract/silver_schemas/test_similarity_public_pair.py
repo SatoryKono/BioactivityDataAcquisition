@@ -9,7 +9,7 @@ from bioetl.domain.contracts.gold._chembl_activity_assay_schemas import (
 from bioetl.domain.contracts.gold._chembl_reference_publication_schemas import (
     ChEMBLPublicationSimilarityGoldSchema,
 )
-from bioetl.domain.schemas.chembl.similarity_pair import valid_similarity_pairs
+from bioetl.domain.schemas.chembl.similarity_pair import valid_similarity_pair
 
 pytestmark = [pytest.mark.contracts, pytest.mark.no_api]
 
@@ -27,7 +27,7 @@ pytestmark = [pytest.mark.contracts, pytest.mark.no_api]
     ],
 )
 def test_complete_pair_contract(record, expected):
-    assert bool(valid_similarity_pairs(pd.DataFrame([record])).iloc[0]) is expected
+    assert valid_similarity_pair(record) is expected
 
 
 @pytest.mark.parametrize(

@@ -460,16 +460,16 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 196
-      total_loc: 23839
+      total_loc: 24122
       files_ge_250_loc: 0
-      helper_function_ratio: 0.376
+      helper_function_ratio: 0.387
       max_internal_fan_in: 5
       max_internal_fan_in_module: bioetl.application.core.target_data_source_mixins
     trend:
       status: reduced_2026-08-27_debt_cycle_fanin_ratchet
-      next_action: '2026-08-27 audit-cycle-tech-debt: ratchet application_core max_internal_fan_in budget
-        10->7 (live fan-in=6; closeout #6032 requires live < budget). files_ge_250_loc remains 0. No technical-debt
-        budget is increased. Hotspot baseline refreshed via report_hotspot_family_baseline --update.
+      next_action: '2026-09-23 full-suite rebind: application_core total_loc 23839->24122
+        after intentional derived-scan/subcellular helper extraction; bounded_growth budgets
+        unchanged (files_ge_250_loc=0, max_internal_fan_in=7). No technical-debt budget increased.
 
         '
   - name: composition_bootstrap_runtime
@@ -569,16 +569,19 @@ hotspot_family_ratchets:
       max_internal_fan_in: 3
     metrics:
       duplication_clusters: 0
-      files: 55
-      total_loc: 7171
+      files: 56
+      total_loc: 7387
       files_ge_250_loc: 0
-      helper_function_ratio: 0.382
+      helper_function_ratio: 0.385
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.runtime_builders.runner_inputs
     trend:
       status: reduced_2026-08-27_debt_cycle_fanin_ratchet
-      next_action: 2026-08-27 audit-cycle-tech-debt ratchets runtime_builders max_internal_fan_in budget
-        5->3 to live observed fan-in. No technical-debt budget is increased.
+      next_action: '2026-09-23 full-suite rebind after #10578 inputs_extraction_preflight
+        (files 55->56, total_loc 7171->7387). bounded_growth budgets unchanged. No technical-debt
+        budget increased.
+
+        '
 full_app_duplication_ratchets:
   snapshot_date: '2026-09-11'
   mode: fail-fast
@@ -752,9 +755,9 @@ hotspot_family_coverage_thresholds:
       min_covered_line_percent: 96.44
       allowlisted_unmeasured_paths: []
     composition_runtime_builders:
-      min_measured_module_count: 55
+      min_measured_module_count: 56
       max_unmeasured_module_count: 0
-      min_covered_module_count: 55
+      min_covered_module_count: 56
       min_covered_line_percent: 94.9
       allowlisted_unmeasured_paths: []
 removable_complexity_family_ratchets:

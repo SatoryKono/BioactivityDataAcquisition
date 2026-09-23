@@ -22,17 +22,14 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_author_orcids,
     extract_author_s2_ids,
     extract_authors,
-    extract_citation_contexts,
     extract_external_ids,
-    extract_fields_of_study,
-    extract_journal_info,
-    extract_open_access_info,
-    extract_raw_citation_contexts,
     extract_tldr,
+    journal_and_citation_fields,
+    publication_type_inputs,
+    subject_and_type_fields,
 )
 from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
 from bioetl.domain.types import GoldRecord
-from bioetl.domain.value_objects import PublicationYear
 from bioetl.domain.value_objects.publications import DOI, PubMedId
 
 if TYPE_CHECKING:
@@ -172,100 +169,31 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
 
         """
         rec = record
-
-        ids = self._extract_validated_ids(rec)
-        author_meta = self._extract_author_metadata(rec.get("authors"))
-
-        citation_contexts = extract_citation_contexts(rec.get("citations"))
-        raw_contexts = extract_raw_citation_contexts(rec.get("citations"))
-        journal_info = extract_journal_info(rec.get("journal"), rec.get("venue"))
-        oa_info = extract_open_access_info(
-            rec.get("isOpenAccess"), rec.get("openAccessPdf")
-        )
-
         tldr = self._data_normalizer.normalize_string(extract_tldr(rec.get("tldr")))
         abstract = self._data_normalizer.normalize_string(rec.get("abstract"))
         if abstract is None:
             abstract = tldr
-
         publication_types = rec.get("publicationTypes")
-        raw_types_list = (
-            [
-                str(t).strip()
-                for t in publication_types
-                if t is not None and str(t).strip()
-            ]
-            if isinstance(publication_types, list)
-            else None
+        raw_types_list, raw_type = publication_type_inputs(
+            publication_types,
+            resolve_scalar=self._resolve_publication_type,
         )
-        raw_type = (
-            None
-            if raw_types_list
-            else self._resolve_publication_type(publication_types)
-        )
-
         return {
-            **ids,
+            **self._extract_validated_ids(rec),
             # Field from PublicationBaseSchema that Semantic Scholar doesn't provide
             # (set to None to satisfy schema inheritance requirement)
             "pmc_id": None,
             "title": rec.get("title"),
             "abstract": abstract,
             "tldr": tldr,
-            **author_meta,
-            "citation_contexts": self.serialize_json_list(citation_contexts)
-            if citation_contexts
-            else None,
-            "citation_contexts_raw_json": self.serialize_json(raw_contexts),
-            "citation_contexts_canonical_json": self.serialize_json_list(
-                citation_contexts
-            ),
-            "journal": journal_info.get("journal"),
-            "issn": None,
-            "issn_list": None,
-            "volume": journal_info.get("volume"),
-            "issue": journal_info.get("issue"),
-            "page_range": journal_info.get("page_range"),
-            "page_first": journal_info.get("page_first"),
-            "page_last": journal_info.get("page_last"),
-            "publication_year": self.validate_value_object(
-                PublicationYear, rec.get("year"), as_string=False
-            ),
-            "publication_date": self._data_normalizer.normalize_partial_date(
-                rec.get("publicationDate")
-            ),
-            "citations_received": rec.get("citationCount"),
-            "citations_made": rec.get("referenceCount"),
-            "influential_citation_count": rec.get("influentialCitationCount"),
-            "is_oa": oa_info.get("is_oa"),
-            "open_access_url": oa_info.get("url"),
-            "oa_status": oa_info.get("oa_status"),
-            "subject_fields": self.serialize_json_list(
-                extract_fields_of_study(rec.get("fieldsOfStudy"))
-            ),
-            # Keep list sidecars as JSON arrays even for single-element payloads
-            # (serialize_json unwraps len==1 lists to scalars and breaks Gold JSON).
-            "subject_fields_raw_json": self.serialize_json_list(
-                rec.get("fieldsOfStudy")
-                if isinstance(rec.get("fieldsOfStudy"), list)
-                else None
-            ),
-            "subject_fields_canonical_json": self.serialize_json_list(
-                extract_fields_of_study(rec.get("fieldsOfStudy"))
-            ),
-            **self._classify_publication_type(
-                "semanticscholar",
+            **self._extract_author_metadata(rec.get("authors")),
+            **journal_and_citation_fields(self, rec),
+            **subject_and_type_fields(
+                self,
+                rec,
                 raw_type=raw_type,
                 raw_types_list=raw_types_list,
-            ),
-            "publication_types": self.serialize_json_list(
-                publication_types if isinstance(publication_types, list) else None
-            ),
-            "publication_types_raw_json": self.serialize_json_list(
-                publication_types if isinstance(publication_types, list) else None
-            ),
-            "publication_types_canonical_json": self.serialize_json_list(
-                publication_types if isinstance(publication_types, list) else None
+                publication_types=publication_types,
             ),
             "_source": "semanticscholar",
             "_lookup_method": rec.get("_lookup_method", "unknown"),

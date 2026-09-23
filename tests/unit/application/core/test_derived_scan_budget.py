@@ -13,15 +13,16 @@ from bioetl.domain.exceptions.internal_state import InvalidStateError
 
 
 def test_resolve_derived_upstream_limit_scales_output_and_filters() -> None:
-    assert resolve_derived_upstream_limit(None, multiplier=10) == DEFAULT_SCAN_RECORDS + 1
+    assert (
+        resolve_derived_upstream_limit(None, multiplier=10) == DEFAULT_SCAN_RECORDS + 1
+    )
     assert resolve_derived_upstream_limit(10, multiplier=20) == 201
     assert resolve_derived_upstream_limit(10, multiplier=200) == 2001
-    assert resolve_derived_upstream_limit(
-        10, multiplier=20, filter_ids=["a", "b", "c"]
-    ) == 4
-    assert resolve_derived_upstream_limit(
-        10, multiplier=20, filter_id_count=7
-    ) == 8
+    assert (
+        resolve_derived_upstream_limit(10, multiplier=20, filter_ids=["a", "b", "c"])
+        == 4
+    )
+    assert resolve_derived_upstream_limit(10, multiplier=20, filter_id_count=7) == 8
     assert resolve_derived_upstream_limit(0, multiplier=20) == 1
     with pytest.raises(ValueError):
         resolve_derived_upstream_limit(10, multiplier=0)

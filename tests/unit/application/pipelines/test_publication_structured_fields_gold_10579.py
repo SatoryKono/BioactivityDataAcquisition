@@ -341,8 +341,12 @@ def test_hundred_percent_gold_schema_quarantine_keeps_terminal_invariants(
 
 def test_silver_quarantine_double_count_is_not_gold_schema_model() -> None:
     """Mixing gold failures into flat silver quarantine violates bronze partition."""
-    from bioetl.application.core.runner_flow_metrics import _record_count_flow_invariants
-    from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
+    from bioetl.application.core.runner_flow_metrics import (
+        _record_count_flow_invariants,
+    )
+    from bioetl.application.observability.pipeline_metrics import (
+        PipelineMetricsRecorder,
+    )
 
     metrics = MagicMock()
     recorder = PipelineMetricsRecorder(metrics, "pubmed_publication")

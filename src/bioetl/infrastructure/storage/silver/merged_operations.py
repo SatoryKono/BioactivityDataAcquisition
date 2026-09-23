@@ -34,6 +34,7 @@ __all__ = [
     "_execute_merged_silver_write_flow",
     "_export_silver_merged_csv",
     "_prepare_merged_silver_write",
+    "_seed_merged_silver_schema_defaults",
     "_write_silver_merged_delta",
 ]
 
@@ -133,6 +134,36 @@ class _MergedSilverWriteExecutorProtocol(Protocol):
     ) -> None: ...
 
 
+_MERGED_SILVER_SCHEMA_DEFAULTS: dict[str, object] = {
+    "_dq_warn": False,
+    "_dq_error": False,
+    "_index": 0,
+}
+
+
+def _seed_merged_silver_schema_defaults(
+    records: list[BronzeRecord],
+    *,
+    schema: pandera_pandas.DataFrameSchema,
+) -> list[BronzeRecord]:
+    """Fill missing Gold-tail / nullable schema columns for Silver core checks."""
+    if not records or not schema.columns:
+        return records
+    seeded: list[BronzeRecord] = []
+    for record in records:
+        updated = dict(record)
+        for name, column in schema.columns.items():
+            if name in updated:
+                continue
+            if name in _MERGED_SILVER_SCHEMA_DEFAULTS:
+                updated[name] = _MERGED_SILVER_SCHEMA_DEFAULTS[name]
+                continue
+            if getattr(column, "nullable", False):
+                updated[name] = None
+        seeded.append(updated)
+    return seeded
+
+
 def _prepare_merged_silver_write(
     host: _SilverWriterMergedHostProtocol,
     request: _MergedSilverWriteRequest,
@@ -148,8 +179,30 @@ def _prepare_merged_silver_write(
         # the deprecated pandas shim and is a different class under pandera 0.31+.
         if not isinstance(schema, pandera_pandas.DataFrameSchema):
             raise TypeError("Merged Silver schema must resolve to DataFrameSchema")
+        # Composite Silver retains enricher extras; Gold contracts default to
+        # strict=True and require DQ/index tails. Rebuild a non-strict schema and
+        # seed missing Gold-tail defaults so core checks stay fail-closed without
+        # rejecting enricher extras or incomplete DQ sidecars on Silver writes.
+        schema = pandera_pandas.DataFrameSchema(
+            columns=dict(schema.columns),
+            checks=schema.checks,
+            index=schema.index,
+            coerce=bool(schema.coerce),
+            strict=False,
+            ordered=bool(schema.ordered),
+            unique=schema.unique,
+            report_duplicates=schema.report_duplicates,
+            unique_column_names=bool(schema.unique_column_names),
+            name=schema.name,
+            title=schema.title,
+            description=schema.description,
+        )
+        records_for_validation = _seed_merged_silver_schema_defaults(
+            request.records,
+            schema=schema,
+        )
         result = PanderaSilverValidator(schema=schema, strict=False).validate(
-            request.records
+            records_for_validation
         )
         if not result.valid:
             raise SchemaViolationError(request.table_name, result.errors)

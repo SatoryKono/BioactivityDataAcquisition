@@ -120,6 +120,23 @@ class TestMergeExecutionRequestHelpers:
     def test_resolve_merge_metadata_timestamp_when_none_then_returns_none(self) -> None:
         assert resolve_merge_metadata_timestamp(None) is None
 
+    def test_resolve_merge_metadata_timestamp_when_none_with_clock_then_uses_clock(
+        self,
+    ) -> None:
+        class _FixedClock:
+            def now(self) -> datetime:
+                return datetime(2026, 9, 23, 12, 0, 0, tzinfo=UTC)
+
+        assert resolve_merge_metadata_timestamp(None, clock=_FixedClock()) == datetime(
+            2026,
+            9,
+            23,
+            12,
+            0,
+            0,
+            tzinfo=UTC,
+        )
+
     def test_resolve_merge_metadata_timestamp_when_iso_date_then_returns_utc_midnight(
         self,
     ) -> None:

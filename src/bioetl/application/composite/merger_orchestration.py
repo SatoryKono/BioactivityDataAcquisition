@@ -27,6 +27,7 @@ if TYPE_CHECKING:
         EnrichmentResult,
         MergeResult,
     )
+    from bioetl.domain.ports import ClockPort
 
 __all__ = [
     "MergeExecutionContext",
@@ -82,12 +83,16 @@ async def load_merge_inputs(
 
 def resolve_merge_metadata_timestamp(
     cached_bronze_date: object | None,
+    *,
+    clock: ClockPort | None = None,
 ) -> datetime | None:
-    """Return deterministic replay timestamp from cached bronze date."""
-    if cached_bronze_date is None:
-        return None
-    replay_date = date.fromisoformat(str(cached_bronze_date))
-    return datetime.combine(replay_date, datetime.min.time(), tzinfo=UTC)
+    """Return deterministic replay timestamp, or live clock time when not replaying."""
+    if cached_bronze_date is not None:
+        replay_date = date.fromisoformat(str(cached_bronze_date))
+        return datetime.combine(replay_date, datetime.min.time(), tzinfo=UTC)
+    if clock is not None:
+        return clock.now()
+    return None
 
 
 def build_merge_execution_request(

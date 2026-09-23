@@ -11,6 +11,9 @@ Split into submodules per audit-package-structure-2026-02-07:
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping
+from typing import Protocol
+
 # Re-export from submodules for backward compatibility
 from bioetl.application.pipelines.semanticscholar._author_extractors import (
     extract_affiliations,
@@ -30,7 +33,8 @@ from bioetl.domain.normalization.open_access import (
 from bioetl.domain.normalization.open_access import (
     normalize_governed_oa_status as normalize_oa_status,
 )
-from bioetl.domain.types import JsonDict
+from bioetl.domain.types import GoldRecord, JsonDict
+from bioetl.domain.value_objects import PublicationYear
 
 
 def extract_raw_citation_contexts(citations: object) -> list[object]:
@@ -308,6 +312,122 @@ def extract_fields_of_study(
     return [f for f in fields_of_study if f and isinstance(f, str)][:max_count]
 
 
+class _BusinessFieldHost(Protocol):
+    """Minimal transformer surface used by business-field assembly."""
+
+    def serialize_json(self, value: object) -> object: ...
+
+    def serialize_json_list(self, value: object) -> object: ...
+
+    def validate_value_object(
+        self,
+        vo_type: type[object],
+        value: object,
+        *,
+        as_string: bool = True,
+    ) -> object: ...
+
+    def _classify_publication_type(
+        self,
+        provider: str,
+        *,
+        raw_type: str | None,
+        raw_types_list: list[str] | None,
+    ) -> Mapping[str, object]: ...
+
+    @property
+    def _data_normalizer(self) -> object: ...
+
+
+def publication_type_inputs(
+    publication_types: object,
+    *,
+    resolve_scalar: Callable[[object], str],
+) -> tuple[list[str] | None, str | None]:
+    """Normalize Semantic Scholar publicationTypes into classifier inputs."""
+    raw_types_list = (
+        [str(t).strip() for t in publication_types if t is not None and str(t).strip()]
+        if isinstance(publication_types, list)
+        else None
+    )
+    raw_type = None if raw_types_list else resolve_scalar(publication_types)
+    return raw_types_list, raw_type
+
+
+def journal_and_citation_fields(
+    host: _BusinessFieldHost, rec: GoldRecord
+) -> GoldRecord:
+    """Extract journal, citation context, and OA fields for Gold."""
+    citation_contexts = extract_citation_contexts(rec.get("citations"))
+    raw_contexts = extract_raw_citation_contexts(rec.get("citations"))
+    journal_info = extract_journal_info(rec.get("journal"), rec.get("venue"))
+    oa_info = extract_open_access_info(
+        rec.get("isOpenAccess"), rec.get("openAccessPdf")
+    )
+    normalizer = host._data_normalizer
+    return {
+        "citation_contexts": host.serialize_json_list(citation_contexts)
+        if citation_contexts
+        else None,
+        "citation_contexts_raw_json": host.serialize_json(raw_contexts),
+        "citation_contexts_canonical_json": host.serialize_json_list(citation_contexts),
+        "journal": journal_info.get("journal"),
+        "issn": None,
+        "issn_list": None,
+        "volume": journal_info.get("volume"),
+        "issue": journal_info.get("issue"),
+        "page_range": journal_info.get("page_range"),
+        "page_first": journal_info.get("page_first"),
+        "page_last": journal_info.get("page_last"),
+        "publication_year": host.validate_value_object(
+            PublicationYear, rec.get("year"), as_string=False
+        ),
+        "publication_date": normalizer.normalize_partial_date(  # type: ignore[attr-defined]
+            rec.get("publicationDate")
+        ),
+        "citations_received": rec.get("citationCount"),
+        "citations_made": rec.get("referenceCount"),
+        "influential_citation_count": rec.get("influentialCitationCount"),
+        "is_oa": oa_info.get("is_oa"),
+        "open_access_url": oa_info.get("url"),
+        "oa_status": oa_info.get("oa_status"),
+    }
+
+
+def subject_and_type_fields(
+    host: _BusinessFieldHost,
+    rec: GoldRecord,
+    *,
+    raw_type: str | None,
+    raw_types_list: list[str] | None,
+    publication_types: object,
+) -> GoldRecord:
+    """Extract subject-field and publication-type sidecar JSON fields."""
+    fields_of_study = rec.get("fieldsOfStudy")
+    types_list = publication_types if isinstance(publication_types, list) else None
+    return {
+        "subject_fields": host.serialize_json_list(
+            extract_fields_of_study(fields_of_study)
+        ),
+        # Keep list sidecars as JSON arrays even for single-element payloads
+        # (serialize_json unwraps len==1 lists to scalars and breaks Gold JSON).
+        "subject_fields_raw_json": host.serialize_json_list(
+            fields_of_study if isinstance(fields_of_study, list) else None
+        ),
+        "subject_fields_canonical_json": host.serialize_json_list(
+            extract_fields_of_study(fields_of_study)
+        ),
+        **host._classify_publication_type(
+            "semanticscholar",
+            raw_type=raw_type,
+            raw_types_list=raw_types_list,
+        ),
+        "publication_types": host.serialize_json_list(types_list),
+        "publication_types_raw_json": host.serialize_json_list(types_list),
+        "publication_types_canonical_json": host.serialize_json_list(types_list),
+    }
+
+
 __all__ = [
     "OA_STATUS_SET",
     "extract_affiliations",
@@ -322,7 +442,10 @@ __all__ = [
     "extract_journal_info",
     "extract_open_access_info",
     "extract_tldr",
+    "journal_and_citation_fields",
     "normalize_oa_status",
     "parse_page_range",
     "parse_volume_issue",
+    "publication_type_inputs",
+    "subject_and_type_fields",
 ]
