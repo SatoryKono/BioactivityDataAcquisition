@@ -3085,7 +3085,7 @@ dashboards:
         - first_window_light
         - zoom_200
       '9002':
-        title: Review Selected Run Domains
+        title: Review Run Domains
         role: evidence_table
         tier: 3
         scope: selected_run
