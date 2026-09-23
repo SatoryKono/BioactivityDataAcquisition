@@ -508,6 +508,9 @@ from memory.graph.sync_pkg.alert_runbook_path import (
 from memory.graph.sync_pkg.alert_runbook_path import (
     _alert_runbook_path as _alert_runbook_path,
 )
+from memory.graph.sync_pkg.alert_target_context import (
+    _alert_target_context as _alert_target_context,
+)
 from memory.graph.sync_pkg.alert_target_inputs import (
     _alert_target_inputs as _alert_target_inputs,
 )
@@ -3256,22 +3259,6 @@ def _alert_surface_context(
             contract_nodes=contract_nodes,
             memory_mapping=memory_mapping,
         ),
-    )
-
-
-def _alert_target_context(
-    snapshot: GraphSnapshot,
-    *,
-    pipeline_nodes: dict[str, NodeKey],
-    contract_nodes: dict[str, NodeKey],
-    memory_mapping: dict[str, object],
-) -> AlertTargetContext:
-    return AlertTargetContext(
-        snapshot=snapshot,
-        pipeline_nodes=pipeline_nodes,
-        provider_nodes=_sorted_provider_surface_nodes(snapshot),
-        contract_nodes=contract_nodes,
-        memory_mapping=memory_mapping,
     )
 
 
