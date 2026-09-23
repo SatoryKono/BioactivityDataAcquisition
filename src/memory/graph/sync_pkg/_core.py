@@ -1034,6 +1034,12 @@ from memory.graph.sync_pkg.docs_reference_allowed_prefixes import (
 from memory.graph.sync_pkg.docs_reference_allowed_prefixes import (
     _trim_docs_reference_candidate as _trim_docs_reference_candidate,
 )
+from memory.graph.sync_pkg.docs_reference_exact_candidates import (
+    _docs_reference_exact_candidates as _docs_reference_exact_candidates,
+)
+from memory.graph.sync_pkg.docs_reference_exact_candidates import (
+    _resolve_claim_targets as _resolve_claim_targets,
+)
 from memory.graph.sync_pkg.duplication_cluster_groups import (
     _add_duplication_cluster_node as _add_duplication_cluster_node,
 )
@@ -3580,37 +3586,6 @@ def _resolve_docs_reference_target(
         if isinstance(source_path, str) and source_path == ref:
             return node.key, "source_path_match", "medium"
     return None, "unresolved", "low"
-
-
-def _docs_reference_exact_candidates(ref: str) -> tuple[NodeKey, ...]:
-    return (
-        NodeKey("module_surface", ref),
-        NodeKey("script_surface", ref),
-        NodeKey("test_artifact", ref),
-        NodeKey("config_artifact", ref),
-        NodeKey(
-            "workflow_surface",
-            Path(ref).stem if ref.startswith(GITHUB_WORKFLOWS_PREFIX) else ref,
-        ),
-        NodeKey("cli_command_surface", _normalize_cli_command_name(ref) or ref),
-        NodeKey("file_surface", ref),
-        NodeKey("directory_surface", ref),
-    )
-
-
-def _resolve_claim_targets(
-    snapshot: GraphSnapshot, claim_text: str
-) -> tuple[tuple[NodeKey, str, str], ...]:
-    resolved: list[tuple[NodeKey, str, str]] = []
-    seen: set[NodeKey] = set()
-    for token in sorted(_claim_target_tokens(claim_text)):
-        normalized_token = PORTS_MODULE_PREFIX if token == "domain.ports" else token
-        for candidate in _claim_exact_candidates(normalized_token):
-            if candidate in snapshot.nodes and candidate not in seen:
-                resolved.append((candidate, "claim_token", "medium"))
-                seen.add(candidate)
-                break
-    return tuple(resolved)
 
 
 def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
