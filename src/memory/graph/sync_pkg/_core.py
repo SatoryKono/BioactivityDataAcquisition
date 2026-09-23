@@ -10,7 +10,6 @@ import json
 import os
 import re
 import shutil as shutil  # re-exported via __all__
-import subprocess
 import sys
 import tempfile
 import time
@@ -369,6 +368,24 @@ from memory.graph.sync_pkg.apply_verify import (
 from memory.graph.sync_pkg.apply_verify import (
     _verify_expected_group_counts as _verify_expected_group_counts,
 )
+from memory.graph.sync_pkg.git_history import (
+    _git_chunk_commit_ages as _git_chunk_commit_ages,
+)
+from memory.graph.sync_pkg.git_history import (
+    _git_chunk_tracked_paths as _git_chunk_tracked_paths,
+)
+from memory.graph.sync_pkg.git_history import (
+    _git_last_commit_age_days as _git_last_commit_age_days,
+)
+from memory.graph.sync_pkg.git_history import (
+    _git_last_commit_age_days_bulk as _git_last_commit_age_days_bulk,
+)
+from memory.graph.sync_pkg.git_history import (
+    _parse_git_chunk_age_output as _parse_git_chunk_age_output,
+)
+from memory.graph.sync_pkg.git_history import (
+    _run_git_history_subprocess as _run_git_history_subprocess,
+)
 from memory.graph.sync_pkg.graph_contexts import (
     AlertTargetContext as AlertTargetContext,
 )
@@ -521,6 +538,16 @@ from memory.graph.sync_pkg.neo4j_statements import (
 from memory.graph.sync_pkg.neo4j_statements import (
     _reset_managed_relations_statement as _reset_managed_relations_statement,
 )
+from memory.graph.sync_pkg.score_family import _family_for_path as _family_for_path
+from memory.graph.sync_pkg.score_family import (
+    _family_matches_relative_path as _family_matches_relative_path,
+)
+from memory.graph.sync_pkg.score_family import (
+    _family_root_priority as _family_root_priority,
+)
+from memory.graph.sync_pkg.score_family import _presence_score as _presence_score
+from memory.graph.sync_pkg.score_family import _semantic_tags as _semantic_tags
+from memory.graph.sync_pkg.score_family import _threshold_score as _threshold_score
 from memory.graph.sync_pkg.shard_filters import DOCS_DRIFT_FILTER as DOCS_DRIFT_FILTER
 from memory.graph.sync_pkg.shard_filters import (
     RUNTIME_EVIDENCE_LAYER_FILTER as RUNTIME_EVIDENCE_LAYER_FILTER,
@@ -1874,203 +1901,6 @@ def _supplemental_directory_hubs_for_node(
     return ()
 
 
-def _git_last_commit_age_days(
-    root: Path,
-    relative_path: str,
-    today: date,
-    cache: dict[str, int | None],
-) -> int | None:
-    if relative_path in cache:
-        return cache[relative_path]
-    try:
-        result = _run_git_history_subprocess(
-            [
-                _resolve_git_executable(),
-                "-C",
-                str(root),
-                "log",
-                "-1",
-                "--format=%ct",
-                "--",
-                relative_path,
-            ],
-            timeout_seconds=10.0,
-        )
-    except subprocess.TimeoutExpired:
-        cache[relative_path] = None
-        return None
-    timestamp = result.stdout.strip()
-    if result.returncode != 0 or not timestamp.isdigit():
-        cache[relative_path] = None
-        return None
-    committed_at = datetime.fromtimestamp(_coerce_int(timestamp), tz=UTC).date()
-    age = max(0, (today - committed_at).days)
-    cache[relative_path] = age
-    return age
-
-
-def _git_last_commit_age_days_bulk(
-    root: Path,
-    relative_paths: list[str],
-    today: date,
-    cache: dict[str, int | None],
-    *,
-    chunk_size: int = 1024,
-) -> dict[str, int | None]:
-    unique_paths = [path for path in dict.fromkeys(relative_paths) if path]
-    if not unique_paths:
-        return {}
-
-    git_executable = _resolve_git_executable()
-    resolved = _git_cached_commit_ages(unique_paths, cache)
-    pending_paths = [path for path in unique_paths if path not in resolved]
-    for start_index in range(0, len(pending_paths), chunk_size):
-        chunk = pending_paths[start_index : start_index + chunk_size]
-        if not chunk:
-            continue
-        tracked_chunk = _git_chunk_tracked_paths(
-            git_executable=git_executable,
-            root=root,
-            chunk=chunk,
-        )
-        untracked_paths = sorted(set(chunk) - set(tracked_chunk))
-        for path in untracked_paths:
-            cache[path] = None
-            resolved[path] = None
-        if not tracked_chunk:
-            continue
-        chunk_results = _git_chunk_commit_ages(
-            git_executable=git_executable,
-            root=root,
-            chunk=tracked_chunk,
-            today=today,
-        )
-        cache.update(chunk_results)
-        resolved.update(chunk_results)
-    return {path: resolved.get(path) for path in unique_paths}
-
-
-def _run_git_history_subprocess(
-    command: list[str], *, timeout_seconds: float | None = None
-) -> subprocess.CompletedProcess[str]:
-    """Run Git history probes with compatibility fallbacks for test doubles."""
-    try:
-        return subprocess.run(
-            command,
-            check=False,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            timeout=timeout_seconds,
-        )
-    except subprocess.TimeoutExpired:
-        raise
-    except TypeError:
-        # Some lightweight test doubles still implement the historical
-        # positional-only signature (cmd, check, capture_output, text).
-        legacy_run = cast(
-            Callable[..., subprocess.CompletedProcess[str]],
-            subprocess.run,
-        )
-        return legacy_run(command, False, True, True)
-
-
-def _git_chunk_commit_ages(
-    *,
-    git_executable: str,
-    root: Path,
-    chunk: list[str],
-    today: date,
-) -> dict[str, int | None]:
-    try:
-        result = _run_git_history_subprocess(
-            [
-                git_executable,
-                "-C",
-                str(root),
-                "log",
-                "--format=__TS__%ct",
-                "--name-only",
-                "--",
-                *chunk,
-            ],
-            timeout_seconds=10.0,
-        )
-    except subprocess.TimeoutExpired:
-        if len(chunk) <= 1:
-            return {
-                path: _git_last_commit_age_days(root, path, today, {}) for path in chunk
-            }
-        middle = len(chunk) // 2
-        first_half = _git_chunk_commit_ages(
-            git_executable=git_executable,
-            root=root,
-            chunk=chunk[:middle],
-            today=today,
-        )
-        second_half = _git_chunk_commit_ages(
-            git_executable=git_executable,
-            root=root,
-            chunk=chunk[middle:],
-            today=today,
-        )
-        first_half.update(second_half)
-        return first_half
-    chunk_results = dict.fromkeys(chunk)
-    if result.returncode != 0:
-        return chunk_results
-    return _parse_git_chunk_age_output(result.stdout, chunk, today)
-
-
-def _git_chunk_tracked_paths(
-    *,
-    git_executable: str,
-    root: Path,
-    chunk: list[str],
-) -> list[str]:
-    result = _run_git_history_subprocess(
-        [
-            git_executable,
-            "-C",
-            str(root),
-            "ls-files",
-            "--cached",
-            "--",
-            *chunk,
-        ]
-    )
-    if result.returncode != 0:
-        return []
-    return [line.strip() for line in result.stdout.splitlines() if line.strip()]
-
-
-def _parse_git_chunk_age_output(
-    output: str,
-    chunk: list[str],
-    today: date,
-) -> dict[str, int | None]:
-    chunk_results = dict.fromkeys(chunk)
-    current_timestamp: int | None = None
-    unresolved = set(chunk)
-    for raw_line in output.splitlines():
-        line = raw_line.strip()
-        if not line:
-            continue
-        if line.startswith("__TS__"):
-            timestamp = line.removeprefix("__TS__")
-            current_timestamp = _coerce_int(timestamp) if timestamp.isdigit() else None
-            continue
-        if current_timestamp is None or line not in unresolved:
-            continue
-        committed_at = datetime.fromtimestamp(current_timestamp, tz=UTC).date()
-        chunk_results[line] = max(0, (today - committed_at).days)
-        unresolved.remove(line)
-        if not unresolved:
-            break
-    return chunk_results
-
-
 def _path_contains_any_token(path: Path, tokens: list[str]) -> bool:
     normalized = _read_text(path).lower()
     return any(token.lower() in normalized for token in tokens)
@@ -2131,74 +1961,6 @@ def _dashboard_panel_target_metrics(panel: dict[str, object]) -> set[str]:
         if isinstance(expr, str):
             metrics.update(_extract_bioetl_metrics(expr))
     return metrics
-
-
-def _threshold_score(value: int, *, medium: int, high: int) -> int:
-    if value >= high:
-        return 2
-    if value >= medium:
-        return 1
-    return 0
-
-
-def _presence_score(size: int) -> int:
-    return _threshold_score(size, medium=1, high=2)
-
-
-def _semantic_tags(relative_path: str, symbol_name: str) -> tuple[str, ...]:
-    normalized = f"{relative_path} {symbol_name}".lower()
-    tags = []
-    for tag in (
-        "normalize",
-        "health",
-        "retry",
-        "fallback",
-        "merge",
-        "join",
-        "request",
-        "response",
-        "contract",
-        "schema",
-        "manifest",
-        "lineage",
-        "metadata",
-        "pipeline",
-    ):
-        if tag in normalized:
-            tags.append(tag)
-    return tuple(sorted(set(tags)))
-
-
-def _family_for_path(
-    relative_path: str, config: dict[str, object]
-) -> DuplicateFamilyConfig | None:
-    families = config.get("families", ())
-    if not isinstance(families, tuple):
-        return None
-    best: DuplicateFamilyConfig | None = None
-    for family in families:
-        if not isinstance(family, DuplicateFamilyConfig):
-            continue
-        if not _family_matches_relative_path(relative_path, family):
-            continue
-        if best is None or _family_root_priority(family) > _family_root_priority(best):
-            best = family
-    return best
-
-
-def _family_matches_relative_path(
-    relative_path: str, family: DuplicateFamilyConfig
-) -> bool:
-    if relative_path in family.excluded_paths:
-        return False
-    return any(
-        relative_path == root or relative_path.startswith(f"{root}/")
-        for root in family.roots
-    )
-
-
-def _family_root_priority(family: DuplicateFamilyConfig) -> int:
-    return max(len(root) for root in family.roots)
 
 
 def _build_port_surface_catalog(
