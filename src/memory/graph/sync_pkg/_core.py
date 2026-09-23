@@ -11,7 +11,6 @@ import os
 import re
 import shutil as shutil  # re-exported via __all__
 import sys
-import tempfile
 import time
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence, Set
 from dataclasses import dataclass
@@ -505,6 +504,122 @@ from memory.graph.sync_pkg.dashboard_metrics import (
 from memory.graph.sync_pkg.dashboard_metrics import (
     _path_contains_any_token as _path_contains_any_token,
 )
+from memory.graph.sync_pkg.default_batch_size import (
+    ADR_DECISIONS_DIR as ADR_DECISIONS_DIR,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    CHEMBL_ACTIVITY_CONTRACT_REF as CHEMBL_ACTIVITY_CONTRACT_REF,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    CONTRACT_REGISTRY_RELATIVE_PATH as CONTRACT_REGISTRY_RELATIVE_PATH,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    CURATED_DOC_SOURCES as CURATED_DOC_SOURCES,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    DEFAULT_BATCH_SIZE as DEFAULT_BATCH_SIZE,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    DEFAULT_COMMON_PIPELINE_DASHBOARDS as DEFAULT_COMMON_PIPELINE_DASHBOARDS,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    DEFAULT_COMPOSITE_PIPELINE_DASHBOARDS as DEFAULT_COMPOSITE_PIPELINE_DASHBOARDS,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    DEFAULT_ENTITY_PIPELINE_DASHBOARDS as DEFAULT_ENTITY_PIPELINE_DASHBOARDS,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    DEFAULT_LEGACY_REPORT_PATH as DEFAULT_LEGACY_REPORT_PATH,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    DEFAULT_PIPELINE_RUNTIME_PATHS as DEFAULT_PIPELINE_RUNTIME_PATHS,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    DEFAULT_PIPELINE_VALIDATION_GATES as DEFAULT_PIPELINE_VALIDATION_GATES,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    DOC_ARCHITECTURE_DIAGRAMS_HUB as DOC_ARCHITECTURE_DIAGRAMS_HUB,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    DOC_DIAGRAM_TOOLING_README as DOC_DIAGRAM_TOOLING_README,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    DOC_GRAFANA_DASHBOARDS_JSON as DOC_GRAFANA_DASHBOARDS_JSON,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    DOCS_VERIFICATION_GUIDE_PATH as DOCS_VERIFICATION_GUIDE_PATH,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    EFFECTIVE_CONFIG_ARTIFACT_REF as EFFECTIVE_CONFIG_ARTIFACT_REF,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    GATE_CONFIG_VALIDATION as GATE_CONFIG_VALIDATION,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    GATE_DIAGRAM_QUALITY as GATE_DIAGRAM_QUALITY,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    GATE_DOCS_VERIFICATION as GATE_DOCS_VERIFICATION,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    GATE_MYPY_STRICT as GATE_MYPY_STRICT,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    GATE_NEO4J_ONTOLOGY_INVARIANTS as GATE_NEO4J_ONTOLOGY_INVARIANTS,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    GATE_PRETEST_GUARDRAILS as GATE_PRETEST_GUARDRAILS,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    GITHUB_WORKFLOWS_PREFIX as GITHUB_WORKFLOWS_PREFIX,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    GOVERNANCE_DECISIONS_SUMMARY_PATH as GOVERNANCE_DECISIONS_SUMMARY_PATH,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    INTEGRATION_VCR_POLICY_PATH as INTEGRATION_VCR_POLICY_PATH,
+)
+from memory.graph.sync_pkg.default_batch_size import KNOWN_LAYERS as KNOWN_LAYERS
+from memory.graph.sync_pkg.default_batch_size import (
+    MANIFEST_ID_TEMPLATE as MANIFEST_ID_TEMPLATE,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    PORTS_FACADE_SOURCE_PATH as PORTS_FACADE_SOURCE_PATH,
+)
+from memory.graph.sync_pkg.default_batch_size import RULES_DOC_PATH as RULES_DOC_PATH
+from memory.graph.sync_pkg.default_batch_size import RUN_ID_TEMPLATE as RUN_ID_TEMPLATE
+from memory.graph.sync_pkg.default_batch_size import (
+    RUN_LEDGER_ARTIFACT_REF as RUN_LEDGER_ARTIFACT_REF,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    RUN_MANIFEST_ARTIFACT_REF as RUN_MANIFEST_ARTIFACT_REF,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    RUN_MANIFEST_INSPECTION_DOC_PATH as RUN_MANIFEST_INSPECTION_DOC_PATH,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    RUN_MANIFEST_LEDGER_DOC_PATH as RUN_MANIFEST_LEDGER_DOC_PATH,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    TEST_MATRIX_CONFIG_PATH as TEST_MATRIX_CONFIG_PATH,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    TEST_SURFACE_ARCHITECTURE as TEST_SURFACE_ARCHITECTURE,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    TEST_SURFACE_E2E as TEST_SURFACE_E2E,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    TEST_SURFACE_INTEGRATION as TEST_SURFACE_INTEGRATION,
+)
+from memory.graph.sync_pkg.default_batch_size import TEST_SURFACES as TEST_SURFACES
+from memory.graph.sync_pkg.default_batch_size import (
+    TESTING_GUIDE_PATH as TESTING_GUIDE_PATH,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    TRACEABILITY_SIGNAL_OWNERSHIP_DOC_PATH as TRACEABILITY_SIGNAL_OWNERSHIP_DOC_PATH,
+)
+from memory.graph.sync_pkg.default_batch_size import YAML_FILE_GLOB as YAML_FILE_GLOB
 from memory.graph.sync_pkg.file_structure import (
     DEFAULT_FILE_STRUCTURE_EXCLUDED_DIR_NAMES as DEFAULT_FILE_STRUCTURE_EXCLUDED_DIR_NAMES,
 )
@@ -846,164 +961,6 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 if str(DEFAULT_ROOT) not in sys.path:
     sys.path.insert(0, str(DEFAULT_ROOT))
-DEFAULT_BATCH_SIZE = 20
-GITHUB_WORKFLOWS_PREFIX = f"{GITHUB_DIR}/workflows/"
-PORTS_FACADE_SOURCE_PATH = f"src/bioetl/domain/ports/{INIT_PY}"
-RULES_DOC_PATH = "docs/00-project/RULES.md"
-TESTING_GUIDE_PATH = "docs/03-guides/testing.md"
-DOCS_VERIFICATION_GUIDE_PATH = "docs/03-guides/docs-verification.md"
-INTEGRATION_VCR_POLICY_PATH = "configs/quality/integration_vcr_policy.yaml"
-TEST_MATRIX_CONFIG_PATH = "configs/quality/test_matrix.yaml"
-RUN_MANIFEST_LEDGER_DOC_PATH = "docs/04-reference/contracts/run-manifest-ledger.md"
-GOVERNANCE_DECISIONS_SUMMARY_PATH = (
-    "docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md"
-)
-RUN_MANIFEST_INSPECTION_DOC_PATH = (
-    "docs/05-operations/runbooks/run-manifest-inspection.md"
-)
-TRACEABILITY_SIGNAL_OWNERSHIP_DOC_PATH = (
-    "docs/05-operations/runbooks/traceability-signal-ownership.md"
-)
-CONTRACT_REGISTRY_RELATIVE_PATH = DEFAULT_CONTRACT_REGISTRY_PATH.as_posix()
-CHEMBL_ACTIVITY_CONTRACT_REF = "chembl.activity"
-RUN_MANIFEST_ARTIFACT_REF = "run_manifest::json"
-EFFECTIVE_CONFIG_ARTIFACT_REF = "effective_config_artifact::json"
-RUN_LEDGER_ARTIFACT_REF = "run_ledger::jsonl"
-DOC_GRAFANA_DASHBOARDS_JSON = "grafana dashboards json"
-DOC_ARCHITECTURE_DIAGRAMS_HUB = "architecture diagrams hub"
-DOC_DIAGRAM_TOOLING_README = "diagram tooling readme"
-TEST_SURFACE_INTEGRATION = "integration tests"
-TEST_SURFACE_E2E = "e2e tests"
-TEST_SURFACE_ARCHITECTURE = "architecture tests"
-GATE_MYPY_STRICT = "mypy --strict"
-GATE_DOCS_VERIFICATION = "docs verification"
-GATE_CONFIG_VALIDATION = "config validation"
-GATE_PRETEST_GUARDRAILS = "pretest guardrails"
-GATE_DIAGRAM_QUALITY = "diagram quality gates"
-GATE_NEO4J_ONTOLOGY_INVARIANTS = "deterministic neo4j memory ontology invariants"
-DEFAULT_LEGACY_REPORT_PATH = str(
-    Path(tempfile.gettempdir()) / "neo4j-memory-audit.json"
-)
-YAML_FILE_GLOB = "*.yaml"
-MANIFEST_ID_TEMPLATE = "{manifest_id}"
-RUN_ID_TEMPLATE = "{run_id}"
-ADR_DECISIONS_DIR = "docs/02-architecture/decisions"
-DEFAULT_PIPELINE_RUNTIME_PATHS: tuple[str, ...] = (
-    "uv run python -m bioetl run --pipeline",
-    '"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m bioetl run --pipeline',
-    ".\\.venv-win\\Scripts\\python.exe -m bioetl run --pipeline",
-)
-DEFAULT_PIPELINE_VALIDATION_GATES: tuple[str, ...] = ("pytest", GATE_CONFIG_VALIDATION)
-DEFAULT_COMMON_PIPELINE_DASHBOARDS: tuple[str, ...] = (
-    "bioetl-overview-v2",
-    "bioetl-runtime",
-)
-DEFAULT_ENTITY_PIPELINE_DASHBOARDS: tuple[str, ...] = (
-    "bioetl-dq-v2",
-    "bioetl-silver-reject-explorer",
-)
-DEFAULT_COMPOSITE_PIPELINE_DASHBOARDS: tuple[str, ...] = ("bioetl-control-plane-v1",)
-KNOWN_LAYERS = ("domain", "application", "infrastructure", "composition", "interfaces")
-TEST_SURFACES: dict[str, str] = {
-    "unit": "unit tests",
-    "integration": TEST_SURFACE_INTEGRATION,
-    "e2e": TEST_SURFACE_E2E,
-    "architecture": TEST_SURFACE_ARCHITECTURE,
-    "contract": "contract tests",
-    "benchmarks": "benchmarks",
-}
-CURATED_DOC_SOURCES: tuple[dict[str, str], ...] = (
-    {
-        "name": "Project Navigator",
-        "path": "docs/00-project/00-map.md",
-        "summary": "Primary project navigator and active entrypoint map.",
-    },
-    {
-        "name": "RULES.md",
-        "path": RULES_DOC_PATH,
-        "summary": "Canonical governance and requirements surface for the project.",
-    },
-    {
-        "name": "agent memory entry point",
-        "path": "docs/00-project/ai/memory/agent-memory.md",
-        "summary": "Human-oriented project memory entry point for AI runtimes.",
-    },
-    {
-        "name": "testing guide",
-        "path": TESTING_GUIDE_PATH,
-        "summary": "Published testing strategy guide.",
-    },
-    {
-        "name": "normalization plan",
-        "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-        "summary": "Canonical normalization architecture, evidence governance, and rollout plan.",
-    },
-    {
-        "name": "pipeline normalization matrix",
-        "path": "docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md",
-        "summary": "Generated field-level normalization evidence for entity and composite pipelines.",
-    },
-    {
-        "name": "dashboard extension guide",
-        "path": "docs/03-guides/dashboards/dashboard-extension-llm.md",
-        "summary": "Canonical LLM playbook for shipped Grafana dashboards.",
-    },
-    {
-        "name": "architecture diagrams hub",
-        "path": "docs/02-architecture/diagrams/README.md",
-        "summary": "Canonical hub for architecture, class, foundation, and view diagram sources and publication artifacts.",
-    },
-    {
-        "name": "diagram governance ADR",
-        "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
-        "summary": "Accepted ADR defining diagram governance, palette, decomposition rules, and CI validation expectations.",
-    },
-    {
-        "name": "diagram governance workflow",
-        "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-        "summary": "Operator workflow for maintaining canonical diagram trees, derived views, and publication bundles.",
-    },
-    {
-        "name": "diagram measured inventory",
-        "path": "docs/02-architecture/diagrams/governance/diagrams-index.md",
-        "summary": "Measured inventory of tracked diagram families and canonical source coverage.",
-    },
-    {
-        "name": "diagram views inventory",
-        "path": "docs/02-architecture/diagrams/governance/diagram-views-inventory.md",
-        "summary": "Measured inventory of derived Mermaid review views and decomposition coverage.",
-    },
-    {
-        "name": "diagram tooling readme",
-        "path": "scripts/diagrams/README.md",
-        "summary": "Repository entrypoint for diagram lint, render, bundle, and regression tooling.",
-    },
-    {
-        "name": "docs verification guide",
-        "path": DOCS_VERIFICATION_GUIDE_PATH,
-        "summary": "Published workflow for docs verification and drift control.",
-    },
-    {
-        "name": RUN_MANIFEST_LEDGER_DOC_PATH,
-        "path": RUN_MANIFEST_LEDGER_DOC_PATH,
-        "summary": "Published control-plane contract for immutable run manifests, append-only run ledgers, and replay inspection surfaces.",
-    },
-    {
-        "name": "package topology evidence summary",
-        "path": "docs/reports/evidence/project-package-topology/SUMMARY.md",
-        "summary": "Repo-only topology calibration evidence for package families.",
-    },
-    {
-        "name": "governance decisions summary",
-        "path": GOVERNANCE_DECISIONS_SUMMARY_PATH,
-        "summary": "Accepted governance decisions and risks.",
-    },
-    {
-        "name": DOC_GRAFANA_DASHBOARDS_JSON,
-        "path": "grafana/dashboards",
-        "summary": "Factual source of truth for shipped dashboard behavior.",
-    },
-)
 CURATED_QUALITY_GATES: tuple[dict[str, object], ...] = (
     {
         "name": "pytest",
