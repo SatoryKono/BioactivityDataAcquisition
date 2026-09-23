@@ -1995,6 +1995,12 @@ from memory.graph.sync_pkg.pipeline_test_ownership_path import (
 from memory.graph.sync_pkg.pipeline_test_payload import (
     _pipeline_test_payload as _pipeline_test_payload,
 )
+from memory.graph.sync_pkg.pipeline_test_suite_name import (
+    _link_entity_pipeline_tests as _link_entity_pipeline_tests,
+)
+from memory.graph.sync_pkg.pipeline_test_suite_name import (
+    _pipeline_test_suite_name as _pipeline_test_suite_name,
+)
 from memory.graph.sync_pkg.pipelinetestcontext import (
     PipelineTestContext as PipelineTestContext,
 )
@@ -3096,27 +3102,6 @@ def _link_pipeline_test_suite(
         relation_type,
         NodeKey("test_surface", suite_name),
         provenance=provenance,
-    )
-
-
-def _pipeline_test_suite_name(
-    snapshot: GraphSnapshot,
-    artifact_key: NodeKey,
-) -> str | None:
-    return TEST_SURFACES.get(
-        str(snapshot.nodes[artifact_key].properties.get("suite", ""))
-    )
-
-
-def _link_entity_pipeline_tests(
-    link_test_target: Callable[[NodeKey, str, str], None],
-    entity_pipeline_index: dict[tuple[str, str], NodeKey],
-    ownership: dict[object, object],
-) -> None:
-    _link_pipeline_test_targets(
-        link_test_target,
-        _entity_pipeline_contract_tests(entity_pipeline_index, ownership),
-        provenance="impact_pipeline_tests",
     )
 
 
