@@ -365,6 +365,13 @@ from memory.graph.sync_pkg.adr_constraint_candidates import (
 from memory.graph.sync_pkg.adr_constraint_candidates import (
     _read_docs_drift_text as _read_docs_drift_text,
 )
+from memory.graph.sync_pkg.adr_title import _adr_title as _adr_title
+from memory.graph.sync_pkg.adr_title import (
+    _doc_reference_context as _doc_reference_context,
+)
+from memory.graph.sync_pkg.adr_title import (
+    _resolve_adr_constraint_target as _resolve_adr_constraint_target,
+)
 from memory.graph.sync_pkg.alert_rule_file_payload import (
     _add_alert_rules_artifact as _add_alert_rules_artifact,
 )
@@ -3371,30 +3378,6 @@ def _add_adr_decision_node(
     )
     snapshot.add_relation(project, "HAS_DECISION", adr_node, provenance="adr")
     return adr_node
-
-
-def _adr_title(adr_path: Path) -> str:
-    text = _read_text(adr_path)
-    for _offset, title in _markdown_headings(text):
-        return title
-    return adr_path.stem
-
-
-def _resolve_adr_constraint_target(
-    snapshot: GraphSnapshot, normalized_ref: str
-) -> NodeKey | None:
-    for candidate in _adr_constraint_candidates(normalized_ref):
-        if candidate in snapshot.nodes:
-            return candidate
-    return None
-
-
-def _doc_reference_context(
-    text: str, offset: int
-) -> tuple[str | None, str | None, int]:
-    section_title, section_anchor = _markdown_heading_context(text, offset)
-    line_number = text.count("\n", 0, offset) + 1
-    return section_title, section_anchor, line_number
 
 
 def _add_doc_path_reference_edges(
