@@ -96,8 +96,11 @@ async def extract_unique_fraction_records(
     try:
         async for assay in assays:
             if not ingest_fraction_assay(
-                assay, records, seen_fractions,
-                limit=limit, continue_after_limit=continue_after_limit,
+                assay,
+                records,
+                seen_fractions,
+                limit=limit,
+                continue_after_limit=continue_after_limit,
             ):
                 break
     finally:

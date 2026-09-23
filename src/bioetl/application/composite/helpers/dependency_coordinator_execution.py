@@ -122,7 +122,7 @@ async def run_single_dependency(
             completed_at=completed_at,
             duration_seconds=duration_seconds,
         )
-    except _DEPENDENCY_EXECUTION_ERRORS as e:
+    except Exception as e:
         completed_at, duration_seconds = derive_completion_timestamp(
             started_at=started_at,
             started_monotonic=started_monotonic,
