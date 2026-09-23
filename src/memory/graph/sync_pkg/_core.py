@@ -1064,6 +1064,18 @@ from memory.graph.sync_pkg.pipeline_normalization_targets import (
 from memory.graph.sync_pkg.pipeline_normalization_targets import (
     _pipeline_normalization_targets as _pipeline_normalization_targets,
 )
+from memory.graph.sync_pkg.pipeline_operational_targets_config import (
+    _link_pipeline_operational_for_pipeline as _link_pipeline_operational_for_pipeline,
+)
+from memory.graph.sync_pkg.pipeline_operational_targets_config import (
+    _pipeline_operational_targets_config as _pipeline_operational_targets_config,
+)
+from memory.graph.sync_pkg.pipeline_operational_targets_config import (
+    _sorted_pipeline_nodes as _sorted_pipeline_nodes,
+)
+from memory.graph.sync_pkg.pipeline_operational_targets_config import (
+    build_audit_report as build_audit_report,
+)
 from memory.graph.sync_pkg.port_surfaces import (
     PORTS_MODULE_PREFIX as PORTS_MODULE_PREFIX,
 )
@@ -9656,95 +9668,6 @@ def _pipeline_operational_context(
         common_dashboards=common_dashboards,
         entity_dashboards=entity_dashboards,
         composite_dashboards=composite_dashboards,
-    )
-
-
-def _pipeline_operational_targets_config(
-    pipeline_ops: dict[str, object],
-) -> tuple[list[NodeKey], list[NodeKey]]:
-    runtime_paths = _configured_node_keys(
-        "execution_path",
-        pipeline_ops.get("runtime_paths"),
-        DEFAULT_PIPELINE_RUNTIME_PATHS,
-    )
-    validation_gates = _configured_node_keys(
-        "quality_gate",
-        pipeline_ops.get("validation_gates"),
-        DEFAULT_PIPELINE_VALIDATION_GATES,
-    )
-    return runtime_paths, validation_gates
-
-
-def _sorted_pipeline_nodes(pipeline_nodes: dict[str, NodeKey]) -> list[NodeKey]:
-    return sorted(pipeline_nodes.values(), key=lambda node: node.name)
-
-
-def _link_pipeline_operational_for_pipeline(
-    snapshot: GraphSnapshot,
-    pipeline: NodeKey,
-    *,
-    operational_context: PipelineOperationalContext,
-) -> None:
-    pipeline_props = snapshot.nodes[pipeline].properties
-    pipeline_kind = pipeline_props.get("pipeline_kind")
-    _link_pipeline_operational_targets(
-        snapshot,
-        pipeline,
-        runtime_paths=operational_context.runtime_paths,
-        validation_gates=operational_context.validation_gates,
-        common_dashboards=operational_context.common_dashboards,
-        kind_dashboards=_pipeline_kind_dashboards(
-            pipeline_kind,
-            entity_dashboards=operational_context.entity_dashboards,
-            composite_dashboards=operational_context.composite_dashboards,
-        ),
-    )
-
-
-def build_audit_report(
-    snapshot: GraphSnapshot,
-    root: Path,
-    http_uri: str | None,
-) -> dict[str, JsonValue]:
-    base_uri, username, password, database = resolve_neo4j_connection(root, http_uri)
-    client = Neo4jHttpClient(base_uri, username, password, database)
-    managed_labels = sorted(
-        {node.key.label for node in snapshot.nodes.values()}
-        | set(DEFAULT_LEGACY_PRUNE_LABELS)
-    )
-    snapshot_relation_types = sorted(
-        {relation.relation_type for relation in snapshot.relations.values()}
-    )
-    snapshot_stats = snapshot.stats()
-    live_label_rows = _live_repo_label_rows(client, managed_labels)
-    live_relation_rows = _live_managed_relation_rows(client, snapshot_relation_types)
-    orphan_rows = _live_orphan_rows(client, managed_labels)
-    unmanaged_rows = _live_unmanaged_repo_rows(client, managed_labels)
-
-    live_managed_label_counts = _managed_label_counts_from_rows(live_label_rows)
-    live_managed_relation_counts = _managed_relation_counts_from_rows(
-        live_relation_rows
-    )
-    managed_node_total = _row_int_total(live_label_rows, "managed")
-    unmanaged_repo_node_total = _row_int_total(unmanaged_rows, "count")
-    managed_relation_total = sum(live_managed_relation_counts.values())
-    live_summary = _audit_live_summary(
-        managed_node_total=managed_node_total,
-        managed_relation_total=managed_relation_total,
-        unmanaged_repo_node_total=unmanaged_repo_node_total,
-        label_summary=live_label_rows,
-        managed_relation_summary=live_relation_rows,
-        orphan_summary=orphan_rows,
-        unmanaged_summary=unmanaged_rows,
-    )
-    return _audit_report_payload(
-        snapshot_payload=snapshot_stats,
-        managed_labels=managed_labels,
-        live_summary=live_summary,
-        snapshot_label_counts=_snapshot_count_map(snapshot_stats, "labels"),
-        live_managed_label_counts=live_managed_label_counts,
-        snapshot_relation_counts=_snapshot_count_map(snapshot_stats, "relation_types"),
-        live_managed_relation_counts=live_managed_relation_counts,
     )
 
 
