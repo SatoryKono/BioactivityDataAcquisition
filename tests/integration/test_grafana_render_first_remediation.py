@@ -795,7 +795,9 @@ def test_operator_critical_tables_expose_full_values() -> None:
                         for link in panel.get("links", [])
                     )
                     detail = _panel(dashboard, 22005)
-                    assert _wrapped_field_names(detail), "Full alert evidence must retain wrapping"
+                    assert _wrapped_field_names(detail), (
+                        "Full alert evidence must retain wrapping"
+                    )
                     assert any(
                         t["id"] == "limit" and t["options"]["limitField"] == 2
                         for t in panel["transformations"]

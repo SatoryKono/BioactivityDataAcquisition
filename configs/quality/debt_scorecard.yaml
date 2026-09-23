@@ -160,11 +160,10 @@ sanctioned_public_entrypoint_governance:
       current_count: 3
       owner: '@bioetl-architecture'
       linked_issue: '10597'
-      rationale: >-
-        Reviewed public export facades remain sanctioned public API seams and stay visible as
-        governance inventory rather than compatibility debt. Ratcheted 4 -> 3 in issue 10597 (AUD-007) by
-        retiring the separate maintenance_api export-facade budget; canonical maintenance symbol access is
-        governed by bioetl.composition.entrypoints and the owner-only service-access seams. The facade
+      rationale: Reviewed public export facades remain sanctioned public API seams and stay visible as
+        governance inventory rather than compatibility debt. Ratcheted 4 -> 3 in issue 10597 (AUD-007)
+        by retiring the separate maintenance_api export-facade budget; canonical maintenance symbol access
+        is governed by bioetl.composition.entrypoints and the owner-only service-access seams. The facade
         inventory was introduced under issue 5374.
       review_cadence: quarterly
       review_policy: Hold export facade count flat or reduce it; new facades require architecture review
@@ -460,7 +459,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 196
-      total_loc: 24081
+      total_loc: 24078
       files_ge_250_loc: 0
       helper_function_ratio: 0.384
       max_internal_fan_in: 5

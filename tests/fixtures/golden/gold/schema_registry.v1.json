@@ -715,7 +715,7 @@
         },
         "assay_param_id": {
           "description": "",
-          "dtype": "float64",
+          "dtype": "int64",
           "nullable": false
         },
         "comments": {
@@ -733,6 +733,21 @@
           "dtype": "str",
           "nullable": false
         },
+        "parameter_relation": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "parameter_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "parameter_value": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
         "qudt_ontology_version": {
           "description": "",
           "dtype": "str",
@@ -749,11 +764,6 @@
           "nullable": true
         },
         "qudt_units": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
-        "relation": {
           "description": "",
           "dtype": "str",
           "nullable": true
@@ -788,11 +798,6 @@
           "dtype": "str",
           "nullable": true
         },
-        "type": {
-          "description": "",
-          "dtype": "str",
-          "nullable": false
-        },
         "units": {
           "description": "",
           "dtype": "str",
@@ -816,11 +821,6 @@
         "uo_units": {
           "description": "",
           "dtype": "str",
-          "nullable": true
-        },
-        "value": {
-          "description": "",
-          "dtype": "float64",
           "nullable": true
         }
       },
@@ -1549,12 +1549,12 @@
         "doc_1": {
           "description": "",
           "dtype": "float64",
-          "nullable": false
+          "nullable": true
         },
         "doc_2": {
           "description": "",
           "dtype": "float64",
-          "nullable": false
+          "nullable": true
         },
         "entity_id": {
           "description": "",
@@ -1571,6 +1571,16 @@
           "dtype": "float64",
           "nullable": true
         },
+        "publication_id1": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_id2": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "pubmed_id1": {
           "description": "",
           "dtype": "str",
@@ -1583,7 +1593,7 @@
         },
         "sim_id": {
           "description": "",
-          "dtype": "float64",
+          "dtype": "int64",
           "nullable": false
         },
         "tid_tani": {
