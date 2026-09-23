@@ -934,7 +934,7 @@ def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
         for panel in child_panels
         if isinstance(panel.get("title"), str)
     }
-    assert "Inspect Health-Check Latency p95" in child_titles
+    assert "Inspect Health p95" in child_titles
     assert detail_row.get("gridPos", {}).get("y", 0) < min(
         int(panel.get("gridPos", {}).get("y", 0)) for panel in child_panels
     )

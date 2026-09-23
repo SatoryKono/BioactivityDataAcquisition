@@ -640,7 +640,7 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
         },
         "bioetl-provider-health-v2.json": {
             "Track Health-Check Latency p95",
-            "Inspect Health-Check Latency p95",
+            "Inspect Health p95",
             "Track Request Latency p95",
             "Track Rate-Limiter Wait p95",
         },

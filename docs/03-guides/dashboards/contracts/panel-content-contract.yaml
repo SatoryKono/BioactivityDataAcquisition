@@ -3811,7 +3811,7 @@ dashboards:
         - not_applicable
         render_profiles: *id001
       '102':
-        title: Inspect Health-Check Latency p95
+        title: Inspect Health p95
         role: indicator
         tier: 3
         scope: time_range

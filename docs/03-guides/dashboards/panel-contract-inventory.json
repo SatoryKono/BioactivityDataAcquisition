@@ -4044,7 +4044,7 @@
       "formula": "(histogram_quantile(0.95, (sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])) unless on (provider) (sum by (provider) (changes(bioetl_health_check_latency_seconds_created{provider=~\"$provider\"}[$__range]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 102,
-      "panel_title": "Inspect Health-Check Latency p95",
+      "panel_title": "Inspect Health p95",
       "query": "(histogram_quantile(0.95, (sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])) unless on (provider) (sum by (provider) (changes(bioetl_health_check_latency_seconds_created{provider=~\"$provider\"}[$__range]) > 0))))) >= 0",
       "query_tokens": [
         "bioetl_health_check_latency_seconds_bucket",

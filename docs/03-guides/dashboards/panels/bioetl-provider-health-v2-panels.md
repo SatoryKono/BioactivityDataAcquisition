@@ -129,7 +129,7 @@ the relevant provider or evidence gap.
   severity or a non-zero selected-range failure signal requires localization.
 - **Data sources:** `bioetl_adapter_request_duration_seconds_bucket`, `bioetl_http_request_errors_total`
 
-### 22. Inspect Health-Check Latency p95
+### 22. Inspect Health p95
 - **Type:** Gauge
 - **Purpose:** Show health check latency p95 for selected provider.
 - **Data sources:** `bioetl_health_check_latency_seconds_bucket`

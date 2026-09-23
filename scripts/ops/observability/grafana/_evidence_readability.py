@@ -256,6 +256,7 @@ def _runtime(p: dict[int, dict]) -> None:
 
 
 def _provider(p: dict[int, dict]) -> None:
+    p[102]["title"] = "Inspect Health p95"
     for field, width in {"Provider": 140, "Source state": 75, "Status": 90}.items():
         _override(p[9107], field, _WIDTH, width)
     _override(p[9107], "Source state", "displayName", "Source")

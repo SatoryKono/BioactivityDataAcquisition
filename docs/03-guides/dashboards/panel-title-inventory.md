@@ -199,7 +199,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-provider-health-v2.json | 107 | Track Failure Share |
 | bioetl-provider-health-v2.json | 108 | Inspect Exhausted Retries |
 | bioetl-provider-health-v2.json | 109 | Track Exhausted Retries |
-| bioetl-provider-health-v2.json | 102 | Inspect Health-Check Latency p95 |
+| bioetl-provider-health-v2.json | 102 | Inspect Health p95 |
 | bioetl-provider-health-v2.json | 110 | Track Request Latency p95 |
 | bioetl-provider-health-v2.json | 111 | Track Rate-Limit Errors |
 | bioetl-provider-health-v2.json | 115 | Track Network & Timeout Errors |
