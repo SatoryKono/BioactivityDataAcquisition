@@ -285,6 +285,9 @@ from memory.graph.sync_pkg.add_entity_pipeline_surfaces import (
 from memory.graph.sync_pkg.add_package_topology_decisions_and_risks import (
     _add_package_topology_decisions_and_risks as _add_package_topology_decisions_and_risks,
 )
+from memory.graph.sync_pkg.add_pipeline_doc_edges import (
+    _add_pipeline_doc_edges as _add_pipeline_doc_edges,
+)
 from memory.graph.sync_pkg.add_policy_surface import (
     _add_policy_artifact as _add_policy_artifact,
 )
@@ -3577,33 +3580,6 @@ def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
         _add_doc_path_reference_edges(snapshot, source_node, text, path_pattern)
         _add_doc_command_reference_edges(snapshot, source_node, text, command_pattern)
         _add_doc_claim_edges(snapshot, source_node, source_path, text, path_pattern)
-
-
-def _add_pipeline_doc_edges(snapshot: GraphSnapshot) -> None:
-    for node in tuple(snapshot.nodes.values()):
-        if node.key.label != "pipeline_surface":
-            continue
-        pipeline_kind = node.properties.get("pipeline_kind")
-        if pipeline_kind == "entity":
-            provider_name = str(node.properties.get("provider") or "")
-            entity_name = str(node.properties.get("entity") or "")
-        elif pipeline_kind == "composite":
-            provider_name = "composite"
-            entity_name = node.key.name.removeprefix("composite_")
-        else:
-            continue
-        if not provider_name or not entity_name:
-            continue
-        _link_pipeline_doc_artifacts(
-            snapshot,
-            node.key,
-            _pipeline_doc_artifact_targets(
-                snapshot,
-                provider_name=provider_name,
-                entity_name=entity_name,
-            ),
-            provenance="impact_pipeline_docs",
-        )
 
 
 def _add_adr_constraint_edges(
