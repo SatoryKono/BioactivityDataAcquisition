@@ -102,6 +102,12 @@ def test_build_stage_metrics_cover_all_terminal_counts() -> None:
             enricher_name="skip",
             status=EnrichmentStatus.SKIPPED,
         ),
+        "partial": EnrichmentResult(
+            enricher_name="partial",
+            status=EnrichmentStatus.PARTIAL,
+            records_input=10,
+            records_enriched=9,
+        ),
     }
     merge_result = MergeResult(
         records_merged=9,
@@ -121,8 +127,8 @@ def test_build_stage_metrics_cover_all_terminal_counts() -> None:
         "dependencies_failed": 1,
     }
     assert build_enrichment_stage_metrics(enrichment_results) == {
-        "enrichers_total": 3,
-        "enrichers_succeeded": 1,
+        "enrichers_total": 4,
+        "enrichers_succeeded": 2,
         "enrichers_failed": 1,
         "enrichers_skipped": 1,
     }

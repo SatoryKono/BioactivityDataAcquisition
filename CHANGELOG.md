@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Composite merge includes PARTIAL enrichers (#10949):** `_load_enricher_dataframes`
+  now joins Silver for `EnrichmentStatus.PARTIAL` as well as `SUCCESS`. Optional
+  enrichers that complete below the hard DQ threshold (live Semantic Scholar
+  `records_enriched=990/1000`) are no longer dropped from `sources_used` / Gold.
+  Run-ledger `enrichers_succeeded` matches the enrichment summary. `SKIPPED`
+  still does not contribute merge input.
+
 ### Added
 
 - **FK reconciliation completeness and mutation identity (#10424, #10425):**

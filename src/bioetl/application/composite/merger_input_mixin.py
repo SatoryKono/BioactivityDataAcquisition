@@ -14,7 +14,6 @@ from bioetl.domain.composite.result import (
     DependencyResult,
     DependencyStatus,
     EnrichmentResult,
-    EnrichmentStatus,
 )
 from bioetl.domain.exceptions import BioETLError, StorageError
 from bioetl.domain.ports import MergedStoragePort, SilverStoragePort
@@ -97,13 +96,17 @@ class _MergeInputLoaderMixin:
         enrichers: Sequence[EnricherConfig],
         enrichment_results: dict[str, EnrichmentResult],
     ) -> tuple[dict[str, pl.DataFrame], list[str]]:
-        """Load DataFrames for successful enrichers only."""
+        """Load DataFrames for enrichers that wrote mergeable Silver.
+
+        ``SUCCESS`` and ``PARTIAL`` both persist Silver below the hard DQ
+        threshold. ``SKIPPED`` / ``FAILED`` / ``TIMEOUT`` / ``NOT_RUN`` do not.
+        """
         enricher_dfs: dict[str, pl.DataFrame] = {}
         sources_used: list[str] = []
 
         for enricher in enrichers:
             result = enrichment_results.get(enricher.pipeline)
-            if result and result.status == EnrichmentStatus.SUCCESS:
+            if result and result.contributes_merge_input:
                 df = await self._read_optional_merge_input(
                     pipeline=enricher.pipeline,
                     table=enricher.silver_table or f"silver/{enricher.pipeline}",
