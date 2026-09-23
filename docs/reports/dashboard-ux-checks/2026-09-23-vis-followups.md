@@ -53,3 +53,11 @@ Runtime/skills не изменены; синхронизация AI runtime mirr
 - [after-dq-gold-destination](assets/2026-09-23-vis/after-dq-gold-destination.jpg)
 - [after-incident-narrow-full](assets/2026-09-23-vis/after-incident-narrow-full.jpg)
 - [after-incident-wide-full](assets/2026-09-23-vis/after-incident-wide-full.jpg)
+
+## Проверка после синхронизации с main
+
+Ветка перебазирована на `e66ab819fd93`; параллельное исправление rolling-window legends сохранено. После rebase: **823 dashboard tests passed, 9 skipped**; **162 HTTP/source-inventory tests passed**. `docs verify --skip-build` завершился успешно; проверены runtime mirrors, docstrings, links и cleanup inventory. Канонические scorecard, ADR, remote-main и debt artifacts согласованы; debt gate check завершился успешно.
+
+Governance preflight выявил превышение active-script budget. Новый `_evidence_readability.py` — supporting helper, не новая активная команда. Пересчитанный inventory содержит 340 active при лимите 338. В committed main inventory было 339; дополнительный обнаруженный active — уже существующий в main `scripts/engineering/qa/report_cast_any_typing_census.py`. Лимит не увеличен. Это остаётся blocker общего preflight; полный архитектурный suite после rebase не переобъявлен успешным.
+
+Точная report-ссылка независимо проверена: HTTP 200, `identity.pipeline_name=chembl_molecule`, полный `identity.run_id=7dfad8f0-1f7b-51c4-8bdd-785defb2fb31`, completed_at `2026-09-22T15:01:19.981035+00:00`. Состояние GitHub draft PR и CI не заменяется этим локальным доказательством.

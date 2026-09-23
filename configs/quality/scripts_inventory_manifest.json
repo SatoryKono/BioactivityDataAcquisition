@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-23T06:36:09.348359+00:00",
+  "generated_at": "2026-09-23T06:54:01.346826+00:00",
   "summary": {
     "total_scripts": 624,
     "status_counts": {
-      "active": 341,
-      "supporting": 283
+      "active": 340,
+      "supporting": 284
     },
     "reference_group_coverage": {
       "agents": 9,
@@ -20105,7 +20105,7 @@
     {
       "path": "scripts/ops/observability/grafana/_evidence_readability.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -20121,7 +20121,11 @@
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal readability pass imported by render_nav_bus.py; it has no standalone command and must stay behind the canonical dashboard generator."
     },
     {
       "path": "scripts/ops/observability/grafana/_gr_db_corrections.py",
