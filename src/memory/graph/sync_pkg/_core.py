@@ -1248,6 +1248,12 @@ from memory.graph.sync_pkg.link_composite_pipeline_dependencies import (
 from memory.graph.sync_pkg.link_composite_pipeline_dependencies import (
     _link_composite_pipeline_dependencies as _link_composite_pipeline_dependencies,
 )
+from memory.graph.sync_pkg.link_contract_dependency_modules import (
+    _link_contract_dependency_docs as _link_contract_dependency_docs,
+)
+from memory.graph.sync_pkg.link_contract_dependency_modules import (
+    _link_contract_dependency_modules as _link_contract_dependency_modules,
+)
 from memory.graph.sync_pkg.link_contract_provider import (
     _add_contract_registry_artifact as _add_contract_registry_artifact,
 )
@@ -4699,43 +4705,6 @@ def _link_contract_dependencies(
     _add_published_contract_artifacts(snapshot, entry_context)
     _link_contract_dependency_modules(snapshot, entry_context, mapping_config)
     _link_contract_dependency_docs(snapshot, entry_context, mapping_config)
-
-
-def _link_contract_dependency_modules(
-    snapshot: GraphSnapshot,
-    entry_context: ContractEntryContext,
-    mapping_config: ContractMappingConfig,
-) -> None:
-    for module_paths, provenance in _contract_dependency_module_specs(mapping_config):
-        _link_contract_module_dependencies(
-            snapshot,
-            entry_context,
-            module_paths,
-            provenance,
-        )
-
-
-def _link_contract_dependency_docs(
-    snapshot: GraphSnapshot,
-    entry_context: ContractEntryContext,
-    mapping_config: ContractMappingConfig,
-) -> None:
-    for (
-        doc_paths,
-        anchor_fields,
-        summary,
-        source_kind,
-        provenance,
-    ) in _contract_dependency_doc_specs(mapping_config):
-        _link_contract_doc_dependencies(
-            snapshot,
-            entry_context,
-            doc_paths,
-            anchor_fields,
-            summary=summary,
-            source_kind=source_kind,
-            provenance=provenance,
-        )
 
 
 def _add_contract_surfaces(
