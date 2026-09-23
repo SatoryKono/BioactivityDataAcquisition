@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import shutil as shutil  # re-exported via __all__
 import sys
-from collections.abc import Callable, Iterable, Mapping, Set
+from collections.abc import Callable, Mapping, Set
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -910,6 +910,10 @@ from memory.graph.sync_pkg.create_workflow_job_surface import (
 )
 from memory.graph.sync_pkg.create_workflow_job_surface import (
     _link_reusable_job_workflow as _link_reusable_job_workflow,
+)
+from memory.graph.sync_pkg.critical_diff_issues import __all__ as __all__
+from memory.graph.sync_pkg.critical_diff_issues import (
+    _critical_diff_issues as _critical_diff_issues,
 )
 from memory.graph.sync_pkg.curated_policy_surfaces import (
     CURATED_POLICY_SURFACES as CURATED_POLICY_SURFACES,
@@ -4767,29 +4771,6 @@ def _critical_analysis_audit_issues(report: dict[str, JsonValue]) -> list[str]:
     )
     return issues
 
-
-def _critical_diff_issues(
-    rows: object,
-    critical_names: Iterable[str],
-    *,
-    kind: str,
-) -> list[str]:
-    issues: list[str] = []
-    if not isinstance(rows, list):
-        return issues
-    for row in rows:
-        if not isinstance(row, dict):
-            continue
-        name = row.get("name")
-        delta = row.get("delta")
-        if isinstance(name, str) and name in critical_names and delta:
-            issues.append(
-                f"{kind} `{name}` expected {row.get('snapshot')}, live managed {row.get('live_managed')}"
-            )
-    return issues
-
-
-__all__ = [name for name in globals() if not name.startswith("__")]
 
 if __name__ == "__main__":
     raise SystemExit(main())
