@@ -896,6 +896,24 @@ from memory.graph.sync_pkg.default_batch_size import (
     TRACEABILITY_SIGNAL_OWNERSHIP_DOC_PATH as TRACEABILITY_SIGNAL_OWNERSHIP_DOC_PATH,
 )
 from memory.graph.sync_pkg.default_batch_size import YAML_FILE_GLOB as YAML_FILE_GLOB
+from memory.graph.sync_pkg.docs_reference_allowed_prefixes import (
+    _DOC_LIKE_LABELS as _DOC_LIKE_LABELS,
+)
+from memory.graph.sync_pkg.docs_reference_allowed_prefixes import (
+    _DOCS_DRIFT_TEXT_EXTENSIONS as _DOCS_DRIFT_TEXT_EXTENSIONS,
+)
+from memory.graph.sync_pkg.docs_reference_allowed_prefixes import (
+    _DOCS_REFERENCE_ALLOWED_PREFIXES as _DOCS_REFERENCE_ALLOWED_PREFIXES,
+)
+from memory.graph.sync_pkg.docs_reference_allowed_prefixes import (
+    _heading_anchor_slug as _heading_anchor_slug,
+)
+from memory.graph.sync_pkg.docs_reference_allowed_prefixes import (
+    _is_docs_drift_source_candidate as _is_docs_drift_source_candidate,
+)
+from memory.graph.sync_pkg.docs_reference_allowed_prefixes import (
+    _trim_docs_reference_candidate as _trim_docs_reference_candidate,
+)
 from memory.graph.sync_pkg.duplication_cluster_groups import (
     _add_duplication_cluster_node as _add_duplication_cluster_node,
 )
@@ -4179,43 +4197,6 @@ def _normalize_docs_repo_reference(raw_ref: str) -> str | None:
     if any(candidate.startswith(prefix) for prefix in _DOCS_REFERENCE_ALLOWED_PREFIXES):
         return candidate
     return None
-
-
-_DOCS_REFERENCE_ALLOWED_PREFIXES = (
-    "src/",
-    "configs/",
-    "scripts/",
-    "tests/",
-    "docs/",
-    "grafana/",
-    GITHUB_PATH_PREFIX,
-)
-
-_DOC_LIKE_LABELS = {"doc_source_surface", "doc_artifact", "policy_surface"}
-_DOCS_DRIFT_TEXT_EXTENSIONS = {".md", ".rst", ".txt", YAML_SUFFIX, ".yml"}
-
-
-def _is_docs_drift_source_candidate(node: GraphNode) -> bool:
-    """Return whether a doc-like node should be parsed for docs-code drift.
-
-    File-structure ingestion creates one ``doc_artifact`` per tracked document.
-    Parsing all of them turns snapshot invariants into a root-wide filesystem
-    scan on mounted Windows/WSL checkouts. Curated docs and policy surfaces are
-    the supported drift sources; file-structure artifacts remain represented in
-    the graph through ``HAS_DOC_ARTIFACT``/``BACKED_BY`` edges.
-    """
-    if node.key.label != "doc_artifact":
-        return True
-    return "repo_zone" not in node.properties
-
-
-def _trim_docs_reference_candidate(raw_ref: str) -> str:
-    return raw_ref.strip().strip("`").rstrip(".,:;)]}")
-
-
-def _heading_anchor_slug(title: str) -> str:
-    slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
-    return slug or "section"
 
 
 def _markdown_heading_context(text: str, offset: int) -> tuple[str | None, str | None]:
