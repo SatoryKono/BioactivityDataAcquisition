@@ -1764,7 +1764,7 @@
           "title": "Inspect Provider Suspects",
           "description": "GLOBAL · CURRENT at query evaluation time (range end). Same fleet scope as Ranked Suspects; pipeline and run selectors do not filter this table. Active signals only. VALID EMPTY is not TELEMETRY MISSING or a healthy-fleet verdict. TIME RANGE · Do not put full UUIDs into Prometheus labels. Selected pipeline may differ from row pipeline (blast radius). Provider causes (current fleet topk). Empty + non-OK Status is an explainability gap. Handoff: Provider Health ",
           "gridPos": {
-            "h": 3,
+            "h": 4,
             "w": 24,
             "x": 0,
             "y": 26
@@ -1956,7 +1956,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 29
+            "y": 30
           },
           "datasource": {
             "type": "prometheus",
