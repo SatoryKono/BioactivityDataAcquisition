@@ -776,6 +776,9 @@ from memory.graph.sync_pkg.complexity_marker_buckets import (
 from memory.graph.sync_pkg.complexity_score_inputs import (
     _complexity_score_inputs as _complexity_score_inputs,
 )
+from memory.graph.sync_pkg.complexity_surface_scores import (
+    _complexity_surface_scores as _complexity_surface_scores,
+)
 from memory.graph.sync_pkg.composite_config_dependency_entries import (
     _add_cli_command_graph as _add_cli_command_graph,
 )
@@ -3439,27 +3442,6 @@ def _complexity_surface_measurements(
         complexity_score,
         simplification_score,
         removable_score,
-    )
-
-
-def _complexity_surface_scores(
-    metrics: SurfaceComplexityMetrics,
-    anchors: SurfaceAnchorSets,
-    *,
-    blocked_by_current_cycle: bool,
-    indirection_markers: tuple[str, ...],
-    stateful_markers: tuple[str, ...],
-    deprecation_markers: tuple[str, ...],
-) -> tuple[float, float, float]:
-    return _complexity_scores(
-        metrics,
-        _complexity_score_inputs(
-            anchors,
-            blocked_by_current_cycle=blocked_by_current_cycle,
-            indirection_markers=indirection_markers,
-            stateful_markers=stateful_markers,
-            deprecation_markers=deprecation_markers,
-        ),
     )
 
 
