@@ -11,10 +11,6 @@ from datetime import date
 from pathlib import Path
 from typing import TypeVar, cast
 
-from bioetl.infrastructure.config.contract_registry_loader import (
-    DEFAULT_CONTRACT_REGISTRY_PATH,
-    load_contract_registry_payload,
-)
 from memory.graph.sync_pkg._core_ast import (
     _CONTROL_FLOW_NODES as _CONTROL_FLOW_NODES,
 )
@@ -922,6 +918,12 @@ from memory.graph.sync_pkg.contract_policy_config_path import (
 )
 from memory.graph.sync_pkg.contract_policy_config_path import (
     _contract_policy_fields as _contract_policy_fields,
+)
+from memory.graph.sync_pkg.contract_registry_payload import (
+    _contract_registry_payload as _contract_registry_payload,
+)
+from memory.graph.sync_pkg.contract_registry_payload import (
+    _link_contract_dependencies as _link_contract_dependencies,
 )
 from memory.graph.sync_pkg.contract_source_prefixes import (
     _add_published_contract_artifacts as _add_published_contract_artifacts,
@@ -3252,26 +3254,6 @@ def _contract_registry_entries(root: Path) -> dict[str, dict[str, object]]:
         for contract_ref, raw_entry in sorted(_contract_registry_payload(root).items())
         if isinstance(contract_ref, str) and isinstance(raw_entry, dict)
     }
-
-
-def _contract_registry_payload(root: Path) -> dict[object, object]:
-    payload = load_contract_registry_payload(root / DEFAULT_CONTRACT_REGISTRY_PATH)
-    entries = payload.get("entries")
-    return entries if isinstance(entries, dict) else {}
-
-
-def _link_contract_dependencies(
-    snapshot: GraphSnapshot,
-    entry_context: ContractEntryContext,
-    mapping_config: ContractMappingConfig,
-) -> None:
-    _link_contract_source_dependencies(
-        snapshot, entry_context, mapping_config.source_prefixes
-    )
-    _add_contract_policy_config(snapshot, entry_context)
-    _add_published_contract_artifacts(snapshot, entry_context)
-    _link_contract_dependency_modules(snapshot, entry_context, mapping_config)
-    _link_contract_dependency_docs(snapshot, entry_context, mapping_config)
 
 
 def _add_contract_surfaces(
