@@ -249,6 +249,9 @@ from memory.graph.sync_pkg.add_curated_cluster_readme import (
 from memory.graph.sync_pkg.add_curated_cluster_readme import (
     _add_curated_cluster_readme as _add_curated_cluster_readme,
 )
+from memory.graph.sync_pkg.add_curated_doc_source import (
+    _add_curated_doc_source as _add_curated_doc_source,
+)
 from memory.graph.sync_pkg.add_dashboard_surface import (
     _add_curated_quality_gates as _add_curated_quality_gates,
 )
@@ -2170,39 +2173,6 @@ def _add_curated_docs(
 ) -> None:
     for entry in CURATED_DOC_SOURCES:
         _add_curated_doc_source(snapshot, root, project, today, entry)
-
-
-def _add_curated_doc_source(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    entry: dict[str, str],
-) -> None:
-    source_name = entry["name"]
-    source_path = entry["path"]
-    summary = entry["summary"]
-    source_node = snapshot.add_node(
-        "doc_source_surface",
-        source_name,
-        summary=summary,
-        source_path=source_path,
-        source_kind="doc_surface",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    snapshot.add_relation(
-        project, "HAS_DOC_SOURCE_SURFACE", source_node, provenance="curated_docs"
-    )
-    _link_curated_doc_artifact(
-        snapshot,
-        root,
-        source_node,
-        source_path=source_path,
-        summary=summary,
-        today=today,
-    )
 
 
 def _add_decisions_and_risks(
