@@ -8,13 +8,11 @@ import fnmatch
 import itertools
 import json
 import os
-import queue
 import re
 import shutil as shutil  # re-exported via __all__
 import subprocess
 import sys
 import tempfile
-import threading
 import time
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence, Set
 from dataclasses import dataclass
@@ -209,6 +207,18 @@ from memory.graph.sync_pkg._core_models import SnapshotSelection as SnapshotSele
 from memory.graph.sync_pkg._core_models import StorageSurfaceSpec as StorageSurfaceSpec
 from memory.graph.sync_pkg._core_models import SyncApplyOptions as SyncApplyOptions
 from memory.graph.sync_pkg._core_models import _ShapeNormalizer as _ShapeNormalizer
+from memory.graph.sync_pkg.analysis_source import (
+    ANALYSIS_SOURCE_READ_TIMEOUT_SECONDS as ANALYSIS_SOURCE_READ_TIMEOUT_SECONDS,
+)
+from memory.graph.sync_pkg.analysis_source import (
+    _analysis_read_source_text as _analysis_read_source_text,
+)
+from memory.graph.sync_pkg.analysis_source import (
+    _build_surface_relation_indexes as _build_surface_relation_indexes,
+)
+from memory.graph.sync_pkg.analysis_source import (
+    _read_analysis_source_text as _read_analysis_source_text,
+)
 from memory.graph.sync_pkg.apply_anchors import _anchor_count_rows as _anchor_count_rows
 from memory.graph.sync_pkg.apply_anchors import (
     _ensure_targeted_apply_prerequisites as _ensure_targeted_apply_prerequisites,
@@ -592,7 +602,6 @@ if str(DEFAULT_ROOT) not in sys.path:
 DEFAULT_BATCH_SIZE = 20
 DEFAULT_MEMORY_MAPPING_PATH = "src/memory/graph/mappings.yaml"
 LEGACY_MEMORY_MAPPING_PATH = "configs/quality/neo4j_memory_mapping.yaml"
-ANALYSIS_SOURCE_READ_TIMEOUT_SECONDS = 2.0
 INIT_PY = "__init__.py"
 MAIN_PY = "__main__.py"
 GITHUB_WORKFLOWS_PREFIX = f"{GITHUB_DIR}/workflows/"
@@ -1220,70 +1229,6 @@ CURATED_SCRIPT_CLUSTERS: tuple[dict[str, object], ...] = (
         ),
     },
 )
-
-
-def _build_surface_relation_indexes(snapshot: GraphSnapshot) -> SurfaceRelationIndexes:
-    incoming: dict[NodeKey, list[GraphRelation]] = {}
-    outgoing: dict[NodeKey, list[GraphRelation]] = {}
-    declared_children: dict[NodeKey, list[NodeKey]] = {}
-    for relation in snapshot.relations.values():
-        incoming.setdefault(relation.target, []).append(relation)
-        outgoing.setdefault(relation.source, []).append(relation)
-        if relation.relation_type == "DECLARES":
-            declared_children.setdefault(relation.source, []).append(relation.target)
-    return SurfaceRelationIndexes(
-        incoming=incoming,
-        outgoing=outgoing,
-        declared_children=declared_children,
-    )
-
-
-def _analysis_read_source_text(
-    root: Path, relative_path: str, text_cache: dict[str, str]
-) -> str:
-    if relative_path not in text_cache:
-        path = root / relative_path
-        try:
-            text_cache[relative_path] = _read_analysis_source_text(path).casefold()
-        except (OSError, TimeoutError):
-            text_cache[relative_path] = ""
-    return text_cache[relative_path]
-
-
-def _read_analysis_source_text(
-    path: Path,
-    *,
-    timeout_seconds: float = ANALYSIS_SOURCE_READ_TIMEOUT_SECONDS,
-    os_name: str = os.name,
-) -> str:
-    """Read optional source text for marker analysis without blocking Windows runs."""
-    if os_name != "nt":
-        return _read_text(path)
-
-    result: queue.Queue[tuple[str, str | BaseException]] = queue.Queue(maxsize=1)
-
-    def _read() -> None:
-        try:
-            result.put(("ok", _read_text(path)))
-        except (OSError, UnicodeError, ValueError) as exc:  # pragma: no cover
-            result.put(("error", exc))
-
-    thread = threading.Thread(
-        target=_read,
-        name=f"memory-analysis-read:{path.name}",
-        daemon=True,
-    )
-    thread.start()
-    thread.join(timeout_seconds)
-    if thread.is_alive():
-        raise TimeoutError(f"Timed out reading analysis source text: {path}")
-
-    status, payload = result.get_nowait()
-    if status == "error":
-        if isinstance(payload, BaseException):
-            raise payload
-        raise RuntimeError(str(payload))
-    return str(payload)
 
 
 def _analysis_family_for_source_path(
