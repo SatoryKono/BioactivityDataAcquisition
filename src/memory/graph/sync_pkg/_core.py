@@ -1292,6 +1292,9 @@ from memory.graph.sync_pkg.existing_snapshot_nodes import (
 from memory.graph.sync_pkg.existing_snapshot_nodes import (
     _selected_alert_dashboards as _selected_alert_dashboards,
 )
+from memory.graph.sync_pkg.extract_code_duplication_surfaces import (
+    _extract_code_duplication_surfaces as _extract_code_duplication_surfaces,
+)
 from memory.graph.sync_pkg.fast_analysis_scope import (
     _critical_analysis_audit_issues as _critical_analysis_audit_issues,
 )
@@ -3263,49 +3266,6 @@ def _populate_workflow_job_surface(
     _add_job_matrix_variants(snapshot, job_context, matrix_variants)
     _add_job_outputs(snapshot, job_context, job_payload.get("outputs"))
     _process_workflow_steps(snapshot, job_context, job_payload.get("steps"))
-
-
-def _extract_code_duplication_surfaces(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    memory_mapping: dict[str, object],
-) -> None:
-    config = _duplication_analysis_config(memory_mapping)
-    if not bool(config.get("enabled", True)):
-        return
-
-    min_cluster_size, min_ast_nodes = _duplication_cluster_thresholds(config)
-    extraction = DuplicationExtractionContext(
-        snapshot=snapshot,
-        root=root,
-        today=today,
-        config=config,
-    )
-    for module in tuple(snapshot.nodes.values()):
-        if module.key.label != "module_surface":
-            continue
-        _collect_duplication_descriptors_for_module(extraction, module)
-
-    class_method_index = _duplication_class_method_index(
-        extraction.callable_descriptors
-    )
-    _link_duplication_override_relations(
-        snapshot,
-        extraction.class_descriptors,
-        extraction.class_name_index,
-        class_method_index,
-    )
-    _emit_duplication_clusters(
-        snapshot,
-        project,
-        today=today,
-        config=config,
-        callable_descriptors=extraction.callable_descriptors,
-        min_cluster_size=min_cluster_size,
-        min_ast_nodes=min_ast_nodes,
-    )
 
 
 def _add_pipeline_test_edges(
