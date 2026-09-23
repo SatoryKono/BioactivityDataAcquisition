@@ -1304,6 +1304,9 @@ from memory.graph.sync_pkg.link_curated_execution_script import (
 from memory.graph.sync_pkg.link_curated_execution_script import (
     _link_curated_execution_script as _link_curated_execution_script,
 )
+from memory.graph.sync_pkg.link_entity_storage_promotions import (
+    _link_entity_storage_promotions as _link_entity_storage_promotions,
+)
 from memory.graph.sync_pkg.link_relation_backed_structure_for_relat import (
     _link_relation_backed_structure_for_relation as _link_relation_backed_structure_for_relation,
 )
@@ -3271,36 +3274,6 @@ def _add_entity_storage_layer(
             layer_config=layer_config,
         ),
     )
-
-
-def _link_entity_storage_promotions(
-    snapshot: GraphSnapshot,
-    layer_nodes: dict[str, NodeKey],
-    field_nodes_by_layer: dict[str, dict[str, NodeKey]],
-) -> None:
-    bronze_fields = field_nodes_by_layer.get("bronze", {})
-    silver_fields = field_nodes_by_layer.get("silver", {})
-    gold_fields = field_nodes_by_layer.get("gold", {})
-    for (
-        source_name,
-        target_name,
-        source_fields,
-        target_fields,
-    ) in _entity_storage_promotion_pairs(
-        layer_nodes,
-        bronze_fields=bronze_fields,
-        silver_fields=silver_fields,
-        gold_fields=gold_fields,
-    ):
-        _link_storage_layer_promotion(
-            snapshot,
-            layer_nodes[source_name],
-            layer_nodes[target_name],
-            source_fields,
-            target_fields,
-        )
-    if "silver" in layer_nodes and "gold" in layer_nodes:
-        _classify_projected_storage_fields(snapshot, silver_fields, gold_fields)
 
 
 def _add_storage_data_surfaces(
