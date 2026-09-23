@@ -1061,6 +1061,12 @@ from memory.graph.sync_pkg.entity_config_identity import (
 from memory.graph.sync_pkg.entity_config_identity import (
     _entity_config_identity as _entity_config_identity,
 )
+from memory.graph.sync_pkg.entity_config_paths import (
+    _add_entity_config_surface as _add_entity_config_surface,
+)
+from memory.graph.sync_pkg.entity_config_paths import (
+    _entity_config_paths as _entity_config_paths,
+)
 from memory.graph.sync_pkg.entity_pipeline_identity import (
     _add_entity_pipeline_surface as _add_entity_pipeline_surface,
 )
@@ -2414,50 +2420,6 @@ def _add_entity_config_surfaces(
             entity_nodes=entity_nodes,
         )
     return entity_nodes
-
-
-def _entity_config_paths(entities_root: Path) -> tuple[Path, ...]:
-    return tuple(sorted(entities_root.rglob(YAML_FILE_GLOB)))
-
-
-def _add_entity_config_surface(
-    snapshot: GraphSnapshot,
-    root: Path,
-    today: str,
-    entity_path: Path,
-    *,
-    provider_nodes: dict[str, NodeKey],
-    entity_nodes: dict[str, NodeKey],
-) -> None:
-    payload = _read_yaml(entity_path)
-    provider_name, entity_name, node_name, summary = _entity_config_identity(
-        entity_path, payload
-    )
-    entity = snapshot.add_node(
-        "entity_config",
-        node_name,
-        summary=summary,
-        source_path=_rel_path(root, entity_path),
-        source_kind="entity_config",
-        provider=provider_name,
-        entity=entity_name,
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    entity_nodes[node_name] = entity
-    provider = provider_nodes.get(provider_name)
-    if provider is not None:
-        snapshot.add_relation(provider, "DEFINES", entity, provenance="entity_config")
-    _link_config_artifact(
-        snapshot,
-        entity,
-        path=_rel_path(root, entity_path),
-        summary=f"Entity config for `{provider_name}/{entity_name}`.",
-        source_kind="entity_config",
-        today=today,
-        provenance="entity_config",
-    )
 
 
 def _add_policy_surfaces(
