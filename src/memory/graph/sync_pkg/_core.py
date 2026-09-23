@@ -493,6 +493,12 @@ from memory.graph.sync_pkg.alert_rule_file_payload import (
 from memory.graph.sync_pkg.alert_rule_file_payload import (
     _link_workflow_job_reusable_target as _link_workflow_job_reusable_target,
 )
+from memory.graph.sync_pkg.alert_rules_paths import (
+    _alert_rules_paths as _alert_rules_paths,
+)
+from memory.graph.sync_pkg.alert_rules_paths import (
+    _alert_surface_context as _alert_surface_context,
+)
 from memory.graph.sync_pkg.alert_runbook_context import (
     _add_pipeline_operational_edges as _add_pipeline_operational_edges,
 )
@@ -3237,29 +3243,6 @@ def _add_alert_surfaces(
             target_context=target_context,
             memory_mapping=memory_mapping,
         )
-
-
-def _alert_rules_paths(rules_root: Path) -> tuple[Path, ...]:
-    return tuple(sorted(rules_root.glob("*.y*ml")))
-
-
-def _alert_surface_context(
-    snapshot: GraphSnapshot,
-    root: Path,
-    *,
-    pipeline_nodes: dict[str, NodeKey],
-    contract_nodes: dict[str, NodeKey],
-    memory_mapping: dict[str, object],
-) -> tuple[dict[NodeKey, set[str]], AlertTargetContext]:
-    return (
-        _dashboard_metric_index(root),
-        _alert_target_context(
-            snapshot,
-            pipeline_nodes=pipeline_nodes,
-            contract_nodes=contract_nodes,
-            memory_mapping=memory_mapping,
-        ),
-    )
 
 
 if __name__ == "__main__":
