@@ -165,7 +165,7 @@ def _saved_run(p: dict[int, dict]) -> None:
     identity_custom["cellOptions"]["wrapText"] = True
     p[9451]["options"]["footer"]["enablePagination"] = False
     p[9452]["options"]["footer"]["enablePagination"] = True
-    _stack(p[9450], {9451: 12, 9452: 6})
+    _stack(p[9450], {9451: 12, 9452: 8})
 
 
 def _overview(p: dict[int, dict]) -> None:
