@@ -919,6 +919,12 @@ from memory.graph.sync_pkg.contract_policy_config_path import (
 from memory.graph.sync_pkg.contract_policy_config_path import (
     _contract_policy_fields as _contract_policy_fields,
 )
+from memory.graph.sync_pkg.contract_registry_entries import (
+    _add_contract_surfaces as _add_contract_surfaces,
+)
+from memory.graph.sync_pkg.contract_registry_entries import (
+    _contract_registry_entries as _contract_registry_entries,
+)
 from memory.graph.sync_pkg.contract_registry_payload import (
     _contract_registry_payload as _contract_registry_payload,
 )
@@ -3249,46 +3255,6 @@ def _populate_workflow_job_surface(
     _add_job_matrix_variants(snapshot, job_context, matrix_variants)
     _add_job_outputs(snapshot, job_context, job_payload.get("outputs"))
     _process_workflow_steps(snapshot, job_context, job_payload.get("steps"))
-
-
-def _contract_registry_entries(root: Path) -> dict[str, dict[str, object]]:
-    return {
-        contract_ref: raw_entry
-        for contract_ref, raw_entry in sorted(_contract_registry_payload(root).items())
-        if isinstance(contract_ref, str) and isinstance(raw_entry, dict)
-    }
-
-
-def _add_contract_surfaces(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    memory_mapping: dict[str, object],
-) -> dict[str, NodeKey]:
-    registry_artifact = _add_contract_registry_artifact(snapshot, root, today)
-    if registry_artifact is None:
-        return {}
-    entries = _contract_registry_entries(root)
-    if not entries:
-        return {}
-    mapping_config = _contract_mapping_config(memory_mapping)
-
-    contract_nodes: dict[str, NodeKey] = {}
-    for contract_ref, raw_entry in entries.items():
-        _register_contract_entry(
-            snapshot,
-            root,
-            project,
-            registry_artifact,
-            contract_ref=contract_ref,
-            raw_entry=raw_entry,
-            today=today,
-            mapping_config=mapping_config,
-            contract_nodes=contract_nodes,
-        )
-
-    return contract_nodes
 
 
 def _extract_code_duplication_surfaces(
