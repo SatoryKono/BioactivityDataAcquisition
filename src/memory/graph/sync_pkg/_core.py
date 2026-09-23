@@ -688,6 +688,15 @@ from memory.graph.sync_pkg.composite_seed_storage_ref import (
 from memory.graph.sync_pkg.composite_seed_storage_ref import (
     _link_composite_seed_surface as _link_composite_seed_surface,
 )
+from memory.graph.sync_pkg.contract_mapping_values import (
+    _add_contract_policy_config as _add_contract_policy_config,
+)
+from memory.graph.sync_pkg.contract_mapping_values import (
+    _contract_mapping_values as _contract_mapping_values,
+)
+from memory.graph.sync_pkg.contract_mapping_values import (
+    _link_contract_source_dependencies as _link_contract_source_dependencies,
+)
 from memory.graph.sync_pkg.contract_policy_config_path import (
     _add_contract_policy_artifact as _add_contract_policy_artifact,
 )
@@ -4845,48 +4854,6 @@ def _contract_source_prefixes(contracts_mapping: dict[str, object]) -> tuple[str
             "bioetl.domain.contracts.gold",
             "bioetl.domain.schemas",
         ]
-    )
-
-
-def _contract_mapping_values(
-    contracts_mapping: dict[str, object],
-    key: str,
-) -> list[str]:
-    return _as_string_list(contracts_mapping.get(key))
-
-
-def _link_contract_source_dependencies(
-    snapshot: GraphSnapshot,
-    context: ContractEntryContext,
-    source_prefixes: tuple[str, ...],
-) -> None:
-    resolved = _contract_source_resolved_path(context)
-    if resolved is None:
-        return
-    _link_contract_source_module(snapshot, context, resolved)
-    _link_contract_imported_modules(snapshot, context, resolved, source_prefixes)
-    _update_contract_schema_classes(snapshot, context, resolved)
-
-
-def _add_contract_policy_config(
-    snapshot: GraphSnapshot, context: ContractEntryContext
-) -> None:
-    contract_config_path = _contract_policy_config_path(context)
-    if not contract_config_path.is_file():
-        return
-    contract_config = _read_yaml(contract_config_path)
-    snapshot.add_node(
-        "contract_surface",
-        context.contract_ref,
-        **_contract_policy_fields(contract_config),
-    )
-    artifact = _add_contract_policy_artifact(
-        snapshot,
-        context=context,
-        contract_config_path=contract_config_path,
-    )
-    snapshot.add_relation(
-        context.contract, "BACKED_BY", artifact, provenance="impact_contracts"
     )
 
 
