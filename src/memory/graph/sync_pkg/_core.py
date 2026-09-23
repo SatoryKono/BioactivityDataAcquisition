@@ -1336,6 +1336,9 @@ from memory.graph.sync_pkg.entity_config_paths import (
 from memory.graph.sync_pkg.entity_config_paths import (
     _entity_config_paths as _entity_config_paths,
 )
+from memory.graph.sync_pkg.entity_pipeline_contract_target import (
+    _entity_pipeline_contract_target as _entity_pipeline_contract_target,
+)
 from memory.graph.sync_pkg.entity_pipeline_identity import (
     _add_entity_pipeline_surface as _add_entity_pipeline_surface,
 )
@@ -3128,23 +3131,6 @@ def _entity_pipeline_contract_tests(
         ]
         if target is not None
     )
-
-
-def _entity_pipeline_contract_target(
-    entity_pipeline_index: dict[tuple[str, str], NodeKey],
-    contract_ref: object,
-    raw_tests: object,
-) -> tuple[NodeKey, tuple[str, ...]] | None:
-    contract_identity = _contract_ref_identity(contract_ref)
-    if contract_identity is None:
-        return None
-    pipeline_key = entity_pipeline_index.get(contract_identity)
-    if pipeline_key is None:
-        return None
-    test_paths = tuple(_as_string_list(raw_tests))
-    if not test_paths:
-        return None
-    return pipeline_key, test_paths
 
 
 if __name__ == "__main__":
