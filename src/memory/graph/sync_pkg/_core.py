@@ -211,6 +211,9 @@ from memory.graph.sync_pkg.add_adr_decision_node import (
 from memory.graph.sync_pkg.add_alert_rule_group_surfaces import (
     _add_alert_rule_group_surfaces as _add_alert_rule_group_surfaces,
 )
+from memory.graph.sync_pkg.add_ci_workflow_graph import (
+    _add_ci_workflow_graph as _add_ci_workflow_graph,
+)
 from memory.graph.sync_pkg.add_claim_target_relation import (
     _add_claim_fallback_target as _add_claim_fallback_target,
 )
@@ -2874,33 +2877,6 @@ def _run_impact_analysis_passes(
     )
     _add_pipeline_operational_edges(snapshot, pipeline_nodes, memory_mapping)
     _extract_code_duplication_surfaces(snapshot, root, project, today, memory_mapping)
-
-
-def _add_ci_workflow_graph(
-    snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str
-) -> None:
-    workflows_root = root / GITHUB_DIR / "workflows"
-    if not workflows_root.is_dir():
-        return
-
-    workflow_files = _workflow_graph_files(workflows_root)
-    workflow_name_by_relative_path = {
-        _rel_path(root, workflow_path): workflow_path.stem
-        for workflow_path in workflow_files
-    }
-    workflow_nodes: dict[str, NodeKey] = {}
-    job_nodes: dict[tuple[str, str], NodeKey] = {}
-    for workflow_path in workflow_files:
-        _process_workflow_file(
-            snapshot,
-            root,
-            project,
-            today,
-            workflow_path,
-            workflow_nodes=workflow_nodes,
-            workflow_name_by_relative_path=workflow_name_by_relative_path,
-            job_nodes=job_nodes,
-        )
 
 
 def _add_pipeline_test_edges(
