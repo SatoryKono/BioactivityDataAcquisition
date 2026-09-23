@@ -318,6 +318,12 @@ from memory.graph.sync_pkg.add_secret_requirements import (
 from memory.graph.sync_pkg.add_secret_requirements import (
     _add_workflow_outputs as _add_workflow_outputs,
 )
+from memory.graph.sync_pkg.add_test_suite_surface import (
+    _add_test_artifact_surface as _add_test_artifact_surface,
+)
+from memory.graph.sync_pkg.add_test_suite_surface import (
+    _add_test_suite_surface as _add_test_suite_surface,
+)
 from memory.graph.sync_pkg.adr_constraint_candidates import (
     _adr_constraint_candidates as _adr_constraint_candidates,
 )
@@ -2495,59 +2501,6 @@ def _add_test_graph(
 
     for test_path in sorted(tests_root.rglob("test_*.py")):
         _add_test_artifact_surface(snapshot, root, today, test_path)
-
-
-def _add_test_suite_surface(
-    snapshot: GraphSnapshot,
-    project: NodeKey,
-    today: str,
-    *,
-    suite_dir: str,
-    suite_name: str,
-) -> None:
-    suite = snapshot.add_node(
-        "test_surface",
-        suite_name,
-        summary=f"`tests/{suite_dir}/` coverage surface.",
-        source_path=f"tests/{suite_dir}",
-        source_kind="test_surface",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    snapshot.add_relation(project, "HAS_TEST_SURFACE", suite, provenance="test_graph")
-
-
-def _add_test_artifact_surface(
-    snapshot: GraphSnapshot,
-    root: Path,
-    today: str,
-    test_path: Path,
-) -> None:
-    relative_path = _rel_path(root, test_path)
-    parts = Path(relative_path).parts
-    suite_name = _test_suite_name(parts)
-    if suite_name is None:
-        return
-    suite_dir = parts[1]
-    artifact = snapshot.add_node(
-        "test_artifact",
-        relative_path,
-        summary=f"Test artifact `{relative_path}`.",
-        source_path=relative_path,
-        source_kind="test_artifact",
-        suite=suite_dir,
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    snapshot.add_relation(
-        NodeKey("test_surface", suite_name),
-        "CONTAINS",
-        artifact,
-        provenance="test_graph",
-    )
-    _link_test_artifact_scope(snapshot, artifact, parts)
 
 
 def _add_policy_surfaces(
