@@ -243,6 +243,12 @@ from memory.graph.sync_pkg.add_dashboard_surface import (
 from memory.graph.sync_pkg.add_dashboard_surface import (
     _link_execution_gate as _link_execution_gate,
 )
+from memory.graph.sync_pkg.add_duplication_callable_surface import (
+    _add_duplication_callable_surface as _add_duplication_callable_surface,
+)
+from memory.graph.sync_pkg.add_duplication_callable_surface import (
+    _duplication_callable_descriptor as _duplication_callable_descriptor,
+)
 from memory.graph.sync_pkg.add_secret_requirements import (
     _add_secret_requirements as _add_secret_requirements,
 )
@@ -6404,68 +6410,6 @@ def _register_duplication_function_surface(
         callable_name=node.name,
         parent_class=None,
         surface_kind="function_surface",
-    )
-
-
-def _add_duplication_callable_surface(
-    context: DuplicationExtractionContext,
-    *,
-    relative_path: str,
-    family: DuplicateFamilyConfig,
-    node: ast.FunctionDef | ast.AsyncFunctionDef,
-    surface_label: str,
-    source_kind: str,
-    summary: str,
-    surface_name: str,
-    parent_class: str | None = None,
-) -> NodeKey:
-    return context.snapshot.add_node(
-        surface_label,
-        surface_name,
-        summary=summary,
-        source_path=relative_path,
-        source_kind=source_kind,
-        family_name=family.name,
-        package_family=family.package_family,
-        callable_name=node.name,
-        parent_class=parent_class,
-        signature_hash=_signature_hash(node),
-        ast_shape_hash=_normalized_callable_hash(node),
-        ast_node_count=_callable_ast_node_count(node),
-        branch_count=_callable_branch_count(node),
-        nesting_depth=_callable_max_nesting_depth(node),
-        call_count=_callable_call_count(node),
-        helper_call_count=_callable_helper_call_count(node),
-        semantic_tags=list(_semantic_tags(relative_path, node.name)),
-        last_verified=context.today,
-        ingest_wave="repo_sync_v1",
-        confidence="medium",
-    )
-
-
-def _duplication_callable_descriptor(
-    context: DuplicationExtractionContext,
-    node_key: NodeKey,
-    *,
-    family: DuplicateFamilyConfig,
-    relative_path: str,
-    callable_name: str,
-    parent_class: str | None,
-    surface_kind: str,
-) -> CallableDescriptor:
-    callable_node = context.snapshot.nodes[node_key]
-    return CallableDescriptor(
-        node_key=node_key,
-        family_name=family.name,
-        package_family=family.package_family,
-        source_path=relative_path,
-        callable_name=callable_name,
-        parent_class=parent_class,
-        surface_kind=surface_kind,
-        ast_shape_hash=str(callable_node.properties["ast_shape_hash"]),
-        signature_hash=str(callable_node.properties["signature_hash"]),
-        ast_node_count=_coerce_int(callable_node.properties["ast_node_count"]),
-        semantic_tags=tuple(_semantic_tags(relative_path, callable_name)),
     )
 
 
