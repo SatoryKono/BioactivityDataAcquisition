@@ -1299,6 +1299,15 @@ from memory.graph.sync_pkg.shard_filters import (
 from memory.graph.sync_pkg.shard_filters import RelationSpec as RelationSpec
 from memory.graph.sync_pkg.shard_filters import ShardFilter as ShardFilter
 from memory.graph.sync_pkg.shard_filters import ShardFilterSpec as ShardFilterSpec
+from memory.graph.sync_pkg.skip_entity_storage_layer import (
+    _create_entity_storage_layer_surface as _create_entity_storage_layer_surface,
+)
+from memory.graph.sync_pkg.skip_entity_storage_layer import (
+    _link_entity_storage_layer_backing as _link_entity_storage_layer_backing,
+)
+from memory.graph.sync_pkg.skip_entity_storage_layer import (
+    _skip_entity_storage_layer as _skip_entity_storage_layer,
+)
 from memory.graph.sync_pkg.snapshot_filters import (
     COMPLEXITY_NODE_LABELS as COMPLEXITY_NODE_LABELS,
 )
@@ -3414,77 +3423,6 @@ def _add_entity_storage_layer(
             layer_config=layer_config,
         ),
     )
-
-
-def _skip_entity_storage_layer(
-    layer_name: str, layer_config: dict[str, object]
-) -> bool:
-    return layer_name == "gold" and not bool(layer_config.get("enabled", True))
-
-
-def _create_entity_storage_layer_surface(
-    snapshot: GraphSnapshot,
-    project: NodeKey,
-    context: EntityPipelineContext,
-    payload: dict[str, object],
-    *,
-    scope: EntityScope,
-    layer_name: str,
-    layer_config: dict[str, object],
-) -> NodeKey:
-    storage_ref = f"{layer_name}/{context.provider_name}/{context.entity_name}"
-    return _add_storage_surface(
-        snapshot,
-        project,
-        StorageSurfaceSpec(
-            ref=storage_ref,
-            summary=f"{layer_name.title()} storage surface for `{context.pipeline_name}`.",
-            layer=layer_name,
-            today=context.today,
-            storage_kind="entity_layer_output",
-            scope=scope,
-            format_name=str(layer_config.get("format"))
-            if layer_config.get("format") is not None
-            else None,
-            mode=str(layer_config.get("mode"))
-            if layer_config.get("mode") is not None
-            else None,
-            enabled=bool(layer_config.get("enabled", True)),
-            retention_days=context.retention_days,
-            config_version=context.config_version,
-            quality_version=context.quality_version,
-            partition_by=_normalized_text_list(layer_config.get("partition_by")),
-            sort_by=_normalized_text_list(layer_config.get("sort_by")),
-            on_schema_mismatch=_optional_text(layer_config.get("on_schema_mismatch")),
-            versioning_mode=_optional_text(layer_config.get("mode")),
-            semantic_properties={
-                **_scd_config_columns(layer_config),
-                **_storage_schema_properties(payload, layer_name=layer_name),
-            },
-        ),
-    )
-
-
-def _link_entity_storage_layer_backing(
-    snapshot: GraphSnapshot,
-    context: EntityPipelineContext,
-    surface: NodeKey,
-) -> None:
-    if context.pipeline_key in snapshot.nodes:
-        snapshot.add_relation(
-            context.pipeline_key, "WRITES_TO", surface, provenance="storage_surfaces"
-        )
-    if context.entity_key in snapshot.nodes:
-        snapshot.add_relation(
-            context.entity_key, "WRITES_TO", surface, provenance="storage_surfaces"
-        )
-    if context.config_artifact in snapshot.nodes:
-        snapshot.add_relation(
-            surface,
-            "DEFINED_BY",
-            context.config_artifact,
-            provenance="storage_surfaces",
-        )
 
 
 def _link_entity_storage_promotions(
