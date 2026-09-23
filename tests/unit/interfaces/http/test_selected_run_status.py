@@ -434,6 +434,58 @@ async def test_current_telemetry_is_not_consulted(tmp_path, monkeypatch, current
     host._run_ledger_port.list_entries_by_run_id.assert_not_called()
 
 
+@pytest.mark.parametrize(
+    "event", ["run_started", "run_finished", "run_failed", "run_shutdown"]
+)
+async def test_unfinalized_run_presentation_matches_ledger(
+    tmp_path, monkeypatch, event
+):
+    """Grafana must see the same execution and heartbeat state as the API."""
+    from types import SimpleNamespace
+
+    monkeypatch.setattr(
+        "bioetl.interfaces.http.run_report_ops._effective_root", lambda root: tmp_path
+    )
+    host = MagicMock()
+    host._read_required_param.side_effect = lambda q, key: q[key]
+    host._read_optional_param.side_effect = lambda q, key: q.get(key)
+    host._forensic_endpoint_limiter = asyncio.Semaphore(2)
+    host._send_payload_response = AsyncMock()
+    host._run_manifest_port.get_by_run_id.return_value = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        manifest_id="m",
+        workflow_name=None,
+        run_type=SimpleNamespace(value="incremental"),
+    )
+    host._run_ledger_port.list_entries_by_run_id.return_value = [
+        SimpleNamespace(
+            manifest_id="m",
+            event_type=event,
+            occurred_at=datetime(2026, 1, 1, tzinfo=UTC),
+        )
+    ]
+    await handle_selected_run_status(
+        host,
+        MagicMock(),
+        {
+            "pipeline": "chembl_activity",
+            "run_id": "00000000-0000-0000-0000-000000000001",
+        },
+    )
+    payload = host._send_payload_response.call_args.args[2]
+    execution = "RUNNING" if event == "run_started" else "TERMINAL"
+    assert payload["execution_state"] == execution
+    for field in ("summary", "presentation_summary", "domains", "presentation_domains"):
+        for row in payload[field]:
+            assert row["execution_state"] == execution
+            assert row["heartbeat_now"] == "STALE"
+            assert row["checks_verdict"] == "UNKNOWN"
+            assert row["evidence_completeness"] == "INCOMPLETE"
+            assert "presentation_summary" not in row
+    for field in ("trust", "presentation_trust"):
+        assert payload[field][0]["processing_status"] == execution
+
+
 async def test_late_previous_request_keeps_its_own_identity(tmp_path, monkeypatch):
     if (
         Path("/proc/version").exists()

@@ -371,13 +371,17 @@ async def handle_selected_run_status(
                 for row in cast(list[dict[str, object]], result["domains"]):
                     row.update(active)
                     row["run_verdict"] = active["verdict"]
-                result["summary"] = [
-                    {
-                        key: value
-                        for key, value in result.items()
-                        if key not in {"summary", "domains", "rows", "trust"}
-                    }
-                ]
+                for field in ("summary", "presentation_summary"):
+                    for row in cast(list[dict[str, object]], result[field]):
+                        row.update(active)
+                for field in ("trust", "presentation_trust"):
+                    for row in cast(list[dict[str, object]], result[field]):
+                        row["processing_status"] = active.get(
+                            "execution_state", "UNKNOWN"
+                        )
+                result["presentation_domains"] = presentation_rows(
+                    cast(list[dict[str, object]], result["domains"])
+                )
         if result.get("execution_state") not in {None, "UNKNOWN"} and not scope_matches(
             result, query
         ):
