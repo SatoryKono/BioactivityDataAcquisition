@@ -661,6 +661,18 @@ from memory.graph.sync_pkg.composite_seed_storage_ref import (
 from memory.graph.sync_pkg.composite_seed_storage_ref import (
     _link_composite_seed_surface as _link_composite_seed_surface,
 )
+from memory.graph.sync_pkg.contract_source_resolved_path import (
+    _contract_source_resolved_path as _contract_source_resolved_path,
+)
+from memory.graph.sync_pkg.contract_source_resolved_path import (
+    _link_contract_imported_modules as _link_contract_imported_modules,
+)
+from memory.graph.sync_pkg.contract_source_resolved_path import (
+    _link_contract_source_module as _link_contract_source_module,
+)
+from memory.graph.sync_pkg.contract_source_resolved_path import (
+    _update_contract_schema_classes as _update_contract_schema_classes,
+)
 from memory.graph.sync_pkg.create_workflow_job_surface import (
     _add_workflow_action_surface as _add_workflow_action_surface,
 )
@@ -5310,54 +5322,6 @@ def _link_contract_source_dependencies(
     _link_contract_source_module(snapshot, context, resolved)
     _link_contract_imported_modules(snapshot, context, resolved, source_prefixes)
     _update_contract_schema_classes(snapshot, context, resolved)
-
-
-def _contract_source_resolved_path(context: ContractEntryContext) -> Path | None:
-    source_path = context.raw_entry.get("source_path")
-    if not isinstance(source_path, str):
-        return None
-    return _resolve_repo_path(context.root, context.registry_path, source_path)
-
-
-def _update_contract_schema_classes(
-    snapshot: GraphSnapshot,
-    context: ContractEntryContext,
-    resolved: Path,
-) -> None:
-    schema_classes = _dataframe_model_class_names(resolved)
-    if schema_classes:
-        snapshot.add_node(
-            "contract_surface", context.contract_ref, schema_classes=schema_classes
-        )
-
-
-def _link_contract_source_module(
-    snapshot: GraphSnapshot,
-    context: ContractEntryContext,
-    resolved: Path,
-) -> None:
-    module_key = NodeKey("module_surface", _rel_path(context.root, resolved))
-    if module_key in snapshot.nodes:
-        snapshot.add_relation(
-            context.contract, "BACKED_BY", module_key, provenance="impact_contracts"
-        )
-
-
-def _link_contract_imported_modules(
-    snapshot: GraphSnapshot,
-    context: ContractEntryContext,
-    resolved: Path,
-    source_prefixes: tuple[str, ...],
-) -> None:
-    for imported_module in sorted(_imported_repo_modules(resolved, source_prefixes)):
-        dependency_key = _resolve_python_module_surface(context.root, imported_module)
-        if dependency_key is not None and dependency_key in snapshot.nodes:
-            snapshot.add_relation(
-                context.contract,
-                "DEPENDS_ON",
-                dependency_key,
-                provenance="impact_contracts",
-            )
 
 
 def _add_contract_policy_config(
