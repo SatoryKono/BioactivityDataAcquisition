@@ -101,12 +101,12 @@ PROVEN P0/P1, без regression и без падения `integral_score` / cate
 | `INCLUDE_PIPELINE` | `true` (arch CI, import-linter, architecture tests) |
 | `LAYERS` | `all` or CSV of hexagonal layers |
 | `SCORE_SOURCE` | `live+committed` \| `committed` \| `live` |
-| `ALLOW_ISSUE_WRITE` | `false` (operator full-run: `true`) |
-| `ALLOW_PUSH` | `false` (operator full-run: `true`) |
-| `ALLOW_MERGE` | `false` (operator full-run: `true`) |
-| `ALLOW_CLOSE` | `false` (operator full-run: `true`) |
+| `ALLOW_ISSUE_WRITE` | `true` (operator full-run: `true`) |
+| `ALLOW_PUSH` | `true` (operator full-run: `true`) |
+| `ALLOW_MERGE` | `true` (operator full-run: `true`) |
+| `ALLOW_CLOSE` | `true` (operator full-run: `true`) |
 | `MAX_ISSUES_PER_ITERATION` | `5` |
-| `MAX_WAVES_PER_ITERATION` | `3` |
+| `MAX_WAVES_PER_ITERATION` | `30` |
 | `BASE_BRANCH` | `main` |
 | `REPO` | `SatoryKono/BioactivityDataAcquisition` |
 | `WORK_BRANCH` | `fix/architecture-audit-cycle-<shortsha>` |

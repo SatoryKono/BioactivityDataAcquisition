@@ -56,7 +56,7 @@ def test_overview_paginates_tracks_without_limiting_evidence():
         assert not any(t.get("id") == "limit" for t in panel.get("transformations", []))
 
 
-def test_short_run_link_uses_full_hidden_identity():
+def test_run_cell_inspection_and_links_use_full_identity():
     dashboard = json.loads(
         (ROOT / "grafana/dashboards/bioetl-run-explorer-v1.json").read_text(
             encoding="utf-8"
@@ -68,7 +68,8 @@ def test_short_run_link_uses_full_hidden_identity():
         for t in panel["transformations"]
         if t["id"] == "filterFieldsByName"
     )
-    assert {"run_id", "run_label"} <= set(fields)
+    assert "run_id" in fields
+    assert "run_label" not in fields
     override = next(
         o
         for o in panel["fieldConfig"]["overrides"]
@@ -78,10 +79,24 @@ def test_short_run_link_uses_full_hidden_identity():
         prop["value"] for prop in override["properties"] if prop["id"] == "links"
     )
     assert all(
-        "var-run_id=${__data.fields.run_id:percentencode}" in link["url"]
+        "var-run_id=${__data.fields.Run:percentencode}" in link["url"]
         for link in links
     )
     assert all("${__value.raw}" not in link["url"] for link in links)
+    assert {prop["id"]: prop["value"] for prop in override["properties"]}[
+        "custom.inspect"
+    ] is True
+    organize = next(t["options"] for t in panel["transformations"] if t["id"] == "organize")
+    assert organize["renameByName"]["run_id"] == "Run"
+    rules = {
+        o["matcher"]["options"]: {p["id"]: p["value"] for p in o["properties"]}
+        for o in panel["fieldConfig"]["overrides"]
+    }
+    assert rules["Workflow"]["custom.hidden"] is False
+    for field in ("Pipeline", "Workflow", "Run"):
+        assert "custom.width" not in rules[field]
+    for field in ("Started", "Duration", "Processing", "Trust", "Report"):
+        assert isinstance(rules[field]["custom.width"], int)
 
 
 @pytest.mark.parametrize("stage", ["bronze", "silver", "gold", "quarantined"])

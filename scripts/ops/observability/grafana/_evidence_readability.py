@@ -600,15 +600,15 @@ def _rewrite_run_links(run: dict) -> None:
             link["url"]
             .replace(
                 "var-run_id=${__value.raw}",
-                "var-run_id=${__data.fields.run_id:percentencode}",
+                "var-run_id=${__data.fields.Run:percentencode}",
             )
             .replace(
-                "${__data.fields.Run:percentencode}",
                 "${__data.fields.run_id:percentencode}",
+                "${__data.fields.Run:percentencode}",
             )
         )
         if field == "Run":
-            link["title"] = "Select ${__data.fields.run_id}"
+            link["title"] = "Select ${__data.fields.Run}"
 
 
 def _run_explorer(p: dict[int, dict]) -> None:
@@ -642,14 +642,24 @@ def _run_explorer(p: dict[int, dict]) -> None:
         opts = transform["options"]
         if transform["id"] == "filterFieldsByName":
             names = opts["include"]["names"]
-            if "run_label" not in names:
-                names.append("run_label")
+            names[:] = [name for name in names if name != "run_label"]
         if transform["id"] == "organize":
-            opts["renameByName"].pop("run_id", None)
-            opts["renameByName"]["run_label"] = "Run"
-            opts["indexByName"]["run_label"] = 4
-            opts["indexByName"]["run_id"] = 20
-    _override(run, "run_id", _HIDDEN, True)
+            opts["renameByName"].pop("run_label", None)
+            opts["renameByName"]["run_id"] = "Run"
+            opts["indexByName"].pop("run_label", None)
+            opts["indexByName"]["run_id"] = 4
+    # Inspect value must receive the complete UUID, not the shortened API label.
+    run["fieldConfig"]["overrides"] = [
+        item for item in run["fieldConfig"]["overrides"]
+        if item["matcher"].get("options") != "run_id"
+    ]
+    for item in run["fieldConfig"]["overrides"]:
+        if item["matcher"].get("options") == "^(workflow_id|Workflow)$":
+            item["properties"] = [
+                prop for prop in item["properties"] if prop["id"] != _HIDDEN
+            ]
+    _override(run, "Workflow", _HIDDEN, False)
+    _override(run, "Run", "custom.inspect", True)
     _override(
         run,
         "Report",
@@ -678,11 +688,9 @@ def _first_window_widths(payload: dict, p: dict[int, dict]) -> None:
             3010: {
                 "selected": 28,
                 "Started": 145,
-                "Pipeline": 165,
-                "Run": 115,
                 "Duration": 90,
-                "Trust": 120,
-                "Processing": 90,
+                "Trust": 100,
+                "Processing": 100,
                 "Report": 80,
             }
         },
@@ -695,3 +703,5 @@ def _first_window_widths(payload: dict, p: dict[int, dict]) -> None:
         _table(p[pid], fields)
         if payload.get("uid") == "bioetl-run-explorer-v1" and pid == 3010:
             _override(p[pid], "selected", "custom.minWidth", 28)
+            # Native Grafana Table accepts px or auto, not percentage strings.
+            # These three auto columns share the remaining width equally.
