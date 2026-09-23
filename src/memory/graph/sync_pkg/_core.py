@@ -407,6 +407,12 @@ from memory.graph.sync_pkg.alert_rule_file_payload import (
 from memory.graph.sync_pkg.alert_rule_file_payload import (
     _link_workflow_job_reusable_target as _link_workflow_job_reusable_target,
 )
+from memory.graph.sync_pkg.alert_runbook_context import (
+    _add_pipeline_operational_edges as _add_pipeline_operational_edges,
+)
+from memory.graph.sync_pkg.alert_runbook_context import (
+    _alert_runbook_context as _alert_runbook_context,
+)
 from memory.graph.sync_pkg.alert_runbook_path import (
     _add_alert_runbook_doc as _add_alert_runbook_doc,
 )
@@ -4675,30 +4681,6 @@ def _link_alert_runbook(
         return
     doc = _add_alert_runbook_doc(snapshot, alert_name, runbook_context.runbook, today)
     snapshot.add_relation(alert, "DESCRIBED_IN", doc, provenance="impact_alerts")
-
-
-def _alert_runbook_context(
-    root: Path,
-    annotations: dict[str, object],
-) -> AlertRunbookContext | None:
-    runbook = _alert_runbook_path(root, annotations)
-    if runbook is None:
-        return None
-    return AlertRunbookContext(runbook=runbook)
-
-
-def _add_pipeline_operational_edges(
-    snapshot: GraphSnapshot,
-    pipeline_nodes: dict[str, NodeKey],
-    memory_mapping: dict[str, object],
-) -> None:
-    operational_context = _pipeline_operational_context(memory_mapping)
-    for pipeline in _sorted_pipeline_nodes(pipeline_nodes):
-        _link_pipeline_operational_for_pipeline(
-            snapshot,
-            pipeline,
-            operational_context=operational_context,
-        )
 
 
 if __name__ == "__main__":
