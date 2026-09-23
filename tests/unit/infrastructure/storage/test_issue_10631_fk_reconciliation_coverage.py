@@ -298,7 +298,7 @@ async def test_read_source_rows_skips_missing_silver_table() -> None:
 
 
 @pytest.mark.asyncio
-async def test_read_reference_rows_wraps_missing_table() -> None:
+async def test_read_reference_rows_wraps_missing_table_for_reads_host() -> None:
     host = _ReadsHost(silver_writer=_SilverWriter(missing={"assay"}))
     with pytest.raises(ValueError, match="reference table not found"):
         await read_reference_rows(host, _complete_request(reference_table="assay"))
