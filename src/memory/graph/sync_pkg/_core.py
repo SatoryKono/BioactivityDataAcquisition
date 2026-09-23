@@ -201,6 +201,15 @@ from memory.graph.sync_pkg._core_models import SnapshotSelection as SnapshotSele
 from memory.graph.sync_pkg._core_models import StorageSurfaceSpec as StorageSurfaceSpec
 from memory.graph.sync_pkg._core_models import SyncApplyOptions as SyncApplyOptions
 from memory.graph.sync_pkg._core_models import _ShapeNormalizer as _ShapeNormalizer
+from memory.graph.sync_pkg.add_adapter_impl_surface import (
+    _add_adapter_impl_surface as _add_adapter_impl_surface,
+)
+from memory.graph.sync_pkg.add_adapter_impl_surface import (
+    _add_adapter_module_surface as _add_adapter_module_surface,
+)
+from memory.graph.sync_pkg.add_adapter_impl_surface import (
+    _link_adapter_ports as _link_adapter_ports,
+)
 from memory.graph.sync_pkg.add_cli_command_surface import (
     _add_cli_command_surface as _add_cli_command_surface,
 )
@@ -233,6 +242,15 @@ from memory.graph.sync_pkg.add_dashboard_surface import (
 )
 from memory.graph.sync_pkg.add_dashboard_surface import (
     _link_execution_gate as _link_execution_gate,
+)
+from memory.graph.sync_pkg.add_secret_requirements import (
+    _add_secret_requirements as _add_secret_requirements,
+)
+from memory.graph.sync_pkg.add_secret_requirements import (
+    _add_workflow_output_surface as _add_workflow_output_surface,
+)
+from memory.graph.sync_pkg.add_secret_requirements import (
+    _add_workflow_outputs as _add_workflow_outputs,
 )
 from memory.graph.sync_pkg.alert_targets import (
     _RUNTIME_DIMENSIONS as _RUNTIME_DIMENSIONS,
@@ -4613,94 +4631,6 @@ def _add_workflow_call_entrypoint(
     return workflow_call_entrypoint
 
 
-def _add_secret_requirements(
-    snapshot: GraphSnapshot,
-    owner: NodeKey,
-    secret_names: tuple[str, ...],
-    *,
-    relative_path: str,
-    today: str,
-) -> None:
-    for secret_name in secret_names:
-        secret = snapshot.add_node(
-            "workflow_secret_surface",
-            secret_name,
-            summary=f"GitHub Actions secret usage hint `{secret_name}`.",
-            source_path=relative_path,
-            source_kind="github_actions_secret",
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
-        )
-        snapshot.add_relation(
-            owner, "REQUIRES_SECRET", secret, provenance="workflow_graph"
-        )
-
-
-def _add_workflow_output_surface(
-    snapshot: GraphSnapshot,
-    *,
-    owner: NodeKey,
-    output_name: str,
-    expression: str | None,
-    summary: str,
-    relative_path: str,
-    workflow_name: str,
-    today: str,
-    output_scope: str,
-    job_id: str | None = None,
-) -> None:
-    output = snapshot.add_node(
-        "workflow_output_surface",
-        output_name,
-        summary=summary,
-        source_path=relative_path,
-        source_kind="workflow_output_surface",
-        workflow=workflow_name,
-        job_id=job_id,
-        output_scope=output_scope,
-        output_expression=expression,
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    snapshot.add_relation(owner, "EMITS_OUTPUT", output, provenance="workflow_graph")
-
-
-def _add_workflow_outputs(
-    snapshot: GraphSnapshot,
-    *,
-    owner: NodeKey,
-    workflow_name: str,
-    relative_path: str,
-    today: str,
-    owner_id: str,
-    output_payload: object,
-    scope: str,
-    output_scope: str,
-    summary_template: str,
-    job_id: str | None = None,
-) -> None:
-    for output_name, expression in _workflow_output_specs(
-        workflow_name,
-        owner_id,
-        output_payload,
-        scope=scope,
-    ):
-        _add_workflow_output_surface(
-            snapshot,
-            owner=owner,
-            output_name=output_name,
-            expression=expression,
-            summary=summary_template.format(output_name=output_name),
-            relative_path=relative_path,
-            workflow_name=workflow_name,
-            today=today,
-            output_scope=output_scope,
-            job_id=job_id,
-        )
-
-
 def _workflow_job_surface_metadata(
     job_payload: dict[str, object],
 ) -> tuple[
@@ -6339,91 +6269,6 @@ def _add_adapter_package_impls(
             )
         imported_ports.update(module_ports)
     return imported_ports
-
-
-def _add_adapter_impl_surface(
-    snapshot: GraphSnapshot,
-    root: Path,
-    adapter: NodeKey,
-    module_path: Path,
-    today: str,
-) -> NodeKey:
-    impl_relative_path = _rel_path(root, module_path)
-    impl_surface_name = _python_surface_name(impl_relative_path)
-    impl_node = snapshot.add_node(
-        "adapter_impl_surface",
-        impl_surface_name,
-        summary=f"Concrete adapter implementation `{impl_surface_name}`.",
-        source_path=impl_relative_path,
-        source_kind="adapter_impl_module",
-        adapter_kind="implementation_module",
-        granularity="concrete_module",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    snapshot.add_relation(
-        adapter, "CONTAINS", impl_node, provenance="impact_adapter_impls"
-    )
-    impl_module_key = NodeKey("module_surface", impl_relative_path)
-    if impl_module_key in snapshot.nodes:
-        snapshot.add_relation(
-            impl_node, "BACKED_BY", impl_module_key, provenance="impact_adapter_impls"
-        )
-    return impl_node
-
-
-def _add_adapter_module_surface(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    adapter_family: NodeKey,
-    child: Path,
-    today: str,
-) -> NodeKey:
-    relative_path = _rel_path(root, child)
-    surface_name = _python_surface_name(relative_path)
-    adapter = snapshot.add_node(
-        "adapter_surface",
-        surface_name,
-        summary=f"Immediate adapter module surface `{surface_name}`.",
-        source_path=relative_path,
-        source_kind="adapter_module",
-        adapter_kind="module",
-        granularity="immediate_child",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    snapshot.add_relation(project, "HAS_ADAPTER", adapter, provenance="impact_adapters")
-    if adapter_family in snapshot.nodes:
-        snapshot.add_relation(
-            adapter_family, "CONTAINS", adapter, provenance="impact_adapters"
-        )
-    module_key = NodeKey("module_surface", relative_path)
-    if module_key in snapshot.nodes:
-        snapshot.add_relation(
-            adapter, "BACKED_BY", module_key, provenance="impact_adapters"
-        )
-    return adapter
-
-
-def _link_adapter_ports(
-    snapshot: GraphSnapshot,
-    source: NodeKey,
-    imported_ports: set[str],
-    port_names: set[str],
-    *,
-    provenance: str,
-) -> None:
-    for port_name in sorted(imported_ports):
-        if port_name in port_names:
-            snapshot.add_relation(
-                source,
-                "DEPENDS_ON",
-                NodeKey("port_surface", port_name),
-                provenance=provenance,
-            )
 
 
 def _contract_mapping_config(
