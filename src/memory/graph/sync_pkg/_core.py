@@ -9,7 +9,7 @@ from collections.abc import Callable, Mapping, Set
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
-from typing import TypeVar, cast
+from typing import TypeVar
 
 from memory.graph.sync_pkg._core_ast import (
     _CONTROL_FLOW_NODES as _CONTROL_FLOW_NODES,
@@ -772,6 +772,12 @@ from memory.graph.sync_pkg.complexity_candidate_anchor_slices import (
 )
 from memory.graph.sync_pkg.complexity_candidate_anchor_slices import (
     _link_complexity_candidate as _link_complexity_candidate,
+)
+from memory.graph.sync_pkg.complexity_candidate_context import (
+    _complexity_candidate_context as _complexity_candidate_context,
+)
+from memory.graph.sync_pkg.complexity_candidate_context import (
+    _emit_complexity_candidate as _emit_complexity_candidate,
 )
 from memory.graph.sync_pkg.complexity_marker_buckets import (
     _classify_complexity_candidate as _classify_complexity_candidate,
@@ -3398,57 +3404,6 @@ def _add_complexity_analysis_surfaces(
         _emit_complexity_candidate(
             snapshot, project, today, config, node, candidate_payload
         )
-
-
-def _complexity_candidate_context(
-    payload: dict[str, object],
-    *,
-    config: ComplexityAnalysisConfig,
-) -> ComplexityCandidateContext:
-    anchors = cast("SurfaceAnchorSets", payload["anchors"])
-    runtime_anchors, config_anchors, doc_anchors, test_anchors = (
-        _complexity_candidate_anchor_slices(
-            anchors,
-            blocker_anchor_limit=config.blocker_anchor_limit,
-        )
-    )
-    return ComplexityCandidateContext(
-        anchors=anchors,
-        metrics=cast("SurfaceComplexityMetrics", payload["metrics"]),
-        runtime_anchors=runtime_anchors,
-        config_anchors=config_anchors,
-        doc_anchors=doc_anchors,
-        test_anchors=test_anchors,
-        blocked_by_current_cycle=bool(payload["blocked_by_current_cycle"]),
-        simplification_score=_coerce_float(payload["simplification_score"]),
-        classification=str(payload["classification"]),
-    )
-
-
-def _emit_complexity_candidate(
-    snapshot: GraphSnapshot,
-    project: NodeKey,
-    today: str,
-    config: ComplexityAnalysisConfig,
-    node: GraphNode,
-    payload: dict[str, object],
-) -> None:
-    context = _complexity_candidate_context(payload, config=config)
-    candidate = _add_complexity_candidate_node(
-        snapshot,
-        today,
-        config,
-        node,
-        payload,
-        context=context,
-    )
-    _link_complexity_candidate(
-        snapshot,
-        project,
-        candidate,
-        node.key,
-        context=context,
-    )
 
 
 def _add_pipeline_test_edges(
