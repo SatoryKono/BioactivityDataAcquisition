@@ -1610,6 +1610,9 @@ from memory.graph.sync_pkg.link_duplication_override_relations import (
 from memory.graph.sync_pkg.link_entity_storage_promotions import (
     _link_entity_storage_promotions as _link_entity_storage_promotions,
 )
+from memory.graph.sync_pkg.link_pipeline_test_paths import (
+    _link_pipeline_test_paths as _link_pipeline_test_paths,
+)
 from memory.graph.sync_pkg.link_relation_backed_structure_for_relat import (
     _link_relation_backed_structure_for_relation as _link_relation_backed_structure_for_relation,
 )
@@ -3270,17 +3273,6 @@ def _link_pipeline_test_targets(
             test_paths,
             provenance=provenance,
         )
-
-
-def _link_pipeline_test_paths(
-    link_test_target: Callable[[NodeKey, str, str], None],
-    pipeline_key: NodeKey,
-    test_paths: tuple[str, ...],
-    *,
-    provenance: str,
-) -> None:
-    for test_path in test_paths:
-        link_test_target(pipeline_key, test_path, provenance)
 
 
 def _link_provider_suite_targets(
