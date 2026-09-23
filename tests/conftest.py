@@ -1042,13 +1042,14 @@ def _vcr_marker(request: pytest.FixtureRequest) -> None:
         elif is_strict_lfs_pointer_blocked_cassette(cassette_path):
             pytest.fail(
                 "Replay-critical VCR cassette is an unresolved Git LFS pointer; "
-                f"run git lfs pull before replaying this cassette: {cassette_path}",
+                "store the full YAML in git before replaying this cassette: "
+                f"{cassette_path}",
                 pytrace=False,
             )
         else:
             pytest.skip(
-                "VCR cassette is a Git LFS pointer; run git lfs pull before replaying "
-                f"this cassette: {cassette_path}"
+                "VCR cassette is a Git LFS pointer; store the full YAML in git "
+                f"before replaying this cassette: {cassette_path}"
             )
     elif (
         cassette_path is not None
@@ -1187,13 +1188,14 @@ def _manual_vcr_marker_runtime(
         elif is_strict_lfs_pointer_blocked_cassette(cassette_path):
             pytest.fail(
                 "Replay-critical VCR cassette is an unresolved Git LFS pointer; "
-                f"run git lfs pull before replaying this cassette: {cassette_path}",
+                "store the full YAML in git before replaying this cassette: "
+                f"{cassette_path}",
                 pytrace=False,
             )
         else:
             pytest.skip(
-                "VCR cassette is a Git LFS pointer; run git lfs pull before replaying "
-                f"this cassette: {cassette_path}"
+                "VCR cassette is a Git LFS pointer; store the full YAML in git "
+                f"before replaying this cassette: {cassette_path}"
             )
 
     vcr = request.getfixturevalue("vcr")

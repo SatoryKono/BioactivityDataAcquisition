@@ -326,8 +326,9 @@ class TestCiCoverageSurfaceMatrix:
                 not in block
             )
             assert "Fail-closed (#7493)" in block or "#7493" in block
+            assert "id: vcr_pointer_guard" in block
+            assert "git lfs pull" not in block
             if job == "control-plane-e2e":
-                assert "id: lfs_pull" in block
                 assert "if-no-files-found: error" in block
                 assert "::error::" in block
 
