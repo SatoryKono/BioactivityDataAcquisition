@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import argparse
 import ast
 import fnmatch
 import itertools
@@ -72,18 +71,34 @@ from memory.graph.sync_pkg._core_ast import _signature_hash as _signature_hash
 
 # AUD-001 slice 1: extracted kernels, re-exported to preserve the public surface.
 from memory.graph.sync_pkg._core_cli import (
+    _export_snapshot_if_requested as _export_snapshot_if_requested,
+)
+from memory.graph.sync_pkg._core_cli import (
     _normalization_operation_count as _normalization_operation_count,
 )
 from memory.graph.sync_pkg._core_cli import _parser as _parser
+from memory.graph.sync_pkg._core_cli import (
+    _print_snapshot_stats as _print_snapshot_stats,
+)
+from memory.graph.sync_pkg._core_cli import _report_payload as _report_payload
 from memory.graph.sync_pkg._core_cli import (
     _run_apply_normalization_evidence_only as _run_apply_normalization_evidence_only,
 )
 from memory.graph.sync_pkg._core_cli import _run_snapshot_cli as _run_snapshot_cli
 from memory.graph.sync_pkg._core_cli import (
+    _selection_from_args as _selection_from_args,
+)
+from memory.graph.sync_pkg._core_cli import (
     _snapshot_operation_count as _snapshot_operation_count,
+)
+from memory.graph.sync_pkg._core_cli import (
+    _sync_snapshot_if_requested as _sync_snapshot_if_requested,
 )
 from memory.graph.sync_pkg._core_cli import _validate_cli_args as _validate_cli_args
 from memory.graph.sync_pkg._core_cli import _write_json as _write_json
+from memory.graph.sync_pkg._core_cli import (
+    _write_report_if_requested as _write_report_if_requested,
+)
 from memory.graph.sync_pkg._core_cli import main as main
 from memory.graph.sync_pkg._core_convert import (
     _DOCS_DRIFT_EXCLUDED_PREFIXES as _DOCS_DRIFT_EXCLUDED_PREFIXES,
@@ -194,6 +209,19 @@ from memory.graph.sync_pkg._core_models import SnapshotSelection as SnapshotSele
 from memory.graph.sync_pkg._core_models import StorageSurfaceSpec as StorageSurfaceSpec
 from memory.graph.sync_pkg._core_models import SyncApplyOptions as SyncApplyOptions
 from memory.graph.sync_pkg._core_models import _ShapeNormalizer as _ShapeNormalizer
+from memory.graph.sync_pkg.apply_runtime import _batched as _batched
+from memory.graph.sync_pkg.apply_runtime import (
+    _execute_grouped_statements as _execute_grouped_statements,
+)
+from memory.graph.sync_pkg.apply_runtime import (
+    _execute_statement_batch as _execute_statement_batch,
+)
+from memory.graph.sync_pkg.apply_runtime import (
+    _raise_grouped_statement_failure as _raise_grouped_statement_failure,
+)
+from memory.graph.sync_pkg.apply_runtime import (
+    _statement_failure_context as _statement_failure_context,
+)
 from memory.graph.sync_pkg.neo4j_statements import (
     DEFAULT_INGEST_WAVE as DEFAULT_INGEST_WAVE,
 )
@@ -14783,98 +14811,6 @@ def sync_snapshot(
     )
 
 
-def _batched[T](items: list[T], size: int) -> list[list[T]]:
-    return [items[index : index + size] for index in range(0, len(items), size)]
-
-
-def _statement_failure_context(statement: dict[str, JsonValue]) -> str:
-    parameters = _as_mapping(statement.get("parameters"))
-    node_name = parameters.get("name")
-    if node_name is not None:
-        return f"name={node_name!r}"
-    source_name = parameters.get("source_name")
-    target_name = parameters.get("target_name")
-    return f"source={source_name!r}, target={target_name!r}"
-
-
-def _raise_grouped_statement_failure(
-    context: GroupedStatementFailureContext,
-    statement: dict[str, JsonValue],
-    cause: Exception,
-) -> None:
-    raise RuntimeError(
-        f"Neo4j sync failed while applying {context.kind} group `{context.group_name}` "
-        f"(batch {context.batch_index}/{context.batch_count}, "
-        f"statement {context.statement_index}/{context.statement_count}, "
-        f"{_statement_failure_context(statement)})"
-    ) from cause
-
-
-def _execute_statement_batch(
-    client: Neo4jHttpClient,
-    batch: list[dict[str, JsonValue]],
-    *,
-    kind: str,
-    group_name: str,
-    batch_index: int,
-    batch_count: int,
-) -> None:
-    try:
-        client.execute(batch)
-    except Exception as exc:  # pragma: no cover - depends on live backend state
-        if len(batch) == 1:
-            _raise_grouped_statement_failure(
-                GroupedStatementFailureContext(
-                    kind=kind,
-                    group_name=group_name,
-                    batch_index=batch_index,
-                    batch_count=batch_count,
-                    statement_index=1,
-                    statement_count=1,
-                ),
-                statement=batch[0],
-                cause=exc,
-            )
-        for statement_index, statement in enumerate(batch, start=1):
-            try:
-                client.execute([statement])
-            except (
-                Exception
-            ) as statement_exc:  # pragma: no cover - live backend dependent
-                _raise_grouped_statement_failure(
-                    GroupedStatementFailureContext(
-                        kind=kind,
-                        group_name=group_name,
-                        batch_index=batch_index,
-                        batch_count=batch_count,
-                        statement_index=statement_index,
-                        statement_count=len(batch),
-                    ),
-                    statement=statement,
-                    cause=statement_exc,
-                )
-
-
-def _execute_grouped_statements(
-    client: Neo4jHttpClient,
-    grouped_statements: dict[str, list[dict[str, JsonValue]]],
-    batch_size: int,
-    kind: str,
-) -> None:
-    for group_name in sorted(grouped_statements):
-        statements = grouped_statements[group_name]
-        grouped_batches = _batched(statements, batch_size)
-        for batch_index, batch in enumerate(grouped_batches, start=1):
-            _execute_statement_batch(
-                client,
-                batch,
-                kind=kind,
-                group_name=group_name,
-                batch_index=batch_index,
-                batch_count=len(grouped_batches),
-            )
-
-
 def _live_managed_node_count(client: Neo4jHttpClient, label: str) -> int:
     return _live_managed_node_counts(
         client,
@@ -17076,67 +17012,6 @@ def _critical_diff_issues(
                 f"{kind} `{name}` expected {row.get('snapshot')}, live managed {row.get('live_managed')}"
             )
     return issues
-
-
-def _selection_from_args(args: argparse.Namespace) -> SnapshotSelection:
-    from memory.graph.sync_pkg import cli as _cli
-
-    return _cli._selection_from_args(args)
-
-
-def _print_snapshot_stats(snapshot: GraphSnapshot) -> None:
-    from memory.graph.sync_pkg import cli as _cli
-
-    return _cli._print_snapshot_stats(snapshot)
-
-
-def _export_snapshot_if_requested(
-    snapshot: GraphSnapshot,
-    export_path: Path | None,
-) -> None:
-    from memory.graph.sync_pkg import cli as _cli
-
-    _cli._export_snapshot_if_requested(snapshot, export_path)
-
-
-def _sync_snapshot_if_requested(
-    args: argparse.Namespace,
-    snapshot: GraphSnapshot,
-    root: Path,
-    selection: SnapshotSelection,
-) -> None:
-    from memory.graph.sync_pkg import cli as _cli
-
-    _cli._sync_snapshot_if_requested(args, snapshot, root, selection)
-
-
-def _report_payload(
-    snapshot: GraphSnapshot,
-    root: Path,
-    http_uri: str | None,
-    report_fast: bool,
-) -> dict[str, JsonValue]:
-    from memory.graph.sync_pkg import cli as _cli
-
-    return _cli._report_payload(snapshot, root, http_uri, report_fast)
-
-
-def _write_report_if_requested(
-    snapshot: GraphSnapshot,
-    root: Path,
-    http_uri: str | None,
-    report_path: Path | None,
-    report_fast: bool,
-) -> None:
-    from memory.graph.sync_pkg import cli as _cli
-
-    _cli._write_report_if_requested(
-        snapshot,
-        root,
-        http_uri,
-        report_path,
-        report_fast,
-    )
 
 
 __all__ = [name for name in globals() if not name.startswith("__")]
