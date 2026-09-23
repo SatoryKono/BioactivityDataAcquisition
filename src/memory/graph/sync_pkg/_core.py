@@ -1676,6 +1676,9 @@ from memory.graph.sync_pkg.link_source_backed_file_structure import (
 from memory.graph.sync_pkg.link_source_backed_node_structure import (
     _link_source_backed_node_structure as _link_source_backed_node_structure,
 )
+from memory.graph.sync_pkg.link_workflow_run_targets import (
+    _link_workflow_run_targets as _link_workflow_run_targets,
+)
 from memory.graph.sync_pkg.live_queries import (
     _audit_live_summary as _audit_live_summary,
 )
@@ -2808,26 +2811,6 @@ def _process_workflow_steps(
             relative_path=context.relative_path,
             today=context.today,
         )
-
-
-def _link_workflow_run_targets(
-    snapshot: GraphSnapshot,
-    context: WorkflowJobContext,
-    run_text: str,
-) -> None:
-    for target in sorted(
-        _workflow_script_targets(run_text), key=lambda item: (item.label, item.name)
-    ):
-        if target in snapshot.nodes:
-            snapshot.add_relation(
-                context.job, "RUNS_VIA", target, provenance="workflow_graph"
-            )
-    for gate_name in _workflow_quality_gates(run_text):
-        gate_key = NodeKey("quality_gate", gate_name)
-        if gate_key in snapshot.nodes:
-            snapshot.add_relation(
-                context.job, "EXECUTES_GATE", gate_key, provenance="workflow_graph"
-            )
 
 
 def _link_workflow_job_dependencies(
