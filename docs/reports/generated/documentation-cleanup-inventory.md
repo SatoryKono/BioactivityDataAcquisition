@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3681 |
-| Tracked doc-like files | 3681 |
+| Doc-like files | 3685 |
+| Tracked doc-like files | 3685 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 7 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3681 |
+| tracked | 3685 |
 
 ## Lifecycle Counts
 
@@ -29,7 +29,7 @@
 | active_quality_baseline | 70 |
 | closeout_evidence | 89 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 21 |
+| docs_reports_curated_or_historical_report | 25 |
 | docs_reports_generated_or_route_owned | 7 |
 | docs_reports_retention_sensitive_evidence | 21 |
 | generated_skill_reference_mirror | 19 |
@@ -62,7 +62,7 @@
 | Canonical | 74 |
 | Deprecated | 2 |
 | Generated | 1045 |
-| Working | 1515 |
+| Working | 1519 |
 
 ## Surface Families
 
@@ -73,14 +73,14 @@
 | canonical | 74 |
 | duplicate | 2 |
 | generated | 1045 |
-| working | 1515 |
+| working | 1519 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 337 |
-| archive-after-migration | 1011 |
+| archive-after-migration | 1015 |
 | generate-automatically | 1045 |
 | keep | 1278 |
 | reconcile-with-github-state | 8 |
@@ -123,6 +123,10 @@
 | `docs/reports/dashboard-ux-checks/2026-09-23.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-event-age.json` | Working | 0 | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-final-tests.txt` | Working | 0 | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/final-dashboard-suite.txt` | Working | 0 | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/post-main-runtime-receipt.json` | Working | 0 | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/post-main-tests.txt` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/runtime-receipt.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/screenshots.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis/screenshots.json` | Working | 0 | archive-after-migration |
@@ -166,10 +170,6 @@
 | `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-budget.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-lint.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality-after.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality-after.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/findings.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -324,6 +324,10 @@
 | `docs/reports/dashboard-ux-checks/2026-09-23.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-event-age.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-final-tests.txt` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/final-dashboard-suite.txt` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/post-main-runtime-receipt.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/post-main-tests.txt` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/runtime-receipt.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/screenshots.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis/screenshots.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
@@ -341,10 +345,6 @@
 | `docs/reports/evidence/project-legacy-compatibility-remediation/interfaces-cli-and-public-entrypoint-compat/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-legacy-compatibility-remediation/tests-docs-and-governance-anchors/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-package-topology/04-decisions/DECISIONS.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/project-package-topology/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/project-test-health/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/project-test-health/metadata.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/project-test-health/shard_registry.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
 
 ## Generated Route Registry
 

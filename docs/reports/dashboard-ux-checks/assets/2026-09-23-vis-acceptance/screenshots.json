@@ -585,5 +585,57 @@
     },
     "sha256": "3d4b2c04b937279d1b1bb2f3ae572001c40834ce584320dea94d5480a486e5e3",
     "fixture": true
+  },
+  {
+    "name": "accepted-post-main-trust-wide",
+    "url": "http://127.0.0.1:3000/d/bioetl-control-plane-v1/1-trust?var-workflow=$__all&var-pipeline=chembl_molecule&var-run_type=incremental&var-run_id=7dfad8f0-1f7b-51c4-8bdd-785defb2fb31&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-read_latency_quantile=0.95&refresh=60s",
+    "time": "2026-09-23T09:15:38.384Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-post-main-trust-wide.jpg",
+    "image": {
+      "width": 1905,
+      "height": 1072
+    },
+    "sha256": "8b695d13476efe04d168b9f8377354058e65ba1f0590aca602057b528c1376c5"
+  },
+  {
+    "name": "accepted-post-main-trust-narrow",
+    "url": "http://127.0.0.1:3000/d/bioetl-control-plane-v1/1-trust?var-workflow=$__all&var-pipeline=chembl_molecule&var-run_type=incremental&var-run_id=7dfad8f0-1f7b-51c4-8bdd-785defb2fb31&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-read_latency_quantile=0.95&refresh=60s",
+    "time": "2026-09-23T09:15:45.504Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-post-main-trust-narrow.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "e661dd0b1a18b6e8c6ac76c6e7eb382865df147d80be7c2b3ef993dbbfc2c4f4"
+  },
+  {
+    "name": "accepted-post-main-incident-wide",
+    "url": "http://127.0.0.1:3000/d/bioetl-incident-v1/6-incident-workspace?var-workflow=$__all&var-pipeline=chembl_molecule&var-run_type=incremental&var-run_id=7dfad8f0-1f7b-51c4-8bdd-785defb2fb31&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-provider=chembl&refresh=60s",
+    "time": "2026-09-23T09:23:07.756Z",
+    "height": 1080,
+    "width": 1920,
+    "file": "accepted-post-main-incident-wide.jpg",
+    "image": {
+      "width": 1905,
+      "height": 1072
+    },
+    "sha256": "b00738c6f8dc5e19e8c08ad9ffa8acfc5bd97e04cb4921ebe13e6e1f9175e2ba"
+  },
+  {
+    "name": "accepted-post-main-incident-narrow",
+    "url": "http://127.0.0.1:3000/d/bioetl-incident-v1/6-incident-workspace?var-workflow=$__all&var-pipeline=chembl_molecule&var-run_type=incremental&var-run_id=7dfad8f0-1f7b-51c4-8bdd-785defb2fb31&from=now-24h&to=now&timezone=Europe%2FKiev&orgId=1&var-provider=chembl&refresh=60s",
+    "time": "2026-09-23T09:22:57.672Z",
+    "height": 900,
+    "width": 1000,
+    "file": "accepted-post-main-incident-narrow.jpg",
+    "image": {
+      "width": 985,
+      "height": 887
+    },
+    "sha256": "b7a8efbc3d61baf166cfb7c9733707f7beb6f23486c96254037581aa7d60f06e"
   }
 ]
