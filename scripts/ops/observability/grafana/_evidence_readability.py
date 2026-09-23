@@ -377,6 +377,18 @@ def apply_evidence_readability(payload: dict) -> None:
     if payload["uid"] == "bioetl-run-explorer-v1":
         _run_explorer(p)
     _first_window_widths(payload, p)
+    if payload["uid"] == "bioetl-control-plane-v1":
+        for pid, title in {
+            9401: "Monitor Readiness",
+            891: "Monitor Replay",
+            892: "Track Checkpoint",
+            893: "Monitor Ledger",
+        }.items():
+            if pid in p:
+                p[pid]["title"] = title
+                p[pid].setdefault("fieldConfig", {}).setdefault("defaults", {})[
+                    "displayName"
+                ] = title
 
 
 def _run_links(run: dict):

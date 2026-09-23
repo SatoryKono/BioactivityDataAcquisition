@@ -15,7 +15,7 @@ dashboards:
     panel_count: 69
     key_panels:
       - id: 891
-        title: "Monitor Replay Safety"
+        title: "Monitor Replay"
         type: stat
         description: Current replay safety state for selected pipeline
       - id: 130
@@ -31,7 +31,7 @@ dashboards:
         type: table
         description: Shared shell panel for Bronze/Silver/Gold accounting
       - id: 9401
-        title: Monitor Current Readiness
+        title: Monitor Readiness
         type: stat
         description:
           Evidence-aware replay/resume verdict; required evidence gaps render

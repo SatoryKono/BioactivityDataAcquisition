@@ -92,8 +92,8 @@
           "refId": "variable",
           "infinityQuery": {
             "format": "table",
-            "parser": "simple",
-            "root_selector": "items",
+            "parser": "backend",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -183,8 +183,8 @@
           "refId": "variable",
           "infinityQuery": {
             "format": "table",
-            "parser": "simple",
-            "root_selector": "items",
+            "parser": "backend",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
             "type": "json",
             "source": "url",
             "url_options": {

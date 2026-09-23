@@ -11,6 +11,8 @@ from bioetl.application.core.derived_scan_budget import (
 )
 from bioetl.domain.exceptions.internal_state import InvalidStateError
 
+pytestmark = pytest.mark.unit
+
 
 def test_resolve_derived_upstream_limit_scales_output_and_filters() -> None:
     assert resolve_derived_upstream_limit(None, multiplier=10) == DEFAULT_SCAN_RECORDS + 1

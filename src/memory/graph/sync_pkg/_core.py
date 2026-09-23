@@ -3,12 +3,8 @@
 
 from __future__ import annotations
 
-import argparse
 import ast
-import base64
 import fnmatch
-import hashlib
-import http.client
 import itertools
 import json
 import os
@@ -25,7 +21,6 @@ from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import TypeVar, cast
-from urllib import error, parse, request
 
 import yaml
 
@@ -33,21 +28,77 @@ from bioetl.infrastructure.config.contract_registry_loader import (
     DEFAULT_CONTRACT_REGISTRY_PATH,
     load_contract_registry_payload,
 )
+from memory.graph.sync_pkg._core_ast import (
+    _CONTROL_FLOW_NODES as _CONTROL_FLOW_NODES,
+)
+from memory.graph.sync_pkg._core_ast import _base_name as _base_name
+from memory.graph.sync_pkg._core_ast import (
+    _callable_ast_node_count as _callable_ast_node_count,
+)
+from memory.graph.sync_pkg._core_ast import (
+    _callable_branch_count as _callable_branch_count,
+)
+from memory.graph.sync_pkg._core_ast import (
+    _callable_call_count as _callable_call_count,
+)
+from memory.graph.sync_pkg._core_ast import (
+    _callable_helper_call_count as _callable_helper_call_count,
+)
+from memory.graph.sync_pkg._core_ast import (
+    _callable_max_nesting_depth as _callable_max_nesting_depth,
+)
+from memory.graph.sync_pkg._core_ast import (
+    _dataframe_model_class_names as _dataframe_model_class_names,
+)
+from memory.graph.sync_pkg._core_ast import (
+    _imported_repo_modules as _imported_repo_modules,
+)
+from memory.graph.sync_pkg._core_ast import _imported_symbols as _imported_symbols
+from memory.graph.sync_pkg._core_ast import (
+    _looks_like_dataframe_model_class as _looks_like_dataframe_model_class,
+)
+from memory.graph.sync_pkg._core_ast import (
+    _matching_imported_module_names as _matching_imported_module_names,
+)
+from memory.graph.sync_pkg._core_ast import (
+    _normalized_callable_hash as _normalized_callable_hash,
+)
+from memory.graph.sync_pkg._core_ast import _parse_python_ast as _parse_python_ast
+from memory.graph.sync_pkg._core_ast import (
+    _protocol_class_names as _protocol_class_names,
+)
+from memory.graph.sync_pkg._core_ast import _signature_hash as _signature_hash
 
 # AUD-001 slice 1: extracted kernels, re-exported to preserve the public surface.
+from memory.graph.sync_pkg._core_cli import (
+    _export_snapshot_if_requested as _export_snapshot_if_requested,
+)
 from memory.graph.sync_pkg._core_cli import (
     _normalization_operation_count as _normalization_operation_count,
 )
 from memory.graph.sync_pkg._core_cli import _parser as _parser
 from memory.graph.sync_pkg._core_cli import (
+    _print_snapshot_stats as _print_snapshot_stats,
+)
+from memory.graph.sync_pkg._core_cli import _report_payload as _report_payload
+from memory.graph.sync_pkg._core_cli import (
     _run_apply_normalization_evidence_only as _run_apply_normalization_evidence_only,
 )
 from memory.graph.sync_pkg._core_cli import _run_snapshot_cli as _run_snapshot_cli
 from memory.graph.sync_pkg._core_cli import (
+    _selection_from_args as _selection_from_args,
+)
+from memory.graph.sync_pkg._core_cli import (
     _snapshot_operation_count as _snapshot_operation_count,
+)
+from memory.graph.sync_pkg._core_cli import (
+    _sync_snapshot_if_requested as _sync_snapshot_if_requested,
 )
 from memory.graph.sync_pkg._core_cli import _validate_cli_args as _validate_cli_args
 from memory.graph.sync_pkg._core_cli import _write_json as _write_json
+from memory.graph.sync_pkg._core_cli import (
+    _write_report_if_requested as _write_report_if_requested,
+)
 from memory.graph.sync_pkg._core_cli import main as main
 from memory.graph.sync_pkg._core_convert import (
     _DOCS_DRIFT_EXCLUDED_PREFIXES as _DOCS_DRIFT_EXCLUDED_PREFIXES,
@@ -158,6 +209,124 @@ from memory.graph.sync_pkg._core_models import SnapshotSelection as SnapshotSele
 from memory.graph.sync_pkg._core_models import StorageSurfaceSpec as StorageSurfaceSpec
 from memory.graph.sync_pkg._core_models import SyncApplyOptions as SyncApplyOptions
 from memory.graph.sync_pkg._core_models import _ShapeNormalizer as _ShapeNormalizer
+from memory.graph.sync_pkg.apply_runtime import _batched as _batched
+from memory.graph.sync_pkg.apply_runtime import (
+    _execute_grouped_statements as _execute_grouped_statements,
+)
+from memory.graph.sync_pkg.apply_runtime import (
+    _execute_statement_batch as _execute_statement_batch,
+)
+from memory.graph.sync_pkg.apply_runtime import (
+    _raise_grouped_statement_failure as _raise_grouped_statement_failure,
+)
+from memory.graph.sync_pkg.apply_runtime import (
+    _statement_failure_context as _statement_failure_context,
+)
+from memory.graph.sync_pkg.live_queries import (
+    _audit_live_summary as _audit_live_summary,
+)
+from memory.graph.sync_pkg.live_queries import (
+    _build_diff_entries as _build_diff_entries,
+)
+from memory.graph.sync_pkg.live_queries import _count_rows_by_key as _count_rows_by_key
+from memory.graph.sync_pkg.live_queries import (
+    _live_managed_node_count as _live_managed_node_count,
+)
+from memory.graph.sync_pkg.live_queries import (
+    _live_managed_node_counts as _live_managed_node_counts,
+)
+from memory.graph.sync_pkg.live_queries import (
+    _live_managed_relation_count as _live_managed_relation_count,
+)
+from memory.graph.sync_pkg.live_queries import (
+    _live_managed_relation_counts as _live_managed_relation_counts,
+)
+from memory.graph.sync_pkg.live_queries import (
+    _live_managed_relation_rows as _live_managed_relation_rows,
+)
+from memory.graph.sync_pkg.live_queries import _live_orphan_rows as _live_orphan_rows
+from memory.graph.sync_pkg.live_queries import (
+    _live_repo_label_rows as _live_repo_label_rows,
+)
+from memory.graph.sync_pkg.live_queries import _live_scalar as _live_scalar
+from memory.graph.sync_pkg.live_queries import (
+    _live_unmanaged_repo_rows as _live_unmanaged_repo_rows,
+)
+from memory.graph.sync_pkg.live_queries import (
+    _managed_label_counts_from_rows as _managed_label_counts_from_rows,
+)
+from memory.graph.sync_pkg.live_queries import (
+    _managed_label_summary_from_counts as _managed_label_summary_from_counts,
+)
+from memory.graph.sync_pkg.live_queries import (
+    _managed_relation_counts_from_rows as _managed_relation_counts_from_rows,
+)
+from memory.graph.sync_pkg.live_queries import (
+    _managed_relation_summary_from_counts as _managed_relation_summary_from_counts,
+)
+from memory.graph.sync_pkg.live_queries import (
+    _managed_sync_run_clause as _managed_sync_run_clause,
+)
+from memory.graph.sync_pkg.live_queries import _row_int_total as _row_int_total
+from memory.graph.sync_pkg.live_queries import (
+    _snapshot_count_map as _snapshot_count_map,
+)
+from memory.graph.sync_pkg.live_queries import (
+    _snapshot_subset_count_map as _snapshot_subset_count_map,
+)
+from memory.graph.sync_pkg.neo4j_statements import (
+    DEFAULT_INGEST_WAVE as DEFAULT_INGEST_WAVE,
+)
+from memory.graph.sync_pkg.neo4j_statements import (
+    DEFAULT_MANAGED_BY as DEFAULT_MANAGED_BY,
+)
+from memory.graph.sync_pkg.neo4j_statements import (
+    _delete_managed_wave_nodes_statement as _delete_managed_wave_nodes_statement,
+)
+from memory.graph.sync_pkg.neo4j_statements import (
+    _managed_properties as _managed_properties,
+)
+from memory.graph.sync_pkg.neo4j_statements import (
+    _neo4j_property_value as _neo4j_property_value,
+)
+from memory.graph.sync_pkg.neo4j_statements import _node_statement as _node_statement
+from memory.graph.sync_pkg.neo4j_statements import (
+    _prune_legacy_unmanaged_nodes_statement as _prune_legacy_unmanaged_nodes_statement,
+)
+from memory.graph.sync_pkg.neo4j_statements import (
+    _prune_stale_nodes_statement as _prune_stale_nodes_statement,
+)
+from memory.graph.sync_pkg.neo4j_statements import (
+    _prune_stale_relations_statement as _prune_stale_relations_statement,
+)
+from memory.graph.sync_pkg.neo4j_statements import (
+    _relation_statement as _relation_statement,
+)
+from memory.graph.sync_pkg.neo4j_statements import (
+    _reset_managed_relations_statement as _reset_managed_relations_statement,
+)
+from memory.graph.sync_pkg.transport import (
+    _DEFAULT_NEO4J_AUDIT_DATABASE as _DEFAULT_NEO4J_AUDIT_DATABASE,
+)
+from memory.graph.sync_pkg.transport import (
+    _DEFAULT_NEO4J_AUDIT_USERNAME as _DEFAULT_NEO4J_AUDIT_USERNAME,
+)
+from memory.graph.sync_pkg.transport import (
+    Neo4jHttpClient as Neo4jHttpClient,
+)
+from memory.graph.sync_pkg.transport import (
+    _default_neo4j_host as _default_neo4j_host,
+)
+from memory.graph.sync_pkg.transport import (
+    _env_flag_is_enabled as _env_flag_is_enabled,
+)
+from memory.graph.sync_pkg.transport import _parse_auth_pair as _parse_auth_pair
+from memory.graph.sync_pkg.transport import _read_env_file as _read_env_file
+from memory.graph.sync_pkg.transport import derive_http_uri as derive_http_uri
+from memory.graph.sync_pkg.transport import load_repo_env as load_repo_env
+from memory.graph.sync_pkg.transport import (
+    resolve_neo4j_connection as resolve_neo4j_connection,
+)
 
 # Graph assembly ingests heterogeneous YAML/JSON and AST-derived values. Keep
 # that pre-serialization boundary explicit; serializers below narrow values to
@@ -178,8 +347,6 @@ if str(SRC_ROOT) not in sys.path:
 if str(DEFAULT_ROOT) not in sys.path:
     sys.path.insert(0, str(DEFAULT_ROOT))
 DEFAULT_BATCH_SIZE = 20
-DEFAULT_INGEST_WAVE = "repo_sync_v1"
-DEFAULT_MANAGED_BY = "neo4j_memory_sync"
 DEFAULT_MEMORY_MAPPING_PATH = "src/memory/graph/mappings.yaml"
 LEGACY_MEMORY_MAPPING_PATH = "configs/quality/neo4j_memory_mapping.yaml"
 ANALYSIS_SOURCE_READ_TIMEOUT_SECONDS = 2.0
@@ -2725,108 +2892,6 @@ def _dashboard_panel_target_metrics(panel: dict[str, object]) -> set[str]:
     return metrics
 
 
-def _parse_python_ast(path: Path) -> ast.Module | None:
-    if path.suffix != ".py":
-        return None
-    try:
-        return ast.parse(_read_text(path), filename=str(path))
-    except (OSError, SyntaxError, UnicodeDecodeError):
-        return None
-
-
-def _base_name(node: ast.expr) -> str:
-    if isinstance(node, ast.Name):
-        return node.id
-    if isinstance(node, ast.Attribute):
-        return node.attr
-    if isinstance(node, ast.Subscript):
-        return _base_name(node.value)
-    if isinstance(node, ast.Call):
-        return _base_name(node.func)
-    return ""
-
-
-def _signature_hash(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
-    args = node.args
-    payload = {
-        "async": isinstance(node, ast.AsyncFunctionDef),
-        "posonly": len(args.posonlyargs),
-        "args": len(args.args),
-        "kwonly": len(args.kwonlyargs),
-        "vararg": args.vararg is not None,
-        "kwarg": args.kwarg is not None,
-        "decorator_count": len(node.decorator_list),
-    }
-    encoded = json.dumps(payload, sort_keys=True)
-    # Deterministic structural fingerprint used for clustering, not for secrets.
-    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
-
-
-def _normalized_callable_hash(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
-    module = ast.Module(body=node.body, type_ignores=[])
-    normalized = _ShapeNormalizer().visit(module)
-    ast.fix_missing_locations(normalized)
-    dumped = ast.dump(normalized, annotate_fields=True, include_attributes=False)
-    # Deterministic structural fingerprint used for clustering, not for secrets.
-    return hashlib.sha256(dumped.encode("utf-8")).hexdigest()
-
-
-def _callable_ast_node_count(node: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
-    return sum(1 for _ in ast.walk(node))
-
-
-_CONTROL_FLOW_NODES = (
-    ast.If,
-    ast.For,
-    ast.AsyncFor,
-    ast.While,
-    ast.Try,
-    ast.Match,
-    ast.IfExp,
-    ast.With,
-    ast.AsyncWith,
-)
-
-
-def _callable_branch_count(node: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
-    count = 0
-    for child in ast.walk(node):
-        if isinstance(child, _CONTROL_FLOW_NODES):
-            count += 1
-        elif isinstance(child, ast.BoolOp):
-            count += max(0, len(child.values) - 1)
-        elif isinstance(child, ast.comprehension):
-            count += len(child.ifs)
-    return count
-
-
-def _callable_max_nesting_depth(node: ast.AST) -> int:
-    def visit(current: ast.AST, depth: int) -> int:
-        max_depth = depth
-        for child in ast.iter_child_nodes(current):
-            next_depth = depth + 1 if isinstance(child, _CONTROL_FLOW_NODES) else depth
-            max_depth = max(max_depth, visit(child, next_depth))
-        return max_depth
-
-    return visit(node, 0)
-
-
-def _callable_call_count(node: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
-    return sum(1 for child in ast.walk(node) if isinstance(child, ast.Call))
-
-
-def _callable_helper_call_count(node: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
-    tokens = ("_", "helper", "policy", "codec", "mixin", "fsm", "compat")
-    count = 0
-    for child in ast.walk(node):
-        if not isinstance(child, ast.Call):
-            continue
-        func_name = _base_name(child.func).casefold()
-        if func_name and any(token in func_name for token in tokens):
-            count += 1
-    return count
-
-
 def _threshold_score(value: int, *, medium: int, high: int) -> int:
     if value >= high:
         return 2
@@ -2893,57 +2958,6 @@ def _family_matches_relative_path(
 
 def _family_root_priority(family: DuplicateFamilyConfig) -> int:
     return max(len(root) for root in family.roots)
-
-
-def _protocol_class_names(path: Path) -> list[str]:
-    tree = _parse_python_ast(path)
-    if tree is None:
-        return []
-
-    protocol_names: list[str] = []
-    for node in tree.body:
-        if not isinstance(node, ast.ClassDef):
-            continue
-        if any(_is_protocol_base(base) for base in node.bases):
-            protocol_names.append(node.name)
-    return protocol_names
-
-
-def _dataframe_model_class_names(path: Path) -> list[str]:
-    tree = _parse_python_ast(path)
-    if tree is None:
-        return []
-
-    class_names: list[str] = []
-    for node in tree.body:
-        if not isinstance(node, ast.ClassDef):
-            continue
-        if _looks_like_dataframe_model_class(node):
-            class_names.append(node.name)
-    return class_names
-
-
-def _looks_like_dataframe_model_class(node: ast.ClassDef) -> bool:
-    """Return True when a class likely represents a Pandera DataFrameModel schema."""
-    if any(_is_dataframe_model_base(base) for base in node.bases):
-        return True
-    if not node.name.endswith("Schema"):
-        return False
-    return any(isinstance(child, ast.AnnAssign) for child in node.body)
-
-
-def _imported_symbols(path: Path) -> list[tuple[str, str, str]]:
-    tree = _parse_python_ast(path)
-    if tree is None:
-        return []
-
-    imports: list[tuple[str, str, str]] = []
-    for node in tree.body:
-        if not isinstance(node, ast.ImportFrom) or node.module is None:
-            continue
-        for alias in node.names:
-            imports.append((node.module, alias.name, alias.asname or alias.name))
-    return imports
 
 
 def _build_port_surface_catalog(
@@ -3135,33 +3149,6 @@ def _resolve_python_module_surface(root: Path, module_name: str) -> NodeKey | No
     if init_candidate.is_file():
         return NodeKey("module_surface", _rel_path(root, init_candidate))
     return None
-
-
-def _matching_imported_module_names(
-    node: ast.AST, prefixes: tuple[str, ...]
-) -> tuple[str, ...]:
-    if isinstance(node, ast.Import):
-        return tuple(
-            alias.name for alias in node.names if alias.name.startswith(prefixes)
-        )
-    if (
-        isinstance(node, ast.ImportFrom)
-        and node.module is not None
-        and node.module.startswith(prefixes)
-    ):
-        return (node.module,)
-    return ()
-
-
-def _imported_repo_modules(path: Path, prefixes: tuple[str, ...]) -> set[str]:
-    tree = _parse_python_ast(path)
-    if tree is None:
-        return set()
-
-    imported: set[str] = set()
-    for node in ast.walk(tree):
-        imported.update(_matching_imported_module_names(node, prefixes))
-    return imported
 
 
 def _runtime_dimensions(*parts: str) -> set[str]:
@@ -3560,104 +3547,6 @@ def _metric_dashboard_targets(
         for dashboard, dashboard_metric_names in dashboard_metrics.items()
         if metrics & dashboard_metric_names
     }
-
-
-def _read_env_file(path: Path) -> dict[str, str]:
-    if not path.exists():
-        return {}
-    loaded: dict[str, str] = {}
-    for raw_line in _read_text(path).splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        name, value = line.split("=", 1)
-        loaded[name.strip()] = _normalize_env_value(value)
-    return loaded
-
-
-def load_repo_env(root: Path) -> dict[str, str]:
-    env = _read_env_file(root / ".env")
-    env.update(_read_env_file(root / ".env.local"))
-    shell_env = {key: value for key, value in os.environ.items() if value}
-    env.update(shell_env)
-    return env
-
-
-def _parse_auth_pair(raw_auth: str | None) -> tuple[str | None, str | None]:
-    if not raw_auth or "/" not in raw_auth:
-        return None, None
-    username, password = raw_auth.split("/", 1)
-    return username or None, password or None
-
-
-def _env_flag_is_enabled(value: str | None) -> bool:
-    if value is None:
-        return False
-    return value.strip().casefold() not in {"", "0", "false", "no", "off"}
-
-
-def _default_neo4j_host(env: dict[str, str]) -> str:
-    if env.get("WSL_INTEROP") or env.get("WSL_DISTRO_NAME"):
-        return "host.docker.internal"
-    return "localhost"
-
-
-_DEFAULT_NEO4J_AUDIT_USERNAME = "neo4j"
-_DEFAULT_NEO4J_AUDIT_DATABASE = "neo4j"
-
-
-def resolve_neo4j_connection(
-    root: Path, explicit_http_uri: str | None
-) -> tuple[str, str, str, str]:
-    env = load_repo_env(root)
-    audit_mode = _env_flag_is_enabled(env.get("LIVE_AUDIT_MODE"))
-    default_host = _default_neo4j_host(env)
-
-    if audit_mode:
-        username = env.get("NEO4J_AUDIT_USERNAME")
-        password = env.get("NEO4J_AUDIT_PASSWORD")
-        database = (
-            env.get("NEO4J_AUDIT_DATABASE")
-            or env.get("NEO4J_DATABASE")
-            or _DEFAULT_NEO4J_AUDIT_DATABASE
-        )
-        auth_username, auth_password = _parse_auth_pair(env.get("NEO4J_AUDIT_AUTH"))
-        username = username or auth_username or _DEFAULT_NEO4J_AUDIT_USERNAME
-        password = password or auth_password
-        if not password:
-            raise RuntimeError(
-                "Neo4j audit password not found in NEO4J_AUDIT_PASSWORD or NEO4J_AUDIT_AUTH"
-            )
-        http_uri = (
-            explicit_http_uri
-            or env.get("NEO4J_AUDIT_HTTP_URI")
-            or f"http://{default_host}:7475"  # NOSONAR - local Neo4j browser port
-        )
-    else:
-        bolt_uri = env.get("NEO4J_URI", "bolt://localhost:7687")
-        username = env.get("NEO4J_USERNAME") or env.get("NEO4J_AUTH_USERNAME")
-        password = env.get("NEO4J_PASSWORD") or env.get("NEO4J_AUTH_PASSWORD")
-        database = env.get("NEO4J_DATABASE", "neo4j")
-        auth_username, auth_password = _parse_auth_pair(env.get("NEO4J_AUTH"))
-        username = username or auth_username or "neo4j"
-        password = password or auth_password
-        if not password:
-            raise RuntimeError(
-                "Neo4j password not found in NEO4J_PASSWORD, NEO4J_AUTH_PASSWORD, or NEO4J_AUTH"
-            )
-        http_uri = (
-            explicit_http_uri or env.get("NEO4J_HTTP_URI") or derive_http_uri(bolt_uri)
-        )
-    return http_uri.rstrip("/"), username, password, database
-
-
-def derive_http_uri(neo4j_uri: str) -> str:
-    parsed = parse.urlparse(neo4j_uri)
-    if parsed.scheme in {"http", "https"}:
-        return f"{parsed.scheme}://{parsed.hostname}:{parsed.port or (443 if parsed.scheme == 'https' else 80)}"
-    scheme = "https" if parsed.scheme in {"neo4j+s", "bolt+s"} else "http"
-    host = parsed.hostname or "localhost"
-    return f"{scheme}://{host}:7474"
 
 
 def build_snapshot(root: Path, verified_at: str | None = None) -> GraphSnapshot:
@@ -14592,411 +14481,8 @@ def _link_pipeline_operational_for_pipeline(
     )
 
 
-class Neo4jHttpClient:
-    def __init__(
-        self, base_uri: str, username: str, password: str, database: str
-    ) -> None:
-        self._endpoint = f"{base_uri}/db/{database}/tx/commit"
-        self._primary_endpoint = self._endpoint
-        parsed = parse.urlparse(base_uri)
-        self._fallback_endpoint: str | None = None
-        if parsed.hostname == "host.docker.internal":
-            fallback_base = (
-                parsed._replace(netloc=f"localhost:{parsed.port or 7474}")
-                .geturl()
-                .rstrip("/")
-            )
-            self._fallback_endpoint = f"{fallback_base}/db/{database}/tx/commit"
-        auth_token = base64.b64encode(f"{username}:{password}".encode()).decode("ascii")
-        self._headers = {
-            "Authorization": f"Basic {auth_token}",
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        }
-
-    def execute(
-        self,
-        statements: list[dict[str, JsonValue]],
-        *,
-        context: str | None = None,
-    ) -> dict[str, object]:
-        payload = json.dumps({"statements": statements}).encode("utf-8")
-        last_exc: Exception | None = None
-        attempt_errors: list[str] = []
-        for attempt in range(12):
-            endpoint = self._endpoint
-            try:
-                raw = self._execute_request(payload)
-                break
-            except error.HTTPError as exc:  # pragma: no cover - live backend dependent
-                last_exc = self._handle_http_error(
-                    endpoint,
-                    exc,
-                    context=context,
-                    attempt=attempt,
-                    attempt_errors=attempt_errors,
-                )
-                continue
-            except (
-                error.URLError,
-                TimeoutError,
-                ConnectionResetError,
-                ConnectionAbortedError,
-                http.client.RemoteDisconnected,
-            ) as exc:  # pragma: no cover - network errors vary per environment
-                last_exc = self._handle_transport_error(
-                    endpoint,
-                    exc,
-                    context=context,
-                    attempt=attempt,
-                    attempt_errors=attempt_errors,
-                )
-                continue
-        else:  # pragma: no cover - loop always breaks or raises
-            raise RuntimeError(
-                self._format_transport_error(
-                    last_exc,
-                    context=context,
-                    attempt_errors=attempt_errors,
-                )
-            )
-        body = json.loads(raw)
-        if not isinstance(body, dict):
-            raise RuntimeError(
-                f"{self._context_prefix(context)}Neo4j response is not a JSON object"
-            )
-        errors = body.get("errors", [])
-        if errors:
-            prefix = self._context_prefix(context)
-            raise RuntimeError(f"{prefix}Neo4j query/runtime error: {errors}")
-        return body
-
-    def _execute_request(self, payload: bytes) -> str:
-        req = request.Request(
-            self._endpoint,
-            data=payload,
-            headers=self._headers,
-            method="POST",
-        )
-        response_cm = request.urlopen(req, timeout=60)
-        with response_cm as response:
-            raw_body: bytes = response.read()
-            return raw_body.decode("utf-8")
-
-    def _handle_http_error(
-        self,
-        endpoint: str,
-        exc: error.HTTPError,
-        *,
-        context: str | None,
-        attempt: int,
-        attempt_errors: list[str],
-    ) -> RuntimeError:
-        body_text = exc.read().decode("utf-8", errors="replace")
-        attempt_errors.append(
-            self._format_transport_attempt(
-                endpoint=endpoint,
-                exc=exc,
-                body_text=body_text,
-            )
-        )
-        if not self._should_retry_http_error(exc):
-            raise RuntimeError(
-                self._format_query_error(exc, context=context, body_text=body_text)
-            ) from exc
-        runtime_error = RuntimeError(
-            self._format_transport_error(
-                exc,
-                context=context,
-                body_text=body_text,
-                attempt_errors=attempt_errors,
-            )
-        )
-        self._retry_or_raise(runtime_error, endpoint, exc, attempt)
-        return runtime_error
-
-    def _handle_transport_error(
-        self,
-        endpoint: str,
-        exc: Exception,
-        *,
-        context: str | None,
-        attempt: int,
-        attempt_errors: list[str],
-    ) -> RuntimeError:
-        attempt_errors.append(
-            self._format_transport_attempt(endpoint=endpoint, exc=exc)
-        )
-        runtime_error = RuntimeError(
-            self._format_transport_error(
-                exc,
-                context=context,
-                attempt_errors=attempt_errors,
-            )
-        )
-        self._retry_or_raise(runtime_error, endpoint, exc, attempt)
-        return runtime_error
-
-    def _retry_or_raise(
-        self,
-        runtime_error: RuntimeError,
-        endpoint: str,
-        exc: Exception,
-        attempt: int,
-    ) -> None:
-        if self._switch_to_fallback_endpoint():
-            return
-        if endpoint != self._primary_endpoint or self._is_last_attempt(attempt):
-            raise runtime_error from exc
-        self._sleep_before_retry(attempt)
-
-    @staticmethod
-    def _should_retry_http_error(exc: error.HTTPError) -> bool:
-        return exc.code in {429, 502, 503, 504}
-
-    def _switch_to_fallback_endpoint(self) -> bool:
-        if self._fallback_endpoint and self._endpoint != self._fallback_endpoint:
-            self._endpoint = self._fallback_endpoint
-            self._fallback_endpoint = None
-            return True
-        return False
-
-    @staticmethod
-    def _is_last_attempt(attempt: int) -> bool:
-        return attempt == 11
-
-    @staticmethod
-    def _sleep_before_retry(attempt: int) -> None:
-        time.sleep(min(3.0, 0.5 * (attempt + 1)))
-
-    def query(
-        self,
-        statement: str,
-        parameters: dict[str, JsonValue] | None = None,
-        *,
-        context: str | None = None,
-    ) -> list[dict[str, JsonValue]]:
-        body = self.execute(
-            [
-                {
-                    "statement": statement,
-                    "parameters": parameters or {},
-                }
-            ],
-            context=context,
-        )
-        results = body.get("results", [])
-        result_items = _as_iterable(results)
-        if not result_items:
-            return []
-        result = _as_mapping(result_items[0])
-        columns = _as_iterable(result.get("columns"))
-        rows: list[dict[str, JsonValue]] = []
-        for entry_value in _as_iterable(result.get("data")):
-            entry = _as_mapping(entry_value)
-            raw_row = _as_iterable(entry.get("row"))
-            row = {str(column): raw_row[index] for index, column in enumerate(columns)}
-            rows.append(row)
-        return rows
-
-    @staticmethod
-    def _context_prefix(context: str | None) -> str:
-        return f"Neo4j {context} failed: " if context else ""
-
-    def _format_transport_error(
-        self,
-        exc: Exception | None,
-        *,
-        context: str | None,
-        body_text: str | None = None,
-        attempt_errors: list[str] | None = None,
-    ) -> str:
-        prefix = self._context_prefix(context)
-        detail = f"{exc}"
-        if body_text:
-            detail = f"{detail}; response={body_text[:500]}"
-        attempts_suffix = ""
-        if attempt_errors:
-            attempts_suffix = " | attempts: " + " ; ".join(attempt_errors)
-        return f"{prefix}transport error reaching HTTP endpoint {self._endpoint}: {detail}{attempts_suffix}"
-
-    @staticmethod
-    def _format_transport_attempt(
-        *,
-        endpoint: str,
-        exc: Exception,
-        body_text: str | None = None,
-    ) -> str:
-        detail = f"{type(exc).__name__}: {exc}"
-        if body_text:
-            detail = f"{detail}; response={body_text[:200]}"
-        return f"{endpoint} -> {detail}"
-
-    def _format_query_error(
-        self,
-        exc: error.HTTPError,
-        *,
-        context: str | None,
-        body_text: str,
-    ) -> str:
-        prefix = self._context_prefix(context)
-        detail: object = body_text[:500]
-        try:
-            payload = json.loads(body_text)
-        except json.JSONDecodeError:
-            payload = detail
-        else:
-            if isinstance(payload, dict) and isinstance(payload.get("errors"), list):
-                detail = payload["errors"]
-        return f"{prefix}query/runtime error (HTTP {exc.code}): {detail}"
-
-
 def _sync_run_id() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-
-
-def _neo4j_property_value(value: JsonValue) -> JsonScalar | list[JsonScalar]:
-    if isinstance(value, Mapping):
-        return json.dumps(value, sort_keys=True)
-    if isinstance(value, Sequence) and not isinstance(value, str | bytes):
-        normalized_items: list[JsonScalar] = []
-        for item in value:
-            if isinstance(item, Mapping | Sequence) and not isinstance(
-                item, str | bytes
-            ):
-                normalized_items.append(json.dumps(item, sort_keys=True))
-            elif isinstance(item, str | int | float | bool) or item is None:
-                normalized_items.append(item)
-        return normalized_items
-    if isinstance(value, str | int | float | bool) or value is None:
-        return value
-    return str(value)
-
-
-def _managed_properties(
-    properties: dict[str, JsonValue], sync_run: str
-) -> dict[str, JsonValue]:
-    managed: dict[str, JsonValue] = {
-        key: _neo4j_property_value(value) for key, value in properties.items()
-    }
-    managed["managed_by"] = DEFAULT_MANAGED_BY
-    managed["sync_run"] = sync_run
-    managed.setdefault("ingest_wave", DEFAULT_INGEST_WAVE)
-    return managed
-
-
-def _node_statement(node: GraphNode, sync_run: str) -> dict[str, JsonValue]:
-    return {
-        "statement": (
-            f"MERGE (n:`{node.key.label}` {{name: $name}}) SET n += $properties"
-        ),
-        "parameters": {
-            "name": node.key.name,
-            "properties": _managed_properties(node.properties, sync_run),
-        },
-    }
-
-
-def _relation_statement(relation: GraphRelation, sync_run: str) -> dict[str, JsonValue]:
-    return {
-        "statement": (
-            f"MATCH (a:`{relation.source.label}` {{name: $source_name}}) "
-            f"MATCH (b:`{relation.target.label}` {{name: $target_name}}) "
-            f"MERGE (a)-[r:`{relation.relation_type}`]->(b) "
-            "SET r += $properties"
-        ),
-        "parameters": {
-            "source_name": relation.source.name,
-            "target_name": relation.target.name,
-            "properties": _managed_properties(relation.properties, sync_run),
-        },
-    }
-
-
-def _reset_managed_relations_statement(
-    relation_types: list[str],
-) -> dict[str, JsonValue]:
-    return {
-        "statement": (
-            "MATCH (a)-[r]->(b) "
-            "WHERE type(r) IN $relation_types "
-            "AND (r.managed_by = $managed_by "
-            "OR (a.ingest_wave = $ingest_wave AND b.ingest_wave = $ingest_wave)) "
-            "DELETE r"
-        ),
-        "parameters": {
-            "relation_types": relation_types,
-            "managed_by": DEFAULT_MANAGED_BY,
-            "ingest_wave": DEFAULT_INGEST_WAVE,
-        },
-    }
-
-
-def _prune_stale_relations_statement(sync_run: str) -> dict[str, JsonValue]:
-    return {
-        "statement": (
-            "MATCH ()-[r]->() "
-            "WHERE (r.managed_by = $managed_by OR r.ingest_wave = $ingest_wave) "
-            "AND coalesce(r.sync_run, '') <> $sync_run "
-            "DELETE r"
-        ),
-        "parameters": {
-            "managed_by": DEFAULT_MANAGED_BY,
-            "ingest_wave": DEFAULT_INGEST_WAVE,
-            "sync_run": sync_run,
-        },
-    }
-
-
-def _prune_stale_nodes_statement(sync_run: str) -> dict[str, JsonValue]:
-    return {
-        "statement": (
-            "MATCH (n) "
-            "WHERE n.ingest_wave = $ingest_wave "
-            "AND coalesce(n.sync_run, '') <> $sync_run "
-            "DETACH DELETE n"
-        ),
-        "parameters": {
-            "ingest_wave": DEFAULT_INGEST_WAVE,
-            "sync_run": sync_run,
-        },
-    }
-
-
-def _delete_managed_wave_nodes_statement(
-    label: str, limit: int
-) -> dict[str, JsonValue]:
-    return {
-        "statement": (
-            f"MATCH (n:`{label}`) "
-            "WHERE n.ingest_wave = $ingest_wave "
-            "AND coalesce(n.managed_by, $managed_by) = $managed_by "
-            "WITH n LIMIT $limit "
-            "DETACH DELETE n "
-            "RETURN count(*) AS deleted"
-        ),
-        "parameters": {
-            "ingest_wave": DEFAULT_INGEST_WAVE,
-            "managed_by": DEFAULT_MANAGED_BY,
-            "limit": limit,
-        },
-    }
-
-
-def _prune_legacy_unmanaged_nodes_statement(
-    managed_labels: list[str],
-) -> dict[str, JsonValue]:
-    return {
-        "statement": (
-            "MATCH (n) "
-            "WHERE any(label IN labels(n) WHERE label IN $managed_labels) "
-            "AND coalesce(n.managed_by, '') = '' "
-            "DETACH DELETE n"
-        ),
-        "parameters": {
-            "managed_labels": managed_labels,
-        },
-    }
 
 
 def _resolved_sync_apply_options(
@@ -15375,197 +14861,6 @@ def sync_snapshot(
         sync_run,
         managed_labels,
     )
-
-
-def _batched[T](items: list[T], size: int) -> list[list[T]]:
-    return [items[index : index + size] for index in range(0, len(items), size)]
-
-
-def _statement_failure_context(statement: dict[str, JsonValue]) -> str:
-    parameters = _as_mapping(statement.get("parameters"))
-    node_name = parameters.get("name")
-    if node_name is not None:
-        return f"name={node_name!r}"
-    source_name = parameters.get("source_name")
-    target_name = parameters.get("target_name")
-    return f"source={source_name!r}, target={target_name!r}"
-
-
-def _raise_grouped_statement_failure(
-    context: GroupedStatementFailureContext,
-    statement: dict[str, JsonValue],
-    cause: Exception,
-) -> None:
-    raise RuntimeError(
-        f"Neo4j sync failed while applying {context.kind} group `{context.group_name}` "
-        f"(batch {context.batch_index}/{context.batch_count}, "
-        f"statement {context.statement_index}/{context.statement_count}, "
-        f"{_statement_failure_context(statement)})"
-    ) from cause
-
-
-def _execute_statement_batch(
-    client: Neo4jHttpClient,
-    batch: list[dict[str, JsonValue]],
-    *,
-    kind: str,
-    group_name: str,
-    batch_index: int,
-    batch_count: int,
-) -> None:
-    try:
-        client.execute(batch)
-    except Exception as exc:  # pragma: no cover - depends on live backend state
-        if len(batch) == 1:
-            _raise_grouped_statement_failure(
-                GroupedStatementFailureContext(
-                    kind=kind,
-                    group_name=group_name,
-                    batch_index=batch_index,
-                    batch_count=batch_count,
-                    statement_index=1,
-                    statement_count=1,
-                ),
-                statement=batch[0],
-                cause=exc,
-            )
-        for statement_index, statement in enumerate(batch, start=1):
-            try:
-                client.execute([statement])
-            except (
-                Exception
-            ) as statement_exc:  # pragma: no cover - live backend dependent
-                _raise_grouped_statement_failure(
-                    GroupedStatementFailureContext(
-                        kind=kind,
-                        group_name=group_name,
-                        batch_index=batch_index,
-                        batch_count=batch_count,
-                        statement_index=statement_index,
-                        statement_count=len(batch),
-                    ),
-                    statement=statement,
-                    cause=statement_exc,
-                )
-
-
-def _execute_grouped_statements(
-    client: Neo4jHttpClient,
-    grouped_statements: dict[str, list[dict[str, JsonValue]]],
-    batch_size: int,
-    kind: str,
-) -> None:
-    for group_name in sorted(grouped_statements):
-        statements = grouped_statements[group_name]
-        grouped_batches = _batched(statements, batch_size)
-        for batch_index, batch in enumerate(grouped_batches, start=1):
-            _execute_statement_batch(
-                client,
-                batch,
-                kind=kind,
-                group_name=group_name,
-                batch_index=batch_index,
-                batch_count=len(grouped_batches),
-            )
-
-
-def _live_managed_node_count(client: Neo4jHttpClient, label: str) -> int:
-    return _live_managed_node_counts(
-        client,
-        (label,),
-        context=f"managed node count for label `{label}`",
-    ).get(label, 0)
-
-
-def _live_managed_relation_count(client: Neo4jHttpClient, relation_type: str) -> int:
-    return _live_managed_relation_counts(
-        client,
-        (relation_type,),
-        context=f"managed relation count for type `{relation_type}`",
-    ).get(relation_type, 0)
-
-
-def _managed_sync_run_clause(
-    alias: str,
-    sync_run: str | None,
-) -> str:
-    return f"AND coalesce({alias}.sync_run, '') = $sync_run " if sync_run else ""
-
-
-def _count_rows_by_key(
-    rows: list[dict[str, JsonValue]],
-    keys: tuple[str, ...],
-    key_field: str,
-) -> dict[str, int]:
-    counts = dict.fromkeys(keys, 0)
-    for row in rows:
-        key_value = row.get(key_field)
-        count = row.get("count")
-        if isinstance(key_value, str) and isinstance(count, (int, float)):
-            counts[key_value] = _coerce_int(count)
-    return counts
-
-
-def _live_managed_node_counts(
-    client: Neo4jHttpClient,
-    labels: tuple[str, ...],
-    *,
-    context: str,
-    sync_run: str | None = None,
-) -> dict[str, int]:
-    if not labels:
-        return {}
-    rows = client.query(
-        (
-            "UNWIND $labels AS label "
-            "OPTIONAL MATCH (n) "
-            "WHERE label IN labels(n) "
-            "AND coalesce(n.managed_by, '') = $managed_by "
-            "AND coalesce(n.ingest_wave, '') = $ingest_wave "
-            f"{_managed_sync_run_clause('n', sync_run)}"
-            "RETURN label, count(n) AS count "
-            "ORDER BY label"
-        ),
-        {
-            "labels": list(labels),
-            "managed_by": DEFAULT_MANAGED_BY,
-            "ingest_wave": DEFAULT_INGEST_WAVE,
-            "sync_run": sync_run or "",
-        },
-        context=context,
-    )
-    return _count_rows_by_key(rows, labels, "label")
-
-
-def _live_managed_relation_counts(
-    client: Neo4jHttpClient,
-    relation_types: tuple[str, ...],
-    *,
-    context: str,
-    sync_run: str | None = None,
-) -> dict[str, int]:
-    if not relation_types:
-        return {}
-    rows = client.query(
-        (
-            "UNWIND $relation_types AS relation_type "
-            "OPTIONAL MATCH ()-[r]->() "
-            "WHERE type(r) = relation_type "
-            "AND coalesce(r.managed_by, '') = $managed_by "
-            "AND coalesce(r.ingest_wave, '') = $ingest_wave "
-            f"{_managed_sync_run_clause('r', sync_run)}"
-            "RETURN relation_type, count(r) AS count "
-            "ORDER BY relation_type"
-        ),
-        {
-            "relation_types": list(relation_types),
-            "managed_by": DEFAULT_MANAGED_BY,
-            "ingest_wave": DEFAULT_INGEST_WAVE,
-            "sync_run": sync_run or "",
-        },
-        context=context,
-    )
-    return _count_rows_by_key(rows, relation_types, "relation_type")
 
 
 def _targeted_apply_required_anchor_labels(snapshot: GraphSnapshot) -> tuple[str, ...]:
@@ -17184,258 +16479,6 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
     )
 
 
-def _build_diff_entries(
-    snapshot_counts: dict[str, int], live_counts: dict[str, int]
-) -> list[dict[str, JsonValue]]:
-    entries: list[dict[str, JsonValue]] = []
-    for name in sorted(set(snapshot_counts) | set(live_counts)):
-        snapshot_value = snapshot_counts.get(name, 0)
-        live_value = live_counts.get(name, 0)
-        entries.append(
-            {
-                "name": name,
-                "snapshot": snapshot_value,
-                "live_managed": live_value,
-                "delta": live_value - snapshot_value,
-            }
-        )
-    return entries
-
-
-def _live_repo_label_rows(
-    client: Neo4jHttpClient, managed_labels: list[str]
-) -> list[dict[str, JsonValue]]:
-    if not managed_labels:
-        return []
-    rows = client.query(
-        (
-            "UNWIND $managed_labels AS label "
-            "OPTIONAL MATCH (n) "
-            "WHERE label IN labels(n) "
-            "WITH label, count(n) AS total "
-            "OPTIONAL MATCH (managed_node) "
-            "WHERE label IN labels(managed_node) "
-            "AND coalesce(managed_node.managed_by, '') = $managed_by "
-            "AND coalesce(managed_node.ingest_wave, '') = $ingest_wave "
-            "WITH label, total, count(managed_node) AS managed "
-            "OPTIONAL MATCH (unmanaged_node) "
-            "WHERE label IN labels(unmanaged_node) "
-            "AND coalesce(unmanaged_node.managed_by, '') = '' "
-            "RETURN label, total, managed, count(unmanaged_node) AS unmanaged "
-            "ORDER BY label"
-        ),
-        {
-            "managed_labels": managed_labels,
-            "managed_by": DEFAULT_MANAGED_BY,
-            "ingest_wave": DEFAULT_INGEST_WAVE,
-        },
-        context="full audit label summary",
-    )
-    return [
-        {
-            "label": str(row["label"]),
-            "total": _coerce_int(row["total"]),
-            "managed": _coerce_int(row["managed"]),
-            "unmanaged": _coerce_int(row["unmanaged"]),
-        }
-        for row in rows
-        if isinstance(row.get("label"), str)
-        and isinstance(row.get("total"), (int, float))
-        and isinstance(row.get("managed"), (int, float))
-        and isinstance(row.get("unmanaged"), (int, float))
-    ]
-
-
-def _live_managed_relation_rows(
-    client: Neo4jHttpClient,
-    relation_types: list[str],
-) -> list[dict[str, JsonValue]]:
-    counts = _live_managed_relation_counts(
-        client,
-        tuple(relation_types),
-        context="full audit relation summary",
-    )
-    return [
-        {"relation_type": relation_type, "total": total}
-        for relation_type, total in sorted(counts.items())
-    ]
-
-
-def _live_orphan_rows(
-    client: Neo4jHttpClient, managed_labels: list[str]
-) -> list[dict[str, JsonValue]]:
-    if not managed_labels:
-        return []
-    rows = client.query(
-        (
-            "UNWIND $managed_labels AS label "
-            "OPTIONAL MATCH (n) "
-            "WHERE label IN labels(n) "
-            "AND coalesce(n.managed_by, '') = $managed_by "
-            "AND coalesce(n.ingest_wave, '') = $ingest_wave "
-            "AND NOT (n)--() "
-            "RETURN label, count(n) AS count, collect(n.name)[0..10] AS samples "
-            "ORDER BY label"
-        ),
-        {
-            "managed_labels": managed_labels,
-            "managed_by": DEFAULT_MANAGED_BY,
-            "ingest_wave": DEFAULT_INGEST_WAVE,
-        },
-        context="full audit orphan summary",
-    )
-    return [
-        {
-            "label": str(row["label"]),
-            "count": _coerce_int(row["count"]),
-            "samples": row.get("samples", []),
-        }
-        for row in rows
-        if isinstance(row.get("label"), str)
-        and isinstance(row.get("count"), (int, float))
-        and _coerce_int(row["count"]) > 0
-    ]
-
-
-def _live_unmanaged_repo_rows(
-    client: Neo4jHttpClient, managed_labels: list[str]
-) -> list[dict[str, JsonValue]]:
-    if not managed_labels:
-        return []
-    rows = client.query(
-        (
-            "UNWIND $managed_labels AS label "
-            "OPTIONAL MATCH (n) "
-            "WHERE label IN labels(n) "
-            "AND coalesce(n.managed_by, '') = '' "
-            "RETURN label, count(n) AS count, collect(n.name)[0..10] AS samples "
-            "ORDER BY label"
-        ),
-        {
-            "managed_labels": managed_labels,
-        },
-        context="full audit unmanaged summary",
-    )
-    return [
-        {
-            "label": str(row["label"]),
-            "count": _coerce_int(row["count"]),
-            "samples": row.get("samples", []),
-        }
-        for row in rows
-        if isinstance(row.get("label"), str)
-        and isinstance(row.get("count"), (int, float))
-        and _coerce_int(row["count"]) > 0
-    ]
-
-
-def _live_scalar(
-    client: Neo4jHttpClient, statement: str, parameters: dict[str, JsonValue]
-) -> int:
-    rows = client.query(statement, parameters)
-    if not rows:
-        return 0
-    value = next(iter(rows[0].values()), 0)
-    return int(value) if isinstance(value, (int, float)) else 0
-
-
-def _row_int_total(rows: list[dict[str, JsonValue]], key: str) -> int:
-    return sum(
-        _coerce_int(row[key]) for row in rows if isinstance(row.get(key), (int, float))
-    )
-
-
-def _managed_label_counts_from_rows(
-    rows: list[dict[str, JsonValue]],
-) -> dict[str, int]:
-    return {
-        str(row["label"]): _coerce_int(row["managed"])
-        for row in rows
-        if isinstance(row.get("label"), str)
-    }
-
-
-def _managed_relation_counts_from_rows(
-    rows: list[dict[str, JsonValue]],
-) -> dict[str, int]:
-    return {
-        str(row["relation_type"]): _coerce_int(row["total"])
-        for row in rows
-        if isinstance(row.get("relation_type"), str)
-    }
-
-
-def _snapshot_count_map(
-    snapshot_stats: dict[str, JsonValue],
-    key: str,
-) -> dict[str, int]:
-    raw_counts = snapshot_stats[key]
-    if not isinstance(raw_counts, dict):
-        return {}
-    return {str(name): _coerce_int(count) for name, count in raw_counts.items()}
-
-
-def _snapshot_subset_count_map(
-    snapshot_stats: dict[str, JsonValue],
-    key: str,
-    names: tuple[str, ...],
-) -> dict[str, int]:
-    raw_counts = snapshot_stats[key]
-    if not isinstance(raw_counts, dict):
-        return {}
-    return {name: _coerce_int(raw_counts.get(name, 0)) for name in names}
-
-
-def _managed_label_summary_from_counts(
-    label_counts: dict[str, int],
-) -> list[dict[str, JsonValue]]:
-    return [
-        {
-            "label": label,
-            "managed": count,
-            "count": count,
-            "unmanaged": 0,
-        }
-        for label, count in label_counts.items()
-    ]
-
-
-def _managed_relation_summary_from_counts(
-    relation_counts: dict[str, int],
-) -> list[dict[str, JsonValue]]:
-    return [
-        {"relation_type": relation_type, "total": total}
-        for relation_type, total in relation_counts.items()
-    ]
-
-
-def _audit_live_summary(
-    *,
-    managed_node_total: int,
-    managed_relation_total: int,
-    unmanaged_repo_node_total: int,
-    label_summary: list[dict[str, JsonValue]],
-    managed_relation_summary: list[dict[str, JsonValue]],
-    orphan_summary: list[dict[str, JsonValue]],
-    unmanaged_summary: list[dict[str, JsonValue]],
-) -> dict[str, JsonValue]:
-    return {
-        "managed_node_total": managed_node_total,
-        "managed_relation_total": managed_relation_total,
-        "unmanaged_repo_node_total": unmanaged_repo_node_total,
-        "label_summary": label_summary,
-        "managed_relation_summary": managed_relation_summary,
-        "orphan_summary": {
-            "total": _row_int_total(orphan_summary, "count"),
-            "by_label": orphan_summary,
-        },
-        "unmanaged_summary": {
-            "total": unmanaged_repo_node_total,
-            "by_label": unmanaged_summary,
-        },
-    }
-
-
 def _audit_report_payload(
     *,
     snapshot_payload: dict[str, JsonValue],
@@ -17670,67 +16713,6 @@ def _critical_diff_issues(
                 f"{kind} `{name}` expected {row.get('snapshot')}, live managed {row.get('live_managed')}"
             )
     return issues
-
-
-def _selection_from_args(args: argparse.Namespace) -> SnapshotSelection:
-    from memory.graph.sync_pkg import cli as _cli
-
-    return _cli._selection_from_args(args)
-
-
-def _print_snapshot_stats(snapshot: GraphSnapshot) -> None:
-    from memory.graph.sync_pkg import cli as _cli
-
-    return _cli._print_snapshot_stats(snapshot)
-
-
-def _export_snapshot_if_requested(
-    snapshot: GraphSnapshot,
-    export_path: Path | None,
-) -> None:
-    from memory.graph.sync_pkg import cli as _cli
-
-    _cli._export_snapshot_if_requested(snapshot, export_path)
-
-
-def _sync_snapshot_if_requested(
-    args: argparse.Namespace,
-    snapshot: GraphSnapshot,
-    root: Path,
-    selection: SnapshotSelection,
-) -> None:
-    from memory.graph.sync_pkg import cli as _cli
-
-    _cli._sync_snapshot_if_requested(args, snapshot, root, selection)
-
-
-def _report_payload(
-    snapshot: GraphSnapshot,
-    root: Path,
-    http_uri: str | None,
-    report_fast: bool,
-) -> dict[str, JsonValue]:
-    from memory.graph.sync_pkg import cli as _cli
-
-    return _cli._report_payload(snapshot, root, http_uri, report_fast)
-
-
-def _write_report_if_requested(
-    snapshot: GraphSnapshot,
-    root: Path,
-    http_uri: str | None,
-    report_path: Path | None,
-    report_fast: bool,
-) -> None:
-    from memory.graph.sync_pkg import cli as _cli
-
-    _cli._write_report_if_requested(
-        snapshot,
-        root,
-        http_uri,
-        report_path,
-        report_fast,
-    )
 
 
 __all__ = [name for name in globals() if not name.startswith("__")]

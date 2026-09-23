@@ -16,12 +16,12 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | --- | ---: | --- |
 | bioetl-control-plane-v1.json | 1000 | Navigate Dashboards |
 | bioetl-control-plane-v1.json | 9400 | Inspect Scope & Evidence |
-| bioetl-control-plane-v1.json | 9401 | Monitor Current Readiness |
+| bioetl-control-plane-v1.json | 9401 | Monitor Readiness |
 | bioetl-control-plane-v1.json | 9418 | Review Selected-Run Trust |
 | bioetl-control-plane-v1.json | 9416 | Review Retention Compliance |
-| bioetl-control-plane-v1.json | 891 | Monitor Replay Safety |
-| bioetl-control-plane-v1.json | 892 | Monitor Checkpoint Age |
-| bioetl-control-plane-v1.json | 893 | Monitor Manifest/Ledger |
+| bioetl-control-plane-v1.json | 891 | Monitor Replay |
+| bioetl-control-plane-v1.json | 892 | Track Checkpoint |
+| bioetl-control-plane-v1.json | 893 | Monitor Ledger |
 | bioetl-control-plane-v1.json | 907 | Monitor Telemetry |
 | bioetl-control-plane-v1.json | 9419 | Review Lineage Validation |
 | bioetl-control-plane-v1.json | 9415 | Review Lineage Validation |
@@ -78,20 +78,27 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 9402 | Review Run Summary |
 | bioetl-control-plane-v1.json | 9403 | Review Processed Records |
 | bioetl-control-plane-v1.json | 9417 | Review Bounded Failure Reasons |
+| bioetl-control-plane-v1.json | 9420 | Inspect Complete Run Discovery |
+| bioetl-control-plane-v1.json | 9421 | Inspect Latest Complete Run |
+| bioetl-control-plane-v1.json | 9450 | Inspect Saved Run Evidence |
+| bioetl-control-plane-v1.json | 9451 | Inspect Selected Run Domains |
+| bioetl-control-plane-v1.json | 9452 | Inspect Selected Run Identity |
 | bioetl-dq-v2.json | 1000 | Navigate Dashboards |
 | bioetl-dq-v2.json | 9400 | Understand Evidence Scope |
 | bioetl-dq-v2.json | 9401 | Monitor Current DQ Status |
 | bioetl-dq-v2.json | 9103 | Start DQ Triage |
 | bioetl-dq-v2.json | 9101 | Monitor DQ Threshold State |
 | bioetl-dq-v2.json | 9102 | Inspect Current DQ Reasons |
-| bioetl-dq-v2.json | 9406 | Review Selected Run Summary |
+| bioetl-dq-v2.json | 9406 | Review Selected Run Status |
 | bioetl-dq-v2.json | 9405 | Selected Run · Identity & Accounting |
 | bioetl-dq-v2.json | 9402 | Inspect Run Identity |
 | bioetl-dq-v2.json | 9403 | Inspect Processed Records |
 | bioetl-dq-v2.json | 9404 | Selected Range · Impact & Freshness |
+| bioetl-dq-v2.json | 157 | Review DQ Coverage |
 | bioetl-dq-v2.json | 2 | Monitor Volume-Weighted DQ Score |
 | bioetl-dq-v2.json | 5 | Monitor Worst-Entity DQ Score |
 | bioetl-dq-v2.json | 8 | Monitor Worst Freshness Age |
+| bioetl-dq-v2.json | 158 | Inspect DQ Sample Coverage |
 | bioetl-dq-v2.json | 154 | Monitor Blocked Records |
 | bioetl-dq-v2.json | 6 | Monitor Quarantined Records |
 | bioetl-dq-v2.json | 117 | Monitor Silver Filter Rejects |
@@ -111,10 +118,13 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 151 | Monitor Gold Validation Failures |
 | bioetl-dq-v2.json | 10 | Track DQ Anomalies |
 | bioetl-dq-v2.json | 11 | Track DQ Check Duration p95 |
-| bioetl-dq-v2.json | 155 | Track DQ Threshold Events |
-| bioetl-dq-v2.json | 153 | Track Volume-Weighted DQ Score |
 | bioetl-dq-v2.json | 116 | Inspect Lineage in Control Plane |
 | bioetl-dq-v2.json | 150 | Inspect Aggregate Control-Plane Issues |
+| bioetl-dq-v2.json | 153 | Track Volume-Weighted DQ Score |
+| bioetl-dq-v2.json | 155 | Track DQ Threshold Events |
+| bioetl-dq-v2.json | 9450 | Inspect Saved Run Evidence |
+| bioetl-dq-v2.json | 9451 | Inspect Selected Run Domains |
+| bioetl-dq-v2.json | 9452 | Inspect Selected Run Identity |
 | bioetl-incident-v1.json | 1000 | Navigate Dashboards |
 | bioetl-incident-v1.json | 9400 | Understand Incident Scope |
 | bioetl-incident-v1.json | 9401 | Monitor Selected-Scope Status |
@@ -129,17 +139,20 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-incident-v1.json | 2003 | Inspect Provider Suspects |
 | bioetl-incident-v1.json | 2004 | Inspect DQ Suspects |
 | bioetl-incident-v1.json | 2100 | Inspect Selected Run Summary |
-| bioetl-incident-v1.json | 2101 | Review Selected Run Summary |
+| bioetl-incident-v1.json | 2101 | Review Selected Run Status |
 | bioetl-incident-v1.json | 32010 | Inspect Full Ranked Suspects |
 | bioetl-incident-v1.json | 22010 | Inspect Full Ranked Suspects |
 | bioetl-incident-v1.json | 32005 | Inspect Full Current Alerts |
 | bioetl-incident-v1.json | 22005 | Inspect Full Current Alerts |
+| bioetl-incident-v1.json | 9450 | Inspect Saved Run Evidence |
+| bioetl-incident-v1.json | 9451 | Inspect Selected Run Domains |
+| bioetl-incident-v1.json | 9452 | Inspect Selected Run Identity |
 | bioetl-overview-v2.json | 1000 | Navigate Dashboards |
 | bioetl-overview-v2.json | 99 | Inspect Scope & Evidence |
-| bioetl-overview-v2.json | 9603 | Review Selected Run Summary |
+| bioetl-overview-v2.json | 9603 | Review Selected Run Status |
 | bioetl-overview-v2.json | 214 | Monitor Scope Health |
 | bioetl-overview-v2.json | 215 | Review First Action |
-| bioetl-overview-v2.json | 9002 | Review Domain Status |
+| bioetl-overview-v2.json | 9002 | Review Selected Run Domains |
 | bioetl-overview-v2.json | 9600 | Inspect Alerts |
 | bioetl-overview-v2.json | 9601 | Review Active Alerts |
 | bioetl-overview-v2.json | 9030 | Domain Status Tracks |
@@ -164,6 +177,9 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-overview-v2.json | 9301 | Review Processed Records |
 | bioetl-overview-v2.json | 30215 | Inspect Full First Action |
 | bioetl-overview-v2.json | 20215 | Inspect Full First Action |
+| bioetl-overview-v2.json | 9450 | Inspect Saved Run Evidence |
+| bioetl-overview-v2.json | 9451 | Inspect Selected Run Domains |
+| bioetl-overview-v2.json | 9452 | Inspect Selected Run Identity |
 | bioetl-provider-health-v2.json | 1000 | Navigate Dashboards |
 | bioetl-provider-health-v2.json | 9400 | Understand Evidence Scope |
 | bioetl-provider-health-v2.json | 9401 | Monitor Selected Provider |
@@ -201,9 +217,15 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-provider-health-v2.json | 9405 | Run Context |
 | bioetl-provider-health-v2.json | 9402 | Inspect Run Identity |
 | bioetl-provider-health-v2.json | 9403 | Inspect Processed Records |
+| bioetl-provider-health-v2.json | 9450 | Inspect Saved Run Evidence |
+| bioetl-provider-health-v2.json | 9451 | Inspect Selected Run Domains |
+| bioetl-provider-health-v2.json | 9452 | Inspect Selected Run Identity |
 | bioetl-run-explorer-v1.json | 1000 | Navigate Dashboards |
 | bioetl-run-explorer-v1.json | 1 | Understand Run Scope |
 | bioetl-run-explorer-v1.json | 3010 | Inspect Recent Runs (last 10) |
+| bioetl-run-explorer-v1.json | 9450 | Inspect Saved Run Evidence |
+| bioetl-run-explorer-v1.json | 9451 | Inspect Selected Run Domains |
+| bioetl-run-explorer-v1.json | 9452 | Inspect Selected Run Identity |
 | bioetl-runtime.json | 1000 | Navigate Dashboards |
 | bioetl-runtime.json | 9400 | Understand Pipeline Scope |
 | bioetl-runtime.json | 9401 | Monitor Pipeline Status |
@@ -244,10 +266,13 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-runtime.json | 9993 | Inspect Run Context |
 | bioetl-runtime.json | 9402 | Inspect Pipeline Identity |
 | bioetl-runtime.json | 9403 | Inspect Processed Records |
-| bioetl-runtime.json | 9998 | Review Selected Run Summary |
+| bioetl-runtime.json | 9998 | Review Selected Run Status |
 | bioetl-runtime.json | 9994 | Inspect Workflow Evidence |
 | bioetl-runtime.json | 9996 | Track Failed Workflow Runs |
 | bioetl-runtime.json | 9997 | Track Failed Workflow Steps |
 | bioetl-runtime.json | 32460 | Inspect Full Stage Progress |
 | bioetl-runtime.json | 22460 | Inspect Full Stage Progress |
 | bioetl-runtime.json | 2461 | Inspect Current Missing Stage Signals |
+| bioetl-runtime.json | 9450 | Inspect Saved Run Evidence |
+| bioetl-runtime.json | 9451 | Inspect Selected Run Domains |
+| bioetl-runtime.json | 9452 | Inspect Selected Run Identity |

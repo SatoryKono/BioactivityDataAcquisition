@@ -93,8 +93,8 @@
           "refId": "variable",
           "infinityQuery": {
             "format": "table",
-            "parser": "simple",
-            "root_selector": "items",
+            "parser": "backend",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -184,8 +184,8 @@
           "refId": "variable",
           "infinityQuery": {
             "format": "table",
-            "parser": "simple",
-            "root_selector": "items",
+            "parser": "backend",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO MATCHES\",\"value\":\"-\"}] : items",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -413,7 +413,7 @@
     {
       "id": 9401,
       "type": "stat",
-      "title": "Monitor Current Readiness",
+      "title": "Monitor Readiness",
       "gridPos": {
         "h": 3,
         "w": 6,
@@ -483,7 +483,7 @@
           },
           "unit": "none",
           "noValue": "UNKNOWN",
-          "displayName": "Monitor Current Readiness"
+          "displayName": "Monitor Readiness"
         },
         "overrides": []
       },
@@ -1735,7 +1735,7 @@
             ]
           },
           "unit": "short",
-          "displayName": "Monitor Replay Safety"
+          "displayName": "Monitor Replay"
         },
         "overrides": []
       },
@@ -1779,7 +1779,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Replay Safety",
+      "title": "Monitor Replay",
       "type": "stat"
     },
     {
@@ -1824,7 +1824,7 @@
           },
           "unit": "s",
           "noValue": "UNKNOWN",
-          "displayName": "Monitor Checkpoint Age"
+          "displayName": "Track Checkpoint"
         },
         "overrides": []
       },
@@ -1885,7 +1885,7 @@
           }
         }
       ],
-      "title": "Monitor Checkpoint Age",
+      "title": "Track Checkpoint",
       "type": "stat",
       "transparent": false
     },
@@ -1948,7 +1948,7 @@
           },
           "unit": "short",
           "noValue": "UNKNOWN",
-          "displayName": "Monitor Manifest/Ledger"
+          "displayName": "Monitor Ledger"
         },
         "overrides": []
       },
@@ -1992,7 +1992,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Manifest/Ledger",
+      "title": "Monitor Ledger",
       "type": "stat"
     },
     {
