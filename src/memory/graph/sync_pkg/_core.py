@@ -694,6 +694,12 @@ from memory.graph.sync_pkg.composite_pipeline_dependency_keys import (
 from memory.graph.sync_pkg.composite_pipeline_dependency_keys import (
     _composite_pipeline_dependency_keys as _composite_pipeline_dependency_keys,
 )
+from memory.graph.sync_pkg.composite_pipeline_name import (
+    _add_composite_pipeline_surface as _add_composite_pipeline_surface,
+)
+from memory.graph.sync_pkg.composite_pipeline_name import (
+    _composite_pipeline_name as _composite_pipeline_name,
+)
 from memory.graph.sync_pkg.composite_seed_pipeline_name import (
     _add_pipeline_normalization_edges as _add_pipeline_normalization_edges,
 )
@@ -5863,68 +5869,6 @@ def _add_composite_pipeline_surfaces(
             composite_path,
             pipeline_nodes=pipeline_nodes,
         )
-
-
-def _composite_pipeline_name(
-    composite_path: Path,
-    composite_payload: object,
-) -> str:
-    composite_name = composite_path.stem
-    if isinstance(composite_payload, dict):
-        composite_name = str(composite_payload.get("name", composite_name))
-    return composite_name
-
-
-def _add_composite_pipeline_surface(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    composite_path: Path,
-    *,
-    pipeline_nodes: dict[str, NodeKey],
-) -> None:
-    payload = _read_yaml(composite_path)
-    composite_payload = payload.get("composite")
-    composite_name = _composite_pipeline_name(composite_path, composite_payload)
-    pipeline = snapshot.add_node(
-        "pipeline_surface",
-        composite_name,
-        summary=f"Composite pipeline `{composite_name}`.",
-        source_path=_rel_path(root, composite_path),
-        source_kind="composite_pipeline",
-        pipeline_kind="composite",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    pipeline_nodes[composite_name] = pipeline
-    snapshot.add_relation(
-        project, "HAS_PIPELINE", pipeline, provenance="impact_pipelines"
-    )
-    composite_key = NodeKey("composite_config", composite_name)
-    if composite_key in snapshot.nodes:
-        snapshot.add_relation(
-            pipeline, "BACKED_BY", composite_key, provenance="impact_pipelines"
-        )
-    config_artifact = NodeKey("config_artifact", _rel_path(root, composite_path))
-    if config_artifact in snapshot.nodes:
-        snapshot.add_relation(
-            pipeline, "DEFINED_BY", config_artifact, provenance="impact_pipelines"
-        )
-    _link_pipeline_doc_artifacts(
-        snapshot,
-        pipeline,
-        _pipeline_doc_artifact_targets(
-            snapshot,
-            provider_name="composite",
-            entity_name=composite_name.removeprefix("composite_"),
-        ),
-        provenance="impact_pipeline_docs",
-    )
-    _link_composite_pipeline_dependencies(
-        snapshot, pipeline, composite_payload, pipeline_nodes
-    )
 
 
 def _add_pipeline_test_edges(
