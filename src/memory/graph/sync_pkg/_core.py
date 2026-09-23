@@ -378,6 +378,12 @@ from memory.graph.sync_pkg.add_runtime_evidence_surface import (
 from memory.graph.sync_pkg.add_runtime_evidence_surface import (
     _link_run_instance_surface as _link_run_instance_surface,
 )
+from memory.graph.sync_pkg.add_runtime_state_spec_surfaces import (
+    _add_runtime_state_spec_surfaces as _add_runtime_state_spec_surfaces,
+)
+from memory.graph.sync_pkg.add_runtime_state_spec_surfaces import (
+    _workflow_script_targets as _workflow_script_targets,
+)
 from memory.graph.sync_pkg.add_secret_requirements import (
     _add_secret_requirements as _add_secret_requirements,
 )
@@ -2776,23 +2782,6 @@ def _add_runtime_state_surfaces(
     snapshot: GraphSnapshot, project: NodeKey, today: str
 ) -> None:
     _add_runtime_state_spec_surfaces(snapshot, project, today)
-
-
-def _add_runtime_state_spec_surfaces(
-    snapshot: GraphSnapshot,
-    project: NodeKey,
-    today: str,
-) -> None:
-    for spec in _runtime_state_specs():
-        state = _add_runtime_state_surface(snapshot, project, today, spec)
-        _link_runtime_state_surface(snapshot, state, spec)
-
-
-def _workflow_script_targets(run_text: str) -> set[NodeKey]:
-    targets: set[NodeKey] = set()
-    targets.update(_workflow_module_script_targets(run_text))
-    targets.update(_workflow_repo_path_targets(run_text))
-    return targets
 
 
 def _process_workflow_steps(
