@@ -148,7 +148,7 @@ def test_issue_6100_vcr_replay_preflight_is_registered_and_catalog_safe() -> Non
 
     assert "check-vcr-replay-preflight" in qa_main
     assert "check-replay-preflight" in vcr_main
-    assert "git lfs pull" in docs
+    assert "GitHub LFS is not used" in docs
 
     report = check_replay_preflight.collect_vcr_replay_preflight(ROOT)
     assert report["schema_version"] == "vcr-replay-preflight-v1"

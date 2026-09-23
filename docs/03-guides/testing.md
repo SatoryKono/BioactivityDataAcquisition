@@ -225,8 +225,8 @@ installed in the active shell.
 `check-vcr-replay-preflight --strict` is the faster replay-lane gate for long
 VCR-backed integration/e2e runs. It reports exact unresolved cassette paths,
 flags replay-critical Git LFS pointers before pytest setup, performs cheap VCR
-metadata-catalog and sanitizer checks, and uses `git lfs pull` as the local
-remediation path.
+metadata-catalog and sanitizer checks, and treats leftover pointer files as
+blockers. Remediation is to commit the full YAML in git (GitHub LFS is not used).
 Refresh the committed test-governance artifacts after changing test sources:
 
 ```bash
@@ -289,19 +289,16 @@ Failure classifications are informational and come from
 `configs/quality/test_health_classifiers.yaml`; pytest exit codes and quality
 gates remain the blocking signals.
 
-Git LFS recovery notes:
+VCR cassette storage notes:
 
-- LFS-tracked test fixtures are declared in `.gitattributes` under
-  `tests/fixtures/vcr/**/*.yaml`.
-- If GitHub rejects a push with `GH008` for an unknown LFS object, first verify
-  local LFS health with `git lfs fsck`, then upload the missing object with
-  `git lfs push origin --object-id <sha>` or, for a full repair,
-  `git lfs push --all origin`.
-- If a generated local pre-push hook fails with
-  `fatal: could not open '/dev/stdin' for reading`, do not replay that hook via
-  a scripted `/dev/stdin` path. Run the explicit `git lfs push ...` repair
-  command from a shell where `git-lfs` is on `PATH`, then rerun the normal
-  project pre-push checks.
+- `tests/fixtures/vcr/**/*.yaml` are regular git blobs (`text eol=lf` in
+  `.gitattributes`). GitHub LFS is not used; the account LFS budget is exhausted
+  and will not be increased.
+- If a cassette is an LFS pointer (`version https://git-lfs.github.com/spec/v1`),
+  replace it with the materialized YAML from a local checkout that already has
+  the payload (`git lfs checkout` against a local LFS object store) and commit
+  the full file. Do not run `git lfs push` to GitHub.
+- CI required VCR lanes reject leftover pointer files fail-closed (#7493).
 
 Canonical local execution paths:
 

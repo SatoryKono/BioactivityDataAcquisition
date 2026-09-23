@@ -54,6 +54,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **VCR cassettes leave GitHub LFS:** `tests/fixtures/vcr/**/*.yaml` are stored
+  as regular git blobs. Required CI lanes no longer call `git lfs pull`; they
+  fail closed on leftover pointer files. GitHub LFS quota will not be increased.
+
 - **Gold/Silver assay_parameters and publication_similarity snapshots:** live
   schemas already renamed `type`/`relation`/`value` → `parameter_*` and added
   `publication_id1`/`publication_id2`; golden Gold registry, Silver contract

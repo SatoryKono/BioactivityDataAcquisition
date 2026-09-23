@@ -139,28 +139,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
-          # Prefer real LFS payloads for content SHA gates. If the account
-          # LFS data pack is exhausted, checkout still succeeds with
-          # pointer files and we fail with an actionable message below.
+          # Cassettes are git blobs. Keep lfs: false so an exhausted GitHub
+          # LFS budget cannot block checkout; pointer stubs fail below.
           lfs: false
 
-      - name: Fetch Git LFS objects for VCR cassettes
-        id: lfs_pull
+      - name: Reject Git LFS pointer cassettes
+        id: vcr_pointer_guard
         run: |
           set -euo pipefail
-          # Fail-closed (#7493): required VCR preflight must not succeed
-          # without materialized cassette payloads.
-          if ! git lfs pull; then
-            echo "::error::Git LFS pull failed. Typical causes: exhausted LFS bandwidth/storage budget or missing git-lfs credentials. Increase the GitHub LFS data pack (Settings â†’ Billing â†’ Git LFS) or free LFS storage, then re-run. VCR content SHA checks cannot run on pointer files."
+          # Fail-closed (#7493): cassette payloads must be git blobs. GitHub
+          # LFS quota is exhausted and will not be increased.
+          if git grep -q 'git-lfs.github.com/spec/v1' -- tests/fixtures/vcr; then
+            echo "::error::VCR cassette is still a Git LFS pointer. Store the full YAML in git and re-run."
+            git grep -l 'git-lfs.github.com/spec/v1' -- tests/fixtures/vcr
             exit 1
-          fi
-          # Fail fast if cassettes are still LFS pointer stubs.
-          if git lfs ls-files -n | head -n 1 | grep -q .; then
-            sample="$(git lfs ls-files -n | head -n 1)"
-            if [ -f "$sample" ] && head -n 1 "$sample" | grep -q 'git-lfs.github.com/spec/v1'; then
-              echo "::error::LFS objects were not materialized (still pointer files). Increase the GitHub LFS data pack and re-run."
-              exit 1
-            fi
           fi
 
       - name: Install uv + cache + dependencies
@@ -197,23 +189,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
-          # Prefer real LFS payloads for PubChem VCR smoke. Fail closed
-          # when required cassette payloads cannot be materialized (#7493).
+          # PubChem VCR smoke uses git-stored cassettes. Fail closed when a
+          # leftover Git LFS pointer is present (#7493).
           lfs: false
 
-      - name: Fetch Git LFS objects for VCR cassettes
-        id: lfs_pull
+      - name: Reject Git LFS pointer cassettes
+        id: vcr_pointer_guard
         run: |
           set -euo pipefail
           # Fail-closed (#7493): blocking control-plane confidence lane
-          # must not succeed without replay-critical VCR evidence.
-          if ! git lfs pull; then
-            echo "::error::Git LFS pull failed for control-plane-e2e. Required VCR smoke cannot run without cassette payloads. Increase the GitHub LFS data pack and re-run."
+          # must not succeed without replay-critical VCR evidence in git.
+          if git grep -q 'git-lfs.github.com/spec/v1' -- tests/fixtures/vcr; then
+            echo "::error::VCR cassette is still a Git LFS pointer. Store the full YAML in git and re-run control-plane-e2e."
+            git grep -l 'git-lfs.github.com/spec/v1' -- tests/fixtures/vcr
             exit 1
           fi
           cassette="tests/fixtures/vcr/pubchem/test_pubchem_compound_full_cycle.yaml"
           if [ -f "$cassette" ] && head -n 1 "$cassette" | grep -q 'git-lfs.github.com/spec/v1'; then
-            echo "::error::PubChem VCR cassette is still an LFS pointer. Materialize LFS objects and re-run control-plane-e2e."
+            echo "::error::PubChem VCR cassette is still an LFS pointer. Store the full YAML in git and re-run control-plane-e2e."
             exit 1
           fi
 
@@ -366,22 +359,16 @@ jobs:
         with:
           lfs: false
 
-      - name: Fetch Git LFS objects for governance preflight
-        id: governance_lfs_pull
+      - name: Reject Git LFS pointer cassettes
+        id: vcr_pointer_guard
         run: |
           set -euo pipefail
           # Fail-closed (#7493): VCR-bound governance preflight must not
-          # be skipped when required LFS cassette payloads are missing.
-          if ! git lfs pull; then
-            echo "::error::Git LFS pull failed for governance-preflight. Required VCR-bound governance checks cannot run without cassette payloads. Increase the GitHub LFS data pack and re-run."
+          # hash Git LFS pointer stubs. Cassette payloads live in git.
+          if git grep -q 'git-lfs.github.com/spec/v1' -- tests/fixtures/vcr; then
+            echo "::error::VCR cassette is still a Git LFS pointer. Store the full YAML in git and re-run governance-preflight."
+            git grep -l 'git-lfs.github.com/spec/v1' -- tests/fixtures/vcr
             exit 1
-          fi
-          if git lfs ls-files -n | head -n 1 | grep -q .; then
-            sample="$(git lfs ls-files -n | head -n 1)"
-            if [ -f "$sample" ] && head -n 1 "$sample" | grep -q 'git-lfs.github.com/spec/v1'; then
-              echo "::error::Git LFS objects remain pointer files for governance-preflight. Materialize LFS objects and re-run."
-              exit 1
-            fi
           fi
 
       - name: Setup Python + uv

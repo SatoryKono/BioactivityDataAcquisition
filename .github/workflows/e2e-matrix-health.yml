@@ -231,11 +231,12 @@ jobs:
         with:
           lfs: false
 
-      - name: Fetch Git LFS objects for E2E
+      - name: Reject Git LFS pointer cassettes
         run: |
           set -euo pipefail
-          if ! git lfs pull; then
-            echo "::error::Git LFS pull failed for e2e-nightly-full"
+          if git grep -q 'git-lfs.github.com/spec/v1' -- tests/fixtures/vcr; then
+            echo "::error::Git LFS pointer cassette blocks e2e-nightly-full. Store the full YAML in git."
+            git grep -l 'git-lfs.github.com/spec/v1' -- tests/fixtures/vcr
             exit 1
           fi
 

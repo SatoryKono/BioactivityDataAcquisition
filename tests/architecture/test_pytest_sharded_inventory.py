@@ -186,14 +186,15 @@ def test_architecture_ci_matrix_matches_canonical_physical_shards() -> None:
 
     assert arch_job["strategy"]["fail-fast"] is False
     assert [entry["shard"] for entry in matrix] == expected
-    assert [entry["shard"] for entry in matrix if entry["requires_lfs"]] == [
-        "S7-crosscutting-architecture-d"
-    ]
+    assert [entry["shard"] for entry in matrix if entry["requires_lfs"]] == []
 
-    lfs_step = next(
-        step for step in arch_job["steps"] if step["name"].startswith("Fetch Git LFS")
+    pointer_step = next(
+        step
+        for step in arch_job["steps"]
+        if step["name"].startswith("Reject Git LFS pointer")
     )
-    assert lfs_step["if"] == "${{ matrix.requires_lfs }}"
+    assert "if" not in pointer_step
+    assert "git lfs pull" not in str(pointer_step)
     assert "import-contracts" in workflow["jobs"]["checks-complete"]["needs"]
 
 
