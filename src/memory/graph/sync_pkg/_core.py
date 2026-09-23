@@ -2178,6 +2178,12 @@ from memory.graph.sync_pkg.runtime_evidence_storage_refs import (
 from memory.graph.sync_pkg.runtime_evidence_storage_refs import (
     _runtime_evidence_storage_refs as _runtime_evidence_storage_refs,
 )
+from memory.graph.sync_pkg.runtime_state_artifact_targets import (
+    _runtime_state_artifact_targets as _runtime_state_artifact_targets,
+)
+from memory.graph.sync_pkg.runtime_state_artifact_targets import (
+    _runtime_state_doc_targets as _runtime_state_doc_targets,
+)
 from memory.graph.sync_pkg.runtime_state_properties import (
     _link_runtime_state_evidence_dependencies as _link_runtime_state_evidence_dependencies,
 )
@@ -2992,20 +2998,6 @@ def _link_runtime_state_evidence_materials(
             snapshot.add_relation(
                 state, "DESCRIBED_IN", doc_key, provenance="runtime_state"
             )
-
-
-def _runtime_state_artifact_targets(spec: dict[str, object]) -> tuple[NodeKey, ...]:
-    return tuple(
-        NodeKey("control_plane_artifact_surface", str(artifact_name))
-        for artifact_name in _as_iterable(spec.get("artifact_refs"))
-    )
-
-
-def _runtime_state_doc_targets(spec: dict[str, object]) -> tuple[NodeKey, ...]:
-    return tuple(
-        NodeKey("doc_artifact", str(doc_path))
-        for doc_path in _as_iterable(spec.get("doc_paths"))
-    )
 
 
 def _add_control_plane_run_instance_surfaces(
