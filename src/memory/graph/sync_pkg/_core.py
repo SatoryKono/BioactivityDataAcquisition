@@ -637,6 +637,12 @@ from memory.graph.sync_pkg.composite_dependency_target import (
 from memory.graph.sync_pkg.composite_dependency_target import (
     _link_config_artifact as _link_config_artifact,
 )
+from memory.graph.sync_pkg.composite_group_field_entries import (
+    _add_composite_seed_surface as _add_composite_seed_surface,
+)
+from memory.graph.sync_pkg.composite_group_field_entries import (
+    _composite_group_field_entries as _composite_group_field_entries,
+)
 from memory.graph.sync_pkg.composite_output_storage_ref import (
     _add_composite_output_field_nodes as _add_composite_output_field_nodes,
 )
@@ -3348,46 +3354,6 @@ def _composite_group_fields(merge_payload: dict[str, object]) -> list[tuple[str,
     for item in column_groups:
         group_fields.extend(_composite_group_field_entries(item))
     return group_fields
-
-
-def _composite_group_field_entries(item: object) -> list[tuple[str, str]]:
-    if not isinstance(item, dict):
-        return []
-    group_name = _optional_text(item.get("name"))
-    if group_name is None:
-        return []
-    return [
-        (group_name, field_name)
-        for field_name in (_normalized_text_list(item.get("fields")) or [])
-    ]
-
-
-def _add_composite_seed_surface(
-    snapshot: GraphSnapshot,
-    project: NodeKey,
-    context: CompositePipelineContext,
-    composite_payload: dict[str, object],
-    has_dependency_pipelines: bool,
-) -> list[str]:
-    seed_storage_ref = _composite_seed_storage_ref(composite_payload)
-    if seed_storage_ref is None:
-        return []
-    seed_surface = NodeKey("storage_surface", seed_storage_ref)
-    if has_dependency_pipelines or seed_surface not in snapshot.nodes:
-        seed_surface = _add_storage_surface(
-            snapshot,
-            project,
-            StorageSurfaceSpec(
-                ref=seed_storage_ref,
-                summary=f"Seed storage surface for composite pipeline `{context.composite_name}`.",
-                layer="silver",
-                today=context.today,
-                storage_kind="composite_seed_input",
-                scope=EntityScope(pipeline_name=context.composite_name),
-            ),
-        )
-    _link_composite_seed_surface(snapshot, context, seed_surface)
-    return [seed_storage_ref]
 
 
 def _add_storage_data_surfaces(
