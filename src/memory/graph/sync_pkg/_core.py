@@ -2014,6 +2014,9 @@ from memory.graph.sync_pkg.process_adapter_package import (
 from memory.graph.sync_pkg.process_adapter_root_child import (
     _process_adapter_root_child as _process_adapter_root_child,
 )
+from memory.graph.sync_pkg.process_workflow_job import (
+    _process_workflow_job as _process_workflow_job,
+)
 from memory.graph.sync_pkg.process_workflow_uses_step import (
     _process_workflow_uses_step as _process_workflow_uses_step,
 )
@@ -2906,42 +2909,6 @@ def _add_workflow_jobs(
         context.workflow_name,
         {str(key): value for key, value in jobs.items()},
         job_nodes,
-    )
-
-
-def _process_workflow_job(
-    snapshot: GraphSnapshot,
-    *,
-    context: WorkflowContext,
-    job_id: str,
-    job_payload: dict[str, object],
-    workflow_nodes: dict[str, NodeKey],
-    workflow_name_by_relative_path: dict[str, str],
-    workflow_call_entrypoint: NodeKey | None,
-    job_nodes: dict[tuple[str, str], NodeKey],
-) -> None:
-    job_context, matrix_variants, secret_usage_hints = _add_workflow_job_surface(
-        snapshot,
-        context,
-        job_id=job_id,
-        job_payload=job_payload,
-    )
-    _register_workflow_job(
-        snapshot,
-        context=context,
-        job_id=job_id,
-        job_context=job_context,
-        workflow_call_entrypoint=workflow_call_entrypoint,
-        job_nodes=job_nodes,
-    )
-    _populate_workflow_job_surface(
-        snapshot,
-        workflow_nodes=workflow_nodes,
-        workflow_name_by_relative_path=workflow_name_by_relative_path,
-        job_context=job_context,
-        job_payload=job_payload,
-        matrix_variants=matrix_variants,
-        secret_usage_hints=secret_usage_hints,
     )
 
 
