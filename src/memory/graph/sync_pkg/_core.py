@@ -771,6 +771,18 @@ from memory.graph.sync_pkg.duplication_cluster_groups import (
 from memory.graph.sync_pkg.duplication_cluster_groups import (
     _link_same_shape_members as _link_same_shape_members,
 )
+from memory.graph.sync_pkg.empty_normalization_evidence_payload import (
+    _accumulate_field_matrix_evidence as _accumulate_field_matrix_evidence,
+)
+from memory.graph.sync_pkg.empty_normalization_evidence_payload import (
+    _empty_normalization_evidence_payload as _empty_normalization_evidence_payload,
+)
+from memory.graph.sync_pkg.empty_normalization_evidence_payload import (
+    _enrich_registry_normalization_evidence as _enrich_registry_normalization_evidence,
+)
+from memory.graph.sync_pkg.empty_normalization_evidence_payload import (
+    _finalize_normalization_evidence_defaults as _finalize_normalization_evidence_defaults,
+)
 from memory.graph.sync_pkg.fast_analysis_snapshot_counts import (
     _active_critical_names as _active_critical_names,
 )
@@ -7870,72 +7882,6 @@ def _build_normalization_pipeline_evidence() -> dict[str, dict[str, JsonValue]]:
         evidence[pipeline_name] = payload
     _finalize_normalization_evidence_defaults(evidence)
     return evidence
-
-
-def _empty_normalization_evidence_payload() -> dict[str, JsonValue]:
-    return {
-        "profile_field_count": 0,
-        "fallback_field_count": 0,
-        "fallback_business_field_count": 0,
-        "fallback_technical_passthrough_field_count": 0,
-    }
-
-
-def _accumulate_field_matrix_evidence(
-    evidence: dict[str, dict[str, JsonValue]],
-    rows: list[dict[str, object]],
-    *,
-    fallback_business: str,
-    fallback_technical_passthrough: str,
-) -> None:
-    for row in rows:
-        pipeline_name = str(row.get("pipeline_name", "")).strip()
-        pipeline_kind = str(row.get("pipeline_kind", "")).strip()
-        if not pipeline_name or pipeline_kind != "entity":
-            continue
-        payload = evidence.setdefault(
-            pipeline_name, _empty_normalization_evidence_payload()
-        )
-        source = str(row.get("normalization_source", "")).strip()
-        if source == "profile":
-            payload["profile_field_count"] = (
-                _coerce_int(payload["profile_field_count"]) + 1
-            )
-            continue
-        payload["fallback_field_count"] = (
-            _coerce_int(payload["fallback_field_count"]) + 1
-        )
-        if source == fallback_business:
-            payload["fallback_business_field_count"] = (
-                _coerce_int(payload["fallback_business_field_count"]) + 1
-            )
-        elif source == fallback_technical_passthrough:
-            payload["fallback_technical_passthrough_field_count"] = (
-                _coerce_int(payload["fallback_technical_passthrough_field_count"]) + 1
-            )
-
-
-def _enrich_registry_normalization_evidence(
-    evidence: dict[str, dict[str, JsonValue]],
-    registry: list[tuple[str, str]],
-    resolve_module_path: Callable[[str, str], str | None],
-) -> None:
-    for provider, entity in registry:
-        pipeline_name = f"{provider}_{entity}"
-        payload = evidence.setdefault(
-            pipeline_name, _empty_normalization_evidence_payload()
-        )
-        payload["normalization_profile_registered"] = True
-        module_path = resolve_module_path(provider, entity)
-        if module_path is not None:
-            payload["normalization_profile_module_path"] = module_path
-
-
-def _finalize_normalization_evidence_defaults(
-    evidence: dict[str, dict[str, JsonValue]],
-) -> None:
-    for payload in evidence.values():
-        payload.setdefault("normalization_profile_registered", False)
 
 
 def _add_pipeline_normalization_evidence(
