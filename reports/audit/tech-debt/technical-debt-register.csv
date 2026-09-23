@@ -1,10 +1,8 @@
 id,path,line,type,evidence,age,risk,blast_radius,effort,owner,priority
-TD-001,src/memory/graph/sync_pkg/_core.py,1,architecture,"God-module sync_pkg/_core.py: 17739 строк, разрыв ~10x; вне продуктовых гейтов",2026-09-21,P1,memory-surface,L,memory-surface,P1
-TD-002,pyproject.toml,26,dependencies,Холдбэки pandas<2.3 и deltalake<1.0; пин arro3 снят,2026-09-21,P1,interfaces-deps,,interfaces-deps,P1
-TD-003,configs/quality/basedpyright_import_cycle_allowlist.json,1,architecture,30 allowlist-циклов импорта с owner и review_by,2026-09-21,P2,architecture,,architecture,P2
-TD-004,src/bioetl/application/services/checkpoint/,1,architecture,Кластер checkpoint_compatibility_* (8+ модулей) при нулевом transition-debt,2026-09-21,P2,application,,application,P2
-TD-005,src/bioetl/interfaces/cli/commands/domains/shared/click_options.py,1,code,"74 type: ignore, кластеры до 5/файл",2026-09-21,P3,interfaces,S,interfaces,P3
-TD-006,configs/quality/security_suppression_registry.yaml,1,security,32 nosec под реестром SUP-* и лок-тестом,2026-09-21,P3,architecture,S,architecture,P3
-TD-007,src/bioetl/application/core/record_processor_config.py,63,tests,23 pragma: no cover с rationale и датами,2026-09-21,P3,architecture,S,architecture,P3
-TD-008,src/bioetl/application/core/base_transformer/__init__.py,4,code,12 ruff noqa I001 в barrel __init__,2026-09-21,P3,application,S,application,P3
-TD-009,tests/,1,tests,43 TODO-маркера в tests/scripts,2026-09-21,P3,platform,S,platform,P3
+AUD-001,reports/quality/architecture-quality-scorecard.json,272,CI/generated-artifact,scorecard sha ce0ac31 vs inventory 0db51a46; gates fail,2026-09-23 after #10630,high,all PRs / debt-governance,S,@bioetl-architecture,P1
+AUD-002,src/memory/graph/sync_pkg/_core.py,1,architecture/god-module,17740 LOC vs next 1978; #10526 closed unmet,2026-09-20 last touch,high,memory graph sync/CLI/http,XL,@bioetl-platform,P1
+AUD-003,src/bioetl/composition,172,architecture/headroom,280/295 util 0.9492 within cap,post #10595,medium,new composition modules blocked at 281,S,@bioetl-architecture,P2
+AUD-004,src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_loaded.py,1,tests/coverage,76.74% 10 missing; two sibling modules 77.5/88.41,2026-09-19,medium,Gold FK reconciliation,M,@bioetl-data-model,P2
+AUD-005,src/bioetl/application/pipelines/common/transformer_initialization.py,47,types,type: ignore[arg-type] at BaseTransformer mixin init,ongoing,low,publication transformers,M,@bioetl-architecture,P3
+WATCH-waiver,configs/quality/constructor_waivers.yaml,6,architecture/waiver,QuarantineEntry max_args=9 expiry 2026-12-31 #6685,tracked,low,quarantine aggregate ctor,S,@bioetl-domain,P3
+WATCH-aggregates,src/bioetl/domain/aggregates,1,architecture/hold-flat,8/8 modules #10552 accepted,tracked,low,domain package growth,L,@bioetl-architecture,P3

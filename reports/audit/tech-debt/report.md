@@ -1,58 +1,105 @@
-# Аудит технического долга — BioactivityDataAcquisition
+# Technical debt audit — `src`
 
-- Промпт: prompt.audit.tech-debt v1.3.0, MODE=audit, LANGUAGE=ru, SCOPE=repo-wide
-- Прогоны: full (9 находок) + differential 2026-09-21 (маркеры стабильны: src 0 реальных, tests/scripts 43; type-ignore 74→64; nosec 32; pragma 23; циклы 30; god-module 17739)
-- Измерения: новые, 2026-09-21 (grep-сводки + реестры + `git diff 09ab9ac..HEAD`)
-- Находок: 9 (TD-001…TD-009); повышение бюджетов — НЕ предлагается
-- surface_score (0–3): code 3, tests 3, config 3, dependencies 2, architecture 2, **общий 2**
+| Field | Value |
+| --- | --- |
+| Date | 2026-09-23 |
+| Ref | `origin/main` `670633e6ec68` |
+| SCOPE | `src` (`bioetl` + `memory`) |
+| MODE | `propose-patches` |
+| AUDIT_MODE | `full` |
+| surface_score | **2** (ядро под контролем; god-module и drift gates) |
 
-## Сводка измерений
+## Executive
 
-| Метрика | Значение | Источник |
+Measured debt, не raw markers: **0** TODO/FIXME/HACK в `src/bioetl` (8 raw hits = TEMP/CVCL_XXXX/ADR-XXX/DEPRECATED enum).
+
+Тренд лучше 2026-08-28: exemptions 48→0, integral 9.47→10.0, composition 291→280/295. Бюджеты не предлагаются к росту.
+
+Два блокирующих факта на текущем `origin/main`:
+
+1. **AUD-001 P1** — scorecard hash `ce0ac31` ≠ inventory `0db51a46` после #10630; gates `module_coverage_scorecard_coherence` + `generated_artifact_drift`.
+2. **AUD-002 P1** — `src/memory/graph/sync_pkg/_core.py` = **17740** LOC; #10526 закрыт без acceptance.
+
+## Trend vs registries
+
+| Signal | Historical | Now | Direction |
+| --- | --- | --- | --- |
+| `debt_scorecard` exemptions | 48 (2025-Q4) | 0 | improved |
+| Architecture integral | 9.47 | 10.0 (artifact) | improved / proxy |
+| Composition modules | 291/295 | 280/295 util 0.9492 | improved, near cap |
+| God-module `_core.py` | 18179 (#10526) | 17740 | unchanged material |
+| Hotspot families `files_ge_250_loc` | 0 budget | 0 observed | held |
+| Uncovered/unmeasured bioetl | 0/0 | 0/0 | held |
+| Partially covered | — | 10 | residual test debt |
+| Constructor waivers | 2 | 1 (`QuarantineEntry`, expiry 2026-12-31) | shrink-only |
+
+## Marker / suppression triage
+
+| Class | Raw | Measured debt |
 | --- | --- | --- |
-| TODO/FIXME/HACK/XXX/WORKAROUND в `src/bioetl` | 0 реальных (4 ложных: `CVCL_XXXX`, enum, ADR-шаблон) | grep |
-| Маркеры в `tests/`,`scripts/` | 43 (тест-локальные) | grep |
-| `nosec` в `src/` | 32, реестр + лок-тест | grep + `security_suppression_registry.yaml` |
-| `type: ignore` в `src/` | 74, макс. 5/файл, рассредоточены | grep |
-| `noqa` / `pragma: no cover` в `src/` | 12 / 23, с построчной rationale | grep |
-| allowlist циклов импорта | 30 записей с owner + review_by | `basedpyright_import_cycle_allowlist.json` |
-| God-module `sync_pkg/_core.py` | 17739 строк / 567 КБ (было 18179) | wc |
-| Топ-модуль `src/bioetl` | 441 строка (size-долга в продукте нет) | find+wc |
-| Дрейф `debt_scorecard.yaml` с 2026-08-20 | только вниз (6→5, 3→2, 2→0/1) | git diff |
-| Гейт `debt-governance-gates.json` | все pass, рост запрещен | коммитованный отчет |
+| TODO/FIXME/HACK | 0 in bioetl | none |
+| XXX/TEMP/DEPRECATED grep | 8 | 0 (FP: TEMP type, CVCL_XXXX, ADR-XXX, enum) |
+| `pragma: no cover` | ~25 | mostly `__getattr__` facades; do not remove |
+| `type: ignore` | ~20 bioetl | AUD-005 P3 mixin/override seams |
+| `# nosec` | pubmed XML / delta / tracing | keep; Bandit seams |
 
-## Реестр по риску
+`coverage.xml` в этом checkout отсутствует — pragma не сверялся с EXCLUDED vs executed. Снимать exclusion без теста запрещено.
 
-### P1
+## Findings (risk order)
 
-| ID | Находка | Путь |
+| ID | P | Status | Claim |
+| --- | --- | --- | --- |
+| AUD-001 | P1 | PROVEN | Scorecard/inventory SHA desync, gates fail on main |
+| AUD-002 | P1 | PROVEN | God-module 17740 LOC; #10526 acceptance unmet |
+| AUD-003 | P2 | PROVEN watch | composition 280/295, util 0.9492 ≤ 0.95 |
+| AUD-004 | P2 | PROVEN | 10 partial modules; FK tail &lt;80% |
+| AUD-005 | P3 | PROVEN | `type: ignore` vs `cast()` at mixins |
+
+Не issue: domain/aggregates 8/8 hold-flat (#10552); config duplicate_cluster_count=6 — зеркала INV-CFG-009, не drift; `no_executable_lines` re-export `domain/exceptions/infrastructure`.
+
+## Top-20 (probability × blast)
+
+1. AUD-001 — CI/release gate на каждом PR после #10630.
+2. AUD-002 — любой memory-graph change = конфликт на 17k файле.
+3. FK reconciliation partial (AUD-004) — Gold FK write path.
+4. composition headroom 15 (AUD-003) — feature-block если добавить модуль.
+5–10. Остальные 7 partial modules (1–6 missing lines).
+11–20. type: ignore mixin seams, constructor waiver, `__getattr__` pragmas, CLI 410 LOC files outside hotspot families (inventory, не exemption).
+
+## Quick wins vs strategic vs dependency
+
+| Bucket | Item | Effort |
 | --- | --- | --- |
-| TD-001 | God-module `sync_pkg/_core.py` сохраняется (17.7k строк, было 18.1k); проектный tooling (Neo4j sync), под ruff/mypy-gates, декомпозиция идет (slice 1) | `src/memory/graph/sync_pkg/_core.py:1` |
-| TD-002 | Мажорные холдбэки `pandas<2.3`, `deltalake<1.0` с rationale; пин arro3 снят (улучшение с AUD-006) | `pyproject.toml:26` |
+| Quick win | AUD-001 rebind scorecard + remote-main baseline | S |
+| Quick win | Sync comment `live 279` → `280` in `package_cohesion_budget.yaml` | S |
+| Test debt | Unit tests on FK reconciliation missing lines | M |
+| Strategic | Split `_core.py` &lt;500 LOC packages | XL |
+| Watch | composition shrink-before-add | — |
+| Dependency | radon untyped import; no obsolete runtime dep found in this pass | — |
 
-### P2
+## Proposed patches (MODE=propose-patches)
 
-| ID | Находка | Путь |
-| --- | --- | --- |
-| TD-003 | 30 allowlist-циклов импорта, все с owner/review_by; структурный остаток под замком | `configs/quality/basedpyright_import_cycle_allowlist.json:1` |
-| TD-004 | Кластер `checkpoint_compatibility_*` (8+ модулей); transition-debt по скорингу = 0, но поверхность политики сохраняется — watch | `src/bioetl/application/services/checkpoint/:1` |
+См. `proposed-patches.md`. Применяется в этой ветке только AUD-001 rebind (budget-neutral). Split `_core.py` и coverage-тесты — отдельные PR, бюджеты не трогать.
 
-### P3
+## GH tracking
 
-| ID | Находка | Путь |
-| --- | --- | --- |
-| TD-005 | 74 `type: ignore`, кластеры ≤5/файл (CLI, bronze_writer, context_run) — диффузный остаток | `src/bioetl/interfaces/cli/commands/domains/shared/click_options.py:1` |
-| TD-006 | 32 `nosec`: lock-тест зелен 2026-09-21 (4 passed), реестр синхронен — закрыто | `configs/quality/security_suppression_registry.yaml:1` |
-| TD-007 | 23 `pragma` проверены 2026-09-21: все EXCLUDED by design, снятие без тестов снизило бы покрытие; dated-review 2026-12-31 в будущем — снятий не due, закрыто как controlled | `src/bioetl/application/core/record_processor_config.py:63` |
-| TD-008 | 11 `noqa: I001` удалены, applied twice (внешний откат между прогонами); gate чист, 86 тестов зеленые — закрыто | `src/bioetl/application/core/base_transformer/__init__.py:4` |
-| TD-009 | 43 маркера разобраны 2026-09-21: 40 ложных (XXXXX-данные, guard-инфра, docstrings), 3 реальных уже удалены; локи зеленые — закрыто | `tests/:1` |
+| Finding | Action |
+| --- | --- |
+| AUD-001 | https://github.com/SatoryKono/BioactivityDataAcquisition/issues/10632 |
+| AUD-002 | reopen https://github.com/SatoryKono/BioactivityDataAcquisition/issues/10526 |
+| AUD-003 | no issue (cap holds) |
+| AUD-004 | https://github.com/SatoryKono/BioactivityDataAcquisition/issues/10631 |
+| AUD-005 | no issue (P3 local) |
 
-## Quick wins vs стратегический
+## Checks
 
-- Quick wins: TD-008 (заменить noqa на isort-профиль для barrels), TD-009 (разобрать 43 маркера тестов).
-- Стратегический: TD-001 (декомпозиция sync-ядра), TD-003 (вывод циклов из allowlist по review-датам).
-- Зависимостный: TD-002 (валидация pandas 3.x / deltalake 1.x).
+Run:
 
-## Stop-подтверждение
+- `python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main` → exit 1 (AUD-001)
+- marker scan `src/bioetl` TODO/FIXME/HACK → 0
+- inventory summary: 2478 modules, 2467 full, 10 partial, 1 no_exec
 
-Ни одна remediation не требует роста бюджетов/exemptions/порогов. Все правки — debt-reducing или budget-neutral.
+Skipped: live `coverage.xml` pragma EXCLUDED map; `mypy --strict` full tree; xenon on `_core.py`; Sonar.
+
+Mirror-sync: N/A (no `.codex`/`.junie` edits).
+`.env` not touched. Debt budgets not raised.
