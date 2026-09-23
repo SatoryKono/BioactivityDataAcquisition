@@ -2001,6 +2001,9 @@ from memory.graph.sync_pkg.register_protocol_port_surface import (
 from memory.graph.sync_pkg.register_protocol_port_surface import (
     _register_protocol_port_surface as _register_protocol_port_surface,
 )
+from memory.graph.sync_pkg.register_workflow_job import (
+    _register_workflow_job as _register_workflow_job,
+)
 from memory.graph.sync_pkg.relation_backed_file_structure_types import (
     _link_relation_backed_directory_housing as _link_relation_backed_directory_housing,
 )
@@ -3242,25 +3245,6 @@ def _process_workflow_job(
         matrix_variants=matrix_variants,
         secret_usage_hints=secret_usage_hints,
     )
-
-
-def _register_workflow_job(
-    snapshot: GraphSnapshot,
-    *,
-    context: WorkflowContext,
-    job_id: str,
-    job_context: WorkflowJobContext,
-    workflow_call_entrypoint: NodeKey | None,
-    job_nodes: dict[tuple[str, str], NodeKey],
-) -> None:
-    job_nodes[(context.workflow_name, job_id)] = job_context.job
-    if workflow_call_entrypoint is not None:
-        snapshot.add_relation(
-            job_context.job,
-            "CALLS_WORKFLOW",
-            workflow_call_entrypoint,
-            provenance="workflow_graph",
-        )
 
 
 def _populate_workflow_job_surface(
