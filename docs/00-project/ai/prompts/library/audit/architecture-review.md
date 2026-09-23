@@ -7,10 +7,10 @@ owner: BioETL Team
 runtimes:
 - any
 params:
-- SCOPE
-- MODE
-- LANGUAGE
-- AUDIT_MODE
+- SCOPE = src/bioetl/
+- MODE = propose-patches
+- LANGUAGE = ru
+- AUDIT_MODE = full
 includes:
 - fragments/git-safety.md
 - fragments/debt-budget-ban.md

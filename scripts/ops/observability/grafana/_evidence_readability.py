@@ -692,7 +692,7 @@ def _first_window_widths(payload: dict, p: dict[int, dict]) -> None:
                 "selected": 28,
                 "Started": 145,
                 "Duration": 90,
-                "Trust": 100,
+                "Trust": 120,
                 "Processing": 100,
                 "Report": 80,
             }
