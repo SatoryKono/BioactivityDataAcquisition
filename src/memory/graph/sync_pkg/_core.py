@@ -738,6 +738,21 @@ from memory.graph.sync_pkg.duplication_cluster_groups import (
 from memory.graph.sync_pkg.duplication_cluster_groups import (
     _link_same_shape_members as _link_same_shape_members,
 )
+from memory.graph.sync_pkg.fast_analysis_snapshot_counts import (
+    _active_critical_names as _active_critical_names,
+)
+from memory.graph.sync_pkg.fast_analysis_snapshot_counts import (
+    _fast_analysis_live_counts as _fast_analysis_live_counts,
+)
+from memory.graph.sync_pkg.fast_analysis_snapshot_counts import (
+    _fast_analysis_live_summary as _fast_analysis_live_summary,
+)
+from memory.graph.sync_pkg.fast_analysis_snapshot_counts import (
+    _fast_analysis_snapshot_counts as _fast_analysis_snapshot_counts,
+)
+from memory.graph.sync_pkg.fast_analysis_snapshot_counts import (
+    _fast_audit_snapshot_payload as _fast_audit_snapshot_payload,
+)
 from memory.graph.sync_pkg.file_structure import (
     DEFAULT_FILE_STRUCTURE_EXCLUDED_DIR_NAMES as DEFAULT_FILE_STRUCTURE_EXCLUDED_DIR_NAMES,
 )
@@ -9718,80 +9733,6 @@ def _fast_analysis_scope(
             snapshot_stats, "relation_types", CRITICAL_ANALYSIS_RELATION_TYPES
         ),
     )
-
-
-def _fast_analysis_snapshot_counts(
-    snapshot_stats: dict[str, JsonValue],
-    active_labels: tuple[str, ...],
-    active_relation_types: tuple[str, ...],
-) -> tuple[dict[str, int], dict[str, int]]:
-    return (
-        _snapshot_subset_count_map(snapshot_stats, "labels", active_labels),
-        _snapshot_subset_count_map(
-            snapshot_stats, "relation_types", active_relation_types
-        ),
-    )
-
-
-def _fast_analysis_live_counts(
-    client: Neo4jHttpClient,
-    active_labels: tuple[str, ...],
-    active_relation_types: tuple[str, ...],
-) -> tuple[dict[str, int], dict[str, int]]:
-    return (
-        _live_managed_node_counts(
-            client,
-            active_labels,
-            context="fast audit label summary",
-        ),
-        _live_managed_relation_counts(
-            client,
-            active_relation_types,
-            context="fast audit relation summary",
-        ),
-    )
-
-
-def _fast_analysis_live_summary(
-    live_managed_label_counts: dict[str, int],
-    live_managed_relation_counts: dict[str, int],
-) -> dict[str, JsonValue]:
-    return _audit_live_summary(
-        managed_node_total=sum(live_managed_label_counts.values()),
-        managed_relation_total=sum(live_managed_relation_counts.values()),
-        unmanaged_repo_node_total=0,
-        label_summary=_managed_label_summary_from_counts(live_managed_label_counts),
-        managed_relation_summary=_managed_relation_summary_from_counts(
-            live_managed_relation_counts
-        ),
-        orphan_summary=[],
-        unmanaged_summary=[],
-    )
-
-
-def _active_critical_names(
-    snapshot_stats: dict[str, JsonValue],
-    key: str,
-    critical_names: Iterable[str],
-) -> tuple[str, ...]:
-    raw_counts = snapshot_stats.get(key)
-    if not isinstance(raw_counts, dict):
-        return ()
-    return tuple(
-        name for name in critical_names if _coerce_int(raw_counts.get(name, 0)) > 0
-    )
-
-
-def _fast_audit_snapshot_payload(
-    snapshot_label_counts: dict[str, int],
-    snapshot_relation_counts: dict[str, int],
-) -> dict[str, JsonValue]:
-    return {
-        "node_count": sum(snapshot_label_counts.values()),
-        "relation_count": sum(snapshot_relation_counts.values()),
-        "labels": snapshot_label_counts,
-        "relation_types": snapshot_relation_counts,
-    }
 
 
 def _critical_analysis_audit_issues(report: dict[str, JsonValue]) -> list[str]:
