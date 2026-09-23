@@ -1,5 +1,14 @@
 # Сводка evidence: project-package-topology
 
+Refresh note (2026-09-23): hash-only reconcile after publication-term HTTP
+limit cassette alignment. Counts and the source fingerprint below come from
+`reports/quality/module-coverage-inventory.json`. Historical notes remain
+historical.
+
+`source_tree_sha256=82d9deb446430309237ac3f46fee3696a5d9cd4e1f9ff68bbce34b745dcc3171`
+
+`source_module_count=2479`
+
 Refresh note (2026-09-23): hash-only reconcile after Retry-After clock routing.
 Counts and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain

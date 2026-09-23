@@ -54,6 +54,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Gold/Silver assay_parameters and publication_similarity snapshots:** live
+  schemas already renamed `type`/`relation`/`value` → `parameter_*` and added
+  `publication_id1`/`publication_id2`; golden Gold registry, Silver contract
+  fixture, and DQ enum contract now follow. Publication-term upstream HTTP
+  `limit` stays `term_limit * 50` without a look-ahead slot so VCR cassettes
+  replay.
+
 - **Composition lazy imports (#10467):** function-level `bioetl.*` imports in
   `src/bioetl/composition/**` are gone (`69 → 0`). Observability/config owners
   load at module level; package-root factory facades still resolve cycle-prone

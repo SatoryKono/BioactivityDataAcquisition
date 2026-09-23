@@ -60,14 +60,11 @@ def resolve_publication_upstream_limit(
     normalized_limit = normalize_publication_term_limit(limit)
     if normalized_limit == 0:
         return None
-    publication_limit = (
-        min(
-            normalized_limit * multiplier
-            if normalized_limit is not None
-            else DEFAULT_SCAN_RECORDS,
-            DEFAULT_SCAN_RECORDS,
-        )
-        + 1
+    publication_limit = min(
+        normalized_limit * multiplier
+        if normalized_limit is not None
+        else DEFAULT_SCAN_RECORDS,
+        DEFAULT_SCAN_RECORDS,
     )
     return normalized_limit, publication_limit
 

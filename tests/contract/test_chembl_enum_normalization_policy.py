@@ -141,7 +141,7 @@ _FILTER_ENUM_POLICY = {
 }
 
 _GOVERNED_CHEMBL_ENUM_POLICY = {
-    ("assay_parameters", "type"): (
+    ("assay_parameters", "parameter_type"): (
         ASSAY_PARAMETER_STANDARD_TYPES,
         CHEMBL_ASSAY_PARAMETERS_PROFILE,
     ),

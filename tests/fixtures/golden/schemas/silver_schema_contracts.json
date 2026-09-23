@@ -3702,7 +3702,7 @@
       }
     },
     "chembl_publication_similarity": {
-      "field_count": 18,
+      "field_count": 20,
       "fields": {
         "_dq_error": {
           "checks": [],
@@ -3817,19 +3817,19 @@
         "doc_1": {
           "checks": [],
           "coerce": false,
-          "description": "FK to document 1.",
-          "dtype": "int64",
-          "nullable": false,
-          "required": true,
+          "description": "Legacy internal document 1 ID, never inferred from CHEMBL ID.",
+          "dtype": "Int64",
+          "nullable": true,
+          "required": false,
           "unique": false
         },
         "doc_2": {
           "checks": [],
           "coerce": false,
-          "description": "FK to document 2.",
-          "dtype": "int64",
-          "nullable": false,
-          "required": true,
+          "description": "Legacy internal document 2 ID, never inferred from CHEMBL ID.",
+          "dtype": "Int64",
+          "nullable": true,
+          "required": false,
           "unique": false
         },
         "entity_id": {
@@ -3877,6 +3877,34 @@
           "required": false,
           "unique": false
         },
+        "publication_id1": {
+          "checks": [
+            {
+              "name": "str_matches",
+              "regex": "^CHEMBL[1-9]\\d*$"
+            }
+          ],
+          "coerce": false,
+          "description": "Public ChEMBL identifier of the first document; not its internal database ID.",
+          "dtype": "str",
+          "nullable": true,
+          "required": false,
+          "unique": false
+        },
+        "publication_id2": {
+          "checks": [
+            {
+              "name": "str_matches",
+              "regex": "^CHEMBL[1-9]\\d*$"
+            }
+          ],
+          "coerce": false,
+          "description": "Public ChEMBL identifier of the second document; not its internal database ID.",
+          "dtype": "str",
+          "nullable": true,
+          "required": false,
+          "unique": false
+        },
         "pubmed_id1": {
           "checks": [
             {
@@ -3912,7 +3940,7 @@
           "dtype": "int64",
           "nullable": false,
           "required": true,
-          "unique": false
+          "unique": true
         },
         "tid_tani": {
           "checks": [
