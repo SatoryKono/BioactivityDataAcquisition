@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import ast
 import fnmatch
-import hashlib
 import itertools
 import json
 import os
@@ -30,6 +29,46 @@ from bioetl.infrastructure.config.contract_registry_loader import (
     DEFAULT_CONTRACT_REGISTRY_PATH,
     load_contract_registry_payload,
 )
+from memory.graph.sync_pkg._core_ast import (
+    _CONTROL_FLOW_NODES as _CONTROL_FLOW_NODES,
+)
+from memory.graph.sync_pkg._core_ast import _base_name as _base_name
+from memory.graph.sync_pkg._core_ast import (
+    _callable_ast_node_count as _callable_ast_node_count,
+)
+from memory.graph.sync_pkg._core_ast import (
+    _callable_branch_count as _callable_branch_count,
+)
+from memory.graph.sync_pkg._core_ast import (
+    _callable_call_count as _callable_call_count,
+)
+from memory.graph.sync_pkg._core_ast import (
+    _callable_helper_call_count as _callable_helper_call_count,
+)
+from memory.graph.sync_pkg._core_ast import (
+    _callable_max_nesting_depth as _callable_max_nesting_depth,
+)
+from memory.graph.sync_pkg._core_ast import (
+    _dataframe_model_class_names as _dataframe_model_class_names,
+)
+from memory.graph.sync_pkg._core_ast import (
+    _imported_repo_modules as _imported_repo_modules,
+)
+from memory.graph.sync_pkg._core_ast import _imported_symbols as _imported_symbols
+from memory.graph.sync_pkg._core_ast import (
+    _looks_like_dataframe_model_class as _looks_like_dataframe_model_class,
+)
+from memory.graph.sync_pkg._core_ast import (
+    _matching_imported_module_names as _matching_imported_module_names,
+)
+from memory.graph.sync_pkg._core_ast import (
+    _normalized_callable_hash as _normalized_callable_hash,
+)
+from memory.graph.sync_pkg._core_ast import _parse_python_ast as _parse_python_ast
+from memory.graph.sync_pkg._core_ast import (
+    _protocol_class_names as _protocol_class_names,
+)
+from memory.graph.sync_pkg._core_ast import _signature_hash as _signature_hash
 
 # AUD-001 slice 1: extracted kernels, re-exported to preserve the public surface.
 from memory.graph.sync_pkg._core_cli import (
@@ -2744,108 +2783,6 @@ def _dashboard_panel_target_metrics(panel: dict[str, object]) -> set[str]:
     return metrics
 
 
-def _parse_python_ast(path: Path) -> ast.Module | None:
-    if path.suffix != ".py":
-        return None
-    try:
-        return ast.parse(_read_text(path), filename=str(path))
-    except (OSError, SyntaxError, UnicodeDecodeError):
-        return None
-
-
-def _base_name(node: ast.expr) -> str:
-    if isinstance(node, ast.Name):
-        return node.id
-    if isinstance(node, ast.Attribute):
-        return node.attr
-    if isinstance(node, ast.Subscript):
-        return _base_name(node.value)
-    if isinstance(node, ast.Call):
-        return _base_name(node.func)
-    return ""
-
-
-def _signature_hash(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
-    args = node.args
-    payload = {
-        "async": isinstance(node, ast.AsyncFunctionDef),
-        "posonly": len(args.posonlyargs),
-        "args": len(args.args),
-        "kwonly": len(args.kwonlyargs),
-        "vararg": args.vararg is not None,
-        "kwarg": args.kwarg is not None,
-        "decorator_count": len(node.decorator_list),
-    }
-    encoded = json.dumps(payload, sort_keys=True)
-    # Deterministic structural fingerprint used for clustering, not for secrets.
-    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
-
-
-def _normalized_callable_hash(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
-    module = ast.Module(body=node.body, type_ignores=[])
-    normalized = _ShapeNormalizer().visit(module)
-    ast.fix_missing_locations(normalized)
-    dumped = ast.dump(normalized, annotate_fields=True, include_attributes=False)
-    # Deterministic structural fingerprint used for clustering, not for secrets.
-    return hashlib.sha256(dumped.encode("utf-8")).hexdigest()
-
-
-def _callable_ast_node_count(node: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
-    return sum(1 for _ in ast.walk(node))
-
-
-_CONTROL_FLOW_NODES = (
-    ast.If,
-    ast.For,
-    ast.AsyncFor,
-    ast.While,
-    ast.Try,
-    ast.Match,
-    ast.IfExp,
-    ast.With,
-    ast.AsyncWith,
-)
-
-
-def _callable_branch_count(node: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
-    count = 0
-    for child in ast.walk(node):
-        if isinstance(child, _CONTROL_FLOW_NODES):
-            count += 1
-        elif isinstance(child, ast.BoolOp):
-            count += max(0, len(child.values) - 1)
-        elif isinstance(child, ast.comprehension):
-            count += len(child.ifs)
-    return count
-
-
-def _callable_max_nesting_depth(node: ast.AST) -> int:
-    def visit(current: ast.AST, depth: int) -> int:
-        max_depth = depth
-        for child in ast.iter_child_nodes(current):
-            next_depth = depth + 1 if isinstance(child, _CONTROL_FLOW_NODES) else depth
-            max_depth = max(max_depth, visit(child, next_depth))
-        return max_depth
-
-    return visit(node, 0)
-
-
-def _callable_call_count(node: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
-    return sum(1 for child in ast.walk(node) if isinstance(child, ast.Call))
-
-
-def _callable_helper_call_count(node: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
-    tokens = ("_", "helper", "policy", "codec", "mixin", "fsm", "compat")
-    count = 0
-    for child in ast.walk(node):
-        if not isinstance(child, ast.Call):
-            continue
-        func_name = _base_name(child.func).casefold()
-        if func_name and any(token in func_name for token in tokens):
-            count += 1
-    return count
-
-
 def _threshold_score(value: int, *, medium: int, high: int) -> int:
     if value >= high:
         return 2
@@ -2912,57 +2849,6 @@ def _family_matches_relative_path(
 
 def _family_root_priority(family: DuplicateFamilyConfig) -> int:
     return max(len(root) for root in family.roots)
-
-
-def _protocol_class_names(path: Path) -> list[str]:
-    tree = _parse_python_ast(path)
-    if tree is None:
-        return []
-
-    protocol_names: list[str] = []
-    for node in tree.body:
-        if not isinstance(node, ast.ClassDef):
-            continue
-        if any(_is_protocol_base(base) for base in node.bases):
-            protocol_names.append(node.name)
-    return protocol_names
-
-
-def _dataframe_model_class_names(path: Path) -> list[str]:
-    tree = _parse_python_ast(path)
-    if tree is None:
-        return []
-
-    class_names: list[str] = []
-    for node in tree.body:
-        if not isinstance(node, ast.ClassDef):
-            continue
-        if _looks_like_dataframe_model_class(node):
-            class_names.append(node.name)
-    return class_names
-
-
-def _looks_like_dataframe_model_class(node: ast.ClassDef) -> bool:
-    """Return True when a class likely represents a Pandera DataFrameModel schema."""
-    if any(_is_dataframe_model_base(base) for base in node.bases):
-        return True
-    if not node.name.endswith("Schema"):
-        return False
-    return any(isinstance(child, ast.AnnAssign) for child in node.body)
-
-
-def _imported_symbols(path: Path) -> list[tuple[str, str, str]]:
-    tree = _parse_python_ast(path)
-    if tree is None:
-        return []
-
-    imports: list[tuple[str, str, str]] = []
-    for node in tree.body:
-        if not isinstance(node, ast.ImportFrom) or node.module is None:
-            continue
-        for alias in node.names:
-            imports.append((node.module, alias.name, alias.asname or alias.name))
-    return imports
 
 
 def _build_port_surface_catalog(
@@ -3154,33 +3040,6 @@ def _resolve_python_module_surface(root: Path, module_name: str) -> NodeKey | No
     if init_candidate.is_file():
         return NodeKey("module_surface", _rel_path(root, init_candidate))
     return None
-
-
-def _matching_imported_module_names(
-    node: ast.AST, prefixes: tuple[str, ...]
-) -> tuple[str, ...]:
-    if isinstance(node, ast.Import):
-        return tuple(
-            alias.name for alias in node.names if alias.name.startswith(prefixes)
-        )
-    if (
-        isinstance(node, ast.ImportFrom)
-        and node.module is not None
-        and node.module.startswith(prefixes)
-    ):
-        return (node.module,)
-    return ()
-
-
-def _imported_repo_modules(path: Path, prefixes: tuple[str, ...]) -> set[str]:
-    tree = _parse_python_ast(path)
-    if tree is None:
-        return set()
-
-    imported: set[str] = set()
-    for node in ast.walk(tree):
-        imported.update(_matching_imported_module_names(node, prefixes))
-    return imported
 
 
 def _runtime_dimensions(*parts: str) -> set[str]:
