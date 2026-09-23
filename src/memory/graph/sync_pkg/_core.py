@@ -1175,6 +1175,12 @@ from memory.graph.sync_pkg.existing_snapshot_nodes import (
 from memory.graph.sync_pkg.existing_snapshot_nodes import (
     _selected_alert_dashboards as _selected_alert_dashboards,
 )
+from memory.graph.sync_pkg.fast_analysis_scope import (
+    _critical_analysis_audit_issues as _critical_analysis_audit_issues,
+)
+from memory.graph.sync_pkg.fast_analysis_scope import (
+    _fast_analysis_scope as _fast_analysis_scope,
+)
 from memory.graph.sync_pkg.fast_analysis_snapshot_counts import (
     _active_critical_names as _active_critical_names,
 )
@@ -4742,34 +4748,6 @@ def build_fast_analysis_audit_report(
         snapshot_relation_counts=snapshot_relation_counts,
         live_managed_relation_counts=live_managed_relation_counts,
     )
-
-
-def _fast_analysis_scope(
-    snapshot_stats: dict[str, JsonValue],
-) -> tuple[tuple[str, ...], tuple[str, ...]]:
-    return (
-        _active_critical_names(snapshot_stats, "labels", CRITICAL_ANALYSIS_NODE_LABELS),
-        _active_critical_names(
-            snapshot_stats, "relation_types", CRITICAL_ANALYSIS_RELATION_TYPES
-        ),
-    )
-
-
-def _critical_analysis_audit_issues(report: dict[str, JsonValue]) -> list[str]:
-    issues: list[str] = []
-    diff = report.get("diff", {})
-    label_rows = diff.get("labels", []) if isinstance(diff, dict) else []
-    relation_rows = diff.get("relation_types", []) if isinstance(diff, dict) else []
-
-    issues.extend(
-        _critical_diff_issues(label_rows, CRITICAL_ANALYSIS_NODE_LABELS, kind="label")
-    )
-    issues.extend(
-        _critical_diff_issues(
-            relation_rows, CRITICAL_ANALYSIS_RELATION_TYPES, kind="relation"
-        )
-    )
-    return issues
 
 
 if __name__ == "__main__":
