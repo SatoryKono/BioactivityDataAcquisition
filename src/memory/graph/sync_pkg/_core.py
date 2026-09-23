@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import os
 import re
 import shutil as shutil  # re-exported via __all__
 import sys
@@ -2206,6 +2205,9 @@ from memory.graph.sync_pkg.transport import load_repo_env as load_repo_env
 from memory.graph.sync_pkg.transport import (
     resolve_neo4j_connection as resolve_neo4j_connection,
 )
+from memory.graph.sync_pkg.walk_repo_zone_file_structure import (
+    _walk_repo_zone_file_structure as _walk_repo_zone_file_structure,
+)
 from memory.graph.sync_pkg.workflow_environment_mapping_name import (
     _sorted_string_items as _sorted_string_items,
 )
@@ -2631,51 +2633,6 @@ def _walk_repo_zone_root(
         zone_root=zone_root,
         config=config,
     )
-
-
-def _walk_repo_zone_file_structure(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    zone: NodeKey,
-    today: str,
-    *,
-    zone_name: str,
-    relative_root: str,
-    zone_root: Path,
-    config: dict[str, object],
-) -> None:
-    for current_dir, dirnames, filenames in os.walk(zone_root):
-        current_path = Path(current_dir)
-        relative_dir = _rel_path(root, current_path)
-        if _is_excluded_file_structure_path(relative_dir, config):
-            dirnames[:] = []
-            filenames[:] = []
-            continue
-        dirnames[:] = _included_file_structure_dirs(
-            root, current_path, dirnames, config
-        )
-        directory = _add_repo_zone_directory_surface(
-            snapshot,
-            root,
-            zone,
-            today,
-            zone_name=zone_name,
-            relative_root=relative_root,
-            current_path=current_path,
-            relative_dir=relative_dir,
-        )
-        _add_repo_zone_directory_files(
-            snapshot,
-            root,
-            project,
-            directory,
-            current_path,
-            filenames,
-            today,
-            zone_name=zone_name,
-            config=config,
-        )
 
 
 def _link_source_backed_file_structure(
