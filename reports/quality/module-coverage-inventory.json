@@ -1,7 +1,7 @@
 {
-  "additive_coverage_xml_path": "reports/gr-db-corr/new-modules-coverage.xml",
-  "additive_coverage_xml_sha256": "48a3625decf553547716b87a63c87037157f82100f22b838aaf597d6dbfaafc5",
-  "additive_measured_module_count": 176,
+  "additive_coverage_xml_path": "reports/quality/issue-10631-fk-reconciliation-coverage.xml",
+  "additive_coverage_xml_sha256": "f91e07dc9583a7b6fbdbaf81049c2de44a7285cbc8b7262bc0355482ca06c364",
+  "additive_measured_module_count": 3,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
   "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
@@ -22979,21 +22979,21 @@
       "source_lines": 88
     },
     {
-      "coverage_percent": 76.74,
-      "coverage_status": "partially_covered",
-      "covered_lines": 33,
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 43,
       "executable_lines": 43,
-      "missing_lines": 10,
+      "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_loaded",
       "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_loaded.py",
       "source_lines": 230
     },
     {
-      "coverage_percent": 77.5,
-      "coverage_status": "partially_covered",
-      "covered_lines": 31,
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 40,
       "executable_lines": 40,
-      "missing_lines": 9,
+      "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_normalization",
       "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_normalization.py",
       "source_lines": 82
@@ -23019,11 +23019,11 @@
       "source_lines": 118
     },
     {
-      "coverage_percent": 88.41,
-      "coverage_status": "partially_covered",
-      "covered_lines": 61,
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 69,
       "executable_lines": 69,
-      "missing_lines": 8,
+      "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_reads",
       "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_reads.py",
       "source_lines": 191
@@ -47761,21 +47761,21 @@
       "source_lines": 88
     },
     {
-      "coverage_percent": 76.74,
-      "coverage_status": "partially_covered",
-      "covered_lines": 33,
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 43,
       "executable_lines": 43,
-      "missing_lines": 10,
+      "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_loaded",
       "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_loaded.py",
       "source_lines": 230
     },
     {
-      "coverage_percent": 77.5,
-      "coverage_status": "partially_covered",
-      "covered_lines": 31,
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 40,
       "executable_lines": 40,
-      "missing_lines": 9,
+      "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_normalization",
       "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_normalization.py",
       "source_lines": 82
@@ -47801,11 +47801,11 @@
       "source_lines": 118
     },
     {
-      "coverage_percent": 88.41,
-      "coverage_status": "partially_covered",
-      "covered_lines": 61,
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 69,
       "executable_lines": 69,
-      "missing_lines": 8,
+      "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_reads",
       "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_reads.py",
       "source_lines": 191
@@ -49731,9 +49731,9 @@
     "source_module_count": 2478,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 2467,
+      "fully_covered": 2470,
       "no_executable_lines": 1,
-      "partially_covered": 10,
+      "partially_covered": 7,
       "uncovered": 0,
       "unmeasured": 0
     },
