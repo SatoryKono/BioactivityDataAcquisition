@@ -261,6 +261,12 @@ from memory.graph.sync_pkg.add_duplication_callable_surface import (
 from memory.graph.sync_pkg.add_duplication_callable_surface import (
     _duplication_callable_descriptor as _duplication_callable_descriptor,
 )
+from memory.graph.sync_pkg.add_entity_pipeline_surfaces import (
+    _add_composite_pipeline_surfaces as _add_composite_pipeline_surfaces,
+)
+from memory.graph.sync_pkg.add_entity_pipeline_surfaces import (
+    _add_entity_pipeline_surfaces as _add_entity_pipeline_surfaces,
+)
 from memory.graph.sync_pkg.add_port_facade_surface import (
     _add_port_facade_surface as _add_port_facade_surface,
 )
@@ -5827,48 +5833,6 @@ def _add_pipeline_surfaces(
         pipeline_nodes,
     )
     return pipeline_nodes
-
-
-def _add_entity_pipeline_surfaces(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    contract_nodes: dict[str, NodeKey],
-    adapter_nodes: dict[str, NodeKey],
-    pipeline_nodes: dict[str, NodeKey],
-) -> None:
-    entities_root = root / "configs" / "entities"
-    for entity_path in sorted(entities_root.rglob(YAML_FILE_GLOB)):
-        _add_entity_pipeline_surface(
-            snapshot,
-            root,
-            project,
-            today,
-            entity_path,
-            contract_nodes=contract_nodes,
-            adapter_nodes=adapter_nodes,
-            pipeline_nodes=pipeline_nodes,
-        )
-
-
-def _add_composite_pipeline_surfaces(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    pipeline_nodes: dict[str, NodeKey],
-) -> None:
-    composites_root = root / "configs" / "composites"
-    for composite_path in sorted(composites_root.glob(YAML_FILE_GLOB)):
-        _add_composite_pipeline_surface(
-            snapshot,
-            root,
-            project,
-            today,
-            composite_path,
-            pipeline_nodes=pipeline_nodes,
-        )
 
 
 def _add_pipeline_test_edges(
