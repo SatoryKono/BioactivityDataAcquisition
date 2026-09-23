@@ -7,7 +7,7 @@ import os
 import re
 import shutil as shutil  # re-exported via __all__
 import sys
-from collections.abc import Callable, Iterable, Mapping, Sequence, Set
+from collections.abc import Callable, Iterable, Mapping, Set
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -1156,6 +1156,9 @@ from memory.graph.sync_pkg.governance_policy_definitions import (
 )
 from memory.graph.sync_pkg.governance_policy_definitions import (
     _governance_policy_spec as _governance_policy_spec,
+)
+from memory.graph.sync_pkg.governance_policy_targets import (
+    _governance_policy_targets as _governance_policy_targets,
 )
 from memory.graph.sync_pkg.governance_summary_table_specs import (
     _add_layer_topology as _add_layer_topology,
@@ -5479,33 +5482,6 @@ def _add_governance_edges(
         contract_nodes=contract_nodes,
     ):
         _link_policy_governance_group(snapshot, policy, *target_groups)
-
-
-def _governance_policy_targets(
-    snapshot: GraphSnapshot,
-    *,
-    port_nodes: set[NodeKey],
-    adapter_nodes: dict[str, NodeKey],
-    pipeline_nodes: dict[str, NodeKey],
-    contract_nodes: dict[str, NodeKey],
-) -> tuple[tuple[NodeKey, tuple[Sequence[NodeKey], ...]], ...]:
-    sorted_ports, sorted_adapters, sorted_pipelines, sorted_contracts = (
-        _sorted_governance_targets(
-            port_nodes=port_nodes,
-            adapter_nodes=adapter_nodes,
-            pipeline_nodes=pipeline_nodes,
-            contract_nodes=contract_nodes,
-        )
-    )
-    return tuple(
-        _governance_policy_specs(
-            snapshot,
-            sorted_ports=sorted_ports,
-            sorted_adapters=sorted_adapters,
-            sorted_pipelines=sorted_pipelines,
-            sorted_contracts=sorted_contracts,
-        )
-    )
 
 
 def _add_pipeline_operational_edges(
