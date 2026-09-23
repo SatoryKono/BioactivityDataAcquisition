@@ -1158,7 +1158,105 @@
             }
           ]
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Result"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "SELECT RUN": {
+                        "text": "—",
+                        "color": "text"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "SELECT RUN": {
+                        "text": "—",
+                        "color": "text"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Rules"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Evidence"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open Run Explorer",
+                    "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+                    "targetBlank": false,
+                    "includeVars": false
+                  }
+                ]
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "SELECT RUN": {
+                        "text": "Choose a run",
+                        "color": "text"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "showHeader": true,
@@ -3375,7 +3473,7 @@
               {
                 "matcher": {
                   "id": "byRegexp",
-                  "options": "(^|[ /])bronze$"
+                  "options": "(^|.*[ /])bronze$"
                 },
                 "properties": [
                   {
@@ -3390,7 +3488,7 @@
               {
                 "matcher": {
                   "id": "byRegexp",
-                  "options": "(^|[ /])silver$"
+                  "options": "(^|.*[ /])silver$"
                 },
                 "properties": [
                   {
@@ -3405,7 +3503,7 @@
               {
                 "matcher": {
                   "id": "byRegexp",
-                  "options": "(^|[ /])gold$"
+                  "options": "(^|.*[ /])gold$"
                 },
                 "properties": [
                   {
@@ -3420,7 +3518,7 @@
               {
                 "matcher": {
                   "id": "byRegexp",
-                  "options": "(^|[ /])quarantined$"
+                  "options": "(^|.*[ /])quarantined$"
                 },
                 "properties": [
                   {
