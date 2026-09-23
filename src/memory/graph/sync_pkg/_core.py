@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import json
 import os
 import re
 import shutil as shutil  # re-exported via __all__
@@ -1371,6 +1370,15 @@ from memory.graph.sync_pkg.normalization_evidence_update_payload import (
 )
 from memory.graph.sync_pkg.normalization_evidence_update_payload import (
     _normalization_evidence_update_payload as _normalization_evidence_update_payload,
+)
+from memory.graph.sync_pkg.normalization_statement import (
+    _emit_normalization_apply_progress as _emit_normalization_apply_progress,
+)
+from memory.graph.sync_pkg.normalization_statement import (
+    _normalization_batch_pipeline_span as _normalization_batch_pipeline_span,
+)
+from memory.graph.sync_pkg.normalization_statement import (
+    _normalization_statement as _normalization_statement,
 )
 from memory.graph.sync_pkg.package_topology_summary_specs import (
     _add_governance_decisions_and_risks as _add_governance_decisions_and_risks,
@@ -5960,48 +5968,6 @@ def _normalization_evidence_statements() -> list[dict[str, JsonValue]]:
     for pipeline_name, evidence in sorted(evidence_by_pipeline.items()):
         statements.append(_normalization_statement(pipeline_name, evidence))
     return statements
-
-
-def _normalization_statement(
-    pipeline_name: str,
-    evidence: dict[str, JsonValue],
-) -> dict[str, JsonValue]:
-    return {
-        "statement": _NORMALIZATION_EVIDENCE_STATEMENT,
-        "parameters": _normalization_statement_params(pipeline_name, evidence),
-    }
-
-
-def _normalization_batch_pipeline_span(
-    batch: list[dict[str, JsonValue]],
-) -> tuple[str | None, str | None]:
-    pipeline_names = _batch_pipeline_names(batch)
-    if not pipeline_names:
-        return None, None
-    return pipeline_names[0], pipeline_names[-1]
-
-
-def _emit_normalization_apply_progress(
-    *,
-    event: str,
-    batch_index: int,
-    batch_count: int,
-    statement_count: int,
-    pipeline_start: str | None,
-    pipeline_end: str | None,
-    elapsed_seconds: float | None = None,
-) -> None:
-    payload = _normalization_progress_payload(
-        event=event,
-        batch_index=batch_index,
-        batch_count=batch_count,
-        statement_count=statement_count,
-        pipeline_start=pipeline_start,
-        pipeline_end=pipeline_end,
-        elapsed_seconds=elapsed_seconds,
-    )
-    sys.stderr.write(json.dumps(payload) + "\n")
-    sys.stderr.flush()
 
 
 def apply_normalization_evidence_only(
