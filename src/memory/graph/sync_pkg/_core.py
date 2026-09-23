@@ -279,6 +279,9 @@ from memory.graph.sync_pkg.add_port_facade_surface import (
 from memory.graph.sync_pkg.add_port_facade_surface import (
     _add_protocol_port_surface as _add_protocol_port_surface,
 )
+from memory.graph.sync_pkg.add_repo_zone_directory_file import (
+    _add_repo_zone_directory_file as _add_repo_zone_directory_file,
+)
 from memory.graph.sync_pkg.add_repo_zone_file_surface import (
     _add_repo_zone_doc_artifact as _add_repo_zone_doc_artifact,
 )
@@ -2874,40 +2877,6 @@ def _add_repo_zone_directory_files(
             zone_name=zone_name,
             config=config,
         )
-
-
-def _add_repo_zone_directory_file(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    directory: NodeKey,
-    current_path: Path,
-    filename: str,
-    today: str,
-    *,
-    zone_name: str,
-    config: dict[str, object],
-) -> None:
-    file_path = current_path / filename
-    relative_file = _rel_path(root, file_path)
-    if _is_excluded_file_structure_path(relative_file, config):
-        return
-    file_surface = _add_repo_zone_file_surface(
-        snapshot,
-        directory,
-        relative_file,
-        today,
-        zone_name=zone_name,
-        filename=filename,
-    )
-    _add_repo_zone_doc_artifact(
-        snapshot,
-        project,
-        file_surface,
-        relative_file,
-        today,
-        zone_name=zone_name,
-    )
 
 
 def _link_source_backed_file_structure(
