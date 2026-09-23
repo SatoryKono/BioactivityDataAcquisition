@@ -2102,6 +2102,9 @@ from memory.graph.sync_pkg.provider_config_properties import (
 from memory.graph.sync_pkg.provider_config_properties import (
     _provider_config_properties as _provider_config_properties,
 )
+from memory.graph.sync_pkg.provider_pipeline_index_entries import (
+    _provider_pipeline_index_entries as _provider_pipeline_index_entries,
+)
 from memory.graph.sync_pkg.provider_pipeline_index_key import (
     _pipeline_test_linker as _pipeline_test_linker,
 )
@@ -3055,17 +3058,6 @@ def _provider_pipeline_test_index(snapshot: GraphSnapshot) -> dict[str, list[Nod
     for provider, node_key in _provider_pipeline_index_entries(snapshot):
         provider_pipeline_index.setdefault(provider, []).append(node_key)
     return provider_pipeline_index
-
-
-def _provider_pipeline_index_entries(
-    snapshot: GraphSnapshot,
-) -> tuple[tuple[str, NodeKey], ...]:
-    return tuple(
-        (provider, node.key)
-        for node in snapshot.nodes.values()
-        for provider in [_provider_pipeline_index_key(node)]
-        if provider is not None
-    )
 
 
 if __name__ == "__main__":
