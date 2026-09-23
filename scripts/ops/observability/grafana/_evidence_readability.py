@@ -82,10 +82,37 @@ def _saved_run(p: dict[int, dict]) -> None:
     for transform in panel["transformations"]:
         if transform["id"] == "filterFieldsByName":
             names = transform["options"]["include"]["names"]
+            names[:] = [
+                "reason_display" if name == "reason" else name for name in names
+            ]
             if "action_path" not in names:
                 names.append("action_path")
+        elif transform["id"] == "organize":
+            options = transform["options"]
+            options["indexByName"]["reason_display"] = options["indexByName"].pop(
+                "reason", 2
+            )
+            options["renameByName"].pop("reason", None)
+            options["renameByName"]["reason_display"] = "Reason"
     _override(panel, "action_path", _HIDDEN, True)
     _table(panel, {"Domain": 125, "Status": 115, "Action": 170})
+    _override(panel, "Reason", "custom.wrapText", True)
+    _override(panel, "Reason", "custom.cellOptions", {"type": "auto", "wrapText": True})
+    _override(
+        panel,
+        "Reason",
+        "mappings",
+        [
+            {
+                "type": "value",
+                "options": {
+                    "selection_required": {
+                        "text": "Choose a run to inspect saved evidence"
+                    }
+                },
+            }
+        ],
+    )
     _override(panel, "Evidence reference", _HIDDEN, True)
     _override(
         panel,
@@ -131,9 +158,14 @@ def _saved_run(p: dict[int, dict]) -> None:
             ],
         )
     _table(p[9452])
+    # Identity is a single evidence row: retain the full UUID and revision,
+    # including on narrow screens, rather than truncating provenance.
+    identity_custom = p[9452]["fieldConfig"]["defaults"]["custom"]
+    identity_custom["wrapText"] = True
+    identity_custom["cellOptions"]["wrapText"] = True
     p[9451]["options"]["footer"]["enablePagination"] = False
-    p[9452]["options"]["footer"]["enablePagination"] = False
-    _stack(p[9450], {9451: 8, 9452: 4})
+    p[9452]["options"]["footer"]["enablePagination"] = True
+    _stack(p[9450], {9451: 12, 9452: 6})
 
 
 def _overview(p: dict[int, dict]) -> None:
@@ -546,6 +578,17 @@ def _run_explorer(p: dict[int, dict]) -> None:
     )
 
     run = p[3010]
+    _override(run, "Trust", "noValue", "Open")
+    _override(
+        run,
+        "Trust",
+        "mappings",
+        [{"type": "value", "options": {"Inspect in 1. Trust": {"text": "Open"}}}],
+    )
+    # Keep the timestamp and both action links visible. Event age remains in
+    # the source frame for Inspect data; it is not a selected-run verdict.
+    _override(run, "Event age", _HIDDEN, True)
+    _override(run, "Report", "displayName", "Report")
     for transform in run["transformations"]:
         opts = transform["options"]
         if transform["id"] == "filterFieldsByName":
@@ -584,12 +627,13 @@ def _first_window_widths(payload: dict, p: dict[int, dict]) -> None:
         "bioetl-dq-v2": {9102: {"severity": 70, "Action": 125}},
         "bioetl-run-explorer-v1": {
             3010: {
-                "selected": 28,
+                "selected": 50,
                 "Started": 145,
                 "Run": 115,
-                "Trust": 120,
-                "Processing": 100,
-                "Report": 85,
+                "Duration": 75,
+                "Trust": 75,
+                "Processing": 90,
+                "Report": 68,
             }
         },
     }
