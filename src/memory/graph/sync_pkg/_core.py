@@ -249,6 +249,12 @@ from memory.graph.sync_pkg.add_duplication_callable_surface import (
 from memory.graph.sync_pkg.add_duplication_callable_surface import (
     _duplication_callable_descriptor as _duplication_callable_descriptor,
 )
+from memory.graph.sync_pkg.add_port_facade_surface import (
+    _add_port_facade_surface as _add_port_facade_surface,
+)
+from memory.graph.sync_pkg.add_port_facade_surface import (
+    _add_protocol_port_surface as _add_protocol_port_surface,
+)
 from memory.graph.sync_pkg.add_secret_requirements import (
     _add_secret_requirements as _add_secret_requirements,
 )
@@ -5608,65 +5614,6 @@ def _register_protocol_port_surface(
         today,
     )
     port_nodes.add(port)
-
-
-def _add_port_facade_surface(
-    snapshot: GraphSnapshot,
-    project: NodeKey,
-    family: NodeKey,
-    today: str,
-) -> NodeKey:
-    facade = snapshot.add_node(
-        "port_surface",
-        PORTS_MODULE_PREFIX,
-        summary="Canonical facade exporting stable domain port protocols.",
-        source_path=f"src/bioetl/domain/ports/{INIT_PY}",
-        source_kind="domain_port_facade",
-        granularity="facade",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    snapshot.add_relation(project, "HAS_PORT", facade, provenance="impact_ports")
-    if family in snapshot.nodes:
-        snapshot.add_relation(family, "CONTAINS", facade, provenance="impact_ports")
-    facade_module = NodeKey("module_surface", PORTS_FACADE_SOURCE_PATH)
-    if facade_module in snapshot.nodes:
-        snapshot.add_relation(
-            facade, "BACKED_BY", facade_module, provenance="impact_ports"
-        )
-    return facade
-
-
-def _add_protocol_port_surface(
-    snapshot: GraphSnapshot,
-    project: NodeKey,
-    facade: NodeKey,
-    family: NodeKey,
-    descriptor: PortSurfaceDescriptor,
-    today: str,
-) -> NodeKey:
-    port = snapshot.add_node(
-        "port_surface",
-        descriptor.surface_name,
-        summary=f"Domain port protocol `{descriptor.class_name}`.",
-        source_path=descriptor.source_path,
-        source_kind="domain_port_protocol",
-        port_name=descriptor.class_name,
-        port_module=descriptor.module_name,
-        granularity="protocol_class",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    snapshot.add_relation(project, "HAS_PORT", port, provenance="impact_ports")
-    snapshot.add_relation(facade, "CONTAINS", port, provenance="impact_ports")
-    if family in snapshot.nodes:
-        snapshot.add_relation(family, "CONTAINS", port, provenance="impact_ports")
-    module_key = NodeKey("module_surface", descriptor.source_path)
-    if module_key in snapshot.nodes:
-        snapshot.add_relation(port, "BACKED_BY", module_key, provenance="impact_ports")
-    return port
 
 
 def _add_adapter_surfaces(
