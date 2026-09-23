@@ -2003,6 +2003,9 @@ from memory.graph.sync_pkg.pipeline_source_config_artifact import (
 from memory.graph.sync_pkg.pipeline_source_config_artifact import (
     _pipeline_source_config_artifact as _pipeline_source_config_artifact,
 )
+from memory.graph.sync_pkg.pipeline_test_indexes import (
+    _pipeline_test_indexes as _pipeline_test_indexes,
+)
 from memory.graph.sync_pkg.pipeline_test_ownership_path import (
     _pipeline_test_mapping_config as _pipeline_test_mapping_config,
 )
@@ -2923,14 +2926,6 @@ def _pipeline_test_context(
         include_provider_regression_suites=include_provider_regression_suites,
         entity_pipeline_index=entity_pipeline_index,
         provider_pipeline_index=provider_pipeline_index,
-    )
-
-
-def _pipeline_test_indexes(
-    snapshot: GraphSnapshot,
-) -> tuple[dict[tuple[str, str], NodeKey], dict[str, list[NodeKey]]]:
-    return _entity_pipeline_test_index(snapshot), _provider_pipeline_test_index(
-        snapshot
     )
 
 
