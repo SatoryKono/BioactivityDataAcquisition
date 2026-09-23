@@ -1114,6 +1114,9 @@ from memory.graph.sync_pkg.entity_pipeline_identity import (
 from memory.graph.sync_pkg.entity_pipeline_identity import (
     _link_entity_pipeline_dependencies as _link_entity_pipeline_dependencies,
 )
+from memory.graph.sync_pkg.entity_storage_context import (
+    _entity_storage_context as _entity_storage_context,
+)
 from memory.graph.sync_pkg.entity_storage_promotion_pairs import (
     _classify_projected_storage_fields as _classify_projected_storage_fields,
 )
@@ -2902,46 +2905,6 @@ def _add_entity_storage_data_surfaces(
             schema_fields_by_storage, layer_nodes, field_nodes_by_layer
         )
         _link_entity_storage_promotions(snapshot, layer_nodes, field_nodes_by_layer)
-
-
-def _entity_storage_context(
-    root: Path,
-    entity_path: Path,
-    payload: dict[str, object],
-    *,
-    today: str,
-    base_payload: dict[str, object],
-) -> tuple[
-    EntityPipelineContext,
-    dict[str, object],
-    dict[str, dict[str, JsonValue]],
-]:
-    provider_name = str(payload.get("provider", entity_path.parent.name))
-    entity_name = str(payload.get("entity", entity_path.stem))
-    pipeline_payload = _as_mapping(payload.get("pipeline"))
-    pipeline_name = str(
-        pipeline_payload.get("pipeline_name", f"{provider_name}_{entity_name}")
-    )
-    maintenance_config = _merged_maintenance_config(base_payload, payload)
-    retention_days = maintenance_config.get("vacuum_retention_days")
-    quality_payload = _as_mapping(payload.get("quality"))
-    context = EntityPipelineContext(
-        provider_name=provider_name,
-        entity_name=entity_name,
-        pipeline_name=pipeline_name,
-        pipeline_key=NodeKey("pipeline_surface", pipeline_name),
-        entity_key=NodeKey("entity_config", pipeline_name),
-        config_artifact=NodeKey("config_artifact", _rel_path(root, entity_path)),
-        today=today,
-        contract_ref=f"{provider_name}.{entity_name}",
-        retention_days=_coerce_int(retention_days)
-        if isinstance(retention_days, int | float)
-        else None,
-        config_version=_optional_text(payload.get("version")),
-        quality_version=_optional_text(quality_payload.get("version")),
-    )
-    pipeline_sink = _entity_pipeline_sink_config(payload)
-    return context, pipeline_sink, _field_quality_index(payload)
 
 
 def _add_control_plane_runtime_evidence(
