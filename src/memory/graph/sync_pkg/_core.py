@@ -969,6 +969,15 @@ from memory.graph.sync_pkg.int_node_property import (
 from memory.graph.sync_pkg.int_node_property import (
     _module_surface_complexity_metrics as _module_surface_complexity_metrics,
 )
+from memory.graph.sync_pkg.is_describes_doc_to_module import (
+    _add_reverse_module_doc_edges as _add_reverse_module_doc_edges,
+)
+from memory.graph.sync_pkg.is_describes_doc_to_module import (
+    _collect_artifact_source_surfaces as _collect_artifact_source_surfaces,
+)
+from memory.graph.sync_pkg.is_describes_doc_to_module import (
+    _is_describes_doc_to_module as _is_describes_doc_to_module,
+)
 from memory.graph.sync_pkg.link_composite_layer_promotions import (
     CONTROL_PLANE_LEDGER_DOCS as CONTROL_PLANE_LEDGER_DOCS,
 )
@@ -4867,60 +4876,6 @@ def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
         _add_doc_path_reference_edges(snapshot, source_node, text, path_pattern)
         _add_doc_command_reference_edges(snapshot, source_node, text, command_pattern)
         _add_doc_claim_edges(snapshot, source_node, source_path, text, path_pattern)
-
-
-def _is_describes_doc_to_module(relation: GraphRelation) -> bool:
-    return (
-        relation.relation_type == "DESCRIBES"
-        and relation.source.label
-        in {"doc_source_surface", "doc_artifact", "policy_surface"}
-        and relation.target.label == "module_surface"
-    )
-
-
-def _collect_artifact_source_surfaces(
-    snapshot: GraphSnapshot,
-) -> dict[NodeKey, list[NodeKey]]:
-    artifact_sources: dict[NodeKey, list[NodeKey]] = {}
-    for relation in tuple(snapshot.relations.values()):
-        if relation.relation_type != "BACKED_BY":
-            continue
-        if relation.source.label != "doc_source_surface":
-            continue
-        if relation.target.label != "doc_artifact":
-            continue
-        artifact_sources.setdefault(relation.target, []).append(relation.source)
-    return artifact_sources
-
-
-def _add_reverse_module_doc_edges(snapshot: GraphSnapshot) -> None:
-    for relation in tuple(snapshot.relations.values()):
-        if not _is_describes_doc_to_module(relation):
-            continue
-        snapshot.add_relation(
-            relation.target,
-            "DESCRIBED_IN",
-            relation.source,
-            provenance="docs_code_drift_reverse",
-            confidence=relation.properties.get("confidence"),
-        )
-
-    artifact_sources = _collect_artifact_source_surfaces(snapshot)
-    for relation in tuple(snapshot.relations.values()):
-        if relation.relation_type != "DESCRIBED_IN":
-            continue
-        if relation.source.label != "module_surface":
-            continue
-        if relation.target.label != "doc_artifact":
-            continue
-        for source_surface in artifact_sources.get(relation.target, ()):
-            snapshot.add_relation(
-                relation.source,
-                "DESCRIBED_IN",
-                source_surface,
-                provenance="docs_code_drift_curated_source",
-                confidence=relation.properties.get("confidence"),
-            )
 
 
 def _add_pipeline_doc_edges(snapshot: GraphSnapshot) -> None:
