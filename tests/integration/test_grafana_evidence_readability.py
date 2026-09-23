@@ -79,14 +79,15 @@ def test_run_cell_inspection_and_links_use_full_identity():
         prop["value"] for prop in override["properties"] if prop["id"] == "links"
     )
     assert all(
-        "var-run_id=${__data.fields.Run:percentencode}" in link["url"]
-        for link in links
+        "var-run_id=${__data.fields.Run:percentencode}" in link["url"] for link in links
     )
     assert all("${__value.raw}" not in link["url"] for link in links)
     assert {prop["id"]: prop["value"] for prop in override["properties"]}[
         "custom.inspect"
     ] is True
-    organize = next(t["options"] for t in panel["transformations"] if t["id"] == "organize")
+    organize = next(
+        t["options"] for t in panel["transformations"] if t["id"] == "organize"
+    )
     assert organize["renameByName"]["run_id"] == "Run"
     rules = {
         o["matcher"]["options"]: {p["id"]: p["value"] for p in o["properties"]}

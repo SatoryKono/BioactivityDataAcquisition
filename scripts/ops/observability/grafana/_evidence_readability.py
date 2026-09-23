@@ -214,7 +214,9 @@ def _trust(p: dict[int, dict]) -> None:
     anchors["fieldConfig"]["defaults"]["custom"]["wrapText"] = True
     anchors["fieldConfig"]["defaults"]["custom"]["cellOptions"]["wrapText"] = True
     _override(anchors, "value_full", "custom.wrapText", True)
-    _override(anchors, "value_full", "custom.cellOptions", {"type": "auto", "wrapText": True})
+    _override(
+        anchors, "value_full", "custom.cellOptions", {"type": "auto", "wrapText": True}
+    )
     for pid in (9408, 9409, 9406):
         _table(p[pid], {"Result": 125, "Status": 115, "Action": 160})
     # A missing cell is not an empty table: retain the per-row MISSING result
@@ -650,7 +652,8 @@ def _run_explorer(p: dict[int, dict]) -> None:
             opts["indexByName"]["run_id"] = 4
     # Inspect value must receive the complete UUID, not the shortened API label.
     run["fieldConfig"]["overrides"] = [
-        item for item in run["fieldConfig"]["overrides"]
+        item
+        for item in run["fieldConfig"]["overrides"]
         if item["matcher"].get("options") != "run_id"
     ]
     for item in run["fieldConfig"]["overrides"]:
