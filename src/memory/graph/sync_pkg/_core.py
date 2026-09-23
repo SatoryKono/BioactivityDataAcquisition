@@ -246,6 +246,9 @@ from memory.graph.sync_pkg.add_contract_doc_dependency import (
 from memory.graph.sync_pkg.add_contract_doc_dependency import (
     _contract_dependency_doc_path as _contract_dependency_doc_path,
 )
+from memory.graph.sync_pkg.add_control_plane_run_instance_surfaces import (
+    _add_control_plane_run_instance_surfaces as _add_control_plane_run_instance_surfaces,
+)
 from memory.graph.sync_pkg.add_curated_cluster_readme import (
     _add_curated_cluster_entrypoint as _add_curated_cluster_entrypoint,
 )
@@ -2774,16 +2777,6 @@ def _add_control_plane_runtime_evidence(
         _add_runtime_evidence_surface(snapshot, project, today, spec)
 
     _add_control_plane_run_instance_surfaces(snapshot, root, project, today)
-
-
-def _add_control_plane_run_instance_surfaces(
-    snapshot: GraphSnapshot,
-    _root: Path,
-    project: NodeKey,
-    today: str,
-) -> None:
-    _add_run_instance_spec_surfaces(snapshot, project, today)
-    _add_runtime_state_surfaces(snapshot, project, today)
 
 
 def _link_workflow_job_dependencies(
