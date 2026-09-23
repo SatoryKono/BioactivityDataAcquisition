@@ -2085,6 +2085,9 @@ from memory.graph.sync_pkg.provider_regression_provider_target import (
 from memory.graph.sync_pkg.provider_regression_provider_target import (
     _provider_regression_provider_target as _provider_regression_provider_target,
 )
+from memory.graph.sync_pkg.provider_regression_provider_targets import (
+    _provider_regression_provider_targets as _provider_regression_provider_targets,
+)
 from memory.graph.sync_pkg.published_contract_artifact_paths import (
     _link_contract_module_dependencies as _link_contract_module_dependencies,
 )
@@ -3191,22 +3194,6 @@ def _provider_regression_suite_target(
     if not provider_targets:
         return None
     return suite_name, provider_targets
-
-
-def _provider_regression_provider_targets(
-    suite_payload: dict[str, object],
-) -> tuple[tuple[str, str], ...]:
-    providers = suite_payload.get("providers")
-    if not isinstance(providers, dict):
-        return ()
-    return tuple(
-        target
-        for provider_name, raw_test_path in providers.items()
-        for target in [
-            _provider_regression_provider_target(provider_name, raw_test_path)
-        ]
-        if target is not None
-    )
 
 
 if __name__ == "__main__":
