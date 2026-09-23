@@ -219,6 +219,21 @@ from memory.graph.sync_pkg.add_cli_command_surface import (
 from memory.graph.sync_pkg.add_cli_command_surface import (
     _link_cli_command_side_effects as _link_cli_command_side_effects,
 )
+from memory.graph.sync_pkg.add_dashboard_surface import (
+    _add_curated_quality_gates as _add_curated_quality_gates,
+)
+from memory.graph.sync_pkg.add_dashboard_surface import (
+    _add_dashboard_surface as _add_dashboard_surface,
+)
+from memory.graph.sync_pkg.add_dashboard_surface import (
+    _add_execution_path_node as _add_execution_path_node,
+)
+from memory.graph.sync_pkg.add_dashboard_surface import (
+    _developer_workflow_readme as _developer_workflow_readme,
+)
+from memory.graph.sync_pkg.add_dashboard_surface import (
+    _link_execution_gate as _link_execution_gate,
+)
 from memory.graph.sync_pkg.alert_targets import (
     _RUNTIME_DIMENSIONS as _RUNTIME_DIMENSIONS,
 )
@@ -1255,6 +1270,33 @@ from memory.graph.sync_pkg.storage_surface_state import (
 from memory.graph.sync_pkg.storage_surface_state import (
     _storage_surface_state as _storage_surface_state,
 )
+from memory.graph.sync_pkg.support_storage_surface import (
+    _support_cli_command_surface as _support_cli_command_surface,
+)
+from memory.graph.sync_pkg.support_storage_surface import (
+    _support_cli_option_surface as _support_cli_option_surface,
+)
+from memory.graph.sync_pkg.support_storage_surface import (
+    _support_doc_claim_surface as _support_doc_claim_surface,
+)
+from memory.graph.sync_pkg.support_storage_surface import (
+    _support_schema_field_surface as _support_schema_field_surface,
+)
+from memory.graph.sync_pkg.support_storage_surface import (
+    _support_storage_surface as _support_storage_surface,
+)
+from memory.graph.sync_pkg.support_storage_surface import (
+    _support_workflow_artifact_surface as _support_workflow_artifact_surface,
+)
+from memory.graph.sync_pkg.support_storage_surface import (
+    _support_workflow_call_surface as _support_workflow_call_surface,
+)
+from memory.graph.sync_pkg.support_storage_surface import (
+    _support_workflow_job_surface as _support_workflow_job_surface,
+)
+from memory.graph.sync_pkg.support_storage_surface import (
+    _support_workflow_output_surface as _support_workflow_output_surface,
+)
 from memory.graph.sync_pkg.sync_run_id import (
     _append_missing_relation_issues as _append_missing_relation_issues,
 )
@@ -1901,101 +1943,6 @@ def _add_dashboard_graph(
             "IS_FACTUAL_SOURCE_FOR",
             dashboard,
             provenance="dashboard_graph",
-        )
-
-
-def _add_dashboard_surface(
-    snapshot: GraphSnapshot,
-    root: Path,
-    dashboard_path: Path,
-    today: str,
-) -> NodeKey:
-    name = dashboard_path.stem
-    try:
-        payload = _read_json(dashboard_path)
-    except (OSError, json.JSONDecodeError):
-        payload = {}
-    title = payload.get("title") if isinstance(payload.get("title"), str) else None
-    return snapshot.add_node(
-        "dashboard_surface",
-        name,
-        summary=str(title or f"Grafana dashboard `{name}`."),
-        source_path=_rel_path(root, dashboard_path),
-        source_kind="dashboard_json",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-
-
-def _add_curated_quality_gates(
-    snapshot: GraphSnapshot, project: NodeKey, today: str
-) -> None:
-    for gate_payload in CURATED_QUALITY_GATES:
-        gate = snapshot.add_node(
-            "quality_gate",
-            str(gate_payload["name"]),
-            summary=str(gate_payload["summary"]),
-            source_kind="curated_quality_gate",
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
-        )
-        snapshot.add_relation(
-            project, "HAS_QUALITY_GATE", gate, provenance="curated_quality"
-        )
-
-
-def _developer_workflow_readme(
-    snapshot: GraphSnapshot, project: NodeKey, today: str
-) -> NodeKey:
-    dev_readme = snapshot.add_node(
-        "doc_artifact",
-        "scripts/engineering/dev/README.md",
-        summary="Developer workflow and wrapper entrypoint guide.",
-        source_path="scripts/engineering/dev/README.md",
-        source_kind="ops_doc",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    snapshot.add_relation(
-        project, "HAS_DOC_ARTIFACT", dev_readme, provenance="curated_scripts"
-    )
-    return dev_readme
-
-
-def _add_execution_path_node(
-    snapshot: GraphSnapshot,
-    today: str,
-    execution_payload: dict[str, object],
-) -> NodeKey:
-    return snapshot.add_node(
-        "execution_path",
-        str(execution_payload["name"]),
-        summary=str(execution_payload["summary"]),
-        platform=str(execution_payload["platform"]),
-        source_kind="execution_path",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-
-
-def _link_execution_gate(
-    snapshot: GraphSnapshot,
-    execution: NodeKey,
-    execution_payload: dict[str, object],
-    *,
-    provenance: str,
-) -> None:
-    gate_name = execution_payload.get("gate")
-    if isinstance(gate_name, str):
-        snapshot.add_relation(
-            execution,
-            "EXECUTES_GATE",
-            NodeKey("quality_gate", gate_name),
-            provenance=provenance,
         )
 
 
@@ -10448,128 +10395,6 @@ def _append_snapshot_support_issues(
                 snapshot, label, _bind_support_predicate(predicate, relation_index)
             ),
         )
-
-
-def _support_storage_surface(
-    relation_index: _SnapshotRelationIndex, key: NodeKey
-) -> bool:
-    return _has_inbound_relation(
-        relation_index,
-        key,
-        {"WRITES_TO", "DEPENDS_ON", "DEFINED_BY"},
-        source_labels={
-            "pipeline_surface",
-            "entity_config",
-            "runtime_evidence_surface",
-            "storage_surface",
-        },
-    ) or _has_outbound_relation(
-        relation_index,
-        key,
-        {"PROMOTES_TO", "DEFINED_BY"},
-    )
-
-
-def _support_schema_field_surface(
-    relation_index: _SnapshotRelationIndex, key: NodeKey
-) -> bool:
-    return _has_inbound_relation(
-        relation_index,
-        key,
-        {"HAS_SCHEMA_FIELD"},
-        source_labels={"storage_surface", "contract_surface"},
-    ) and _has_outbound_relation(
-        relation_index,
-        key,
-        {"DEFINED_BY", "PROMOTES_FIELD_TO", "DERIVES_FIELD_FROM"},
-    )
-
-
-def _support_workflow_job_surface(
-    relation_index: _SnapshotRelationIndex, key: NodeKey
-) -> bool:
-    return _has_inbound_relation(
-        relation_index, key, {"CONTAINS"}, source_labels={"workflow_surface"}
-    )
-
-
-def _support_cli_command_surface(
-    relation_index: _SnapshotRelationIndex, key: NodeKey
-) -> bool:
-    return _has_outbound_relation(
-        relation_index,
-        key,
-        {"RUNS_VIA", "EXECUTES_GATE", "DEPENDS_ON"},
-    ) or _has_inbound_relation(
-        relation_index,
-        key,
-        {"HAS_CLI_COMMAND"},
-        source_labels={"project"},
-    )
-
-
-def _support_workflow_artifact_surface(
-    relation_index: _SnapshotRelationIndex, key: NodeKey
-) -> bool:
-    return _has_inbound_relation(
-        relation_index,
-        key,
-        {"PUBLISHES_ARTIFACT", "DEPENDS_ON"},
-        source_labels={"workflow_job_surface"},
-    )
-
-
-def _support_workflow_call_surface(
-    relation_index: _SnapshotRelationIndex, key: NodeKey
-) -> bool:
-    return _has_inbound_relation(
-        relation_index,
-        key,
-        {"CALLS_WORKFLOW"},
-        source_labels={"workflow_surface", "workflow_job_surface"},
-    ) or _has_outbound_relation(
-        relation_index,
-        key,
-        {"DEPENDS_ON"},
-        target_labels={"workflow_surface"},
-    )
-
-
-def _support_workflow_output_surface(
-    relation_index: _SnapshotRelationIndex, key: NodeKey
-) -> bool:
-    return _has_inbound_relation(
-        relation_index,
-        key,
-        {"EMITS_OUTPUT"},
-        source_labels={"workflow_surface", "workflow_job_surface"},
-    )
-
-
-def _support_cli_option_surface(
-    relation_index: _SnapshotRelationIndex, key: NodeKey
-) -> bool:
-    return _has_inbound_relation(
-        relation_index,
-        key,
-        {"ACCEPTS_OPTION"},
-        source_labels={"cli_command_surface"},
-    )
-
-
-def _support_doc_claim_surface(
-    relation_index: _SnapshotRelationIndex, key: NodeKey
-) -> bool:
-    return _has_inbound_relation(
-        relation_index,
-        key,
-        {"ASSERTS"},
-        source_labels={"doc_source_surface", "doc_artifact", "policy_surface"},
-    ) or _has_outbound_relation(
-        relation_index,
-        key,
-        {"ASSERTS_ABOUT"},
-    )
 
 
 def _snapshot_support_specs() -> tuple[
