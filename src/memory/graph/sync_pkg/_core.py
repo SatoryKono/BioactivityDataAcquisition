@@ -410,6 +410,12 @@ from memory.graph.sync_pkg.add_secret_requirements import (
 from memory.graph.sync_pkg.add_single_adr_constraint_edges import (
     _add_single_adr_constraint_edges as _add_single_adr_constraint_edges,
 )
+from memory.graph.sync_pkg.add_single_alert_surface import (
+    _add_alert_surface_from_rule as _add_alert_surface_from_rule,
+)
+from memory.graph.sync_pkg.add_single_alert_surface import (
+    _add_single_alert_surface as _add_single_alert_surface,
+)
 from memory.graph.sync_pkg.add_storage_data_surfaces import (
     _add_storage_data_surfaces as _add_storage_data_surfaces,
 )
@@ -3322,84 +3328,6 @@ def _add_alert_rule_group_surfaces(
             target_context=target_context,
             memory_mapping=memory_mapping,
         )
-
-
-def _add_single_alert_surface(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    rules_path: Path,
-    artifact: NodeKey,
-    group_name: str,
-    rule: dict[str, object],
-    *,
-    dashboard_metrics: Mapping[NodeKey, Set[str]],
-    target_context: AlertTargetContext,
-    memory_mapping: dict[str, object],
-) -> None:
-    alert_context = _alert_rule_context(rule)
-    if alert_context is None:
-        return
-    alert = _add_alert_surface_node(
-        snapshot,
-        root,
-        project,
-        today,
-        rules_path,
-        artifact,
-        group_name,
-        alert_context.alert_name,
-        alert_context.annotations,
-        alert_context.labels,
-    )
-    _link_alert_targets(
-        snapshot,
-        alert,
-        alert_context.alert_name,
-        group_name,
-        rule,
-        dashboard_metrics=dashboard_metrics,
-        target_context=target_context,
-        memory_mapping=memory_mapping,
-    )
-    _link_alert_runbook(
-        snapshot,
-        root,
-        alert,
-        alert_context.alert_name,
-        alert_context.annotations,
-        today,
-    )
-
-
-def _add_alert_surface_from_rule(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    rules_path: Path,
-    artifact: NodeKey,
-    *,
-    group_name: str,
-    rule: dict[str, object],
-    dashboard_metrics: Mapping[NodeKey, Set[str]],
-    target_context: AlertTargetContext,
-    memory_mapping: dict[str, object],
-) -> None:
-    _add_single_alert_surface(
-        snapshot,
-        root,
-        project,
-        today,
-        rules_path,
-        artifact,
-        group_name,
-        rule,
-        dashboard_metrics=dashboard_metrics,
-        target_context=target_context,
-        memory_mapping=memory_mapping,
-    )
 
 
 if __name__ == "__main__":
