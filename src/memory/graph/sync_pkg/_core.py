@@ -1505,6 +1505,9 @@ from memory.graph.sync_pkg.link_source_backed_file_node import (
 from memory.graph.sync_pkg.link_source_backed_file_node import (
     _link_source_backed_file_node as _link_source_backed_file_node,
 )
+from memory.graph.sync_pkg.link_source_backed_file_structure import (
+    _link_source_backed_file_structure as _link_source_backed_file_structure,
+)
 from memory.graph.sync_pkg.link_source_backed_node_structure import (
     _link_source_backed_node_structure as _link_source_backed_node_structure,
 )
@@ -2643,28 +2646,6 @@ def _impact_analysis_context(
         snapshot, root, project, today, contract_nodes, adapter_nodes
     )
     return port_nodes, adapter_nodes, contract_nodes, pipeline_nodes
-
-
-def _link_source_backed_file_structure(
-    snapshot: GraphSnapshot,
-    root: Path,
-    today: str,
-    zone_roots: dict[str, tuple[str, ...]],
-    config: dict[str, object],
-) -> None:
-    source_backed_labels = _source_backed_file_structure_labels()
-    path_kind_cache: dict[str, str | None] = {}
-    for node in tuple(snapshot.nodes.values()):
-        _link_source_backed_node_structure(
-            snapshot,
-            root,
-            node,
-            source_backed_labels=source_backed_labels,
-            path_kind_cache=path_kind_cache,
-            today=today,
-            zone_roots=zone_roots,
-            config=config,
-        )
 
 
 def _add_file_structure_surfaces(
