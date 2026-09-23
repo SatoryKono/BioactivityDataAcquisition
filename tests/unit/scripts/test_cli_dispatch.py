@@ -14,11 +14,16 @@ from __future__ import annotations
 
 import pytest
 
+import os
 from pathlib import Path
 import subprocess
 import sys
 
-from scripts.engineering.common.cli_dispatch import module_command, run_command
+from scripts.engineering.common.cli_dispatch import (
+    module_command,
+    run_command,
+    shell_command,
+)
 
 
 pytestmark = pytest.mark.unit
@@ -205,3 +210,62 @@ def test_docs_verify_and_kpi_accept_workflow_flags(
     assert verify_rc == 0
     assert kpi_rc == 0
     assert "does not accept command arguments" not in captured.err
+
+
+def test_run_command_shell_refuses_native_windows_with_guidance(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """#10641: shell dispatch on native Windows must fail closed, not mangle paths."""
+    monkeypatch.setattr(os, "name", "nt")
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            AssertionError("refused shell dispatch must not spawn subprocesses")
+        ),
+    )
+
+    exit_code = run_command(
+        shell_command("launchers/codex/setup_plugins.sh"),
+        [],
+        base_dir=tmp_path,
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 2
+    assert "requires a POSIX bash" in captured.err
+    assert "setup_env_windows.ps1" in captured.err
+
+
+def test_run_command_shell_uses_bash_on_posix(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """POSIX shell dispatch behavior is unchanged: bash + resolved script path."""
+    seen: dict[str, object] = {}
+
+    def _fake_run(command: object, **kwargs: object) -> object:
+        seen["command"] = command
+
+        class _Result:
+            returncode = 0
+
+        return _Result()
+
+    monkeypatch.setattr(os, "name", "posix")
+    monkeypatch.setattr(subprocess, "run", _fake_run)
+
+    exit_code = run_command(
+        shell_command("launchers/codex/setup_plugins.sh"),
+        ["--pytest-only"],
+        base_dir=tmp_path,
+    )
+
+    assert exit_code == 0
+    command = seen["command"]
+    assert isinstance(command, list)
+    assert command[0] == "bash"
+    assert str(command[1]).endswith("setup_plugins.sh")
+    assert command[2:] == ["--pytest-only"]

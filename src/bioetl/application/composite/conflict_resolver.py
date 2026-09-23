@@ -118,9 +118,47 @@ class ConflictResolverService:
                 "Skipping conflict resolution - preserve_all_sources=True",
                 qualified_columns=len(qualified_cols),
             )
-            return df
+            return self._materialize_canonical_fields(df, seed_pipeline)
 
         return self._resolve_by_policy(df, enrichers, seed_pipeline)
+
+    def _materialize_canonical_fields(
+        self,
+        df: pl.DataFrame,
+        seed_pipeline: str | None,
+    ) -> pl.DataFrame:
+        """Keep provider-qualified columns and emit missing canonical fields.
+
+        ``preserve_all_sources`` skips coalescing *away* qualified copies, but
+        Gold contracts still require unqualified fields such as ``title``.
+        """
+        from bioetl.application.composite._coalesce_policy_support import (
+            build_field_groups,
+            compatible_columns,
+            seed_prefix as build_seed_prefix,
+            sort_columns,
+        )
+
+        seed_prefix_value = build_seed_prefix(seed_pipeline)
+        result = df
+        for field, columns in build_field_groups(result).items():
+            if field in result.columns:
+                continue
+            qualified = [col for col in columns if col != field and "." in col]
+            if not qualified:
+                continue
+            ordered = sort_columns(
+                qualified,
+                seed_prefix_value,
+                prefer_seed=True,
+            )
+            compatible = compatible_columns(result, ordered)
+            if not compatible:
+                continue
+            result = result.with_columns(
+                pl.coalesce(*[pl.col(col) for col in compatible]).alias(field)
+            )
+        return result
 
     def _resolve_by_policy(
         self,

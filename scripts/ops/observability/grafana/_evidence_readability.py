@@ -217,7 +217,7 @@ def _provider(p: dict[int, dict]) -> None:
     }
     p[105]["options"]["colorMode"] = "value"
     p[105]["description"] = (
-        "TIME RANGE Â· Observed degraded health checks in the selected range; "
+        "TIME RANGE · Observed degraded health checks in the selected range; "
         "historical count, not current severity. Missing evidence remains UNKNOWN."
     )
 
@@ -293,6 +293,8 @@ def _incident(p: dict[int, dict]) -> None:
             [{"type": "value", "options": {"data_quality": {"text": "DQ"}}}],
         )
     _stack(p[2099], {2002: 7, 2003: 3, 2004: 7})
+    _table(p[2002], {"pipeline": 250, "reason": 280, "run_type": 150})
+    _table(p[2004], {"Pipeline": 250, "Signal": 90})
     p[22010]["options"].setdefault("footer", {}).update(
         enablePagination=False, countRows=False
     )
@@ -303,7 +305,7 @@ def _incident(p: dict[int, dict]) -> None:
             p[22010], field, "custom.cellOptions", {"type": "auto", "wrapText": True}
         )
     p[22010]["description"] = (
-        "GLOBAL / CURRENT Â· Empty successful result: no ranked suspects. Missing telemetry remains "
+        "GLOBAL / CURRENT · Empty successful result: no ranked suspects. Missing telemetry remains "
         "UNKNOWN; request failures remain QUERY ERROR. Open domain diagnostics from Action."
     )
     p[9400]["options"]["content"] = (
@@ -334,11 +336,13 @@ def _selection_summary(panel: dict) -> None:
             [
                 {
                     "type": "value",
-                    "options": {"SELECT RUN": {"text": "â€”", "color": "text"}},
+                    "options": {"SELECT RUN": {"text": "—", "color": "text"}},
                 }
             ],
         )
     _override(panel, "Rules", _HIDDEN, True)
+    links = panel["fieldConfig"]["defaults"].get("links", [])
+    _override(panel, "Evidence", "links", links[:1])
     _override(
         panel,
         "Evidence",

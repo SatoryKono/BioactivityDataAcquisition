@@ -1575,7 +1575,9 @@
                   "type": "auto",
                   "wrapText": false
                 },
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50,
+                "wrapText": false
               },
               "color": {
                 "mode": "thresholds"
@@ -1700,15 +1702,39 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 150
-                  },
-                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
                       "wrapText": true
                     }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 280
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "pipeline"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 250
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "run_type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 150
                   }
                 ]
               }
@@ -1974,7 +2000,9 @@
                   "type": "auto",
                   "wrapText": false
                 },
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50,
+                "wrapText": false
               },
               "color": {
                 "mode": "thresholds"
@@ -2031,7 +2059,7 @@
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 70
+                    "value": 250
                   }
                 ]
               },
@@ -2103,7 +2131,7 @@
                   },
                   {
                     "id": "custom.width",
-                    "value": 88
+                    "value": 90
                   }
                 ]
               },
@@ -2208,7 +2236,7 @@
                         "type": "value",
                         "options": {
                           "SELECT RUN": {
-                            "text": "â€”",
+                            "text": "—",
                             "color": "text"
                           }
                         }
@@ -2234,7 +2262,7 @@
                         "type": "value",
                         "options": {
                           "SELECT RUN": {
-                            "text": "â€”",
+                            "text": "—",
                             "color": "text"
                           }
                         }
@@ -2261,6 +2289,17 @@
                   "options": "Evidence"
                 },
                 "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Open Run Explorer",
+                        "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+                        "targetBlank": false,
+                        "includeVars": false
+                      }
+                    ]
+                  },
                   {
                     "id": "mappings",
                     "value": [
@@ -2367,7 +2406,7 @@
           "id": 22010,
           "type": "table",
           "title": "Inspect Full Ranked Suspects",
-          "description": "GLOBAL / CURRENT Â· Empty successful result: no ranked suspects. Missing telemetry remains UNKNOWN; request failures remain QUERY ERROR. Open domain diagnostics from Action.",
+          "description": "GLOBAL / CURRENT · Empty successful result: no ranked suspects. Missing telemetry remains UNKNOWN; request failures remain QUERY ERROR. Open domain diagnostics from Action.",
           "gridPos": {
             "x": 0,
             "y": 21,
