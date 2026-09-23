@@ -878,6 +878,9 @@ from memory.graph.sync_pkg.contract_dependency_module_specs import (
 from memory.graph.sync_pkg.contract_dependency_module_specs import (
     _contract_dependency_module_specs as _contract_dependency_module_specs,
 )
+from memory.graph.sync_pkg.contract_mapping_config import (
+    _contract_mapping_config as _contract_mapping_config,
+)
 from memory.graph.sync_pkg.contract_mapping_values import (
     _add_contract_policy_config as _add_contract_policy_config,
 )
@@ -3275,35 +3278,6 @@ def _populate_workflow_job_surface(
     _add_job_matrix_variants(snapshot, job_context, matrix_variants)
     _add_job_outputs(snapshot, job_context, job_payload.get("outputs"))
     _process_workflow_steps(snapshot, job_context, job_payload.get("steps"))
-
-
-def _contract_mapping_config(
-    memory_mapping: dict[str, object],
-) -> ContractMappingConfig:
-    contracts_mapping = _mapping_dict_or_empty(memory_mapping.get("contracts"))
-    return ContractMappingConfig(
-        source_prefixes=_contract_source_prefixes(contracts_mapping),
-        control_plane_modules=_contract_mapping_values(
-            contracts_mapping, "control_plane_modules"
-        ),
-        control_plane_runtime_modules=_contract_mapping_values(
-            contracts_mapping, "control_plane_runtime_modules"
-        ),
-        lineage_modules=_contract_mapping_values(contracts_mapping, "lineage_modules"),
-        lineage_runtime_modules=_contract_mapping_values(
-            contracts_mapping, "lineage_runtime_modules"
-        ),
-        control_plane_docs=_contract_mapping_values(
-            contracts_mapping, "control_plane_docs"
-        ),
-        lineage_docs=_contract_mapping_values(contracts_mapping, "lineage_docs"),
-        control_plane_anchor_fields=_contract_mapping_values(
-            contracts_mapping, "control_plane_anchor_fields"
-        ),
-        lineage_anchor_fields=_contract_mapping_values(
-            contracts_mapping, "lineage_anchor_fields"
-        ),
-    )
 
 
 def _contract_registry_entries(root: Path) -> dict[str, dict[str, object]]:
