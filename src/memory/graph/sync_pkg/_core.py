@@ -1218,6 +1218,12 @@ from memory.graph.sync_pkg.link_composite_pipeline_dependencies import (
 from memory.graph.sync_pkg.link_composite_pipeline_dependencies import (
     _link_composite_pipeline_dependencies as _link_composite_pipeline_dependencies,
 )
+from memory.graph.sync_pkg.link_contract_provider import (
+    _add_contract_registry_artifact as _add_contract_registry_artifact,
+)
+from memory.graph.sync_pkg.link_contract_provider import (
+    _link_contract_provider as _link_contract_provider,
+)
 from memory.graph.sync_pkg.link_curated_doc_artifact import (
     _add_summary_identifiers as _add_summary_identifiers,
 )
@@ -4886,40 +4892,6 @@ def _add_contract_entry_surface(
         contract_ref=contract_ref,
         contract=contract,
         raw_entry=raw_entry,
-    )
-
-
-def _link_contract_provider(
-    snapshot: GraphSnapshot,
-    contract_ref: str,
-    contract: NodeKey,
-) -> None:
-    provider_name = contract_ref.split(".", 1)[0]
-    provider_key = NodeKey("provider_surface", provider_name)
-    if provider_key in snapshot.nodes:
-        snapshot.add_relation(
-            provider_key, "DEFINES", contract, provenance="impact_contracts"
-        )
-
-
-def _add_contract_registry_artifact(
-    snapshot: GraphSnapshot,
-    root: Path,
-    today: str,
-) -> NodeKey | None:
-    registry_path = root / CONTRACT_REGISTRY_RELATIVE_PATH
-    if not registry_path.is_file():
-        return None
-    relative_path = _rel_path(root, registry_path)
-    return snapshot.add_node(
-        "config_artifact",
-        relative_path,
-        summary="Contract registry for published data contracts.",
-        source_path=relative_path,
-        source_kind="contract_registry",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
     )
 
 
