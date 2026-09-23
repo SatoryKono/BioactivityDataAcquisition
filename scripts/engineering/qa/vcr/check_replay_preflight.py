@@ -147,7 +147,7 @@ def collect_vcr_replay_preflight(
                 "id": "unresolved_vcr_lfs_pointers",
                 "message": (
                     f"Found {len(pointer_rows)} unresolved VCR Git LFS pointer "
-                    "cassette(s); run git lfs pull before replaying."
+                    "cassette(s); store the full YAML in git before replaying."
                 ),
                 "paths": [row["path"] for row in pointer_rows],
             }
@@ -158,7 +158,8 @@ def collect_vcr_replay_preflight(
                 "id": "unresolved_replay_critical_lfs_pointers",
                 "message": (
                     f"Found {len(strict_pointer_rows)} replay-critical unresolved "
-                    "Git LFS pointer cassette(s); run git lfs pull before replaying."
+                    "Git LFS pointer cassette(s); store the full YAML in git "
+                    "before replaying."
                 ),
                 "paths": [row["path"] for row in strict_pointer_rows],
             }
@@ -207,7 +208,9 @@ def collect_vcr_replay_preflight(
         "strict_unresolved_lfs_pointer_count": len(strict_pointer_rows),
         "catalog": catalog,
         "sanitizer_status": sanitizer_status,
-        "remediation": "Run `git lfs pull` before replaying unresolved VCR cassettes.",
+        "remediation": (
+            "Replace Git LFS pointer cassettes with git-stored YAML before replaying."
+        ),
         "blockers": blockers,
     }
 
@@ -307,7 +310,9 @@ def _public_vcr_replay_preflight(report: dict[str, Any]) -> dict[str, Any]:
             "has_request_sanitizer": sanitizer.get("has_request_sanitizer") is True,
             "has_response_filter": sanitizer.get("has_response_filter") is True,
         },
-        "remediation": "Run `git lfs pull` before replaying unresolved VCR cassettes.",
+        "remediation": (
+            "Replace Git LFS pointer cassettes with git-stored YAML before replaying."
+        ),
         "blockers": _public_blocker_rows(report),
     }
 
