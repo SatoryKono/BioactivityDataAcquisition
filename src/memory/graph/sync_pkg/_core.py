@@ -840,6 +840,27 @@ from memory.graph.sync_pkg.int_node_property import (
 from memory.graph.sync_pkg.int_node_property import (
     _module_surface_complexity_metrics as _module_surface_complexity_metrics,
 )
+from memory.graph.sync_pkg.link_composite_layer_promotions import (
+    CONTROL_PLANE_LEDGER_DOCS as CONTROL_PLANE_LEDGER_DOCS,
+)
+from memory.graph.sync_pkg.link_composite_layer_promotions import (
+    EFFECTIVE_CONFIG_RUNTIME_MODULES as EFFECTIVE_CONFIG_RUNTIME_MODULES,
+)
+from memory.graph.sync_pkg.link_composite_layer_promotions import (
+    LINEAGE_RUNTIME_MODULES as LINEAGE_RUNTIME_MODULES,
+)
+from memory.graph.sync_pkg.link_composite_layer_promotions import (
+    RUN_LEDGER_RUNTIME_MODULES as RUN_LEDGER_RUNTIME_MODULES,
+)
+from memory.graph.sync_pkg.link_composite_layer_promotions import (
+    RUN_MANIFEST_RUNTIME_MODULES as RUN_MANIFEST_RUNTIME_MODULES,
+)
+from memory.graph.sync_pkg.link_composite_layer_promotions import (
+    _composite_storage_context as _composite_storage_context,
+)
+from memory.graph.sync_pkg.link_composite_layer_promotions import (
+    _link_composite_layer_promotions as _link_composite_layer_promotions,
+)
 from memory.graph.sync_pkg.link_curated_doc_artifact import (
     _add_summary_identifiers as _add_summary_identifiers,
 )
@@ -3773,86 +3794,6 @@ def _add_composite_storage_data_surfaces(
         )
         _link_composite_layer_promotions(snapshot, layer_nodes, field_nodes_by_layer)
 
-
-def _link_composite_layer_promotions(
-    snapshot: GraphSnapshot,
-    layer_nodes: dict[str, NodeKey],
-    field_nodes_by_layer: dict[str, dict[str, NodeKey]],
-) -> None:
-    silver_layer = layer_nodes.get("silver")
-    gold_layer = layer_nodes.get("gold")
-    if silver_layer is None or gold_layer is None:
-        return
-    snapshot.add_relation(
-        silver_layer,
-        "PROMOTES_TO",
-        gold_layer,
-        provenance="storage_surfaces",
-    )
-    gold_fields = field_nodes_by_layer.get("gold", {})
-    for field_name, silver_field in field_nodes_by_layer.get("silver", {}).items():
-        gold_field = gold_fields.get(field_name)
-        if gold_field is None:
-            continue
-        snapshot.add_relation(
-            silver_field,
-            "PROMOTES_FIELD_TO",
-            gold_field,
-            provenance="schema_fields",
-        )
-
-
-def _composite_storage_context(
-    root: Path,
-    composite_path: Path,
-    payload: dict[str, object],
-    *,
-    today: str,
-) -> tuple[CompositePipelineContext, dict[str, object], object]:
-    composite_payload = _as_mapping(payload.get("composite"))
-    composite_name = str(composite_payload.get("name", composite_path.stem))
-    context = CompositePipelineContext(
-        composite_name=composite_name,
-        pipeline_key=NodeKey("pipeline_surface", composite_name),
-        config_artifact=NodeKey("config_artifact", _rel_path(root, composite_path)),
-        today=today,
-        composite_version=_optional_text(composite_payload.get("version")),
-    )
-    return context, composite_payload, composite_payload.get("dependencies")
-
-
-CONTROL_PLANE_LEDGER_DOCS = (
-    RUN_MANIFEST_LEDGER_DOC_PATH,
-    RUN_MANIFEST_INSPECTION_DOC_PATH,
-    "docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md",
-)
-
-RUN_MANIFEST_RUNTIME_MODULES = (
-    "src/bioetl/domain/control_plane/run_manifest.py",
-    "src/bioetl/application/services/control_plane/run_manifest_service.py",
-    "src/bioetl/application/services/control_plane/run_manifest_diagnostics.py",
-    "src/bioetl/application/services/control_plane/run_manifest_inspection_service.py",
-    "src/bioetl/interfaces/cli/commands/run_manifest.py",
-    "src/bioetl/composition/bootstrap/cli/run_manifest.py",
-    "src/bioetl/composition/runtime_builders/run_manifest_builder.py",
-)
-
-RUN_LEDGER_RUNTIME_MODULES = (
-    "src/bioetl/domain/control_plane/run_ledger.py",
-    "src/bioetl/application/services/control_plane/run_ledger_service.py",
-)
-
-EFFECTIVE_CONFIG_RUNTIME_MODULES = (
-    "src/bioetl/domain/control_plane/effective_config_artifact.py",
-    "src/bioetl/composition/services/effective_config_serializer.py",
-    "src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py",
-)
-
-LINEAGE_RUNTIME_MODULES = (
-    "src/bioetl/application/services/lineage/lineage_inspection_service.py",
-    "src/bioetl/composition/bootstrap/cli/lineage.py",
-    "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
-)
 
 RUNTIME_EVIDENCE_DEFINITIONS = (
     (
