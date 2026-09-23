@@ -254,7 +254,9 @@ def test_load_default_reason_catalog_all_candidates_none(
 
 def test_interpretation_good_band() -> None:
     assert _interpretation(8.5) == "good_targeted_improvements"
-    assert _interpretation(9.9) == "good_targeted_improvements"
+    assert _interpretation(9.49) == "good_targeted_improvements"
+    assert _interpretation(9.5) == "excellent"
+    assert _interpretation(9.9) == "excellent"
 
 
 def test_merge_unit_companion_policies_non_dict() -> None:

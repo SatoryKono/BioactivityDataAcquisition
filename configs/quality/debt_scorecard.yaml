@@ -569,7 +569,7 @@ hotspot_family_ratchets:
       max_internal_fan_in: 3
     metrics:
       duplication_clusters: 0
-      files: 55
+      files: 56
       total_loc: 7171
       files_ge_250_loc: 0
       helper_function_ratio: 0.382
@@ -752,9 +752,9 @@ hotspot_family_coverage_thresholds:
       min_covered_line_percent: 96.44
       allowlisted_unmeasured_paths: []
     composition_runtime_builders:
-      min_measured_module_count: 55
+      min_measured_module_count: 56
       max_unmeasured_module_count: 0
-      min_covered_module_count: 55
+      min_covered_module_count: 56
       min_covered_line_percent: 94.9
       allowlisted_unmeasured_paths: []
 removable_complexity_family_ratchets:

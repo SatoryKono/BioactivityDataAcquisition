@@ -381,11 +381,20 @@ def _build_categories(metrics: dict[str, object]) -> list[dict[str, object]]:
 
 
 def _interpretation(score: float) -> str:
+    """Map integral score to the audit-prompt interpretation band.
+
+    Bands match ``prompt.architecture.cycle`` / architecture-index semantics:
+    excellent ≥ 9.5, good_targeted_improvements [8.5, 9.5),
+    satisfactory_system_refactoring_required [5.0, 8.5), critical < 5.0.
+    Machine tokens keep the committed names for the two lower bands.
+    """
     if score < 5.0:
         return "critical"
     if score < 8.5:
         return "satisfactory_system_refactoring_required"
-    return "good_targeted_improvements"
+    if score < 9.5:
+        return "good_targeted_improvements"
+    return "excellent"
 
 
 __all__ = [
