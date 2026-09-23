@@ -312,6 +312,12 @@ from memory.graph.sync_pkg.add_entity_regular_field_node import (
 from memory.graph.sync_pkg.add_entity_regular_field_node import (
     _add_entity_regular_field_node as _add_entity_regular_field_node,
 )
+from memory.graph.sync_pkg.add_file_structure_surfaces import (
+    _add_entity_layer_field_nodes as _add_entity_layer_field_nodes,
+)
+from memory.graph.sync_pkg.add_file_structure_surfaces import (
+    _add_file_structure_surfaces as _add_file_structure_surfaces,
+)
 from memory.graph.sync_pkg.add_file_structure_zone import (
     _add_file_structure_zone as _add_file_structure_zone,
 )
@@ -2705,55 +2711,6 @@ def _run_impact_analysis_passes(
     )
     _add_pipeline_operational_edges(snapshot, pipeline_nodes, memory_mapping)
     _extract_code_duplication_surfaces(snapshot, root, project, today, memory_mapping)
-
-
-def _add_file_structure_surfaces(
-    snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str
-) -> None:
-    memory_mapping = _load_memory_mapping(root)
-    config = _file_structure_config(memory_mapping)
-    zone_roots = _file_structure_zone_roots(config)
-    _materialize_file_structure(snapshot, root, project, today, zone_roots, config)
-
-
-def _add_entity_layer_field_nodes(
-    snapshot: GraphSnapshot,
-    project: NodeKey,
-    context: EntityPipelineContext,
-    layer_context: EntityLayerFieldContext,
-) -> dict[str, NodeKey]:
-    layer_field_nodes: dict[str, NodeKey] = {}
-    scope = _entity_pipeline_scope(
-        context.provider_name, context.entity_name, context.pipeline_name
-    )
-    drift_classification = (
-        "staging_projection" if layer_context.layer_name == "bronze" else None
-    )
-    for field_group, field_name in _filtered_group_fields(
-        layer_context.payload, layer_name=layer_context.layer_name
-    ):
-        _add_entity_regular_field_node(
-            snapshot,
-            project,
-            context,
-            layer_context,
-            scope=scope,
-            field_group=field_group,
-            field_name=field_name,
-            drift_classification=drift_classification,
-            layer_field_nodes=layer_field_nodes,
-        )
-    for metadata_field in _scd_config_columns(layer_context.layer_config).values():
-        _add_entity_metadata_field_node(
-            snapshot,
-            project,
-            context,
-            layer_context,
-            scope=scope,
-            metadata_field=metadata_field,
-            layer_field_nodes=layer_field_nodes,
-        )
-    return layer_field_nodes
 
 
 def _add_entity_storage_layers(
