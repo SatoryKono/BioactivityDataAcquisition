@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import shutil as shutil  # re-exported via __all__
 import sys
-from datetime import date
 from pathlib import Path
 from typing import TypeVar
 
@@ -805,6 +804,7 @@ from memory.graph.sync_pkg.batch_pipeline_names import (
 from memory.graph.sync_pkg.batch_pipeline_names import (
     _normalization_progress_payload as _normalization_progress_payload,
 )
+from memory.graph.sync_pkg.build_snapshot import build_snapshot as build_snapshot
 from memory.graph.sync_pkg.claim_line_context import (
     _add_claim_path_targets as _add_claim_path_targets,
 )
@@ -2804,43 +2804,6 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 if str(DEFAULT_ROOT) not in sys.path:
     sys.path.insert(0, str(DEFAULT_ROOT))
-
-
-def build_snapshot(root: Path, verified_at: str | None = None) -> GraphSnapshot:
-    snapshot = GraphSnapshot()
-    today = verified_at or date.today().isoformat()
-    memory_mapping = _load_memory_mapping(root)
-    project = snapshot.add_node(
-        "project",
-        "BioETL",
-        summary="Python ETL framework for bioactivity data acquisition.",
-        source_path="docs/00-project/ai/memory/agent-memory.md",
-        source_kind="memory_entrypoint",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    _add_curated_docs(snapshot, root, project, today)
-    _add_decisions_and_risks(snapshot, root, project, today)
-    _add_layer_topology(snapshot, root, project, today)
-    _add_provider_and_config_graph(snapshot, root, project, today)
-    _add_dashboard_graph(snapshot, root, project, today)
-    _add_quality_and_scripts(snapshot, root, project, today)
-    _add_test_graph(snapshot, root, project, today)
-    _add_policy_surfaces(snapshot, root, project, today)
-    _add_impact_analysis_surfaces(snapshot, root, project, today)
-    _add_file_structure_surfaces(snapshot, root, project, today)
-    _add_storage_data_surfaces(snapshot, root, project, today)
-    _add_control_plane_runtime_evidence(snapshot, root, project, today)
-    _add_ci_workflow_graph(snapshot, root, project, today)
-    _add_cli_command_graph(snapshot, root, project, today)
-    _add_docs_to_code_drift_edges(snapshot, root)
-    _add_pipeline_doc_edges(snapshot)
-    _add_reverse_module_doc_edges(snapshot)
-    _add_adr_constraint_edges(snapshot, root, project, today)
-    _add_retirement_analysis_surfaces(snapshot, root, project, today, memory_mapping)
-    _add_complexity_analysis_surfaces(snapshot, root, project, today, memory_mapping)
-    return snapshot
 
 
 if __name__ == "__main__":
