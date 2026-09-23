@@ -1283,3 +1283,16 @@ def test_selection_presentation_does_not_imply_failed_execution():
     assert payload["presentation_summary"][0]["execution_state"] == "SELECT RUN"
     assert payload["presentation_summary"][0]["pipeline"] == "No run selected"
     assert payload["presentation_trust"][0]["processing_status"] == "SELECT RUN"
+
+
+def test_selection_presentation_retains_summary_mirror_fields():
+    from bioetl.interfaces.http import selected_run_status
+
+    payload = selected_run_status.unavailable_status(
+        ".*", "-", "SELECT RUN", "run_not_selected"
+    )
+    row = payload["presentation_domains"][0]
+    assert row["execution_state"] == "SELECT RUN"
+    assert row["run_verdict"] == "SELECT RUN"
+    assert row["evidence_completeness"] == "SELECT RUN"
+    assert row["rules_version"]

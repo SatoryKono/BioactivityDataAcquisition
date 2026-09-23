@@ -38,6 +38,26 @@ def _legend(panel: dict) -> None:
     }
 
 
+def _stage_colors(panel: dict) -> None:
+    # Stage identity stays stable across Runtime and DQ, independently of severity.
+    overrides = panel["fieldConfig"].setdefault("overrides", [])
+    for stage, color in {
+        "bronze": "#CD7F32",
+        "silver": "#C0C0C0",
+        "gold": "#E0B400",
+        "quarantined": "#B877D9",
+    }.items():
+        matcher = {"id": "byRegexp", "options": "(^|[ /])" + stage + "$"}
+        match = next((o for o in overrides if o["matcher"] == matcher), None)
+        if match is None:
+            match = {"matcher": matcher, "properties": []}
+            overrides.append(match)
+        match["properties"] = [p for p in match["properties"] if p["id"] != "color"]
+        match["properties"].append(
+            {"id": "color", "value": {"mode": "fixed", "fixedColor": color}}
+        )
+
+
 def _saved_run(p: dict[int, dict]) -> None:
     for candidate in p.values():
         for target in candidate.get("targets", []):
@@ -67,6 +87,21 @@ def _saved_run(p: dict[int, dict]) -> None:
             }
         ],
     )
+    _override(
+        panel,
+        "Action",
+        "mappings",
+        [
+            {
+                "type": "value",
+                "options": {
+                    "Inspect saved evidence": {"text": "Open report"},
+                    "Inspect reason and evidence": {"text": "Open report"},
+                    "Select run or inspect evidence": {"text": "Inspect report"},
+                },
+            }
+        ],
+    )
     panel["links"] = []
     for field in ("Pipeline", "Run ID"):
         _override(
@@ -84,7 +119,9 @@ def _saved_run(p: dict[int, dict]) -> None:
             ],
         )
     _table(p[9452])
-    _stack(p[9450], {9451: 10, 9452: 5})
+    p[9451]["options"]["footer"]["enablePagination"] = False
+    p[9452]["options"]["footer"]["enablePagination"] = False
+    _stack(p[9450], {9451: 8, 9452: 4})
 
 
 def _overview(p: dict[int, dict]) -> None:
@@ -100,7 +137,11 @@ def _overview(p: dict[int, dict]) -> None:
             _override(p[pid], field, "custom.hidden", True)
         _table(p[pid], {"Priority": 80, "Pipeline": 190, "Action": 170})
     for pid in (9010, 9011):
-        _table(p[pid], {"Pipeline": 230, "Run Type": 110, "Status": 110})
+        for item in p[pid]["fieldConfig"].get("overrides", []):
+            item["properties"] = [
+                prop for prop in item["properties"] if prop["id"] != "custom.width"
+            ]
+        _table(p[pid], {"Run Type": 130, "Status": 110, "Failures": 110, "Runs": 110})
 
 
 def _trust(p: dict[int, dict]) -> None:
@@ -110,7 +151,10 @@ def _trust(p: dict[int, dict]) -> None:
     for pid in (9413, 9414, 9415):
         _table(p[pid], {"check": 220, "status": 110})
         _override(p[pid], "reason", "custom.hidden", True)
-        _override(p[pid], "reason_display", "displayName", "Reason")
+        _override(p[pid], "reason_display", "custom.hidden", True)
+        _override(p[pid], "detail", "displayName", "Reason")
+        _override(p[pid], "check", "displayName", "Check")
+        _override(p[pid], "status", "displayName", "Status")
     _legend(p[7])
     y = p[901]["gridPos"]["y"] + 1
     p[908]["gridPos"].update(x=0, y=y, w=24, h=4)
@@ -126,11 +170,14 @@ def _trust(p: dict[int, dict]) -> None:
 def _runtime(p: dict[int, dict]) -> None:
     for pid in (238, 240, 9105):
         _legend(p[pid])
+        _stage_colors(p[pid])
     p[9105]["fieldConfig"]["defaults"].setdefault("custom", {})["axisLabel"] = (
         "Stage lag"
     )
     _stack(p[252], {238: 10, 240: 10, 242: 9, 9105: 10, 243: 9, 220: 3})
     _stack(p[32460], {22460: 14, 2461: 14})
+    _table(p[22460], {"Backlog": 100, "Lag": 100, "Throughput": 130})
+    _table(p[2461], {"Pipeline": 240, "Run type": 130})
     for pid in (2460, 22460, 2461, 243):
         _override(p[pid], "Throughput", "unit", "suffix: records/s")
         _override(p[pid], "scope_stage\\measure", "displayName", "Pipeline / Stage")
@@ -140,6 +187,7 @@ def _runtime(p: dict[int, dict]) -> None:
 def _provider(p: dict[int, dict]) -> None:
     p[9101]["gridPos"]["h"] = p[9107]["gridPos"]["h"] = 7
     p[9104]["gridPos"].update(y=14, h=3)
+    p[9104]["options"]["colorMode"] = "value"
     _stack(p[9404], {114: 10, 1: 10, 2: 3, 105: 3, 104: 3, 7: 3})
     _table(
         p[114],
@@ -174,12 +222,58 @@ def _dq(p: dict[int, dict]) -> None:
             }
         ],
     )
+    _override(
+        p[9102],
+        "action_target",
+        "mappings",
+        [
+            {
+                "type": "value",
+                "options": {
+                    "data_quality": {"text": "Rejects", "color": "orange"},
+                    "verify_dq_reason_rules": {
+                        "text": "Verify DQ rules",
+                        "color": "gray",
+                    },
+                },
+            }
+        ],
+    )
+    for item in p[9102]["fieldConfig"]["overrides"]:
+        if item["matcher"].get("options") == "action_target":
+            for prop in item["properties"]:
+                if prop["id"] == "links":
+                    base = prop["value"][0]["url"].split("&viewPanel=")[0]
+                    prop["value"] = [
+                        {
+                            "title": "Inspect Gold exclusions",
+                            "url": base + "&viewPanel=156",
+                            "targetBlank": False,
+                        },
+                        {
+                            "title": "Inspect Silver rejects",
+                            "url": base + "&viewPanel=121",
+                            "targetBlank": False,
+                        },
+                        {
+                            "title": "Verify DQ recording rules",
+                            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md",
+                            "targetBlank": True,
+                        },
+                    ]
     _legend(p[1])
+    _stage_colors(p[1])
     p[9]["options"].update(orientation="horizontal", displayMode="basic")
     _stack(p[221], {1: 10, 4: 3, 3: 3, 101: 3, 9: 7, 12: 3, 151: 3})
 
 
 def _incident(p: dict[int, dict]) -> None:
+    _override(
+        p[22010],
+        "Action",
+        "mappings",
+        [{"type": "value", "options": {"data_quality": {"text": "DQ"}}}],
+    )
     p[22010]["options"].setdefault("footer", {}).update(
         enablePagination=False, countRows=False
     )
@@ -263,7 +357,7 @@ def apply_evidence_readability(payload: dict) -> None:
                     "type": "value",
                     "options": {
                         "REPORT MISSING": {"text": "Missing"},
-                        "Open report": {"text": "Open report"},
+                        "Open report": {"text": "Open"},
                     },
                 }
             ],
@@ -293,7 +387,14 @@ def apply_evidence_readability(payload: dict) -> None:
         "bioetl-overview-v2": {215: {"Priority": 70, "Action": 125}},
         "bioetl-dq-v2": {9102: {"severity": 70, "Action": 125}},
         "bioetl-run-explorer-v1": {
-            3010: {"selected": 28, "Processing": 100, "Report": 110}
+            3010: {
+                "selected": 28,
+                "Started": 145,
+                "Run": 115,
+                "Trust": 120,
+                "Processing": 100,
+                "Report": 85,
+            }
         },
     }
     for pid, fields in widths.get(payload["uid"], {}).items():

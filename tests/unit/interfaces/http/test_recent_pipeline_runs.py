@@ -430,3 +430,12 @@ def test_terminal_age_uses_completion_event_not_last_seen_or_mtime(status):
         result = _timing_fields(row, NOW)
         assert result["last_event_age_seconds"] is None
         assert result["event_age_display"] == "UNKNOWN"
+
+
+def test_short_run_label_preserves_full_identity_and_report_target(tmp_path):
+    run_id = _report(tmp_path, "chembl_assay", 42, started=NOW.isoformat(), mtime=1)
+    row = _list(tmp_path, selected_run_id=run_id)["items"][0]
+    assert row["run_label"] == run_id[:4] + "…" + run_id[-4:]
+    assert row["run_id"] == run_id
+    assert row["selected"] == 1
+    assert parse_qs(urlsplit(row["report_url"]).query)["run_id"] == [run_id]

@@ -235,7 +235,7 @@ def list_recent_pipeline_runs(
         item.update(_timing_fields(item, observed_at))
         run_identity = str(item["run_id"])
         item["run_label"] = (
-            run_identity[:8] + "…" + run_identity[-4:]
+            run_identity[:4] + "…" + run_identity[-4:]
             if len(run_identity) > 16
             else run_identity
         )

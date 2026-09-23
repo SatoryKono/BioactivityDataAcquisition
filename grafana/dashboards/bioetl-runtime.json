@@ -1452,7 +1452,68 @@
               "decimals": 0,
               "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])bronze$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#CD7F32"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])silver$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#C0C0C0"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])gold$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#E0B400"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])quarantined$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#B877D9"
+                    }
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
             "x": 0,
@@ -1530,7 +1591,68 @@
               "decimals": 0,
               "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])bronze$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#CD7F32"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])silver$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#C0C0C0"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])gold$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#E0B400"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])quarantined$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#B877D9"
+                    }
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
             "x": 0,
@@ -1853,7 +1975,68 @@
               "unit": "s",
               "noValue": "UNKNOWN"
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])bronze$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#CD7F32"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])silver$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#C0C0C0"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])gold$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#E0B400"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "(^|[ /])quarantined$"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#B877D9"
+                    }
+                  }
+                ]
+              }
+            ]
           },
           "options": {
             "legend": {
@@ -5005,7 +5188,9 @@
                 "cellOptions": {
                   "type": "auto",
                   "wrapText": false
-                }
+                },
+                "minWidth": 50,
+                "wrapText": false
               },
               "unit": "short"
             },
@@ -5019,6 +5204,10 @@
                   {
                     "id": "unit",
                     "value": "short"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 100
                   }
                 ]
               },
@@ -5031,6 +5220,10 @@
                   {
                     "id": "unit",
                     "value": "s"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 100
                   }
                 ]
               },
@@ -5040,6 +5233,10 @@
                   "options": "Throughput"
                 },
                 "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 130
+                  },
                   {
                     "id": "unit",
                     "value": "suffix: records/s"
@@ -5137,10 +5334,12 @@
             "defaults": {
               "custom": {
                 "inspect": true,
-                "minWidth": 70,
+                "minWidth": 50,
                 "cellOptions": {
-                  "type": "auto"
-                }
+                  "type": "auto",
+                  "wrapText": false
+                },
+                "wrapText": false
               },
               "noValue": "UNKNOWN — stage coverage unavailable",
               "unit": "none"
@@ -5179,6 +5378,30 @@
                   {
                     "id": "displayName",
                     "value": "Pipeline / Stage"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Pipeline"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 240
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Run type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 130
                   }
                 ]
               }
@@ -5233,7 +5456,7 @@
             "x": 0,
             "y": 25,
             "w": 24,
-            "h": 10
+            "h": 8
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
@@ -5242,7 +5465,7 @@
             "cellHeight": "sm",
             "footer": {
               "show": false,
-              "enablePagination": true
+              "enablePagination": false
             }
           },
           "fieldConfig": {
@@ -5314,6 +5537,25 @@
                         "title": "Inspect saved run report",
                         "url": "/${__data.fields.action_path}&var-pipeline=${pipeline:percentencode}&var-run_type=${run_type:percentencode}&var-workflow=${workflow:percentencode}&${__url_time_range}",
                         "targetBlank": true
+                      }
+                    ]
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "Inspect saved evidence": {
+                            "text": "Open report"
+                          },
+                          "Inspect reason and evidence": {
+                            "text": "Open report"
+                          },
+                          "Select run or inspect evidence": {
+                            "text": "Inspect report"
+                          }
+                        }
                       }
                     ]
                   }
@@ -5405,9 +5647,9 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 35,
+            "y": 33,
             "w": 24,
-            "h": 5
+            "h": 4
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
@@ -5416,7 +5658,7 @@
             "cellHeight": "sm",
             "footer": {
               "show": false,
-              "enablePagination": true
+              "enablePagination": false
             }
           },
           "fieldConfig": {

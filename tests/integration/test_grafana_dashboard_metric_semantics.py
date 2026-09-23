@@ -1313,7 +1313,7 @@ def test_provider_telemetry_freshness_fails_closed_when_status_is_missing() -> N
     )
     assert special_mapping["options"]["match"] == "null"
     assert special_mapping["options"]["result"]["text"] == "UNKNOWN"
-    assert panel.get("options", {}).get("colorMode") == "background"
+    assert panel.get("options", {}).get("colorMode") == "value"
 
     description = str(panel.get("description", "")).lower()
     assert "telemetry" in description

@@ -7,7 +7,6 @@ import json
 from collections.abc import Mapping
 from pathlib import Path
 from typing import cast
-from urllib.parse import urlencode
 
 from bioetl.application.observability.reason_aliases import (
     display_reason,
@@ -35,6 +34,7 @@ from bioetl.interfaces.http._selected_run_live import (
     pipeline_owners,
     scope_matches,
 )
+from bioetl.interfaces.http._selected_run_presentation import presentation_rows
 from bioetl.interfaces.http.run_report_ops import _validated_artifact_paths
 
 _NOT_EVALUATED = "NOT EVALUATED"
@@ -49,39 +49,6 @@ class _RevisionMissingError(LookupError):
 
 class _IdentityMismatchError(LookupError):
     """Persisted report identity does not match the requested pipeline/run."""
-
-
-def _presentation_rows(
-    rows: list[dict[str, object]], *, selection: bool = False
-) -> list[dict[str, object]]:
-    """Keep canonical domain verdicts intact; present one neutral selection action."""
-    if selection:
-        return [
-            {
-                "domain": "Selected run",
-                "verdict": "SELECT RUN",
-                "reason": "Choose a run to inspect saved evidence",
-                "action": "Choose a run",
-                "action_path": "d/bioetl-run-explorer-v1/0-run-explorer?var-run_id=-",
-            }
-        ]
-    return [
-        {
-            **row,
-            "action_path": (
-                "api/datasources/proxy/uid/bioetl-ops-http/ops/observability/"
-                "pipeline-run-report-artifact?"
-                + urlencode(
-                    {
-                        "pipeline": str(row.get("pipeline", "")),
-                        "run_id": str(row.get("run_id", "")),
-                        "format": "pipeline_run_report_json",
-                    }
-                )
-            ),
-        }
-        for row in rows
-    ]
 
 
 def unavailable_status(
@@ -148,7 +115,7 @@ def unavailable_status(
             else trust
         ],
         "domains": rows,
-        "presentation_domains": _presentation_rows(
+        "presentation_domains": presentation_rows(
             rows, selection=state == "SELECT RUN"
         ),
         "rows": rows,
@@ -374,7 +341,7 @@ def load_selected_run_status(
             else trust
         ],
         "domains": rows,
-        "presentation_domains": _presentation_rows(rows),
+        "presentation_domains": presentation_rows(rows),
         "rows": rows,
         "trust": [trust],
     }

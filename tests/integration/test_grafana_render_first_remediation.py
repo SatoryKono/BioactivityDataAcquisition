@@ -1149,7 +1149,9 @@ def test_run_explorer_recent_runs_bind_run_id_via_data_link() -> None:
     first_screen = _panel(explorer, 3010)
     first_links = _run_select_links(first_screen)
     assert first_links
-    assert any("var-run_id=${__data.fields.run_id:percentencode}" in url for url in first_links)
+    assert any(
+        "var-run_id=${__data.fields.run_id:percentencode}" in url for url in first_links
+    )
     assert any("var-pipeline=${__data.fields.Pipeline}" in url for url in first_links)
     assert any("var-run_type=${__data.fields.run_type}" in url for url in first_links)
     assert all("var-run_type=$run_type" not in url for url in first_links)

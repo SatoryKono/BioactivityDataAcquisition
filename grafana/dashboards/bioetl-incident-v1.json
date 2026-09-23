@@ -2778,31 +2778,6 @@
                     "value": "Inspect"
                   },
                   {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "provider": {
-                            "text": "Provider"
-                          },
-                          "runtime": {
-                            "text": "Runtime"
-                          },
-                          "dq": {
-                            "text": "DQ"
-                          },
-                          "UNKNOWN": {
-                            "text": "Inspect"
-                          },
-                          "unknown": {
-                            "text": "Inspect"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
                     "id": "custom.hidden",
                     "value": false
                   },
@@ -2824,6 +2799,34 @@
                   {
                     "id": "custom.width",
                     "value": 90
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "provider": {
+                            "text": "Provider"
+                          },
+                          "runtime": {
+                            "text": "Runtime"
+                          },
+                          "dq": {
+                            "text": "DQ"
+                          },
+                          "UNKNOWN": {
+                            "text": "Inspect"
+                          },
+                          "unknown": {
+                            "text": "Inspect"
+                          },
+                          "data_quality": {
+                            "text": "DQ"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               },
@@ -3217,7 +3220,7 @@
             "x": 0,
             "y": 23,
             "w": 24,
-            "h": 10
+            "h": 8
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
@@ -3226,7 +3229,7 @@
             "cellHeight": "sm",
             "footer": {
               "show": false,
-              "enablePagination": true
+              "enablePagination": false
             }
           },
           "fieldConfig": {
@@ -3298,6 +3301,25 @@
                         "title": "Inspect saved run report",
                         "url": "/${__data.fields.action_path}&var-pipeline=${pipeline:percentencode}&var-run_type=${run_type:percentencode}&var-workflow=${workflow:percentencode}&${__url_time_range}",
                         "targetBlank": true
+                      }
+                    ]
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "Inspect saved evidence": {
+                            "text": "Open report"
+                          },
+                          "Inspect reason and evidence": {
+                            "text": "Open report"
+                          },
+                          "Select run or inspect evidence": {
+                            "text": "Inspect report"
+                          }
+                        }
                       }
                     ]
                   }
@@ -3389,9 +3411,9 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 33,
+            "y": 31,
             "w": 24,
-            "h": 5
+            "h": 4
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
@@ -3400,7 +3422,7 @@
             "cellHeight": "sm",
             "footer": {
               "show": false,
-              "enablePagination": true
+              "enablePagination": false
             }
           },
           "fieldConfig": {
