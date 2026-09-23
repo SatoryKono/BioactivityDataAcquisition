@@ -615,7 +615,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 28
+                "value": 50
               }
             ]
           },
@@ -784,6 +784,10 @@
                 "value": false
               },
               {
+                "id": "displayName",
+                "value": "Report"
+              },
+              {
                 "id": "mappings",
                 "value": [
                   {
@@ -801,7 +805,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 85
+                "value": 68
               }
             ]
           },
@@ -858,6 +862,10 @@
               {
                 "id": "noValue",
                 "value": "UNKNOWN"
+              },
+              {
+                "id": "custom.width",
+                "value": 75
               }
             ]
           },
@@ -906,6 +914,10 @@
               {
                 "id": "noValue",
                 "value": "UNKNOWN"
+              },
+              {
+                "id": "custom.hidden",
+                "value": true
               }
             ]
           },
@@ -988,10 +1000,6 @@
             },
             "properties": [
               {
-                "id": "noValue",
-                "value": "Inspect in 1. Trust"
-              },
-              {
                 "id": "links",
                 "value": [
                   {
@@ -1002,8 +1010,25 @@
                 ]
               },
               {
+                "id": "noValue",
+                "value": "Open"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "Inspect in 1. Trust": {
+                        "text": "Open"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
                 "id": "custom.width",
-                "value": 120
+                "value": 75
               }
             ]
           },
@@ -1081,7 +1106,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 100
+                "value": 90
               }
             ]
           }
@@ -1239,7 +1264,7 @@
             "x": 0,
             "y": 18,
             "w": 24,
-            "h": 8
+            "h": 12
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
@@ -1347,6 +1372,38 @@
               {
                 "matcher": {
                   "id": "byName",
+                  "options": "Reason"
+                },
+                "properties": [
+                  {
+                    "id": "custom.wrapText",
+                    "value": true
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "selection_required": {
+                            "text": "Choose a run to inspect saved evidence"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
                   "options": "Evidence reference"
                 },
                 "properties": [
@@ -1387,7 +1444,7 @@
                   "names": [
                     "domain",
                     "verdict",
-                    "reason",
+                    "reason_display",
                     "action",
                     "evidence_ref",
                     "action_path"
@@ -1401,9 +1458,9 @@
                 "indexByName": {
                   "domain": 0,
                   "verdict": 1,
-                  "reason": 2,
                   "action": 3,
-                  "evidence_ref": 4
+                  "evidence_ref": 4,
+                  "reason_display": 2
                 },
                 "renameByName": {
                   "domain": "Domain",
@@ -1411,13 +1468,13 @@
                   "execution_state": "Result",
                   "evidence_completeness": "Evidence",
                   "rules_version": "Rules",
-                  "reason": "Reason",
                   "action": "Action",
                   "evidence_ref": "Evidence reference",
                   "pipeline": "Pipeline",
                   "run_id": "Run ID",
                   "completed_at": "Completed",
-                  "revision": "Revision"
+                  "revision": "Revision",
+                  "reason_display": "Reason"
                 }
               }
             }
@@ -1430,9 +1487,9 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 26,
+            "y": 30,
             "w": 24,
-            "h": 4
+            "h": 6
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
@@ -1441,7 +1498,7 @@
             "cellHeight": "sm",
             "footer": {
               "show": false,
-              "enablePagination": false
+              "enablePagination": true
             }
           },
           "fieldConfig": {
@@ -1452,11 +1509,11 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 },
                 "inspect": true,
                 "minWidth": 50,
-                "wrapText": false
+                "wrapText": true
               }
             },
             "overrides": [

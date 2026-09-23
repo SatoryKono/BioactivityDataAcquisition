@@ -1249,7 +1249,7 @@ def test_run_explorer_index_is_disk_last_ten_not_time_range() -> None:
 def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     explorer = _load("bioetl-run-explorer-v1.json")
     recent = _panel(explorer, 3010)
-    assert _override_width(recent, "selected") == 28
+    assert _override_width(recent, "selected") == 50
     assert _override_width(recent, "^(workflow_id|Workflow)$") is None
     assert recent["fieldConfig"]["defaults"]["custom"]["minWidth"] == 50
     assert recent["options"]["footer"]["enablePagination"] is False
@@ -1403,6 +1403,24 @@ def test_visible_trust_reason_count_opens_frozen_reason_details() -> None:
         if item["id"] == "filterFieldsByName"
     )
     assert "reason_display" in names
+
+
+@pytest.mark.parametrize("dashboard_path", sorted(DASHBOARD_DIR.glob("*.json")))
+def test_saved_domain_details_expose_specific_reason(dashboard_path: Path) -> None:
+    """A trust-assessment label must not hide the persisted failure reasons."""
+    details = _panel(_load(dashboard_path.name), 9451)
+    names = next(
+        item["options"]["include"]["names"]
+        for item in details["transformations"]
+        if item["id"] == "filterFieldsByName"
+    )
+    assert "reason_display" in names and "reason" not in names
+    rename = next(
+        item["options"]["renameByName"]
+        for item in details["transformations"]
+        if item["id"] == "organize"
+    )
+    assert rename["reason_display"] == "Reason"
 
 
 def test_cycle5_wrap_text_columns_restore_declared_widths() -> None:
