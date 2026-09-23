@@ -2087,6 +2087,18 @@ from memory.graph.sync_pkg.transport import load_repo_env as load_repo_env
 from memory.graph.sync_pkg.transport import (
     resolve_neo4j_connection as resolve_neo4j_connection,
 )
+from memory.graph.sync_pkg.workflow_environment_mapping_name import (
+    _sorted_string_items as _sorted_string_items,
+)
+from memory.graph.sync_pkg.workflow_environment_mapping_name import (
+    _workflow_environment_mapping_name as _workflow_environment_mapping_name,
+)
+from memory.graph.sync_pkg.workflow_environment_mapping_name import (
+    _workflow_matrix_axes as _workflow_matrix_axes,
+)
+from memory.graph.sync_pkg.workflow_environment_mapping_name import (
+    _workflow_matrix_variants as _workflow_matrix_variants,
+)
 from memory.graph.sync_pkg.workflow_matrix_axis_values import (
     _append_workflow_matrix_include_variants as _append_workflow_matrix_include_variants,
 )
@@ -3541,45 +3553,6 @@ def _workflow_environment_name(job_payload: dict[str, object]) -> str | None:
     if isinstance(environment_payload, str):
         return environment_payload
     return _workflow_environment_mapping_name(environment_payload)
-
-
-def _workflow_environment_mapping_name(environment_payload: object) -> str | None:
-    if not isinstance(environment_payload, dict):
-        return None
-    name = environment_payload.get("name")
-    return name if isinstance(name, str) else None
-
-
-def _sorted_string_items(items: Iterable[object]) -> tuple[str, ...]:
-    return tuple(sorted(str(item) for item in items if isinstance(item, str)))
-
-
-def _workflow_matrix_axes(job_payload: dict[str, object]) -> tuple[str, ...]:
-    matrix_payload = _workflow_matrix_payload(job_payload)
-    if not isinstance(matrix_payload, dict):
-        return ()
-    return tuple(
-        sorted(
-            _normalize_workflow_matrix_axis_name(str(key))
-            for key in matrix_payload
-            if key not in {"include", "exclude"}
-        )
-    )
-
-
-def _workflow_matrix_variants(
-    job_payload: dict[str, object],
-) -> tuple[dict[str, str], ...]:
-    matrix_payload = _workflow_matrix_payload(job_payload)
-    if not isinstance(matrix_payload, dict):
-        return ()
-
-    base_axes = _workflow_matrix_base_axes(matrix_payload)
-    if base_axes is None or not base_axes:
-        return ()
-    return _workflow_matrix_variants_with_includes(
-        base_axes, matrix_payload.get("include")
-    )
 
 
 def _enrich_workflow_surface(
