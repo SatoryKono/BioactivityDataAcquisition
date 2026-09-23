@@ -1740,6 +1740,9 @@ from memory.graph.sync_pkg.link_source_backed_file_structure import (
 from memory.graph.sync_pkg.link_source_backed_node_structure import (
     _link_source_backed_node_structure as _link_source_backed_node_structure,
 )
+from memory.graph.sync_pkg.link_workflow_job_dependencies import (
+    _link_workflow_job_dependencies as _link_workflow_job_dependencies,
+)
 from memory.graph.sync_pkg.link_workflow_run_targets import (
     _link_workflow_run_targets as _link_workflow_run_targets,
 )
@@ -2862,26 +2865,6 @@ def _run_impact_analysis_passes(
     )
     _add_pipeline_operational_edges(snapshot, pipeline_nodes, memory_mapping)
     _extract_code_duplication_surfaces(snapshot, root, project, today, memory_mapping)
-
-
-def _link_workflow_job_dependencies(
-    snapshot: GraphSnapshot,
-    workflow_name: str,
-    jobs: dict[str, object],
-    job_nodes: dict[tuple[str, str], NodeKey],
-) -> None:
-    for job_id, job_payload in jobs.items():
-        if not isinstance(job_payload, dict):
-            continue
-        job = job_nodes.get((workflow_name, str(job_id)))
-        if job is None:
-            continue
-        for dependency_id in _workflow_job_dependency_ids(job_payload):
-            dependency_key = job_nodes.get((workflow_name, dependency_id))
-            if dependency_key is not None:
-                snapshot.add_relation(
-                    job, "DEPENDS_ON", dependency_key, provenance="workflow_graph"
-                )
 
 
 def _add_ci_workflow_graph(
