@@ -237,6 +237,8 @@ class PanderaSilverValidator(BasePanderaValidator):
 
     In strict mode, validation fails if no schema is provided.
     Production Silver writes default to strict (fail-closed) binding.
+    When ``strict=False``, validates only schema-declared columns so composite
+    merged Silver can retain layer-specific extras without COLUMN_NOT_IN_SCHEMA.
 
     Args:
         schema: Pandera DataFrameSchema for validation. If None and strict=False,
@@ -253,6 +255,41 @@ class PanderaSilverValidator(BasePanderaValidator):
     ) -> None:
         """Initialize Silver validator with strict schema binding by default."""
         super().__init__(schema=schema, strict=strict)
+
+    def _validate_with_schema(self, df: pd.DataFrame) -> ValidationResult:
+        """Validate DataFrame; when non-strict, ignore undeclared extra columns."""
+        assert self._schema is not None  # Guaranteed by validate()
+        from pandera.errors import SchemaError, SchemaErrors
+
+        try:
+            if not self._strict and hasattr(self._schema, "columns"):
+                schema_columns = list(self._schema.columns.keys())
+                # Core-contract frame: drop extras, seed missing columns as NA so
+                # sparse composite merges do not fail COLUMN_NOT_IN_DATAFRAME.
+                core = df.reindex(columns=schema_columns)
+                # DQ / index defaults required by StrictGoldContractSchema.
+                for name, default in (
+                    ("_dq_warn", False),
+                    ("_dq_error", False),
+                    ("_index", 0),
+                ):
+                    if name not in core.columns:
+                        continue
+                    # reindex() materializes missing cols as float NaN; rebuild
+                    # with explicit Python defaults to avoid pandas dtype traps.
+                    core[name] = [
+                        default if value is None or value != value else value
+                        for value in core[name].tolist()
+                    ]
+                # Exact schema columns => schema.strict=True still accepts the frame.
+                df_to_validate = self._reorder_to_schema(core)
+                self._schema.validate(df_to_validate, lazy=True)
+            else:
+                df_to_validate = self._reorder_to_schema(df)
+                self._schema.validate(df_to_validate, lazy=True)
+            return ValidationResult(valid=True)
+        except (SchemaError, SchemaErrors, KeyError, TypeError, ValueError) as e:
+            return ValidationResult(valid=False, errors=[str(e)])
 
 
 class PanderaGoldValidator(BasePanderaValidator):

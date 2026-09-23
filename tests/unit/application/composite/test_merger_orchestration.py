@@ -76,6 +76,7 @@ def _make_host() -> MagicMock:
         )
     )
     host._load_dependency_dataframes = AsyncMock(return_value=({}, []))
+    host._clock = None
     return host
 
 
@@ -119,6 +120,16 @@ class TestMergeExecutionRequestHelpers:
 
     def test_resolve_merge_metadata_timestamp_when_none_then_returns_none(self) -> None:
         assert resolve_merge_metadata_timestamp(None) is None
+
+    def test_resolve_merge_metadata_timestamp_when_clock_then_uses_clock_now(
+        self,
+    ) -> None:
+        clock = MagicMock()
+        clock.now.return_value = datetime(2026, 4, 28, 12, 0, tzinfo=UTC)
+        assert resolve_merge_metadata_timestamp(None, clock=clock) == datetime(
+            2026, 4, 28, 12, 0, tzinfo=UTC
+        )
+        clock.now.assert_called_once_with()
 
     def test_resolve_merge_metadata_timestamp_when_iso_date_then_returns_utc_midnight(
         self,

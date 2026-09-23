@@ -12,6 +12,27 @@ DEFAULT_SCAN_RECORDS = 50_000
 DEFAULT_SCAN_SECONDS = 180.0
 
 
+def _resolve_filter_id_count(
+    filter_ids: Sequence[str] | None,
+    filter_id_count: int | None,
+) -> int | None:
+    """Normalize optional filter-id sizing inputs to a non-negative count."""
+    if filter_id_count is not None:
+        if filter_id_count < 0:
+            raise ValueError("filter_id_count must be >= 0")
+        return filter_id_count
+    if filter_ids is not None:
+        return len(filter_ids)
+    return None
+
+
+def _limit_with_lookahead(count: int, max_records: int) -> int:
+    """Apply max_records cap and reserve one look-ahead slot."""
+    if count < 1:
+        return 1
+    return min(count, max_records) + 1
+
+
 def resolve_derived_upstream_limit(
     output_limit: int | None,
     *,
@@ -31,22 +52,14 @@ def resolve_derived_upstream_limit(
         raise ValueError("multiplier must be >= 1")
     if max_records < 1:
         raise ValueError("max_records must be >= 1")
-    count: int | None = filter_id_count
-    if count is None and filter_ids is not None:
-        count = len(filter_ids)
+    count = _resolve_filter_id_count(filter_ids, filter_id_count)
     if count is not None:
-        if count < 0:
-            raise ValueError("filter_id_count must be >= 0")
-        if count < 1:
-            return 1
-        return min(count, max_records) + 1
+        return _limit_with_lookahead(count, max_records)
     if output_limit is None:
         return max_records + 1
     if output_limit < 0:
         raise ValueError("output_limit must be >= 0")
-    if output_limit == 0:
-        return 1
-    return min(output_limit * multiplier, max_records) + 1
+    return _limit_with_lookahead(output_limit * multiplier, max_records)
 
 
 async def bounded_source_records[T](

@@ -14,9 +14,9 @@
     "application_core": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 5,
-      "helper_function_ratio": 0.384,
+      "helper_function_ratio": 0.387,
       "files": 196,
-      "total_loc": 24083,
+      "total_loc": 24122,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 7
     },
@@ -50,9 +50,9 @@
     "composition_runtime_builders": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 2,
-      "helper_function_ratio": 0.383,
+      "helper_function_ratio": 0.385,
       "files": 56,
-      "total_loc": 7379,
+      "total_loc": 7387,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     }

@@ -82,6 +82,34 @@ class TestPanderaSilverValidator:
         assert result.valid is False
         assert "Silver schema is required but not provided" in result.errors
 
+    def test_validate_non_strict_allows_extra_columns_and_seeds_dq(self):
+        """Non-strict Silver validates core columns and ignores enricher extras."""
+        import pandera.pandas as pa
+
+        schema = pa.DataFrameSchema(
+            columns={
+                "entity_id": pa.Column(str, nullable=False),
+                "_source_providers": pa.Column(str, nullable=False),
+                "_enrichment_status": pa.Column(str, nullable=False),
+                "_dq_warn": pa.Column(bool, nullable=False),
+                "_dq_error": pa.Column(bool, nullable=False),
+                "_index": pa.Column(int, nullable=False),
+            },
+            strict=True,
+        )
+        validator = PanderaSilverValidator(schema=schema, strict=False)
+        result = validator.validate(
+            [
+                {
+                    "entity_id": "CHEMBL1",
+                    "_source_providers": "chembl",
+                    "_enrichment_status": "partial",
+                    "content_hash": "drop-from-validation-only",
+                }
+            ]
+        )
+        assert result.valid is True
+
     def test_validate_with_schema_valid_records(self):
         """Test validation passes for records matching schema."""
         import pandera as pa

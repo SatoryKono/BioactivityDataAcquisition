@@ -370,7 +370,8 @@ async def test_run_id_sentinel_returns_select_run_not_http_400() -> None:
             row.get("reason") == "selection_required" for row in _payload_rows(payload)
         )
         assert any(
-            "SELECT RUN" in str(row.get("detail") or "") for row in _payload_rows(payload)
+            "SELECT RUN" in str(row.get("detail") or "")
+            for row in _payload_rows(payload)
         )
 
         status_all, payload_all = await _get_json(

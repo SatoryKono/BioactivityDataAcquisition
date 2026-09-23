@@ -46,6 +46,7 @@ class SilverMergedWriteProtocol(Protocol):
         primary_keys: list[str] | None = None,
         *,
         schema: CompositeSchemaProvider | None = None,
+        completed_at: datetime | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,

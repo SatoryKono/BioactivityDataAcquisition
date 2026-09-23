@@ -89,6 +89,7 @@ class StorageBundleMergedMixin:
         primary_keys: list[str] | None = None,
         *,
         schema: DataFrameSchema | None = None,
+        completed_at: datetime | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
@@ -104,6 +105,7 @@ class StorageBundleMergedMixin:
             primary_keys: Optional list of column names for sorting.
             schema: Optional caller-provided validation schema. If omitted, a
                 registered composite schema must exist for ``table_name``.
+            completed_at: Optional deterministic metadata timestamp for merged sidecars.
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
             preserve_column_order: If True, skip canonical reordering.
@@ -122,6 +124,7 @@ class StorageBundleMergedMixin:
             records,
             primary_keys,
             schema=composite_schema,
+            completed_at=completed_at,
             run_id=run_id,
             sources_used=sources_used,
             preserve_column_order=preserve_column_order,

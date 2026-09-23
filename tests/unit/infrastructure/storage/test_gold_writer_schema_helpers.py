@@ -72,12 +72,13 @@ class TestGoldWriterSchemaHelpers:
                     ("entity_id", object()),
                     ("_dq_warn", object()),
                     ("_dq_error", object()),
+                    ("_index", object()),
                 )
             )
         )
 
         projected = _project_records_for_gold_schema(
-            [{"entity_id": "CHEMBL1"}],
+            [{"entity_id": "CHEMBL1", "content_hash": "drop-me"}],
             schema=schema,
         )
 
@@ -86,6 +87,27 @@ class TestGoldWriterSchemaHelpers:
                 "entity_id": "CHEMBL1",
                 "_dq_warn": False,
                 "_dq_error": False,
+                "_index": 0,
+            }
+        ]
+        sparse_schema = SimpleNamespace(
+            columns=OrderedDict(
+                (
+                    ("entity_id", object()),
+                    ("_source", object()),
+                    ("_dq_warn", object()),
+                )
+            )
+        )
+        sparse = _project_records_for_gold_schema(
+            [{"entity_id": "CHEMBL3"}],
+            schema=sparse_schema,
+        )
+        assert sparse == [
+            {
+                "entity_id": "CHEMBL3",
+                "_source": None,
+                "_dq_warn": False,
             }
         ]
         records = [{"entity_id": "CHEMBL2"}]
