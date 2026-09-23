@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 from bioetl.domain.composite.result_composite import CompositeResult
-from bioetl.domain.composite.result_enrichment import EnrichmentResult, EnrichmentStatus
+from bioetl.domain.composite.result_enrichment import (
+    MERGEABLE_ENRICHMENT_STATUSES,
+    EnrichmentResult,
+    EnrichmentStatus,
+)
 from bioetl.domain.composite.result_merge import MergeResult
 from bioetl.domain.composite.result_seed_dependency import (
     DependencyResult,
@@ -12,6 +16,7 @@ from bioetl.domain.composite.result_seed_dependency import (
 )
 
 __all__ = [
+    "MERGEABLE_ENRICHMENT_STATUSES",
     "CompositeResult",
     "DependencyResult",
     "DependencyStatus",

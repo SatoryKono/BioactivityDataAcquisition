@@ -131,6 +131,16 @@ class TestEnrichmentResult:
             records_enriched=50,
         )
         assert result.is_success is True
+        assert result.contributes_merge_input is True
+
+    def test_skipped_does_not_contribute_merge_input(self):
+        """SKIPPED is operator-success but has no Silver for merge."""
+        result = EnrichmentResult.skipped(
+            enricher_name="pubmed",
+            reason="Filter excluded all records",
+        )
+        assert result.is_success is True
+        assert result.contributes_merge_input is False
 
     def test_invalid_dq_error_rate_raises(self):
         """DQ error rate outside 0-1 should raise ValueError."""

@@ -19,6 +19,14 @@ class EnrichmentStatus(StrEnum):
     TIMEOUT = "timeout"
 
 
+MERGEABLE_ENRICHMENT_STATUSES: frozenset[EnrichmentStatus] = frozenset(
+    {
+        EnrichmentStatus.SUCCESS,
+        EnrichmentStatus.PARTIAL,
+    }
+)
+
+
 @dataclass(frozen=True, slots=True)
 class EnrichmentResult:
     """Result of a single enrichment pipeline execution."""
@@ -91,6 +99,15 @@ class EnrichmentResult:
             EnrichmentStatus.PARTIAL,
             EnrichmentStatus.SKIPPED,
         )
+
+    @property
+    def contributes_merge_input(self) -> bool:
+        """Whether Silver output should be joined into the composite merge.
+
+        ``PARTIAL`` is below the hard DQ threshold and still wrote Silver.
+        ``SKIPPED`` is operator-success without Silver rows and must stay out.
+        """
+        return self.status in MERGEABLE_ENRICHMENT_STATUSES
 
     @property
     def enrichment_rate(self) -> float:

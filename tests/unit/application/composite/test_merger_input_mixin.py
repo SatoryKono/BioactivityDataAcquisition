@@ -70,9 +70,18 @@ def _enricher_config(pipeline: str, silver_table: str | None = None) -> Enricher
 
 
 def _enrichment_result(
-    name: str, status: EnrichmentStatus = EnrichmentStatus.SUCCESS
+    name: str,
+    status: EnrichmentStatus = EnrichmentStatus.SUCCESS,
+    *,
+    records_input: int = 0,
+    records_enriched: int = 0,
 ) -> EnrichmentResult:
-    return EnrichmentResult(enricher_name=name, status=status)
+    return EnrichmentResult(
+        enricher_name=name,
+        status=status,
+        records_input=records_input,
+        records_enriched=records_enriched,
+    )
 
 
 def _dependency_config(
@@ -192,6 +201,33 @@ class TestLoadEnricherDataframes:
         assert "chembl_compound" in dfs
         assert "crossref_publication" not in dfs
         assert sources == ["chembl_compound"]
+
+    @pytest.mark.asyncio
+    async def test_loads_partial_enrichers(self) -> None:
+        mixin = _make_mixin()
+        enrichers = [
+            _enricher_config("semanticscholar_publication"),
+            _enricher_config("crossref_publication"),
+        ]
+        results = {
+            "semanticscholar_publication": _enrichment_result(
+                "semanticscholar_publication",
+                EnrichmentStatus.PARTIAL,
+                records_input=1000,
+                records_enriched=990,
+            ),
+            "crossref_publication": _enrichment_result(
+                "crossref_publication", EnrichmentStatus.SKIPPED
+            ),
+        }
+        df = pl.DataFrame({"x": [1]})
+        mixin._read_optional_merge_input = AsyncMock(return_value=df)
+
+        dfs, sources = await mixin._load_enricher_dataframes(enrichers, results)
+
+        assert "semanticscholar_publication" in dfs
+        assert "crossref_publication" not in dfs
+        assert sources == ["semanticscholar_publication"]
 
     @pytest.mark.asyncio
     async def test_empty_when_all_failed(self) -> None:

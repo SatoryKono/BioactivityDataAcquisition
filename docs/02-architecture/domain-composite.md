@@ -175,8 +175,8 @@ src/bioetl/domain/composite/
 **Статусы:**
 - `SUCCESS` - успешное выполнение
 - `FAILURE` - ошибка выполнения
-- `PARTIAL` - частичное выполнение
-- `SKIPPED` - пропущено
+- `PARTIAL` - частичное выполнение (Silver записан; merge включает эти данные)
+- `SKIPPED` - пропущено (нет Silver для merge)
 
 ### 9. State Machine
 

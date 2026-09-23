@@ -105,7 +105,7 @@ def build_enrichment_stage_metrics(
         "enrichers_succeeded": sum(
             1
             for result in enrichment_results.values()
-            if result.status == EnrichmentStatus.SUCCESS
+            if result.contributes_merge_input
         ),
         "enrichers_failed": sum(
             1
