@@ -7,10 +7,9 @@ import os
 import re
 import shutil as shutil  # re-exported via __all__
 import sys
-import time
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence, Set
 from dataclasses import dataclass
-from datetime import UTC, date, datetime
+from datetime import date
 from pathlib import Path
 from typing import TypeVar, cast
 
@@ -261,6 +260,12 @@ from memory.graph.sync_pkg.add_duplication_callable_surface import (
 )
 from memory.graph.sync_pkg.add_duplication_callable_surface import (
     _duplication_callable_descriptor as _duplication_callable_descriptor,
+)
+from memory.graph.sync_pkg.add_entity_pipeline_surfaces import (
+    _add_composite_pipeline_surfaces as _add_composite_pipeline_surfaces,
+)
+from memory.graph.sync_pkg.add_entity_pipeline_surfaces import (
+    _add_entity_pipeline_surfaces as _add_entity_pipeline_surfaces,
 )
 from memory.graph.sync_pkg.add_port_facade_surface import (
     _add_port_facade_surface as _add_port_facade_surface,
@@ -611,6 +616,12 @@ from memory.graph.sync_pkg.complexity_analysis_label_sets import (
 from memory.graph.sync_pkg.complexity_analysis_label_sets import (
     _complexity_surface_prerequisites as _complexity_surface_prerequisites,
 )
+from memory.graph.sync_pkg.complexity_blocker_context import (
+    _add_pipeline_surfaces as _add_pipeline_surfaces,
+)
+from memory.graph.sync_pkg.complexity_blocker_context import (
+    _complexity_blocker_context as _complexity_blocker_context,
+)
 from memory.graph.sync_pkg.complexity_marker_buckets import (
     _classify_complexity_candidate as _classify_complexity_candidate,
 )
@@ -694,6 +705,12 @@ from memory.graph.sync_pkg.composite_pipeline_dependency_keys import (
 )
 from memory.graph.sync_pkg.composite_pipeline_dependency_keys import (
     _composite_pipeline_dependency_keys as _composite_pipeline_dependency_keys,
+)
+from memory.graph.sync_pkg.composite_pipeline_name import (
+    _add_composite_pipeline_surface as _add_composite_pipeline_surface,
+)
+from memory.graph.sync_pkg.composite_pipeline_name import (
+    _composite_pipeline_name as _composite_pipeline_name,
 )
 from memory.graph.sync_pkg.composite_seed_pipeline_name import (
     _add_pipeline_normalization_edges as _add_pipeline_normalization_edges,
@@ -1156,6 +1173,15 @@ from memory.graph.sync_pkg.is_describes_doc_to_module import (
 from memory.graph.sync_pkg.is_describes_doc_to_module import (
     _is_describes_doc_to_module as _is_describes_doc_to_module,
 )
+from memory.graph.sync_pkg.iter_normalization_evidence_updates import (
+    _iter_normalization_evidence_updates as _iter_normalization_evidence_updates,
+)
+from memory.graph.sync_pkg.iter_normalization_evidence_updates import (
+    _normalization_evidence_statements as _normalization_evidence_statements,
+)
+from memory.graph.sync_pkg.iter_normalization_evidence_updates import (
+    apply_normalization_evidence_only as apply_normalization_evidence_only,
+)
 from memory.graph.sync_pkg.link_composite_layer_promotions import (
     CONTROL_PLANE_LEDGER_DOCS as CONTROL_PLANE_LEDGER_DOCS,
 )
@@ -1176,6 +1202,12 @@ from memory.graph.sync_pkg.link_composite_layer_promotions import (
 )
 from memory.graph.sync_pkg.link_composite_layer_promotions import (
     _link_composite_layer_promotions as _link_composite_layer_promotions,
+)
+from memory.graph.sync_pkg.link_composite_pipeline_dependencies import (
+    _add_pipeline_normalization_evidence as _add_pipeline_normalization_evidence,
+)
+from memory.graph.sync_pkg.link_composite_pipeline_dependencies import (
+    _link_composite_pipeline_dependencies as _link_composite_pipeline_dependencies,
 )
 from memory.graph.sync_pkg.link_curated_doc_artifact import (
     _add_summary_identifiers as _add_summary_identifiers,
@@ -5765,261 +5797,6 @@ def _add_complexity_candidate_node(
         ingest_wave="repo_sync_v1",
         confidence="medium",
     )
-
-
-def _complexity_blocker_context(
-    node: GraphNode,
-    *,
-    blocked_by_current_cycle: bool,
-) -> dict[str, object]:
-    if not blocked_by_current_cycle:
-        return {"target_name": None, "score": None, "wip_markers": None}
-    return {
-        "target_name": node.key.name,
-        "score": node.properties.get("current_cycle_score"),
-        "wip_markers": node.properties.get("current_cycle_wip_markers"),
-    }
-
-
-def _add_pipeline_surfaces(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    contract_nodes: dict[str, NodeKey],
-    adapter_nodes: dict[str, NodeKey],
-) -> dict[str, NodeKey]:
-    pipeline_nodes: dict[str, NodeKey] = {}
-    _add_entity_pipeline_surfaces(
-        snapshot,
-        root,
-        project,
-        today,
-        contract_nodes,
-        adapter_nodes,
-        pipeline_nodes,
-    )
-    _add_composite_pipeline_surfaces(
-        snapshot,
-        root,
-        project,
-        today,
-        pipeline_nodes,
-    )
-    return pipeline_nodes
-
-
-def _add_entity_pipeline_surfaces(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    contract_nodes: dict[str, NodeKey],
-    adapter_nodes: dict[str, NodeKey],
-    pipeline_nodes: dict[str, NodeKey],
-) -> None:
-    entities_root = root / "configs" / "entities"
-    for entity_path in sorted(entities_root.rglob(YAML_FILE_GLOB)):
-        _add_entity_pipeline_surface(
-            snapshot,
-            root,
-            project,
-            today,
-            entity_path,
-            contract_nodes=contract_nodes,
-            adapter_nodes=adapter_nodes,
-            pipeline_nodes=pipeline_nodes,
-        )
-
-
-def _add_composite_pipeline_surfaces(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    pipeline_nodes: dict[str, NodeKey],
-) -> None:
-    composites_root = root / "configs" / "composites"
-    for composite_path in sorted(composites_root.glob(YAML_FILE_GLOB)):
-        _add_composite_pipeline_surface(
-            snapshot,
-            root,
-            project,
-            today,
-            composite_path,
-            pipeline_nodes=pipeline_nodes,
-        )
-
-
-def _composite_pipeline_name(
-    composite_path: Path,
-    composite_payload: object,
-) -> str:
-    composite_name = composite_path.stem
-    if isinstance(composite_payload, dict):
-        composite_name = str(composite_payload.get("name", composite_name))
-    return composite_name
-
-
-def _add_composite_pipeline_surface(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    composite_path: Path,
-    *,
-    pipeline_nodes: dict[str, NodeKey],
-) -> None:
-    payload = _read_yaml(composite_path)
-    composite_payload = payload.get("composite")
-    composite_name = _composite_pipeline_name(composite_path, composite_payload)
-    pipeline = snapshot.add_node(
-        "pipeline_surface",
-        composite_name,
-        summary=f"Composite pipeline `{composite_name}`.",
-        source_path=_rel_path(root, composite_path),
-        source_kind="composite_pipeline",
-        pipeline_kind="composite",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    pipeline_nodes[composite_name] = pipeline
-    snapshot.add_relation(
-        project, "HAS_PIPELINE", pipeline, provenance="impact_pipelines"
-    )
-    composite_key = NodeKey("composite_config", composite_name)
-    if composite_key in snapshot.nodes:
-        snapshot.add_relation(
-            pipeline, "BACKED_BY", composite_key, provenance="impact_pipelines"
-        )
-    config_artifact = NodeKey("config_artifact", _rel_path(root, composite_path))
-    if config_artifact in snapshot.nodes:
-        snapshot.add_relation(
-            pipeline, "DEFINED_BY", config_artifact, provenance="impact_pipelines"
-        )
-    _link_pipeline_doc_artifacts(
-        snapshot,
-        pipeline,
-        _pipeline_doc_artifact_targets(
-            snapshot,
-            provider_name="composite",
-            entity_name=composite_name.removeprefix("composite_"),
-        ),
-        provenance="impact_pipeline_docs",
-    )
-    _link_composite_pipeline_dependencies(
-        snapshot, pipeline, composite_payload, pipeline_nodes
-    )
-
-
-def _link_composite_pipeline_dependencies(
-    snapshot: GraphSnapshot,
-    pipeline: NodeKey,
-    composite_payload: object,
-    pipeline_nodes: dict[str, NodeKey],
-) -> None:
-    for dependency_key in _composite_pipeline_dependency_keys(
-        composite_payload, pipeline_nodes
-    ):
-        snapshot.add_relation(
-            pipeline,
-            "DEPENDS_ON",
-            dependency_key,
-            provenance="impact_pipelines",
-        )
-
-
-def _add_pipeline_normalization_evidence(
-    snapshot: GraphSnapshot,
-    pipeline_nodes: dict[str, NodeKey],
-) -> None:
-    evidence_by_pipeline = _build_normalization_pipeline_evidence()
-    for (
-        pipeline_name,
-        entity_key,
-        update_payload,
-    ) in _iter_normalization_evidence_updates(
-        pipeline_nodes,
-        evidence_by_pipeline,
-    ):
-        pipeline = snapshot.add_node(
-            "pipeline_surface", pipeline_name, **update_payload
-        )
-        if entity_key in snapshot.nodes:
-            snapshot.add_node("entity_config", pipeline_name, **update_payload)
-        _link_normalization_registry_module(
-            snapshot,
-            pipeline,
-            entity_key=entity_key,
-            module_path=update_payload["normalization_profile_module_path"],
-        )
-
-
-def _iter_normalization_evidence_updates(
-    pipeline_nodes: dict[str, NodeKey],
-    evidence_by_pipeline: dict[str, dict[str, JsonValue]],
-) -> tuple[tuple[str, NodeKey, dict[str, JsonValue]], ...]:
-    updates: list[tuple[str, NodeKey, dict[str, JsonValue]]] = []
-    for pipeline_name, evidence in evidence_by_pipeline.items():
-        if pipeline_nodes.get(pipeline_name) is None:
-            continue
-        updates.append(
-            (
-                pipeline_name,
-                NodeKey("entity_config", pipeline_name),
-                _normalization_evidence_update_payload(evidence),
-            )
-        )
-    return tuple(updates)
-
-
-def _normalization_evidence_statements() -> list[dict[str, JsonValue]]:
-    evidence_by_pipeline = _build_normalization_pipeline_evidence()
-    statements: list[dict[str, JsonValue]] = []
-    for pipeline_name, evidence in sorted(evidence_by_pipeline.items()):
-        statements.append(_normalization_statement(pipeline_name, evidence))
-    return statements
-
-
-def apply_normalization_evidence_only(
-    root: Path,
-    http_uri: str | None,
-    batch_size: int = DEFAULT_BATCH_SIZE,
-) -> dict[str, JsonValue]:
-    started_at = datetime.now(tz=UTC).isoformat()
-    overall_started = time.perf_counter()
-    base_uri, username, password, database = resolve_neo4j_connection(root, http_uri)
-    client = Neo4jHttpClient(base_uri, username, password, database)
-    evidence_started = time.perf_counter()
-    statements = _normalization_evidence_statements()
-    evidence_build_seconds = time.perf_counter() - evidence_started
-    batches = _normalization_evidence_batches(statements, batch_size)
-    batch_summaries: list[dict[str, JsonValue]] = []
-    completed_statement_count = 0
-
-    for batch_index, batch in enumerate(batches, start=1):
-        batch_summary = _execute_normalization_evidence_batch(
-            client,
-            batch,
-            batch_index=batch_index,
-            batch_count=len(batches),
-        )
-        completed_statement_count += len(batch)
-        batch_summaries.append(batch_summary)
-
-    total_seconds = time.perf_counter() - overall_started
-    return {
-        "started_at": started_at,
-        "pipeline_count": len(statements),
-        "batch_count": len(batches),
-        "batch_size": batch_size,
-        "completed_statement_count": completed_statement_count,
-        "evidence_build_seconds": round(evidence_build_seconds, 3),
-        "total_seconds": round(total_seconds, 3),
-        "batches": batch_summaries,
-        "updated_at": datetime.now(tz=UTC).isoformat(),
-    }
 
 
 def _add_pipeline_test_edges(
