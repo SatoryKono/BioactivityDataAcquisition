@@ -1613,6 +1613,9 @@ from memory.graph.sync_pkg.link_entity_storage_promotions import (
 from memory.graph.sync_pkg.link_pipeline_test_paths import (
     _link_pipeline_test_paths as _link_pipeline_test_paths,
 )
+from memory.graph.sync_pkg.link_pipeline_test_targets import (
+    _link_pipeline_test_targets as _link_pipeline_test_targets,
+)
 from memory.graph.sync_pkg.link_relation_backed_structure_for_relat import (
     _link_relation_backed_structure_for_relation as _link_relation_backed_structure_for_relation,
 )
@@ -3257,21 +3260,6 @@ def _link_provider_regression_suite_tests(
             provider_pipeline_index,
             suite_name=suite_name,
             provider_targets=provider_targets,
-        )
-
-
-def _link_pipeline_test_targets(
-    link_test_target: Callable[[NodeKey, str, str], None],
-    targets: tuple[tuple[NodeKey, tuple[str, ...]], ...],
-    *,
-    provenance: str,
-) -> None:
-    for pipeline_key, test_paths in targets:
-        _link_pipeline_test_paths(
-            link_test_target,
-            pipeline_key,
-            test_paths,
-            provenance=provenance,
         )
 
 
