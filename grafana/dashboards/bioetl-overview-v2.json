@@ -1972,7 +1972,7 @@
               }
             }
           ],
-          "description": "CURRENT · TIME RANGE · Complete current Control Plane, Runtime, Provider, Data Quality, Data Validation, and Workflow matrix for the selected scope. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN means incomplete evidence, not OK. This is the full first-screen companion to the six-domain Review Domain Status summary. TELEMETRY MISSING is not a zero and not VALID EMPTY."
+          "description": "CURRENT · TIME RANGE · Complete current Control Plane, Runtime, Provider, Data Quality, Data Validation, and Workflow matrix for the selected scope. Values are 0=OK, 1=WARN, 2=CRIT, and null/3=UNKNOWN; UNKNOWN means incomplete evidence, not OK. This is the full first-screen companion to the six-domain Review Domain Status summary. TELEMETRY MISSING is not a zero and not VALID EMPTY."
         },
         {
           "id": 9018,
@@ -3553,7 +3553,7 @@
               }
             }
           ],
-          "description": "CURRENT · TIME RANGE · Shows current Provider status across all pipelines. Pipeline and Run Type filters do not affect this panel. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; open Provider Health for provider-scoped evidence. TELEMETRY MISSING is not a zero and not VALID EMPTY."
+          "description": "CURRENT · TIME RANGE · Shows current Provider status across all pipelines. Pipeline and Run Type filters do not affect this panel. Values are 0=OK, 1=WARN, 2=CRIT, and null/3=UNKNOWN; open Provider Health for provider-scoped evidence. TELEMETRY MISSING is not a zero and not VALID EMPTY."
         },
         {
           "id": 9005,

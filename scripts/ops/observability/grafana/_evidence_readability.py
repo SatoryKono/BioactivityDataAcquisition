@@ -533,6 +533,19 @@ def apply_evidence_readability(payload: dict) -> None:
     if payload.get("uid") == "bioetl-run-explorer-v1":
         _run_explorer(p)
     _first_window_widths(payload, p)
+    # These are enum verdicts, not blocker counts: code 3 is UNKNOWN.
+    # Counter panels intentionally retain their >=2=CRIT threshold copy.
+    enum_panels = {
+        "bioetl-dq-v2": (9401,),
+        "bioetl-provider-health-v2": (9401,),
+        "bioetl-overview-v2": (9031, 9007),
+    }
+    for pid in enum_panels.get(payload.get("uid"), ()):
+        p[pid]["description"] = (
+            p[pid]["description"]
+            .replace(">=2=CRIT", "2=CRIT")
+            .replace("`null=UNKNOWN`", "`3/null=UNKNOWN`")
+        )
     if 9402 in p and p[9402].get("title") == "Review Run Summary":
         # Hashes and composite parameter names need two lines at 900px.
         # Large rows keep pagination from placing wrapped text under its footer.
