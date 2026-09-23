@@ -1619,6 +1619,9 @@ from memory.graph.sync_pkg.link_runtime_state_run_and_pipeline import (
 from memory.graph.sync_pkg.link_runtime_state_run_and_pipeline import (
     _link_runtime_state_run_and_pipeline as _link_runtime_state_run_and_pipeline,
 )
+from memory.graph.sync_pkg.link_schema_field_definition import (
+    _link_schema_field_definition as _link_schema_field_definition,
+)
 from memory.graph.sync_pkg.link_source_backed_file_node import (
     _link_relation_backed_file_structure as _link_relation_backed_file_structure,
 )
@@ -2812,17 +2815,6 @@ def _add_entity_metadata_field_node(
     )
     layer_field_nodes[metadata_field] = field_node
     _link_schema_field_definition(snapshot, field_node, context.config_artifact)
-
-
-def _link_schema_field_definition(
-    snapshot: GraphSnapshot,
-    field_node: NodeKey,
-    config_artifact: NodeKey,
-) -> None:
-    if config_artifact in snapshot.nodes:
-        snapshot.add_relation(
-            field_node, "DEFINED_BY", config_artifact, provenance="schema_fields"
-        )
 
 
 def _add_entity_storage_layers(
