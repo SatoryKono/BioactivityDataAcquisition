@@ -219,6 +219,21 @@ from memory.graph.sync_pkg.add_cli_command_surface import (
 from memory.graph.sync_pkg.add_cli_command_surface import (
     _link_cli_command_side_effects as _link_cli_command_side_effects,
 )
+from memory.graph.sync_pkg.add_dashboard_surface import (
+    _add_curated_quality_gates as _add_curated_quality_gates,
+)
+from memory.graph.sync_pkg.add_dashboard_surface import (
+    _add_dashboard_surface as _add_dashboard_surface,
+)
+from memory.graph.sync_pkg.add_dashboard_surface import (
+    _add_execution_path_node as _add_execution_path_node,
+)
+from memory.graph.sync_pkg.add_dashboard_surface import (
+    _developer_workflow_readme as _developer_workflow_readme,
+)
+from memory.graph.sync_pkg.add_dashboard_surface import (
+    _link_execution_gate as _link_execution_gate,
+)
 from memory.graph.sync_pkg.alert_targets import (
     _RUNTIME_DIMENSIONS as _RUNTIME_DIMENSIONS,
 )
@@ -1928,101 +1943,6 @@ def _add_dashboard_graph(
             "IS_FACTUAL_SOURCE_FOR",
             dashboard,
             provenance="dashboard_graph",
-        )
-
-
-def _add_dashboard_surface(
-    snapshot: GraphSnapshot,
-    root: Path,
-    dashboard_path: Path,
-    today: str,
-) -> NodeKey:
-    name = dashboard_path.stem
-    try:
-        payload = _read_json(dashboard_path)
-    except (OSError, json.JSONDecodeError):
-        payload = {}
-    title = payload.get("title") if isinstance(payload.get("title"), str) else None
-    return snapshot.add_node(
-        "dashboard_surface",
-        name,
-        summary=str(title or f"Grafana dashboard `{name}`."),
-        source_path=_rel_path(root, dashboard_path),
-        source_kind="dashboard_json",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-
-
-def _add_curated_quality_gates(
-    snapshot: GraphSnapshot, project: NodeKey, today: str
-) -> None:
-    for gate_payload in CURATED_QUALITY_GATES:
-        gate = snapshot.add_node(
-            "quality_gate",
-            str(gate_payload["name"]),
-            summary=str(gate_payload["summary"]),
-            source_kind="curated_quality_gate",
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
-        )
-        snapshot.add_relation(
-            project, "HAS_QUALITY_GATE", gate, provenance="curated_quality"
-        )
-
-
-def _developer_workflow_readme(
-    snapshot: GraphSnapshot, project: NodeKey, today: str
-) -> NodeKey:
-    dev_readme = snapshot.add_node(
-        "doc_artifact",
-        "scripts/engineering/dev/README.md",
-        summary="Developer workflow and wrapper entrypoint guide.",
-        source_path="scripts/engineering/dev/README.md",
-        source_kind="ops_doc",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    snapshot.add_relation(
-        project, "HAS_DOC_ARTIFACT", dev_readme, provenance="curated_scripts"
-    )
-    return dev_readme
-
-
-def _add_execution_path_node(
-    snapshot: GraphSnapshot,
-    today: str,
-    execution_payload: dict[str, object],
-) -> NodeKey:
-    return snapshot.add_node(
-        "execution_path",
-        str(execution_payload["name"]),
-        summary=str(execution_payload["summary"]),
-        platform=str(execution_payload["platform"]),
-        source_kind="execution_path",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-
-
-def _link_execution_gate(
-    snapshot: GraphSnapshot,
-    execution: NodeKey,
-    execution_payload: dict[str, object],
-    *,
-    provenance: str,
-) -> None:
-    gate_name = execution_payload.get("gate")
-    if isinstance(gate_name, str):
-        snapshot.add_relation(
-            execution,
-            "EXECUTES_GATE",
-            NodeKey("quality_gate", gate_name),
-            provenance=provenance,
         )
 
 
