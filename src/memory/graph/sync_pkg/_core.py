@@ -1381,6 +1381,18 @@ from memory.graph.sync_pkg.register_duplication_class_surface import (
 from memory.graph.sync_pkg.register_duplication_class_surface import (
     _register_duplication_method_surfaces as _register_duplication_method_surfaces,
 )
+from memory.graph.sync_pkg.relation_backed_file_structure_types import (
+    _link_relation_backed_directory_housing as _link_relation_backed_directory_housing,
+)
+from memory.graph.sync_pkg.relation_backed_file_structure_types import (
+    _relation_backed_file_structure_labels as _relation_backed_file_structure_labels,
+)
+from memory.graph.sync_pkg.relation_backed_file_structure_types import (
+    _relation_backed_file_structure_types as _relation_backed_file_structure_types,
+)
+from memory.graph.sync_pkg.relation_backed_file_structure_types import (
+    _relation_backed_parent_relative as _relation_backed_parent_relative,
+)
 from memory.graph.sync_pkg.relation_requirement_keys import (
     _append_path_issue as _append_path_issue,
 )
@@ -2924,53 +2936,6 @@ def _link_relation_backed_structure_for_relation(
         parent_relative=parent_relative,
         config=config,
     )
-
-
-def _relation_backed_file_structure_types() -> set[str]:
-    return {"BACKED_BY", "DESCRIBED_IN", "DEFINED_BY"}
-
-
-def _relation_backed_file_structure_labels() -> set[str]:
-    return {
-        "doc_artifact",
-        "config_artifact",
-        "module_surface",
-        "script_surface",
-        "test_artifact",
-    }
-
-
-def _relation_backed_parent_relative(root: Path, source_path_value: str) -> str | None:
-    normalized_path = _normalize_repo_relative_path(source_path_value)
-    if not normalized_path:
-        return None
-    target_path = root / normalized_path
-    if target_path.is_dir():
-        return normalized_path
-    # Relation-backed labels here are file-oriented. Prefer the lexical parent
-    # after the directory check to avoid expensive repeated file stats during
-    # snapshot assembly on large or partially materialized trees.
-    return str(Path(normalized_path).parent)
-
-
-def _link_relation_backed_directory_housing(
-    snapshot: GraphSnapshot,
-    source: NodeKey,
-    *,
-    parent_relative: str,
-    config: dict[str, object],
-) -> None:
-    directory_key = NodeKey("directory_surface", parent_relative)
-    if directory_key in snapshot.nodes:
-        snapshot.add_relation(
-            directory_key, "HOUSES", source, provenance="file_structure_inferred"
-        )
-    for promoted_hub in _promoted_directory_hubs(parent_relative, config):
-        hub_key = NodeKey("directory_surface", promoted_hub)
-        if hub_key in snapshot.nodes:
-            snapshot.add_relation(
-                hub_key, "HOUSES", source, provenance="file_structure_inferred"
-            )
 
 
 def _add_file_structure_surfaces(
