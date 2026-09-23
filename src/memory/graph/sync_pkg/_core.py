@@ -2099,6 +2099,18 @@ from memory.graph.sync_pkg.workflow_environment_mapping_name import (
 from memory.graph.sync_pkg.workflow_environment_mapping_name import (
     _workflow_matrix_variants as _workflow_matrix_variants,
 )
+from memory.graph.sync_pkg.workflow_family_rules import (
+    _WORKFLOW_FAMILY_RULES as _WORKFLOW_FAMILY_RULES,
+)
+from memory.graph.sync_pkg.workflow_family_rules import (
+    _workflow_environment_name as _workflow_environment_name,
+)
+from memory.graph.sync_pkg.workflow_family_rules import (
+    _workflow_on_payload as _workflow_on_payload,
+)
+from memory.graph.sync_pkg.workflow_family_rules import (
+    _workflow_trigger_names as _workflow_trigger_names,
+)
 from memory.graph.sync_pkg.workflow_matrix_axis_values import (
     _append_workflow_matrix_include_variants as _append_workflow_matrix_include_variants,
 )
@@ -3521,38 +3533,6 @@ def _workflow_family(workflow_name: str, title: str) -> str:
         if _contains_any(lowered, needles):
             return family_name
     return "test"
-
-
-_WORKFLOW_FAMILY_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
-    ("release", ("release", "publish")),
-    ("docs", ("docs", "doc")),
-    ("governance", ("governance", "schema", "quality")),
-    ("docker", ("docker",)),
-)
-
-
-def _workflow_on_payload(payload: dict[str, object]) -> object:
-    if "on" in payload:
-        return payload.get("on")
-    return cast(dict[object, object], payload).get(True)
-
-
-def _workflow_trigger_names(payload: dict[str, object]) -> tuple[str, ...]:
-    trigger_payload = _workflow_on_payload(payload)
-    if isinstance(trigger_payload, str):
-        return (trigger_payload,)
-    if isinstance(trigger_payload, list):
-        return _sorted_string_items(trigger_payload)
-    if isinstance(trigger_payload, dict):
-        return _sorted_string_items(trigger_payload.keys())
-    return ()
-
-
-def _workflow_environment_name(job_payload: dict[str, object]) -> str | None:
-    environment_payload = job_payload.get("environment")
-    if isinstance(environment_payload, str):
-        return environment_payload
-    return _workflow_environment_mapping_name(environment_payload)
 
 
 def _enrich_workflow_surface(
