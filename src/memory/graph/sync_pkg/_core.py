@@ -1918,6 +1918,9 @@ from memory.graph.sync_pkg.pipeline_test_ownership_path import (
 from memory.graph.sync_pkg.pipeline_test_ownership_path import (
     _pipeline_test_ownership_path as _pipeline_test_ownership_path,
 )
+from memory.graph.sync_pkg.pipeline_test_payload import (
+    _pipeline_test_payload as _pipeline_test_payload,
+)
 from memory.graph.sync_pkg.policy_governance_targets import (
     _policy_governance_targets as _policy_governance_targets,
 )
@@ -3082,17 +3085,6 @@ def _pipeline_test_context(
         entity_pipeline_index=entity_pipeline_index,
         provider_pipeline_index=provider_pipeline_index,
     )
-
-
-def _pipeline_test_payload(
-    root: Path,
-    ownership_config: str,
-) -> tuple[dict[str, object] | None, dict[object, object] | None]:
-    ownership_path = _pipeline_test_ownership_path(root, ownership_config)
-    if not ownership_path.is_file():
-        return None, None
-    payload = _read_yaml(ownership_path)
-    return payload, _pipeline_test_ownership(payload)
 
 
 def _pipeline_test_indexes(
