@@ -1663,6 +1663,9 @@ from memory.graph.sync_pkg.link_pipeline_test_paths import (
 from memory.graph.sync_pkg.link_pipeline_test_targets import (
     _link_pipeline_test_targets as _link_pipeline_test_targets,
 )
+from memory.graph.sync_pkg.link_provider_suite_targets import (
+    _link_provider_suite_targets as _link_provider_suite_targets,
+)
 from memory.graph.sync_pkg.link_relation_backed_structure_for_relat import (
     _link_relation_backed_structure_for_relation as _link_relation_backed_structure_for_relation,
 )
@@ -3161,19 +3164,6 @@ def _link_provider_regression_suite_tests(
             suite_name=suite_name,
             provider_targets=provider_targets,
         )
-
-
-def _link_provider_suite_targets(
-    link_test_target: Callable[[NodeKey, str, str], None],
-    provider_pipeline_index: dict[str, list[NodeKey]],
-    *,
-    suite_name: str,
-    provider_targets: tuple[tuple[str, str], ...],
-) -> None:
-    provenance = _provider_suite_provenance(suite_name)
-    for provider_name, raw_test_path in provider_targets:
-        for pipeline_key in provider_pipeline_index.get(provider_name, []):
-            link_test_target(pipeline_key, raw_test_path, provenance)
 
 
 if __name__ == "__main__":
