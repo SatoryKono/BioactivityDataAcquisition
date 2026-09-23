@@ -748,6 +748,15 @@ from memory.graph.sync_pkg.composite_seed_storage_ref import (
 from memory.graph.sync_pkg.composite_seed_storage_ref import (
     _link_composite_seed_surface as _link_composite_seed_surface,
 )
+from memory.graph.sync_pkg.contract_dependency_module_key import (
+    _contract_dependency_module_key as _contract_dependency_module_key,
+)
+from memory.graph.sync_pkg.contract_dependency_module_key import (
+    _link_contract_dependency_module as _link_contract_dependency_module,
+)
+from memory.graph.sync_pkg.contract_dependency_module_key import (
+    _link_contract_doc_dependencies as _link_contract_doc_dependencies,
+)
 from memory.graph.sync_pkg.contract_mapping_values import (
     _add_contract_policy_config as _add_contract_policy_config,
 )
@@ -4773,54 +4782,6 @@ def _link_contract_module_dependencies(
 ) -> None:
     for module_path in module_paths:
         _link_contract_dependency_module(snapshot, context, module_path, provenance)
-
-
-def _contract_dependency_module_key(root: Path, module_path: str) -> NodeKey | None:
-    resolved_module = root / module_path
-    if not resolved_module.is_file():
-        return None
-    return NodeKey("module_surface", _rel_path(root, resolved_module))
-
-
-def _link_contract_dependency_module(
-    snapshot: GraphSnapshot,
-    context: ContractEntryContext,
-    module_path: str,
-    provenance: str,
-) -> None:
-    module_key = _contract_dependency_module_key(context.root, module_path)
-    if module_key is not None and module_key in snapshot.nodes:
-        snapshot.add_relation(
-            context.contract, "DEPENDS_ON", module_key, provenance=provenance
-        )
-
-
-def _link_contract_doc_dependencies(
-    snapshot: GraphSnapshot,
-    context: ContractEntryContext,
-    doc_paths: list[str],
-    anchor_fields: list[str],
-    *,
-    summary: str,
-    source_kind: str,
-    provenance: str,
-) -> None:
-    for doc_path in doc_paths:
-        resolved_doc = _contract_dependency_doc_path(
-            context.root, doc_path, anchor_fields
-        )
-        if resolved_doc is None:
-            continue
-        artifact = _add_contract_doc_dependency(
-            snapshot,
-            context=context,
-            doc_path=doc_path,
-            summary=summary,
-            source_kind=source_kind,
-        )
-        snapshot.add_relation(
-            context.contract, "DESCRIBED_IN", artifact, provenance=provenance
-        )
 
 
 def _contract_registry_entries(root: Path) -> dict[str, dict[str, object]]:
