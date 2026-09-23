@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import shutil as shutil  # re-exported via __all__
 import sys
-from collections.abc import Callable, Mapping, Set
+from collections.abc import Callable
 from datetime import date
 from pathlib import Path
 from typing import TypeVar
@@ -208,6 +208,9 @@ from memory.graph.sync_pkg.add_adr_decision_node import (
 )
 from memory.graph.sync_pkg.add_adr_decision_node import (
     _add_doc_path_reference_edges as _add_doc_path_reference_edges,
+)
+from memory.graph.sync_pkg.add_alert_rule_group_surfaces import (
+    _add_alert_rule_group_surfaces as _add_alert_rule_group_surfaces,
 )
 from memory.graph.sync_pkg.add_claim_target_relation import (
     _add_claim_fallback_target as _add_claim_fallback_target,
@@ -3294,36 +3297,6 @@ def _add_alert_rule_file_surfaces(
             rules_path,
             file_context.artifact,
             group,
-            dashboard_metrics=dashboard_metrics,
-            target_context=target_context,
-            memory_mapping=memory_mapping,
-        )
-
-
-def _add_alert_rule_group_surfaces(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    rules_path: Path,
-    artifact: NodeKey,
-    group: dict[str, object],
-    *,
-    dashboard_metrics: Mapping[NodeKey, Set[str]],
-    target_context: AlertTargetContext,
-    memory_mapping: dict[str, object],
-) -> None:
-    group_context = _alert_rule_group_context(group, rules_path)
-    for rule in group_context.rules:
-        _add_alert_surface_from_rule(
-            snapshot,
-            root,
-            project,
-            today,
-            rules_path,
-            artifact,
-            group_name=group_context.group_name,
-            rule=rule,
             dashboard_metrics=dashboard_metrics,
             target_context=target_context,
             memory_mapping=memory_mapping,
