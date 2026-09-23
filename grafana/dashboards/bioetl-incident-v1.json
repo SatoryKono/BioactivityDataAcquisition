@@ -1714,7 +1714,7 @@
                   },
                   {
                     "id": "custom.width",
-                    "value": 230
+                    "value": 300
                   },
                   {
                     "id": "custom.wrapText",
@@ -1742,7 +1742,7 @@
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 120
+                    "value": 110
                   }
                 ]
               }

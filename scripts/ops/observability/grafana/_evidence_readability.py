@@ -396,7 +396,7 @@ def _incident(p: dict[int, dict]) -> None:
             [{"type": "value", "options": {"data_quality": {"text": "DQ"}}}],
         )
     _stack(p[2099], {2002: 7, 2003: 4, 2004: 7})
-    _table(p[2002], {"pipeline": 230, "reason": 230, "run_type": 120})
+    _table(p[2002], {"pipeline": 230, "reason": 300, "run_type": 110})
     _override(p[2002], "reason", "custom.wrapText", True)
     _table(p[2004], {"Pipeline": 250, "Signal": 88})
     p[22010]["options"].setdefault("footer", {}).update(
