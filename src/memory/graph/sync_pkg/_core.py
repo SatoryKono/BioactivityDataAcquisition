@@ -933,6 +933,12 @@ from memory.graph.sync_pkg.critical_diff_issues import (
 from memory.graph.sync_pkg.curated_policy_surfaces import (
     CURATED_POLICY_SURFACES as CURATED_POLICY_SURFACES,
 )
+from memory.graph.sync_pkg.curated_policy_surfaces_2 import (
+    _add_policy_surface_entry as _add_policy_surface_entry,
+)
+from memory.graph.sync_pkg.curated_policy_surfaces_2 import (
+    _curated_policy_surfaces as _curated_policy_surfaces,
+)
 from memory.graph.sync_pkg.curated_quality_gates import (
     CURATED_EXECUTION_PATHS as CURATED_EXECUTION_PATHS,
 )
@@ -2563,27 +2569,6 @@ def _add_policy_surfaces(
 ) -> None:
     for policy_payload in _curated_policy_surfaces():
         _add_policy_surface_entry(snapshot, project, today, policy_payload)
-
-
-def _curated_policy_surfaces() -> tuple[dict[str, object], ...]:
-    return tuple(CURATED_POLICY_SURFACES)
-
-
-def _add_policy_surface_entry(
-    snapshot: GraphSnapshot,
-    project: NodeKey,
-    today: str,
-    policy_payload: dict[str, object],
-) -> None:
-    policy_context = _policy_surface_context(snapshot, policy_payload, today)
-    policy = policy_context.policy
-    snapshot.add_relation(
-        project, "HAS_POLICY_SURFACE", policy, provenance="curated_policy"
-    )
-    snapshot.add_relation(
-        policy, "BACKED_BY", policy_context.artifact, provenance="curated_policy"
-    )
-    _link_policy_governance_targets(snapshot, policy, policy_payload)
 
 
 def _add_impact_analysis_surfaces(
