@@ -446,6 +446,9 @@ from memory.graph.sync_pkg.alert_group_name import (
 from memory.graph.sync_pkg.alert_group_name import (
     _alert_rule_group_context as _alert_rule_group_context,
 )
+from memory.graph.sync_pkg.alert_rule_context import (
+    _alert_rule_context as _alert_rule_context,
+)
 from memory.graph.sync_pkg.alert_rule_file_payload import (
     _add_alert_rules_artifact as _add_alert_rules_artifact,
 )
@@ -3541,17 +3544,6 @@ def _add_alert_surface_from_rule(
         dashboard_metrics=dashboard_metrics,
         target_context=target_context,
         memory_mapping=memory_mapping,
-    )
-
-
-def _alert_rule_context(rule: dict[str, object]) -> AlertRuleContext | None:
-    alert_name = rule.get("alert")
-    if not isinstance(alert_name, str):
-        return None
-    return AlertRuleContext(
-        alert_name=alert_name,
-        annotations=_alert_annotations(rule),
-        labels=_alert_labels(rule),
     )
 
 
