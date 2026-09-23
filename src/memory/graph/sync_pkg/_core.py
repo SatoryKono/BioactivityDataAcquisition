@@ -1465,6 +1465,9 @@ from memory.graph.sync_pkg.process_adapter_package import (
 from memory.graph.sync_pkg.process_adapter_root_child import (
     _process_adapter_root_child as _process_adapter_root_child,
 )
+from memory.graph.sync_pkg.process_workflow_uses_step import (
+    _process_workflow_uses_step as _process_workflow_uses_step,
+)
 from memory.graph.sync_pkg.promotion_targets_from_payload import (
     _complexity_analysis_config as _complexity_analysis_config,
 )
@@ -3913,42 +3916,6 @@ def _process_workflow_steps(
             _workflow_secret_refs(step),
             relative_path=context.relative_path,
             today=context.today,
-        )
-
-
-def _process_workflow_uses_step(
-    snapshot: GraphSnapshot,
-    context: WorkflowJobContext,
-    uses_ref: str,
-    step: dict[str, object],
-) -> None:
-    action_key = _workflow_action_key(uses_ref)
-    _add_workflow_action_surface(
-        snapshot,
-        context,
-        action_key=action_key,
-        uses_ref=uses_ref,
-        summary=f"Workflow action `{action_key}`.",
-    )
-    for artifact_name, artifact_relation, artifact_path in _workflow_artifact_specs(
-        context.workflow_name,
-        context.job_id,
-        step,
-    ):
-        artifact = snapshot.add_node(
-            "workflow_artifact_surface",
-            artifact_name,
-            summary=f"Workflow artifact `{artifact_name}`.",
-            source_path=context.relative_path,
-            source_kind="github_actions_artifact",
-            artifact_path=artifact_path,
-            workflow=context.workflow_name,
-            last_verified=context.today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
-        )
-        snapshot.add_relation(
-            context.job, artifact_relation, artifact, provenance="workflow_graph"
         )
 
 
