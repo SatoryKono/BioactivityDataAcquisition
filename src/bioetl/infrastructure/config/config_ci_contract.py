@@ -104,6 +104,16 @@ COMPOSITE_ALLOWED_KEYS: Final[frozenset[str]] = frozenset(
         "maintenance",
     }
 )
+# Nested CompositeConfig payload keys. They live under `composite:`, not as
+# YAML top-level keys, so INV-CFG-005 / COMPOSITE_ALLOWED_KEYS must not list them.
+COMPOSITE_NESTED_PAYLOAD_KEYS: Final[frozenset[str]] = frozenset(
+    {
+        "cross_validation",
+        "dq_overrides",
+        "execution",
+        "lineage",
+    }
+)
 
 PROVIDER_ALLOWED_KEYS: Final[frozenset[str]] = frozenset(
     {
@@ -208,6 +218,7 @@ EXTRACTION_PARAM_ALLOWLIST: Final[dict[str, frozenset[str]]] = {
 
 __all__ = [
     "COMPOSITE_ALLOWED_KEYS",
+    "COMPOSITE_NESTED_PAYLOAD_KEYS",
     "CONTRACT_ALLOWED_KEYS",
     "ENTITY_ALLOWED_KEYS",
     "EXTRACTION_PARAM_ALLOWLIST",

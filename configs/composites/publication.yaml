@@ -665,4 +665,5 @@ composite:
 
 # -----------------------------------------------------------------------------
 maintenance:
+  # Relative to configs/composites/ (this file's directory), not configs/field_groups/.
   composite_shared_policy_file: field_groups/shared_policy.yaml

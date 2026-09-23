@@ -37,6 +37,7 @@ import yaml
 
 from bioetl.infrastructure.config.config_ci_contract import (
     COMPOSITE_ALLOWED_KEYS,
+    COMPOSITE_NESTED_PAYLOAD_KEYS,
     CONTRACT_ALLOWED_KEYS,
     ENTITY_ALLOWED_KEYS,
     FILTER_ALLOWED_KEYS,
@@ -343,7 +344,12 @@ def _append_unknown_key_errors(
 
 
 def check_inv_005(verbose: bool) -> list[str]:
-    """INV-CFG-005: No unknown keys in unified entity/composite/provider configs."""
+    """INV-CFG-005: No unknown top-level keys in entity/composite/provider configs.
+
+    Composite payload keys such as ``cross_validation``, ``dq_overrides``,
+    ``execution``, and ``lineage`` belong under ``composite:`` and are not
+    judged by ``COMPOSITE_ALLOWED_KEYS``.
+    """
     errors: list[str] = []
 
     for path in _entity_configs():
@@ -379,6 +385,11 @@ def check_inv_005(verbose: bool) -> list[str]:
         unknown = set(data.keys()) - COMPOSITE_ALLOWED_KEYS
         if unknown:
             errors.append(f"INV-CFG-005 {_rel(path)}: unknown keys {unknown}")
+        leaked = COMPOSITE_NESTED_PAYLOAD_KEYS & set(data.keys())
+        if leaked:
+            errors.append(
+                f"INV-CFG-005 {_rel(path)}: nested payload keys at top level {leaked}"
+            )
 
     if verbose and not errors:
         sys.stdout.write("  INV-CFG-005: PASS (no unknown keys)\n")

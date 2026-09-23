@@ -18,7 +18,11 @@ def _load_external_shared_policy(
     policy_file: str,
     config_path: Path,
 ) -> JsonDict:
-    """Load and validate shared composite policy payload."""
+    """Load and validate shared composite policy payload.
+
+    ``policy_file`` is relative to the composite YAML directory
+    (``configs/composites/``), not ``configs/`` or ``configs/field_groups/``.
+    """
     policy_path = config_path.parent / policy_file
     if not policy_path.exists():
         raise FileNotFoundError(

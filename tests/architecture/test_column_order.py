@@ -19,9 +19,11 @@ Per RULES.md §2.4 and ADR-014.
 from __future__ import annotations
 
 from functools import cache
+from pathlib import Path
 from typing import Any
 
 import pytest
+import yaml
 
 from bioetl.domain.schemas.column_order import (
     ALL_SYSTEM_FIELDS,
@@ -349,3 +351,60 @@ class TestSchemaColumnOrder:
                 f"First mismatch at position "
                 f"{next(i for i, (a, b) in enumerate(zip(column_names, expected, strict=True)) if a != b)}"
             )
+
+
+def _system_group_fields(path: Path) -> list[str] | None:
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    groups: object
+    if path.parent.name == "composites":
+        merge = data.get("composite", {}).get("merge", {})
+        groups = merge.get("column_groups") if isinstance(merge, dict) else None
+    else:
+        schema = data.get("schema")
+        groups = schema.get("column_groups") if isinstance(schema, dict) else None
+    if not isinstance(groups, list):
+        return None
+    for group in groups:
+        if not isinstance(group, dict) or group.get("name") != "system":
+            continue
+        fields = group.get("fields")
+        if isinstance(fields, list):
+            return [str(field) for field in fields]
+    return None
+
+
+def _iter_configured_system_groups() -> list[tuple[str, list[str]]]:
+    root = Path(__file__).resolve().parents[2]
+    rows: list[tuple[str, list[str]]] = []
+    for path in sorted((root / "configs" / "entities").rglob("*.yaml")):
+        fields = _system_group_fields(path)
+        if fields is not None:
+            rows.append((str(path.relative_to(root)).replace("\\", "/"), fields))
+    for path in sorted((root / "configs" / "composites").glob("*.yaml")):
+        fields = _system_group_fields(path)
+        if fields is not None:
+            rows.append((str(path.relative_to(root)).replace("\\", "/"), fields))
+    return rows
+
+
+_CONFIG_SYSTEM_GROUPS = _iter_configured_system_groups()
+
+
+class TestConfigSystemGroupPrefixOrder:
+    """Config system groups may be a subset of SYSTEM_FIELDS_PREFIX plus extras."""
+
+    @pytest.mark.parametrize(
+        "config_label,fields",
+        _CONFIG_SYSTEM_GROUPS,
+        ids=[label for label, _fields in _CONFIG_SYSTEM_GROUPS],
+    )
+    def test_system_group_prefix_intersection_preserves_order(
+        self, config_label: str, fields: list[str]
+    ) -> None:
+        prefix_in_group = [field for field in fields if field in SYSTEM_FIELDS_PREFIX]
+        expected = [field for field in SYSTEM_FIELDS_PREFIX if field in fields]
+        assert prefix_in_group == expected, (
+            f"{config_label}: system group prefix intersection out of order.\n"
+            f"Expected: {expected}\n"
+            f"Got: {prefix_in_group}"
+        )

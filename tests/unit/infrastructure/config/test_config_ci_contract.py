@@ -59,6 +59,12 @@ def test_provider_and_filter_contracts_expose_required_policy_fields() -> None:
     assert "strict_validation" in config_ci_contract.QUALITY_ALLOWED_KEYS
     assert "contracts" in config_ci_contract.ENTITY_ALLOWED_KEYS
     assert "maintenance" in config_ci_contract.COMPOSITE_ALLOWED_KEYS
+    assert config_ci_contract.COMPOSITE_NESTED_PAYLOAD_KEYS == frozenset(
+        {"cross_validation", "dq_overrides", "execution", "lineage"}
+    )
+    assert config_ci_contract.COMPOSITE_NESTED_PAYLOAD_KEYS.isdisjoint(
+        config_ci_contract.COMPOSITE_ALLOWED_KEYS
+    )
 
 
 def test_extraction_param_allowlist_is_narrowed_by_entity_surface() -> None:

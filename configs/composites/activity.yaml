@@ -233,6 +233,9 @@ composite:
       # === System / ETL metadata (MUST be first) ===
     - name: system
       fields:
+      # SYSTEM_FIELDS_PREFIX is write-time SSOT (present-only). This group is a
+      # subset: occurrence-scoped _run_id/_run_type/_source_batch_id/_ingestion_ts
+      # stay out of persisted composite output.
       - entity_id
       - content_hash
       - _source
@@ -447,4 +450,5 @@ composite:
 # Maintenance Configuration
 # -----------------------------------------------------------------------------
 maintenance:
+  # Relative to configs/composites/ (this file's directory), not configs/field_groups/.
   composite_shared_policy_file: field_groups/shared_policy.yaml
