@@ -1349,6 +1349,9 @@ from memory.graph.sync_pkg.process_adapter_module import (
 from memory.graph.sync_pkg.process_adapter_module import (
     _process_adapter_module as _process_adapter_module,
 )
+from memory.graph.sync_pkg.process_adapter_package import (
+    _process_adapter_package as _process_adapter_package,
+)
 from memory.graph.sync_pkg.promotion_targets_from_payload import (
     _complexity_analysis_config as _complexity_analysis_config,
 )
@@ -5120,50 +5123,6 @@ def _process_adapter_root_child(
         port_module_surfaces=port_module_surfaces,
         port_symbol_index=port_symbol_index,
         port_names=port_names,
-    )
-
-
-def _process_adapter_package(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    child: Path,
-    *,
-    adapter_family: NodeKey,
-    adapter_nodes: dict[str, NodeKey],
-    port_module_surfaces: dict[str, set[str]],
-    port_symbol_index: dict[str, dict[str, str]],
-    port_names: set[str],
-    fine_grained_enabled: bool,
-) -> None:
-    adapter = _add_adapter_package_surface(
-        snapshot,
-        root,
-        project,
-        adapter_family,
-        child,
-        today,
-    )
-    adapter_nodes[child.name] = adapter
-    provider_key = NodeKey("provider_surface", child.name)
-    if provider_key in snapshot.nodes:
-        snapshot.add_relation(
-            provider_key, "PROVIDES", adapter, provenance="impact_adapters"
-        )
-    imported_ports = _add_adapter_package_impls(
-        snapshot,
-        root,
-        adapter,
-        child,
-        port_module_surfaces,
-        port_symbol_index,
-        port_names,
-        today,
-        fine_grained_enabled=fine_grained_enabled,
-    )
-    _link_adapter_ports(
-        snapshot, adapter, imported_ports, port_names, provenance="impact_adapters"
     )
 
 
