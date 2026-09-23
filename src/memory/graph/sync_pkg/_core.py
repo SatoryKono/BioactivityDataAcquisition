@@ -294,6 +294,9 @@ from memory.graph.sync_pkg.add_port_facade_surface import (
 from memory.graph.sync_pkg.add_port_facade_surface import (
     _add_protocol_port_surface as _add_protocol_port_surface,
 )
+from memory.graph.sync_pkg.add_port_surfaces import (
+    _add_port_surfaces as _add_port_surfaces,
+)
 from memory.graph.sync_pkg.add_repo_zone_directory_file import (
     _add_repo_zone_directory_file as _add_repo_zone_directory_file,
 )
@@ -4248,35 +4251,6 @@ def _add_claim_token_targets(
         )
         claim_has_target = True
     return claim_has_target
-
-
-def _add_port_surfaces(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-) -> set[NodeKey]:
-    ports_root = root / "src" / "bioetl" / "domain" / "ports"
-    if not ports_root.is_dir():
-        return set()
-
-    family = NodeKey("package_family", "domain/ports")
-    port_nodes: set[NodeKey] = set()
-    facade = _add_port_facade_surface(snapshot, project, family, today)
-    port_nodes.add(facade)
-
-    descriptors, _, _ = _build_port_surface_catalog(root)
-    for descriptor in descriptors:
-        _register_protocol_port_surface(
-            snapshot,
-            project,
-            facade,
-            family,
-            descriptor,
-            today,
-            port_nodes=port_nodes,
-        )
-    return port_nodes
 
 
 def _contract_mapping_config(
