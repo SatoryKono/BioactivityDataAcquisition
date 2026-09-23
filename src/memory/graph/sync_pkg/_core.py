@@ -1055,6 +1055,12 @@ from memory.graph.sync_pkg.empty_normalization_evidence_payload import (
 from memory.graph.sync_pkg.empty_normalization_evidence_payload import (
     _finalize_normalization_evidence_defaults as _finalize_normalization_evidence_defaults,
 )
+from memory.graph.sync_pkg.entity_config_identity import (
+    _add_composite_config_surfaces as _add_composite_config_surfaces,
+)
+from memory.graph.sync_pkg.entity_config_identity import (
+    _entity_config_identity as _entity_config_identity,
+)
 from memory.graph.sync_pkg.entity_pipeline_identity import (
     _add_entity_pipeline_surface as _add_entity_pipeline_surface,
 )
@@ -2452,45 +2458,6 @@ def _add_entity_config_surface(
         today=today,
         provenance="entity_config",
     )
-
-
-def _entity_config_identity(
-    entity_path: Path,
-    payload: dict[str, object],
-) -> tuple[str, str, str, str]:
-    provider_name = str(payload.get("provider", entity_path.parent.name))
-    entity_name = str(payload.get("entity", entity_path.stem))
-    pipeline = payload.get("pipeline", {})
-    pipeline_name = None
-    pipeline_description = None
-    if isinstance(pipeline, dict):
-        pipeline_name = pipeline.get("pipeline_name")
-        pipeline_description = pipeline.get("description")
-    node_name = str(pipeline_name or f"{provider_name}_{entity_name}")
-    summary = str(
-        pipeline_description
-        or f"Entity pipeline config for `{provider_name}/{entity_name}`."
-    )
-    return provider_name, entity_name, node_name, summary
-
-
-def _add_composite_config_surfaces(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    entity_nodes: dict[str, NodeKey],
-) -> None:
-    composites_root = root / "configs" / "composites"
-    for composite_path in _composite_config_paths(composites_root):
-        _add_composite_config_surface(
-            snapshot,
-            root,
-            project,
-            today,
-            composite_path,
-            entity_nodes=entity_nodes,
-        )
 
 
 def _add_policy_surfaces(
