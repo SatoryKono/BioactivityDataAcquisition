@@ -272,6 +272,9 @@ from memory.graph.sync_pkg.add_dashboard_surface import (
 from memory.graph.sync_pkg.add_doc_claim_edges import (
     _add_doc_claim_edges as _add_doc_claim_edges,
 )
+from memory.graph.sync_pkg.add_doc_describes_relation import (
+    _add_doc_describes_relation as _add_doc_describes_relation,
+)
 from memory.graph.sync_pkg.add_duplication_callable_surface import (
     _add_duplication_callable_surface as _add_duplication_callable_surface,
 )
@@ -3439,32 +3442,6 @@ def _add_doc_command_reference_edges(
             evidence_kind="command_reference",
             confidence="medium",
         )
-
-
-def _add_doc_describes_relation(
-    snapshot: GraphSnapshot,
-    source_node: NodeKey,
-    target: NodeKey,
-    text: str,
-    offset: int,
-    *,
-    doc_reference: str,
-    evidence_kind: str,
-    confidence: str,
-) -> None:
-    section_title, section_anchor, line_number = _doc_reference_context(text, offset)
-    snapshot.add_relation(
-        source_node,
-        "DESCRIBES",
-        target,
-        provenance="docs_code_drift",
-        doc_reference=doc_reference,
-        evidence_kind=evidence_kind,
-        confidence=confidence,
-        section_title=section_title,
-        section_anchor=section_anchor,
-        line_number=line_number,
-    )
 
 
 def _contract_mapping_config(
