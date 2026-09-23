@@ -3,6 +3,10 @@
 from __future__ import annotations
 from scripts.ops.observability.grafana._gr_db_corrections import _override, _panels
 
+_WIDTH = "custom.width"
+_HIDDEN = "custom.hidden"
+_OPEN_REPORT = "Open report"
+
 
 def _table(panel: dict, widths: dict[str, int] | None = None) -> None:
     custom = panel["fieldConfig"]["defaults"].setdefault("custom", {})
@@ -10,7 +14,7 @@ def _table(panel: dict, widths: dict[str, int] | None = None) -> None:
     custom.setdefault("cellOptions", {"type": "auto"})["wrapText"] = False
     panel["options"]["cellHeight"] = "sm"
     for field, width in (widths or {}).items():
-        _override(panel, field, "custom.width", width)
+        _override(panel, field, _WIDTH, width)
 
 
 def _stack(row: dict, heights: dict[int, int] | None = None) -> None:
@@ -58,13 +62,17 @@ def _stage_colors(panel: dict) -> None:
         )
 
 
-def _saved_run(p: dict[int, dict]) -> None:
+def _selected_run_selectors(p: dict[int, dict]) -> None:
     for candidate in p.values():
         for target in candidate.get("targets", []):
             if "/selected-run-status?" in target.get("url", ""):
                 selector = target.get("root_selector")
                 if selector in {"summary", "trust", "domains"}:
                     target["root_selector"] = "presentation_" + selector
+
+
+def _saved_run(p: dict[int, dict]) -> None:
+    _selected_run_selectors(p)
     panel = p[9451]
     panel["targets"][0]["root_selector"] = "presentation_domains"
     for transform in panel["transformations"]:
@@ -72,9 +80,9 @@ def _saved_run(p: dict[int, dict]) -> None:
             names = transform["options"]["include"]["names"]
             if "action_path" not in names:
                 names.append("action_path")
-    _override(panel, "action_path", "custom.hidden", True)
+    _override(panel, "action_path", _HIDDEN, True)
     _table(panel, {"Domain": 125, "Status": 115, "Action": 170})
-    _override(panel, "Evidence reference", "custom.hidden", True)
+    _override(panel, "Evidence reference", _HIDDEN, True)
     _override(
         panel,
         "Action",
@@ -95,8 +103,8 @@ def _saved_run(p: dict[int, dict]) -> None:
             {
                 "type": "value",
                 "options": {
-                    "Inspect saved evidence": {"text": "Open report"},
-                    "Inspect reason and evidence": {"text": "Open report"},
+                    "Inspect saved evidence": {"text": _OPEN_REPORT},
+                    "Inspect reason and evidence": {"text": _OPEN_REPORT},
                     "Select run or inspect evidence": {"text": "Inspect report"},
                 },
             }
@@ -134,12 +142,12 @@ def _overview(p: dict[int, dict]) -> None:
     _stack(p[9012], dict.fromkeys((9006, 9003, 9004, 9007, 9005, 9013), 8))
     for pid in (215, 20215):
         for field in ("action_scope", "action_dashboard_uid", "run_type"):
-            _override(p[pid], field, "custom.hidden", True)
+            _override(p[pid], field, _HIDDEN, True)
         _table(p[pid], {"Priority": 80, "Pipeline": 190, "Action": 170})
     for pid in (9010, 9011):
         for item in p[pid]["fieldConfig"].get("overrides", []):
             item["properties"] = [
-                prop for prop in item["properties"] if prop["id"] != "custom.width"
+                prop for prop in item["properties"] if prop["id"] != _WIDTH
             ]
         _table(p[pid], {"Run Type": 130, "Status": 110, "Failures": 110, "Runs": 110})
 
@@ -150,8 +158,8 @@ def _trust(p: dict[int, dict]) -> None:
         _table(p[pid], {"Result": 125, "Status": 115, "Action": 160})
     for pid in (9413, 9414, 9415):
         _table(p[pid], {"check": 220, "status": 110})
-        _override(p[pid], "reason", "custom.hidden", True)
-        _override(p[pid], "reason_display", "custom.hidden", True)
+        _override(p[pid], "reason", _HIDDEN, True)
+        _override(p[pid], "reason_display", _HIDDEN, True)
         _override(p[pid], "detail", "displayName", "Reason")
         _override(p[pid], "check", "displayName", "Check")
         _override(p[pid], "status", "displayName", "Status")
@@ -207,7 +215,7 @@ def _provider(p: dict[int, dict]) -> None:
 
 def _dq(p: dict[int, dict]) -> None:
     _table(p[9102], {"pipeline": 160, "severity": 70, "Action": 140})
-    _override(p[9102], "pipeline", "custom.hidden", False)
+    _override(p[9102], "pipeline", _HIDDEN, False)
     _override(p[9102], "pipeline", "displayName", "Pipeline")
     _override(
         p[9102],
@@ -320,66 +328,82 @@ def apply_evidence_readability(payload: dict) -> None:
     if handler := handlers.get(payload["uid"]):
         handler(p)
     if payload["uid"] == "bioetl-run-explorer-v1":
-        _table(
-            p[3010],
+        _run_explorer(p)
+    _first_window_widths(payload, p)
+
+
+def _run_links(run: dict):
+    for item in run["fieldConfig"]["overrides"]:
+        for prop in item["properties"]:
+            if prop["id"] != "links":
+                continue
+            for link in prop["value"]:
+                yield item["matcher"].get("options"), link
+
+
+def _rewrite_run_links(run: dict) -> None:
+    for field, link in _run_links(run):
+        link["url"] = (
+            link["url"]
+            .replace(
+                "var-run_id=${__value.raw}",
+                "var-run_id=${__data.fields.run_id:percentencode}",
+            )
+            .replace(
+                "${__data.fields.Run:percentencode}",
+                "${__data.fields.run_id:percentencode}",
+            )
+        )
+        if field == "Run":
+            link["title"] = "Select ${__data.fields.run_id}"
+
+
+def _run_explorer(p: dict[int, dict]) -> None:
+    _table(
+        p[3010],
+        {
+            "selected": 28,
+            "Started": 145,
+            "Pipeline": 185,
+            "Run": 135,
+            "Duration": 85,
+            "Event age": 95,
+            "Processing": 100,
+            "Report": 125,
+        },
+    )
+
+    run = p[3010]
+    for transform in run["transformations"]:
+        opts = transform["options"]
+        if transform["id"] == "filterFieldsByName":
+            names = opts["include"]["names"]
+            if "run_label" not in names:
+                names.append("run_label")
+        if transform["id"] == "organize":
+            opts["renameByName"].pop("run_id", None)
+            opts["renameByName"]["run_label"] = "Run"
+            opts["indexByName"]["run_label"] = 4
+            opts["indexByName"]["run_id"] = 20
+    _override(run, "run_id", _HIDDEN, True)
+    _override(
+        run,
+        "Report",
+        "mappings",
+        [
             {
-                "selected": 28,
-                "Started": 145,
-                "Pipeline": 185,
-                "Run": 135,
-                "Duration": 85,
-                "Event age": 95,
-                "Processing": 100,
-                "Report": 125,
-            },
-        )
+                "type": "value",
+                "options": {
+                    "REPORT MISSING": {"text": "Missing"},
+                    _OPEN_REPORT: {"text": "Open"},
+                },
+            }
+        ],
+    )
+    _rewrite_run_links(run)
 
-    if payload["uid"] == "bioetl-run-explorer-v1":
-        run = p[3010]
-        for transform in run["transformations"]:
-            opts = transform["options"]
-            if transform["id"] == "filterFieldsByName":
-                names = opts["include"]["names"]
-                if "run_label" not in names:
-                    names.append("run_label")
-            if transform["id"] == "organize":
-                opts["renameByName"].pop("run_id", None)
-                opts["renameByName"]["run_label"] = "Run"
-                opts["indexByName"]["run_label"] = 4
-                opts["indexByName"]["run_id"] = 20
-        _override(run, "run_id", "custom.hidden", True)
-        _override(
-            run,
-            "Report",
-            "mappings",
-            [
-                {
-                    "type": "value",
-                    "options": {
-                        "REPORT MISSING": {"text": "Missing"},
-                        "Open report": {"text": "Open"},
-                    },
-                }
-            ],
-        )
-        for item in run["fieldConfig"]["overrides"]:
-            for prop in item["properties"]:
-                if prop["id"] == "links":
-                    for link in prop["value"]:
-                        link["url"] = (
-                            link["url"]
-                            .replace(
-                                "var-run_id=${__value.raw}",
-                                "var-run_id=${__data.fields.run_id:percentencode}",
-                            )
-                            .replace(
-                                "${__data.fields.Run:percentencode}",
-                                "${__data.fields.run_id:percentencode}",
-                            )
-                        )
-                        if item["matcher"].get("options") == "Run":
-                            link["title"] = "Select ${__data.fields.run_id}"
 
+def _first_window_widths(payload: dict, p: dict[int, dict]) -> None:
     widths = {
         "bioetl-control-plane-v1": {
             9418: {"Result": 100, "Trust": 105, "reasons_count": 80}
@@ -400,6 +424,6 @@ def apply_evidence_readability(payload: dict) -> None:
     for pid, fields in widths.get(payload["uid"], {}).items():
         for item in p[pid]["fieldConfig"].get("overrides", []):
             item["properties"] = [
-                prop for prop in item["properties"] if prop["id"] != "custom.width"
+                prop for prop in item["properties"] if prop["id"] != _WIDTH
             ]
         _table(p[pid], fields)

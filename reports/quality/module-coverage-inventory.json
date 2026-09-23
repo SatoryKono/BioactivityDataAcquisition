@@ -1,6 +1,6 @@
 {
   "additive_coverage_xml_path": "reports/quality/grafana-vis-coverage.xml",
-  "additive_coverage_xml_sha256": "8d005e3f91c474dcf94154742555d3b07aa79fe96670313d5e9cbf9ff559ff8a",
+  "additive_coverage_xml_sha256": "b1c0d71343b447ce1d3254d9fa030e95d4e8f2841d9c724a42a4fdd171a110fc",
   "additive_measured_module_count": 1,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
@@ -24491,12 +24491,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 5,
-      "executable_lines": 5,
+      "covered_lines": 6,
+      "executable_lines": 6,
       "missing_lines": 0,
       "module": "bioetl.interfaces.http._selected_run_presentation",
       "path": "src/bioetl/interfaces/http/_selected_run_presentation.py",
-      "source_lines": 40
+      "source_lines": 42
     },
     {
       "coverage_percent": 100.0,
@@ -49283,12 +49283,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 5,
-      "executable_lines": 5,
+      "covered_lines": 6,
+      "executable_lines": 6,
       "missing_lines": 0,
       "module": "bioetl.interfaces.http._selected_run_presentation",
       "path": "src/bioetl/interfaces/http/_selected_run_presentation.py",
-      "source_lines": 40
+      "source_lines": 42
     },
     {
       "coverage_percent": 100.0,
@@ -49593,7 +49593,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
-  "source_tree_sha256": "7a21c044756e8876e34a9e6ac44ec75c9bd1a2d5d10c451b16d08aea92cb566d",
+  "source_tree_sha256": "fc343df044246d054c2c63145617b00a28fde4590ab9409dea0002c63fba55d9",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

@@ -2,6 +2,8 @@
 
 from urllib.parse import urlencode
 
+_SELECT_RUN = "SELECT RUN"
+
 
 def presentation_rows(
     rows: list[dict[str, object]], *, selection: bool = False
@@ -12,10 +14,10 @@ def presentation_rows(
             {
                 **(rows[0] if rows else {}),
                 "domain": "Selected run",
-                "execution_state": "SELECT RUN",
-                "evidence_completeness": "SELECT RUN",
-                "run_verdict": "SELECT RUN",
-                "verdict": "SELECT RUN",
+                "execution_state": _SELECT_RUN,
+                "evidence_completeness": _SELECT_RUN,
+                "run_verdict": _SELECT_RUN,
+                "verdict": _SELECT_RUN,
                 "reason": "Choose a run to inspect saved evidence",
                 "action": "Choose a run",
                 "action_path": "d/bioetl-run-explorer-v1/0-run-explorer?var-run_id=-",

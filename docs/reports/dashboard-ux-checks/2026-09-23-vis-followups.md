@@ -61,3 +61,7 @@ Runtime/skills не изменены; синхронизация AI runtime mirr
 Governance preflight выявил превышение active-script budget. Новый `_evidence_readability.py` — supporting helper, не новая активная команда. Пересчитанный inventory содержит 340 active при лимите 338. В committed main inventory было 339; дополнительный обнаруженный active — уже существующий в main `scripts/engineering/qa/report_cast_any_typing_census.py`. Лимит не увеличен. Это остаётся blocker общего preflight; полный архитектурный suite после rebase не переобъявлен успешным.
 
 Точная report-ссылка независимо проверена: HTTP 200, `identity.pipeline_name=chembl_molecule`, полный `identity.run_id=7dfad8f0-1f7b-51c4-8bdd-785defb2fb31`, completed_at `2026-09-22T15:01:19.981035+00:00`. Состояние GitHub draft PR и CI не заменяется этим локальным доказательством.
+
+## PR checks
+
+Для head `d793f2fca447cbc556680c25161500f96fa1a966` [first-window workflow](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/35829147265) завершился FAILURE до старта job: annotation подтверждает billing lock. SonarCloud выявил пять повторяющихся literals и две функции с повышенной cognitive complexity. Они устранены константами и декомпозицией; `render_nav_bus.py --check` подтверждает, что generated JSON не изменился. Повторная cloud-проверка требуется на новом head.
