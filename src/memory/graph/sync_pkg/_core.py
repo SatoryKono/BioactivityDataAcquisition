@@ -1672,6 +1672,9 @@ from memory.graph.sync_pkg.link_entity_storage_promotions import (
 from memory.graph.sync_pkg.link_pipeline_test_paths import (
     _link_pipeline_test_paths as _link_pipeline_test_paths,
 )
+from memory.graph.sync_pkg.link_pipeline_test_suite import (
+    _link_pipeline_test_suite as _link_pipeline_test_suite,
+)
 from memory.graph.sync_pkg.link_pipeline_test_targets import (
     _link_pipeline_test_targets as _link_pipeline_test_targets,
 )
@@ -3085,24 +3088,6 @@ def _pipeline_test_linker(
         )
 
     return link_test_target
-
-
-def _link_pipeline_test_suite(
-    snapshot: GraphSnapshot,
-    pipeline_key: NodeKey,
-    relation_type: str,
-    artifact_key: NodeKey,
-    provenance: str,
-) -> None:
-    suite_name = _pipeline_test_suite_name(snapshot, artifact_key)
-    if suite_name is None:
-        return
-    snapshot.add_relation(
-        pipeline_key,
-        relation_type,
-        NodeKey("test_surface", suite_name),
-        provenance=provenance,
-    )
 
 
 if __name__ == "__main__":
