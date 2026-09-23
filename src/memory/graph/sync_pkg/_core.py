@@ -1339,6 +1339,9 @@ from memory.graph.sync_pkg.entity_config_paths import (
 from memory.graph.sync_pkg.entity_pipeline_contract_target import (
     _entity_pipeline_contract_target as _entity_pipeline_contract_target,
 )
+from memory.graph.sync_pkg.entity_pipeline_contract_tests import (
+    _entity_pipeline_contract_tests as _entity_pipeline_contract_tests,
+)
 from memory.graph.sync_pkg.entity_pipeline_identity import (
     _add_entity_pipeline_surface as _add_entity_pipeline_surface,
 )
@@ -3114,22 +3117,6 @@ def _link_entity_pipeline_tests(
         link_test_target,
         _entity_pipeline_contract_tests(entity_pipeline_index, ownership),
         provenance="impact_pipeline_tests",
-    )
-
-
-def _entity_pipeline_contract_tests(
-    entity_pipeline_index: dict[tuple[str, str], NodeKey],
-    ownership: dict[object, object],
-) -> tuple[tuple[NodeKey, tuple[str, ...]], ...]:
-    return tuple(
-        target
-        for contract_ref, raw_tests in ownership.items()
-        for target in [
-            _entity_pipeline_contract_target(
-                entity_pipeline_index, contract_ref, raw_tests
-            )
-        ]
-        if target is not None
     )
 
 
