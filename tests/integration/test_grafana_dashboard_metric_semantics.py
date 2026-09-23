@@ -1464,6 +1464,11 @@ def test_provider_diagnostic_panels_preserve_no_data_for_tokens_and_circuit_brea
     }
     assert set(panels) == set(expectations)
 
+    trips = panels["Track Global Circuit-Breaker Trips"]
+    assert trips["fieldConfig"]["defaults"]["custom"]["showPoints"] == "always"
+    assert trips["options"]["legend"]["showLegend"] is True
+    assert trips["options"]["legend"]["displayMode"] != "hidden"
+
     for panel_title, (required_snippet, forbidden_snippet) in expectations.items():
         expressions = [
             target.get("expr", "")

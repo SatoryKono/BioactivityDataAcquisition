@@ -255,6 +255,10 @@ def apply_corrections(payload: dict) -> None:
                 _override(panels[panel_id], field, "custom.width", width)
 
     if uid == "bioetl-provider-health-v2":
+        # Sparse real counter observations (including a single zero) need a
+        # marker; a line alone renders an indistinguishable empty chart.
+        panels[32]["fieldConfig"]["defaults"]["custom"]["showPoints"] = "always"
+        panels[32]["options"]["legend"].update(showLegend=True, displayMode="list")
         _override(
             panels[9101],
             "provider",
