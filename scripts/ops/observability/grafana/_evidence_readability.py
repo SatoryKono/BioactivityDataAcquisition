@@ -195,6 +195,17 @@ def _overview(p: dict[int, dict]) -> None:
 
 
 def _trust(p: dict[int, dict]) -> None:
+    # An unselected run is not a successful processing result.
+    for override in p[9418]["fieldConfig"]["overrides"]:
+        if override.get("matcher", {}).get("options") == "Result":
+            for prop in override["properties"]:
+                if prop["id"] == "mappings":
+                    for mapping in prop["value"]:
+                        if mapping["type"] == "value":
+                            mapping["options"]["SELECT RUN"] = {
+                                "text": "SELECT RUN",
+                                "color": "#A3A3A3",
+                            }
     _table(p[9418], {"Result": 110, "Trust": 105, "Reasons": 90, "Observed": 165})
     anchors = p[9404]
     _table(anchors)
@@ -664,13 +675,14 @@ def _first_window_widths(payload: dict, p: dict[int, dict]) -> None:
         "bioetl-dq-v2": {9102: {"severity": 70, "Action": 125}},
         "bioetl-run-explorer-v1": {
             3010: {
-                "selected": 50,
+                "selected": 28,
                 "Started": 145,
+                "Pipeline": 165,
                 "Run": 115,
-                "Duration": 75,
-                "Trust": 75,
+                "Duration": 90,
+                "Trust": 120,
                 "Processing": 90,
-                "Report": 68,
+                "Report": 80,
             }
         },
     }
@@ -680,3 +692,5 @@ def _first_window_widths(payload: dict, p: dict[int, dict]) -> None:
                 prop for prop in item["properties"] if prop["id"] != _WIDTH
             ]
         _table(p[pid], fields)
+        if payload.get("uid") == "bioetl-run-explorer-v1" and pid == 3010:
+            _override(p[pid], "selected", "custom.minWidth", 28)
