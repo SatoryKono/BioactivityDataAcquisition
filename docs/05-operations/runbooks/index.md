@@ -54,6 +54,7 @@ ______________________________________________________________________
 | [Data Recovery](data-recovery.md)                       | Steps to recover from data corruption or loss (DR) | P0/P1    |
 | [Game Day](game-day.md)                                 | Annual DR restore drill; RPO 24h / RTO 4h          | P1       |
 | [Quarantine Management](quarantine-management.md)       | Managing quarantined records                       | P2       |
+| [Bounded Pipeline Smoke (`--limit 100`)](bounded-pipeline-smoke.md) | Sequential catalog smoke: every entity pipeline then every composite pack | P2 |
 | [Backfill/Rebuild](backfill-rebuild.md)                 | Data backfill and rebuild procedures               | P2       |
 | [Schema Evolution](schema-evolution.md)                 | Handling schema changes                            | P2       |
 | [Canonical Semantic Field Unification](canonical-semantic-field-unification.md) | Registry-driven canonical field rename/drift prevention runbook | P2 |

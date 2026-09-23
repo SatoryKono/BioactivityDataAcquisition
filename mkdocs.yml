@@ -534,6 +534,7 @@ nav:
           - "Pipeline Failure (DQ)": 05-operations/runbooks/pipeline-failure-dq.md
           - "Data Recovery": 05-operations/runbooks/data-recovery.md
           - "Incident Response": 05-operations/runbooks/incident-response.md
+          - "Bounded Pipeline Smoke": 05-operations/runbooks/bounded-pipeline-smoke.md
           - "Backfill & Rebuild": 05-operations/runbooks/backfill-rebuild.md
           - "Checkpoint Debugging": 05-operations/runbooks/checkpoint-debugging.md
           - "Schema Evolution": 05-operations/runbooks/schema-evolution.md

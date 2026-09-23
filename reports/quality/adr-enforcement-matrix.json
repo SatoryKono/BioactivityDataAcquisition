@@ -314,6 +314,7 @@
         "docs/05-operations/performance-baselines.md",
         "docs/05-operations/performance-tuning.md",
         "docs/05-operations/runbooks/backfill-rebuild.md",
+        "docs/05-operations/runbooks/bounded-pipeline-smoke.md",
         "docs/05-operations/runbooks/checkpoint-debugging.md",
         "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
         "docs/05-operations/runbooks/data-recovery.md",

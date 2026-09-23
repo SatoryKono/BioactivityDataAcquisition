@@ -721,6 +721,9 @@ bioetl run-all --source chembl
 bioetl run-all --source chembl --limit 100
 ```
 
+Полный последовательный smoke всех 22 entity-пайплайнов и пяти composite-паков:
+[Bounded Pipeline Smoke (`--limit 100`)](../05-operations/runbooks/bounded-pipeline-smoke.md).
+
 ### Композитные пайплайны
 
 Для сущностей с обогащением из нескольких источников (например, publications):
@@ -755,3 +758,4 @@ ______________________________________________________________________
 - [Metrics & Monitoring](metrics-monitoring.md) — метрики и мониторинг
 - [Troubleshooting](troubleshooting.md) — решение проблем
 - [Getting Started](getting-started.md) — начало работы
+- [Bounded Pipeline Smoke](../05-operations/runbooks/bounded-pipeline-smoke.md) — последовательный `--limit 100` / `--seed-limit 100` каталог

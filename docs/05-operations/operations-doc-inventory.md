@@ -16,6 +16,7 @@ Last reviewed: 2026-05-26
 - `docs/05-operations/vacuum-retention.md`
 - `docs/05-operations/runbooks/*.md` (кроме явно помеченных duplicate/obsolete ниже).
 - `docs/05-operations/runbooks/game-day.md` — ежегодный DR restore drill (RPO/RTO).
+- `docs/05-operations/runbooks/bounded-pipeline-smoke.md` — sequential `--limit 100` catalog smoke.
 
 ## Duplicate (de-duplicated)
 

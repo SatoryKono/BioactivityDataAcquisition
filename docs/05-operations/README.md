@@ -63,6 +63,7 @@ runtime path.
 - [Control-Plane Lifecycle](control-plane-lifecycle.md)
 - [Retention-Sensitive Cleanup](runbooks/retention-sensitive-cleanup.md)
 - [Backfill/Rebuild](runbooks/backfill-rebuild.md)
+- [Bounded Pipeline Smoke](runbooks/bounded-pipeline-smoke.md)
 - [Quarantine Management](runbooks/quarantine-management.md)
 
 ### Monitoring
