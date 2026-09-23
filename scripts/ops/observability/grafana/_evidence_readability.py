@@ -546,6 +546,17 @@ def _run_explorer(p: dict[int, dict]) -> None:
     )
 
     run = p[3010]
+    _override(run, "Trust", "noValue", "Open")
+    _override(
+        run,
+        "Trust",
+        "mappings",
+        [{"type": "value", "options": {"Inspect in 1. Trust": {"text": "Open"}}}],
+    )
+    # Keep the timestamp and both action links visible. Event age remains in
+    # the source frame for Inspect data; it is not a selected-run verdict.
+    _override(run, "Event age", _HIDDEN, True)
+    _override(run, "Report", "displayName", "Report")
     for transform in run["transformations"]:
         opts = transform["options"]
         if transform["id"] == "filterFieldsByName":
@@ -584,12 +595,13 @@ def _first_window_widths(payload: dict, p: dict[int, dict]) -> None:
         "bioetl-dq-v2": {9102: {"severity": 70, "Action": 125}},
         "bioetl-run-explorer-v1": {
             3010: {
-                "selected": 28,
+                "selected": 50,
                 "Started": 145,
                 "Run": 115,
-                "Trust": 120,
-                "Processing": 100,
-                "Report": 85,
+                "Duration": 75,
+                "Trust": 75,
+                "Processing": 90,
+                "Report": 68,
             }
         },
     }
