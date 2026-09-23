@@ -1555,6 +1555,9 @@ from memory.graph.sync_pkg.link_alert_target_group import (
 from memory.graph.sync_pkg.link_alert_target_group import (
     _link_alert_target_group as _link_alert_target_group,
 )
+from memory.graph.sync_pkg.link_alert_targets import (
+    _link_alert_targets as _link_alert_targets,
+)
 from memory.graph.sync_pkg.link_composite_config_dependencies import (
     _add_test_graph as _add_test_graph,
 )
@@ -3396,37 +3399,6 @@ def _add_alert_surface_from_rule(
         dashboard_metrics=dashboard_metrics,
         target_context=target_context,
         memory_mapping=memory_mapping,
-    )
-
-
-def _link_alert_targets(
-    snapshot: GraphSnapshot,
-    alert: NodeKey,
-    alert_name: str,
-    group_name: str,
-    rule: dict[str, object],
-    *,
-    dashboard_metrics: Mapping[NodeKey, Set[str]],
-    target_context: AlertTargetContext,
-    memory_mapping: dict[str, object],
-) -> None:
-    expr, dimensions = _alert_target_inputs(rule)
-    selection = _select_alert_targets(
-        target_context,
-        alert_name,
-        group_name,
-        expr,
-        dimensions,
-    )
-    _link_selected_alert_targets(snapshot, alert, selection)
-    _link_alert_observer_dashboards(
-        snapshot,
-        alert,
-        alert_name,
-        group_name,
-        expr,
-        dashboard_metrics,
-        memory_mapping,
     )
 
 
