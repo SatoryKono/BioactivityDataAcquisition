@@ -420,7 +420,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Shows the sole current Pipeline Health verdict. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. A telemetry gap makes the verdict incomplete; use First Action and Runtime Blockers to continue. This CURRENT pipeline verdict is not exact-run processing_status or trust_status.",
+      "description": "CURRENT · Pipeline / Run Type readiness. Mapping: 0=OK, 1=WARN, 2=CRIT, 3=INCOMPLETE, null=UNKNOWN. Missing publication or expected stage evidence makes readiness INCOMPLETE even when no active blockers are observed. Inspect Monitor Coverage and Review Stage Progress. This verdict does not describe the selected run's processing or trust status.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -895,7 +895,7 @@
         ]
       },
       "gridPos": {
-        "h": 6,
+        "h": 7,
         "w": 16,
         "x": 0,
         "y": 5
@@ -1114,7 +1114,7 @@
         ]
       },
       "gridPos": {
-        "h": 6,
+        "h": 7,
         "w": 8,
         "x": 16,
         "y": 5
@@ -1348,9 +1348,9 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 11,
+        "y": 12,
         "w": 24,
-        "h": 6
+        "h": 5
       },
       "id": 2460,
       "options": {
