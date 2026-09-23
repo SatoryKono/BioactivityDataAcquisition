@@ -990,6 +990,12 @@ from memory.graph.sync_pkg.graph_snapshot import GraphRelation as GraphRelation
 from memory.graph.sync_pkg.graph_snapshot import GraphSnapshot as GraphSnapshot
 from memory.graph.sync_pkg.graph_snapshot import _write_export as _write_export
 from memory.graph.sync_pkg.graph_snapshot import snapshot_orphans as snapshot_orphans
+from memory.graph.sync_pkg.included_file_structure_dirs import (
+    _add_repo_zone_directory_surface as _add_repo_zone_directory_surface,
+)
+from memory.graph.sync_pkg.included_file_structure_dirs import (
+    _included_file_structure_dirs as _included_file_structure_dirs,
+)
 from memory.graph.sync_pkg.int_node_property import (
     _aggregate_callable_metrics as _aggregate_callable_metrics,
 )
@@ -2661,55 +2667,6 @@ def _walk_repo_zone_file_structure(
             zone_name=zone_name,
             config=config,
         )
-
-
-def _included_file_structure_dirs(
-    root: Path,
-    current_path: Path,
-    dirnames: list[str],
-    config: dict[str, object],
-) -> list[str]:
-    return sorted(
-        name
-        for name in dirnames
-        if not _is_excluded_file_structure_path(
-            _rel_path(root, current_path / name), config
-        )
-    )
-
-
-def _add_repo_zone_directory_surface(
-    snapshot: GraphSnapshot,
-    root: Path,
-    zone: NodeKey,
-    today: str,
-    *,
-    zone_name: str,
-    relative_root: str,
-    current_path: Path,
-    relative_dir: str,
-) -> NodeKey:
-    directory = snapshot.add_node(
-        "directory_surface",
-        relative_dir,
-        summary=f"Primary repository directory `{relative_dir}`.",
-        source_path=relative_dir,
-        source_kind="file_structure_directory",
-        repo_zone=zone_name,
-        depth=len(Path(relative_dir).parts),
-        is_primary=True,
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    if relative_dir == relative_root:
-        snapshot.add_relation(zone, "CONTAINS", directory, provenance="file_structure")
-    else:
-        parent_key = NodeKey("directory_surface", _rel_path(root, current_path.parent))
-        snapshot.add_relation(
-            parent_key, "CONTAINS", directory, provenance="file_structure"
-        )
-    return directory
 
 
 def _add_repo_zone_directory_files(
