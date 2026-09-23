@@ -1008,6 +1008,15 @@ from memory.graph.sync_pkg.link_curated_doc_artifact import (
 from memory.graph.sync_pkg.link_curated_doc_artifact import (
     _summary_table_rows as _summary_table_rows,
 )
+from memory.graph.sync_pkg.link_runtime_evidence_support import (
+    _add_run_instance_surface as _add_run_instance_surface,
+)
+from memory.graph.sync_pkg.link_runtime_evidence_support import (
+    _add_runtime_evidence_storage_refs as _add_runtime_evidence_storage_refs,
+)
+from memory.graph.sync_pkg.link_runtime_evidence_support import (
+    _link_runtime_evidence_support as _link_runtime_evidence_support,
+)
 from memory.graph.sync_pkg.live_queries import (
     _audit_live_summary as _audit_live_summary,
 )
@@ -3818,62 +3827,6 @@ def _add_runtime_evidence_surface(
         storage_refs=spec["storage_refs"],
         today=today,
     )
-
-
-def _link_runtime_evidence_support(
-    snapshot: GraphSnapshot,
-    surface: NodeKey,
-    spec: dict[str, object],
-) -> None:
-    _link_runtime_evidence_docs(snapshot, surface, spec["docs"])
-    _link_runtime_evidence_modules(snapshot, surface, spec["modules"])
-
-
-def _add_runtime_evidence_storage_refs(
-    snapshot: GraphSnapshot,
-    project: NodeKey,
-    surface: NodeKey,
-    *,
-    evidence_name: str,
-    storage_refs: object,
-    today: str,
-) -> None:
-    for storage_ref, suffix, key_template in _runtime_evidence_storage_refs(
-        storage_refs
-    ):
-        _add_runtime_evidence_storage_artifact(
-            snapshot,
-            project,
-            surface,
-            evidence_name=evidence_name,
-            storage_ref=storage_ref,
-            suffix=suffix,
-            key_template=key_template,
-            today=today,
-        )
-
-
-def _add_run_instance_surface(
-    snapshot: GraphSnapshot,
-    project: NodeKey,
-    today: str,
-    spec: dict[str, object],
-) -> NodeKey:
-    manifest_id = str(spec["manifest_id"])
-    surface = snapshot.add_node(
-        "run_instance_surface",
-        manifest_id,
-        summary=f"Deterministic control-plane run instance surface for `{manifest_id}`.",
-        **_run_instance_properties(spec, manifest_id=manifest_id),
-        source_kind="run_instance_surface",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    snapshot.add_relation(
-        project, "HAS_RUN_INSTANCE", surface, provenance="runtime_evidence"
-    )
-    return surface
 
 
 def _link_run_instance_surface(
