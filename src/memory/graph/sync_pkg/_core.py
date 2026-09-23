@@ -1759,6 +1759,15 @@ from memory.graph.sync_pkg.pipeline_source_config_artifact import (
 from memory.graph.sync_pkg.policy_governance_targets import (
     _policy_governance_targets as _policy_governance_targets,
 )
+from memory.graph.sync_pkg.policysurfacecontext import (
+    PolicySurfaceContext as PolicySurfaceContext,
+)
+from memory.graph.sync_pkg.policysurfacecontext import (
+    _link_policy_governance_targets as _link_policy_governance_targets,
+)
+from memory.graph.sync_pkg.policysurfacecontext import (
+    _policy_surface_context as _policy_surface_context,
+)
 from memory.graph.sync_pkg.port_surfaces import (
     PORTS_MODULE_PREFIX as PORTS_MODULE_PREFIX,
 )
@@ -2563,32 +2572,6 @@ def _add_policy_surface_entry(
         policy, "BACKED_BY", policy_context.artifact, provenance="curated_policy"
     )
     _link_policy_governance_targets(snapshot, policy, policy_payload)
-
-
-@dataclass(frozen=True)
-class PolicySurfaceContext:
-    policy: NodeKey
-    artifact: NodeKey
-
-
-def _policy_surface_context(
-    snapshot: GraphSnapshot,
-    policy_payload: dict[str, object],
-    today: str,
-) -> PolicySurfaceContext:
-    return PolicySurfaceContext(
-        policy=_add_policy_surface(snapshot, policy_payload, today),
-        artifact=_add_policy_artifact(snapshot, policy_payload, today),
-    )
-
-
-def _link_policy_governance_targets(
-    snapshot: GraphSnapshot,
-    policy: NodeKey,
-    policy_payload: dict[str, object],
-) -> None:
-    for target in _policy_governance_targets(policy_payload):
-        snapshot.add_relation(policy, "GOVERNS", target, provenance="curated_policy")
 
 
 def _add_impact_analysis_surfaces(
