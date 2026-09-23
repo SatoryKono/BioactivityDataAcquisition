@@ -11,7 +11,6 @@ import os
 import re
 import shutil as shutil  # re-exported via __all__
 import sys
-import tempfile
 import time
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence, Set
 from dataclasses import dataclass
@@ -460,6 +459,30 @@ from memory.graph.sync_pkg.apply_verify import (
 from memory.graph.sync_pkg.apply_verify import (
     _verify_expected_group_counts as _verify_expected_group_counts,
 )
+from memory.graph.sync_pkg.complexity_marker_buckets import (
+    _classify_complexity_candidate as _classify_complexity_candidate,
+)
+from memory.graph.sync_pkg.complexity_marker_buckets import (
+    _complexity_marker_buckets as _complexity_marker_buckets,
+)
+from memory.graph.sync_pkg.complexity_marker_buckets import (
+    _complexity_scores as _complexity_scores,
+)
+from memory.graph.sync_pkg.complexity_marker_buckets import (
+    _configured_duplicate_families as _configured_duplicate_families,
+)
+from memory.graph.sync_pkg.complexity_marker_buckets import (
+    _configured_node_keys as _configured_node_keys,
+)
+from memory.graph.sync_pkg.complexity_marker_buckets import (
+    _link_existing_targets as _link_existing_targets,
+)
+from memory.graph.sync_pkg.complexity_marker_buckets import (
+    _retirement_scores as _retirement_scores,
+)
+from memory.graph.sync_pkg.curated_policy_surfaces import (
+    CURATED_POLICY_SURFACES as CURATED_POLICY_SURFACES,
+)
 from memory.graph.sync_pkg.dashboard_metrics import (
     BIOETL_METRIC_PATTERN as BIOETL_METRIC_PATTERN,
 )
@@ -484,6 +507,122 @@ from memory.graph.sync_pkg.dashboard_metrics import (
 from memory.graph.sync_pkg.dashboard_metrics import (
     _path_contains_any_token as _path_contains_any_token,
 )
+from memory.graph.sync_pkg.default_batch_size import (
+    ADR_DECISIONS_DIR as ADR_DECISIONS_DIR,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    CHEMBL_ACTIVITY_CONTRACT_REF as CHEMBL_ACTIVITY_CONTRACT_REF,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    CONTRACT_REGISTRY_RELATIVE_PATH as CONTRACT_REGISTRY_RELATIVE_PATH,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    CURATED_DOC_SOURCES as CURATED_DOC_SOURCES,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    DEFAULT_BATCH_SIZE as DEFAULT_BATCH_SIZE,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    DEFAULT_COMMON_PIPELINE_DASHBOARDS as DEFAULT_COMMON_PIPELINE_DASHBOARDS,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    DEFAULT_COMPOSITE_PIPELINE_DASHBOARDS as DEFAULT_COMPOSITE_PIPELINE_DASHBOARDS,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    DEFAULT_ENTITY_PIPELINE_DASHBOARDS as DEFAULT_ENTITY_PIPELINE_DASHBOARDS,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    DEFAULT_LEGACY_REPORT_PATH as DEFAULT_LEGACY_REPORT_PATH,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    DEFAULT_PIPELINE_RUNTIME_PATHS as DEFAULT_PIPELINE_RUNTIME_PATHS,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    DEFAULT_PIPELINE_VALIDATION_GATES as DEFAULT_PIPELINE_VALIDATION_GATES,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    DOC_ARCHITECTURE_DIAGRAMS_HUB as DOC_ARCHITECTURE_DIAGRAMS_HUB,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    DOC_DIAGRAM_TOOLING_README as DOC_DIAGRAM_TOOLING_README,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    DOC_GRAFANA_DASHBOARDS_JSON as DOC_GRAFANA_DASHBOARDS_JSON,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    DOCS_VERIFICATION_GUIDE_PATH as DOCS_VERIFICATION_GUIDE_PATH,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    EFFECTIVE_CONFIG_ARTIFACT_REF as EFFECTIVE_CONFIG_ARTIFACT_REF,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    GATE_CONFIG_VALIDATION as GATE_CONFIG_VALIDATION,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    GATE_DIAGRAM_QUALITY as GATE_DIAGRAM_QUALITY,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    GATE_DOCS_VERIFICATION as GATE_DOCS_VERIFICATION,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    GATE_MYPY_STRICT as GATE_MYPY_STRICT,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    GATE_NEO4J_ONTOLOGY_INVARIANTS as GATE_NEO4J_ONTOLOGY_INVARIANTS,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    GATE_PRETEST_GUARDRAILS as GATE_PRETEST_GUARDRAILS,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    GITHUB_WORKFLOWS_PREFIX as GITHUB_WORKFLOWS_PREFIX,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    GOVERNANCE_DECISIONS_SUMMARY_PATH as GOVERNANCE_DECISIONS_SUMMARY_PATH,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    INTEGRATION_VCR_POLICY_PATH as INTEGRATION_VCR_POLICY_PATH,
+)
+from memory.graph.sync_pkg.default_batch_size import KNOWN_LAYERS as KNOWN_LAYERS
+from memory.graph.sync_pkg.default_batch_size import (
+    MANIFEST_ID_TEMPLATE as MANIFEST_ID_TEMPLATE,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    PORTS_FACADE_SOURCE_PATH as PORTS_FACADE_SOURCE_PATH,
+)
+from memory.graph.sync_pkg.default_batch_size import RULES_DOC_PATH as RULES_DOC_PATH
+from memory.graph.sync_pkg.default_batch_size import RUN_ID_TEMPLATE as RUN_ID_TEMPLATE
+from memory.graph.sync_pkg.default_batch_size import (
+    RUN_LEDGER_ARTIFACT_REF as RUN_LEDGER_ARTIFACT_REF,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    RUN_MANIFEST_ARTIFACT_REF as RUN_MANIFEST_ARTIFACT_REF,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    RUN_MANIFEST_INSPECTION_DOC_PATH as RUN_MANIFEST_INSPECTION_DOC_PATH,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    RUN_MANIFEST_LEDGER_DOC_PATH as RUN_MANIFEST_LEDGER_DOC_PATH,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    TEST_MATRIX_CONFIG_PATH as TEST_MATRIX_CONFIG_PATH,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    TEST_SURFACE_ARCHITECTURE as TEST_SURFACE_ARCHITECTURE,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    TEST_SURFACE_E2E as TEST_SURFACE_E2E,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    TEST_SURFACE_INTEGRATION as TEST_SURFACE_INTEGRATION,
+)
+from memory.graph.sync_pkg.default_batch_size import TEST_SURFACES as TEST_SURFACES
+from memory.graph.sync_pkg.default_batch_size import (
+    TESTING_GUIDE_PATH as TESTING_GUIDE_PATH,
+)
+from memory.graph.sync_pkg.default_batch_size import (
+    TRACEABILITY_SIGNAL_OWNERSHIP_DOC_PATH as TRACEABILITY_SIGNAL_OWNERSHIP_DOC_PATH,
+)
+from memory.graph.sync_pkg.default_batch_size import YAML_FILE_GLOB as YAML_FILE_GLOB
 from memory.graph.sync_pkg.file_structure import (
     DEFAULT_FILE_STRUCTURE_EXCLUDED_DIR_NAMES as DEFAULT_FILE_STRUCTURE_EXCLUDED_DIR_NAMES,
 )
@@ -825,164 +964,6 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 if str(DEFAULT_ROOT) not in sys.path:
     sys.path.insert(0, str(DEFAULT_ROOT))
-DEFAULT_BATCH_SIZE = 20
-GITHUB_WORKFLOWS_PREFIX = f"{GITHUB_DIR}/workflows/"
-PORTS_FACADE_SOURCE_PATH = f"src/bioetl/domain/ports/{INIT_PY}"
-RULES_DOC_PATH = "docs/00-project/RULES.md"
-TESTING_GUIDE_PATH = "docs/03-guides/testing.md"
-DOCS_VERIFICATION_GUIDE_PATH = "docs/03-guides/docs-verification.md"
-INTEGRATION_VCR_POLICY_PATH = "configs/quality/integration_vcr_policy.yaml"
-TEST_MATRIX_CONFIG_PATH = "configs/quality/test_matrix.yaml"
-RUN_MANIFEST_LEDGER_DOC_PATH = "docs/04-reference/contracts/run-manifest-ledger.md"
-GOVERNANCE_DECISIONS_SUMMARY_PATH = (
-    "docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md"
-)
-RUN_MANIFEST_INSPECTION_DOC_PATH = (
-    "docs/05-operations/runbooks/run-manifest-inspection.md"
-)
-TRACEABILITY_SIGNAL_OWNERSHIP_DOC_PATH = (
-    "docs/05-operations/runbooks/traceability-signal-ownership.md"
-)
-CONTRACT_REGISTRY_RELATIVE_PATH = DEFAULT_CONTRACT_REGISTRY_PATH.as_posix()
-CHEMBL_ACTIVITY_CONTRACT_REF = "chembl.activity"
-RUN_MANIFEST_ARTIFACT_REF = "run_manifest::json"
-EFFECTIVE_CONFIG_ARTIFACT_REF = "effective_config_artifact::json"
-RUN_LEDGER_ARTIFACT_REF = "run_ledger::jsonl"
-DOC_GRAFANA_DASHBOARDS_JSON = "grafana dashboards json"
-DOC_ARCHITECTURE_DIAGRAMS_HUB = "architecture diagrams hub"
-DOC_DIAGRAM_TOOLING_README = "diagram tooling readme"
-TEST_SURFACE_INTEGRATION = "integration tests"
-TEST_SURFACE_E2E = "e2e tests"
-TEST_SURFACE_ARCHITECTURE = "architecture tests"
-GATE_MYPY_STRICT = "mypy --strict"
-GATE_DOCS_VERIFICATION = "docs verification"
-GATE_CONFIG_VALIDATION = "config validation"
-GATE_PRETEST_GUARDRAILS = "pretest guardrails"
-GATE_DIAGRAM_QUALITY = "diagram quality gates"
-GATE_NEO4J_ONTOLOGY_INVARIANTS = "deterministic neo4j memory ontology invariants"
-DEFAULT_LEGACY_REPORT_PATH = str(
-    Path(tempfile.gettempdir()) / "neo4j-memory-audit.json"
-)
-YAML_FILE_GLOB = "*.yaml"
-MANIFEST_ID_TEMPLATE = "{manifest_id}"
-RUN_ID_TEMPLATE = "{run_id}"
-ADR_DECISIONS_DIR = "docs/02-architecture/decisions"
-DEFAULT_PIPELINE_RUNTIME_PATHS: tuple[str, ...] = (
-    "uv run python -m bioetl run --pipeline",
-    '"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m bioetl run --pipeline',
-    ".\\.venv-win\\Scripts\\python.exe -m bioetl run --pipeline",
-)
-DEFAULT_PIPELINE_VALIDATION_GATES: tuple[str, ...] = ("pytest", GATE_CONFIG_VALIDATION)
-DEFAULT_COMMON_PIPELINE_DASHBOARDS: tuple[str, ...] = (
-    "bioetl-overview-v2",
-    "bioetl-runtime",
-)
-DEFAULT_ENTITY_PIPELINE_DASHBOARDS: tuple[str, ...] = (
-    "bioetl-dq-v2",
-    "bioetl-silver-reject-explorer",
-)
-DEFAULT_COMPOSITE_PIPELINE_DASHBOARDS: tuple[str, ...] = ("bioetl-control-plane-v1",)
-KNOWN_LAYERS = ("domain", "application", "infrastructure", "composition", "interfaces")
-TEST_SURFACES: dict[str, str] = {
-    "unit": "unit tests",
-    "integration": TEST_SURFACE_INTEGRATION,
-    "e2e": TEST_SURFACE_E2E,
-    "architecture": TEST_SURFACE_ARCHITECTURE,
-    "contract": "contract tests",
-    "benchmarks": "benchmarks",
-}
-CURATED_DOC_SOURCES: tuple[dict[str, str], ...] = (
-    {
-        "name": "Project Navigator",
-        "path": "docs/00-project/00-map.md",
-        "summary": "Primary project navigator and active entrypoint map.",
-    },
-    {
-        "name": "RULES.md",
-        "path": RULES_DOC_PATH,
-        "summary": "Canonical governance and requirements surface for the project.",
-    },
-    {
-        "name": "agent memory entry point",
-        "path": "docs/00-project/ai/memory/agent-memory.md",
-        "summary": "Human-oriented project memory entry point for AI runtimes.",
-    },
-    {
-        "name": "testing guide",
-        "path": TESTING_GUIDE_PATH,
-        "summary": "Published testing strategy guide.",
-    },
-    {
-        "name": "normalization plan",
-        "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-        "summary": "Canonical normalization architecture, evidence governance, and rollout plan.",
-    },
-    {
-        "name": "pipeline normalization matrix",
-        "path": "docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md",
-        "summary": "Generated field-level normalization evidence for entity and composite pipelines.",
-    },
-    {
-        "name": "dashboard extension guide",
-        "path": "docs/03-guides/dashboards/dashboard-extension-llm.md",
-        "summary": "Canonical LLM playbook for shipped Grafana dashboards.",
-    },
-    {
-        "name": "architecture diagrams hub",
-        "path": "docs/02-architecture/diagrams/README.md",
-        "summary": "Canonical hub for architecture, class, foundation, and view diagram sources and publication artifacts.",
-    },
-    {
-        "name": "diagram governance ADR",
-        "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
-        "summary": "Accepted ADR defining diagram governance, palette, decomposition rules, and CI validation expectations.",
-    },
-    {
-        "name": "diagram governance workflow",
-        "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-        "summary": "Operator workflow for maintaining canonical diagram trees, derived views, and publication bundles.",
-    },
-    {
-        "name": "diagram measured inventory",
-        "path": "docs/02-architecture/diagrams/governance/diagrams-index.md",
-        "summary": "Measured inventory of tracked diagram families and canonical source coverage.",
-    },
-    {
-        "name": "diagram views inventory",
-        "path": "docs/02-architecture/diagrams/governance/diagram-views-inventory.md",
-        "summary": "Measured inventory of derived Mermaid review views and decomposition coverage.",
-    },
-    {
-        "name": "diagram tooling readme",
-        "path": "scripts/diagrams/README.md",
-        "summary": "Repository entrypoint for diagram lint, render, bundle, and regression tooling.",
-    },
-    {
-        "name": "docs verification guide",
-        "path": DOCS_VERIFICATION_GUIDE_PATH,
-        "summary": "Published workflow for docs verification and drift control.",
-    },
-    {
-        "name": RUN_MANIFEST_LEDGER_DOC_PATH,
-        "path": RUN_MANIFEST_LEDGER_DOC_PATH,
-        "summary": "Published control-plane contract for immutable run manifests, append-only run ledgers, and replay inspection surfaces.",
-    },
-    {
-        "name": "package topology evidence summary",
-        "path": "docs/reports/evidence/project-package-topology/SUMMARY.md",
-        "summary": "Repo-only topology calibration evidence for package families.",
-    },
-    {
-        "name": "governance decisions summary",
-        "path": GOVERNANCE_DECISIONS_SUMMARY_PATH,
-        "summary": "Accepted governance decisions and risks.",
-    },
-    {
-        "name": DOC_GRAFANA_DASHBOARDS_JSON,
-        "path": "grafana/dashboards",
-        "summary": "Factual source of truth for shipped dashboard behavior.",
-    },
-)
 CURATED_QUALITY_GATES: tuple[dict[str, object], ...] = (
     {
         "name": "pytest",
@@ -1011,196 +992,6 @@ CURATED_QUALITY_GATES: tuple[dict[str, object], ...] = (
     {
         "name": GATE_DIAGRAM_QUALITY,
         "summary": "Diagram lint, syntax validation, artifact checks, visual smoke, and nightly regression gates for Mermaid publication surfaces.",
-    },
-)
-CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
-    {
-        "name": "hexagonal import matrix",
-        "summary": (
-            "Import boundaries are strict: domain imports only domain, application imports domain plus itself, "
-            "infrastructure imports domain plus itself, composition can wire all layers except interfaces, "
-            "and interfaces can depend on all layers."
-        ),
-        "source_path": RULES_DOC_PATH,
-        "artifact_label": "doc_artifact",
-        "governs_layers": KNOWN_LAYERS,
-    },
-    {
-        "name": "medallion storage contract",
-        "summary": (
-            "BioETL follows Bronze to Silver to Gold medallion flow. Silver must use Delta Lake rather than raw "
-            "Parquet, and Pandera remains the schema validation standard across dataframe boundaries."
-        ),
-        "source_path": RULES_DOC_PATH,
-        "artifact_label": "doc_artifact",
-    },
-    {
-        "name": "provider support matrix",
-        "summary": (
-            "Primary provider set includes ChEMBL, PubChem, PubMed, Semantic Scholar, CrossRef, OpenAlex, "
-            "and UniProt for bioactivity acquisition and enrichment workflows."
-        ),
-        "source_path": RULES_DOC_PATH,
-        "artifact_label": "doc_artifact",
-    },
-    {
-        "name": "hexagonal package layout",
-        "summary": (
-            "Source layout is organized into domain, application, infrastructure, composition, and interfaces. "
-            "Domain stays pure, composition owns wiring, interfaces expose CLI entrypoints, and architecture tests "
-            "enforce cross-layer boundaries."
-        ),
-        "source_path": RULES_DOC_PATH,
-        "artifact_label": "doc_artifact",
-        "governs_layers": KNOWN_LAYERS,
-    },
-    {
-        "name": "pipeline assembly model",
-        "summary": (
-            "BioETL assembles provider ingestion, transformation, schema validation, and medallion storage flow "
-            "through composition-layer factories and config-driven pipeline definitions rather than hard-coded "
-            "business wiring inside domain or application layers."
-        ),
-        "source_path": RULES_DOC_PATH,
-        "artifact_label": "doc_artifact",
-        "governs_layers": ("composition", "application"),
-    },
-    {
-        "name": "observability surface model",
-        "summary": (
-            "Operational visibility is centered on Grafana dashboards backed primarily by Prometheus metrics, "
-            "with dashboard JSON in grafana/dashboards as the factual source of shipped behavior and dedicated "
-            "guides for dashboard extension work."
-        ),
-        "source_path": "docs/03-guides/dashboards/dashboard-extension-llm.md",
-        "artifact_label": "doc_artifact",
-        "governs_docs": (DOC_GRAFANA_DASHBOARDS_JSON,),
-    },
-    {
-        "name": "testing strategy matrix",
-        "summary": (
-            "Testing is intentionally stratified across unit, integration, e2e, architecture, contract, "
-            "and optional benchmark surfaces. ADR-042 and the published testing guide define when each "
-            "surface is appropriate and keep scope explicit."
-        ),
-        "source_path": "docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md",
-        "artifact_label": "doc_artifact",
-        "governs_test_surfaces": (
-            "unit tests",
-            TEST_SURFACE_INTEGRATION,
-            TEST_SURFACE_E2E,
-            TEST_SURFACE_ARCHITECTURE,
-            "contract tests",
-        ),
-    },
-    {
-        "name": "quality gate stack",
-        "summary": (
-            f"The main repository gate stack combines pytest, {GATE_MYPY_STRICT}, VCR execution policy, "
-            f"{GATE_DOCS_VERIFICATION}, {GATE_CONFIG_VALIDATION}, and {GATE_PRETEST_GUARDRAILS}."
-        ),
-        "source_path": TESTING_GUIDE_PATH,
-        "artifact_label": "doc_artifact",
-        "governs_quality_gates": (
-            "pytest",
-            GATE_MYPY_STRICT,
-            GATE_DOCS_VERIFICATION,
-            GATE_CONFIG_VALIDATION,
-            GATE_PRETEST_GUARDRAILS,
-        ),
-    },
-    {
-        "name": "VCR replay discipline",
-        "summary": (
-            "Integration and e2e work is replay-first. VCR cassettes are refreshed in a targeted way rather than "
-            "broad uncontrolled rewrites, and machine-readable policy keeps the replay contract synchronized with the test matrix."
-        ),
-        "source_path": TESTING_GUIDE_PATH,
-        "artifact_label": "doc_artifact",
-        "governs_test_surfaces": (TEST_SURFACE_INTEGRATION, TEST_SURFACE_E2E),
-    },
-    {
-        "name": "target enrichment bridge",
-        "summary": (
-            "Target enrichment crosses provider boundaries: ChEMBL supplies target-centric seed records while UniProt "
-            "contributes reviewed protein metadata and an idmapping surface that translates ChEMBL target identifiers into UniProt accessions."
-        ),
-        "source_path": "configs/providers/uniprot.yaml",
-        "artifact_label": "config_artifact",
-    },
-    {
-        "name": "publication enrichment mesh",
-        "summary": (
-            "Publication enrichment is intentionally multi-provider. ChEMBL contributes source publication references, "
-            "while PubMed, CrossRef, OpenAlex, and Semantic Scholar enrich publication metadata through PMID, DOI, title, "
-            "and citation-oriented resolution paths."
-        ),
-        "source_path": TEST_MATRIX_CONFIG_PATH,
-        "artifact_label": "config_artifact",
-    },
-    {
-        "name": "integration and VCR execution policy",
-        "summary": "Tracked machine-readable policy for integration and VCR execution scope, replay modes, and suite inventory.",
-        "source_path": INTEGRATION_VCR_POLICY_PATH,
-        "artifact_label": "config_artifact",
-        "governs_test_surfaces": (TEST_SURFACE_INTEGRATION, TEST_SURFACE_E2E),
-        "governs_quality_gates": ("pytest",),
-    },
-    {
-        "name": "docs verification guide",
-        "summary": "Published workflow defining the verification path for docs surface and repo-only supporting material boundaries.",
-        "source_path": DOCS_VERIFICATION_GUIDE_PATH,
-        "artifact_label": "doc_artifact",
-        "governs_quality_gates": (GATE_DOCS_VERIFICATION,),
-    },
-    {
-        "name": "diagram governance policy",
-        "summary": (
-            "Canonical architecture diagrams live under docs/02-architecture/diagrams with ADR-040, canonical policy, "
-            "measured inventories, and scripted lint/render/publication checks defining the supported workflow."
-        ),
-        "source_path": "docs/02-architecture/diagrams/governance/policy.md",
-        "artifact_label": "doc_artifact",
-        "governs_quality_gates": (GATE_DIAGRAM_QUALITY,),
-        "governs_test_surfaces": (TEST_SURFACE_ARCHITECTURE,),
-        "governs_docs": (
-            DOC_ARCHITECTURE_DIAGRAMS_HUB,
-            "diagram governance ADR",
-            "diagram governance workflow",
-            "diagram measured inventory",
-            "diagram views inventory",
-            DOC_DIAGRAM_TOOLING_README,
-        ),
-    },
-    {
-        "name": "diagram publication boundary",
-        "summary": (
-            "Canonical .mmd trees and derived Mermaid views are source of truth for diagrams; svg, png, bundles, "
-            "descriptions, and index files are publication artifacts regenerated from those sources."
-        ),
-        "source_path": "docs/02-architecture/diagrams/README.md",
-        "artifact_label": "doc_artifact",
-        "governs_docs": (DOC_ARCHITECTURE_DIAGRAMS_HUB, DOC_DIAGRAM_TOOLING_README),
-    },
-    {
-        "name": "published docs boundary",
-        "summary": "Published docs in docs/00-05 and README define active supported behavior; repo-only material must not override them.",
-        "source_path": DOCS_VERIFICATION_GUIDE_PATH,
-        "artifact_label": "doc_artifact",
-    },
-    {
-        "name": "default VCR record mode",
-        "summary": "CI defaults to none; local defaults to once unless explicitly overridden.",
-        "source_path": INTEGRATION_VCR_POLICY_PATH,
-        "artifact_label": "config_artifact",
-        "governs_test_surfaces": (TEST_SURFACE_INTEGRATION, TEST_SURFACE_E2E),
-    },
-    {
-        "name": "targeted cassette refresh",
-        "summary": "Targeted VCR refresh uses new_episodes; broad rewrites are not the supported default path.",
-        "source_path": INTEGRATION_VCR_POLICY_PATH,
-        "artifact_label": "config_artifact",
-        "governs_test_surfaces": (TEST_SURFACE_INTEGRATION, TEST_SURFACE_E2E),
     },
 )
 CURATED_EXECUTION_PATHS: tuple[dict[str, object], ...] = (
@@ -1602,168 +1393,6 @@ def _aggregate_surface_complexity_metrics(
         return _module_surface_complexity_metrics(snapshot, indexes, surface_key)
 
     return ComplexityMetrics(0, 0, 0, 0, 0, 0.0)
-
-
-def _complexity_marker_buckets(
-    config: ComplexityAnalysisConfig,
-    relative_path: str,
-    symbol_name: str,
-    source_text: str,
-) -> tuple[tuple[str, ...], tuple[str, ...], tuple[str, ...]]:
-    normalized = f"{relative_path} {symbol_name}".casefold()
-    indirection = sorted(
-        {
-            marker
-            for marker in config.indirection_markers
-            if marker in normalized or marker in source_text
-        }
-    )
-    stateful = sorted(
-        {
-            marker
-            for marker in config.stateful_markers
-            if marker in normalized or marker in source_text
-        }
-    )
-    deprecation = sorted(
-        {
-            marker
-            for marker in config.deprecation_markers
-            if marker in normalized or marker in source_text
-        }
-    )
-    return tuple(indirection), tuple(stateful), tuple(deprecation)
-
-
-def _retirement_scores(
-    config: RetirementAnalysisConfig,
-    inputs: RetirementScoreInputs,
-) -> tuple[int, int, bool]:
-    only_test_referenced = (
-        inputs.test_count > 0
-        and inputs.runtime_count == 0
-        and inputs.config_count == 0
-        and inputs.doc_count == 0
-    )
-    cycle_score = 0
-    if (
-        inputs.recent_age_days is not None
-        and inputs.recent_age_days <= config.current_cycle_age_days
-    ):
-        cycle_score += 2
-    if inputs.wip_markers:
-        cycle_score += 3
-    if inputs.doc_count > 0 and inputs.runtime_count == 0:
-        cycle_score += 1
-
-    deletion_score = 0
-    if inputs.runtime_count == 0:
-        deletion_score += 3
-    if inputs.config_count == 0:
-        deletion_score += 2
-    if inputs.doc_count == 0:
-        deletion_score += 1
-    if only_test_referenced:
-        deletion_score += 2
-    if inputs.deprecation_markers:
-        deletion_score += 2
-    if (
-        inputs.recent_age_days is not None
-        and inputs.recent_age_days >= config.stale_age_days
-    ):
-        deletion_score += 2
-    return cycle_score, deletion_score - cycle_score, only_test_referenced
-
-
-def _complexity_scores(
-    metrics: ComplexityMetrics,
-    inputs: ComplexityScoreInputs,
-) -> tuple[int, int, int]:
-    complexity_score = 0
-    complexity_score += _threshold_score(metrics.branch_count, medium=3, high=6)
-    complexity_score += _threshold_score(metrics.nesting_depth, medium=3, high=4)
-    complexity_score += _threshold_score(metrics.helper_call_count, medium=2, high=4)
-    complexity_score += _presence_score(len(inputs.indirection_markers))
-    complexity_score += _presence_score(len(inputs.stateful_markers))
-    complexity_score += _threshold_score(metrics.abstraction_fanout, medium=3, high=6)
-
-    removable_score = complexity_score
-    if inputs.runtime_count == 0:
-        removable_score += 2
-    if inputs.config_count == 0:
-        removable_score += 2
-    if inputs.doc_count == 0:
-        removable_score += 1
-    if inputs.test_count == 0:
-        removable_score += 1
-    if inputs.deprecation_markers:
-        removable_score += 2
-    if inputs.blocked_by_current_cycle:
-        removable_score -= 3
-    return complexity_score, complexity_score, removable_score
-
-
-def _classify_complexity_candidate(
-    config: ComplexityAnalysisConfig,
-    *,
-    removable_score: float,
-    runtime_count: int,
-    config_count: int,
-    doc_count: int,
-    blocked_by_current_cycle: bool,
-) -> tuple[str, str]:
-    if (
-        removable_score >= config.removable_score_threshold
-        and not blocked_by_current_cycle
-    ):
-        removal_confidence = (
-            "high"
-            if removable_score >= config.removable_score_threshold + 2
-            else "medium"
-        )
-        return "removable_complexity", removal_confidence
-    if runtime_count == 0 and config_count == 0 and doc_count == 0:
-        return "overengineered_stale", "medium"
-    return "overengineered_active", "low"
-
-
-def _configured_node_keys(
-    label: str,
-    values: object,
-    default_names: tuple[str, ...],
-) -> list[NodeKey]:
-    names = _as_string_list(values) or list(default_names)
-    return [NodeKey(label, name) for name in names]
-
-
-def _link_existing_targets(
-    snapshot: GraphSnapshot,
-    source: NodeKey,
-    relation_type: str,
-    targets: list[NodeKey],
-    *,
-    provenance: str,
-) -> None:
-    for target in targets:
-        if target in snapshot.nodes:
-            snapshot.add_relation(source, relation_type, target, provenance=provenance)
-
-
-def _configured_duplicate_families(
-    payload: dict[str, object],
-    duplication_config: dict[str, object],
-) -> tuple[str, ...]:
-    duplication_families = tuple(
-        family.name
-        for family in _as_iterable(duplication_config.get("families"))
-        if isinstance(family, DuplicateFamilyConfig)
-    )
-    configured_families = tuple(
-        family_name
-        for family_name in _as_string_list(payload.get("families"))
-        if family_name in duplication_families
-    )
-    return configured_families or duplication_families
 
 
 def _casefolded_markers(
