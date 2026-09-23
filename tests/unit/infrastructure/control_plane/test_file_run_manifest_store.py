@@ -73,6 +73,43 @@ def test_manifest_catalog_does_not_parse_contract_evidence_sidecars(tmp_path) ->
     assert store.get_by_run_id(manifest.run_id) == manifest
 
 
+def test_manifest_catalog_overlaps_bounded_reads_without_reordering(
+    tmp_path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Slow independent reads overlap without changing catalog order or validation."""
+    from threading import Barrier, Lock
+
+    store = FileRunManifestStore(base_path=tmp_path)
+    expected = tuple(
+        make_run_manifest(
+            manifest_id=f"parallel-{index}",
+            run_id=RunID(deterministic_uuid_from_callsite(f"parallel-{index}")),
+        )
+        for index in range(8)
+    )
+    for manifest in reversed(expected):
+        store.save(manifest)
+    read = FileRunManifestStore._load_manifest
+    barrier, lock = Barrier(4, timeout=5), Lock()
+    active = peak = 0
+
+    def synchronized_read(self, manifest_id):
+        nonlocal active, peak
+        with lock:
+            active += 1
+            peak = max(peak, active)
+        try:
+            barrier.wait()
+            return read(self, manifest_id)
+        finally:
+            with lock:
+                active -= 1
+
+    monkeypatch.setattr(FileRunManifestStore, "_load_manifest", synchronized_read)
+    assert store.list_all() == expected
+    assert peak == 4
+
+
 def test_file_store_round_trips_manifest_by_id_and_run_id(tmp_path) -> None:
     store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
     run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
