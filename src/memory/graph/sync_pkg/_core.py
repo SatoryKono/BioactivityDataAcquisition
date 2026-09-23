@@ -372,6 +372,15 @@ from memory.graph.sync_pkg.add_repo_zone_file_surface import (
 from memory.graph.sync_pkg.add_repo_zone_file_surface import (
     _add_repo_zone_file_surface as _add_repo_zone_file_surface,
 )
+from memory.graph.sync_pkg.add_run_instance_spec_surfaces import (
+    _add_run_instance_spec_surfaces as _add_run_instance_spec_surfaces,
+)
+from memory.graph.sync_pkg.add_run_instance_spec_surfaces import (
+    _add_runtime_state_surfaces as _add_runtime_state_surfaces,
+)
+from memory.graph.sync_pkg.add_run_instance_spec_surfaces import (
+    _process_workflow_steps as _process_workflow_steps,
+)
 from memory.graph.sync_pkg.add_runtime_evidence_surface import (
     _add_runtime_evidence_surface as _add_runtime_evidence_surface,
 )
@@ -2769,48 +2778,6 @@ def _add_control_plane_run_instance_surfaces(
 ) -> None:
     _add_run_instance_spec_surfaces(snapshot, project, today)
     _add_runtime_state_surfaces(snapshot, project, today)
-
-
-def _add_run_instance_spec_surfaces(
-    snapshot: GraphSnapshot,
-    project: NodeKey,
-    today: str,
-) -> None:
-    for spec in _control_plane_run_instance_specs():
-        surface = _add_run_instance_surface(snapshot, project, today, spec)
-        _link_run_instance_surface(snapshot, surface, spec)
-
-
-def _add_runtime_state_surfaces(
-    snapshot: GraphSnapshot, project: NodeKey, today: str
-) -> None:
-    _add_runtime_state_spec_surfaces(snapshot, project, today)
-
-
-def _process_workflow_steps(
-    snapshot: GraphSnapshot,
-    context: WorkflowJobContext,
-    steps: object,
-) -> None:
-    if not isinstance(steps, list):
-        return
-    for step in steps:
-        if not isinstance(step, dict):
-            continue
-        uses_ref = step.get("uses")
-        if isinstance(uses_ref, str):
-            _process_workflow_uses_step(snapshot, context, uses_ref, step)
-        run_text = step.get("run")
-        if not isinstance(run_text, str):
-            continue
-        _link_workflow_run_targets(snapshot, context, run_text)
-        _add_secret_requirements(
-            snapshot,
-            context.job,
-            _workflow_secret_refs(step),
-            relative_path=context.relative_path,
-            today=context.today,
-        )
 
 
 def _link_workflow_job_dependencies(
