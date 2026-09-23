@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import re
 import shutil as shutil  # re-exported via __all__
 import sys
 from collections.abc import Callable, Iterable, Mapping, Set
@@ -349,6 +348,9 @@ from memory.graph.sync_pkg.add_secret_requirements import (
 )
 from memory.graph.sync_pkg.add_secret_requirements import (
     _add_workflow_outputs as _add_workflow_outputs,
+)
+from memory.graph.sync_pkg.add_single_adr_constraint_edges import (
+    _add_single_adr_constraint_edges as _add_single_adr_constraint_edges,
 )
 from memory.graph.sync_pkg.add_test_suite_surface import (
     _add_test_artifact_surface as _add_test_artifact_surface,
@@ -3325,47 +3327,6 @@ def _add_adr_constraint_edges(
             today,
             adr_path,
             path_pattern,
-        )
-
-
-def _add_single_adr_constraint_edges(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    adr_path: Path,
-    path_pattern: re.Pattern[str],
-) -> None:
-    relative_adr_path = _rel_path(root, adr_path)
-    adr_node = _add_adr_decision_node(snapshot, root, project, today, adr_path)
-    adr_doc = NodeKey("doc_artifact", relative_adr_path)
-    if adr_doc in snapshot.nodes:
-        snapshot.add_relation(
-            adr_node, "DESCRIBED_IN", adr_doc, provenance="adr_constraints"
-        )
-    text = _read_text(adr_path)
-    seen_targets: set[NodeKey] = set()
-    for path_match in path_pattern.finditer(text):
-        normalized = _normalize_docs_repo_reference(path_match.group(1))
-        if normalized is None or normalized == relative_adr_path:
-            continue
-        target = _resolve_adr_constraint_target(snapshot, normalized)
-        if target is None or target in seen_targets:
-            continue
-        seen_targets.add(target)
-        section_title, section_anchor, line_number = _doc_reference_context(
-            text, path_match.start()
-        )
-        snapshot.add_relation(
-            adr_node,
-            "CONSTRAINS",
-            target,
-            provenance="adr_path_reference",
-            doc_reference=normalized,
-            section_title=section_title,
-            section_anchor=section_anchor,
-            line_number=line_number,
-            confidence="medium",
         )
 
 
