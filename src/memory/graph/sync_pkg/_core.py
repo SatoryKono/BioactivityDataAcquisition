@@ -592,6 +592,24 @@ from memory.graph.sync_pkg.complexity_marker_buckets import (
 from memory.graph.sync_pkg.complexity_marker_buckets import (
     _retirement_scores as _retirement_scores,
 )
+from memory.graph.sync_pkg.composite_config_dependency_entries import (
+    _add_cli_command_graph as _add_cli_command_graph,
+)
+from memory.graph.sync_pkg.composite_config_dependency_entries import (
+    _add_curated_execution_paths as _add_curated_execution_paths,
+)
+from memory.graph.sync_pkg.composite_config_dependency_entries import (
+    _add_quality_and_scripts as _add_quality_and_scripts,
+)
+from memory.graph.sync_pkg.composite_config_dependency_entries import (
+    _composite_config_dependency_entries as _composite_config_dependency_entries,
+)
+from memory.graph.sync_pkg.composite_config_dependency_entries import (
+    _link_composite_dependency as _link_composite_dependency,
+)
+from memory.graph.sync_pkg.composite_config_dependency_entries import (
+    _link_composite_seed_dependency as _link_composite_seed_dependency,
+)
 from memory.graph.sync_pkg.composite_dependency_storage_ref import (
     _add_composite_dependency_surface as _add_composite_dependency_surface,
 )
@@ -2241,116 +2259,6 @@ def _link_composite_config_dependencies(
     )
     for dependency in _composite_config_dependency_entries(composite_payload):
         _link_composite_dependency(snapshot, composite_node, dependency, entity_nodes)
-
-
-def _composite_config_dependency_entries(
-    composite_payload: object,
-) -> tuple[object, ...]:
-    dependencies = (
-        composite_payload.get("dependencies")
-        if isinstance(composite_payload, dict)
-        else None
-    )
-    if not isinstance(dependencies, list):
-        return ()
-    return tuple(dependencies)
-
-
-def _link_composite_seed_dependency(
-    snapshot: GraphSnapshot,
-    composite_node: NodeKey,
-    *,
-    seed_pipeline: str | None,
-    entity_nodes: dict[str, NodeKey],
-) -> None:
-    target = _composite_dependency_target(seed_pipeline, entity_nodes)
-    if target is not None:
-        snapshot.add_relation(
-            composite_node, "DEPENDS_ON", target, provenance="composite_seed"
-        )
-
-
-def _link_composite_dependency(
-    snapshot: GraphSnapshot,
-    composite_node: NodeKey,
-    dependency: object,
-    entity_nodes: dict[str, NodeKey],
-) -> None:
-    if not isinstance(dependency, dict):
-        return
-    target = _composite_dependency_target(dependency.get("pipeline"), entity_nodes)
-    if target is not None:
-        snapshot.add_relation(
-            composite_node,
-            "DEPENDS_ON",
-            target,
-            provenance="composite_dependency",
-            required=bool(dependency.get("required", False)),
-        )
-
-
-def _add_curated_execution_paths(
-    snapshot: GraphSnapshot, today: str, dev_readme: NodeKey
-) -> None:
-    for execution_payload in CURATED_EXECUTION_PATHS:
-        execution = _add_execution_path_node(snapshot, today, execution_payload)
-        _link_execution_gate(
-            snapshot, execution, execution_payload, provenance="curated_execution"
-        )
-        _link_curated_execution_script(
-            snapshot, execution, execution_payload, today=today, dev_readme=dev_readme
-        )
-
-
-def _add_quality_and_scripts(
-    snapshot: GraphSnapshot, _root: Path, project: NodeKey, today: str
-) -> None:
-    _add_curated_quality_gates(snapshot, project, today)
-    dev_readme = _developer_workflow_readme(snapshot, project, today)
-    _add_curated_execution_paths(snapshot, today, dev_readme)
-    _add_curated_script_clusters(snapshot, project, today)
-
-
-def _add_cli_command_graph(
-    snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str
-) -> None:
-    execution_to_gates, execution_to_scripts = _cli_execution_indexes(snapshot)
-    for execution in tuple(snapshot.nodes.values()):
-        if execution.key.label != "execution_path":
-            continue
-        command_name = _normalize_cli_command_name(execution.key.name)
-        if command_name is None:
-            continue
-        backing_scripts = execution_to_scripts.get(execution.key, [])
-        source_path = _cli_command_source_path(root, command_name, backing_scripts)
-        command_options = _extract_cli_options(execution.key.name)
-        command = _add_cli_command_surface(
-            snapshot,
-            execution,
-            command_name=command_name,
-            source_path=source_path,
-            command_options=command_options,
-            today=today,
-        )
-        snapshot.add_relation(
-            project, "HAS_CLI_COMMAND", command, provenance="cli_command_graph"
-        )
-        _link_cli_command_execution(
-            snapshot,
-            command,
-            execution.key,
-            execution_to_gates.get(execution.key, []),
-            backing_scripts,
-        )
-        _add_cli_option_surfaces(
-            snapshot,
-            command,
-            command_name=command_name,
-            source_path=source_path,
-            command_options=command_options,
-            today=today,
-        )
-        _link_cli_command_side_effects(snapshot, command, command_name)
 
 
 def _add_test_graph(
