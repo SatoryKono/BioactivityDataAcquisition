@@ -909,6 +909,15 @@ from memory.graph.sync_pkg.entity_pipeline_identity import (
 from memory.graph.sync_pkg.entity_pipeline_identity import (
     _link_entity_pipeline_dependencies as _link_entity_pipeline_dependencies,
 )
+from memory.graph.sync_pkg.entity_storage_promotion_pairs import (
+    _classify_projected_storage_fields as _classify_projected_storage_fields,
+)
+from memory.graph.sync_pkg.entity_storage_promotion_pairs import (
+    _entity_storage_promotion_pairs as _entity_storage_promotion_pairs,
+)
+from memory.graph.sync_pkg.entity_storage_promotion_pairs import (
+    _link_storage_layer_promotion as _link_storage_layer_promotion,
+)
 from memory.graph.sync_pkg.fast_analysis_snapshot_counts import (
     _active_critical_names as _active_critical_names,
 )
@@ -3278,51 +3287,6 @@ def _link_entity_storage_promotions(
         )
     if "silver" in layer_nodes and "gold" in layer_nodes:
         _classify_projected_storage_fields(snapshot, silver_fields, gold_fields)
-
-
-def _entity_storage_promotion_pairs(
-    layer_nodes: dict[str, NodeKey],
-    *,
-    bronze_fields: dict[str, NodeKey],
-    silver_fields: dict[str, NodeKey],
-    gold_fields: dict[str, NodeKey],
-) -> tuple[tuple[str, str, dict[str, NodeKey], dict[str, NodeKey]], ...]:
-    pairs: list[tuple[str, str, dict[str, NodeKey], dict[str, NodeKey]]] = []
-    if "bronze" in layer_nodes and "silver" in layer_nodes:
-        pairs.append(("bronze", "silver", bronze_fields, silver_fields))
-    if "silver" in layer_nodes and "gold" in layer_nodes:
-        pairs.append(("silver", "gold", silver_fields, gold_fields))
-    return tuple(pairs)
-
-
-def _link_storage_layer_promotion(
-    snapshot: GraphSnapshot,
-    source_layer: NodeKey,
-    target_layer: NodeKey,
-    source_fields: dict[str, NodeKey],
-    target_fields: dict[str, NodeKey],
-) -> None:
-    snapshot.add_relation(
-        source_layer, "PROMOTES_TO", target_layer, provenance="storage_surfaces"
-    )
-    for field_name, source_field in source_fields.items():
-        target_field = target_fields.get(field_name)
-        if target_field is not None:
-            snapshot.add_relation(
-                source_field,
-                "PROMOTES_FIELD_TO",
-                target_field,
-                provenance="schema_fields",
-            )
-
-
-def _classify_projected_storage_fields(
-    snapshot: GraphSnapshot,
-    silver_fields: dict[str, NodeKey],
-    gold_fields: dict[str, NodeKey],
-) -> None:
-    _classify_silver_storage_fields(snapshot, silver_fields, gold_fields)
-    _classify_gold_storage_fields(snapshot, silver_fields, gold_fields)
 
 
 def _add_storage_data_surfaces(
