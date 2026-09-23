@@ -248,7 +248,8 @@ async def test_chembl_fetch_mixin_and_request_helpers() -> None:
         page_size=50,
         extraction_params=ExtractionParams.empty(),
     )
-    assert "limit" not in params
+    assert params["limit"] == 50
+    assert params["offset"] == 10
     filled = build_request_params(
         offset=10,
         entity_type="activity",

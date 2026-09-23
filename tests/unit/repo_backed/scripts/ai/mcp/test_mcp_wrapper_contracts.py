@@ -85,6 +85,40 @@ POWERSHELL_MARK = pytest.mark.skipif(
     POWERSHELL is None,
     reason="PowerShell is required for the Windows MCP wrapper contracts",
 )
+# Keep this below pytest-timeout (60s). subprocess.run(timeout=) on Windows
+# re-enters communicate() with no timeout after kill and can hang the suite.
+_POWERSHELL_EXEC_TIMEOUT_SEC = 35
+
+
+def _popen_communicate_or_skip(
+    args: list[str],
+    *,
+    env: dict[str, str],
+    skip_reason: str,
+    timeout: int = _POWERSHELL_EXEC_TIMEOUT_SEC,
+) -> subprocess.CompletedProcess[str]:
+    proc = subprocess.Popen(
+        args,
+        cwd=ROOT,
+        env=env,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    try:
+        stdout, stderr = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        for stream in (proc.stdout, proc.stderr):
+            if stream is not None:
+                try:
+                    stream.close()
+                except OSError:
+                    pass
+        pytest.skip(skip_reason)
+    return subprocess.CompletedProcess(
+        args, 0 if proc.returncode is None else proc.returncode, stdout, stderr
+    )
 
 
 @lru_cache(maxsize=1)
@@ -408,26 +442,19 @@ def _run_powershell_command(
 ) -> subprocess.CompletedProcess[str]:
     assert POWERSHELL is not None
     run_env = _collapse_windows_env(env or _clean_env())
-    try:
-        result = subprocess.run(
-            [
-                POWERSHELL,
-                "-NoProfile",
-                "-NonInteractive",
-                "-ExecutionPolicy",
-                "Bypass",
-                "-Command",
-                _powershell_cwd_prefix() + command,
-            ],
-            cwd=ROOT,
-            env=run_env,
-            text=True,
-            capture_output=True,
-            check=False,
-            timeout=60,
-        )
-    except subprocess.TimeoutExpired as exc:
-        pytest.skip(f"PowerShell command timed out in this environment: {exc}")
+    result = _popen_communicate_or_skip(
+        [
+            POWERSHELL,
+            "-NoProfile",
+            "-NonInteractive",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-Command",
+            _powershell_cwd_prefix() + command,
+        ],
+        env=run_env,
+        skip_reason="PowerShell command timed out in this environment",
+    )
     if any(
         marker in result.stderr
         for marker in ("UtilBindVsockAnyPort", "UtilAcceptVsock")
@@ -449,28 +476,19 @@ def _run_powershell_file(
             setup.append(f"Remove-Item 'Env:{name}' -ErrorAction SilentlyContinue")
     setup.append(f"& {_ps_quote(_powershell_path(path))}")
     setup.append("exit $LASTEXITCODE")
-    try:
-        result = subprocess.run(
-            [
-                POWERSHELL,
-                "-NoProfile",
-                "-NonInteractive",
-                "-ExecutionPolicy",
-                "Bypass",
-                "-Command",
-                _powershell_cwd_prefix() + "; ".join(setup),
-            ],
-            cwd=ROOT,
-            env=run_env,
-            text=True,
-            capture_output=True,
-            check=False,
-            timeout=60,
-        )
-    except subprocess.TimeoutExpired as exc:
-        pytest.skip(
-            f"PowerShell wrapper execution timed out in this environment: {exc}"
-        )
+    result = _popen_communicate_or_skip(
+        [
+            POWERSHELL,
+            "-NoProfile",
+            "-NonInteractive",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-Command",
+            _powershell_cwd_prefix() + "; ".join(setup),
+        ],
+        env=run_env,
+        skip_reason="PowerShell wrapper execution timed out in this environment",
+    )
     if any(
         marker in result.stderr
         for marker in ("UtilBindVsockAnyPort", "UtilAcceptVsock")

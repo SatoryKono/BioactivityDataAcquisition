@@ -867,6 +867,13 @@ def test_cycle4_named_text_columns_wrap_below_fold() -> None:
         custom = (panel.get("fieldConfig") or {}).get("defaults", {}).get("custom", {})
         assert custom.get("cellOptions", {}).get("wrapText") in (True, False, None)
         wrapped = _wrapped_field_names(panel)
+        if dashboard_name == "bioetl-control-plane-v1.json" and panel_id == 9404:
+            # #10571/#10668: full identity values need lg rows and wrapping.
+            assert panel["options"]["cellHeight"] == "lg"
+            assert panel["options"]["footer"]["enablePagination"] is True
+            assert field in wrapped
+            assert panel["gridPos"]["h"] >= 12
+            continue
         if dashboard_name in {
             "bioetl-control-plane-v1.json",
             "bioetl-provider-health-v2.json",
@@ -1249,7 +1256,7 @@ def test_run_explorer_index_is_disk_last_ten_not_time_range() -> None:
 def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     explorer = _load("bioetl-run-explorer-v1.json")
     recent = _panel(explorer, 3010)
-    assert _override_width(recent, "selected") == 50
+    assert _override_width(recent, "selected") == 28
     assert _override_width(recent, "^(workflow_id|Workflow)$") is None
     assert recent["fieldConfig"]["defaults"]["custom"]["minWidth"] == 50
     assert recent["options"]["footer"]["enablePagination"] is False
@@ -1605,12 +1612,20 @@ def test_active_alert_missing_labels_do_not_claim_empty_domain() -> None:
             )
 
 
+@pytest.mark.timeout(90)
 def test_scrolling_capture_preserves_layout_viewport(tmp_path: Path) -> None:
     import os
     import subprocess
+    import sys
     from scripts.ops.observability.grafana import (
         rerender_grafana_screenshots as rerender,
     )
+
+    if sys.platform == "win32" and os.environ.get("BIOETL_GRAFANA_BROWSER") != "1":
+        pytest.skip(
+            "Chromium scroll-capture hangs under native Windows pytest "
+            "(subprocess pipe join); opt in with BIOETL_GRAFANA_BROWSER=1"
+        )
 
     node = rerender._resolve_node_executable()
     if node is None:

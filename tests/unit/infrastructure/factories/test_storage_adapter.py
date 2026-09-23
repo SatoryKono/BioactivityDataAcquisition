@@ -496,6 +496,7 @@ class TestStorageBundleAdditionalPaths:
             [{"id": 1}],
             ["id"],
             schema=storage_adapter._COMPOSITE_GOLD_SCHEMAS["composite/publication"],
+            completed_at=None,
             run_id="run-1",
             sources_used=["chembl_publication"],
             preserve_column_order=True,

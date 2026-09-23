@@ -2,9 +2,14 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.runtime_timestamps import capture_runtime_timing_anchor
+from bioetl.application.services.execution.nested_run_report import (
+    persist_composite_pipeline_run_report,
+)
+from bioetl.application.services.execution.pipeline_runner_models import RunOptions
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
@@ -25,7 +30,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.composite.result import CompositeResult
-    from bioetl.domain.ports import ClockPort
+    from bioetl.domain.ports import ClockPort, LoggerPort, RunReportStorePort
 
 __all__ = [
     "complete_successful_run",
@@ -50,6 +55,10 @@ class _RunnerLifecycleHost(Protocol):
     _final_state: CompositePipelineState | None
     _started_at: datetime | None
     _start_time: float | None
+    _run_report_store: RunReportStorePort | None
+    _report_root: object
+    _manifest_id: str | None
+    _logger: LoggerPort
 
     def _validate_config_consistency(self) -> None: ...
 
@@ -165,5 +174,29 @@ async def complete_successful_run(
     completion_context = host._prepare_composite_result_context(execution_context)
     host._log_composite_completion(completion_context)
     result = host._finalize_composite_result(completion_context)
+    _persist_composite_run_report(host, result)
     host._record_run_finished(execution_context)
     return result
+
+
+def _persist_composite_run_report(
+    host: _RunnerLifecycleHost,
+    result: CompositeResult,
+) -> None:
+    """Best-effort parent pipeline-run-report; nested children write separately."""
+    store = getattr(host, "_run_report_store", None)
+    if store is None:
+        return
+    raw_root = getattr(host, "_report_root", None)
+    persist_composite_pipeline_run_report(
+        result=result,
+        store=store,
+        options=RunOptions(
+            run_type="incremental",
+            dry_run=bool(getattr(host._runtime, "dry_run", False)),
+            execution_context="composite",
+        ),
+        report_root=raw_root if isinstance(raw_root, Path) else None,
+        manifest_id=getattr(host, "_manifest_id", None),
+        logger=getattr(host, "_logger", None),
+    )

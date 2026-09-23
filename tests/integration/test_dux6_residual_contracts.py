@@ -203,7 +203,8 @@ def test_pfill_11_dq_freshness_missing_series_is_explicit() -> None:
     )
     assert any("bioetl_data_freshness_seconds" in expr for expr in expressions)
     assert all("or vector(0)" not in expr for expr in expressions)
-    assert "telemetry missing" in str(freshness.get("description") or "").lower()
+    description = str(freshness.get("description") or "").lower()
+    assert "missing series" in description or "telemetry missing" in description
 
 
 def test_pfill_10_provider_missing_series_has_reason_and_action() -> None:

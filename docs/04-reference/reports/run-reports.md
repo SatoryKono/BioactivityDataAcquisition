@@ -77,6 +77,8 @@ reports/run-reports/
 | Quarantine | `batch_metrics.py` `track_quarantined_records` | `quarantined` + ErrorType |
 | Gold excludes (metric backfill) | `execution/_pipeline_runner_support.py` `_seed_gold_removals_from_metrics` | `excluded_by_contract` |
 | Pipeline report write | `execution/_pipeline_runner_support.py` `finalize_pipeline_run_report` | JSON+MD+`_latest` |
+| Nested composite child report | `execution/nested_run_report.py` `ReportingExecutionRunner` | seed/enricher/dependency `runner.run()` |
+| Composite parent report | `runner_lifecycle_flow.py` `_persist_composite_run_report` | `composite_<name>` JSON+MD+`_latest` |
 | Workflow report write | `workflow_runner_reports.py` `attach_workflow_run_report` | JSON+MD+`_latest` |
 
 ## CLI

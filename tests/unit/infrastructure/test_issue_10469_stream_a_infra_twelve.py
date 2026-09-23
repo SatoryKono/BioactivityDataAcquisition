@@ -81,6 +81,7 @@ from bioetl.infrastructure.control_plane.file_effective_config_artifact_store im
 )
 from bioetl.infrastructure.control_plane.file_lineage_store import FileLineageStore
 from bioetl.infrastructure.control_plane.file_provider_health_evidence import (
+    PROVIDER_HEALTH_EVIDENCE_SCHEMA,
     _record_from_path,
 )
 from bioetl.infrastructure.control_plane.file_workflow_ledger_store import (
@@ -608,6 +609,7 @@ class TestContractRegistryHealthConfigAndRefs:
         payload.write_text(
             json.dumps(
                 {
+                    "schema_version": PROVIDER_HEALTH_EVIDENCE_SCHEMA,
                     "provider": "chembl",
                     "status": 1,
                     "observed_at": "2026-01-01T00:00:00+00:00",

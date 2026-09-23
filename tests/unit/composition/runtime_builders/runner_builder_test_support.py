@@ -215,6 +215,7 @@ def _build_settings(
 
 def _build_pipeline_config(**overrides: object) -> SimpleNamespace:
     values: dict[str, object] = {
+        "pipeline_name": "chembl_activity",
         "provider": "chembl",
         "entity_type": "activity",
         "version": "2.0.0",
@@ -222,6 +223,7 @@ def _build_pipeline_config(**overrides: object) -> SimpleNamespace:
         "input_filter": SimpleNamespace(),
         "business_primary_keys": ["activity_id"],
         "technical_primary_key": "entity_id",
+        "batch_size": 100,
         "sink": {
             "bronze": SimpleNamespace(enabled=True, save_metadata=True),
             "silver": SimpleNamespace(enabled=True, save_metadata=True),

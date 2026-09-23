@@ -172,7 +172,7 @@ def adjust_batch_size_for_filter_impl(
     if filter_config and filter_batch_size is not None:
         observability.logger.info(
             "batch_size_auto_adjusted",
-            original=yaml_config.batch_size,
+            original=getattr(yaml_config, "batch_size", None),
             adjusted=filter_batch_size,
             reason="input_filter_active",
         )

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, TypedDict, TypeVar
+from typing import TYPE_CHECKING, TypedDict, TypeVar, cast
 
 if TYPE_CHECKING:
     import polars as pl
@@ -14,6 +14,9 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.ports import LoggerPort
 
+from bioetl.application.services.execution.nested_run_report import (
+    maybe_wrap_reporting_runner,
+)
 from bioetl.composition.bootstrap.runtime._dependency_runner_support import (
     build_dependency_debug_context,
     resolve_dependency_runner_limit,
@@ -22,6 +25,9 @@ from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service im
     CompositeFilterExtractor,
 )
 from bioetl.infrastructure.config.settings_api import get_settings
+from bioetl.infrastructure.storage.run_report_store_adapter import (
+    FileRunReportStoreAdapter,
+)
 
 
 class BronzeRunOptions(TypedDict):
@@ -88,7 +94,15 @@ class RunnerFactoryBuilder[RunOptionsT]:
         )
         options = self._run_options_cls(**option_kwargs)
         ctx = self._build_context(pipeline_name, options)
-        return self._pipeline_runner_builder(ctx)
+        runner = self._pipeline_runner_builder(ctx)
+        wrapped = maybe_wrap_reporting_runner(
+            runner,
+            pipeline_name=pipeline_name,
+            options=options,
+            store=FileRunReportStoreAdapter(),
+            report_root=get_settings().report_root,
+        )
+        return cast("PipelineRunner", wrapped)
 
     def build_seed_factory(
         self,

@@ -394,7 +394,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Current DQ verdict for the selected pipeline. Mapping: `0=OK`, `1=WARN`, `>=2=CRIT`, `null=UNKNOWN`. UNKNOWN means current status evidence is missing, stale, unavailable, or not started—not healthy. Run type and stage mainly affect range evidence; run ID does not filter this verdict. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
+      "description": "CURRENT · Current DQ verdict for the selected pipeline. Mapping: `0=OK`, `1=WARN`, `2=CRIT`, `3/null=UNKNOWN`. UNKNOWN means current status evidence is missing, stale, unavailable, or not started—not healthy. Run type and stage mainly affect range evidence; run ID does not filter this verdict. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
       "fieldConfig": {
         "defaults": {
           "color": {

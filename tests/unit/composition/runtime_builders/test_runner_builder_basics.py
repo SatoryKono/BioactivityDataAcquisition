@@ -141,6 +141,9 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
 
     def load_pipeline_config_fn(_: str) -> SimpleNamespace:
         return SimpleNamespace(
+            pipeline_name="chembl_activity",
+            provider="chembl",
+            entity_type="activity",
             maintenance={"retain_days": 7},
             input_filter=SimpleNamespace(),
             business_primary_keys=["activity_id"],
@@ -259,10 +262,9 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
         snapshot["snapshot_id"] for snapshot in snapshots
     )
     events = [event for event, _ in logger_calls]
-    assert events[:2] == [
-        "input_filter_enabled",
-        "cached_bronze_mode_enabled",
-    ]
+    assert events[0] == "input_filter_enabled"
+    assert "batch_size_auto_adjusted" in events
+    assert "cached_bronze_mode_enabled" in events
     assert "effective_config_artifact_persisted" in events
 
 

@@ -295,6 +295,7 @@ class TestFetchFilteredWithFallback:
         }
 
         mock_http_client.post.return_value = batch_response
+        mock_http_client.get.return_value = search_response
         mock_http_client.get_once.return_value = search_response
 
         fallback_mapping = {
@@ -329,6 +330,7 @@ class TestFetchFilteredWithFallback:
                 {"paperId": "c" * 40, "title": "Title Only Paper"}
             ]  # Matches fallback
         }
+        mock_http_client.get.return_value = search_response
         mock_http_client.get_once.return_value = search_response
 
         # Empty batch response for no valid DOIs

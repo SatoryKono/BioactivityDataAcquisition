@@ -74,6 +74,7 @@ def test_build_pipeline_runner_rejects_exact_replay_without_materialized_cached_
                         test_mode=False,
                     ),
                     load_pipeline_config_fn=lambda _: SimpleNamespace(
+                        pipeline_name="chembl_activity",
                         provider="chembl",
                         entity_type="activity",
                         version="2.0.0",
@@ -146,6 +147,7 @@ def test_build_pipeline_runner_keeps_snapshot_backed_execution_identity_stable_a
                             test_mode=False,
                         ),
                         load_pipeline_config_fn=lambda _: SimpleNamespace(
+                            pipeline_name="chembl_activity",
                             provider="chembl",
                             entity_type="activity",
                             version="2.0.0",

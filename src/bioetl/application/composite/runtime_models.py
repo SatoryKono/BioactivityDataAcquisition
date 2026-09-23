@@ -16,6 +16,8 @@ from bioetl.domain.composite.result import (
 )
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     import polars as pl
 
     from bioetl.application.composite.checkpoint import (
@@ -50,6 +52,7 @@ if TYPE_CHECKING:
         LoggerPort,
         MetricsPort,
         QuarantinePort,
+        RunReportStorePort,
         TracingPort,
     )
 
@@ -128,6 +131,8 @@ class CompositeRunnerDependencies:
     manifest_id: str | None = None
     run_ledger_service: RunLedgerService | None = None
     clock: ClockPort = field(default_factory=RuntimeClock)
+    run_report_store: RunReportStorePort | None = None
+    report_root: Path | None = None
 
 
 @dataclass(frozen=True, slots=True)

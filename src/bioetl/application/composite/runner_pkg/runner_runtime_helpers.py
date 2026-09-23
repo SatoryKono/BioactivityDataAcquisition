@@ -83,6 +83,8 @@ class _CompositeRunnerHostProtocol(Protocol):
     _manifest_id: str | None
     _run_ledger_service: object
     _clock: object
+    _run_report_store: object
+    _report_root: object
     _run_id_str: str
     _run_id: RunID
     _start_time: float | None
@@ -135,6 +137,8 @@ def bind_runner_dependencies(host: object, deps: CompositeRunnerDependencies) ->
     runner_host._manifest_id = deps.manifest_id
     runner_host._run_ledger_service = deps.run_ledger_service
     runner_host._clock = resolve_runtime_clock(getattr(deps, "clock", None))
+    runner_host._run_report_store = getattr(deps, "run_report_store", None)
+    runner_host._report_root = getattr(deps, "report_root", None)
 
 
 def initialize_runner_runtime_state(host: object, run_id: str | None) -> None:

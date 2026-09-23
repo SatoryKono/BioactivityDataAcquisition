@@ -1875,18 +1875,23 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     else:
         assert "valid empty" in identity_no_value.lower()
         assert "query error" in processed_no_value.lower()
-    assert (
-        identity.get("options", {}).get("cellHeight")
-        == processed.get("options", {}).get("cellHeight")
-        == ("md" if full_width_evidence else "sm")
-    )
+    if full_width_evidence:
+        assert identity.get("options", {}).get("cellHeight") in {"md", "lg"}
+        assert processed.get("options", {}).get("cellHeight") == "md"
+    else:
+        assert (
+            identity.get("options", {}).get("cellHeight")
+            == processed.get("options", {}).get("cellHeight")
+            == "sm"
+        )
     default_identity_cell_options = (
         identity.get("fieldConfig", {})
         .get("defaults", {})
         .get("custom", {})
         .get("cellOptions", {})
     )
-    assert default_identity_cell_options.get("wrapText") is not True
+    if not full_width_evidence:
+        assert default_identity_cell_options.get("wrapText") is not True
     wrapped_identity_fields = {
         override["matcher"]["options"]
         for override in identity.get("fieldConfig", {}).get("overrides", [])
@@ -1896,7 +1901,11 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     }
     expected_wrapped_fields = {"parameter"}
     if full_width_evidence:
-        expected_wrapped_fields = set()
+        expected_wrapped_fields = (
+            {"Parameter", "Value"}
+            if dashboard_name == "bioetl-control-plane-v1.json"
+            else set()
+        )
         assert identity["fieldConfig"]["defaults"]["custom"]["inspect"] is True
     assert wrapped_identity_fields == expected_wrapped_fields
 

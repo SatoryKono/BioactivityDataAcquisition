@@ -74,7 +74,7 @@ async def test_resolve_evidence_scope_does_not_reread_failed_pipeline(
 
     assert scope is None
     assert payload is not None
-    assert payload["status"] == "ERROR"
+    assert payload["status"] == "UNKNOWN"
     assert host.pipeline_reads == 1
     assert payload["pipeline"] == ""
     assert payload["resolved_via"] == "control_plane_source_read_failed"

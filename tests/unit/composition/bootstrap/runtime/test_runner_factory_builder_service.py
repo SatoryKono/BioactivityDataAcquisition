@@ -44,6 +44,7 @@ from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import 
     RunnerFactoryBuilder,
     resolve_bronze_opts,
 )
+from bioetl.infrastructure.config.settings_api import get_settings
 
 
 class _RunOptionsRecorder:
@@ -109,6 +110,9 @@ def test_seed_runoptions_snapshot() -> None:
         "use_cached_bronze": True,
         "cached_bronze_path": "data/bronze",
         "cached_bronze_date": "2026-03-04",
+        "required_persistence_profile": (
+            get_settings().pipeline.control_plane.required_persistence_profile
+        ),
     }
 
 
@@ -154,6 +158,9 @@ def test_enricher_runoptions_snapshot() -> None:
         "use_cached_bronze": True,
         "cached_bronze_path": "data/bronze",
         "cached_bronze_date": "2026-03-04",
+        "required_persistence_profile": (
+            get_settings().pipeline.control_plane.required_persistence_profile
+        ),
     }
 
 
@@ -207,6 +214,9 @@ def test_dependency_runoptions_snapshot_single_and_multi_filter() -> None:
         "use_cached_bronze": False,
         "cached_bronze_path": None,
         "cached_bronze_date": None,
+        "required_persistence_profile": (
+            get_settings().pipeline.control_plane.required_persistence_profile
+        ),
     }
 
     _ = factory(
@@ -228,4 +238,53 @@ def test_dependency_runoptions_snapshot_single_and_multi_filter() -> None:
         "use_cached_bronze": False,
         "cached_bronze_path": None,
         "cached_bronze_date": None,
+        "required_persistence_profile": (
+            get_settings().pipeline.control_plane.required_persistence_profile
+        ),
     }
+
+
+@pytest.mark.unit
+def test_create_runner_invokes_nested_report_wrap(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from bioetl.composition.bootstrap.runtime import (
+        runner_factory_builder_service as mod,
+    )
+
+    seen: dict[str, object] = {}
+
+    def _fake_wrap(runner: object, **kwargs: object) -> object:
+        seen["runner"] = runner
+        seen.update(kwargs)
+        return runner
+
+    monkeypatch.setattr(mod, "maybe_wrap_reporting_runner", _fake_wrap)
+    recorder = _RunOptionsRecorder()
+    builder = RunnerFactoryBuilder(
+        logger=MagicMock(),
+        run_options_cls=recorder,
+        build_context=_build_context,
+        pipeline_runner_builder=_build_runner,
+        filter_extraction_service=CompositeFilterExtractor(),
+    )
+    factory = builder.build_enricher_factory(
+        enrichers=[
+            SimpleNamespace(
+                pipeline="pubmed_publication",
+                join_keys=("pmid",),
+                is_many_to_one=False,
+            )
+        ],
+        bronze_opts={
+            "use_cached_bronze": False,
+            "cached_bronze_path": None,
+            "cached_bronze_date": None,
+        },
+    )
+    produced = factory("pubmed_publication", pl.DataFrame({"pmid": ["14695825"]}))
+
+    assert produced["pipeline"] == "pubmed_publication"
+    assert seen["pipeline_name"] == "pubmed_publication"
+    assert seen["runner"] is produced
+    assert seen["report_root"] == get_settings().report_root

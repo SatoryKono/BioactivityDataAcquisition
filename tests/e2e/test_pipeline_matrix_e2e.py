@@ -184,6 +184,7 @@ PIPELINE_CASES: tuple[PipelineE2ECase, ...] = (
         "chembl_target_component",
         "chembl",
         "target_component",
+        smoke_limit=10,
         cassette_candidates=(
             "TestChemblTargetComponentPipeline.test_chembl_target_component_happy_path",
         ),

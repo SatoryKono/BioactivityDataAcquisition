@@ -224,7 +224,7 @@ def resolve_runner_derived_inputs(
     provenance = validate_resolved_extraction_input(
         pipeline_name=prepared.yaml_config.pipeline_name,
         provider=prepared.yaml_config.provider,
-        query=runtime_config.query,
+        query=getattr(runtime_config, "query", None),
         filter_config=filter_config,
     )
     if provenance is not None:

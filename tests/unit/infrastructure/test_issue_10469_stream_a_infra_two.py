@@ -395,7 +395,7 @@ async def test_semanticscholar_fetch_mixin_limit_and_extractor() -> None:
                 measure_request=lambda *_a, **_k: _Span()
             )
             self._http_client = SimpleNamespace(
-                get_once=AsyncMock(
+                get=AsyncMock(
                     return_value=SimpleNamespace(
                         json=lambda: {"data": [{"paperId": "p1"}], "next": None}
                     )
@@ -413,7 +413,9 @@ async def test_semanticscholar_fetch_mixin_limit_and_extractor() -> None:
     search_host._validate_entity_type("paper")
     with pytest.raises(ValueError, match="got: gene"):
         search_host._validate_entity_type("gene")
-    page_rows = [row async for row in search_host._paginate_search(query=None, limit=1)]
+    page_rows = [
+        row async for row in search_host._paginate_search(query="CRISPR", limit=1)
+    ]
     assert page_rows == [{"paperId": "p1"}]
 
 

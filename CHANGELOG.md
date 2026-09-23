@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Composite nested run reports:** seed, enricher, and dependency
+  `PipelineRunner.run()` paths now persist `pipeline-run-report.json` /
+  `.md` through the same writer as standalone CLI runs. The composite
+  parent (`composite_<name>`) also writes a report on successful
+  completion. Grafana Run Explorer no longer shows `REPORT MISSING` for
+  nested `pubmed_publication` (and sibling) enricher launches.
+
 ### Added
 
 - **FK reconciliation completeness and mutation identity (#10424, #10425):**
@@ -53,6 +62,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   scanning owner; default setup stays off; weekly Monday triage.
 
 ### Changed
+
+- **Run Explorer first-window table (panel 3010):** visible `custom.width`
+  sum fits DASH-REFLOW-001 200% CSS budget (643px at 1366/2); selected-run
+  marker stays 28px. Pipeline Diagnostics headline 9401 names
+  `processing_status` / `trust_status` and states that a telemetry gap makes
+  the verdict incomplete.
 
 - **Gold/Silver assay_parameters and publication_similarity snapshots:** live
   schemas already renamed `type`/`relation`/`value` → `parameter_*` and added

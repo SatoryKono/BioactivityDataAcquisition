@@ -39,26 +39,11 @@
 # VCR cassettes
 *.json text eol=lf
 
-# Git LFS tracking for large VCR cassettes
-tests/fixtures/vcr/**/*.yaml filter=lfs diff=lfs merge=lfs -text
-
-# PR-blocking E2E matrix playback must remain available when GitHub LFS quota
-# is exhausted. Keep only this bounded critical-smoke cassette set in Git.
-tests/fixtures/vcr/chembl/test_chembl_activity_full_cycle.yaml text eol=lf -filter -diff -merge
-tests/fixtures/vcr/chembl/test_chembl_assay_full_cycle.yaml text eol=lf -filter -diff -merge
-tests/fixtures/vcr/chembl/test_chembl_molecule_full_cycle.yaml text eol=lf -filter -diff -merge
-tests/fixtures/vcr/chembl/test_chembl_publication_full_cycle.yaml text eol=lf -filter -diff -merge
-tests/fixtures/vcr/chembl/test_chembl_target_full_cycle.yaml text eol=lf -filter -diff -merge
-tests/fixtures/vcr/crossref/test_crossref_search_by_title.yaml text eol=lf -filter -diff -merge
-tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_with_query.yaml text eol=lf -filter -diff -merge
-tests/fixtures/vcr/pubchem/test_pubchem_compound_pipeline.yaml text eol=lf -filter -diff -merge
-tests/fixtures/vcr/pubmed/test_pubmed_publication_full_cycle.yaml text eol=lf -filter -diff -merge
-tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_with_query.yaml text eol=lf -filter -diff -merge
-tests/fixtures/vcr/uniprot/test_uniprot_protein_full_cycle.yaml text eol=lf -filter -diff -merge
-
-# VCR metadata sidecars are small governance payloads and must remain readable
-# text for architecture tests and review diffs.
-tests/fixtures/vcr/**/*_meta.yaml text eol=lf -filter -diff -merge
+# VCR cassettes and metadata sidecars live in git. GitHub LFS quota is
+# exhausted and will not be increased; pointer files would make replay CI
+# unreproducible. Keep YAML as regular text blobs (largest current cassette
+# is well under GitHub's 100 MiB file limit).
+tests/fixtures/vcr/**/*.yaml text eol=lf
 
 # Preserve the original bytes of this immutable RF-004 operator evidence bundle.
 # Its captured CRLF text must not be normalized during checkout or verification.

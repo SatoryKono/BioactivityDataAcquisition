@@ -124,7 +124,7 @@ async def test_semantic_scholar_fetch_search_page_swallows_collector_errors() ->
                 measure_request=lambda *_args, **_kwargs: nullcontext()
             )
             self._http_client = SimpleNamespace(
-                get_once=AsyncMock(
+                get=AsyncMock(
                     return_value=SimpleNamespace(
                         json=lambda: {"data": [{"paperId": "1"}], "next": 7}
                     )
@@ -138,7 +138,7 @@ async def test_semantic_scholar_fetch_search_page_swallows_collector_errors() ->
             return {"ua": "test"}
 
     records, nxt = await _Host()._fetch_search_page(
-        query=None, page_size=10, current_offset=0
+        query="CRISPR", page_size=10, current_offset=0
     )
     assert records == [{"paperId": "1"}]
     assert nxt == 7

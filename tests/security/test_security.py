@@ -432,6 +432,7 @@ class TestPIIHandling:
             "health_probe.py",  # OpenAlex mailto for API identification (EXC-010)
             "query_builder.py",  # OpenAlex mailto for API identification (EXC-010)
             "constants.py",  # NCBI API docstring mentions Email requirement (EXC-010)
+            "_client_retry_policy.py",  # stdlib email.utils Retry-After HTTP-date parse
         }
     )
     KNOWN_TECHNICAL_EMAIL_PATHS = frozenset(

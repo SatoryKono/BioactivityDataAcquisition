@@ -13,11 +13,11 @@ params:
 - REPO
 - BASE
 - WORK_BRANCH
-- SCOPE
+- SCOPE = full
 - MODE
 - CYCLE_COUNT
 - AUDIT_MODE
-- REQUIRE_GH_TRACKING
+- REQUIRE_GH_TRACKING = true
 - LANGUAGE
 includes:
 - fragments/git-safety.md
@@ -66,7 +66,7 @@ Do not run empty cycles "for form".
 | `WORK_BRANCH` | `fix/<audit-slug>` (never main) |
 | `SCOPE` | surface list or theme |
 | `MODE` | `audit` |
-| `CYCLE_COUNT` | `1` |
+| `CYCLE_COUNT` | `10` |
 | `AUDIT_MODE` | `full` \| `differential` |
 | `REQUIRE_GH_TRACKING` | `true` |
 | `LANGUAGE` | `ru` (code/ids/paths original) |

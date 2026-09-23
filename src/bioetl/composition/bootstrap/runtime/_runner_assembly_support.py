@@ -21,6 +21,10 @@ from bioetl.application.composite.runtime_wiring_api import (
     MergeService as _MergeService,
 )
 from bioetl.composition.occurrence_identity import create_runtime_occurrence_id
+from bioetl.infrastructure.config.settings_api import get_settings
+from bioetl.infrastructure.storage.run_report_store_adapter import (
+    FileRunReportStoreAdapter,
+)
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
@@ -118,6 +122,8 @@ def build_composite_runner_dependencies(
         manifest_id=inputs.manifest_id,
         run_ledger_service=inputs.run_ledger_service,
         clock=effective_clock,
+        run_report_store=FileRunReportStoreAdapter(),
+        report_root=get_settings().report_root,
     )
 
 

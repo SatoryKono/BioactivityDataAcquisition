@@ -95,11 +95,6 @@ class TestChemblTargetComponentPipeline(IntegrationPipelineTestCase):
                 f"{self.bronze_path}/**/*.jsonl.zstd", recursive=True
             )
 
-        # The current cassette/adapter path completes successfully but yields no
-        # materialized records. Lock the behavior explicitly until the fixture is
-        # refreshed or the pipeline is re-enabled for persisted output assertions.
-        assert runner.execution_metrics["records_fetched"] == 0
-        assert runner.execution_metrics["records_bronze"] == 0
-        assert runner.execution_metrics["records_silver"] == 0
-        assert runner.execution_metrics["records_gold"] == 0
-        assert bronze_files == []
+        assert runner.execution_metrics["records_fetched"] == 10
+        assert runner.execution_metrics["records_bronze"] == 10
+        assert bronze_files, f"No bronze files found in {self.bronze_path}"

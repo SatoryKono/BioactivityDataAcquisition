@@ -74,6 +74,7 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
                     load_pipeline_config_fn=cast(
                         Any,
                         lambda _: SimpleNamespace(
+                            pipeline_name="chembl_activity",
                             provider="chembl",
                             entity_type="activity",
                             version="2.0.0",
