@@ -3,11 +3,10 @@
 
 from __future__ import annotations
 
-import os
 import re
 import shutil as shutil  # re-exported via __all__
 import sys
-from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence, Set
+from collections.abc import Callable, Iterable, Mapping, Set
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -213,6 +212,9 @@ from memory.graph.sync_pkg.add_claim_target_relation import (
 from memory.graph.sync_pkg.add_claim_target_relation import (
     _add_claim_target_relation as _add_claim_target_relation,
 )
+from memory.graph.sync_pkg.add_claim_token_targets import (
+    _add_claim_token_targets as _add_claim_token_targets,
+)
 from memory.graph.sync_pkg.add_cli_command_surface import (
     _add_cli_command_surface as _add_cli_command_surface,
 )
@@ -231,6 +233,15 @@ from memory.graph.sync_pkg.add_cli_command_surface import (
 from memory.graph.sync_pkg.add_cli_command_surface import (
     _link_cli_command_side_effects as _link_cli_command_side_effects,
 )
+from memory.graph.sync_pkg.add_contract_doc_dependency import (
+    _add_contract_doc_dependency as _add_contract_doc_dependency,
+)
+from memory.graph.sync_pkg.add_contract_doc_dependency import (
+    _add_contract_entry_surface as _add_contract_entry_surface,
+)
+from memory.graph.sync_pkg.add_contract_doc_dependency import (
+    _contract_dependency_doc_path as _contract_dependency_doc_path,
+)
 from memory.graph.sync_pkg.add_curated_cluster_readme import (
     _add_curated_cluster_entrypoint as _add_curated_cluster_entrypoint,
 )
@@ -239,6 +250,9 @@ from memory.graph.sync_pkg.add_curated_cluster_readme import (
 )
 from memory.graph.sync_pkg.add_curated_cluster_readme import (
     _add_curated_cluster_readme as _add_curated_cluster_readme,
+)
+from memory.graph.sync_pkg.add_curated_doc_source import (
+    _add_curated_doc_source as _add_curated_doc_source,
 )
 from memory.graph.sync_pkg.add_dashboard_surface import (
     _add_curated_quality_gates as _add_curated_quality_gates,
@@ -267,11 +281,38 @@ from memory.graph.sync_pkg.add_entity_pipeline_surfaces import (
 from memory.graph.sync_pkg.add_entity_pipeline_surfaces import (
     _add_entity_pipeline_surfaces as _add_entity_pipeline_surfaces,
 )
+from memory.graph.sync_pkg.add_file_structure_zone import (
+    _add_file_structure_zone as _add_file_structure_zone,
+)
+from memory.graph.sync_pkg.add_file_structure_zone import (
+    _field_quality_index as _field_quality_index,
+)
+from memory.graph.sync_pkg.add_package_topology_decisions_and_risks import (
+    _add_package_topology_decisions_and_risks as _add_package_topology_decisions_and_risks,
+)
+from memory.graph.sync_pkg.add_pipeline_doc_edges import (
+    _add_pipeline_doc_edges as _add_pipeline_doc_edges,
+)
+from memory.graph.sync_pkg.add_policy_surface import (
+    _add_policy_artifact as _add_policy_artifact,
+)
+from memory.graph.sync_pkg.add_policy_surface import (
+    _add_policy_surface as _add_policy_surface,
+)
 from memory.graph.sync_pkg.add_port_facade_surface import (
     _add_port_facade_surface as _add_port_facade_surface,
 )
 from memory.graph.sync_pkg.add_port_facade_surface import (
     _add_protocol_port_surface as _add_protocol_port_surface,
+)
+from memory.graph.sync_pkg.add_port_surfaces import (
+    _add_port_surfaces as _add_port_surfaces,
+)
+from memory.graph.sync_pkg.add_repo_zone_directory_file import (
+    _add_repo_zone_directory_file as _add_repo_zone_directory_file,
+)
+from memory.graph.sync_pkg.add_repo_zone_directory_files import (
+    _add_repo_zone_directory_files as _add_repo_zone_directory_files,
 )
 from memory.graph.sync_pkg.add_repo_zone_file_surface import (
     _add_repo_zone_doc_artifact as _add_repo_zone_doc_artifact,
@@ -293,6 +334,15 @@ from memory.graph.sync_pkg.add_secret_requirements import (
 )
 from memory.graph.sync_pkg.add_secret_requirements import (
     _add_workflow_outputs as _add_workflow_outputs,
+)
+from memory.graph.sync_pkg.add_test_suite_surface import (
+    _add_test_artifact_surface as _add_test_artifact_surface,
+)
+from memory.graph.sync_pkg.add_test_suite_surface import (
+    _add_test_suite_surface as _add_test_suite_surface,
+)
+from memory.graph.sync_pkg.add_workflow_file_surface import (
+    _add_workflow_file_surface as _add_workflow_file_surface,
 )
 from memory.graph.sync_pkg.adr_constraint_candidates import (
     _adr_constraint_candidates as _adr_constraint_candidates,
@@ -326,6 +376,15 @@ from memory.graph.sync_pkg.alert_rule_file_payload import (
 )
 from memory.graph.sync_pkg.alert_rule_file_payload import (
     _link_workflow_job_reusable_target as _link_workflow_job_reusable_target,
+)
+from memory.graph.sync_pkg.alert_runbook_path import (
+    _add_alert_runbook_doc as _add_alert_runbook_doc,
+)
+from memory.graph.sync_pkg.alert_runbook_path import (
+    _add_governance_edges as _add_governance_edges,
+)
+from memory.graph.sync_pkg.alert_runbook_path import (
+    _alert_runbook_path as _alert_runbook_path,
 )
 from memory.graph.sync_pkg.alert_targets import (
     _RUNTIME_DIMENSIONS as _RUNTIME_DIMENSIONS,
@@ -589,6 +648,12 @@ from memory.graph.sync_pkg.batch_pipeline_names import (
 from memory.graph.sync_pkg.batch_pipeline_names import (
     _normalization_progress_payload as _normalization_progress_payload,
 )
+from memory.graph.sync_pkg.claim_target_tokens import (
+    _claim_exact_candidates as _claim_exact_candidates,
+)
+from memory.graph.sync_pkg.claim_target_tokens import (
+    _claim_target_tokens as _claim_target_tokens,
+)
 from memory.graph.sync_pkg.classify_silver_storage_fields import (
     _classify_gold_storage_fields as _classify_gold_storage_fields,
 )
@@ -661,6 +726,15 @@ from memory.graph.sync_pkg.composite_config_dependency_entries import (
 from memory.graph.sync_pkg.composite_config_dependency_entries import (
     _link_composite_seed_dependency as _link_composite_seed_dependency,
 )
+from memory.graph.sync_pkg.composite_config_paths import (
+    _add_composite_config_surface as _add_composite_config_surface,
+)
+from memory.graph.sync_pkg.composite_config_paths import (
+    _composite_config_identity as _composite_config_identity,
+)
+from memory.graph.sync_pkg.composite_config_paths import (
+    _composite_config_paths as _composite_config_paths,
+)
 from memory.graph.sync_pkg.composite_dependency_storage_ref import (
     _add_composite_dependency_surface as _add_composite_dependency_surface,
 )
@@ -729,6 +803,35 @@ from memory.graph.sync_pkg.composite_seed_storage_ref import (
 )
 from memory.graph.sync_pkg.composite_seed_storage_ref import (
     _link_composite_seed_surface as _link_composite_seed_surface,
+)
+from memory.graph.sync_pkg.contains_any import (
+    _WORKFLOW_GATE_RULES as _WORKFLOW_GATE_RULES,
+)
+from memory.graph.sync_pkg.contains_any import (
+    _add_workflow_call_entrypoint as _add_workflow_call_entrypoint,
+)
+from memory.graph.sync_pkg.contains_any import _contains_any as _contains_any
+from memory.graph.sync_pkg.contains_any import (
+    _enrich_workflow_surface as _enrich_workflow_surface,
+)
+from memory.graph.sync_pkg.contains_any import _workflow_family as _workflow_family
+from memory.graph.sync_pkg.contains_any import (
+    _workflow_job_surface_metadata as _workflow_job_surface_metadata,
+)
+from memory.graph.sync_pkg.contract_dependency_module_key import (
+    _contract_dependency_module_key as _contract_dependency_module_key,
+)
+from memory.graph.sync_pkg.contract_dependency_module_key import (
+    _link_contract_dependency_module as _link_contract_dependency_module,
+)
+from memory.graph.sync_pkg.contract_dependency_module_key import (
+    _link_contract_doc_dependencies as _link_contract_doc_dependencies,
+)
+from memory.graph.sync_pkg.contract_dependency_module_specs import (
+    _contract_dependency_doc_specs as _contract_dependency_doc_specs,
+)
+from memory.graph.sync_pkg.contract_dependency_module_specs import (
+    _contract_dependency_module_specs as _contract_dependency_module_specs,
 )
 from memory.graph.sync_pkg.contract_mapping_values import (
     _add_contract_policy_config as _add_contract_policy_config,
@@ -954,6 +1057,12 @@ from memory.graph.sync_pkg.docs_reference_allowed_prefixes import (
 from memory.graph.sync_pkg.docs_reference_allowed_prefixes import (
     _trim_docs_reference_candidate as _trim_docs_reference_candidate,
 )
+from memory.graph.sync_pkg.docs_reference_exact_candidates import (
+    _docs_reference_exact_candidates as _docs_reference_exact_candidates,
+)
+from memory.graph.sync_pkg.docs_reference_exact_candidates import (
+    _resolve_claim_targets as _resolve_claim_targets,
+)
 from memory.graph.sync_pkg.duplication_cluster_groups import (
     _add_duplication_cluster_node as _add_duplication_cluster_node,
 )
@@ -984,6 +1093,18 @@ from memory.graph.sync_pkg.empty_normalization_evidence_payload import (
 from memory.graph.sync_pkg.empty_normalization_evidence_payload import (
     _finalize_normalization_evidence_defaults as _finalize_normalization_evidence_defaults,
 )
+from memory.graph.sync_pkg.entity_config_identity import (
+    _add_composite_config_surfaces as _add_composite_config_surfaces,
+)
+from memory.graph.sync_pkg.entity_config_identity import (
+    _entity_config_identity as _entity_config_identity,
+)
+from memory.graph.sync_pkg.entity_config_paths import (
+    _add_entity_config_surface as _add_entity_config_surface,
+)
+from memory.graph.sync_pkg.entity_config_paths import (
+    _entity_config_paths as _entity_config_paths,
+)
 from memory.graph.sync_pkg.entity_pipeline_identity import (
     _add_entity_pipeline_surface as _add_entity_pipeline_surface,
 )
@@ -993,6 +1114,9 @@ from memory.graph.sync_pkg.entity_pipeline_identity import (
 from memory.graph.sync_pkg.entity_pipeline_identity import (
     _link_entity_pipeline_dependencies as _link_entity_pipeline_dependencies,
 )
+from memory.graph.sync_pkg.entity_storage_context import (
+    _entity_storage_context as _entity_storage_context,
+)
 from memory.graph.sync_pkg.entity_storage_promotion_pairs import (
     _classify_projected_storage_fields as _classify_projected_storage_fields,
 )
@@ -1001,6 +1125,12 @@ from memory.graph.sync_pkg.entity_storage_promotion_pairs import (
 )
 from memory.graph.sync_pkg.entity_storage_promotion_pairs import (
     _link_storage_layer_promotion as _link_storage_layer_promotion,
+)
+from memory.graph.sync_pkg.existing_snapshot_nodes import (
+    _existing_snapshot_nodes as _existing_snapshot_nodes,
+)
+from memory.graph.sync_pkg.existing_snapshot_nodes import (
+    _selected_alert_dashboards as _selected_alert_dashboards,
 )
 from memory.graph.sync_pkg.fast_analysis_snapshot_counts import (
     _active_critical_names as _active_critical_names,
@@ -1029,6 +1159,12 @@ from memory.graph.sync_pkg.file_structure import (
 from memory.graph.sync_pkg.file_structure import (
     _file_structure_config as _file_structure_config,
 )
+from memory.graph.sync_pkg.file_structure_zone_roots import (
+    _add_file_structure_zones as _add_file_structure_zones,
+)
+from memory.graph.sync_pkg.file_structure_zone_roots import (
+    _file_structure_zone_roots as _file_structure_zone_roots,
+)
 from memory.graph.sync_pkg.git_history import (
     _git_chunk_commit_ages as _git_chunk_commit_ages,
 )
@@ -1046,6 +1182,15 @@ from memory.graph.sync_pkg.git_history import (
 )
 from memory.graph.sync_pkg.git_history import (
     _run_git_history_subprocess as _run_git_history_subprocess,
+)
+from memory.graph.sync_pkg.governance_policy_definitions import (
+    _governance_policy_definitions as _governance_policy_definitions,
+)
+from memory.graph.sync_pkg.governance_policy_definitions import (
+    _governance_policy_spec as _governance_policy_spec,
+)
+from memory.graph.sync_pkg.governance_policy_targets import (
+    _governance_policy_targets as _governance_policy_targets,
 )
 from memory.graph.sync_pkg.governance_summary_table_specs import (
     _add_layer_topology as _add_layer_topology,
@@ -1182,6 +1327,12 @@ from memory.graph.sync_pkg.iter_normalization_evidence_updates import (
 from memory.graph.sync_pkg.iter_normalization_evidence_updates import (
     apply_normalization_evidence_only as apply_normalization_evidence_only,
 )
+from memory.graph.sync_pkg.link_composite_config_dependencies import (
+    _add_test_graph as _add_test_graph,
+)
+from memory.graph.sync_pkg.link_composite_config_dependencies import (
+    _link_composite_config_dependencies as _link_composite_config_dependencies,
+)
 from memory.graph.sync_pkg.link_composite_layer_promotions import (
     CONTROL_PLANE_LEDGER_DOCS as CONTROL_PLANE_LEDGER_DOCS,
 )
@@ -1209,6 +1360,18 @@ from memory.graph.sync_pkg.link_composite_pipeline_dependencies import (
 from memory.graph.sync_pkg.link_composite_pipeline_dependencies import (
     _link_composite_pipeline_dependencies as _link_composite_pipeline_dependencies,
 )
+from memory.graph.sync_pkg.link_contract_dependency_modules import (
+    _link_contract_dependency_docs as _link_contract_dependency_docs,
+)
+from memory.graph.sync_pkg.link_contract_dependency_modules import (
+    _link_contract_dependency_modules as _link_contract_dependency_modules,
+)
+from memory.graph.sync_pkg.link_contract_provider import (
+    _add_contract_registry_artifact as _add_contract_registry_artifact,
+)
+from memory.graph.sync_pkg.link_contract_provider import (
+    _link_contract_provider as _link_contract_provider,
+)
 from memory.graph.sync_pkg.link_curated_doc_artifact import (
     _add_summary_identifiers as _add_summary_identifiers,
 )
@@ -1233,6 +1396,21 @@ from memory.graph.sync_pkg.link_curated_execution_script import (
 from memory.graph.sync_pkg.link_curated_execution_script import (
     _link_curated_execution_script as _link_curated_execution_script,
 )
+from memory.graph.sync_pkg.link_duplication_override_relations import (
+    _duplication_promotion_target as _duplication_promotion_target,
+)
+from memory.graph.sync_pkg.link_duplication_override_relations import (
+    _emit_duplication_clusters as _emit_duplication_clusters,
+)
+from memory.graph.sync_pkg.link_duplication_override_relations import (
+    _link_duplication_override_relations as _link_duplication_override_relations,
+)
+from memory.graph.sync_pkg.link_entity_storage_promotions import (
+    _link_entity_storage_promotions as _link_entity_storage_promotions,
+)
+from memory.graph.sync_pkg.link_relation_backed_structure_for_relat import (
+    _link_relation_backed_structure_for_relation as _link_relation_backed_structure_for_relation,
+)
 from memory.graph.sync_pkg.link_run_instance_dependencies import (
     _add_runtime_state_surface as _add_runtime_state_surface,
 )
@@ -1253,6 +1431,21 @@ from memory.graph.sync_pkg.link_runtime_evidence_support import (
 )
 from memory.graph.sync_pkg.link_runtime_evidence_support import (
     _link_runtime_evidence_support as _link_runtime_evidence_support,
+)
+from memory.graph.sync_pkg.link_runtime_state_run_and_pipeline import (
+    _link_runtime_state_dependencies as _link_runtime_state_dependencies,
+)
+from memory.graph.sync_pkg.link_runtime_state_run_and_pipeline import (
+    _link_runtime_state_run_and_pipeline as _link_runtime_state_run_and_pipeline,
+)
+from memory.graph.sync_pkg.link_source_backed_file_node import (
+    _link_relation_backed_file_structure as _link_relation_backed_file_structure,
+)
+from memory.graph.sync_pkg.link_source_backed_file_node import (
+    _link_source_backed_file_node as _link_source_backed_file_node,
+)
+from memory.graph.sync_pkg.link_source_backed_node_structure import (
+    _link_source_backed_node_structure as _link_source_backed_node_structure,
 )
 from memory.graph.sync_pkg.live_queries import (
     _audit_live_summary as _audit_live_summary,
@@ -1324,6 +1517,12 @@ from memory.graph.sync_pkg.mapping_io import (
 )
 from memory.graph.sync_pkg.mapping_io import _read_json as _read_json
 from memory.graph.sync_pkg.mapping_io import _read_yaml as _read_yaml
+from memory.graph.sync_pkg.markdown_headings import (
+    _markdown_headings as _markdown_headings,
+)
+from memory.graph.sync_pkg.markdown_headings import (
+    _resolve_docs_reference_target as _resolve_docs_reference_target,
+)
 from memory.graph.sync_pkg.merge_field_validation_item import (
     _add_schema_field_surface as _add_schema_field_surface,
 )
@@ -1365,6 +1564,9 @@ from memory.graph.sync_pkg.merge_storage_layer_config import (
 )
 from memory.graph.sync_pkg.merge_storage_layer_config import (
     _storage_schema_properties as _storage_schema_properties,
+)
+from memory.graph.sync_pkg.method_surface_promotion_target import (
+    _method_surface_promotion_target as _method_surface_promotion_target,
 )
 from memory.graph.sync_pkg.neo4j_statements import (
     DEFAULT_INGEST_WAVE as DEFAULT_INGEST_WAVE,
@@ -1423,6 +1625,12 @@ from memory.graph.sync_pkg.normalization_statement import (
 )
 from memory.graph.sync_pkg.normalization_statement import (
     _normalization_statement as _normalization_statement,
+)
+from memory.graph.sync_pkg.override_target_classes import (
+    _duplication_family_by_name as _duplication_family_by_name,
+)
+from memory.graph.sync_pkg.override_target_classes import (
+    _override_target_classes as _override_target_classes,
 )
 from memory.graph.sync_pkg.package_topology_summary_specs import (
     _add_governance_decisions_and_risks as _add_governance_decisions_and_risks,
@@ -1541,6 +1749,27 @@ from memory.graph.sync_pkg.promotion_targets_from_payload import (
 from memory.graph.sync_pkg.promotion_targets_from_payload import (
     _retirement_analysis_config as _retirement_analysis_config,
 )
+from memory.graph.sync_pkg.provider_config_paths import (
+    _add_provider_surface as _add_provider_surface,
+)
+from memory.graph.sync_pkg.provider_config_paths import (
+    _provider_config_paths as _provider_config_paths,
+)
+from memory.graph.sync_pkg.provider_config_properties import (
+    _add_entity_config_surfaces as _add_entity_config_surfaces,
+)
+from memory.graph.sync_pkg.provider_config_properties import (
+    _provider_config_properties as _provider_config_properties,
+)
+from memory.graph.sync_pkg.published_contract_artifact_paths import (
+    _link_contract_module_dependencies as _link_contract_module_dependencies,
+)
+from memory.graph.sync_pkg.published_contract_artifact_paths import (
+    _published_contract_artifact_key as _published_contract_artifact_key,
+)
+from memory.graph.sync_pkg.published_contract_artifact_paths import (
+    _published_contract_artifact_paths as _published_contract_artifact_paths,
+)
 from memory.graph.sync_pkg.python_paths import INIT_PY as INIT_PY
 from memory.graph.sync_pkg.python_paths import MAIN_PY as MAIN_PY
 from memory.graph.sync_pkg.python_paths import (
@@ -1626,6 +1855,12 @@ from memory.graph.sync_pkg.relation_requirement_keys import (
 )
 from memory.graph.sync_pkg.relation_requirement_keys import (
     snapshot_invariant_issues as snapshot_invariant_issues,
+)
+from memory.graph.sync_pkg.repo_zone_for_path import (
+    _add_repo_zone_file_structure as _add_repo_zone_file_structure,
+)
+from memory.graph.sync_pkg.repo_zone_for_path import (
+    _repo_zone_for_path as _repo_zone_for_path,
 )
 from memory.graph.sync_pkg.resolved_base_classes import (
     _link_duplication_override_methods as _link_duplication_override_methods,
@@ -1888,6 +2123,12 @@ from memory.graph.sync_pkg.snapshotrelationindex import (
 from memory.graph.sync_pkg.snapshotrelationindex import (
     _SnapshotRelationIndex as _SnapshotRelationIndex,
 )
+from memory.graph.sync_pkg.sorted_governance_targets import (
+    _governance_policy_specs as _governance_policy_specs,
+)
+from memory.graph.sync_pkg.sorted_governance_targets import (
+    _sorted_governance_targets as _sorted_governance_targets,
+)
 from memory.graph.sync_pkg.source_backed_path_kind import (
     _link_source_backed_directory_structure as _link_source_backed_directory_structure,
 )
@@ -1986,6 +2227,10 @@ from memory.graph.sync_pkg.sync_run_id import (
     _verify_sync_snapshot as _verify_sync_snapshot,
 )
 from memory.graph.sync_pkg.sync_run_id import sync_snapshot as sync_snapshot
+from memory.graph.sync_pkg.test_suite_name import (
+    _link_test_artifact_scope as _link_test_artifact_scope,
+)
+from memory.graph.sync_pkg.test_suite_name import _test_suite_name as _test_suite_name
 from memory.graph.sync_pkg.transport import (
     _DEFAULT_NEO4J_AUDIT_DATABASE as _DEFAULT_NEO4J_AUDIT_DATABASE,
 )
@@ -2007,6 +2252,36 @@ from memory.graph.sync_pkg.transport import derive_http_uri as derive_http_uri
 from memory.graph.sync_pkg.transport import load_repo_env as load_repo_env
 from memory.graph.sync_pkg.transport import (
     resolve_neo4j_connection as resolve_neo4j_connection,
+)
+from memory.graph.sync_pkg.walk_repo_zone_file_structure import (
+    _walk_repo_zone_file_structure as _walk_repo_zone_file_structure,
+)
+from memory.graph.sync_pkg.walk_repo_zone_root import (
+    _walk_repo_zone_root as _walk_repo_zone_root,
+)
+from memory.graph.sync_pkg.workflow_environment_mapping_name import (
+    _sorted_string_items as _sorted_string_items,
+)
+from memory.graph.sync_pkg.workflow_environment_mapping_name import (
+    _workflow_environment_mapping_name as _workflow_environment_mapping_name,
+)
+from memory.graph.sync_pkg.workflow_environment_mapping_name import (
+    _workflow_matrix_axes as _workflow_matrix_axes,
+)
+from memory.graph.sync_pkg.workflow_environment_mapping_name import (
+    _workflow_matrix_variants as _workflow_matrix_variants,
+)
+from memory.graph.sync_pkg.workflow_family_rules import (
+    _WORKFLOW_FAMILY_RULES as _WORKFLOW_FAMILY_RULES,
+)
+from memory.graph.sync_pkg.workflow_family_rules import (
+    _workflow_environment_name as _workflow_environment_name,
+)
+from memory.graph.sync_pkg.workflow_family_rules import (
+    _workflow_on_payload as _workflow_on_payload,
+)
+from memory.graph.sync_pkg.workflow_family_rules import (
+    _workflow_trigger_names as _workflow_trigger_names,
 )
 from memory.graph.sync_pkg.workflow_matrix_axis_values import (
     _append_workflow_matrix_include_variants as _append_workflow_matrix_include_variants,
@@ -2031,6 +2306,27 @@ from memory.graph.sync_pkg.workflow_matrix_axis_values import (
 )
 from memory.graph.sync_pkg.workflow_matrix_axis_values import (
     _workflow_secret_refs as _workflow_secret_refs,
+)
+from memory.graph.sync_pkg.workflow_matrix_payload import (
+    _workflow_matrix_base_axes as _workflow_matrix_base_axes,
+)
+from memory.graph.sync_pkg.workflow_matrix_payload import (
+    _workflow_matrix_payload as _workflow_matrix_payload,
+)
+from memory.graph.sync_pkg.workflow_matrix_payload import (
+    _workflow_matrix_variants_with_includes as _workflow_matrix_variants_with_includes,
+)
+from memory.graph.sync_pkg.workflow_module_script_targets import (
+    _add_workflow_job_surface as _add_workflow_job_surface,
+)
+from memory.graph.sync_pkg.workflow_module_script_targets import (
+    _workflow_module_script_targets as _workflow_module_script_targets,
+)
+from memory.graph.sync_pkg.workflow_module_script_targets import (
+    _workflow_quality_gates as _workflow_quality_gates,
+)
+from memory.graph.sync_pkg.workflow_module_script_targets import (
+    _workflow_repo_path_targets as _workflow_repo_path_targets,
 )
 from memory.graph.sync_pkg.workflow_output_expression import (
     _add_workflow_surface as _add_workflow_surface,
@@ -2127,77 +2423,11 @@ def _add_curated_docs(
         _add_curated_doc_source(snapshot, root, project, today, entry)
 
 
-def _add_curated_doc_source(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    entry: dict[str, str],
-) -> None:
-    source_name = entry["name"]
-    source_path = entry["path"]
-    summary = entry["summary"]
-    source_node = snapshot.add_node(
-        "doc_source_surface",
-        source_name,
-        summary=summary,
-        source_path=source_path,
-        source_kind="doc_surface",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    snapshot.add_relation(
-        project, "HAS_DOC_SOURCE_SURFACE", source_node, provenance="curated_docs"
-    )
-    _link_curated_doc_artifact(
-        snapshot,
-        root,
-        source_node,
-        source_path=source_path,
-        summary=summary,
-        today=today,
-    )
-
-
 def _add_decisions_and_risks(
     snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str
 ) -> None:
     _add_package_topology_decisions_and_risks(snapshot, root, project, today)
     _add_governance_decisions_and_risks(snapshot, root, project, today)
-
-
-def _add_package_topology_decisions_and_risks(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-) -> None:
-    summary_path = (
-        root / "docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md"
-    )
-    if not summary_path.is_file():
-        return
-    package_summary, package_doc = _evidence_summary_doc(
-        snapshot,
-        root,
-        today,
-        path="docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md",
-        summary="Accepted package topology decisions and risks.",
-    )
-    source_path = _rel_path(root, package_summary)
-    for identifier_kind, pattern, summary in _package_topology_summary_specs():
-        _add_summary_identifiers(
-            snapshot,
-            project,
-            today,
-            doc=package_doc,
-            provenance="package_topology_summary",
-            identifier_kind=identifier_kind,
-            matches=_summary_identifier_matches(package_summary, pattern),
-            summary=summary,
-            source_path=source_path,
-        )
 
 
 def _add_provider_and_config_graph(
@@ -2229,349 +2459,6 @@ def _add_provider_surfaces(
             provider_nodes=provider_nodes,
         )
     return provider_nodes
-
-
-def _provider_config_paths(providers_root: Path) -> tuple[Path, ...]:
-    return tuple(sorted(providers_root.glob(YAML_FILE_GLOB)))
-
-
-def _add_provider_surface(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    provider_path: Path,
-    *,
-    provider_nodes: dict[str, NodeKey],
-) -> None:
-    payload = _read_yaml(provider_path)
-    provider_name = str(payload.get("provider", provider_path.stem))
-    auth_type, pagination = _provider_config_properties(payload.get("source", {}))
-    provider = snapshot.add_node(
-        "provider_surface",
-        provider_name,
-        summary=f"Provider surface for `{provider_name}`.",
-        source_path=_rel_path(root, provider_path),
-        source_kind="provider_config",
-        auth_type=auth_type,
-        pagination_strategy=pagination,
-        entity_count=len(_as_iterable(payload.get("entities"))) or None,
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    provider_nodes[provider_name] = provider
-    snapshot.add_relation(
-        project, "HAS_PROVIDER", provider, provenance="provider_config"
-    )
-    _link_config_artifact(
-        snapshot,
-        provider,
-        path=_rel_path(root, provider_path),
-        summary=f"Provider config for `{provider_name}`.",
-        source_kind="provider_config",
-        today=today,
-        provenance="provider_config",
-    )
-
-
-def _provider_config_properties(
-    source_payload: object,
-) -> tuple[str | None, str | None]:
-    auth_type = None
-    pagination = None
-    provider_config = source_payload
-    if isinstance(provider_config, dict):
-        provider_config = provider_config.get("provider_config", provider_config)
-        if isinstance(provider_config, dict):
-            auth_type = _optional_text(provider_config.get("auth_type"))
-            pagination_data = provider_config.get("pagination")
-            if isinstance(pagination_data, dict):
-                pagination = _optional_text(pagination_data.get("strategy"))
-    return auth_type, pagination
-
-
-def _add_entity_config_surfaces(
-    snapshot: GraphSnapshot,
-    root: Path,
-    today: str,
-    provider_nodes: dict[str, NodeKey],
-) -> dict[str, NodeKey]:
-    entities_root = root / "configs" / "entities"
-    entity_nodes: dict[str, NodeKey] = {}
-    for entity_path in _entity_config_paths(entities_root):
-        _add_entity_config_surface(
-            snapshot,
-            root,
-            today,
-            entity_path,
-            provider_nodes=provider_nodes,
-            entity_nodes=entity_nodes,
-        )
-    return entity_nodes
-
-
-def _entity_config_paths(entities_root: Path) -> tuple[Path, ...]:
-    return tuple(sorted(entities_root.rglob(YAML_FILE_GLOB)))
-
-
-def _add_entity_config_surface(
-    snapshot: GraphSnapshot,
-    root: Path,
-    today: str,
-    entity_path: Path,
-    *,
-    provider_nodes: dict[str, NodeKey],
-    entity_nodes: dict[str, NodeKey],
-) -> None:
-    payload = _read_yaml(entity_path)
-    provider_name, entity_name, node_name, summary = _entity_config_identity(
-        entity_path, payload
-    )
-    entity = snapshot.add_node(
-        "entity_config",
-        node_name,
-        summary=summary,
-        source_path=_rel_path(root, entity_path),
-        source_kind="entity_config",
-        provider=provider_name,
-        entity=entity_name,
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    entity_nodes[node_name] = entity
-    provider = provider_nodes.get(provider_name)
-    if provider is not None:
-        snapshot.add_relation(provider, "DEFINES", entity, provenance="entity_config")
-    _link_config_artifact(
-        snapshot,
-        entity,
-        path=_rel_path(root, entity_path),
-        summary=f"Entity config for `{provider_name}/{entity_name}`.",
-        source_kind="entity_config",
-        today=today,
-        provenance="entity_config",
-    )
-
-
-def _entity_config_identity(
-    entity_path: Path,
-    payload: dict[str, object],
-) -> tuple[str, str, str, str]:
-    provider_name = str(payload.get("provider", entity_path.parent.name))
-    entity_name = str(payload.get("entity", entity_path.stem))
-    pipeline = payload.get("pipeline", {})
-    pipeline_name = None
-    pipeline_description = None
-    if isinstance(pipeline, dict):
-        pipeline_name = pipeline.get("pipeline_name")
-        pipeline_description = pipeline.get("description")
-    node_name = str(pipeline_name or f"{provider_name}_{entity_name}")
-    summary = str(
-        pipeline_description
-        or f"Entity pipeline config for `{provider_name}/{entity_name}`."
-    )
-    return provider_name, entity_name, node_name, summary
-
-
-def _add_composite_config_surfaces(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    entity_nodes: dict[str, NodeKey],
-) -> None:
-    composites_root = root / "configs" / "composites"
-    for composite_path in _composite_config_paths(composites_root):
-        _add_composite_config_surface(
-            snapshot,
-            root,
-            project,
-            today,
-            composite_path,
-            entity_nodes=entity_nodes,
-        )
-
-
-def _composite_config_paths(composites_root: Path) -> tuple[Path, ...]:
-    return tuple(sorted(composites_root.glob(YAML_FILE_GLOB)))
-
-
-def _composite_config_identity(
-    composite_path: Path,
-    payload: dict[str, object],
-) -> tuple[str, str, object, str | None]:
-    composite_payload = payload.get("composite", {})
-    composite_name = composite_path.stem
-    summary = f"Composite pipeline config `{composite_name}`."
-    seed_pipeline = None
-    if isinstance(composite_payload, dict):
-        composite_name = str(composite_payload.get("name", composite_name))
-        summary = f"Composite pipeline config `{composite_name}`."
-        seed = composite_payload.get("seed")
-        if isinstance(seed, dict):
-            seed_pipeline = seed.get("pipeline")
-    return composite_name, summary, composite_payload, seed_pipeline
-
-
-def _add_composite_config_surface(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    composite_path: Path,
-    *,
-    entity_nodes: dict[str, NodeKey],
-) -> None:
-    payload = _read_yaml(composite_path)
-    composite_name, summary, composite_payload, seed_pipeline = (
-        _composite_config_identity(
-            composite_path,
-            payload,
-        )
-    )
-    composite_node = snapshot.add_node(
-        "composite_config",
-        composite_name,
-        summary=summary,
-        source_path=_rel_path(root, composite_path),
-        source_kind="composite_config",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    snapshot.add_relation(
-        project, "HAS_COMPOSITE", composite_node, provenance="composite_config"
-    )
-    _link_config_artifact(
-        snapshot,
-        composite_node,
-        path=_rel_path(root, composite_path),
-        summary=summary,
-        source_kind="composite_config",
-        today=today,
-        provenance="composite_config",
-    )
-    _link_composite_config_dependencies(
-        snapshot,
-        composite_node,
-        composite_payload,
-        seed_pipeline=seed_pipeline,
-        entity_nodes=entity_nodes,
-    )
-
-
-def _link_composite_config_dependencies(
-    snapshot: GraphSnapshot,
-    composite_node: NodeKey,
-    composite_payload: object,
-    *,
-    seed_pipeline: str | None,
-    entity_nodes: dict[str, NodeKey],
-) -> None:
-    _link_composite_seed_dependency(
-        snapshot, composite_node, seed_pipeline=seed_pipeline, entity_nodes=entity_nodes
-    )
-    for dependency in _composite_config_dependency_entries(composite_payload):
-        _link_composite_dependency(snapshot, composite_node, dependency, entity_nodes)
-
-
-def _add_test_graph(
-    snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str
-) -> None:
-    tests_root = root / "tests"
-    for suite_dir, suite_name in TEST_SURFACES.items():
-        _add_test_suite_surface(
-            snapshot, project, today, suite_dir=suite_dir, suite_name=suite_name
-        )
-
-    for test_path in sorted(tests_root.rglob("test_*.py")):
-        _add_test_artifact_surface(snapshot, root, today, test_path)
-
-
-def _add_test_suite_surface(
-    snapshot: GraphSnapshot,
-    project: NodeKey,
-    today: str,
-    *,
-    suite_dir: str,
-    suite_name: str,
-) -> None:
-    suite = snapshot.add_node(
-        "test_surface",
-        suite_name,
-        summary=f"`tests/{suite_dir}/` coverage surface.",
-        source_path=f"tests/{suite_dir}",
-        source_kind="test_surface",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    snapshot.add_relation(project, "HAS_TEST_SURFACE", suite, provenance="test_graph")
-
-
-def _add_test_artifact_surface(
-    snapshot: GraphSnapshot,
-    root: Path,
-    today: str,
-    test_path: Path,
-) -> None:
-    relative_path = _rel_path(root, test_path)
-    parts = Path(relative_path).parts
-    suite_name = _test_suite_name(parts)
-    if suite_name is None:
-        return
-    suite_dir = parts[1]
-    artifact = snapshot.add_node(
-        "test_artifact",
-        relative_path,
-        summary=f"Test artifact `{relative_path}`.",
-        source_path=relative_path,
-        source_kind="test_artifact",
-        suite=suite_dir,
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    snapshot.add_relation(
-        NodeKey("test_surface", suite_name),
-        "CONTAINS",
-        artifact,
-        provenance="test_graph",
-    )
-    _link_test_artifact_scope(snapshot, artifact, parts)
-
-
-def _test_suite_name(parts: tuple[str, ...]) -> str | None:
-    if len(parts) < 2:
-        return None
-    suite_dir = parts[1]
-    return TEST_SURFACES.get(suite_dir)
-
-
-def _link_test_artifact_scope(
-    snapshot: GraphSnapshot, artifact: NodeKey, parts: tuple[str, ...]
-) -> None:
-    layer_name = parts[2] if len(parts) > 2 and parts[2] in KNOWN_LAYERS else None
-    if layer_name is None:
-        return
-    snapshot.add_relation(
-        artifact,
-        "TESTS_LAYER",
-        NodeKey("layer_family", layer_name),
-        provenance="test_graph",
-    )
-    if len(parts) <= 4:
-        return
-    family_key = NodeKey("package_family", f"{layer_name}/{parts[3]}")
-    if family_key in snapshot.nodes:
-        snapshot.add_relation(
-            artifact,
-            "TESTS_PACKAGE_FAMILY",
-            family_key,
-            provenance="test_graph",
-        )
 
 
 def _add_policy_surfaces(
@@ -2616,41 +2503,6 @@ def _policy_surface_context(
     return PolicySurfaceContext(
         policy=_add_policy_surface(snapshot, policy_payload, today),
         artifact=_add_policy_artifact(snapshot, policy_payload, today),
-    )
-
-
-def _add_policy_surface(
-    snapshot: GraphSnapshot,
-    policy_payload: dict[str, object],
-    today: str,
-) -> NodeKey:
-    return snapshot.add_node(
-        "policy_surface",
-        str(policy_payload["name"]),
-        summary=str(policy_payload["summary"]),
-        source_path=str(policy_payload["source_path"]),
-        source_kind="repo_policy_surface",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-
-
-def _add_policy_artifact(
-    snapshot: GraphSnapshot,
-    policy_payload: dict[str, object],
-    today: str,
-) -> NodeKey:
-    source_path = str(policy_payload["source_path"])
-    return snapshot.add_node(
-        str(policy_payload["artifact_label"]),
-        source_path,
-        summary=str(policy_payload["summary"]),
-        source_path=source_path,
-        source_kind="policy_artifact",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
     )
 
 
@@ -2757,188 +2609,6 @@ def _impact_analysis_context(
     return port_nodes, adapter_nodes, contract_nodes, pipeline_nodes
 
 
-def _repo_zone_for_path(
-    source_path_value: str, zone_roots: dict[str, tuple[str, ...]]
-) -> str | None:
-    return next(
-        (
-            zone_name
-            for zone_name, relative_roots in zone_roots.items()
-            if any(
-                source_path_value == zone_root
-                or source_path_value.startswith(f"{zone_root}/")
-                for zone_root in relative_roots
-            )
-        ),
-        None,
-    )
-
-
-def _add_repo_zone_file_structure(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    zone_name: str,
-    relative_roots: tuple[str, ...],
-    config: dict[str, object],
-) -> None:
-    zone = snapshot.add_node(
-        "repo_zone",
-        zone_name,
-        summary=f"Primary repository zone `{zone_name}`.",
-        source_kind="file_structure_zone",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    snapshot.add_relation(project, "HAS_REPO_ZONE", zone, provenance="file_structure")
-
-    for relative_root in relative_roots:
-        _walk_repo_zone_root(
-            snapshot,
-            root,
-            project,
-            zone,
-            today,
-            zone_name=zone_name,
-            relative_root=relative_root,
-            config=config,
-        )
-
-
-def _walk_repo_zone_root(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    zone: NodeKey,
-    today: str,
-    *,
-    zone_name: str,
-    relative_root: str,
-    config: dict[str, object],
-) -> None:
-    zone_root = root / relative_root
-    if not zone_root.is_dir():
-        return
-    _walk_repo_zone_file_structure(
-        snapshot,
-        root,
-        project,
-        zone,
-        today,
-        zone_name=zone_name,
-        relative_root=relative_root,
-        zone_root=zone_root,
-        config=config,
-    )
-
-
-def _walk_repo_zone_file_structure(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    zone: NodeKey,
-    today: str,
-    *,
-    zone_name: str,
-    relative_root: str,
-    zone_root: Path,
-    config: dict[str, object],
-) -> None:
-    for current_dir, dirnames, filenames in os.walk(zone_root):
-        current_path = Path(current_dir)
-        relative_dir = _rel_path(root, current_path)
-        if _is_excluded_file_structure_path(relative_dir, config):
-            dirnames[:] = []
-            filenames[:] = []
-            continue
-        dirnames[:] = _included_file_structure_dirs(
-            root, current_path, dirnames, config
-        )
-        directory = _add_repo_zone_directory_surface(
-            snapshot,
-            root,
-            zone,
-            today,
-            zone_name=zone_name,
-            relative_root=relative_root,
-            current_path=current_path,
-            relative_dir=relative_dir,
-        )
-        _add_repo_zone_directory_files(
-            snapshot,
-            root,
-            project,
-            directory,
-            current_path,
-            filenames,
-            today,
-            zone_name=zone_name,
-            config=config,
-        )
-
-
-def _add_repo_zone_directory_files(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    directory: NodeKey,
-    current_path: Path,
-    filenames: list[str],
-    today: str,
-    *,
-    zone_name: str,
-    config: dict[str, object],
-) -> None:
-    for filename in sorted(filenames):
-        _add_repo_zone_directory_file(
-            snapshot,
-            root,
-            project,
-            directory,
-            current_path,
-            filename,
-            today,
-            zone_name=zone_name,
-            config=config,
-        )
-
-
-def _add_repo_zone_directory_file(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    directory: NodeKey,
-    current_path: Path,
-    filename: str,
-    today: str,
-    *,
-    zone_name: str,
-    config: dict[str, object],
-) -> None:
-    file_path = current_path / filename
-    relative_file = _rel_path(root, file_path)
-    if _is_excluded_file_structure_path(relative_file, config):
-        return
-    file_surface = _add_repo_zone_file_surface(
-        snapshot,
-        directory,
-        relative_file,
-        today,
-        zone_name=zone_name,
-        filename=filename,
-    )
-    _add_repo_zone_doc_artifact(
-        snapshot,
-        project,
-        file_surface,
-        relative_file,
-        today,
-        zone_name=zone_name,
-    )
-
-
 def _link_source_backed_file_structure(
     snapshot: GraphSnapshot,
     root: Path,
@@ -2961,151 +2631,6 @@ def _link_source_backed_file_structure(
         )
 
 
-def _link_source_backed_node_structure(
-    snapshot: GraphSnapshot,
-    root: Path,
-    node: GraphNode,
-    *,
-    source_backed_labels: set[str],
-    path_kind_cache: dict[str, str | None],
-    today: str,
-    zone_roots: dict[str, tuple[str, ...]],
-    config: dict[str, object],
-) -> None:
-    if node.key.label not in source_backed_labels:
-        return
-    source_path_value = node.properties.get("source_path")
-    if not isinstance(source_path_value, str) or not source_path_value:
-        return
-    if _is_excluded_file_structure_path(source_path_value, config):
-        return
-
-    path_kind = _source_backed_path_kind(snapshot, source_path_value, path_kind_cache)
-    if path_kind == "directory":
-        _link_source_backed_directory_structure(
-            snapshot,
-            node.key,
-            source_path_value=source_path_value,
-            config=config,
-        )
-        return
-    if path_kind != "file":
-        return
-    _link_source_backed_file_node(
-        snapshot,
-        root,
-        node.key,
-        root / source_path_value,
-        source_path_value=source_path_value,
-        today=today,
-        zone_roots=zone_roots,
-        config=config,
-    )
-
-
-def _link_source_backed_file_node(
-    snapshot: GraphSnapshot,
-    root: Path,
-    node_key: NodeKey,
-    source_path: Path,
-    *,
-    source_path_value: str,
-    today: str,
-    zone_roots: dict[str, tuple[str, ...]],
-    config: dict[str, object],
-) -> None:
-    parent_relative = _rel_path(root, source_path.parent)
-    file_surface = snapshot.add_node(
-        "file_surface",
-        source_path_value,
-        summary=f"Primary repository file `{source_path_value}`.",
-        source_path=source_path_value,
-        source_kind="file_structure_file",
-        repo_zone=_repo_zone_for_path(source_path_value, zone_roots),
-        suffix=source_path.suffix,
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    directory_key = NodeKey("directory_surface", parent_relative)
-    if directory_key in snapshot.nodes:
-        snapshot.add_relation(
-            directory_key, "CONTAINS", file_surface, provenance="file_structure"
-        )
-        snapshot.add_relation(
-            directory_key, "HOUSES", node_key, provenance="file_structure"
-        )
-    for promoted_hub in _promoted_directory_hubs(parent_relative, config):
-        hub_key = NodeKey("directory_surface", promoted_hub)
-        if hub_key in snapshot.nodes:
-            snapshot.add_relation(
-                hub_key, "HOUSES", node_key, provenance="file_structure"
-            )
-    for supplemental_hub in _supplemental_directory_hubs_for_node(
-        node_key, source_path_value
-    ):
-        hub_key = NodeKey("directory_surface", supplemental_hub)
-        snapshot.add_relation(
-            hub_key, "CONTAINS", file_surface, provenance="file_structure_promoted"
-        )
-        snapshot.add_relation(
-            hub_key, "HOUSES", node_key, provenance="file_structure_promoted"
-        )
-    snapshot.add_relation(file_surface, "BACKS", node_key, provenance="file_structure")
-
-
-def _link_relation_backed_file_structure(
-    snapshot: GraphSnapshot,
-    root: Path,
-    config: dict[str, object],
-) -> None:
-    relation_backed_types = _relation_backed_file_structure_types()
-    file_backed_labels = _relation_backed_file_structure_labels()
-    for relation in tuple(snapshot.relations.values()):
-        _link_relation_backed_structure_for_relation(
-            snapshot,
-            root,
-            relation,
-            relation_backed_types=relation_backed_types,
-            file_backed_labels=file_backed_labels,
-            config=config,
-        )
-
-
-def _link_relation_backed_structure_for_relation(
-    snapshot: GraphSnapshot,
-    root: Path,
-    relation: GraphRelation,
-    *,
-    relation_backed_types: set[str],
-    file_backed_labels: set[str],
-    config: dict[str, object],
-) -> None:
-    if (
-        relation.relation_type not in relation_backed_types
-        or relation.target.label not in file_backed_labels
-    ):
-        return
-    target_node = snapshot.nodes.get(relation.target)
-    if target_node is None:
-        return
-    source_path_value = target_node.properties.get("source_path")
-    if not isinstance(source_path_value, str) or not source_path_value:
-        return
-    if _is_excluded_file_structure_path(source_path_value, config):
-        return
-
-    parent_relative = _relation_backed_parent_relative(root, source_path_value)
-    if parent_relative is None:
-        return
-    _link_relation_backed_directory_housing(
-        snapshot,
-        relation.source,
-        parent_relative=parent_relative,
-        config=config,
-    )
-
-
 def _add_file_structure_surfaces(
     snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str
 ) -> None:
@@ -3126,69 +2651,6 @@ def _materialize_file_structure(
     _add_file_structure_zones(snapshot, root, project, today, zone_roots, config)
     _link_source_backed_file_structure(snapshot, root, today, zone_roots, config)
     _link_relation_backed_file_structure(snapshot, root, config)
-
-
-def _file_structure_zone_roots(config: dict[str, object]) -> dict[str, tuple[str, ...]]:
-    raw_zones = config.get("repo_zones")
-    if not isinstance(raw_zones, dict):
-        return {}
-    return {
-        str(name): tuple(_as_string_list(paths)) for name, paths in raw_zones.items()
-    }
-
-
-def _add_file_structure_zones(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    zone_roots: dict[str, tuple[str, ...]],
-    config: dict[str, object],
-) -> None:
-    for zone_name, relative_roots in zone_roots.items():
-        _add_file_structure_zone(
-            snapshot,
-            root,
-            project,
-            today,
-            zone_name,
-            relative_roots,
-            config,
-        )
-
-
-def _add_file_structure_zone(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    zone_name: str,
-    relative_roots: tuple[str, ...],
-    config: dict[str, object],
-) -> None:
-    _add_repo_zone_file_structure(
-        snapshot,
-        root,
-        project,
-        today,
-        zone_name,
-        relative_roots,
-        config,
-    )
-
-
-def _field_quality_index(payload: dict[str, object]) -> dict[str, dict[str, JsonValue]]:
-    quality_payload = _as_mapping(payload.get("quality"))
-    index: dict[str, dict[str, JsonValue]] = {}
-    field_validations = quality_payload.get("entity_field_validations")
-    if isinstance(field_validations, list):
-        for item in field_validations:
-            _merge_field_validation_item(index, item)
-    key_nullability = quality_payload.get("key_nullability")
-    if isinstance(key_nullability, list):
-        for item in key_nullability:
-            _merge_key_nullability_item(index, item)
-    return index
 
 
 def _add_entity_layer_field_nodes(
@@ -3382,36 +2844,6 @@ def _add_entity_storage_layer(
     )
 
 
-def _link_entity_storage_promotions(
-    snapshot: GraphSnapshot,
-    layer_nodes: dict[str, NodeKey],
-    field_nodes_by_layer: dict[str, dict[str, NodeKey]],
-) -> None:
-    bronze_fields = field_nodes_by_layer.get("bronze", {})
-    silver_fields = field_nodes_by_layer.get("silver", {})
-    gold_fields = field_nodes_by_layer.get("gold", {})
-    for (
-        source_name,
-        target_name,
-        source_fields,
-        target_fields,
-    ) in _entity_storage_promotion_pairs(
-        layer_nodes,
-        bronze_fields=bronze_fields,
-        silver_fields=silver_fields,
-        gold_fields=gold_fields,
-    ):
-        _link_storage_layer_promotion(
-            snapshot,
-            layer_nodes[source_name],
-            layer_nodes[target_name],
-            source_fields,
-            target_fields,
-        )
-    if "silver" in layer_nodes and "gold" in layer_nodes:
-        _classify_projected_storage_fields(snapshot, silver_fields, gold_fields)
-
-
 def _add_storage_data_surfaces(
     snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str
 ) -> None:
@@ -3470,46 +2902,6 @@ def _add_entity_storage_data_surfaces(
         _link_entity_storage_promotions(snapshot, layer_nodes, field_nodes_by_layer)
 
 
-def _entity_storage_context(
-    root: Path,
-    entity_path: Path,
-    payload: dict[str, object],
-    *,
-    today: str,
-    base_payload: dict[str, object],
-) -> tuple[
-    EntityPipelineContext,
-    dict[str, object],
-    dict[str, dict[str, JsonValue]],
-]:
-    provider_name = str(payload.get("provider", entity_path.parent.name))
-    entity_name = str(payload.get("entity", entity_path.stem))
-    pipeline_payload = _as_mapping(payload.get("pipeline"))
-    pipeline_name = str(
-        pipeline_payload.get("pipeline_name", f"{provider_name}_{entity_name}")
-    )
-    maintenance_config = _merged_maintenance_config(base_payload, payload)
-    retention_days = maintenance_config.get("vacuum_retention_days")
-    quality_payload = _as_mapping(payload.get("quality"))
-    context = EntityPipelineContext(
-        provider_name=provider_name,
-        entity_name=entity_name,
-        pipeline_name=pipeline_name,
-        pipeline_key=NodeKey("pipeline_surface", pipeline_name),
-        entity_key=NodeKey("entity_config", pipeline_name),
-        config_artifact=NodeKey("config_artifact", _rel_path(root, entity_path)),
-        today=today,
-        contract_ref=f"{provider_name}.{entity_name}",
-        retention_days=_coerce_int(retention_days)
-        if isinstance(retention_days, int | float)
-        else None,
-        config_version=_optional_text(payload.get("version")),
-        quality_version=_optional_text(quality_payload.get("version")),
-    )
-    pipeline_sink = _entity_pipeline_sink_config(payload)
-    return context, pipeline_sink, _field_quality_index(payload)
-
-
 def _add_control_plane_runtime_evidence(
     snapshot: GraphSnapshot,
     root: Path,
@@ -3530,38 +2922,6 @@ def _link_runtime_state_surface(
     _link_runtime_state_run_and_pipeline(snapshot, state, spec)
     _link_runtime_state_dependencies(snapshot, state, spec)
     _link_runtime_state_evidence_materials(snapshot, state, spec)
-
-
-def _link_runtime_state_run_and_pipeline(
-    snapshot: GraphSnapshot,
-    state: NodeKey,
-    spec: dict[str, object],
-) -> None:
-    manifest_id = _optional_text(spec.get("manifest_id"))
-    if manifest_id is not None:
-        run_key = NodeKey("run_instance_surface", manifest_id)
-        if run_key in snapshot.nodes:
-            snapshot.add_relation(
-                run_key, "HAS_RUNTIME_STATE", state, provenance="runtime_state"
-            )
-            pipeline_name = _optional_text(
-                snapshot.nodes[run_key].properties.get("pipeline_name")
-            )
-            if pipeline_name is not None:
-                pipeline_key = NodeKey("pipeline_surface", pipeline_name)
-                if pipeline_key in snapshot.nodes:
-                    snapshot.add_relation(
-                        state, "DEPENDS_ON", pipeline_key, provenance="runtime_state"
-                    )
-
-
-def _link_runtime_state_dependencies(
-    snapshot: GraphSnapshot,
-    state: NodeKey,
-    spec: dict[str, object],
-) -> None:
-    _link_runtime_state_workflow_dependency(snapshot, state, spec)
-    _link_runtime_state_evidence_dependencies(snapshot, state, spec)
 
 
 def _link_runtime_state_evidence_materials(
@@ -3636,319 +2996,6 @@ def _workflow_script_targets(run_text: str) -> set[NodeKey]:
     targets.update(_workflow_module_script_targets(run_text))
     targets.update(_workflow_repo_path_targets(run_text))
     return targets
-
-
-def _workflow_module_script_targets(run_text: str) -> tuple[NodeKey, ...]:
-    module_pattern = re.compile(
-        r"(?:uv\s+run\s+)?python(?:3)?\s+-m\s+scripts\.([\w.]+)"
-    )
-    return tuple(
-        NodeKey(
-            "script_surface", f"scripts/{match.group(1).replace('.', '/')}/{MAIN_PY}"
-        )
-        for match in module_pattern.finditer(run_text)
-    )
-
-
-def _workflow_repo_path_targets(run_text: str) -> tuple[NodeKey, ...]:
-    path_pattern = re.compile(
-        r"(?<![\w./-])((?:scripts|tests|configs|src|docs|grafana|\.github)/[\w./-]+)"
-    )
-    targets: list[NodeKey] = []
-    for match in path_pattern.finditer(run_text):
-        candidate = match.group(1).rstrip(".,:)")
-        targets.extend(
-            (
-                NodeKey("script_surface", candidate),
-                NodeKey("file_surface", candidate),
-                NodeKey("directory_surface", candidate),
-            )
-        )
-    return tuple(targets)
-
-
-def _workflow_quality_gates(run_text: str) -> tuple[str, ...]:
-    lowered = run_text.lower()
-    gates: list[str] = []
-    for predicate, gate_name in _WORKFLOW_GATE_RULES:
-        if predicate(lowered):
-            gates.append(gate_name)
-    return tuple(dict.fromkeys(gates))
-
-
-def _contains_any(text: str, needles: tuple[str, ...]) -> bool:
-    return any(needle in text for needle in needles)
-
-
-_WORKFLOW_GATE_RULES: tuple[tuple[Callable[[str], bool], str], ...] = (
-    (lambda text: "pytest" in text, "pytest"),
-    (lambda text: "mypy" in text, GATE_MYPY_STRICT),
-    (
-        lambda text: _contains_any(
-            text, ("scripts.docs", "check-links", "build_docs_site.sh")
-        ),
-        GATE_DOCS_VERIFICATION,
-    ),
-    (
-        lambda text: _contains_any(
-            text,
-            ("validate_pipeline_configs", "scripts.schema", "check_config_invariants"),
-        ),
-        GATE_CONFIG_VALIDATION,
-    ),
-    (lambda text: "neo4j-memory" in text, GATE_NEO4J_ONTOLOGY_INVARIANTS),
-)
-
-
-def _workflow_family(workflow_name: str, title: str) -> str:
-    lowered = f"{workflow_name} {title}".lower()
-    for family_name, needles in _WORKFLOW_FAMILY_RULES:
-        if _contains_any(lowered, needles):
-            return family_name
-    return "test"
-
-
-_WORKFLOW_FAMILY_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
-    ("release", ("release", "publish")),
-    ("docs", ("docs", "doc")),
-    ("governance", ("governance", "schema", "quality")),
-    ("docker", ("docker",)),
-)
-
-
-def _workflow_on_payload(payload: dict[str, object]) -> object:
-    if "on" in payload:
-        return payload.get("on")
-    return cast(dict[object, object], payload).get(True)
-
-
-def _workflow_trigger_names(payload: dict[str, object]) -> tuple[str, ...]:
-    trigger_payload = _workflow_on_payload(payload)
-    if isinstance(trigger_payload, str):
-        return (trigger_payload,)
-    if isinstance(trigger_payload, list):
-        return _sorted_string_items(trigger_payload)
-    if isinstance(trigger_payload, dict):
-        return _sorted_string_items(trigger_payload.keys())
-    return ()
-
-
-def _workflow_environment_name(job_payload: dict[str, object]) -> str | None:
-    environment_payload = job_payload.get("environment")
-    if isinstance(environment_payload, str):
-        return environment_payload
-    return _workflow_environment_mapping_name(environment_payload)
-
-
-def _workflow_environment_mapping_name(environment_payload: object) -> str | None:
-    if not isinstance(environment_payload, dict):
-        return None
-    name = environment_payload.get("name")
-    return name if isinstance(name, str) else None
-
-
-def _sorted_string_items(items: Iterable[object]) -> tuple[str, ...]:
-    return tuple(sorted(str(item) for item in items if isinstance(item, str)))
-
-
-def _workflow_matrix_axes(job_payload: dict[str, object]) -> tuple[str, ...]:
-    matrix_payload = _workflow_matrix_payload(job_payload)
-    if not isinstance(matrix_payload, dict):
-        return ()
-    return tuple(
-        sorted(
-            _normalize_workflow_matrix_axis_name(str(key))
-            for key in matrix_payload
-            if key not in {"include", "exclude"}
-        )
-    )
-
-
-def _workflow_matrix_variants(
-    job_payload: dict[str, object],
-) -> tuple[dict[str, str], ...]:
-    matrix_payload = _workflow_matrix_payload(job_payload)
-    if not isinstance(matrix_payload, dict):
-        return ()
-
-    base_axes = _workflow_matrix_base_axes(matrix_payload)
-    if base_axes is None or not base_axes:
-        return ()
-    return _workflow_matrix_variants_with_includes(
-        base_axes, matrix_payload.get("include")
-    )
-
-
-def _workflow_matrix_payload(job_payload: dict[str, object]) -> object:
-    strategy_payload = job_payload.get("strategy")
-    if not isinstance(strategy_payload, dict):
-        return None
-    return strategy_payload.get("matrix")
-
-
-def _workflow_matrix_variants_with_includes(
-    base_axes: list[tuple[str, list[str]]],
-    include_payload: object,
-) -> tuple[dict[str, str], ...]:
-    variants = _workflow_matrix_base_variants(base_axes)
-    _append_workflow_matrix_include_variants(variants, include_payload)
-    return tuple(variants)
-
-
-def _workflow_matrix_base_axes(
-    matrix_payload: dict[str, object],
-) -> list[tuple[str, list[str]]] | None:
-    base_axes: list[tuple[str, list[str]]] = []
-    for axis_name, axis_values in matrix_payload.items():
-        if axis_name in {"include", "exclude"}:
-            continue
-        normalized = _workflow_matrix_axis_values(axis_values)
-        if not normalized:
-            return None
-        normalized_axis_name = _normalize_workflow_matrix_axis_name(str(axis_name))
-        base_axes.append((normalized_axis_name, normalized))
-    return base_axes
-
-
-def _enrich_workflow_surface(
-    snapshot: GraphSnapshot,
-    context: WorkflowContext,
-    payload: dict[str, object],
-) -> None:
-    snapshot.add_node(
-        "workflow_surface",
-        context.workflow_name,
-        workflow_family=_workflow_family(context.workflow_name, context.title),
-        trigger_names=list(_workflow_trigger_names(payload)) or None,
-        concurrency_group=_workflow_concurrency_group(payload),
-    )
-
-
-def _add_workflow_call_entrypoint(
-    snapshot: GraphSnapshot,
-    context: WorkflowContext,
-    payload: dict[str, object],
-) -> NodeKey | None:
-    workflow_call_payload = _workflow_on_payload(payload)
-    if not isinstance(workflow_call_payload, dict):
-        return None
-    reusable_workflow_payload = workflow_call_payload.get("workflow_call")
-    if not isinstance(reusable_workflow_payload, dict):
-        return None
-    workflow_call_entrypoint = snapshot.add_node(
-        "workflow_call_surface",
-        f"{context.workflow_name}::workflow_call",
-        summary=f"Reusable workflow entrypoint for `{context.workflow_name}`.",
-        source_path=context.relative_path,
-        source_kind="workflow_call_surface",
-        workflow=context.workflow_name,
-        reusable_kind="workflow_call_trigger",
-        last_verified=context.today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    snapshot.add_relation(
-        context.workflow,
-        "CALLS_WORKFLOW",
-        workflow_call_entrypoint,
-        provenance="workflow_graph",
-    )
-    snapshot.add_relation(
-        workflow_call_entrypoint,
-        "DEPENDS_ON",
-        context.workflow,
-        provenance="workflow_graph",
-    )
-    _add_workflow_outputs(
-        snapshot,
-        owner=context.workflow,
-        workflow_name=context.workflow_name,
-        relative_path=context.relative_path,
-        today=context.today,
-        owner_id=context.workflow_name,
-        output_payload=reusable_workflow_payload.get("outputs"),
-        scope="workflow_call_output",
-        output_scope="workflow_call",
-        summary_template="Reusable workflow output `{output_name}`.",
-    )
-    return workflow_call_entrypoint
-
-
-def _workflow_job_surface_metadata(
-    job_payload: dict[str, object],
-) -> tuple[
-    int,
-    int,
-    tuple[str, ...],
-    tuple[dict[str, str], ...],
-    str | None,
-    str | None,
-    tuple[str, ...],
-]:
-    steps = job_payload.get("steps")
-    inline_run_step_count, uses_step_count = _job_step_counts(steps)
-    secret_usage_hints = _workflow_secret_refs(job_payload)
-    matrix_axes = _workflow_matrix_axes(job_payload)
-    matrix_variants = _workflow_matrix_variants(job_payload)
-    environment_name = _workflow_environment_name(job_payload)
-    concurrency_group = _workflow_concurrency_group(job_payload)
-    return (
-        inline_run_step_count,
-        uses_step_count,
-        matrix_axes,
-        matrix_variants,
-        environment_name,
-        concurrency_group,
-        secret_usage_hints,
-    )
-
-
-def _add_workflow_job_surface(
-    snapshot: GraphSnapshot,
-    context: WorkflowContext,
-    *,
-    job_id: str,
-    job_payload: dict[str, object],
-) -> tuple[WorkflowJobContext, tuple[dict[str, str], ...], tuple[str, ...]]:
-    (
-        inline_run_step_count,
-        uses_step_count,
-        matrix_axes,
-        matrix_variants,
-        environment_name,
-        concurrency_group,
-        secret_usage_hints,
-    ) = _workflow_job_surface_metadata(job_payload)
-    job_name = f"{context.workflow_name}::{job_id}"
-    job = _create_workflow_job_surface(
-        snapshot,
-        context,
-        job_name=job_name,
-        job_id=job_id,
-        job_payload=job_payload,
-        inline_run_step_count=inline_run_step_count,
-        uses_step_count=uses_step_count,
-        matrix_axes=matrix_axes,
-        matrix_variants=matrix_variants,
-        environment_name=environment_name,
-        secret_usage_hints=secret_usage_hints,
-        concurrency_group=concurrency_group,
-    )
-    snapshot.add_relation(
-        context.workflow, "CONTAINS", job, provenance="workflow_graph"
-    )
-    return (
-        WorkflowJobContext(
-            workflow_name=context.workflow_name,
-            job_id=job_id,
-            job_name=job_name,
-            relative_path=context.relative_path,
-            today=context.today,
-            job=job,
-        ),
-        matrix_variants,
-        secret_usage_hints,
-    )
 
 
 def _process_workflow_steps(
@@ -4092,34 +3139,6 @@ def _process_workflow_file(
     )
 
 
-def _add_workflow_file_surface(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    workflow_path: Path,
-) -> tuple[str, dict[str, object], WorkflowContext, NodeKey | None]:
-    payload = _read_yaml(workflow_path)
-    workflow_name = workflow_path.stem
-    title_value = payload.get("name")
-    title = title_value if isinstance(title_value, str) else workflow_name
-    relative_path = _rel_path(root, workflow_path)
-    context = _add_workflow_surface(
-        snapshot,
-        workflow_name=workflow_name,
-        title=title,
-        relative_path=relative_path,
-        today=today,
-    )
-    _enrich_workflow_surface(snapshot, context, payload)
-    snapshot.add_relation(
-        project, "HAS_WORKFLOW", context.workflow, provenance="workflow_graph"
-    )
-    _attach_workflow_file_backing(snapshot, context.workflow, relative_path)
-    workflow_call_entrypoint = _add_workflow_call_entrypoint(snapshot, context, payload)
-    return workflow_name, payload, context, workflow_call_entrypoint
-
-
 def _add_workflow_jobs(
     snapshot: GraphSnapshot,
     *,
@@ -4259,105 +3278,6 @@ def _markdown_heading_context(text: str, offset: int) -> tuple[str | None, str |
     return current_title, current_anchor
 
 
-def _markdown_headings(text: str) -> Iterator[tuple[int, str]]:
-    offset = 0
-    for raw_line in text.splitlines(keepends=True):
-        line = raw_line.rstrip("\r\n")
-        stripped = line.lstrip(" \t")
-        leading_indent = len(line) - len(stripped)
-        if leading_indent > 3 or not stripped.startswith("#"):
-            offset += len(raw_line)
-            continue
-
-        level = len(stripped) - len(stripped.lstrip("#"))
-        if level < 1 or level > 6:
-            offset += len(raw_line)
-            continue
-
-        if len(stripped) <= level or stripped[level] not in {" ", "\t"}:
-            offset += len(raw_line)
-            continue
-
-        title = stripped[level:].strip()
-        if title:
-            yield offset, title
-        offset += len(raw_line)
-
-
-def _resolve_docs_reference_target(
-    snapshot: GraphSnapshot,
-    ref: str,
-) -> tuple[NodeKey | None, str, str]:
-    for candidate in _docs_reference_exact_candidates(ref):
-        if candidate in snapshot.nodes:
-            return candidate, "direct_path", "high"
-
-    for node in tuple(snapshot.nodes.values()):
-        source_path = node.properties.get("source_path")
-        if isinstance(source_path, str) and source_path == ref:
-            return node.key, "source_path_match", "medium"
-    return None, "unresolved", "low"
-
-
-def _docs_reference_exact_candidates(ref: str) -> tuple[NodeKey, ...]:
-    return (
-        NodeKey("module_surface", ref),
-        NodeKey("script_surface", ref),
-        NodeKey("test_artifact", ref),
-        NodeKey("config_artifact", ref),
-        NodeKey(
-            "workflow_surface",
-            Path(ref).stem if ref.startswith(GITHUB_WORKFLOWS_PREFIX) else ref,
-        ),
-        NodeKey("cli_command_surface", _normalize_cli_command_name(ref) or ref),
-        NodeKey("file_surface", ref),
-        NodeKey("directory_surface", ref),
-    )
-
-
-def _resolve_claim_targets(
-    snapshot: GraphSnapshot, claim_text: str
-) -> tuple[tuple[NodeKey, str, str], ...]:
-    resolved: list[tuple[NodeKey, str, str]] = []
-    seen: set[NodeKey] = set()
-    for token in sorted(_claim_target_tokens(claim_text)):
-        normalized_token = PORTS_MODULE_PREFIX if token == "domain.ports" else token
-        for candidate in _claim_exact_candidates(normalized_token):
-            if candidate in snapshot.nodes and candidate not in seen:
-                resolved.append((candidate, "claim_token", "medium"))
-                seen.add(candidate)
-                break
-    return tuple(resolved)
-
-
-def _claim_target_tokens(claim_text: str) -> set[str]:
-    tokens: set[str] = set()
-    tokens.update(match.group(1) for match in re.finditer(r"`([^`]+)`", claim_text))
-    tokens.update(
-        match.group(0) for match in re.finditer(r"\bbioetl\s+[\w-]+\b", claim_text)
-    )
-    tokens.update(
-        match.group(0)
-        for match in re.finditer(r"\bscripts\.\w+(?:\s+[\w.-]+)?\b", claim_text)
-    )
-    tokens.update(
-        match.group(0)
-        for match in re.finditer(r"\b(?:bioetl|domain)\.[\w.]+\b", claim_text)
-    )
-    return tokens
-
-
-def _claim_exact_candidates(normalized_token: str) -> tuple[NodeKey, ...]:
-    return (
-        NodeKey("port_surface", normalized_token),
-        NodeKey("cli_command_surface", normalized_token),
-        NodeKey("script_surface", normalized_token),
-        NodeKey("module_surface", normalized_token),
-        NodeKey("workflow_surface", normalized_token),
-        NodeKey("execution_path", normalized_token),
-    )
-
-
 def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
     path_pattern = _docs_path_pattern()
     command_pattern = _docs_command_pattern()
@@ -4366,33 +3286,6 @@ def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
         _add_doc_path_reference_edges(snapshot, source_node, text, path_pattern)
         _add_doc_command_reference_edges(snapshot, source_node, text, command_pattern)
         _add_doc_claim_edges(snapshot, source_node, source_path, text, path_pattern)
-
-
-def _add_pipeline_doc_edges(snapshot: GraphSnapshot) -> None:
-    for node in tuple(snapshot.nodes.values()):
-        if node.key.label != "pipeline_surface":
-            continue
-        pipeline_kind = node.properties.get("pipeline_kind")
-        if pipeline_kind == "entity":
-            provider_name = str(node.properties.get("provider") or "")
-            entity_name = str(node.properties.get("entity") or "")
-        elif pipeline_kind == "composite":
-            provider_name = "composite"
-            entity_name = node.key.name.removeprefix("composite_")
-        else:
-            continue
-        if not provider_name or not entity_name:
-            continue
-        _link_pipeline_doc_artifacts(
-            snapshot,
-            node.key,
-            _pipeline_doc_artifact_targets(
-                snapshot,
-                provider_name=provider_name,
-                entity_name=entity_name,
-            ),
-            provenance="impact_pipeline_docs",
-        )
 
 
 def _add_adr_constraint_edges(
@@ -4703,63 +3596,6 @@ def _add_claim_path_targets(
     return claim_has_target
 
 
-def _add_claim_token_targets(
-    snapshot: GraphSnapshot,
-    claim: NodeKey,
-    clean_text: str,
-    *,
-    section_title: str | None,
-    section_anchor: str | None,
-    line_number: int,
-) -> bool:
-    claim_has_target = False
-    for target, evidence_kind, confidence in _resolve_claim_targets(
-        snapshot, clean_text
-    ):
-        _add_claim_target_relation(
-            snapshot,
-            claim,
-            target,
-            provenance="docs_claims",
-            section_title=section_title,
-            section_anchor=section_anchor,
-            line_number=line_number,
-            evidence_kind=evidence_kind,
-            confidence=confidence,
-        )
-        claim_has_target = True
-    return claim_has_target
-
-
-def _add_port_surfaces(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-) -> set[NodeKey]:
-    ports_root = root / "src" / "bioetl" / "domain" / "ports"
-    if not ports_root.is_dir():
-        return set()
-
-    family = NodeKey("package_family", "domain/ports")
-    port_nodes: set[NodeKey] = set()
-    facade = _add_port_facade_surface(snapshot, project, family, today)
-    port_nodes.add(facade)
-
-    descriptors, _, _ = _build_port_surface_catalog(root)
-    for descriptor in descriptors:
-        _register_protocol_port_surface(
-            snapshot,
-            project,
-            facade,
-            family,
-            descriptor,
-            today,
-            port_nodes=port_nodes,
-        )
-    return port_nodes
-
-
 def _contract_mapping_config(
     memory_mapping: dict[str, object],
 ) -> ContractMappingConfig:
@@ -4811,209 +3647,6 @@ def _add_published_contract_artifacts(
         )
 
 
-def _published_contract_artifact_paths(
-    context: ContractEntryContext,
-) -> tuple[str, ...]:
-    published_artifacts = context.raw_entry.get("published_artifacts")
-    if not isinstance(published_artifacts, list):
-        return ()
-    return tuple(path for path in published_artifacts if isinstance(path, str))
-
-
-def _published_contract_artifact_key(
-    snapshot: GraphSnapshot,
-    context: ContractEntryContext,
-    published_path: str,
-) -> NodeKey | None:
-    resolved = _resolve_repo_path(context.root, context.registry_path, published_path)
-    if resolved is None:
-        return None
-    relative_path = _rel_path(context.root, resolved)
-    return snapshot.add_node(
-        "doc_artifact",
-        relative_path,
-        summary=f"Published contract artifact for `{context.contract_ref}`.",
-        source_path=relative_path,
-        source_kind="published_contract",
-        last_verified=context.today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-
-
-def _link_contract_module_dependencies(
-    snapshot: GraphSnapshot,
-    context: ContractEntryContext,
-    module_paths: list[str],
-    provenance: str,
-) -> None:
-    for module_path in module_paths:
-        _link_contract_dependency_module(snapshot, context, module_path, provenance)
-
-
-def _contract_dependency_module_key(root: Path, module_path: str) -> NodeKey | None:
-    resolved_module = root / module_path
-    if not resolved_module.is_file():
-        return None
-    return NodeKey("module_surface", _rel_path(root, resolved_module))
-
-
-def _link_contract_dependency_module(
-    snapshot: GraphSnapshot,
-    context: ContractEntryContext,
-    module_path: str,
-    provenance: str,
-) -> None:
-    module_key = _contract_dependency_module_key(context.root, module_path)
-    if module_key is not None and module_key in snapshot.nodes:
-        snapshot.add_relation(
-            context.contract, "DEPENDS_ON", module_key, provenance=provenance
-        )
-
-
-def _link_contract_doc_dependencies(
-    snapshot: GraphSnapshot,
-    context: ContractEntryContext,
-    doc_paths: list[str],
-    anchor_fields: list[str],
-    *,
-    summary: str,
-    source_kind: str,
-    provenance: str,
-) -> None:
-    for doc_path in doc_paths:
-        resolved_doc = _contract_dependency_doc_path(
-            context.root, doc_path, anchor_fields
-        )
-        if resolved_doc is None:
-            continue
-        artifact = _add_contract_doc_dependency(
-            snapshot,
-            context=context,
-            doc_path=doc_path,
-            summary=summary,
-            source_kind=source_kind,
-        )
-        snapshot.add_relation(
-            context.contract, "DESCRIBED_IN", artifact, provenance=provenance
-        )
-
-
-def _add_contract_doc_dependency(
-    snapshot: GraphSnapshot,
-    *,
-    context: ContractEntryContext,
-    doc_path: str,
-    summary: str,
-    source_kind: str,
-) -> NodeKey:
-    return snapshot.add_node(
-        "doc_artifact",
-        doc_path,
-        summary=summary.format(contract_ref=context.contract_ref),
-        source_path=doc_path,
-        source_kind=source_kind,
-        last_verified=context.today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-
-
-def _contract_dependency_doc_path(
-    root: Path,
-    doc_path: str,
-    anchor_fields: list[str],
-) -> Path | None:
-    resolved_doc = root / doc_path
-    if not resolved_doc.is_file() or not _path_contains_any_token(
-        resolved_doc, anchor_fields
-    ):
-        return None
-    return resolved_doc
-
-
-def _add_contract_entry_surface(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    registry_artifact: NodeKey,
-    *,
-    contract_ref: str,
-    raw_entry: dict[str, object],
-    today: str,
-) -> ContractEntryContext:
-    identity = _as_mapping(raw_entry.get("identity"))
-    registry_path = root / CONTRACT_REGISTRY_RELATIVE_PATH
-    contract = snapshot.add_node(
-        "contract_surface",
-        contract_ref,
-        summary=f"Published contract surface `{contract_ref}`.",
-        source_path=_rel_path(root, registry_path),
-        source_kind="contract_registry",
-        status=raw_entry.get("status"),
-        contract_version=identity.get("contract_version"),
-        compatibility_level=identity.get("compatibility_level"),
-        schema_hash=identity.get("schema_hash"),
-        dq_policy_ref=raw_entry.get("dq_policy_ref") or identity.get("dq_policy_ref"),
-        rule_bundle_version=raw_entry.get("rule_bundle_version")
-        or identity.get("rule_bundle_version"),
-        owners=raw_entry.get("owners"),
-        supported_versions=raw_entry.get("supported_versions"),
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    snapshot.add_relation(
-        project, "HAS_CONTRACT", contract, provenance="impact_contracts"
-    )
-    snapshot.add_relation(
-        contract, "BACKED_BY", registry_artifact, provenance="impact_contracts"
-    )
-    _link_contract_provider(snapshot, contract_ref, contract)
-    return ContractEntryContext(
-        root=root,
-        registry_path=registry_path,
-        today=today,
-        contract_ref=contract_ref,
-        contract=contract,
-        raw_entry=raw_entry,
-    )
-
-
-def _link_contract_provider(
-    snapshot: GraphSnapshot,
-    contract_ref: str,
-    contract: NodeKey,
-) -> None:
-    provider_name = contract_ref.split(".", 1)[0]
-    provider_key = NodeKey("provider_surface", provider_name)
-    if provider_key in snapshot.nodes:
-        snapshot.add_relation(
-            provider_key, "DEFINES", contract, provenance="impact_contracts"
-        )
-
-
-def _add_contract_registry_artifact(
-    snapshot: GraphSnapshot,
-    root: Path,
-    today: str,
-) -> NodeKey | None:
-    registry_path = root / CONTRACT_REGISTRY_RELATIVE_PATH
-    if not registry_path.is_file():
-        return None
-    relative_path = _rel_path(root, registry_path)
-    return snapshot.add_node(
-        "config_artifact",
-        relative_path,
-        summary="Contract registry for published data contracts.",
-        source_path=relative_path,
-        source_kind="contract_registry",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-
-
 def _contract_registry_entries(root: Path) -> dict[str, dict[str, object]]:
     return {
         contract_ref: raw_entry
@@ -5040,75 +3673,6 @@ def _link_contract_dependencies(
     _add_published_contract_artifacts(snapshot, entry_context)
     _link_contract_dependency_modules(snapshot, entry_context, mapping_config)
     _link_contract_dependency_docs(snapshot, entry_context, mapping_config)
-
-
-def _link_contract_dependency_modules(
-    snapshot: GraphSnapshot,
-    entry_context: ContractEntryContext,
-    mapping_config: ContractMappingConfig,
-) -> None:
-    for module_paths, provenance in _contract_dependency_module_specs(mapping_config):
-        _link_contract_module_dependencies(
-            snapshot,
-            entry_context,
-            module_paths,
-            provenance,
-        )
-
-
-def _link_contract_dependency_docs(
-    snapshot: GraphSnapshot,
-    entry_context: ContractEntryContext,
-    mapping_config: ContractMappingConfig,
-) -> None:
-    for (
-        doc_paths,
-        anchor_fields,
-        summary,
-        source_kind,
-        provenance,
-    ) in _contract_dependency_doc_specs(mapping_config):
-        _link_contract_doc_dependencies(
-            snapshot,
-            entry_context,
-            doc_paths,
-            anchor_fields,
-            summary=summary,
-            source_kind=source_kind,
-            provenance=provenance,
-        )
-
-
-def _contract_dependency_module_specs(
-    mapping_config: ContractMappingConfig,
-) -> tuple[tuple[list[str], str], ...]:
-    return (
-        (mapping_config.control_plane_modules, "impact_contracts_control_plane"),
-        (mapping_config.control_plane_runtime_modules, "impact_contracts_runtime"),
-        (mapping_config.lineage_modules, "impact_contracts_lineage"),
-        (mapping_config.lineage_runtime_modules, "impact_contracts_lineage_runtime"),
-    )
-
-
-def _contract_dependency_doc_specs(
-    mapping_config: ContractMappingConfig,
-) -> tuple[tuple[list[str], list[str], str, str, str], ...]:
-    return (
-        (
-            mapping_config.control_plane_docs,
-            mapping_config.control_plane_anchor_fields,
-            "Control-plane contract reference for `{contract_ref}`.",
-            "control_plane_contract_doc",
-            "impact_contracts_control_plane",
-        ),
-        (
-            mapping_config.lineage_docs,
-            mapping_config.lineage_anchor_fields,
-            "Lineage/traceability contract reference for `{contract_ref}`.",
-            "lineage_contract_doc",
-            "impact_contracts_lineage",
-        ),
-    )
 
 
 def _add_contract_surfaces(
@@ -5166,162 +3730,6 @@ def _register_contract_entry(
     )
     contract_nodes[contract_ref] = entry_context.contract
     _link_contract_dependencies(snapshot, entry_context, mapping_config)
-
-
-def _link_duplication_override_relations(
-    snapshot: GraphSnapshot,
-    class_descriptors: dict[NodeKey, ClassDescriptor],
-    class_name_index: dict[str, list[NodeKey]],
-    class_method_index: dict[tuple[NodeKey, str], NodeKey],
-) -> None:
-    for class_descriptor in class_descriptors.values():
-        for base_class in _resolved_base_classes(
-            snapshot, class_descriptor, class_name_index
-        ):
-            snapshot.add_relation(
-                class_descriptor.node_key,
-                "DEPENDS_ON",
-                base_class,
-                provenance="code_duplication",
-            )
-            _link_duplication_override_methods(
-                snapshot,
-                class_descriptor=class_descriptor,
-                base_class=base_class,
-                class_method_index=class_method_index,
-            )
-
-
-def _duplication_promotion_target(
-    snapshot: GraphSnapshot,
-    config: dict[str, object],
-    family_name: str,
-    surface_kind: str,
-    unique_members: list[CallableDescriptor],
-) -> NodeKey | None:
-    promotion_target = _method_surface_promotion_target(
-        snapshot, surface_kind, unique_members
-    )
-    if promotion_target is not None:
-        return promotion_target
-    family = _duplication_family_by_name(config, family_name)
-    if not isinstance(family, DuplicateFamilyConfig):
-        return None
-    for candidate in family.promotion_targets:
-        if candidate in snapshot.nodes:
-            return candidate
-    return None
-
-
-def _method_surface_promotion_target(
-    snapshot: GraphSnapshot,
-    surface_kind: str,
-    unique_members: list[CallableDescriptor],
-) -> NodeKey | None:
-    if surface_kind != "method_surface" or not unique_members:
-        return None
-    method_name = unique_members[0].callable_name
-    if not all(
-        member.callable_name == method_name and member.parent_class
-        for member in unique_members
-    ):
-        return None
-    common_base_candidates: set[NodeKey] | None = None
-    for member in unique_members:
-        class_targets = _override_target_classes(snapshot, member)
-        common_base_candidates = (
-            class_targets
-            if common_base_candidates is None
-            else common_base_candidates & class_targets
-        )
-    if not common_base_candidates:
-        return None
-    return sorted(common_base_candidates, key=lambda item: item.name)[0]
-
-
-def _override_target_classes(
-    snapshot: GraphSnapshot,
-    member: CallableDescriptor,
-) -> set[NodeKey]:
-    candidate_set = {
-        relation.target
-        for relation in snapshot.relations.values()
-        if relation.source == member.node_key
-        and relation.relation_type == "OVERRIDES"
-        and relation.target.label == "method_surface"
-    }
-    return {
-        NodeKey("class_surface", target.name.rsplit(".", 1)[0])
-        for target in candidate_set
-    }
-
-
-def _duplication_family_by_name(
-    config: dict[str, object],
-    family_name: str,
-) -> DuplicateFamilyConfig | None:
-    return next(
-        (
-            item
-            for item in _as_iterable(config.get("families"))
-            if isinstance(item, DuplicateFamilyConfig) and item.name == family_name
-        ),
-        None,
-    )
-
-
-def _emit_duplication_clusters(
-    snapshot: GraphSnapshot,
-    project: NodeKey,
-    *,
-    today: str,
-    config: dict[str, object],
-    callable_descriptors: dict[NodeKey, CallableDescriptor],
-    min_cluster_size: int,
-    min_ast_nodes: int,
-) -> None:
-    for (family_name, surface_kind, shape_hash), members in _duplication_cluster_groups(
-        callable_descriptors,
-        min_ast_nodes=min_ast_nodes,
-    ):
-        if len(members) < min_cluster_size:
-            continue
-        unique_members = sorted(members, key=lambda item: item.node_key.name)
-        cluster = _add_duplication_cluster_node(
-            snapshot,
-            today=today,
-            family_name=family_name,
-            surface_kind=surface_kind,
-            shape_hash=shape_hash,
-            unique_members=unique_members,
-        )
-        snapshot.add_relation(
-            project, "CONTAINS", cluster, provenance="code_duplication"
-        )
-        _link_duplication_cluster_members(snapshot, cluster, unique_members)
-        _link_same_shape_members(snapshot, unique_members)
-        promotion_target = _duplication_promotion_target(
-            snapshot, config, family_name, surface_kind, unique_members
-        )
-        if promotion_target is not None:
-            snapshot.add_relation(
-                cluster,
-                "CAN_PROMOTE_TO",
-                promotion_target,
-                provenance="code_duplication",
-            )
-        package_family = NodeKey("package_family", unique_members[0].package_family)
-        for relation in tuple(snapshot.relations.values()):
-            if (
-                relation.relation_type == "TESTS_PACKAGE_FAMILY"
-                and relation.target == package_family
-            ):
-                snapshot.add_relation(
-                    cluster,
-                    "COVERED_BY_TEST",
-                    relation.source,
-                    provenance="code_duplication",
-                )
 
 
 def _extract_code_duplication_surfaces(
@@ -6562,31 +4970,6 @@ def _link_alert_observer_dashboards(
         )
 
 
-def _existing_snapshot_nodes(
-    snapshot: GraphSnapshot,
-    nodes: Iterable[NodeKey],
-) -> tuple[NodeKey, ...]:
-    return tuple(node for node in nodes if node in snapshot.nodes)
-
-
-def _selected_alert_dashboards(
-    alert_name: str,
-    group_name: str,
-    expr: str,
-    dashboard_metrics: Mapping[NodeKey, Set[str]],
-    memory_mapping: dict[str, object],
-) -> tuple[NodeKey, ...]:
-    return tuple(
-        _select_alert_dashboards(
-            alert_name,
-            group_name,
-            expr,
-            dashboard_metrics,
-            memory_mapping,
-        )
-    )
-
-
 def _link_alert_runbook(
     snapshot: GraphSnapshot,
     root: Path,
@@ -6610,138 +4993,6 @@ def _alert_runbook_context(
     if runbook is None:
         return None
     return AlertRunbookContext(runbook=runbook)
-
-
-def _alert_runbook_path(root: Path, annotations: dict[str, object]) -> str | None:
-    runbook = annotations.get("runbook")
-    if not isinstance(runbook, str):
-        return None
-    return runbook if (root / runbook).is_file() else None
-
-
-def _add_alert_runbook_doc(
-    snapshot: GraphSnapshot,
-    alert_name: str,
-    runbook: str,
-    today: str,
-) -> NodeKey:
-    return snapshot.add_node(
-        "doc_artifact",
-        runbook,
-        summary=f"Runbook referenced by alert `{alert_name}`.",
-        source_path=runbook,
-        source_kind="alert_runbook",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-
-
-def _add_governance_edges(
-    snapshot: GraphSnapshot,
-    port_nodes: set[NodeKey],
-    adapter_nodes: dict[str, NodeKey],
-    pipeline_nodes: dict[str, NodeKey],
-    contract_nodes: dict[str, NodeKey],
-) -> None:
-    for policy, target_groups in _governance_policy_targets(
-        snapshot,
-        port_nodes=port_nodes,
-        adapter_nodes=adapter_nodes,
-        pipeline_nodes=pipeline_nodes,
-        contract_nodes=contract_nodes,
-    ):
-        _link_policy_governance_group(snapshot, policy, *target_groups)
-
-
-def _governance_policy_targets(
-    snapshot: GraphSnapshot,
-    *,
-    port_nodes: set[NodeKey],
-    adapter_nodes: dict[str, NodeKey],
-    pipeline_nodes: dict[str, NodeKey],
-    contract_nodes: dict[str, NodeKey],
-) -> tuple[tuple[NodeKey, tuple[Sequence[NodeKey], ...]], ...]:
-    sorted_ports, sorted_adapters, sorted_pipelines, sorted_contracts = (
-        _sorted_governance_targets(
-            port_nodes=port_nodes,
-            adapter_nodes=adapter_nodes,
-            pipeline_nodes=pipeline_nodes,
-            contract_nodes=contract_nodes,
-        )
-    )
-    return tuple(
-        _governance_policy_specs(
-            snapshot,
-            sorted_ports=sorted_ports,
-            sorted_adapters=sorted_adapters,
-            sorted_pipelines=sorted_pipelines,
-            sorted_contracts=sorted_contracts,
-        )
-    )
-
-
-def _sorted_governance_targets(
-    *,
-    port_nodes: set[NodeKey],
-    adapter_nodes: dict[str, NodeKey],
-    pipeline_nodes: dict[str, NodeKey],
-    contract_nodes: dict[str, NodeKey],
-) -> tuple[list[NodeKey], list[NodeKey], list[NodeKey], list[NodeKey]]:
-    return (
-        sorted(port_nodes, key=lambda node: node.name),
-        sorted(adapter_nodes.values(), key=lambda node: node.name),
-        sorted(pipeline_nodes.values(), key=lambda node: node.name),
-        sorted(contract_nodes.values(), key=lambda node: node.name),
-    )
-
-
-def _governance_policy_specs(
-    snapshot: GraphSnapshot,
-    *,
-    sorted_ports: list[NodeKey],
-    sorted_adapters: list[NodeKey],
-    sorted_pipelines: list[NodeKey],
-    sorted_contracts: list[NodeKey],
-) -> list[tuple[NodeKey, tuple[Sequence[NodeKey], ...]]]:
-    return [
-        _governance_policy_spec(*policy)
-        for policy in _governance_policy_definitions(
-            snapshot,
-            sorted_ports=sorted_ports,
-            sorted_adapters=sorted_adapters,
-            sorted_pipelines=sorted_pipelines,
-            sorted_contracts=sorted_contracts,
-        )
-    ]
-
-
-def _governance_policy_definitions(
-    snapshot: GraphSnapshot,
-    *,
-    sorted_ports: list[NodeKey],
-    sorted_adapters: list[NodeKey],
-    sorted_pipelines: list[NodeKey],
-    sorted_contracts: list[NodeKey],
-) -> tuple[tuple[str, Sequence[NodeKey], Sequence[NodeKey] | None], ...]:
-    return (
-        ("hexagonal import matrix", sorted_ports, sorted_adapters),
-        ("hexagonal package layout", sorted_ports, sorted_adapters),
-        ("pipeline assembly model", sorted_pipelines, None),
-        ("medallion storage contract", sorted_contracts, sorted_pipelines),
-        ("observability surface model", _alert_surface_nodes(snapshot), None),
-    )
-
-
-def _governance_policy_spec(
-    policy_name: str,
-    target_group: Sequence[NodeKey],
-    extra_target_group: Sequence[NodeKey] | None = None,
-) -> tuple[NodeKey, tuple[Sequence[NodeKey], ...]]:
-    return NodeKey("policy_surface", policy_name), _governance_target_groups(
-        target_group,
-        extra_target_group,
-    )
 
 
 def _add_pipeline_operational_edges(
