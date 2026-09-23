@@ -1,5 +1,14 @@
 # Сводка evidence: project-package-topology
 
+Refresh note (2026-09-23): hash-only reconcile after S2 transformer split
+and governance rebind loop. Counts and the source fingerprint below come from
+`reports/quality/module-coverage-inventory.json`. Historical notes remain
+historical.
+
+`source_tree_sha256=71d06c86bb3a115e1cc7092e7ac1b35d543d5c18517e80780ec1598817e5dfcb`
+
+`source_module_count=2479`
+
 Refresh note (2026-09-21): hash-only reconcile after FK cycle break and
 coverage inventory rebind. Counts and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain

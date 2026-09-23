@@ -152,7 +152,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-overview-v2.json | 9603 | Review Selected Run Status |
 | bioetl-overview-v2.json | 214 | Monitor Scope Health |
 | bioetl-overview-v2.json | 215 | Review First Action |
-| bioetl-overview-v2.json | 9002 | Review Selected Run Domains |
+| bioetl-overview-v2.json | 9002 | Review Run Domains |
 | bioetl-overview-v2.json | 9600 | Inspect Alerts |
 | bioetl-overview-v2.json | 9601 | Review Active Alerts |
 | bioetl-overview-v2.json | 9030 | Domain Status Tracks |

@@ -30,16 +30,16 @@ absence.
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
 | 9400 | Inspect Scope & Evidence | text | Static | Replay-safety question: SELECTED RUN is this run's processing outcome and Trust status; CURRENT is pipeline replay readiness now, not this run. INCOMPLETE/UNKNOWN is incomplete evidence, not OK. | shared shell | No thresholds; interpretive guidance only. |
-| 9401 | Monitor Current Readiness | stat | Prometheus | CURRENT Prometheus replay/resume verdict from `bioetl_control_plane_current_status_trusted` (not selected-run HTTP trust). | shared shell | `0=OK`, `1=WARN`, `2=CRIT`, `3=INCOMPLETE`, `null=UNKNOWN`. `INCOMPLETE` blocks Prom-current replay approval. |
+| 9401 | Monitor Readiness | stat | Prometheus | CURRENT Prometheus replay/resume verdict from `bioetl_control_plane_current_status_trusted` (not selected-run HTTP trust). | shared shell | `0=OK`, `1=WARN`, `2=CRIT`, `3=INCOMPLETE`, `null=UNKNOWN`. `INCOMPLETE` blocks Prom-current replay approval. |
 | 9418 | Review Selected-Run Trust | table | BioETL Ops HTTP | Exact-run processing outcome and aggregate manifest, lineage, and retention Trust from `trust-summary`. `error_as_row=1` displays deadline/capacity failures as `QUERY ERROR` with the reason code, unknown processing outcome, and no manifest timestamp. | shared shell | `INCOMPLETE`/`ERROR`/`UNKNOWN`/`QUERY ERROR` are not OK; query failure does not mean the run selection is missing. |
 | 9416 | Review Retention Compliance | table | BioETL Ops HTTP | First-screen run-scoped evidence-floor, retention-policy, required-evidence, and archive-support checks. | shared shell | Unsupported archive behavior is explicit rather than inferred as compliant. |
 | 9402 | Review Run Summary | table | BioETL Ops HTTP | Identity anchors for the selected workflow/pipeline/run scope. | shared shell | No numeric threshold; forensic handoff table. |
 | 9403 | Review Processed Records | table | BioETL Ops HTTP | Current processed-record evidence for the selected run scope. | shared shell | No numeric threshold; read-path evidence table. |
 | 9410 | Explain Missing Identity Data | text | Static | Neutral visible fallback when the Control Plane identity table returns no visible rows. | shared shell | No thresholds; prevents blank first-screen identity space. |
 | 9411 | Explain Missing Record Counts | text | Static | Neutral visible fallback when the Control Plane accounting table returns no visible rows. | shared shell | No thresholds; distinguishes missing accounting evidence from zero records. |
-| 891 | Monitor Replay Safety | stat | Prometheus | Replay-safety blocker state for the selected scope. | shared shell | Severity/value mapping. |
-| 892 | Track Checkpoint Age | stat | BioETL Ops HTTP | Current checkpoint freshness lag from HTTP-backed control-plane evidence. | shared shell | Numeric lag; no PromQL threshold in doc. |
-| 893 | Monitor Manifest/Ledger | stat | Prometheus | Current manifest/ledger failure state from `bioetl_manifest_ledger_failures_15m`. | shared shell | Severity/value mapping. |
+| 891 | Monitor Replay | stat | Prometheus | Replay-safety blocker state for the selected scope. | shared shell | Severity/value mapping. |
+| 892 | Track Checkpoint | stat | BioETL Ops HTTP | Current checkpoint freshness lag from HTTP-backed control-plane evidence. | shared shell | Numeric lag; no PromQL threshold in doc. |
+| 893 | Monitor Ledger | stat | Prometheus | Current manifest/ledger failure state from `bioetl_manifest_ledger_failures_15m`. | shared shell | Severity/value mapping. |
 | 907 | Monitor Telemetry | stat | Prometheus | Missing-control-plane-telemetry signal from `bioetl_control_plane_telemetry_missing_5m`. | shared shell | Value mapping distinguishes no-data vs telemetry-missing. |
 
 ### Inspect Replay & Checkpoint Evidence
@@ -135,8 +135,8 @@ below document the current Prometheus query families for all Prometheus-backed
 panels; HTTP-backed identity panels are documented in the inventory above.
 
 - `Status`: `max((bioetl_control_plane_current_status_trusted{run_type=~"$run_type"}) and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), "pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))`
-- `Monitor Replay Safety`: `max((bioetl_replay_safety_blockers_15m{run_type=~"$run_type"}) and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), "pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))`
-- `Monitor Manifest/Ledger`: `max((bioetl_manifest_ledger_failures_15m{run_type=~"$run_type"}) and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), "pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))`
+- `Monitor Replay`: `max((bioetl_replay_safety_blockers_15m{run_type=~"$run_type"}) and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), "pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))`
+- `Monitor Ledger`: `max((bioetl_manifest_ledger_failures_15m{run_type=~"$run_type"}) and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), "pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))`
 - `Monitor Telemetry`: `max((bioetl_control_plane_telemetry_missing_5m{run_type=~"$run_type"}) and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), "pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))`
 - `Track: Replay / Resume Blockers in Range`: `round((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~"$pipeline", run_type=~"$run_type", status="failed"}[$__range])) or vector(0)) + (sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~"$pipeline", status="failed"}[$__range])) or vector(0)) + (sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~"$pipeline", disposition=~".*_incompatible"}[$__range])) or vector(0)) + (sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~"$pipeline", status="not_reconstructable"}[$__range])) or vector(0)) + (sum(increase(bioetl_replay_drift_events_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__range])) or vector(0)) + (sum(increase(bioetl_lineage_refs_missing_total{pipeline=~"$pipeline"}[$__range])) or vector(0)))`
 - `Monitor: Checkpoint Incompatibilities`: `round(sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~"$pipeline", disposition=~".*_incompatible"}[$__range])) or vector(0))`
@@ -183,7 +183,7 @@ panels; HTTP-backed identity panels are documented in the inventory above.
 
 ## Notes
 
-- `Monitor Replay Safety` remains one business-signal card. `Status` is
+- `Monitor Replay` remains one business-signal card. `Status` is
   intentionally stricter: it reads `bioetl_control_plane_current_status_trusted`
   so replay blockers cannot render green when checkpoint evidence is missing or
   stale (`>=900s` WARN, `>=3600s` CRIT) or required telemetry is incomplete.

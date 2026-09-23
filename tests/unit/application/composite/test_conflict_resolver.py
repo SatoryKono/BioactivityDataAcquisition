@@ -203,7 +203,10 @@ def test_resolve_conflicts_skips_when_preserve_all_sources_enabled(
 
     result = service.resolve_conflicts(df, {}, _build_enrichers(), "chembl_publication")
 
-    assert result is df
+    assert result["chembl.publication.title"].to_list() == ["Seed"]
+    assert result["crossref.publication.title"].to_list() == ["Enricher"]
+    assert result["title"].to_list() == ["Seed"]
+    assert result["_internal"].to_list() == ["ignore"]
     logger.info.assert_called_once_with(
         "Skipping conflict resolution - preserve_all_sources=True",
         qualified_columns=2,

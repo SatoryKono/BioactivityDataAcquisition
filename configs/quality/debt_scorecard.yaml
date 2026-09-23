@@ -460,9 +460,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 196
-      total_loc: 23839
+      total_loc: 24083
       files_ge_250_loc: 0
-      helper_function_ratio: 0.376
+      helper_function_ratio: 0.384
       max_internal_fan_in: 5
       max_internal_fan_in_module: bioetl.application.core.target_data_source_mixins
     trend:
@@ -487,10 +487,10 @@ hotspot_family_ratchets:
       max_internal_fan_in: 3
     metrics:
       duplication_clusters: 0
-      files: 52
-      total_loc: 6177
+      files: 45
+      total_loc: 6051
       files_ge_250_loc: 0
-      helper_function_ratio: 0.328
+      helper_function_ratio: 0.326
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.tracing_bootstrap
     trend:
@@ -514,12 +514,12 @@ hotspot_family_ratchets:
       max_internal_fan_in: 3
     metrics:
       duplication_clusters: 0
-      files: 35
-      total_loc: 3936
+      files: 32
+      total_loc: 3870
       files_ge_250_loc: 0
       helper_function_ratio: 0.358
       max_internal_fan_in: 2
-      max_internal_fan_in_module: bioetl.composition.factories.pipeline.transformer_builder
+      max_internal_fan_in_module: bioetl.composition.factories.pipeline.runner_constructor
     trend:
       status: reduced_2026-07-28_issue_6787_helper_ratio
       next_action: '2026-07-28 issue 6787: helper-heavy modules remain under composition/factories/pipeline_support/
@@ -570,7 +570,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 56
-      total_loc: 7171
+      total_loc: 7379
       files_ge_250_loc: 0
       helper_function_ratio: 0.382
       max_internal_fan_in: 2

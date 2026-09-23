@@ -10,7 +10,24 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `4dfad943b9a184f9782b1a1ae58f2f53f6a0dff7d86aca7d74ad42878e3f9980`
+Evidence surface SHA-256: `7d23fae26f3f5dc47a094a8ed26c434f8b318e440ac4ffa8a834d3fd6bab508c`
+
+Evidence metadata refresh (2026-09-23): the canonical registry digest was
+recomputed after S2 transformer split, test-governance unique-name/marker
+repair, and module-coverage inventory rebind.
+Current headline evidence:
+Debt-governance gates: **45 pass / 0 fail**;
+Architecture quality integral score: **10.0** (`excellent`);
+Integral score `10.00`. architecture score `10.00`.
+source_module_count: **2479** with fully_covered: **2471**;
+partially_covered: **7**; no_executable_lines: **1**;
+uncovered: **0**; unmeasured: **0** (= 2479 == source_module_count).
+Contract coverage matrix schema: **contract-coverage-matrix-v3**.
+Constructor waivers (shrink-only inventory): **1** entries.
+Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**.
+Layer violations: **0**.
+The historical audited commit above is retained; this metadata refresh does
+not constitute a new repository-wide architecture audit.
 
 Evidence metadata refresh (2026-09-19): the canonical registry digest was
 recomputed after hotspot fan-in closeout, assertless-triage reduction,
@@ -50,10 +67,10 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "4dfad943b9a184f9782b1a1ae58f2f53f6a0dff7d86aca7d74ad42878e3f9980",
+  "evidence_surface_sha256": "7d23fae26f3f5dc47a094a8ed26c434f8b318e440ac4ffa8a834d3fd6bab508c",
   "metrics": {
-    "architecture_integral_score": 9.47,
-    "architecture_interpretation": "good_targeted_improvements",
+    "architecture_integral_score": 10.0,
+    "architecture_interpretation": "excellent",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 45,
@@ -61,11 +78,11 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 2486,
+    "fully_covered_module_count": 2471,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 1,
-    "partially_covered_module_count": 10,
-    "source_module_count": 2497,
+    "partially_covered_module_count": 7,
+    "source_module_count": 2479,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
@@ -100,7 +117,7 @@ Refresh reason: Reconcile the current evidence surface and semantic summary with
 
 | Facade | Source importers | Test importers |
 | --- | ---: | ---: |
-| `bioetl.domain.composite.config` | 0 | 40 |
+| `bioetl.domain.composite.config` | 0 | 44 |
 | `bioetl.application.composite.merger` | 0 | 5 |
 
 ## Evidence anchors

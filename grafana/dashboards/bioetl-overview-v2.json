@@ -406,6 +406,24 @@
               {
                 "id": "custom.width",
                 "value": 130
+              },
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "SELECT RUN": {
+                        "text": "—",
+                        "color": "text"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -430,6 +448,77 @@
               {
                 "id": "custom.width",
                 "value": 140
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Result"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "SELECT RUN": {
+                        "text": "—",
+                        "color": "text"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Rules"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Evidence"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open Run Explorer",
+                    "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+                    "targetBlank": false,
+                    "includeVars": false
+                  }
+                ]
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "SELECT RUN": {
+                        "text": "Choose a run",
+                        "color": "text"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           }
@@ -899,7 +988,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 70
+                "value": 90
               }
             ]
           },
@@ -1054,7 +1143,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 }
               }
             ]
@@ -4739,7 +4828,7 @@
                   },
                   {
                     "id": "custom.width",
-                    "value": 80
+                    "value": 90
                   }
                 ]
               },
@@ -4845,15 +4934,15 @@
                 },
                 "properties": [
                   {
+                    "id": "custom.width",
+                    "value": 280
+                  },
+                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 190
                   }
                 ]
               },

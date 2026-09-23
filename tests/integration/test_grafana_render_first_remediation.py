@@ -1060,7 +1060,8 @@ def test_incident_alert_count_and_dq_reason_have_honest_table_semantics() -> Non
         }
         for override in dq_suspects["fieldConfig"]["overrides"]
     }
-    assert overrides["Pipeline"]["custom.width"] == 70
+    assert dq_suspects["gridPos"]["w"] == 24
+    assert overrides["Pipeline"]["custom.width"] == 250
     assert "custom.width" not in overrides["Reason"]
     assert overrides["Reason"]["custom.cellOptions"] == {
         "type": "auto",
@@ -1076,7 +1077,8 @@ def test_incident_alert_count_and_dq_reason_have_honest_table_semantics() -> Non
     visible_width = int(overrides["Pipeline"]["custom.width"]) + int(
         overrides["Signal"]["custom.width"]
     )
-    assert visible_width <= 187
+    css_budget = (1366 // 2) * dq_suspects["gridPos"]["w"] // 24 - 40
+    assert visible_width <= css_budget
 
 
 def test_runtime_multi_query_tables_expose_semantic_fields_only() -> None:

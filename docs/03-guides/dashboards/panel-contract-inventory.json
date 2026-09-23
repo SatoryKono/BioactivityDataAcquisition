@@ -3308,7 +3308,7 @@
       "formula": "",
       "kind": "http",
       "panel_id": 9002,
-      "panel_title": "Review Selected Run Domains",
+      "panel_title": "Review Run Domains",
       "query": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
       "query_tokens": [
         "/ops/observability/selected-run-status",

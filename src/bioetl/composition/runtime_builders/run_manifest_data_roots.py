@@ -27,14 +27,26 @@ __all__ = [
 ]
 
 
+def compat_attr(module: str, name: str, *args: object, **kwargs: object) -> object:
+    return getattr(import_module(module), name)(*args, **kwargs)
+
+
 def control_plane_root(*args: object, **kwargs: object) -> object:
-    module = "bioetl.composition.control_plane_paths"
-    return import_module(module).control_plane_root(*args, **kwargs)
+    return compat_attr(
+        "bioetl.composition.control_plane_paths",
+        "control_plane_root",
+        *args,
+        **kwargs,
+    )
 
 
 def build_planned_artifacts(*args: object, **kwargs: object) -> object:
-    module = "bioetl.composition.runtime_builders._run_manifest_planned_artifacts"
-    return import_module(module).build_planned_artifacts(*args, **kwargs)
+    return compat_attr(
+        "bioetl.composition.runtime_builders._run_manifest_planned_artifacts",
+        "build_planned_artifacts",
+        *args,
+        **kwargs,
+    )
 
 
 def is_explicit_data_root_configured(settings: Settings) -> bool:
@@ -73,11 +85,7 @@ def resolve_data_root_with_mode(settings: Settings) -> tuple[Path, DataRootMode]
 
 
 def _private_fallback_data_root() -> Path:
-    """Return a user-private fallback data root for legacy facade callers.
-
-    Kept as a named seam so tests can monkeypatch the private fallback path
-    without reimplementing mode classification.
-    """
+    """Named seam for the user-private fallback data root (test monkeypatch)."""
     preferred = Path.home() / ".cache" / "bioetl-data"
     try:
         return _prepare_private_runtime_dir(preferred)
@@ -100,12 +108,7 @@ def _private_fallback_data_root_with_mode() -> tuple[Path, DataRootMode]:
 
 
 def _prepare_private_runtime_dir(path: Path) -> Path:
-    """Create a private runtime directory owned by the current user.
-
-    On POSIX, rejects fallbacks that cannot be restricted to owner-only access.
-    Windows ACLs do not map cleanly to Unix mode bits; there we still create
-    the directory and best-effort chmod without hard-failing on mode 0o777.
-    """
+    """Create a private runtime directory; POSIX rejects non-owner modes."""
     path.mkdir(parents=True, exist_ok=True, mode=0o700)
     with suppress(OSError):
         path.chmod(0o700)
@@ -121,7 +124,6 @@ def _assert_private_runtime_dir(path: Path) -> None:
         st = path.stat()
     except OSError as exc:
         raise OSError(f"unable to stat private runtime path: {path}") from exc
-
     getuid = cast("Callable[[], int] | None", getattr(os, "getuid", None))
     if getuid is not None:
         try:
@@ -134,12 +136,10 @@ def _assert_private_runtime_dir(path: Path) -> None:
                     f"private runtime path is not owned by current user: {path}"
                 )
 
-    # Windows reports broad mode bits even for private dirs; skip mode gate.
     if os.name == "nt":
         return
 
     mode = stat.S_IMODE(st.st_mode)
-    # Owner-only: no group/other read/write/execute.
     if mode & 0o077:
         with suppress(OSError):
             path.chmod(0o700)

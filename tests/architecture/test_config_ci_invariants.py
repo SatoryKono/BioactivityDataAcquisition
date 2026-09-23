@@ -692,7 +692,8 @@ class TestConfigContractSourceOfTruth:
         assert invariant_script.ENTITY_ALLOWED_KEYS is ENTITY_ALLOWED_KEYS
         assert invariant_script.COMPOSITE_ALLOWED_KEYS is COMPOSITE_ALLOWED_KEYS
         assert (
-            invariant_script.COMPOSITE_NESTED_PAYLOAD_KEYS is COMPOSITE_NESTED_PAYLOAD_KEYS
+            invariant_script.COMPOSITE_NESTED_PAYLOAD_KEYS
+            is COMPOSITE_NESTED_PAYLOAD_KEYS
         )
         assert invariant_script.PROVIDER_ALLOWED_KEYS is PROVIDER_ALLOWED_KEYS
         assert invariant_script.QUALITY_ALLOWED_KEYS is QUALITY_ALLOWED_KEYS
