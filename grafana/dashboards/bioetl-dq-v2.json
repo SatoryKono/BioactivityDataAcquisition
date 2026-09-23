@@ -3864,7 +3864,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Selected-range anomaly counts by severity and anomaly type. WARN-only anomalies indicate drift; CRIT anomalies are blocking and should be correlated with current DQ reasons before replay or promotion. No data means no anomaly events were observed in the current window; the panel must not invent a synthetic severity/type series. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Selected-range anomaly counts by severity and anomaly type. WARN-only anomalies indicate drift; CRIT anomalies are blocking and should be correlated with current DQ reasons before replay or promotion. No data means no anomaly events were observed in the current window; the panel must not invent a synthetic severity/type series. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row TELEMETRY MISSING is not a zero and not VALID EMPTY. Rolling-window samples overlap; legend Last is the last observed window, not an event total for the selected time range.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3914,7 +3914,7 @@
           "options": {
             "legend": {
               "calcs": [
-                "sum",
+                "lastNotNull",
                 "max"
               ],
               "displayMode": "list",
