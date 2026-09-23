@@ -40,7 +40,7 @@ multiple runs; use RunLedger for exact reconciliation.
 - **Notes:** `run_id` is URL handoff context, never a Prometheus label. The
   Action cell preserves the domain target and the row's pipeline.
 
-### 5. Review Selected Run Domains
+### 5. Review Run Domains
 - **Type:** Table (`id=9002`)
 - **Purpose:** Six fixed domains from the exact persisted run assessment, independent of age and range.
 - **Data source:** Selected-run API. Summary panel 9603 reuses this response through the Dashboard datasource.

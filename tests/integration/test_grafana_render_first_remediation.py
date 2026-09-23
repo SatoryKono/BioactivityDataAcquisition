@@ -825,8 +825,8 @@ def test_first_window_named_text_columns_wrap_without_table_default() -> None:
             assert panel["options"]["cellHeight"] == "sm"
             # Keep the reason flexible so status and source survive at 900px.
             assert _override_width(panel, "reason") is None
-            assert _override_width(panel, "Source state") == 105
-            assert _override_width(panel, "Status") == 100
+            assert _override_width(panel, "Source state") == 70
+            assert _override_width(panel, "Status") == 90
         else:
             # The reason uses the space left by compact categorical columns.
             assert all(_override_width(panel, name) is None for name in wrapped)
@@ -1394,7 +1394,7 @@ def test_cycle5_wrap_text_columns_restore_declared_widths() -> None:
     layout_width = 1366 // 2
     chrome_px = 40
     cases = (
-        ("bioetl-provider-health-v2.json", 9107, 12, "Source state", 105, "reason"),
+        ("bioetl-provider-health-v2.json", 9107, 12, "Source state", 70, "reason"),
         ("bioetl-runtime.json", 9101, 16, "reason", None, "action_target"),
         (
             "bioetl-control-plane-v1.json",

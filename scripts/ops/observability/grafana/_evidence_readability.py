@@ -257,7 +257,7 @@ def _runtime(p: dict[int, dict]) -> None:
 
 def _provider(p: dict[int, dict]) -> None:
     p[102]["title"] = "Inspect Health p95"
-    for field, width in {"Provider": 140, "Source state": 75, "Status": 90}.items():
+    for field, width in {"Provider": 140, "Source state": 70, "Status": 90}.items():
         _override(p[9107], field, _WIDTH, width)
     _override(p[9107], "Source state", "displayName", "Source")
     _override(p[9111], "Provider", _WIDTH, 200)
@@ -432,12 +432,12 @@ def apply_evidence_readability(payload: dict) -> None:
         "bioetl-dq-v2": _dq,
         "bioetl-incident-v1": _incident,
     }
-    if handler := handlers.get(payload["uid"]):
+    if handler := handlers.get(payload.get("uid")):
         handler(p)
-    if payload["uid"] == "bioetl-run-explorer-v1":
+    if payload.get("uid") == "bioetl-run-explorer-v1":
         _run_explorer(p)
     _first_window_widths(payload, p)
-    if payload["uid"] == "bioetl-control-plane-v1":
+    if payload.get("uid") == "bioetl-control-plane-v1":
         for pid, title in {
             9401: "Monitor Readiness",
             891: "Monitor Replay",
@@ -540,7 +540,7 @@ def _first_window_widths(payload: dict, p: dict[int, dict]) -> None:
             }
         },
     }
-    for pid, fields in widths.get(payload["uid"], {}).items():
+    for pid, fields in widths.get(payload.get("uid"), {}).items():
         for item in p[pid]["fieldConfig"].get("overrides", []):
             item["properties"] = [
                 prop for prop in item["properties"] if prop["id"] != _WIDTH
