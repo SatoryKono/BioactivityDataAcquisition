@@ -225,11 +225,11 @@ def test_runtime_telemetry_gap_panel_keeps_readable_first_screen_width() -> None
         if isinstance(panel.get("title"), str)
     }
 
-    panel = root["Monitor Metrics Coverage"]
+    panel = root["Monitor Coverage"]
     grid = panel.get("gridPos", {})
     assert grid["y"] <= 23
     assert grid["w"] >= 4, (
-        "Monitor Metrics Coverage must reserve readable width on the first screen"
+        "Monitor Coverage must reserve readable width on the first screen"
     )
     secondary_row = next(
         panel for panel in dashboard["panels"] if panel.get("id") == 9992
@@ -934,7 +934,7 @@ def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
         for panel in child_panels
         if isinstance(panel.get("title"), str)
     }
-    assert "Inspect Health-Check Latency p95" in child_titles
+    assert "Inspect Health p95" in child_titles
     assert detail_row.get("gridPos", {}).get("y", 0) < min(
         int(panel.get("gridPos", {}).get("y", 0)) for panel in child_panels
     )

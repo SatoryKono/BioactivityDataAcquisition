@@ -1643,7 +1643,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '2':
-        title: Monitor Volume-Weighted DQ Score
+        title: Monitor Weighted DQ
         role: indicator
         tier: 3
         scope: time_range
@@ -1727,7 +1727,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '5':
-        title: Monitor Worst-Entity DQ Score
+        title: Monitor Worst DQ
         role: indicator
         tier: 3
         scope: time_range
@@ -2832,7 +2832,7 @@ dashboards:
         - not_applicable
         render_profiles: *id001
       '9401':
-        title: Monitor Selected-Scope Status
+        title: Monitor Scope Status
         role: indicator
         tier: 3
         scope: current
@@ -3811,7 +3811,7 @@ dashboards:
         - not_applicable
         render_profiles: *id001
       '102':
-        title: Inspect Health-Check Latency p95
+        title: Inspect Health p95
         role: indicator
         tier: 3
         scope: time_range
@@ -4692,7 +4692,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '5':
-        title: Inspect Control Plane Alert Conditions
+        title: Inspect Control Plane Alerts
         role: indicator
         tier: 3
         scope: time_range
@@ -4720,7 +4720,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '6':
-        title: Inspect Provider Alert Conditions
+        title: Inspect Provider Alerts
         role: indicator
         tier: 3
         scope: time_range
@@ -4804,7 +4804,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '21':
-        title: Monitor Memory Pressure Active
+        title: Monitor Memory Pressure
         role: indicator
         tier: 3
         scope: time_range
@@ -4958,7 +4958,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '230':
-        title: Monitor Pipeline Alert Conditions
+        title: Monitor Pipeline Alerts
         role: indicator
         tier: 3
         scope: time_range
@@ -5398,7 +5398,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '9102':
-        title: Monitor Metrics Coverage
+        title: Monitor Coverage
         role: confidence
         tier: 2
         scope: current

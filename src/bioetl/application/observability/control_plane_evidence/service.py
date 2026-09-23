@@ -83,17 +83,33 @@ class ControlPlaneEvidenceService:
     ) -> dict[str, object] | None:
         """Validate a discovery candidate only after its terminal success is known.
 
-        Non-success cannot satisfy latest-complete discovery, so reading its
-        archives and lineage is unnecessary. Success still requires every Trust
-        component; the same immutable ledger snapshot drives both decisions.
+        Discovery needs an all-OK candidate, not a full diagnostic for every
+        rejected run. Stop at the first non-OK component; check retention before
+        the more expensive lineage traversal. A returned candidate still requires
+        every component, using one immutable ledger snapshot.
         """
         snapshot = (
             ledger_entries(self.ledger_port, scope.manifest) if scope.manifest else ()
         )
         if _processing_status(scope.manifest, snapshot) != "success":
             return None
-        return self._trust_summary_from_snapshot(
-            scope=scope, now=now, snapshot=snapshot
+        checks: list[EvidenceCheckResult] = []
+        for build in (
+            lambda: self.manifest_validation(scope=scope, ledger_snapshot=snapshot),
+            lambda: self.retention_compliance(
+                scope=scope, now=now, ledger_snapshot=snapshot
+            ),
+            lambda: self.lineage_validation(scope=scope, ledger_snapshot=snapshot),
+        ):
+            current = component_checks((build(),))
+            if not current or any(check.status != "OK" for check in current):
+                return None
+            checks.extend(current)
+        return service_payload(
+            endpoint="trust-summary",
+            scope=scope,
+            checks=tuple(checks),
+            ledger_entries=snapshot,
         )
 
     def _trust_summary_from_snapshot(

@@ -585,7 +585,7 @@ def test_runtime_alert_condition_summaries_are_telemetry_anchored() -> None:
     """Runtime handoff cards must preserve UNKNOWN for missing scope telemetry."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expected_anchor = {
-        "Monitor Pipeline Alert Conditions": (
+        "Monitor Pipeline Alerts": (
             "bioetl_runtime_pipeline_run_type_universe",
             'run_type=~"$run_type"',
         ),
@@ -593,11 +593,11 @@ def test_runtime_alert_condition_summaries_are_telemetry_anchored() -> None:
             "bioetl_runtime_pipeline_run_type_universe",
             'pipeline=~"$pipeline"',
         ),
-        "Inspect Control Plane Alert Conditions": (
+        "Inspect Control Plane Alerts": (
             "bioetl_runtime_pipeline_run_type_universe",
             'run_type=~"$run_type"',
         ),
-        "Inspect Provider Alert Conditions": (
+        "Inspect Provider Alerts": (
             "bioetl_provider_current_status",
             'provider=~"$provider_hint"',
         ),
@@ -640,7 +640,7 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
         },
         "bioetl-provider-health-v2.json": {
             "Track Health-Check Latency p95",
-            "Inspect Health-Check Latency p95",
+            "Inspect Health p95",
             "Track Request Latency p95",
             "Track Rate-Limiter Wait p95",
         },
@@ -772,10 +772,10 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
             "Monitor Silver Validation Failures": "round(",
         },
         "bioetl-runtime.json": {
-            "Monitor Pipeline Alert Conditions": "bioetl_runtime_pipeline_alert_count",
+            "Monitor Pipeline Alerts": "bioetl_runtime_pipeline_alert_count",
             "Inspect DQ Alert Conditions": "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
-            "Inspect Control Plane Alert Conditions": "bioetl_runtime_control_plane_alert_count",
-            "Inspect Provider Alert Conditions": "bioetl_runtime_provider_alert_count",
+            "Inspect Control Plane Alerts": "bioetl_runtime_control_plane_alert_count",
+            "Inspect Provider Alerts": "bioetl_runtime_provider_alert_count",
             "Inspect Global Provider Alert Conditions": (
                 "bioetl_runtime_alert_condition_provider_adapter_latency_high_30m"
             ),
@@ -810,7 +810,7 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-dq-v2.json", "Monitor Volume-Weighted DQ Score"),
+        ("bioetl-dq-v2.json", "Monitor Weighted DQ"),
     ],
 )
 def test_dq_score_uses_validation_metric(dashboard_file, panel_title):
@@ -856,21 +856,21 @@ def test_worst_entity_dq_score_preserves_no_data_state() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor Worst-Entity DQ Score"
+            if item.get("title") == "Monitor Worst DQ"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Monitor Worst-Entity DQ Score' not found"
+    assert panel is not None, "Panel 'Monitor Worst DQ' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert any("bioetl_dq_validation_score" in expr for expr in expressions)
     assert all("last_over_time(" in expr and "[7d]" in expr for expr in expressions)
     assert all("or vector(0)" not in expr for expr in expressions), (
-        "Monitor Worst-Entity DQ Score must preserve no-data rather than rendering score 0"
+        "Monitor Worst DQ must preserve no-data rather than rendering score 0"
     )
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     assert defaults.get("noValue") == "UNKNOWN", (
-        "Monitor Worst-Entity DQ Score must render missing score samples as UNKNOWN"
+        "Monitor Worst DQ must render missing score samples as UNKNOWN"
     )
 
 
@@ -1069,11 +1069,11 @@ def test_runtime_diagnostic_panels_preserve_unknown_no_data_state() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expected_panels = {
         "Monitor Pipeline Status",
-        "Monitor Metrics Coverage",
+        "Monitor Coverage",
         "Monitor Active Blocker Count",
         "Monitor Runtime Error Rate",
         "Monitor Worst Stage Lag",
-        "Monitor Memory Pressure Active",
+        "Monitor Memory Pressure",
     }
     panels = {
         panel.get("title"): panel
@@ -1101,11 +1101,11 @@ def test_runtime_telemetry_gap_checks_scrape_and_rule_health() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor Metrics Coverage"
+            if item.get("title") == "Monitor Coverage"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Monitor Metrics Coverage' not found"
+    assert panel is not None, "Panel 'Monitor Coverage' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert (
@@ -1638,13 +1638,13 @@ def test_dq_problem_panels_expose_actionable_datalinks() -> None:
     """Key DQ incident panels must offer direct operator handoff."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     expected_panels = {
-        "Monitor Worst-Entity DQ Score",
+        "Monitor Worst DQ",
         "Monitor Worst Freshness Age",
         "Monitor Silver Filter Rejects",
     }
     # Silver Reject Explorer handoffs were removed; reject accounting stays on-panel.
     panels_requiring_links = {
-        "Monitor Worst-Entity DQ Score",
+        "Monitor Worst DQ",
         "Monitor Worst Freshness Age",
     }
     panels = {

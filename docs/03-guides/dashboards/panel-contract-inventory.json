@@ -1972,7 +1972,7 @@
       "formula": "((sum((last_over_time(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}[7d]) * last_over_time(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}[7d])))) / clamp_min(sum(last_over_time(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}[7d])), 1))",
       "kind": "promql",
       "panel_id": 2,
-      "panel_title": "Monitor Volume-Weighted DQ Score",
+      "panel_title": "Monitor Weighted DQ",
       "query": "((sum((last_over_time(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}[7d]) * last_over_time(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}[7d])))) / clamp_min(sum(last_over_time(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}[7d])), 1))",
       "query_tokens": [
         "bioetl_dq_validation_record_count",
@@ -2056,7 +2056,7 @@
       "formula": "min(last_over_time(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}[7d]))",
       "kind": "promql",
       "panel_id": 5,
-      "panel_title": "Monitor Worst-Entity DQ Score",
+      "panel_title": "Monitor Worst DQ",
       "query": "min(last_over_time(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}[7d]))",
       "query_tokens": [
         "bioetl_dq_validation_score"
@@ -2111,11 +2111,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "coverage_gap",
-      "formula": "(max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}[12h]), 0))) / 3600",
+      "formula": "(max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}[$__range]), 0))) / 3600",
       "kind": "promql",
       "panel_id": 8,
       "panel_title": "Monitor Worst Freshness Age",
-      "query": "(max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}[12h]), 0))) / 3600",
+      "query": "(max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}[$__range]), 0))) / 3600",
       "query_tokens": [
         "bioetl_data_freshness_seconds"
       ],
@@ -3152,7 +3152,7 @@
       "formula": "max(bioetl_l0_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
       "kind": "promql",
       "panel_id": 9401,
-      "panel_title": "Monitor Selected-Scope Status",
+      "panel_title": "Monitor Scope Status",
       "query": "max(bioetl_l0_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
       "query_tokens": [
         "bioetl_l0_status"
@@ -4044,7 +4044,7 @@
       "formula": "(histogram_quantile(0.95, (sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])) unless on (provider) (sum by (provider) (changes(bioetl_health_check_latency_seconds_created{provider=~\"$provider\"}[$__range]) > 0))))) >= 0",
       "kind": "promql",
       "panel_id": 102,
-      "panel_title": "Inspect Health-Check Latency p95",
+      "panel_title": "Inspect Health p95",
       "query": "(histogram_quantile(0.95, (sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])) unless on (provider) (sum by (provider) (changes(bioetl_health_check_latency_seconds_created{provider=~\"$provider\"}[$__range]) > 0))))) >= 0",
       "query_tokens": [
         "bioetl_health_check_latency_seconds_bucket",
@@ -5074,7 +5074,7 @@
       "formula": "sum(bioetl_runtime_control_plane_alert_count{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0)",
       "kind": "promql",
       "panel_id": 5,
-      "panel_title": "Inspect Control Plane Alert Conditions",
+      "panel_title": "Inspect Control Plane Alerts",
       "query": "sum(bioetl_runtime_control_plane_alert_count{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0)",
       "query_tokens": [
         "bioetl_runtime_control_plane_alert_count",
@@ -5108,7 +5108,7 @@
       "formula": "sum(bioetl_runtime_provider_alert_count{provider=~\"$provider_hint\"}) and on() (count(bioetl_provider_current_status{provider=~\"$provider_hint\"}) > bool 0)",
       "kind": "promql",
       "panel_id": 6,
-      "panel_title": "Inspect Provider Alert Conditions",
+      "panel_title": "Inspect Provider Alerts",
       "query": "sum(bioetl_runtime_provider_alert_count{provider=~\"$provider_hint\"}) and on() (count(bioetl_provider_current_status{provider=~\"$provider_hint\"}) > bool 0)",
       "query_tokens": [
         "bioetl_provider_current_status",
@@ -5205,7 +5205,7 @@
       "formula": "max(max_over_time(bioetl_memory_pressure_state{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",stage=~\"$stage\"}[15m]))",
       "kind": "promql",
       "panel_id": 21,
-      "panel_title": "Monitor Memory Pressure Active",
+      "panel_title": "Monitor Memory Pressure",
       "query": "max(max_over_time(bioetl_memory_pressure_state{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",stage=~\"$stage\"}[15m]))",
       "query_tokens": [
         "bioetl_memory_pressure_state"
@@ -5433,7 +5433,7 @@
       "formula": "sum(bioetl_runtime_pipeline_alert_count{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0)",
       "kind": "promql",
       "panel_id": 230,
-      "panel_title": "Monitor Pipeline Alert Conditions",
+      "panel_title": "Monitor Pipeline Alerts",
       "query": "sum(bioetl_runtime_pipeline_alert_count{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0)",
       "query_tokens": [
         "bioetl_runtime_pipeline_alert_count",
@@ -6221,7 +6221,7 @@
       "formula": "max(up{job=\"bioetl\"})",
       "kind": "promql",
       "panel_id": 9102,
-      "panel_title": "Monitor Metrics Coverage",
+      "panel_title": "Monitor Coverage",
       "query": "max(up{job=\"bioetl\"})",
       "query_tokens": [
         "up"
@@ -6256,7 +6256,7 @@
       "formula": "min(bioetl_runtime_stage_evidence_present_ratio{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() vector(-1)",
       "kind": "promql",
       "panel_id": 9102,
-      "panel_title": "Monitor Metrics Coverage",
+      "panel_title": "Monitor Coverage",
       "query": "min(bioetl_runtime_stage_evidence_present_ratio{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() vector(-1)",
       "query_tokens": [
         "bioetl_runtime_stage_evidence_present_ratio"
@@ -6291,7 +6291,7 @@
       "formula": "bioetl_runtime_required_rule_age_seconds",
       "kind": "promql",
       "panel_id": 9102,
-      "panel_title": "Monitor Metrics Coverage",
+      "panel_title": "Monitor Coverage",
       "query": "bioetl_runtime_required_rule_age_seconds",
       "query_tokens": [
         "bioetl_runtime_required_rule_age_seconds"

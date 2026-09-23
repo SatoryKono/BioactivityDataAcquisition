@@ -21,12 +21,12 @@
   },
   "dashboard_sha256": {
     "bioetl-control-plane-v1": "74c8810b098669a6d1129d6ff93542d39f5f28c501616bdd7427186917a4e307",
-    "bioetl-dq-v2": "8fb7692efc68009032963bd87e333ef3f83b35efe53dedb3f3cf407960754295",
-    "bioetl-incident-v1": "d4a4ec5ba3e9b2595c3f8ac8653f58ed650bf85a375eec610eae459352dfe1f6",
+    "bioetl-dq-v2": "c91544a8339c0f28069c5ae37bbece49a87c029381362e3e9d624111ebb6d48d",
+    "bioetl-incident-v1": "1e969153c3aa1f9fdcd57365ad5efb3d03175211d42247b6d10eb902dea39b56",
     "bioetl-overview-v2": "6cc12b5722e897a2478ad9a303e3dc7dee487ed4d9d40fd0f71d6bd607a4b91b",
-    "bioetl-provider-health-v2": "a5c7fc1b5340f74ebb5b22ce2f0be43095f69310cdfdb55e7d30cb92781a2441",
+    "bioetl-provider-health-v2": "ce1db35b364bffd3fe0ffb574a561d6db1745a0724e535c913ce58c9c96e4ff8",
     "bioetl-run-explorer-v1": "1f68dc375d8c566928b07f6874e6eed12ad052358b6388e255e9a2da8b0d77c7",
-    "bioetl-runtime": "1d25872c4f9d74223b29b467e615c734370f25f99021b41b0dbd3999ad05c37c"
+    "bioetl-runtime": "b9c75c295e150e7e79ce6ab354eac118c69133f7b70daf5babf23d97ddf1df35"
   },
   "panels": [
     {
@@ -1358,7 +1358,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-dq-v2",
       "panel_id": 2,
-      "panel_title": "Monitor Volume-Weighted DQ Score",
+      "panel_title": "Monitor Weighted DQ",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
@@ -1377,7 +1377,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-dq-v2",
       "panel_id": 5,
-      "panel_title": "Monitor Worst-Entity DQ Score",
+      "panel_title": "Monitor Worst DQ",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
@@ -1402,7 +1402,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "(max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}[12h]), 0))) / 3600"
+          "(max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}[$__range]), 0))) / 3600"
         ],
         "target_count": 1
       }
@@ -1904,7 +1904,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-incident-v1",
       "panel_id": 9401,
-      "panel_title": "Monitor Selected-Scope Status",
+      "panel_title": "Monitor Scope Status",
       "route": "incident-console",
       "source": {
         "datasource_type": "prometheus",
@@ -2946,7 +2946,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-provider-health-v2",
       "panel_id": 102,
-      "panel_title": "Inspect Health-Check Latency p95",
+      "panel_title": "Inspect Health p95",
       "route": "dependency-health",
       "source": {
         "datasource_type": "prometheus",
@@ -3453,7 +3453,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-runtime",
       "panel_id": 9102,
-      "panel_title": "Monitor Metrics Coverage",
+      "panel_title": "Monitor Coverage",
       "route": "pipeline-flow",
       "source": {
         "datasource_type": "prometheus",
@@ -3731,7 +3731,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-runtime",
       "panel_id": 230,
-      "panel_title": "Monitor Pipeline Alert Conditions",
+      "panel_title": "Monitor Pipeline Alerts",
       "route": "pipeline-flow",
       "source": {
         "datasource_type": "prometheus",
@@ -3769,7 +3769,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-runtime",
       "panel_id": 21,
-      "panel_title": "Monitor Memory Pressure Active",
+      "panel_title": "Monitor Memory Pressure",
       "route": "pipeline-flow",
       "source": {
         "datasource_type": "prometheus",
@@ -3824,7 +3824,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-runtime",
       "panel_id": 5,
-      "panel_title": "Inspect Control Plane Alert Conditions",
+      "panel_title": "Inspect Control Plane Alerts",
       "route": "pipeline-flow",
       "source": {
         "datasource_type": "prometheus",
@@ -3843,7 +3843,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-runtime",
       "panel_id": 6,
-      "panel_title": "Inspect Provider Alert Conditions",
+      "panel_title": "Inspect Provider Alerts",
       "route": "pipeline-flow",
       "source": {
         "datasource_type": "prometheus",

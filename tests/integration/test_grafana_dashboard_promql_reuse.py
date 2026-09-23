@@ -64,7 +64,7 @@ def _assert_dq_score_time_semantics() -> None:
         for panel in get_dashboard_panels(dq_dashboard)
         if panel.get("title")
     }
-    score_summary = dq_panels["Monitor Volume-Weighted DQ Score"]
+    score_summary = dq_panels["Monitor Weighted DQ"]
     score_trend = dq_panels["Track Volume-Weighted DQ Score"]
     assert score_summary.get("type") == "stat"
     assert score_summary.get("options", {}).get("colorMode") == "value"

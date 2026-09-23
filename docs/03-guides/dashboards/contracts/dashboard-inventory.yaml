@@ -96,7 +96,7 @@ dashboards:
         type: stat
         description: Worst observed stage lag in the selected range
       - id: 9102
-        title: Monitor Metrics Coverage
+        title: Monitor Coverage
         type: stat
         description: Telemetry confidence chip / scrape-rule trust gate; a gap forces the headline to INCOMPLETE
     selector_variables:

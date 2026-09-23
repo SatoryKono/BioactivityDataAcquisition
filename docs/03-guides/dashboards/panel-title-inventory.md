@@ -95,8 +95,8 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 9403 | Inspect Processed Records |
 | bioetl-dq-v2.json | 9404 | Selected Range · Impact & Freshness |
 | bioetl-dq-v2.json | 157 | Review DQ Coverage |
-| bioetl-dq-v2.json | 2 | Monitor Volume-Weighted DQ Score |
-| bioetl-dq-v2.json | 5 | Monitor Worst-Entity DQ Score |
+| bioetl-dq-v2.json | 2 | Monitor Weighted DQ |
+| bioetl-dq-v2.json | 5 | Monitor Worst DQ |
 | bioetl-dq-v2.json | 8 | Monitor Worst Freshness Age |
 | bioetl-dq-v2.json | 158 | Inspect DQ Sample Coverage |
 | bioetl-dq-v2.json | 154 | Monitor Blocked Records |
@@ -127,7 +127,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 9452 | Inspect Selected Run Identity |
 | bioetl-incident-v1.json | 1000 | Navigate Dashboards |
 | bioetl-incident-v1.json | 9400 | Understand Incident Scope |
-| bioetl-incident-v1.json | 9401 | Monitor Selected-Scope Status |
+| bioetl-incident-v1.json | 9401 | Monitor Scope Status |
 | bioetl-incident-v1.json | 2001 | Start Incident Triage |
 | bioetl-incident-v1.json | 2010 | Inspect Ranked Suspects |
 | bioetl-incident-v1.json | 2005 | Monitor Current Alerts |
@@ -199,7 +199,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-provider-health-v2.json | 107 | Track Failure Share |
 | bioetl-provider-health-v2.json | 108 | Inspect Exhausted Retries |
 | bioetl-provider-health-v2.json | 109 | Track Exhausted Retries |
-| bioetl-provider-health-v2.json | 102 | Inspect Health-Check Latency p95 |
+| bioetl-provider-health-v2.json | 102 | Inspect Health p95 |
 | bioetl-provider-health-v2.json | 110 | Track Request Latency p95 |
 | bioetl-provider-health-v2.json | 111 | Track Rate-Limit Errors |
 | bioetl-provider-health-v2.json | 115 | Track Network & Timeout Errors |
@@ -230,7 +230,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-runtime.json | 9400 | Understand Pipeline Scope |
 | bioetl-runtime.json | 9401 | Monitor Pipeline Status |
 | bioetl-runtime.json | 9101 | Review Runtime Blockers |
-| bioetl-runtime.json | 9102 | Monitor Metrics Coverage |
+| bioetl-runtime.json | 9102 | Monitor Coverage |
 | bioetl-runtime.json | 2460 | Review Stage Progress |
 | bioetl-runtime.json | 252 | Inspect Detection Signals |
 | bioetl-runtime.json | 238 | Track Stage Backlog Trend |
@@ -247,13 +247,13 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-runtime.json | 9991 | Start Pipeline Triage |
 | bioetl-runtime.json | 254 | Review Escalation Paths |
 | bioetl-runtime.json | 2541 | Review Runtime Escalation |
-| bioetl-runtime.json | 230 | Monitor Pipeline Alert Conditions |
+| bioetl-runtime.json | 230 | Monitor Pipeline Alerts |
 | bioetl-runtime.json | 236 | Monitor No-Records Runs |
-| bioetl-runtime.json | 21 | Monitor Memory Pressure Active |
+| bioetl-runtime.json | 21 | Monitor Memory Pressure |
 | bioetl-runtime.json | 2542 | Review Cross-Domain Handoffs |
 | bioetl-runtime.json | 4 | Inspect DQ Alert Conditions |
-| bioetl-runtime.json | 5 | Inspect Control Plane Alert Conditions |
-| bioetl-runtime.json | 6 | Inspect Provider Alert Conditions |
+| bioetl-runtime.json | 5 | Inspect Control Plane Alerts |
+| bioetl-runtime.json | 6 | Inspect Provider Alerts |
 | bioetl-runtime.json | 259 | Inspect Global Provider Alert Conditions |
 | bioetl-runtime.json | 7 | Inspect Entities Stale Over 24h |
 | bioetl-runtime.json | 2543 | Review Global Process Signals |

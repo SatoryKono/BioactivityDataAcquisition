@@ -42,7 +42,7 @@ used.
 - **Data sources:** BioETL Ops HTTP
   `/ops/observability/processed-records`; this is not a Prometheus panel.
 
-### 7. Monitor Metrics Coverage
+### 7. Monitor Coverage
 - **Type:** Stat
 - **Purpose:** Neutral Endpoint, Baseline and Rule age evidence beside blockers.
   SCRAPING proves endpoint access. PRESENT proves only the existing limited
@@ -156,7 +156,7 @@ used.
 - **Purpose:** Explain escalation ownership and handoffs.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 26. Monitor Pipeline Alert Conditions
+### 26. Monitor Pipeline Alerts
 - **Type:** Stat
 - **Purpose:** Show pipeline alert condition status.
 - **Data sources:** `bioetl_runtime_pipeline_alert_count`
@@ -166,7 +166,7 @@ used.
 - **Purpose:** Count runs with zero records processed.
 - **Data sources:** `bioetl_records_processed_total`
 
-### 28. Monitor Memory Pressure Active
+### 28. Monitor Memory Pressure
 - **Type:** Stat
 - **Purpose:** Show active memory pressure conditions.
 - **Data sources:** `bioetl_memory_pressure_state`
@@ -182,12 +182,12 @@ used.
 - **Purpose:** Show DQ alert conditions.
 - **Data sources:** `bioetl_runtime_alert_condition_dq_soft_threshold`
 
-### 31. Inspect Control Plane Alert Conditions
+### 31. Inspect Control Plane Alerts
 - **Type:** Stat
 - **Purpose:** Show control-plane alert conditions.
 - **Data sources:** `bioetl_runtime_control_plane_alert_count`
 
-### 32. Inspect Provider Alert Conditions
+### 32. Inspect Provider Alerts
 - **Type:** Stat
 - **Purpose:** Show provider alert conditions.
 - **Data sources:** `bioetl_runtime_provider_alert_count`

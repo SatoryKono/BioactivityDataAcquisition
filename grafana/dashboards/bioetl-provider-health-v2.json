@@ -1165,7 +1165,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 100
+                "value": 90
               }
             ]
           },
@@ -1188,7 +1188,11 @@
               },
               {
                 "id": "custom.width",
-                "value": 105
+                "value": 70
+              },
+              {
+                "id": "displayName",
+                "value": "Source"
               }
             ]
           },
@@ -1204,7 +1208,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 95
+                "value": 140
               }
             ]
           },
@@ -2288,15 +2292,15 @@
                 },
                 "properties": [
                   {
+                    "id": "custom.width",
+                    "value": 200
+                  },
+                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": true
+                      "wrapText": false
                     }
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 130
                   }
                 ]
               },
@@ -3307,7 +3311,7 @@
               "refId": "A"
             }
           ],
-          "title": "Inspect Health-Check Latency p95",
+          "title": "Inspect Health p95",
           "type": "stat",
           "description": "TIME RANGE · Compact optional selected-range evidence: per-provider p95 health-check latency over the active Grafana range. No data means no latency samples or no probe activity in range, not 0s latency and not a provider verdict TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: range snapshot stat of health-check p95; the interval trend is Track Health-Check Latency p95 (1). Histogram generation guard: windows with a changed producer creation timestamp are omitted for the whole aggregate. A repeated batch snapshot is not a continuous counter; narrow the window to one stable generation. Omitted values do not mean zero latency."
         },
