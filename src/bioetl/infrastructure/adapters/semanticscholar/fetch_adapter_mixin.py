@@ -196,18 +196,7 @@ class SemanticScholarFetchAdapterMixin(
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch by DOI and recover unresolved records through title fallback.
-
-        Args:
-            entity_type: Entity type identifier (ignored; always resolves publications).
-            filter_ids: List of DOI strings for primary batch resolution.
-            filter_field: Filter field name used for the primary lookup phase.
-            fallback_mapping: Mapping of DOI to title for title-based fallback resolution.
-            limit: Optional maximum number of records to yield.
-
-        Yields:
-            BronzeRecord entries from primary DOI resolution and title fallback phases.
-        """
+        """Fetch by DOI and recover unresolved records through title fallback."""
         del entity_type
         resolved_dois: set[str] = set()
 
@@ -229,7 +218,9 @@ class SemanticScholarFetchAdapterMixin(
                 )  # Any: mixin host
             return None
 
-        async for record in as_mixin_host(self)._fallback_decorator.execute(  # Any: mixin host
+        async for record in as_mixin_host(
+            self
+        )._fallback_decorator.execute(  # Any: mixin host
             filter_ids=filter_ids,
             fallback_mapping=fallback_mapping,
             primary_record_fetcher=_primary_records,

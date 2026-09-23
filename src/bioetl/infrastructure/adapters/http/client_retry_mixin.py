@@ -58,11 +58,9 @@ class HTTPClientRetryMixin:
     run_id: RunID | None = cast(Any, None)  # Any: host attr default (PD6)
 
     def _observability_run_id(self) -> str:
-        """Return a stable run identifier for retry logs and spans."""
         return str(self.run_id) if self.run_id is not None else "unknown"
 
     def _get_client(self) -> httpx.AsyncClient:
-        """Provided by HTTPClientContextMixin in UnifiedHTTPClient."""
         raise NotImplementedError
 
     async def _handle_retry_delay(

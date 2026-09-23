@@ -92,7 +92,8 @@ def _journal_and_citation_fields(host: Any, rec: GoldRecord) -> GoldRecord:
 
 
 def _subject_and_type_fields(
-    host: Any, rec: GoldRecord,
+    host: Any,
+    rec: GoldRecord,
     *,
     raw_type: str | None,
     raw_types_list: list[str] | None,
