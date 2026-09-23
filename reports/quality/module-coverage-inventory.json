@@ -1,7 +1,7 @@
 {
-  "additive_coverage_xml_path": "reports/gr-db-corr/new-modules-coverage.xml",
-  "additive_coverage_xml_sha256": "48a3625decf553547716b87a63c87037157f82100f22b838aaf597d6dbfaafc5",
-  "additive_measured_module_count": 176,
+  "additive_coverage_xml_path": "reports/quality/grafana-vis-coverage.xml",
+  "additive_coverage_xml_sha256": "8d005e3f91c474dcf94154742555d3b07aa79fe96670313d5e9cbf9ff559ff8a",
+  "additive_measured_module_count": 1,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
   "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
@@ -24487,6 +24487,16 @@
       "module": "bioetl.interfaces.http._selected_run_live",
       "path": "src/bioetl/interfaces/http/_selected_run_live.py",
       "source_lines": 78
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 5,
+      "executable_lines": 5,
+      "missing_lines": 0,
+      "module": "bioetl.interfaces.http._selected_run_presentation",
+      "path": "src/bioetl/interfaces/http/_selected_run_presentation.py",
+      "source_lines": 40
     },
     {
       "coverage_percent": 100.0,
@@ -49273,6 +49283,16 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
+      "covered_lines": 5,
+      "executable_lines": 5,
+      "missing_lines": 0,
+      "module": "bioetl.interfaces.http._selected_run_presentation",
+      "path": "src/bioetl/interfaces/http/_selected_run_presentation.py",
+      "source_lines": 40
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
       "covered_lines": 4,
       "executable_lines": 4,
       "missing_lines": 0,
@@ -49728,10 +49748,10 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2478,
+    "source_module_count": 2479,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 2467,
+      "fully_covered": 2468,
       "no_executable_lines": 1,
       "partially_covered": 10,
       "uncovered": 0,

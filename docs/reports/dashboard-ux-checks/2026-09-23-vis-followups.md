@@ -20,7 +20,7 @@
 
 ## Проверки и ограничения
 
-Последний широкий dashboard-прогон: **816 passed, 9 skipped**; HTTP unit-прогон: **160 passed**. После последней короткой подписи DQ выполнены регрессии idempotence / metric preservation / action coverage и размер HTTP-модуля: **14 passed**. Два source-inventory guards до commit пропускались штатно из-за dirty source tree; их требуется повторить после commit. Canonical renderer и Scenes ledger обновлены.
+Последний широкий dashboard-прогон: **816 passed, 9 skipped**; HTTP unit-прогон: **160 passed**. После последней короткой подписи DQ выполнены регрессии idempotence / metric preservation / action coverage и размер HTTP-модуля: **14 passed**. После commit source inventory, source hash, scripts inventory и UX report freshness: **8 passed**, без skips. Новый модуль добавлен через измеренное покрытие и non-regressing refresh (2479 модулей); прежние измерения сохранены. Canonical renderer и Scenes ledger обновлены.
 
 Полный архитектурный прогон до финальных правок: **4748 passed, 40 failed, 80 skipped**. Нельзя считать его PASS. Прямое превышение лимита selected_run_status устранено выделением `_selected_run_presentation.py`; форматирование затронутых файлов исправлено. Остальные ошибки включают существующие application complexity, facade LOC и рассинхронизацию governance artifacts; полный baseline-сравнительный прогон не выполнен, поэтому все 40 ошибок не объявляются фоновыми.
 
