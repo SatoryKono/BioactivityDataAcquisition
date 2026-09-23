@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import ast
-import fnmatch
 import itertools
 import json
 import os
@@ -834,6 +833,33 @@ from memory.graph.sync_pkg.mapping_io import (
 )
 from memory.graph.sync_pkg.mapping_io import _read_json as _read_json
 from memory.graph.sync_pkg.mapping_io import _read_yaml as _read_yaml
+from memory.graph.sync_pkg.merge_storage_layer_config import (
+    _entity_pipeline_sink_config as _entity_pipeline_sink_config,
+)
+from memory.graph.sync_pkg.merge_storage_layer_config import (
+    _filtered_group_fields as _filtered_group_fields,
+)
+from memory.graph.sync_pkg.merge_storage_layer_config import (
+    _infer_storage_format as _infer_storage_format,
+)
+from memory.graph.sync_pkg.merge_storage_layer_config import (
+    _merge_sink_config as _merge_sink_config,
+)
+from memory.graph.sync_pkg.merge_storage_layer_config import (
+    _merge_storage_layer_config as _merge_storage_layer_config,
+)
+from memory.graph.sync_pkg.merge_storage_layer_config import (
+    _schema_group_field_map as _schema_group_field_map,
+)
+from memory.graph.sync_pkg.merge_storage_layer_config import (
+    _storage_ref_from_output_path as _storage_ref_from_output_path,
+)
+from memory.graph.sync_pkg.merge_storage_layer_config import (
+    _storage_ref_identity as _storage_ref_identity,
+)
+from memory.graph.sync_pkg.merge_storage_layer_config import (
+    _storage_schema_properties as _storage_schema_properties,
+)
 from memory.graph.sync_pkg.neo4j_statements import (
     DEFAULT_INGEST_WAVE as DEFAULT_INGEST_WAVE,
 )
@@ -3199,137 +3225,6 @@ def _add_file_structure_zone(
         relative_roots,
         config,
     )
-
-
-def _merge_storage_layer_config(
-    base_sink: dict[str, object],
-    pipeline_sink: dict[str, object],
-    layer_name: str,
-) -> dict[str, object]:
-    merged: dict[str, object] = {}
-    base_layer = base_sink.get(layer_name)
-    if isinstance(base_layer, dict):
-        merged.update(base_layer)
-    override_layer = pipeline_sink.get(layer_name)
-    if isinstance(override_layer, dict):
-        merged.update(override_layer)
-    return merged
-
-
-def _merge_sink_config(
-    base_sink: dict[str, object],
-    override_sink: dict[str, object],
-) -> dict[str, object]:
-    merged: dict[str, object] = dict(base_sink)
-    for raw_layer_name, override_layer in override_sink.items():
-        layer_name = str(raw_layer_name)
-        base_layer = merged.get(layer_name)
-        if isinstance(base_layer, dict) and isinstance(override_layer, dict):
-            layer_config = dict(base_layer)
-            layer_config.update(override_layer)
-            merged[layer_name] = layer_config
-        else:
-            merged[layer_name] = override_layer
-    return merged
-
-
-def _entity_pipeline_sink_config(payload: dict[str, object]) -> dict[str, object]:
-    direct_sink = _as_mapping(payload.get("sink"))
-    pipeline_payload = _as_mapping(payload.get("pipeline"))
-    nested_sink = _as_mapping(pipeline_payload.get("sink"))
-    return _merge_sink_config(direct_sink, nested_sink)
-
-
-def _storage_ref_from_output_path(raw_path: str) -> str:
-    normalized = raw_path.strip().strip("/")
-    if normalized.startswith("data/output/"):
-        normalized = normalized.removeprefix("data/output/")
-    return normalized
-
-
-def _storage_ref_identity(ref: str) -> tuple[str | None, str | None, str | None]:
-    parts = [part for part in ref.split("/") if part]
-    if len(parts) < 3:
-        return (parts[0] if parts else None, None, None)
-    return parts[0], parts[1], "/".join(parts[2:])
-
-
-def _infer_storage_format(ref: str) -> str | None:
-    suffix = Path(ref).suffix.casefold()
-    if suffix == ".json":
-        return "json"
-    if suffix == ".jsonl":
-        return "jsonl"
-    if suffix == ".txt":
-        return "txt"
-    return None
-
-
-def _storage_schema_properties(
-    payload: dict[str, object],
-    *,
-    layer_name: str,
-) -> dict[str, JsonValue]:
-    schema_payload = _as_mapping(payload.get("schema"))
-    layer_schema = _as_mapping(schema_payload.get(layer_name))
-    column_groups = _as_iterable(schema_payload.get("column_groups"))
-    schema_column_groups = [
-        name
-        for item in column_groups
-        if isinstance(item, dict)
-        for name in [_optional_text(item.get("name"))]
-        if name is not None
-    ]
-    return {
-        "schema_present": bool(layer_schema),
-        "schema_column_groups": schema_column_groups if schema_column_groups else None,
-        "schema_include_groups": _normalized_text_list(
-            layer_schema.get("include_groups")
-        ),
-        "schema_exclude_fields": _normalized_text_list(
-            layer_schema.get("exclude_fields")
-        ),
-        "schema_alias_policy": _optional_text(layer_schema.get("alias_policy")),
-    }
-
-
-def _schema_group_field_map(payload: dict[str, object]) -> dict[str, list[str]]:
-    schema_payload = _as_mapping(payload.get("schema"))
-    column_groups = schema_payload.get("column_groups")
-    group_map: dict[str, list[str]] = {}
-    if not isinstance(column_groups, list):
-        return group_map
-    for item in column_groups:
-        if not isinstance(item, dict):
-            continue
-        group_name = _optional_text(item.get("name"))
-        if group_name is None:
-            continue
-        fields = _normalized_text_list(item.get("fields")) or []
-        if fields:
-            group_map[group_name] = fields
-    return group_map
-
-
-def _filtered_group_fields(
-    payload: dict[str, object],
-    *,
-    layer_name: str,
-) -> list[tuple[str, str]]:
-    schema_payload = _as_mapping(payload.get("schema"))
-    layer_schema = _as_mapping(schema_payload.get(layer_name))
-    include_groups = _normalized_text_list(layer_schema.get("include_groups")) or []
-    exclude_patterns = _normalized_text_list(layer_schema.get("exclude_fields")) or []
-    group_map = _schema_group_field_map(payload)
-    results: list[tuple[str, str]] = []
-    for group_name in include_groups:
-        for field_name in group_map.get(group_name, []):
-            if any(
-                fnmatch.fnmatch(field_name, pattern) for pattern in exclude_patterns
-            ):
-                continue
-            results.append((group_name, field_name))
-    return results
 
 
 def _field_quality_index(payload: dict[str, object]) -> dict[str, dict[str, JsonValue]]:
