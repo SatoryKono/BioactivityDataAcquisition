@@ -1595,6 +1595,9 @@ from memory.graph.sync_pkg.link_runtime_evidence_support import (
 from memory.graph.sync_pkg.link_runtime_evidence_support import (
     _link_runtime_evidence_support as _link_runtime_evidence_support,
 )
+from memory.graph.sync_pkg.link_runtime_state_evidence_materials import (
+    _link_runtime_state_evidence_materials as _link_runtime_state_evidence_materials,
+)
 from memory.graph.sync_pkg.link_runtime_state_run_and_pipeline import (
     _link_runtime_state_dependencies as _link_runtime_state_dependencies,
 )
@@ -2981,23 +2984,6 @@ def _link_runtime_state_surface(
     _link_runtime_state_run_and_pipeline(snapshot, state, spec)
     _link_runtime_state_dependencies(snapshot, state, spec)
     _link_runtime_state_evidence_materials(snapshot, state, spec)
-
-
-def _link_runtime_state_evidence_materials(
-    snapshot: GraphSnapshot,
-    state: NodeKey,
-    spec: dict[str, object],
-) -> None:
-    for artifact_key in _runtime_state_artifact_targets(spec):
-        if artifact_key in snapshot.nodes:
-            snapshot.add_relation(
-                state, "REFERENCES_ARTIFACT", artifact_key, provenance="runtime_state"
-            )
-    for doc_key in _runtime_state_doc_targets(spec):
-        if doc_key in snapshot.nodes:
-            snapshot.add_relation(
-                state, "DESCRIBED_IN", doc_key, provenance="runtime_state"
-            )
 
 
 def _add_control_plane_run_instance_surfaces(
