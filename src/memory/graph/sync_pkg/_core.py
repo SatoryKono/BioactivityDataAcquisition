@@ -2690,6 +2690,9 @@ from memory.graph.sync_pkg.workflow_family_rules import (
 from memory.graph.sync_pkg.workflow_family_rules import (
     _workflow_trigger_names as _workflow_trigger_names,
 )
+from memory.graph.sync_pkg.workflow_job_dependency_ids import (
+    _workflow_job_dependency_ids as _workflow_job_dependency_ids,
+)
 from memory.graph.sync_pkg.workflow_matrix_axis_values import (
     _append_workflow_matrix_include_variants as _append_workflow_matrix_include_variants,
 )
@@ -2879,15 +2882,6 @@ def _link_workflow_job_dependencies(
                 snapshot.add_relation(
                     job, "DEPENDS_ON", dependency_key, provenance="workflow_graph"
                 )
-
-
-def _workflow_job_dependency_ids(job_payload: dict[str, object]) -> tuple[str, ...]:
-    needs_payload = job_payload.get("needs")
-    if isinstance(needs_payload, str):
-        return (needs_payload,)
-    if isinstance(needs_payload, list):
-        return tuple(str(item) for item in needs_payload if isinstance(item, str))
-    return ()
 
 
 def _add_ci_workflow_graph(
