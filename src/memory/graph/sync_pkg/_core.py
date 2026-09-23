@@ -1707,6 +1707,9 @@ from memory.graph.sync_pkg.markdown_headings import (
 from memory.graph.sync_pkg.markdown_headings import (
     _resolve_docs_reference_target as _resolve_docs_reference_target,
 )
+from memory.graph.sync_pkg.materialize_file_structure import (
+    _materialize_file_structure as _materialize_file_structure,
+)
 from memory.graph.sync_pkg.merge_field_validation_item import (
     _add_schema_field_surface as _add_schema_field_surface,
 )
@@ -2702,19 +2705,6 @@ def _add_file_structure_surfaces(
     config = _file_structure_config(memory_mapping)
     zone_roots = _file_structure_zone_roots(config)
     _materialize_file_structure(snapshot, root, project, today, zone_roots, config)
-
-
-def _materialize_file_structure(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    zone_roots: dict[str, tuple[str, ...]],
-    config: dict[str, object],
-) -> None:
-    _add_file_structure_zones(snapshot, root, project, today, zone_roots, config)
-    _link_source_backed_file_structure(snapshot, root, today, zone_roots, config)
-    _link_relation_backed_file_structure(snapshot, root, config)
 
 
 def _add_entity_layer_field_nodes(
