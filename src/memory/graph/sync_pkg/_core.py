@@ -529,6 +529,15 @@ from memory.graph.sync_pkg.apply_verify import (
 from memory.graph.sync_pkg.apply_verify import (
     _verify_expected_group_counts as _verify_expected_group_counts,
 )
+from memory.graph.sync_pkg.collect_duplication_class_descriptors import (
+    _collect_duplication_class_descriptors as _collect_duplication_class_descriptors,
+)
+from memory.graph.sync_pkg.collect_duplication_class_descriptors import (
+    _collect_duplication_function_descriptor as _collect_duplication_function_descriptor,
+)
+from memory.graph.sync_pkg.collect_duplication_class_descriptors import (
+    _duplication_class_method_index as _duplication_class_method_index,
+)
 from memory.graph.sync_pkg.complexity_analysis_label_sets import (
     _complexity_analysis_label_sets as _complexity_analysis_label_sets,
 )
@@ -6335,70 +6344,6 @@ def _collect_duplication_descriptors_for_module(
             family=family,
             node=node,
         )
-
-
-def _collect_duplication_class_descriptors(
-    context: DuplicationExtractionContext,
-    *,
-    module_key: NodeKey,
-    relative_path: str,
-    dotted_path: str,
-    family: DuplicateFamilyConfig,
-    node: ast.ClassDef,
-) -> None:
-    class_key = _register_duplication_class_surface(
-        context,
-        module_key=module_key,
-        relative_path=relative_path,
-        dotted_path=dotted_path,
-        family=family,
-        node=node,
-    )
-    _register_duplication_method_surfaces(
-        context,
-        relative_path=relative_path,
-        dotted_path=dotted_path,
-        family=family,
-        class_key=class_key,
-        class_name=node.name,
-        class_body=node.body,
-    )
-
-
-def _collect_duplication_function_descriptor(
-    context: DuplicationExtractionContext,
-    *,
-    module_key: NodeKey,
-    relative_path: str,
-    dotted_path: str,
-    family: DuplicateFamilyConfig,
-    node: ast.FunctionDef | ast.AsyncFunctionDef,
-) -> None:
-    _register_duplication_function_surface(
-        context,
-        module_key=module_key,
-        relative_path=relative_path,
-        dotted_path=dotted_path,
-        family=family,
-        node=node,
-    )
-
-
-def _duplication_class_method_index(
-    callable_descriptors: dict[NodeKey, CallableDescriptor],
-) -> dict[tuple[NodeKey, str], NodeKey]:
-    class_method_index: dict[tuple[NodeKey, str], NodeKey] = {}
-    for callable_descriptor in callable_descriptors.values():
-        if (
-            callable_descriptor.surface_kind != "method_surface"
-            or callable_descriptor.parent_class is None
-        ):
-            continue
-        owner_name = callable_descriptor.node_key.name.rsplit(".", 1)[0]
-        class_method_index[
-            (NodeKey("class_surface", owner_name), callable_descriptor.callable_name)
-        ] = callable_descriptor.node_key
-    return class_method_index
 
 
 def _link_duplication_override_relations(
