@@ -249,6 +249,9 @@ from memory.graph.sync_pkg.add_contract_doc_dependency import (
 from memory.graph.sync_pkg.add_control_plane_run_instance_surfaces import (
     _add_control_plane_run_instance_surfaces as _add_control_plane_run_instance_surfaces,
 )
+from memory.graph.sync_pkg.add_control_plane_runtime_evidence import (
+    _add_control_plane_runtime_evidence as _add_control_plane_runtime_evidence,
+)
 from memory.graph.sync_pkg.add_curated_cluster_readme import (
     _add_curated_cluster_entrypoint as _add_curated_cluster_entrypoint,
 )
@@ -2765,18 +2768,6 @@ def _run_impact_analysis_passes(
     )
     _add_pipeline_operational_edges(snapshot, pipeline_nodes, memory_mapping)
     _extract_code_duplication_surfaces(snapshot, root, project, today, memory_mapping)
-
-
-def _add_control_plane_runtime_evidence(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-) -> None:
-    for spec in _control_plane_runtime_evidence_specs():
-        _add_runtime_evidence_surface(snapshot, project, today, spec)
-
-    _add_control_plane_run_instance_surfaces(snapshot, root, project, today)
 
 
 def _link_workflow_job_dependencies(
