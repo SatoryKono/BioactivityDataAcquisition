@@ -134,3 +134,18 @@ def test_run_explorer_styles_processing_without_obsolete_columns() -> None:
     assert props["Pipeline"]["custom.cellOptions"]["wrapText"] is False
     assert props["Pipeline"]["custom.inspect"] is True
     assert panel["options"]["footer"]["enablePagination"] is False
+
+
+def test_run_explorer_hidden_fields_cannot_enable_table_wide_wrapping() -> None:
+    """Grafana 12 TableRT applies one field's wrap option to every row cell."""
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-run-explorer-v1.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    panel = next(p for p in panels(dashboard) if p["id"] == 3010)
+    assert not panel["fieldConfig"]["defaults"]["custom"]["cellOptions"].get("wrapText")
+    for override in panel["fieldConfig"]["overrides"]:
+        for prop in override["properties"]:
+            if prop["id"] == "custom.cellOptions":
+                assert not prop["value"].get("wrapText"), override["matcher"]
