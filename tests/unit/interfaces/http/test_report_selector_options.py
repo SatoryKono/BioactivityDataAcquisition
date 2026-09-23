@@ -125,6 +125,77 @@ def test_selected_pipeline_does_not_read_foreign_report_identity(
     assert owners == ["chembl_assay"]
 
 
+def test_catalog_owner_reads_overlap_and_keep_complete_index(tmp_path, monkeypatch):
+    if _is_wsl():
+        pytest.skip("WSL inline thread execution")
+    from threading import Barrier
+    from bioetl.interfaces.http import _report_selector_options as module
+    from bioetl.composition.observability_runtime import create_run_report_store
+
+    _report(tmp_path)
+    other = tmp_path / "pipeline" / "pubmed_publication" / "run-b"
+    other.mkdir(parents=True)
+    (other / "pipeline-run-report.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "pipeline_run_report_v1",
+                "identity": {
+                    "pipeline_name": "pubmed_publication",
+                    "run_id": "run-b",
+                    "run_type": "incremental",
+                    "status": "failed",
+                },
+            }
+        ),
+        encoding="utf8",
+    )
+    original = module.list_pipeline_reports
+    expected = original(
+        root=tmp_path,
+        limit=None,
+        store=create_run_report_store(),
+        include_markdown=False,
+    )
+    barrier = Barrier(2, timeout=3)
+
+    def read_owner(**kwargs):
+        assert kwargs["pipeline_name"] is not None
+        assert kwargs["limit"] is None
+        barrier.wait()
+        return original(**kwargs)
+
+    monkeypatch.setattr(module, "list_pipeline_reports", read_owner)
+    assert module.load_report_selector_entries({}, root=tmp_path) == expected
+
+
+def test_catalog_does_not_normalize_unusual_historical_owner(tmp_path):
+    from bioetl.interfaces.http import _report_selector_options as module
+    from bioetl.composition.observability_runtime import create_run_report_store
+
+    _report(tmp_path)
+    (tmp_path / "pipeline" / "chembl_assay").rename(
+        tmp_path / "pipeline" / "legacy owner"
+    )
+    expected = module.list_pipeline_reports(
+        root=tmp_path,
+        limit=None,
+        store=create_run_report_store(),
+        include_markdown=False,
+    )
+    assert module.load_report_selector_entries({}, root=tmp_path) == expected
+
+
+def test_catalog_owner_io_error_is_not_a_partial_success(tmp_path, monkeypatch):
+    from bioetl.interfaces.http import _report_selector_options as module
+
+    def unreadable(**kwargs):
+        raise OSError("unreadable owner")
+
+    monkeypatch.setattr(module, "list_pipeline_reports", unreadable)
+    with pytest.raises(OSError, match="unreadable owner"):
+        module.load_report_selector_entries({"pipeline": ("a", "b")}, root=tmp_path)
+
+
 def test_manifest_backed_pipeline_does_not_reload_duplicate_reports(
     tmp_path: Path, monkeypatch
 ) -> None:
