@@ -1,6 +1,5 @@
 path,type,audience,owner,last_change,status,score,priority,evidence
-docs/03-guides/quick-start.md,tutorial,new contributor,BioETL Team,2026-09-03,drift,1,P2,uv sync tracing extras equated with Makefile install extras (tests_full+export)
-docs/03-guides/github-workflow-diagrams.md,explanation,contributor,BioETL Team,2026-09-03,drift,1,P2,Release diagram Python 3.11 vs .github/workflows/release.yml 3.13 and tests.yml 3.12
-README.md,reference,contributor,BioETL Team,2026-09-14,drift,2,P3,ruff check . vs Makefile ruff check src tests scripts; check-drift flags subset vs docs-verification.md
-docs/04-reference/pipeline-catalog.md,reference,engineer,BioETL Team,2026-09-03,aligned,3,P3,22+5 entity yaml counts match glob configs/entities
-pyproject.toml,manifest,all,BioETL Team,n/a,aligned,3,P3,version 6.1.0 and requires-python >=3.12 match README badge and runtime policy
+README.md:168 setup-plugins,how-to,eng,BioETL Team,current,broken-on-win-powershell,1,P1,"F1: bash path mangling на нативном Windows"
+.env.example:37 quarantine serve,reference,eng,BioETL Team,current,contradicts-cli,2,P2,"F2: recommended launcher против retired-статуса"
+.python-version vs README:141-153,reference,eng,BioETL Team,current,minor-mismatch,3,P3,"F3: 3.13 против baseline 3.12"
+README.md:261-306 env defaults,reference,eng,BioETL Team,current,single-sourced-unverified,3,P3,"F4: defaults только в README, противоречий нет"

@@ -1,6 +1,3 @@
 path,type,audience,owner,last_change,status,score,priority,evidence
-docs/03-guides/github-workflow-diagrams.md,explanation,contributor,BioETL Team,2026-09-03,stale-claim,1,P2,Mermaid still says Test on Py 3.11; release.yml is 3.13-only; tests.yml 3.12 default
-docs/05-operations/runbooks/pipeline-failure-recovery.md,how-to,operator,BioETL Team,2026-09-03,stale-stamp,2,P3,Last verified 2026-04-03 vs ops index 2026-08-26; procedure not re-executed in this audit
-docs/03-guides/getting-started.md,tutorial,new contributor,BioETL Team,2026-09-14,stale-stamp,3,P3,Header Last verified 2026-07-30 while body references current make install path
-docs/03-guides/development/codex-wsl2-setup.md,how-to,dev,BioETL Team,n/a,stale-claim,1,P3,Table lists Python (Windows) 3.11+; README treats 3.10/3.11 as deprecated
-docs/03-guides/coverage-configuration.md,reference,qa,BioETL Team,n/a,stale-claim,2,P3,Mentions 3.11 vs 3.12 conditional paths; not a bootstrap procedure
+docs/04-reference/environment-variables.md,reference,eng,BioETL Team,unknown,partial-single-source,2,P3,"покрывает Core/Providers/Observability; PIPELINE/DQ/Quarantine/Delta только в README"
+.env.example,reference,eng,BioETL Team,unknown,subset-of-README,2,P3,"11 BIOETL_-ключей против ~40 в README-таблице"

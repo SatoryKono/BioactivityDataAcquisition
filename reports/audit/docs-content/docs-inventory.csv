@@ -1,21 +1,11 @@
 path,type,audience,owner,last_change,status,score,priority,evidence
-README.md,tutorial+reference,new contributor + operator,BioETL Team,2026-09-14,active,2,P2,Purpose stated; uv-first bootstrap verified against pyproject 6.1.0 / requires-python >=3.12; extra-set warning present; lint/docs-check recipes incomplete vs Makefile and docs-verification.md
-CONTRIBUTING.md,how-to,contributor,BioETL Team,2026-09-03,active,3,P3,Pointer to .github/CONTRIBUTING.md and NORMATIVE_SOURCES
-.github/CONTRIBUTING.md,how-to,contributor,BioETL Team,2026-09-14,active,3,P3,uv sync tests_full+tracing; make lint && make test match Makefile targets
-.github/SECURITY.md,reference,security+ops,BioETL Team,2026-09-10,active,3,P3,Threat model; env var names only; no secret values observed
-CHANGELOG.md,reference,release,BioETL Team,2026-09-10,active,3,P3,Keep-a-changelog surface; version badge 6.1.0 matches pyproject.toml
-LICENSE,legal,all,BioETL Team,2026-09-03,active,3,P3,MIT
-docs/00-project/00-map.md,explanation,navigator,BioETL Team,2026-09-03,active,3,P3,Diataxis entry; synced RULES.md v6.1.11 matches RULES header
-docs/00-project/NORMATIVE_SOURCES.md,reference,AI+contributor,BioETL Team,2026-09-03,active,3,P3,SSOT index; drift command --runtime-mirrors --freshness
-docs/00-project/RULES.md,reference,all,BioETL Team,2026-09-15,active,3,P3,Constitution Version 6.1.11; section 6 docs guardrails
-docs/01-requirements/REQUIREMENTS.md,reference,product+qa,BioETL Team,2026-09-03,active,3,P3,REQ-DOC-001/002 bind docs checks
-docs/03-guides/quick-start.md,tutorial,new contributor,BioETL Team,2026-09-03,active,1,P2,DOCS-001 extra-set contradiction with Makefile install
-docs/03-guides/getting-started.md,tutorial,new contributor,BioETL Team,2026-09-14,active,3,P3,make install as aggregate; extras not copied; Last verified 2026-07-30 header lag
-docs/03-guides/docs-verification.md,how-to,docs contributor,BioETL Team,2026-09-03,active,3,P3,Full published docs check recipe including both drift invocations
-docs/03-guides/github-workflow-diagrams.md,explanation,contributor,BioETL Team,2026-09-03,active,1,P2,DOCS-002 Python 3.11 in release mermaid vs workflows
-docs/DOCKER_QUICKSTART.md,how-to,ops adjunct,BioETL Team,2026-09-06,active,3,P3,Marked adjunct; ADR-010 local-only remains canonical
-docs/04-reference/pipeline-catalog.md,reference,engineer,BioETL Team,2026-09-03,active,3,P3,22 provider + 5 composite matches configs/entities/**/*.yaml count
-docs/05-operations/README.md,how-to,operator,BioETL Team,2026-09-03,active,3,P3,Ops entry; Last verified 2026-08-26
-docs/05-operations/runbooks/pipeline-failure-recovery.md,how-to,operator,BioETL Team,2026-09-03,active,2,P3,REQ-ROLLBACK-001 surface; Last verified 2026-04-03
-docs/02-architecture/decisions/,reference,architect,BioETL Team,n/a,active,3,P3,ADR index linked from README and NORMATIVE_SOURCES
-SUPPORT.md,how-to,user,n/a,MISSING,missing,0,P3,GitHub SUPPORT.md not present; out of published docs/00-05; not a P1 bootstrap break
+README.md,how-to+reference,eng/ops,BioETL Team,current,ok-с-замечаниями,2,P1,"bootstrap F1; env F4; остальное сверено"
+docs/00-project/00-map.md,navigation,eng,BioETL Team,2026-08-25,ok,3,-,"ссылки резолвятся; changelog 2026-06-03 исторический"
+docs/00-project/RULES.md,reference,eng,BioETL Team,current,ok,3,-,"сканирован на секреты: чисто"
+docs/01-requirements/REQUIREMENTS.md,reference,eng,BioETL Team,current,ok,3,-,"ссылки резолвятся"
+docs/04-reference/cli.md,reference,ops,BioETL Team,current,ok,2,P2,"согласован с CLI; serve помечен retired (см. F2)"
+docs/04-reference/environment-variables.md,reference,eng,BioETL Team,current,partial,2,P3,"самодекларированный partial; ссылается на README (см. F4)"
+docs/03-guides/docs-verification.md,how-to,eng,BioETL Team,current,ok,3,-,"ссылки резолвятся"
+docs/03-guides/local-storage-layout.md,reference,ops,BioETL Team,current,ok,3,-,"существует; из README резолвится"
+CONTRIBUTING.md,navigation,eng,BioETL Team,current,ok,3,-,"тонкая обёртка над .github/CONTRIBUTING.md"
+.env.example,reference,eng,BioETL Team,current,drift,2,P2,"см. F2"
