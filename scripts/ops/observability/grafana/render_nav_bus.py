@@ -1303,6 +1303,13 @@ def _layout_uid_first_window(panels: list[object], *, current_uid: str) -> None:
                     "This verdict does not describe the selected run's processing "
                     "or trust status."
                 )
+        # Wrapped blocker reasons need three full 52px rows. Stage progress
+        # uses compact single-line rows and can donate one grid row safely.
+        _apply_first_window_geometry(
+            panels,
+            {9101: (0, 5, 16, 7), 9102: (16, 5, 8, 7), 2460: (0, 12, 24, 5)},
+            uid=current_uid,
+        )
     if current_uid == "bioetl-provider-health-v2":
         for panel in _root_panels(panels):
             if panel.get("id") == 9107:
