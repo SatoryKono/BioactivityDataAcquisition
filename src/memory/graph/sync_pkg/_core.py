@@ -1041,6 +1041,12 @@ from memory.graph.sync_pkg.link_curated_doc_artifact import (
 from memory.graph.sync_pkg.link_curated_doc_artifact import (
     _summary_table_rows as _summary_table_rows,
 )
+from memory.graph.sync_pkg.link_curated_execution_script import (
+    _add_curated_script_clusters as _add_curated_script_clusters,
+)
+from memory.graph.sync_pkg.link_curated_execution_script import (
+    _link_curated_execution_script as _link_curated_execution_script,
+)
 from memory.graph.sync_pkg.link_runtime_evidence_support import (
     _add_run_instance_surface as _add_run_instance_surface,
 )
@@ -2294,56 +2300,6 @@ def _add_curated_execution_paths(
         _link_curated_execution_script(
             snapshot, execution, execution_payload, today=today, dev_readme=dev_readme
         )
-
-
-def _link_curated_execution_script(
-    snapshot: GraphSnapshot,
-    execution: NodeKey,
-    execution_payload: dict[str, object],
-    *,
-    today: str,
-    dev_readme: NodeKey,
-) -> None:
-    script_path = execution_payload.get("script_path")
-    if not isinstance(script_path, str):
-        return
-    script = snapshot.add_node(
-        "script_surface",
-        script_path,
-        summary=f"Script surface for `{script_path}`.",
-        source_path=script_path,
-        source_kind="script_surface",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    snapshot.add_relation(script, "PROVIDES", execution, provenance="curated_execution")
-    if script_path.startswith("scripts/engineering/dev/"):
-        snapshot.add_relation(
-            dev_readme, "DESCRIBES", execution, provenance="scripts_dev_readme"
-        )
-
-
-def _add_curated_script_clusters(
-    snapshot: GraphSnapshot, project: NodeKey, today: str
-) -> None:
-    for cluster in CURATED_SCRIPT_CLUSTERS:
-        readme = _add_curated_cluster_readme(snapshot, cluster, today)
-        snapshot.add_relation(
-            project, "HAS_DOC_ARTIFACT", readme, provenance="curated_scripts"
-        )
-        entrypoint = _add_curated_cluster_entrypoint(snapshot, cluster, today)
-
-        for execution_payload in _as_iterable(cluster.get("execution_paths")):
-            if not isinstance(execution_payload, dict):
-                continue
-            _add_curated_cluster_execution(
-                snapshot,
-                today,
-                entrypoint,
-                readme,
-                execution_payload,
-            )
 
 
 def _add_quality_and_scripts(
