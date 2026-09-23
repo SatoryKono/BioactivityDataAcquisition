@@ -21,7 +21,7 @@
   },
   "dashboard_sha256": {
     "bioetl-control-plane-v1": "74c8810b098669a6d1129d6ff93542d39f5f28c501616bdd7427186917a4e307",
-    "bioetl-dq-v2": "8fb7692efc68009032963bd87e333ef3f83b35efe53dedb3f3cf407960754295",
+    "bioetl-dq-v2": "acc35846627e1fbe4089078da65cee5ce73febcb1b857f2e22ec4f6250cc5d1e",
     "bioetl-incident-v1": "d4a4ec5ba3e9b2595c3f8ac8653f58ed650bf85a375eec610eae459352dfe1f6",
     "bioetl-overview-v2": "6cc12b5722e897a2478ad9a303e3dc7dee487ed4d9d40fd0f71d6bd607a4b91b",
     "bioetl-provider-health-v2": "ce1db35b364bffd3fe0ffb574a561d6db1745a0724e535c913ce58c9c96e4ff8",
@@ -1358,7 +1358,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-dq-v2",
       "panel_id": 2,
-      "panel_title": "Monitor Volume-Weighted DQ Score",
+      "panel_title": "Monitor Weighted DQ",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
@@ -1377,7 +1377,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-dq-v2",
       "panel_id": 5,
-      "panel_title": "Monitor Worst-Entity DQ Score",
+      "panel_title": "Monitor Worst DQ",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",

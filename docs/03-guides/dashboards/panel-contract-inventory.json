@@ -1972,7 +1972,7 @@
       "formula": "((sum((last_over_time(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}[7d]) * last_over_time(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}[7d])))) / clamp_min(sum(last_over_time(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}[7d])), 1))",
       "kind": "promql",
       "panel_id": 2,
-      "panel_title": "Monitor Volume-Weighted DQ Score",
+      "panel_title": "Monitor Weighted DQ",
       "query": "((sum((last_over_time(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}[7d]) * last_over_time(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}[7d])))) / clamp_min(sum(last_over_time(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}[7d])), 1))",
       "query_tokens": [
         "bioetl_dq_validation_record_count",
@@ -2056,7 +2056,7 @@
       "formula": "min(last_over_time(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}[7d]))",
       "kind": "promql",
       "panel_id": 5,
-      "panel_title": "Monitor Worst-Entity DQ Score",
+      "panel_title": "Monitor Worst DQ",
       "query": "min(last_over_time(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}[7d]))",
       "query_tokens": [
         "bioetl_dq_validation_score"

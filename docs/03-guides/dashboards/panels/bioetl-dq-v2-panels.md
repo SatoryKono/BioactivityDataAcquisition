@@ -75,7 +75,7 @@ accepted as the denominator; zero/missing denominator remains unknown.
 - **Purpose:** Guide operator to next triage action.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 11. Monitor Volume-Weighted DQ Score
+### 11. Monitor Weighted DQ
 - **Type:** Stat
 - **Purpose:** Show the latest volume-weighted DQ score retained for up to seven
   days between runs on the canonical `0.0-1.0` ratio scale. If no score/count
@@ -92,7 +92,7 @@ accepted as the denominator; zero/missing denominator remains unknown.
 - **Purpose:** Count Gold records in range.
 - **Data sources:** `bioetl_records_processed_total`
 
-### 14. Monitor Worst-Entity DQ Score
+### 14. Monitor Worst DQ
 - **Type:** Stat
 - **Purpose:** Show the latest worst-entity DQ score retained for up to seven
   days between runs on the canonical `0.0-1.0` ratio scale. A missing sample

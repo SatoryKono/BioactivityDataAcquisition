@@ -1643,7 +1643,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '2':
-        title: Monitor Volume-Weighted DQ Score
+        title: Monitor Weighted DQ
         role: indicator
         tier: 3
         scope: time_range
@@ -1727,7 +1727,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '5':
-        title: Monitor Worst-Entity DQ Score
+        title: Monitor Worst DQ
         role: indicator
         tier: 3
         scope: time_range

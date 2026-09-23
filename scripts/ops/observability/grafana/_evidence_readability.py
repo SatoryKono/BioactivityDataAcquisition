@@ -283,6 +283,16 @@ def _provider(p: dict[int, dict]) -> None:
 
 
 def _dq(p: dict[int, dict]) -> None:
+    p[2]["title"] = "Monitor Weighted DQ"
+    _table(p[156], {"Pipeline": 200, "Quarantined records": 100, "Excluded records": 80})
+    _override(p[156], "Quarantined records", "displayName", "Quarantined")
+    _override(p[156], "Excluded records", "displayName", "Excluded")
+    p[5]["title"] = "Monitor Worst DQ"
+    coverage_delta = 4 - p[157]["gridPos"]["h"]
+    p[157]["gridPos"]["h"] = 4
+    for panel in p[9404]["panels"]:
+        if panel["id"] != 157:
+            panel["gridPos"]["y"] += coverage_delta
     _table(p[9102], {"pipeline": 160, "severity": 70, "Action": 140})
     _override(p[9102], "pipeline", _HIDDEN, False)
     _override(p[9102], "pipeline", "displayName", "Pipeline")

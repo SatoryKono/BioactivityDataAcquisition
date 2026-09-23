@@ -95,8 +95,8 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 9403 | Inspect Processed Records |
 | bioetl-dq-v2.json | 9404 | Selected Range · Impact & Freshness |
 | bioetl-dq-v2.json | 157 | Review DQ Coverage |
-| bioetl-dq-v2.json | 2 | Monitor Volume-Weighted DQ Score |
-| bioetl-dq-v2.json | 5 | Monitor Worst-Entity DQ Score |
+| bioetl-dq-v2.json | 2 | Monitor Weighted DQ |
+| bioetl-dq-v2.json | 5 | Monitor Worst DQ |
 | bioetl-dq-v2.json | 8 | Monitor Worst Freshness Age |
 | bioetl-dq-v2.json | 158 | Inspect DQ Sample Coverage |
 | bioetl-dq-v2.json | 154 | Monitor Blocked Records |

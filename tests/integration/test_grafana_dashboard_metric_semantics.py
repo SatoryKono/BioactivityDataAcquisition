@@ -810,7 +810,7 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-dq-v2.json", "Monitor Volume-Weighted DQ Score"),
+        ("bioetl-dq-v2.json", "Monitor Weighted DQ"),
     ],
 )
 def test_dq_score_uses_validation_metric(dashboard_file, panel_title):
@@ -856,21 +856,21 @@ def test_worst_entity_dq_score_preserves_no_data_state() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor Worst-Entity DQ Score"
+            if item.get("title") == "Monitor Worst DQ"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Monitor Worst-Entity DQ Score' not found"
+    assert panel is not None, "Panel 'Monitor Worst DQ' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert any("bioetl_dq_validation_score" in expr for expr in expressions)
     assert all("last_over_time(" in expr and "[7d]" in expr for expr in expressions)
     assert all("or vector(0)" not in expr for expr in expressions), (
-        "Monitor Worst-Entity DQ Score must preserve no-data rather than rendering score 0"
+        "Monitor Worst DQ must preserve no-data rather than rendering score 0"
     )
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     assert defaults.get("noValue") == "UNKNOWN", (
-        "Monitor Worst-Entity DQ Score must render missing score samples as UNKNOWN"
+        "Monitor Worst DQ must render missing score samples as UNKNOWN"
     )
 
 
@@ -1638,13 +1638,13 @@ def test_dq_problem_panels_expose_actionable_datalinks() -> None:
     """Key DQ incident panels must offer direct operator handoff."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     expected_panels = {
-        "Monitor Worst-Entity DQ Score",
+        "Monitor Worst DQ",
         "Monitor Worst Freshness Age",
         "Monitor Silver Filter Rejects",
     }
     # Silver Reject Explorer handoffs were removed; reject accounting stays on-panel.
     panels_requiring_links = {
-        "Monitor Worst-Entity DQ Score",
+        "Monitor Worst DQ",
         "Monitor Worst Freshness Age",
     }
     panels = {
