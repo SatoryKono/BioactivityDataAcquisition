@@ -20,8 +20,6 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import TypeVar, cast
 
-import yaml
-
 from bioetl.infrastructure.config.contract_registry_loader import (
     DEFAULT_CONTRACT_REGISTRY_PATH,
     load_contract_registry_payload,
@@ -474,6 +472,24 @@ from memory.graph.sync_pkg.live_queries import (
 from memory.graph.sync_pkg.live_queries import (
     _snapshot_subset_count_map as _snapshot_subset_count_map,
 )
+from memory.graph.sync_pkg.mapping_io import (
+    DEFAULT_MEMORY_MAPPING_PATH as DEFAULT_MEMORY_MAPPING_PATH,
+)
+from memory.graph.sync_pkg.mapping_io import (
+    LEGACY_MEMORY_MAPPING_PATH as LEGACY_MEMORY_MAPPING_PATH,
+)
+from memory.graph.sync_pkg.mapping_io import (
+    _load_memory_mapping as _load_memory_mapping,
+)
+from memory.graph.sync_pkg.mapping_io import (
+    _mapping_dict_or_empty as _mapping_dict_or_empty,
+)
+from memory.graph.sync_pkg.mapping_io import _mapping_section as _mapping_section
+from memory.graph.sync_pkg.mapping_io import (
+    _memory_mapping_path as _memory_mapping_path,
+)
+from memory.graph.sync_pkg.mapping_io import _read_json as _read_json
+from memory.graph.sync_pkg.mapping_io import _read_yaml as _read_yaml
 from memory.graph.sync_pkg.neo4j_statements import (
     DEFAULT_INGEST_WAVE as DEFAULT_INGEST_WAVE,
 )
@@ -600,8 +616,6 @@ if str(SRC_ROOT) not in sys.path:
 if str(DEFAULT_ROOT) not in sys.path:
     sys.path.insert(0, str(DEFAULT_ROOT))
 DEFAULT_BATCH_SIZE = 20
-DEFAULT_MEMORY_MAPPING_PATH = "src/memory/graph/mappings.yaml"
-LEGACY_MEMORY_MAPPING_PATH = "configs/quality/neo4j_memory_mapping.yaml"
 INIT_PY = "__init__.py"
 MAIN_PY = "__main__.py"
 GITHUB_WORKFLOWS_PREFIX = f"{GITHUB_DIR}/workflows/"
@@ -1572,49 +1586,6 @@ def _link_existing_targets(
     for target in targets:
         if target in snapshot.nodes:
             snapshot.add_relation(source, relation_type, target, provenance=provenance)
-
-
-def _read_yaml(path: Path) -> dict[str, object]:
-    loaded = yaml.safe_load(_read_text(path))
-    if isinstance(loaded, dict):
-        return loaded
-    return {}
-
-
-def _read_json(path: Path) -> dict[str, object]:
-    loaded = json.loads(_read_text(path))
-    if isinstance(loaded, dict):
-        return loaded
-    return {}
-
-
-def _load_memory_mapping(root: Path) -> dict[str, object]:
-    mapping_path = _memory_mapping_path(root)
-    if not mapping_path.is_file():
-        return {}
-    return _read_yaml(mapping_path)
-
-
-def _mapping_section(
-    memory_mapping: dict[str, object], section: str
-) -> dict[str, object]:
-    return _mapping_dict_or_empty(memory_mapping.get(section, {}))
-
-
-def _memory_mapping_path(root: Path) -> Path:
-    preferred = root / DEFAULT_MEMORY_MAPPING_PATH
-    if preferred.is_file():
-        return preferred
-    legacy = root / LEGACY_MEMORY_MAPPING_PATH
-    if legacy.is_file():
-        return legacy
-    return preferred
-
-
-def _mapping_dict_or_empty(payload: object) -> dict[str, object]:
-    if isinstance(payload, dict):
-        return payload
-    return {}
 
 
 def _configured_duplicate_families(
