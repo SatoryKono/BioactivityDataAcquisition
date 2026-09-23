@@ -1244,6 +1244,12 @@ from memory.graph.sync_pkg.iter_normalization_evidence_updates import (
 from memory.graph.sync_pkg.iter_normalization_evidence_updates import (
     apply_normalization_evidence_only as apply_normalization_evidence_only,
 )
+from memory.graph.sync_pkg.link_composite_config_dependencies import (
+    _add_test_graph as _add_test_graph,
+)
+from memory.graph.sync_pkg.link_composite_config_dependencies import (
+    _link_composite_config_dependencies as _link_composite_config_dependencies,
+)
 from memory.graph.sync_pkg.link_composite_layer_promotions import (
     CONTROL_PLANE_LEDGER_DOCS as CONTROL_PLANE_LEDGER_DOCS,
 )
@@ -2544,34 +2550,6 @@ def _add_composite_config_surface(
         seed_pipeline=seed_pipeline,
         entity_nodes=entity_nodes,
     )
-
-
-def _link_composite_config_dependencies(
-    snapshot: GraphSnapshot,
-    composite_node: NodeKey,
-    composite_payload: object,
-    *,
-    seed_pipeline: str | None,
-    entity_nodes: dict[str, NodeKey],
-) -> None:
-    _link_composite_seed_dependency(
-        snapshot, composite_node, seed_pipeline=seed_pipeline, entity_nodes=entity_nodes
-    )
-    for dependency in _composite_config_dependency_entries(composite_payload):
-        _link_composite_dependency(snapshot, composite_node, dependency, entity_nodes)
-
-
-def _add_test_graph(
-    snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str
-) -> None:
-    tests_root = root / "tests"
-    for suite_dir, suite_name in TEST_SURFACES.items():
-        _add_test_suite_surface(
-            snapshot, project, today, suite_dir=suite_dir, suite_name=suite_name
-        )
-
-    for test_path in sorted(tests_root.rglob("test_*.py")):
-        _add_test_artifact_surface(snapshot, root, today, test_path)
 
 
 def _add_policy_surfaces(
