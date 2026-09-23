@@ -896,6 +896,12 @@ from memory.graph.sync_pkg.contract_policy_config_path import (
 from memory.graph.sync_pkg.contract_policy_config_path import (
     _contract_policy_fields as _contract_policy_fields,
 )
+from memory.graph.sync_pkg.contract_source_prefixes import (
+    _add_published_contract_artifacts as _add_published_contract_artifacts,
+)
+from memory.graph.sync_pkg.contract_source_prefixes import (
+    _contract_source_prefixes as _contract_source_prefixes,
+)
 from memory.graph.sync_pkg.contract_source_resolved_path import (
     _contract_source_resolved_path as _contract_source_resolved_path,
 )
@@ -3298,28 +3304,6 @@ def _contract_mapping_config(
             contracts_mapping, "lineage_anchor_fields"
         ),
     )
-
-
-def _contract_source_prefixes(contracts_mapping: dict[str, object]) -> tuple[str, ...]:
-    return tuple(
-        _contract_mapping_values(contracts_mapping, "registry_source_prefixes")
-        or [
-            "bioetl.domain.contracts.gold",
-            "bioetl.domain.schemas",
-        ]
-    )
-
-
-def _add_published_contract_artifacts(
-    snapshot: GraphSnapshot, context: ContractEntryContext
-) -> None:
-    for published_path in _published_contract_artifact_paths(context):
-        artifact = _published_contract_artifact_key(snapshot, context, published_path)
-        if artifact is None:
-            continue
-        snapshot.add_relation(
-            context.contract, "BACKED_BY", artifact, provenance="impact_contracts"
-        )
 
 
 def _contract_registry_entries(root: Path) -> dict[str, dict[str, object]]:
