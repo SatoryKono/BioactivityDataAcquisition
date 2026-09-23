@@ -290,6 +290,24 @@ from memory.graph.sync_pkg.add_secret_requirements import (
 from memory.graph.sync_pkg.add_secret_requirements import (
     _add_workflow_outputs as _add_workflow_outputs,
 )
+from memory.graph.sync_pkg.adr_constraint_candidates import (
+    _adr_constraint_candidates as _adr_constraint_candidates,
+)
+from memory.graph.sync_pkg.adr_constraint_candidates import (
+    _docs_command_pattern as _docs_command_pattern,
+)
+from memory.graph.sync_pkg.adr_constraint_candidates import (
+    _docs_drift_sources as _docs_drift_sources,
+)
+from memory.graph.sync_pkg.adr_constraint_candidates import (
+    _docs_path_pattern as _docs_path_pattern,
+)
+from memory.graph.sync_pkg.adr_constraint_candidates import (
+    _normalize_docs_drift_source_path as _normalize_docs_drift_source_path,
+)
+from memory.graph.sync_pkg.adr_constraint_candidates import (
+    _read_docs_drift_text as _read_docs_drift_text,
+)
 from memory.graph.sync_pkg.alert_rule_file_payload import (
     _add_alert_rules_artifact as _add_alert_rules_artifact,
 )
@@ -4445,96 +4463,6 @@ def _resolve_adr_constraint_target(
         if candidate in snapshot.nodes:
             return candidate
     return None
-
-
-def _adr_constraint_candidates(normalized_ref: str) -> tuple[NodeKey, ...]:
-    return (
-        NodeKey("module_surface", normalized_ref),
-        NodeKey("config_artifact", normalized_ref),
-        NodeKey("test_artifact", normalized_ref),
-        NodeKey("file_surface", normalized_ref),
-        NodeKey("directory_surface", normalized_ref),
-    )
-
-
-def _docs_path_pattern() -> re.Pattern[str]:
-    return re.compile(
-        r"(?<![\w./-])("
-        r"README\.md|mkdocs\.yml|\.github/[\w./*-]+|"
-        r"(?:src|configs|scripts|tests|docs|grafana)/[\w./*-]+"
-        r")"
-    )
-
-
-def _docs_command_pattern() -> re.Pattern[str]:
-    return re.compile(
-        r"(?:python3?\s+-m\s+(?:bioetl|scripts\.\w+)(?:\s+[\w.-]+)?(?:\s+--?[\w][\w-]*(?:[ =][^\s`]+)?)*|"
-        r"uv\s+run\s+python3?\s+-m\s+(?:bioetl|scripts\.\w+)(?:\s+[\w.-]+)?(?:\s+--?[\w][\w-]*(?:[ =][^\s`]+)?)*|"
-        r"uv\s+run\s+python\s+-m\s+(?:bioetl|scripts\.\w+)(?:\s+[\w.-]+)?(?:\s+--?[\w][\w-]*(?:[ =][^\s`]+)?)*"
-        r")"
-    )
-
-
-def _normalize_docs_drift_source_path(
-    root: Path,
-    source_path: object,
-    config: dict[str, object],
-) -> str | None:
-    if not isinstance(source_path, str):
-        return None
-    normalized_source_path = _coerce_repo_relative_path(root, source_path)
-    if not normalized_source_path:
-        return None
-    if _is_excluded_docs_drift_prefix(normalized_source_path):
-        return None
-    if _is_excluded_file_structure_path(normalized_source_path, config):
-        return None
-    if Path(normalized_source_path).suffix.lower() not in _DOCS_DRIFT_TEXT_EXTENSIONS:
-        return None
-    return normalized_source_path
-
-
-def _read_docs_drift_text(
-    root: Path,
-    normalized_source_path: str,
-    cached_text: dict[str, str],
-) -> str | None:
-    text = cached_text.get(normalized_source_path)
-    if text is not None:
-        return text
-    try:
-        text = _read_text(root / normalized_source_path)
-    except OSError:
-        # Some tracked doc paths can exist in the graph but still be
-        # unreadable on a given checkout or platform mount. Skip them
-        # instead of failing the entire snapshot build.
-        return None
-    cached_text[normalized_source_path] = text
-    return text
-
-
-def _docs_drift_sources(
-    snapshot: GraphSnapshot,
-    root: Path,
-    config: dict[str, object],
-) -> Iterator[tuple[NodeKey, str, str]]:
-    cached_text: dict[str, str] = {}
-    for node in tuple(snapshot.nodes.values()):
-        if node.key.label not in _DOC_LIKE_LABELS:
-            continue
-        if not _is_docs_drift_source_candidate(node):
-            continue
-        normalized_source_path = _normalize_docs_drift_source_path(
-            root,
-            node.properties.get("source_path"),
-            config,
-        )
-        if normalized_source_path is None:
-            continue
-        text = _read_docs_drift_text(root, normalized_source_path, cached_text)
-        if text is None:
-            continue
-        yield node.key, normalized_source_path, text
 
 
 def _doc_reference_context(
