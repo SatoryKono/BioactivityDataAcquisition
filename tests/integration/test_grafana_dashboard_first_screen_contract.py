@@ -409,7 +409,7 @@ def test_required_trust_markers_stay_visible_on_target_dashboards() -> None:
     """Datasource trust surfaces are targeted: Runtime/Control Plane need explicit first-screen markers."""
     expectations = {
         "bioetl-runtime.json": (
-            "Monitor Metrics Coverage",
+            "Monitor Coverage",
             ("evidence confidence", "inconclusive"),
         ),
         "bioetl-control-plane-v1.json": (
@@ -692,7 +692,7 @@ def test_current_status_headlines_use_instant_queries() -> None:
         ),
         "bioetl-runtime.json": (
             "Monitor Pipeline Status",
-            "Monitor Metrics Coverage",
+            "Monitor Coverage",
         ),
         "bioetl-provider-health-v2.json": ("Monitor Selected Provider",),
     }

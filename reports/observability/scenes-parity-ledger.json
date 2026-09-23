@@ -26,7 +26,7 @@
     "bioetl-overview-v2": "6cc12b5722e897a2478ad9a303e3dc7dee487ed4d9d40fd0f71d6bd607a4b91b",
     "bioetl-provider-health-v2": "a5c7fc1b5340f74ebb5b22ce2f0be43095f69310cdfdb55e7d30cb92781a2441",
     "bioetl-run-explorer-v1": "1f68dc375d8c566928b07f6874e6eed12ad052358b6388e255e9a2da8b0d77c7",
-    "bioetl-runtime": "1d25872c4f9d74223b29b467e615c734370f25f99021b41b0dbd3999ad05c37c"
+    "bioetl-runtime": "9be200d769e07c7020fbeec5e478bd65c62be4bbbd88688f5423203bb4211a8b"
   },
   "panels": [
     {
@@ -3453,7 +3453,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-runtime",
       "panel_id": 9102,
-      "panel_title": "Monitor Metrics Coverage",
+      "panel_title": "Monitor Coverage",
       "route": "pipeline-flow",
       "source": {
         "datasource_type": "prometheus",

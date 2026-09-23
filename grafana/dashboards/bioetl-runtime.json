@@ -1159,7 +1159,7 @@
           "legendFormat": "Rule age"
         }
       ],
-      "title": "Monitor Metrics Coverage",
+      "title": "Monitor Coverage",
       "type": "stat",
       "links": [
         {

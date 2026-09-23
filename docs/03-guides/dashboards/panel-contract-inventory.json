@@ -6221,7 +6221,7 @@
       "formula": "max(up{job=\"bioetl\"})",
       "kind": "promql",
       "panel_id": 9102,
-      "panel_title": "Monitor Metrics Coverage",
+      "panel_title": "Monitor Coverage",
       "query": "max(up{job=\"bioetl\"})",
       "query_tokens": [
         "up"
@@ -6256,7 +6256,7 @@
       "formula": "min(bioetl_runtime_stage_evidence_present_ratio{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() vector(-1)",
       "kind": "promql",
       "panel_id": 9102,
-      "panel_title": "Monitor Metrics Coverage",
+      "panel_title": "Monitor Coverage",
       "query": "min(bioetl_runtime_stage_evidence_present_ratio{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() vector(-1)",
       "query_tokens": [
         "bioetl_runtime_stage_evidence_present_ratio"
@@ -6291,7 +6291,7 @@
       "formula": "bioetl_runtime_required_rule_age_seconds",
       "kind": "promql",
       "panel_id": 9102,
-      "panel_title": "Monitor Metrics Coverage",
+      "panel_title": "Monitor Coverage",
       "query": "bioetl_runtime_required_rule_age_seconds",
       "query_tokens": [
         "bioetl_runtime_required_rule_age_seconds"

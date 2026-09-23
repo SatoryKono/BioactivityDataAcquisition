@@ -229,6 +229,7 @@ def _trust(p: dict[int, dict]) -> None:
 
 
 def _runtime(p: dict[int, dict]) -> None:
+    p[9102]["title"] = "Monitor Coverage"
     for pid in (238, 240, 9105):
         _legend(p[pid])
         _stage_colors(p[pid])

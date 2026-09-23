@@ -230,7 +230,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-runtime.json | 9400 | Understand Pipeline Scope |
 | bioetl-runtime.json | 9401 | Monitor Pipeline Status |
 | bioetl-runtime.json | 9101 | Review Runtime Blockers |
-| bioetl-runtime.json | 9102 | Monitor Metrics Coverage |
+| bioetl-runtime.json | 9102 | Monitor Coverage |
 | bioetl-runtime.json | 2460 | Review Stage Progress |
 | bioetl-runtime.json | 252 | Inspect Detection Signals |
 | bioetl-runtime.json | 238 | Track Stage Backlog Trend |

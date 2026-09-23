@@ -5398,7 +5398,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '9102':
-        title: Monitor Metrics Coverage
+        title: Monitor Coverage
         role: confidence
         tier: 2
         scope: current

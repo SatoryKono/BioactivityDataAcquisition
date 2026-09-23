@@ -1069,7 +1069,7 @@ def test_runtime_diagnostic_panels_preserve_unknown_no_data_state() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expected_panels = {
         "Monitor Pipeline Status",
-        "Monitor Metrics Coverage",
+        "Monitor Coverage",
         "Monitor Active Blocker Count",
         "Monitor Runtime Error Rate",
         "Monitor Worst Stage Lag",
@@ -1101,11 +1101,11 @@ def test_runtime_telemetry_gap_checks_scrape_and_rule_health() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor Metrics Coverage"
+            if item.get("title") == "Monitor Coverage"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Monitor Metrics Coverage' not found"
+    assert panel is not None, "Panel 'Monitor Coverage' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert (

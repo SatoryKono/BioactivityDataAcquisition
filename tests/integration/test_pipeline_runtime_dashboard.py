@@ -199,7 +199,7 @@ def test_pipeline_runtime_data_panel_titles_are_action_first() -> None:
         "Inspect Pipeline Identity",
         "Inspect Processed Records",
         "Review Runtime Blockers",
-        "Monitor Metrics Coverage",
+        "Monitor Coverage",
         "Monitor Monitor Runtime Error Rate",
         "Monitor Monitor Failed Runs",
         "Monitor Monitor Worst Stage Lag",
