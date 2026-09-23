@@ -5665,9 +5665,11 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 },
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50,
+                "wrapText": true
               },
               "unit": "none",
               "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity."
@@ -5954,15 +5956,19 @@
                     "value": "Value"
                   },
                   {
+                    "id": "custom.inspect",
+                    "value": true
+                  },
+                  {
+                    "id": "custom.wrapText",
+                    "value": true
+                  },
+                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
-                      "wrapText": false
+                      "wrapText": true
                     }
-                  },
-                  {
-                    "id": "custom.inspect",
-                    "value": true
                   }
                 ]
               },
@@ -6133,7 +6139,7 @@
               "countRows": true
             },
             "showHeader": true,
-            "cellHeight": "md"
+            "cellHeight": "lg"
           },
           "targets": [
             {
@@ -8322,6 +8328,10 @@
                   {
                     "id": "custom.inspect",
                     "value": true
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "UNKNOWN"
                   }
                 ]
               },
@@ -9019,7 +9029,7 @@
                   },
                   {
                     "id": "custom.width",
-                    "value": 160
+                    "value": 190
                   }
                 ]
               },

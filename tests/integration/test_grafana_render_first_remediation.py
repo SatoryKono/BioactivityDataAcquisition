@@ -867,6 +867,14 @@ def test_cycle4_named_text_columns_wrap_below_fold() -> None:
         custom = (panel.get("fieldConfig") or {}).get("defaults", {}).get("custom", {})
         assert custom.get("cellOptions", {}).get("wrapText") in (True, False, None)
         wrapped = _wrapped_field_names(panel)
+        if dashboard_name == "bioetl-control-plane-v1.json" and panel_id == 9404:
+            # #10571: full fingerprints and identity-gap reasons need wrapping
+            # at 900px; large rows reserve space before the pagination footer.
+            assert panel["options"]["cellHeight"] == "lg"
+            assert panel["options"]["footer"]["enablePagination"] is True
+            assert field in wrapped
+            assert panel["gridPos"]["h"] >= 12
+            continue
         if dashboard_name in {
             "bioetl-control-plane-v1.json",
             "bioetl-provider-health-v2.json",
