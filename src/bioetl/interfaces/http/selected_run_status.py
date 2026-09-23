@@ -34,12 +34,15 @@ from bioetl.interfaces.http._selected_run_live import (
     pipeline_owners,
     scope_matches,
 )
+from bioetl.interfaces.http._selected_run_presentation import presentation_rows
 from bioetl.interfaces.http.run_report_ops import _validated_artifact_paths
 
 _NOT_EVALUATED = "NOT EVALUATED"
 _QUERY_ERROR = "QUERY ERROR"
 _CONTROL_PLANE = "Control Plane"
 _REPORT_SCHEMAS = {"pipeline_run_report_v1", "pipeline_run_report_v2"}
+
+_SELECT_RUN = "SELECT RUN"
 
 
 class _RevisionMissingError(LookupError):
@@ -93,7 +96,28 @@ def unavailable_status(
     return {
         **summary,
         "summary": [summary],
+        "presentation_summary": [
+            {
+                **summary,
+                "pipeline": "No run selected",
+                "run_id": "—",
+                "execution_state": _SELECT_RUN,
+                "evidence_completeness": _SELECT_RUN,
+            }
+            if summary["verdict"] == _SELECT_RUN
+            else summary
+        ],
+        "presentation_trust": [
+            {
+                **trust,
+                "processing_status": _SELECT_RUN,
+                "reasons_display": "Choose a run",
+            }
+            if summary["verdict"] == _SELECT_RUN
+            else trust
+        ],
         "domains": rows,
+        "presentation_domains": presentation_rows(rows, selection=state == _SELECT_RUN),
         "rows": rows,
         "trust": [trust],
     }
@@ -234,7 +258,7 @@ def load_selected_run_status(
 ) -> dict[str, object]:
     """Load and revalidate the exact report, revision and bound identity each time."""
     if run_id in {"", "-", "All", "$__all"}:
-        return unavailable_status(pipeline, run_id, "SELECT RUN", "selection_required")
+        return unavailable_status(pipeline, run_id, _SELECT_RUN, "selection_required")
     try:
         selected_pipeline = _selected_pipeline(pipeline, run_id, root)
     except ValueError as exc:
@@ -296,7 +320,28 @@ def load_selected_run_status(
     return {
         **summary,
         "summary": [summary],
+        "presentation_summary": [
+            {
+                **summary,
+                "pipeline": "No run selected",
+                "run_id": "—",
+                "execution_state": _SELECT_RUN,
+                "evidence_completeness": _SELECT_RUN,
+            }
+            if summary["verdict"] == _SELECT_RUN
+            else summary
+        ],
+        "presentation_trust": [
+            {
+                **trust,
+                "processing_status": _SELECT_RUN,
+                "reasons_display": "Choose a run",
+            }
+            if summary["verdict"] == _SELECT_RUN
+            else trust
+        ],
         "domains": rows,
+        "presentation_domains": presentation_rows(rows),
         "rows": rows,
         "trust": [trust],
     }

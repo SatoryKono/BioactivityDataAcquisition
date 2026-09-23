@@ -1460,6 +1460,11 @@ def apply_to_dashboard(
     from scripts.ops.observability.grafana._gr_db_corrections import apply_corrections
 
     apply_corrections(payload)
+    from scripts.ops.observability.grafana._evidence_readability import (
+        apply_evidence_readability,
+    )
+
+    apply_evidence_readability(payload)
     finalize_dashboard_links(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")

@@ -514,8 +514,8 @@
         },
         "textMode": "value",
         "text": {
-          "titleSize": 14,
-          "valueSize": 20
+          "valueSize": 20,
+          "titleSize": 14
         }
       },
       "targets": [
@@ -547,7 +547,8 @@
               "wrapText": false
             },
             "inspect": true,
-            "minWidth": 50
+            "minWidth": 50,
+            "wrapText": false
           },
           "unit": "none",
           "noValue": "Trust response unavailable. Check the panel error and run selection.",
@@ -575,10 +576,6 @@
               {
                 "id": "displayName",
                 "value": "Freshness"
-              },
-              {
-                "id": "custom.width",
-                "value": 90
               },
               {
                 "id": "custom.hidden",
@@ -710,10 +707,6 @@
                 "value": "Reasons"
               },
               {
-                "id": "custom.width",
-                "value": 80
-              },
-              {
                 "id": "links",
                 "value": [
                   {
@@ -735,6 +728,10 @@
                   "legend": true,
                   "tooltip": false
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 80
               }
             ]
           },
@@ -782,7 +779,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 80
+                "value": 100
               }
             ]
           },
@@ -850,7 +847,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 115
+                "value": 105
               }
             ]
           },
@@ -870,10 +867,6 @@
               {
                 "id": "custom.inspect",
                 "value": true
-              },
-              {
-                "id": "custom.width",
-                "value": 65
               },
               {
                 "id": "custom.cellOptions",
@@ -917,7 +910,7 @@
           "format": "table",
           "parser": "backend",
           "refId": "A",
-          "root_selector": "trust",
+          "root_selector": "presentation_trust",
           "source": "url",
           "type": "json",
           "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
@@ -1774,8 +1767,8 @@
         },
         "textMode": "value",
         "text": {
-          "titleSize": 14,
-          "valueSize": 20
+          "valueSize": 20,
+          "titleSize": 14
         }
       },
       "pluginVersion": "9.5.0",
@@ -1856,8 +1849,8 @@
         },
         "textMode": "value",
         "text": {
-          "titleSize": 14,
-          "valueSize": 20
+          "valueSize": 20,
+          "titleSize": 14
         }
       },
       "pluginVersion": "9.5.0",
@@ -1987,8 +1980,8 @@
         },
         "textMode": "value",
         "text": {
-          "titleSize": 14,
-          "valueSize": 20
+          "valueSize": 20,
+          "titleSize": 14
         }
       },
       "pluginVersion": "9.5.0",
@@ -2093,8 +2086,8 @@
         },
         "textMode": "value",
         "text": {
-          "titleSize": 14,
-          "valueSize": 20
+          "valueSize": 20,
+          "titleSize": 14
         }
       },
       "pluginVersion": "9.5.0",
@@ -2129,9 +2122,12 @@
               "custom": {
                 "align": "left",
                 "cellOptions": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": false
                 },
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50,
+                "wrapText": false
               },
               "unit": "none",
               "noValue": "No lineage-validation rows. Select an exact run and verify backend health; UNKNOWN or backend unavailable must not be treated as OK."
@@ -2143,10 +2139,6 @@
                   "options": "status"
                 },
                 "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 110
-                  },
                   {
                     "id": "mappings",
                     "value": [
@@ -2160,6 +2152,14 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 110
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Status"
                   }
                 ]
               },
@@ -2170,15 +2170,19 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 180
-                  },
-                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
                       "wrapText": true
                     }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 220
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Check"
                   }
                 ]
               },
@@ -2220,6 +2224,10 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               },
@@ -2235,6 +2243,10 @@
                       "type": "auto",
                       "wrapText": true
                     }
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
                   }
                 ]
               },
@@ -2287,6 +2299,22 @@
                         }
                       }
                     ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason_display"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               }
@@ -2447,7 +2475,11 @@
                 "title": "Open Checkpoint Debugging Runbook",
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"
               }
-            ]
+            ],
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -2540,7 +2572,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -2632,7 +2668,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -2724,7 +2764,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -2816,7 +2860,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -2908,7 +2956,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -3000,7 +3052,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -3092,7 +3148,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -3475,9 +3535,12 @@
               "custom": {
                 "align": "left",
                 "cellOptions": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": false
                 },
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50,
+                "wrapText": false
               },
               "unit": "none",
               "noValue": "No checkpoint-validation rows. Select an exact run and verify backend health; UNKNOWN or backend unavailable must not be treated as OK."
@@ -3489,10 +3552,6 @@
                   "options": "status"
                 },
                 "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 110
-                  },
                   {
                     "id": "mappings",
                     "value": [
@@ -3506,6 +3565,14 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 110
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Status"
                   }
                 ]
               },
@@ -3536,6 +3603,10 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               },
@@ -3588,6 +3659,50 @@
                         }
                       }
                     ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "check"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 220
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Check"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason_display"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "detail"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
                   }
                 ]
               }
@@ -3810,7 +3925,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -3902,7 +4021,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -3994,7 +4117,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -4086,7 +4213,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -4133,7 +4264,7 @@
             "x": 0,
             "y": 27,
             "w": 24,
-            "h": 7
+            "h": 9
           },
           "id": 131,
           "options": {
@@ -4188,16 +4319,20 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 34,
+            "y": 36,
             "w": 24,
-            "h": 7
+            "h": 12
           },
           "id": 7,
           "options": {
             "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom"
+              "showLegend": true,
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
             },
             "tooltip": {
               "mode": "multi",
@@ -4224,9 +4359,12 @@
               "custom": {
                 "align": "left",
                 "cellOptions": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": false
                 },
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50,
+                "wrapText": false
               },
               "unit": "none",
               "noValue": "No manifest-validation rows. Select an exact run and verify backend health; UNKNOWN or backend unavailable must not be treated as OK."
@@ -4238,10 +4376,6 @@
                   "options": "status"
                 },
                 "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 110
-                  },
                   {
                     "id": "mappings",
                     "value": [
@@ -4255,6 +4389,14 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 110
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Status"
                   }
                 ]
               },
@@ -4285,6 +4427,10 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               },
@@ -4339,14 +4485,58 @@
                     ]
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "check"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 220
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Check"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason_display"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "detail"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Reason"
+                  }
+                ]
               }
             ]
           },
           "gridPos": {
             "x": 0,
-            "y": 41,
+            "y": 48,
             "w": 24,
-            "h": 6
+            "h": 9
           },
           "id": 9414,
           "options": {
@@ -4478,7 +4668,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -4570,7 +4764,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -4843,7 +5041,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -4935,7 +5137,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -7182,7 +7388,9 @@
                   "type": "auto",
                   "wrapText": false
                 },
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50,
+                "wrapText": false
               },
               "unit": "none",
               "noValue": "No P1 replay/evidence anchors for this forensic view. Use the replay/resume summary above, then verify backend health and selected run scope before treating this as expected empty."
@@ -7587,15 +7795,15 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
                       "wrapText": false
                     }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 160
                   }
                 ]
               },
@@ -7678,6 +7886,22 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 115
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Result"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 125
                   }
                 ]
               }
@@ -7697,7 +7921,7 @@
               "countRows": true
             },
             "showHeader": true,
-            "cellHeight": "md"
+            "cellHeight": "sm"
           },
           "targets": [
             {
@@ -7771,7 +7995,9 @@
                   "type": "auto",
                   "wrapText": false
                 },
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50,
+                "wrapText": false
               },
               "unit": "none",
               "noValue": "No checkpoint anchor comparison rows. Use checkpoint freshness above, then verify backend health and selected run scope before treating this as expected empty.",
@@ -8177,15 +8403,15 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
                       "wrapText": false
                     }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 160
                   }
                 ]
               },
@@ -8268,6 +8494,22 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 115
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Result"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 125
                   }
                 ]
               }
@@ -8287,7 +8529,7 @@
               "countRows": true
             },
             "showHeader": true,
-            "cellHeight": "md"
+            "cellHeight": "sm"
           },
           "targets": [
             {
@@ -8362,7 +8604,9 @@
                   "type": "auto",
                   "wrapText": false
                 },
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50,
+                "wrapText": false
               },
               "unit": "none",
               "noValue": "No P2 forensic anchors for this scope. Use the summary cards above, then select an exact run_id or verify backend health before treating this as expected empty."
@@ -8767,15 +9011,15 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 240
-                  },
-                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
                       "wrapText": false
                     }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 160
                   }
                 ]
               },
@@ -8858,6 +9102,22 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 115
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Result"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 125
                   }
                 ]
               }
@@ -8877,7 +9137,7 @@
               "countRows": true
             },
             "showHeader": true,
-            "cellHeight": "md"
+            "cellHeight": "sm"
           },
           "targets": [
             {
@@ -10204,16 +10464,16 @@
             "x": 0,
             "y": 26,
             "w": 24,
-            "h": 12
+            "h": 8
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "md",
+            "cellHeight": "sm",
             "footer": {
               "show": false,
-              "enablePagination": true
+              "enablePagination": false
             }
           },
           "fieldConfig": {
@@ -10224,10 +10484,11 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapText": false
               }
             },
             "overrides": [
@@ -10249,6 +10510,95 @@
                     "value": true
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "action_path"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Domain"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 125
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 115
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Action"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 170
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Inspect saved run report",
+                        "url": "/${__data.fields.action_path}&var-pipeline=${pipeline:percentencode}&var-run_type=${run_type:percentencode}&var-workflow=${workflow:percentencode}&${__url_time_range}",
+                        "targetBlank": true
+                      }
+                    ]
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "Inspect saved evidence": {
+                            "text": "Open report"
+                          },
+                          "Inspect reason and evidence": {
+                            "text": "Open report"
+                          },
+                          "Select run or inspect evidence": {
+                            "text": "Inspect report"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Evidence reference"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
               }
             ]
           },
@@ -10259,7 +10609,7 @@
               "source": "url",
               "parser": "backend",
               "format": "table",
-              "root_selector": "domains",
+              "root_selector": "presentation_domains",
               "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
               "url_options": {
                 "method": "GET",
@@ -10283,7 +10633,8 @@
                     "display_verdict",
                     "reason_display",
                     "action",
-                    "evidence_ref"
+                    "evidence_ref",
+                    "action_path"
                   ]
                 }
               }
@@ -10323,18 +10674,18 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 38,
+            "y": 34,
             "w": 24,
-            "h": 7
+            "h": 4
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "md",
+            "cellHeight": "sm",
             "footer": {
               "show": false,
-              "enablePagination": true
+              "enablePagination": false
             }
           },
           "fieldConfig": {
@@ -10345,10 +10696,11 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapText": false
               }
             },
             "overrides": [
@@ -10367,6 +10719,54 @@
                     "value": 175
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Pipeline"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          ".*": {
+                            "text": "No run selected"
+                          },
+                          "-": {
+                            "text": "No run selected"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Run ID"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          ".*": {
+                            "text": "No run selected"
+                          },
+                          "-": {
+                            "text": "No run selected"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -10377,7 +10777,7 @@
               "source": "url",
               "parser": "backend",
               "format": "table",
-              "root_selector": "summary",
+              "root_selector": "presentation_summary",
               "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
               "url_options": {
                 "method": "GET",

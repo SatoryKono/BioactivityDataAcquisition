@@ -560,8 +560,8 @@
         },
         "textMode": "value",
         "text": {
-          "titleSize": 14,
-          "valueSize": 20
+          "valueSize": 20,
+          "titleSize": 14
         }
       },
       "targets": [
@@ -802,7 +802,7 @@
         ]
       },
       "gridPos": {
-        "h": 5,
+        "h": 7,
         "w": 12,
         "x": 0,
         "y": 7
@@ -1226,7 +1226,7 @@
         ]
       },
       "gridPos": {
-        "h": 5,
+        "h": 7,
         "w": 12,
         "x": 12,
         "y": 7
@@ -1324,7 +1324,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "#555555"
+                  "color": "text"
                 }
               }
             }
@@ -1352,14 +1352,14 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 3,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 14
       },
       "id": 9104,
       "options": {
-        "colorMode": "background",
+        "colorMode": "value",
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
@@ -1374,8 +1374,8 @@
         "textMode": "value",
         "wideLayout": false,
         "text": {
-          "titleSize": 14,
-          "valueSize": 20
+          "valueSize": 20,
+          "titleSize": 14
         }
       },
       "pluginVersion": "10.4.0",
@@ -3294,6 +3294,10 @@
               ],
               "fields": "",
               "values": false
+            },
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
             }
           },
           "targets": [
@@ -3816,7 +3820,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -3996,7 +4004,13 @@
               "unit": "short",
               "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)",
               "custom": {
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50,
+                "wrapText": false,
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             },
             "overrides": [
@@ -4043,6 +4057,10 @@
                   {
                     "id": "noValue",
                     "value": "UNKNOWN"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 175
                   }
                 ]
               },
@@ -4070,6 +4088,34 @@
                   {
                     "id": "noValue",
                     "value": "UNKNOWN"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 145
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Provider"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 125
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 110
                   }
                 ]
               }
@@ -4078,8 +4124,8 @@
           "gridPos": {
             "x": 0,
             "y": 21,
-            "w": 12,
-            "h": 7
+            "w": 24,
+            "h": 10
           },
           "id": 114,
           "options": {
@@ -4196,10 +4242,10 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 12,
-            "y": 21,
-            "w": 12,
-            "h": 7
+            "x": 0,
+            "y": 31,
+            "w": 24,
+            "h": 10
           },
           "id": 1,
           "options": {
@@ -4268,8 +4314,8 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 28,
-            "w": 12,
+            "y": 41,
+            "w": 24,
             "h": 3
           },
           "id": 2,
@@ -4285,7 +4331,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -4313,8 +4363,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "value": null,
+                    "color": "text"
                   }
                 ]
               },
@@ -4337,9 +4387,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 12,
-            "y": 28,
-            "w": 12,
+            "x": 0,
+            "y": 44,
+            "w": 24,
             "h": 3
           },
           "id": 105,
@@ -4355,7 +4405,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -4366,7 +4420,7 @@
           ],
           "title": "Monitor Degraded Checks",
           "type": "stat",
-          "description": "TIME RANGE · Selected-range evidence: completed DEGRADED probes in the active Grafana range. This panel is not a current-health source, so non-zero counts remain neutral evidence rather than WARN/CRIT by themselves TELEMETRY MISSING is not a zero and not VALID EMPTY."
+          "description": "TIME RANGE · Observed degraded health checks in the selected range; historical count, not current severity. Missing evidence remains UNKNOWN."
         },
         {
           "datasource": {
@@ -4418,8 +4472,8 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 31,
-            "w": 12,
+            "y": 47,
+            "w": 24,
             "h": 3
           },
           "id": 104,
@@ -4441,7 +4495,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -4493,9 +4551,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 12,
-            "y": 31,
-            "w": 12,
+            "x": 0,
+            "y": 50,
+            "w": 24,
             "h": 3
           },
           "id": 7,
@@ -4511,7 +4569,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -5179,16 +5241,16 @@
             "x": 0,
             "y": 23,
             "w": 24,
-            "h": 12
+            "h": 8
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "md",
+            "cellHeight": "sm",
             "footer": {
               "show": false,
-              "enablePagination": true
+              "enablePagination": false
             }
           },
           "fieldConfig": {
@@ -5199,13 +5261,104 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapText": false
               }
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "action_path"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Domain"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 125
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 115
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Action"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 170
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Inspect saved run report",
+                        "url": "/${__data.fields.action_path}&var-pipeline=${pipeline:percentencode}&var-run_type=${run_type:percentencode}&var-workflow=${workflow:percentencode}&${__url_time_range}",
+                        "targetBlank": true
+                      }
+                    ]
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "Inspect saved evidence": {
+                            "text": "Open report"
+                          },
+                          "Inspect reason and evidence": {
+                            "text": "Open report"
+                          },
+                          "Select run or inspect evidence": {
+                            "text": "Inspect report"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Evidence reference"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              }
+            ]
           },
           "targets": [
             {
@@ -5214,7 +5367,7 @@
               "source": "url",
               "parser": "backend",
               "format": "table",
-              "root_selector": "domains",
+              "root_selector": "presentation_domains",
               "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
               "url_options": {
                 "method": "GET",
@@ -5238,7 +5391,8 @@
                     "verdict",
                     "reason",
                     "action",
-                    "evidence_ref"
+                    "evidence_ref",
+                    "action_path"
                   ]
                 }
               }
@@ -5278,18 +5432,18 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 35,
+            "y": 31,
             "w": 24,
-            "h": 7
+            "h": 4
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "md",
+            "cellHeight": "sm",
             "footer": {
               "show": false,
-              "enablePagination": true
+              "enablePagination": false
             }
           },
           "fieldConfig": {
@@ -5300,10 +5454,11 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapText": false
               }
             },
             "overrides": [
@@ -5322,6 +5477,54 @@
                     "value": 175
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Pipeline"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          ".*": {
+                            "text": "No run selected"
+                          },
+                          "-": {
+                            "text": "No run selected"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Run ID"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          ".*": {
+                            "text": "No run selected"
+                          },
+                          "-": {
+                            "text": "No run selected"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -5332,7 +5535,7 @@
               "source": "url",
               "parser": "backend",
               "format": "table",
-              "root_selector": "summary",
+              "root_selector": "presentation_summary",
               "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
               "url_options": {
                 "method": "GET",

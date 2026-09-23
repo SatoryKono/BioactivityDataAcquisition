@@ -505,8 +505,8 @@
                 "id": "links",
                 "value": [
                   {
-                    "title": "Select this run",
-                    "url": "/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline}&var-run_type=${__data.fields.run_type}&var-run_id=${__value.raw}&${__url_time_range}",
+                    "title": "Select ${__data.fields.run_id}",
+                    "url": "/d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline}&var-run_type=${__data.fields.run_type}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}",
                     "targetBlank": false,
                     "includeVars": false
                   }
@@ -522,6 +522,10 @@
               {
                 "id": "custom.inspect",
                 "value": true
+              },
+              {
+                "id": "custom.width",
+                "value": 115
               }
             ]
           },
@@ -636,10 +640,6 @@
               {
                 "id": "custom.inspect",
                 "value": true
-              },
-              {
-                "id": "custom.width",
-                "value": 140
               },
               {
                 "id": "custom.cellOptions",
@@ -784,8 +784,24 @@
                 "value": false
               },
               {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "REPORT MISSING": {
+                        "text": "Missing"
+                      },
+                      "Open report": {
+                        "text": "Open"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
                 "id": "custom.width",
-                "value": 110
+                "value": 85
               }
             ]
           },
@@ -869,6 +885,10 @@
             "properties": [
               {
                 "id": "custom.inspect",
+                "value": true
+              },
+              {
+                "id": "custom.hidden",
                 "value": true
               }
             ]
@@ -972,18 +992,18 @@
                 "value": "Inspect in 1. Trust"
               },
               {
-                "id": "custom.width",
-                "value": 110
-              },
-              {
                 "id": "links",
                 "value": [
                   {
                     "title": "Open 1. Trust",
-                    "url": "/d/bioetl-control-plane-v1/1-trust?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.Run:percentencode}&${__url_time_range}",
+                    "url": "/d/bioetl-control-plane-v1/1-trust?var-workflow=${__data.fields.workflow_scope}&var-pipeline=${__data.fields.Pipeline:percentencode}&var-run_type=${__data.fields.run_type:percentencode}&var-run_id=${__data.fields.run_id:percentencode}&${__url_time_range}",
                     "includeVars": false
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 120
               }
             ]
           },
@@ -1000,10 +1020,6 @@
                   "wrapText": false,
                   "mode": "basic"
                 }
-              },
-              {
-                "id": "custom.width",
-                "value": 90
               },
               {
                 "id": "mappings",
@@ -1062,6 +1078,10 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 100
               }
             ]
           }
@@ -1125,7 +1145,8 @@
                 "report_url",
                 "workflow_scope",
                 "run_type",
-                "completed_at"
+                "completed_at",
+                "run_label"
               ]
             }
           }
@@ -1138,7 +1159,7 @@
               "started_at": 1,
               "pipeline": 2,
               "workflow_id": 3,
-              "run_id": 4,
+              "run_id": 20,
               "duration_display": 5,
               "event_age_display": 6,
               "status": 7,
@@ -1147,19 +1168,20 @@
               "report_url": 10,
               "workflow_scope": 11,
               "run_type": 12,
-              "completed_at": 13
+              "completed_at": 13,
+              "run_label": 4
             },
             "renameByName": {
               "selected": "",
               "started_at": "Started",
               "pipeline": "Pipeline",
               "workflow_id": "Workflow",
-              "run_id": "Run",
               "duration_display": "Duration",
               "status": "Processing",
               "report_label": "Report",
               "event_age_display": "Event age",
-              "trust_status": "Trust"
+              "trust_status": "Trust",
+              "run_label": "Run"
             },
             "excludeByName": {
               "Value": true,
@@ -1217,16 +1239,16 @@
             "x": 0,
             "y": 18,
             "w": 24,
-            "h": 12
+            "h": 8
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "md",
+            "cellHeight": "sm",
             "footer": {
               "show": false,
-              "enablePagination": true
+              "enablePagination": false
             }
           },
           "fieldConfig": {
@@ -1237,13 +1259,104 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapText": false
               }
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "action_path"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Domain"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 125
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 115
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Action"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 170
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Inspect saved run report",
+                        "url": "/${__data.fields.action_path}&var-pipeline=${pipeline:percentencode}&var-run_type=${run_type:percentencode}&var-workflow=${workflow:percentencode}&${__url_time_range}",
+                        "targetBlank": true
+                      }
+                    ]
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "Inspect saved evidence": {
+                            "text": "Open report"
+                          },
+                          "Inspect reason and evidence": {
+                            "text": "Open report"
+                          },
+                          "Select run or inspect evidence": {
+                            "text": "Inspect report"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Evidence reference"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              }
+            ]
           },
           "targets": [
             {
@@ -1252,7 +1365,7 @@
               "source": "url",
               "parser": "backend",
               "format": "table",
-              "root_selector": "domains",
+              "root_selector": "presentation_domains",
               "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
               "url_options": {
                 "method": "GET",
@@ -1276,7 +1389,8 @@
                     "verdict",
                     "reason",
                     "action",
-                    "evidence_ref"
+                    "evidence_ref",
+                    "action_path"
                   ]
                 }
               }
@@ -1316,18 +1430,18 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 30,
+            "y": 26,
             "w": 24,
-            "h": 7
+            "h": 4
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "md",
+            "cellHeight": "sm",
             "footer": {
               "show": false,
-              "enablePagination": true
+              "enablePagination": false
             }
           },
           "fieldConfig": {
@@ -1338,10 +1452,11 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapText": false
               }
             },
             "overrides": [
@@ -1360,6 +1475,54 @@
                     "value": 175
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Pipeline"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          ".*": {
+                            "text": "No run selected"
+                          },
+                          "-": {
+                            "text": "No run selected"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Run ID"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          ".*": {
+                            "text": "No run selected"
+                          },
+                          "-": {
+                            "text": "No run selected"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -1370,7 +1533,7 @@
               "source": "url",
               "parser": "backend",
               "format": "table",
-              "root_selector": "summary",
+              "root_selector": "presentation_summary",
               "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
               "url_options": {
                 "method": "GET",

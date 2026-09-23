@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-22T09:12:35.182286+00:00",
+  "generated_at": "2026-09-23T06:54:01.346826+00:00",
   "summary": {
-    "total_scripts": 622,
+    "total_scripts": 624,
     "status_counts": {
-      "active": 339,
-      "supporting": 283
+      "active": 340,
+      "supporting": 284
     },
     "reference_group_coverage": {
       "agents": 9,
@@ -13,9 +13,9 @@
       "ci": 83,
       "docs": 261,
       "other": 75,
-      "scripts": 521,
+      "scripts": 523,
       "skills": 12,
-      "tests": 435
+      "tests": 437
     }
   },
   "scripts": [
@@ -5073,7 +5073,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 20,
+      "reference_count": 21,
       "references": [
         {
           "path": "docs/00-project/ai/README.md",
@@ -5335,19 +5335,19 @@
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 119,
+          "line": 118,
           "source_group": "docs",
           "text": "| `pipeline/registry.py`              | Реестр фабрик                                   | Все зарегистрированные pipeline factories                      |"
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 231,
+          "line": 230,
           "source_group": "docs",
           "text": "### 2.4. `registry.py` — Реестр пайплайнов"
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 269,
+          "line": 268,
           "source_group": "docs",
           "text": "- **Декларативность:** `GenericPipelineFactory`, `PIPELINE_CONFIGS` и `factories/pipeline/registry.py` позволяют добавлять новые пайплайны без дублирования шаблонного assembly-кода."
         },
@@ -10655,7 +10655,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 264,
+      "reference_count": 265,
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/local/gh-fix-ci/scripts/inspect_pr_checks.py",
@@ -12588,7 +12588,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 192,
+          "line": 195,
           "source_group": "scripts",
           "text": "\"analyze-duplicate-functions\": \"scripts.engineering.qa.analyze_duplicate_functions\","
         }
@@ -12613,7 +12613,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 219,
+          "line": 222,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.assemble_observability_closure_evidence\""
         },
@@ -12640,7 +12640,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 193,
+          "line": 196,
           "source_group": "scripts",
           "text": "\"calibrate-hotspots\": \"scripts.engineering.qa.calibrate_hotspot_budgets\","
         }
@@ -12826,7 +12826,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 197,
+          "line": 200,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.check_dashboard_performance_budgets\""
         },
@@ -12849,11 +12849,11 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 8,
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 195,
+          "line": 198,
           "source_group": "scripts",
           "text": "\"check-dashboard-visual-semantics\": \"scripts.engineering.qa.check_dashboard_visual_semantics\","
         },
@@ -12871,7 +12871,7 @@
         },
         {
           "path": "tests/integration/test_grafana_render_first_remediation.py",
-          "line": 1480,
+          "line": 1524,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         },
@@ -12886,6 +12886,18 @@
           "line": 95,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import check_dashboard_visual_semantics as subject"
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
+          "line": 177,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
+          "line": 189,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         }
       ]
     },
@@ -13148,7 +13160,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 202,
+          "line": 205,
           "source_group": "scripts",
           "text": "\"check-prometheus-rules\": \"scripts.engineering.qa.check_prometheus_rules\","
         },
@@ -14947,7 +14959,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 184,
+          "line": 187,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.refresh_governance_artifacts\""
         },
@@ -15273,6 +15285,39 @@
       "next_step": "Retain as the documented shrink-only basedpyright suppression ledger command; route it through the canonical QA dispatcher or retire the direct module surface when Project Diagnostics governance is consolidated."
     },
     {
+      "path": "scripts/engineering/qa/report_cast_any_typing_census.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 175,
+          "source_group": "scripts",
+          "text": "\"scripts.engineering.qa.report_cast_any_typing_census\""
+        },
+        {
+          "path": "tests/architecture/test_cast_any_unjustified_ratchet.py",
+          "line": 21,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.report_cast_any_typing_census import ("
+        },
+        {
+          "path": "tests/architecture/test_issue_10596_cast_any_census.py",
+          "line": 23,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.report_cast_any_typing_census import ("
+        },
+        {
+          "path": "tests/architecture/test_issue_10596_cast_any_census.py",
+          "line": 35,
+          "source_group": "tests",
+          "text": "GENERATOR = ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"report_cast_any_typing_census.py\""
+        }
+      ]
+    },
+    {
       "path": "scripts/engineering/qa/report_chembl_observed_value_inventory.py",
       "type": "py",
       "status": "active",
@@ -15298,7 +15343,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": ".github/ISSUES/TWIN-IMPORT-RATCHET-4744-Implement-Sanctioned-Twin-Module-Ratchet-Reduction.md",
@@ -15331,6 +15376,12 @@
           "text": "\"report-compatibility-importer-census\": \"scripts.engineering.qa.report_compatibility_importer_census\","
         },
         {
+          "path": "tests/architecture/test_issue_10597_export_facade_shrink.py",
+          "line": 123,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.report_compatibility_importer_census import ("
+        },
+        {
           "path": "tests/architecture/test_public_surface_importer_census_governance.py",
           "line": 33,
           "source_group": "tests",
@@ -15353,7 +15404,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 175,
+          "line": 178,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_composition_protocol_inventory\""
         },
@@ -15474,7 +15525,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 203,
+          "line": 206,
           "source_group": "scripts",
           "text": "\"report-dashboard-inventory\": \"scripts.engineering.qa.report_dashboard_inventory\","
         },
@@ -15519,7 +15570,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 207,
+          "line": 210,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_dashboard_panel_audit_matrix\""
         },
@@ -15546,7 +15597,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 205,
+          "line": 208,
           "source_group": "scripts",
           "text": "\"report-dashboard-promql-scope\": \"scripts.engineering.qa.report_dashboard_promql_scope\","
         },
@@ -15571,7 +15622,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 204,
+          "line": 207,
           "source_group": "scripts",
           "text": "\"report-dashboard-query-duplicates\": \"scripts.engineering.qa.report_dashboard_query_duplicates\","
         },
@@ -15604,7 +15655,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 210,
+          "line": 213,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_dashboard_scalar_density\""
         },
@@ -15635,7 +15686,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 200,
+          "line": 203,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_dashboard_scenes_parity\""
         },
@@ -16069,7 +16120,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 178,
+          "line": 181,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_lazy_import_inventory\""
         },
@@ -16305,7 +16356,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 213,
+          "line": 216,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_panel_title_inventory\""
         }
@@ -16456,7 +16507,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 181,
+          "line": 184,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_source_tree_manifest\""
         },
@@ -16652,7 +16703,7 @@
       "references": [
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 256,
+          "line": 255,
           "source_group": "docs",
           "text": "`scripts/engineering/qa/run_architecture_audit_read_only.py`."
         },
@@ -16670,7 +16721,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 190,
+          "line": 193,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.run_architecture_audit_read_only\""
         },
@@ -16828,7 +16879,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 216,
+          "line": 219,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.run_observability_closure_campaign\""
         },
@@ -16919,7 +16970,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 187,
+          "line": 190,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.technical_debt_audit_registry\""
         },
@@ -16986,7 +17037,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 225,
+          "line": 228,
           "source_group": "scripts",
           "text": "TEST_HEALTH_MODULE = \"scripts.engineering.qa.test_health\""
         },
@@ -18290,7 +18341,7 @@
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 245,
+          "line": 244,
           "source_group": "docs",
           "text": "| Pipeline run CLI | `src/bioetl/interfaces/cli/commands/run.py` resolves the canonical `bioetl.composition.entrypoints` seam; `execution_api` is external compatibility only | `src/bioetl/composition/"
         },
@@ -19518,7 +19569,7 @@
           "path": "scripts/engineering/dev/run_pytest.sh",
           "line": 565,
           "source_group": "scripts",
-          "text": "if [[ -f \"scripts/ops/launchers/codex/setup_plugins.sh\" ]]; then"
+          "text": "if [[ \"${BIOETL_SKIP_PREFLIGHT:-0}\" != \"1\" && \"${BIOETL_SKIP_SETUP_PLUGINS:-0}\" != \"1\" && -f \"scripts/ops/launchers/codex/setup_plugins.sh\" ]]; then"
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
@@ -20035,7 +20086,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1428,
+          "line": 1429,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._dashboard_state_followup import ("
         },
@@ -20052,15 +20103,46 @@
       "next_step": "Internal transformations invoked by render_nav_bus --state-followup; no standalone CLI. Keep the public command in render_nav_bus."
     },
     {
+      "path": "scripts/ops/observability/grafana/_evidence_readability.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 1463,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._evidence_readability import ("
+        },
+        {
+          "path": "tests/integration/test_grafana_evidence_readability.py",
+          "line": 9,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana._evidence_readability import ("
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal readability pass imported by render_nav_bus.py; it has no standalone command and must stay behind the canonical dashboard generator."
+    },
+    {
       "path": "scripts/ops/observability/grafana/_gr_db_corrections.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
+          "path": "scripts/ops/observability/grafana/_evidence_readability.py",
+          "line": 4,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._gr_db_corrections import _override, _panels"
+        },
+        {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1459,
+          "line": 1460,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._gr_db_corrections import apply_corrections"
         }
@@ -20119,7 +20201,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1454,
+          "line": 1455,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._visual_usability import ("
         }
@@ -20150,7 +20232,7 @@
         },
         {
           "path": "tests/integration/test_grafana_action_target_coverage.py",
-          "line": 137,
+          "line": 133,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana.action_target_routes import ("
         },
@@ -20476,7 +20558,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/action_target_routes.py",
@@ -20517,6 +20599,12 @@
         {
           "path": "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
           "line": 99,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
+          "line": 158,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         }
@@ -20616,13 +20704,13 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 194,
+          "line": 195,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/generate_trust_validation_fixtures.py\""
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 209,
+          "line": 210,
           "source_group": "tests",
           "text": "\"generate_trust_validation_fixtures.py must not call write_text; \""
         }
@@ -21210,7 +21298,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 191,
+          "line": 192,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/trust_validation_fixture_materialization.py\""
         }
@@ -21343,21 +21431,21 @@
         },
         {
           "path": "docs/03-guides/development/coderabbit-local-reviews.md",
-          "line": 14,
+          "line": 18,
           "source_group": "docs",
-          "text": "wsl -d Ubuntu --cd /mnt/e/github/BioactivityDataAcquisition --exec bash scripts/ops/run-coderabbit-reviews.sh --preflight"
+          "text": "wsl -d Ubuntu --cd $repoWsl --exec bash scripts/ops/run-coderabbit-reviews.sh --preflight"
         },
         {
           "path": "docs/03-guides/development/coderabbit-local-reviews.md",
-          "line": 17,
+          "line": 21,
           "source_group": "docs",
-          "text": "wsl -d Ubuntu --cd /mnt/e/github/BioactivityDataAcquisition --exec bash scripts/ops/run-coderabbit-reviews.sh changes --uncommitted"
+          "text": "wsl -d Ubuntu --cd $repoWsl --exec bash scripts/ops/run-coderabbit-reviews.sh changes --uncommitted"
         },
         {
           "path": "docs/03-guides/development/coderabbit-local-reviews.md",
-          "line": 20,
+          "line": 24,
           "source_group": "docs",
-          "text": "wsl -d Ubuntu --cd /mnt/e/github/BioactivityDataAcquisition --exec bash scripts/ops/run-coderabbit-reviews.sh changes --base origin/main --dir src/bioetl/interfaces"
+          "text": "wsl -d Ubuntu --cd $repoWsl --exec bash scripts/ops/run-coderabbit-reviews.sh changes --base origin/main --dir src/bioetl/interfaces"
         },
         {
           "path": "tests/unit/scripts/ops/test_run_coderabbit_reviews.py",
@@ -23537,7 +23625,7 @@
         },
         {
           "path": "tests/architecture/test_config_ci_invariants.py",
-          "line": 62,
+          "line": 63,
           "source_group": "tests",
           "text": "from scripts.schema.validation import ("
         }
@@ -23576,7 +23664,7 @@
         },
         {
           "path": "tests/architecture/test_config_ci_invariants.py",
-          "line": 65,
+          "line": 66,
           "source_group": "tests",
           "text": "from scripts.schema.validation import check_config_invariants as invariant_script"
         }
@@ -23603,7 +23691,7 @@
         },
         {
           "path": "tests/architecture/test_config_ci_invariants.py",
-          "line": 66,
+          "line": 67,
           "source_group": "tests",
           "text": "from scripts.schema.validation import ("
         }
@@ -23687,7 +23775,7 @@
         },
         {
           "path": "tests/architecture/test_config_ci_invariants.py",
-          "line": 69,
+          "line": 70,
           "source_group": "tests",
           "text": "from scripts.schema.validation.validate_pipeline_configs import _canonical_script"
         }
