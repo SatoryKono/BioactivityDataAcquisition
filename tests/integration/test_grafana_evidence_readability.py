@@ -2,6 +2,7 @@
 
 from copy import deepcopy
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -81,3 +82,26 @@ def test_short_run_link_uses_full_hidden_identity():
         for link in links
     )
     assert all("${__value.raw}" not in link["url"] for link in links)
+
+
+@pytest.mark.parametrize("stage", ["bronze", "silver", "gold", "quarantined"])
+def test_stage_colors_match_bare_and_pipeline_qualified_names(stage):
+    """Grafana stringToJsRegex anchors delimiter-free patterns on both ends."""
+    from scripts.ops.observability.grafana._evidence_readability import _stage_colors
+
+    panel = {"fieldConfig": {"overrides": []}}
+    _stage_colors(panel)
+    colors = []
+    for name in (stage, f"chembl_molecule / {stage}"):
+        matched = [
+            rule
+            for rule in panel["fieldConfig"]["overrides"]
+            if re.fullmatch(rule["matcher"]["options"], name)
+        ]
+        assert len(matched) == 1
+        colors.append(matched[0]["properties"])
+    assert colors[0] == colors[1]
+    assert not any(
+        re.fullmatch(rule["matcher"]["options"], "bronze_partitioned / passed")
+        for rule in panel["fieldConfig"]["overrides"]
+    )
