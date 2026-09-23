@@ -2438,6 +2438,12 @@ from memory.graph.sync_pkg.sync_run_id import (
     _verify_sync_snapshot as _verify_sync_snapshot,
 )
 from memory.graph.sync_pkg.sync_run_id import sync_snapshot as sync_snapshot
+from memory.graph.sync_pkg.test_artifact_key import (
+    _link_pipeline_test_artifact as _link_pipeline_test_artifact,
+)
+from memory.graph.sync_pkg.test_artifact_key import (
+    _test_artifact_key as _test_artifact_key,
+)
 from memory.graph.sync_pkg.test_suite_name import (
     _link_test_artifact_scope as _link_test_artifact_scope,
 )
@@ -3551,22 +3557,6 @@ def _pipeline_test_linker(
         )
 
     return link_test_target
-
-
-def _test_artifact_key(test_path: str) -> NodeKey:
-    return NodeKey("test_artifact", test_path)
-
-
-def _link_pipeline_test_artifact(
-    snapshot: GraphSnapshot,
-    pipeline_key: NodeKey,
-    relation_type: str,
-    artifact_key: NodeKey,
-    provenance: str,
-) -> None:
-    snapshot.add_relation(
-        pipeline_key, relation_type, artifact_key, provenance=provenance
-    )
 
 
 def _link_pipeline_test_suite(
