@@ -262,6 +262,15 @@ from memory.graph.sync_pkg.add_curated_cluster_readme import (
 from memory.graph.sync_pkg.add_curated_doc_source import (
     _add_curated_doc_source as _add_curated_doc_source,
 )
+from memory.graph.sync_pkg.add_curated_docs import (
+    _add_curated_docs as _add_curated_docs,
+)
+from memory.graph.sync_pkg.add_curated_docs import (
+    _add_decisions_and_risks as _add_decisions_and_risks,
+)
+from memory.graph.sync_pkg.add_curated_docs import (
+    _add_provider_and_config_graph as _add_provider_and_config_graph,
+)
 from memory.graph.sync_pkg.add_dashboard_surface import (
     _add_curated_quality_gates as _add_curated_quality_gates,
 )
@@ -2523,31 +2532,6 @@ def build_snapshot(root: Path, verified_at: str | None = None) -> GraphSnapshot:
     _add_retirement_analysis_surfaces(snapshot, root, project, today, memory_mapping)
     _add_complexity_analysis_surfaces(snapshot, root, project, today, memory_mapping)
     return snapshot
-
-
-def _add_curated_docs(
-    snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str
-) -> None:
-    for entry in CURATED_DOC_SOURCES:
-        _add_curated_doc_source(snapshot, root, project, today, entry)
-
-
-def _add_decisions_and_risks(
-    snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str
-) -> None:
-    _add_package_topology_decisions_and_risks(snapshot, root, project, today)
-    _add_governance_decisions_and_risks(snapshot, root, project, today)
-
-
-def _add_provider_and_config_graph(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-) -> None:
-    provider_nodes = _add_provider_surfaces(snapshot, root, project, today)
-    entity_nodes = _add_entity_config_surfaces(snapshot, root, today, provider_nodes)
-    _add_composite_config_surfaces(snapshot, root, project, today, entity_nodes)
 
 
 def _add_impact_analysis_surfaces(
