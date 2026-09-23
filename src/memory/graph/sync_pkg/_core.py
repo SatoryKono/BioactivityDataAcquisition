@@ -649,6 +649,12 @@ from memory.graph.sync_pkg.composite_output_storage_ref import (
 from memory.graph.sync_pkg.composite_output_storage_ref import (
     _composite_output_storage_ref as _composite_output_storage_ref,
 )
+from memory.graph.sync_pkg.composite_pipeline_dependency_keys import (
+    _build_normalization_pipeline_evidence as _build_normalization_pipeline_evidence,
+)
+from memory.graph.sync_pkg.composite_pipeline_dependency_keys import (
+    _composite_pipeline_dependency_keys as _composite_pipeline_dependency_keys,
+)
 from memory.graph.sync_pkg.composite_seed_pipeline_name import (
     _add_pipeline_normalization_edges as _add_pipeline_normalization_edges,
 )
@@ -6317,47 +6323,6 @@ def _link_composite_pipeline_dependencies(
             dependency_key,
             provenance="impact_pipelines",
         )
-
-
-def _composite_pipeline_dependency_keys(
-    composite_payload: object,
-    pipeline_nodes: dict[str, NodeKey],
-) -> tuple[NodeKey, ...]:
-    if not isinstance(composite_payload, dict):
-        return ()
-    keys: list[NodeKey] = []
-    seed_pipeline = _composite_seed_pipeline_name(composite_payload.get("seed"))
-    if seed_pipeline is not None and seed_pipeline in pipeline_nodes:
-        keys.append(pipeline_nodes[seed_pipeline])
-    keys.extend(
-        _composite_dependency_pipeline_keys(
-            composite_payload.get("dependencies"), pipeline_nodes
-        )
-    )
-    return tuple(keys)
-
-
-def _build_normalization_pipeline_evidence() -> dict[str, dict[str, JsonValue]]:
-    try:
-        from bioetl.domain.normalization.profiles.registry import (
-            NORMALIZATION_PROFILE_REGISTRY,
-            resolve_normalization_profile_module_path,
-        )
-    except (AttributeError, ImportError):
-        return {}
-
-    evidence: dict[str, dict[str, JsonValue]] = {}
-    for (provider, entity), profile in NORMALIZATION_PROFILE_REGISTRY.items():
-        pipeline_name = f"{provider}_{entity}"
-        payload = _empty_normalization_evidence_payload()
-        payload["normalization_profile_registered"] = True
-        payload["normalization_profile_module_path"] = (
-            resolve_normalization_profile_module_path(provider, entity)
-        )
-        payload["profile_field_count"] = len(profile.field_rules)
-        evidence[pipeline_name] = payload
-    _finalize_normalization_evidence_defaults(evidence)
-    return evidence
 
 
 def _add_pipeline_normalization_evidence(
