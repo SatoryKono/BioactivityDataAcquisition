@@ -392,6 +392,18 @@ from memory.graph.sync_pkg.dashboard_metrics import (
 from memory.graph.sync_pkg.dashboard_metrics import (
     _path_contains_any_token as _path_contains_any_token,
 )
+from memory.graph.sync_pkg.file_structure import (
+    DEFAULT_FILE_STRUCTURE_EXCLUDED_DIR_NAMES as DEFAULT_FILE_STRUCTURE_EXCLUDED_DIR_NAMES,
+)
+from memory.graph.sync_pkg.file_structure import (
+    DEFAULT_FILE_STRUCTURE_EXCLUDED_PREFIXES as DEFAULT_FILE_STRUCTURE_EXCLUDED_PREFIXES,
+)
+from memory.graph.sync_pkg.file_structure import (
+    DEFAULT_FILE_STRUCTURE_REPO_ZONES as DEFAULT_FILE_STRUCTURE_REPO_ZONES,
+)
+from memory.graph.sync_pkg.file_structure import (
+    _file_structure_config as _file_structure_config,
+)
 from memory.graph.sync_pkg.git_history import (
     _git_chunk_commit_ages as _git_chunk_commit_ages,
 )
@@ -727,45 +739,6 @@ DEFAULT_LEGACY_REPORT_PATH = str(
 YAML_FILE_GLOB = "*.yaml"
 MANIFEST_ID_TEMPLATE = "{manifest_id}"
 RUN_ID_TEMPLATE = "{run_id}"
-DEFAULT_FILE_STRUCTURE_REPO_ZONES: dict[str, tuple[str, ...]] = {
-    "src": ("src",),
-    "configs": ("configs",),
-    "tests": ("tests",),
-    "docs": ("docs",),
-    "scripts": ("scripts",),
-    "grafana": ("grafana",),
-    GITHUB_DIR: (GITHUB_DIR,),
-}
-DEFAULT_FILE_STRUCTURE_EXCLUDED_PREFIXES: tuple[str, ...] = (
-    "docs/site",
-    "docs/99-archive",
-    "docs/exports",
-    "docs/reports",
-    "docs/reports/generated",
-    "docs/00-project/ai/agents/agents",
-    "docs/00-project/ai/agents/runtime",
-    "docs/00-project/ai/prompts",
-    "docs/00-project/ai/rules",
-    "docs/00-project/ai/skills",
-    "docs/02-architecture/generated",
-    "docs/02-architecture/diagrams/bundles",
-    "docs/02-architecture/diagrams/descriptions",
-    "docs/02-architecture/diagrams/manifests",
-    "docs/02-architecture/diagrams/png",
-    "docs/02-architecture/diagrams/tooling",
-    "docs/02-architecture/diagrams/architecture/png",
-    "docs/02-architecture/diagrams/architecture/svg",
-    "docs/02-architecture/diagrams/class-diagrams/png",
-    "docs/02-architecture/diagrams/class-diagrams/svg",
-    "docs/02-architecture/diagrams/foundation/png",
-    "docs/02-architecture/diagrams/foundation/svg",
-    "docs/02-architecture/diagrams/views/png",
-    "docs/02-architecture/diagrams/views/svg",
-    "docs/02-architecture/diagrams/providers",
-    "scripts/diagrams/svg2png.mjs",
-    "scripts/archive",
-)
-DEFAULT_FILE_STRUCTURE_EXCLUDED_DIR_NAMES: tuple[str, ...] = ("__pycache__",)
 ADR_DECISIONS_DIR = "docs/02-architecture/decisions"
 DEFAULT_PIPELINE_RUNTIME_PATHS: tuple[str, ...] = (
     "uv run python -m bioetl run --pipeline",
@@ -1674,42 +1647,6 @@ def _casefolded_markers(
     return tuple(
         marker.casefold() for marker in (_as_string_list(payload.get(key)) or defaults)
     )
-
-
-def _file_structure_config(memory_mapping: dict[str, object]) -> dict[str, object]:
-    payload = _mapping_section(memory_mapping, "file_structure")
-
-    raw_repo_zones = payload.get("repo_zones", {})
-    repo_zones: dict[str, tuple[str, ...]] = {}
-    if isinstance(raw_repo_zones, dict):
-        for zone_name, zone_paths in raw_repo_zones.items():
-            repo_zones[str(zone_name)] = tuple(_as_string_list(zone_paths))
-    if not repo_zones:
-        repo_zones = DEFAULT_FILE_STRUCTURE_REPO_ZONES
-
-    excluded_prefixes = tuple(
-        sorted(
-            set(
-                _as_string_list(payload.get("excluded_prefixes"))
-                or list(DEFAULT_FILE_STRUCTURE_EXCLUDED_PREFIXES)
-            )
-        )
-    )
-    excluded_dir_names = tuple(
-        sorted(
-            set(
-                _as_string_list(payload.get("excluded_dir_names"))
-                or list(DEFAULT_FILE_STRUCTURE_EXCLUDED_DIR_NAMES)
-            )
-        )
-    )
-    promoted_hubs = tuple(sorted(set(_as_string_list(payload.get("promoted_hubs")))))
-    return {
-        "repo_zones": repo_zones,
-        "excluded_prefixes": excluded_prefixes,
-        "excluded_dir_names": excluded_dir_names,
-        "promoted_hubs": promoted_hubs,
-    }
 
 
 def _duplication_analysis_config(
