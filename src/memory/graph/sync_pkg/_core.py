@@ -349,6 +349,9 @@ from memory.graph.sync_pkg.add_package_topology_decisions_and_risks import (
 from memory.graph.sync_pkg.add_pipeline_doc_edges import (
     _add_pipeline_doc_edges as _add_pipeline_doc_edges,
 )
+from memory.graph.sync_pkg.add_pipeline_test_edges import (
+    _add_pipeline_test_edges as _add_pipeline_test_edges,
+)
 from memory.graph.sync_pkg.add_policy_surface import (
     _add_policy_artifact as _add_policy_artifact,
 )
@@ -2883,31 +2886,6 @@ def _run_impact_analysis_passes(
     )
     _add_pipeline_operational_edges(snapshot, pipeline_nodes, memory_mapping)
     _extract_code_duplication_surfaces(snapshot, root, project, today, memory_mapping)
-
-
-def _add_pipeline_test_edges(
-    snapshot: GraphSnapshot,
-    root: Path,
-    _pipeline_nodes: dict[str, NodeKey],
-    memory_mapping: dict[str, object],
-) -> None:
-    test_context = _pipeline_test_context(
-        snapshot, root, memory_mapping.get("pipeline_tests")
-    )
-    if test_context is None:
-        return
-    test_linker = _pipeline_test_linker(snapshot, test_context.relation_type)
-    _link_entity_pipeline_tests(
-        test_linker,
-        test_context.entity_pipeline_index,
-        test_context.ownership,
-    )
-    _link_provider_regression_suite_tests(
-        test_linker,
-        test_context.provider_pipeline_index,
-        suites=test_context.provider_regression_suites,
-        enabled=test_context.include_provider_regression_suites,
-    )
 
 
 if __name__ == "__main__":
