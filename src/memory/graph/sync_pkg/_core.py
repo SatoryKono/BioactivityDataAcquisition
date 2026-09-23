@@ -1036,6 +1036,12 @@ from memory.graph.sync_pkg.contract_policy_config_path import (
 from memory.graph.sync_pkg.contract_policy_config_path import (
     _contract_policy_fields as _contract_policy_fields,
 )
+from memory.graph.sync_pkg.contract_ref_identity import (
+    _contract_ref_identity as _contract_ref_identity,
+)
+from memory.graph.sync_pkg.contract_ref_identity import (
+    _link_provider_regression_suite_tests as _link_provider_regression_suite_tests,
+)
 from memory.graph.sync_pkg.contract_registry_entries import (
     _add_contract_surfaces as _add_contract_surfaces,
 )
@@ -3139,31 +3145,6 @@ def _entity_pipeline_contract_target(
     if not test_paths:
         return None
     return pipeline_key, test_paths
-
-
-def _contract_ref_identity(contract_ref: object) -> tuple[str, str] | None:
-    if not isinstance(contract_ref, str) or "." not in contract_ref:
-        return None
-    provider_name, entity_name = contract_ref.split(".", 1)
-    return provider_name, entity_name
-
-
-def _link_provider_regression_suite_tests(
-    link_test_target: Callable[[NodeKey, str, str], None],
-    provider_pipeline_index: dict[str, list[NodeKey]],
-    *,
-    suites: object,
-    enabled: bool,
-) -> None:
-    if not enabled or not isinstance(suites, dict):
-        return
-    for suite_name, provider_targets in _provider_regression_suite_targets(suites):
-        _link_provider_suite_targets(
-            link_test_target,
-            provider_pipeline_index,
-            suite_name=suite_name,
-            provider_targets=provider_targets,
-        )
 
 
 if __name__ == "__main__":
