@@ -1024,6 +1024,21 @@ from memory.graph.sync_pkg.python_paths import (
 from memory.graph.sync_pkg.python_paths import (
     _supplemental_directory_hubs_for_node as _supplemental_directory_hubs_for_node,
 )
+from memory.graph.sync_pkg.retirement_candidate_metrics import (
+    _add_retirement_candidate_node as _add_retirement_candidate_node,
+)
+from memory.graph.sync_pkg.retirement_candidate_metrics import (
+    _annotate_current_cycle_surface as _annotate_current_cycle_surface,
+)
+from memory.graph.sync_pkg.retirement_candidate_metrics import (
+    _link_retirement_candidate as _link_retirement_candidate,
+)
+from memory.graph.sync_pkg.retirement_candidate_metrics import (
+    _retirement_candidate_confidence as _retirement_candidate_confidence,
+)
+from memory.graph.sync_pkg.retirement_candidate_metrics import (
+    _retirement_candidate_metrics as _retirement_candidate_metrics,
+)
 from memory.graph.sync_pkg.score_family import _family_for_path as _family_for_path
 from memory.graph.sync_pkg.score_family import (
     _family_matches_relative_path as _family_matches_relative_path,
@@ -8023,116 +8038,6 @@ def _emit_retirement_candidate(
         wip_markers=wip_markers,
     )
     _link_retirement_candidate(snapshot, project, candidate, node.key)
-
-
-def _retirement_candidate_metrics(payload: dict[str, object]) -> dict[str, int]:
-    return {
-        "cycle_score": _coerce_int(payload["cycle_score"]),
-        "runtime_count": _coerce_int(payload["runtime_count"]),
-        "config_count": _coerce_int(payload["config_count"]),
-        "doc_count": _coerce_int(payload["doc_count"]),
-        "test_count": _coerce_int(payload["test_count"]),
-        "deletion_score": _coerce_int(payload["deletion_score"]),
-    }
-
-
-def _retirement_candidate_confidence(
-    *,
-    deletion_score: int,
-    dead_score_threshold: int,
-) -> str:
-    return "high" if deletion_score >= dead_score_threshold + 2 else "medium"
-
-
-def _link_retirement_candidate(
-    snapshot: GraphSnapshot,
-    project: NodeKey,
-    candidate: NodeKey,
-    target: NodeKey,
-) -> None:
-    snapshot.add_relation(
-        project, "CONTAINS", candidate, provenance="retirement_analysis"
-    )
-    snapshot.add_relation(
-        candidate, "CANDIDATE_FOR_REMOVAL", target, provenance="retirement_analysis"
-    )
-
-
-def _annotate_current_cycle_surface(
-    snapshot: GraphSnapshot,
-    node: GraphNode,
-    *,
-    cycle_score: int,
-    recent_age_days: object,
-    wip_markers: object,
-    runtime_count: int,
-    config_count: int,
-    doc_count: int,
-    test_count: int,
-) -> None:
-    snapshot.add_node(
-        node.key.label,
-        node.key.name,
-        current_cycle_status="current_cycle",
-        current_cycle_score=cycle_score,
-        current_cycle_recent_age_days=recent_age_days,
-        current_cycle_wip_markers=wip_markers,
-        current_cycle_runtime_anchor_count=runtime_count,
-        current_cycle_config_anchor_count=config_count,
-        current_cycle_doc_anchor_count=doc_count,
-        current_cycle_test_anchor_count=test_count,
-    )
-
-
-def _add_retirement_candidate_node(
-    snapshot: GraphSnapshot,
-    today: str,
-    node: GraphNode,
-    payload: dict[str, object],
-    *,
-    confidence: str,
-    cycle_score: int,
-    deletion_score: int,
-    recent_age_days: object,
-    runtime_count: int,
-    config_count: int,
-    doc_count: int,
-    test_count: int,
-    wip_markers: object,
-) -> NodeKey:
-    anchors = cast("AnalysisAnchors", payload["anchors"])
-    return snapshot.add_node(
-        "retirement_candidate",
-        f"{node.key.label}:{node.key.name}",
-        summary=f"Potential dead/stale code candidate `{node.key.name}` in `{payload['family_name']}`.",
-        source_path=str(node.properties.get("source_path")),
-        source_kind="retirement_candidate",
-        family_name=str(payload["family_name"]),
-        target_label=node.key.label,
-        target_name=node.key.name,
-        deletion_score=deletion_score,
-        deletion_confidence=confidence,
-        recent_age_days=recent_age_days,
-        only_test_referenced=payload["only_test_referenced"],
-        deprecation_markers=payload["deprecation_markers"],
-        runtime_anchor_count=runtime_count,
-        config_anchor_count=config_count,
-        doc_anchor_count=doc_count,
-        test_anchor_count=test_count,
-        runtime_anchors=sorted(anchor.name for anchor in anchors.runtime),
-        config_anchors=sorted(anchor.name for anchor in anchors.config),
-        doc_anchors=sorted(anchor.name for anchor in anchors.docs),
-        test_anchors=sorted(anchor.name for anchor in anchors.tests),
-        blocked_by_current_cycle=cycle_score >= 3,
-        blocked_by_current_cycle_target_name=node.key.name
-        if cycle_score >= 3
-        else None,
-        blocked_by_current_cycle_score=cycle_score if cycle_score >= 3 else None,
-        blocked_by_current_cycle_wip_markers=wip_markers if cycle_score >= 3 else None,
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence=confidence,
-    )
 
 
 def _add_complexity_analysis_surfaces(
