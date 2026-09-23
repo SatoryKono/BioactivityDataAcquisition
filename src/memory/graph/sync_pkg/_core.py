@@ -579,6 +579,12 @@ from memory.graph.sync_pkg.apply_verify import (
 from memory.graph.sync_pkg.apply_verify import (
     _verify_expected_group_counts as _verify_expected_group_counts,
 )
+from memory.graph.sync_pkg.batch_pipeline_names import (
+    _batch_pipeline_names as _batch_pipeline_names,
+)
+from memory.graph.sync_pkg.batch_pipeline_names import (
+    _normalization_progress_payload as _normalization_progress_payload,
+)
 from memory.graph.sync_pkg.classify_silver_storage_fields import (
     _classify_gold_storage_fields as _classify_gold_storage_fields,
 )
@@ -5996,42 +6002,6 @@ def _emit_normalization_apply_progress(
     )
     sys.stderr.write(json.dumps(payload) + "\n")
     sys.stderr.flush()
-
-
-def _batch_pipeline_names(batch: list[dict[str, JsonValue]]) -> list[str]:
-    return [
-        str(pipeline_name)
-        for statement in batch
-        for pipeline_name in [
-            _as_mapping(statement.get("parameters")).get("pipeline_name")
-        ]
-        if isinstance(pipeline_name, str) and pipeline_name
-    ]
-
-
-def _normalization_progress_payload(
-    *,
-    event: str,
-    batch_index: int,
-    batch_count: int,
-    statement_count: int,
-    pipeline_start: str | None,
-    pipeline_end: str | None,
-    elapsed_seconds: float | None,
-) -> dict[str, JsonValue]:
-    payload: dict[str, JsonValue] = {
-        "event": event,
-        "sync_scope": "normalization_evidence_only",
-        "batch_index": batch_index,
-        "batch_count": batch_count,
-        "statement_count": statement_count,
-        "pipeline_start": pipeline_start,
-        "pipeline_end": pipeline_end,
-        "timestamp": datetime.now(tz=UTC).isoformat(),
-    }
-    if elapsed_seconds is not None:
-        payload["elapsed_seconds"] = round(elapsed_seconds, 3)
-    return payload
 
 
 def apply_normalization_evidence_only(
