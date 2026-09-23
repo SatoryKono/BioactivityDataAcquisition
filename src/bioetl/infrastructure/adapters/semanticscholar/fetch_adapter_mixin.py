@@ -229,9 +229,7 @@ class SemanticScholarFetchAdapterMixin(
                 )  # Any: mixin host
             return None
 
-        async for record in as_mixin_host(
-            self
-        )._fallback_decorator.execute(  # Any: mixin host
+        async for record in as_mixin_host(self)._fallback_decorator.execute(  # Any: mixin host
             filter_ids=filter_ids,
             fallback_mapping=fallback_mapping,
             primary_record_fetcher=_primary_records,
