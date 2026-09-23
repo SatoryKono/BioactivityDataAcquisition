@@ -343,6 +343,9 @@ from memory.graph.sync_pkg.add_file_structure_zone import (
 from memory.graph.sync_pkg.add_file_structure_zone import (
     _field_quality_index as _field_quality_index,
 )
+from memory.graph.sync_pkg.add_impact_analysis_surfaces import (
+    _add_impact_analysis_surfaces as _add_impact_analysis_surfaces,
+)
 from memory.graph.sync_pkg.add_package_topology_decisions_and_risks import (
     _add_package_topology_decisions_and_risks as _add_package_topology_decisions_and_risks,
 )
@@ -2838,32 +2841,6 @@ def build_snapshot(root: Path, verified_at: str | None = None) -> GraphSnapshot:
     _add_retirement_analysis_surfaces(snapshot, root, project, today, memory_mapping)
     _add_complexity_analysis_surfaces(snapshot, root, project, today, memory_mapping)
     return snapshot
-
-
-def _add_impact_analysis_surfaces(
-    snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str
-) -> None:
-    memory_mapping = _load_memory_mapping(root)
-    port_nodes, adapter_nodes, contract_nodes, pipeline_nodes = (
-        _impact_analysis_context(
-            snapshot,
-            root,
-            project,
-            today,
-            memory_mapping,
-        )
-    )
-    _run_impact_analysis_passes(
-        snapshot,
-        root,
-        project,
-        today,
-        memory_mapping=memory_mapping,
-        port_nodes=port_nodes,
-        adapter_nodes=adapter_nodes,
-        contract_nodes=contract_nodes,
-        pipeline_nodes=pipeline_nodes,
-    )
 
 
 if __name__ == "__main__":
