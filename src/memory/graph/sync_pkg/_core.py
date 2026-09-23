@@ -5,11 +5,6 @@ from __future__ import annotations
 
 import shutil as shutil  # re-exported via __all__
 import sys
-from collections.abc import Callable, Mapping, Set
-from dataclasses import dataclass
-from datetime import date
-from pathlib import Path
-from typing import TypeVar
 
 from memory.graph.sync_pkg._core_ast import (
     _CONTROL_FLOW_NODES as _CONTROL_FLOW_NODES,
@@ -210,6 +205,12 @@ from memory.graph.sync_pkg.add_adr_decision_node import (
 from memory.graph.sync_pkg.add_adr_decision_node import (
     _add_doc_path_reference_edges as _add_doc_path_reference_edges,
 )
+from memory.graph.sync_pkg.add_alert_rule_group_surfaces import (
+    _add_alert_rule_group_surfaces as _add_alert_rule_group_surfaces,
+)
+from memory.graph.sync_pkg.add_ci_workflow_graph import (
+    _add_ci_workflow_graph as _add_ci_workflow_graph,
+)
 from memory.graph.sync_pkg.add_claim_target_relation import (
     _add_claim_fallback_target as _add_claim_fallback_target,
 )
@@ -339,11 +340,17 @@ from memory.graph.sync_pkg.add_file_structure_zone import (
 from memory.graph.sync_pkg.add_file_structure_zone import (
     _field_quality_index as _field_quality_index,
 )
+from memory.graph.sync_pkg.add_impact_analysis_surfaces import (
+    _add_impact_analysis_surfaces as _add_impact_analysis_surfaces,
+)
 from memory.graph.sync_pkg.add_package_topology_decisions_and_risks import (
     _add_package_topology_decisions_and_risks as _add_package_topology_decisions_and_risks,
 )
 from memory.graph.sync_pkg.add_pipeline_doc_edges import (
     _add_pipeline_doc_edges as _add_pipeline_doc_edges,
+)
+from memory.graph.sync_pkg.add_pipeline_test_edges import (
+    _add_pipeline_test_edges as _add_pipeline_test_edges,
 )
 from memory.graph.sync_pkg.add_policy_surface import (
     _add_policy_artifact as _add_policy_artifact,
@@ -411,6 +418,12 @@ from memory.graph.sync_pkg.add_secret_requirements import (
 from memory.graph.sync_pkg.add_single_adr_constraint_edges import (
     _add_single_adr_constraint_edges as _add_single_adr_constraint_edges,
 )
+from memory.graph.sync_pkg.add_single_alert_surface import (
+    _add_alert_surface_from_rule as _add_alert_surface_from_rule,
+)
+from memory.graph.sync_pkg.add_single_alert_surface import (
+    _add_single_alert_surface as _add_single_alert_surface,
+)
 from memory.graph.sync_pkg.add_storage_data_surfaces import (
     _add_storage_data_surfaces as _add_storage_data_surfaces,
 )
@@ -422,6 +435,9 @@ from memory.graph.sync_pkg.add_test_suite_surface import (
 )
 from memory.graph.sync_pkg.add_workflow_file_surface import (
     _add_workflow_file_surface as _add_workflow_file_surface,
+)
+from memory.graph.sync_pkg.add_workflow_jobs import (
+    _add_workflow_jobs as _add_workflow_jobs,
 )
 from memory.graph.sync_pkg.adr_constraint_candidates import (
     _adr_constraint_candidates as _adr_constraint_candidates,
@@ -485,6 +501,12 @@ from memory.graph.sync_pkg.alert_rule_file_payload import (
 from memory.graph.sync_pkg.alert_rule_file_payload import (
     _link_workflow_job_reusable_target as _link_workflow_job_reusable_target,
 )
+from memory.graph.sync_pkg.alert_rules_paths import (
+    _alert_rules_paths as _alert_rules_paths,
+)
+from memory.graph.sync_pkg.alert_rules_paths import (
+    _alert_surface_context as _alert_surface_context,
+)
 from memory.graph.sync_pkg.alert_runbook_context import (
     _add_pipeline_operational_edges as _add_pipeline_operational_edges,
 )
@@ -499,6 +521,12 @@ from memory.graph.sync_pkg.alert_runbook_path import (
 )
 from memory.graph.sync_pkg.alert_runbook_path import (
     _alert_runbook_path as _alert_runbook_path,
+)
+from memory.graph.sync_pkg.alert_target_context import (
+    _alert_target_context as _alert_target_context,
+)
+from memory.graph.sync_pkg.alert_target_inputs import (
+    _alert_target_inputs as _alert_target_inputs,
 )
 from memory.graph.sync_pkg.alert_targets import (
     _RUNTIME_DIMENSIONS as _RUNTIME_DIMENSIONS,
@@ -774,6 +802,7 @@ from memory.graph.sync_pkg.batch_pipeline_names import (
 from memory.graph.sync_pkg.batch_pipeline_names import (
     _normalization_progress_payload as _normalization_progress_payload,
 )
+from memory.graph.sync_pkg.build_snapshot import build_snapshot as build_snapshot
 from memory.graph.sync_pkg.claim_line_context import (
     _add_claim_path_targets as _add_claim_path_targets,
 )
@@ -1015,6 +1044,12 @@ from memory.graph.sync_pkg.contract_policy_config_path import (
 )
 from memory.graph.sync_pkg.contract_policy_config_path import (
     _contract_policy_fields as _contract_policy_fields,
+)
+from memory.graph.sync_pkg.contract_ref_identity import (
+    _contract_ref_identity as _contract_ref_identity,
+)
+from memory.graph.sync_pkg.contract_ref_identity import (
+    _link_provider_regression_suite_tests as _link_provider_regression_suite_tests,
 )
 from memory.graph.sync_pkg.contract_registry_entries import (
     _add_contract_surfaces as _add_contract_surfaces,
@@ -1310,6 +1345,12 @@ from memory.graph.sync_pkg.entity_config_paths import (
 from memory.graph.sync_pkg.entity_config_paths import (
     _entity_config_paths as _entity_config_paths,
 )
+from memory.graph.sync_pkg.entity_pipeline_contract_target import (
+    _entity_pipeline_contract_target as _entity_pipeline_contract_target,
+)
+from memory.graph.sync_pkg.entity_pipeline_contract_tests import (
+    _entity_pipeline_contract_tests as _entity_pipeline_contract_tests,
+)
 from memory.graph.sync_pkg.entity_pipeline_identity import (
     _add_entity_pipeline_surface as _add_entity_pipeline_surface,
 )
@@ -1318,6 +1359,15 @@ from memory.graph.sync_pkg.entity_pipeline_identity import (
 )
 from memory.graph.sync_pkg.entity_pipeline_identity import (
     _link_entity_pipeline_dependencies as _link_entity_pipeline_dependencies,
+)
+from memory.graph.sync_pkg.entity_pipeline_node_identity import (
+    _entity_pipeline_node_identity as _entity_pipeline_node_identity,
+)
+from memory.graph.sync_pkg.entity_pipeline_node_identity import (
+    _provider_pipeline_test_index as _provider_pipeline_test_index,
+)
+from memory.graph.sync_pkg.entity_pipeline_test_index import (
+    _entity_pipeline_test_index as _entity_pipeline_test_index,
 )
 from memory.graph.sync_pkg.entity_storage_context import (
     _entity_storage_context as _entity_storage_context,
@@ -1553,6 +1603,9 @@ from memory.graph.sync_pkg.link_alert_target_group import (
 from memory.graph.sync_pkg.link_alert_target_group import (
     _link_alert_target_group as _link_alert_target_group,
 )
+from memory.graph.sync_pkg.link_alert_targets import (
+    _link_alert_targets as _link_alert_targets,
+)
 from memory.graph.sync_pkg.link_composite_config_dependencies import (
     _add_test_graph as _add_test_graph,
 )
@@ -1637,8 +1690,14 @@ from memory.graph.sync_pkg.link_entity_storage_promotions import (
 from memory.graph.sync_pkg.link_pipeline_test_paths import (
     _link_pipeline_test_paths as _link_pipeline_test_paths,
 )
+from memory.graph.sync_pkg.link_pipeline_test_suite import (
+    _link_pipeline_test_suite as _link_pipeline_test_suite,
+)
 from memory.graph.sync_pkg.link_pipeline_test_targets import (
     _link_pipeline_test_targets as _link_pipeline_test_targets,
+)
+from memory.graph.sync_pkg.link_provider_suite_targets import (
+    _link_provider_suite_targets as _link_provider_suite_targets,
 )
 from memory.graph.sync_pkg.link_relation_backed_structure_for_relat import (
     _link_relation_backed_structure_for_relation as _link_relation_backed_structure_for_relation,
@@ -1690,6 +1749,9 @@ from memory.graph.sync_pkg.link_source_backed_file_structure import (
 )
 from memory.graph.sync_pkg.link_source_backed_node_structure import (
     _link_source_backed_node_structure as _link_source_backed_node_structure,
+)
+from memory.graph.sync_pkg.link_workflow_job_dependencies import (
+    _link_workflow_job_dependencies as _link_workflow_job_dependencies,
 )
 from memory.graph.sync_pkg.link_workflow_run_targets import (
     _link_workflow_run_targets as _link_workflow_run_targets,
@@ -1945,6 +2007,12 @@ from memory.graph.sync_pkg.pipeline_source_config_artifact import (
 from memory.graph.sync_pkg.pipeline_source_config_artifact import (
     _pipeline_source_config_artifact as _pipeline_source_config_artifact,
 )
+from memory.graph.sync_pkg.pipeline_test_context import (
+    _pipeline_test_context as _pipeline_test_context,
+)
+from memory.graph.sync_pkg.pipeline_test_indexes import (
+    _pipeline_test_indexes as _pipeline_test_indexes,
+)
 from memory.graph.sync_pkg.pipeline_test_ownership_path import (
     _pipeline_test_mapping_config as _pipeline_test_mapping_config,
 )
@@ -1956,6 +2024,15 @@ from memory.graph.sync_pkg.pipeline_test_ownership_path import (
 )
 from memory.graph.sync_pkg.pipeline_test_payload import (
     _pipeline_test_payload as _pipeline_test_payload,
+)
+from memory.graph.sync_pkg.pipeline_test_suite_name import (
+    _link_entity_pipeline_tests as _link_entity_pipeline_tests,
+)
+from memory.graph.sync_pkg.pipeline_test_suite_name import (
+    _pipeline_test_suite_name as _pipeline_test_suite_name,
+)
+from memory.graph.sync_pkg.pipelinetestcontext import (
+    PipelineTestContext as PipelineTestContext,
 )
 from memory.graph.sync_pkg.policy_governance_targets import (
     _policy_governance_targets as _policy_governance_targets,
@@ -2052,6 +2129,33 @@ from memory.graph.sync_pkg.provider_config_properties import (
 )
 from memory.graph.sync_pkg.provider_config_properties import (
     _provider_config_properties as _provider_config_properties,
+)
+from memory.graph.sync_pkg.provider_pipeline_index_entries import (
+    _provider_pipeline_index_entries as _provider_pipeline_index_entries,
+)
+from memory.graph.sync_pkg.provider_pipeline_index_key import (
+    _pipeline_test_linker as _pipeline_test_linker,
+)
+from memory.graph.sync_pkg.provider_pipeline_index_key import (
+    _provider_pipeline_index_key as _provider_pipeline_index_key,
+)
+from memory.graph.sync_pkg.provider_regression_provider_target import (
+    _add_alert_surfaces as _add_alert_surfaces,
+)
+from memory.graph.sync_pkg.provider_regression_provider_target import (
+    _provider_regression_provider_target as _provider_regression_provider_target,
+)
+from memory.graph.sync_pkg.provider_regression_provider_targets import (
+    _provider_regression_provider_targets as _provider_regression_provider_targets,
+)
+from memory.graph.sync_pkg.provider_regression_suite_target import (
+    _provider_regression_suite_target as _provider_regression_suite_target,
+)
+from memory.graph.sync_pkg.provider_suite_provenance import (
+    _provider_regression_suite_targets as _provider_regression_suite_targets,
+)
+from memory.graph.sync_pkg.provider_suite_provenance import (
+    _provider_suite_provenance as _provider_suite_provenance,
 )
 from memory.graph.sync_pkg.published_contract_artifact_paths import (
     _link_contract_module_dependencies as _link_contract_module_dependencies,
@@ -2222,6 +2326,9 @@ from memory.graph.sync_pkg.reusable_target_workflow_key import (
 )
 from memory.graph.sync_pkg.reusable_target_workflow_key import (
     _reusable_target_workflow_key as _reusable_target_workflow_key,
+)
+from memory.graph.sync_pkg.run_impact_analysis_passes import (
+    _run_impact_analysis_passes as _run_impact_analysis_passes,
 )
 from memory.graph.sync_pkg.run_instance_doc_targets import (
     _run_instance_artifact_targets as _run_instance_artifact_targets,
@@ -2439,6 +2546,12 @@ from memory.graph.sync_pkg.sorted_governance_targets import (
 from memory.graph.sync_pkg.sorted_governance_targets import (
     _sorted_governance_targets as _sorted_governance_targets,
 )
+from memory.graph.sync_pkg.sorted_provider_surface_nodes import (
+    _add_alert_rule_file_surfaces as _add_alert_rule_file_surfaces,
+)
+from memory.graph.sync_pkg.sorted_provider_surface_nodes import (
+    _sorted_provider_surface_nodes as _sorted_provider_surface_nodes,
+)
 from memory.graph.sync_pkg.source_backed_path_kind import (
     _link_source_backed_directory_structure as _link_source_backed_directory_structure,
 )
@@ -2537,6 +2650,9 @@ from memory.graph.sync_pkg.sync_run_id import (
     _verify_sync_snapshot as _verify_sync_snapshot,
 )
 from memory.graph.sync_pkg.sync_run_id import sync_snapshot as sync_snapshot
+from memory.graph.sync_pkg.t import DEFAULT_ROOT as DEFAULT_ROOT
+from memory.graph.sync_pkg.t import SRC_ROOT as SRC_ROOT
+from memory.graph.sync_pkg.t import T as T
 from memory.graph.sync_pkg.test_artifact_key import (
     _link_pipeline_test_artifact as _link_pipeline_test_artifact,
 )
@@ -2598,6 +2714,15 @@ from memory.graph.sync_pkg.workflow_family_rules import (
 )
 from memory.graph.sync_pkg.workflow_family_rules import (
     _workflow_trigger_names as _workflow_trigger_names,
+)
+from memory.graph.sync_pkg.workflow_graph_files import (
+    _process_workflow_file as _process_workflow_file,
+)
+from memory.graph.sync_pkg.workflow_graph_files import (
+    _workflow_graph_files as _workflow_graph_files,
+)
+from memory.graph.sync_pkg.workflow_job_dependency_ids import (
+    _workflow_job_dependency_ids as _workflow_job_dependency_ids,
 )
 from memory.graph.sync_pkg.workflow_matrix_axis_values import (
     _append_workflow_matrix_include_variants as _append_workflow_matrix_include_variants,
@@ -2672,777 +2797,10 @@ from memory.graph.sync_pkg.workflow_output_expression import (
 # Graph assembly ingests heterogeneous YAML/JSON and AST-derived values. Keep
 # that pre-serialization boundary explicit; serializers below narrow values to
 # the scalar/list shapes accepted by Neo4j and JSON.
-T = TypeVar("T")
-
-SRC_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_ROOT = Path(__file__).resolve().parents[4]
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 if str(DEFAULT_ROOT) not in sys.path:
     sys.path.insert(0, str(DEFAULT_ROOT))
-
-
-def build_snapshot(root: Path, verified_at: str | None = None) -> GraphSnapshot:
-    snapshot = GraphSnapshot()
-    today = verified_at or date.today().isoformat()
-    memory_mapping = _load_memory_mapping(root)
-    project = snapshot.add_node(
-        "project",
-        "BioETL",
-        summary="Python ETL framework for bioactivity data acquisition.",
-        source_path="docs/00-project/ai/memory/agent-memory.md",
-        source_kind="memory_entrypoint",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    _add_curated_docs(snapshot, root, project, today)
-    _add_decisions_and_risks(snapshot, root, project, today)
-    _add_layer_topology(snapshot, root, project, today)
-    _add_provider_and_config_graph(snapshot, root, project, today)
-    _add_dashboard_graph(snapshot, root, project, today)
-    _add_quality_and_scripts(snapshot, root, project, today)
-    _add_test_graph(snapshot, root, project, today)
-    _add_policy_surfaces(snapshot, root, project, today)
-    _add_impact_analysis_surfaces(snapshot, root, project, today)
-    _add_file_structure_surfaces(snapshot, root, project, today)
-    _add_storage_data_surfaces(snapshot, root, project, today)
-    _add_control_plane_runtime_evidence(snapshot, root, project, today)
-    _add_ci_workflow_graph(snapshot, root, project, today)
-    _add_cli_command_graph(snapshot, root, project, today)
-    _add_docs_to_code_drift_edges(snapshot, root)
-    _add_pipeline_doc_edges(snapshot)
-    _add_reverse_module_doc_edges(snapshot)
-    _add_adr_constraint_edges(snapshot, root, project, today)
-    _add_retirement_analysis_surfaces(snapshot, root, project, today, memory_mapping)
-    _add_complexity_analysis_surfaces(snapshot, root, project, today, memory_mapping)
-    return snapshot
-
-
-def _add_impact_analysis_surfaces(
-    snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str
-) -> None:
-    memory_mapping = _load_memory_mapping(root)
-    port_nodes, adapter_nodes, contract_nodes, pipeline_nodes = (
-        _impact_analysis_context(
-            snapshot,
-            root,
-            project,
-            today,
-            memory_mapping,
-        )
-    )
-    _run_impact_analysis_passes(
-        snapshot,
-        root,
-        project,
-        today,
-        memory_mapping=memory_mapping,
-        port_nodes=port_nodes,
-        adapter_nodes=adapter_nodes,
-        contract_nodes=contract_nodes,
-        pipeline_nodes=pipeline_nodes,
-    )
-
-
-def _run_impact_analysis_passes(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    *,
-    memory_mapping: dict[str, object],
-    port_nodes: set[NodeKey],
-    adapter_nodes: dict[str, NodeKey],
-    contract_nodes: dict[str, NodeKey],
-    pipeline_nodes: dict[str, NodeKey],
-) -> None:
-    _add_pipeline_normalization_edges(snapshot, pipeline_nodes, memory_mapping)
-    _add_pipeline_normalization_evidence(snapshot, pipeline_nodes)
-    _add_pipeline_test_edges(snapshot, root, pipeline_nodes, memory_mapping)
-    _add_alert_surfaces(
-        snapshot, root, project, today, pipeline_nodes, contract_nodes, memory_mapping
-    )
-    _add_governance_edges(
-        snapshot, port_nodes, adapter_nodes, pipeline_nodes, contract_nodes
-    )
-    _add_pipeline_operational_edges(snapshot, pipeline_nodes, memory_mapping)
-    _extract_code_duplication_surfaces(snapshot, root, project, today, memory_mapping)
-
-
-def _link_workflow_job_dependencies(
-    snapshot: GraphSnapshot,
-    workflow_name: str,
-    jobs: dict[str, object],
-    job_nodes: dict[tuple[str, str], NodeKey],
-) -> None:
-    for job_id, job_payload in jobs.items():
-        if not isinstance(job_payload, dict):
-            continue
-        job = job_nodes.get((workflow_name, str(job_id)))
-        if job is None:
-            continue
-        for dependency_id in _workflow_job_dependency_ids(job_payload):
-            dependency_key = job_nodes.get((workflow_name, dependency_id))
-            if dependency_key is not None:
-                snapshot.add_relation(
-                    job, "DEPENDS_ON", dependency_key, provenance="workflow_graph"
-                )
-
-
-def _workflow_job_dependency_ids(job_payload: dict[str, object]) -> tuple[str, ...]:
-    needs_payload = job_payload.get("needs")
-    if isinstance(needs_payload, str):
-        return (needs_payload,)
-    if isinstance(needs_payload, list):
-        return tuple(str(item) for item in needs_payload if isinstance(item, str))
-    return ()
-
-
-def _add_ci_workflow_graph(
-    snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str
-) -> None:
-    workflows_root = root / GITHUB_DIR / "workflows"
-    if not workflows_root.is_dir():
-        return
-
-    workflow_files = _workflow_graph_files(workflows_root)
-    workflow_name_by_relative_path = {
-        _rel_path(root, workflow_path): workflow_path.stem
-        for workflow_path in workflow_files
-    }
-    workflow_nodes: dict[str, NodeKey] = {}
-    job_nodes: dict[tuple[str, str], NodeKey] = {}
-    for workflow_path in workflow_files:
-        _process_workflow_file(
-            snapshot,
-            root,
-            project,
-            today,
-            workflow_path,
-            workflow_nodes=workflow_nodes,
-            workflow_name_by_relative_path=workflow_name_by_relative_path,
-            job_nodes=job_nodes,
-        )
-
-
-def _workflow_graph_files(workflows_root: Path) -> list[Path]:
-    return sorted(workflows_root.glob("*.y*ml"))
-
-
-def _process_workflow_file(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    workflow_path: Path,
-    *,
-    workflow_nodes: dict[str, NodeKey],
-    workflow_name_by_relative_path: dict[str, str],
-    job_nodes: dict[tuple[str, str], NodeKey],
-) -> None:
-    workflow_name, payload, context, workflow_call_entrypoint = (
-        _add_workflow_file_surface(
-            snapshot,
-            root,
-            project,
-            today,
-            workflow_path,
-        )
-    )
-    workflow_nodes[workflow_name] = context.workflow
-    jobs = payload.get("jobs")
-    if not isinstance(jobs, dict):
-        return
-    _add_workflow_jobs(
-        snapshot,
-        context=context,
-        jobs=jobs,
-        workflow_nodes=workflow_nodes,
-        workflow_name_by_relative_path=workflow_name_by_relative_path,
-        workflow_call_entrypoint=workflow_call_entrypoint,
-        job_nodes=job_nodes,
-    )
-
-
-def _add_workflow_jobs(
-    snapshot: GraphSnapshot,
-    *,
-    context: WorkflowContext,
-    jobs: dict[object, object],
-    workflow_nodes: dict[str, NodeKey],
-    workflow_name_by_relative_path: dict[str, str],
-    workflow_call_entrypoint: NodeKey | None,
-    job_nodes: dict[tuple[str, str], NodeKey],
-) -> None:
-    for job_id, job_payload in jobs.items():
-        if not isinstance(job_payload, dict):
-            continue
-        _process_workflow_job(
-            snapshot,
-            context=context,
-            job_id=str(job_id),
-            job_payload=job_payload,
-            workflow_nodes=workflow_nodes,
-            workflow_name_by_relative_path=workflow_name_by_relative_path,
-            workflow_call_entrypoint=workflow_call_entrypoint,
-            job_nodes=job_nodes,
-        )
-    _link_workflow_job_dependencies(
-        snapshot,
-        context.workflow_name,
-        {str(key): value for key, value in jobs.items()},
-        job_nodes,
-    )
-
-
-def _add_pipeline_test_edges(
-    snapshot: GraphSnapshot,
-    root: Path,
-    _pipeline_nodes: dict[str, NodeKey],
-    memory_mapping: dict[str, object],
-) -> None:
-    test_context = _pipeline_test_context(
-        snapshot, root, memory_mapping.get("pipeline_tests")
-    )
-    if test_context is None:
-        return
-    test_linker = _pipeline_test_linker(snapshot, test_context.relation_type)
-    _link_entity_pipeline_tests(
-        test_linker,
-        test_context.entity_pipeline_index,
-        test_context.ownership,
-    )
-    _link_provider_regression_suite_tests(
-        test_linker,
-        test_context.provider_pipeline_index,
-        suites=test_context.provider_regression_suites,
-        enabled=test_context.include_provider_regression_suites,
-    )
-
-
-@dataclass(frozen=True)
-class PipelineTestContext:
-    relation_type: str
-    ownership: dict[object, object]
-    provider_regression_suites: object
-    include_provider_regression_suites: bool
-    entity_pipeline_index: dict[tuple[str, str], NodeKey]
-    provider_pipeline_index: dict[str, list[NodeKey]]
-
-
-def _pipeline_test_context(
-    snapshot: GraphSnapshot,
-    root: Path,
-    tests_mapping: object,
-) -> PipelineTestContext | None:
-    relation_type, ownership_config, include_provider_regression_suites = (
-        _pipeline_test_mapping_config(tests_mapping)
-    )
-    payload, ownership = _pipeline_test_payload(root, ownership_config)
-    if payload is None or ownership is None:
-        return None
-    entity_pipeline_index, provider_pipeline_index = _pipeline_test_indexes(snapshot)
-    return PipelineTestContext(
-        relation_type=relation_type,
-        ownership=ownership,
-        provider_regression_suites=payload.get("provider_regression_suites"),
-        include_provider_regression_suites=include_provider_regression_suites,
-        entity_pipeline_index=entity_pipeline_index,
-        provider_pipeline_index=provider_pipeline_index,
-    )
-
-
-def _pipeline_test_indexes(
-    snapshot: GraphSnapshot,
-) -> tuple[dict[tuple[str, str], NodeKey], dict[str, list[NodeKey]]]:
-    return _entity_pipeline_test_index(snapshot), _provider_pipeline_test_index(
-        snapshot
-    )
-
-
-def _entity_pipeline_test_index(
-    snapshot: GraphSnapshot,
-) -> dict[tuple[str, str], NodeKey]:
-    return {
-        identity: node.key
-        for node in snapshot.nodes.values()
-        for identity in [_entity_pipeline_node_identity(node)]
-        if identity is not None
-    }
-
-
-def _entity_pipeline_node_identity(node: GraphNode) -> tuple[str, str] | None:
-    if (
-        node.key.label != "pipeline_surface"
-        or node.properties.get("pipeline_kind") != "entity"
-    ):
-        return None
-    return str(node.properties.get("provider")), str(node.properties.get("entity"))
-
-
-def _provider_pipeline_test_index(snapshot: GraphSnapshot) -> dict[str, list[NodeKey]]:
-    provider_pipeline_index: dict[str, list[NodeKey]] = {}
-    for provider, node_key in _provider_pipeline_index_entries(snapshot):
-        provider_pipeline_index.setdefault(provider, []).append(node_key)
-    return provider_pipeline_index
-
-
-def _provider_pipeline_index_entries(
-    snapshot: GraphSnapshot,
-) -> tuple[tuple[str, NodeKey], ...]:
-    return tuple(
-        (provider, node.key)
-        for node in snapshot.nodes.values()
-        for provider in [_provider_pipeline_index_key(node)]
-        if provider is not None
-    )
-
-
-def _provider_pipeline_index_key(node: GraphNode) -> str | None:
-    if node.key.label != "pipeline_surface":
-        return None
-    provider = node.properties.get("provider")
-    return provider if isinstance(provider, str) else None
-
-
-def _pipeline_test_linker(
-    snapshot: GraphSnapshot,
-    relation_type: str,
-) -> Callable[[NodeKey, str, str], None]:
-    def link_test_target(
-        pipeline_key: NodeKey, test_path: str, provenance: str
-    ) -> None:
-        artifact_key = _test_artifact_key(test_path)
-        if artifact_key not in snapshot.nodes:
-            return
-        _link_pipeline_test_artifact(
-            snapshot, pipeline_key, relation_type, artifact_key, provenance
-        )
-        _link_pipeline_test_suite(
-            snapshot, pipeline_key, relation_type, artifact_key, provenance
-        )
-
-    return link_test_target
-
-
-def _link_pipeline_test_suite(
-    snapshot: GraphSnapshot,
-    pipeline_key: NodeKey,
-    relation_type: str,
-    artifact_key: NodeKey,
-    provenance: str,
-) -> None:
-    suite_name = _pipeline_test_suite_name(snapshot, artifact_key)
-    if suite_name is None:
-        return
-    snapshot.add_relation(
-        pipeline_key,
-        relation_type,
-        NodeKey("test_surface", suite_name),
-        provenance=provenance,
-    )
-
-
-def _pipeline_test_suite_name(
-    snapshot: GraphSnapshot,
-    artifact_key: NodeKey,
-) -> str | None:
-    return TEST_SURFACES.get(
-        str(snapshot.nodes[artifact_key].properties.get("suite", ""))
-    )
-
-
-def _link_entity_pipeline_tests(
-    link_test_target: Callable[[NodeKey, str, str], None],
-    entity_pipeline_index: dict[tuple[str, str], NodeKey],
-    ownership: dict[object, object],
-) -> None:
-    _link_pipeline_test_targets(
-        link_test_target,
-        _entity_pipeline_contract_tests(entity_pipeline_index, ownership),
-        provenance="impact_pipeline_tests",
-    )
-
-
-def _entity_pipeline_contract_tests(
-    entity_pipeline_index: dict[tuple[str, str], NodeKey],
-    ownership: dict[object, object],
-) -> tuple[tuple[NodeKey, tuple[str, ...]], ...]:
-    return tuple(
-        target
-        for contract_ref, raw_tests in ownership.items()
-        for target in [
-            _entity_pipeline_contract_target(
-                entity_pipeline_index, contract_ref, raw_tests
-            )
-        ]
-        if target is not None
-    )
-
-
-def _entity_pipeline_contract_target(
-    entity_pipeline_index: dict[tuple[str, str], NodeKey],
-    contract_ref: object,
-    raw_tests: object,
-) -> tuple[NodeKey, tuple[str, ...]] | None:
-    contract_identity = _contract_ref_identity(contract_ref)
-    if contract_identity is None:
-        return None
-    pipeline_key = entity_pipeline_index.get(contract_identity)
-    if pipeline_key is None:
-        return None
-    test_paths = tuple(_as_string_list(raw_tests))
-    if not test_paths:
-        return None
-    return pipeline_key, test_paths
-
-
-def _contract_ref_identity(contract_ref: object) -> tuple[str, str] | None:
-    if not isinstance(contract_ref, str) or "." not in contract_ref:
-        return None
-    provider_name, entity_name = contract_ref.split(".", 1)
-    return provider_name, entity_name
-
-
-def _link_provider_regression_suite_tests(
-    link_test_target: Callable[[NodeKey, str, str], None],
-    provider_pipeline_index: dict[str, list[NodeKey]],
-    *,
-    suites: object,
-    enabled: bool,
-) -> None:
-    if not enabled or not isinstance(suites, dict):
-        return
-    for suite_name, provider_targets in _provider_regression_suite_targets(suites):
-        _link_provider_suite_targets(
-            link_test_target,
-            provider_pipeline_index,
-            suite_name=suite_name,
-            provider_targets=provider_targets,
-        )
-
-
-def _link_provider_suite_targets(
-    link_test_target: Callable[[NodeKey, str, str], None],
-    provider_pipeline_index: dict[str, list[NodeKey]],
-    *,
-    suite_name: str,
-    provider_targets: tuple[tuple[str, str], ...],
-) -> None:
-    provenance = _provider_suite_provenance(suite_name)
-    for provider_name, raw_test_path in provider_targets:
-        for pipeline_key in provider_pipeline_index.get(provider_name, []):
-            link_test_target(pipeline_key, raw_test_path, provenance)
-
-
-def _provider_suite_provenance(suite_name: str) -> str:
-    return f"impact_pipeline_regression_suite:{suite_name}"
-
-
-def _provider_regression_suite_targets(
-    suites: dict[object, object],
-) -> tuple[tuple[str, tuple[tuple[str, str], ...]], ...]:
-    return tuple(
-        suite_target
-        for suite_name, suite_payload in suites.items()
-        for suite_target in [
-            _provider_regression_suite_target(suite_name, suite_payload)
-        ]
-        if suite_target is not None
-    )
-
-
-def _provider_regression_suite_target(
-    suite_name: object,
-    suite_payload: object,
-) -> tuple[str, tuple[tuple[str, str], ...]] | None:
-    if not isinstance(suite_name, str) or not isinstance(suite_payload, dict):
-        return None
-    provider_targets = _provider_regression_provider_targets(suite_payload)
-    if not provider_targets:
-        return None
-    return suite_name, provider_targets
-
-
-def _provider_regression_provider_targets(
-    suite_payload: dict[str, object],
-) -> tuple[tuple[str, str], ...]:
-    providers = suite_payload.get("providers")
-    if not isinstance(providers, dict):
-        return ()
-    return tuple(
-        target
-        for provider_name, raw_test_path in providers.items()
-        for target in [
-            _provider_regression_provider_target(provider_name, raw_test_path)
-        ]
-        if target is not None
-    )
-
-
-def _provider_regression_provider_target(
-    provider_name: object,
-    raw_test_path: object,
-) -> tuple[str, str] | None:
-    if isinstance(provider_name, str) and isinstance(raw_test_path, str):
-        return provider_name, raw_test_path
-    return None
-
-
-def _add_alert_surfaces(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    pipeline_nodes: dict[str, NodeKey],
-    contract_nodes: dict[str, NodeKey],
-    memory_mapping: dict[str, object],
-) -> None:
-    rules_root = root / "grafana" / "prometheus-rules"
-    if not rules_root.is_dir():
-        return
-
-    dashboard_metrics, target_context = _alert_surface_context(
-        snapshot,
-        root,
-        pipeline_nodes=pipeline_nodes,
-        contract_nodes=contract_nodes,
-        memory_mapping=memory_mapping,
-    )
-    for rules_path in _alert_rules_paths(rules_root):
-        _add_alert_rule_file_surfaces(
-            snapshot,
-            root,
-            project,
-            today,
-            rules_path,
-            dashboard_metrics=dashboard_metrics,
-            target_context=target_context,
-            memory_mapping=memory_mapping,
-        )
-
-
-def _alert_rules_paths(rules_root: Path) -> tuple[Path, ...]:
-    return tuple(sorted(rules_root.glob("*.y*ml")))
-
-
-def _alert_surface_context(
-    snapshot: GraphSnapshot,
-    root: Path,
-    *,
-    pipeline_nodes: dict[str, NodeKey],
-    contract_nodes: dict[str, NodeKey],
-    memory_mapping: dict[str, object],
-) -> tuple[dict[NodeKey, set[str]], AlertTargetContext]:
-    return (
-        _dashboard_metric_index(root),
-        _alert_target_context(
-            snapshot,
-            pipeline_nodes=pipeline_nodes,
-            contract_nodes=contract_nodes,
-            memory_mapping=memory_mapping,
-        ),
-    )
-
-
-def _alert_target_context(
-    snapshot: GraphSnapshot,
-    *,
-    pipeline_nodes: dict[str, NodeKey],
-    contract_nodes: dict[str, NodeKey],
-    memory_mapping: dict[str, object],
-) -> AlertTargetContext:
-    return AlertTargetContext(
-        snapshot=snapshot,
-        pipeline_nodes=pipeline_nodes,
-        provider_nodes=_sorted_provider_surface_nodes(snapshot),
-        contract_nodes=contract_nodes,
-        memory_mapping=memory_mapping,
-    )
-
-
-def _sorted_provider_surface_nodes(snapshot: GraphSnapshot) -> list[NodeKey]:
-    return sorted(
-        (key for key in snapshot.nodes if key.label == "provider_surface"),
-        key=lambda node: node.name,
-    )
-
-
-def _add_alert_rule_file_surfaces(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    rules_path: Path,
-    *,
-    dashboard_metrics: dict[NodeKey, set[str]],
-    target_context: AlertTargetContext,
-    memory_mapping: dict[str, object],
-) -> None:
-    file_context = _alert_rule_file_context(snapshot, root, today, rules_path)
-    for group in _alert_rule_groups(file_context.payload):
-        _add_alert_rule_group_surfaces(
-            snapshot,
-            root,
-            project,
-            today,
-            rules_path,
-            file_context.artifact,
-            group,
-            dashboard_metrics=dashboard_metrics,
-            target_context=target_context,
-            memory_mapping=memory_mapping,
-        )
-
-
-def _add_alert_rule_group_surfaces(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    rules_path: Path,
-    artifact: NodeKey,
-    group: dict[str, object],
-    *,
-    dashboard_metrics: Mapping[NodeKey, Set[str]],
-    target_context: AlertTargetContext,
-    memory_mapping: dict[str, object],
-) -> None:
-    group_context = _alert_rule_group_context(group, rules_path)
-    for rule in group_context.rules:
-        _add_alert_surface_from_rule(
-            snapshot,
-            root,
-            project,
-            today,
-            rules_path,
-            artifact,
-            group_name=group_context.group_name,
-            rule=rule,
-            dashboard_metrics=dashboard_metrics,
-            target_context=target_context,
-            memory_mapping=memory_mapping,
-        )
-
-
-def _add_single_alert_surface(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    rules_path: Path,
-    artifact: NodeKey,
-    group_name: str,
-    rule: dict[str, object],
-    *,
-    dashboard_metrics: Mapping[NodeKey, Set[str]],
-    target_context: AlertTargetContext,
-    memory_mapping: dict[str, object],
-) -> None:
-    alert_context = _alert_rule_context(rule)
-    if alert_context is None:
-        return
-    alert = _add_alert_surface_node(
-        snapshot,
-        root,
-        project,
-        today,
-        rules_path,
-        artifact,
-        group_name,
-        alert_context.alert_name,
-        alert_context.annotations,
-        alert_context.labels,
-    )
-    _link_alert_targets(
-        snapshot,
-        alert,
-        alert_context.alert_name,
-        group_name,
-        rule,
-        dashboard_metrics=dashboard_metrics,
-        target_context=target_context,
-        memory_mapping=memory_mapping,
-    )
-    _link_alert_runbook(
-        snapshot,
-        root,
-        alert,
-        alert_context.alert_name,
-        alert_context.annotations,
-        today,
-    )
-
-
-def _add_alert_surface_from_rule(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    rules_path: Path,
-    artifact: NodeKey,
-    *,
-    group_name: str,
-    rule: dict[str, object],
-    dashboard_metrics: Mapping[NodeKey, Set[str]],
-    target_context: AlertTargetContext,
-    memory_mapping: dict[str, object],
-) -> None:
-    _add_single_alert_surface(
-        snapshot,
-        root,
-        project,
-        today,
-        rules_path,
-        artifact,
-        group_name,
-        rule,
-        dashboard_metrics=dashboard_metrics,
-        target_context=target_context,
-        memory_mapping=memory_mapping,
-    )
-
-
-def _link_alert_targets(
-    snapshot: GraphSnapshot,
-    alert: NodeKey,
-    alert_name: str,
-    group_name: str,
-    rule: dict[str, object],
-    *,
-    dashboard_metrics: Mapping[NodeKey, Set[str]],
-    target_context: AlertTargetContext,
-    memory_mapping: dict[str, object],
-) -> None:
-    expr, dimensions = _alert_target_inputs(rule)
-    selection = _select_alert_targets(
-        target_context,
-        alert_name,
-        group_name,
-        expr,
-        dimensions,
-    )
-    _link_selected_alert_targets(snapshot, alert, selection)
-    _link_alert_observer_dashboards(
-        snapshot,
-        alert,
-        alert_name,
-        group_name,
-        expr,
-        dashboard_metrics,
-        memory_mapping,
-    )
-
-
-def _alert_target_inputs(rule: dict[str, object]) -> tuple[str, set[str]]:
-    annotations = _alert_annotations(rule)
-    expr = str(rule.get("expr", ""))
-    context = AlertTargetInputs(
-        expr=expr,
-        dimensions=_runtime_dimensions(expr, _alert_dimension_text(annotations)),
-    )
-    return context.expr, context.dimensions
 
 
 if __name__ == "__main__":
