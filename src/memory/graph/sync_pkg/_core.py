@@ -407,6 +407,15 @@ from memory.graph.sync_pkg.adr_title import (
 from memory.graph.sync_pkg.adr_title import (
     _resolve_adr_constraint_target as _resolve_adr_constraint_target,
 )
+from memory.graph.sync_pkg.alert_group_name import (
+    _alert_group_name as _alert_group_name,
+)
+from memory.graph.sync_pkg.alert_group_name import (
+    _alert_group_rules as _alert_group_rules,
+)
+from memory.graph.sync_pkg.alert_group_name import (
+    _alert_rule_group_context as _alert_rule_group_context,
+)
 from memory.graph.sync_pkg.alert_rule_file_payload import (
     _add_alert_rules_artifact as _add_alert_rules_artifact,
 )
@@ -4296,27 +4305,6 @@ def _add_alert_rule_group_surfaces(
             target_context=target_context,
             memory_mapping=memory_mapping,
         )
-
-
-def _alert_group_name(group: dict[str, object], rules_path: Path) -> str:
-    return str(group.get("name", rules_path.stem))
-
-
-def _alert_group_rules(group: dict[str, object]) -> tuple[dict[str, object], ...]:
-    rules = group.get("rules")
-    if not isinstance(rules, list):
-        return ()
-    return tuple(rule for rule in rules if isinstance(rule, dict))
-
-
-def _alert_rule_group_context(
-    group: dict[str, object],
-    rules_path: Path,
-) -> AlertRuleGroupContext:
-    return AlertRuleGroupContext(
-        group_name=_alert_group_name(group, rules_path),
-        rules=_alert_group_rules(group),
-    )
 
 
 def _add_single_alert_surface(
