@@ -279,6 +279,9 @@ from memory.graph.sync_pkg.add_entity_pipeline_surfaces import (
 from memory.graph.sync_pkg.add_entity_pipeline_surfaces import (
     _add_entity_pipeline_surfaces as _add_entity_pipeline_surfaces,
 )
+from memory.graph.sync_pkg.add_package_topology_decisions_and_risks import (
+    _add_package_topology_decisions_and_risks as _add_package_topology_decisions_and_risks,
+)
 from memory.graph.sync_pkg.add_policy_surface import (
     _add_policy_artifact as _add_policy_artifact,
 )
@@ -2180,39 +2183,6 @@ def _add_decisions_and_risks(
 ) -> None:
     _add_package_topology_decisions_and_risks(snapshot, root, project, today)
     _add_governance_decisions_and_risks(snapshot, root, project, today)
-
-
-def _add_package_topology_decisions_and_risks(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-) -> None:
-    summary_path = (
-        root / "docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md"
-    )
-    if not summary_path.is_file():
-        return
-    package_summary, package_doc = _evidence_summary_doc(
-        snapshot,
-        root,
-        today,
-        path="docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md",
-        summary="Accepted package topology decisions and risks.",
-    )
-    source_path = _rel_path(root, package_summary)
-    for identifier_kind, pattern, summary in _package_topology_summary_specs():
-        _add_summary_identifiers(
-            snapshot,
-            project,
-            today,
-            doc=package_doc,
-            provenance="package_topology_summary",
-            identifier_kind=identifier_kind,
-            matches=_summary_identifier_matches(package_summary, pattern),
-            summary=summary,
-            source_path=source_path,
-        )
 
 
 def _add_provider_and_config_graph(
