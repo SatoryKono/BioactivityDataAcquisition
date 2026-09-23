@@ -615,7 +615,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 28
+                "value": 50
               }
             ]
           },
@@ -784,6 +784,10 @@
                 "value": false
               },
               {
+                "id": "displayName",
+                "value": "Report"
+              },
+              {
                 "id": "mappings",
                 "value": [
                   {
@@ -801,7 +805,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 85
+                "value": 68
               }
             ]
           },
@@ -858,6 +862,10 @@
               {
                 "id": "noValue",
                 "value": "UNKNOWN"
+              },
+              {
+                "id": "custom.width",
+                "value": 75
               }
             ]
           },
@@ -906,6 +914,10 @@
               {
                 "id": "noValue",
                 "value": "UNKNOWN"
+              },
+              {
+                "id": "custom.hidden",
+                "value": true
               }
             ]
           },
@@ -988,10 +1000,6 @@
             },
             "properties": [
               {
-                "id": "noValue",
-                "value": "Inspect in 1. Trust"
-              },
-              {
                 "id": "links",
                 "value": [
                   {
@@ -1002,8 +1010,25 @@
                 ]
               },
               {
+                "id": "noValue",
+                "value": "Open"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "Inspect in 1. Trust": {
+                        "text": "Open"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
                 "id": "custom.width",
-                "value": 120
+                "value": 75
               }
             ]
           },
@@ -1081,7 +1106,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 100
+                "value": 90
               }
             ]
           }

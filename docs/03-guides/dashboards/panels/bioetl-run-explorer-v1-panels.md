@@ -88,3 +88,9 @@ actual browser table with ten populated rows and working Report links.
 | 9450 | Inspect Saved Run Evidence | Saved exact-run evidence; expand for identity, version, reasons and actions. |
 | 9451 | Inspect Selected Run Domains | Saved exact-run evidence; expand for identity, version, reasons and actions. |
 | 9452 | Inspect Selected Run Identity | Saved exact-run evidence; expand for identity, version, reasons and actions. |
+
+Recent Runs keeps Pipeline, the short Run ID, Processing, Trust and Report
+readable in the 900-pixel view. Trust uses an Open link, never an inferred OK
+from processing success. Event age remains in the query frame for Inspect
+data; it is hidden from the compact table because Started already supplies
+the visible timestamp. Exact Run IDs and event-age values remain unchanged.

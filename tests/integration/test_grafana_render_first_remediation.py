@@ -1249,7 +1249,7 @@ def test_run_explorer_index_is_disk_last_ten_not_time_range() -> None:
 def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     explorer = _load("bioetl-run-explorer-v1.json")
     recent = _panel(explorer, 3010)
-    assert _override_width(recent, "selected") == 28
+    assert _override_width(recent, "selected") == 50
     assert _override_width(recent, "^(workflow_id|Workflow)$") is None
     assert recent["fieldConfig"]["defaults"]["custom"]["minWidth"] == 50
     assert recent["options"]["footer"]["enablePagination"] is False
