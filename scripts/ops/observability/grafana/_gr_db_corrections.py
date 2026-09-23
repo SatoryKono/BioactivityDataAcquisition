@@ -775,7 +775,7 @@ def apply_corrections(payload: dict) -> None:
             panels[3010],
             "Workflow",
             "custom.cellOptions",
-            {"type": "auto", "wrapText": True},
+            {"type": "auto", "wrapText": False},
         )
         _override(
             panels[3010],
