@@ -2079,6 +2079,12 @@ from memory.graph.sync_pkg.provider_config_properties import (
 from memory.graph.sync_pkg.provider_config_properties import (
     _provider_config_properties as _provider_config_properties,
 )
+from memory.graph.sync_pkg.provider_regression_provider_target import (
+    _add_alert_surfaces as _add_alert_surfaces,
+)
+from memory.graph.sync_pkg.provider_regression_provider_target import (
+    _provider_regression_provider_target as _provider_regression_provider_target,
+)
 from memory.graph.sync_pkg.published_contract_artifact_paths import (
     _link_contract_module_dependencies as _link_contract_module_dependencies,
 )
@@ -3201,48 +3207,6 @@ def _provider_regression_provider_targets(
         ]
         if target is not None
     )
-
-
-def _provider_regression_provider_target(
-    provider_name: object,
-    raw_test_path: object,
-) -> tuple[str, str] | None:
-    if isinstance(provider_name, str) and isinstance(raw_test_path, str):
-        return provider_name, raw_test_path
-    return None
-
-
-def _add_alert_surfaces(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    pipeline_nodes: dict[str, NodeKey],
-    contract_nodes: dict[str, NodeKey],
-    memory_mapping: dict[str, object],
-) -> None:
-    rules_root = root / "grafana" / "prometheus-rules"
-    if not rules_root.is_dir():
-        return
-
-    dashboard_metrics, target_context = _alert_surface_context(
-        snapshot,
-        root,
-        pipeline_nodes=pipeline_nodes,
-        contract_nodes=contract_nodes,
-        memory_mapping=memory_mapping,
-    )
-    for rules_path in _alert_rules_paths(rules_root):
-        _add_alert_rule_file_surfaces(
-            snapshot,
-            root,
-            project,
-            today,
-            rules_path,
-            dashboard_metrics=dashboard_metrics,
-            target_context=target_context,
-            memory_mapping=memory_mapping,
-        )
 
 
 if __name__ == "__main__":
