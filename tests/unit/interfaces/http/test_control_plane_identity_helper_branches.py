@@ -45,6 +45,7 @@ from bioetl.domain.control_plane import (
 from bioetl.domain.control_plane.run_ledger import (
     ARTIFACT_PUBLISHED_EVENT,
     COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
+    INPUT_SNAPSHOT_PUBLISHED_EVENT,
     RUN_FAILED_EVENT,
     RUN_FINISHED_EVENT,
     RUN_STARTED_EVENT,
@@ -744,6 +745,52 @@ def test_ledger_extractor_helpers_cover_composite_edges() -> None:
         )
         == 3
     )
+
+
+def test_bronze_forensics_include_materialized_ledger_snapshot() -> None:
+    manifest = _manifest("9")
+    published = _ledger_entry(
+        manifest,
+        "snapshot",
+        event_type=INPUT_SNAPSHOT_PUBLISHED_EVENT,
+        details={
+            "snapshot_id": "sha256:saved-input",
+            "content_hash": "saved-input",
+            "immutable_uri": "file:///saved/bronze.jsonl.gz",
+        },
+    )
+    values = ledger_extractors.bronze_batch_ids(manifest, (published, published))
+    assert values == ["sha256:saved-input"]
+    row = identity_payload.build_anchor_row(
+        SPEC_BY_NAME["bronze_batch_ids"],
+        value=values,
+        manifest=manifest,
+        ledger_entries=(published,),
+        checkpoint_status="MISSING",
+    )
+    assert row["present"] is True
+    assert row["value_full"] == "sha256:saved-input"
+    assert row["status"] == "OK"
+
+
+@pytest.mark.parametrize(
+    "event_type", [INPUT_SNAPSHOT_PUBLISHED_EVENT, RUN_STARTED_EVENT]
+)
+def test_bronze_forensics_reject_incomplete_or_unrelated_snapshot(event_type) -> None:
+    manifest = _manifest("9")
+    entry = _ledger_entry(
+        manifest,
+        "invalid",
+        event_type=event_type,
+        details={"snapshot_id": "unverified"}
+        if event_type == INPUT_SNAPSHOT_PUBLISHED_EVENT
+        else {
+            "snapshot_id": "unverified",
+            "content_hash": "hash",
+            "immutable_uri": "file:///unrelated.jsonl.gz",
+        },
+    )
+    assert ledger_extractors.bronze_batch_ids(manifest, (entry,)) == []
 
 
 def test_checkpoint_compare_helpers_cover_status_edges() -> None:

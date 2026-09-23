@@ -253,7 +253,7 @@ def _anchor_value_fields(
         value,
         present=present,
         missing_text=missing_text,
-        absent_short=anchor_applicability,
+        absent_short=missing_text,
     )
     copy_enabled, copy_mode, copy_value = _copy_fields(
         copy_flag=copy_flag,
