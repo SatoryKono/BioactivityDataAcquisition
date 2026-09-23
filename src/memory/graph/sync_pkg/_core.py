@@ -2091,6 +2091,12 @@ from memory.graph.sync_pkg.provider_regression_provider_targets import (
 from memory.graph.sync_pkg.provider_regression_suite_target import (
     _provider_regression_suite_target as _provider_regression_suite_target,
 )
+from memory.graph.sync_pkg.provider_suite_provenance import (
+    _provider_regression_suite_targets as _provider_regression_suite_targets,
+)
+from memory.graph.sync_pkg.provider_suite_provenance import (
+    _provider_suite_provenance as _provider_suite_provenance,
+)
 from memory.graph.sync_pkg.published_contract_artifact_paths import (
     _link_contract_module_dependencies as _link_contract_module_dependencies,
 )
@@ -3168,23 +3174,6 @@ def _link_provider_suite_targets(
     for provider_name, raw_test_path in provider_targets:
         for pipeline_key in provider_pipeline_index.get(provider_name, []):
             link_test_target(pipeline_key, raw_test_path, provenance)
-
-
-def _provider_suite_provenance(suite_name: str) -> str:
-    return f"impact_pipeline_regression_suite:{suite_name}"
-
-
-def _provider_regression_suite_targets(
-    suites: dict[object, object],
-) -> tuple[tuple[str, tuple[tuple[str, str], ...]], ...]:
-    return tuple(
-        suite_target
-        for suite_name, suite_payload in suites.items()
-        for suite_target in [
-            _provider_regression_suite_target(suite_name, suite_payload)
-        ]
-        if suite_target is not None
-    )
 
 
 if __name__ == "__main__":
