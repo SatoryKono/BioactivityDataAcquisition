@@ -7,17 +7,21 @@ and `.coderabbit.yaml` separately.
 
 ## Windows / WSL
 
-Run from PowerShell, with the repository visible in Ubuntu:
+Run from PowerShell, with the repository visible in Ubuntu. Resolve the checkout
+with `wslpath` instead of a machine-specific mount path:
 
 ```powershell
+# Convert the current Windows checkout to the distro path (no hardcoded drive).
+$repoWsl = (wsl -d Ubuntu wslpath -a (Get-Location).Path).Trim()
+
 # Validate credentials, backend/WebSocket connectivity, and configuration.
-wsl -d Ubuntu --cd /mnt/e/github/BioactivityDataAcquisition --exec bash scripts/ops/run-coderabbit-reviews.sh --preflight
+wsl -d Ubuntu --cd $repoWsl --exec bash scripts/ops/run-coderabbit-reviews.sh --preflight
 
 # Review staged and unstaged tracked changes once.
-wsl -d Ubuntu --cd /mnt/e/github/BioactivityDataAcquisition --exec bash scripts/ops/run-coderabbit-reviews.sh changes --uncommitted
+wsl -d Ubuntu --cd $repoWsl --exec bash scripts/ops/run-coderabbit-reviews.sh changes --uncommitted
 
 # Review changes against an explicit baseline within one directory.
-wsl -d Ubuntu --cd /mnt/e/github/BioactivityDataAcquisition --exec bash scripts/ops/run-coderabbit-reviews.sh changes --base origin/main --dir src/bioetl/interfaces
+wsl -d Ubuntu --cd $repoWsl --exec bash scripts/ops/run-coderabbit-reviews.sh changes --base origin/main --dir src/bioetl/interfaces
 ```
 
 The same Bash commands work directly in Linux. CodeRabbit must be on `PATH`.

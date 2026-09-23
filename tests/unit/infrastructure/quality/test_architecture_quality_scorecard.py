@@ -130,11 +130,17 @@ def test_scoring_diagnostic_payload_zero_lazy_import_state() -> None:
     ("score", "expected"),
     [
         (4.9, "critical"),
+        (5.0, "satisfactory_system_refactoring_required"),
         (8.0, "satisfactory_system_refactoring_required"),
+        (8.49, "satisfactory_system_refactoring_required"),
+        (8.5, "good_targeted_improvements"),
+        (9.49, "good_targeted_improvements"),
+        (9.5, "excellent"),
+        (10.0, "excellent"),
     ],
 )
-def test_score_interpretation_lower_bands(score: float, expected: str) -> None:
-    """Lower score bands retain explicit operator-facing interpretations."""
+def test_score_interpretation_bands(score: float, expected: str) -> None:
+    """Integral bands match prompt.architecture.cycle, including excellent ≥ 9.5."""
     assert scoring_module._interpretation(score) == expected
 
 
@@ -157,7 +163,8 @@ def test_architecture_quality_scorecard_has_stable_weighted_shape(
     assert payload["integral_score"] >= 8.0
     assert payload["interpretation"] in {
         "satisfactory_system_refactoring_required",  # [5.0, 8.5)
-        "good_targeted_improvements",  # >= 8.5
+        "good_targeted_improvements",  # [8.5, 9.5)
+        "excellent",  # >= 9.5
     }
     assert all(0.0 <= category["score"] <= 10.0 for category in payload["categories"])
 

@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-09-11'
+  Last verified: '2026-09-23'
 
 ______________________________________________________________________
 
@@ -58,22 +58,23 @@ Three architecture scanners count different populations. They are not interchang
 and a numeric gap is not a layer violation. Re-measure with the live commands before
 copying these integers forward.
 
-Live counts below were re-measured 2026-09-15 (W0 `#10442`). Grafana/ops Python
+Live counts below were re-measured 2026-09-23 (`#10610`/`#10611`). Grafana/ops Python
 under `scripts/ops/observability/grafana/` stays outside RF-06 hotspot families
 (decision C / `#10447`); do not fold those files into `debt_scorecard.yaml`
 without a separate ADR.
 
 Hash-only coverage refresh (`--allow-missing-coverage-xml`) hashes all
 `src/bioetl/**/*.py` and drops deleted inventory paths. It does not add rows
-for renamed modules until a coverage XML refresh. After `#10450`/`#10451`
-the committed inventory matches the live tree (`source_module_count=2474`)
-because the additive nonregressing coverage refresh added the observability
-backend process/probe adapters, remaining application startup modules, and
-the composition wiring seam.
+for new modules until a coverage XML refresh. After `#10610` the committed
+inventory matches the live tree (`source_module_count=2478`) because
+`src/bioetl/composition/runtime_builders/inputs_extraction_preflight.py` was
+added as a fully-covered additive row. `composition_runtime_builders` family
+inventory is 56 modules (measured=56); hotspot coverage floors were ratcheted
+to those live counts without raising debt budgets.
 
 | Scanner | Artifact / command | What it counts |
 | --- | --- | --- |
-| Coverage inventory | `reports/quality/module-coverage-inventory.json` | Coverage-fact rows for `src/bioetl/**/*.py` that still exist in the tree (currently 2474 rows; live tree 2474 files). `report-module-coverage --check --allow-missing-coverage-xml` refreshes `source_tree_sha256` and drops deleted paths; new modules are added only from a coverage XML refresh (`--refresh-nonregressing-from-coverage-xml` or the coverage-verify lane). |
+| Coverage inventory | `reports/quality/module-coverage-inventory.json` | Coverage-fact rows for `src/bioetl/**/*.py` that still exist in the tree (currently 2478 rows; live tree 2478 files). `report-module-coverage --check --allow-missing-coverage-xml` refreshes `source_tree_sha256` and drops deleted paths; new modules are added only from a coverage XML refresh (`--refresh-nonregressing-from-coverage-xml` or the coverage-verify lane). |
 | Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Live modules with a resolvable hexagonal layer + group (currently 2472). Excludes package-root `bioetl` and `bioetl.__main__` (no hexagonal layer tag). |
 | import-linter | `lint-imports --no-cache` (`.importlinter`) | Importable files in the `bioetl` package graph (2423 files in the 2026-09-15 W0 closeout pass). Excludes stubs / non-imported modules |
 
@@ -100,3 +101,17 @@ utilisation, composition module count) **do** reduce the diagnostic grade.
 Program-gate `max_count` / `max_modules` remain shrink-only and are not raised
 by scorecard regeneration. Clean posture scores 10.0; live integral is sensitive
 to those diagnostics (`schema_version` 2).
+
+Interpretation bands (`_interpretation` in
+`src/bioetl/infrastructure/quality/architecture_quality_scoring.py`) match
+`prompt.architecture.cycle`:
+
+| Band | integral | Machine token |
+| --- | --- | --- |
+| excellent | ≥ 9.5 | `excellent` |
+| good / targeted improvements | [8.5, 9.5) | `good_targeted_improvements` |
+| needs work | [5.0, 8.5) | `satisfactory_system_refactoring_required` |
+| weak / critical | < 5.0 | `critical` |
+
+The two lower machine tokens keep the committed names; they are not a separate
+taxonomy. An integral of 10.0 is `excellent`, not `good_targeted_improvements`.
