@@ -1090,6 +1090,45 @@ from memory.graph.sync_pkg.python_paths import (
 from memory.graph.sync_pkg.python_paths import (
     _supplemental_directory_hubs_for_node as _supplemental_directory_hubs_for_node,
 )
+from memory.graph.sync_pkg.relation_requirement_keys import (
+    _append_path_issue as _append_path_issue,
+)
+from memory.graph.sync_pkg.relation_requirement_keys import (
+    _append_snapshot_support_issues as _append_snapshot_support_issues,
+)
+from memory.graph.sync_pkg.relation_requirement_keys import (
+    _audit_report_payload as _audit_report_payload,
+)
+from memory.graph.sync_pkg.relation_requirement_keys import (
+    _bind_support_predicate as _bind_support_predicate,
+)
+from memory.graph.sync_pkg.relation_requirement_keys import (
+    _excluded_file_structure_paths as _excluded_file_structure_paths,
+)
+from memory.graph.sync_pkg.relation_requirement_keys import (
+    _format_orphan_nodes as _format_orphan_nodes,
+)
+from memory.graph.sync_pkg.relation_requirement_keys import (
+    _ignored_runtime_paths as _ignored_runtime_paths,
+)
+from memory.graph.sync_pkg.relation_requirement_keys import (
+    _orphan_node_issues as _orphan_node_issues,
+)
+from memory.graph.sync_pkg.relation_requirement_keys import (
+    _path_leak_issues as _path_leak_issues,
+)
+from memory.graph.sync_pkg.relation_requirement_keys import (
+    _relation_requirement_keys as _relation_requirement_keys,
+)
+from memory.graph.sync_pkg.relation_requirement_keys import (
+    _sampled_sorted_unique as _sampled_sorted_unique,
+)
+from memory.graph.sync_pkg.relation_requirement_keys import (
+    _support_and_relation_issues as _support_and_relation_issues,
+)
+from memory.graph.sync_pkg.relation_requirement_keys import (
+    snapshot_invariant_issues as snapshot_invariant_issues,
+)
 from memory.graph.sync_pkg.retirement_analysis_label_sets import (
     _evaluate_retirement_surface as _evaluate_retirement_surface,
 )
@@ -10046,166 +10085,6 @@ def _link_pipeline_operational_for_pipeline(
             composite_dashboards=operational_context.composite_dashboards,
         ),
     )
-
-
-def _relation_requirement_keys(
-    relations: tuple[GraphRelation, ...],
-) -> set[tuple[str, str, str, str]]:
-    return {
-        (rel.source.label, rel.source.name, rel.relation_type, rel.target.label)
-        for rel in relations
-    }
-
-
-def _bind_support_predicate(
-    predicate: Callable[[_SnapshotRelationIndex, NodeKey], bool],
-    relation_index: _SnapshotRelationIndex,
-) -> Callable[[NodeKey], bool]:
-    def _is_supported(key: NodeKey) -> bool:
-        return predicate(relation_index, key)
-
-    return _is_supported
-
-
-def _append_snapshot_support_issues(
-    issues: list[str],
-    snapshot: GraphSnapshot,
-    relations: tuple[GraphRelation, ...],
-) -> None:
-    relation_index = _build_snapshot_relation_index(relations)
-    for prefix, label, predicate in _snapshot_support_specs():
-        _append_support_issue(
-            issues,
-            prefix,
-            _missing_node_support_names(
-                snapshot, label, _bind_support_predicate(predicate, relation_index)
-            ),
-        )
-
-
-def _support_and_relation_issues(
-    snapshot: GraphSnapshot,
-    relations: tuple[GraphRelation, ...],
-) -> list[str]:
-    issues: list[str] = []
-    relation_keys = _relation_requirement_keys(relations)
-    _append_missing_relation_issues(
-        issues, relation_keys, SNAPSHOT_RELATION_REQUIREMENTS
-    )
-    _append_snapshot_support_issues(issues, snapshot, relations)
-    return issues
-
-
-def _ignored_runtime_paths(snapshot: GraphSnapshot) -> list[str]:
-    return [
-        node.key.name
-        for node in snapshot.nodes.values()
-        if "__pycache__" in node.key.name
-        or "__pycache__" in str(node.properties.get("source_path", ""))
-    ]
-
-
-def _excluded_file_structure_paths(snapshot: GraphSnapshot) -> list[str]:
-    return [
-        node.key.name
-        for node in snapshot.nodes.values()
-        if node.key.label in {"directory_surface", "file_surface"}
-        and (
-            node.key.name.startswith("docs/site")
-            or node.key.name.startswith("docs/site/")
-            or node.key.name.startswith("docs/99-archive")
-            or node.key.name.startswith("docs/exports")
-            or node.key.name.startswith("docs/reports/generated")
-            or node.key.name.startswith("docs/02-architecture/generated")
-            or node.key.name.startswith("docs/02-architecture/diagrams/bundles")
-            or node.key.name.startswith("scripts/archive")
-            or "/png" in node.key.name
-            or "/svg" in node.key.name
-        )
-    ]
-
-
-def _sampled_sorted_unique(values: list[str], limit: int) -> list[str]:
-    return sorted(set(values))[:limit]
-
-
-def _append_path_issue(
-    issues: list[str],
-    prefix: str,
-    paths: list[str],
-    *,
-    limit: int,
-) -> None:
-    if paths:
-        issues.append(f"{prefix}: {_sampled_sorted_unique(paths, limit)}")
-
-
-def _path_leak_issues(snapshot: GraphSnapshot) -> list[str]:
-    issues: list[str] = []
-    _append_path_issue(
-        issues,
-        "ignored runtime paths leaked into snapshot",
-        _ignored_runtime_paths(snapshot),
-        limit=5,
-    )
-    excluded_paths = _excluded_file_structure_paths(snapshot)
-    if excluded_paths:
-        issues.append(
-            "excluded file-structure paths leaked into snapshot: "
-            + ", ".join(_sampled_sorted_unique(excluded_paths, 10))
-        )
-    return issues
-
-
-def _format_orphan_nodes(orphan_nodes: list[NodeKey], limit: int) -> str:
-    return ", ".join(f"{node.label}:{node.name}" for node in orphan_nodes[:limit])
-
-
-def _orphan_node_issues(snapshot: GraphSnapshot) -> list[str]:
-    orphan_nodes = snapshot_orphans(snapshot)
-    if not orphan_nodes:
-        return []
-    return ["snapshot contains orphan nodes: " + _format_orphan_nodes(orphan_nodes, 10)]
-
-
-def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
-    stats = snapshot.stats()
-    relations = tuple(snapshot.relations.values())
-    return (
-        _required_population_issues(stats)
-        + _port_and_contract_metadata_issues(snapshot)
-        + _support_and_relation_issues(snapshot, relations)
-        + _path_leak_issues(snapshot)
-        + _orphan_node_issues(snapshot)
-    )
-
-
-def _audit_report_payload(
-    *,
-    snapshot_payload: dict[str, JsonValue],
-    managed_labels: list[str],
-    live_summary: dict[str, JsonValue],
-    snapshot_label_counts: dict[str, int],
-    live_managed_label_counts: dict[str, int],
-    snapshot_relation_counts: dict[str, int],
-    live_managed_relation_counts: dict[str, int],
-) -> dict[str, JsonValue]:
-    return {
-        "generated_at": _sync_run_id(),
-        "managed_by": DEFAULT_MANAGED_BY,
-        "ingest_wave": DEFAULT_INGEST_WAVE,
-        "snapshot": snapshot_payload,
-        "managed_labels": managed_labels,
-        "live": live_summary,
-        "diff": {
-            "labels": _build_diff_entries(
-                snapshot_label_counts, live_managed_label_counts
-            ),
-            "relation_types": _build_diff_entries(
-                snapshot_relation_counts, live_managed_relation_counts
-            ),
-        },
-    }
 
 
 def build_audit_report(
