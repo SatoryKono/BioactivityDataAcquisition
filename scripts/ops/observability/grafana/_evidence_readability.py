@@ -1,0 +1,304 @@
+"""Canonical readable evidence views for the seven Grafana dashboards."""
+
+from __future__ import annotations
+from scripts.ops.observability.grafana._gr_db_corrections import _override, _panels
+
+
+def _table(panel: dict, widths: dict[str, int] | None = None) -> None:
+    custom = panel["fieldConfig"]["defaults"].setdefault("custom", {})
+    custom.update(minWidth=50, inspect=True, wrapText=False)
+    custom.setdefault("cellOptions", {"type": "auto"})["wrapText"] = False
+    panel["options"]["cellHeight"] = "sm"
+    for field, width in (widths or {}).items():
+        _override(panel, field, "custom.width", width)
+
+
+def _stack(row: dict, heights: dict[int, int] | None = None) -> None:
+    """Relayout a detail row without dropping evidence."""
+    y = row["gridPos"]["y"] + 1
+    order = list(heights or {})
+    row["panels"].sort(
+        key=lambda p: (
+            order.index(p["id"]) if p["id"] in order else len(order),
+            p["id"],
+        )
+    )
+    for panel in row.get("panels", []):
+        grid = panel["gridPos"]
+        grid.update(x=0, y=y, w=24, h=(heights or {}).get(panel["id"], grid["h"]))
+        y += grid["h"]
+
+
+def _legend(panel: dict) -> None:
+    panel.setdefault("options", {})["legend"] = {
+        "showLegend": True,
+        "displayMode": "table",
+        "placement": "bottom",
+        "calcs": ["lastNotNull", "max"],
+    }
+
+
+def _saved_run(p: dict[int, dict]) -> None:
+    for candidate in p.values():
+        for target in candidate.get("targets", []):
+            if "/selected-run-status?" in target.get("url", ""):
+                selector = target.get("root_selector")
+                if selector in {"summary", "trust", "domains"}:
+                    target["root_selector"] = "presentation_" + selector
+    panel = p[9451]
+    panel["targets"][0]["root_selector"] = "presentation_domains"
+    for transform in panel["transformations"]:
+        if transform["id"] == "filterFieldsByName":
+            names = transform["options"]["include"]["names"]
+            if "action_path" not in names:
+                names.append("action_path")
+    _override(panel, "action_path", "custom.hidden", True)
+    _table(panel, {"Domain": 125, "Status": 115, "Action": 170})
+    _override(panel, "Evidence reference", "custom.hidden", True)
+    _override(
+        panel,
+        "Action",
+        "links",
+        [
+            {
+                "title": "Inspect saved run report",
+                "url": "/${__data.fields.action_path}&var-pipeline=${pipeline:percentencode}&var-run_type=${run_type:percentencode}&var-workflow=${workflow:percentencode}&${__url_time_range}",
+                "targetBlank": True,
+            }
+        ],
+    )
+    panel["links"] = []
+    for field in ("Pipeline", "Run ID"):
+        _override(
+            p[9452],
+            field,
+            "mappings",
+            [
+                {
+                    "type": "value",
+                    "options": {
+                        ".*": {"text": "No run selected"},
+                        "-": {"text": "No run selected"},
+                    },
+                }
+            ],
+        )
+    _table(p[9452])
+    _stack(p[9450], {9451: 10, 9452: 5})
+
+
+def _overview(p: dict[int, dict]) -> None:
+    _stack(p[9030], {9031: 9, 9018: 12, 9019: 12, 9020: 12})
+    for pid in (9018, 9019, 9020):
+        p[pid]["options"].pop("pageSize", None)
+        p[pid]["options"].update(perPage=8, rowHeight=0.8, showValue="never")
+        p[pid]["fieldConfig"]["defaults"].setdefault("custom", {})["axisWidth"] = 290
+    _stack(p[9009], {9010: 9, 9011: 9, 9015: 3})
+    _stack(p[9012], dict.fromkeys((9006, 9003, 9004, 9007, 9005, 9013), 8))
+    for pid in (215, 20215):
+        for field in ("action_scope", "action_dashboard_uid", "run_type"):
+            _override(p[pid], field, "custom.hidden", True)
+        _table(p[pid], {"Priority": 80, "Pipeline": 190, "Action": 170})
+    for pid in (9010, 9011):
+        _table(p[pid], {"Pipeline": 230, "Run Type": 110, "Status": 110})
+
+
+def _trust(p: dict[int, dict]) -> None:
+    _table(p[9418], {"Result": 110, "Trust": 105, "Reasons": 90, "Observed": 165})
+    for pid in (9408, 9409, 9406):
+        _table(p[pid], {"Result": 125, "Status": 115, "Action": 160})
+    for pid in (9413, 9414, 9415):
+        _table(p[pid], {"check": 220, "status": 110})
+        _override(p[pid], "reason", "custom.hidden", True)
+        _override(p[pid], "reason_display", "displayName", "Reason")
+    _legend(p[7])
+    y = p[901]["gridPos"]["y"] + 1
+    p[908]["gridPos"].update(x=0, y=y, w=24, h=4)
+    y += 4
+    for index, pid in enumerate((2, 1, 132, 133)):
+        p[pid]["gridPos"].update(x=index * 6, y=y, w=6, h=3)
+    y += 3
+    for pid, height in ((131, 9), (7, 12), (9414, 9)):
+        p[pid]["gridPos"].update(x=0, y=y, w=24, h=height)
+        y += height
+
+
+def _runtime(p: dict[int, dict]) -> None:
+    for pid in (238, 240, 9105):
+        _legend(p[pid])
+    p[9105]["fieldConfig"]["defaults"].setdefault("custom", {})["axisLabel"] = (
+        "Stage lag"
+    )
+    _stack(p[252], {238: 10, 240: 10, 242: 9, 9105: 10, 243: 9, 220: 3})
+    _stack(p[32460], {22460: 14, 2461: 14})
+    for pid in (2460, 22460, 2461, 243):
+        _override(p[pid], "Throughput", "unit", "suffix: records/s")
+        _override(p[pid], "scope_stage\\measure", "displayName", "Pipeline / Stage")
+        _override(p[pid], "scope_stage", "displayName", "Pipeline / Stage")
+
+
+def _provider(p: dict[int, dict]) -> None:
+    p[9101]["gridPos"]["h"] = p[9107]["gridPos"]["h"] = 7
+    p[9104]["gridPos"].update(y=14, h=3)
+    _stack(p[9404], {114: 10, 1: 10, 2: 3, 105: 3, 104: 3, 7: 3})
+    _table(
+        p[114],
+        {"Provider": 125, "Status": 110, "Last check": 175, "Observation age": 145},
+    )
+    p[105]["fieldConfig"]["defaults"]["color"] = {"mode": "thresholds"}
+    p[105]["fieldConfig"]["defaults"]["thresholds"] = {
+        "mode": "absolute",
+        "steps": [{"value": None, "color": "text"}],
+    }
+    p[105]["options"]["colorMode"] = "value"
+    p[105]["description"] = (
+        "TIME RANGE · Observed degraded health checks in the selected range; "
+        "historical count, not current severity. Missing evidence remains UNKNOWN."
+    )
+
+
+def _dq(p: dict[int, dict]) -> None:
+    _table(p[9102], {"pipeline": 160, "severity": 70, "Action": 140})
+    _override(p[9102], "pipeline", "custom.hidden", False)
+    _override(p[9102], "pipeline", "displayName", "Pipeline")
+    _override(
+        p[9102],
+        "reason",
+        "mappings",
+        [
+            {
+                "type": "value",
+                "options": {
+                    "gold_contract_exclusions": {"text": "Gold contract exclusions"},
+                },
+            }
+        ],
+    )
+    _legend(p[1])
+    p[9]["options"].update(orientation="horizontal", displayMode="basic")
+    _stack(p[221], {1: 10, 4: 3, 3: 3, 101: 3, 9: 7, 12: 3, 151: 3})
+
+
+def _incident(p: dict[int, dict]) -> None:
+    p[22010]["options"].setdefault("footer", {}).update(
+        enablePagination=False, countRows=False
+    )
+    p[22010]["gridPos"]["h"] = 12
+    for field in ("Object", "Signal", "Details"):
+        _override(p[22010], field, "custom.wrapText", True)
+        _override(
+            p[22010], field, "custom.cellOptions", {"type": "auto", "wrapText": True}
+        )
+    p[22010]["description"] = (
+        "GLOBAL / CURRENT · Empty successful result: no ranked suspects. Missing telemetry remains "
+        "UNKNOWN; request failures remain QUERY ERROR. Open domain diagnostics from Action."
+    )
+    p[9400]["options"]["content"] = (
+        '<div style="padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch">GLOBAL signals are not verified causes. '
+        "Selected-scope status is separate. Telemetry gaps remain UNKNOWN; event age and impact need event evidence.</div>"
+    )
+    p[2001]["options"]["content"] = (
+        '<div style="font-size:16px;line-height:1.2">Start with ranked suspects; '
+        "open Action for domain evidence. PENDING means the alert has not fired. "
+        "Use alert history below to assess timing and impact.</div>"
+    )
+    for pid in (2005, 22005):
+        _table(p[pid], {"severity": 90, "alertstate": 100})
+        _override(p[pid], "alertname", "displayName", "Alert")
+        _override(p[pid], "alertstate", "displayName", "State")
+
+
+def apply_evidence_readability(payload: dict) -> None:
+    """Preserve queries while improving evidence readability at narrow widths."""
+    p = {panel["id"]: panel for panel in _panels(payload["panels"])}
+    for panel in p.values():
+        if panel["type"] == "stat":
+            panel.setdefault("options", {})["text"] = {"valueSize": 20, "titleSize": 14}
+    _saved_run(p)
+    handlers = {
+        "bioetl-overview-v2": _overview,
+        "bioetl-control-plane-v1": _trust,
+        "bioetl-runtime": _runtime,
+        "bioetl-provider-health-v2": _provider,
+        "bioetl-dq-v2": _dq,
+        "bioetl-incident-v1": _incident,
+    }
+    if handler := handlers.get(payload["uid"]):
+        handler(p)
+    if payload["uid"] == "bioetl-run-explorer-v1":
+        _table(
+            p[3010],
+            {
+                "selected": 28,
+                "Started": 145,
+                "Pipeline": 185,
+                "Run": 135,
+                "Duration": 85,
+                "Event age": 95,
+                "Processing": 100,
+                "Report": 125,
+            },
+        )
+
+    if payload["uid"] == "bioetl-run-explorer-v1":
+        run = p[3010]
+        for transform in run["transformations"]:
+            opts = transform["options"]
+            if transform["id"] == "filterFieldsByName":
+                names = opts["include"]["names"]
+                if "run_label" not in names:
+                    names.append("run_label")
+            if transform["id"] == "organize":
+                opts["renameByName"].pop("run_id", None)
+                opts["renameByName"]["run_label"] = "Run"
+                opts["indexByName"]["run_label"] = 4
+                opts["indexByName"]["run_id"] = 20
+        _override(run, "run_id", "custom.hidden", True)
+        _override(
+            run,
+            "Report",
+            "mappings",
+            [
+                {
+                    "type": "value",
+                    "options": {
+                        "REPORT MISSING": {"text": "Missing"},
+                        "Open report": {"text": "Open report"},
+                    },
+                }
+            ],
+        )
+        for item in run["fieldConfig"]["overrides"]:
+            for prop in item["properties"]:
+                if prop["id"] == "links":
+                    for link in prop["value"]:
+                        link["url"] = (
+                            link["url"]
+                            .replace(
+                                "var-run_id=${__value.raw}",
+                                "var-run_id=${__data.fields.run_id:percentencode}",
+                            )
+                            .replace(
+                                "${__data.fields.Run:percentencode}",
+                                "${__data.fields.run_id:percentencode}",
+                            )
+                        )
+                        if item["matcher"].get("options") == "Run":
+                            link["title"] = "Select ${__data.fields.run_id}"
+
+    widths = {
+        "bioetl-control-plane-v1": {
+            9418: {"Result": 100, "Trust": 105, "reasons_count": 80}
+        },
+        "bioetl-overview-v2": {215: {"Priority": 70, "Action": 125}},
+        "bioetl-dq-v2": {9102: {"severity": 70, "Action": 125}},
+        "bioetl-run-explorer-v1": {
+            3010: {"selected": 28, "Processing": 100, "Report": 110}
+        },
+    }
+    for pid, fields in widths.get(payload["uid"], {}).items():
+        for item in p[pid]["fieldConfig"].get("overrides", []):
+            item["properties"] = [
+                prop for prop in item["properties"] if prop["id"] != "custom.width"
+            ]
+        _table(p[pid], fields)

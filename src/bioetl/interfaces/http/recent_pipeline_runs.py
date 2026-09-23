@@ -233,6 +233,12 @@ def list_recent_pipeline_runs(
     for item in items:
         item.update(_report_link(item, root))
         item.update(_timing_fields(item, observed_at))
+        run_identity = str(item["run_id"])
+        item["run_label"] = (
+            run_identity[:8] + "…" + run_identity[-4:]
+            if len(run_identity) > 16
+            else run_identity
+        )
         item["selected"] = int(item["run_id"] == selected_run_id)
         item["workflow_scope"] = _workflow_scope(item)
     return {
@@ -274,13 +280,10 @@ def _format_compact_duration(seconds: float) -> str:
 def _event_age_display(
     row: dict[str, object], now: datetime, last: datetime, minimum: datetime
 ) -> str:
-    status = row.get("status")
-    if status in {"running", "unfinished"}:
-        if minimum < last <= now:
-            return _format_compact_duration((now - last).total_seconds())
-        return "UNKNOWN"
-    if status in _TERMINAL_STATUSES:
-        return "completed"
+    if row.get("status") in _TERMINAL_STATUSES:
+        last = _timestamp(row.get("completed_at"))
+    if minimum < last <= now:
+        return _format_compact_duration((now - last).total_seconds())
     return "UNKNOWN"
 
 
@@ -293,8 +296,9 @@ def _timing_fields(row: dict[str, object], now: datetime) -> dict[str, object]:
     if start != minimum and end >= start and end != minimum:
         duration = (end - start).total_seconds()
     last_event_age = None
-    if row.get("status") in {"running", "unfinished"} and minimum < last <= now:
-        last_event_age = (now - last).total_seconds()
+    event = end if row.get("status") in _TERMINAL_STATUSES else last
+    if minimum < event <= now:
+        last_event_age = (now - event).total_seconds()
     return {
         "duration_seconds": duration,
         "duration_display": (

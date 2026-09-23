@@ -485,8 +485,8 @@
         },
         "textMode": "value",
         "text": {
-          "titleSize": 14,
-          "valueSize": 20
+          "valueSize": 20,
+          "titleSize": 14
         }
       },
       "targets": [
@@ -621,8 +621,8 @@
         },
         "textMode": "value",
         "text": {
-          "titleSize": 14,
-          "valueSize": 20
+          "valueSize": 20,
+          "titleSize": 14
         }
       },
       "targets": [
@@ -653,7 +653,8 @@
               "wrapText": false
             },
             "inspect": true,
-            "wrapText": false
+            "wrapText": false,
+            "minWidth": 50
           },
           "mappings": [
             {
@@ -777,6 +778,29 @@
               {
                 "id": "links",
                 "value": []
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "gold_contract_exclusions": {
+                        "text": "Gold contract exclusions"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -800,6 +824,10 @@
               {
                 "id": "links",
                 "value": []
+              },
+              {
+                "id": "custom.width",
+                "value": 70
               }
             ]
           },
@@ -890,7 +918,12 @@
               "id": "byName",
               "options": "Action"
             },
-            "properties": []
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 125
+              }
+            ]
           },
           {
             "matcher": {
@@ -904,12 +937,7 @@
               "id": "byName",
               "options": "Pipeline"
             },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 140
-              }
-            ]
+            "properties": []
           },
           {
             "matcher": {
@@ -937,24 +965,14 @@
               "id": "byName",
               "options": "Status"
             },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 90
-              }
-            ]
+            "properties": []
           },
           {
             "matcher": {
               "id": "byName",
               "options": "Severity"
             },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 90
-              }
-            ]
+            "properties": []
           },
           {
             "matcher": {
@@ -988,7 +1006,11 @@
             "properties": [
               {
                 "id": "custom.hidden",
-                "value": true
+                "value": false
+              },
+              {
+                "id": "displayName",
+                "value": "Pipeline"
               }
             ]
           },
@@ -1141,7 +1163,7 @@
           "source": "url",
           "parser": "backend",
           "format": "table",
-          "root_selector": "summary",
+          "root_selector": "presentation_summary",
           "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
           "url_options": {
             "method": "GET",
@@ -1923,7 +1945,8 @@
             },
             "textMode": "value_and_name",
             "text": {
-              "value": 32
+              "valueSize": 20,
+              "titleSize": 14
             }
           },
           "targets": [
@@ -2013,7 +2036,8 @@
             },
             "textMode": "value_and_name",
             "text": {
-              "value": 32
+              "valueSize": 20,
+              "titleSize": 14
             }
           },
           "targets": [
@@ -2102,7 +2126,8 @@
             ],
             "orientation": "auto",
             "text": {
-              "value": 32
+              "valueSize": 20,
+              "titleSize": 14
             }
           },
           "targets": [
@@ -2173,7 +2198,8 @@
             },
             "textMode": "value_and_name",
             "text": {
-              "value": 32
+              "valueSize": 20,
+              "titleSize": 14
             }
           },
           "targets": [
@@ -2266,7 +2292,8 @@
             "textMode": "value",
             "wideLayout": true,
             "text": {
-              "value": 32
+              "valueSize": 20,
+              "titleSize": 14
             }
           },
           "targets": [
@@ -2361,7 +2388,8 @@
             },
             "textMode": "value",
             "text": {
-              "value": 32
+              "valueSize": 20,
+              "titleSize": 14
             }
           },
           "targets": [
@@ -2443,7 +2471,8 @@
             },
             "textMode": "value",
             "text": {
-              "value": 32
+              "valueSize": 20,
+              "titleSize": 14
             }
           },
           "targets": [
@@ -2560,7 +2589,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -3333,18 +3366,18 @@
             "x": 0,
             "y": 22,
             "w": 24,
-            "h": 5
+            "h": 10
           },
           "id": 1,
           "options": {
             "legend": {
-              "calcs": [
-                "mean",
-                "max"
-              ],
-              "displayMode": "list",
+              "showLegend": true,
+              "displayMode": "table",
               "placement": "bottom",
-              "showLegend": false
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
             },
             "tooltip": {
               "mode": "multi",
@@ -3409,9 +3442,9 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 27,
-            "w": 6,
-            "h": 4
+            "y": 32,
+            "w": 24,
+            "h": 3
           },
           "id": 4,
           "options": {
@@ -3426,7 +3459,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -3479,10 +3516,10 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 6,
-            "y": 27,
-            "w": 6,
-            "h": 4
+            "x": 0,
+            "y": 35,
+            "w": 24,
+            "h": 3
           },
           "id": 3,
           "options": {
@@ -3497,7 +3534,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -3556,10 +3597,10 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 12,
-            "y": 27,
-            "w": 6,
-            "h": 4
+            "x": 0,
+            "y": 38,
+            "w": 24,
+            "h": 3
           },
           "id": 101,
           "options": {
@@ -3587,7 +3628,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -3649,14 +3694,14 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 18,
-            "y": 27,
-            "w": 6,
-            "h": 4
+            "x": 0,
+            "y": 41,
+            "w": 24,
+            "h": 7
           },
           "id": 9,
           "options": {
-            "displayMode": "gradient",
+            "displayMode": "basic",
             "orientation": "horizontal",
             "reduceOptions": {
               "calcs": [
@@ -3739,9 +3784,9 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 31,
-            "w": 12,
-            "h": 4
+            "y": 48,
+            "w": 24,
+            "h": 3
           },
           "id": 12,
           "options": {
@@ -3763,7 +3808,11 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value",
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -3823,10 +3872,10 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 12,
-            "y": 31,
-            "w": 12,
-            "h": 4
+            "x": 0,
+            "y": 51,
+            "w": 24,
+            "h": 3
           },
           "id": 151,
           "options": {
@@ -3848,7 +3897,11 @@
                 "title": "Open DQ Investigation Runbook",
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/pipeline-failure-dq.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
               }
-            ]
+            ],
+            "text": {
+              "valueSize": 20,
+              "titleSize": 14
+            }
           },
           "targets": [
             {
@@ -3906,8 +3959,8 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 35,
-            "w": 12,
+            "y": 54,
+            "w": 24,
             "h": 6
           },
           "id": 10,
@@ -3984,9 +4037,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 12,
-            "y": 35,
-            "w": 12,
+            "x": 0,
+            "y": 60,
+            "w": 24,
             "h": 6
           },
           "id": 11,
@@ -4018,78 +4071,72 @@
           "interval": "1m"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "description": "TIME RANGE · Total soft plus hard threshold events requires observations for both counters for every observed pipeline. A missing branch leaves the total UNKNOWN, not zero. Inspect each counter when coverage is incomplete; resets use increase. Tooltip and inspection expose full series labels; full identifiers remain available.",
+          "description": "Lineage-reference gaps remain a replay/control-plane trust signal owned by `1. Trust`. This DQ surface keeps only a compact handoff so the trends row can stay focused on local DQ evidence. Open the canonical control-plane panels when missing lineage must be reviewed together with replay blockers, manifest / ledger evidence, and artifact identity anchors",
           "fieldConfig": {
             "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "decimals": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short",
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null+nan",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "noValue": "TELEMETRY MISSING — no series for this scope; not a zero"
+              "mappings": [],
+              "unit": "short"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 0,
-            "y": 41,
-            "w": 12,
-            "h": 6
+            "y": 66,
+            "w": 24,
+            "h": 4
           },
-          "id": 155,
-          "options": {
-            "legend": {
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": false
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
+          "id": 116,
+          "links": [
             {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "round(sum(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval]))) + sum(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval])))) unless (count(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval]))) or count(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval]))))",
-              "legendFormat": "threshold events",
-              "range": true,
-              "refId": "A"
+              "includeVars": false,
+              "targetBlank": false,
+              "title": "Open Control Plane lineage diagnostics",
+              "tooltip": "Canonical lineage/replay trust surface. Opens the Control Plane dashboard focused on its lineage diagnostics row.",
+              "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=904&${__url_time_range}"
             }
           ],
-          "title": "Track DQ Threshold Events",
-          "type": "timeseries",
-          "maxDataPoints": 400,
-          "interval": "1m"
+          "options": {
+            "content": "<div style=\"padding:2px 8px;font-size:16px;line-height:1.25;overflow:hidden\"><strong>Lineage handoff</strong> — open the canonical <a href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Control Plane</a> for lineage trust, checkpoint integrity, and replay blockers. Preserve time range + pipeline scope.</div>",
+            "dataLinks": [
+              {
+                "includeVars": false,
+                "targetBlank": false,
+                "title": "Open Control Plane lineage diagnostics",
+                "tooltip": "Canonical lineage/replay trust surface. Opens the Control Plane dashboard focused on its lineage diagnostics row.",
+                "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=904&${__url_time_range}"
+              }
+            ],
+            "mode": "html"
+          },
+          "title": "Inspect Lineage in Control Plane",
+          "type": "text"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [],
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 70,
+            "w": 24,
+            "h": 4
+          },
+          "id": 150,
+          "description": "Compact handoff note for aggregate control-plane symptoms. Keep this as footer guidance only; operational evidence still lives in `1. Trust` and its runbook surfaces",
+          "options": {
+            "content": "<div style=\"padding:2px 8px;font-size:16px;line-height:1.25;overflow:hidden\"><strong>Aggregate control-plane handoff</strong> — <a href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Trust</a> for store/manifest failures and fleet-wide control-plane reliability. Use when DQ impact is global. <a href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Back to top</a>.</div>",
+            "mode": "html"
+          },
+          "title": "Inspect Aggregate Control-Plane Issues",
+          "type": "text"
         },
         {
           "datasource": {
@@ -4147,9 +4194,9 @@
             "overrides": []
           },
           "gridPos": {
-            "x": 12,
-            "y": 41,
-            "w": 12,
+            "x": 0,
+            "y": 74,
+            "w": 24,
             "h": 6
           },
           "id": 153,
@@ -4183,72 +4230,78 @@
           "interval": "1m"
         },
         {
-          "description": "Lineage-reference gaps remain a replay/control-plane trust signal owned by `1. Trust`. This DQ surface keeps only a compact handoff so the trends row can stay focused on local DQ evidence. Open the canonical control-plane panels when missing lineage must be reviewed together with replay blockers, manifest / ledger evidence, and artifact identity anchors",
-          "fieldConfig": {
-            "defaults": {
-              "mappings": [],
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "x": 0,
-            "y": 47,
-            "w": 24,
-            "h": 4
-          },
-          "id": 116,
-          "links": [
-            {
-              "includeVars": false,
-              "targetBlank": false,
-              "title": "Open Control Plane lineage diagnostics",
-              "tooltip": "Canonical lineage/replay trust surface. Opens the Control Plane dashboard focused on its lineage diagnostics row.",
-              "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=904&${__url_time_range}"
-            }
-          ],
-          "options": {
-            "content": "<div style=\"padding:2px 8px;font-size:16px;line-height:1.25;overflow:hidden\"><strong>Lineage handoff</strong> — open the canonical <a href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Control Plane</a> for lineage trust, checkpoint integrity, and replay blockers. Preserve time range + pipeline scope.</div>",
-            "dataLinks": [
-              {
-                "includeVars": false,
-                "targetBlank": false,
-                "title": "Open Control Plane lineage diagnostics",
-                "tooltip": "Canonical lineage/replay trust surface. Opens the Control Plane dashboard focused on its lineage diagnostics row.",
-                "url": "/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=904&${__url_time_range}"
-              }
-            ],
-            "mode": "html"
-          },
-          "title": "Inspect Lineage in Control Plane",
-          "type": "text"
-        },
-        {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
+          "description": "TIME RANGE · Total soft plus hard threshold events requires observations for both counters for every observed pipeline. A missing branch leaves the total UNKNOWN, not zero. Inspect each counter when coverage is incomplete; resets use increase. Tooltip and inspection expose full series labels; full identifiers remain available.",
           "fieldConfig": {
             "defaults": {
-              "mappings": [],
-              "unit": "short"
+              "color": {
+                "mode": "palette-classic"
+              },
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short",
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
+              "noValue": "TELEMETRY MISSING — no series for this scope; not a zero"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 0,
-            "y": 51,
+            "y": 80,
             "w": 24,
-            "h": 4
+            "h": 6
           },
-          "id": 150,
-          "description": "Compact handoff note for aggregate control-plane symptoms. Keep this as footer guidance only; operational evidence still lives in `1. Trust` and its runbook surfaces",
+          "id": 155,
           "options": {
-            "content": "<div style=\"padding:2px 8px;font-size:16px;line-height:1.25;overflow:hidden\"><strong>Aggregate control-plane handoff</strong> — <a href=\"/d/bioetl-control-plane-v1/1-trust?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Trust</a> for store/manifest failures and fleet-wide control-plane reliability. Use when DQ impact is global. <a href=\"/d/bioetl-dq-v2/5-data-quality?${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Back to top</a>.</div>",
-            "mode": "html"
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
           },
-          "title": "Inspect Aggregate Control-Plane Issues",
-          "type": "text"
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "round(sum(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval]))) + sum(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval])))) unless (count(sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval]))) or count(sum by (pipeline) (increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__rate_interval])) unless on(pipeline) sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__rate_interval]))))",
+              "legendFormat": "threshold events",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Track DQ Threshold Events",
+          "type": "timeseries",
+          "maxDataPoints": 400,
+          "interval": "1m"
         }
       ]
     },
@@ -4272,13 +4325,13 @@
             "x": 0,
             "y": 23,
             "w": 24,
-            "h": 12
+            "h": 10
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "md",
+            "cellHeight": "sm",
             "footer": {
               "show": false,
               "enablePagination": true
@@ -4292,13 +4345,85 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapText": false
               }
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "action_path"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Domain"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 125
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 115
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Action"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 170
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Inspect saved run report",
+                        "url": "/${__data.fields.action_path}&var-pipeline=${pipeline:percentencode}&var-run_type=${run_type:percentencode}&var-workflow=${workflow:percentencode}&${__url_time_range}",
+                        "targetBlank": true
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Evidence reference"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              }
+            ]
           },
           "targets": [
             {
@@ -4307,7 +4432,7 @@
               "source": "url",
               "parser": "backend",
               "format": "table",
-              "root_selector": "domains",
+              "root_selector": "presentation_domains",
               "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
               "url_options": {
                 "method": "GET",
@@ -4331,7 +4456,8 @@
                     "verdict",
                     "reason",
                     "action",
-                    "evidence_ref"
+                    "evidence_ref",
+                    "action_path"
                   ]
                 }
               }
@@ -4371,15 +4497,15 @@
           "title": "Inspect Selected Run Identity",
           "gridPos": {
             "x": 0,
-            "y": 35,
+            "y": 33,
             "w": 24,
-            "h": 7
+            "h": 5
           },
           "datasource": "BioETL Ops HTTP",
           "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
           "options": {
             "showHeader": true,
-            "cellHeight": "md",
+            "cellHeight": "sm",
             "footer": {
               "show": false,
               "enablePagination": true
@@ -4393,10 +4519,11 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true,
-                "minWidth": 50
+                "minWidth": 50,
+                "wrapText": false
               }
             },
             "overrides": [
@@ -4415,6 +4542,54 @@
                     "value": 175
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Pipeline"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          ".*": {
+                            "text": "No run selected"
+                          },
+                          "-": {
+                            "text": "No run selected"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Run ID"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          ".*": {
+                            "text": "No run selected"
+                          },
+                          "-": {
+                            "text": "No run selected"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -4425,7 +4600,7 @@
               "source": "url",
               "parser": "backend",
               "format": "table",
-              "root_selector": "summary",
+              "root_selector": "presentation_summary",
               "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
               "url_options": {
                 "method": "GET",

@@ -396,8 +396,8 @@ def test_elapsed_fields_use_event_evidence_only():
     assert _timing_fields(row, NOW) == {
         "duration_seconds": 60,
         "duration_display": "1 m",
-        "last_event_age_seconds": None,
-        "event_age_display": "completed",
+        "last_event_age_seconds": 0,
+        "event_age_display": "0 s",
     }
     row.update(
         status="running",
@@ -410,3 +410,23 @@ def test_elapsed_fields_use_event_evidence_only():
         "last_event_age_seconds": None,
         "event_age_display": "UNKNOWN",
     }
+
+
+@pytest.mark.parametrize("status", ["success", "failed", "shutdown"])
+def test_terminal_age_uses_completion_event_not_last_seen_or_mtime(status):
+    from bioetl.interfaces.http.recent_pipeline_runs import _timing_fields
+
+    row = {
+        "status": status,
+        "completed_at": (NOW - timedelta(hours=2)).isoformat(),
+        "last_event_at": NOW.isoformat(),
+        "mtime": NOW.timestamp(),
+    }
+    result = _timing_fields(row, NOW)
+    assert result["last_event_age_seconds"] == 7200
+    assert result["event_age_display"] == "2 h"
+    for invalid in ("invalid", (NOW + timedelta(seconds=1)).isoformat()):
+        row["completed_at"] = invalid
+        result = _timing_fields(row, NOW)
+        assert result["last_event_age_seconds"] is None
+        assert result["event_age_display"] == "UNKNOWN"

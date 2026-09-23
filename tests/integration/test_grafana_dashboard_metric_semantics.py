@@ -1531,7 +1531,7 @@ def test_provider_degraded_checks_panel_uses_neutral_evidence_thresholds() -> No
 
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     assert defaults.get("thresholds", {}).get("steps") == [
-        {"color": "green", "value": None}
+        {"color": "text", "value": None}
     ]
 
 

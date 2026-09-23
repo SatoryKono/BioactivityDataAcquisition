@@ -7,6 +7,7 @@ import json
 from collections.abc import Mapping
 from pathlib import Path
 from typing import cast
+from urllib.parse import urlencode
 
 from bioetl.application.observability.reason_aliases import (
     display_reason,
@@ -48,6 +49,39 @@ class _RevisionMissingError(LookupError):
 
 class _IdentityMismatchError(LookupError):
     """Persisted report identity does not match the requested pipeline/run."""
+
+
+def _presentation_rows(
+    rows: list[dict[str, object]], *, selection: bool = False
+) -> list[dict[str, object]]:
+    """Keep canonical domain verdicts intact; present one neutral selection action."""
+    if selection:
+        return [
+            {
+                "domain": "Selected run",
+                "verdict": "SELECT RUN",
+                "reason": "Choose a run to inspect saved evidence",
+                "action": "Choose a run",
+                "action_path": "d/bioetl-run-explorer-v1/0-run-explorer?var-run_id=-",
+            }
+        ]
+    return [
+        {
+            **row,
+            "action_path": (
+                "api/datasources/proxy/uid/bioetl-ops-http/ops/observability/"
+                "pipeline-run-report-artifact?"
+                + urlencode(
+                    {
+                        "pipeline": str(row.get("pipeline", "")),
+                        "run_id": str(row.get("run_id", "")),
+                        "format": "pipeline_run_report_json",
+                    }
+                )
+            ),
+        }
+        for row in rows
+    ]
 
 
 def unavailable_status(
@@ -93,7 +127,30 @@ def unavailable_status(
     return {
         **summary,
         "summary": [summary],
+        "presentation_summary": [
+            {
+                **summary,
+                "pipeline": "No run selected",
+                "run_id": "—",
+                "execution_state": "SELECT RUN",
+                "evidence_completeness": "SELECT RUN",
+            }
+            if summary["verdict"] == "SELECT RUN"
+            else summary
+        ],
+        "presentation_trust": [
+            {
+                **trust,
+                "processing_status": "SELECT RUN",
+                "reasons_display": "Choose a run",
+            }
+            if summary["verdict"] == "SELECT RUN"
+            else trust
+        ],
         "domains": rows,
+        "presentation_domains": _presentation_rows(
+            rows, selection=state == "SELECT RUN"
+        ),
         "rows": rows,
         "trust": [trust],
     }
@@ -296,7 +353,28 @@ def load_selected_run_status(
     return {
         **summary,
         "summary": [summary],
+        "presentation_summary": [
+            {
+                **summary,
+                "pipeline": "No run selected",
+                "run_id": "—",
+                "execution_state": "SELECT RUN",
+                "evidence_completeness": "SELECT RUN",
+            }
+            if summary["verdict"] == "SELECT RUN"
+            else summary
+        ],
+        "presentation_trust": [
+            {
+                **trust,
+                "processing_status": "SELECT RUN",
+                "reasons_display": "Choose a run",
+            }
+            if summary["verdict"] == "SELECT RUN"
+            else trust
+        ],
         "domains": rows,
+        "presentation_domains": _presentation_rows(rows),
         "rows": rows,
         "trust": [trust],
     }

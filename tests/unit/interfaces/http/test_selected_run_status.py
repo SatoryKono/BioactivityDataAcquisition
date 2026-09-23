@@ -1244,3 +1244,42 @@ async def test_selected_status_handler_covers_selector_and_request_failures(
         {"pipeline": "chembl_activity", "run_id": "run-a"},
     )
     assert host._send_payload_response.call_args.args[2]["reason"] == "request_failed"
+
+
+def test_selection_presentation_keeps_canonical_domains_and_one_action():
+    from bioetl.interfaces.http.selected_run_status import unavailable_status
+
+    payload = unavailable_status(".*", "-", "SELECT RUN", "selection_required")
+    assert len(payload["domains"]) == 6
+    rows = payload["presentation_domains"]
+    assert len(rows) == 1
+    assert rows[0]["verdict"] == "SELECT RUN"
+    assert (
+        rows[0]["action_path"] == "d/bioetl-run-explorer-v1/0-run-explorer?var-run_id=-"
+    )
+
+
+def test_error_presentation_never_collapses_into_selection_or_healthy_empty():
+    from bioetl.interfaces.http.selected_run_status import unavailable_status
+
+    payload = unavailable_status(
+        "chembl_activity", "run-1", "QUERY ERROR", "evidence_read_failed"
+    )
+    assert len(payload["presentation_domains"]) == 6
+    assert all(
+        row["verdict"] == "QUERY ERROR" for row in payload["presentation_domains"]
+    )
+    assert all(
+        "pipeline=chembl_activity" in row["action_path"]
+        for row in payload["presentation_domains"]
+    )
+
+
+def test_selection_presentation_does_not_imply_failed_execution():
+    from bioetl.interfaces.http.selected_run_status import unavailable_status
+
+    payload = unavailable_status(".*", "-", "SELECT RUN", "selection_required")
+    assert payload["summary"][0]["execution_state"] == "UNKNOWN"
+    assert payload["presentation_summary"][0]["execution_state"] == "SELECT RUN"
+    assert payload["presentation_summary"][0]["pipeline"] == "No run selected"
+    assert payload["presentation_trust"][0]["processing_status"] == "SELECT RUN"

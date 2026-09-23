@@ -263,7 +263,7 @@ def test_dq_10253_selected_run_summary_is_first_window() -> None:
         "evidence_completeness": 2,
         "rules_version": 3,
     }
-    assert summary["targets"][0]["root_selector"] == "summary"
+    assert summary["targets"][0]["root_selector"] == "presentation_summary"
     assert "/selected-run-status?" in summary["targets"][0]["url"]
     no_value = str(summary.get("fieldConfig", {}).get("defaults", {}).get("noValue"))
     assert (
