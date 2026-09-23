@@ -315,6 +315,9 @@ from memory.graph.sync_pkg.add_entity_regular_field_node import (
 from memory.graph.sync_pkg.add_entity_storage_layer import (
     _add_entity_storage_layer as _add_entity_storage_layer,
 )
+from memory.graph.sync_pkg.add_entity_storage_layers import (
+    _add_entity_storage_layers as _add_entity_storage_layers,
+)
 from memory.graph.sync_pkg.add_file_structure_surfaces import (
     _add_entity_layer_field_nodes as _add_entity_layer_field_nodes,
 )
@@ -2714,37 +2717,6 @@ def _run_impact_analysis_passes(
     )
     _add_pipeline_operational_edges(snapshot, pipeline_nodes, memory_mapping)
     _extract_code_duplication_surfaces(snapshot, root, project, today, memory_mapping)
-
-
-def _add_entity_storage_layers(
-    snapshot: GraphSnapshot,
-    project: NodeKey,
-    context: EntityPipelineContext,
-    payload: dict[str, object],
-    base_sink: dict[str, object],
-    pipeline_sink: dict[str, object],
-    quality_index: dict[str, dict[str, JsonValue]],
-) -> tuple[dict[str, NodeKey], dict[str, dict[str, NodeKey]]]:
-    layer_nodes: dict[str, NodeKey] = {}
-    field_nodes_by_layer: dict[str, dict[str, NodeKey]] = {}
-    scope = _entity_pipeline_scope(
-        context.provider_name, context.entity_name, context.pipeline_name
-    )
-    for layer_name in ("bronze", "silver", "gold"):
-        _add_entity_storage_layer(
-            snapshot,
-            project,
-            context,
-            payload,
-            base_sink,
-            pipeline_sink,
-            quality_index,
-            scope=scope,
-            layer_name=layer_name,
-            layer_nodes=layer_nodes,
-            field_nodes_by_layer=field_nodes_by_layer,
-        )
-    return layer_nodes, field_nodes_by_layer
 
 
 def _add_storage_data_surfaces(
