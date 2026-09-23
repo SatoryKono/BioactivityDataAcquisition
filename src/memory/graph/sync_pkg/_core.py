@@ -1504,6 +1504,12 @@ from memory.graph.sync_pkg.normalization_statement import (
 from memory.graph.sync_pkg.normalization_statement import (
     _normalization_statement as _normalization_statement,
 )
+from memory.graph.sync_pkg.override_target_classes import (
+    _duplication_family_by_name as _duplication_family_by_name,
+)
+from memory.graph.sync_pkg.override_target_classes import (
+    _override_target_classes as _override_target_classes,
+)
 from memory.graph.sync_pkg.package_topology_summary_specs import (
     _add_governance_decisions_and_risks as _add_governance_decisions_and_risks,
 )
@@ -4505,37 +4511,6 @@ def _method_surface_promotion_target(
     if not common_base_candidates:
         return None
     return sorted(common_base_candidates, key=lambda item: item.name)[0]
-
-
-def _override_target_classes(
-    snapshot: GraphSnapshot,
-    member: CallableDescriptor,
-) -> set[NodeKey]:
-    candidate_set = {
-        relation.target
-        for relation in snapshot.relations.values()
-        if relation.source == member.node_key
-        and relation.relation_type == "OVERRIDES"
-        and relation.target.label == "method_surface"
-    }
-    return {
-        NodeKey("class_surface", target.name.rsplit(".", 1)[0])
-        for target in candidate_set
-    }
-
-
-def _duplication_family_by_name(
-    config: dict[str, object],
-    family_name: str,
-) -> DuplicateFamilyConfig | None:
-    return next(
-        (
-            item
-            for item in _as_iterable(config.get("families"))
-            if isinstance(item, DuplicateFamilyConfig) and item.name == family_name
-        ),
-        None,
-    )
 
 
 def _emit_duplication_clusters(
