@@ -62,6 +62,7 @@ ALLOWED_USES: dict[str, set[str]] = {
     "astral-sh/setup-uv": {
         "37802adc94f370d6bfd71619e3f0bf239e1f3b78",  # v7 (canonical; composite setup-python-uv)
         "20cfd1bf945f4377ade1205e4dbc17946fc9a30d",  # v10.0.1
+        "bec219d24cd3e171d82865faccec33120bb574f4",  # v10.1.0
     },
     "SonarSource/sonarqube-scan-action": {
         "fd88b7d7ccbaefd23d8f36f73b59db7a3d246602",
@@ -78,7 +79,10 @@ ALLOWED_USES: dict[str, set[str]] = {
     },
     "docker/build-push-action": {"ca052bb54ab0790a636c9b5f226502c73d547a25"},
     "docker/login-action": {"dbcb813823bdd20940b903addbd779551569679f"},
-    "docker/setup-buildx-action": {"bb05f3f5519dd87d3ba754cc423b652a5edd6d2c"},
+    "docker/setup-buildx-action": {
+        "bb05f3f5519dd87d3ba754cc423b652a5edd6d2c",  # v4.2.0
+        "f87e5991a6d7451dcb8d9637bfbc97413f497069",  # v4.4.1
+    },
     "gitleaks/gitleaks-action": {
         "e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e",  # v3.0.0
     },
@@ -100,6 +104,7 @@ ALLOWED_USES: dict[str, set[str]] = {
     },
     "google/osv-scanner-action/osv-scanner-action": {
         "6e4298ebc4db23e847df9b2e2de2939d6f066c67",  # v2.5.1
+        "a345acffa64b0eaede81a3d9aae6141214d9c8fc",  # v2.6.0
     },
     "hadolint/hadolint-action": {
         "06be81baf89a55ffd0e24b8f04a4185738dd3387",  # v3.5.0

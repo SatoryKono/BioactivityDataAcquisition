@@ -529,9 +529,7 @@ def test_security_workflow_runs_gitleaks_and_osv_scanner() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/security.yml")
     jobs = cast(dict[str, dict[str, Any]], workflow["jobs"])
     gitleaks_sha = next(iter(policy.ALLOWED_USES["gitleaks/gitleaks-action"]))
-    osv_sha = next(
-        iter(policy.ALLOWED_USES["google/osv-scanner-action/osv-scanner-action"])
-    )
+    osv_allowed = policy.ALLOWED_USES["google/osv-scanner-action/osv-scanner-action"]
     gitleaks_env = jobs["gitleaks"]["steps"][1]["env"]
     osv_step = next(
         step
@@ -555,9 +553,13 @@ def test_security_workflow_runs_gitleaks_and_osv_scanner() -> None:
     assert jobs["gitleaks"]["steps"][0]["with"]["fetch-depth"] == 0
     assert gitleaks_env["GITLEAKS_CONFIG"] == ".gitleaks.toml"
     assert gitleaks_env["GITLEAKS_ENABLE_COMMENTS"] == "false"
-    assert f"google/osv-scanner-action/osv-scanner-action@{osv_sha}" in _step_uses(
-        workflow, "osv-scanner"
-    )
+    osv_uses = [
+        uses
+        for uses in _step_uses(workflow, "osv-scanner")
+        if uses.startswith("google/osv-scanner-action/osv-scanner-action@")
+    ]
+    assert osv_uses
+    assert all(uses.rsplit("@", 1)[-1] in osv_allowed for uses in osv_uses)
     assert osv_step.get("continue-on-error") is True
     assert "--lockfile=uv.lock" in str(osv_step["with"]["scan-args"])
     assert "--format=json" in str(osv_step["with"]["scan-args"])
