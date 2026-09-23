@@ -949,6 +949,12 @@ from memory.graph.sync_pkg.duplication_cluster_groups import (
 from memory.graph.sync_pkg.duplication_cluster_groups import (
     _link_same_shape_members as _link_same_shape_members,
 )
+from memory.graph.sync_pkg.emit_normalization_batch_progress import (
+    _emit_normalization_batch_progress as _emit_normalization_batch_progress,
+)
+from memory.graph.sync_pkg.emit_normalization_batch_progress import (
+    _normalization_batch_summary as _normalization_batch_summary,
+)
 from memory.graph.sync_pkg.empty_normalization_evidence_payload import (
     _accumulate_field_matrix_evidence as _accumulate_field_matrix_evidence,
 )
@@ -6059,44 +6065,6 @@ def _execute_normalization_evidence_batch(
         pipeline_end=pipeline_end,
         elapsed_seconds=batch_elapsed,
     )
-
-
-def _emit_normalization_batch_progress(
-    *,
-    event: str,
-    batch: list[dict[str, JsonValue]],
-    batch_index: int,
-    batch_count: int,
-    pipeline_start: str | None,
-    pipeline_end: str | None,
-    elapsed_seconds: float | None = None,
-) -> None:
-    _emit_normalization_apply_progress(
-        event=event,
-        batch_index=batch_index,
-        batch_count=batch_count,
-        statement_count=len(batch),
-        pipeline_start=pipeline_start,
-        pipeline_end=pipeline_end,
-        elapsed_seconds=elapsed_seconds,
-    )
-
-
-def _normalization_batch_summary(
-    *,
-    batch: list[dict[str, JsonValue]],
-    batch_index: int,
-    pipeline_start: str | None,
-    pipeline_end: str | None,
-    elapsed_seconds: float,
-) -> dict[str, JsonValue]:
-    return {
-        "batch_index": batch_index,
-        "statement_count": len(batch),
-        "pipeline_start": pipeline_start,
-        "pipeline_end": pipeline_end,
-        "elapsed_seconds": round(elapsed_seconds, 3),
-    }
 
 
 def _add_pipeline_test_edges(
