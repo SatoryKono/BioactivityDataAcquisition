@@ -1660,6 +1660,12 @@ from memory.graph.sync_pkg.promotion_targets_from_payload import (
 from memory.graph.sync_pkg.promotion_targets_from_payload import (
     _retirement_analysis_config as _retirement_analysis_config,
 )
+from memory.graph.sync_pkg.provider_config_paths import (
+    _add_provider_surface as _add_provider_surface,
+)
+from memory.graph.sync_pkg.provider_config_paths import (
+    _provider_config_paths as _provider_config_paths,
+)
 from memory.graph.sync_pkg.provider_config_properties import (
     _add_entity_config_surfaces as _add_entity_config_surfaces,
 )
@@ -2346,50 +2352,6 @@ def _add_provider_surfaces(
             provider_nodes=provider_nodes,
         )
     return provider_nodes
-
-
-def _provider_config_paths(providers_root: Path) -> tuple[Path, ...]:
-    return tuple(sorted(providers_root.glob(YAML_FILE_GLOB)))
-
-
-def _add_provider_surface(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    provider_path: Path,
-    *,
-    provider_nodes: dict[str, NodeKey],
-) -> None:
-    payload = _read_yaml(provider_path)
-    provider_name = str(payload.get("provider", provider_path.stem))
-    auth_type, pagination = _provider_config_properties(payload.get("source", {}))
-    provider = snapshot.add_node(
-        "provider_surface",
-        provider_name,
-        summary=f"Provider surface for `{provider_name}`.",
-        source_path=_rel_path(root, provider_path),
-        source_kind="provider_config",
-        auth_type=auth_type,
-        pagination_strategy=pagination,
-        entity_count=len(_as_iterable(payload.get("entities"))) or None,
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-    provider_nodes[provider_name] = provider
-    snapshot.add_relation(
-        project, "HAS_PROVIDER", provider, provenance="provider_config"
-    )
-    _link_config_artifact(
-        snapshot,
-        provider,
-        path=_rel_path(root, provider_path),
-        summary=f"Provider config for `{provider_name}`.",
-        source_kind="provider_config",
-        today=today,
-        provenance="provider_config",
-    )
 
 
 def _add_policy_surfaces(
