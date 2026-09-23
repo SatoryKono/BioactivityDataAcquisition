@@ -1039,6 +1039,21 @@ from memory.graph.sync_pkg.retirement_candidate_metrics import (
 from memory.graph.sync_pkg.retirement_candidate_metrics import (
     _retirement_candidate_metrics as _retirement_candidate_metrics,
 )
+from memory.graph.sync_pkg.retirement_marker_sets import (
+    _analysis_anchor_counts as _analysis_anchor_counts,
+)
+from memory.graph.sync_pkg.retirement_marker_sets import (
+    _emit_retirement_candidate as _emit_retirement_candidate,
+)
+from memory.graph.sync_pkg.retirement_marker_sets import (
+    _retirement_marker_sets as _retirement_marker_sets,
+)
+from memory.graph.sync_pkg.retirement_marker_sets import (
+    _retirement_score_inputs as _retirement_score_inputs,
+)
+from memory.graph.sync_pkg.retirement_marker_sets import (
+    _retirement_surface_payload as _retirement_surface_payload,
+)
 from memory.graph.sync_pkg.score_family import _family_for_path as _family_for_path
 from memory.graph.sync_pkg.score_family import (
     _family_matches_relative_path as _family_matches_relative_path,
@@ -7925,119 +7940,6 @@ def _evaluate_retirement_surface(
         deletion_score=deletion_score,
         only_test_referenced=only_test_referenced,
     )
-
-
-def _retirement_marker_sets(
-    config: RetirementAnalysisConfig,
-    source_text: str,
-) -> tuple[list[str], list[str]]:
-    return (
-        sorted({marker for marker in config.wip_markers if marker in source_text}),
-        sorted(
-            {marker for marker in config.deprecation_markers if marker in source_text}
-        ),
-    )
-
-
-def _retirement_score_inputs(
-    anchor_counts: dict[str, int],
-    *,
-    recent_age_days: int | None,
-    wip_markers: list[str],
-    deprecation_markers: list[str],
-) -> RetirementScoreInputs:
-    return RetirementScoreInputs(
-        runtime_count=anchor_counts["runtime_count"],
-        config_count=anchor_counts["config_count"],
-        doc_count=anchor_counts["doc_count"],
-        test_count=anchor_counts["test_count"],
-        recent_age_days=recent_age_days,
-        wip_markers=wip_markers,
-        deprecation_markers=deprecation_markers,
-    )
-
-
-def _analysis_anchor_counts(anchors: SurfaceAnchorSets) -> dict[str, int]:
-    return {
-        "runtime_count": len(anchors.runtime),
-        "config_count": len(anchors.config),
-        "doc_count": len(anchors.docs),
-        "test_count": len(anchors.tests),
-    }
-
-
-def _retirement_surface_payload(
-    *,
-    family_name: str,
-    anchors: SurfaceAnchorSets,
-    anchor_counts: dict[str, int],
-    wip_markers: list[str],
-    deprecation_markers: list[str],
-    recent_age_days: int | None,
-    cycle_score: int,
-    deletion_score: int,
-    only_test_referenced: bool,
-) -> dict[str, object]:
-    return {
-        "family_name": family_name,
-        "anchors": anchors,
-        **anchor_counts,
-        "wip_markers": wip_markers,
-        "deprecation_markers": deprecation_markers,
-        "recent_age_days": recent_age_days,
-        "cycle_score": cycle_score,
-        "deletion_score": deletion_score,
-        "only_test_referenced": only_test_referenced,
-    }
-
-
-def _emit_retirement_candidate(
-    snapshot: GraphSnapshot,
-    project: NodeKey,
-    today: str,
-    config: RetirementAnalysisConfig,
-    node: GraphNode,
-    payload: dict[str, object],
-) -> None:
-    metrics = _retirement_candidate_metrics(payload)
-    cycle_score = metrics["cycle_score"]
-    recent_age_days = payload["recent_age_days"]
-    wip_markers = payload["wip_markers"]
-    deletion_score = metrics["deletion_score"]
-    if cycle_score >= 3:
-        _annotate_current_cycle_surface(
-            snapshot,
-            node,
-            cycle_score=cycle_score,
-            recent_age_days=recent_age_days,
-            wip_markers=wip_markers,
-            runtime_count=metrics["runtime_count"],
-            config_count=metrics["config_count"],
-            doc_count=metrics["doc_count"],
-            test_count=metrics["test_count"],
-        )
-    if deletion_score < config.dead_score_threshold:
-        return
-    confidence = _retirement_candidate_confidence(
-        deletion_score=deletion_score,
-        dead_score_threshold=config.dead_score_threshold,
-    )
-    candidate = _add_retirement_candidate_node(
-        snapshot,
-        today,
-        node,
-        payload,
-        confidence=confidence,
-        cycle_score=cycle_score,
-        deletion_score=deletion_score,
-        recent_age_days=recent_age_days,
-        runtime_count=metrics["runtime_count"],
-        config_count=metrics["config_count"],
-        doc_count=metrics["doc_count"],
-        test_count=metrics["test_count"],
-        wip_markers=wip_markers,
-    )
-    _link_retirement_candidate(snapshot, project, candidate, node.key)
 
 
 def _add_complexity_analysis_surfaces(
