@@ -1268,6 +1268,12 @@ from memory.graph.sync_pkg.normalization_evidence_update_payload import (
 from memory.graph.sync_pkg.normalization_evidence_update_payload import (
     _normalization_evidence_update_payload as _normalization_evidence_update_payload,
 )
+from memory.graph.sync_pkg.package_topology_summary_specs import (
+    _add_governance_decisions_and_risks as _add_governance_decisions_and_risks,
+)
+from memory.graph.sync_pkg.package_topology_summary_specs import (
+    _package_topology_summary_specs as _package_topology_summary_specs,
+)
 from memory.graph.sync_pkg.pipeline_dashboard_config import (
     PipelineOperationalContext as PipelineOperationalContext,
 )
@@ -2025,48 +2031,6 @@ def _add_package_topology_decisions_and_risks(
             identifier_kind=identifier_kind,
             matches=_summary_identifier_matches(package_summary, pattern),
             summary=summary,
-            source_path=source_path,
-        )
-
-
-def _package_topology_summary_specs() -> tuple[tuple[str, str, str], ...]:
-    return (
-        ("decision", r"DEC-[a-z0-9-]+", "Accepted package-topology decision."),
-        (
-            "risk",
-            r"RISK-[a-z0-9-]+",
-            "Package-topology risk captured in evidence decisions.",
-        ),
-    )
-
-
-def _add_governance_decisions_and_risks(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-) -> None:
-    summary_path = root / GOVERNANCE_DECISIONS_SUMMARY_PATH
-    if not summary_path.is_file():
-        return
-    governance_summary, governance_doc = _evidence_summary_doc(
-        snapshot,
-        root,
-        today,
-        path=GOVERNANCE_DECISIONS_SUMMARY_PATH,
-        summary="Accepted governance decisions and associated risks.",
-    )
-    governance_text = _read_text(governance_summary)
-    source_path = _rel_path(root, governance_summary)
-    for identifier_kind, prefix in _governance_summary_table_specs():
-        _add_summary_table_identifiers(
-            snapshot,
-            project,
-            today,
-            doc=governance_doc,
-            provenance="governance_summary",
-            identifier_kind=identifier_kind,
-            rows=_summary_table_rows(governance_text, prefix),
             source_path=source_path,
         )
 
