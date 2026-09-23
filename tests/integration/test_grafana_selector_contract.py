@@ -15,6 +15,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from scripts.ops.observability.grafana._selected_run_panels import SELECTOR_ROWS
+
 import pytest
 import yaml
 
@@ -538,8 +540,8 @@ def test_http_selector_frames_declare_columns_for_empty_catalogs() -> None:
             if "/ops/control-plane/filter-options?" not in infinity.get("url", ""):
                 continue
             assert "response_shape=options" in infinity["url"], path.name
-            assert infinity["parser"] == "simple", path.name
-            assert infinity["root_selector"] == "items", path.name
+            assert infinity["parser"] == "backend", path.name
+            assert infinity["root_selector"] == SELECTOR_ROWS, path.name
             assert infinity["columns"] == [
                 {"selector": field, "text": f"__{field}", "type": "string"}
                 for field in ("text", "value")

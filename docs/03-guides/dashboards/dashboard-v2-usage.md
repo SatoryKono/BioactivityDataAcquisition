@@ -278,8 +278,8 @@ Explorer health probe and monitoring setup docs for that reason.
    первого экрана.
 1. `bioetl-control-plane-v1`, answer row:
    `Inspect Scope & Evidence`, `Status`, `ID`, `Processed Records`, then
-   `Monitor Replay Safety`, `Monitor Checkpoint Age`,
-   `Monitor Manifest/Ledger` и `Monitor Telemetry`
+   `Monitor Replay`, `Track Checkpoint`,
+   `Monitor Ledger` и `Monitor Telemetry`
    отвечают на L1/L2 вопрос: можно ли доверять
    manifest/ledger/checkpoint/lineage state и безопасно выполнять
    replay/resume прямо сейчас. Headline `Status` reads
@@ -572,7 +572,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
   same trust verdict as `chembl_assay`.
 
   **First 2 clicks (L1):**
-  1. Click #1: открыть `bioetl-control-plane-v1`, проверить `Monitor Replay Safety` (`id=891`), `Monitor Telemetry` (`id=907`) и `Review First Recovery Action` (`id=906`).
+  1. Click #1: открыть `bioetl-control-plane-v1`, проверить `Monitor Replay` (`id=891`), `Monitor Telemetry` (`id=907`) и `Review First Recovery Action` (`id=906`).
   2. Click #2: перейти через top-level bus в `3. Pipeline Diagnostics` (если есть активный blocker) или `5. Data Quality` (если blocker связан с downstream quality symptoms). На первом экране оставлены current-status Trust KPI: `id=891..893`, `id=907`, copyable identity anchors and replay-предупреждение в `id=9400`; `Track Replay Blockers in Range` (`id=130`) живёт внутри первого collapsed replay/checkpoint row, а `Review Terminal Run Outcomes` (`id=908`) остаётся manifest/ledger range evidence.
   Все остальные control-plane метрики перенесены в collapsed incident rows.
   Рекомендованный operator path: сначала проверить blocker cards, затем открыть
@@ -778,7 +778,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
   duplicate/overwrite exposure is now covered by bounded replay-risk telemetry;
   checkpoint age vs RPO and richer occurrence-vs-semantic drift classification
   remain exact-evidence limitations instead of fake PromQL.
-- `control-plane.Monitor Checkpoint Age` is the canonical
+- `control-plane.Track Checkpoint` is the canonical
   exact-run checkpoint freshness read path through
   `/ops/control-plane/checkpoint-freshness`. For
   `run_id=b51986c6-870b-4457-aa70-baedac2710ad`, the local manifest

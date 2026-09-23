@@ -20,6 +20,8 @@ import logging
 import re
 from functools import cache
 from pathlib import Path
+
+from scripts.ops.observability.grafana._selected_run_panels import SELECTOR_ROWS
 from typing import Any
 
 import yaml
@@ -579,7 +581,7 @@ def _assert_pipeline_filter_options_shell(
     assert query.get("queryType") == "infinity"
     infinity_query = query.get("infinityQuery", {})
     assert isinstance(infinity_query, dict)
-    assert infinity_query.get("root_selector") == "items"
+    assert infinity_query.get("root_selector") == SELECTOR_ROWS
     _assert_pipeline_filter_options_url(str(infinity_query.get("url", "")))
 
 
@@ -597,8 +599,8 @@ def _assert_run_id_infinity_shell(
     infinity_query = run_id_query.get("infinityQuery", {})
     assert isinstance(infinity_query, dict)
     assert infinity_query.get("format") == "table"
-    assert infinity_query.get("parser") == "simple"
-    assert infinity_query.get("root_selector") == "items"
+    assert infinity_query.get("parser") == "backend"
+    assert infinity_query.get("root_selector") == SELECTOR_ROWS
     assert infinity_query.get("url_options", {}).get("method") == "GET"
     columns = infinity_query.get("columns")
     assert isinstance(columns, list)

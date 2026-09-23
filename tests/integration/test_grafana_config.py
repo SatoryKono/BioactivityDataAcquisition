@@ -15,6 +15,8 @@ from collections.abc import Iterator
 from html import unescape
 import json
 from pathlib import Path
+
+from scripts.ops.observability.grafana._selected_run_panels import SELECTOR_ROWS
 import re
 
 import pytest
@@ -520,8 +522,8 @@ def _assert_overview_run_id_infinity_query(run_id_query: dict) -> None:
     infinity_query = run_id_query.get("infinityQuery", {})
     assert isinstance(infinity_query, dict)
     assert infinity_query.get("format") == "table"
-    assert infinity_query.get("parser") == "simple"
-    assert infinity_query.get("root_selector") == "items"
+    assert infinity_query.get("parser") == "backend"
+    assert infinity_query.get("root_selector") == SELECTOR_ROWS
     assert infinity_query.get("url_options", {}).get("method") == "GET"
     selectors = {
         (i.get("selector"), i.get("text")) for i in infinity_query.get("columns") or []
@@ -1158,9 +1160,9 @@ def test_control_plane_l1_triage_row_has_3_to_5_kpis_and_one_next_step() -> None
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     panels = get_dashboard_panels(dashboard)
     kpi_titles = {
-        "Monitor Replay Safety",
-        "Monitor Checkpoint Age",
-        "Monitor Manifest/Ledger",
+        "Monitor Replay",
+        "Track Checkpoint",
+        "Monitor Ledger",
         "Monitor Telemetry",
     }
     next_step_title = "Inspect Scope & Evidence"
@@ -1298,7 +1300,7 @@ def test_control_plane_no_missing_metric_promql() -> None:
     }
 
     assert "bioetl_replay_duplicate_records_total" not in expressions
-    checkpoint_panel = panels["Monitor Checkpoint Age"]
+    checkpoint_panel = panels["Track Checkpoint"]
     # Epic #6573/#6574: first-paint Ops HTTP = 0; checkpoint lag uses Prometheus rule.
     assert checkpoint_panel.get("datasource") == {
         "type": "prometheus",

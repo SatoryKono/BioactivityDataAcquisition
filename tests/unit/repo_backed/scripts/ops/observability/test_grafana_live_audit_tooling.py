@@ -100,7 +100,7 @@ def test_live_audit_reviewed_specs_cover_semantically_sensitive_panels() -> None
         covered[("bioetl-control-plane-v1", 133)]
         == "Monitor Ledger Failure Severity [30m]"
     )
-    assert covered[("bioetl-control-plane-v1", 892)] == "Monitor Checkpoint Age"
+    assert covered[("bioetl-control-plane-v1", 892)] == "Track Checkpoint"
     assert covered[("bioetl-control-plane-v1", 9402)] == "ID"
     assert covered[("bioetl-control-plane-v1", 9403)] == "Processed Records"
     assert covered[("bioetl-dq-v2", 101)] == "Review: Latest Successful Data Timestamp"
@@ -293,7 +293,7 @@ def test_live_audit_treats_checkpoint_freshness_unknown_as_valid_unknown_state(
     spec = audit_subject.PanelAuditSpec(
         dashboard_uid="bioetl-control-plane-v1",
         panel_id=892,
-        title="Monitor Checkpoint Age",
+        title="Track Checkpoint",
         source_kind="http",
         semantic_kind="freshness",
     )

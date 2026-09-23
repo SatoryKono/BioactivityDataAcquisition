@@ -31,11 +31,11 @@
       "target_panels": [
         {
           "panel_id": 9401,
-          "title": "Monitor Current Readiness"
+          "title": "Monitor Readiness"
         },
         {
           "panel_id": 891,
-          "title": "Monitor Replay Safety"
+          "title": "Monitor Replay"
         },
         {
           "panel_id": 907,
@@ -73,7 +73,7 @@
       "target_panels": [
         {
           "panel_id": 893,
-          "title": "Monitor Manifest/Ledger"
+          "title": "Monitor Ledger"
         }
       ],
       "initial_context": {

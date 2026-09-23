@@ -870,7 +870,7 @@ dashboards:
         - not_applicable
         render_profiles: *id001
       '891':
-        title: Monitor Replay Safety
+        title: Monitor Replay
         role: verdict
         tier: 1
         scope: current
@@ -900,7 +900,7 @@ dashboards:
         - first_window_light
         - zoom_200
       '892':
-        title: Monitor Checkpoint Age
+        title: Track Checkpoint
         role: freshness
         tier: 3
         scope: current
@@ -928,7 +928,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '893':
-        title: Monitor Manifest/Ledger
+        title: Monitor Ledger
         role: indicator
         tier: 3
         scope: time_range
@@ -1125,7 +1125,7 @@ dashboards:
         - not_applicable
         render_profiles: *id001
       '9401':
-        title: Monitor Current Readiness
+        title: Monitor Readiness
         role: confidence
         tier: 1
         scope: current

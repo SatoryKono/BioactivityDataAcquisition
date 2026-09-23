@@ -553,9 +553,9 @@ def fix_trust() -> None:
                 }
             ]
         if p.get("title") in {
-            "Monitor Replay Safety",
-            "Monitor Checkpoint Age",
-            "Monitor Manifest/Ledger",
+            "Monitor Replay",
+            "Track Checkpoint",
+            "Monitor Ledger",
             "Monitor Telemetry",
         }:
             desc = p.get("description") or ""

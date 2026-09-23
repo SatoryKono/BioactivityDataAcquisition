@@ -38,7 +38,7 @@ absence.
 | 9410 | Explain Missing Identity Data | text | Static | Neutral visible fallback when the Control Plane identity table returns no visible rows. | shared shell | No thresholds; prevents blank first-screen identity space. |
 | 9411 | Explain Missing Record Counts | text | Static | Neutral visible fallback when the Control Plane accounting table returns no visible rows. | shared shell | No thresholds; distinguishes missing accounting evidence from zero records. |
 | 891 | Monitor Replay Safety | stat | Prometheus | Replay-safety blocker state for the selected scope. | shared shell | Severity/value mapping. |
-| 892 | Monitor Checkpoint Age | stat | BioETL Ops HTTP | Current checkpoint freshness lag from HTTP-backed control-plane evidence. | shared shell | Numeric lag; no PromQL threshold in doc. |
+| 892 | Track Checkpoint Age | stat | BioETL Ops HTTP | Current checkpoint freshness lag from HTTP-backed control-plane evidence. | shared shell | Numeric lag; no PromQL threshold in doc. |
 | 893 | Monitor Manifest/Ledger | stat | Prometheus | Current manifest/ledger failure state from `bioetl_manifest_ledger_failures_15m`. | shared shell | Severity/value mapping. |
 | 907 | Monitor Telemetry | stat | Prometheus | Missing-control-plane-telemetry signal from `bioetl_control_plane_telemetry_missing_5m`. | shared shell | Value mapping distinguishes no-data vs telemetry-missing. |
 
