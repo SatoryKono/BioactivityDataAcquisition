@@ -269,7 +269,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "9fe6270b8d1517206a556053389acee1a5f86f53cb52d5de1a2795a8e40724b3"
+      "source_tree_sha256": "e1725f5ce53dfd1a4b54dac7c3186e4c2e31b162e491bfb04ee38b1e52afa775"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,
