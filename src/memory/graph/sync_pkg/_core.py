@@ -5,8 +5,6 @@ from __future__ import annotations
 
 import shutil as shutil  # re-exported via __all__
 import sys
-from pathlib import Path
-from typing import TypeVar
 
 from memory.graph.sync_pkg._core_ast import (
     _CONTROL_FLOW_NODES as _CONTROL_FLOW_NODES,
@@ -2652,6 +2650,9 @@ from memory.graph.sync_pkg.sync_run_id import (
     _verify_sync_snapshot as _verify_sync_snapshot,
 )
 from memory.graph.sync_pkg.sync_run_id import sync_snapshot as sync_snapshot
+from memory.graph.sync_pkg.t import DEFAULT_ROOT as DEFAULT_ROOT
+from memory.graph.sync_pkg.t import SRC_ROOT as SRC_ROOT
+from memory.graph.sync_pkg.t import T as T
 from memory.graph.sync_pkg.test_artifact_key import (
     _link_pipeline_test_artifact as _link_pipeline_test_artifact,
 )
@@ -2796,10 +2797,6 @@ from memory.graph.sync_pkg.workflow_output_expression import (
 # Graph assembly ingests heterogeneous YAML/JSON and AST-derived values. Keep
 # that pre-serialization boundary explicit; serializers below narrow values to
 # the scalar/list shapes accepted by Neo4j and JSON.
-T = TypeVar("T")
-
-SRC_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_ROOT = Path(__file__).resolve().parents[4]
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 if str(DEFAULT_ROOT) not in sys.path:
