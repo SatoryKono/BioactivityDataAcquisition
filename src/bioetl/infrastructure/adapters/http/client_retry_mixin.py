@@ -74,10 +74,7 @@ class HTTPClientRetryMixin:
         if response is not None:
             retry_after = response.headers.get("Retry-After")
             if retry_after:
-                retry_after_delay = _parse_retry_after(
-                    retry_after,
-                    now=time.time(),
-                )
+                retry_after_delay = _parse_retry_after(retry_after)
                 if retry_after_delay is not None:
                     delay = self.retry_config.clamp_retry_after(retry_after_delay)
         await asyncio.sleep(delay)
