@@ -369,6 +369,15 @@ from memory.graph.sync_pkg.alert_rule_file_payload import (
 from memory.graph.sync_pkg.alert_rule_file_payload import (
     _link_workflow_job_reusable_target as _link_workflow_job_reusable_target,
 )
+from memory.graph.sync_pkg.alert_runbook_path import (
+    _add_alert_runbook_doc as _add_alert_runbook_doc,
+)
+from memory.graph.sync_pkg.alert_runbook_path import (
+    _add_governance_edges as _add_governance_edges,
+)
+from memory.graph.sync_pkg.alert_runbook_path import (
+    _alert_runbook_path as _alert_runbook_path,
+)
 from memory.graph.sync_pkg.alert_targets import (
     _RUNTIME_DIMENSIONS as _RUNTIME_DIMENSIONS,
 )
@@ -5440,48 +5449,6 @@ def _alert_runbook_context(
     if runbook is None:
         return None
     return AlertRunbookContext(runbook=runbook)
-
-
-def _alert_runbook_path(root: Path, annotations: dict[str, object]) -> str | None:
-    runbook = annotations.get("runbook")
-    if not isinstance(runbook, str):
-        return None
-    return runbook if (root / runbook).is_file() else None
-
-
-def _add_alert_runbook_doc(
-    snapshot: GraphSnapshot,
-    alert_name: str,
-    runbook: str,
-    today: str,
-) -> NodeKey:
-    return snapshot.add_node(
-        "doc_artifact",
-        runbook,
-        summary=f"Runbook referenced by alert `{alert_name}`.",
-        source_path=runbook,
-        source_kind="alert_runbook",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-
-
-def _add_governance_edges(
-    snapshot: GraphSnapshot,
-    port_nodes: set[NodeKey],
-    adapter_nodes: dict[str, NodeKey],
-    pipeline_nodes: dict[str, NodeKey],
-    contract_nodes: dict[str, NodeKey],
-) -> None:
-    for policy, target_groups in _governance_policy_targets(
-        snapshot,
-        port_nodes=port_nodes,
-        adapter_nodes=adapter_nodes,
-        pipeline_nodes=pipeline_nodes,
-        contract_nodes=contract_nodes,
-    ):
-        _link_policy_governance_group(snapshot, policy, *target_groups)
 
 
 def _add_pipeline_operational_edges(
