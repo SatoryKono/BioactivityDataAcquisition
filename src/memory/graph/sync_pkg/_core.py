@@ -1756,6 +1756,9 @@ from memory.graph.sync_pkg.pipeline_source_config_artifact import (
 from memory.graph.sync_pkg.pipeline_source_config_artifact import (
     _pipeline_source_config_artifact as _pipeline_source_config_artifact,
 )
+from memory.graph.sync_pkg.policy_governance_targets import (
+    _policy_governance_targets as _policy_governance_targets,
+)
 from memory.graph.sync_pkg.port_surfaces import (
     PORTS_MODULE_PREFIX as PORTS_MODULE_PREFIX,
 )
@@ -2586,29 +2589,6 @@ def _link_policy_governance_targets(
 ) -> None:
     for target in _policy_governance_targets(policy_payload):
         snapshot.add_relation(policy, "GOVERNS", target, provenance="curated_policy")
-
-
-def _policy_governance_targets(
-    policy_payload: dict[str, object],
-) -> tuple[NodeKey, ...]:
-    targets: list[NodeKey] = []
-    targets.extend(
-        NodeKey("layer_family", str(name))
-        for name in _as_iterable(policy_payload.get("governs_layers"))
-    )
-    targets.extend(
-        NodeKey("quality_gate", str(name))
-        for name in _as_iterable(policy_payload.get("governs_quality_gates"))
-    )
-    targets.extend(
-        NodeKey("test_surface", str(name))
-        for name in _as_iterable(policy_payload.get("governs_test_surfaces"))
-    )
-    targets.extend(
-        NodeKey("doc_source_surface", str(name))
-        for name in _as_iterable(policy_payload.get("governs_docs"))
-    )
-    return tuple(targets)
 
 
 def _add_impact_analysis_surfaces(
