@@ -628,6 +628,15 @@ from memory.graph.sync_pkg.composite_seed_pipeline_name import (
 from memory.graph.sync_pkg.composite_seed_pipeline_name import (
     _composite_seed_pipeline_name as _composite_seed_pipeline_name,
 )
+from memory.graph.sync_pkg.composite_seed_storage_ref import (
+    _add_composite_dependency_surfaces as _add_composite_dependency_surfaces,
+)
+from memory.graph.sync_pkg.composite_seed_storage_ref import (
+    _composite_seed_storage_ref as _composite_seed_storage_ref,
+)
+from memory.graph.sync_pkg.composite_seed_storage_ref import (
+    _link_composite_seed_surface as _link_composite_seed_surface,
+)
 from memory.graph.sync_pkg.create_workflow_job_surface import (
     _add_workflow_action_surface as _add_workflow_action_surface,
 )
@@ -3542,58 +3551,6 @@ def _add_composite_seed_surface(
         )
     _link_composite_seed_surface(snapshot, context, seed_surface)
     return [seed_storage_ref]
-
-
-def _composite_seed_storage_ref(composite_payload: dict[str, object]) -> str | None:
-    seed_payload = _as_mapping(composite_payload.get("seed"))
-    seed_table = seed_payload.get("silver_table")
-    if not isinstance(seed_table, str) or not seed_table.strip():
-        return None
-    return seed_table.strip()
-
-
-def _link_composite_seed_surface(
-    snapshot: GraphSnapshot,
-    context: CompositePipelineContext,
-    seed_surface: NodeKey,
-) -> None:
-    if context.pipeline_key in snapshot.nodes:
-        snapshot.add_relation(
-            context.pipeline_key,
-            "DEPENDS_ON",
-            seed_surface,
-            provenance="storage_surfaces",
-        )
-    if context.config_artifact in snapshot.nodes:
-        snapshot.add_relation(
-            seed_surface,
-            "DEFINED_BY",
-            context.config_artifact,
-            provenance="storage_surfaces",
-        )
-
-
-def _add_composite_dependency_surfaces(
-    snapshot: GraphSnapshot,
-    project: NodeKey,
-    context: CompositePipelineContext,
-    dependencies: object,
-) -> list[str]:
-    source_storage_refs: list[str] = []
-    if not isinstance(dependencies, list):
-        return source_storage_refs
-    for dependency in dependencies:
-        storage_ref = _composite_dependency_storage_ref(dependency)
-        if storage_ref is None:
-            continue
-        source_storage_refs.append(storage_ref)
-        dependency_surface = _add_composite_dependency_surface(
-            snapshot, project, context, storage_ref
-        )
-        _link_composite_dependency_surface(
-            snapshot, context, dependency_surface, dependency
-        )
-    return source_storage_refs
 
 
 def _add_storage_data_surfaces(
