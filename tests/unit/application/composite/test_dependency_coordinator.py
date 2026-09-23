@@ -611,11 +611,13 @@ class TestDependencyExecution:
         request = httpx.Request("GET", "https://rest.uniprot.org/idmapping/status/job")
         response = httpx.Response(400, request=request)
         runner = MagicMock()
-        runner.run = AsyncMock(side_effect=httpx.HTTPStatusError(
-            "400",
-            request=request,
-            response=response,
-        ))
+        runner.run = AsyncMock(
+            side_effect=httpx.HTTPStatusError(
+                "400",
+                request=request,
+                response=response,
+            )
+        )
 
         result = await coordinator._run_single_dependency(
             dependency=dependency,

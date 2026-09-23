@@ -1,5 +1,14 @@
 # Сводка evidence: project-package-topology
 
+Refresh note (2026-09-23): hash-only reconcile after Any-justification
+comment on semanticscholar transformer. Counts and the source fingerprint
+below come from `reports/quality/module-coverage-inventory.json`. Historical
+notes remain historical.
+
+`source_tree_sha256=eb89fd6972f9bd94478a1986cc521bf0d96e98e8c795c93627016536cbdbb218`
+
+`source_module_count=2479`
+
 Refresh note (2026-09-23): hash-only reconcile after S2 transformer split
 and governance rebind loop. Counts and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
