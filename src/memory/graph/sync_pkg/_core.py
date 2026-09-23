@@ -2326,6 +2326,9 @@ from memory.graph.sync_pkg.reusable_target_workflow_key import (
 from memory.graph.sync_pkg.reusable_target_workflow_key import (
     _reusable_target_workflow_key as _reusable_target_workflow_key,
 )
+from memory.graph.sync_pkg.run_impact_analysis_passes import (
+    _run_impact_analysis_passes as _run_impact_analysis_passes,
+)
 from memory.graph.sync_pkg.run_instance_doc_targets import (
     _run_instance_artifact_targets as _run_instance_artifact_targets,
 )
@@ -2861,31 +2864,6 @@ def _add_impact_analysis_surfaces(
         contract_nodes=contract_nodes,
         pipeline_nodes=pipeline_nodes,
     )
-
-
-def _run_impact_analysis_passes(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    *,
-    memory_mapping: dict[str, object],
-    port_nodes: set[NodeKey],
-    adapter_nodes: dict[str, NodeKey],
-    contract_nodes: dict[str, NodeKey],
-    pipeline_nodes: dict[str, NodeKey],
-) -> None:
-    _add_pipeline_normalization_edges(snapshot, pipeline_nodes, memory_mapping)
-    _add_pipeline_normalization_evidence(snapshot, pipeline_nodes)
-    _add_pipeline_test_edges(snapshot, root, pipeline_nodes, memory_mapping)
-    _add_alert_surfaces(
-        snapshot, root, project, today, pipeline_nodes, contract_nodes, memory_mapping
-    )
-    _add_governance_edges(
-        snapshot, port_nodes, adapter_nodes, pipeline_nodes, contract_nodes
-    )
-    _add_pipeline_operational_edges(snapshot, pipeline_nodes, memory_mapping)
-    _extract_code_duplication_surfaces(snapshot, root, project, today, memory_mapping)
 
 
 if __name__ == "__main__":
