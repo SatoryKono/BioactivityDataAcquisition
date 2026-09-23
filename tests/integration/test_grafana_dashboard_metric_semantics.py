@@ -43,6 +43,24 @@ from tests.integration.grafana_contract_specs import (
 )
 
 pytestmark = pytest.mark.integration
+
+
+@pytest.mark.parametrize("dashboard_file", get_dashboard_files(), ids=lambda p: p.name)
+def test_rolling_counter_legends_do_not_sum_overlapping_windows(dashboard_file):
+    """A legend total must not vary with the query_range evaluation step."""
+    dashboard = load_dashboard(dashboard_file)
+    for panel in get_dashboard_panels(dashboard):
+        if panel.get("type") != "timeseries":
+            continue
+        if any(
+            re.search(r"\b(?:rate|increase)\(", t.get("expr", ""))
+            for t in panel.get("targets", [])
+        ):
+            assert "sum" not in panel.get("options", {}).get("legend", {}).get(
+                "calcs", []
+            ), (dashboard_file.name, panel["id"])
+
+
 RULES_PATH = Path("grafana/prometheus-rules/bioetl_observability.yml")
 MAX_OVER_TIME_COUNTER_POLICY_PATH = Path(
     "configs/quality/promql_max_over_time_counter_policy.yaml"

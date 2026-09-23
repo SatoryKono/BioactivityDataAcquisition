@@ -115,6 +115,28 @@ def apply_corrections(payload: dict) -> None:
             if runbook not in action_panel.setdefault("links", []):
                 action_panel["links"].append(runbook)
     for panel in panels.values():
+        legend = panel.get("options", {}).get("legend", {})
+        if (
+            panel.get("type") == "timeseries"
+            and "sum" in legend.get("calcs", [])
+            and any(
+                re.search(r"\b(?:rate|increase)\(", target.get("expr", ""))
+                for target in panel.get("targets", [])
+            )
+        ):
+            # Adjacent increase/rate samples overlap. Their sum varies with the
+            # evaluation step and is not the number of events in the time range.
+            legend["calcs"] = list(
+                dict.fromkeys(
+                    "lastNotNull" if calc == "sum" else calc for calc in legend["calcs"]
+                )
+            )
+            explanation = (
+                " Rolling-window samples overlap; legend Last is the last observed "
+                "window, not an event total for the selected time range."
+            )
+            if "Rolling-window samples overlap" not in panel.get("description", ""):
+                panel["description"] = panel.get("description", "") + explanation
         if (
             panel.get("type") == "stat"
             and panel.get("options", {}).get("colorMode") == "value"
