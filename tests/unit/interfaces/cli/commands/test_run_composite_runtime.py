@@ -122,6 +122,25 @@ class TestBuildRuntimeConfig:
         assert result.cached_bronze_path == CACHED_BRONZE_PATH
         assert result.cached_bronze_enrichers is False
         assert result.cached_bronze_dependencies is True
+        assert result.required_persistence_profile is None
+
+    def test_required_persistence_profile_passed_through(self) -> None:
+        """CLI persistence-profile override is copied onto runtime config."""
+        result = build_runtime_config(
+            resume=False,
+            dry_run=False,
+            seed_limit=None,
+            enrich_only=None,
+            required_only=False,
+            force_enricher=None,
+            use_cached_bronze=False,
+            cached_bronze_date=None,
+            cached_bronze_path=None,
+            cached_bronze_enrichers=None,
+            cached_bronze_dependencies=False,
+            required_persistence_profile="degraded_observable",
+        )
+        assert result.required_persistence_profile == "degraded_observable"
 
     def test_enrich_only_none_maps_to_none(self) -> None:
         """enrich_only=None produces None on config."""

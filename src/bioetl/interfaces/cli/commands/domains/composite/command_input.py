@@ -59,6 +59,9 @@ def build_composite_run_command_input(
             cached_bronze_dependencies=option_bool_get(
                 options, "cached_bronze_dependencies", False
             ),
+            required_persistence_profile=option_optional_str_get(
+                options, "required_persistence_profile"
+            ),
         ),
         debug=option_bool_get(options, "debug", False),
         health_server=option_bool_get(options, "health_server", True),

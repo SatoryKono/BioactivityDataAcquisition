@@ -74,7 +74,6 @@ def _composite_contract_identity_field_values(
     normalization_profile_version: str | None,
     normalization_profile_hash: str | None,
 ) -> dict[str, object]:
-    """Return the shared contract-identity payload for manifest assembly."""
     return dict(
         build_contract_identity_field_values(
             contract_ref=contract_ref,
@@ -92,7 +91,6 @@ def _composite_contract_identity_field_values(
 def _composite_manifest_contract_identity_kwargs(
     artifacts: CompositeControlPlaneConfigArtifacts,
 ) -> dict[str, object]:
-    """Project contract-identity fields from resolved config artifacts."""
     return _composite_contract_identity_field_values(
         contract_ref=artifacts.contract_ref,
         contract_version=artifacts.contract_version,
@@ -106,14 +104,17 @@ def _composite_manifest_contract_identity_kwargs(
 
 
 def _read_pipeline_control_plane(settings: object) -> object | None:
-    """Return pipeline.control_plane settings for one composite launch."""
     return getattr(getattr(settings, "pipeline", None), "control_plane", None)
 
 
 def _read_configured_required_persistence_profile(
     control_plane: object | None,
+    *,
+    runtime: object | None = None,
 ) -> str:
-    """Return configured profile or the composite rebuild/resume default."""
+    requested = getattr(runtime, "required_persistence_profile", None)
+    if requested is not None and str(requested).strip():
+        return str(requested).strip()
     return str(
         getattr(
             control_plane,
@@ -125,12 +126,17 @@ def _read_configured_required_persistence_profile(
 
 def _read_composite_control_plane_settings(
     settings: object,
+    *,
+    runtime: object | None = None,
 ) -> tuple[object | None, bool, bool, str, str]:
     """Return control-plane view and resolved persistence profile for composite runs."""
     control_plane = _read_pipeline_control_plane(settings)
     manifest_enabled = bool(getattr(control_plane, "run_manifest_enabled", True))
     ledger_enabled = bool(getattr(control_plane, "run_ledger_enabled", True))
-    required_profile = _read_configured_required_persistence_profile(control_plane)
+    required_profile = _read_configured_required_persistence_profile(
+        control_plane,
+        runtime=runtime,
+    )
     effective_required_profile = _resolve_composite_required_persistence_profile(
         settings,
         configured_required_profile=required_profile,
@@ -168,7 +174,8 @@ def _build_composite_control_plane_config_artifacts(
 ) -> CompositeControlPlaneConfigArtifacts:
     """Build configuration and contract artifacts for composite control plane."""
     _, _, _, _, effective_required_profile = _read_composite_control_plane_settings(
-        infra_context.settings
+        infra_context.settings,
+        runtime=runtime,
     )
     contract_ref, contract_entity = _resolve_composite_contract_coordinates(config)
     contract_identity = resolve_contract_identity(

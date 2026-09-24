@@ -3,10 +3,10 @@
   "prompt_id": "prompt.audit.agents-runtime",
   "prompt_version": "1.2.0",
   "generated_at_utc": "2026-09-24T06:52:35Z",
-  "mode": "audit",
+  "mode": "propose-patches",
   "audit_mode": "full",
   "language": "ru",
-  "surface_score": 2,
+  "surface_score": 3,
   "debt_outcome": "improved",
   "checkout": {
     "branch": "main",
@@ -26,6 +26,16 @@
     "AGT-004",
     "AGT-005",
     "AGT-006"
+  ],
+  "remediated_in_propose_patches": [
+    "AGT-002",
+    "AGT-007",
+    "AGT-008",
+    "AGT-009",
+    "AGT-010",
+    "AGT-011",
+    "AGT-012",
+    "AGT-013"
   ],
   "findings": [
     {

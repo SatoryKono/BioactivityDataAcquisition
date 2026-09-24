@@ -28,6 +28,7 @@ class CompositeRuntimeCliInput:
     cached_bronze_path: str | None = None
     cached_bronze_enrichers: bool | None = None
     cached_bronze_dependencies: bool = False
+    required_persistence_profile: str | None = None
 
 
 def parse_enrich_only(enrich_only: str | None) -> tuple[str, ...] | None:
@@ -69,6 +70,8 @@ def build_runtime_config(
         cached_bronze_enrichers: Override cached Bronze usage for enrichers; follows
             ``use_cached_bronze`` if None.
         cached_bronze_dependencies: When True, dependency pipelines also use cached Bronze.
+        required_persistence_profile: Per-run override for the control-plane
+            persistence profile; settings default is used when None.
 
     Returns:
         CompositeRuntimeConfig ready for composite pipeline bootstrap.
@@ -88,6 +91,7 @@ def build_runtime_config(
         cached_bronze_date=resolved.cached_bronze_date,
         cached_bronze_enrichers=resolved.cached_bronze_enrichers,
         cached_bronze_dependencies=resolved.cached_bronze_dependencies,
+        required_persistence_profile=resolved.required_persistence_profile,
     )
 
 
@@ -108,6 +112,7 @@ def _build_overridden_cli_input(
         "cached_bronze_path",
         "cached_bronze_enrichers",
         "cached_bronze_dependencies",
+        "required_persistence_profile",
     }
     unknown = sorted(set(overrides) - allowed)
     if unknown:
@@ -154,6 +159,13 @@ def _build_overridden_cli_input(
             overrides.get(
                 "cached_bronze_dependencies",
                 resolved.cached_bronze_dependencies,
+            ),
+        ),
+        required_persistence_profile=cast(
+            str | None,
+            overrides.get(
+                "required_persistence_profile",
+                resolved.required_persistence_profile,
             ),
         ),
     )

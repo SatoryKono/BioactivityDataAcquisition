@@ -16,6 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Run-ledger `enrichers_succeeded` matches the enrichment summary. `SKIPPED`
   still does not contribute merge input.
 
+- **`run-composite --required-persistence-profile`:** `bioetl run-composite`
+  now accepts the same per-run override as `bioetl run`. Default settings
+  `replay_ready` still fail-closes (composite is outside exact-replay);
+  local `--seed-limit` smokes must pass `degraded_observable`.
+  Nested seed/enricher/dependency launches inherit that composite profile
+  instead of settings `replay_ready`. `forensic_grade` remains fail-closed.
+
 - **`chembl_publication_term --limit` CSV window:** explicit `filter_ids` are
   capped to the term-row `--limit` before upstream `/document` fetches, so a
   large `data/input/publication.csv` no longer burns the 180s derived-scan I/O

@@ -6,7 +6,7 @@ fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=ed7e887cf7609b0efa2b50ef5a0e2835a376c6bcb72501fdbf66dc91ba99ca04`
+`source_tree_sha256=de11093aaeedf6fbbac66e555382c843c661d01ad28cd714f631f46acbc05829`
 
 `source_module_count=2479`
 

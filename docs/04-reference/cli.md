@@ -441,6 +441,7 @@ bioetl run-composite --composite <NAME> [OPTIONS]
 | `--cached-bronze-path`                                         | path | None         | Явный путь к каталогу Bronze cache                   |
 | `--cached-bronze-enrichers/--no-cached-bronze-enrichers`       | flag | None         | Override cached Bronze только для enrichers          |
 | `--cached-bronze-dependencies/--no-cached-bronze-dependencies` | flag | False        | Override cached Bronze для dependency pipelines      |
+| `--required-persistence-profile`                               | choice | None       | Per-run override control-plane profile (`degraded_observable`, `replay_ready`, `forensic_grade`). Composite is outside exact-replay; `replay_ready`/`forensic_grade` fail-close |
 | `--debug`                                                      | flag | False        | DEBUG логирование                                    |
 | `--health-server/--no-health-server`                           | flag | True         | Включить HTTP health server                          |
 | `--health-port`                                                | int  | 8000         | Порт для health/metrics server                       |

@@ -188,6 +188,7 @@ class TestRunCompositeHelp:
         assert "--health-port" in result.output
         assert "--cached-bronze-enrichers" in result.output
         assert "--cached-bronze-dependencies" in result.output
+        assert "--required-persistence-profile" in result.output
 
 
 class TestRunCompositeInner:
@@ -594,6 +595,22 @@ class TestRunCompositeRuntimeConfig:
             result = cli_runner.invoke(
                 cli,
                 ["run-composite", "--composite", "publication", "--seed-limit", "100"],
+            )
+
+        assert result.exit_code == ExitCode.OK.value
+
+    def test_required_persistence_profile_option(self, cli_runner: CliRunner) -> None:
+        """Test --required-persistence-profile option."""
+        with mock_asyncio_run(return_value=(True, None)):
+            result = cli_runner.invoke(
+                cli,
+                [
+                    "run-composite",
+                    "--composite",
+                    "publication",
+                    "--required-persistence-profile",
+                    "degraded_observable",
+                ],
             )
 
         assert result.exit_code == ExitCode.OK.value

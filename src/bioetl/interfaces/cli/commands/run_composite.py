@@ -256,6 +256,17 @@ def _exit_with_composite_result(success: bool, error_message: str | None) -> Non
     show_default=True,
 )
 @typed_click_option(
+    "--required-persistence-profile",
+    type=click.Choice(["degraded_observable", "replay_ready", "forensic_grade"]),
+    default=None,
+    help=(
+        "Override the required control-plane persistence profile for this run. "
+        "Composite execution is outside the strict exact-replay boundary; "
+        "use degraded_observable for local diagnostic smokes. "
+        "replay_ready and forensic_grade remain fail-closed."
+    ),
+)
+@typed_click_option(
     "--debug",
     is_flag=True,
     help="Enable DEBUG level logging",
@@ -323,6 +334,10 @@ def run_composite(**options: object) -> None:
             follows ``use_cached_bronze`` if None.
         cached_bronze_dependencies: When True, dependency pipelines also load
             from the Bronze cache.
+        required_persistence_profile: Per-run override for the control-plane
+            persistence profile. Composite execution cannot satisfy
+            ``replay_ready`` / ``forensic_grade``; local smokes should pass
+            ``degraded_observable``.
         debug: When True, sets log level to DEBUG for detailed output.
         health_server: When True, starts an HTTP health server during execution.
         health_port: TCP port for the HTTP health server.

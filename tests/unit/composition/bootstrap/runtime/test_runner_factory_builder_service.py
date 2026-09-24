@@ -109,6 +109,7 @@ def test_seed_runoptions_snapshot() -> None:
         "use_cached_bronze": True,
         "cached_bronze_path": "data/bronze",
         "cached_bronze_date": "2026-03-04",
+        "required_persistence_profile": "degraded_observable",
     }
 
 
@@ -154,6 +155,7 @@ def test_enricher_runoptions_snapshot() -> None:
         "use_cached_bronze": True,
         "cached_bronze_path": "data/bronze",
         "cached_bronze_date": "2026-03-04",
+        "required_persistence_profile": "degraded_observable",
     }
 
 
@@ -207,6 +209,7 @@ def test_dependency_runoptions_snapshot_single_and_multi_filter() -> None:
         "use_cached_bronze": False,
         "cached_bronze_path": None,
         "cached_bronze_date": None,
+        "required_persistence_profile": "degraded_observable",
     }
 
     _ = factory(
@@ -228,4 +231,29 @@ def test_dependency_runoptions_snapshot_single_and_multi_filter() -> None:
         "use_cached_bronze": False,
         "cached_bronze_path": None,
         "cached_bronze_date": None,
+        "required_persistence_profile": "degraded_observable",
     }
+
+
+@pytest.mark.unit
+def test_seed_runoptions_uses_explicit_builder_persistence_profile() -> None:
+    recorder = _RunOptionsRecorder()
+    builder = RunnerFactoryBuilder(
+        logger=MagicMock(),
+        run_options_cls=recorder,
+        build_context=_build_context,
+        pipeline_runner_builder=_build_runner,
+        filter_extraction_service=CompositeFilterExtractor(),
+        required_persistence_profile="degraded_observable",
+    )
+    runtime = _make_runtime(seed_limit=10)
+    bronze_opts = resolve_bronze_opts(runtime, phase_override=None)
+    factory = builder.build_seed_factory(
+        seed_pipeline="chembl_publication",
+        seed_limit=runtime.seed_limit,
+        bronze_opts=bronze_opts,
+    )
+    _ = factory()
+    assert recorder.calls[-1]["required_persistence_profile"] == (
+        "degraded_observable"
+    )

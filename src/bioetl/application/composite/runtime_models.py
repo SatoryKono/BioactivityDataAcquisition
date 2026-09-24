@@ -86,6 +86,7 @@ class CompositeRuntimeConfig:
     cached_bronze_enrichers: bool | None = None
     cached_bronze_dependencies: bool = False
     exact_replay: bool = False
+    required_persistence_profile: str | None = None
     heartbeat_interval_seconds: int = 30
     lock_ttl_seconds: int = _DEFAULT_COMPOSITE_LOCK_TTL_SECONDS
 

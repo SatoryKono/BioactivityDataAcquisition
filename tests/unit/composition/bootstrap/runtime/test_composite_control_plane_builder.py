@@ -345,6 +345,64 @@ def test_build_composite_control_plane_bundle_allows_disabled_ledger_under_degra
         assert not (tmp_path / "output" / "control" / "run_ledger").exists()
 
 
+def test_build_composite_control_plane_bundle_accepts_cli_degraded_override_when_settings_replay_ready(
+    tmp_path: Path,
+) -> None:
+    config = cast(Any, _RichMockCompositeConfig())
+    runtime = CompositeRuntimeConfig(
+        resume=True,
+        required_persistence_profile="degraded_observable",
+    )
+    infra_context = cast(
+        Any,
+        SimpleNamespace(
+            run_id=_VALID_RUN_ID,
+            clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
+            settings=SimpleNamespace(
+                data_dir=str(tmp_path),
+                pipeline=SimpleNamespace(
+                    control_plane=SimpleNamespace(
+                        run_manifest_enabled=True,
+                        run_ledger_enabled=True,
+                        required_persistence_profile="replay_ready",
+                    )
+                ),
+            ),
+            logger=MagicMock(),
+            metrics=MagicMock(),
+            storage=MagicMock(),
+            lock=MagicMock(),
+        ),
+    )
+
+    with patch(
+        "bioetl.composition.bootstrap.runtime.composite_control_plane_builder.get_code_revision_provenance",
+        return_value=SimpleNamespace(
+            git_commit="abc1234",
+            source_revision_state="clean",
+            dependency_lock_hash=_VALID_SHA256_D,
+        ),
+    ):
+        bundle = build_composite_control_plane_bundle(
+            config=config,
+            runtime=runtime,
+            infra_context=infra_context,
+        )
+
+    manifest_path = (
+        tmp_path
+        / "output"
+        / "control"
+        / "run_manifest"
+        / f"{bundle.manifest_id}.json"
+    )
+    manifest = RunManifest.from_dict(json.loads(manifest_path.read_text("utf-8")))
+    assert manifest.replay_capability == ReplayCapability.RESUME_ONLY
+    assert manifest.launch_context["required_persistence_profile"] == (
+        "degraded_observable"
+    )
+
+
 def test_build_composite_control_plane_bundle_requires_ledger_for_forensic_grade_profile(
     tmp_path: Path,
 ) -> None:

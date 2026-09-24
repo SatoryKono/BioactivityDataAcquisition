@@ -21,7 +21,8 @@ from bioetl.composition.bootstrap.runtime._dependency_runner_support import (
 from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
     CompositeFilterExtractor,
 )
-from bioetl.infrastructure.config.settings_api import get_settings
+
+_COMPOSITE_PHASE_REQUIRED_PERSISTENCE_PROFILE = "degraded_observable"
 
 
 class BronzeRunOptions(TypedDict):
@@ -65,12 +66,21 @@ class RunnerFactoryBuilder[RunOptionsT]:
         build_context: Callable[[str, _RunOptionsT], PipelineRunContext],
         pipeline_runner_builder: Callable[[PipelineRunContext], PipelineRunner],
         filter_extraction_service: CompositeFilterExtractor,
+        required_persistence_profile: str | None = None,
     ) -> None:
         self._logger = logger
         self._run_options_cls = run_options_cls
         self._build_context = build_context
         self._pipeline_runner_builder = pipeline_runner_builder
         self._filter_extraction_service = filter_extraction_service
+        profile = (
+            str(required_persistence_profile).strip()
+            if required_persistence_profile is not None
+            else ""
+        )
+        self._required_persistence_profile = (
+            profile or _COMPOSITE_PHASE_REQUIRED_PERSISTENCE_PROFILE
+        )
 
     def _create_runner(
         self,
@@ -79,12 +89,12 @@ class RunnerFactoryBuilder[RunOptionsT]:
         **option_kwargs: object,
     ) -> PipelineRunner:
         """Build a runner from one resolved RunOptions payload."""
-        # Composite phases must put the required profile on RunOptions/ctx so
-        # degraded_observable opt-down is explicit (settings alone leave
-        # ctx.required_persistence_profile=None and strict snapshot gates fire).
+        # Nested seed/enricher/dependency runs inherit the composite profile.
+        # Settings default replay_ready must not leak in: those nested launches
+        # are outside exact-replay unless cached Bronze snapshots are bound.
         option_kwargs.setdefault(
             "required_persistence_profile",
-            get_settings().pipeline.control_plane.required_persistence_profile,
+            self._required_persistence_profile,
         )
         options = self._run_options_cls(**option_kwargs)
         ctx = self._build_context(pipeline_name, options)

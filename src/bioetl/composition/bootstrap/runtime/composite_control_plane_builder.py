@@ -60,10 +60,14 @@ __all__ = [
 ]
 
 
-def resolve_composite_control_plane_flags(settings: object) -> tuple[bool, bool]:
+def resolve_composite_control_plane_flags(
+    settings: object,
+    *,
+    runtime: object | None = None,
+) -> tuple[bool, bool]:
     """Resolve manifest/ledger feature flags for executable composite runs."""
     _, manifest_enabled, ledger_enabled, _, effective_required_profile = (
-        _read_composite_control_plane_settings(settings)
+        _read_composite_control_plane_settings(settings, runtime=runtime)
     )
     if not manifest_enabled:
         raise RuntimeError(
@@ -133,7 +137,8 @@ def build_composite_control_plane_bundle(
 ) -> CompositeControlPlaneBundle:
     """Materialize manifest/ledger artifacts for one composite execution."""
     _manifest_enabled, ledger_enabled = resolve_composite_control_plane_flags(
-        infra_context.settings
+        infra_context.settings,
+        runtime=runtime,
     )
     config_artifacts = _build_composite_control_plane_config_artifacts(
         config=config,

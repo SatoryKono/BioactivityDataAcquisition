@@ -730,11 +730,13 @@ bioetl run-all --source chembl --limit 100
 
 ```bash
 bioetl run-composite --composite publication
-bioetl run-composite --composite publication --seed-limit 100
+bioetl run-composite --composite publication --seed-limit 100 --required-persistence-profile degraded_observable
 bioetl run-composite --composite publication --use-cached-bronze
 ```
 
-Composite execution is outside the strict exact-replay boundary. Cached Bronze
+Composite execution is outside the strict exact-replay boundary. Default
+settings `replay_ready` fail-closes; local smokes must pass
+`--required-persistence-profile degraded_observable`. Cached Bronze
 may be used as rebuild/resume evidence for every seed, dependency, and enricher
 participant, but it does not make the composite run exact-replayable. Strict
 exact replay remains limited to snapshot-backed source runs. The covered runtime

@@ -85,6 +85,7 @@ Composite pack (`--limit` is **not** a composite flag; use `--seed-limit`):
 .\.venv-win\Scripts\python.exe -m bioetl run-composite `
   --composite <ENTITY> `
   --seed-limit 100 `
+  --required-persistence-profile degraded_observable `
   --no-health-server `
   --no-ensure-observability-backend
 ```
@@ -93,9 +94,11 @@ Why these flags:
 
 - `--limit 100` / `--seed-limit 100` — bounded live smoke, not a full ingest.
 - `--required-persistence-profile degraded_observable` — local diagnostic
-  opt-down for ordinary `bioetl run` that stays observable without claiming
-  the `replay_ready` evidence floor. Do **not** combine with `--exact-replay`.
-  `run-composite` does not expose this flag.
+  opt-down that stays observable without claiming the `replay_ready` evidence
+  floor. Required for both `bioetl run` and `bioetl run-composite`: default
+  settings stay `replay_ready`, and composite execution is outside the
+  strict exact-replay boundary (`replay_ready` / `forensic_grade` fail-close).
+  Do **not** combine with `--exact-replay`.
 - `--no-health-server` — sequential smokes must not fight over `:8000`.
 - `--no-ensure-observability-backend` — keep the default-off Ops HTTP backend
   off unless Grafana ID panels are in scope.
@@ -108,6 +111,7 @@ python -m bioetl run --pipeline <NAME> --limit 100 \
   --no-health-server --no-ensure-observability-backend
 
 python -m bioetl run-composite --composite <ENTITY> --seed-limit 100 \
+  --required-persistence-profile degraded_observable \
   --no-health-server --no-ensure-observability-backend
 ```
 
@@ -230,7 +234,12 @@ $common = @(
 & $py -m bioetl run --pipeline uniprot_idmapping @common
 
 # Wave E
-$ccommon = @("--seed-limit", "100", "--no-health-server", "--no-ensure-observability-backend")
+$ccommon = @(
+  "--seed-limit", "100",
+  "--required-persistence-profile", "degraded_observable",
+  "--no-health-server",
+  "--no-ensure-observability-backend"
+)
 & $py -m bioetl run-composite --composite publication @ccommon
 & $py -m bioetl run-composite --composite activity @ccommon
 & $py -m bioetl run-composite --composite assay @ccommon
