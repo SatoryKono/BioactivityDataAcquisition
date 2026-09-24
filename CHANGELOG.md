@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Remote-main architecture debt baseline rebound (#10957):**
+  `architecture-debt-remote-main-baseline` tracks current `origin/main`;
+  `generated_artifact_drift` / debt-gates `--check` pass without raising
+  debt budgets.
+
+- **Architecture-index dep-map census 2495 (#10958):** dependency-map row
+  matches committed `summary.scanned_modules` (was 2472). Coverage 2479 and
+  import-linter 2426 stay separate scanner populations.
+
 - **Ops HTTP backend logs stay under data/repo ops dirs (#10951):** detached
   `bioetl health server` startup logs use `<data_root>/ops/` or
   `logs/ops/bioetl-ops-http-backend-{port}.log`, not `tempfile.gettempdir()`.
