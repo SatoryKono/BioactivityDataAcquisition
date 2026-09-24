@@ -16,6 +16,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Run-ledger `enrichers_succeeded` matches the enrichment summary. `SKIPPED`
   still does not contribute merge input.
 
+- **`chembl_publication_term --limit` CSV window:** explicit `filter_ids` are
+  capped to the term-row `--limit` before upstream `/document` fetches, so a
+  large `data/input/publication.csv` no longer burns the 180s derived-scan I/O
+  budget when current ChEMBL payloads omit MeSH/keywords.
+
+- **Derived-scan hang budget is per `anext`:** `bounded_source_records` treats
+  `timeout_seconds` as hang detection for one upstream wait, not a cumulative
+  I/O cap. Paginated `--limit` smokes (`chembl_subcellular_fraction`,
+  `chembl_publication_term`) can finish after several ChEMBL pages without a
+  false `derived_scan_budget_exceeded`. `max_records` remains the completeness
+  bound.
+
+- **`pubchem_compound` input CSV:** `filters.input_filter.source_path` now points
+  at `data/input/pubchem_smiles.csv` (`canonical_smiles`). The previous
+  `data/input/molecule.csv` only has `molecule_chembl_id` and fail-closed at
+  preflight (`ExtractionInputError`, exit 80).
+
+- **`uniprot_idmapping` seed CSV column:** `filters.input_filter.enabled` is
+  now `true`, so registration uses `data/input/target.csv` column
+  `target_chembl_id`. With the filter disabled, the data source still opened
+  that file with hardcoded `target_id` and fail-closed (`ValueError`, exit 80).
+
 ### Added
 
 - **Bounded pipeline smoke runbook:** sequential `--limit 100` launch of all

@@ -64,6 +64,37 @@ async def test_fetch_limit_zero_yields_empty_without_upstream_records() -> None:
     assert source.calls == 0
 
 
+@pytest.mark.asyncio
+async def test_fetch_limit_slices_filter_ids_to_term_cap() -> None:
+    class _Src:
+        def __init__(self) -> None:
+            self.filter_ids: list[str] | None = None
+            self.limit: int | None = None
+
+        async def fetch(self, **kwargs: object):
+            raw_ids = kwargs.get("filter_ids")
+            self.filter_ids = list(raw_ids) if isinstance(raw_ids, list) else None
+            raw_limit = kwargs.get("limit")
+            self.limit = raw_limit if isinstance(raw_limit, int) else None
+            if False:
+                yield {}
+
+    source = _Src()
+    wrapper = PublicationTermDataSource(data_source=source)  # type: ignore[arg-type]
+    terms = [
+        term
+        async for term in wrapper.fetch(
+            "publication_term",
+            limit=2,
+            filter_ids=["A", "B", "C", "D"],
+            filter_field="publication_id",
+        )
+    ]
+    assert terms == []
+    assert source.filter_ids == ["A", "B"]
+    assert source.limit == 2
+
+
 def test_extract_mesh_rejects_non_string_and_blank_fields_s5_residual() -> None:
     publication = {
         "mesh_terms": [

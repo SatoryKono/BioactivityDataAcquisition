@@ -54,12 +54,14 @@ ______________________________________________________________________
   | File | Used by |
   | --- | --- |
   | `data/input/cell.csv` | `chembl_cell_line` |
-  | `data/input/molecule.csv` | `chembl_compound_record`, `pubchem_compound` |
+  | `data/input/molecule.csv` | `chembl_compound_record` |
+  | `data/input/pubchem_smiles.csv` | `pubchem_compound` |
   | `data/input/target_component.csv` | `chembl_target_component` |
   | `data/input/publication.csv` | `chembl_publication_term` |
   | `data/input/pubmed.csv` | `pubmed_publication` |
   | `data/input/dois.csv` | `crossref_publication`, `openalex_publication`, `semanticscholar_publication` |
   | `data/input/protein.csv` | `uniprot_protein` |
+  | `data/input/target.csv` | `uniprot_idmapping` |
 
 - No stale lock. If lock acquisition fails, follow
   [Stale Lock](stale-lock.md) before retrying.
@@ -152,8 +154,8 @@ the fix invalidates their Gold).
 | # | Pipeline | Notes |
 | --- | --- | --- |
 | 12 | `chembl_publication_similarity` | API scan from documents. |
-| 13 | `chembl_publication_term` | Input filter: `data/input/publication.csv`. `/document_term` is retired; terms come from publication records. |
-| 14 | `chembl_subcellular_fraction` | Derived from assays; sparse. Upstream scan uses `ASSAY_LIMIT_MULTIPLIER=200`. |
+| 13 | `chembl_publication_term` | Input filter: `data/input/publication.csv`. `/document_term` is retired; terms come from publication records. `--limit N` caps the CSV ID window to N publications (not `N * 50`) so the 180s derived-scan I/O budget is not exhausted when MeSH/keywords are absent. |
+| 14 | `chembl_subcellular_fraction` | Derived from assays; sparse. Upstream scan uses `ASSAY_LIMIT_MULTIPLIER=200`. Hang timeout is per upstream `anext`, not a 180s sum across pages. |
 | 15 | `chembl_target_protein_classification` | Local Gold snapshots of `chembl_target`, `chembl_target_component`, `chembl_protein_class`. Fail-closed if those snapshots are missing. |
 
 ### Wave D — enrichers (standalone CSV, not composite)
@@ -164,9 +166,9 @@ the fix invalidates their Gold).
 | 17 | `crossref_publication` | `data/input/dois.csv`. |
 | 18 | `openalex_publication` | `data/input/dois.csv`. |
 | 19 | `semanticscholar_publication` | `data/input/dois.csv`. Tight provider QPS; expect longer wall time. |
-| 20 | `pubchem_compound` | `data/input/molecule.csv` (`canonical_smiles` → `smiles`). |
+| 20 | `pubchem_compound` | `data/input/pubchem_smiles.csv` (`canonical_smiles` → `smiles`). |
 | 21 | `uniprot_protein` | `data/input/protein.csv`. |
-| 22 | `uniprot_idmapping` | Input filter off; `--limit 100` caps mapped IDs. Prefer after `chembl_target`. |
+| 22 | `uniprot_idmapping` | Input filter: `data/input/target.csv` (`target_chembl_id` → `target_id`). `--limit 100` caps mapped IDs. Prefer after `chembl_target`. |
 
 ### Wave E — composite packs
 

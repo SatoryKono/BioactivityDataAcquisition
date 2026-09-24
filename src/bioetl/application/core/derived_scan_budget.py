@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import AsyncGenerator, AsyncIterator, Sequence
-from time import monotonic
 
 from bioetl.domain.exceptions.internal_state import InvalidStateError
 
@@ -55,27 +54,22 @@ async def bounded_source_records[T](
     max_records: int = DEFAULT_SCAN_RECORDS,
     timeout_seconds: float = DEFAULT_SCAN_SECONDS,
 ) -> AsyncGenerator[T, None]:
-    """Fail explicitly on exhaustion; close the upstream iterator on every exit.
+    """Fail explicitly on record-budget exhaustion; close the iterator on every exit.
 
-    Time spent processing yielded rows is excluded from the upstream I/O budget.
-    One look-ahead record distinguishes natural EOF from a truncated scan.
-    Cancellation propagates unchanged to the run finalization boundary.
+    ``timeout_seconds`` is hang detection for a single upstream ``anext``, not a
+    cumulative I/O cap. A progressing paginated scan may run until ``max_records``
+    or natural EOF. Time spent processing yielded rows is excluded: the next
+    wait starts after ``yield``. Cancellation propagates unchanged to the run
+    finalization boundary.
     """
     if max_records < 1 or timeout_seconds <= 0:
         raise ValueError("scan budgets must be positive")
     consumed = 0
-    remaining = timeout_seconds
     try:
         while True:
-            started = monotonic()
-            deadline = asyncio.timeout(max(0, remaining))
+            deadline = asyncio.timeout(timeout_seconds)
             try:
                 async with deadline:
-                    if remaining <= 0:
-                        raise InvalidStateError(
-                            "derived_scan_budget_exceeded: upstream time budget exhausted",
-                            current_state="incomplete_scan",
-                        )
                     record = await anext(source)
             except StopAsyncIteration:
                 return
@@ -87,7 +81,6 @@ async def bounded_source_records[T](
                     "narrow the input selection before retrying.",
                     current_state="incomplete_scan",
                 ) from exc
-            remaining -= monotonic() - started
             consumed += 1
             if consumed > max_records:
                 raise InvalidStateError(
