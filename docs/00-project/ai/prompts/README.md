@@ -57,6 +57,7 @@ See `REGISTRY.yaml` `scenarios:`. Primary cards:
 | closeout | `prompt.closeout.grok` | [library/closeout/grok-closeout.md](library/closeout/grok-closeout.md) |
 | github-actions | `prompt.audit.github-actions` | [library/audit/github-actions.md](library/audit/github-actions.md) |
 | agents-runtime | `prompt.audit.agents-runtime` | [library/audit/agents-runtime.md](library/audit/agents-runtime.md) |
+| generic-nine pack | `prompt.audit.generic-nine.pack` | [library/audit/generic-nine.pack.md](library/audit/generic-nine.pack.md) |
 | architecture-cycle | `prompt.architecture.cycle` | [library/audit/architecture.md](library/audit/architecture.md) |
 | dashboard-audit | `prompt.observability.dashboard-audit-cycle` | [library/audit/dashboard.md](library/audit/dashboard.md) |
 | sequential-run | `prompt.audit.sequential-run` | [library/audit/sequential-run.md](library/audit/sequential-run.md) |
