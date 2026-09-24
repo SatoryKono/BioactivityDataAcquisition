@@ -7,6 +7,11 @@
     "language": "ru",
     "audit_mode": "full",
     "require_gh_tracking": true,
+    "gh_issues_created": {
+      "DIAG-ADR040-CENSUS": "#10983",
+      "DIAG-META-NODES": "#10984",
+      "DIAG-CURRENT-STATE-STAMP": "#10985"
+    },
     "base_sha": "73e76c20c0df2771d48fdca6fb18f828985c7b57",
     "origin_main_sha": "2348b89f6a11",
     "generated_at_utc": "2026-09-24T10:27:08Z",

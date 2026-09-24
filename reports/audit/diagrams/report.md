@@ -42,19 +42,19 @@
 
 ADR-040 «measured baseline 2026-07-18»: 290 `.mmd` (architecture 89 + class 145 + foundation 55 + template). Live: **328** = то же + `providers/` 28 + `sequence/` 5 + `state-machines/` 5.
 
-**Patch (не применён):** обновить числа/семьи в ADR-040; не поднимать quality budgets.
+**Patch (не применён):** обновить числа/семьи в ADR-040; не поднимать quality budgets. Issue #10983.
 
 ### DIAG-META-NODES — P3 PROVEN
 
 ADR-040 D4 требует `%% @nodes` на `.mmd`. Нет на 35 файлах: architecture `24`–`48`, все `sequence/`, все `state-machines/`. Lint не падает (ELK/`SIZE` смотрят `@nodes` только если он есть).
 
-**Patch:** проставить `@nodes` (посчитать узлы) без смены семантики.
+**Patch:** проставить `@nodes` (посчитать узлы) без смены семантики. Issue #10984.
 
 ### DIAG-CURRENT-STATE-STAMP — P3 PROVEN
 
 `docs/02-architecture/current-state-diagrams.md` `Last verified: 2026-08-05`. Сами C4 Context/Container и слои **согласованы** с ADR-010 (optional Grafana, container = процесс). Это stamp-drift, не wrong model.
 
-**Patch:** обновить `Last verified` после сверки (уже сделана этим аудитом).
+**Patch:** обновить `Last verified` после сверки (уже сделана этим аудитом). Issue #10985.
 
 ## Lint warnings (не отдельные issues)
 
