@@ -4,7 +4,7 @@
   "score_legend": "0 unacceptable, 1 weak, 2 acceptable, 3 good",
   "audit_mode": "full",
   "mode": "propose-patches",
-  "patches_applied": false,
+  "patches_applied": true,
   "generated_at_utc": "2026-09-24T17:04:19Z",
   "findings": [
     {
@@ -24,7 +24,7 @@
       "broken_invariant": "REQ-TEST-005 requires the CI pytest command path to be an actual gate; a missing budget artifact must not be success.",
       "method": "inspection of .github/workflows/tests.yml and tests/performance/test_hotspot_budgets.py",
       "expected": "Missing hotspot degradation report fails the blocking Tests lane.",
-      "actual": "Gate on degradation report runs under if: always() and only checks the JSON when the file exists.",
+      "actual": "At audit time the gate succeeded when the JSON was absent. Working tree now exits 1 when hotspot-observations.jsonl or hotspot-degradation.json is missing.",
       "impact": "A green performance-budgets job, which tests-complete requires, can occur without a budget verdict if observations were not written.",
       "root_cause": "performance-budgets treats a missing hotspot degradation report as success",
       "affected_paths": [
@@ -32,7 +32,7 @@
         "tests/performance/test_hotspot_budgets.py",
         "tests/performance/conftest.py"
       ],
-      "path": ".github/workflows/tests.yml:1303-1316",
+      "path": ".github/workflows/tests.yml:1285-1309",
       "evidence": [
         {
           "path": ".github/workflows/tests.yml",
@@ -55,7 +55,7 @@
         "Inspect the gate step else-branch exits 1 before relying on pytest outcome alone."
       ],
       "validation_commands": [
-        "not run; workflow change not applied"
+        ".\\\\.venv-win\\\\Scripts\\\\python.exe -m pytest tests/architecture/test_ci_heavy_lane_rebalance.py::TestCiHeavyLaneRebalance::test_memory_and_performance_lanes_stay_isolated -q --tb=short -p no:xdist"
       ],
       "remediation": "Fail the gate when hotspot-observations.jsonl or hotspot-degradation.json is missing. Do not raise budgets.",
       "effort": "S",
@@ -64,7 +64,11 @@
       "dependencies": [],
       "rollback": "Revert the workflow step to the previous if-file-exists gate.",
       "owner_surface": "docs",
-      "patches_applied": false
+      "patches_applied": true,
+      "remediation_applied_in": [
+        ".github/workflows/tests.yml",
+        "tests/architecture/test_ci_heavy_lane_rebalance.py"
+      ]
     }
   ]
 }

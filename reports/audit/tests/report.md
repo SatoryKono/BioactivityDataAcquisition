@@ -1,7 +1,7 @@
 # Аудит тестовой системы
 
 surface_score: **2** (приемлемо: ядро блокирует merge, локальные щели в наблюдаемости).
-Режим: `full` / `propose-patches`. Патч не применён.
+Режим: `full` / `propose-patches`. Патч TESTS-001 внесён в рабочее дерево, коммит не создавался.
 Срез: 2026-09-24T17:04:19Z. Checkout грязный (незавершённый merge), это не clean-checkout и не coverage-verify truth.
 
 ## Что реально блокирует
@@ -53,7 +53,7 @@ N=2, оба раза exit 0, по 4 кейса. Вердикт: stable. Полн
 
 `TESTS-001` (P2, PROVEN, `REQ-TEST-005`). Job `performance-budgets` входит в блокирующий `tests-complete`, но шаг Gate on degradation report успешен, если `reports/performance/hotspot-degradation.json` нет. Генерация отчёта при отсутствии JSONL только печатает skip. Наблюдения пишутся лишь когда тест дошёл до `_record_observation`.
 
-Патч не применён (нужно подтверждение). В шаге Gate on degradation report:
+Патч внесён в `.github/workflows/tests.yml`. В шаге Gate on degradation report:
 
 ```bash
 if [ ! -f reports/performance/hotspot-degradation.json ]; then
