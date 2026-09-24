@@ -1286,6 +1286,10 @@
                 "value": "Reason"
               },
               {
+                "id": "links",
+                "value": []
+              },
+              {
                 "id": "mappings",
                 "value": [
                   {
@@ -1322,7 +1326,7 @@
       },
       "options": {
         "showHeader": true,
-        "cellHeight": "sm",
+        "cellHeight": "lg",
         "footer": {
           "show": false
         }

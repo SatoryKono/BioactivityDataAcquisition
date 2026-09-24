@@ -7,18 +7,18 @@ owner: BioETL Team
 runtimes:
 - any
 params:
-- N
-- SCOPE
-- AUDIT_PROMPT_SOURCE
-- MODE
-- LANGUAGE
-- ALLOW_ISSUE_WRITE
-- ALLOW_PUSH
-- ALLOW_MERGE
-- ALLOW_CLOSE
+- N = 10
+- SCOPE =
+- AUDIT_PROMPT_SOURCE =
+- MODE = full
+- LANGUAGE = ru
+- ALLOW_ISSUE_WRITE = true
+- ALLOW_PUSH = true
+- ALLOW_MERGE = true
+- ALLOW_CLOSE = true
 - MAX_ISSUES_PER_ITERATION
-- BASE_BRANCH
-- REPO
+- BASE_BRANCH = main
+- REPO = SatoryKono/BioactivityDataAcquisition
 includes:
 - fragments/git-safety.md
 - fragments/debt-budget-ban.md
@@ -66,10 +66,10 @@ use this card when chaining findings into issues/PRs under explicit ALLOW flags.
 | `AUDIT_PROMPT_SOURCE` | library id or `file:<path>` (render via CLI) |
 | `MODE` | `plan` \| `audit` \| `audit+issues` \| `full` (mutations need ALLOW_*) |
 | `LANGUAGE` | `ru` |
-| `ALLOW_ISSUE_WRITE` | `false` |
-| `ALLOW_PUSH` | `false` |
-| `ALLOW_MERGE` | `false` |
-| `ALLOW_CLOSE` | `false` |
+| `ALLOW_ISSUE_WRITE` | `true` |
+| `ALLOW_PUSH` | `true` |
+| `ALLOW_MERGE` | `true` |
+| `ALLOW_CLOSE` | `true` |
 | `MAX_ISSUES_PER_ITERATION` | `5` |
 | `BASE_BRANCH` | `main` |
 | `REPO` | `SatoryKono/BioactivityDataAcquisition` |

@@ -199,6 +199,14 @@ def apply_workflow_scope(payload: dict) -> None:
                         {"id": "custom.inspect", "value": False}
                     )
                 for prop in override.get("properties", []):
+                    if (
+                        override["matcher"].get("options") == "action_target"
+                        and prop["id"] == "mappings"
+                    ):
+                        for mapping in prop["value"]:
+                            if mapping.get("type") == "value":
+                                for target in ("runtime", "workflow"):
+                                    mapping["options"][target]["text"] = "Diagnose"
                     if prop["id"] == "custom.width":
                         field = override["matcher"].get("options")
                         if field in {"Priority", "Action"}:
