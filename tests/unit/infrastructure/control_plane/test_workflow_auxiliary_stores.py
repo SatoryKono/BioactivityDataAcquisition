@@ -29,6 +29,7 @@
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
 from threading import Barrier, Lock
@@ -556,3 +557,22 @@ def test_workflow_manifest_catalog_corruption_is_not_empty(tmp_path: Path) -> No
 def test_workflow_manifest_catalog_missing_directory_is_empty(tmp_path: Path) -> None:
     store = FileWorkflowManifestStore(base_path=tmp_path / "missing")
     assert store.list_all() == ()
+
+
+def test_workflow_manifest_error_does_not_queue_entire_catalog(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    for index in range(20):
+        (tmp_path / f"broken-{index}.json").write_text("invalid", encoding="utf-8")
+    submitted: list[str] = []
+
+    class TrackingExecutor(ThreadPoolExecutor):
+        def submit(self, fn, *args, **kwargs):
+            submitted.append(args[0])
+            return super().submit(fn, *args, **kwargs)
+
+    monkeypatch.setattr(manifest_store_module, "ThreadPoolExecutor", TrackingExecutor)
+    with pytest.raises(ValueError):
+        FileWorkflowManifestStore(base_path=tmp_path).list_all()
+    assert len(submitted) == 4
