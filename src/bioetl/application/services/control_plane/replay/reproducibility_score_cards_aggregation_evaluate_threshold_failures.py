@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
-    JsonDict,
-)
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
+        JsonDict,
+    )
 
 
 def evaluate_threshold_failures(

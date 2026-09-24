@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from bioetl.domain.ports import (
     AuditPort,
     LoggerPort,
     MetricsPort,
     TracingPort,
-)
-
-from .observability_bundle import (
-    validate_observability_preflight_impl as _validate_observability_preflight_impl,
 )
 
 
@@ -26,9 +24,10 @@ def validate_observability_preflight(
     control_plane: object | None = None,
     yaml_config: object | None = None,
     skip_gold: bool = False,
+    impl: Callable[..., None],
 ) -> None:
     """Validate observability components for production readiness."""
-    _validate_observability_preflight_impl(
+    impl(
         tracer=tracer,
         metrics=metrics,
         environment=environment,
