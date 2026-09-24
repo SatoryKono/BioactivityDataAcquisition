@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import json
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from contextlib import suppress
 from dataclasses import dataclass
+from itertools import islice
 from pathlib import Path
 from time import perf_counter
 from typing import override
@@ -130,14 +131,7 @@ class FileWorkflowManifestStore(WorkflowManifestPort):
             # Bound parallel reads to amortize Windows bind-mount latency without
             # changing catalog validation, freshness, or the selector deadline.
             manifest_ids = [path.stem for path in self.base_path.glob("*.json")]
-            with ThreadPoolExecutor(
-                max_workers=_WORKFLOW_MANIFEST_READ_WORKERS
-            ) as executor:
-                manifests = [
-                    manifest
-                    for manifest in executor.map(self._load_manifest, manifest_ids)
-                    if manifest is not None
-                ]
+            manifests = self._read_catalog(manifest_ids)
             return tuple(
                 sorted(
                     manifests,
@@ -155,6 +149,31 @@ class FileWorkflowManifestStore(WorkflowManifestPort):
                 status=status,
                 duration_seconds=perf_counter() - started_at,
             )
+
+    def _read_catalog(self, manifest_ids: list[str]) -> list[WorkflowManifest]:
+        """Bound submitted reads and stop scheduling after the first read error."""
+        remaining = iter(manifest_ids)
+        executor = ThreadPoolExecutor(max_workers=_WORKFLOW_MANIFEST_READ_WORKERS)
+        manifests: list[WorkflowManifest] = []
+        try:
+            pending = {
+                executor.submit(self._load_manifest, manifest_id)
+                for manifest_id in islice(remaining, _WORKFLOW_MANIFEST_READ_WORKERS)
+            }
+            while pending:
+                completed, pending = wait(pending, return_when=FIRST_COMPLETED)
+                # Resolve the entire completed batch before submitting more work.
+                loaded = [future.result() for future in completed]
+                manifests.extend(item for item in loaded if item is not None)
+                pending.update(
+                    executor.submit(self._load_manifest, manifest_id)
+                    for manifest_id in islice(remaining, len(completed))
+                )
+            return manifests
+        finally:
+            # Keep forensic limiter ownership until running threads finish;
+            # returning earlier would allow unbounded background I/O on retries.
+            executor.shutdown(wait=True, cancel_futures=True)
 
     def _load_manifest(self, manifest_id: str) -> WorkflowManifest | None:
         manifest_path = self.base_path / f"{manifest_id}.json"

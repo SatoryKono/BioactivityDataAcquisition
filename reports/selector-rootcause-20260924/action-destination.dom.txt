@@ -1,0 +1,187 @@
+- link "Skip to main content":
+  - /url: "#pageContent"
+  - generic: Skip to main content
+- banner:
+  - button "Open menu":
+    - img "Grafana"
+  - navigation "Breadcrumbs":
+    - list:
+      - link "Home":
+        - /url: /
+      - link "Dashboards":
+        - /url: /dashboards
+      - link "BioETL":
+        - /url: /dashboards/f/bioetl/bioetl
+      - generic "3. Pipeline Diagnostics"
+  - button "Search..."
+  - generic: ctrl+k
+  - button "New":
+  - button "Help":
+  - button "Profile":
+    - img "User avatar"
+  - button "Mark as favorite":
+  - button "Edit":
+    - generic: Edit
+  - button "Export":
+    - text: Export
+  - button "Share":
+    - generic: Share
+  - button "Toggle share menu":
+- main:
+  - text: Workflow
+  - log
+  - generic: All
+  - combobox
+  - text: Pipeline
+  - log
+  - generic: chembl_compound_record
+  - combobox
+  - text: Run Type
+  - log
+  - generic: All
+  - button "Remove":
+  - combobox
+  - button "Clear value"
+  - text: Run ID
+  - log
+  - generic: SELECT RUN
+  - combobox
+  - text: Stage
+  - log
+  - generic: All
+  - button "Remove":
+  - combobox
+  - button "Clear value"
+  - button "Move time range backwards":
+  - 'button "Time range selected: 2026-09-24 03:00 to 2026-09-24 13:40"':
+    - generic: 2026-09-24 03:00 to 2026-09-24 13:40
+  - button "Move time range forwards":
+  - button "Zoom out time range":
+  - button "Refresh":
+    - generic: Refresh
+  - button "Auto refresh turned off. Choose refresh time interval":
+  - link "0. Run Explorer":
+    - /url: /d/bioetl-run-explorer-v1/0-run-explorer?var-workflow=$__all&var-pipeline=chembl_compound_record&var-run_type=$__all&var-run_id=-&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=Europe%2FKiev
+  - link "1. Trust":
+    - /url: /d/bioetl-control-plane-v1/1-trust?var-workflow=$__all&var-pipeline=chembl_compound_record&var-run_type=$__all&var-run_id=-&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=Europe%2FKiev
+  - link "2. Overview":
+    - /url: /d/bioetl-overview-v2/2-overview?var-workflow=$__all&var-pipeline=chembl_compound_record&var-run_type=$__all&var-run_id=-&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=Europe%2FKiev
+  - link "3. Pipeline Diagnostics":
+    - /url: "#bioetl-runtime"
+  - link "4. Provider Health":
+    - /url: /d/bioetl-provider-health-v2/4-provider-health?var-workflow=$__all&var-pipeline=chembl_compound_record&var-run_type=$__all&var-run_id=-&var-provider=$__all&var-pipeline_context=chembl_compound_record&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=Europe%2FKiev
+  - link "5. Data Quality":
+    - /url: /d/bioetl-dq-v2/5-data-quality?var-workflow=$__all&var-pipeline=chembl_compound_record&var-run_type=$__all&var-run_id=-&var-stage=$__all&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=Europe%2FKiev
+  - link "6. Incident Workspace":
+    - /url: /d/bioetl-incident-v1/6-incident-workspace?var-workflow=$__all&var-pipeline=chembl_compound_record&var-run_type=$__all&var-run_id=-&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=Europe%2FKiev
+  - generic: "CURRENT · Pipeline / Run Type. Missing stages: INCOMPLETE / UNKNOWN. SCRAPING is not an active blocker; no blockers do not prove completeness."
+  - region "Monitor Pipeline Status":
+    - heading "Monitor Pipeline Status" [level=2]
+    - generic "Monitor Pipeline Status":
+      - generic: CRIT
+  - region "Review Runtime Blockers":
+    - heading "Review Runtime Blockers" [level=2]
+    - table:
+      - rowgroup:
+        - row "table header":
+          - columnheader "severity":
+            - button "severity":
+              - generic: severity
+            - separator
+          - columnheader "reason":
+            - button "reason":
+              - generic: reason
+            - separator
+          - columnheader "Action":
+            - button "Action":
+              - generic: Action
+            - separator
+          - columnheader "stage":
+            - button "stage":
+              - generic: stage
+            - separator
+      - row "degraded ingestion_throughput_degraded Runtime None observed":
+        - cell "degraded":
+          - button "degraded"
+        - cell "ingestion_throughput_degraded"
+        - cell "Runtime":
+          - link "Runtime":
+            - /url: /d/bioetl-runtime/?var-workflow=$__all&var-pipeline=chembl_compound_record&var-stage=$__all&var-run_type=incremental&var-run_id=-&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=Europe%2FKiev
+            - generic: Runtime
+        - cell "None observed":
+          - button "None observed"
+      - row "failing stage_backlog Runtime ingestion":
+        - cell "failing":
+          - button "failing"
+        - cell "stage_backlog"
+        - cell "Runtime":
+          - link "Runtime":
+            - /url: /d/bioetl-runtime/?var-workflow=$__all&var-pipeline=chembl_compound_record&var-stage=$__all&var-run_type=incremental&var-run_id=-&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=Europe%2FKiev
+            - generic: Runtime
+        - cell "ingestion":
+          - button "ingestion"
+      - row "failing stage_lag Runtime ingestion":
+        - cell "failing":
+          - button "failing"
+        - cell "stage_lag"
+        - cell "Runtime":
+          - link "Runtime":
+            - /url: /d/bioetl-runtime/?var-workflow=$__all&var-pipeline=chembl_compound_record&var-stage=$__all&var-run_type=incremental&var-run_id=-&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=Europe%2FKiev
+            - generic: Runtime
+        - cell "ingestion":
+          - button "ingestion"
+  - region "Monitor Coverage":
+    - heading "Monitor Coverage" [level=2]
+    - link "Open observability runbook":
+      - /url: https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md
+    - button "Menu for panel Monitor Coverage":
+    - generic: Endpoint
+    - generic: SCRAPING
+    - generic: Expected stage signals
+    - generic: 100%
+    - generic: Rule age
+    - generic: 35 s
+  - region "Review Stage Progress":
+    - heading "Review Stage Progress" [level=2]
+    - 'link "Show all rows and total (summary: up to 3)"':
+      - /url: /d/bioetl-runtime/3-pipeline-diagnostics?var-workflow=$__all&var-pipeline=chembl_compound_record&var-run_type=$__all&var-run_id=-&viewPanel=22460&from=2026-09-24T00:00:00.000Z&to=2026-09-24T10:40:00.000Z&timezone=Europe%2FKiev
+    - table:
+      - rowgroup:
+        - row "table header":
+          - columnheader "Pipeline / Stage":
+            - button "Pipeline / Stage":
+              - generic: Pipeline / Stage
+            - separator
+          - columnheader "Backlog":
+            - button "Backlog":
+              - generic: Backlog
+            - separator
+          - columnheader "Lag":
+            - button "Lag":
+              - generic: Lag
+            - separator
+          - columnheader "Throughput":
+            - button "Throughput":
+              - generic: Throughput
+            - separator
+      - row "chembl_compound_record / incremental / ingestion 2 10.0 mins 0 records/s":
+        - cell "chembl_compound_record / incremental / ingestion"
+        - cell "2"
+        - cell "10.0 mins"
+        - cell "0 records/s"
+      - row "chembl_compound_record / incremental / output 0 0 s 0 records/s":
+        - cell "chembl_compound_record / incremental / output"
+        - cell "0"
+        - cell "0 s"
+        - cell "0 records/s"
+      - row "chembl_compound_record / incremental / validation 0 0 s 0 records/s":
+        - cell "chembl_compound_record / incremental / validation"
+        - cell "0"
+        - cell "0 s"
+        - cell "0 records/s"
+  - button "Expand row":
+    - heading "Inspect Detection Signals"
+  - generic: (6 panels)
+  - button "Expand row":
+    - heading "Localize Runtime Cause"
+  - generic: (5 panels)
