@@ -124,7 +124,6 @@ class OpenAlexCursorFlow:
             total_titles=len(titles),
             limit=limit,
         )
-        fetched = 0
         found = 0
         effective_titles = titles[:limit] if limit is not None else titles
         for title in effective_titles:
@@ -140,7 +139,6 @@ class OpenAlexCursorFlow:
                 search_title=title,
             )
             found += 1
-            fetched += 1
         self.logger.info(
             "openalex_title_lookup_summary",
             total_titles=len(effective_titles),

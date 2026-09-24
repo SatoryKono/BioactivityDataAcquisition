@@ -233,19 +233,27 @@ def _rename_event_age_fields(panel: dict[str, Any]) -> None:
     _rename_timing_display_fields(panel)
 
 
+def _rename_filter_timing_fields(options: dict[str, Any]) -> None:
+    options["include"]["names"] = [
+        _TIMING_DISPLAY_FIELDS.get(name, name)
+        for name in options["include"]["names"]
+    ]
+
+
+def _rename_organize_timing_fields(options: dict[str, Any]) -> None:
+    for key in ("indexByName", "renameByName"):
+        for source, display in _TIMING_DISPLAY_FIELDS.items():
+            if source in options[key]:
+                options[key][display] = options[key].pop(source)
+
+
 def _rename_timing_display_fields(panel: dict[str, Any]) -> None:
     for transform in panel["transformations"]:
-        options = transform["options"]
-        if transform["id"] == "filterFieldsByName":
-            options["include"]["names"] = [
-                _TIMING_DISPLAY_FIELDS.get(name, name)
-                for name in options["include"]["names"]
-            ]
-        if transform["id"] == "organize":
-            for key in ("indexByName", "renameByName"):
-                for source, display in _TIMING_DISPLAY_FIELDS.items():
-                    if source in options[key]:
-                        options[key][display] = options[key].pop(source)
+        transform_id = transform["id"]
+        if transform_id == "filterFieldsByName":
+            _rename_filter_timing_fields(transform["options"])
+        elif transform_id == "organize":
+            _rename_organize_timing_fields(transform["options"])
 
 
 def _relabel_run_variables(dashboard: dict[str, Any]) -> None:

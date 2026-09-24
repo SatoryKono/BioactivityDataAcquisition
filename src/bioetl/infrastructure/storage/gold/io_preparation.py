@@ -16,6 +16,8 @@ from bioetl.infrastructure.storage.gold.io_protocols import _GoldMergedWriteHost
 if TYPE_CHECKING:
     from pandera.polars import DataFrameSchema
 
+_GOLD_RECORD_LIST = "list[dict[str, object]]"
+
 __all__ = [
     "_GoldMergedWriteRequest",
     "_PreparedGoldMergedWrite",
@@ -91,9 +93,9 @@ async def _prepare_gold_merged_write(
 
     host._validate_schema_strict(request.schema)
     projected_records = cast(
-        "list[dict[str, object]]",
+        _GOLD_RECORD_LIST,
         _project_records_for_gold_schema(
-            cast("list[dict[str, object]]", request.records),
+            cast(_GOLD_RECORD_LIST, request.records),
             schema=request.schema,
         ),
     )
@@ -104,7 +106,7 @@ async def _prepare_gold_merged_write(
         preserve_column_order=projected_request.preserve_column_order,
     )
     await host._validate_records_against_schema(
-        cast("list[dict[str, object]]", arrow_table.to_pylist()),
+        cast(_GOLD_RECORD_LIST, arrow_table.to_pylist()),
         projected_request.schema,
     )
     return _PreparedGoldMergedWrite(

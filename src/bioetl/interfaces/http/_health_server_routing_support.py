@@ -45,6 +45,7 @@ from bioetl.interfaces.http._report_selector_options import (
 )
 from bioetl.interfaces.http.control_plane_selector_context import (
     RUN_ID_NO_SELECTION,
+    RunIdOptionPolicy,
     build_selector_context_payload,
     build_selector_filter_options_payload,
 )
@@ -252,8 +253,10 @@ async def _filter_options_payload(
             selected_run_types=selected_run_types,
             selected_run_statuses=selected_run_statuses,
             selected_run_id=selected_run_id,
-            exact_run_only=exact_run_only,
-            fallback_value=fallback_value,
+            run_id_policy=RunIdOptionPolicy(
+                exact_run_only=exact_run_only,
+                fallback_value=fallback_value,
+            ),
             timezone=query.get("timezone") or "UTC",
         )
 

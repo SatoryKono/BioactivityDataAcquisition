@@ -65,6 +65,17 @@ class ControlPlaneEvidenceService:
     retention_days: int = DEFAULT_CONTROL_PLANE_RETENTION_DAYS
     archive_verifier: ArchiveVerifierProtocol | None = None
 
+    def _resolved_ledger_entries(
+        self,
+        scope: EvidenceScopeContext,
+        ledger_snapshot: tuple[RunLedgerEntry, ...] | None,
+    ) -> tuple[RunLedgerEntry, ...]:
+        if scope.manifest is None:
+            return ()
+        if ledger_snapshot is not None:
+            return ledger_snapshot
+        return ledger_entries(self.ledger_port, scope.manifest)
+
     def trust_summary(
         self, *, scope: EvidenceScopeContext, now: datetime
     ) -> dict[str, object]:
@@ -183,15 +194,7 @@ class ControlPlaneEvidenceService:
             endpoint="manifest-validation",
             scope=sanitized_manifest_payload_scope(scope, checks),
             checks=checks,
-            ledger_entries=(
-                (
-                    ledger_snapshot
-                    if ledger_snapshot is not None
-                    else ledger_entries(self.ledger_port, scope.manifest)
-                )
-                if scope.manifest is not None
-                else ()
-            ),
+            ledger_entries=self._resolved_ledger_entries(scope, ledger_snapshot),
         )
 
     def lineage_validation(

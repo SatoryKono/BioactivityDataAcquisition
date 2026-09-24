@@ -28,6 +28,14 @@ class _NormalizedExecution:
     pipeline_name: str | None
 
 
+@dataclass(frozen=True, slots=True)
+class _RowFaults:
+    error_type: object = None
+    error_message: object = None
+    skip_reason: object = None
+    gold_excluded_by_contract: object = None
+
+
 def _optional_int(source: Mapping[str, object], name: str) -> int | None:
     value = source.get(name)
     return None if value is None else _as_int(value)
@@ -97,12 +105,14 @@ def _mapping_execution(raw: Mapping[str, object]) -> _NormalizedExecution:
             "child_manifest_id",
         ),
         pipeline_report_ref=raw.get("pipeline_report_ref"),
-        error_type=raw.get("error_type"),
-        error_message=raw.get("error_message"),
         top_reasons=raw.get("top_reasons") or (),
-        skip_reason=raw.get("skip_reason"),
         reconciliation=_reconciliation_details(raw.get("payload")),
-        gold_excluded_by_contract=raw.get("gold_excluded_by_contract"),
+        faults=_RowFaults(
+            error_type=raw.get("error_type"),
+            error_message=raw.get("error_message"),
+            skip_reason=raw.get("skip_reason"),
+            gold_excluded_by_contract=raw.get("gold_excluded_by_contract"),
+        ),
     )
 
 
@@ -125,12 +135,14 @@ def _object_execution(raw: object) -> _NormalizedExecution:
             "pipeline_manifest_id",
         ),
         pipeline_report_ref=getattr(raw, "pipeline_report_ref", None),
-        error_type=getattr(raw, "error_type", None),
-        error_message=getattr(raw, "error_message", None),
         top_reasons=getattr(raw, "top_reasons", ()) or (),
-        skip_reason=getattr(raw, "skip_reason", None),
         reconciliation=_reconciliation_details(getattr(raw, "payload", None)),
-        gold_excluded_by_contract=getattr(raw, "gold_excluded_by_contract", None),
+        faults=_RowFaults(
+            error_type=getattr(raw, "error_type", None),
+            error_message=getattr(raw, "error_message", None),
+            skip_reason=getattr(raw, "skip_reason", None),
+            gold_excluded_by_contract=getattr(raw, "gold_excluded_by_contract", None),
+        ),
     )
 
 
@@ -187,12 +199,9 @@ def _normalized_row(
     pipeline_run_id: object,
     pipeline_manifest_id: object,
     pipeline_report_ref: object,
-    error_type: object,
-    error_message: object,
     top_reasons: object = (),
-    skip_reason: object = None,
     reconciliation: dict[str, object] | None = None,
-    gold_excluded_by_contract: object = None,
+    faults: _RowFaults = _RowFaults(),
 ) -> _NormalizedExecution:
     name = _optional_text(pipeline_name)
     run_id = _optional_text(pipeline_run_id)
@@ -214,15 +223,15 @@ def _normalized_row(
         pipeline_run_id=run_id,
         pipeline_manifest_id=_optional_text(pipeline_manifest_id),
         pipeline_report_ref=report_ref,
-        error_type=_optional_text(error_type),
-        error_message=_optional_text(error_message),
+        error_type=_optional_text(faults.error_type),
+        error_message=_optional_text(faults.error_message),
         top_reasons=reasons,
-        skip_reason=_optional_text(skip_reason),
+        skip_reason=_optional_text(faults.skip_reason),
         reconciliation=reconciliation,
         gold_excluded_by_contract=(
             None
-            if gold_excluded_by_contract is None
-            else _as_int(gold_excluded_by_contract)
+            if faults.gold_excluded_by_contract is None
+            else _as_int(faults.gold_excluded_by_contract)
         ),
     )
     return _NormalizedExecution(row=row, pipeline_name=name)

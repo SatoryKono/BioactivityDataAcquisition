@@ -121,7 +121,7 @@ class ChemblAdapter(
         """Build API request parameters with health-aware batch size."""
         return build_request_params(
             offset=offset,
-            entity_type=entity_type,
+            _entity_type=entity_type,
             page_size=self._get_effective_batch_size(),
             extraction_params=self._extraction_params,
         )

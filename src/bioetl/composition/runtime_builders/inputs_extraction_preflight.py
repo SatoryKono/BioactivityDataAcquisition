@@ -40,41 +40,26 @@ class ExtractionInputProvenance:
     id_count: int | None
 
 
-def validate_resolved_extraction_input(
+def _query_provenance(
+    *, pipeline_name: str, provider: str
+) -> ExtractionInputProvenance:
+    return ExtractionInputProvenance(
+        pipeline_name=pipeline_name,
+        provider=provider,
+        input_kind="query",
+        source_path=None,
+        column_name=None,
+        filter_field=None,
+        id_count=None,
+    )
+
+
+def _filter_provenance(
     *,
     pipeline_name: str,
     provider: str,
-    query: str | None,
-    filter_config: InputFilterConfig | None,
-) -> ExtractionInputProvenance | None:
-    """Validate resolved query/filter for pipelines that require an input mode.
-
-    Returns provenance when the pipeline is in the required-input set and the
-    input is usable. Returns ``None`` for pipelines that allow open full-scan.
-    Raises :class:`ExtractionInputError` with an actionable reason otherwise.
-    """
-    if pipeline_name not in _QUERY_OR_FILTER_PIPELINES:
-        return None
-
-    normalized_query = query.strip() if isinstance(query, str) else ""
-    if normalized_query:
-        return ExtractionInputProvenance(
-            pipeline_name=pipeline_name,
-            provider=provider,
-            input_kind="query",
-            source_path=None,
-            column_name=None,
-            filter_field=None,
-            id_count=None,
-        )
-
-    if filter_config is None or not filter_config.enabled:
-        raise ExtractionInputError(
-            f"{pipeline_name} requires either filter IDs (CSV/`--csv`/"
-            f"direct IDs) or a non-empty `--query` before extract; "
-            f"resolved input has neither."
-        )
-
+    filter_config: InputFilterConfig,
+) -> ExtractionInputProvenance:
     if filter_config.is_direct_multi_filter:
         multi = filter_config.direct_multi_filter_ids or {}
         total = sum(len(ids) for ids in multi.values())
@@ -135,6 +120,40 @@ def validate_resolved_extraction_input(
         column_name=column_name,
         filter_field=filter_config.filter_field,
         id_count=id_count,
+    )
+
+
+def validate_resolved_extraction_input(
+    *,
+    pipeline_name: str,
+    provider: str,
+    query: str | None,
+    filter_config: InputFilterConfig | None,
+) -> ExtractionInputProvenance | None:
+    """Validate resolved query/filter for pipelines that require an input mode.
+
+    Returns provenance when the pipeline is in the required-input set and the
+    input is usable. Returns ``None`` for pipelines that allow open full-scan.
+    Raises :class:`ExtractionInputError` with an actionable reason otherwise.
+    """
+    if pipeline_name not in _QUERY_OR_FILTER_PIPELINES:
+        return None
+
+    normalized_query = query.strip() if isinstance(query, str) else ""
+    if normalized_query:
+        return _query_provenance(pipeline_name=pipeline_name, provider=provider)
+
+    if filter_config is None or not filter_config.enabled:
+        raise ExtractionInputError(
+            f"{pipeline_name} requires either filter IDs (CSV/`--csv`/"
+            f"direct IDs) or a non-empty `--query` before extract; "
+            f"resolved input has neither."
+        )
+
+    return _filter_provenance(
+        pipeline_name=pipeline_name,
+        provider=provider,
+        filter_config=filter_config,
     )
 
 
