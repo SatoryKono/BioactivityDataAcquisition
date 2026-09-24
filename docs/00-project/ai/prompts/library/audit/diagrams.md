@@ -7,11 +7,11 @@ owner: BioETL Team
 runtimes:
 - any
 params:
-- SCOPE
-- MODE
-- LANGUAGE
-- AUDIT_MODE
-- REQUIRE_GH_TRACKING
+- SCOPE = docs diagrams + related scripts
+- MODE = propose-patches
+- LANGUAGE = ru
+- AUDIT_MODE = full
+- REQUIRE_GH_TRACKING =true
 includes:
 - fragments/git-safety.md
 - fragments/debt-budget-ban.md

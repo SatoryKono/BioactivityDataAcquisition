@@ -30,6 +30,7 @@ def _loc(path: Path) -> int:
 def test_build_snapshot_owns_symbols_and_shrinks_core() -> None:
     assert not _OWNED.search(CORE.read_text(encoding="utf-8"))
     assert _OWNED.search(MOD.read_text(encoding="utf-8"))
-    assert getattr(_core, _NAME) is getattr(extracted, _NAME)
+    assert getattr(_core, _NAME) is extracted
+    assert callable(extracted)
     assert _loc(CORE) < _CORE_LOC_BEFORE
     assert _loc(MOD) < 500

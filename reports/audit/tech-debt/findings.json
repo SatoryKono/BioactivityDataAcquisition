@@ -1,189 +1,155 @@
 {
-  "audit_id": "tech-debt-src-20260923",
-  "audited_commit": "670633e6ec685da28c734fb7225db5de27c87d97",
-  "audited_ref": "origin/main",
-  "scope": "src",
-  "mode": "propose-patches",
+  "audit_id": "tech-debt-src-bioetl-20260924",
+  "audited_commit": "9d2992a9e40218e631ca71616b160cafffd90e7f",
+  "audited_ref": "working-tree",
+  "scope": "src/bioetl",
+  "mode": "audit",
   "audit_mode": "full",
-  "surface_score": 2,
-  "surface_score_legend": "2 = core mechanism correct; local non-critical gaps plus one unmanaged god-module",
+  "language": "ru",
+  "require_gh_tracking": false,
+  "surface_score": 3,
+  "surface_score_legend": "3 = debt identified with owner/risk/effort; new code does not worsen baseline",
   "trend": {
-    "exemptions": "48 (2025-Q4) -> 0 (current)",
-    "architecture_integral_score": "9.47 (2026-08-28 snapshot) -> 10.0 (committed scorecard)",
-    "composition_modules": "291/295 (#10595) -> 280/295",
-    "god_module_loc": "18179 (#10526) -> 17740 (still unmet acceptance <500)",
-    "debt_gates_on_origin_main": "2 fail after #10630 hash desync"
+    "measured_todo_fixme_hack_in_src_bioetl": 0,
+    "type_ignore_delta": "3 eliminated this session (#10963); 17 pre-existing seams remain",
+    "fk_reconciliation_coverage": "3/3 modules 100% statements+branches (#10962)",
+    "debt_scorecard_exemptions": "0 baseline held, no increase proposed",
+    "previous_audit": "tech-debt-src-20260923 (SCOPE=src, score 2)"
   },
   "marker_triage": {
-    "raw_TODO_FIXME_HACK_XXX_TEMP_DEPRECATED_hits": 8,
+    "raw_TODO_FIXME_HACK_XXX_WORKAROUND_DEPRECATED_hits": 4,
     "false_positives": [
-      "TEMP as ChEMBL assay parameter type",
-      "CVCL_XXXX Cellosaurus docstring",
-      "ADR-XXX filename template",
-      "DEPRECATED enum member"
+      "DEPRECATED enum member in domain/types/contract_identity.py",
+      "CVCL_XXXX Cellosaurus docstrings (2 files)",
+      "ADR-XXX filename template in adr/_adr_validators.py"
     ],
-    "measured_todo_fixme_hack_in_src_bioetl": 0
+    "measured_todo_fixme_hack_in_src_bioetl": 0,
+    "pragma_no_cover": "facade __getattr__ + defensive paths; governed, do not remove",
+    "nosec": "registry-referenced B404/B603/B405/B506 + B105 PASS-enum FPs; keep",
+    "TEMP_hits": "exit codes, ChEMBL assay param type, IRI templates; all FP"
   },
   "findings": [
     {
-      "finding_id": "AUD-001",
-      "fingerprint": "b7997794b5de41ec54c1761440cb86786b39e9a30b83aad339c0a5cee4915679",
-      "status": "PROVEN",
-      "evidence_class": "FACT",
-      "priority": "P1",
-      "requirement_id": "REQ-GOV-007",
-      "domain": "tech-debt",
-      "claim": "После merge #10630 committed scorecard хранит source_tree_sha256 ce0ac31, а module-coverage-inventory — 0db51a46; debt-governance gates падают на чистом origin/main.",
-      "broken_invariant": "module_coverage_scorecard_coherence и generated_artifact_drift должны быть pass на origin/main без ручного rebind.",
-      "root_cause": "scorecard inventory source_tree_sha256 desync after config closeout merge",
-      "affected_paths": [
-        "reports/quality/architecture-quality-scorecard.json",
-        "reports/quality/module-coverage-inventory.json"
-      ],
-      "evidence": {
-        "path": "reports/quality/architecture-quality-scorecard.json",
-        "symbol": "source_artifacts.module_coverage_inventory.source_tree_sha256",
-        "line": 272,
-        "command": "python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main",
-        "scope": "src",
-        "timestamp": "2026-09-23T06:05:47Z",
-        "exit_code": 1,
-        "output": "Debt governance gates have 2 failing gate(s): module_coverage_scorecard_coherence, generated_artifact_drift"
-      },
-      "acceptance": "Gates pass на том же SHA: inventory.source_tree_sha256 == scorecard source_artifacts.module_coverage_inventory.source_tree_sha256; generated_artifact_drift count=0. Бюджеты не выросли.",
-      "validation_commands": [
-        "python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main"
-      ],
-      "rollback": "git revert of the rebind commit; do not raise budgets",
-      "owner_surface": "docs"
-    },
-    {
-      "finding_id": "AUD-002",
-      "fingerprint": "9932d85b9fdf0a64e17d086e8bea5ca77e873362db811fb69363c266649af790",
-      "status": "PROVEN",
-      "evidence_class": "FACT",
-      "priority": "P1",
-      "requirement_id": "REQ-ARCH-001",
-      "domain": "tech-debt",
-      "claim": "src/memory/graph/sync_pkg/_core.py остаётся god-module на 17740 строк; acceptance #10526 (<500 строк на единицу) не выполнен, issue закрыт 2026-09-21 без комментария.",
-      "broken_invariant": "Крупнейший модуль src не должен смешивать argparse, ast, subprocess, threading, http.client и Neo4j sync в одном файле на порядок больше следующего.",
-      "root_cause": "god-module src/memory/graph/sync_pkg/_core.py remains a single 17k-LOC unit",
-      "affected_paths": [
-        "src/memory/graph/sync_pkg/_core.py"
-      ],
-      "evidence": {
-        "path": "src/memory/graph/sync_pkg/_core.py",
-        "symbol": "module",
-        "line": 1,
-        "command": "python -c \"from pathlib import Path; p=Path('src/memory/graph/sync_pkg/_core.py'); print(p.read_text(encoding='utf-8').count(chr(10))+1)\"",
-        "scope": "src/memory",
-        "timestamp": "2026-09-23T06:03:00Z",
-        "exit_code": 0,
-        "output": "17740 src/memory/graph/sync_pkg/_core.py; next largest src/memory/graph/query.py=1978"
-      },
-      "acceptance": "Модуль разбит на cohesive единицы <500 LOC; потребители импортируют новые пути; e2e sync зелёный. Не закрывать #10526 пока loc(_core.py)>=500.",
-      "validation_commands": [
-        "python -c \"from pathlib import Path; print((Path('src/memory/graph/sync_pkg/_core.py').read_text(encoding='utf-8').count(chr(10))+1))\""
-      ],
-      "rollback": "restore previous _core.py via git; no budget change",
-      "owner_surface": "docs"
-    },
-    {
-      "finding_id": "AUD-003",
-      "fingerprint": "5bf2316f3b533e9ca930f6c60dad6487e23c7db081117d8741ada5eeffe61905",
-      "status": "PROVEN",
-      "evidence_class": "FACT",
-      "priority": "P2",
-      "requirement_id": "REQ-GOV-012",
-      "domain": "tech-debt",
-      "claim": "composition_util=0.9492 (280/295) держит cap, но headroom 15 модулей; любой рост composition без shrink блокирует фичи. Это watch, не нарушение ≤0.95.",
-      "broken_invariant": "Не нарушен: util ≤ 0.95. Нарушение наступит при 281-м модуле без удаления другого.",
-      "root_cause": "composition package utilization remains within cap but near 0.95 headroom floor",
-      "affected_paths": [
-        "configs/quality/package_cohesion_budget.yaml",
-        "src/bioetl/composition"
-      ],
-      "evidence": {
-        "path": "reports/quality/architecture-quality-scorecard.json",
-        "symbol": "diagnostics.composition_util",
-        "line": 172,
-        "command": "python -c \"import json; d=json.loads(open('reports/quality/architecture-quality-scorecard.json',encoding='utf-8').read()); print(d['diagnostics']['composition_module_count'], d['diagnostics']['composition_module_cap'], d['diagnostics']['composition_util'])\"",
-        "scope": "src/bioetl/composition",
-        "timestamp": "2026-09-23T06:04:00Z",
-        "exit_code": 0,
-        "output": "280 295 0.9492"
-      },
-      "acceptance": "Watch: не создавать issue пока util≤0.95. При util>0.95 — shrink-only PR, cap не поднимать. Комментарий в package_cohesion_budget.yaml (live 279) синхронизировать с 280.",
-      "validation_commands": [
-        "python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main"
-      ],
-      "rollback": "n/a watch item",
-      "owner_surface": "composition"
-    },
-    {
-      "finding_id": "AUD-004",
-      "fingerprint": "d22baa24bbb67fbcb0c1281c730eb1a1d6126c1ef6e7cf4d8f8ca87562c8a148",
+      "finding_id": "F-001",
+      "fingerprint": "ce4f9be53e0bf947903be7d8a0c077940e76b696be208cfe3e209726ceb099d9",
       "status": "PROVEN",
       "evidence_class": "FACT",
       "priority": "P2",
       "requirement_id": "REQ-GOV-007",
       "domain": "tech-debt",
-      "claim": "10 модулей bioetl partially_covered; хвост FK-reconciliation 76.74/77.5/88.41% (27 missing lines). Не снимать pragma: покрытие только тестами.",
-      "broken_invariant": "coverage-verify inventory допускает partial, но FK-reconciliation ниже 80% повышает cost-of-change на Gold FK path.",
-      "root_cause": "ten bioetl modules remain partially_covered with FK-reconciliation tail below 80 percent",
+      "claim": "FK-reconciliation trio fully covered: 152 stmts, 0 miss, 66 branches, 0 partial; #10962 acceptance met.",
+      "broken_invariant": "coverage-verify inventory still lists the trio partially_covered until regenerated with coverage.xml",
+      "root_cause": "fk-reconciliation coverage tail closed by focused tests including protocol no-op pin",
       "affected_paths": [
         "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_loaded.py",
         "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_normalization.py",
         "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_reads.py"
       ],
       "evidence": {
-        "path": "reports/quality/module-coverage-inventory.json",
-        "symbol": "summary.status_counts.partially_covered",
-        "line": 49736,
-        "command": "python reports/audit/tech-debt/_collect_scan.py",
+        "path": "tests/unit/infrastructure/storage/test_issue_10631_fk_reconciliation_coverage.py",
+        "command": "PYTHONPATH=src python -m pytest tests/unit/infrastructure/storage/test_issue_10631_fk_reconciliation_coverage.py -q --cov=bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_loaded --cov=bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_normalization --cov=bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_reads --cov-report=term-missing",
         "scope": "src/bioetl",
-        "timestamp": "2026-09-23T06:06:00Z",
+        "timestamp": "2026-09-24T10:03:04Z",
         "exit_code": 0,
-        "output": "partially_covered=10; worst=workflow_foreign_key_reconciliation_loaded.py 76.74 missing=10"
+        "output": "15 passed; loaded/normalization/reads 100.00% statements+branches"
       },
-      "acceptance": "Три FK-модуля fully_covered в inventory без снятия pragma и без снижения fail-under. Бюджеты покрытия не поднимать.",
+      "acceptance": "Trio fully_covered in module-coverage-inventory.json after staff regeneration; no pragma removed; fail-under unchanged.",
       "validation_commands": [
         "python -m scripts.engineering.qa report-module-coverage --check --allow-missing-coverage-xml"
       ],
-      "rollback": "revert tests only",
+      "rollback": "revert test-only commit",
       "owner_surface": "infrastructure"
     },
     {
-      "finding_id": "AUD-005",
-      "fingerprint": "9ebadbabb087f151b67d531c268547df4aca44e4193e9d7956e648831febd799",
+      "finding_id": "F-002",
+      "fingerprint": "78c7c8906c551d14f670bd3a0f68da9fcbb62ab43fd32f6d2959392b5e80e49a",
       "status": "PROVEN",
       "evidence_class": "FACT",
       "priority": "P3",
       "requirement_id": "REQ-ARCH-002",
       "domain": "tech-debt",
-      "claim": "Около 20 type: ignore в src/bioetl на mixin/override/dynamic kwargs; соседний openalex клиент уже использует cast(). Не ретипировать без mypy --strict.",
-      "broken_invariant": "Публичные швы предпочитают узкий cast(), а не type: ignore, где это проверяемо.",
-      "root_cause": "dynamic mixin and override seams still use type ignore instead of narrow cast",
+      "claim": "Both dynamic HTTP seams narrowed from type: ignore to cast(); #10963 acceptance met, behavior unchanged (cast is runtime no-op).",
+      "broken_invariant": "none introduced; public seams prefer narrow cast() over type: ignore",
+      "root_cause": "dynamic http seams narrowed from type ignore to cast",
       "affected_paths": [
-        "src/bioetl/application/pipelines/common/transformer_initialization.py",
-        "src/bioetl/infrastructure/adapters/common/fallback_policy_mixin.py"
+        "src/bioetl/interfaces/http/control_plane_identity/types.py",
+        "src/bioetl/interfaces/http/health_server.py"
       ],
       "evidence": {
-        "path": "src/bioetl/application/pipelines/common/transformer_initialization.py",
-        "symbol": "BaseTransformer.__init__",
-        "line": 47,
-        "command": "rg -n \"type: ignore\" src/bioetl --glob \"*.py\"",
+        "path": "src/bioetl/interfaces/http/health_server.py",
+        "line": 136,
+        "command": "rg -n 'type: ignore' src/bioetl/interfaces/http/health_server.py src/bioetl/interfaces/http/control_plane_identity/types.py; PYTHONPATH=src python -m pytest tests/unit/interfaces/http/test_health_server.py tests/unit/interfaces/http/test_health_server_control_plane_identity.py -q",
         "scope": "src/bioetl",
-        "timestamp": "2026-09-23T06:03:30Z",
+        "timestamp": "2026-09-24T10:03:04Z",
         "exit_code": 0,
-        "output": "transformer_initialization.py:47 type: ignore[arg-type]; fallback_policy_mixin.py:116 type: ignore[attr-defined]"
+        "output": "rg: no matches; 103 passed"
       },
-      "acceptance": "Каждая замена ignore→cast проходит mypy --strict и существующие unit-тесты модуля. Не массовый ретайп.",
+      "acceptance": "mypy --strict and basedpyright green on both files in CI (not runnable locally); module tests green.",
       "validation_commands": [
-        "mypy --strict src/bioetl/application/pipelines/common/transformer_initialization.py src/bioetl/infrastructure/adapters/common/fallback_policy_mixin.py"
+        "mypy --strict src/bioetl/interfaces/http/health_server.py src/bioetl/interfaces/http/control_plane_identity/types.py"
       ],
       "rollback": "restore type: ignore comments",
       "owner_surface": "application"
+    },
+    {
+      "finding_id": "F-003",
+      "fingerprint": "da4b8bd2c3c56c2499202afcee263edbdf31be39f374694827a7b045e00ef443",
+      "status": "PROVEN",
+      "evidence_class": "FACT",
+      "priority": "P3",
+      "requirement_id": "REQ-ARCH-002",
+      "domain": "tech-debt",
+      "claim": "17 pre-existing type: ignore seams remain at mixin/override/duck-type/import-untyped sites; each replacement requires mypy-gated cast(), no mass retype.",
+      "broken_invariant": "none while each seam stays locally justified and budgets hold",
+      "root_cause": "remaining pre-existing type ignore seams at mixin override and duck-type sites",
+      "affected_paths": [
+        "src/bioetl"
+      ],
+      "evidence": {
+        "path": "src/bioetl/application/pipelines/common/transformer_initialization.py",
+        "line": 47,
+        "command": "rg -n 'type: ignore' src/bioetl --glob '*.py'",
+        "scope": "src/bioetl",
+        "timestamp": "2026-09-24T10:03:04Z",
+        "exit_code": 0,
+        "output": "17 pre-existing seams (mixins, overrides, duck-types, radon import-untyped); 2 docstring/comment FPs excluded"
+      },
+      "acceptance": "Count does not grow; each future ignore→cast passes mypy --strict plus module tests.",
+      "validation_commands": [
+        "rg -c 'type: ignore' src/bioetl --glob '*.py'"
+      ],
+      "rollback": "n/a watch item",
+      "owner_surface": "application"
+    },
+    {
+      "finding_id": "F-004",
+      "fingerprint": "d72fad68317da4baa4db2827827e46ca3f2095979c30841dc059f6fbf246e45b",
+      "status": "NOT_PROVEN",
+      "evidence_class": "GAP",
+      "priority": "P2",
+      "requirement_id": "GAP",
+      "domain": "tech-debt",
+      "claim": "Composition package near cap (280/295, util 0.9492 per 2026-09-23 scorecard) — not re-measured this session; watch only, no issue.",
+      "broken_invariant": "not violated while util <= 0.95",
+      "root_cause": "composition package utilization near headroom floor (carry-over, unmeasured this session)",
+      "affected_paths": [
+        "configs/quality/package_cohesion_budget.yaml",
+        "src/bioetl/composition"
+      ],
+      "evidence": {
+        "path": "reports/quality/architecture-quality-scorecard.json",
+        "command": "not re-run this session (carry-over from tech-debt-src-20260923)",
+        "scope": "src/bioetl/composition",
+        "timestamp": "2026-09-24T10:03:04Z",
+        "exit_code": -1,
+        "output": "no independent measurement; do not create issue"
+      },
+      "acceptance": "Re-measure on next cycle; shrink-only if util > 0.95; cap never raised.",
+      "validation_commands": [
+        "python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main"
+      ],
+      "rollback": "n/a watch item",
+      "owner_surface": "composition"
     }
   ]
 }

@@ -4566,7 +4566,7 @@
       "formula": "topk(3, max by (provider) (bioetl_provider_current_status{provider!~\"^(test|synthetic)$\"}))",
       "kind": "promql",
       "panel_id": 9101,
-      "panel_title": "Monitor Fleet Severity",
+      "panel_title": "Monitor Fleet Status",
       "query": "topk(3, max by (provider) (bioetl_provider_current_status{provider!~\"^(test|synthetic)$\"}))",
       "query_tokens": [
         "bioetl_provider_current_status"
@@ -4722,7 +4722,7 @@
       "formula": "topk(3, max by (provider, reason, source_state) (bioetl_provider_current_status_info))",
       "kind": "promql",
       "panel_id": 9107,
-      "panel_title": "Inspect Status Reason",
+      "panel_title": "Inspect Health Evidence",
       "query": "topk(3, max by (provider, reason, source_state) (bioetl_provider_current_status_info))",
       "query_tokens": [
         "bioetl_provider_current_status_info"

@@ -47,7 +47,6 @@ pytestmark = pytest.mark.integration
 
 @pytest.mark.parametrize("dashboard_file", get_dashboard_files(), ids=lambda p: p.name)
 def test_rolling_counter_legends_do_not_sum_overlapping_windows(dashboard_file):
-    """A legend total must not vary with the query_range evaluation step."""
     dashboard = load_dashboard(dashboard_file)
     for panel in get_dashboard_panels(dashboard):
         if panel.get("type") != "timeseries":
@@ -126,7 +125,6 @@ _PROCESSED_RECORDS_SECONDARY_LABELS = {
 
 
 def _expected_processed_records_display_token_mappings() -> list[dict[str, object]]:
-    """Historical pipe-token mappings removed (PFILL-01)."""
     return []
 
 
@@ -1225,7 +1223,6 @@ def test_provider_failure_rate_panel_uses_neutral_zero_and_policy_thresholds() -
 
 
 def test_provider_severity_matrix_preserves_unknown_and_critical_mapping() -> None:
-    """Provider first-screen severity matrix must fail closed and color CRIT correctly."""
     dashboard = load_dashboard(
         Path("grafana/dashboards/bioetl-provider-health-v2.json")
     )
@@ -1233,11 +1230,11 @@ def test_provider_severity_matrix_preserves_unknown_and_critical_mapping() -> No
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor Fleet Severity"
+            if item.get("title") == "Monitor Fleet Status"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Monitor Fleet Severity' not found"
+    assert panel is not None, "Panel 'Monitor Fleet Status' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert any("bioetl_provider_current_status" in expr for expr in expressions)
@@ -1264,7 +1261,6 @@ def test_provider_severity_matrix_preserves_unknown_and_critical_mapping() -> No
 
 
 def test_provider_telemetry_freshness_fails_closed_when_status_is_missing() -> None:
-    """Provider first screen must expose telemetry presence separately from health."""
     dashboard = load_dashboard(
         Path("grafana/dashboards/bioetl-provider-health-v2.json")
     )
@@ -1781,7 +1777,6 @@ def test_selected_range_kpis_follow_declared_counter_window_intent() -> None:
 
 
 def test_all_max_over_time_counter_expressions_are_reviewed() -> None:
-    """Every Counter used with max_over_time must match the reviewed ID registry."""
     policy = yaml.safe_load(MAX_OVER_TIME_COUNTER_POLICY_PATH.read_text("utf-8"))
     allowed_metrics = set(policy["allowed_counter_metrics"])
     counter_metrics = set(COUNTERS)
@@ -1839,7 +1834,6 @@ def test_all_max_over_time_counter_expressions_are_reviewed() -> None:
 def test_processed_records_parameter_rows_sort_and_display_cleanly(
     dashboard_name: str,
 ) -> None:
-    """Processed Records rows must sort numerically without leaking sort prefixes."""
     dashboard = load_dashboard(_require_dashboard(dashboard_name))
     panels = {
         panel.get("id"): panel
@@ -1879,11 +1873,9 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         assert identity.get("options", {}).get("cellHeight") == "lg"
         assert processed.get("options", {}).get("cellHeight") == "md"
     else:
-        assert (
-            identity.get("options", {}).get("cellHeight")
-            == processed.get("options", {}).get("cellHeight")
-            == ("md" if full_width_evidence else "sm")
-        )
+        cell = "md" if full_width_evidence else "sm"
+        assert identity.get("options", {}).get("cellHeight") == cell
+        assert processed.get("options", {}).get("cellHeight") == cell
     default_identity_cell_options = (
         identity.get("fieldConfig", {})
         .get("defaults", {})

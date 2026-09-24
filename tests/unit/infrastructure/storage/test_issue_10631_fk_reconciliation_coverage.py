@@ -406,9 +406,7 @@ async def test_reconciliation_protocol_seams_default_to_noop() -> None:
         is None
     )
     assert (
-        ForeignKeyReadsHost._record_metrics(
-            stub_host, scanned=0, retained=0, deleted=0
-        )
+        ForeignKeyReadsHost._record_metrics(stub_host, scanned=0, retained=0, deleted=0)
         is None
     )
     assert ForeignKeyReadsHost._log(stub_host, "warning", "noop probe") is None

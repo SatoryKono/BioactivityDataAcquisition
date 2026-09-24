@@ -579,15 +579,18 @@ def test_audit_followup_action_first_layout_contracts() -> None:
         9450,
     ]
     assert [panel.get("gridPos", {}).get("y") for panel in provider_rows] == [
-        17,
         18,
         19,
         20,
         21,
         22,
+        23,
     ]
     assert all(panel.get("collapsed") is True for panel in provider_rows)
-    for panel_id in (9101, 9102, 9103):
+    assert _panel(provider, 9101).get("options", {}).get("sortBy") == [
+        {"displayName": "Status", "desc": True}
+    ]
+    for panel_id in (9102, 9103):
         assert _panel(provider, panel_id).get("options", {}).get("sortBy") == [
             {"desc": True, "displayName": "Severity"}
         ]

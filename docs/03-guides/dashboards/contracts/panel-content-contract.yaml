@@ -4160,7 +4160,7 @@ dashboards:
         - not_applicable
         render_profiles: *id001
       '9101':
-        title: Monitor Fleet Severity
+        title: Monitor Fleet Status
         role: severity_table
         tier: 1
         scope: current
@@ -4295,7 +4295,7 @@ dashboards:
         - full_light
         - zoom_200
       '9107':
-        title: Inspect Status Reason
+        title: Inspect Health Evidence
         role: forensic_table
         tier: 3
         scope: current

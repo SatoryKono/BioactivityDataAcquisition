@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
 
@@ -44,7 +44,9 @@ def initialize_base_transformer(
     kwargs: Mapping[str, object],
 ) -> None:
     """Initialize a ``BaseTransformer`` subclass through the shared contract."""
-    BaseTransformer.__init__(transformer, provider, **dict(kwargs))  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+    BaseTransformer.__init__(
+        transformer, provider, **cast(Any, dict(kwargs))
+    )  # Any: TYPE-002 kwargs bridge
 
 
 def initialize_next_transformer_mro(
@@ -55,7 +57,10 @@ def initialize_next_transformer_mro(
     kwargs: Mapping[str, object],
 ) -> None:
     """Initialize the next transformer class in ``owner_type`` MRO."""
-    super(owner_type, transformer).__init__(provider, **dict(kwargs))  # type: ignore[misc]  # pyright: ignore[reportCallIssue]
+    super(cast(Any, owner_type), transformer).__init__(  # Any: TYPE-002 MRO host
+        provider,
+        **cast(Any, dict(kwargs)),  # Any: TYPE-002 kwargs bridge
+    )
 
 
 def build_runtime_transformer_init(

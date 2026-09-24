@@ -56,11 +56,10 @@ def test_overview_paginates_tracks_without_limiting_evidence():
         assert not any(t.get("id") == "limit" for t in panel.get("transformations", []))
 
 
-def test_overview_summary_uses_aggregate_verdict_and_explains_missing_archive():
+@pytest.mark.parametrize("uid", ["bioetl-overview-v2", "bioetl-dq-v2"])
+def test_summary_uses_aggregate_verdict_and_explains_missing_archive(uid):
     dashboard = json.loads(
-        (ROOT / "grafana/dashboards/bioetl-overview-v2.json").read_text(
-            encoding="utf-8"
-        )
+        (ROOT / f"grafana/dashboards/{uid}.json").read_text(encoding="utf-8")
     )
     panels = {p["id"]: p for p in _panels(dashboard["panels"])}
     summary = next(
@@ -73,7 +72,8 @@ def test_overview_summary_uses_aggregate_verdict_and_explains_missing_archive():
     assert "/selected-run-status?" in target["url"]
     assert "presentation_summary[0]" in target["root_selector"]
     assert "presentation_trust[0].reasons_display" in target["root_selector"]
-    for panel in (summary, panels[9002]):
+    views = (summary, panels[9002]) if uid == "bioetl-overview-v2" else (summary,)
+    for panel in views:
         fields = next(
             t["options"]["include"]["names"]
             for t in panel["transformations"]
@@ -93,6 +93,24 @@ def test_overview_summary_uses_aggregate_verdict_and_explains_missing_archive():
             props["mappings"][0]["options"]["Archive missing"]["text"]
             == "No verified archive"
         )
+
+
+def test_provider_fleet_does_not_drop_equal_status_providers():
+    dashboard = json.loads(
+        (ROOT / "grafana/dashboards/bioetl-provider-health-v2.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    panels = {p["id"]: p for p in _panels(dashboard["panels"])}
+    for pid in (9101, 9107):
+        query = panels[pid]["targets"][0]["expr"]
+        assert query.startswith("max by (")
+        assert "topk" not in query
+        assert not any(t["id"] == "limit" for t in panels[pid]["transformations"])
+    organize = next(
+        t["options"] for t in panels[9107]["transformations"] if t["id"] == "organize"
+    )
+    assert organize["excludeByName"]["source_state"] is True
 
 
 def test_run_cell_inspection_and_links_use_full_identity():

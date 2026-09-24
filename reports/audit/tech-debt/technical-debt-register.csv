@@ -2,7 +2,7 @@ id,path,line,type,evidence,age,risk,blast_radius,effort,owner,priority
 AUD-001,reports/quality/architecture-quality-scorecard.json,272,CI/generated-artifact,scorecard sha ce0ac31 vs inventory 0db51a46; gates fail,2026-09-23 after #10630,high,all PRs / debt-governance,S,@bioetl-architecture,P1
 AUD-002,src/memory/graph/sync_pkg/_core.py,1,architecture/god-module,17740 LOC vs next 1978; #10526 closed unmet,2026-09-20 last touch,high,memory graph sync/CLI/http,XL,@bioetl-platform,P1
 AUD-003,src/bioetl/composition,172,architecture/headroom,280/295 util 0.9492 within cap,post #10595,medium,new composition modules blocked at 281,S,@bioetl-architecture,P2
-AUD-004,src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_loaded.py,1,tests/coverage,76.74% 10 missing; two sibling modules 77.5/88.41,2026-09-19,medium,Gold FK reconciliation,M,@bioetl-data-model,P2
-AUD-005,src/bioetl/application/pipelines/common/transformer_initialization.py,47,types,type: ignore[arg-type] at BaseTransformer mixin init,ongoing,low,publication transformers,M,@bioetl-architecture,P3
+AUD-004,src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_loaded.py,1,tests/coverage,RESOLVED 2026-09-24 (#10962 closed): trio 100% stmts+branches; inventory rebind pending,2026-09-24,medium,Gold FK reconciliation,M,@bioetl-data-model,P2
+AUD-005,src/bioetl/application/pipelines/common/transformer_initialization.py,47,types,PARTIAL 2026-09-24 (#10963 closed): 2 http seams to cast(); 17 pre-existing seams remain watch-only,ongoing,low,publication transformers,M,@bioetl-architecture,P3
 WATCH-waiver,configs/quality/constructor_waivers.yaml,6,architecture/waiver,QuarantineEntry max_args=9 expiry 2026-12-31 #6685,tracked,low,quarantine aggregate ctor,S,@bioetl-domain,P3
 WATCH-aggregates,src/bioetl/domain/aggregates,1,architecture/hold-flat,8/8 modules #10552 accepted,tracked,low,domain package growth,L,@bioetl-architecture,P3

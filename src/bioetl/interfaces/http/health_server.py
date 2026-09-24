@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 import time
 from dataclasses import dataclass
-from typing import Any, cast
+from typing import cast
 
 from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
@@ -134,9 +134,38 @@ class HealthServer(
             )
         if control_plane is None and recognized:
             control_plane = HealthServerControlPlaneDeps(
-                # Keys pre-validated against _LEGACY_CONTROL_PLANE_KEYS; Any
-                # only bridges dict[str, object] into the typed bag.
-                **cast(Any, recognized)
+                health_monitor=cast(
+                    HealthMonitorPort | None, recognized.get("health_monitor")
+                ),
+                quarantine_service=cast(
+                    QuarantineService | None, recognized.get("quarantine_service")
+                ),
+                checkpoint_port=cast(
+                    CheckpointPort | None, recognized.get("checkpoint_port")
+                ),
+                run_manifest_port=cast(
+                    RunManifestPort | None, recognized.get("run_manifest_port")
+                ),
+                run_ledger_port=cast(
+                    RunLedgerPort | None, recognized.get("run_ledger_port")
+                ),
+                workflow_manifest_port=cast(
+                    WorkflowManifestPort | None,
+                    recognized.get("workflow_manifest_port"),
+                ),
+                control_plane_evidence_service=cast(
+                    ControlPlaneEvidenceService | None,
+                    recognized.get("control_plane_evidence_service"),
+                ),
+                control_plane_integrity_refresher=cast(
+                    ControlPlaneMetricsRefresher | None,
+                    recognized.get("control_plane_integrity_refresher"),
+                ),
+                metrics_exposition=cast(
+                    HealthMetricsExpositionPort | None,
+                    recognized.get("metrics_exposition"),
+                ),
+                runtime_source_id=cast(str | None, recognized.get("runtime_source_id")),
             )
         return control_plane or HealthServerControlPlaneDeps()
 
