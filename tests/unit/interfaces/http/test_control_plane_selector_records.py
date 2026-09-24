@@ -675,3 +675,87 @@ def test_pipeline_list_empty_scope_retains_legacy_sentinel() -> None:
         requested_pipeline=None,
     )
     assert payload == {"items": ["unknown"]}
+
+
+def test_ledger_catalog_reads_are_bounded_and_preserve_order():
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier, Lock
+
+    manifests = tuple(_manifest(index) for index in range(1, 10))
+    barrier = Barrier(5)
+    lock = Lock()
+    active = 0
+    peak = 0
+    calls = 0
+
+    class BlockingLedger:
+        def list_entries_by_run_id(self, run_id):
+            nonlocal active, peak, calls
+            with lock:
+                active += 1
+                calls += 1
+                ordinal = calls
+                peak = max(peak, active)
+            try:
+                if ordinal <= 4:
+                    barrier.wait(timeout=5)
+                return []
+            finally:
+                with lock:
+                    active -= 1
+
+    with ThreadPoolExecutor(max_workers=1) as caller:
+        result = caller.submit(
+            subject.build_selector_records, manifests, BlockingLedger()
+        )
+        barrier.wait(timeout=5)
+        records = result.result(timeout=5)
+    assert peak == 4
+    assert calls == len(manifests)
+    assert tuple(record.manifest for record in records) == manifests
+    assert all(record.run_status == "unknown" for record in records)
+
+
+def test_ledger_read_failure_stops_refill_and_waits_for_running_reads(monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier, Event, Lock
+
+    manifests = tuple(_manifest(index) for index in range(1, 20))
+    barrier = Barrier(4)
+    failed = Event()
+    release = Event()
+    lock = Lock()
+    calls = []
+
+    class FailingLedger:
+        def list_entries_by_run_id(self, run_id):
+            with lock:
+                calls.append(run_id)
+            barrier.wait(timeout=5)
+            if run_id == manifests[0].run_id:
+                raise OSError("ledger read failed")
+            assert release.wait(timeout=5)
+            return []
+
+    class TrackingExecutor(ThreadPoolExecutor):
+        def submit(self, *args, **kwargs):
+            future = super().submit(*args, **kwargs)
+            future.add_done_callback(
+                lambda done: failed.set() if done.exception() else None
+            )
+            return future
+
+    monkeypatch.setattr(subject, "ThreadPoolExecutor", TrackingExecutor)
+    with ThreadPoolExecutor(max_workers=1) as caller:
+        result = caller.submit(
+            subject.build_selector_records, manifests, FailingLedger()
+        )
+        try:
+            assert failed.wait(timeout=5)
+            assert not result.done()
+            assert len(calls) == 4
+        finally:
+            release.set()
+        with pytest.raises(OSError, match="ledger read failed"):
+            result.result(timeout=5)
+    assert len(calls) == 4
