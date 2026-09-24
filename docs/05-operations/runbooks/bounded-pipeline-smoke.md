@@ -102,6 +102,11 @@ Why these flags:
 - `--no-health-server` — sequential smokes must not fight over `:8000`.
 - `--no-ensure-observability-backend` — keep the default-off Ops HTTP backend
   off unless Grafana ID panels are in scope.
+- `composite publication` without `BIOETL_SEMANTICSCHOLAR_API_KEY`: skip the
+  optional Semantic Scholar enricher (`--enrich-only crossref,openalex,pubmed`).
+  Unauthenticated title-fallback search hits HTTP 429 with multi-minute backoff
+  per missing DOI and can exceed the 7200s enricher timeout. Config already
+  marks this enricher `required: false` (high rate limits, ok to skip).
 
 Equivalent bash:
 
@@ -240,7 +245,7 @@ $ccommon = @(
   "--no-health-server",
   "--no-ensure-observability-backend"
 )
-& $py -m bioetl run-composite --composite publication @ccommon
+& $py -m bioetl run-composite --composite publication @ccommon --enrich-only "crossref,openalex,pubmed"
 & $py -m bioetl run-composite --composite activity @ccommon
 & $py -m bioetl run-composite --composite assay @ccommon
 & $py -m bioetl run-composite --composite molecule @ccommon

@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 import time
 from dataclasses import dataclass
+from typing import Any, cast
 
 from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
@@ -133,7 +134,9 @@ class HealthServer(
             )
         if control_plane is None and recognized:
             control_plane = HealthServerControlPlaneDeps(
-                **recognized  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+                # Keys pre-validated against _LEGACY_CONTROL_PLANE_KEYS; Any
+                # only bridges dict[str, object] into the typed bag.
+                **cast(Any, recognized)
             )
         return control_plane or HealthServerControlPlaneDeps()
 
