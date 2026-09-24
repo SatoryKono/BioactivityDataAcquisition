@@ -10,6 +10,9 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_refre
     _ReplayRefreshProjection,
     _ReplayRefreshSummaryUpdate,
 )
+from bioetl.application.services.control_plane.manifest.diagnostics.source_refs import (
+    _build_effective_source_refs,
+)
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.snapshot_materialization import (
     resolve_post_manifest_input_snapshot_materialization_mode,
@@ -123,6 +126,8 @@ def _refresh_replay_summary_from_materialized_snapshots(
         manifest=manifest,
         summary=summary,
         input_snapshots=snapshot_payloads,
+        build_source_refs=_build_effective_source_refs,
+        refresh_context_type=_ReplayRefreshContext,
     )
     return _build_refresh_summary_update(
         summary=summary,

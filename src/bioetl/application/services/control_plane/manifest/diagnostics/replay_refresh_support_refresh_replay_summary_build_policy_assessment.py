@@ -2,15 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import replace
 from typing import cast
 
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_types import (
-    _ReplayRefreshContext,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.source_refs import (
-    _build_effective_source_refs,
-)
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
     assess_reproducibility_policy,
@@ -21,9 +16,12 @@ def _refresh_replay_summary_build_policy_assessment(
     manifest: RunManifest,
     summary: dict[str, object],
     input_snapshots: list[dict[str, object]],
-) -> _ReplayRefreshContext:
+    *,
+    build_source_refs: Callable[..., tuple[object, ...]],
+    refresh_context_type: Callable[..., object],
+) -> object:
     """Build policy assessment from materialized snapshots."""
-    source_refs = _build_effective_source_refs(
+    source_refs = build_source_refs(
         manifest=manifest,
         input_snapshots=input_snapshots,
     )
@@ -58,7 +56,7 @@ def _refresh_replay_summary_build_policy_assessment(
         replay_capability=policy_assessment.replay_capability,
         source_refs=source_refs,
     )
-    return _ReplayRefreshContext(
+    return refresh_context_type(
         effective_manifest=effective_manifest,
         policy_assessment=policy_assessment,
         input_snapshots=input_snapshots,
