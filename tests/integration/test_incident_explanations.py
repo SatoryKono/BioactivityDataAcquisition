@@ -3,6 +3,10 @@
 import json
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.integration
+
 
 def _panels():
     dashboard = json.loads(

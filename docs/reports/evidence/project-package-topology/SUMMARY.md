@@ -1,5 +1,11 @@
 # Сводка evidence: project-package-topology
 
+Refresh note (2026-09-24): hash-only reconcile after arch-guard landing. Counts and the source fingerprint below come from `reports/quality/module-coverage-inventory.json`. Historical notes remain historical.
+
+`source_tree_sha256=e68122becf56412da6449521c8f603667730782f75a1ba6d2147345635ade44f`
+
+`source_module_count=2479`
+
 Refresh note (2026-09-24): hash-only reconcile after composition bootstrap/runtime shrink to family total_loc 6049. Counts and the source fingerprint below come from
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
