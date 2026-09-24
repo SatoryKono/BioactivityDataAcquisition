@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
@@ -19,6 +20,8 @@ from bioetl.infrastructure.errors import build_storage_error
 from bioetl.infrastructure.storage.atomic import atomic_write_text
 
 __all__ = ["FileWorkflowManifestStore"]
+
+_WORKFLOW_MANIFEST_READ_WORKERS = 4
 
 
 @dataclass(slots=True)
@@ -124,11 +127,17 @@ class FileWorkflowManifestStore(WorkflowManifestPort):
         started_at = perf_counter()
         status = "success"
         try:
-            manifests = [
-                manifest
-                for path in self.base_path.glob("*.json")
-                if (manifest := self._load_manifest(path.stem)) is not None
-            ]
+            # Bound parallel reads to amortize Windows bind-mount latency without
+            # changing catalog validation, freshness, or the selector deadline.
+            manifest_ids = [path.stem for path in self.base_path.glob("*.json")]
+            with ThreadPoolExecutor(
+                max_workers=_WORKFLOW_MANIFEST_READ_WORKERS
+            ) as executor:
+                manifests = [
+                    manifest
+                    for manifest in executor.map(self._load_manifest, manifest_ids)
+                    if manifest is not None
+                ]
             return tuple(
                 sorted(
                     manifests,

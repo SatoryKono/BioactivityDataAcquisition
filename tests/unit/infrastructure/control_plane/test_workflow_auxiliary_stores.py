@@ -31,6 +31,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from pathlib import Path
+from threading import Barrier, Lock
 from uuid import UUID
 
 import pytest
@@ -513,3 +514,45 @@ def test_artifact_lifecycle_payload_helpers_cover_time_and_hash_fallbacks(
     assert lifecycle_payloads_module._content_addressed_file_snapshot_id(
         binary_path
     ).startswith("sha256:")
+
+
+def test_workflow_manifest_catalog_reads_are_parallel_and_bounded(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store = FileWorkflowManifestStore(base_path=tmp_path)
+    for index in range(8):
+        (tmp_path / f"manifest-{index}.json").write_text("{}", encoding="utf-8")
+    barrier = Barrier(4, timeout=5)
+    lock = Lock()
+    active = 0
+    maximum = 0
+    visited: list[str] = []
+
+    def load(self: FileWorkflowManifestStore, manifest_id: str) -> None:
+        nonlocal active, maximum
+        with lock:
+            active += 1
+            maximum = max(maximum, active)
+            visited.append(manifest_id)
+        # Every batch must overlap; sequential reading cannot pass this barrier.
+        barrier.wait()
+        with lock:
+            active -= 1
+
+    monkeypatch.setattr(FileWorkflowManifestStore, "_load_manifest", load)
+    assert store.list_all() == ()
+    assert maximum == 4
+    assert sorted(visited) == [f"manifest-{index}" for index in range(8)]
+
+
+def test_workflow_manifest_catalog_corruption_is_not_empty(tmp_path: Path) -> None:
+    (tmp_path / "broken.json").write_text("not json", encoding="utf-8")
+    store = FileWorkflowManifestStore(base_path=tmp_path)
+    with pytest.raises(ValueError):
+        store.list_all()
+
+
+def test_workflow_manifest_catalog_missing_directory_is_empty(tmp_path: Path) -> None:
+    store = FileWorkflowManifestStore(base_path=tmp_path / "missing")
+    assert store.list_all() == ()
