@@ -416,6 +416,18 @@ def _correct_provider(uid: object, panels: dict[int, dict]) -> None:
     _override(panels[9107], "Provider", _WIDTH, 95)
     _override(panels[9107], "Source state", _WIDTH, 105)
     _override(panels[9107], "Status", _WIDTH, 100)
+    selected = 'bioetl_provider_current_status{provider=~"$provider"}'
+    # Status codes are categories, not severity order: UNKNOWN=3 must not
+    # hide a confirmed CRIT=2 or WARN=1 in a multi-provider selection.
+    panels[9401]["targets"][0]["expr"] = " or ".join(
+        f"max({selected} == {code})" for code in (2, 1, 3, 0)
+    )
+    panels[9401]["description"] = (
+        "CURRENT / SELECTED PROVIDER · Confirmed CRIT takes precedence, then WARN, "
+        "UNKNOWN and OK. UNKNOWN means an observation is missing or invalid. "
+        "Inspect Health Evidence lists observation availability for every provider; "
+        "this aggregate is not proof of complete fleet evidence."
+    )
     fleet = "max by (provider) (bioetl_provider_current_status)"
     health = "max by (provider) (bioetl_provider_health_status)"
     coverage = (
@@ -435,6 +447,19 @@ def _correct_control_plane(uid: object, panels: dict[int, dict]) -> None:
     if uid != "bioetl-control-plane-v1":
         return
     retention = panels[9416]
+    # B repeated the full retention/hash verification only to rename a header.
+    # Keep the evidence rows from A; their statuses already convey the result.
+    retention["targets"] = [
+        target for target in retention["targets"] if target.get("refId") != "B"
+    ]
+    retention["transformations"] = [
+        transform
+        for transform in retention.get("transformations", [])
+        if not (
+            transform.get("id") == "configFromData"
+            and transform.get("options", {}).get("configRefId") == "B"
+        )
+    ]
     for item in retention["fieldConfig"]["overrides"]:
         if item["matcher"].get("options") in ("Check", "Status"):
             item["properties"] = [

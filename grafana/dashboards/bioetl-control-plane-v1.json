@@ -1590,56 +1590,11 @@
               "type": "string"
             }
           ]
-        },
-        {
-          "format": "table",
-          "parser": "uql",
-          "refId": "B",
-          "root_selector": "summary",
-          "source": "url",
-          "type": "json",
-          "uql": "parse-json | jsonata \"summary.{'headline': $string(ok_count) & ' OK, ' & $string(unknown_count) & ' UNKNOWN', 'ok_count': ok_count, 'unknown_count': unknown_count, 'warning_count': warning_count, 'error_count': error_count, 'check_count': check_count}\"",
-          "url": "/ops/control-plane/retention-compliance?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&error_as_row=1",
-          "url_options": {
-            "data": "",
-            "method": "GET"
-          },
-          "columns": [
-            {
-              "selector": "headline",
-              "text": "headline",
-              "type": "string"
-            },
-            {
-              "selector": "ok_count",
-              "text": "ok_count",
-              "type": "number"
-            },
-            {
-              "selector": "unknown_count",
-              "text": "unknown_count",
-              "type": "number"
-            }
-          ]
         }
       ],
       "title": "Review Retention Compliance",
       "type": "table",
       "transformations": [
-        {
-          "id": "configFromData",
-          "options": {
-            "configRefId": "B",
-            "mappings": [
-              {
-                "fieldName": "headline",
-                "handlerKey": "displayName",
-                "reducerId": "lastNotNull",
-                "targetField": "check"
-              }
-            ]
-          }
-        },
         {
           "id": "filterByRefId",
           "options": {

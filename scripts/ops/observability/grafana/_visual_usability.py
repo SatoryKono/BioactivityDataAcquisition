@@ -543,7 +543,7 @@ def apply_visual_usability(payload: dict) -> None:
     if handler := handlers.get(payload["uid"]):
         handler(p)
     if payload["uid"] == "bioetl-dq-v2":
-        p[9103]["gridPos"]["h"] = 3
+        p[9103]["gridPos"]["h"] = 2
     if payload["uid"] == "bioetl-incident-v1":
         p[2001]["gridPos"].update(y=5, h=3)
     # Keep useful evidence tables compact with explicit pagination, not huge repeated placeholders.
