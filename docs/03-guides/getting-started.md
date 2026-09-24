@@ -154,9 +154,9 @@ per-task approval; this command is a human local setup step.
 
 **Key Variables:**
 
-- `BIOETL_ENV`: Set to `dev`.
+- `BIOETL_ENV`: Set to `dev` (`staging` and `prod` are the other accepted modes).
 - `BIOETL_DATA_DIR`: Directory for data storage (default: `./data`).
-- `BIOETL_LOG_LEVEL`: Logging level (default: `INFO`).
+- Log level is not a `Settings` environment variable. The default is `INFO`. Use `bioetl run --debug` or workflow `--log-level`.
 
 > **Note:** For a complete reference of all BIOETL_* environment variables, see [Environment Variables Reference](../04-reference/environment-variables.md).
 

@@ -9,9 +9,10 @@ variables, see [README.md](../../README.md#installation) and `.env.example`.
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
-| `BIOETL_ENV` | Environment mode (dev, test, prod) | `dev` | No |
+| `BIOETL_ENV` | Environment mode (`dev`, `staging`, `prod`). `test` is not a valid mode. | `dev` | No |
 | `BIOETL_DATA_DIR` | Directory for data storage | `./data` | No |
-| `BIOETL_LOG_LEVEL` | Logging level (DEBUG, INFO, WARNING, ERROR) | `INFO` | No |
+
+`BIOETL_LOG_LEVEL` is not a `Settings` field and is not read. The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-level`.
 
 ## Provider API Keys
 
@@ -23,8 +24,10 @@ variables, see [README.md](../../README.md#installation) and `.env.example`.
 ### OpenAlex
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `BIOETL_OPENALEX_API_KEY` | OpenAlex API key for higher rate limits | No |
-| `BIOETL_OPENALEX_EMAIL` | Email for polite pool attribution | No |
+| `BIOETL_OPENALEX_API_KEY` | API key for production-like OpenAlex runs. This is the production access boundary, not only a higher rate limit. | Yes for production-like runs |
+| `BIOETL_OPENALEX_EMAIL` | Optional contact attribution. It does not replace the API key. | No |
+
+A `mailto` value without `BIOETL_OPENALEX_API_KEY` is only a legacy adapter fallback (`api_key or mailto`). It is not the production boundary.
 
 ### PubMed
 | Variable | Description | Default | Required |

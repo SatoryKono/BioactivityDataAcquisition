@@ -683,12 +683,13 @@ ______________________________________________________________________
 
 | Переменная               | Описание                       | По умолчанию |
 | ------------------------ | ------------------------------ | ------------ |
-| `BIOETL_ENV`             | Окружение (`dev`, `prod`)      | `dev`        |
-| `BIOETL_DATA_DIR`        | Директория данных              | `./data`     |
-| `BIOETL_LOG_LEVEL`       | Уровень логирования            | `INFO`       |
-| `BIOETL_METRICS_ENABLED` | Включить Prometheus метрики    | `true`       |
-| `BIOETL_METRICS_PORT`    | Порт для Prometheus            | `8000`       |
-| `BIOETL_TRACING_ENABLED` | Включить OpenTelemetry tracing | `false`      |
+| `BIOETL_ENV`                            | Окружение (`dev`, `staging`, `prod`) | `dev`   |
+| `BIOETL_DATA_DIR`                       | Директория данных                    | `./data` |
+| `BIOETL_OBSERVABILITY__METRICS_ENABLED` | Включить Prometheus метрики          | `true`  |
+| `BIOETL_METRICS_PORT`                   | Порт для Prometheus                  | `8000`  |
+| `BIOETL_OBSERVABILITY__TRACING_ENABLED` | Включить OpenTelemetry tracing       | `false` |
+
+`BIOETL_LOG_LEVEL` не является полем `Settings` и не читается. Уровень по умолчанию — `INFO`. Для pipeline run используйте `bioetl run --debug`, для шагов workflow — `--log-level`.
 
 **API-ключи провайдеров:**
 - `BIOETL_UNIPROT_API_KEY` — optional higher-throughput UniProt profile
@@ -705,7 +706,7 @@ Verified against root `Makefile` (2026-07-28). Prefer `make` targets for CI-pari
 | Command | Use when |
 | --- | --- |
 | `make install` | Create/sync project env (`uv`/deps) |
-| `make test-deps` | Install test-only dependencies |
+| `make test-deps` | Check that test dependencies import |
 | `make lint` | Ruff + project lint surface |
 | `make test` | Default test suite |
 | `make test-fast` | Faster local subset |

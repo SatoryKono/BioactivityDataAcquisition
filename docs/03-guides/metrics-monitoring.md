@@ -116,7 +116,6 @@ ______________________________________________________________________
 | `BIOETL_OBSERVABILITY__METRICS_ENABLED` | Включить Prometheus метрики    | `true`       |
 | `BIOETL_METRICS_PORT`                   | Порт для Prometheus endpoint   | `8000`       |
 | `BIOETL_OBSERVABILITY__TRACING_ENABLED` | Включить OpenTelemetry tracing | `false`      |
-| `BIOETL_LOG_LEVEL`                      | Уровень логирования            | `INFO`       |
 
 ### Включение/отключение
 
@@ -560,10 +559,7 @@ ______________________________________________________________________
 ### Настройка уровня
 
 ```bash
-# Via переменную окружения
-export BIOETL_LOG_LEVEL=DEBUG
-
-# Via CLI флаг
+# Уровень задаётся CLI. BIOETL_LOG_LEVEL не читается Settings.
 bioetl run --pipeline chembl_activity --debug
 ```
 
