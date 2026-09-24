@@ -443,7 +443,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT snapshot · selected provider snapshot; fleet panels below have a different scope. Mapping: `0=OK`, `1=WARN`, `2=CRIT`, `3/null=UNKNOWN`. The verdict uses current provider status; it does not prove that a pipeline run succeeded. TELEMETRY MISSING means status evidence is unavailable—check Monitor Telemetry Presence and Raw Health Status; it is not evidence of a healthy fleet. Fleet panels can disagree because they cover all providers.",
+      "description": "CURRENT / SELECTED PROVIDER · Confirmed CRIT takes precedence, then WARN, UNKNOWN and OK. UNKNOWN means an observation is missing or invalid. Inspect Health Evidence lists observation availability for every provider; this aggregate is not proof of complete fleet evidence.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -566,7 +566,7 @@
       },
       "targets": [
         {
-          "expr": "max(bioetl_provider_current_status{provider=~\"$provider\"})",
+          "expr": "max(bioetl_provider_current_status{provider=~\"$provider\"} == 2) or max(bioetl_provider_current_status{provider=~\"$provider\"} == 1) or max(bioetl_provider_current_status{provider=~\"$provider\"} == 3) or max(bioetl_provider_current_status{provider=~\"$provider\"} == 0)",
           "refId": "A",
           "instant": true
         }
