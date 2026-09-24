@@ -63,7 +63,7 @@ def _catalog_row(record: SelectorRecord) -> dict[str, object]:
         "pipeline": record.pipeline,
         "run_id": record.run_id,
         "workflow_id": _workflow_name(record),
-        "workflow_run_id": "—",
+        "workflow_run_id": _workflow_run_id(record),
         "run_type": record.run_type,
         "started_at": record.started_at.isoformat(),
         "started_at_source": record.started_at_source,
@@ -81,18 +81,31 @@ def _catalog_row(record: SelectorRecord) -> dict[str, object]:
     }
 
 
+def _present_label(value: object) -> str | None:
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+    return None
+
+
 def _workflow_name(record: SelectorRecord) -> str:
-    # The selector resolver also synthesizes pipeline aliases. Do not present
-    # those aliases as evidence of an actual parent workflow occurrence.
+    # Manifest workflow_name is the parent occurrence. Nested payloads are the
+    # older location. Do not fall back to synthesized pipeline aliases.
+    parent = _present_label(record.manifest.workflow_name)
+    if parent is not None:
+        return parent
     for payload in (
         record.manifest.launch_context,
         record.manifest.runtime_config,
         record.manifest.resolved_config,
     ):
         for key in ("workflow_name", "workflow"):
-            if value := payload.get(key):
-                return str(value)
+            if label := _present_label(payload.get(key)):
+                return label
     return "—"
+
+
+def _workflow_run_id(record: SelectorRecord) -> str:
+    return _present_label(record.manifest.workflow_run_id) or "—"
 
 
 def _merge_record(row: dict[str, object], record: SelectorRecord) -> dict[str, object]:

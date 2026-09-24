@@ -210,6 +210,43 @@ def test_start_sort_normalizes_timezones_and_is_deterministic(tmp_path):
     assert [row["run_id"] for row in rows] == [newer, older]
 
 
+def test_manifest_parent_workflow_fills_unfinished_row_without_nested_alias(
+    tmp_path,
+):
+    from dataclasses import replace
+
+    _report(tmp_path, "chembl_target", 1, started=NOW.isoformat(), mtime=1)
+    manifest = replace(
+        _manifest(2),
+        launch_context={},
+        workflow_name="chembl_activity",
+        workflow_run_id="211a104c-0054-5722-bca7-dc9ad04a1a02",
+    )
+    manifests, ledger = Mock(), Mock()
+    manifests.list_all.return_value = (manifest,)
+    ledger.list_entries_by_run_id.return_value = [
+        RunLedgerEntry(
+            entry_id="started",
+            manifest_id=manifest.manifest_id,
+            run_id=manifest.run_id,
+            event_type="run_started",
+            occurred_at=NOW + timedelta(hours=1),
+        )
+    ]
+    row = _list(tmp_path, manifest_port=manifests, ledger_port=ledger)["items"][0]
+    assert row["workflow_id"] == "chembl_activity"
+    assert row["workflow_run_id"] == "211a104c-0054-5722-bca7-dc9ad04a1a02"
+    assert row["workflow_scope"] == "chembl_activity"
+    assert row["status"] == "unfinished"
+    scoped = _list(
+        tmp_path,
+        manifest_port=manifests,
+        ledger_port=ledger,
+        workflow="chembl_activity",
+    )["items"]
+    assert [item["run_id"] for item in scoped] == [str(manifest.run_id)]
+
+
 def test_report_start_wins_over_manifest_fallback_and_missing_workflow_is_explicit(
     tmp_path,
 ):

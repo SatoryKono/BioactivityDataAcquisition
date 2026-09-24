@@ -8,9 +8,9 @@ owner: BioETL Team
 runtimes:
 - any
 params:
-- N
-- MODE
-- LANGUAGE
+- N = 100
+- MODE = full
+- LANGUAGE =ru
 includes:
 - fragments/debt-budget-ban.md
 - fragments/env-guardrail.md
