@@ -138,9 +138,9 @@ _INCIDENT_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
     2005: (0, 13, 24, 4),
 }
 _DQ_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
-    9101: (0, 8, 8, 4),
-    9102: (8, 8, 16, 4),
-    9406: (0, 12, 24, 5),
+    9101: (0, 7, 8, 4),
+    9102: (8, 7, 16, 4),
+    9406: (0, 11, 24, 5),
 }
 _RECOVERY_ACTION_HTML = (
     '<div style="padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;'
@@ -1351,7 +1351,7 @@ def _layout_uid_first_window(panels: list[object], *, current_uid: str) -> None:
         _apply_first_window_geometry(panels, _DQ_FIRST_WINDOW_GEOMETRY, uid=current_uid)
         _pin_collapsed_rows_from(
             panels,
-            target_y=18,
+            target_y=17,
             protected_ids=set(_DQ_FIRST_WINDOW_GEOMETRY),
             uid=current_uid,
         )
