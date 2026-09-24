@@ -239,8 +239,8 @@ review_lanes:
     retention_action: retain_curated_runtime_roots_and_keep_local_generated_state_untracked
     cleanup_policy: owner_decision_required_before_rehome_or_delete
     verification:
-      - git ls-files .agents .claude .vibe .ai .gemini .idea .jules .junie .zed skills-lock.json
-      - rg -n "\\.agents/|\\.claude/|\\.vibe|\\.ai/|\\.gemini/|\\.idea/|\\.jules/|\\.junie/|\\.zed/|skills-lock\\.json" .github docs scripts tests configs README.md pyproject.toml
+      - git ls-files .agents .claude .vibe .ai .gemini .idea .jules .junie .opencode .zed skills-lock.json
+      - rg -n "\\.agents/|\\.claude/|\\.vibe|\\.ai/|\\.gemini/|\\.idea/|\\.jules/|\\.junie/|\\.opencode/|\\.zed/|skills-lock\\.json" .github docs scripts tests configs README.md pyproject.toml
       - .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
     candidates:
       - path: .junie
@@ -248,6 +248,11 @@ review_lanes:
         canonical_path: .junie
         disposition: must_stay_root
         action_if_reintroduced: retain_as_tracked_jetbrains_junie_runtime_peer_equal_to_codex_not_local_vendor_clutter
+      - path: .opencode
+        current_live_state: present_curated_root_surface
+        canonical_path: .opencode
+        disposition: must_stay_root
+        action_if_reintroduced: retain_as_tracked_opencode_phase1_review_triage_surface_exact_root_not_clutter
       - path: .agents
         current_live_state: absent_from_root_baseline
         canonical_path: .codex/skills

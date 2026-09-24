@@ -8,6 +8,9 @@ __pycache__/
 # Cygwin/MSYS crash dumps
 *.stackdump
 
+# Accidental Windows PowerShell module-analysis cache at repo root (do not allowlist)
+/Microsoft/
+
 # Virtual environments
 .venv/
 .venv-win/
