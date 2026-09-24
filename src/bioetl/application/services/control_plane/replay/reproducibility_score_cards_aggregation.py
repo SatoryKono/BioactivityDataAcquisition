@@ -37,6 +37,7 @@ from bioetl.application.services.control_plane.replay.reproducibility_score_card
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
     score_run_identity as score_run_identity,
 )
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation_evaluate_threshold_failures import evaluate_threshold_failures
 
 _BLOCKER_PRIORITY_ORDER: tuple[str, ...] = (
     "dependency_lock_hash_missing",
@@ -56,38 +57,6 @@ _BLOCKER_PRIORITY_INDEX: dict[str, int] = {
 }
 
 
-def evaluate_threshold_failures(
-    *,
-    thresholds: dict[str, int],
-    category_scores: dict[str, JsonDict],
-) -> list[JsonDict]:
-    failures: list[JsonDict] = []
-    for category, minimum_score in thresholds.items():
-        score_payload = category_scores.get(category)
-        actual_score = (
-            score_payload.get("score") if isinstance(score_payload, dict) else None
-        )
-        if not isinstance(actual_score, int):
-            failures.append(
-                {
-                    "category": category,
-                    "required": minimum_score,
-                    "actual": None,
-                    "reason": "category_score_missing",
-                }
-            )
-            continue
-        if actual_score >= minimum_score:
-            continue
-        failures.append(
-            {
-                "category": category,
-                "required": minimum_score,
-                "actual": actual_score,
-                "reason": "below_required_threshold",
-            }
-        )
-    return failures
 
 
 def overall_blockers(

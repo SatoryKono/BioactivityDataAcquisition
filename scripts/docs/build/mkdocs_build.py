@@ -26,8 +26,20 @@ def _site_dir_explicit(argv: Sequence[str]) -> bool:
     return False
 
 
+def _with_default_strict(argv: Sequence[str]) -> list[str]:
+    """Default to ``mkdocs build --strict`` unless the caller opts out."""
+    args = list(argv)
+    if any(arg in {"-h", "--help"} for arg in args):
+        return args
+    if "--no-strict" in args:
+        return [arg for arg in args if arg != "--no-strict"]
+    if "--strict" not in args:
+        return ["--strict", *args]
+    return args
+
+
 def _mkdocs_build(argv: Sequence[str]) -> int:
-    command = [sys.executable, "-m", "mkdocs", "build", *argv]
+    command = [sys.executable, "-m", "mkdocs", "build", *_with_default_strict(argv)]
     result = subprocess.run(command, check=False)
     return result.returncode
 
