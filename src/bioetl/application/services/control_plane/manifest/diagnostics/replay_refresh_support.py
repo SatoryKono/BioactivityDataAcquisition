@@ -2,30 +2,21 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
-from typing import cast
-
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection import (
     _build_replay_projection_bundle,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support_refresh_replay_summary_build_policy_assessment import (
+    _refresh_replay_summary_build_policy_assessment,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_types import (
     _ReplayRefreshContext,
     _ReplayRefreshProjection,
     _ReplayRefreshSummaryUpdate,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.source_refs import (
-    _build_effective_source_refs,
-)
-from bioetl.domain.control_plane import ReplayCapability, RunManifest
-from bioetl.domain.control_plane.reproducibility_policy import (
-    assess_reproducibility_policy,
-)
+from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.snapshot_materialization import (
     resolve_post_manifest_input_snapshot_materialization_mode,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support_refresh_replay_summary_build_policy_assessment import _refresh_replay_summary_build_policy_assessment
-
-
 
 
 def _build_refresh_replay_projection(

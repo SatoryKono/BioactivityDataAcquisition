@@ -1,7 +1,10 @@
 """Alert- and next-step helpers for manifest diagnostics persistence output."""
 
 from __future__ import annotations
-from bioetl.application.services.control_plane.manifest.diagnostics.persistence_alerts_build_alert_signals import build_alert_signals
+
+from bioetl.application.services.control_plane.manifest.diagnostics.persistence_alerts_build_alert_signals import (
+    build_alert_signals,
+)
 
 __all__ = ["build_alert_signals", "build_next_steps"]
 
@@ -82,8 +85,6 @@ _NEXT_STEP_BY_SIGNAL: tuple[tuple[str, str], ...] = (
         "Confirm graceful shutdown reason and resume policy compatibility.",
     ),
 )
-
-
 
 
 def build_next_steps(alert_signals: dict[str, bool]) -> list[str]:

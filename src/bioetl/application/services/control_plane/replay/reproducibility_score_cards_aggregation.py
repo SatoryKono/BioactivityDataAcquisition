@@ -37,7 +37,6 @@ from bioetl.application.services.control_plane.replay.reproducibility_score_card
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
     score_run_identity as score_run_identity,
 )
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_aggregation_evaluate_threshold_failures import evaluate_threshold_failures
 
 _BLOCKER_PRIORITY_ORDER: tuple[str, ...] = (
     "dependency_lock_hash_missing",
@@ -55,8 +54,6 @@ _BLOCKER_PRIORITY_ORDER: tuple[str, ...] = (
 _BLOCKER_PRIORITY_INDEX: dict[str, int] = {
     blocker: index for index, blocker in enumerate(_BLOCKER_PRIORITY_ORDER)
 }
-
-
 
 
 def overall_blockers(

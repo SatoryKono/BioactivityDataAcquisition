@@ -16,6 +16,7 @@ from bioetl.domain.filtering.silver_filter_identity import (
     resolve_silver_filter_compatibility_mode,
 )
 
+
 def assemble_runtime_config(
     *,
     run_type: RunType,

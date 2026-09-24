@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+
 def _build_unified_reproducibility_diagnostics_policy_payload(
     summary: dict[str, object],
     persistence_profile: dict[str, object],

@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, cast
 from bioetl.application.services.control_plane.manifest.diagnostics.artifact_support import (
     apply_artifact_publication_closure_policy,
     build_produced_artifact_trace,
-    sorted_text_items,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.persistence_alerts import (
     build_alert_signals,
@@ -16,14 +15,15 @@ from bioetl.application.services.control_plane.manifest.diagnostics.persistence_
 from bioetl.application.services.control_plane.manifest.diagnostics.persistence_profiles import (
     build_persistence_profile,
 )
+from bioetl.application.services.control_plane.manifest.diagnostics.summary_support_build_exact_replay_anchors import (
+    build_exact_replay_anchors,
+)
 from bioetl.application.services.control_plane.manifest.identity_graph_assembly import (
     RunManifestIdentityGraphAssembler,
 )
-from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.execution_context import (
     is_composite_execution_context as _is_composite_execution_context,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.summary_support_build_exact_replay_anchors import build_exact_replay_anchors
 
 if TYPE_CHECKING:
     from bioetl.application.services.control_plane.manifest.diagnostics.summary import (
@@ -40,8 +40,6 @@ def _resolve_policy_value(values: set[str]) -> str | None:
     if len(values) == 1:
         return next(iter(values))
     return "mixed"
-
-
 
 
 def build_identity_graph(

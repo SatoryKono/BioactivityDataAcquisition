@@ -4,22 +4,19 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.runtime_builders.inputs_runtime_models import (
     ResolvedVacuumSettings,
 )
-from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.context import CachedBronzeContext
-from bioetl.domain.types import RunType
-from bioetl.domain.filtering.silver_filter_identity import (
-    resolve_silver_filter_compatibility_mode,
-)
 from bioetl.composition.runtime_builders.runner_builder_wiring import (
     RunnerBuilderWiring,
 )
-from bioetl.composition.bootstrap.runtime.assembly_assemble_runtime_config import assemble_runtime_config
+from bioetl.composition.bootstrap.runtime.assembly_assemble_runtime_config import (
+    assemble_runtime_config,
+)
 
 if TYPE_CHECKING:
     from bioetl.composition.registry_api import PipelineRegistry
@@ -100,8 +97,6 @@ def assemble_vacuum_settings(
         enabled=yaml_maintenance.auto_vacuum,
         retention_days=yaml_maintenance.vacuum_retention_days,
     )
-
-
 
 
 def assemble_filter_config(

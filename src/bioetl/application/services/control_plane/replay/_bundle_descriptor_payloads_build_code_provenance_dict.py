@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+
 def _build_code_provenance_dict(code_provenance: object) -> dict[str, object]:
     payload: dict[str, object] = {
         "pipeline_version": getattr(code_provenance, "pipeline_version", None),

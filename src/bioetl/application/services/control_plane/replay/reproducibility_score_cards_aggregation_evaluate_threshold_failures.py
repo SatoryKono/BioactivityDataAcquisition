@@ -4,9 +4,8 @@ from __future__ import annotations
 
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
     JsonDict,
-    string_items,
-    supported_boundary_block_reason,
 )
+
 
 def evaluate_threshold_failures(
     *,

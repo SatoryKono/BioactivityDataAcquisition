@@ -3,12 +3,10 @@
 from __future__ import annotations
 
 from bioetl.application.services.control_plane.manifest.diagnostics.artifact_support import (
-    apply_artifact_publication_closure_policy,
-    build_produced_artifact_trace,
     sorted_text_items,
 )
-
 from bioetl.domain.control_plane import RunManifest
+
 
 def build_exact_replay_anchors(
     *,

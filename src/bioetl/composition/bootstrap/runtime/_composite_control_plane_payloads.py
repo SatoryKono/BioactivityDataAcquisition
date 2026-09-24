@@ -19,9 +19,10 @@ from bioetl.domain.control_plane import (
     RunInputSnapshotRef,
     RunSourceRef,
 )
-from bioetl.domain.types import RunType
 from bioetl.domain.context import CachedBronzeContext
-from bioetl.composition.bootstrap.runtime._composite_control_plane_payloads_build_composite_launch_context_snapshot import build_composite_launch_context_snapshot
+from bioetl.composition.bootstrap.runtime._composite_control_plane_payloads_build_composite_launch_context_snapshot import (
+    build_composite_launch_context_snapshot,
+)
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
@@ -33,8 +34,6 @@ __all__ = [
     "build_composite_runtime_config_snapshot",
     "build_composite_source_refs",
 ]
-
-
 
 
 def build_composite_source_refs(

@@ -6,7 +6,10 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from importlib import import_module
 from typing import Protocol
-from bioetl.application.services.control_plane.replay._bundle_descriptor_payloads_build_code_provenance_dict import _build_code_provenance_dict
+
+from bioetl.application.services.control_plane.replay._bundle_descriptor_payloads_build_code_provenance_dict import (
+    _build_code_provenance_dict,
+)
 
 
 class _InspectionManifest(Protocol):
@@ -78,8 +81,6 @@ def _string_list(value: object) -> list[str]:
 
 def optional_string(value: object) -> str | None:
     return None if value is None else str(value)
-
-
 
 
 @dataclass(frozen=True, slots=True)

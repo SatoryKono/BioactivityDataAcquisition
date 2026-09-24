@@ -8,6 +8,7 @@ from bioetl.domain.composite import CompositeConfig
 
 from bioetl.domain.types import RunType
 
+
 def build_composite_launch_context_snapshot(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,

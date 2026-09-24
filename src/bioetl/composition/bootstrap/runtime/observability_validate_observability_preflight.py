@@ -13,6 +13,7 @@ from .observability_bundle import (
     validate_observability_preflight_impl as _validate_observability_preflight_impl,
 )
 
+
 def validate_observability_preflight(
     tracer: TracingPort,
     metrics: MetricsPort,

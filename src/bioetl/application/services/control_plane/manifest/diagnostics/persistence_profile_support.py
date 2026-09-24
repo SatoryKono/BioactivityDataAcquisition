@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import cast
-from bioetl.application.services.control_plane.manifest.diagnostics.persistence_profile_support_build_composite_resume_reconstructability import build_composite_resume_reconstructability
+
+from bioetl.application.services.control_plane.manifest.diagnostics.persistence_profile_support_build_composite_resume_reconstructability import (
+    build_composite_resume_reconstructability,
+)
 
 __all__ = [
     "PersistenceProfileContext",
@@ -139,8 +142,6 @@ def build_persistence_surfaces(
         "artifact_lineage_links": inputs.artifact_lineage_links_complete,
         "lineage_closure_boundary_support": inputs.lineage_closure_boundary_supported,
     }
-
-
 
 
 def _bool_or_default(value: object, *, default: bool) -> bool:

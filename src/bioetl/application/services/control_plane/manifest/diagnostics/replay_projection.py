@@ -8,12 +8,12 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_invar
     ReplayFamilyContext,
     build_replay_family_context,
 )
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_build_operator_replay_projection import (
+    _build_operator_replay_projection,
+)
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload import (
-    _build_operator_replay_projection_inputs,
-    _build_operator_replay_projection_payload,
     _build_replay_projection_context_kwargs,
     _build_replay_state_projection_for_context,
-    build_replay_taxonomy_projection,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.resume_contract import (
     _build_resume_contract,
@@ -22,7 +22,6 @@ from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
     ReproducibilityPolicyAssessment,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_build_operator_replay_projection import _build_operator_replay_projection
 
 
 @dataclass(frozen=True, slots=True)
@@ -38,8 +37,6 @@ class _ReplayProjectionBundle:
     replay_family_context: ReplayFamilyContext
     replay_family_contract: dict[str, object]
     replay_family_contract_payload: dict[str, object]
-
-
 
 
 def _resolve_snapshot_status(

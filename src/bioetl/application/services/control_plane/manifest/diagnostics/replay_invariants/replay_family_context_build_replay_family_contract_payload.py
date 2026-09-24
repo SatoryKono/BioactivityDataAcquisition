@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+
 def _build_replay_family_contract_payload(
     replay_family_contract: dict[str, object],
 ) -> dict[str, object]:

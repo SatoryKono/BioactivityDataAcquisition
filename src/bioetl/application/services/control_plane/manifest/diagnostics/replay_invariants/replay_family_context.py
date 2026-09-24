@@ -5,6 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context_build_replay_family_contract_payload import (
+    _build_replay_family_contract_payload,
+)
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.execution_context import (
     is_composite_execution_context as _is_composite_execution_context,
@@ -14,7 +17,6 @@ from bioetl.domain.control_plane.reproducibility_profiles import (
     build_replay_family_contract,
     resolve_reproducibility_family_profile,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context_build_replay_family_contract_payload import _build_replay_family_contract_payload
 
 is_composite_execution_context = _is_composite_execution_context
 
@@ -35,8 +37,6 @@ def _resolve_replay_family_execution_context(
     manifest: RunManifest,
 ) -> Literal["source", "composite"]:
     return "composite" if _is_composite_execution_context(manifest) else "source"
-
-
 
 
 def build_replay_family_context(manifest: RunManifest) -> ReplayFamilyContext:

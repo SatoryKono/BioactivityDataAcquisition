@@ -8,6 +8,7 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     assess_reproducibility_policy,
 )
 
+
 def resolve_composite_replay_capability(
     *,
     source_refs: tuple[RunSourceRef, ...],

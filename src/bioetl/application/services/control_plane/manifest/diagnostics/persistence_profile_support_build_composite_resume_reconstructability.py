@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+
 def build_composite_resume_reconstructability(
     *,
     composite_execution_context: bool,

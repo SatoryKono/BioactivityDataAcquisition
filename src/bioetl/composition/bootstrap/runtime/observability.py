@@ -28,7 +28,9 @@ from .tracing_bootstrap import bootstrap_tracer as _bootstrap_tracer_impl
 from bioetl.composition.factories.storage.audit import (
     create_audit_port as create_audit_port_impl,
 )
-from bioetl.composition.bootstrap.runtime.observability_validate_observability_preflight import validate_observability_preflight
+from bioetl.composition.bootstrap.runtime.observability_validate_observability_preflight import (
+    validate_observability_preflight,
+)
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
@@ -76,8 +78,6 @@ def _runtime_audit_bootstrapper(
         metrics=audit_metrics,
         tracing=audit_tracer,
     )
-
-
 
 
 def bootstrap_logger(

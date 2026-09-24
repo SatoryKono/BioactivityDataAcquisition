@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+
 def build_alert_signals(
     *,
     latest_status: str | None,
