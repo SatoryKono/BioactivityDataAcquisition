@@ -687,6 +687,10 @@ def apply_evidence_readability(payload: dict) -> None:
     if payload.get("uid") == "bioetl-run-explorer-v1":
         _run_explorer(p)
     _first_window_widths(payload, p)
+    if payload.get("uid") == "bioetl-incident-v1":
+        from ._incident_explanations import explain_incident
+
+        explain_incident(p, _override)
     if payload.get("uid") in {"bioetl-overview-v2", "bioetl-dq-v2"}:
         _selected_verdict_reasons(p, overview=payload["uid"] == "bioetl-overview-v2")
     # These are enum verdicts, not blocker counts: code 3 is UNKNOWN.
