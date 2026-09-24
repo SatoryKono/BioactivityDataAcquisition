@@ -21,7 +21,6 @@ if TYPE_CHECKING:
 
 
 async def _close_publications(publications: AsyncIterator[BronzeRecord]) -> None:
-    """Close an upstream generator when it exposes asynchronous cleanup."""
     aclose = getattr(publications, "aclose", None)
     if callable(aclose):
         await cast(Callable[[], Awaitable[object]], aclose)()
@@ -69,13 +68,17 @@ def resolve_publication_upstream_limit(
     return normalized_limit, publication_limit
 
 
+def _cap_filter_ids(
+    filter_ids: list[str] | None, term_limit: int | None, pub_limit: int | None
+) -> tuple[list[str] | None, int | None]:
+    if filter_ids is None or (term_limit is None and pub_limit is None):
+        return filter_ids, pub_limit
+    cap = term_limit if term_limit is not None else pub_limit
+    ids = filter_ids[:cap]
+    return ids, len(ids) if pub_limit is None else min(pub_limit, len(ids))
+
+
 class PublicationTermExtractionHost(Protocol):
-    """Structural host required by publication-term extraction mixins.
-
-    Composed adapters (e.g. ``PublicationTermDataSource``) provide these
-    attributes; mixin methods use the protocol instead of ``self: Any``.
-    """
-
     SOURCE_ENTITY_TYPE: ClassVar[str]
     PUBLICATION_LIMIT_MULTIPLIER: ClassVar[int]
     _data_source: DataSourcePort
@@ -94,8 +97,6 @@ class PublicationTermExtractionHost(Protocol):
 
 
 class PublicationTermExtractionMixin:
-    """Shared publication->term extraction flow."""
-
     async def _yield_terms_from_publications(
         self: PublicationTermExtractionHost,
         publications: AsyncIterator[BronzeRecord],
@@ -148,6 +149,9 @@ class PublicationTermExtractionMixin:
         if resolved is None:
             return
         normalized_limit, publication_limit = resolved
+        filter_ids, publication_limit = _cap_filter_ids(
+            filter_ids, normalized_limit, publication_limit
+        )
         publications = self._data_source.fetch(
             entity_type=self.SOURCE_ENTITY_TYPE,
             limit=publication_limit,
@@ -165,7 +169,6 @@ class PublicationTermExtractionMixin:
         record: BronzeRecord,
         publication_id: str,
     ) -> list[BronzeRecord]:
-        """Extract and flatten all terms from a publication record."""
         return extract_terms_from_publication(record, publication_id)
 
     def _create_term_record(
@@ -176,7 +179,6 @@ class PublicationTermExtractionMixin:
         mesh_id: str | None,
         qualifier: str | None,
     ) -> BronzeRecord:
-        """Create a single publication-term record."""
         return create_term_record(
             publication_id=publication_id,
             term=term,
@@ -191,7 +193,6 @@ class PublicationTermExtractionMixin:
         term_type: str,
         term: str,
     ) -> str:
-        """Compute deterministic term entity ID."""
         return compute_term_entity_id(
             publication_id=publication_id,
             term_type=term_type,
@@ -212,6 +213,11 @@ class PublicationTermExtractionMixin:
         if resolved is None:
             return
         normalized_limit, publication_limit = resolved
+        filter_ids, publication_limit = _cap_filter_ids(
+            filter_ids, normalized_limit, publication_limit
+        )
+        if filter_ids is None:
+            return
         publications = filterable.fetch_filtered(
             entity_type=self.SOURCE_ENTITY_TYPE,
             filter_ids=filter_ids,

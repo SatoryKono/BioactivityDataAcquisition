@@ -111,12 +111,7 @@ def test_rejected_retention_skips_lineage_but_full_diagnostics_do_not(
         manifest=manifest,
     )
     service = ControlPlaneEvidenceService(ledger_port=ledger)
-    assert (
-        service.successful_run_trust_summary(scope=scope, now=datetime.now(UTC)) is None
-    )
+    assert service.successful_run_trust_summary(scope=scope, now=FIXED_NOW) is None
     components["lineage_validation"].assert_not_called()
-    assert (
-        service.trust_summary(scope=scope, now=datetime.now(UTC))["trust_status"]
-        != "OK"
-    )
+    assert service.trust_summary(scope=scope, now=FIXED_NOW)["trust_status"] != "OK"
     components["lineage_validation"].assert_called_once()

@@ -1775,6 +1775,13 @@ def _build_fast_stdout_payload(root: Path) -> dict[str, object]:
 
 
 def main(argv: list[str] | None = None) -> int:
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            try:
+                reconfigure(encoding="utf-8", errors="replace")
+            except (OSError, ValueError, AttributeError):
+                pass
     args = parse_args(argv or sys.argv[1:])
     root = _project_root()
     if _can_fast_path_json(args):

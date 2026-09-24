@@ -70,6 +70,28 @@ async def test_deadline_closes_blocked_source():
 
 
 @pytest.mark.asyncio
+async def test_progressing_pages_are_not_killed_by_sum_of_waits():
+    closed = []
+
+    async def source():
+        try:
+            for row in range(3):
+                await asyncio.sleep(0.03)
+                yield row
+        finally:
+            closed.append(True)
+
+    rows = [
+        row
+        async for row in bounded_source_records(
+            source(), max_records=10, timeout_seconds=0.08
+        )
+    ]
+    assert rows == [0, 1, 2]
+    assert closed == [True]
+
+
+@pytest.mark.asyncio
 async def test_source_timeout_is_not_misclassified_as_scan_deadline():
     async def source():
         raise TimeoutError("provider timeout")

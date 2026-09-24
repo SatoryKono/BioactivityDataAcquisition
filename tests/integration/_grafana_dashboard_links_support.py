@@ -805,7 +805,7 @@ def _assert_cross_dashboard_link_policy(
             and link.get("title") == "Open 1. Trust"
         ):
             values = _extract_link_var_values(url)
-            assert values["run_id"] == "${__data.fields.run_id:percentencode}"
+            assert values["run_id"] == "${__data.fields.Run:percentencode}"
             assert values["pipeline"] == "${__data.fields.Pipeline:percentencode}"
             assert values["run_type"] == "${__data.fields.run_type:percentencode}"
         else:

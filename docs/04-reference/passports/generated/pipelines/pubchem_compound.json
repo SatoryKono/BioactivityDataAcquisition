@@ -108,7 +108,7 @@
     ],
     "filters": [
       {
-        "description": "IDs from data/input/molecule.csv column canonical_smiles; CLI may override the input CSV",
+        "description": "IDs from data/input/pubchem_smiles.csv column canonical_smiles; CLI may override the input CSV",
         "name": "smiles",
         "required": true,
         "source": "cli"
@@ -564,15 +564,15 @@
   "summary": {
     "excluded_data_summary": "invalid_record_policy=quarantine",
     "field_selection_summary": "В business-проекцию входят `molecule_id`, `canonical_smiles`, `isomeric_smiles`, `inchi`, `inchi_key`, `standardized_canonical_smiles`, `standardized_isomeric_smiles`, `standardized_inchi` и ещё 40 полей.",
-    "query_filter_summary": "smiles=IDs from data/input/molecule.csv column canonical_smiles; CLI may override the input CSV",
+    "query_filter_summary": "smiles=IDs from data/input/pubchem_smiles.csv column canonical_smiles; CLI may override the input CSV",
     "sentences": [
-      "Pipeline for ingesting PubChem compounds. Источник — `pubchem:compound` на `https://pubchem.ncbi.nlm.nih.gov/rest/pug`; применяемые extraction/input filters: smiles=IDs from data/input/molecule.csv column canonical_smiles; CLI may override the input CSV.",
+      "Pipeline for ingesting PubChem compounds. Источник — `pubchem:compound` на `https://pubchem.ncbi.nlm.nih.gov/rest/pug`; применяемые extraction/input filters: smiles=IDs from data/input/pubchem_smiles.csv column canonical_smiles; CLI may override the input CSV.",
       "В business-проекцию входят `molecule_id`, `canonical_smiles`, `isomeric_smiles`, `inchi`, `inchi_key`, `standardized_canonical_smiles`, `standardized_isomeric_smiles`, `standardized_inchi` и ещё 40 полей.",
       "Silver использует профиль `pubchem.compound` и проверяет обязательные поля `molecule_id`; невалидные записи направляются в `quarantine`.",
       "Перед Gold применяется строгий Pandera-контракт `pubchem.compound`; Gold filters/constraints заданы в entity config (6 групп правил)."
     ],
     "silver_processing_summary": "Silver использует профиль `pubchem.compound` и проверяет обязательные поля `molecule_id`; невалидные записи направляются в `quarantine`.",
-    "source_description": "Pipeline for ingesting PubChem compounds. Источник — `pubchem:compound` на `https://pubchem.ncbi.nlm.nih.gov/rest/pug`; применяемые extraction/input filters: smiles=IDs from data/input/molecule.csv column canonical_smiles; CLI may override the input CSV.",
+    "source_description": "Pipeline for ingesting PubChem compounds. Источник — `pubchem:compound` на `https://pubchem.ncbi.nlm.nih.gov/rest/pug`; применяемые extraction/input filters: smiles=IDs from data/input/pubchem_smiles.csv column canonical_smiles; CLI may override the input CSV.",
     "validation_summary": "Перед Gold применяется строгий Pandera-контракт `pubchem.compound`; Gold filters/constraints заданы в entity config (6 групп правил)."
   }
 }

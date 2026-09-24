@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-23T10:45:28.613310+00:00",
+  "generated_at": "2026-09-23T20:15:05.681179+00:00",
   "summary": {
     "total_scripts": 624,
     "status_counts": {
@@ -2756,7 +2756,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1942,
+          "line": 1929,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
@@ -6039,7 +6039,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 472,
+          "line": 459,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/data_quality/run_silver_gold_filter_parity.py --check"
         },
@@ -9690,13 +9690,13 @@
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
-          "line": 258,
+          "line": 251,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci"
         },
         {
           "path": ".github/workflows/import-linter.yml",
-          "line": 308,
+          "line": 301,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci"
         },
@@ -9714,13 +9714,13 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 435,
+          "line": 422,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 617,
+          "line": 604,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory-live --batch-size 50"
         },
@@ -10249,7 +10249,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1369,
+          "line": 1356,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -10992,7 +10992,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 2011,
+          "line": 1998,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -11408,7 +11408,7 @@
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
-          "line": 244,
+          "line": 237,
           "source_group": "ci",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
         },
@@ -11432,25 +11432,25 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 832,
+          "line": 829,
           "source_group": "docs",
           "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 851,
+          "line": 848,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 942,
+          "line": 939,
           "source_group": "docs",
           "text": "| 5   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream` | Выполнить ускоренный coverage/sharded прогон |"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 943,
+          "line": 940,
           "source_group": "docs",
           "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
         }
@@ -12871,7 +12871,7 @@
         },
         {
           "path": "tests/integration/test_grafana_render_first_remediation.py",
-          "line": 1526,
+          "line": 1568,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         },
@@ -13052,7 +13052,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 478,
+          "line": 465,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa check-naming-pkg --check"
         },
@@ -13439,7 +13439,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 419,
+          "line": 406,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/check_test_audit_preflight.py --strict"
         },
@@ -13469,7 +13469,7 @@
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
-          "line": 516,
+          "line": 517,
           "source_group": "tests",
           "text": "assert \"check_test_audit_preflight.py --strict\" in body"
         }
@@ -14224,7 +14224,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 669,
+          "line": 656,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -16597,7 +16597,7 @@
       "references": [
         {
           "path": "docs/03-guides/testing.md",
-          "line": 604,
+          "line": 601,
           "source_group": "docs",
           "text": "`python scripts/engineering/qa/report_vcr_cassette_census.py`; результат в"
         }
@@ -16641,7 +16641,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 368,
+          "line": 365,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
@@ -17138,19 +17138,19 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 172,
+          "line": 164,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-placement"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 175,
+          "line": 167,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-naming"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 181,
+          "line": 173,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90"
         },
@@ -17236,7 +17236,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 172,
+          "line": 164,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-placement"
         },
@@ -17254,7 +17254,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 884,
+          "line": 881,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         },
@@ -17287,7 +17287,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 175,
+          "line": 167,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-naming"
         },
@@ -17305,7 +17305,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 885,
+          "line": 882,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-naming`"
         },
@@ -17344,19 +17344,19 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 181,
+          "line": 173,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 366,
+          "line": 363,
           "source_group": "docs",
           "text": "- `vcr_cassette_max_age_days: 90` является blocking stale-age threshold: CI теперь валидирует managed metadata inventory через `scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90`"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 890,
+          "line": 887,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90`"
         },
@@ -17846,7 +17846,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 416,
+          "line": 403,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml"
         },
@@ -17903,7 +17903,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 408,
+          "line": 395,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-inventory \\"
         },
@@ -18150,7 +18150,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_github_actions_runtime_policy.py",
-          "line": 138,
+          "line": 143,
           "source_group": "scripts",
           "text": "vs this list is reviewed by `github_settings_review.py`, not here."
         },
@@ -19563,7 +19563,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 323,
+          "line": 320,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
         },
@@ -19750,7 +19750,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 178,
+          "line": 170,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py --check"
         },
@@ -19762,7 +19762,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 368,
+          "line": 365,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
@@ -20094,7 +20094,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1429,
+          "line": 1448,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._dashboard_state_followup import ("
         },
@@ -20119,7 +20119,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1463,
+          "line": 1482,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
         },
@@ -20131,7 +20131,7 @@
         },
         {
           "path": "tests/integration/test_grafana_evidence_readability.py",
-          "line": 90,
+          "line": 106,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._evidence_readability import _stage_colors"
         }
@@ -20156,7 +20156,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1460,
+          "line": 1479,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._gr_db_corrections import apply_corrections"
         }
@@ -20245,7 +20245,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1455,
+          "line": 1474,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._visual_usability import ("
         }
@@ -20618,7 +20618,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 1423,
+          "line": 1442,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },

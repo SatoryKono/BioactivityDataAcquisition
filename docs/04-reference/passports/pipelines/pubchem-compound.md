@@ -12,7 +12,7 @@
 
 ## Назначение и обработка данных
 
-Pipeline for ingesting PubChem compounds. Источник — `pubchem:compound` на `https://pubchem.ncbi.nlm.nih.gov/rest/pug`; применяемые extraction/input filters: smiles=IDs from data/input/molecule.csv column canonical_smiles; CLI may override the input CSV.
+Pipeline for ingesting PubChem compounds. Источник — `pubchem:compound` на `https://pubchem.ncbi.nlm.nih.gov/rest/pug`; применяемые extraction/input filters: smiles=IDs from data/input/pubchem_smiles.csv column canonical_smiles; CLI may override the input CSV.
 В business-проекцию входят `molecule_id`, `canonical_smiles`, `isomeric_smiles`, `inchi`, `inchi_key`, `standardized_canonical_smiles`, `standardized_isomeric_smiles`, `standardized_inchi` и ещё 40 полей.
 Silver использует профиль `pubchem.compound` и проверяет обязательные поля `molecule_id`; невалидные записи направляются в `quarantine`.
 Перед Gold применяется строгий Pandera-контракт `pubchem.compound`; Gold filters/constraints заданы в entity config (6 групп правил).
@@ -24,7 +24,7 @@ Silver использует профиль `pubchem.compound` и проверя�
 | Source | `http_api` · `pubchem:compound` |
 | Method / endpoint | `GET` · `https://pubchem.ncbi.nlm.nih.gov/rest/pug` |
 | Resource / tables | `compound` |
-| Filters | `smiles`: IDs from data/input/molecule.csv column canonical_smiles; CLI may override the input CSV |
+| Filters | `smiles`: IDs from data/input/pubchem_smiles.csv column canonical_smiles; CLI may override the input CSV |
 | Selected fields | `system` (7 fields); `business` (48 fields) |
 
 ## Silver и Data Quality

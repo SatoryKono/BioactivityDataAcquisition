@@ -185,7 +185,7 @@ filters:
   entity: compound
   input_filter:
     enabled: true
-    source_path: data/input/molecule.csv
+    source_path: data/input/pubchem_smiles.csv
     column_name: canonical_smiles
     filter_field: smiles
     batch_size: 1

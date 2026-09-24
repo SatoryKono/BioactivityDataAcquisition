@@ -131,7 +131,7 @@ filters:
   provider: uniprot
   entity: idmapping
   input_filter:
-    enabled: false
+    enabled: true
     source_path: data/input/target.csv
     column_name: target_chembl_id
     filter_field: target_id
