@@ -73,11 +73,11 @@ max_body_lines: 280
 | `BASE_BRANCH` | `main` |
 | `WORK_BRANCH` | `fix/audit-seq-<shortsha>` |
 | `LANGUAGE` | `ru` |
-| `N` | `1` |
+| `N` | `10` |
 | `MODE` | `full` |
 | `DEPTH` | `full` |
 | `INCLUDE_PIPELINE` | `true` |
-| `MONITORING` | `false` |
+| `MONITORING` | `true` |
 | `ALLOW_ISSUE_WRITE` | `true` |
 | `ALLOW_PUSH` | `true` |
 | `ALLOW_MERGE` | `false` |
