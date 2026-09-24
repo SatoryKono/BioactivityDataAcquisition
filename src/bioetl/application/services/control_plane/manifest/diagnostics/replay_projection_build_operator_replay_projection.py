@@ -2,19 +2,18 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context import (
-    ReplayFamilyContext,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload import (
-    _build_operator_replay_projection_inputs,
-    _build_operator_replay_projection_payload,
-    _build_replay_projection_context_kwargs,
-    build_replay_taxonomy_projection,
-)
+from collections.abc import Callable
+from typing import TYPE_CHECKING
+
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
     ReproducibilityPolicyAssessment,
 )
+
+if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context import (
+        ReplayFamilyContext,
+    )
 
 
 def _build_operator_replay_projection(
@@ -27,9 +26,13 @@ def _build_operator_replay_projection(
     replay_family_context: ReplayFamilyContext,
     replay_family_contract: dict[str, object],
     replay_family_contract_payload: dict[str, object],
+    build_context_kwargs: Callable[..., dict[str, object]],
+    build_inputs: Callable[..., dict[str, object]],
+    build_payload: Callable[..., dict[str, object]],
+    build_taxonomy: Callable[..., dict[str, object]],
 ) -> dict[str, object]:
     """Return canonical operator-facing replay projection fields."""
-    replay_projection_context = _build_replay_projection_context_kwargs(
+    replay_projection_context = build_context_kwargs(
         manifest,
         input_snapshots,
         requested_exact_replay,
@@ -37,16 +40,14 @@ def _build_operator_replay_projection(
         policy_assessment,
         replay_family_context,
     )
-    replay_inputs = _build_operator_replay_projection_inputs(
-        **replay_projection_context
-    )
-    payload = _build_operator_replay_projection_payload(
+    replay_inputs = build_inputs(**replay_projection_context)
+    payload = build_payload(
         **replay_projection_context,
         replay_family_contract=replay_family_contract,
         replay_family_contract_payload=replay_family_contract_payload,
         replay_inputs=replay_inputs,
     )
-    projection = build_replay_taxonomy_projection(**payload)
+    projection = build_taxonomy(**payload)
     parentage = payload["replay_parentage"]
     projection["replay_parentage"] = (
         dict(parentage) if isinstance(parentage, dict) else parentage
