@@ -559,7 +559,6 @@ ______________________________________________________________________
 ### Настройка уровня
 
 ```bash
-# Уровень задаётся CLI. BIOETL_LOG_LEVEL не читается Settings.
 bioetl run --pipeline chembl_activity --debug
 ```
 

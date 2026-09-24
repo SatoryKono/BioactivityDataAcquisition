@@ -104,16 +104,14 @@ See: [quarantine runbook](../../05-operations/runbooks/quarantine-management.md)
 ### CLI inspection
 
 ```bash
-bioetl dq validate --entity chembl.activity
-bioetl dq validate --entity chembl.activity --show-rules
-bioetl dq validate --entity chembl.activity --strict
+bioetl dq validate chembl_activity
 ```
 
 ## Investigation procedures
 
 1. **Locate failure**
    - Pipeline logs: `dq_`, Pandera `SchemaError`, exit code DQ threshold (see CLI cheatsheet exit codes).
-   - `bioetl diagnostics --pipeline <name> --quarantine`
+   - `bioetl diagnostics quarantine --pipeline chembl_activity`
 2. **Identify failing records**
    - Report samples when `report.include_sample_failures: true` (base quality).
    - Quarantine table `common.quarantine` + [quarantine CLI](cli-commands.md).

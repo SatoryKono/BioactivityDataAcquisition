@@ -689,7 +689,7 @@ ______________________________________________________________________
 | `BIOETL_METRICS_PORT`                   | Порт для Prometheus                  | `8000`  |
 | `BIOETL_OBSERVABILITY__TRACING_ENABLED` | Включить OpenTelemetry tracing       | `false` |
 
-`BIOETL_LOG_LEVEL` не является полем `Settings` и не читается. Уровень по умолчанию — `INFO`. Для pipeline run используйте `bioetl run --debug`, для шагов workflow — `--log-level`.
+Уровень логов по умолчанию — `INFO`. Для pipeline run используйте `bioetl run --debug`, для шагов workflow — `--log-level`.
 
 **API-ключи провайдеров:**
 - `BIOETL_UNIPROT_API_KEY` — optional higher-throughput UniProt profile

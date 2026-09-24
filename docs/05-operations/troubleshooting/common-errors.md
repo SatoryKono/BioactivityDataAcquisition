@@ -92,7 +92,7 @@ Operator/developer playbook for frequent BioETL failures.
 | --- | --- |
 | **Symptoms** | Exit DQ codes; soft/hard threshold messages |
 | **Root causes** | Bad source batch; thresholds; new rule too strict |
-| **Diagnosis** | [DQ cheatsheet](../../03-guides/cheatsheets/data-quality-rules.md); `bioetl dq validate --entity ... --show-rules`; quarantine inspect |
+| **Diagnosis** | [DQ cheatsheet](../../03-guides/cheatsheets/data-quality-rules.md); `bioetl dq validate chembl_activity`; `bioetl diagnostics quarantine --pipeline chembl_activity` |
 | **Resolution** | Fix data/transform **or** justified YAML threshold change **or** quarantine path |
 | **Prevention** | No silent skip of invalid Silver rows (RULES §2.1) |
 
