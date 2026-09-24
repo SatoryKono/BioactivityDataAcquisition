@@ -56,6 +56,45 @@ def test_overview_paginates_tracks_without_limiting_evidence():
         assert not any(t.get("id") == "limit" for t in panel.get("transformations", []))
 
 
+def test_overview_summary_uses_aggregate_verdict_and_explains_missing_archive():
+    dashboard = json.loads(
+        (ROOT / "grafana/dashboards/bioetl-overview-v2.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    panels = {p["id"]: p for p in _panels(dashboard["panels"])}
+    summary = next(
+        p for p in panels.values() if p.get("title") == "Review Selected Run Status"
+    )
+    target = summary["targets"][0]
+    assert "panelId" not in target, (
+        "First domain OK must not replace aggregate INCOMPLETE"
+    )
+    assert "/selected-run-status?" in target["url"]
+    assert "presentation_summary[0]" in target["root_selector"]
+    assert "presentation_trust[0].reasons_display" in target["root_selector"]
+    for panel in (summary, panels[9002]):
+        fields = next(
+            t["options"]["include"]["names"]
+            for t in panel["transformations"]
+            if t["id"] == "filterFieldsByName"
+        )
+        assert "verdict" in fields
+        assert "reason_display" in fields
+        assert "evidence_completeness" not in fields
+        reason = next(
+            o
+            for o in panel["fieldConfig"]["overrides"]
+            if o["matcher"]["options"] == "Reason"
+        )
+        props = {p["id"]: p["value"] for p in reason["properties"]}
+        assert props["custom.cellOptions"]["wrapText"] is True
+        assert (
+            props["mappings"][0]["options"]["Archive missing"]["text"]
+            == "No verified archive"
+        )
+
+
 def test_run_cell_inspection_and_links_use_full_identity():
     dashboard = json.loads(
         (ROOT / "grafana/dashboards/bioetl-run-explorer-v1.json").read_text(

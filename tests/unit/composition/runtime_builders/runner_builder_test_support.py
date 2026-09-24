@@ -127,8 +127,8 @@ def _namespace_observability(logger: object | None = None) -> SimpleNamespace:
     )
 
 
-def _runtime_config_stub() -> dict[str, object]:
-    return {"runtime_profile": "stub"}
+def _runtime_config_stub() -> SimpleNamespace:
+    return SimpleNamespace(runtime_profile="stub", query=None)
 
 
 def _build_factory_registry() -> tuple[_FakeFactory, _FakeRegistry]:
@@ -223,6 +223,7 @@ def _build_pipeline_config(**overrides: object) -> SimpleNamespace:
         "input_filter": SimpleNamespace(),
         "business_primary_keys": ["activity_id"],
         "technical_primary_key": "entity_id",
+        "batch_size": 100,
         "sink": {
             "bronze": SimpleNamespace(enabled=True, save_metadata=True),
             "silver": SimpleNamespace(enabled=True, save_metadata=True),

@@ -273,6 +273,11 @@ Normative rules:
   accounting evidence. It intentionally omits reconciliation status, accounted
   subtotal, and delta rows, and MUST NOT replace the dashboard role-specific
   `Status` or `First Action` decision path.
+- Overview `Review Selected Run Status` shows processing, aggregate trust, and
+  the saved explanation (`Обработка`, `Доверие`, `Причина`). It must not use the
+  first domain verdict as the aggregate. `Review Run Domains` also shows the
+  domain explanation. Missing archive evidence reads `No verified archive`
+  and remains `INCOMPLETE`; evidence completeness remains in the saved report.
 - `Processed Records` percentage evidence MUST stay denominator-explicit:
   Bronze renders `100%`, and all Silver and Gold outcome rows divide by
   `bronze [total]`. Zero-valued rows are omitted from the compact table, but

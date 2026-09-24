@@ -50,8 +50,8 @@ panels:
     endpoint: pipeline_run_reports
     url: /ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}
     root_selector: 'index_state = "valid_empty" and $exists(items) and $count(items) = 0 ? [{"pipeline": "VALID EMPTY"}] : items'
-    no_value_tokens: [VALID EMPTY]
-    copy_tokens: [TREE_MISSING, LAYOUT_UNHEALTHY]
+    no_value_tokens: [UNKNOWN]
+    copy_tokens: [VALID EMPTY, TREE_MISSING, LAYOUT_UNHEALTHY]
   - id: 9451
     title: Inspect Selected Run Domains
     endpoint: selected_run_status

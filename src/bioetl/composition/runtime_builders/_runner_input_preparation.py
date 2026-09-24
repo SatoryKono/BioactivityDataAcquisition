@@ -58,7 +58,6 @@ def _resolve_settings_for_runner(
     ctx: PipelineRunContext,
     get_settings_fn: Callable[[], Settings],
 ) -> Settings:
-    """Apply runtime tracing overrides before building runner inputs."""
     return _apply_tracing_override_impl(
         settings=get_settings_fn(),
         enabled=getattr(ctx, "tracing_enabled_override", None),
@@ -104,7 +103,6 @@ def _resolve_effective_context(
         [PipelineRunContext], CachedBronzeContext
     ],
 ) -> tuple[PipelineRunContext, CachedBronzeContext]:
-    """Resolve exact-replay cached Bronze state and bind it into the context."""
     cached_bronze = _resolve_exact_replay_cached_bronze_context(
         ctx=ctx,
         settings=settings,
@@ -119,7 +117,6 @@ def _load_runner_yaml_config(
     load_pipeline_config_fn: Callable[[str], PipelineYamlConfig],
     validate_pk_contract_fn: Callable[[PipelineYamlConfig], None],
 ) -> PipelineYamlConfig:
-    """Load and validate the pipeline contract used for runner assembly."""
     yaml_config = load_pipeline_config_fn(pipeline_name)
     validate_pk_contract_fn(yaml_config)
     return yaml_config
@@ -132,7 +129,6 @@ def _build_runner_observability(
     yaml_config: PipelineYamlConfig,
     build_observability_bundle_fn: Callable[..., ObservabilityBundle],
 ) -> ObservabilityBundle:
-    """Create the observability bundle for one effective runner context."""
     return build_observability_bundle_fn(
         pipeline=ctx.pipeline_name,
         run_id=ctx.run_id,
@@ -222,9 +218,13 @@ def resolve_runner_derived_inputs(
         load_source_config_fn=load_source_config_fn,
     )
     provenance = validate_resolved_extraction_input(
-        pipeline_name=prepared.yaml_config.pipeline_name,
-        provider=prepared.yaml_config.provider,
-        query=runtime_config.query,
+        pipeline_name=getattr(
+            prepared.yaml_config,
+            "pipeline_name",
+            getattr(prepared.effective_ctx, "pipeline_name", ""),
+        ),
+        provider=getattr(prepared.yaml_config, "provider", ""),
+        query=getattr(runtime_config, "query", None),
         filter_config=filter_config,
     )
     if provenance is not None:

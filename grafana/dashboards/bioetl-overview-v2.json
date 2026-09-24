@@ -353,15 +353,12 @@
       "title": "Review Selected Run Status",
       "gridPos": {
         "h": 6,
-        "w": 16,
+        "w": 12,
         "x": 0,
         "y": 11
       },
-      "datasource": {
-        "type": "datasource",
-        "uid": "-- Dashboard --"
-      },
-      "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
+      "datasource": "BioETL Ops HTTP",
+      "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
       "fieldConfig": {
         "defaults": {
           "noValue": "UNKNOWN",
@@ -404,10 +401,6 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 130
-              },
-              {
                 "id": "links",
                 "value": []
               },
@@ -424,6 +417,14 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "displayName",
+                "value": "Доверие"
+              },
+              {
+                "id": "custom.width",
+                "value": 115
               }
             ]
           },
@@ -474,6 +475,14 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "displayName",
+                "value": "Обработка"
+              },
+              {
+                "id": "custom.width",
+                "value": 100
               }
             ]
           },
@@ -521,6 +530,45 @@
                 ]
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reason"
+            },
+            "properties": [
+              {
+                "id": "custom.wrapText",
+                "value": true
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Причина"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "Archive missing": {
+                        "text": "No verified archive"
+                      },
+                      "archive_evidence_not_recorded": {
+                        "text": "No verified archive"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
@@ -533,9 +581,18 @@
       },
       "targets": [
         {
-          "panelId": 9002,
           "refId": "A",
-          "withTransforms": false
+          "type": "json",
+          "source": "url",
+          "parser": "uql",
+          "format": "table",
+          "root_selector": "[$merge([presentation_summary[0], {\"reason_display\": presentation_trust[0].reasons_display ? presentation_trust[0].reasons_display : presentation_summary[0].reason}])]",
+          "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "uql": "parse-json | jsonata \"[$merge([presentation_summary[0], {'reason_display': presentation_trust[0].reasons_display ? presentation_trust[0].reasons_display : presentation_summary[0].reason}])]\""
         }
       ],
       "transformations": [
@@ -551,9 +608,8 @@
             "include": {
               "names": [
                 "execution_state",
-                "run_verdict",
-                "evidence_completeness",
-                "rules_version"
+                "verdict",
+                "reason_display"
               ]
             }
           }
@@ -563,9 +619,8 @@
           "options": {
             "indexByName": {
               "execution_state": 0,
-              "evidence_completeness": 2,
-              "rules_version": 3,
-              "run_verdict": 1
+              "verdict": 1,
+              "reason_display": 2
             },
             "renameByName": {
               "domain": "Domain",
@@ -573,7 +628,8 @@
               "execution_state": "Result",
               "evidence_completeness": "Evidence",
               "rules_version": "Rules",
-              "run_verdict": "Status"
+              "run_verdict": "Status",
+              "reason_display": "Reason"
             },
             "excludeByName": {
               "__name__": true,
@@ -728,7 +784,7 @@
       "title": "Review First Action",
       "gridPos": {
         "h": 6,
-        "w": 16,
+        "w": 12,
         "x": 0,
         "y": 5
       },
@@ -1242,7 +1298,7 @@
           "show": false,
           "enablePagination": false
         },
-        "cellHeight": "sm",
+        "cellHeight": "lg",
         "sortBy": [
           {
             "desc": true,
@@ -1358,8 +1414,8 @@
       "title": "Review Run Domains",
       "gridPos": {
         "h": 12,
-        "w": 8,
-        "x": 16,
+        "w": 12,
+        "x": 12,
         "y": 5
       },
       "datasource": "BioETL Ops HTTP",
@@ -1373,7 +1429,9 @@
               "type": "auto",
               "wrapText": false
             },
-            "inspect": true
+            "inspect": true,
+            "minWidth": 50,
+            "wrapText": true
           },
           "links": [
             {
@@ -1402,7 +1460,83 @@
             }
           ]
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reason"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Причина"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "Archive missing": {
+                        "text": "No verified archive"
+                      },
+                      "archive_evidence_not_recorded": {
+                        "text": "No verified archive"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "custom.wrapText",
+                "value": true
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Domain"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              },
+              {
+                "id": "links",
+                "value": []
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 105
+              },
+              {
+                "id": "links",
+                "value": []
+              }
+            ]
+          }
+        ]
       },
       "targets": [
         {
@@ -1421,7 +1555,7 @@
       ],
       "options": {
         "showHeader": true,
-        "cellHeight": "sm",
+        "cellHeight": "lg",
         "footer": {
           "show": false
         }
@@ -1439,7 +1573,8 @@
             "include": {
               "names": [
                 "domain",
-                "verdict"
+                "verdict",
+                "reason_display"
               ]
             }
           }
@@ -1449,19 +1584,21 @@
           "options": {
             "indexByName": {
               "domain": 0,
-              "verdict": 1
+              "verdict": 1,
+              "reason_display": 2
             },
             "renameByName": {
               "domain": "Domain",
               "verdict": "Status",
               "execution_state": "Result",
               "evidence_completeness": "Evidence",
-              "rules_version": "Rules"
+              "rules_version": "Rules",
+              "reason_display": "Reason"
             }
           }
         }
       ],
-      "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence.",
+      "description": "SELECTED RUN · Saved evidence for the exact Run ID. Completion age and chart range do not change this verdict. CURRENT uses fresh telemetry and retains its 15-minute freshness rule. Historical Trust never authorizes replay now. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query; backend down is QUERY ERROR. Chart coverage is separate: use Set range to run in Run Explorer to inspect a partial or outside range. Inspect the report for rules, revision, completion and the saved source evidence. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report.",
       "links": [
         {
           "title": "Open run in Run Explorer",

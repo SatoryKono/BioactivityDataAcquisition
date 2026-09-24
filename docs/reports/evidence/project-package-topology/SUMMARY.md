@@ -4,7 +4,7 @@ Refresh note (2026-09-24): hash-only reconcile after composition bootstrap/runti
 `reports/quality/module-coverage-inventory.json`. Historical notes remain
 historical.
 
-`source_tree_sha256=d235c918f64ac242ba9162300692a52e5a4b81257cab88eb86f486c3360190e2`
+`source_tree_sha256=2aeac7963c8a35dc02295df8e6a56389f70b1992f4b042ac67dd35bf3eb72c40`
 
 `source_module_count=2479`
 

@@ -23,10 +23,10 @@
     "bioetl-control-plane-v1": "2a61a8450ca9abd1a674ee6593adfe8474bff2078aa1c3554efb283facdaeb53",
     "bioetl-dq-v2": "37d309b658e3a43438cd0113e8f93b97881a1fc5a72a68ca822fa027ed6447fe",
     "bioetl-incident-v1": "e82599954f04f3fd38a9dd769008631619395fd37d1d3af4f5b65c96c895597a",
-    "bioetl-overview-v2": "0be697c9c5be818557deab149d4a2e62130d665dfed26924685906147d1c2551",
+    "bioetl-overview-v2": "42a3c2ffbf0698ca7e365b9c5c6766b122ebe70b88c2ae3c48cca0df1ff238a3",
     "bioetl-provider-health-v2": "10e1c76f151bec677e01b10a4d854cba200d4ed2984fa3e9e6a9e7b9aa34fd4c",
     "bioetl-run-explorer-v1": "6593cd9104921368f5681cff2699c21b3222641c446448bb40f62f159999c407",
-    "bioetl-runtime": "2d5cbbea3144a5e5dca2ff3bf1234e0352fa660c3b1cffcdfca10dd89566e056"
+    "bioetl-runtime": "937d40657cf3fc9dadfb5f9a47db71a5dbee644b668f76aea66a5add14f9db69"
   },
   "panels": [
     {
@@ -2199,9 +2199,11 @@
       "panel_title": "Review Selected Run Status",
       "route": "operations-home",
       "source": {
-        "datasource_type": "datasource",
-        "datasource_uid": "-- Dashboard --",
-        "expressions": [],
+        "datasource_type": null,
+        "datasource_uid": null,
+        "expressions": [
+          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+        ],
         "target_count": 1
       }
     },

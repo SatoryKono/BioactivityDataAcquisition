@@ -1,6 +1,7 @@
 """Canonical readable evidence views for the seven Grafana dashboards."""
 
 from __future__ import annotations
+from copy import deepcopy
 from scripts.ops.observability.grafana._gr_db_corrections import _override, _panels
 from scripts.ops.observability.grafana._visual_usability import _bands
 
@@ -526,6 +527,89 @@ def _selection_summary(panel: dict) -> None:
     )
 
 
+def _overview_verdict_reasons(p: dict[int, dict]) -> None:
+    """Expose explanations without replacing the aggregate saved-run verdict."""
+    summary = next(
+        panel
+        for panel in p.values()
+        if panel.get("title") == "Review Selected Run Status"
+    )
+    # The previous Dashboard datasource reused domain rows. Query the envelope
+    # directly: the first domain's verdict is not the aggregate run verdict.
+    summary["datasource"] = deepcopy(p[9002]["datasource"])
+    summary["targets"] = deepcopy(p[9002]["targets"])
+    summary["targets"][0]["root_selector"] = (
+        '[$merge([presentation_summary[0], {"reason_display": '
+        "presentation_trust[0].reasons_display ? "
+        "presentation_trust[0].reasons_display : presentation_summary[0].reason}])]"
+    )
+    target = summary["targets"][0]
+    target["parser"] = "uql"
+    target["uql"] = (
+        'parse-json | jsonata "' + target["root_selector"].replace('"', "'") + '"'
+    )
+    for panel, fields in (
+        (summary, ["execution_state", "verdict", "reason_display"]),
+        (p[9002], ["domain", "verdict", "reason_display"]),
+    ):
+        for transform in panel["transformations"]:
+            if transform["id"] == "filterFieldsByName":
+                transform["options"]["include"]["names"] = fields
+            elif transform["id"] == "organize":
+                transform["options"]["indexByName"] = {
+                    name: index for index, name in enumerate(fields)
+                }
+                transform["options"]["renameByName"]["reason_display"] = "Reason"
+        _override(panel, "Reason", "custom.wrapText", True)
+        _override(
+            panel, "Reason", "custom.cellOptions", {"type": "auto", "wrapText": True}
+        )
+        _override(panel, "Reason", "displayName", "Причина")
+        _override(
+            panel,
+            "Reason",
+            "mappings",
+            [
+                {
+                    "type": "value",
+                    "options": {
+                        "Archive missing": {"text": "No verified archive"},
+                        "archive_evidence_not_recorded": {
+                            "text": "No verified archive"
+                        },
+                    },
+                }
+            ],
+        )
+        panel["description"] += (
+            (
+                " Reason explains the saved assessment; missing archive evidence remains "
+                "INCOMPLETE. Evidence completeness remains available in the saved report."
+            )
+            if "Reason explains the saved assessment" not in panel["description"]
+            else ""
+        )
+    _override(summary, "Result", "displayName", "Обработка")
+    _override(summary, "Status", "displayName", "Доверие")
+    _table(p[9002], {"Domain": 120, "Status": 105})
+    # Three evidence columns need half the first-screen width at narrow viewports.
+    p[9002]["gridPos"].update(x=12, w=12)
+    p[214]["gridPos"].update(x=16, w=8)
+    p[215]["gridPos"]["w"] = 12
+    p[215]["options"]["cellHeight"] = "lg"
+    summary["gridPos"]["w"] = 12
+    _override(summary, "Result", _WIDTH, 100)
+    _override(summary, "Status", _WIDTH, 115)
+    p[9002]["options"]["cellHeight"] = "lg"
+    p[9002]["fieldConfig"]["defaults"]["custom"]["wrapText"] = True
+    for field in ("Domain", "Status", "Reason"):
+        _override(p[9002], field, "links", [])
+    _override(p[9002], "Reason", "custom.wrapText", True)
+    _override(
+        p[9002], "Reason", "custom.cellOptions", {"type": "auto", "wrapText": True}
+    )
+
+
 def apply_evidence_readability(payload: dict) -> None:
     """Preserve queries while improving evidence readability at narrow widths."""
     p = {panel["id"]: panel for panel in _panels(payload["panels"])}
@@ -547,6 +631,8 @@ def apply_evidence_readability(payload: dict) -> None:
     if payload.get("uid") == "bioetl-run-explorer-v1":
         _run_explorer(p)
     _first_window_widths(payload, p)
+    if payload.get("uid") == "bioetl-overview-v2":
+        _overview_verdict_reasons(p)
     # These are enum verdicts, not blocker counts: code 3 is UNKNOWN.
     # Counter panels intentionally retain their >=2=CRIT threshold copy.
     enum_panels = {

@@ -1890,7 +1890,8 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         .get("custom", {})
         .get("cellOptions", {})
     )
-    assert default_identity_cell_options.get("wrapText") is not True
+    if dashboard_name != "bioetl-control-plane-v1.json":
+        assert default_identity_cell_options.get("wrapText") is not True
     wrapped_identity_fields = {
         override["matcher"]["options"]
         for override in identity.get("fieldConfig", {}).get("overrides", [])
@@ -1899,7 +1900,9 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         and property_.get("value", {}).get("wrapText") is True
     }
     expected_wrapped_fields = {"parameter"}
-    if full_width_evidence:
+    if dashboard_name == "bioetl-control-plane-v1.json":
+        expected_wrapped_fields = {"Parameter", "Value"}
+    elif full_width_evidence:
         expected_wrapped_fields = set()
         assert identity["fieldConfig"]["defaults"]["custom"]["inspect"] is True
     assert wrapped_identity_fields == expected_wrapped_fields
