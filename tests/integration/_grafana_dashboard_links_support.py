@@ -481,6 +481,15 @@ def _assert_critical_panel_entry(
         f"critical link to target_uid={target_uid} with title in {sorted(expected_titles)}"
     )
 
+    if target_uid == "${__data.fields.action_dashboard_uid}":
+        for link in matching_links:
+            _assert_cross_dashboard_link_policy(
+                dashboard_name=dashboard_path.name,
+                current_uid=uid,
+                link=link,
+                dashboard_links=[],
+            )
+        return
     allowed_vars = _ALLOWED_DASHBOARD_LINK_VARS[target_uid]
     for link in matching_links:
         url = str(link.get("url", ""))
@@ -798,7 +807,7 @@ def _assert_cross_dashboard_link_policy(
             assert _extract_link_var_values(url)["run_id"] == "-"
             assert (
                 _extract_link_var_values(url)["pipeline"]
-                == "${__data.fields.route_pipeline}"
+                == "${__data.fields.route_pipeline:percentencode}"
             )
         elif (
             current_uid == "bioetl-run-explorer-v1"

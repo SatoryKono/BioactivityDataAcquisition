@@ -2606,3 +2606,85 @@ tests:
       exp_samples:
       - labels: '{}'
         value: 0
+
+  - name: thresholds, missing and stale samples
+    interval: 1m
+    input_series:
+    - series: bioetl_stage_lag_seconds{pipeline="p299",run_type="incremental",stage="ingestion"}
+      values: 299 stale
+    - series: bioetl_stage_lag_seconds{pipeline="p300",run_type="incremental",stage="ingestion"}
+      values: 300 stale
+    - series: bioetl_stage_lag_seconds{pipeline="p301",run_type="incremental",stage="ingestion"}
+      values: 301 stale
+    - series: bioetl_stage_backlog_records{pipeline="p0",run_type="incremental",stage="ingestion"}
+      values: 0 stale
+    - series: bioetl_stage_backlog_records{pipeline="p1",run_type="incremental",stage="ingestion"}
+      values: 1 stale
+    promql_expr_test:
+    - expr: '(label_join(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(max
+        by (pipeline, run_type, stage) (max_over_time(bioetl_stage_lag_seconds[15m]))
+        >= 300,"signal","stage_lag","",""),"window","15m maximum","",""),"threshold",">=
+        300 s (15m maximum)","",""),"unit","s","",""),"observation_time","Not provided","",""),"publication_time","Not
+        provided","",""),"freshness","Not verified: observed/published timestamps not
+        provided","",""),"scope"," / ","pipeline","run_type","stage")) or (label_join(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(max
+        by (pipeline, run_type, stage) (bioetl_stage_backlog_records{stage!="validation"})
+        > 0,"signal","stage_backlog","",""),"window","instant","",""),"threshold",">
+        0 records (instant)","",""),"unit","records","",""),"observation_time","Not
+        provided","",""),"publication_time","Not provided","",""),"freshness","Not verified:
+        observed/published timestamps not provided","",""),"scope"," / ","pipeline","run_type","stage"))'
+      eval_time: 0m
+      exp_samples:
+      - labels: '{freshness="Not verified: observed/published timestamps not provided",observation_time="Not
+          provided",pipeline="p300",publication_time="Not provided",run_type="incremental",scope="p300
+          / incremental / ingestion",signal="stage_lag",stage="ingestion",threshold=">=
+          300 s (15m maximum)",unit="s",window="15m maximum"}'
+        value: 300
+      - labels: '{freshness="Not verified: observed/published timestamps not provided",observation_time="Not
+          provided",pipeline="p301",publication_time="Not provided",run_type="incremental",scope="p301
+          / incremental / ingestion",signal="stage_lag",stage="ingestion",threshold=">=
+          300 s (15m maximum)",unit="s",window="15m maximum"}'
+        value: 301
+      - labels: '{freshness="Not verified: observed/published timestamps not provided",observation_time="Not
+          provided",pipeline="p1",publication_time="Not provided",run_type="incremental",scope="p1
+          / incremental / ingestion",signal="stage_backlog",stage="ingestion",threshold=">
+          0 records (instant)",unit="records",window="instant"}'
+        value: 1
+    - expr: '(label_join(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(max
+        by (pipeline, run_type, stage) (max_over_time(bioetl_stage_lag_seconds[15m]))
+        >= 300,"signal","stage_lag","",""),"window","15m maximum","",""),"threshold",">=
+        300 s (15m maximum)","",""),"unit","s","",""),"observation_time","Not provided","",""),"publication_time","Not
+        provided","",""),"freshness","Not verified: observed/published timestamps not
+        provided","",""),"scope"," / ","pipeline","run_type","stage")) or (label_join(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(max
+        by (pipeline, run_type, stage) (bioetl_stage_backlog_records{stage!="validation"})
+        > 0,"signal","stage_backlog","",""),"window","instant","",""),"threshold",">
+        0 records (instant)","",""),"unit","records","",""),"observation_time","Not
+        provided","",""),"publication_time","Not provided","",""),"freshness","Not verified:
+        observed/published timestamps not provided","",""),"scope"," / ","pipeline","run_type","stage"))'
+      eval_time: 16m
+      exp_samples: []
+  - name: provider absent or mixed False
+    input_series:
+    - series: bioetl_incident_alert_priority{pipeline="p"}
+      values: '2'
+    promql_expr_test:
+    - expr: label_replace(bioetl_incident_alert_priority,"provider","Not provided","provider","^$")
+      eval_time: 0m
+      exp_samples:
+      - labels: '{__name__="bioetl_incident_alert_priority",pipeline="p",provider="Not
+          provided"}'
+        value: 2
+  - name: provider absent or mixed True
+    input_series:
+    - series: bioetl_incident_alert_priority{pipeline="p"}
+      values: '2'
+    - series: bioetl_incident_alert_priority{pipeline="q",provider="crossref"}
+      values: '1'
+    promql_expr_test:
+    - expr: label_replace(bioetl_incident_alert_priority,"provider","Not provided","provider","^$")
+      eval_time: 0m
+      exp_samples:
+      - labels: '{__name__="bioetl_incident_alert_priority",pipeline="p",provider="Not
+          provided"}'
+        value: 2
+      - labels: '{__name__="bioetl_incident_alert_priority",pipeline="q",provider="crossref"}'
+        value: 1

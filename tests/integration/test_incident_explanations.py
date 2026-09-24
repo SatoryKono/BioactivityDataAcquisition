@@ -34,7 +34,10 @@ def test_global_context_and_row_action_do_not_inherit_selected_history():
     )
     for pid in (2010, 22010):
         panel = panels[pid]
-        assert "$pipeline" not in panel["targets"][0]["expr"]
+        source = panel if pid == 2010 else panels[panel["targets"][0]["panelId"]]
+        assert "$pipeline" not in source["targets"][0]["expr"]
+        if pid == 22010:
+            assert "expr" not in panel["targets"][0]
         url = _properties(panel, "Action")["links"][0]["url"]
         assert "var-run_id=-" in url
         assert "var-workflow=$__all" in url
@@ -49,7 +52,12 @@ def test_verification_is_presentation_only_and_not_health():
     assert confidence["displayName"] == "Cause verification"
     assert confidence["mappings"][0]["options"]["UNVERIFIED"]["text"] == "Not verified"
     for pid in (2005, 22005):
-        assert '"provider","^$"' in panels[pid]["targets"][0]["expr"]
+        source = (
+            panels[pid] if pid == 2005 else panels[panels[pid]["targets"][0]["panelId"]]
+        )
+        assert '"provider","^$"' in source["targets"][0]["expr"]
+        if pid == 22005:
+            assert "expr" not in panels[pid]["targets"][0]
         assert _properties(panels[pid], "provider")["noValue"] == "Not provided"
     assert panels[9401]["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
 

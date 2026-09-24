@@ -76,7 +76,7 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
   (`id=2005`) stay on the first screen.
 - **Data sources:** Nested Prometheus and static evidence panels below.
 
-### 8. Monitor Current Alerts
+### 8. Monitor Global Alerts
 - **Type:** Table (first-screen, `id=2005`, below ranked suspects)
 - **Purpose:** Instant ALERTS snapshot (firing|pending) with a runbook link.
   Limited to three rows. `Active Alerts` is a
@@ -108,19 +108,19 @@ Shipped in `bioetl-incident-v1.json`.
 
 Shipped in `bioetl-incident-v1.json`.
 
-### 100. Inspect Full Ranked Suspects
+### 100. Browse Global Suspects
 
 Complete evidence is available in the collapsed detail group. The table reuses the source panel response before transformations, keeps all rows, and shows the total through native pagination. It issues no duplicate backend query.
 
-### 101. Inspect Full Ranked Suspects
+### 101. Inspect Global Suspects (Full)
 
 Complete evidence is available in the collapsed detail group. The table reuses the source panel response before transformations, keeps all rows, and shows the total through native pagination. It issues no duplicate backend query.
 
-### 102. Inspect Full Current Alerts
+### 102. Browse Global Alerts
 
 Complete evidence is available in the collapsed detail group. The table reuses the source panel response before transformations, keeps all rows, and shows the total through native pagination. It issues no duplicate backend query.
 
-### 103. Inspect Full Current Alerts
+### 103. Monitor Global Alerts (Full)
 
 Complete evidence is available in the collapsed detail group. The table reuses the source panel response before transformations, keeps all rows, and shows the total through native pagination. It issues no duplicate backend query.
 
@@ -135,3 +135,7 @@ Complete evidence is available in the collapsed detail group. The table reuses t
 The first-window ranked-suspect and current-alert tables show up to two rows;
 the panel links open the unrestricted full lists. Alert history paginates
 at eight series per page while preserving complete alert and scope labels.
+
+### 99. Inspect Global Signal Measurements
+
+GLOBAL / TIME RANGE. Runtime lag and non-validation backlog operands with thresholds, window and evaluation time. Missing observed/published timestamps leave freshness unverified.

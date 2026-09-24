@@ -40,7 +40,7 @@ diagnostics use it. Navigation without provider context resets Provider=All.
 - **Data sources:** BioETL Ops HTTP
   `/ops/observability/processed-records`; this is not a Prometheus panel.
 
-### 6. Monitor Fleet Severity
+### 6. Monitor Fleet Status
 - **Type:** Table
 - **Purpose:** Show global provider severity matrix, sorted worst-first.
 - **Data sources:** `bioetl_provider_current_status`
@@ -193,7 +193,7 @@ the relevant provider or evidence gap.
 - Legacy provider request-success/rate-limited placeholders are intentionally not documented here.
 
 ## Additional shipped panels
-### 32. Inspect Status Reason
+### 32. Inspect Health Evidence
 
 Shipped in `bioetl-provider-health-v2.json`.
 ### 33. Inspect Fleet Non-OK and Causes

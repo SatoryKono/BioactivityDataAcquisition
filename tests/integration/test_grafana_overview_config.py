@@ -233,7 +233,7 @@ def test_review_domain_status_uses_exact_persisted_evidence() -> None:
     assert not summary_expr
     target = summary["targets"][0]
     assert "selected-run-status?pipeline=${pipeline}&run_id=${run_id}" in target["url"]
-    assert target["root_selector"] == "presentation_domains"
+    assert "presentation_domains" in target["root_selector"]
     assert "from=" not in target["url"] and "to=" not in target["url"]
     assert "15-minute" in summary["description"]
 

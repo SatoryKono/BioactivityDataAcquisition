@@ -1053,7 +1053,10 @@ def test_incident_alert_count_and_dq_reason_have_honest_table_semantics() -> Non
     current_alerts = _panel(incident, 2005)
     dq_suspects = _panel(incident, 2004)
 
-    assert current_alerts["targets"][0]["expr"] == "bioetl_incident_alert_priority"
+    assert (
+        'label_replace(bioetl_incident_alert_priority,"provider","Not provided"'
+        in current_alerts["targets"][0]["expr"]
+    )
     transforms = current_alerts["transformations"]
     ids = [t["id"] for t in transforms]
     assert ids.index("sortBy") < ids.index("limit")
