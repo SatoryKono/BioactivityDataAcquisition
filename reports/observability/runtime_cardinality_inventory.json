@@ -2409,6 +2409,7 @@
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md",
+      "grafana/dashboards/bioetl-incident-v1.json",
       "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_stage_lag_seconds": [
@@ -2418,6 +2419,7 @@
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md",
+      "grafana/dashboards/bioetl-incident-v1.json",
       "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_stage_records_total": [

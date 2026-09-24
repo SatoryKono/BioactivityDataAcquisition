@@ -308,6 +308,10 @@ def select_first_window_panels(
 def panel_declared_row_cap(panel: dict[str, Any]) -> int | None:
     """Return the tightest declared first-screen row cap, if any."""
     caps: list[int] = []
+    options = panel.get("options") or {}
+    per_page = options.get("perPage")
+    if isinstance(per_page, int) and not isinstance(per_page, bool) and per_page > 0:
+        caps.append(per_page)
     for target in panel.get("targets") or []:
         if not isinstance(target, dict):
             continue
