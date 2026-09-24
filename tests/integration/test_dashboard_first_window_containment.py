@@ -146,7 +146,7 @@ def test_trust_9418_keeps_verdict_and_reason_count_visible() -> None:
 
 
 def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
-    """#10245: first-window retention table shows live counts, UNKNOWN first, no wrap."""
+    """#10245: first-window retention rows stay UNKNOWN-first and unwrapped."""
     dashboard_path = next(
         path
         for path in get_dashboard_files()
@@ -166,7 +166,7 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
 
     transforms = panel.get("transformations", [])
     transform_ids = [item.get("id") for item in transforms]
-    assert "configFromData" in transform_ids
+    assert "configFromData" not in transform_ids
     assert "filterByRefId" in transform_ids
     assert "sortBy" in transform_ids
     assert transform_ids.index("sortBy") < transform_ids.index("limit")
@@ -174,11 +174,6 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
     assert (sort.get("options") or {}).get("sort") == [
         {"field": "status", "desc": True}
     ]
-    config = next(item for item in transforms if item.get("id") == "configFromData")
-    mapping = ((config.get("options") or {}).get("mappings") or [{}])[0]
-    assert mapping.get("fieldName") == "headline"
-    assert mapping.get("handlerKey") == "displayName"
-    assert mapping.get("targetField") == "check"
     filter_ref = next(item for item in transforms if item.get("id") == "filterByRefId")
     assert (filter_ref.get("options") or {}).get("include") == "A"
 
@@ -203,16 +198,11 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
     }
 
     targets = panel.get("targets") or []
-    assert len(targets) == 2
+    assert [target.get("refId") for target in targets] == ["A"]
     rows_target = targets[0]
-    summary_target = targets[1]
     assert rows_target.get("parser") == "backend"
     assert rows_target.get("root_selector") == "rows"
-    assert summary_target.get("refId") == "B"
-    assert summary_target.get("root_selector") == "summary"
-    assert "ok_count" in str(summary_target.get("uql") or "")
-    assert "unknown_count" in str(summary_target.get("uql") or "")
-    assert "headline" in str(summary_target.get("uql") or "")
+    assert "error_as_row=1" in str(rows_target.get("url") or "")
 
     override_properties = {
         override.get("matcher", {}).get("options"): {

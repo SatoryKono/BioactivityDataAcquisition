@@ -138,8 +138,8 @@ bioetl config show chembl_activity --format json
 # Validate entity config
 bioetl config validate chembl_activity
 
-# DQ rules for entity
-bioetl dq validate --entity chembl.activity --show-rules
+# DQ configuration for a pipeline
+bioetl dq validate chembl_activity
 ```
 
 Detailed guide: [pipeline-configuration.md](../pipeline-configuration.md).

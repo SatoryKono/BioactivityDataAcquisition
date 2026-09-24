@@ -5,6 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import cast
 
+from .persistence_profile_support_build_composite_resume_reconstructability import (
+    build_composite_resume_reconstructability,
+)
+
 __all__ = [
     "PersistenceProfileContext",
     "build_composite_resume_reconstructability",
@@ -137,47 +141,6 @@ def build_persistence_surfaces(
         "run_ledger_history": ledger_entries_present,
         "artifact_lineage_links": inputs.artifact_lineage_links_complete,
         "lineage_closure_boundary_support": inputs.lineage_closure_boundary_supported,
-    }
-
-
-def build_composite_resume_reconstructability(
-    *,
-    composite_execution_context: bool,
-    composite_resume_rich_replay_supported: bool,
-) -> dict[str, object]:
-    """Return the published checkpoint reconstruction scope for composite runs."""
-    if composite_execution_context and composite_resume_rich_replay_supported:
-        return {
-            "scope": "rich_composite_resume",
-            "resume_model": "checkpoint_snapshot_plus_ledger_suffix",
-            "reconstructs": [
-                "state",
-                "seed_completed",
-                "seed_result",
-                "dependency_results",
-                "enrichment_results",
-                "merge_result",
-                "last_event_id",
-                "last_event_occurred_at",
-            ],
-            "does_not_reconstruct": [],
-            "forensic_grade_supported": True,
-        }
-    return {
-        "scope": "coarse_grained_composite_resume",
-        "resume_model": "checkpoint_snapshot_plus_ledger_suffix",
-        "reconstructs": [
-            "state",
-            "seed_completed",
-            "merge_completed",
-            "last_event_id",
-            "last_event_occurred_at",
-        ],
-        "does_not_reconstruct": [
-            "per_provider_result_maps",
-            "rich_checkpoint_payloads",
-        ],
-        "forensic_grade_supported": False,
     }
 
 

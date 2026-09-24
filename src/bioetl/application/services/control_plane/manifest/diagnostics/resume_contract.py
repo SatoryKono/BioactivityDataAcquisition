@@ -10,6 +10,9 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_invar
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.checkpoint_policy import (
     resolve_applied_checkpoint_compatibility_policy as _resolve_applied_checkpoint_compatibility_policy,
 )
+from bioetl.application.services.control_plane.manifest.diagnostics.resume_contract_resolve_resume_guarantee import (
+    _resolve_resume_guarantee,
+)
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
 from bioetl.domain.control_plane.execution_context import (
     is_composite_execution_context as _is_composite_execution_context,
@@ -23,38 +26,6 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context import (
         ReplayFamilyContext,
     )
-
-
-def _resolve_resume_guarantee(
-    *,
-    continuation_mode: str,
-) -> tuple[str, str, bool]:
-    """Map continuation taxonomy to the published resume guarantee."""
-    if continuation_mode == "exact_replay":
-        return (
-            "strict_evidence_boundary_exact_replay",
-            "manifest_input_snapshots_and_control_plane_anchors",
-            False,
-        )
-    if continuation_mode == "checkpoint_snapshot_plus_ledger_suffix_resume":
-        return (
-            "bounded_composite_reconstructive_resume",
-            "checkpoint_snapshot_plus_ledger_suffix",
-            True,
-        )
-    if continuation_mode == "checkpoint_snapshot_only_resume":
-        return (
-            "compatibility_checked_checkpoint_snapshot_resume",
-            "checkpoint_snapshot",
-            False,
-        )
-    if continuation_mode == "full_scan_idempotent_rebuild":
-        return (
-            "idempotent_rebuild_not_checkpoint_resume",
-            "full_scan_content_hash_deduplication",
-            False,
-        )
-    return ("no_resume_guarantee", "none", False)
 
 
 def _build_resume_contract(

@@ -12,7 +12,7 @@ variables, see [README.md](../../README.md#installation) and `.env.example`.
 | `BIOETL_ENV` | Environment mode (`dev`, `staging`, `prod`). `test` is not a valid mode. | `dev` | No |
 | `BIOETL_DATA_DIR` | Directory for data storage | `./data` | No |
 
-`BIOETL_LOG_LEVEL` is not a `Settings` field and is not read. The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-level`.
+The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-level`. Settings does not read a log-level environment variable.
 
 ## Provider API Keys
 

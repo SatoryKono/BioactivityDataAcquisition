@@ -73,24 +73,11 @@ docker tag bioetl:REPLACE_IMAGE_TAG your-registry/bioetl:REPLACE_IMAGE_TAG
 docker push your-registry/bioetl:REPLACE_IMAGE_TAG
 ```
 
-### Update Manifests
+### Do not apply `k8s-deployment.yaml`
 
-Edit `k8s-deployment.yaml` and change the image reference:
+The file banner marks that manifest unsupported. This procedure does not edit it as an install step and does not pass it to `kubectl apply`. ADR-010 remains Local-Only.
 
-```yaml
-image: your-registry/bioetl:REPLACE_IMAGE_TAG  # ← Update this line
-imagePullPolicy: Always
-```
-
-Use the same image tag consistently in `k8s-deployment.yaml` and, if you use
-the helper shell flow, set matching overrides before running it:
-
-```bash
-BIOETL_IMAGE_REGISTRY=your-registry BIOETL_IMAGE_TAG=REPLACE_IMAGE_TAG \
-  scripts/ops/runtime/deploy/deploy-bioetl.sh deploy dev
-```
-
-This extended deployment subtree is still maintained as experimental material.
+This extended deployment subtree stays experimental material.
 
 If using private registry, create a secret:
 
@@ -113,10 +100,10 @@ ______________________________________________________________________
 Create and update secrets with your actual API keys:
 
 ```bash
-# Create the bioetl-secrets Secret
-kubectl apply -f k8s-deployment.yaml
+# k8s-deployment.yaml is UNSUPPORTED. Do not apply it.
+# See the banner at the top of that file. ADR-010 is Local-Only.
 
-# Edit the secret
+# Edit an existing secret only when a cluster was created outside this guide
 kubectl edit secret bioetl-secrets
 
 # Or use sealed-secrets for GitOps-friendly encryption:
@@ -126,7 +113,7 @@ kubectl edit secret bioetl-secrets
 **Critical / Provider Secrets to Review:**
 
 ```yaml
-BIOETL_PII_SALT_CURRENT: "YOUR-RANDOM-64-CHAR-STRING"
+# Inject BIOETL_PII_SALT_CURRENT from a secret manager. Do not paste a salt here.
 BIOETL_OPENALEX_API_KEY: "your-actual-key"
 BIOETL_OPENALEX_EMAIL: "your@email.com"
 BIOETL_SEMANTICSCHOLAR_API_KEY: "your-actual-key"
@@ -201,8 +188,7 @@ ______________________________________________________________________
 ## Step 4: Deploy BioETL Application
 
 ```bash
-# Deploy core application
-kubectl apply -f k8s-deployment.yaml
+# k8s-deployment.yaml is unsupported. This step does not apply it.
 
 # Verify deployment
 kubectl get deployments
@@ -439,8 +425,7 @@ kubectl cp default/$(kubectl get pod -l app=bioetl -o jsonpath='{.items[0].metad
 # Delete old PVC
 kubectl delete pvc bioetl-data
 
-# Create new PVC
-kubectl apply -f k8s-deployment.yaml
+# Do not recreate workloads from k8s-deployment.yaml. The manifest is unsupported.
 
 # Restore data
 kubectl cp ./backup.tar.gz default/$(kubectl get pod -l app=bioetl -o jsonpath='{.items[0].metadata.name}'):/tmp/

@@ -17,7 +17,6 @@ import os
 import re
 import sys
 import unicodedata
-from datetime import datetime
 from html.parser import HTMLParser
 from pathlib import Path
 
@@ -577,13 +576,18 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "Defaults to all collections."
         ),
     )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Fail when tracked bundles drift. Stamp text is normalized.",
+    )
     return parser.parse_args(argv)
 
 
-def _bundle_header_lines(bundle_title: str, diagram_count: int) -> list[str]:
+def _bundle_header_lines(bundle_title: str, diagram_count: int, stamp: str) -> list[str]:
     return [
         f"# {bundle_title}\n",
-        f"- Generated: {datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}",
+        f"- Generated: {stamp}",
         f"- Diagram count: {diagram_count}\n",
     ]
 
@@ -646,6 +650,8 @@ def generate_bundle(
     output_name: str,
     bundle_title: str,
     collection_key: str,
+    *,
+    check: bool = False,
 ) -> int:
     """Generate a single diagram bundle."""
     diagram_files = sorted(collection_dir.glob(f"*{file_ext}"))
@@ -658,7 +664,13 @@ def generate_bundle(
         (diagram_path, parse_mermaid(diagram_path)) for diagram_path in diagram_files
     ]
 
-    lines = _bundle_header_lines(bundle_title, len(diagram_files))
+    from scripts.diagrams.render.generate_description_indexes import deterministic_stamp
+
+    lines = _bundle_header_lines(
+        bundle_title,
+        len(diagram_files),
+        deterministic_stamp(collection_dir),
+    )
     lines.extend(build_toc_lines(parsed_diagrams, collection_key))
     _append_page_break(lines)
 
@@ -676,15 +688,20 @@ def generate_bundle(
         )
         first = False
 
-    output_md.write_text("\n".join(lines), encoding="utf-8")
-    print(f"[OK] {output_name}.md: {len(diagram_files)} diagrams")
-    return len(diagram_files)
+    from scripts.diagrams.render.generate_description_indexes import write_or_check
+
+    content = "\n".join(lines)
+    exit_code = write_or_check(output_md, content, check=check)
+    if exit_code == 0 and not check:
+        print(f"[OK] {output_name}.md: {len(diagram_files)} diagrams")
+    return len(diagram_files) if exit_code == 0 else -1
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     selected = set(args.collection or COLLECTION_KEYS)
     total = 0
+    failed = False
     for dir_name, ext, output_name, title in COLLECTIONS:
         if dir_name not in selected:
             continue
@@ -692,10 +709,21 @@ def main(argv: list[str] | None = None) -> int:
         if not collection_dir.exists():
             print(f"[SKIP] {dir_name}/ not found")
             continue
-        total += generate_bundle(collection_dir, ext, output_name, title, dir_name)
+        written = generate_bundle(
+            collection_dir,
+            ext,
+            output_name,
+            title,
+            dir_name,
+            check=args.check,
+        )
+        if written < 0:
+            failed = True
+            continue
+        total += written
 
     print(f"[INFO] Total diagrams processed: {total}")
-    return 0
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":

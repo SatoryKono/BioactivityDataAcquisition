@@ -99,7 +99,7 @@ The domain layer implements Domain-Driven Design patterns:
 | [ChEMBL Activity Dataflow Passport](docs/02-architecture/generated/pipeline-dataflows/chembl_activity/pipeline-passport.md) | Generated source criteria, filters, processing, DQ, and layer fields |
 | [Workflow Catalog](docs/04-reference/workflow-catalog.md)                   | Current declarative workflow DAG catalog                             |
 | [Data Contracts Current State](docs/04-reference/contracts/data-contracts-current.md) | Current data-contract inventory and runtime contract chain       |
-| [API Reference](docs/04-reference/api/index.md)                             | Full API documentation with mkdocstrings                             |
+| [API Reference](docs/04-reference/api/index.md)                             | Curated published API reference checked against public facades       |
 | [Architecture Decisions](docs/02-architecture/decisions/)                   | Canonical ADR index for architectural decisions                      |
 | [Ubiquitous Language](docs/00-project/glossary.md)                          | Domain terminology and canonical naming                              |
 | [RULES.md](docs/00-project/RULES.md)                                        | Canonical active governance and requirements                         |
@@ -290,24 +290,11 @@ pip install -e ".[dev,tests,tracing,docs]"
    | `BIOETL_OBSERVABILITY__METRICS_ENABLED`    | Enable Prometheus metrics                                   | `true`                    |
    | `BIOETL_METRICS_PORT`                      | Prometheus HTTP server port                                 | `8000`                    |
    | `BIOETL_OBSERVABILITY__TRACING_ENABLED`    | Enable OpenTelemetry tracing                                | `false`                   |
-   | `BIOETL_OBSERVABILITY__DQ_MONITOR_ENABLED` | Enable data quality monitoring                              | `false`                   |
-   | **Data Quality**                           |                                                             |                           |
-   | `BIOETL_DQ_SOFT_THRESHOLD`                 | Warning error rate threshold                                | `0.05`                    |
-   | `BIOETL_DQ_HARD_THRESHOLD`                 | Fail batch error rate threshold                             | `0.20`                    |
-   | **Resilience**                             |                                                             |                           |
-   | `BIOETL_CB_FAILURE_THRESHOLD`              | Consecutive errors to open circuit breaker                  | `5`                       |
-   | `BIOETL_CB_RECOVERY_TIMEOUT`               | Circuit breaker recovery timeout (seconds)                  | `300`                     |
-   | `BIOETL_RETRY_MAX_ATTEMPTS`                | Maximum retry attempts                                      | `3`                       |
-   | `BIOETL_RETRY_MULTIPLIER`                  | Exponential backoff multiplier                              | `2.0`                     |
-   | **Delta Lake**                             |                                                             |                           |
-   | `BIOETL_DELTA_VACUUM_RETENTION`            | VACUUM retention (days)                                     | `7`                       |
-   | `BIOETL_DELTA_FORENSIC_RETENTION`          | Forensic retention (days)                                   | `7`                       |
-   | **Quarantine**                             |                                                             |                           |
-   | `BIOETL_QUARANTINE_RETENTION_DAYS`         | Quarantine record retention (days)                          | `30`                      |
-   | `BIOETL_QUARANTINE_PAYLOAD_MAX_SIZE`       | Max payload size (bytes)                                    | `65536`                   |
+   | `BIOETL_OBSERVABILITY__DQ_MONITOR_ENABLED` | Enable data quality monitoring                              | `true`                    |
 
    See [`.env.example`](.env.example) for the full list with comments.
-   `BIOETL_LOG_LEVEL` is not a Settings field. The default log level is `INFO`; use `bioetl run --debug` or workflow `--log-level`.
+   DQ thresholds, circuit breaker, retry, Delta vacuum, and quarantine retention are not `Settings` environment variables. `thresholds.hard_fail` is `0.50` in `configs/base/quality.yaml`. Provider `circuit_breaker` blocks live in provider YAML. Vacuum retention is `maintenance` in `configs/base/pipeline.yaml`.
+   The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-level`.
 
 1. **Verify Installation**:
    Run tests to ensure everything works.
