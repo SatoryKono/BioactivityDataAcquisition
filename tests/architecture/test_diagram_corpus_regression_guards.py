@@ -169,21 +169,33 @@ def test_governance_docs_match_active_diagram_counts() -> None:
     architecture_count = len(_source_files(MMD_COLLECTIONS["architecture"], ".mmd"))
     class_count = len(_source_files(MMD_COLLECTIONS["class-diagrams"], ".mmd"))
     foundation_count = len(_source_files(MMD_COLLECTIONS["foundation"], ".mmd"))
+    providers_count = len(
+        _source_files(MMD_COLLECTIONS["providers"], ".mmd", recursive=True)
+    )
+    sequence_count = len(_source_files(MMD_COLLECTIONS["sequence"], ".mmd"))
+    state_count = len(_source_files(MMD_COLLECTIONS["state-machines"], ".mmd"))
     template_count = int((DIAGRAM_ROOT / "_template.mmd").exists())
-    mmd_total = architecture_count + class_count + foundation_count + template_count
+    core_mmd = architecture_count + class_count + foundation_count + template_count
+    mmd_total = core_mmd + providers_count + sequence_count + state_count
     view_count = len(_source_files(VIEW_COLLECTION, ".mermaid"))
 
     assert (
         architecture_count,
         class_count,
         foundation_count,
+        providers_count,
+        sequence_count,
+        state_count,
         mmd_total,
         view_count,
     ) == (
         89,
         145,
         55,
-        290,
+        28,
+        5,
+        5,
+        328,
         165,
     )
 
@@ -196,6 +208,9 @@ def test_governance_docs_match_active_diagram_counts() -> None:
             f"`architecture/` — {architecture_count}",
             f"`class-diagrams/` — {class_count}",
             f"`foundation/` — {foundation_count}",
+            f"`providers/` — {providers_count}",
+            f"`sequence/` — {sequence_count}",
+            f"`state-machines/` — {state_count}",
             f"{mmd_total} `.mmd`",
             f"{view_count} `.mermaid`",
         ],
@@ -203,6 +218,9 @@ def test_governance_docs_match_active_diagram_counts() -> None:
             f"`architecture/` — {architecture_count}",
             f"`class-diagrams/` — {class_count}",
             f"`foundation/` — {foundation_count}",
+            f"`providers/` — {providers_count}",
+            f"`sequence/` — {sequence_count}",
+            f"`state-machines/` — {state_count}",
             f"`views/` — {view_count}",
         ],
         DIAGRAM_ROOT / "governance" / "DIAGRAM-WORKFLOW-GUIDE.md": [
@@ -211,6 +229,9 @@ def test_governance_docs_match_active_diagram_counts() -> None:
             f"| `architecture/`   | {architecture_count}",
             f"| `class-diagrams/` | {class_count}",
             f"| `foundation/`     | {foundation_count}",
+            f"| `providers/`      | {providers_count}",
+            f"| `sequence/`       | {sequence_count}",
+            f"| `state-machines/` | {state_count}",
         ],
     }
 

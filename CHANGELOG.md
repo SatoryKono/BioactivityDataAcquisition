@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+
+- **Diagram census and metadata (#10983–#10985):** ADR-040 live `.mmd` count
+  328 (was 290 core-only); add `%% @nodes` on 35 canonical diagrams; refresh
+  `current-state-diagrams.md` Last verified to 2026-09-24.
+
 ### Fixed
 
 - **Root hygiene (#10968–#10971):** untrack accidental
