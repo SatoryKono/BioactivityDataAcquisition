@@ -319,8 +319,8 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
     """Overview/Control Plane answer rows must stay on projected current-state or fixed-window evidence."""
     expectations = {
         "bioetl-overview-v2.json": {
-            "Monitor Scope Health": "bioetl_l0_status",
-            "Review First Action": "bioetl_l0_next_action_route",
+            "Monitor Scope Health": "bioetl_workflow_scope_priority",
+            "Review First Action": "bioetl_workflow_scope_action",
         },
         "bioetl-control-plane-v1.json": {
             "Monitor Replay": "bioetl_replay_safety_blockers_15m",

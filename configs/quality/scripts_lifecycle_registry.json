@@ -1363,6 +1363,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/ops/observability/grafana/_incident_explanations.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Keep incident explanation copy internal to the readability pass. This module has no standalone CLI or deployment entrypoint.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-12-14"
+    },
     "scripts/ops/observability/grafana/_latest_complete_run_panel.py": {
       "decision": "shared_helper_module",
       "next_step": "Keep as the internal discovery-panel transformation imported by render_nav_bus and its tests; this module has no CLI entrypoint.",
@@ -1378,6 +1384,12 @@
     "scripts/ops/observability/grafana/_visual_usability.py": {
       "decision": "shared_helper_module",
       "next_step": "Keep the visual-audit transformations internal to render_nav_bus. This module has no standalone CLI or deployment entrypoint.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-12-14"
+    },
+    "scripts/ops/observability/grafana/_workflow_scope.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Keep workflow-scope transformations internal to render_nav_bus. This module has no standalone CLI or deployment entrypoint.",
       "owner": "@bioetl-observability",
       "review_by": "2026-12-14"
     },

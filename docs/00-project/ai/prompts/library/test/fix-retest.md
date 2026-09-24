@@ -7,9 +7,9 @@ owner: BioETL Team
 runtimes:
 - any
 params:
-- SCOPE
-- MAX_ITERATIONS
-- LANGUAGE
+- SCOPE =  tests/
+- MAX_ITERATIONS = 5
+- LANGUAGE = ru
 includes:
 - fragments/git-safety.md
 - fragments/debt-budget-ban.md

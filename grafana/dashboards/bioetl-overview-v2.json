@@ -338,7 +338,7 @@
       },
       "id": 99,
       "options": {
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;max-width:96ch\">CURRENT · Pipeline: ${pipeline:text}. Open the first action; VERIFY means evidence is missing.<br>SELECTED RUN below is persisted history, not current health.</div>",
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #6b7280;font-size:16px;line-height:1.2;overflow-wrap:anywhere\">CURRENT card: ${workflow:text} / ${pipeline:text} / ${run_type:text}.<br>Open First Action; VERIFY means evidence is missing. SELECTED RUN is persisted history.</div>",
         "mode": "html",
         "bioetlDisplayTitle": "Inspect Scope & Evidence"
       },
@@ -654,7 +654,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Scope health for the selected pipeline. Palette: 0=OK, 1=WARN, 2=CRIT, 3/null=UNKNOWN. UNKNOWN means evidence incomplete, not OK.",
+      "description": "CURRENT · Selected workflow, pipeline and run type; not Selected Run. Inspect Current Workflow Evidence below for the source and publication clock.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -670,16 +670,16 @@
                   "color": "green"
                 },
                 "1": {
+                  "text": "UNKNOWN",
+                  "color": "#555555"
+                },
+                "2": {
                   "text": "WARN",
                   "color": "orange"
                 },
-                "2": {
+                "3": {
                   "text": "CRIT",
                   "color": "red"
-                },
-                "3": {
-                  "text": "UNKNOWN",
-                  "color": "#555555"
                 }
               }
             },
@@ -771,9 +771,9 @@
       },
       "targets": [
         {
-          "expr": "max(bioetl_l0_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
           "refId": "A",
-          "instant": true
+          "instant": true,
+          "expr": "max(bioetl_workflow_scope_priority{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})"
         }
       ],
       "title": "Monitor Scope Health",
@@ -918,7 +918,7 @@
                 "value": [
                   {
                     "title": "Open routed diagnostics",
-                    "url": "/d/${__data.fields.action_dashboard_uid}/?${workflow:queryparam}&${__data.fields.action_scope:raw}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+                    "url": "/d/${__data.fields.action_dashboard_uid}/?var-workflow=${__data.fields.Workflow:percentencode}&${__data.fields.action_scope:raw}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
                     "targetBlank": false,
                     "includeVars": false
                   }
@@ -1133,22 +1133,25 @@
                         "text": "Workflow review"
                       },
                       "runtime_evidence_missing": {
-                        "text": "Runtime: evidence missing"
+                        "text": "Runtime: no evidence"
                       },
                       "control_plane_evidence_missing": {
-                        "text": "Control Plane: evidence missing"
+                        "text": "Trust: no evidence"
                       },
                       "gold_evidence_missing": {
-                        "text": "Gold: evidence missing"
+                        "text": "Gold: no evidence"
                       },
                       "dq_evidence_missing": {
-                        "text": "DQ: evidence missing"
+                        "text": "Dq: no evidence"
                       },
                       "provider_evidence_missing": {
-                        "text": "Provider: evidence missing"
+                        "text": "Provider: no evidence"
                       },
                       "workflow_evidence_missing": {
-                        "text": "Workflow: evidence missing"
+                        "text": "Workflow: no evidence"
+                      },
+                      "provider_scope_degradation": {
+                        "text": "Provider degraded"
                       }
                     }
                   },
@@ -1202,6 +1205,10 @@
                   "type": "auto",
                   "wrapText": false
                 }
+              },
+              {
+                "id": "custom.hidden",
+                "value": true
               }
             ]
           },
@@ -1213,7 +1220,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 155
+                "value": 120
               }
             ]
           },
@@ -1282,12 +1289,35 @@
                 "value": true
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Workflow"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              },
+              {
+                "id": "custom.wrapText",
+                "value": true
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
+              }
+            ]
           }
         ]
       },
       "targets": [
         {
-          "expr": "max without(run_type)(bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}>0) or on() bioetl_l0_next_action_no_route",
+          "expr": "max without(run_type)(bioetl_workflow_scope_action{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}>0) or on() bioetl_l0_next_action_no_route",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -1299,7 +1329,7 @@
           "show": false,
           "enablePagination": false
         },
-        "cellHeight": "sm",
+        "cellHeight": "lg",
         "sortBy": [
           {
             "desc": true,
@@ -1364,7 +1394,8 @@
               "Pipeline": false,
               "action_dashboard_uid": false,
               "job": true,
-              "action_scope": false
+              "action_scope": false,
+              "workflow": false
             },
             "indexByName": {
               "Value": 0,
@@ -1372,11 +1403,13 @@
               "action_reason": 3,
               "action_target": 4,
               "action_dashboard_uid": 5,
-              "run_type": 2
+              "run_type": 2,
+              "workflow": 1
             },
             "renameByName": {
               "Value": "Priority",
-              "pipeline": "Pipeline"
+              "pipeline": "Pipeline",
+              "workflow": "Workflow"
             }
           }
         }
@@ -5027,22 +5060,25 @@
                             "text": "Workflow review"
                           },
                           "runtime_evidence_missing": {
-                            "text": "Runtime: evidence missing; verify source"
+                            "text": "Runtime: no evidence"
                           },
                           "control_plane_evidence_missing": {
-                            "text": "Control Plane: evidence missing; verify source"
+                            "text": "Trust: no evidence"
                           },
                           "gold_evidence_missing": {
-                            "text": "Gold: evidence missing; verify source"
+                            "text": "Gold: no evidence"
                           },
                           "dq_evidence_missing": {
-                            "text": "Dq: evidence missing; verify source"
+                            "text": "Dq: no evidence"
                           },
                           "provider_evidence_missing": {
-                            "text": "Provider: evidence missing; verify source"
+                            "text": "Provider: no evidence"
                           },
                           "workflow_evidence_missing": {
-                            "text": "Workflow: evidence missing; verify source"
+                            "text": "Workflow: no evidence"
+                          },
+                          "provider_scope_degradation": {
+                            "text": "Provider degraded"
                           }
                         }
                       }
@@ -5097,6 +5133,10 @@
                       "type": "auto",
                       "wrapText": false
                     }
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               },
@@ -5132,7 +5172,30 @@
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 170
+                    "value": 120
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Workflow"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  },
+                  {
+                    "id": "custom.wrapText",
+                    "value": true
+                  },
+                  {
+                    "id": "custom.inspect",
+                    "value": true
                   }
                 ]
               }
@@ -5152,7 +5215,7 @@
               "enablePagination": true,
               "countRows": true
             },
-            "cellHeight": "sm",
+            "cellHeight": "lg",
             "sortBy": [
               {
                 "desc": true,
@@ -5208,7 +5271,8 @@
                   "input": true,
                   "run_type": true,
                   "pipeline": false,
-                  "Pipeline": false
+                  "Pipeline": false,
+                  "workflow": false
                 },
                 "indexByName": {
                   "Value": 0,
@@ -5216,12 +5280,14 @@
                   "action_reason": 3,
                   "action_target": 4,
                   "action_dashboard_uid": 5,
-                  "run_type": 2
+                  "run_type": 2,
+                  "workflow": 1
                 },
                 "renameByName": {
                   "Value": "Priority",
                   "pipeline": "Pipeline",
-                  "run_type": "Run type"
+                  "run_type": "Run type",
+                  "workflow": "Workflow"
                 }
               }
             }
@@ -5672,6 +5738,158 @@
             }
           ],
           "links": []
+        }
+      ]
+    },
+    {
+      "id": 9700,
+      "type": "row",
+      "title": "Inspect Current Workflow Evidence",
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 24,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "id": 9701,
+          "type": "table",
+          "title": "Review Current Workflow Evidence",
+          "gridPos": {
+            "x": 0,
+            "y": 25,
+            "w": 24,
+            "h": 9
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "CURRENT · Workflow/pipeline/run-type scope, independent of Selected Run. Published at is the gateway publication clock, not the Prometheus evaluation clock. Retained publications do not expire after 15 minutes. Reason unavailable means no diagnostic cause is exposed by this metric.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "wrapText": true,
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              },
+              "noValue": "UNKNOWN"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "0": {
+                            "text": "OK"
+                          },
+                          "1": {
+                            "text": "WARN"
+                          },
+                          "2": {
+                            "text": "CRIT"
+                          },
+                          "3": {
+                            "text": "UNKNOWN"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Published at"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm"
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {
+              "show": false
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "instant": true,
+              "format": "table",
+              "expr": "label_replace(max by(workflow)(bioetl_workflow_scope_input_status{input=\"workflow\",workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"reason\",\"Reason unavailable\",\"\",\"\")"
+            },
+            {
+              "refId": "B",
+              "instant": true,
+              "format": "table",
+              "expr": "bioetl_workflow_scope_published_seconds * on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) * 1000"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "joinByField",
+              "options": {
+                "byField": "workflow",
+                "mode": "outer"
+              }
+            },
+            {
+              "id": "filterFieldsByName",
+              "options": {
+                "include": {
+                  "names": [
+                    "workflow",
+                    "pipeline",
+                    "run_type",
+                    "Value #A",
+                    "Value #B",
+                    "reason"
+                  ]
+                }
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "renameByName": {
+                  "workflow": "Workflow",
+                  "pipeline": "Pipeline",
+                  "run_type": "Run Type",
+                  "Value #A": "Status",
+                  "Value #B": "Published at",
+                  "reason": "Reason"
+                }
+              }
+            }
+          ],
+          "links": [
+            {
+              "title": "Open run in Run Explorer",
+              "url": "/d/bioetl-run-explorer-v1/0-run-explorer?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false
+            }
+          ]
         }
       ]
     }

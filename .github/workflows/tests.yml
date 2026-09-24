@@ -1282,16 +1282,16 @@ jobs:
         if: always()
         run: |
           mkdir -p reports/performance
-          if [ -f reports/performance/hotspot-observations.jsonl ]; then
-            uv run --frozen --no-build python -m scripts.engineering.qa.generate_hotspot_degradation_report \
-              --observations reports/performance/hotspot-observations.jsonl \
-              --budgets tests/performance/hotspot_budgets.json \
-              --window-size 5 \
-              --json-out reports/performance/hotspot-degradation.json \
-              --markdown-out reports/performance/hotspot-degradation.md
-          else
-            echo "No hotspot observations file found; skipping degradation report generation."
+          if [ ! -f reports/performance/hotspot-observations.jsonl ]; then
+            echo "::error::Hotspot observations file is missing."
+            exit 1
           fi
+          uv run --frozen --no-build python -m scripts.engineering.qa.generate_hotspot_degradation_report \
+            --observations reports/performance/hotspot-observations.jsonl \
+            --budgets tests/performance/hotspot_budgets.json \
+            --window-size 5 \
+            --json-out reports/performance/hotspot-degradation.json \
+            --markdown-out reports/performance/hotspot-degradation.md
 
       - name: Publish hotspot degradation summary
         if: always()
@@ -1303,8 +1303,11 @@ jobs:
       - name: Gate on degradation report
         if: always()
         run: |
-          if [ -f reports/performance/hotspot-degradation.json ]; then
-            python3 -c "
+          if [ ! -f reports/performance/hotspot-degradation.json ]; then
+            echo "::error::Hotspot degradation report is missing."
+            exit 1
+          fi
+          python3 -c "
           import json, sys
           data = json.load(open('reports/performance/hotspot-degradation.json'))
           failed = data.get('summary', {}).get('failed', 0)
@@ -1313,7 +1316,6 @@ jobs:
               sys.exit(1)
           print('PASS: all benchmarks within budget')
           "
-          fi
 
       - name: Upload performance budget report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4

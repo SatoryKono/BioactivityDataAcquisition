@@ -93,6 +93,22 @@ provider is healthy while fleet peers fail. Copy must say **fleet vs selected**.
 
 ## Incident evidence
 
+Overview `Monitor Scope Health` and Incident `Monitor Scope Status` evaluate
+CURRENT inputs for the selected Workflow, Pipeline and Run Type. Workflow
+identity is retained until the selector is applied. `All` includes every
+matching workflow; display precedence is CRIT, WARN, UNKNOWN, OK. A critical
+sibling workflow must not change the verdict of a specifically selected
+healthy workflow. Pipeline-domain inputs still apply to that pipeline.
+
+`Review First Action` identifies the responsible workflow, and its action
+opens that workflow even when the selector is `All`. `Inspect Current Workflow
+Evidence` shows the workflow verdict and gateway `Published at` timestamp.
+This timestamp is not the evaluation time or run completion time. Missing or
+future publication timestamps cannot grant OK; retained publications do not
+expire merely after 15 minutes. `Reason unavailable` explicitly denotes the
+absence of a diagnostic cause in the source metric. Saved Selected Run
+verdicts remain independent of this CURRENT projection.
+
 Incident suspect and alert tables are GLOBAL, independent of the selected
 Pipeline, Provider and Run ID. `CRIT` is the rule's urgency; `Not verified`
 is the display of raw `UNVERIFIED` cause verification. A triggered rule does
