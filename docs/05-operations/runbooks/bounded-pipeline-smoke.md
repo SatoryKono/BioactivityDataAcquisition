@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P2
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-09-23'
+  Last verified: '2026-09-24'
 
 ______________________________________________________________________
 
@@ -65,6 +65,12 @@ ______________________________________________________________________
 
 - No stale lock. If lock acquisition fails, follow
   [Stale Lock](stale-lock.md) before retrying.
+
+## Procedure
+
+Follow the canonical smoke flags, then execute one pipeline or composite at a
+time in the wave order below. Stop on the first non-zero exit, classify it,
+fix, and resume from the failed name.
 
 ## Canonical smoke flags
 
@@ -312,6 +318,18 @@ For each successful composite run:
   run-report was `AVAILABLE`.
 - If Grafana Run Explorer still shows `REPORT MISSING` after exit `0`, treat it
   as a persistence-path defect, not as a missing ingest.
+
+## Compliance
+
+- This runbook MUST be executed within the priority and runtime profile
+  declared in the YAML header (ADR-010 local-only).
+- Operators MUST NOT create, edit, rename, move, or delete any `.env` file as
+  part of this procedure.
+- Operators MUST NOT start `docker-compose.monitoring.yml` unless an operator
+  explicitly requested dashboard work.
+- Operators SHOULD preserve pipeline name, `run_id`, exit code, and report
+  availability in the Verification and Post-incident sections.
+- Do not raise tech-debt budgets to make a bounded smoke pass.
 
 ## See also
 
