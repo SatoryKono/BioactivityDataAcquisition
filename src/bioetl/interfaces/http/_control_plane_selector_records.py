@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from dataclasses import dataclass
 from datetime import datetime
+from itertools import islice
 from typing import Protocol
 
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest, WorkflowManifest
@@ -54,10 +56,50 @@ def build_selector_records(
     ledger_port: RunLedgerLookup | None,
     workflow_aliases: WorkflowAliasMap | None = None,
 ) -> tuple[SelectorRecord, ...]:
-    return tuple(
-        _build_selector_record(manifest, ledger_port, workflow_aliases)
-        for manifest in manifests
-    )
+    if ledger_port is None or len(manifests) < 2:
+        return tuple(
+            _build_selector_record(manifest, ledger_port, workflow_aliases)
+            for manifest in manifests
+        )
+    return _read_selector_records(manifests, ledger_port, workflow_aliases)
+
+
+def _read_selector_records(
+    manifests: tuple[RunManifest, ...],
+    ledger_port: RunLedgerLookup,
+    workflow_aliases: WorkflowAliasMap | None,
+) -> tuple[SelectorRecord, ...]:
+    """Bound ledger I/O and preserve catalog order without caching evidence."""
+    remaining = iter(enumerate(manifests))
+    records: dict[int, SelectorRecord] = {}
+    executor = ThreadPoolExecutor(max_workers=4)
+    try:
+        pending = {
+            executor.submit(
+                _build_selector_record, manifest, ledger_port, workflow_aliases
+            ): index
+            for index, manifest in islice(remaining, 4)
+        }
+        while pending:
+            completed, _ = wait(pending, return_when=FIRST_COMPLETED)
+            # Resolve the whole batch before refilling, so failures stop new reads.
+            loaded = {pending[future]: future.result() for future in completed}
+            records.update(loaded)
+            for future in completed:
+                del pending[future]
+            pending.update(
+                (
+                    executor.submit(
+                        _build_selector_record, manifest, ledger_port, workflow_aliases
+                    ),
+                    index,
+                )
+                for index, manifest in islice(remaining, len(completed))
+            )
+        return tuple(records[index] for index in range(len(manifests)))
+    finally:
+        # Keep the request limiter occupied until already-running reads finish.
+        executor.shutdown(wait=True, cancel_futures=True)
 
 
 def selected_pipeline_scope(
