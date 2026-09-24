@@ -108,6 +108,15 @@ CANONICAL_PALETTE = {
     "#ffe4e6",
     "#e11d48",  # Quarantine
 }
+# Label ink for classDef/style ``color:`` properties. ADR-040 governs fill/stroke.
+TEXT_INK_PALETTE = {
+    "#111827",
+    "#212121",
+}
+_FILL_OR_STROKE_HEX_RE = re.compile(
+    r"(?i)\b(?:fill|stroke)\s*:\s*(#[0-9a-f]{6})\b"
+)
+_TEXT_COLOR_HEX_RE = re.compile(r"(?i)\bcolor\s*:\s*(#[0-9a-f]{6})\b")
 # Legacy palette values blocked in style/classDef rules.
 DEPRECATED_PALETTE = {
     # Material palette (superseded by muted 2026 palette).
@@ -446,7 +455,7 @@ def _staleness_issues(
 
 
 def check_colour_policy(path: Path, lines: list[str]) -> list[Issue]:
-    """Check for deprecated non-canonical palette usage (COLOUR-001)."""
+    """Flag style/classDef hex outside the ADR-040 palette (COLOUR-001)."""
     issues: list[Issue] = []
     fname = str(path)
 
@@ -454,9 +463,16 @@ def check_colour_policy(path: Path, lines: list[str]) -> list[Issue]:
     for line in lines:
         if not _STYLE_OR_CLASSDEF_RE.match(line):
             continue
-        for color in _HEX_COLOR_RE.findall(line):
+        for color in _FILL_OR_STROKE_HEX_RE.findall(line):
             normalized = color.lower()
-            if normalized in DEPRECATED_PALETTE and normalized not in CANONICAL_PALETTE:
+            if normalized not in CANONICAL_PALETTE:
+                found.add(normalized)
+        for color in _TEXT_COLOR_HEX_RE.findall(line):
+            normalized = color.lower()
+            if (
+                normalized not in CANONICAL_PALETTE
+                and normalized not in TEXT_INK_PALETTE
+            ):
                 found.add(normalized)
 
     if found:
@@ -466,7 +482,7 @@ def check_colour_policy(path: Path, lines: list[str]) -> list[Issue]:
                 severity="ERROR",
                 rule="COLOUR-001",
                 message=(
-                    "Deprecated palette color(s) in style/classDef: "
+                    "Non-canonical palette color(s) in style/classDef: "
                     f"{', '.join(sorted(found))}"
                 ),
             )
