@@ -1,78 +1,24 @@
-# Аудит тестовой системы
+# tests-system
 
-surface_score: **2** (приемлемо: ядро блокирует merge, локальные щели в наблюдаемости).
-Режим: `full` / `propose-patches`. Патч TESTS-001 внесён в рабочее дерево, коммит не создавался.
-Срез: 2026-09-24T17:04:19Z. Checkout грязный (незавершённый merge), это не clean-checkout и не coverage-verify truth.
+- prompt: `prompt.audit.tests-system`
+- surface_score: **2**
+- proven: 5; P0/P1: 0
+- run_id: `20260924T183653Z-9d9d303fa3f6-e28b4aa3`
 
-## Что реально блокирует
+Стек подтверждён: Python >=3.12 (3.12/3.13), pytest в pyproject.toml, pytest.ini нет. Merge wall — pr-gate-complete; гейт tests (always_required) гоняет tests.yml: unit 3.12/3.13, integration, security, offline contract-confidence, coverage-verify --fail-under=85 и branch min 85 (порог из репозитория). Архитектура блокируется lint-arch. xfail в продуктовых тестах нет; curated flaky пуст. e2e-smoke и полный e2e вне каталога required checks; live-контракты — monthly schedule. Оценка 2: основные слои CI блокирует, сигнал e2e_smoke и flaky-наблюдаемость неполные.
 
-Единственный required context — job `pr-gate-complete` (`.github/workflows/pr-required.yml`).
-Гейт `tests` в `configs/quality/github_required_checks.yaml` всегда required и включает `smoke-check`, `governance-preflight`, `test-fast`, `test-matrix`, `coverage-verify`.
-`tests-complete` падает, если любой нужный lane не `success`, включая `performance-budgets` и `coverage-inventory-currentness`.
+## Findings
 
-Порог покрытия задан проектом и не выдуман здесь: line и branch **85%**.
-`pyproject.toml` намеренно не ставит `fail_under`, чтобы частичные шарды не падали. Жёсткий порог стоит в `coverage-verify` (`.github/workflows/tests.yml`, `coverage report --fail-under=85` и `check-branch-coverage --min-percent 85`).
-Живой пересчёт coverage в этом аудите не запускался.
+- **TST-001** P2 PROVEN `pyproject.toml:236` — Маркер e2e_smoke описан как PR-blocking, тогда как каталог required checks и политика не включают e2e-matrix-health в pr-gate-complete.
+- **TST-002** P2 PROVEN `.github/workflows/e2e-matrix-health.yml:221` — Полный offline e2e replay не исполняется на pull_request: job e2e-nightly-full-replay ограничен schedule и workflow_dispatch.
+- **TST-003** P2 PROVEN `tests/architecture/test_fix_mermaid_operators.py:161` — Два вызова mounted_worktree_skip_reason не входят в architecture_platform_skips, а guard сравнивает инвентарь только с жёстким набором из четырёх путей.
+- **TST-004** P2 PROVEN `.github/workflows/tests.yml:321` — Блокирующий flaky-telemetry повторяет только два модуля на трёх seed и не даёт repeat-count по остальному suite.
+- **TST-005** P3 PROVEN `docs/00-project/governance/05-github-policy.md:364` — Политика и комментарий tests.yml называют job test-matrix path-scoped и not always-on, хотя гейт tests в каталоге always_required и на каждом PR вызывает весь tests.yml.
 
-## Уровни
+## Remediations
 
-| Уровень | Где | Python-файлы |
-| --- | --- | ---: |
-| unit | `tests/unit/` | 2179 |
-| architecture | `tests/architecture/` | 538 |
-| integration | `tests/integration/` | 260 |
-| contract | `tests/contract/` | 54 |
-| e2e | `tests/e2e/` | 30 |
-| security | `tests/security/` | 14 |
-| prompts | `tests/prompts/` | 10 |
-| smoke | `tests/smoke/` | 8 |
-| benchmarks | `tests/benchmarks/` | 7 |
-| performance | `tests/performance/` | 6 |
-
-Отдельного `tests/migration/` и `tests/api/` нет. Контракты API живут в `tests/contract/` и scheduled `contract-tests.yml` (`REQ-TEST-006`). Миграционный уровень не выделен.
-
-24 канонических lane — в `test-matrix.csv`. Источник: `configs/quality/test_matrix.yaml`. Модель запуска: `docs/00-project/ai/agents/guides/TEST_LANE_MENTAL_MODEL.md`.
-
-Стек: pytest (`pyproject.toml` `[tool.pytest.ini_options]`). `pytest.ini` и `tox.ini` нет. Локальный default серийный (`forbid_global_xdist_addopts`). `pytest-rerunfailures` и `pytest.mark.flaky` в `pyproject.toml` не найдены.
-
-## Чеклист
-
-- Канон с чистого checkout описан (venv и `scripts/engineering/dev/run_pytest.ps1` / lane-команды). Этот прогон шёл с грязного дерева.
-- Сеть по умолчанию выключена: session fixture ставит `VCR_RECORD_MODE=none`; live contract пропускается без `--network` или `BIOETL_NETWORK_TESTS` (`tests/contract/conftest.py`).
-- Изоляция частичная: autouse чинит `pathlib` и `os.name`, repo-backed откатывает мутацию исходника, timeout 60 с. Общего запрета сокетов (`pytest-socket`) нет.
-- Skip-census: 31 запись, все `permanent_policy`, owner есть, `temporary_debt` = 0, поэтому `expires_on` не требуется. Безусловный `@pytest.mark.skip` в unit/architecture запрещён тестом. 4 Windows/WSL architecture skip инвентаризированы (`#10418`).
-- `.only` как плагин не подключён. Полный обход дерева на маркеры не завершён (процесс инвентаризации остановлен), отсутствие `.only` по всему `tests/` не доказано.
-
-## Контрольный прогон
-
-`.\.venv-win\Scripts\python.exe -m pytest tests/unit/domain/contracts/gold/test_protein_class_parent.py -q --tb=line -p no:benchmark -p no:xdist --timeout=60`
-
-N=2, оба раза exit 0, по 4 кейса. Вердикт: stable. Полный suite не запускался.
-
-## Находка
-
-`TESTS-001` (P2, PROVEN, `REQ-TEST-005`). Job `performance-budgets` входит в блокирующий `tests-complete`, но шаг Gate on degradation report успешен, если `reports/performance/hotspot-degradation.json` нет. Генерация отчёта при отсутствии JSONL только печатает skip. Наблюдения пишутся лишь когда тест дошёл до `_record_observation`.
-
-Патч внесён в `.github/workflows/tests.yml`. В шаге Gate on degradation report:
-
-```bash
-if [ ! -f reports/performance/hotspot-degradation.json ]; then
-  echo "::error::Hotspot degradation report is missing."
-  exit 1
-fi
-```
-
-Тот же fail-closed нужен в шаге генерации отчёта, если нет `hotspot-observations.jsonl`. Бюджеты не повышать.
-
-## Остаточный риск (не дефект политики)
-
-`e2e-matrix-health.yml` гоняет matrix smoke 3 раза и падает на ненулевом pytest, но не входит в `github_required_checks.yaml`. Это зафиксировано: satellite, не owner `pr-gate-complete`.
-16 pipeline исключены из PR smoke списком `MATRIX_REPLAY_DEFERRED_PIPELINES` (owner, `#9729`), не через голый skip.
-Коммитнутый inventory `2026-09-18`: 2471/2479 fully covered, 7 partial, 0 uncovered. К текущему грязному дереву не привязан.
-
-## Пропущено
-
-- Полный pytest и `collect-only` всего `tests/`.
-- Повтор CI flaky-telemetry (seeds 17/73/113) локально: N=0, flaky не назначался.
-- Пересчёт `--cov-fail-under=85`.
-- Memory pre-task/post-task.
+- Выровнять маркер e2e_smoke с политикой: это PR-спутник, не merge wall, пока e2e-matrix-health нет в github_required_checks.yaml.
+- Для полного e2e явно пометить nightly-only в матрице слоёв либо ввести узкий блокирующий replay в гейт tests.
+- Дописать два Windows/WSL skip в architecture_platform_skips и проверять все вызовы mounted_worktree_skip_reason.
+- Не трактовать flaky-telemetry из двух модулей и пустой curated inventory как доказательство стабильности всего suite.
+- Исправить формулировку path-scoped/not always-on для test-matrix: на PR job входит в always_required гейт tests.

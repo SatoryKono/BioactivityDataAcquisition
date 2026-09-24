@@ -1,155 +1,130 @@
 {
-  "audit_id": "tech-debt-src-bioetl-20260924",
-  "audited_commit": "9d2992a9e40218e631ca71616b160cafffd90e7f",
-  "audited_ref": "working-tree",
-  "scope": "src/bioetl",
-  "mode": "audit",
-  "audit_mode": "full",
-  "language": "ru",
-  "require_gh_tracking": false,
-  "surface_score": 3,
-  "surface_score_legend": "3 = debt identified with owner/risk/effort; new code does not worsen baseline",
-  "trend": {
-    "measured_todo_fixme_hack_in_src_bioetl": 0,
-    "type_ignore_delta": "3 eliminated this session (#10963); 17 pre-existing seams remain",
-    "fk_reconciliation_coverage": "3/3 modules 100% statements+branches (#10962)",
-    "debt_scorecard_exemptions": "0 baseline held, no increase proposed",
-    "previous_audit": "tech-debt-src-20260923 (SCOPE=src, score 2)"
-  },
-  "marker_triage": {
-    "raw_TODO_FIXME_HACK_XXX_WORKAROUND_DEPRECATED_hits": 4,
-    "false_positives": [
-      "DEPRECATED enum member in domain/types/contract_identity.py",
-      "CVCL_XXXX Cellosaurus docstrings (2 files)",
-      "ADR-XXX filename template in adr/_adr_validators.py"
-    ],
-    "measured_todo_fixme_hack_in_src_bioetl": 0,
-    "pragma_no_cover": "facade __getattr__ + defensive paths; governed, do not remove",
-    "nosec": "registry-referenced B404/B603/B405/B506 + B105 PASS-enum FPs; keep",
-    "TEMP_hits": "exit codes, ChEMBL assay param type, IRI templates; all FP"
-  },
   "findings": [
     {
-      "finding_id": "F-001",
-      "fingerprint": "ce4f9be53e0bf947903be7d8a0c077940e76b696be208cfe3e209726ceb099d9",
+      "id": "TD-001",
+      "requirement_id": "REQ-GOV-012",
+      "path": "configs/quality/debt_scorecard.yaml:748",
+      "observation": "Fail-fast полы hotspot-покрытия ниже живого measured count не блокируют архитектуру: тест принимает вычисленный threshold_status=fail.",
+      "method": "Сверка configs/quality/debt_scorecard.yaml hotspot_family_coverage_thresholds с reports/quality/module-coverage-inventory.json summary.hotspot_family_coverage и tests/architecture/test_module_coverage_inventory.py:647-670.",
+      "expected": "mode=fail-fast и measured_module_count не ниже min_measured_module_count; threshold_status=pass обязателен для CI.",
+      "actual": "application_services_control_plane: measured/covered 113 при min 124/124, threshold_status=fail (inventory:49648, пол :748). composition_bootstrap_runtime: 45 при min_measured 50 и min_covered 49, threshold_status=fail (inventory:49678, пол :737). Тест на :668 сравнивает статус только с формулой, которая возвращает fail.",
+      "impact": "Сокращение семейства модулей не останавливает merge: объявленный fail-fast гейт готовности рефакторинга не enforced.",
       "status": "PROVEN",
-      "evidence_class": "FACT",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "remediation": "Требовать threshold_status=pass в test_hotspot_refactor_targets_have_authoritative_module_coverage_gates. Вернуть measured count к существующим полям 124 и 50. Не снижать min_covered_line_percent и не поднимать max_count.",
+      "effort": "M",
+      "automation": "tests/architecture/test_module_coverage_inventory.py::test_hotspot_refactor_targets_have_authoritative_module_coverage_gates",
+      "automated_fix_possible": false
+    },
+    {
+      "id": "TD-002",
+      "requirement_id": "REQ-GOV-012",
+      "path": "reports/quality/debt-governance-gates.json:49",
+      "observation": "Зафиксированный pass-снимок source_tree_sha256 не воспроизводится по текущим входам гейта связности.",
+      "method": "Сравнение source_tree_sha256 в module-coverage-inventory.json:49596, architecture-quality-scorecard.json:272 и debt-governance-gates.json:49-55 с правилом _module_coverage_scorecard_coherence_gate.",
+      "expected": "Хеш инвентаря, source_artifacts.module_coverage_inventory и current/limit гейта module_coverage_source_tree_hash_current совпадают; coherence status=pass на живых файлах.",
+      "actual": "inventory 9bb646a395d0ba313f842417d23126c262f2f4cda021b26001034a38b73e6784; scorecard e68122becf56412da6449521c8f603667730782f75a1ba6d2147345635ade44f; gates current=limit a48e30fb04969685bf2d2ab91f811193c1aff4805cd401b561970e8e2937b5fa при status=pass. Рабочее дерево этих файлов чистое.",
+      "impact": "Свежий --check по связности покрытия и scorecard должен падать, а сохранённый rollup сообщает pass.",
+      "status": "PROVEN",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "remediation": "Пересобрать scorecard и debt-governance-gates от текущего inventory тем же генератором, без изменения max_count и exemption.",
+      "effort": "S",
+      "automation": "python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref refs/remotes/origin/main",
+      "automated_fix_possible": false
+    },
+    {
+      "id": "TD-003",
+      "requirement_id": "REQ-GOV-001",
+      "path": "src/bioetl/application/services/quality/data_quality_anomalies.py:21",
+      "observation": "Неоправданные cast(Any) сидят ровно на shrink-only потолке и маскируют отсутствие Protocol-host.",
+      "method": "reports/quality/cast-any-typing-census.json summary.unjustified_count против configs/quality/cast_any_unjustified_budget.yaml:19 и сайт census:2074.",
+      "expected": "Неоправданные cast(Any) только убывают ниже зафиксированного потолка; host-default закрыт Protocol, а не cast.",
+      "actual": "unjustified_count=142 при max_unjustified_count=142 (baseline 2026-09-22). Пример: _dq_monitor: DQMonitorPort | None = cast(Any, None) с тегом PD4; в том же файле 11 неоправданных сайтов.",
+      "impact": "Потолок не даёт запаса: новый cast(Any) без PD3/PD6/TYPE-002 ломает ratchet, а текущие 142 сайта обходят строгую границу Any.",
+      "status": "PROVEN",
       "priority": "P2",
-      "requirement_id": "REQ-GOV-007",
-      "domain": "tech-debt",
-      "claim": "FK-reconciliation trio fully covered: 152 stmts, 0 miss, 66 branches, 0 partial; #10962 acceptance met.",
-      "broken_invariant": "coverage-verify inventory still lists the trio partially_covered until regenerated with coverage.xml",
-      "root_cause": "fk-reconciliation coverage tail closed by focused tests including protocol no-op pin",
-      "affected_paths": [
-        "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_loaded.py",
-        "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_normalization.py",
-        "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_reads.py"
-      ],
-      "evidence": {
-        "path": "tests/unit/infrastructure/storage/test_issue_10631_fk_reconciliation_coverage.py",
-        "command": "PYTHONPATH=src python -m pytest tests/unit/infrastructure/storage/test_issue_10631_fk_reconciliation_coverage.py -q --cov=bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_loaded --cov=bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_normalization --cov=bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_reads --cov-report=term-missing",
-        "scope": "src/bioetl",
-        "timestamp": "2026-09-24T10:03:04Z",
-        "exit_code": 0,
-        "output": "15 passed; loaded/normalization/reads 100.00% statements+branches"
-      },
-      "acceptance": "Trio fully_covered in module-coverage-inventory.json after staff regeneration; no pragma removed; fail-under unchanged.",
-      "validation_commands": [
-        "python -m scripts.engineering.qa report-module-coverage --check --allow-missing-coverage-xml"
-      ],
-      "rollback": "revert test-only commit",
-      "owner_surface": "infrastructure"
+      "severity": "Medium",
+      "confidence": "high",
+      "remediation": "Заменить PD4 host-default cast на Protocol-поверхность и снизить max_unjustified_count только вниз от 142.",
+      "effort": "L",
+      "automation": "tests/architecture/test_cast_any_unjustified_ratchet.py::test_cast_any_unjustified_count_stays_within_shrink_only_budget",
+      "automated_fix_possible": false
     },
     {
-      "finding_id": "F-002",
-      "fingerprint": "78c7c8906c551d14f670bd3a0f68da9fcbb62ab43fd32f6d2959392b5e80e49a",
+      "id": "TD-004",
+      "requirement_id": "REQ-GOV-012",
+      "path": "configs/quality/debt_scorecard.yaml:259",
+      "observation": "Поверхность конфигов и словарь параметров заморожены на current_count=max_count без запаса.",
+      "method": "Разбор config_surface_ratchet.metrics и families в configs/quality/debt_scorecard.yaml.",
+      "expected": "Новый конфиг или параметр возможен только после сжатия другого остатка в том же изменении; max_count не растёт.",
+      "actual": "config_count 27/27 (:259), unique_parameter_count 419/419 (:266), entity_effective 22/22 и 262/262 (:303,:308), composite_runtime 5/5 и 157/157 (:335,:340).",
+      "impact": "Любое расширение config surface упирается в hard freeze из 08-debt-ownership-playbook.",
       "status": "PROVEN",
-      "evidence_class": "FACT",
-      "priority": "P3",
-      "requirement_id": "REQ-ARCH-002",
-      "domain": "tech-debt",
-      "claim": "Both dynamic HTTP seams narrowed from type: ignore to cast(); #10963 acceptance met, behavior unchanged (cast is runtime no-op).",
-      "broken_invariant": "none introduced; public seams prefer narrow cast() over type: ignore",
-      "root_cause": "dynamic http seams narrowed from type ignore to cast",
-      "affected_paths": [
-        "src/bioetl/interfaces/http/control_plane_identity/types.py",
-        "src/bioetl/interfaces/http/health_server.py"
-      ],
-      "evidence": {
-        "path": "src/bioetl/interfaces/http/health_server.py",
-        "line": 136,
-        "command": "rg -n 'type: ignore' src/bioetl/interfaces/http/health_server.py src/bioetl/interfaces/http/control_plane_identity/types.py; PYTHONPATH=src python -m pytest tests/unit/interfaces/http/test_health_server.py tests/unit/interfaces/http/test_health_server_control_plane_identity.py -q",
-        "scope": "src/bioetl",
-        "timestamp": "2026-09-24T10:03:04Z",
-        "exit_code": 0,
-        "output": "rg: no matches; 103 passed"
-      },
-      "acceptance": "mypy --strict and basedpyright green on both files in CI (not runnable locally); module tests green.",
-      "validation_commands": [
-        "mypy --strict src/bioetl/interfaces/http/health_server.py src/bioetl/interfaces/http/control_plane_identity/types.py"
-      ],
-      "rollback": "restore type: ignore comments",
-      "owner_surface": "application"
-    },
-    {
-      "finding_id": "F-003",
-      "fingerprint": "da4b8bd2c3c56c2499202afcee263edbdf31be39f374694827a7b045e00ef443",
-      "status": "PROVEN",
-      "evidence_class": "FACT",
-      "priority": "P3",
-      "requirement_id": "REQ-ARCH-002",
-      "domain": "tech-debt",
-      "claim": "17 pre-existing type: ignore seams remain at mixin/override/duck-type/import-untyped sites; each replacement requires mypy-gated cast(), no mass retype.",
-      "broken_invariant": "none while each seam stays locally justified and budgets hold",
-      "root_cause": "remaining pre-existing type ignore seams at mixin override and duck-type sites",
-      "affected_paths": [
-        "src/bioetl"
-      ],
-      "evidence": {
-        "path": "src/bioetl/application/pipelines/common/transformer_initialization.py",
-        "line": 47,
-        "command": "rg -n 'type: ignore' src/bioetl --glob '*.py'",
-        "scope": "src/bioetl",
-        "timestamp": "2026-09-24T10:03:04Z",
-        "exit_code": 0,
-        "output": "17 pre-existing seams (mixins, overrides, duck-types, radon import-untyped); 2 docstring/comment FPs excluded"
-      },
-      "acceptance": "Count does not grow; each future ignore→cast passes mypy --strict plus module tests.",
-      "validation_commands": [
-        "rg -c 'type: ignore' src/bioetl --glob '*.py'"
-      ],
-      "rollback": "n/a watch item",
-      "owner_surface": "application"
-    },
-    {
-      "finding_id": "F-004",
-      "fingerprint": "d72fad68317da4baa4db2827827e46ca3f2095979c30841dc059f6fbf246e45b",
-      "status": "NOT_PROVEN",
-      "evidence_class": "GAP",
       "priority": "P2",
-      "requirement_id": "GAP",
-      "domain": "tech-debt",
-      "claim": "Composition package near cap (280/295, util 0.9492 per 2026-09-23 scorecard) — not re-measured this session; watch only, no issue.",
-      "broken_invariant": "not violated while util <= 0.95",
-      "root_cause": "composition package utilization near headroom floor (carry-over, unmeasured this session)",
-      "affected_paths": [
-        "configs/quality/package_cohesion_budget.yaml",
-        "src/bioetl/composition"
-      ],
-      "evidence": {
-        "path": "reports/quality/architecture-quality-scorecard.json",
-        "command": "not re-run this session (carry-over from tech-debt-src-20260923)",
-        "scope": "src/bioetl/composition",
-        "timestamp": "2026-09-24T10:03:04Z",
-        "exit_code": -1,
-        "output": "no independent measurement; do not create issue"
-      },
-      "acceptance": "Re-measure on next cycle; shrink-only if util > 0.95; cap never raised.",
-      "validation_commands": [
-        "python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main"
-      ],
-      "rollback": "n/a watch item",
-      "owner_surface": "composition"
+      "severity": "Medium",
+      "confidence": "high",
+      "remediation": "Сжимать число конфигов или параметров до добавления новых. max_count не поднимать.",
+      "effort": "M",
+      "automation": "python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref refs/remotes/origin/main",
+      "automated_fix_possible": false
+    },
+    {
+      "id": "TD-005",
+      "requirement_id": "REQ-GOV-012",
+      "path": "configs/quality/debt_scorecard.yaml:900",
+      "observation": "Классифицированный retirement-остаток и zero-import кандидаты стоят на потолке.",
+      "method": "Разбор retirement_governance_metrics.metrics в debt_scorecard.yaml.",
+      "expected": "triaged_entry_count и repo_wide_zero_import_candidate_count не растут; снятие записей снижает и current, и max.",
+      "actual": "triaged_entry_count 18/18 (:900), repo_wide_zero_import_candidate_count 2/2 (:909), repo_wide_non_static_reachability_candidate_count 1/1 (:952), triaged_retained_owner_test_anchored_count 14/14 (:961). Untriaged остаётся 0/0.",
+      "impact": "Новая zero-import или triage-запись без удаления существующей нарушает non-growth ratchet.",
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "remediation": "Удалять классифицированные записи до добавления новых и снижать max_count вместе с current. Не расширять бюджет.",
+      "effort": "M",
+      "automation": "reports/quality/dead-code-inventory.json через debt-governance gate dead_code_untriaged_zero_import_candidates",
+      "automated_fix_possible": false
+    },
+    {
+      "id": "TD-006",
+      "requirement_id": "REQ-GOV-012",
+      "path": "configs/quality/debt_scorecard.yaml:770",
+      "observation": "Семейные бюджеты files_ge_250_loc заняты целиком живыми модулями.",
+      "method": "Подсчёт строк src/bioetl/**/*.py под path_prefixes adapter_layer и composite_layer против family_budgets.",
+      "expected": "Число модулей ≥250 LOC не выше family_budgets и имеет запас для снижения бюджета.",
+      "actual": "adapter_layer files_ge_250_loc 2/2: health_check_mixin.py 343 строки, http/client_retry_mixin.py 332. composite_layer 1/1: application/composite/column_service.py 257. В src/bioetl файлов длиннее max_tracked_lines 500 нет.",
+      "impact": "Следующий модуль ≥250 LOC в этих префиксах упирается в потолок; поднимать files_ge_250_loc нельзя.",
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "remediation": "Разрезать три модуля ниже 250 LOC и затем снизить files_ge_250_loc. Бюджет 2 и 1 не увеличивать.",
+      "effort": "M",
+      "automation": "removable_complexity_family_ratchets в configs/quality/debt_scorecard.yaml",
+      "automated_fix_possible": false
+    },
+    {
+      "id": "TD-007",
+      "requirement_id": "REQ-GOV-012",
+      "path": "configs/quality/debt_scorecard.yaml:159",
+      "observation": "Потолок публичных фасадов зафиксирован текущим счётчиком, а не отдельным max_count; growth-гейт берёт лимит из того же счётчика scorecard.",
+      "method": "sanctioned_public_entrypoint_governance.metrics против debt_governance_gate_evaluators.py:956-962 и tests/architecture/test_tech_debt_issues_5839_5845_closeout.py:114-117.",
+      "expected": "Рост фасадов и entrypoint сравнивается с независимым max_count, который не равен живой записи current.",
+      "actual": "public_export_facade_count current_count=3 без max_count (:159); public_entrypoint_count current_count=12 без max_count (:132). Гейт retained_public_export_facade_growth ставит limit=scorecard.metrics.retained_public_export_facade_count. Отдельный closeout-тест держит census <=3 и entrypoint ==12.",
+      "impact": "Согласованное повышение census и scorecard проходит rollup-гейт роста; независимый потолок в scorecard YAML отсутствует.",
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "remediation": "Задать отдельный shrink-only max_count для фасадов и entrypoint и сравнивать census с ним. Текущие 3 и 12 не повышать.",
+      "effort": "S",
+      "automation": "tests/architecture/test_issue_10597_export_facade_shrink.py и gейт retained_public_export_facade_growth",
+      "automated_fix_possible": false
     }
   ]
 }

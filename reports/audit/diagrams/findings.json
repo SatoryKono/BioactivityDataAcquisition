@@ -1,109 +1,94 @@
 {
-  "audit": {
-    "prompt": "prompt.audit.diagrams",
-    "version": "1.2.0",
-    "scope": "docs diagrams + related scripts",
-    "mode": "propose-patches",
-    "language": "ru",
-    "audit_mode": "full",
-    "require_gh_tracking": true,
-    "gh_issues_created": {},
-    "prior_gh_issues": {
-      "DIAG-ADR040-CENSUS": "#10983",
-      "DIAG-META-NODES": "#10984",
-      "DIAG-CURRENT-STATE-STAMP": "#10985"
-    },
-    "base_sha": "6b9c73935f1b3695145088902d946522be7ca0fa",
-    "origin_main_sha": "6b9c73935f1b",
-    "diagrams_pr": "#10986",
-    "diagrams_squash_sha": "5cc40b73b250",
-    "generated_at_utc": "2026-09-24T11:12:30Z",
-    "surface_score": 3,
-    "open_proven_count": 0,
-    "p0_count": 0,
-    "lint_exit": 0,
-    "lint_errors": 0,
-    "lint_warnings": 174,
-    "check_artifacts_exit": 0,
-    "collected_at_utc": "2026-09-24T11:05:46Z"
-  },
-  "findings": [],
-  "resolved": [
+  "findings": [
     {
-      "finding_id": "DIAG-ADR040-CENSUS",
-      "fingerprint": "a362158702fd83df5dbcfc9e41c9c9cb1ca4b0bd08e795f7f90a27284994eb60",
-      "status": "VERIFIED_ALREADY_RESOLVED",
-      "gh": "#10983",
-      "gh_state": "CLOSED",
-      "closed_at": "2026-09-24T10:57:06Z",
-      "evidence": {
-        "kind": "command",
-        "command": "python reports/audit/diagrams/_collect_meta.py",
-        "scope": "docs/02-architecture/diagrams @ 6b9c73935f1b",
-        "timestamp": "2026-09-24T11:05:46Z",
-        "exit_code": 0,
-        "output": "mmd=328 mermaid=165 adr040_total_mmd_prose=328 adr040_total_views_prose=165"
-      }
+      "id": "DIAG-001",
+      "requirement_id": "GAP",
+      "path": "docs/02-architecture/diagrams/providers/chembl/01-api-integration-flow.mmd:14",
+      "observation": "ChEMBL integration diagram ветвится по API key и по cursor/offset/scroll, тогда как адаптер собирает только offset/limit и ChEMBL нет в PROVIDER_AUTH_REQUIREMENTS.",
+      "method": "Сверка `01-api-integration-flow.mmd:14-36` с `src/bioetl/infrastructure/adapters/chembl/_client_request_helpers.py:60` и `src/bioetl/infrastructure/config/config_ci_contract.py:25-28`.",
+      "expected": "Диаграмма показывает фактический режим BioETL: публичный ChEMBL API и пагинация offset/limit.",
+      "actual": "Узлы `API Key Available?` (строка 14) и `Cursor`/`Scroll` (строки 34 и 36) описаны как рабочие ветки потока.",
+      "impact": "Неверная зависимость интегратора: настройка несуществующего ключа и реализация cursor/scroll, которых адаптер не вызывает.",
+      "status": "PROVEN",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "remediation": "Переписать chembl/01-api-integration-flow.mmd под offset/limit без ветки API key и обновить sibling SVG.",
+      "effort": "M",
+      "automation": "Архитектурный тест: запрет строк API Key/Cursor Pagination/Scroll Pagination в chembl/01-api-integration-flow.mmd.",
+      "automated_fix_possible": false
     },
     {
-      "finding_id": "DIAG-META-NODES",
-      "fingerprint": "31ca3ee945c239798680794d678bb99b5d3bfd98f09999db71b5aa4182819419",
-      "status": "VERIFIED_ALREADY_RESOLVED",
-      "gh": "#10984",
-      "gh_state": "CLOSED",
-      "closed_at": "2026-09-24T10:57:08Z",
-      "evidence": {
-        "kind": "command",
-        "command": "python reports/audit/diagrams/_collect_meta.py",
-        "scope": "canonical *.mmd @ 6b9c73935f1b",
-        "timestamp": "2026-09-24T11:05:46Z",
-        "exit_code": 0,
-        "output": "mmd_with_nodes=328 mmd_missing_nodes_count=0 mmd_broken_nodes=[]"
-      }
+      "id": "DIAG-002",
+      "requirement_id": "GAP",
+      "path": "docs/02-architecture/diagrams/providers/semanticscholar/01-api-integration-flow.mmd:20",
+      "observation": "Клон provider flow помечает пагинацию как cursor у Semantic Scholar, PubMed и PubChem, хотя runtime — offset или offset не используется.",
+      "method": "Чтение строки 20 в `semanticscholar`, `pubmed` и `pubchem` `01-api-integration-flow.mmd`; сверка с `semanticscholar/constants.py:4`, `semanticscholar/_search_fetch_flow.py:86`, `pubmed/adapter_filter_fetch_mixin.py:112`, `pubchem/_client_fetch_surface.py:47`.",
+      "expected": "Подпись пагинации совпадает с адаптером: offset для Semantic Scholar и PubMed; для PubChem offset явно не используется.",
+      "actual": "Все три файла содержат узел `Build request + pagination cursor`.",
+      "impact": "Устаревший runtime-view: интегратор выбирает cursor API там, где код шлёт offset или игнорирует offset.",
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "remediation": "Заменить подпись пагинации в трёх `01-api-integration-flow.mmd` на фактический режим и пересобрать sibling SVG.",
+      "effort": "S",
+      "automation": "Точечный тест на запрещённую фразу pagination cursor в этих трёх путях.",
+      "automated_fix_possible": false
     },
     {
-      "finding_id": "DIAG-CURRENT-STATE-STAMP",
-      "fingerprint": "cd903d0a83303d4b87e3fac40c85642ff6ee5c3208312658fee7dac3cbd29069",
-      "status": "VERIFIED_ALREADY_RESOLVED",
-      "gh": "#10985",
-      "gh_state": "CLOSED",
-      "closed_at": "2026-09-24T10:57:10Z",
-      "evidence": {
-        "kind": "path",
-        "path": "docs/02-architecture/current-state-diagrams.md:10",
-        "symbol": "Last verified: '2026-09-24'",
-        "command_corroboration": "C4 Container text: containers are processes not Docker; Rel grafana optional; 09-observability-stack.mmd Prometheus + Grafana (optional, ADR-010/053)"
-      }
-    }
-  ],
-  "not_findings": [
-    {
-      "id": "NF-NPX",
-      "observation": "No npx -y in scripts/diagrams or .github; setup-mermaid pins mermaid-cli 10.6.1 via package-lock and refuses other versions. Hint text uses npx puppeteer (not npx -y)."
+      "id": "DIAG-003",
+      "requirement_id": "GAP",
+      "path": ".github/workflows/docs.yml:496",
+      "observation": "PR drift-gate смотрит только плоские globs architecture/foundation/class-diagrams `*.mmd` и views `*.mermaid` и пропускает 28 вложенных providers, 5 sequence и 5 state-machines.",
+      "method": "Инспекция globs `docs.yml:496-500` и подсчёт `*.mmd` в `providers/` (рекурсивно), `sequence/`, `state-machines/`.",
+      "expected": "Смена любого канонического `.mmd`/`.mermaid` без sibling SVG ломает PR.",
+      "actual": "38 источников вне globs; их SVG можно не обновлять, и job `check-diagram-drift` это не увидит.",
+      "impact": "Расхождение source/SVG для provider, sequence и state-machine проходит CI.",
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "remediation": "Добавить в drift-gate `providers/**/*.mmd`, `sequence/*.mmd`, `state-machines/*.mmd` и тест на эти globs.",
+      "effort": "S",
+      "automation": "Расширить `test_docs_workflow_diagram_drift_uses_pr_base_ref` проверкой трёх globs.",
+      "automated_fix_possible": true
     },
     {
-      "id": "NF-PNG-GITIGNORE",
-      "observation": "PNG under diagrams/**/png/ is gitignored by policy (DOC-GOV-02); SVG tracked. Avoids large binary churn."
+      "id": "DIAG-004",
+      "requirement_id": "GAP",
+      "path": ".github/workflows/docs.yml:384",
+      "observation": "Полный render и visual/quality gates лежат в job с `if: false`; drift-gate сравнивает только имя SVG в diff, без повторного рендера.",
+      "method": "Чтение `docs.yml:381-384` и `523-532`, `diagram-nightly.yml:20`, ADR-040 строка 305, `render-retention.md:35`.",
+      "expected": "ADR-040: blocking source-render drift gate сверяет источник и отрисованный SVG.",
+      "actual": "Full-corpus render и nightly phase2 отключены; живой gate требует лишь, чтобы путь `svg/<stem>.svg` попал в git diff. Точечный render ChEMBL activity остаётся условным.",
+      "impact": "Устаревший или пустой SVG проходит, если файл затронут в том же PR. Регрессия раскладки полного корпуса не блокирует merge.",
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "remediation": "Для изменённых source запускать pinned `render.sh` во временный каталог и `git diff`; в ADR-040 явно описать co-change, если полный render остаётся выключенным.",
+      "effort": "M",
+      "automation": "CI step: render только changed stems pin 10.6.1 и fail при отличии SVG.",
+      "automated_fix_possible": false
     },
     {
-      "id": "NF-C4-DOCKER",
-      "observation": "current-state C4 Container and 09-observability-stack treat Docker/Prometheus as optional. Not a P0 wrong deploy model."
-    },
-    {
-      "id": "NF-LINT-WARNINGS",
-      "observation": "174 lint warnings (SIZE-002 99, STALE-002 24, LINK-001 22, LABEL-001 20, GRAPH-001 4, SIZE-003 3, CLASS-003 2), zero errors, files_failed=0."
-    },
-    {
-      "id": "NF-BINARY-ONLY",
-      "observation": "No PlantUML/drawio/dot in docs/. Sources are Mermaid text."
-    },
-    {
-      "id": "NF-VISUAL-SMOKE",
-      "observation": "PR visual-smoke manifest is 6 SVG by design; check-artifacts exit 0; nightly has extended/broad tiers."
-    },
-    {
-      "id": "NF-CENSUS-MATCH",
-      "observation": "Live family counts 89/145/55/28/5/5/328/165 match ADR-040, diagrams-index.md, and test_governance_docs_match_active_diagram_counts expected tuple."
+      "id": "DIAG-005",
+      "requirement_id": "GAP",
+      "path": "docs/02-architecture/diagrams/providers/uniprot/01-api-integration-flow.mmd:35",
+      "observation": "classDef composition использует stroke `#ea580c`, которого нет в канонической палитре ADR-040, и COLOUR-001 его не ловит.",
+      "method": "Поиск `#ea580c` в `providers/**/*.mmd`; сверка с ADR-040 таблицей stroke `#f59e0b` и `CANONICAL_PALETTE`/`DEPRECATED_PALETTE` в `lint_diagrams.py:91-112` и `:449-460`.",
+      "expected": "D1: произвольные цвета запрещены; composition stroke `#f59e0b`; lint даёт ERROR на цвет вне палитры.",
+      "actual": "`#ea580c` стоит в classDef provider-диаграмм. COLOUR-001 флагует только `DEPRECATED_PALETTE`.",
+      "impact": "Палитра ADR-040 расходится на provider views; CI это не блокирует.",
+      "status": "PROVEN",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "remediation": "Заменить `#ea580c` на `#f59e0b` и расширить COLOUR-001 на hex в style/classDef вне `CANONICAL_PALETTE`.",
+      "effort": "S",
+      "automation": "Правило COLOUR-003: любой hex в style/classDef обязан быть в CANONICAL_PALETTE.",
+      "automated_fix_possible": true
     }
   ]
 }

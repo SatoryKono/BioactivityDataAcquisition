@@ -1,419 +1,148 @@
 {
-  "scope": "docs/",
-  "mode": "propose-patches",
-  "audit_mode": "full",
-  "surface_score": 2,
-  "surface_score_basis": "Main bootstrap and link/drift gates are correct; operator env and bootstrap sentences drift.",
-  "patches_applied": false,
-  "markdown_files": 1487,
   "findings": [
     {
       "id": "DOCS-001",
-      "requirement_id": "REQ-DX-005",
+      "requirement_id": "REQ-THRESHOLD-002",
+      "path": "README.md:297",
+      "observation": "README задаёт BIOETL_DQ_HARD_THRESHOLD со значением по умолчанию 0.20 как порог остановки батча, но это имя не читается кодом.",
+      "method": "Сверка README.md:296-297 с src/bioetl/infrastructure/config/_base.py:64-67 (extra=ignore, поля нет), поиском BIOETL_DQ_HARD_THRESHOLD по src (0 совпадений) и configs/base/quality.yaml:8-9 плюс docs/00-project/RULES.md:835.",
+      "expected": "Документированная ручка порога либо соответствует полю Settings, либо отсутствует; активный иерархический hard_fail равен 0.50.",
+      "actual": "Имя есть только в README.md:297 и в ConfigMap docs/05-operations/deployment/k8s-deployment.yaml:158. Settings его отбрасывает. Канонический hierarchical hard_fail — 0.50.",
+      "impact": "Оператор считает, что выставил отказ батча на 20%, а прогон продолжает использовать YAML-порог 0.50. Полоса 20–50% ошибок не останавливает hierarchical DQ.",
+      "status": "PROVEN",
       "priority": "P1",
       "severity": "High",
-      "category": "env-name",
-      "evidence_class": "CONTRADICTION",
-      "claim": "CLI reference tells operators to set BIOETL_TRACING_ENABLED, and Settings ignores that name.",
-      "broken_invariant": "Documented operator environment variables match Settings env_prefix and nested delimiter.",
-      "root_cause": "Flat tracing env name is not a Settings field or alias; tracing is nested observability.tracing_enabled.",
-      "affected_paths": [
-        "docs/04-reference/cli.md",
-        "docs/03-guides/cheatsheets/cli-commands.md",
-        "src/bioetl/infrastructure/config/_base.py",
-        "src/bioetl/infrastructure/observability/tracing.py"
-      ],
-      "path": "docs/04-reference/cli.md:1578",
-      "observation": "BIOETL_TRACING_ENABLED=true leaves observability.tracing_enabled false.",
-      "method": "Settings(_env_file=None) probe 2026-09-24 plus source inspection",
-      "expected": "Docs name BIOETL_OBSERVABILITY__TRACING_ENABLED, which sets observability.tracing_enabled.",
-      "actual": "cli.md:1578 and cli-commands.md:691 document BIOETL_TRACING_ENABLED. Probe: flat name tracing_nested=False; nested name tracing_nested=True.",
-      "impact": "Operator enables tracing with the documented variable and tracing stays off.",
-      "remediation": "Replace BIOETL_TRACING_ENABLED with BIOETL_OBSERVABILITY__TRACING_ENABLED in both tables. Do not apply until approved.",
-      "effort": "S",
-      "automation": "n/a",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": "docs/04-reference/cli.md",
-          "line": 1578,
-          "observation": "table row BIOETL_TRACING_ENABLED"
-        },
-        {
-          "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 691,
-          "observation": "same row"
-        },
-        {
-          "path": "src/bioetl/infrastructure/observability/tracing.py",
-          "line": 24,
-          "observation": "docstring requires BIOETL_OBSERVABILITY__TRACING_ENABLED"
-        },
-        {
-          "command": "Settings probe",
-          "observation": "BIOETL_TRACING_ENABLED=true -> tracing_enabled False; BIOETL_OBSERVABILITY__TRACING_ENABLED=true -> True"
-        }
-      ],
-      "acceptance": "rg BIOETL_TRACING_ENABLED docs/04-reference/cli.md docs/03-guides/cheatsheets/cli-commands.md returns no matches; both tables use BIOETL_OBSERVABILITY__TRACING_ENABLED.",
-      "validation": [
-        "rg -n BIOETL_TRACING_ENABLED docs/04-reference/cli.md docs/03-guides/cheatsheets/cli-commands.md"
-      ],
-      "rollback": "Revert the two table rows.",
-      "dependencies": [],
-      "validation_commands": [
-        "rg -n BIOETL_TRACING_ENABLED docs/04-reference/cli.md docs/03-guides/cheatsheets/cli-commands.md"
-      ],
-      "fingerprint": "564dde50f3bffef6bde5dd86083b0ebfe92d52cc3cb821fa0f104eec37d54d31",
-      "finding_id": "DOCS-001",
-      "owner_surface": "docs",
       "confidence": "high",
-      "confidence_score": 0.95,
-      "status": "PROVEN"
+      "remediation": "Удалить BIOETL_DQ_SOFT_THRESHOLD и BIOETL_DQ_HARD_THRESHOLD из README и k8s ConfigMap либо завести реальные поля и выровнять дефолт с configs/base/quality.yaml hard_fail 0.50.",
+      "effort": "S",
+      "automation": "Проверка scripts.docs check-drift: каждое BIOETL_* из README должно быть полем Settings или os.getenv в src.",
+      "automated_fix_possible": false
     },
     {
       "id": "DOCS-002",
-      "requirement_id": "REQ-DX-005",
+      "requirement_id": "GAP",
+      "path": "docs/03-guides/cheatsheets/data-quality-rules.md:107",
+      "observation": "Активные шпаргалки и troubleshooting предписывают удалённый CLI bioetl dq validate --entity --show-rules и bioetl diagnostics --pipeline --quarantine.",
+      "method": "Сверка docs/03-guides/cheatsheets/data-quality-rules.md:107-116, docs/03-guides/cheatsheets/pipeline-config.md:142 и docs/05-operations/troubleshooting/common-errors.md:95 с docs/04-reference/cli.md:1066-1068 и src/bioetl/interfaces/cli/commands/config_dq.py:100-106, src/bioetl/interfaces/cli/commands/diagnostics.py:306.",
+      "expected": "Диагностика DQ вызывает bioetl dq validate <PIPELINE> и bioetl diagnostics quarantine --pipeline <NAME>.",
+      "actual": "Шпаргалки передают --entity, --show-rules и --strict. cli.md фиксирует, что эти флаги удалены. diagnostics — группа; карантин — подкоманда quarantine с обязательным --pipeline, флага --quarantine на корне нет.",
+      "impact": "При DQ-инциденте оператор получает Click usage error вместо валидации правил и статистики карантина.",
+      "status": "PROVEN",
       "priority": "P1",
       "severity": "High",
-      "category": "env-name",
-      "evidence_class": "CONTRADICTION",
-      "claim": "running-pipelines.md and the CLI env tables say BIOETL_METRICS_ENABLED turns metrics on or off, but the runtime gate is observability.metrics_enabled.",
-      "broken_invariant": "The documented metrics switch is the field the metrics bootstrap reads.",
-      "root_cause": "Root Settings.metrics_enabled is a separate field from ObservabilitySettings.metrics_enabled, and bootstrap prefers the nested field.",
-      "affected_paths": [
-        "docs/03-guides/running-pipelines.md",
-        "docs/04-reference/cli.md",
-        "docs/03-guides/cheatsheets/cli-commands.md",
-        "src/bioetl/composition/bootstrap/runtime/metrics_bootstrap.py",
-        "src/bioetl/infrastructure/config/_base.py"
-      ],
-      "path": "docs/03-guides/running-pipelines.md:481-484",
-      "observation": "BIOETL_METRICS_ENABLED=false sets only the root flag; nested metrics stay enabled.",
-      "method": "Settings probe 2026-09-24 and metrics_bootstrap._metrics_enabled",
-      "expected": "How-to uses BIOETL_OBSERVABILITY__METRICS_ENABLED, already documented in metrics-monitoring.md.",
-      "actual": "Probe flat BIOETL_METRICS_ENABLED=false -> metrics_root False, metrics_nested True. Nested BIOETL_OBSERVABILITY__METRICS_ENABLED=false -> metrics_nested False.",
-      "impact": "Operators following the running guide cannot disable metrics with the command they are given.",
-      "remediation": "Point the running-pipelines snippet and CLI tables at BIOETL_OBSERVABILITY__METRICS_ENABLED. Leave metrics-monitoring.md as the matching how-to. Do not apply until approved.",
-      "effort": "S",
-      "automation": "n/a",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": "docs/03-guides/running-pipelines.md",
-          "line": 481,
-          "observation": "export BIOETL_METRICS_ENABLED"
-        },
-        {
-          "path": "src/bioetl/composition/bootstrap/runtime/metrics_bootstrap.py",
-          "line": 43,
-          "observation": "_metrics_enabled reads observability.metrics_enabled when present"
-        },
-        {
-          "path": "docs/03-guides/metrics-monitoring.md",
-          "line": 116,
-          "observation": "correct nested name already published"
-        }
-      ],
-      "acceptance": "running-pipelines.md and both CLI tables use BIOETL_OBSERVABILITY__METRICS_ENABLED for the on/off switch.",
-      "validation": [
-        "rg -n BIOETL_METRICS_ENABLED docs/03-guides/running-pipelines.md docs/04-reference/cli.md docs/03-guides/cheatsheets/cli-commands.md"
-      ],
-      "rollback": "Revert those snippets.",
-      "dependencies": [],
-      "validation_commands": [
-        "rg -n \"BIOETL_METRICS_ENABLED|BIOETL_OBSERVABILITY__METRICS_ENABLED\" docs/03-guides/running-pipelines.md docs/03-guides/metrics-monitoring.md"
-      ],
-      "fingerprint": "44d9150b41caa50a454c47491233bc15dd1fbb31cbc3de84f70e3c72cf8f03d2",
-      "finding_id": "DOCS-002",
-      "owner_surface": "docs",
       "confidence": "high",
-      "confidence_score": 0.95,
-      "status": "PROVEN"
+      "remediation": "Заменить примеры на bioetl dq validate chembl_activity и bioetl diagnostics quarantine --pipeline chembl_activity в трёх перечисленных файлах.",
+      "effort": "S",
+      "automation": "Контракт-тест: выдержки CLI из docs/03-guides/cheatsheets сверять с click-командами src/bioetl/interfaces/cli.",
+      "automated_fix_possible": false
     },
     {
       "id": "DOCS-003",
-      "requirement_id": "REQ-ENV-001",
-      "priority": "P2",
-      "severity": "Medium",
-      "category": "env-enum",
-      "evidence_class": "CONTRADICTION",
-      "claim": "environment-variables.md lists BIOETL_ENV modes dev, test, prod, and Settings rejects test.",
-      "broken_invariant": "Published environment mode list equals Settings.env Literal.",
-      "root_cause": "The partial env reference was not updated when the allowed set became dev, staging, prod.",
-      "affected_paths": [
-        "docs/04-reference/environment-variables.md",
-        "docs/04-reference/cli.md",
-        "src/bioetl/infrastructure/config/_base.py"
-      ],
-      "path": "docs/04-reference/environment-variables.md:12",
-      "observation": "Settings(env='test') raises ValidationError; env='staging' is accepted by the type.",
-      "method": "Settings probe 2026-09-24",
-      "expected": "Docs list dev, staging, prod.",
-      "actual": "environment-variables.md:12 says dev, test, prod. cli.md:1573 says dev, prod and omits staging. Probe rejected env=test.",
-      "impact": "An operator who sets BIOETL_ENV=test from the reference fails settings validation at startup.",
-      "remediation": "Replace the mode list with dev, staging, prod in environment-variables.md and cli.md. Do not apply until approved.",
-      "effort": "S",
-      "automation": "n/a",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": "docs/04-reference/environment-variables.md",
-          "line": 12,
-          "observation": "(dev, test, prod)"
-        },
-        {
-          "path": "src/bioetl/infrastructure/config/_base.py",
-          "line": 72,
-          "observation": "Literal dev, staging, prod"
-        },
-        {
-          "command": "Settings probe",
-          "observation": "env=test REJECTED error_count=1"
-        }
-      ],
-      "acceptance": "Neither active reference lists test as a BIOETL_ENV mode; both list staging.",
-      "validation": [
-        "rg -n \"BIOETL_ENV\" docs/04-reference/environment-variables.md docs/04-reference/cli.md"
-      ],
-      "rollback": "Revert the two mode cells.",
-      "dependencies": [],
-      "validation_commands": [
-        "rg -n BIOETL_ENV docs/04-reference/environment-variables.md docs/04-reference/cli.md"
-      ],
-      "fingerprint": "54b721e883c42d56482dcef4bc6f9184b9bc31b730e9ac1371376b46afbdca15",
-      "finding_id": "DOCS-003",
-      "owner_surface": "docs",
+      "requirement_id": "GAP",
+      "path": "docs/05-operations/deployment/deployment-guide.md:117",
+      "observation": "Активный deployment-guide шаг 2 выполняет kubectl apply -f k8s-deployment.yaml, тогда как сам манифест запрещает apply.",
+      "method": "Чтение docs/05-operations/deployment/deployment-guide.md:16-21 и :117 против шапки docs/05-operations/deployment/k8s-deployment.yaml:1-4, runAsNonRoot: false на строке 30 и stringData BIOETL_PII_SALT_CURRENT на строке 185.",
+      "expected": "Экспериментальный манифест не входит в исполняемую процедуру; секрет соли не публикуется как apply-ready значение.",
+      "actual": "Guide со Status active даёт kubectl apply -f k8s-deployment.yaml. Манифест помечен UNSUPPORTED и «Do not apply», содержит известную строку соли change_me_to_random_64_char_string_abc123xyz789 и runAsNonRoot: false.",
+      "impact": "Следование нумерованному шагу поднимает неподдерживаемый профиль с опубликованной солью PII до ручного kubectl edit secret.",
+      "status": "PROVEN",
+      "priority": "P1",
+      "severity": "High",
       "confidence": "high",
-      "confidence_score": 0.95,
-      "status": "PROVEN"
+      "remediation": "Убрать kubectl apply из deployment-guide либо заменить манифест на явно неисполняемый пример без секрета и согласовать баннер файла с текстом процедуры.",
+      "effort": "M",
+      "automation": "Запрет в docs-check строк kubectl apply рядом с баннером UNSUPPORTED в docs/05-operations/deployment/.",
+      "automated_fix_possible": false
     },
     {
       "id": "DOCS-004",
-      "requirement_id": "REQ-ENV-003",
+      "requirement_id": "GAP",
+      "path": "docs/03-guides/running-pipelines.md:446",
+      "observation": "Инструкция export BIOETL_LOG_LEVEL=DEBUG не меняет уровень логов: код эту переменную не читает.",
+      "method": "Поиск BIOETL_LOG_LEVEL по репозиторию (только docs и k8s ConfigMap) против src/bioetl/composition/bootstrap_logger.py:63 и src/bioetl/application/services/execution/cli_run_orchestration_service.py:144.",
+      "expected": "Документированный способ включить DEBUG реально выставляет log_level.",
+      "actual": "bootstrap вызывает configure_logging(..., log_level=\"INFO\"). DEBUG включается флагом --debug (log_level=\"DEBUG\" if request.debug). BIOETL_LOG_LEVEL также указан в README.md:288, docs/04-reference/environment-variables.md:14 и docs/04-reference/cli.md:1575.",
+      "impact": "Оператор при разборе сбоя экспортирует BIOETL_LOG_LEVEL и остаётся на INFO, считая, что включил DEBUG.",
+      "status": "PROVEN",
       "priority": "P2",
       "severity": "Medium",
-      "category": "contradiction",
-      "evidence_class": "CONTRADICTION",
-      "claim": "The env reference calls the OpenAlex API key an optional rate-limit upgrade, while the provider page requires it for production-like runs.",
-      "broken_invariant": "One operator contract for whether BIOETL_OPENALEX_API_KEY is required.",
-      "root_cause": "environment-variables.md understates the provider contract and does not mention the legacy mailto-only adapter path.",
-      "affected_paths": [
-        "docs/04-reference/environment-variables.md",
-        "docs/04-reference/providers/openalex/publication.md",
-        "src/bioetl/infrastructure/adapters/openalex/_client_support.py"
-      ],
-      "path": "docs/04-reference/environment-variables.md:26",
-      "observation": "Required column is No and the description is higher rate limits; publication.md says the key is required and email does not replace it.",
-      "method": "file inspection of both docs and OpenAlex adapter creator",
-      "expected": "Partial env reference matches the provider page: key required for production-like runs; email is attribution only.",
-      "actual": "environment-variables.md:26 Required=No, higher rate limits. publication.md:172-174 and :272 Required=Да. Adapter raises ValueError only when both api_key and mailto are missing (_client_support.py:95-99).",
-      "impact": "An operator can omit the key after reading the env reference and still miss the production boundary stated by the provider page.",
-      "remediation": "Rewrite the OpenAlex rows to match publication.md, and add one clause that mailto-only construction remains a legacy adapter fallback, not the production boundary. Do not apply until approved.",
-      "effort": "S",
-      "automation": "n/a",
-      "automated_fix_possible": false,
-      "evidence": [
-        {
-          "path": "docs/04-reference/environment-variables.md",
-          "line": 26,
-          "observation": "Required No"
-        },
-        {
-          "path": "docs/04-reference/providers/openalex/publication.md",
-          "line": 272,
-          "observation": "Обязательна Да"
-        },
-        {
-          "path": "src/bioetl/infrastructure/adapters/openalex/_client_support.py",
-          "line": 95,
-          "observation": "api_key or mailto"
-        }
-      ],
-      "acceptance": "environment-variables.md OpenAlex rows match publication.md:169-174 and state the legacy mailto fallback explicitly.",
-      "validation": [
-        "rg -n OPENALEX docs/04-reference/environment-variables.md docs/04-reference/providers/openalex/publication.md"
-      ],
-      "rollback": "Revert the OpenAlex table rows.",
-      "dependencies": [],
-      "validation_commands": [
-        "rg -n BIOETL_OPENALEX_API_KEY docs/04-reference/environment-variables.md docs/04-reference/providers/openalex/publication.md"
-      ],
-      "fingerprint": "28314e9c46b956b939ae9ebf70b865b32b6cb5dfa7144b73ac3b5184d5110ac9",
-      "finding_id": "DOCS-004",
-      "owner_surface": "docs",
       "confidence": "high",
-      "confidence_score": 0.95,
-      "status": "PROVEN"
+      "remediation": "Оставить в running-pipelines только bioetl run --debug; удалить BIOETL_LOG_LEVEL из справочников, пока Settings или configure_logging его не читают.",
+      "effort": "S",
+      "automation": "Тот же drift-check BIOETL_* против src.",
+      "automated_fix_possible": false
     },
     {
       "id": "DOCS-005",
-      "requirement_id": "REQ-DX-001",
+      "requirement_id": "GAP",
+      "path": "README.md:299",
+      "observation": "Таблица README для circuit breaker, retry, Delta vacuum и quarantine retention называет переменные, которых нет в Settings и в src.",
+      "method": "Поиск BIOETL_CB_FAILURE_THRESHOLD, BIOETL_RETRY_MAX_ATTEMPTS, BIOETL_DELTA_VACUUM_RETENTION, BIOETL_QUARANTINE_RETENTION_DAYS в src (0 совпадений) против README.md:299-308 и Settings extra=ignore в _base.py:67.",
+      "expected": "Каждая операционная переменная из таблицы Installation либо поле Settings/os.getenv, либо не публикуется как действующая.",
+      "actual": "Эти имена встречаются в README и в неподдерживаемом k8s ConfigMap (k8s-deployment.yaml:162-175). Код их не читает, extra=ignore их отбрасывает.",
+      "impact": "Смена retention vacuum, порога circuit breaker или срока карантина через окружение не влияет на рантайм.",
+      "status": "PROVEN",
       "priority": "P2",
       "severity": "Medium",
-      "category": "bootstrap",
-      "evidence_class": "CONTRADICTION",
-      "claim": "running-pipelines.md presents the tracing uv extra set and make install as the same canonical bootstrap.",
-      "broken_invariant": "How-to bootstrap commands match the Makefile install target and the quick-start distinction.",
-      "root_cause": "The running guide collapsed two documented extra sets into one sentence.",
-      "affected_paths": [
-        "docs/03-guides/running-pipelines.md",
-        "Makefile",
-        "docs/03-guides/quick-start.md"
-      ],
-      "path": "docs/03-guides/running-pipelines.md:59-61",
-      "observation": "Makefile install syncs dev, tests, tests_full, export. quick-start says that set is not the tracing minimal set.",
-      "method": "Read Makefile install target and both guides",
-      "expected": "running-pipelines.md names both sets separately, as quick-start.md:50-55 does.",
-      "actual": "Line 59-60 joins `uv sync --extra dev --extra tests --extra tracing` and `make install` with a slash as one canonical bootstrap. Makefile:99-100 is `uv sync --extra dev --extra tests --extra tests_full --extra export`.",
-      "impact": "An operator can install the tracing set and believe architecture/export extras from make install are present, or the reverse.",
-      "remediation": "Replace the slash sentence with the two explicit extra sets from quick-start.md. Do not apply until approved.",
-      "effort": "S",
-      "automation": "n/a",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": "docs/03-guides/running-pipelines.md",
-          "line": 59,
-          "observation": "slash equivalence"
-        },
-        {
-          "path": "Makefile",
-          "line": 100,
-          "observation": "install extras"
-        },
-        {
-          "path": "docs/03-guides/quick-start.md",
-          "line": 50,
-          "observation": "sets are not the same"
-        }
-      ],
-      "acceptance": "running-pipelines.md no longer equates the tracing extra set with make install.",
-      "validation": [
-        "rg -n \"make install\" docs/03-guides/running-pipelines.md Makefile"
-      ],
-      "rollback": "Revert the sentence in running-pipelines.md.",
-      "dependencies": [],
-      "validation_commands": [
-        "rg -n \"canonical bootstrap|make install\" docs/03-guides/running-pipelines.md"
-      ],
-      "fingerprint": "9480083d406f23bcd934226cf7f1d8afb46133cd7b357b33f32db7936514906c",
-      "finding_id": "DOCS-005",
-      "owner_surface": "docs",
       "confidence": "high",
-      "confidence_score": 0.95,
-      "status": "PROVEN"
+      "remediation": "Удалить несвязанные строки из README и k8s ConfigMap; для живых ручек сослаться на YAML source circuit_breaker и quality/maintenance config.",
+      "effort": "S",
+      "automation": "Drift-check имён BIOETL_* из README против полей Settings.",
+      "automated_fix_possible": false
     },
     {
       "id": "DOCS-006",
-      "requirement_id": "REQ-DX-005",
+      "requirement_id": "GAP",
+      "path": "README.md:294",
+      "observation": "README указывает дефолт BIOETL_OBSERVABILITY__DQ_MONITOR_ENABLED=false, код инициализирует dq_monitor_enabled=True.",
+      "method": "Сверка README.md:294 с src/bioetl/infrastructure/config/_observability_settings.py:46-47 и .env.example:69.",
+      "expected": "Опубликованный дефолт совпадает с Field(default=...) при отсутствии переменной.",
+      "actual": "Поле ObservabilitySettings.dq_monitor_enabled по умолчанию True. .env.example задаёт true. README пишет false.",
+      "impact": "Оператор ожидает выключенный DQ-monitor и не отключает его явно; монитор остаётся включённым.",
+      "status": "PROVEN",
       "priority": "P2",
       "severity": "Medium",
-      "category": "env-name",
-      "evidence_class": "FACT",
-      "claim": "BIOETL_LOG_LEVEL is documented as a core setting and is not read by Settings or any Python module.",
-      "broken_invariant": "A variable listed as a key local setting exists on Settings or in .env.example.",
-      "root_cause": "Log level is a CLI/context default, and the env name was documented without a Settings field.",
-      "affected_paths": [
-        "docs/03-guides/getting-started.md",
-        "docs/04-reference/environment-variables.md",
-        "docs/04-reference/cli.md",
-        "docs/03-guides/cheatsheets/cli-commands.md",
-        "docs/03-guides/metrics-monitoring.md",
-        "src/bioetl/infrastructure/config/_base.py"
-      ],
-      "path": "docs/03-guides/getting-started.md:159",
-      "observation": "Settings has no log_level attribute. Repository Python sources do not reference BIOETL_LOG_LEVEL. .env.example has no such key.",
-      "method": "Settings probe hasattr log_level False; ripgrep BIOETL_LOG_LEVEL under src and .env.example",
-      "expected": "Docs either remove the variable or point at the real log-level control.",
-      "actual": "getting-started.md:159, environment-variables.md:14, cli.md:1575, cli-commands.md:688, metrics-monitoring.md:119 list BIOETL_LOG_LEVEL default INFO. Probe has_log_level False.",
-      "impact": "Setting BIOETL_LOG_LEVEL=DEBUG in .env does not change log verbosity.",
-      "remediation": "Remove BIOETL_LOG_LEVEL from the core tables or label it unused and point to the CLI debug flag. Confirm the intended control before editing. Do not apply until approved.",
-      "effort": "S",
-      "automation": "n/a",
-      "automated_fix_possible": false,
-      "evidence": [
-        {
-          "path": "docs/03-guides/getting-started.md",
-          "line": 159,
-          "observation": "BIOETL_LOG_LEVEL default INFO"
-        },
-        {
-          "path": "src/bioetl/infrastructure/config/_base.py",
-          "line": 72,
-          "observation": "no log_level field"
-        },
-        {
-          "command": "rg BIOETL_LOG_LEVEL src .env.example",
-          "observation": "no matches"
-        }
-      ],
-      "acceptance": "Active docs no longer present BIOETL_LOG_LEVEL as a working Settings variable unless a reader is added in code.",
-      "validation": [
-        "rg -n BIOETL_LOG_LEVEL src .env.example docs/03-guides/getting-started.md docs/04-reference/environment-variables.md"
-      ],
-      "rollback": "Revert the table rows.",
-      "dependencies": [],
-      "validation_commands": [
-        "rg -n BIOETL_LOG_LEVEL src .env.example"
-      ],
-      "fingerprint": "55ab2daeb0fc3ab5e5098348a2907285738340d0d4ffa2c307f00605aa1fc38b",
-      "finding_id": "DOCS-006",
-      "owner_surface": "docs",
       "confidence": "high",
-      "confidence_score": 0.95,
-      "status": "PROVEN"
+      "remediation": "Поставить в README дефолт true в соответствии с ObservabilitySettings.",
+      "effort": "S",
+      "automation": "Сверка колонки Default в README с Field(default) вложенных Settings.",
+      "automated_fix_possible": false
     },
     {
       "id": "DOCS-007",
-      "requirement_id": "REQ-DX-001",
-      "priority": "P3",
-      "severity": "Low",
-      "category": "command",
-      "evidence_class": "FACT",
-      "claim": "cli-commands.md says make test-deps installs test-only dependencies.",
-      "broken_invariant": "Make target descriptions match the Makefile recipe.",
-      "root_cause": "The cheatsheet verb was not updated when the target became an import check.",
-      "affected_paths": [
-        "docs/03-guides/cheatsheets/cli-commands.md",
-        "Makefile"
-      ],
-      "path": "docs/03-guides/cheatsheets/cli-commands.md:708",
-      "observation": "Makefile test-deps runs python -c import of pytest, pytest_cov, pytest_asyncio, hypothesis, vcr.",
-      "method": "Read Makefile:102-103 and cli-commands.md:708",
-      "expected": "Use when: check that test dependencies import.",
-      "actual": "Cell says Install test-only dependencies.",
-      "impact": "Running only make test-deps does not install missing test packages.",
-      "remediation": "Change the Use when cell to a presence check. Do not apply until approved.",
-      "effort": "S",
-      "automation": "n/a",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 708,
-          "observation": "Install test-only dependencies"
-        },
-        {
-          "path": "Makefile",
-          "line": 102,
-          "observation": "import check"
-        }
-      ],
-      "acceptance": "cli-commands.md no longer says make test-deps installs packages.",
-      "validation": [
-        "rg -n test-deps docs/03-guides/cheatsheets/cli-commands.md Makefile"
-      ],
-      "rollback": "Revert the table cell.",
-      "dependencies": [],
-      "validation_commands": [
-        "rg -n test-deps Makefile docs/03-guides/cheatsheets/cli-commands.md"
-      ],
-      "fingerprint": "ea397a371156104c8e5c5ef2dc46754c1b18aadeb4510684d295d6936a79589a",
-      "finding_id": "DOCS-007",
-      "owner_surface": "docs",
+      "requirement_id": "GAP",
+      "path": "docs/04-reference/cli.md:1578",
+      "observation": "Справочник CLI называет ручку трейсинга BIOETL_TRACING_ENABLED, рабочее имя — BIOETL_OBSERVABILITY__TRACING_ENABLED.",
+      "method": "Сверка docs/04-reference/cli.md:1578 с src/bioetl/infrastructure/observability/tracing.py:24, README.md:293 и docs/04-reference/environment-variables.md:51. Поиск BIOETL_TRACING_ENABLED в src: 0 совпадений.",
+      "expected": "Имя переменной в CLI reference совпадает с вложенным полем observability.tracing_enabled.",
+      "actual": "Короткое имя не является полем Settings и отбрасывается extra=ignore. Включение трейсинга описано как BIOETL_OBSERVABILITY__TRACING_ENABLED=true.",
+      "impact": "export BIOETL_TRACING_ENABLED=true из таблицы CLI не включает OpenTelemetry.",
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
       "confidence": "high",
-      "confidence_score": 0.95,
-      "status": "PROVEN"
+      "remediation": "Заменить строку в docs/04-reference/cli.md:1578 на BIOETL_OBSERVABILITY__TRACING_ENABLED.",
+      "effort": "S",
+      "automation": "Тот же drift-check BIOETL_* .",
+      "automated_fix_possible": false
+    },
+    {
+      "id": "DOCS-008",
+      "requirement_id": "GAP",
+      "path": "docs/00-project/RULES.md:1146",
+      "observation": "RULES §4.2.1 фиксирует нижние границы pytest, pytest-asyncio и vcrpy ниже, чем extra tests в pyproject.toml.",
+      "method": "Сверка docs/00-project/RULES.md:1146-1149 с pyproject.toml:82, pyproject.toml:84 и pyproject.toml:101.",
+      "expected": "Нормативная таблица тестовых зависимостей повторяет нижние границы extra tests.",
+      "actual": "RULES: pytest>=8.0, pytest-asyncio>=0.23, vcrpy>=6.0. pyproject tests: pytest>=9.0.3, pytest-asyncio>=1.4, vcrpy>=8.2.1.",
+      "impact": "Ручная установка по RULES может поставить pytest 8 и vcrpy 6, которых текущий extra tests уже не принимает.",
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "remediation": "Обновить таблицу RULES §4.2.1 до границ pyproject.toml extra tests и не дублировать пины вручную.",
+      "effort": "S",
+      "automation": "Генерация таблицы зависимостей RULES из [project.optional-dependencies].tests.",
+      "automated_fix_possible": false
     }
   ]
 }

@@ -1,388 +1,76 @@
 {
-  "domain_id": "docs-pipeline",
-  "prompt_id": "prompt.audit.docs-pipeline",
-  "checked_at_utc": "2026-09-14T06:13:47Z",
-  "surface_score": 2,
   "findings": [
     {
-      "finding_id": "DOCS-PIPE-001",
       "id": "DOCS-PIPE-001",
       "requirement_id": "REQ-DOC-001",
+      "path": "docs/02-architecture/diagrams/descriptions/INDEX.md:3",
+      "observation": "Tracked generated description index stores a local wall-clock stamp, and its generator is not a docs CI drift check.",
+      "method": "inspection of docs/02-architecture/diagrams/descriptions/INDEX.md:3, scripts/diagrams/render/generate_description_indexes.py:55-56 and :206-207, scripts/diagrams/render/generate_all_bundles.py:586 and :679; workflow search for those script names",
+      "expected": "Tracked generated docs are deterministic (no local now()) and regenerated output is checked in CI.",
+      "actual": "INDEX.md line 3 is `_Автогенерация: 2026-07-18T17:33:44+03:00_`. Generator uses `datetime.now().astimezone()` and `Path.write_text`. Sibling `docs/02-architecture/diagrams/bundles/architecture.bundle.md:3` is `Generated: 2026-07-18T18:29:11` from naive `datetime.now().strftime`. Neither script is invoked by `.github/workflows/docs.yml`.",
+      "impact": "Repeating the generator on an unchanged corpus rewrites tracked Markdown; CI will not fail that drift.",
+      "status": "PROVEN",
       "priority": "P2",
       "severity": "Medium",
       "confidence": "high",
-      "confidence_score": 0.93,
-      "status": "PROVEN",
-      "evidence_class": "FACT",
-      "category": "publication-path",
-      "path": "mkdocs.yml:7",
-      "observation": "Канонический MkDocs `site_dir` пишет в корневой `site/`, тогда как упакованный `build-site` и publication policy используют `docs/site/`.",
-      "claim": "Default `mkdocs build` and `python -m scripts.docs build-site` write HTML to different directories.",
-      "broken_invariant": "Один детерминированный publication helper path для MkDocs site_dir",
-      "root_cause": "mkdocs.yml site_dir=site is not aligned with scripts.docs.build.mkdocs_build default docs/site",
-      "affected_paths": [
-        "mkdocs.yml",
-        "scripts/docs/build/mkdocs_build.py",
-        "docs/00-project/governance/06-doc-publication-policy.md"
-      ],
-      "evidence": {
-        "path": "mkdocs.yml",
-        "line": 7,
-        "symbol": "site_dir",
-        "observation": "site_dir: site; build-site copies staged output to docs/site"
-      },
-      "expected": "mkdocs.yml, build-site и 06-doc-publication-policy.md сходятся на одном игнорируемом helper-каталоге (`docs/site/`).",
-      "actual": "mkdocs.yml: `site_dir: site` (корень репо); scripts/docs/build/mkdocs_build.py `_DEFAULT_SITE_DIR = repo/docs/site`; policy и generated_artifact_routing описывают `docs/site/`.",
-      "impact": "Локальный `mkdocs build` без флагов оставляет HTML в другом дереве, чем packaged entrypoint; риск скрытого local-only state при будущей публикации.",
-      "method": "inspection mkdocs.yml + mkdocs_build.py + publication policy",
-      "remediation": "Выставить `site_dir: docs/site` (или эквивалент) в mkdocs.yml и оставить build-site единственным wrapper; проверить gitignore обеих путей.",
-      "effort": "S",
-      "automation": "architecture test: mkdocs.yml site_dir == build-site default",
-      "automated_fix_possible": true,
-      "validation": [
-        "python -c \"import yaml; print(yaml.safe_load(open('mkdocs.yml',encoding='utf-8'))['site_dir'])\"",
-        "rg \"_DEFAULT_SITE_DIR\" scripts/docs/build/mkdocs_build.py"
-      ],
-      "acceptance": "site_dir в mkdocs.yml совпадает с docs/site и policy",
-      "rollback": "revert mkdocs.yml site_dir",
-      "owner_surface": "docs",
-      "dependencies": [],
-      "validation_commands": [
-        "python -m scripts.docs build-site --help"
-      ],
-      "domain": "docs-pipeline",
-      "fingerprint": "6aca5e906c66b9968b1092f0afe050fd452fae1cb87199d19ce4e9102a6ab7b2"
+      "remediation": "Stamp from a fixed source (git commit date or SOURCE_DATE_EPOCH), normalize the stamp in `--check`, write via temp+os.replace, and call that check from docs CI.",
+      "effort": "M",
+      "automation": "CI check that regenerates indexes/bundles and diffs them with calendar stamps normalized",
+      "automated_fix_possible": true
     },
     {
-      "finding_id": "DOCS-PIPE-002",
       "id": "DOCS-PIPE-002",
       "requirement_id": "REQ-DOC-001",
+      "path": "scripts/docs/checks/check_links.py:669",
+      "observation": "The canonical link gate and strict MkDocs build both ignore missing PNG/SVG targets.",
+      "method": "inspection of scripts/docs/checks/check_links.py:669-672, mkdocs.yml:97-100, .github/workflows/docs.yml:379-384",
+      "expected": "Broken published image links fail `python -m scripts.docs verify` or the strict MkDocs build.",
+      "actual": "check-links continues when the target endswith `.png` or `.svg`. mkdocs `validation.links.not_found` is `info`. Job `render-diagrams` is `if: ${{ false }}`.",
+      "impact": "A Markdown href to a missing PNG/SVG can pass the docs verify chain. Bundle image existence is a separate architecture test, not this command.",
+      "status": "PROVEN",
       "priority": "P2",
       "severity": "Medium",
       "confidence": "high",
-      "confidence_score": 0.95,
-      "status": "PROVEN",
-      "evidence_class": "FACT",
-      "category": "hidden-precondition",
-      "path": "scripts/docs/checks/verify.py:99-112",
-      "observation": "Каноническая цепочка `python -m scripts.docs verify` требует extra `docs` (mkdocs); в `.venv-win` mkdocs отсутствует, shell-adapter ищет `.venv`, не `.venv-win`.",
-      "claim": "Documented one-command docs verify cannot complete strict-build on the Windows project venv without a hidden docs extra install.",
-      "broken_invariant": "Clean checkout one-command docs build/check with pinned toolchain",
-      "root_cause": "verify strict-build imports mkdocs; default Windows venv has no docs extra; build_docs_site.sh probes .venv not .venv-win",
-      "affected_paths": [
-        "scripts/docs/checks/verify.py",
-        "scripts/docs/build_docs_site.sh",
-        "pyproject.toml",
-        ".github/workflows/docs.yml"
-      ],
-      "evidence": {
-        "command": "E:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe -c \"import mkdocs\"",
-        "scope": "local .venv-win",
-        "timestamp": "2026-09-14T06:13:47Z",
-        "exit_code": 1,
-        "output": "ModuleNotFoundError: No module named 'mkdocs'"
-      },
-      "expected": "Один задокументированный Python (`.venv-win`) завершает `scripts.docs verify`, включая strict MkDocs, либо явно требует `uv sync --extra docs` в README.",
-      "actual": "CI validate-mkdocs ставит `uv-extras: docs`; локальный `.venv-win` без mkdocs; `build_docs_site.sh` проверяет `./.venv/Scripts/python.exe`, не `.venv-win`.",
-      "impact": "Локальный operator думает, что verify зелёный, либо падает на последнем шаге без явного указания extra; Windows shell-path не находит интерпретатор.",
-      "method": "command import mkdocs on .venv-win; inspection verify.py and docs.yml",
-      "remediation": "Документировать `uv sync --extra docs` как precondition для verify; fail-fast с сообщением до mkdocs; в build_docs_site.sh добавить `.venv-win`.",
-      "effort": "S",
-      "automation": "CI already uses uv-extras docs; add local README + shell probe",
-      "automated_fix_possible": true,
-      "validation": [
-        "uv sync --frozen --extra docs && python -m scripts.docs verify --skip-links --skip-drift --skip-docstrings --skip-cleanup-inventory"
-      ],
-      "acceptance": "`.venv-win` с extra docs либо явный precondition в scripts/docs/README.md",
-      "rollback": "revert README/shell probe",
-      "owner_surface": "docs",
-      "dependencies": [],
-      "validation_commands": [
-        ".venv-win\\Scripts\\python.exe -c \\\"import mkdocs\\\""
-      ],
-      "domain": "docs-pipeline",
-      "fingerprint": "acaa88409248678b2162179f76ff3109c6dcf2891d67e6349078cf4ceb3117c5"
-    },
-    {
-      "finding_id": "DOCS-PIPE-003",
-      "id": "DOCS-PIPE-003",
-      "requirement_id": "REQ-DOC-001",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "confidence_score": 0.92,
-      "status": "PROVEN",
-      "evidence_class": "FACT",
-      "category": "determinism",
-      "path": "scripts/generate_adr_registry.py:801",
-      "observation": "Tracked published ADR registry встраивает wall-clock `datetime.now()`; генератор вне `python -m scripts.docs` и не входит в `scripts.docs verify`.",
-      "claim": "Regenerating the published ADR registry cannot be bit-identical and is not gated by the canonical docs verify chain.",
-      "broken_invariant": "Tracked generated docs are deterministic and --check'd in docs CI",
-      "root_cause": "ADR registry generator uses datetime.now in tracked outputs and is not a scripts.docs command",
-      "affected_paths": [
-        "scripts/generate_adr_registry.py",
-        "docs/02-architecture/adr-registry/registry.json",
-        "scripts/docs/__main__.py",
-        ".github/workflows/docs.yml"
-      ],
-      "evidence": {
-        "path": "scripts/generate_adr_registry.py",
-        "line": 801,
-        "symbol": "generate_json_registry",
-        "observation": "return includes \"generated\": datetime.now().isoformat()"
-      },
-      "expected": "Published generated ADR mirrors детерминированы (без wall-clock) и имеют `--check` в `python -m scripts.docs verify` / docs.yml.",
-      "actual": "registry.json `generated` = `2026-08-30T21:14:41.260534`; generator пишет `Last Updated` через datetime.now; CLI `python scripts/generate_adr_registry.py`; docs.yml pytest не включает test_adr_registry_governance_sync (есть в lint-arch shards).",
-      "impact": "Повторная генерация всегда dirty git; семантический drift метаданных ADR не ловится verify (тест считает только total/latest).",
-      "method": "inspection generator + tracked registry.json + docs.yml pytest list",
-      "remediation": "Убрать wall-clock (source hash / preserve existing stamp); добавить `python -m scripts.docs generate-adr-registry --check` в verify.",
+      "remediation": "Fail check-links on missing local `.png`/`.svg` targets, or raise MkDocs `not_found` above info and keep a CI render/existence job that actually runs.",
       "effort": "M",
-      "automation": "docs.yml verify step + byte-compare --check",
-      "automated_fix_possible": true,
-      "validation": [
-        "python scripts/generate_adr_registry.py --validate"
-      ],
-      "acceptance": "повторный generate даёт bit-identical tracked files; --check в verify",
-      "rollback": "revert generator timestamp change",
-      "owner_surface": "docs",
-      "dependencies": [],
-      "validation_commands": [
-        "python scripts/generate_adr_registry.py --validate"
-      ],
-      "domain": "docs-pipeline",
-      "fingerprint": "702c6ba337d8048b17f2e7fb22e4a1d3cc7fc23fdac2f79444b893dac28eb999"
+      "automation": "extend scripts.docs check-links and keep it in docs.yml validate-mkdocs",
+      "automated_fix_possible": false
     },
     {
-      "finding_id": "DOCS-PIPE-004",
+      "id": "DOCS-PIPE-003",
+      "requirement_id": "GAP",
+      "path": "scripts/docs/build/mkdocs_build.py:29",
+      "observation": "Packaged site build does not pass `--strict`, while the CI verification chain does.",
+      "method": "inspection of scripts/docs/build/mkdocs_build.py:29-31, scripts/docs/checks/verify.py:137-149, scripts/docs/README.md:76, .github/workflows/docs.yml:177-178",
+      "expected": "`python -m scripts.docs build-site` matches the strict build used by `python -m scripts.docs verify` in CI.",
+      "actual": "`_mkdocs_build` runs `mkdocs build` plus caller args and does not add `--strict`. CI job `validate-mkdocs` runs `verify`, which adds `--strict --clean` into a temp site dir. README calls `build-site` a CI-style local smoke.",
+      "impact": "A local build-site success can hide warnings that fail the CI strict build.",
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "remediation": "Default `build-site` to `mkdocs build --strict` unless the caller opts out.",
+      "effort": "S",
+      "automation": "unit test that the default argv contains --strict",
+      "automated_fix_possible": true
+    },
+    {
       "id": "DOCS-PIPE-004",
-      "requirement_id": "REQ-DOC-001",
+      "requirement_id": "GAP",
+      "path": "mkdocs.yml:125",
+      "observation": "mkdocstrings is enabled, but no docs page has a directive, so the strict build does not render the public API.",
+      "method": "inspection of mkdocs.yml:125-134; search of docs/**/*.md for mkdocstrings directives; tests/architecture/test_api_reference_public_facades.py:15-18 and :43-46; docs.yml docs-governance pytest list",
+      "expected": "CI either builds API reference from src via mkdocstrings or an equivalent check covers the published API surface.",
+      "actual": "Plugin paths point at `src`, and no `:::` handler directive exists under docs/. CI test `test_api_reference_public_facades.py` only checks backtick symbols in package-structure tables of application.md, composition.md, and infrastructure.md, and forbids an autogen claim.",
+      "impact": "API drift outside those three tables does not fail `mkdocs build --strict`.",
+      "status": "PROVEN",
       "priority": "P2",
       "severity": "Medium",
       "confidence": "high",
-      "confidence_score": 0.9,
-      "status": "PROVEN",
-      "evidence_class": "FACT",
-      "category": "ci-gap",
-      "path": "scripts/docs/checks/verify.py:39-92",
-      "observation": "Tracked `pipeline_normalization_field_matrix` имеет `--check`, но каноническая цепочка verify/docs.yml его не вызывает; шаг живёт в provider-contract-drift.yml.",
-      "claim": "Canonical docs verification does not fail on stale tracked normalization matrix docs.",
-      "broken_invariant": "generated-doc --check gates run in documentation CI (REQ-DOC-001)",
-      "root_cause": "normalization matrix --check is owned by a separate workflow, not scripts.docs verify",
-      "affected_paths": [
-        "scripts/docs/checks/verify.py",
-        ".github/workflows/docs.yml",
-        ".github/workflows/provider-contract-drift.yml",
-        "configs/quality/generated_artifact_routing.yaml"
-      ],
-      "evidence": {
-        "path": ".github/workflows/provider-contract-drift.yml",
-        "line": 78,
-        "observation": "python -m scripts.docs generate-pipeline-normalization-matrix --check; published inventory 2026-09-10 marks this workflow disabled_manually/keep-disabled"
-      },
-      "expected": "`python -m scripts.docs verify` или docs.yml validate-mkdocs гоняет `generate-pipeline-normalization-matrix --check`.",
-      "actual": "verify steps: check-links, check-drift, check-docstrings, cleanup-inventory, strict-build. Matrix --check только в provider-contract-drift.yml:75-78. Не re-enable KEEP-DISABLED workflow.",
-      "impact": "Стейл tracked generated matrix может пройти docs-governance; generator exit 0 на других шагах не доказывает семантическую свежесть матрицы.",
-      "method": "inspection verify.py COMMANDS vs docs.yml vs provider-contract-drift.yml",
-      "remediation": "Добавить `python -m scripts.docs generate-pipeline-normalization-matrix --check` в verify или отдельный шаг validate-mkdocs; не включать disabled workflow.",
-      "effort": "S",
-      "automation": "docs.yml / scripts.docs verify",
-      "automated_fix_possible": true,
-      "validation": [
-        "python -m scripts.docs generate-pipeline-normalization-matrix --check"
-      ],
-      "acceptance": "--check матрицы в активной docs CI цепочке",
-      "rollback": "remove the added verify step",
-      "owner_surface": "docs",
-      "dependencies": [],
-      "validation_commands": [
-        "python -m scripts.docs generate-pipeline-normalization-matrix --check"
-      ],
-      "domain": "docs-pipeline",
-      "fingerprint": "13b166a6704a017e4c5598fee04f3a1482537615bdad60f49a5c6d2969e13395"
-    },
-    {
-      "finding_id": "DOCS-PIPE-005",
-      "id": "DOCS-PIPE-005",
-      "requirement_id": "REQ-DOC-001",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "confidence_score": 0.91,
-      "status": "PROVEN",
-      "evidence_class": "FACT",
-      "category": "semantic-gap",
-      "path": ".github/workflows/docs.yml:87-90",
-      "observation": "Шаг package-family `--check` отключён `if: ${{ false }}`; architecture-тест проверяет только наличие строки команды в YAML.",
-      "claim": "docs-governance appears to check package-family diagrams, but the step never runs.",
-      "broken_invariant": "CI string presence is not semantic execution (generator/test exit 0 ≠ check ran)",
-      "root_cause": "docs.yml hard-disables package-family --check while test_docs_governance_workflow only asserts the command string exists",
-      "affected_paths": [
-        ".github/workflows/docs.yml",
-        "tests/architecture/test_docs_governance_workflow.py"
-      ],
-      "evidence": {
-        "path": ".github/workflows/docs.yml",
-        "line": 87,
-        "observation": "if: ${{ false }} # Full-corpus package-family generation is disabled."
-      },
-      "expected": "Либо шаг реально выполняется, либо тест/workflow не утверждают покрытие.",
-      "actual": "docs.yml:87 `if: ${{ false }}`; test_docs_workflow_runs_lightweight_docs_governance_profile asserts `generate_package_family_class_diagrams.py --check` in workflow text.",
-      "impact": "Ложное чувство, что full-corpus package-family drift закрыт docs-governance.",
-      "method": "inspection docs.yml + test_docs_governance_workflow.py:64-69",
-      "remediation": "Удалить мёртвый step и ослабить string-assert ИЛИ включить bounded --check, который действительно runs; не разблокировать full-corpus render без решения.",
-      "effort": "S",
-      "automation": "assert step is not `if: false` or drop the coverage claim",
-      "automated_fix_possible": true,
-      "validation": [
-        "rg \"generate_package_family_class_diagrams.py --check\" .github/workflows/docs.yml tests/architecture/test_docs_governance_workflow.py"
-      ],
-      "acceptance": "нет claim о package-family check без исполняемого шага",
-      "rollback": "restore previous YAML/test",
-      "owner_surface": "docs",
-      "dependencies": [],
-      "validation_commands": [
-        "rg \"if: \\$\\{\\{ false \\}\\}\" .github/workflows/docs.yml"
-      ],
-      "domain": "docs-pipeline",
-      "fingerprint": "6f9d8dd86cc0d843a11cb76f0e35b30fadeffe1767134449533271deda77cf89"
-    },
-    {
-      "finding_id": "DOCS-PIPE-006",
-      "id": "DOCS-PIPE-006",
-      "requirement_id": "REQ-DOC-001",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "confidence_score": 0.88,
-      "status": "PROVEN",
-      "evidence_class": "FACT",
-      "category": "atomicity",
-      "path": "scripts/docs/checks/documentation_cleanup_inventory.py:1326-1338",
-      "observation": "`generate-cleanup-inventory --update` пишет tracked JSON/MD через `Path.write_text`, без temp → os.replace.",
-      "claim": "Tracked cleanup-inventory artifacts are not written atomically.",
-      "broken_invariant": "Data/artifact files use temp then os.replace",
-      "root_cause": "_write_if_changed uses in-place write_text for tracked inventory artifacts",
-      "affected_paths": [
-        "scripts/docs/checks/documentation_cleanup_inventory.py"
-      ],
-      "evidence": {
-        "path": "scripts/docs/checks/documentation_cleanup_inventory.py",
-        "line": 1335,
-        "symbol": "_write_if_changed",
-        "observation": "safe_path.write_text(content, encoding='utf-8', newline='\\n')"
-      },
-      "expected": "tmp файл + os.replace для tracked inventory JSON/MD",
-      "actual": "прямой write_text в конечный путь после mkdir",
-      "impact": "прерванный --update может оставить обрезанный committed artifact",
-      "method": "inspection _write_if_changed",
-      "remediation": "писать в sibling .tmp и os.replace; покрыть unit-тестом",
-      "effort": "S",
-      "automation": "unit test that mocks replace/write",
-      "automated_fix_possible": true,
-      "validation": [
-        "python -m scripts.docs generate-cleanup-inventory --check"
-      ],
-      "acceptance": "_write_if_changed использует os.replace",
-      "rollback": "revert helper",
-      "owner_surface": "docs",
-      "dependencies": [],
-      "validation_commands": [
-        "python -m scripts.docs generate-cleanup-inventory --check"
-      ],
-      "domain": "docs-pipeline",
-      "fingerprint": "7a145a65d3136ad9d3f9c4d0f03fcfc4d3de9c79d683982decab30f579e2ae1f"
-    },
-    {
-      "finding_id": "DOCS-PIPE-007",
-      "id": "DOCS-PIPE-007",
-      "requirement_id": "REQ-DOC-001",
-      "priority": "P3",
-      "severity": "Low",
-      "confidence": "high",
-      "confidence_score": 0.86,
-      "status": "PROVEN",
-      "evidence_class": "FACT",
-      "category": "toolchain",
-      "path": "pyproject.toml:177",
-      "observation": "optional-dependencies.docs включает mkdocs-mermaid2-plugin, но mkdocs.yml не регистрирует mermaid2 plugin (client-side pymdown fence + mermaid-init.js).",
-      "claim": "Docs extra pins an unused MkDocs plugin.",
-      "broken_invariant": "Pinned docs toolchain matches the actual mkdocs.yml plugin set",
-      "root_cause": "mkdocs-mermaid2-plugin listed in pyproject docs extra but unused by mkdocs.yml",
-      "affected_paths": [
-        "pyproject.toml",
-        "mkdocs.yml"
-      ],
-      "evidence": {
-        "path": "pyproject.toml",
-        "line": 177,
-        "observation": "mkdocs-mermaid2-plugin>=1.1; mkdocs.yml plugins: search, mkdocstrings only"
-      },
-      "expected": "extra docs == фактически используемые плагины, либо явный comment why unused",
-      "actual": "plugin в extra; mkdocs.yml plugins = search + mkdocstrings; mermaid via pymdownx.superfences",
-      "impact": "лишняя зависимость docs extra; путаница какой renderer каноничен",
-      "method": "inspection pyproject.toml docs extra vs mkdocs.yml plugins",
-      "remediation": "удалить unused plugin из extra или подключить в mkdocs.yml с тестом",
-      "effort": "S",
-      "automation": "test that every docs extra mkdocs plugin is referenced in mkdocs.yml",
-      "automated_fix_possible": true,
-      "validation": [
-        "rg mermaid2 mkdocs.yml pyproject.toml"
-      ],
-      "acceptance": "нет висящего mermaid2 либо он wired",
-      "rollback": "restore extra pin",
-      "owner_surface": "docs",
-      "dependencies": [],
-      "validation_commands": [
-        "rg mermaid2 pyproject.toml mkdocs.yml"
-      ],
-      "domain": "docs-pipeline",
-      "fingerprint": "47b4d84154ef6b3594308f523080533bbc144507f81b26544fee0d34dd41c630"
-    },
-    {
-      "finding_id": "DOCS-PIPE-008",
-      "id": "DOCS-PIPE-008",
-      "requirement_id": "REQ-DOC-001",
-      "priority": "P3",
-      "severity": "Low",
-      "confidence": "high",
-      "confidence_score": 0.9,
-      "status": "PROVEN",
-      "evidence_class": "FACT",
-      "category": "pipeline-docs-drift",
-      "path": "scripts/docs/README.md:79",
-      "observation": "scripts/docs/README.md утверждает weekly KPI schedule; docs-kpi-weekly.yml помечен KEEP-DISABLED (#10263) и keep-disabled в inventory.",
-      "claim": "Docs tooling README overstates that check-kpi/freshness runs on a live weekly schedule.",
-      "broken_invariant": "scripts/docs operator docs match live CI lanes",
-      "root_cause": "README still describes docs-kpi-weekly as scheduled while the workflow is keep-disabled",
-      "affected_paths": [
-        "scripts/docs/README.md",
-        ".github/workflows/docs-kpi-weekly.yml"
-      ],
-      "evidence": {
-        "path": "scripts/docs/README.md",
-        "line": 79,
-        "observation": "check-kpi 'Scheduled weekly (Monday 4:00 UTC)'; workflow header KEEP-DISABLED (#10263); cron is 30 4 * * 1"
-      },
-      "expected": "README указывает, что weekly KPI lane keep-disabled; freshness на PR идёт через `scripts.docs verify` в docs.yml.",
-      "actual": "README: scheduled weekly; YAML: KEEP-DISABLED; inventory: disabled_manually/keep-disabled",
-      "impact": "operator ожидает календарный KPI/freshness, которого нет; не путать с docs-content IA",
-      "method": "inspection scripts/docs/README.md vs docs-kpi-weekly.yml vs workflow inventory",
-      "remediation": "Поправить When-to-Use: KPI weekly = keep-disabled; runtime-mirrors/freshness на docs PR через verify. Не re-enable workflow.",
-      "effort": "S",
-      "automation": "n/a",
-      "automated_fix_possible": true,
-      "validation": [
-        "rg \"Scheduled weekly\" scripts/docs/README.md"
-      ],
-      "acceptance": "README не обещает живой weekly KPI job",
-      "rollback": "revert README",
-      "owner_surface": "docs",
-      "dependencies": [],
-      "validation_commands": [
-        "rg KEEP-DISABLED .github/workflows/docs-kpi-weekly.yml"
-      ],
-      "domain": "docs-pipeline",
-      "fingerprint": "067e96ed0c8f06f4d3505654dde142a7aca70c71bb740953b891d44a1f2db4ae"
+      "remediation": "Add mkdocstrings directives for the published public surface, or drop the unused plugin and widen the facade test beyond the three tables.",
+      "effort": "M",
+      "automation": "architecture test that every nav API page is either mkdocstrings-backed or listed in the facade allowlist",
+      "automated_fix_possible": false
     }
   ]
 }

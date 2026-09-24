@@ -1,74 +1,94 @@
 {
-  "domain": "tests",
-  "surface_score": 2,
-  "score_legend": "0 unacceptable, 1 weak, 2 acceptable, 3 good",
-  "audit_mode": "full",
-  "mode": "propose-patches",
-  "patches_applied": true,
-  "generated_at_utc": "2026-09-24T17:04:19Z",
   "findings": [
     {
-      "id": "TESTS-001",
-      "finding_id": "TESTS-001",
-      "fingerprint": "a4a5befc08c614d7293483552d00226e8157a9d21c026ca77d124383f9a4aa3b",
-      "requirement_id": "REQ-TEST-005",
+      "id": "TST-001",
+      "requirement_id": "GAP",
+      "path": "pyproject.toml:236",
+      "observation": "Маркер e2e_smoke описан как PR-blocking, тогда как каталог required checks и политика не включают e2e-matrix-health в pr-gate-complete.",
+      "method": "Сверка pyproject.toml:236, configs/quality/test_matrix.yaml:595-597, configs/quality/github_required_checks.yaml:125-136, docs/00-project/governance/05-github-policy.md:289-294",
+      "expected": "Текст маркера совпадает с merge wall: e2e-smoke либо входит в github_required_checks.yaml, либо явно назван неблокирующим спутником.",
+      "actual": "Маркер: «PR-blocking E2E smoke subset». test_matrix и 05-github-policy: не GitHub-required и не owner pr-gate-complete (#10412). В gates.tests нет e2e-matrix-health.",
+      "impact": "Красный e2e-matrix-health на PR не валит pr-gate-complete; оператор по маркеру может счесть representative entity path защищённым merge wall.",
+      "status": "PROVEN",
       "priority": "P2",
       "severity": "Medium",
       "confidence": "high",
-      "confidence_score": 0.86,
-      "status": "PROVEN",
-      "evidence_class": "FACT",
-      "category": "ci-gate-fail-open",
-      "claim": "Job performance-budgets can finish its budget gate successfully when hotspot-degradation.json is absent.",
-      "observation": "The gate step exits 0 when reports/performance/hotspot-degradation.json does not exist.",
-      "broken_invariant": "REQ-TEST-005 requires the CI pytest command path to be an actual gate; a missing budget artifact must not be success.",
-      "method": "inspection of .github/workflows/tests.yml and tests/performance/test_hotspot_budgets.py",
-      "expected": "Missing hotspot degradation report fails the blocking Tests lane.",
-      "actual": "At audit time the gate succeeded when the JSON was absent. Working tree now exits 1 when hotspot-observations.jsonl or hotspot-degradation.json is missing.",
-      "impact": "A green performance-budgets job, which tests-complete requires, can occur without a budget verdict if observations were not written.",
-      "root_cause": "performance-budgets treats a missing hotspot degradation report as success",
-      "affected_paths": [
-        ".github/workflows/tests.yml",
-        "tests/performance/test_hotspot_budgets.py",
-        "tests/performance/conftest.py"
-      ],
-      "path": ".github/workflows/tests.yml:1285-1309",
-      "evidence": [
-        {
-          "path": ".github/workflows/tests.yml",
-          "line": 1303,
-          "observation": "Gate step is if: always() and enters the checker only when the JSON file exists."
-        },
-        {
-          "path": ".github/workflows/tests.yml",
-          "line": 1282,
-          "observation": "Report generation prints a skip message and continues when hotspot-observations.jsonl is absent."
-        },
-        {
-          "path": "tests/performance/test_hotspot_budgets.py",
-          "line": 331,
-          "observation": "_record_observation returns without creating a file when no output path is set; CI passes --perf-obs-out, but a run that never records still leaves the gate fail-open."
-        }
-      ],
-      "acceptance": "performance-budgets exits non-zero when hotspot-degradation.json is missing or summary.failed > 0.",
-      "validation": [
-        "Inspect the gate step else-branch exits 1 before relying on pytest outcome alone."
-      ],
-      "validation_commands": [
-        ".\\\\.venv-win\\\\Scripts\\\\python.exe -m pytest tests/architecture/test_ci_heavy_lane_rebalance.py::TestCiHeavyLaneRebalance::test_memory_and_performance_lanes_stay_isolated -q --tb=short -p no:xdist"
-      ],
-      "remediation": "Fail the gate when hotspot-observations.jsonl or hotspot-degradation.json is missing. Do not raise budgets.",
+      "remediation": "Заменить описание маркера e2e_smoke на формулировку test_matrix (advisory/satellite) либо добавить workflow в каталог required checks отдельным решением.",
       "effort": "S",
-      "automation": "tests-complete already depends on performance-budgets; the inner shell must fail closed",
-      "automated_fix_possible": true,
-      "dependencies": [],
-      "rollback": "Revert the workflow step to the previous if-file-exists gate.",
-      "owner_surface": "docs",
-      "patches_applied": true,
-      "remediation_applied_in": [
-        ".github/workflows/tests.yml",
-        "tests/architecture/test_ci_heavy_lane_rebalance.py"
-      ]
+      "automation": "Тест на паритет текста маркера e2e_smoke и статуса e2e-matrix-health в github_required_checks.yaml",
+      "automated_fix_possible": false
+    },
+    {
+      "id": "TST-002",
+      "requirement_id": "GAP",
+      "path": ".github/workflows/e2e-matrix-health.yml:221",
+      "observation": "Полный offline e2e replay не исполняется на pull_request: job e2e-nightly-full-replay ограничен schedule и workflow_dispatch.",
+      "method": "Чтение if job e2e-nightly-full-replay и on.pull_request в e2e-matrix-health.yml; слой composition/interfaces e2e MUST в configs/quality/test_matrix.yaml:771-781",
+      "expected": "Если слой требует e2e MUST, полный replay либо входит в блокирующий/явный PR-контур, либо в той же матрице помечен nightly-only.",
+      "actual": "На PR выполняется matrix-smoke-blocking (спутник, не required). Полный маркер «e2e and not e2e_smoke» запускается только по расписанию или вручную. Шестнадцать pipeline исключены из PR smoke списком e2e_matrix_replay_deferred (test_skip_inventory.yaml:406-429) с владельцем.",
+      "impact": "Регрессия полного cassette-replay e2e не блокирует merge; окно до nightly.",
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "remediation": "В test_matrix у composition/interfaces явно зафиксировать nightly-only для полного e2e либо выделить узкий блокирующий replay в гейт tests.",
+      "effort": "M",
+      "automation": "n/a",
+      "automated_fix_possible": false
+    },
+    {
+      "id": "TST-003",
+      "requirement_id": "GAP",
+      "path": "tests/architecture/test_fix_mermaid_operators.py:161",
+      "observation": "Два вызова mounted_worktree_skip_reason не входят в architecture_platform_skips, а guard сравнивает инвентарь только с жёстким набором из четырёх путей.",
+      "method": "Поиск mounted_worktree_skip_reason; сверка с configs/quality/test_skip_inventory.yaml:15-64 и tests/architecture/test_test_skip_inventory.py:215-222",
+      "expected": "Каждый Windows/WSL skip архитектуры есть в architecture_platform_skips, и тест падает при новом call site.",
+      "actual": "Вне ценза: test_fix_mermaid_operators.py:161-163 и test_issue_10597_export_facade_shrink.py:119-121 (pytest.skip). Инвентарь и expected set держат ровно четыре файла. На Linux CI эти тесты не скипаются.",
+      "impact": "Локальный Windows/WSL прогон молча пропускает mermaid-регрессию и live census фасадов; merge-truth остаётся Linux.",
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "remediation": "Добавить оба пути в architecture_platform_skips с owner и заменить equality-набор на скан всех mounted_worktree_skip_reason.",
+      "effort": "S",
+      "automation": "Расширить test_architecture_platform_skips_are_reviewed сканом call site",
+      "automated_fix_possible": false
+    },
+    {
+      "id": "TST-004",
+      "requirement_id": "GAP",
+      "path": ".github/workflows/tests.yml:321",
+      "observation": "Блокирующий flaky-telemetry повторяет только два модуля на трёх seed и не даёт repeat-count по остальному suite.",
+      "method": "Чтение цикла seed 17/73/113 и списка pytest-путей в tests.yml:321-329; curated список configs/quality/flaky_test_inventory.yaml:55",
+      "expected": "Эмпирический flaky-гейт либо покрывает заявленный determinism-контур и так подписан, либо повторяет критические lane с записанным N.",
+      "actual": "N=3 только для tests/contract/test_semanticscholar_contract.py и tests/architecture/test_determinism_identity_policy.py. reviewed_flaky_tests пуст (reviewed_on 2026-08-03). Иных repeat-count в этом аудите нет; флаки вне среза не утверждаются.",
+      "impact": "tests-complete падает лишь на этом срезе; перемежающиеся падения остальных lane не ловятся повторным прогоном.",
+      "status": "PROVEN",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "remediation": "Подписать job как determinism-critical shard и расширять список только с новым N и junit; не считать пустой curated inventory доказательством отсутствия флаки.",
+      "effort": "M",
+      "automation": "Оставить report-flaky-test-burndown-review --check и не расширять срез без repeat-count",
+      "automated_fix_possible": false
+    },
+    {
+      "id": "TST-005",
+      "requirement_id": "REQ-TEST-005",
+      "path": "docs/00-project/governance/05-github-policy.md:364",
+      "observation": "Политика и комментарий tests.yml называют job test-matrix path-scoped и not always-on, хотя гейт tests в каталоге always_required и на каждом PR вызывает весь tests.yml.",
+      "method": "Сверка 05-github-policy.md:364, .github/workflows/tests.yml:1125-1127, configs/quality/github_required_checks.yaml:125-129, scripts/engineering/ci/pr_gate.py:184-187, .github/workflows/pr-required.yml:117-120",
+      "expected": "Описание CI-команды pytest совпадает с классификатором: leaf context не required, но job на PR всегда исполняется внутри гейта tests.",
+      "actual": "Таблица помечает test-matrix и coverage-verify как path-scoped/not always-on. pr_gate для always_required ставит REQUIRED без фильтра путей и вызывает tests.yml, включая test-matrix и coverage-verify.",
+      "impact": "Оператор может пропустить 3.13 matrix и порог 85 как необязательные на PR, хотя агрегатор их ждёт.",
+      "status": "PROVEN",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "remediation": "В 05-github-policy.md:364 и tests.yml:1125 заменить «path-scoped; not always-on» на «не leaf required context; на PR всегда внутри гейта tests».",
+      "effort": "S",
+      "automation": "n/a",
+      "automated_fix_possible": false
     }
   ]
 }
