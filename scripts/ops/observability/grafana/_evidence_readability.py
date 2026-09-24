@@ -663,6 +663,11 @@ def _apply_reason_columns(panel: dict, fields: list[str]) -> None:
     _override(panel, "Reason", _WRAP, True)
     _override(panel, "Reason", _CELL, {"type": "auto", "wrapText": True})
     _override(panel, "Reason", "displayName", "Reason")
+    if panel.get("title") == "Review Selected Run Status":
+        # Linked table text is ellipsized even with wrapping enabled. Keep the
+        # existing panel-header Run Explorer link and make the reason readable.
+        _override(panel, "Reason", "links", [])
+        panel["options"]["cellHeight"] = "lg"
     _override(
         panel,
         "Reason",

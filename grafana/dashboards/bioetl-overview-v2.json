@@ -546,6 +546,10 @@
                 "value": "Reason"
               },
               {
+                "id": "links",
+                "value": []
+              },
+              {
                 "id": "mappings",
                 "value": [
                   {
@@ -582,7 +586,7 @@
       },
       "options": {
         "showHeader": true,
-        "cellHeight": "sm",
+        "cellHeight": "lg",
         "footer": {
           "show": false
         }
@@ -987,11 +991,11 @@
                         "color": "text"
                       },
                       "runtime": {
-                        "text": "Diagnostics",
+                        "text": "Diagnose",
                         "color": "text"
                       },
                       "workflow": {
-                        "text": "Diagnostics",
+                        "text": "Diagnose",
                         "color": "text"
                       }
                     }
@@ -1033,19 +1037,12 @@
                 }
               },
               {
-                "id": "links",
-                "value": [
-                  {
-                    "includeVars": false,
-                    "title": "Show all rows and total (summary: up to 2)",
-                    "url": "/d/bioetl-overview-v2/2-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=20215&${__url_time_range}",
-                    "targetBlank": false
-                  }
-                ]
+                "id": "custom.width",
+                "value": 100
               },
               {
-                "id": "custom.width",
-                "value": 90
+                "id": "custom.inspect",
+                "value": false
               }
             ]
           },
@@ -1220,7 +1217,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 120
+                "value": 110
               }
             ]
           },
@@ -4928,11 +4925,11 @@
                             "color": "text"
                           },
                           "runtime": {
-                            "text": "Pipeline Diagnostics",
+                            "text": "Diagnose",
                             "color": "text"
                           },
                           "workflow": {
-                            "text": "Pipeline Diagnostics",
+                            "text": "Diagnose",
                             "color": "text"
                           }
                         }
@@ -5010,12 +5007,12 @@
                     }
                   },
                   {
-                    "id": "links",
-                    "value": []
+                    "id": "custom.width",
+                    "value": 100
                   },
                   {
-                    "id": "custom.width",
-                    "value": 90
+                    "id": "custom.inspect",
+                    "value": false
                   }
                 ]
               },
@@ -5172,7 +5169,7 @@
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 120
+                    "value": 110
                   }
                 ]
               },
