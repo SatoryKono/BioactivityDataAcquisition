@@ -314,6 +314,43 @@ def _runtime(p: dict[int, dict]) -> None:
 
 
 def _provider(p: dict[int, dict]) -> None:
+    p[9101]["title"] = "Monitor Fleet Status"
+    p[9107]["title"] = "Inspect Health Evidence"
+    for pid in (9101, 9107):
+        target = p[pid]["targets"][0]
+        if target["expr"].startswith("topk(3, "):
+            target["expr"] = target["expr"][8:-1]
+        p[pid]["description"] = (
+            "GLOBAL / CURRENT · All observed provider status series, independent of "
+            "Pipeline, Run ID and Provider selection. Missing series are not proof of "
+            "health. Status is the current assessment; evidence describes observation "
+            "availability, not the selected historical run."
+        )
+    _override(p[9101], "Severity", "displayName", "Status")
+    p[9101]["options"]["sortBy"] = [{"displayName": "Status", "desc": True}]
+    for transform in p[9107]["transformations"]:
+        if transform["id"] == "organize":
+            transform["options"]["excludeByName"]["source_state"] = True
+    _override(p[9107], "reason", "displayName", "Evidence")
+    _override(
+        p[9107],
+        "reason",
+        "mappings",
+        [
+            {
+                "type": "value",
+                "options": {
+                    "observed_health_status": {"text": "Health observation available"},
+                    "invalid_health_timestamp": {"text": "Invalid observation time"},
+                    "missing_health_status": {"text": "No health observation"},
+                },
+            }
+        ],
+    )
+    p[9002]["options"]["content"] = (
+        '<div style="font-size:16px;line-height:1">Next action: inspect non-OK Fleet Status rows.</div>'
+    )
+    p[9002]["gridPos"]["h"] = 1
     p[102]["title"] = "Inspect Health p95"
     for field, width in {"Provider": 140, "Source state": 70, "Status": 90}.items():
         _override(p[9107], field, _WIDTH, width)
@@ -322,8 +359,9 @@ def _provider(p: dict[int, dict]) -> None:
     _override(
         p[9111], "Provider", "custom.cellOptions", {"type": "auto", "wrapText": False}
     )
-    p[9101]["gridPos"]["h"] = p[9107]["gridPos"]["h"] = 7
-    p[9104]["gridPos"].update(y=14, h=3)
+    for pid in (9101, 9107):
+        p[pid]["gridPos"].update(y=6, h=9)
+    p[9104]["gridPos"].update(y=15, h=2)
     p[9104]["options"]["colorMode"] = "value"
     _stack(p[9404], {114: 10, 1: 10, 2: 3, 105: 3, 104: 3, 7: 3})
     _table(
@@ -564,7 +602,7 @@ def _overview_verdict_reasons(p: dict[int, dict]) -> None:
         _override(
             panel, "Reason", "custom.cellOptions", {"type": "auto", "wrapText": True}
         )
-        _override(panel, "Reason", "displayName", "Причина")
+        _override(panel, "Reason", "displayName", "Reason")
         _override(
             panel,
             "Reason",
@@ -573,6 +611,15 @@ def _overview_verdict_reasons(p: dict[int, dict]) -> None:
                 {
                     "type": "value",
                     "options": {
+                        "execution_success": {"text": "Processing completed"},
+                        "standalone_pipeline": {"text": "Standalone pipeline"},
+                        "run_dq_threshold_evaluation": {"text": "Data quality checks"},
+                        "run_preflight_provider_observation": {
+                            "text": "Provider preflight check"
+                        },
+                        "run_gold_schema_validation": {
+                            "text": "Gold schema validation"
+                        },
                         "Archive missing": {"text": "No verified archive"},
                         "archive_evidence_not_recorded": {
                             "text": "No verified archive"
@@ -589,8 +636,8 @@ def _overview_verdict_reasons(p: dict[int, dict]) -> None:
             if "Reason explains the saved assessment" not in panel["description"]
             else ""
         )
-    _override(summary, "Result", "displayName", "Обработка")
-    _override(summary, "Status", "displayName", "Доверие")
+    _override(summary, "Result", "displayName", "Processing")
+    _override(summary, "Status", "displayName", "Trust")
     _table(p[9002], {"Domain": 120, "Status": 105})
     # Three evidence columns need half the first-screen width at narrow viewports.
     p[9002]["gridPos"].update(x=12, w=12)

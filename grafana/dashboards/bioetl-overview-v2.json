@@ -420,7 +420,7 @@
               },
               {
                 "id": "displayName",
-                "value": "Доверие"
+                "value": "Trust"
               },
               {
                 "id": "custom.width",
@@ -478,7 +478,7 @@
               },
               {
                 "id": "displayName",
-                "value": "Обработка"
+                "value": "Processing"
               },
               {
                 "id": "custom.width",
@@ -550,7 +550,7 @@
               },
               {
                 "id": "displayName",
-                "value": "Причина"
+                "value": "Reason"
               },
               {
                 "id": "mappings",
@@ -558,6 +558,21 @@
                   {
                     "type": "value",
                     "options": {
+                      "execution_success": {
+                        "text": "Processing completed"
+                      },
+                      "standalone_pipeline": {
+                        "text": "Standalone pipeline"
+                      },
+                      "run_dq_threshold_evaluation": {
+                        "text": "Data quality checks"
+                      },
+                      "run_preflight_provider_observation": {
+                        "text": "Provider preflight check"
+                      },
+                      "run_gold_schema_validation": {
+                        "text": "Gold schema validation"
+                      },
                       "Archive missing": {
                         "text": "No verified archive"
                       },
@@ -1469,7 +1484,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "Причина"
+                "value": "Reason"
               },
               {
                 "id": "mappings",
@@ -1477,6 +1492,21 @@
                   {
                     "type": "value",
                     "options": {
+                      "execution_success": {
+                        "text": "Processing completed"
+                      },
+                      "standalone_pipeline": {
+                        "text": "Standalone pipeline"
+                      },
+                      "run_dq_threshold_evaluation": {
+                        "text": "Data quality checks"
+                      },
+                      "run_preflight_provider_observation": {
+                        "text": "Provider preflight check"
+                      },
+                      "run_gold_schema_validation": {
+                        "text": "Gold schema validation"
+                      },
                       "Archive missing": {
                         "text": "No verified archive"
                       },
