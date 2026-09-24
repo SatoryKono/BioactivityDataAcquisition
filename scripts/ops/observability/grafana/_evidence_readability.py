@@ -629,6 +629,16 @@ def _run_explorer(p: dict[int, dict]) -> None:
     )
 
     run = p[3010]
+    # Grafana also renders noValue when a request fails. Empty-state claims
+    # must come from a successful, explicitly classified backend response.
+    run["fieldConfig"]["defaults"]["noValue"] = (
+        "UNKNOWN — response unavailable; inspect panel status for QUERY ERROR."
+    )
+    for target in run["targets"]:
+        target["root_selector"] = (
+            'index_state = "valid_empty" and $exists(items) and $count(items) = 0 '
+            '? [{"pipeline": "VALID EMPTY"}] : items'
+        )
     _override(run, "Trust", "noValue", "Open")
     _override(
         run,

@@ -166,7 +166,6 @@ def build_runner_factories(
         # inject an explicit ClockPort; ``build_pipeline_context`` rejects None.
         return build_pipeline_context(name, options, clock=SystemClock())
 
-    requested_profile = getattr(runtime, "required_persistence_profile", None)
     runner_factory_builder = cast(
         "Callable[..., RunnerFactoryBuilder[RunOptions]]",
         runner_factory_builder_cls,
@@ -176,7 +175,9 @@ def build_runner_factories(
         build_context=build_context_fn,
         pipeline_runner_builder=pipeline_runner_builder,
         filter_extraction_service=filter_extraction_service,
-        required_persistence_profile=requested_profile,
+        required_persistence_profile=getattr(
+            runtime, "required_persistence_profile", None
+        ),
     )
     seed_factory = runner_factory_builder.build_seed_factory(
         seed_pipeline=config.seed.pipeline,

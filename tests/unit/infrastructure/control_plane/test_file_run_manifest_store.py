@@ -61,6 +61,39 @@ from tests.unit.application.services.run_manifest_test_support import (
 pytestmark = pytest.mark.unit
 
 
+def test_repeated_catalog_decodes_identical_contents_once(tmp_path) -> None:
+    store = FileRunManifestStore(base_path=tmp_path)
+    manifest = make_run_manifest(manifest_id="decode-reuse")
+    store.save(manifest)
+    manifest_store_module._decode_manifest.cache_clear()
+    assert store.list_all() == store.list_all() == (manifest,)
+    stats = manifest_store_module._decode_manifest.cache_info()
+    assert stats.misses == 1
+    assert stats.hits == 1
+
+
+def test_cached_manifest_still_checks_content_and_run_index(tmp_path) -> None:
+    store = FileRunManifestStore(base_path=tmp_path)
+    manifest = make_run_manifest(manifest_id="decode-validation")
+    store.save(manifest)
+    assert store.get(manifest.manifest_id) == manifest
+    index = tmp_path / "_by_run_id" / f"{manifest.run_id}.txt"
+    index.write_text("wrong-manifest", encoding="utf-8")
+    with pytest.raises(RunManifestStoreCorruptionError):
+        store.get(manifest.manifest_id)
+    index.write_text(manifest.manifest_id, encoding="utf-8")
+    path = tmp_path / f"{manifest.manifest_id}.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["pipeline_name"] = "changed_pipeline"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    assert store.get(manifest.manifest_id).pipeline_name == "changed_pipeline"
+    path.write_text("{invalid", encoding="utf-8")
+    with pytest.raises(ValueError):
+        store.get(manifest.manifest_id)
+    path.unlink()
+    assert store.get(manifest.manifest_id) is None
+
+
 def test_manifest_catalog_does_not_parse_contract_evidence_sidecars(tmp_path) -> None:
     store = FileRunManifestStore(base_path=tmp_path)
     manifest = make_run_manifest(manifest_id="with-sidecar")

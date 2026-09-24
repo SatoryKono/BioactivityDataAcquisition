@@ -6,6 +6,7 @@ import json
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import suppress
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 from time import perf_counter
 from typing import TYPE_CHECKING, override
@@ -39,6 +40,14 @@ from bioetl.infrastructure.storage.atomic import atomic_write_text
 __all__ = ["FileRunManifestStore", "RunManifestStoreCorruptionError"]
 
 _MANIFEST_READ_WORKERS = 4
+
+
+@lru_cache(maxsize=1024)
+def _decode_manifest(raw: str) -> RunManifest:
+    payload = json.loads(raw)
+    if not isinstance(payload, dict):
+        raise ValueError("Manifest payload must be a JSON object")
+    return RunManifest.from_dict(payload)
 
 
 class RunManifestStoreCorruptionError(ValueError):
@@ -288,10 +297,7 @@ class FileRunManifestStore(RawRunManifestInspectionMixin, RunManifestPort):
         manifest_path = self.base_path / f"{manifest_id}.json"
         if not manifest_path.exists():
             return None
-        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
-        if not isinstance(payload, dict):
-            raise ValueError("Manifest payload must be a JSON object")
-        manifest = RunManifest.from_dict(payload)
+        manifest = _decode_manifest(manifest_path.read_text(encoding="utf-8"))
         indexed_manifest_id = self._load_manifest_id_for_run_id(manifest.run_id)
         if indexed_manifest_id != manifest.manifest_id:
             raise RunManifestStoreCorruptionError(

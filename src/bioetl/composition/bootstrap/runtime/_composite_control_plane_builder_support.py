@@ -108,13 +108,11 @@ def _read_pipeline_control_plane(settings: object) -> object | None:
 
 
 def _read_configured_required_persistence_profile(
-    control_plane: object | None,
-    *,
-    runtime: object | None = None,
+    control_plane: object | None, *, runtime: object | None = None
 ) -> str:
-    requested = getattr(runtime, "required_persistence_profile", None)
-    if requested is not None and str(requested).strip():
-        return str(requested).strip()
+    requested = str(getattr(runtime, "required_persistence_profile", "") or "").strip()
+    if requested:
+        return requested
     return str(
         getattr(
             control_plane,
@@ -125,17 +123,13 @@ def _read_configured_required_persistence_profile(
 
 
 def _read_composite_control_plane_settings(
-    settings: object,
-    *,
-    runtime: object | None = None,
+    settings: object, *, runtime: object | None = None
 ) -> tuple[object | None, bool, bool, str, str]:
-    """Return control-plane view and resolved persistence profile for composite runs."""
     control_plane = _read_pipeline_control_plane(settings)
     manifest_enabled = bool(getattr(control_plane, "run_manifest_enabled", True))
     ledger_enabled = bool(getattr(control_plane, "run_ledger_enabled", True))
     required_profile = _read_configured_required_persistence_profile(
-        control_plane,
-        runtime=runtime,
+        control_plane, runtime=runtime
     )
     effective_required_profile = _resolve_composite_required_persistence_profile(
         settings,
@@ -155,7 +149,6 @@ def _resolve_composite_required_persistence_profile(
     *,
     configured_required_profile: object,
 ) -> str:
-    """Resolve composite launches against the rebuild/resume default."""
     return resolve_effective_required_persistence_profile(
         configured_required_profile=configured_required_profile,
         family_default_profile=_COMPOSITE_REQUIRED_PERSISTENCE_PROFILE,
@@ -172,10 +165,8 @@ def _build_composite_control_plane_config_artifacts(
     runtime: CompositeRuntimeConfig,
     infra_context: CompositeInfrastructureContext,
 ) -> CompositeControlPlaneConfigArtifacts:
-    """Build configuration and contract artifacts for composite control plane."""
     _, _, _, _, effective_required_profile = _read_composite_control_plane_settings(
-        infra_context.settings,
-        runtime=runtime,
+        infra_context.settings, runtime=runtime
     )
     contract_ref, contract_entity = _resolve_composite_contract_coordinates(config)
     contract_identity = resolve_contract_identity(
@@ -232,7 +223,6 @@ def _build_composite_control_plane_config_artifacts(
 def _resolve_composite_contract_coordinates(
     config: CompositeConfig,
 ) -> tuple[str, str]:
-    """Resolve canonical dotted contract identity for one composite pipeline."""
     pipeline_name = str(getattr(config, "name", "") or "").strip()
     if not pipeline_name:
         raise RuntimeError("Composite config requires a non-empty name")

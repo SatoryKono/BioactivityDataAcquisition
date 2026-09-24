@@ -397,7 +397,7 @@
             },
             "wrapText": false
           },
-          "noValue": "VALID EMPTY — no matching launches in the report and control-plane catalogs.",
+          "noValue": "UNKNOWN — response unavailable; inspect panel status for QUERY ERROR.",
           "links": []
         },
         "overrides": [
@@ -1106,7 +1106,7 @@
           "format": "table",
           "parser": "backend",
           "refId": "A",
-          "root_selector": "items",
+          "root_selector": "index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ? [{\"pipeline\": \"VALID EMPTY\"}] : items",
           "source": "url",
           "type": "json",
           "url": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}",

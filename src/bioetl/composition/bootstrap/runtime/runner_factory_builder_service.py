@@ -73,13 +73,9 @@ class RunnerFactoryBuilder[RunOptionsT]:
         self._build_context = build_context
         self._pipeline_runner_builder = pipeline_runner_builder
         self._filter_extraction_service = filter_extraction_service
-        profile = (
-            str(required_persistence_profile).strip()
-            if required_persistence_profile is not None
-            else ""
-        )
+        raw = str(required_persistence_profile or "").strip()
         self._required_persistence_profile = (
-            profile or _COMPOSITE_PHASE_REQUIRED_PERSISTENCE_PROFILE
+            raw or _COMPOSITE_PHASE_REQUIRED_PERSISTENCE_PROFILE
         )
 
     def _create_runner(
@@ -88,10 +84,6 @@ class RunnerFactoryBuilder[RunOptionsT]:
         pipeline_name: str,
         **option_kwargs: object,
     ) -> PipelineRunner:
-        """Build a runner from one resolved RunOptions payload."""
-        # Nested seed/enricher/dependency runs inherit the composite profile.
-        # Settings default replay_ready must not leak in: those nested launches
-        # are outside exact-replay unless cached Bronze snapshots are bound.
         option_kwargs.setdefault(
             "required_persistence_profile",
             self._required_persistence_profile,
@@ -114,7 +106,6 @@ class RunnerFactoryBuilder[RunOptionsT]:
         """
 
         def seed_runner_factory() -> PipelineRunner:
-            """Create a PipelineRunner configured for the seed phase."""
             return self._create_runner(
                 pipeline_name=seed_pipeline,
                 run_type="incremental",
@@ -142,7 +133,6 @@ class RunnerFactoryBuilder[RunOptionsT]:
             pipeline_name: str,
             keys: pl.DataFrame,
         ) -> PipelineRunner:
-            """Create a PipelineRunner configured for the given enricher."""
             enricher_cfg = enricher_configs.get(pipeline_name)
             filter_ids: tuple[str, ...] | None = None
             filter_field: str | None = None

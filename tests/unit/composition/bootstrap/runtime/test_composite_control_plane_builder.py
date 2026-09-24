@@ -390,11 +390,7 @@ def test_build_composite_control_plane_bundle_accepts_cli_degraded_override_when
         )
 
     manifest_path = (
-        tmp_path
-        / "output"
-        / "control"
-        / "run_manifest"
-        / f"{bundle.manifest_id}.json"
+        tmp_path / "output" / "control" / "run_manifest" / f"{bundle.manifest_id}.json"
     )
     manifest = RunManifest.from_dict(json.loads(manifest_path.read_text("utf-8")))
     assert manifest.replay_capability == ReplayCapability.RESUME_ONLY

@@ -148,12 +148,19 @@ def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None
     description = str(browse.get("description") or "")
     target = (browse.get("targets") or [])[0]
 
-    assert no_value.startswith("VALID EMPTY — no matching launches")
+    assert no_value.startswith("UNKNOWN")
+    assert "VALID EMPTY" not in no_value
+    assert "QUERY ERROR" in no_value
     assert "$pipeline" not in no_value
     assert "tree_missing" in description.lower()
     assert "verify_report_bind.py" in description
     assert "query error" in description.lower()
-    assert target.get("root_selector") == "items"
+    selector = target.get("root_selector", "")
+    assert 'index_state = "valid_empty"' in selector
+    assert "$exists(items)" in selector
+    assert "$count(items) = 0" in selector
+    assert '"pipeline": "VALID EMPTY"' in selector
+    assert selector.endswith(": items")
     assert target.get("url") == (
         "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10"
         "&run_id=${run_id}&view=recent&workflow=${workflow}"

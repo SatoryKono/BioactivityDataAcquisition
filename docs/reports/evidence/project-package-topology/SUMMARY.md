@@ -1,5 +1,13 @@
 # Сводка evidence: project-package-topology
 
+Refresh note (2026-09-24): hash-only reconcile after composition bootstrap/runtime shrink to family total_loc 6049. Counts and the source fingerprint below come from
+`reports/quality/module-coverage-inventory.json`. Historical notes remain
+historical.
+
+`source_tree_sha256=759f94c6def007d27698384845f647fd2b816c7a3fb3b695f1a3e5a64c15cdfe`
+
+`source_module_count=2479`
+
 Refresh note (2026-09-24): hash-only reconcile after application_core
 publication-term bound and derived-scan shrink. Counts and the source
 fingerprint below come from

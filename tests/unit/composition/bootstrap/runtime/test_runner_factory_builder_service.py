@@ -254,6 +254,4 @@ def test_seed_runoptions_uses_explicit_builder_persistence_profile() -> None:
         bronze_opts=bronze_opts,
     )
     _ = factory()
-    assert recorder.calls[-1]["required_persistence_profile"] == (
-        "degraded_observable"
-    )
+    assert recorder.calls[-1]["required_persistence_profile"] == ("degraded_observable")

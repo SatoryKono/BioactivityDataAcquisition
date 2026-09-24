@@ -61,11 +61,8 @@ __all__ = [
 
 
 def resolve_composite_control_plane_flags(
-    settings: object,
-    *,
-    runtime: object | None = None,
+    settings: object, *, runtime: object | None = None
 ) -> tuple[bool, bool]:
-    """Resolve manifest/ledger feature flags for executable composite runs."""
     _, manifest_enabled, ledger_enabled, _, effective_required_profile = (
         _read_composite_control_plane_settings(settings, runtime=runtime)
     )
@@ -86,12 +83,10 @@ def resolve_composite_control_plane_flags(
 
 
 def bind_manifest_logger(logger: LoggerPort, manifest_id: str | None) -> LoggerPort:
-    """Bind ``manifest_id`` into logger context when supported."""
     return _bind_manifest_logger(logger, manifest_id)
 
 
 def _normalize_object(value: object) -> dict[str, object]:
-    """Convert dataclasses/models into stable JSON-safe mappings."""
     return _support_normalize_object(value)
 
 
@@ -103,7 +98,6 @@ def _build_composite_control_plane_manifest(
     config_artifacts: CompositeControlPlaneConfigArtifacts,
     ledger_enabled: bool,
 ) -> RunManifest:
-    """Create manifest for composite control plane."""
     manifest_store = FileRunManifestStore(
         base_path=_control_plane_root(infra_context.settings, "run_manifest"),
         metrics=infra_context.metrics,
@@ -137,8 +131,7 @@ def build_composite_control_plane_bundle(
 ) -> CompositeControlPlaneBundle:
     """Materialize manifest/ledger artifacts for one composite execution."""
     _manifest_enabled, ledger_enabled = resolve_composite_control_plane_flags(
-        infra_context.settings,
-        runtime=runtime,
+        infra_context.settings, runtime=runtime
     )
     config_artifacts = _build_composite_control_plane_config_artifacts(
         config=config,
