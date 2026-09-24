@@ -7,118 +7,83 @@
     "language": "ru",
     "audit_mode": "full",
     "require_gh_tracking": true,
-    "gh_issues_created": {
+    "gh_issues_created": {},
+    "prior_gh_issues": {
       "DIAG-ADR040-CENSUS": "#10983",
       "DIAG-META-NODES": "#10984",
       "DIAG-CURRENT-STATE-STAMP": "#10985"
     },
-    "base_sha": "73e76c20c0df2771d48fdca6fb18f828985c7b57",
-    "origin_main_sha": "2348b89f6a11",
-    "generated_at_utc": "2026-09-24T10:27:08Z",
-    "surface_score": 2,
-    "open_proven_count": 3,
+    "base_sha": "6b9c73935f1b3695145088902d946522be7ca0fa",
+    "origin_main_sha": "6b9c73935f1b",
+    "diagrams_pr": "#10986",
+    "diagrams_squash_sha": "5cc40b73b250",
+    "generated_at_utc": "2026-09-24T11:12:30Z",
+    "surface_score": 3,
+    "open_proven_count": 0,
     "p0_count": 0,
     "lint_exit": 0,
-    "check_artifacts_exit": 0
+    "lint_errors": 0,
+    "lint_warnings": 174,
+    "check_artifacts_exit": 0,
+    "collected_at_utc": "2026-09-24T11:05:46Z"
   },
-  "findings": [
+  "findings": [],
+  "resolved": [
     {
       "finding_id": "DIAG-ADR040-CENSUS",
       "fingerprint": "a362158702fd83df5dbcfc9e41c9c9cb1ca4b0bd08e795f7f90a27284994eb60",
-      "status": "PROVEN",
-      "evidence_class": "FACT",
-      "priority": "P3",
-      "requirement_id": "GAP",
-      "requirement_binding_note": "SSOT is ADR-040 measured baseline in docs/02-architecture/decisions/ADR-040-diagram-governance.md. No REQ-* for diagram census.",
-      "claim": "ADR-040 still publishes a 2026-07-18 measured baseline of 290 .mmd files while the live diagrams tree has 328 .mmd files.",
-      "broken_invariant": "ADR-040 measured inventory must stay aligned with docs/02-architecture/diagrams/**/*.mmd.",
-      "root_cause": "ADR-040 measured .mmd census frozen at 290 while live tree has 328",
-      "affected_paths": [
-        "docs/02-architecture/decisions/ADR-040-diagram-governance.md"
-      ],
+      "status": "VERIFIED_ALREADY_RESOLVED",
+      "gh": "#10983",
+      "gh_state": "CLOSED",
+      "closed_at": "2026-09-24T10:57:06Z",
       "evidence": {
         "kind": "command",
-        "command": "python reports/audit/diagrams/_collect.py",
-        "scope": "docs/02-architecture/diagrams @ 73e76c20c0df",
-        "timestamp": "2026-09-24T10:27:08Z",
+        "command": "python reports/audit/diagrams/_collect_meta.py",
+        "scope": "docs/02-architecture/diagrams @ 6b9c73935f1b",
+        "timestamp": "2026-09-24T11:05:46Z",
         "exit_code": 0,
-        "output": "mmd=328 mermaid=165 by_family architecture=89 class-diagrams=145 foundation=55 providers=28 sequence=5 state-machines=5 views=165; ADR text: architecture 89 + class 145 + foundation 55 + template = 290"
-      },
-      "acceptance": "ADR-040 measured baseline lists live family counts (328 .mmd, 165 .mermaid views) or explicitly marks 290 as historical 2026-07-18.",
-      "validation_commands": [
-        "python -c \"from pathlib import Path; p=Path('docs/02-architecture/diagrams'); print(len(list(p.rglob('*.mmd'))), len(list(p.rglob('*.mermaid'))))\""
-      ],
-      "rollback": "Revert ADR-040 census prose.",
-      "owner_surface": "docs",
-      "remediation": "Update ADR-040 inventory table; do not raise lint/quality budgets."
+        "output": "mmd=328 mermaid=165 adr040_total_mmd_prose=328 adr040_total_views_prose=165"
+      }
     },
     {
       "finding_id": "DIAG-META-NODES",
       "fingerprint": "31ca3ee945c239798680794d678bb99b5d3bfd98f09999db71b5aa4182819419",
-      "status": "PROVEN",
-      "evidence_class": "FACT",
-      "priority": "P3",
-      "requirement_id": "GAP",
-      "requirement_binding_note": "ADR-040 D4 requires %% @nodes on canonical .mmd files.",
-      "claim": "35 canonical .mmd files omit %% @nodes (architecture 24-48, all sequence/, all state-machines/).",
-      "broken_invariant": "Canonical .mmd metadata MUST include %% @nodes (ADR-040 D4).",
-      "root_cause": "canonical .mmd metadata omits %% @nodes on architecture 24-48 plus sequence and state-machines",
-      "affected_paths": [
-        "docs/02-architecture/diagrams/architecture",
-        "docs/02-architecture/diagrams/sequence",
-        "docs/02-architecture/diagrams/state-machines"
-      ],
+      "status": "VERIFIED_ALREADY_RESOLVED",
+      "gh": "#10984",
+      "gh_state": "CLOSED",
+      "closed_at": "2026-09-24T10:57:08Z",
       "evidence": {
-        "kind": "path",
-        "path": "docs/02-architecture/diagrams/architecture/24-control-plane-artifact-publication-pipeline.mmd:1-8",
-        "symbol": "%% @version / @date / @type present; %% @nodes absent",
-        "command_corroboration": "inventory: mmd_missing_core_meta=35; lint_diagrams exit 0 (SIZE/ELK skip when @nodes missing)"
-      },
-      "acceptance": "Those 35 files have %% @nodes <int>; lint still exit 0; no semantic diagram edits required.",
-      "validation_commands": [
-        "python scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams/sequence docs/02-architecture/diagrams/state-machines"
-      ],
-      "rollback": "Revert metadata-only commits.",
-      "owner_surface": "docs",
-      "remediation": "Add %% @nodes counts. Do not invent a full-repo god diagram."
+        "kind": "command",
+        "command": "python reports/audit/diagrams/_collect_meta.py",
+        "scope": "canonical *.mmd @ 6b9c73935f1b",
+        "timestamp": "2026-09-24T11:05:46Z",
+        "exit_code": 0,
+        "output": "mmd_with_nodes=328 mmd_missing_nodes_count=0 mmd_broken_nodes=[]"
+      }
     },
     {
       "finding_id": "DIAG-CURRENT-STATE-STAMP",
       "fingerprint": "cd903d0a83303d4b87e3fac40c85642ff6ee5c3208312658fee7dac3cbd29069",
-      "status": "PROVEN",
-      "evidence_class": "FACT",
-      "priority": "P3",
-      "requirement_id": "GAP",
-      "requirement_binding_note": "Published diagram page header Last verified must not silently lag a verified current-state view.",
-      "claim": "current-state-diagrams.md still shows Last verified 2026-08-05 after later architecture closeouts; C4/layer mermaid itself matches ADR-010 (optional monitoring, process containers).",
-      "broken_invariant": "Operator-facing current-state diagram page freshness stamp stays aligned with last verification.",
-      "root_cause": "current-state diagrams page Last verified stamp lags live architecture",
-      "affected_paths": [
-        "docs/02-architecture/current-state-diagrams.md"
-      ],
+      "status": "VERIFIED_ALREADY_RESOLVED",
+      "gh": "#10985",
+      "gh_state": "CLOSED",
+      "closed_at": "2026-09-24T10:57:10Z",
       "evidence": {
         "kind": "path",
         "path": "docs/02-architecture/current-state-diagrams.md:10",
-        "symbol": "Last verified: '2026-08-05'",
-        "command_corroboration": "C4Container text states containers are processes not Docker; Rel grafana optional; 09-observability-stack.mmd @date 2026-09-10 Prometheus+Grafana optional"
-      },
-      "acceptance": "Last verified updated to the audit/verification date; C4 still must not depict Docker/Loki/Tempo as required runtime.",
-      "validation_commands": [
-        "rg -n \"Last verified\" docs/02-architecture/current-state-diagrams.md"
-      ],
-      "rollback": "Revert the header stamp only.",
-      "owner_surface": "docs",
-      "remediation": "Set Last verified to 2026-09-24 (this audit). No C4 structural rewrite unless a later audit finds model drift."
+        "symbol": "Last verified: '2026-09-24'",
+        "command_corroboration": "C4 Container text: containers are processes not Docker; Rel grafana optional; 09-observability-stack.mmd Prometheus + Grafana (optional, ADR-010/053)"
+      }
     }
   ],
   "not_findings": [
     {
       "id": "NF-NPX",
-      "observation": "No npx -y in scripts/diagrams or .github; setup-mermaid uses npm ci + package-lock mermaid-cli 10.6.1 and refuses other versions."
+      "observation": "No npx -y in scripts/diagrams or .github; setup-mermaid pins mermaid-cli 10.6.1 via package-lock and refuses other versions. Hint text uses npx puppeteer (not npx -y)."
     },
     {
       "id": "NF-PNG-GITIGNORE",
-      "observation": "PNG under diagrams/**/png/ is gitignored by policy; SVG tracked. Avoids large binary churn."
+      "observation": "PNG under diagrams/**/png/ is gitignored by policy (DOC-GOV-02); SVG tracked. Avoids large binary churn."
     },
     {
       "id": "NF-C4-DOCKER",
@@ -126,11 +91,19 @@
     },
     {
       "id": "NF-LINT-WARNINGS",
-      "observation": "168 lint warnings (SIZE/STALE/LINK/LABEL), zero errors, files_failed=0."
+      "observation": "174 lint warnings (SIZE-002 99, STALE-002 24, LINK-001 22, LABEL-001 20, GRAPH-001 4, SIZE-003 3, CLASS-003 2), zero errors, files_failed=0."
     },
     {
       "id": "NF-BINARY-ONLY",
       "observation": "No PlantUML/drawio/dot in docs/. Sources are Mermaid text."
+    },
+    {
+      "id": "NF-VISUAL-SMOKE",
+      "observation": "PR visual-smoke manifest is 6 SVG by design; check-artifacts exit 0; nightly has extended/broad tiers."
+    },
+    {
+      "id": "NF-CENSUS-MATCH",
+      "observation": "Live family counts 89/145/55/28/5/5/328/165 match ADR-040, diagrams-index.md, and test_governance_docs_match_active_diagram_counts expected tuple."
     }
   ]
 }
