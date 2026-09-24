@@ -249,11 +249,15 @@ def _rename_organize_timing_fields(options: dict[str, Any]) -> None:
 
 def _rename_timing_display_fields(panel: dict[str, Any]) -> None:
     for transform in panel["transformations"]:
-        transform_id = transform["id"]
-        if transform_id == "filterFieldsByName":
-            _rename_filter_timing_fields(transform["options"])
-        elif transform_id == "organize":
-            _rename_organize_timing_fields(transform["options"])
+        _rename_timing_transform(transform)
+
+
+def _rename_timing_transform(transform: dict[str, Any]) -> None:
+    transform_id = transform["id"]
+    if transform_id == "filterFieldsByName":
+        _rename_filter_timing_fields(transform["options"])
+    elif transform_id == "organize":
+        _rename_organize_timing_fields(transform["options"])
 
 
 def _relabel_run_variables(dashboard: dict[str, Any]) -> None:
