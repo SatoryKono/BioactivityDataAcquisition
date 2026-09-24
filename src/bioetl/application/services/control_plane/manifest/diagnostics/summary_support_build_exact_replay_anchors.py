@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.diagnostics.artifact_support import (
-    sorted_text_items,
-)
+from collections.abc import Callable
+
 from bioetl.domain.control_plane import RunManifest
 
 
@@ -14,6 +13,7 @@ def build_exact_replay_anchors(
     summary: dict[str, object],
     artifact_refs: list[dict[str, object]],
     lineage_fragment_ids: set[str] | frozenset[str],
+    sorted_text_items: Callable[..., list[str]],
 ) -> dict[str, object]:
     """Return semantic replay anchors separately from occurrence diagnostics."""
     published_artifact_ids = sorted_text_items(
