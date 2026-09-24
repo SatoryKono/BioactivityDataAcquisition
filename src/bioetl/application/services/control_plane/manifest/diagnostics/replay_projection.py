@@ -8,9 +8,6 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_invar
     ReplayFamilyContext,
     build_replay_family_context,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_build_operator_replay_projection import (
-    _build_operator_replay_projection,
-)
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload import (
     _build_replay_projection_context_kwargs,
     _build_replay_state_projection_for_context,
@@ -21,6 +18,10 @@ from bioetl.application.services.control_plane.manifest.diagnostics.resume_contr
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
     ReproducibilityPolicyAssessment,
+)
+
+from .replay_projection_build_operator_replay_projection import (
+    _build_operator_replay_projection,
 )
 
 

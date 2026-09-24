@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import cast
 
-from bioetl.application.services.control_plane.manifest.diagnostics.persistence_profile_support_build_composite_resume_reconstructability import (
+from .persistence_profile_support_build_composite_resume_reconstructability import (
     build_composite_resume_reconstructability,
 )
 

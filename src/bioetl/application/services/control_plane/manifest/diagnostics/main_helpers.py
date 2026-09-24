@@ -11,7 +11,8 @@ from bioetl.application.services.control_plane.manifest.diagnostics.base import 
     _build_checkpoint_anchor_projection,
     _build_effective_config_diagnostics,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.main_helpers_build_unified_reproducibility_diagnostics_policy_payload import (
+
+from .main_helpers_build_unified_reproducibility_diagnostics_policy_payload import (
     _build_unified_reproducibility_diagnostics_policy_payload,
 )
 

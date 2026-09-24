@@ -20,7 +20,7 @@ from bioetl.domain.control_plane import (
     RunSourceRef,
 )
 from bioetl.domain.context import CachedBronzeContext
-from bioetl.composition.bootstrap.runtime._composite_control_plane_payloads_build_composite_launch_context_snapshot import (
+from ._composite_control_plane_payloads_build_composite_launch_context_snapshot import (
     build_composite_launch_context_snapshot,
 )
 
