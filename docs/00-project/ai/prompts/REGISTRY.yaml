@@ -323,6 +323,15 @@ entries:
   tags: []
   summary: Bind project-domain audits to REQUIREMENTS.md — REQ-* IDs, gates, issue
     titles
+- id: prompt.audit.generic-nine.pack
+  path: library/audit/generic-nine.pack.md
+  status: active
+  class: index
+  tags:
+  - audit
+  - index
+  - operator
+  summary: Index of the nine-domain operator-paste audit kit (not runtime SSOT)
 - id: prompt.audit.agents-runtime
   path: library/audit/agents-runtime.md
   status: active

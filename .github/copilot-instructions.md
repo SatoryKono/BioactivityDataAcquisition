@@ -4,11 +4,16 @@ Use this file as a strict operating profile for code suggestions in this reposit
 
 ## Canonical Sources
 
+Runtime-source-first (same order as `AGENTS.md`):
+
+- `AGENTS.md` (assistant workflow constraints and AI runtime precedence)
+- matching runtime maps: `.codex/agents/CODEX-RUNTIME.md`,
+  `.junie/agents/JUNIE-RUNTIME.md` (with `.junie/guidelines.md`); Devin maps
+  under `.devin/agents/**` only in Devin sessions
 - `docs/00-project/NORMATIVE_SOURCES.md` (normative stack index)
 - `docs/00-project/RULES.md` (project constitution, RFC2119 requirements)
 - `docs/01-requirements/REQUIREMENTS.md` (functional/non-functional requirements)
 - ADRs in `docs/02-architecture/decisions/`
-- `AGENTS.md` (assistant workflow constraints)
 - `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 

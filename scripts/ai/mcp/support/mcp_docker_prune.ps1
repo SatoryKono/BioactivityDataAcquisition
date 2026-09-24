@@ -1,13 +1,17 @@
 # Shared helper: drop exited/orphan containers for a given MCP image before
 # starting a new stdio session. Does not stop running containers (other clients
 # may still own them). Never touches bioetl-*.
+# Default is dry-run (same as mcp_docker_prune.sh). Set MCP_DOCKER_PRUNE_APPLY=1
+# to remove. BIOETL_MCP_PRUNE_DRY_RUN=1 forces dry-run even if APPLY=1.
 function Remove-McpExitedContainers {
     param(
         [Parameter(Mandatory = $true)]
         [string]$ImageMatch
     )
     $ErrorActionPreference = 'SilentlyContinue'
-    $dryRun = $env:BIOETL_MCP_PRUNE_DRY_RUN -eq '1'
+    $apply = $env:MCP_DOCKER_PRUNE_APPLY -eq '1'
+    $forceDryRun = $env:BIOETL_MCP_PRUNE_DRY_RUN -eq '1'
+    $dryRun = $forceDryRun -or -not $apply
     $rows = docker ps -aq --filter 'status=exited' 2>$null
     if (-not $rows) { return }
     foreach ($id in $rows) {
