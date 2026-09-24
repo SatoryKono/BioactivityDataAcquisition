@@ -99,7 +99,7 @@ The domain layer implements Domain-Driven Design patterns:
 | [ChEMBL Activity Dataflow Passport](docs/02-architecture/generated/pipeline-dataflows/chembl_activity/pipeline-passport.md) | Generated source criteria, filters, processing, DQ, and layer fields |
 | [Workflow Catalog](docs/04-reference/workflow-catalog.md)                   | Current declarative workflow DAG catalog                             |
 | [Data Contracts Current State](docs/04-reference/contracts/data-contracts-current.md) | Current data-contract inventory and runtime contract chain       |
-| [API Reference](docs/04-reference/api/index.md)                             | Full API documentation with mkdocstrings                             |
+| [API Reference](docs/04-reference/api/index.md)                             | Curated published API reference checked against public facades       |
 | [Architecture Decisions](docs/02-architecture/decisions/)                   | Canonical ADR index for architectural decisions                      |
 | [Ubiquitous Language](docs/00-project/glossary.md)                          | Domain terminology and canonical naming                              |
 | [RULES.md](docs/00-project/RULES.md)                                        | Canonical active governance and requirements                         |

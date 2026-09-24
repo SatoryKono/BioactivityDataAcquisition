@@ -281,10 +281,6 @@ def build_class_index_markdown(class_cards: list[Path]) -> str:
     return "\n".join(lines)
 
 
-def write_index(path: Path, content: str) -> None:
-    atomic_write_text(path, content if content.endswith("\n") else f"{content}\n")
-
-
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     targets = set(args.target or TARGETS)

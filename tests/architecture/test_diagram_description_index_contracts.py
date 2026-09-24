@@ -92,6 +92,18 @@ def test_root_index_groups_view_cards_by_parent_family() -> None:
     assert "[01-demo-dataflow]" not in text
 
 
+def test_generated_stamp_check_normalizes_clock_and_requires_utc() -> None:
+    module = _load_module()
+    local_clock = "_Автогенерация: 2026-07-18T17:33:44+03:00_\n- body\n"
+    utc_clock = "_Автогенерация: 2026-09-24T00:00:00+00:00_\n- body\n"
+
+    assert module.normalize_generated_stamp(local_clock) == module.normalize_generated_stamp(
+        utc_clock
+    )
+    assert module.generated_stamps_are_utc(utc_clock)
+    assert not module.generated_stamps_are_utc(local_clock)
+
+
 def test_render_desc_indexes_command_is_registered() -> None:
     content = Path("scripts/diagrams/__main__.py").read_text(encoding="utf-8")
 

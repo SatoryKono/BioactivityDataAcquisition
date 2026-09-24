@@ -193,8 +193,8 @@ uv run python -m scripts.docs verify --skip-links --skip-drift --skip-docstrings
 Use the strict build after the checks above when you need confidence that the
 published MkDocs surface still renders cleanly.
 
-For a quick non-strict local preview, use
-`uv run python -m scripts.docs build-site`.
+`uv run python -m scripts.docs build-site` is strict by default.
+Pass `--no-strict` for a local preview that tolerates MkDocs warnings.
 
 ## Mixed Windows + WSL Notes
 

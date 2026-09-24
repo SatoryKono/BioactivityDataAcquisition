@@ -34,6 +34,31 @@ def check_doc_links_module() -> ModuleType:
     return _load_module()
 
 
+def test_broken_links_report_missing_local_svg(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    check_doc_links_module: ModuleType,
+) -> None:
+    page = tmp_path / "page.md"
+    page.write_text(
+        "[missing](missing.svg)\n[present](ok.svg)\n[remote](https://example.com/a.svg)\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "ok.svg").write_text(
+        "<svg xmlns='http://www.w3.org/2000/svg'/>",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        check_doc_links_module,
+        "_collect_link_scan_files",
+        lambda root: [page],
+    )
+
+    broken = check_doc_links_module.check_broken_links(tmp_path)
+
+    assert [item[3] for item in broken] == ["missing.svg"]
+
+
 def test_iter_python_fence_lines_extracts_python_blocks_only(
     check_doc_links_module: ModuleType,
 ) -> None:

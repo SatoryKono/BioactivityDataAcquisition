@@ -1,6 +1,6 @@
 # BioETL Class Diagrams Bundle
 
-- Generated: 2026-08-26T21:23:35
+- Generated: 2026-09-10T16:12:50+00:00
 - Diagram count: 145
 
 ## Table of Contents
@@ -544,7 +544,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `7`
 
 \newpage
@@ -563,7 +563,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `12`
 
 \newpage
@@ -582,7 +582,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `30`
 
 \newpage
@@ -601,7 +601,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `12`
 
 \newpage
@@ -620,7 +620,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `17`
 
 \newpage
@@ -639,7 +639,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `15`
 
 \newpage
@@ -658,7 +658,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `4`
 
 \newpage
@@ -677,7 +677,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `22`
 
 \newpage
@@ -696,7 +696,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `18`
 
 \newpage
@@ -715,7 +715,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `5`
 
 \newpage
@@ -734,7 +734,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `4`
 
 \newpage
@@ -753,7 +753,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `18`
 
 \newpage
@@ -772,7 +772,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `30`
 
 \newpage
@@ -791,7 +791,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `4`
 
 \newpage
@@ -810,7 +810,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `11`
 
 \newpage
@@ -829,7 +829,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `6`
 
 \newpage
@@ -848,7 +848,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `10`
 
 \newpage
@@ -867,7 +867,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `8`
 
 \newpage
@@ -886,7 +886,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `4`
 
 \newpage
@@ -900,13 +900,13 @@
 ![90-pkg-application-ports-part1](../class-diagrams/svg/90-pkg-application-ports-part1.svg)
 
 ### Описание
-Диаграмма «Package Family: application/ports (Part 1/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/application/ports; part 1/2; modules: providers, control_plane, operations.. Схема имеет плотность порядка 27 узлов и 1 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: providers, control plane, operations. Показательные узлы для быстрого чтения: AdapterCreatorProtocol, DataSourceCreatorProtocol, HttpConfig, HttpConfigProtocol, ProviderAdapterFactoryProtocol, ProviderDataSourceAccessProtocol. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: application/ports (Part 1/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/application/ports; part 1/2; modules: providers, control_plane, operations.. Схема имеет плотность порядка 26 узлов и 1 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: providers, control plane, operations. Показательные узлы для быстрого чтения: AdapterCreatorProtocol, DataSourceCreatorProtocol, HttpConfig, ProviderAdapterFactoryProtocol, ProviderDataSourceAccessProtocol, ProviderHttpClientFactoryProtocol. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
-- Узлы (metadata): `27`
+- Дата: `2026-09-02`
+- Узлы (metadata): `26`
 
 \newpage
 
@@ -924,7 +924,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `24`
 
 \newpage
@@ -943,7 +943,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `7`
 
 \newpage
@@ -962,7 +962,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `8`
 
 \newpage
@@ -981,7 +981,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `9`
 
 \newpage
@@ -1000,7 +1000,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `14`
 
 \newpage
@@ -1019,7 +1019,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `20`
 
 \newpage
@@ -1038,7 +1038,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `26`
 
 \newpage
@@ -1057,7 +1057,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `5`
 
 \newpage
@@ -1076,7 +1076,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `7`
 
 \newpage
@@ -1095,7 +1095,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `20`
 
 \newpage
@@ -1114,7 +1114,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `26`
 
 \newpage
@@ -1133,7 +1133,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `12`
 
 \newpage
@@ -1152,7 +1152,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `8`
 
 \newpage
@@ -1171,7 +1171,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `26`
 
 \newpage
@@ -1190,7 +1190,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `4`
 
 \newpage
@@ -1209,7 +1209,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `23`
 
 \newpage
@@ -1228,7 +1228,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `5`
 
 \newpage
@@ -1247,7 +1247,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `5`
 
 \newpage
@@ -1266,7 +1266,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `17`
 
 \newpage
@@ -1285,7 +1285,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `4`
 
 \newpage
@@ -1304,7 +1304,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `17`
 
 \newpage
@@ -1323,7 +1323,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `28`
 
 \newpage
@@ -1342,7 +1342,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `8`
 
 \newpage
@@ -1361,7 +1361,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `11`
 
 \newpage
@@ -1380,7 +1380,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `11`
 
 \newpage
@@ -1399,7 +1399,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `14`
 
 \newpage
@@ -1418,7 +1418,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `22`
 
 \newpage
@@ -1437,7 +1437,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `18`
 
 \newpage
@@ -1451,13 +1451,13 @@
 ![90-pkg-domain-aggregates](../class-diagrams/svg/90-pkg-domain-aggregates.svg)
 
 ### Описание
-Диаграмма «Package Family: domain/aggregates» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/domain/aggregates; modules: events, _quarantine_value_objects, batch, pipeline_run_stage_result, _batch_mixins, _pipeline_run_mixins.. Схема имеет плотность порядка 29 узлов и 19 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: events, quarantine value objects, batch, pipeline run stage result, batch mixins, pipeline run mixins. Показательные узлы для быстрого чтения: BatchCreated, BatchFailed, BatchSealed, BatchWritten, DomainEvent, PipelineCompleted. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: domain/aggregates» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/domain/aggregates; modules: events, batch, _quarantine_value_objects, pipeline_run_stage_result, _batch_aggregate, pipeline_run.. Схема имеет плотность порядка 28 узлов и 17 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: events, batch, quarantine value objects, pipeline run stage result, batch aggregate, pipeline run. Показательные узлы для быстрого чтения: BatchCreated, BatchFailed, BatchSealed, BatchWritten, DomainEvent, PipelineCompleted. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
-- Узлы (metadata): `29`
+- Дата: `2026-09-10`
+- Узлы (metadata): `28`
 
 \newpage
 
@@ -1475,7 +1475,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `30`
 
 \newpage
@@ -1494,7 +1494,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `12`
 
 \newpage
@@ -1513,7 +1513,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `27`
 
 \newpage
@@ -1532,7 +1532,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `30`
 
 \newpage
@@ -1551,7 +1551,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `4`
 
 \newpage
@@ -1570,7 +1570,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `30`
 
 \newpage
@@ -1589,7 +1589,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `1`
 
 \newpage
@@ -1608,7 +1608,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `30`
 
 \newpage
@@ -1627,7 +1627,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `20`
 
 \newpage
@@ -1646,7 +1646,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `10`
 
 \newpage
@@ -1665,7 +1665,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `12`
 
 \newpage
@@ -1684,7 +1684,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `12`
 
 \newpage
@@ -1703,7 +1703,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `9`
 
 \newpage
@@ -1722,7 +1722,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `13`
 
 \newpage
@@ -1741,7 +1741,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `24`
 
 \newpage
@@ -1760,7 +1760,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `9`
 
 \newpage
@@ -1779,7 +1779,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `18`
 
 \newpage
@@ -1798,7 +1798,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `11`
 
 \newpage
@@ -1817,7 +1817,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `30`
 
 \newpage
@@ -1836,7 +1836,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `1`
 
 \newpage
@@ -1855,7 +1855,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `7`
 
 \newpage
@@ -1874,7 +1874,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `11`
 
 \newpage
@@ -1893,7 +1893,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `6`
 
 \newpage
@@ -1912,7 +1912,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `10`
 
 \newpage
@@ -1931,7 +1931,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `11`
 
 \newpage
@@ -1950,7 +1950,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `16`
 
 \newpage
@@ -1969,7 +1969,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `26`
 
 \newpage
@@ -1988,7 +1988,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `7`
 
 \newpage
@@ -2007,7 +2007,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `4`
 
 \newpage
@@ -2026,7 +2026,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `17`
 
 \newpage
@@ -2045,7 +2045,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `15`
 
 \newpage
@@ -2064,7 +2064,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `5`
 
 \newpage
@@ -2083,7 +2083,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `6`
 
 \newpage
@@ -2102,7 +2102,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `10`
 
 \newpage
@@ -2121,7 +2121,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `30`
 
 \newpage
@@ -2140,7 +2140,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `11`
 
 \newpage
@@ -2159,7 +2159,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `19`
 
 \newpage
@@ -2178,7 +2178,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `29`
 
 \newpage
@@ -2197,7 +2197,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `27`
 
 \newpage
@@ -2216,7 +2216,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `17`
 
 \newpage
@@ -2235,7 +2235,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `15`
 
 \newpage
@@ -2254,7 +2254,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `22`
 
 \newpage
@@ -2273,7 +2273,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `14`
 
 \newpage
@@ -2287,12 +2287,12 @@
 ![90-pkg-infrastructure-adapters-uniprot-part1](../class-diagrams/svg/90-pkg-infrastructure-adapters-uniprot-part1.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/adapters/uniprot (Part 1/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/adapters/uniprot; part 1/2; modules: _uniprot_model_annotations, _uniprot_model_structures, _uniprot_model_records, _idmapping_errors, _idmapping_health, _idmapping_retry.. Схема имеет плотность порядка 30 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: uniprot model annotations, uniprot model structures, uniprot model records, idmapping errors, idmapping health, idmapping retry. Показательные узлы для быстрого чтения: UniProtComment, UniProtEcNumber, UniProtEvidence, UniProtFullName, UniProtGene, UniProtIsoform. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: infrastructure/adapters/uniprot (Part 1/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/adapters/uniprot; part 1/2; modules: _uniprot_model_annotations, _uniprot_model_structures, _uniprot_model_records, _idmapping_errors, _idmapping_health, _idmapping_parser.. Схема имеет плотность порядка 30 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: uniprot model annotations, uniprot model structures, uniprot model records, idmapping errors, idmapping health, idmapping parser. Показательные узлы для быстрого чтения: UniProtComment, UniProtEcNumber, UniProtEvidence, UniProtFullName, UniProtGene, UniProtIsoform. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `30`
 
 \newpage
@@ -2306,13 +2306,13 @@
 ![90-pkg-infrastructure-adapters-uniprot-part2](../class-diagrams/svg/90-pkg-infrastructure-adapters-uniprot-part2.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/adapters/uniprot (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/adapters/uniprot; part 2/2; modules: _idmapping_transport, _idmapping_parser, client, fallback_policy, fasta_parser, feature_sequence_adapter_mixin.. Схема имеет плотность порядка 11 узлов и 6 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: idmapping transport, idmapping parser, client, fallback policy, fasta parser, feature sequence adapter mixin. Показательные узлы для быстрого чтения: IDMappingTransportDependencies, IDMappingTransportMixin, IDMappingParserMixin, UniProtAdapter, UniProtFallbackPolicy, FastaParser. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: infrastructure/adapters/uniprot (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/adapters/uniprot; part 2/2; modules: _idmapping_retry, _idmapping_transport, client, fallback_policy, fasta_parser, feature_sequence_adapter_mixin.. Схема имеет плотность порядка 12 узлов и 6 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: idmapping retry, idmapping transport, client, fallback policy, fasta parser, feature sequence adapter mixin. Показательные узлы для быстрого чтения: IDMappingRetryDependencies, IDMappingRetryMixin, IDMappingTransportDependencies, IDMappingTransportMixin, UniProtAdapter, UniProtFallbackPolicy. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
-- Узлы (metadata): `11`
+- Дата: `2026-09-02`
+- Узлы (metadata): `12`
 
 \newpage
 
@@ -2325,12 +2325,12 @@
 ![90-pkg-infrastructure-config-part1](../class-diagrams/svg/90-pkg-infrastructure-config-part1.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/config (Part 1/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/config; part 1/2; modules: _retry_settings, contract_policy_validation, domain_config_resolver, _path_settings, _pipeline_settings, _base.. Схема имеет плотность порядка 30 узлов и 2 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: retry settings, contract policy validation, domain config resolver, path settings, pipeline settings, base. Показательные узлы для быстрого чтения: AtomicReplaceRetrySettings, SilverMergeRetrySettings, SilverMergeTimeoutSettings, _ArrowSchemaLike, _ResolvedSchema, _SchemaBuilder. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: infrastructure/config (Part 1/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/config; part 1/2; modules: _retry_settings, contract_policy_validation, _path_settings, _pipeline_settings, domain_config_resolver, _base.. Схема имеет плотность порядка 30 узлов и 2 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: retry settings, contract policy validation, path settings, pipeline settings, domain config resolver, base. Показательные узлы для быстрого чтения: AtomicReplaceRetrySettings, SilverMergeRetrySettings, SilverMergeTimeoutSettings, _ArrowSchemaLike, _ResolvedSchema, _SchemaBuilder. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `30`
 
 \newpage
@@ -2344,13 +2344,13 @@
 ![90-pkg-infrastructure-config-part2](../class-diagrams/svg/90-pkg-infrastructure-config-part2.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/config (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/config; part 2/2; modules: publication_controlled_vocabulary_loader, publication_type_classification_loader, semantic_field_registry_loader.. Схема имеет плотность порядка 3 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: publication controlled vocabulary loader, publication type classification loader, semantic field registry loader. Показательные узлы для быстрого чтения: PublicationControlledVocabularyLoader, PublicationTypeClassificationLoader, SemanticFieldRegistryLoader. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: infrastructure/config (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/config; part 2/2; modules: publication_type_classification_loader, semantic_field_registry_loader.. Схема имеет плотность порядка 2 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: publication type classification loader, semantic field registry loader. Показательные узлы для быстрого чтения: PublicationTypeClassificationLoader, SemanticFieldRegistryLoader. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
-- Узлы (metadata): `3`
+- Дата: `2026-09-02`
+- Узлы (metadata): `2`
 
 \newpage
 
@@ -2368,7 +2368,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `30`
 
 \newpage
@@ -2387,7 +2387,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `7`
 
 \newpage
@@ -2406,7 +2406,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `6`
 
 \newpage
@@ -2425,7 +2425,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `4`
 
 \newpage
@@ -2444,7 +2444,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `8`
 
 \newpage
@@ -2463,7 +2463,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `29`
 
 \newpage
@@ -2482,7 +2482,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `30`
 
 \newpage
@@ -2501,7 +2501,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `29`
 
 \newpage
@@ -2520,7 +2520,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `9`
 
 \newpage
@@ -2539,7 +2539,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `22`
 
 \newpage
@@ -2558,7 +2558,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `4`
 
 \newpage
@@ -2577,7 +2577,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `30`
 
 \newpage
@@ -2596,7 +2596,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `10`
 
 \newpage
@@ -2615,7 +2615,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `8`
 
 \newpage
@@ -2634,7 +2634,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `30`
 
 \newpage
@@ -2653,7 +2653,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `7`
 
 \newpage
@@ -2672,7 +2672,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `30`
 
 \newpage
@@ -2691,7 +2691,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `19`
 
 \newpage
@@ -2710,7 +2710,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `6`
 
 \newpage
@@ -2729,7 +2729,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `6`
 
 \newpage
@@ -2748,7 +2748,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `26`
 
 \newpage
@@ -2767,7 +2767,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `6`
 
 \newpage
@@ -2786,7 +2786,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `21`
 
 \newpage
@@ -2805,7 +2805,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `8`
 
 \newpage
@@ -2824,7 +2824,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `5`
 
 \newpage
@@ -2843,7 +2843,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `6`
 
 \newpage
@@ -2862,7 +2862,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `6`
 
 \newpage
@@ -2881,7 +2881,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `30`
 
 \newpage
@@ -2900,5 +2900,5 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-08-26`
+- Дата: `2026-09-02`
 - Узлы (metadata): `1`
