@@ -1046,38 +1046,7 @@ def _stamp_retention_copy(by_id: dict[object, dict[str, object]]) -> None:
     if note not in retention.get("description", ""):
         retention["description"] = retention.get("description", "") + note
     for override in retention.get("fieldConfig", {}).get("overrides", []):
-        field = override.get("matcher", {}).get("options")
-        if field == "check":
-            for prop in override.get("properties", []):
-                if prop.get("id") == "mappings":
-                    prop["value"][0]["options"].update(
-                        {
-                            "scope_resolution": {"text": "Scope"},
-                        }
-                    )
-            continue
-        if field != "reason":
-            continue
-        for prop in override.get("properties", []):
-            if prop.get("id") == "mappings":
-                prop["value"][0]["options"].update(
-                    {
-                        "archive_not_applicable": {"text": "N/A: policy"},
-                        "archive_restore_verified": {"text": "Archive verified"},
-                        "archive_identity_mismatch": {"text": "Identity mismatch"},
-                        "archive_checksum_mismatch": {"text": "Checksum mismatch"},
-                        "archive_inventory_mismatch": {"text": "Files mismatch"},
-                        "archive_source_mismatch": {"text": "Source changed"},
-                        "archive_evidence_invalid": {"text": "Archive invalid"},
-                        "archive_index_invalid": {"text": "Index invalid"},
-                        "snapshot_lifecycle_evidence_present": {
-                            "text": "Snapshots present"
-                        },
-                        "selected_run_id_not_found": {"text": "Run not found"},
-                        "deadline_exceeded": {"text": "Deadline exceeded"},
-                        "capacity_exhausted": {"text": "At capacity"},
-                    }
-                )
+        _stamp_retention_labels(override)
 
 
 def _stamp_retention_readability(by_id: dict[object, dict[str, object]]) -> None:
@@ -1101,24 +1070,7 @@ def _stamp_retention_readability(by_id: dict[object, dict[str, object]]) -> None
     if not isinstance(overrides, list):
         return
     for override in overrides:
-        if not isinstance(override, dict):
-            continue
-        matcher = override.get("matcher")
-        field = matcher.get("options") if isinstance(matcher, dict) else None
-        if field in widths:
-            properties = override.setdefault("properties", [])
-            properties[:] = [p for p in properties if p.get("id") != CUSTOM_WIDTH]
-            properties.append({"id": CUSTOM_WIDTH, "value": widths[field]})
-        if field in {"reason", "Reason"}:
-            override["properties"] = [
-                p for p in override.get("properties", []) if p.get("id") != CUSTOM_WIDTH
-            ]
-        if field in wrap_fields:
-            _set_override_value(
-                override,
-                "custom.cellOptions",
-                {"type": "auto", "wrapText": True},
-            )
+        _stamp_retention_field(override, widths, wrap_fields)
 
 
 def _stamp_aggregate_trust(by_id: dict[object, dict[str, object]]) -> None:
@@ -1531,6 +1483,62 @@ def main(argv: list[str] | None = None) -> int:
         if not args.check:
             print(f"updated {filename} current={item['title']!r}")
     return 0 if ok else 1
+
+
+def _stamp_retention_labels(override: dict) -> None:
+    field = override.get("matcher", {}).get("options")
+    if field == "check":
+        for prop in override.get("properties", []):
+            if prop.get("id") == "mappings":
+                prop["value"][0]["options"].update(
+                    {
+                        "scope_resolution": {"text": "Scope"},
+                    }
+                )
+        return
+    if field != "reason":
+        return
+    for prop in override.get("properties", []):
+        if prop.get("id") == "mappings":
+            prop["value"][0]["options"].update(
+                {
+                    "archive_not_applicable": {"text": "N/A: policy"},
+                    "archive_restore_verified": {"text": "Archive verified"},
+                    "archive_identity_mismatch": {"text": "Identity mismatch"},
+                    "archive_checksum_mismatch": {"text": "Checksum mismatch"},
+                    "archive_inventory_mismatch": {"text": "Files mismatch"},
+                    "archive_source_mismatch": {"text": "Source changed"},
+                    "archive_evidence_invalid": {"text": "Archive invalid"},
+                    "archive_index_invalid": {"text": "Index invalid"},
+                    "snapshot_lifecycle_evidence_present": {
+                        "text": "Snapshots present"
+                    },
+                    "selected_run_id_not_found": {"text": "Run not found"},
+                    "deadline_exceeded": {"text": "Deadline exceeded"},
+                    "capacity_exhausted": {"text": "At capacity"},
+                }
+            )
+
+
+def _stamp_retention_field(override: dict, widths: dict, wrap_fields: set[str]) -> None:
+    if not isinstance(override, dict):
+        return
+    matcher = override.get("matcher")
+    field = matcher.get("options") if isinstance(matcher, dict) else None
+    if field in widths:
+        properties = override.setdefault("properties", [])
+        properties[:] = [p for p in properties if p.get("id") != CUSTOM_WIDTH]
+        properties.append({"id": CUSTOM_WIDTH, "value": widths[field]})
+    if field in {"reason", "Reason"}:
+        override["properties"] = [
+            p for p in override.get("properties", []) if p.get("id") != CUSTOM_WIDTH
+        ]
+    if field in wrap_fields:
+        _set_override_value(
+            override,
+            "custom.cellOptions",
+            {"type": "auto", "wrapText": True},
+        )
 
 
 if __name__ == "__main__":

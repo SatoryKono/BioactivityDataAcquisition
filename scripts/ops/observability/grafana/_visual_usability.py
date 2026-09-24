@@ -78,32 +78,12 @@ def _runtime(p: dict[int, dict]) -> None:
 
 
 def _trust(p: dict[int, dict]) -> None:
-    for panel in p.values():
-        for target in panel.get("targets", []):
-            expr = target.get("expr", "")
-            if "increase(" in expr or "rate(" in expr:
-                target["expr"] = expr.replace("[$__interval]", "[$__rate_interval]")
+    _trust_rate_intervals(p)
     p[5]["targets"][0]["expr"] = (
         "sum by (disposition) (increase(bioetl_checkpoint_compatibility_events_total"
         '{pipeline=~"$pipeline"}[$__rate_interval]))'
     )
-    for panel_id in (3, 104, 120, 101, 102, 103, 4, 136, 122, 137):
-        p[panel_id]["fieldConfig"]["defaults"]["noValue"] = "NO OBSERVATIONS"
-        for mapping in p[panel_id]["fieldConfig"]["defaults"].get("mappings", []):
-            if (
-                mapping.get("type") == "special"
-                and mapping["options"].get("match") == "null"
-            ):
-                mapping["options"]["result"]["text"] = "NO OBSERVATIONS"
-        p[panel_id]["description"] = (
-            (
-                p[panel_id].get("description", "")
-                + " No observations means this outcome has no samples in the selected window; "
-                "it does not prove zero failures. A measured zero is displayed numerically."
-            )
-            if "No observations means" not in p[panel_id].get("description", "")
-            else p[panel_id]["description"]
-        )
+    _trust_no_observations(p)
     p[892]["fieldConfig"]["defaults"]["thresholds"] = {
         "mode": "absolute",
         "steps": [{"color": "blue", "value": None}],
@@ -124,40 +104,7 @@ def _trust(p: dict[int, dict]) -> None:
         "width": 430,
     }
     latency["gridPos"]["h"] = 10
-    for panel_id in (9404, 9405, 9406, 9407, 9408, 9409, 9402, 9403, 9417):
-        panel = p[panel_id]
-        _table(panel, compact=False)
-        _flex(panel, {"Current", "Value"})
-        if panel_id == 9403:
-            override(panel, "value", **{"custom.width": 70})
-        panel["options"].setdefault("footer", {}).update(
-            enablePagination=True, countRows=True
-        )
-        # Grafana pagination uses the configured row height. Wrapped cells can
-        # exceed it and hide the last row; full values remain available in Inspect.
-        panel["fieldConfig"]["defaults"]["custom"]["cellOptions"] = {
-            "type": "auto",
-            "wrapText": False,
-        }
-        for item in panel["fieldConfig"].get("overrides", []):
-            for prop in item["properties"]:
-                if prop["id"] == "custom.cellOptions":
-                    if item["matcher"].get("options") in {
-                        "value",
-                        "percentage",
-                        "row_status",
-                    }:
-                        prop["value"].pop("wrapText", None)
-                    else:
-                        prop["value"]["wrapText"] = False
-        for name in ("Current", "Parameter", "Action"):
-            override(
-                panel,
-                name,
-                **{
-                    "custom.cellOptions": {"type": "auto", "wrapText": False},
-                },
-            )
+    _trust_evidence_tables(p)
     _bands(
         p[905],
         [
@@ -178,32 +125,7 @@ def _overview(p: dict[int, dict]) -> None:
     # Align the current verdict with the selected-run domains column below it.
     p[99]["gridPos"].update(x=0, w=16)
     p[214]["gridPos"].update(x=16, w=p[9002]["gridPos"]["w"])
-    for panel_id in (215, 20215):
-        panel = p[panel_id]
-        _table(panel)
-        _flex(panel, {"action_reason", "Priority", "Action"})
-        for name in ("action_target",):
-            override(
-                panel,
-                name,
-                **{
-                    "custom.width": 210,
-                    "custom.cellOptions": {"type": "auto", "wrapText": True},
-                },
-            )
-        for item in panel["fieldConfig"]["overrides"]:
-            for prop in item["properties"]:
-                if prop["id"] == "mappings":
-                    for mapping in prop["value"]:
-                        for value in mapping.get("options", {}).values():
-                            if isinstance(value, dict):
-                                value["text"] = {
-                                    "Runtime": "Pipeline Diagnostics",
-                                    "Runtime (wf)": "Pipeline Diagnostics",
-                                    "Control Plane": "Trust",
-                                    "DQ": "Data Quality",
-                                    "Provider": "Provider Health",
-                                }.get(value.get("text"), value.get("text", ""))
+    _overview_action_labels(p)
     _table(p[20215], compact=False)
     # Reserve only the short label columns; leave the explanation responsive.
     for name, width in (("Priority", 80), ("Pipeline", 120), ("action_target", 190)):
@@ -259,81 +181,7 @@ def _provider(p: dict[int, dict]) -> None:
         )
         panel["fieldConfig"]["defaults"]["noValue"] = "TELEMETRY MISSING"
     p[110]["options"]["legend"].update(placement="right", width=400)
-    raw = p[114]
-    _table(raw)
-    for item in raw["fieldConfig"]["overrides"]:
-        for prop in item["properties"]:
-            if prop["id"] == "displayName" and prop["value"] == "Count":
-                prop["value"] = "Best raw status in range"
-    _flex(raw, {"Value"})
-    raw["description"] = (
-        "TIME RANGE / DIAGNOSTIC · 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null/NaN=UNKNOWN. Raw provider health enum evidence: best observed status in the selected range, "
-        "not the canonical first-screen verdict. When raw status is absent, status is UNKNOWN. "
-        "A past HEALTHY observation does not establish current freshness. "
-        "Last check and age describe the latest observation, not necessarily the best status. "
-        "Use Status Reason / Telemetry Presence for the current verdict."
-    )
-    raw["targets"] = raw["targets"][:1]
-    universe = 'max by (provider) (max_over_time(bioetl_provider_health_check_provider_universe_15m{provider=~"$provider"}[${__range_s}s]))'
-    raw["targets"][0]["expr"] = (
-        'max by (provider) (max_over_time(bioetl_provider_health_status{provider=~"$provider"}[${__range_s}s])) '
-        f"or on (provider) (({universe} * 0) / ({universe} * 0))"
-    )
-    for ref, expression in (
-        (
-            "B",
-            'max by (provider) (max_over_time(bioetl_provider_health_observed_timestamp_seconds{provider=~"$provider"}[${__range_s}s])) * 1000',
-        ),
-        (
-            "C",
-            'clamp_min(time() - max by (provider) (max_over_time(bioetl_provider_health_observed_timestamp_seconds{provider=~"$provider"}[${__range_s}s])), 0)',
-        ),
-    ):
-        raw["targets"].append(
-            {"refId": ref, "expr": expression, "format": "table", "instant": True}
-        )
-    raw["transformations"] = [
-        {
-            "id": "joinByField",
-            "options": {"byField": "provider", "mode": "outer"},
-        },
-        {
-            "id": "organize",
-            "options": {
-                "excludeByName": {
-                    "Time": True,
-                    "Time 1": True,
-                    "Time 2": True,
-                    "Time 3": True,
-                    "__name__": True,
-                },
-                "renameByName": {
-                    "Value #A": "Best status · range",
-                    "Value #B": "Last check",
-                    "Value #C": "Observation age",
-                },
-            },
-        },
-    ]
-    raw["fieldConfig"]["overrides"] = [
-        item
-        for item in raw["fieldConfig"]["overrides"]
-        if item["matcher"]["id"] != "byRegexp"
-    ]
-    for name, unit in (
-        ("Last check", "time:YYYY-MM-DD HH:mm"),
-        ("Observation age", "s"),
-    ):
-        override(
-            raw,
-            name,
-            **{
-                "unit": unit,
-                "mappings": [],
-                "color": {"mode": "fixed", "fixedColor": "text"},
-                "noValue": "UNKNOWN",
-            },
-        )
+    _provider_raw_evidence(p)
     _bands(
         p[9404],
         [
@@ -356,14 +204,7 @@ def _provider(p: dict[int, dict]) -> None:
         ],
     )
 
-    for panel_id in (9402, 9403):
-        _table(p[panel_id], compact=False)
-        p[panel_id]["options"].pop("enablePagination", None)
-        p[panel_id]["options"]["footer"].update(enablePagination=True, countRows=True)
-        for item in p[panel_id]["fieldConfig"].get("overrides", []):
-            for prop in item["properties"]:
-                if prop["id"] == "custom.cellOptions" and "wrapText" in prop["value"]:
-                    prop["value"]["wrapText"] = False
+    _provider_evidence_tables(p)
     _bands(p[9405], [[(9402, 0, 24, 12)], [(9403, 0, 24, 12)]])
 
 
@@ -531,3 +372,198 @@ def apply_visual_usability(payload: dict) -> None:
             panel["gridPos"]["h"] += shift
         if panel["id"] != 1000:
             panel["gridPos"]["y"] -= shift
+
+
+def _trust_rate_intervals(p: dict) -> None:
+    for panel in p.values():
+        for target in panel.get("targets", []):
+            expr = target.get("expr", "")
+            if "increase(" in expr or "rate(" in expr:
+                target["expr"] = expr.replace("[$__interval]", "[$__rate_interval]")
+
+
+def _trust_no_observations(p: dict) -> None:
+    for panel_id in (3, 104, 120, 101, 102, 103, 4, 136, 122, 137):
+        p[panel_id]["fieldConfig"]["defaults"]["noValue"] = "NO OBSERVATIONS"
+        for mapping in p[panel_id]["fieldConfig"]["defaults"].get("mappings", []):
+            if (
+                mapping.get("type") == "special"
+                and mapping["options"].get("match") == "null"
+            ):
+                mapping["options"]["result"]["text"] = "NO OBSERVATIONS"
+        p[panel_id]["description"] = (
+            (
+                p[panel_id].get("description", "")
+                + " No observations means this outcome has no samples in the selected window; "
+                "it does not prove zero failures. A measured zero is displayed numerically."
+            )
+            if "No observations means" not in p[panel_id].get("description", "")
+            else p[panel_id]["description"]
+        )
+
+
+def _trust_evidence_tables(p: dict) -> None:
+    for panel_id in (9404, 9405, 9406, 9407, 9408, 9409, 9402, 9403, 9417):
+        _trust_evidence_table(p, panel_id)
+
+
+def _overview_action_labels(p: dict) -> None:
+    for panel_id in (215, 20215):
+        _overview_action_panel(p, panel_id)
+
+
+def _provider_raw_evidence(p: dict) -> None:
+    raw = p[114]
+    _table(raw)
+    for item in raw["fieldConfig"]["overrides"]:
+        for prop in item["properties"]:
+            if prop["id"] == "displayName" and prop["value"] == "Count":
+                prop["value"] = "Best raw status in range"
+    _flex(raw, {"Value"})
+    raw["description"] = (
+        "TIME RANGE / DIAGNOSTIC · 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null/NaN=UNKNOWN. Raw provider health enum evidence: best observed status in the selected range, "
+        "not the canonical first-screen verdict. When raw status is absent, status is UNKNOWN. "
+        "A past HEALTHY observation does not establish current freshness. "
+        "Last check and age describe the latest observation, not necessarily the best status. "
+        "Use Status Reason / Telemetry Presence for the current verdict."
+    )
+    raw["targets"] = raw["targets"][:1]
+    universe = 'max by (provider) (max_over_time(bioetl_provider_health_check_provider_universe_15m{provider=~"$provider"}[${__range_s}s]))'
+    raw["targets"][0]["expr"] = (
+        'max by (provider) (max_over_time(bioetl_provider_health_status{provider=~"$provider"}[${__range_s}s])) '
+        f"or on (provider) (({universe} * 0) / ({universe} * 0))"
+    )
+    for ref, expression in (
+        (
+            "B",
+            'max by (provider) (max_over_time(bioetl_provider_health_observed_timestamp_seconds{provider=~"$provider"}[${__range_s}s])) * 1000',
+        ),
+        (
+            "C",
+            'clamp_min(time() - max by (provider) (max_over_time(bioetl_provider_health_observed_timestamp_seconds{provider=~"$provider"}[${__range_s}s])), 0)',
+        ),
+    ):
+        raw["targets"].append(
+            {"refId": ref, "expr": expression, "format": "table", "instant": True}
+        )
+    raw["transformations"] = [
+        {
+            "id": "joinByField",
+            "options": {"byField": "provider", "mode": "outer"},
+        },
+        {
+            "id": "organize",
+            "options": {
+                "excludeByName": {
+                    "Time": True,
+                    "Time 1": True,
+                    "Time 2": True,
+                    "Time 3": True,
+                    "__name__": True,
+                },
+                "renameByName": {
+                    "Value #A": "Best status · range",
+                    "Value #B": "Last check",
+                    "Value #C": "Observation age",
+                },
+            },
+        },
+    ]
+    raw["fieldConfig"]["overrides"] = [
+        item
+        for item in raw["fieldConfig"]["overrides"]
+        if item["matcher"]["id"] != "byRegexp"
+    ]
+    for name, unit in (
+        ("Last check", "time:YYYY-MM-DD HH:mm"),
+        ("Observation age", "s"),
+    ):
+        override(
+            raw,
+            name,
+            **{
+                "unit": unit,
+                "mappings": [],
+                "color": {"mode": "fixed", "fixedColor": "text"},
+                "noValue": "UNKNOWN",
+            },
+        )
+
+
+def _provider_evidence_tables(p: dict) -> None:
+    for panel_id in (9402, 9403):
+        _table(p[panel_id], compact=False)
+        p[panel_id]["options"].pop("enablePagination", None)
+        p[panel_id]["options"]["footer"].update(enablePagination=True, countRows=True)
+        for item in p[panel_id]["fieldConfig"].get("overrides", []):
+            for prop in item["properties"]:
+                if prop["id"] == "custom.cellOptions" and "wrapText" in prop["value"]:
+                    prop["value"]["wrapText"] = False
+
+
+def _trust_evidence_table(p: dict, panel_id: int) -> None:
+    panel = p[panel_id]
+    _table(panel, compact=False)
+    _flex(panel, {"Current", "Value"})
+    if panel_id == 9403:
+        override(panel, "value", **{"custom.width": 70})
+    panel["options"].setdefault("footer", {}).update(
+        enablePagination=True, countRows=True
+    )
+    # Grafana pagination uses the configured row height. Wrapped cells can
+    # exceed it and hide the last row; full values remain available in Inspect.
+    panel["fieldConfig"]["defaults"]["custom"]["cellOptions"] = {
+        "type": "auto",
+        "wrapText": False,
+    }
+    for item in panel["fieldConfig"].get("overrides", []):
+        for prop in item["properties"]:
+            if prop["id"] == "custom.cellOptions":
+                if item["matcher"].get("options") in {
+                    "value",
+                    "percentage",
+                    "row_status",
+                }:
+                    prop["value"].pop("wrapText", None)
+                else:
+                    prop["value"]["wrapText"] = False
+    for name in ("Current", "Parameter", "Action"):
+        override(
+            panel,
+            name,
+            **{
+                "custom.cellOptions": {"type": "auto", "wrapText": False},
+            },
+        )
+
+
+def _overview_action_panel(p: dict, panel_id: int) -> None:
+    panel = p[panel_id]
+    _table(panel)
+    _flex(panel, {"action_reason", "Priority", "Action"})
+    for name in ("action_target",):
+        override(
+            panel,
+            name,
+            **{
+                "custom.width": 210,
+                "custom.cellOptions": {"type": "auto", "wrapText": True},
+            },
+        )
+    for item in panel["fieldConfig"]["overrides"]:
+        _overview_action_override(item)
+
+
+def _overview_action_override(item: dict) -> None:
+    for prop in item["properties"]:
+        if prop["id"] == "mappings":
+            for mapping in prop["value"]:
+                for value in mapping.get("options", {}).values():
+                    if isinstance(value, dict):
+                        value["text"] = {
+                            "Runtime": "Pipeline Diagnostics",
+                            "Runtime (wf)": "Pipeline Diagnostics",
+                            "Control Plane": "Trust",
+                            "DQ": "Data Quality",
+                            "Provider": "Provider Health",
+                        }.get(value.get("text"), value.get("text", ""))

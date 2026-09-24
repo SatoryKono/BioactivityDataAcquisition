@@ -197,17 +197,7 @@ def _overview(p: dict[int, dict]) -> None:
 
 def _trust(p: dict[int, dict]) -> None:
     # An unselected run is not a successful processing result.
-    for override in p[9418]["fieldConfig"]["overrides"]:
-        if override.get("matcher", {}).get("options") == "Result":
-            for prop in override["properties"]:
-                if prop["id"] == "mappings":
-                    for mapping in prop["value"]:
-                        if mapping["type"] == "value":
-                            for state in ("SELECT RUN", "UNFINISHED"):
-                                mapping["options"][state] = {
-                                    "text": state,
-                                    "color": "#A3A3A3",
-                                }
+    _trust_result_mappings(p)
     _table(p[9418], {"Result": 110, "Trust": 105, "Reasons": 90, "Observed": 165})
     anchors = p[9404]
     _table(anchors)
@@ -480,13 +470,7 @@ def _incident(p: dict[int, dict]) -> None:
     p[2001]["gridPos"].update(y=5, h=2)
     p[2010]["gridPos"].update(y=7, h=5)
     p[2005]["gridPos"].update(y=12, h=5)
-    for panel_id, limit in ((2010, 2), (2005, 2)):
-        for transform in p[panel_id]["transformations"]:
-            if transform["id"] == "limit":
-                transform["options"]["limitField"] = limit
-        for link in p[panel_id].get("links", []):
-            if link.get("title", "").startswith("Show all rows"):
-                link["title"] = f"Show all rows and total (summary: up to {limit})"
+    _limit_incident_summaries(p)
     _override(
         p[2010], "Confidence", "custom.cellOptions", {"type": "auto", "wrapText": False}
     )
@@ -520,15 +504,7 @@ def _incident(p: dict[int, dict]) -> None:
     p[2001]["options"]["content"] = (
         '<div style="font-size:16px;line-height:1.2">Open Action for evidence; PENDING has not fired. Use alert history.</div>'
     )
-    for pid in (2005, 22005):
-        _table(p[pid], {"severity": 90, "alertstate": 100})
-        _override(p[pid], "alertname", "displayName", "Alert")
-        _override(p[pid], "alertstate", "displayName", "State")
-    for override in p[2005]["fieldConfig"]["overrides"]:
-        if override.get("matcher", {}).get("options") in {"instance", "job", "Value"}:
-            override["properties"] = [
-                prop for prop in override["properties"] if prop["id"] != _WIDTH
-            ]
+    _incident_alert_labels(p)
     p[2006]["options"].pop("pageSize", None)
     p[2006]["options"].update(perPage=8, rowHeight=0.85, showValue="never")
     p[2006]["fieldConfig"]["defaults"]["custom"]["axisWidth"] = 650
@@ -724,42 +700,7 @@ def apply_evidence_readability(payload: dict) -> None:
         _selected_verdict_reasons(p, overview=payload["uid"] == "bioetl-overview-v2")
     # These are enum verdicts, not blocker counts: code 3 is UNKNOWN.
     # Counter panels intentionally retain their >=2=CRIT threshold copy.
-    enum_panels = {
-        "bioetl-dq-v2": (9401,),
-        "bioetl-provider-health-v2": (9401,),
-        "bioetl-overview-v2": (9031, 9007),
-    }
-    for pid in enum_panels.get(payload.get("uid"), ()):
-        p[pid]["description"] = (
-            p[pid]["description"]
-            .replace(">=2=CRIT", "2=CRIT")
-            .replace("`null=UNKNOWN`", "`3/null=UNKNOWN`")
-        )
-    if 9402 in p and p[9402].get("title") == "Review Run Summary":
-        # Hashes and composite parameter names need two lines at 900px.
-        # Large rows keep pagination from placing wrapped text under its footer.
-        summary = p[9402]
-        _table(summary, {"Parameter": 300})
-        summary["options"]["cellHeight"] = "lg"
-        summary["fieldConfig"]["defaults"]["custom"]["wrapText"] = True
-        summary["fieldConfig"]["defaults"]["custom"]["cellOptions"]["wrapText"] = True
-        for field in ("Parameter", "Value"):
-            _override(summary, field, "custom.wrapText", True)
-            _override(
-                summary, field, "custom.cellOptions", {"type": "auto", "wrapText": True}
-            )
-    if payload.get("uid") == "bioetl-control-plane-v1":
-        for pid, title in {
-            9401: "Monitor Readiness",
-            891: "Monitor Replay",
-            892: "Track Checkpoint",
-            893: "Monitor Ledger",
-        }.items():
-            if pid in p:
-                p[pid]["title"] = title
-                p[pid].setdefault("fieldConfig", {}).setdefault("defaults", {})[
-                    "displayName"
-                ] = title
+    _finish_evidence_copy(payload, p)
 
 
 def _run_links(run: dict):
@@ -893,3 +834,87 @@ def _first_window_widths(payload: dict, p: dict[int, dict]) -> None:
             _override(p[pid], "selected", "custom.minWidth", 28)
             # Native Grafana Table accepts px or auto, not percentage strings.
             # These three auto columns share the remaining width equally.
+
+
+def _trust_result_mappings(p: dict) -> None:
+    for override in p[9418]["fieldConfig"]["overrides"]:
+        _trust_result_override(override)
+
+
+def _limit_incident_summaries(p: dict) -> None:
+    for panel_id, limit in ((2010, 2), (2005, 2)):
+        for transform in p[panel_id]["transformations"]:
+            if transform["id"] == "limit":
+                transform["options"]["limitField"] = limit
+        for link in p[panel_id].get("links", []):
+            if link.get("title", "").startswith("Show all rows"):
+                link["title"] = f"Show all rows and total (summary: up to {limit})"
+
+
+def _incident_alert_labels(p: dict) -> None:
+    for pid in (2005, 22005):
+        _table(p[pid], {"severity": 90, "alertstate": 100})
+        _override(p[pid], "alertname", "displayName", "Alert")
+        _override(p[pid], "alertstate", "displayName", "State")
+    for override in p[2005]["fieldConfig"]["overrides"]:
+        if override.get("matcher", {}).get("options") in {"instance", "job", "Value"}:
+            override["properties"] = [
+                prop for prop in override["properties"] if prop["id"] != _WIDTH
+            ]
+
+
+def _finish_evidence_copy(payload: dict, p: dict) -> None:
+    enum_panels = {
+        "bioetl-dq-v2": (9401,),
+        "bioetl-provider-health-v2": (9401,),
+        "bioetl-overview-v2": (9031, 9007),
+    }
+    for pid in enum_panels.get(payload.get("uid"), ()):
+        p[pid]["description"] = (
+            p[pid]["description"]
+            .replace(">=2=CRIT", "2=CRIT")
+            .replace("`null=UNKNOWN`", "`3/null=UNKNOWN`")
+        )
+    if 9402 in p and p[9402].get("title") == "Review Run Summary":
+        # Hashes and composite parameter names need two lines at 900px.
+        # Large rows keep pagination from placing wrapped text under its footer.
+        summary = p[9402]
+        _table(summary, {"Parameter": 300})
+        summary["options"]["cellHeight"] = "lg"
+        summary["fieldConfig"]["defaults"]["custom"]["wrapText"] = True
+        summary["fieldConfig"]["defaults"]["custom"]["cellOptions"]["wrapText"] = True
+        for field in ("Parameter", "Value"):
+            _override(summary, field, "custom.wrapText", True)
+            _override(
+                summary, field, "custom.cellOptions", {"type": "auto", "wrapText": True}
+            )
+    if payload.get("uid") == "bioetl-control-plane-v1":
+        for pid, title in {
+            9401: "Monitor Readiness",
+            891: "Monitor Replay",
+            892: "Track Checkpoint",
+            893: "Monitor Ledger",
+        }.items():
+            if pid in p:
+                p[pid]["title"] = title
+                p[pid].setdefault("fieldConfig", {}).setdefault("defaults", {})[
+                    "displayName"
+                ] = title
+
+
+def _trust_result_override(override: dict) -> None:
+    if not (override.get("matcher", {}).get("options") == "Result"):
+        return
+    for prop in override["properties"]:
+        _trust_result_property(prop)
+
+
+def _trust_result_property(prop: dict) -> None:
+    if prop["id"] == "mappings":
+        for mapping in prop["value"]:
+            if mapping["type"] == "value":
+                for state in ("SELECT RUN", "UNFINISHED"):
+                    mapping["options"][state] = {
+                        "text": state,
+                        "color": "#A3A3A3",
+                    }
