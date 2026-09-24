@@ -649,3 +649,29 @@ def test_run_option_labels_mark_unknown_when_catalog_record_is_missing() -> None
     items = cast(list[dict[str, str]], payload["items"])
     assert items[0] == {"text": "SELECT RUN", "value": "-"}
     assert items[1] == {"text": "UNKNOWN · orphan-run", "value": "orphan-run"}
+
+
+@pytest.mark.parametrize("with_unmatched_manifest", [False, True])
+def test_pipeline_options_empty_scope_has_no_synthetic_unknown(
+    with_unmatched_manifest: bool,
+) -> None:
+    payload = selector_context.build_selector_filter_options_payload(
+        manifests=(_manifest(11),) if with_unmatched_manifest else (),
+        ledger_port=None,
+        dimension="pipeline",
+        response_shape="options",
+        requested_pipeline=None,
+        selected_workflows=("audit_absent_workflow_10981",),
+    )
+    assert payload == {"items": []}
+
+
+def test_pipeline_list_empty_scope_retains_legacy_sentinel() -> None:
+    payload = selector_context.build_selector_filter_options_payload(
+        manifests=(),
+        ledger_port=None,
+        dimension="pipeline",
+        response_shape="list",
+        requested_pipeline=None,
+    )
+    assert payload == {"items": ["unknown"]}

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import UTC
 from dataclasses import dataclass
+from datetime import UTC
 
 from bioetl.domain.control_plane import RunManifest, WorkflowManifest
 from bioetl.interfaces.http._control_plane_selector_filters import (
@@ -157,6 +157,10 @@ def _filter_options_response(
     values: list[str],
 ) -> dict[str, object]:
     if response_shape == "options":
+        # The legacy list sentinel is not an observed pipeline. Let Grafana's
+        # empty-options mapping show NO MATCHES for a successful empty scope.
+        if dimension == "pipeline" and values == [UNKNOWN_SCOPE]:
+            return {"items": []}
         return {"items": [{"text": value, "value": value} for value in values]}
     if response_shape == "list":
         return {"items": values}
