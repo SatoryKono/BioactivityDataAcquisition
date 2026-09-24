@@ -1301,7 +1301,7 @@ def _layout_uid_first_window(panels: list[object], *, current_uid: str) -> None:
                     "INCOMPLETE even when no active blockers are observed. "
                     "Inspect Monitor Coverage and Review Stage Progress. "
                     "This verdict does not describe the selected run's processing "
-                    "or trust status."
+                    "or trust status (processing_status or trust_status)."
                 )
         # Wrapped blocker reasons need three full 52px rows. Stage progress
         # uses compact single-line rows and can donate one grid row safely.

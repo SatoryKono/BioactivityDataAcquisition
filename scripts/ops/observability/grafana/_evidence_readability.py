@@ -318,11 +318,11 @@ def _provider(p: dict[int, dict]) -> None:
     p[9107]["title"] = "Inspect Health Evidence"
     for pid in (9101, 9107):
         target = p[pid]["targets"][0]
-        if target["expr"].startswith("topk(3, "):
-            target["expr"] = target["expr"][8:-1]
+        if not target["expr"].startswith("topk(3, "):
+            target["expr"] = f"topk(3, {target['expr']})"
         p[pid]["description"] = (
-            "GLOBAL / CURRENT · All observed provider status series, independent of "
-            "Pipeline, Run ID and Provider selection. Missing series are not proof of "
+            "GLOBAL / CURRENT · Top three observed provider status series; full fleet below, independent of "
+            "Pipeline and Run ID; independent of the selected Provider. Missing series are not proof of "
             "health. Status is the current assessment; evidence describes observation "
             "availability, not the selected historical run."
         )
@@ -360,9 +360,9 @@ def _provider(p: dict[int, dict]) -> None:
         p[9111], "Provider", "custom.cellOptions", {"type": "auto", "wrapText": False}
     )
     for pid in (9101, 9107):
-        p[pid]["gridPos"].update(y=7, h=9)
+        p[pid]["gridPos"].update(y=7, h=8)
         p[pid]["options"].setdefault("footer", {})["enablePagination"] = True
-    p[9104]["gridPos"].update(y=16, h=2)
+    p[9104]["gridPos"].update(y=15, h=3)
     p[9104]["options"]["colorMode"] = "value"
     _stack(p[9404], {114: 10, 1: 10, 2: 3, 105: 3, 104: 3, 7: 3})
     _table(
@@ -593,7 +593,28 @@ def _selected_verdict_reasons(p: dict[int, dict], *, overview: bool) -> None:
     target["uql"] = (
         'parse-json | jsonata "' + target["root_selector"].replace('"', "'") + '"'
     )
-    views = [(summary, ["execution_state", "verdict", "reason_display"])]
+    summary_fields = ["execution_state", "verdict", "reason_display"]
+    if overview:
+        # Share one envelope; never substitute the first domain verdict for trust.
+        source_target = source["targets"][0]
+        projection = (
+            "($s := presentation_summary[0]; $r := presentation_trust[0].reasons_display; "
+            "$map(presentation_domains, function($d) { $merge([$d, {"
+            "'run_execution': $s.execution_state, 'run_verdict': $s.verdict, "
+            "'run_reason': $r ? $r : $s.reason}]) }))"
+        )
+        source_target["parser"] = "uql"
+        source_target["root_selector"] = projection
+        source_target["uql"] = 'parse-json | jsonata "' + projection + '"'
+        summary["datasource"] = {"type": "datasource", "uid": "-- Dashboard --"}
+        summary["targets"] = [{"panelId": 9002, "refId": "A", "withTransforms": False}]
+        summary_fields = ["run_execution", "run_verdict", "run_reason"]
+        for transform in summary["transformations"]:
+            if transform["id"] == "organize":
+                transform["options"]["renameByName"].update(
+                    run_execution="Result", run_verdict="Status", run_reason="Reason"
+                )
+    views = [(summary, summary_fields)]
     if overview:
         views.append((p[9002], ["domain", "verdict", "reason_display"]))
     for panel, fields in views:
@@ -647,13 +668,21 @@ def _selected_verdict_reasons(p: dict[int, dict], *, overview: bool) -> None:
     _override(summary, "Status", "displayName", "Trust")
     if not overview:
         return
-    _table(p[9002], {"Domain": 120, "Status": 105})
+    _table(p[9002], {"Domain": 120, "Status": 115})
     # Three evidence columns need half the first-screen width at narrow viewports.
     p[9002]["gridPos"].update(x=12, w=12)
     p[214]["gridPos"].update(x=16, w=8)
     p[215]["gridPos"]["w"] = 12
     p[215]["options"]["cellHeight"] = "sm"
     summary["gridPos"]["w"] = 12
+    for rule in summary["fieldConfig"]["overrides"]:
+        if rule["matcher"].get("options") in {
+            "Evidence",
+            "Reason",
+            "Pipeline",
+            "Severity",
+        }:
+            rule["properties"] = [v for v in rule["properties"] if v["id"] != _WIDTH]
     _override(summary, "Result", _WIDTH, 100)
     _override(summary, "Status", _WIDTH, 115)
     p[9002]["options"]["cellHeight"] = "sm"

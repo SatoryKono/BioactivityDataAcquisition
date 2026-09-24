@@ -413,21 +413,21 @@ required_panel_links_by_uid:
     - Open 1. Trust
   bioetl-incident-v1:
   - panel_id: 2010
+    target_uid: '${__data.fields.action_dashboard_uid}'
+    link_titles:
+    - Open domain diagnostics
+  - panel_id: 2002
     target_uid: bioetl-runtime
     link_titles:
-    - Open Pipeline Diagnostics
-  - panel_id: 2010
+    - Open domain workspace
+  - panel_id: 2003
     target_uid: bioetl-provider-health-v2
     link_titles:
-    - Open Provider Health
-  - panel_id: 2010
+    - Open domain workspace
+  - panel_id: 2004
     target_uid: bioetl-dq-v2
     link_titles:
-    - Open Data Quality
-  - panel_id: 2010
-    target_uid: bioetl-run-explorer-v1
-    link_titles:
-    - Open Run Explorer
+    - Open domain workspace
   - panel_id: 2101
     target_uid: bioetl-run-explorer-v1
     link_titles:

@@ -13,6 +13,8 @@ REASON_ALIASES: dict[str, str] = {
     "snapshot_lifecycle_evidence_present": "Snapshots present",
     "required_evidence_surfaces_present": "Evidence present",
     "retention_policy_satisfied": "Retained by policy",
+    "lineage_fragments_missing": "Lineage fragments missing",
+    "lineage_identity_not_observable": "Lineage identity not observable",
     "lineage_closure_gap": "Lineage closure gap",
     "lineage_closure_complete": "Lineage closed",
     "selected_run_id_not_found": "Run not found",

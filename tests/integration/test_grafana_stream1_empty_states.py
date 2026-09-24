@@ -260,10 +260,9 @@ def test_dq_10253_selected_run_summary_is_first_window() -> None:
     assert organize["options"]["indexByName"] == {
         "execution_state": 0,
         "verdict": 1,
-        "evidence_completeness": 2,
-        "rules_version": 3,
+        "reason_display": 2,
     }
-    assert summary["targets"][0]["root_selector"] == "presentation_summary"
+    assert "presentation_summary[0]" in summary["targets"][0]["root_selector"]
     assert "/selected-run-status?" in summary["targets"][0]["url"]
     no_value = str(summary.get("fieldConfig", {}).get("defaults", {}).get("noValue"))
     assert (

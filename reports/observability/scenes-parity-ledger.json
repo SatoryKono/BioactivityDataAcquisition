@@ -22,11 +22,11 @@
   "dashboard_sha256": {
     "bioetl-control-plane-v1": "2a61a8450ca9abd1a674ee6593adfe8474bff2078aa1c3554efb283facdaeb53",
     "bioetl-dq-v2": "2a294966ddd19ceac4383e51e5d9e8b0e0cb4c443127b88be120ea5d19c59fc1",
-    "bioetl-incident-v1": "687437c6385488dc64934848af4290808b250defb2f2931e1891a2ee2e6be5cd",
-    "bioetl-overview-v2": "7533447d1eb71e904b952f0afc8660707607c5868e9b8ad677b5a0d2d9ce2854",
-    "bioetl-provider-health-v2": "35f04d89939771f284e41a3a4f7f8a8651f0e57b9a9998e0f74444fbf41ce2da",
+    "bioetl-incident-v1": "73c2b20ac62b2a9b76e7c0c9e60c33183743d66d5aea1f56420122cda38eaabf",
+    "bioetl-overview-v2": "229a38af825ddbd8ecbd196729fb60433451aa1590faf3b9e89a11094965dc7a",
+    "bioetl-provider-health-v2": "82af7a267a5dc24650fbd587867117b588407bc8aebb5a05798ac6a6ca73558c",
     "bioetl-run-explorer-v1": "6593cd9104921368f5681cff2699c21b3222641c446448bb40f62f159999c407",
-    "bioetl-runtime": "937d40657cf3fc9dadfb5f9a47db71a5dbee644b668f76aea66a5add14f9db69"
+    "bioetl-runtime": "0f8b10ffbfa52a27f33e113d7ac650f0cb0df57d9fc9b836e42f04a6bd442a32"
   },
   "panels": [
     {
@@ -1940,7 +1940,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-incident-v1",
       "panel_id": 2010,
-      "panel_title": "Inspect Global Suspects",
+      "panel_title": "Inspect Ranked Suspects",
       "route": "incident-console",
       "source": {
         "datasource_type": "prometheus",
@@ -2109,14 +2109,12 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-incident-v1",
       "panel_id": 22010,
-      "panel_title": "Inspect Global Suspects",
+      "panel_title": "Inspect Global Suspects (Full)",
       "route": "incident-console",
       "source": {
         "datasource_type": "datasource",
         "datasource_uid": "-- Dashboard --",
-        "expressions": [
-          "label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\")"
-        ],
+        "expressions": [],
         "target_count": 1
       }
     },
@@ -2128,14 +2126,12 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-incident-v1",
       "panel_id": 22005,
-      "panel_title": "Monitor Global Alerts",
+      "panel_title": "Monitor Global Alerts (Full)",
       "route": "incident-console",
       "source": {
         "datasource_type": "datasource",
         "datasource_uid": "-- Dashboard --",
-        "expressions": [
-          "label_replace(bioetl_incident_alert_priority,\"provider\",\"Not provided\",\"provider\",\"^$\")"
-        ],
+        "expressions": [],
         "target_count": 1
       }
     },
@@ -2222,11 +2218,9 @@
       "panel_title": "Review Selected Run Status",
       "route": "operations-home",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
-        "expressions": [
-          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
-        ],
+        "datasource_type": "datasource",
+        "datasource_uid": "-- Dashboard --",
+        "expressions": [],
         "target_count": 1
       }
     },
@@ -2748,7 +2742,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (provider) (bioetl_provider_current_status{provider!~\"^(test|synthetic)$\"})"
+          "topk(3, max by (provider) (bioetl_provider_current_status{provider!~\"^(test|synthetic)$\"}))"
         ],
         "target_count": 1
       }
@@ -2767,7 +2761,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (provider, reason, source_state) (bioetl_provider_current_status_info)"
+          "topk(3, max by (provider, reason, source_state) (bioetl_provider_current_status_info))"
         ],
         "target_count": 1
       }

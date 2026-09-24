@@ -66,9 +66,10 @@ def test_summary_uses_aggregate_verdict_and_explains_missing_archive(uid):
         p for p in panels.values() if p.get("title") == "Review Selected Run Status"
     )
     target = summary["targets"][0]
-    assert "panelId" not in target, (
-        "First domain OK must not replace aggregate INCOMPLETE"
-    )
+    if uid == "bioetl-overview-v2":
+        assert target == {"panelId": 9002, "refId": "A", "withTransforms": False}
+        target = panels[9002]["targets"][0]
+        assert "'run_verdict': $s.verdict" in target["root_selector"]
     assert "/selected-run-status?" in target["url"]
     assert "presentation_summary[0]" in target["root_selector"]
     assert "presentation_trust[0].reasons_display" in target["root_selector"]
@@ -79,8 +80,16 @@ def test_summary_uses_aggregate_verdict_and_explains_missing_archive(uid):
             for t in panel["transformations"]
             if t["id"] == "filterFieldsByName"
         )
-        assert "verdict" in fields
-        assert "reason_display" in fields
+        assert (
+            "run_verdict"
+            if panel is summary and uid == "bioetl-overview-v2"
+            else "verdict"
+        ) in fields
+        assert (
+            "run_reason"
+            if panel is summary and uid == "bioetl-overview-v2"
+            else "reason_display"
+        ) in fields
         assert "evidence_completeness" not in fields
         reason = next(
             o
@@ -95,7 +104,7 @@ def test_summary_uses_aggregate_verdict_and_explains_missing_archive(uid):
         )
 
 
-def test_provider_fleet_does_not_drop_equal_status_providers():
+def test_provider_first_window_caps_summary_and_explains_full_fleet():
     dashboard = json.loads(
         (ROOT / "grafana/dashboards/bioetl-provider-health-v2.json").read_text(
             encoding="utf-8"
@@ -104,8 +113,8 @@ def test_provider_fleet_does_not_drop_equal_status_providers():
     panels = {p["id"]: p for p in _panels(dashboard["panels"])}
     for pid in (9101, 9107):
         query = panels[pid]["targets"][0]["expr"]
-        assert query.startswith("max by (")
-        assert "topk" not in query
+        assert query.startswith("topk(3, max by (")
+        assert "full fleet below" in panels[pid]["description"]
         assert not any(t["id"] == "limit" for t in panels[pid]["transformations"])
     organize = next(
         t["options"] for t in panels[9107]["transformations"] if t["id"] == "organize"
